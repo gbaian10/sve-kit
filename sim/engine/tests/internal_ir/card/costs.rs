@@ -152,3 +152,171 @@ fn ex_count_cost_uses_own_matching_public_cards() {
         );
     }
 }
+
+fn conditional_program(condition: &Value, spell: bool) -> WellFormedCardProgram {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["play"] = json!({"cost_delta":{"if":condition,"delta":-2_i8}});
+    let mut seed = tree["cards"]["BP08-038"].clone();
+    seed["abilities"] = json!([entry]);
+    let name = if spell { "unit-spell" } else { "unit-follower" };
+    tree["cards"] = json!({name:seed});
+    lowerer().lower(&tree).unwrap().remove(name).unwrap()
+}
+
+fn discounted_game(condition: &Value, grave: Value, maximum: u8, life: u8) -> Game {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10_u8,"max":maximum});
+    initial["players"]["P1"]["leader"]["life"] = json!(life);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = grave;
+    initial["players"]["P2"]["zones"]["cemetery"] =
+        json!([{"id":"opponent-spell","card":"unit-spell"}]);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("3")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "qualified-cost",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &conditional_program(condition, false))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game
+}
+
+#[test]
+fn spellchain_discount_counts_only_own_cemetery_spells_at_payment() {
+    for spells in [2_u8, 3] {
+        let mut grave = vec![json!({"id":"nonspell","card":"unit-follower"})];
+        grave.extend((0..spells).map(|i| json!({"id":format!("spell-{i}"),"card":"unit-spell"})));
+        let mut game = discounted_game(&json!({"spellchain":3}), json!(grave), 10, 20);
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if spells == 3 { 9_u8 } else { 7_u8 }
+        );
+    }
+}
+
+#[test]
+fn necro_discount_counts_all_cemetery_cards_without_spending_them() {
+    for size in [2_u8, 3] {
+        let grave = json!(
+            (0..size)
+                .map(|i| json!({"id":format!("grave-{i}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let mut game = discounted_game(&json!({"necro":3}), grave, 10, 20);
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["pp"]["current"],
+            if size == 3 { 9_u8 } else { 7_u8 }
+        );
+        assert_eq!(
+            state["P1"]["cemetery"].as_array().unwrap().len(),
+            usize::from(size)
+        );
+    }
+}
+
+#[test]
+fn awakening_discount_reads_maximum_pp_before_payment() {
+    for maximum in [6_u8, 7] {
+        let mut game = discounted_game(&json!({"awakened":true}), json!([]), maximum, 20);
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if maximum == 7 { 9_u8 } else { 7_u8 }
+        );
+    }
+}
+
+#[test]
+fn leader_life_discount_checks_the_printed_threshold() {
+    for life in [9_u8, 10, 11] {
+        let mut game = discounted_game(
+            &json!({"leader_life":{"who":"self","le":10}}),
+            json!([]),
+            10,
+            life,
+        );
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if life <= 10 { 9_u8 } else { 7_u8 }
+        );
+    }
+}
+
+#[test]
+fn opponent_life_condition_does_not_read_the_controllers_life() {
+    let mut game = discounted_game(
+        &json!({"leader_life":{"who":"opp","ge":20}}),
+        json!([]),
+        10,
+        1,
+    );
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        9_u8
+    );
+}
+
+#[test]
+fn crimson_discount_uses_a_real_life_decrease_this_turn() {
+    for decrease in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":10_u8,"max":10_u8});
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"emitter","card":"unit-follower"}]);
+        let mut program = conditional_program(&json!({"crimson":true}), false)
+            .card()
+            .clone();
+        program.abilities.push(ability(
+            1,
+            vec![instruction(
+                1,
+                Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(-1)),
+                    },
+                },
+            )],
+        ));
+        let mut game = Game::new(
+            catalog_with_cost(&json!("3")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "crimson-payment",
+        )
+        .unwrap();
+        game.load_internal_card(
+            "unit-follower",
+            &WellFormedCardProgram::check(program).unwrap(),
+        )
+        .unwrap();
+        if decrease {
+            resolved(
+                game.activate_internal_card("emitter", AbilityId(1), PlayerId { seat: 1 })
+                    .unwrap(),
+            );
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+        }
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if decrease { 9_u8 } else { 7_u8 }
+        );
+    }
+}

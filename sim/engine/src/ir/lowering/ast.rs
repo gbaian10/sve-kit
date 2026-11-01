@@ -1301,6 +1301,11 @@ pub(super) struct PlayRestrictionZone {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostCondition {
+    Spellchain(u64),
+    Necro(u64),
+    Awakened(bool),
+    Crimson(bool),
+    LeaderLife(PlayerThreshold),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
