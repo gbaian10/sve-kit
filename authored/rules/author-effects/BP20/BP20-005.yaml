@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-005:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          on:
+            played:
+              who: self
+              sel:
+                trait: 精霊
+          do:
+            - life:
+                who: self
+                delta: 1

@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            played:
+              who: self
+              during:
+                turn: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_count:
+                        event: played
+                        who: self
+                        window: this_turn
+                    op: eq
+                    right: 3
+                then:
+                  - life:
+                      who: self
+                      delta: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_count:
+                        event: played
+                        who: self
+                        window: this_turn
+                    op: eq
+                    right: 5
+                then:
+                  - draw:
+                      n: 1
