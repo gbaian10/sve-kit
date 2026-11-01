@@ -2,13 +2,13 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::game::list;
 use crate::ir::effect_evolution;
+use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
-    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Declinable, Disjointness, Info,
-    Int, IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand,
-    ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture, PostureRead,
-    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
-    Visibility,
+    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, Info, Int,
+    IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand, ObjectProperty,
+    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture, PostureRead, Predicate, ScopeId,
+    SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -74,45 +74,7 @@ pub(in crate::game::internal) fn characteristics(
 
 impl TargetWait {
     fn is_private_look_member(&self, member: ObjectRef) -> bool {
-        let ChoiceDomain::Objects {
-            constraint,
-            target_roles: None,
-            ..
-        } = &self.decision.domain
-        else {
-            return false;
-        };
-        if constraint.groups.is_empty() || constraint.groups.len() > 2 {
-            return false;
-        }
-        let expected_bounds = Cardinality {
-            minimum: Nat(0),
-            maximum: u64::try_from(constraint.groups.len()).ok().map(Nat),
-        };
-        self.members.contains(&member)
-            && constraint
-                .groups
-                .iter()
-                .all(|group| look_filtered_selector(&group.selector))
-            && constraint.groups.iter().all(|group| {
-                group.cardinality.minimum == Nat(0) && group.cardinality.maximum == Some(Nat(1))
-            })
-            && constraint.cardinality == expected_bounds
-            && self.decision.actor == (PlayerRef::Controller {})
-            && matches!(
-                &self.decision.visibility,
-                Visibility::Only { players }
-                    if players.relation == PlayerRelation::SelfPlayer
-                        && players.relative_to == self.decision.actor
-            )
-            && matches!(
-                self.decision.kind,
-                DecisionKind::ResolutionChoice {
-                    may: Declinable::MayDecline,
-                    cardinality,
-                    precondition: None,
-                } if cardinality == expected_bounds
-            )
+        self.members.contains(&member) && private_look_choice(&self.decision)
     }
 
     pub(in crate::game::internal) fn check_current(
@@ -260,18 +222,6 @@ fn assign_groups(
     false
 }
 
-fn private_look_decision(decision: &Decision, constraint: &SelectionConstraint) -> bool {
-    matches!(
-        &decision.visibility,
-        Visibility::Only { players }
-            if players.relation == PlayerRelation::SelfPlayer
-                && players.relative_to == decision.actor
-    ) && constraint
-        .groups
-        .iter()
-        .all(|group| look_filtered_selector(&group.selector))
-}
-
 /// Candidates are the union of the groups; one candidate may belong to several groups.
 fn group_layout(
     constraint: &SelectionConstraint,
@@ -401,23 +351,10 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             .iter()
             .all(|group| private_look_filter(&group.selector).is_some());
     if private_look_groups {
-        if decision.actor != (PlayerRef::Controller {})
-            || constraint.groups.len() > 2
-            || constraint.cardinality.minimum != Nat(0)
-            || constraint
-                .cardinality
-                .maximum
-                .is_none_or(|maximum| maximum.0 > 2)
-            || constraint.distinct_by.is_some()
-            || !constraint.aggregate_bounds.is_empty()
-            || constraint.disjoint != Disjointness::Disjoint
-        {
+        if !private_look_choice(decision) {
             return Err(unsupported("private observed choice actor or bounds"));
         }
         for group in &constraint.groups {
-            if group.cardinality.minimum != Nat(0) || group.cardinality.maximum != Some(Nat(1)) {
-                return Err(unsupported("private observed group bounds"));
-            }
             let (binding, predicate) = private_look_filter(&group.selector)
                 .ok_or_else(|| unsupported("private observed group selector"))?;
             check_predicate(predicate, binding, true)?;
@@ -850,7 +787,7 @@ impl Game {
         }
         let evolution = effect_evolution::is_choice(decision);
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
-        let observed_deck = allow_resolution_zones && private_look_decision(decision, constraint);
+        let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
         let group_members = self.target_group_members(execution, decision, constraint)?;
@@ -944,7 +881,7 @@ impl Game {
             return Ok(vec![self.effect_evolution_members(execution)?]);
         }
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
-        let observed_deck = allow_resolution_zones && private_look_decision(decision, constraint);
+        let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
         constraint
@@ -1233,14 +1170,4 @@ impl Execution {
             },
         );
     }
-}
-
-fn look_filtered_selector(selector: &Selector) -> bool {
-    matches!(selector,
-        Selector::Filter { input, .. }
-            if matches!(input.as_ref(), Selector::ReceiptMembers {
-                receipt: ObjectReceipt::Look { .. },
-                projection: MemberProjection::Before,
-            })
-    )
 }

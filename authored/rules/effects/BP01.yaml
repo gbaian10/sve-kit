@@ -1,246 +1,202 @@
-format: 1
-kind: effect_set
 cards:
   BP01-001:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
+      - body:
+          name: 薔薇の一撃
           op: transform
           subjects: target.1
-          name: 薔薇の一撃
         event: enter
+        kind: trigger
+        line: 1
         subject: self
         targets:
           - key: "1"
+            max: 5
+            min: 0
             select:
               side: self
-              zone: ex
-              type: follower
               trait: 妖精
-            min: 0
-            max: 5
-      - line: 2
-        kind: activated
-        body:
-          op: recover_pp
+              type: follower
+              zone: ex
+      - body:
           amount:
             count:
+              name: 薔薇の一撃
               side: self
               zone: ex
-              name: 薔薇の一撃
+          op: recover_pp
         costs:
           - op: act
             subjects: self
-  BP01-013:
-    status: complete
-    abilities:
-      - line: 1
         kind: activated
-        body:
+        line: 2
+    status: complete
+  BP01-013:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: modify
+            - hp: 3
+              op: modify
               subjects: self.leader
-              hp: 3
-            - op: draw
-              count: 1
-        limit: 1
+            - count: 1
+              op: draw
         cost_selections:
           - key: "1"
-            select:
-              zone: ex
-              side: self
-              type: follower
-              trait: 妖精
-            min: 1
             max: 1
+            min: 1
+            select:
+              side: self
+              trait: 妖精
+              type: follower
+              zone: ex
         costs:
           - op: banish
             subjects: cost.1
+        kind: activated
+        limit: 1
+        line: 1
+    status: complete
   BP01-042:
-    status: complete
     abilities: []
-  BP01-056:
     status: complete
-    review: 依 Q189／Q190：補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
+  BP01-056:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: quick
-      - line: 2
-        kind: spell
-        body:
-          op: repeat
+          op: macro
+        kind: static
+        line: 1
+      - body:
           body:
             op: move
             subjects:
               side: self
-              zone: deck
               top: 1
+              zone: deck
             to: ex
+          op: repeat
           until:
-            fn: ge
             args:
               - count:
                   side: self
                   zone: ex
               - 5
-      - line: 3
+            fn: ge
         kind: spell
-        body:
-          op: delay
-          event: end
+        line: 2
+      - body:
           body:
             op: banish
             subjects:
               side: self
               zone: ex
+          event: end
           once: true
-  BP01-105:
+          op: delay
+        kind: spell
+        line: 3
+    review: 依 Q189／Q190：補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
     status: complete
+  BP01-105:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: modify
+          - hp: -3
+            op: modify
             subjects: self.leader
-            hp: -3
-      - line: 2
-        kind: static
-        body:
-          op: macro
+        kind: evolve
+        line: 1
+      - body:
           name: bane
-  BP01-115:
+          op: macro
+        kind: static
+        line: 2
     status: complete
+  BP01-115:
     abilities:
-      - line: 1
-        kind: spell
-        body:
+      - body:
           op: seq
           steps:
-            - op: move
+            - bind: revived
+              op: move
               subjects: target.1
               to: field
-              bind: revived
-            - op: modify
-              subjects: revived
-              keywords:
+            - keywords:
                 - guard
+              op: modify
+              subjects: revived
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: cemetery
               type: follower
               where:
-                fn: le
                 args:
                   - read: item.cost
                   - 8
-            min: 1
-            max: 1
-  BP01-149:
+                fn: le
+              zone: cemetery
     status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: modify
-          subjects: target.1
-          keywords:
-            - guard
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: self
-              type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: activated
-        body:
-          op: modify
-          subjects: target.1
-          power: 2
-          hp: 2
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: self
-              type: follower
-              keyword: guard
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 2
-          - op: act
-            subjects: self
-          - op: move
-            subjects: self
-            to: cemetery
   BP01-170:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: discard
-        subject: self
-        active_zones:
+      - active_zones:
           - hand
-      - line: 1
-        kind: spell
         body:
-          op: draw
           count: 1
-        section: 0
-  BP01-172:
-    status: complete
-    abilities: []
-  BP01-173:
-    status: complete
-    abilities: []
-  BP01-175:
-    status: complete
-    abilities: []
-  BP01-P23:
-    status: complete
-    abilities:
-      - line: 1
+          op: draw
+        event: discard
         kind: trigger
-        body:
+        line: 1
+        subject: self
+      - body:
+          count: 1
+          op: draw
+        kind: spell
+        line: 1
+        section: 0
+    status: complete
+  BP01-172:
+    abilities: []
+    status: complete
+  BP01-173:
+    abilities: []
+    status: complete
+  BP01-175:
+    abilities: []
+    status: complete
+  BP01-P23:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 2
+              op: damage
               subjects: self.leader
-              amount: 2
             - op: reveal
               subjects:
-                zone: hand
                 side: opponent
+                zone: hand
               to: all
-            - op: select
-              select:
-                zone: hand
-                side: opponent
-              min: 1
+            - bind: chosen
               max: 1
-              bind: chosen
+              min: 1
+              op: select
+              select:
+                side: opponent
+                zone: hand
             - op: discard
               subjects: chosen
         event: evolve
+        kind: trigger
+        line: 1
         subject: self
+    status: complete
+format: 1
+kind: effect_set

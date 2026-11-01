@@ -358,7 +358,7 @@ impl BodyContext<'_> {
             || matches!(value.to, ast::Destination::Ex)
             || matches!(objects, ast::Objects::Bound(name)
                 if self.observed_targets.contains(name)
-                    && matches!(value.to, ast::Destination::Hand))
+                    && matches!(value.to, ast::Destination::Hand | ast::Destination::Cemetery))
     }
 }
 

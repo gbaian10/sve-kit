@@ -142,6 +142,7 @@ impl BodyContext<'_> {
             || choice.from.leaders.is_some()
             || choice.from.leader_or
             || !matches!(&choice.from.kind, Some(ast::SearchKind::Follower))
+            || choice.from.keyword.is_some()
             || choice.from.r#trait.is_some()
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
@@ -240,6 +241,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::TargetQuery) -> Self {
         Self {
             kind: query.kind.as_ref(),
+            keyword: query.keyword.map(|keyword| keyword.0),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &[],
@@ -261,6 +263,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
         Self {
             racing: query.racing,
             kind: query.kind.as_ref(),
+            keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
@@ -296,6 +299,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
         Self {
             face_up: query.face_up,
             kind: query.kind.as_ref(),
+            keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),

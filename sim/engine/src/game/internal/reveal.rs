@@ -68,9 +68,6 @@ impl Game {
             Selector::Bound { .. } => (execution.objects(self, objects)?, true),
             _ => return Err(unsupported("whole hand reveal")),
         };
-        if selected && members.len() > 1 {
-            return Err(unsupported("single selected card reveal"));
-        }
         let mut ids = Vec::new();
         let mut current_members = Vec::with_capacity(members.len());
         for member in &members {

@@ -1,0 +1,36 @@
+cards:
+  BP06-093:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  n: 3
+                  sel:
+                    keyword: ward
+                    kind: follower
+                    who: self
+                    zone: cemetery
+          do:
+            - banish: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

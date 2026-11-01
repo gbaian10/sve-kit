@@ -420,7 +420,7 @@ pub(super) fn private_requirement(code: &str) -> bool {
     )
 }
 
-// Keyword identifiers are also used by grants; only their Search-owned locations are private reads.
+// Grants and characteristic predicates share identifiers, but their checked owners differ.
 pub(super) fn keyword_requirement(
     requirements: &Requirements,
     requirement: &Requirement,
@@ -443,7 +443,12 @@ pub(super) fn keyword_requirement(
             || requirements
                 .required
                 .iter()
-                .filter(|owner| owner.capability.code == "shape.Action.Search")
+                .filter(|owner| {
+                    matches!(
+                        owner.capability.code,
+                        "shape.Action.Search" | "shape.Predicate.HasAbility"
+                    )
+                })
                 .flat_map(|owner| &owner.locations)
                 .any(|owner| location.ir_path.starts_with(&format!("{}/", owner.ir_path)))
     })
@@ -505,6 +510,11 @@ pub(super) fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicat
         .keyword
         .ok_or_else(|| unsupported("search keyword"))?;
     game.require_internal_abilities(id, "search keyword")?;
+    if let Some(name) = super::grant::keyword(keyword)
+        && game.object(id)?.zone == "field"
+    {
+        return Ok(game.keywords(id)?.contains(name));
+    }
     Ok(game
         .internal_characteristic_abilities(id)?
         .iter()

@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
@@ -81,7 +82,7 @@ impl Checker {
         else {
             return Err(self.error(WellFormedReason::DecisionTiming));
         };
-        if *may != Declinable::Required && !private_optional_look(decision, *cardinality) {
+        if *may != Declinable::Required && !private_look_choice(decision) {
             return self.reject();
         }
         if let Some(guard) = precondition {
@@ -651,48 +652,6 @@ impl Checker {
         }
         Ok(())
     }
-}
-
-fn private_optional_look(decision: &Decision, cardinality: Cardinality) -> bool {
-    let ChoiceDomain::Objects {
-        constraint,
-        target_roles: None,
-        ..
-    } = &decision.domain
-    else {
-        return false;
-    };
-    if constraint.groups.is_empty() || constraint.groups.len() > 2 {
-        return false;
-    }
-    let expected = Cardinality {
-        minimum: Nat(0),
-        maximum: u64::try_from(constraint.groups.len()).ok().map(Nat),
-    };
-    cardinality == expected
-        && constraint.cardinality == expected
-        && constraint.groups.iter().all(|group| {
-            group.cardinality
-                == (Cardinality {
-                    minimum: Nat(0),
-                    maximum: Some(Nat(1)),
-                })
-                && matches!(
-                    &group.selector,
-                    Selector::Filter { input, .. }
-                        if matches!(input.as_ref(), Selector::ReceiptMembers {
-                            receipt: ObjectReceipt::Look { .. },
-                            projection: MemberProjection::Before,
-                        })
-                )
-        })
-        && decision.actor == (PlayerRef::Controller {})
-        && matches!(
-            &decision.visibility,
-            Visibility::Only { players }
-                if players.relation == PlayerRelation::SelfPlayer
-                    && players.relative_to == decision.actor
-        )
 }
 
 fn has_roles(domain: &ChoiceDomain) -> bool {
