@@ -545,13 +545,25 @@ impl Checker {
         if !self.env.choices && optional == PaymentOptionality::Optional {
             return self.reject();
         }
+        let mut paid = None;
         self.isolated(|checker| {
             checker.env.scope = on_paid.scope;
             checker.env.play_payments = None;
             checker.at("costs", |checker| checker.costs(costs))?;
             checker.produce(receipt, TypeId::of::<PaymentResult>())?;
-            checker.at("on_paid", |checker| checker.program(on_paid))
+            checker.at("on_paid", |checker| checker.program(on_paid))?;
+            if at == PaymentTime::PlayParameter && optional == PaymentOptionality::Required {
+                paid = Some(checker.env.clone());
+            }
+            Ok(())
         })?;
+        if let Some(paid) = paid {
+            self.env.receipts.extend(paid.receipts);
+            self.env.receipt_access.extend(paid.receipt_access);
+            self.env
+                .movement_before_access
+                .extend(paid.movement_before_access);
+        }
         self.env
             .receipts
             .insert(receipt, TypeId::of::<PaymentResult>());

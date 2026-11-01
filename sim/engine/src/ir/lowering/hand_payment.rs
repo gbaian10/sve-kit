@@ -35,14 +35,9 @@ pub(super) fn lower(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<Action, LoweringError> {
-    if material.n == 0 {
-        return Err(unsupported(path));
-    }
+    let cardinality = cardinality(material, path)?;
     let binding = Binding::new(allocator.id(path)?, allocator.scope(path)?);
-    let cardinality = Cardinality {
-        minimum: Nat(material.n),
-        maximum: Some(Nat(material.n)),
-    };
+
     Ok(Action::Discard {
         player: PlayerRef::Controller {},
         mode: DiscardMode::Chosen {
@@ -134,4 +129,25 @@ fn filter(
     } else {
         Expr::Compute(Box::new(Predicate::And { predicates }))
     })
+}
+
+pub(super) fn cardinality(
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<Cardinality, LoweringError> {
+    match (material.n, material.upto, material.any) {
+        (Some(n), None, false) if n > 0 => Ok(Cardinality {
+            minimum: Nat(n),
+            maximum: Some(Nat(n)),
+        }),
+        (None, Some(n), false) if n > 0 => Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(n)),
+        }),
+        (None, None, true) => Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        }),
+        _ => Err(unsupported(path)),
+    }
 }

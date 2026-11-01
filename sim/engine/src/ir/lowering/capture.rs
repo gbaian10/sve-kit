@@ -114,6 +114,9 @@ impl BodyContext<'_> {
             | ast::Number::Literal(_)
             | ast::Number::Alias(_)
             | ast::Number::HistoryCount { .. }
+            | ast::Number::ReceiptCount { .. }
+            | ast::Number::CountOf { .. }
+            | ast::Number::TurnOrdinal { .. }
             | ast::Number::LeaderLife { .. }
             | ast::Number::Minus { .. }
             | ast::Number::Resource { .. }

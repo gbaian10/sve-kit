@@ -514,7 +514,12 @@ fn entry_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.Control.Pay"
+        "shape.MovementReceipt.Discard"
+            | "shape.Predicate.ReceiptAny"
+            | "read.receipt.member-any"
+            | "shape.ObjectView.Snapshot"
+            | "reference.snapshot"
+            | "shape.Control.Pay"
             | "shape.Control.May"
             | "control.may"
             | "shape.Action.MealRace"
@@ -795,6 +800,8 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.Conditional"
             | "shape.NatRead.ZoneCount"
             | "read.zone-count"
+            | "shape.NatRead.TurnOrdinal"
+            | "read.turn.ordinal"
             | "shape.Predicate.And"
             | "predicate.and"
             | "shape.Predicate.Or"

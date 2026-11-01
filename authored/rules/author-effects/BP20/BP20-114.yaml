@@ -1,0 +1,20 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-114:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve: { cost: { pp: 1 } }
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond: { cmp: { left: { resource: { who: self, kind: sep } }, op: eq, right: 0 } }
+                then:
+                  - buff: { on: this, power: 1, hp: 1 }
+                  - grant: { on: this, keywords: [storm] }

@@ -1,0 +1,21 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-112:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        fanfare:
+          do:
+            - draw: { who: self, n: 1 }
+            - if:
+                cond: { cmp: { left: { resource: { who: self, kind: sep } }, op: eq, right: 0 } }
+                then:
+                  - buff: { on: this, power: 2, hp: 2 }
+            - life: { who: self, delta: 2 }

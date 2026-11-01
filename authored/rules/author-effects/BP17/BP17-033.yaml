@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-033:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            discard:
+              sel: { who: self, zone: hand, class: ロイヤル }
+              n: 1
+              result: discarded
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in: { objects_of: discarded, view: before }
+                        kind: spell
+                    op: ge
+                    right: 1
+                then:
+                  - draw: { who: self, n: 2 }
+                else:
+                  - draw: { who: self, n: 1 }

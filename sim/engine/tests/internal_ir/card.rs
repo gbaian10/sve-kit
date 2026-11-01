@@ -651,3 +651,6 @@ mod observation_filters;
 
 #[path = "card/declaration_costs.rs"]
 mod declaration_costs;
+
+#[path = "card/choice_condition_lowering.rs"]
+mod choice_condition_lowering;

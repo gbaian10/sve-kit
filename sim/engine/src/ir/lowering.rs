@@ -24,6 +24,7 @@ mod payment;
 mod play;
 mod play_restrictions;
 mod prevention;
+mod receipt_counts;
 mod static_keywords;
 
 mod posture;
@@ -476,6 +477,11 @@ impl Allocator {
         }
         context.departure_to_cemetery = events.departure_to_cemetery;
         context.cemetery_return = active_zones == [ZoneKind::Cemetery];
+        let activated_play = entry
+            .activate
+            .as_ref()
+            .map(|activated| payment::lower(&mut context, &activated.cost, &ability_source, path))
+            .transpose()?;
         let mut program =
             context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         if let Some(payment) = optional {
@@ -499,17 +505,8 @@ impl Allocator {
                 )?),
                 None,
             )
-        } else if let Some(activated) = &entry.activate {
-            (
-                AbilityKind::Activated,
-                Some(payment::lower(
-                    &mut context,
-                    &activated.cost,
-                    &ability_source,
-                    path,
-                )?),
-                None,
-            )
+        } else if let Some(play) = activated_play {
+            (AbilityKind::Activated, Some(play), None)
         } else {
             let trigger = context.trigger(entry, keyword, body, path)?;
             (AbilityKind::Triggered, triggered_play, Some(trigger))
@@ -925,6 +922,7 @@ struct BodyContext<'definitions> {
     ex_outputs: BTreeMap<String, Selector>,
     ex_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
+    single_discards: BTreeSet<ReceiptId>,
     observed_targets: BTreeSet<String>,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
@@ -962,6 +960,7 @@ impl<'definitions> BodyContext<'definitions> {
             ex_outputs: BTreeMap::new(),
             ex_targets: BTreeSet::new(),
             observations: BTreeMap::new(),
+            single_discards: BTreeSet::new(),
             observed_targets: BTreeSet::new(),
             targets: BTreeMap::new(),
             recipient_targets: BTreeMap::new(),
