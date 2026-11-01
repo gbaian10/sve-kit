@@ -1,0 +1,29 @@
+cards:
+  BP01-013:
+    abilities:
+      - activate:
+          cost:
+            banish:
+              n: 1
+              sel:
+                kind: follower
+                trait: 妖精
+                who: self
+                zone: ex
+          do:
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 1
+          per_turn: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

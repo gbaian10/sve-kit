@@ -1,0 +1,23 @@
+cards:
+  BP01-102:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 冥焔の右腕・ミミ
+            - create:
+                n: 1
+                to: ex
+                token: 冥焔の左腕・ココ
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

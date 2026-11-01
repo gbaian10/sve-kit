@@ -31,32 +31,6 @@ cards:
         kind: activated
         line: 2
     status: complete
-  BP01-013:
-    abilities:
-      - body:
-          op: seq
-          steps:
-            - hp: 3
-              op: modify
-              subjects: self.leader
-            - count: 1
-              op: draw
-        cost_selections:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              trait: 妖精
-              type: follower
-              zone: ex
-        costs:
-          - op: banish
-            subjects: cost.1
-        kind: activated
-        limit: 1
-        line: 1
-    status: complete
   BP01-042:
     abilities: []
     status: complete
