@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-018:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        attack_time:
+          do:
+            - apply:
+                "on": this
+                effect:
+                  prevent:
+                    kind: any
+                until: turn
+      - line: 3
+        fanfare:
+          cost:
+            pp: 2
+          do:
+            - buff:
+                "on": this
+                power: 2
+                hp: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

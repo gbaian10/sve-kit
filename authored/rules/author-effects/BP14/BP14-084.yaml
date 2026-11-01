@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-084:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+      - line: 2
+        attack_time:
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+            - life:
+                who: self
+                delta: 2
+      - line: 3
+        activate:
+          cost:
+            pp: 2
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

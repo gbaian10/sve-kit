@@ -1,0 +1,65 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-116:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - create:
+                token: 分身の術・煤木万裁
+                n: 1
+                to: field
+      - line: 3
+        fanfare:
+          cost:
+            pp: 2
+          do:
+            - create:
+                token: 分身の術・煤木万裁
+                n: 1
+                to: field
+      - line: 4
+        activate:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 透京
+              n: 1
+          do:
+            - apply:
+                "on":
+                  who: self
+                  zone: field
+                  name: 帥忍部長・煤木万裁
+                effect:
+                  prevent:
+                    kind: any
+                until: turn
+            - apply:
+                "on":
+                  who: self
+                  zone: field
+                  name: 分身の術・煤木万裁
+                effect:
+                  prevent:
+                    kind: any
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

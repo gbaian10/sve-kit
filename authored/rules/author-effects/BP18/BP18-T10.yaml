@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-T10:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - create:
+                token: 分身の術・煤木万裁
+                n: 1
+                to: field
+    token:
+      name: 分身の術・煤木万裁
+      template: true
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
