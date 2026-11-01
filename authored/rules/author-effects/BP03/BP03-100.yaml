@@ -1,0 +1,64 @@
+cards:
+  BP03-100:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  cost_le: 5
+                  in: seen
+                  kind: follower
+                  trait: 童話
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - move:
+                ref: ally
+                result: returned
+                to: field
+          targets:
+            - bind: ally
+              from:
+                cost_le: 3
+                kind: follower
+                trait: 童話
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

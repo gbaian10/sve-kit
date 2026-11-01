@@ -1,0 +1,27 @@
+cards:
+  BP03-T06:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - banish:
+                ref: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: ジャイアントゴースト
+      template: true
+format: 2
+kind: author_effect_set

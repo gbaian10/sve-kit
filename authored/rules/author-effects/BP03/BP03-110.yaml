@@ -1,0 +1,28 @@
+cards:
+  BP03-110:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+          while:
+            cmp:
+              left:
+                counter:
+                  name: 童話カウンター
+                  on: this
+              op: eq
+              right: 0
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

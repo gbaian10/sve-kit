@@ -1,0 +1,35 @@
+cards:
+  BP03-020:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: hand
+              op: le
+              right: 2
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  not_same_name_as_this: true
+                  trait: ヒーロー
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
