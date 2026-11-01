@@ -42,6 +42,7 @@ impl Game {
                 |keyword| match keyword {
                     KeywordId::SingleDrive => Some("single_drive"),
                     KeywordId::TwinDrive => Some("twin_drive"),
+                    KeywordId::Drain => Some("drain"),
                     _ => grant::keyword(keyword),
                 },
             ) {
@@ -201,14 +202,16 @@ pub(super) fn check(
     ) {
         return Err(unsupported("printed keyword requires a follower face"));
     }
-    if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive)
-        && located
-            .node
-            .body
-            .as_ref()
-            .is_none_or(|body| body.steps.iter().any(|step| step.source != located.source))
+    if matches!(
+        keyword,
+        KeywordId::SingleDrive | KeywordId::TwinDrive | KeywordId::Drain
+    ) && located
+        .node
+        .body
+        .as_ref()
+        .is_none_or(|body| body.steps.iter().any(|step| step.source != located.source))
     {
-        return Err(invalid("Drive declaration source mismatch"));
+        return Err(invalid("keyword declaration source mismatch"));
     }
     let current = game
         .card_runtime
@@ -231,6 +234,7 @@ pub(super) fn check(
                     | (PrintedKeyword::Storm, KeywordId::Storm)
                     | (PrintedKeyword::Rush, KeywordId::Rush)
                     | (PrintedKeyword::Bane, KeywordId::Bane)
+                    | (PrintedKeyword::Drain, KeywordId::Drain)
                     | (PrintedKeyword::Intimidate, KeywordId::Intimidate)
                     | (PrintedKeyword::Assail, KeywordId::Assail)
                     | (PrintedKeyword::SingleDrive, KeywordId::SingleDrive)

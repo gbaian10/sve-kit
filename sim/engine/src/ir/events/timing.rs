@@ -196,3 +196,23 @@ pub(crate) fn second_header(ability: &Ability) -> Option<bool> {
         _ => None,
     }
 }
+
+pub(crate) fn drain_predicate(event: Binding<DamageEvent>) -> Expr<Bool> {
+    use crate::ir::{ObjectFrozen, SnapshotFields};
+    Expr::Compute(Box::new(Predicate::And {
+        predicates: vec![
+            Expr::Compute(Box::new(Predicate::ObjectEquals {
+                left: Expr::Frozen(Box::new(ObjectFrozen::SnapshotObject {
+                    snapshot: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
+                })),
+                right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+            })),
+            Expr::Compute(Box::new(Predicate::Equal {
+                operands: Box::new(ValueEquality::DamageFlags {
+                    left: Expr::Frozen(Box::new(DamageFlagsFields::DamageFlags { event })),
+                    right: Expr::Literal(DamageFlags::AttackCombat),
+                }),
+            })),
+        ],
+    }))
+}

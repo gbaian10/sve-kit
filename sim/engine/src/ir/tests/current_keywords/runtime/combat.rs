@@ -508,6 +508,6 @@ fn the_complete_seven_keyword_handoff_is_closed_and_consumed_in_order() {
     unsupported["source_inventory"]["non_body"][0]["declaration"]["keywords"]
         .as_array_mut()
         .unwrap()
-        .push(json!("drain"));
+        .push(json!("stack"));
     lowerer.lower_current(&unsupported).unwrap_err();
 }

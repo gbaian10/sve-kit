@@ -491,14 +491,16 @@ fn keyword_sources_are_scope_free_and_keep_their_own_coordinate() {
         json!(["intimidate"]),
         json!(["assail"]),
         json!(["ward", "storm"]),
+        json!(["drain"]),
+        json!(["ward", "drain"]),
     ] {
         let mut supported = tree.clone();
         supported.pointer_mut(pointer).unwrap()["keywords"] = keywords;
         lowerer.lower(&supported).unwrap();
     }
     for keywords in [
-        json!(["drain"]),
-        json!(["ward", "drain"]),
+        json!(["stack"]),
+        json!(["ward", "stack"]),
         json!(["quick", "aura"]),
     ] {
         let mut unsupported = tree.clone();
@@ -1425,4 +1427,17 @@ fn evolve_counts_reject_opponents_and_hidden_zone_face_filters() {
             "unsupported_construct"
         );
     }
+}
+
+#[test]
+fn printed_drain_does_not_expand_search_keyword_admission() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP03-002"]["abilities"][0]["fanfare"]["do"] = json!([
+        {"search":{"sel":{"who":"self","zone":"deck","keyword":"drain"},"n":1_u64,"to":"hand"}}
+    ]);
+    assert_eq!(
+        lowerer().lower(&tree).unwrap_err().code,
+        "unsupported_construct",
+        "printed Drain does not add an unproven search consumer"
+    );
 }

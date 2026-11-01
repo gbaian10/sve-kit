@@ -253,7 +253,7 @@ fn current_internal_keyword_wire_is_closed_and_required() {
         ("/source_inventory/non_body/0/kind", json!("unknown")),
         (
             "/source_inventory/non_body/0/declaration/keywords",
-            json!(["drain"]),
+            json!(["stack"]),
         ),
         (
             "/source_inventory/non_body/0/declaration/keywords",

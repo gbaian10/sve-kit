@@ -65,7 +65,7 @@ fn query_filter(
     let mut filter = super::selection::ObjectFilter::from(query);
     if let Some(keyword) = &query.keyword {
         filter.keyword =
-            Some(super::keywords::keyword_id(keyword).ok_or_else(|| unsupported(path))?);
+            Some(super::keywords::basic_keyword_id(keyword).ok_or_else(|| unsupported(path))?);
     }
     filter.power_at_most = match (&query.alias, &query.r#where) {
         (None, None) => None,
