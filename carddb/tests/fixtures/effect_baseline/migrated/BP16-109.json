@@ -1,0 +1,28 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "aura"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self",
+        "power": 1
+      },
+      "event": "enter",
+      "subject": {
+        "side": "self",
+        "zone": "field",
+        "type": "amulet"
+      }
+    }
+  ]
+}
