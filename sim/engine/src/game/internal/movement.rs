@@ -1,6 +1,8 @@
 //! Physical movement and successful receipt projections; full replacement chains remain closed.
 
-use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, player_id, unsupported};
+use super::{
+    Execution, Fact, Game, InstructionOutcome, Result, int, invalid, player_id, unsupported,
+};
 use crate::game::Object;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
@@ -773,6 +775,7 @@ impl Game {
             let followup =
                 self.departure_followup(execution, &previous, zone, evolution.is_some())?;
 
+            let stack_replaced = self.stack_replaces_departure(&id, zone)?;
             plans.push((
                 moves.len().saturating_sub(1),
                 id,
@@ -780,23 +783,26 @@ impl Game {
                 from_kind,
                 followup,
                 evolution,
+                stack_replaced,
             ));
         }
         if owner_ex {
             let mut arrivals = BTreeMap::<String, usize>::new();
-            for (_, _, previous, _, _, _) in &plans {
+            for (_, _, previous, ..) in plans.iter().filter(|plan| !plan.6) {
                 let count = arrivals.entry(previous.owner.clone()).or_default();
                 *count = count.saturating_add(1);
             }
             for (owner, count) in arrivals {
                 if !self.owner_ex_has_room(&owner, count)? {
-                    plans.retain(|(_, _, previous, _, _, _)| previous.owner != owner);
+                    plans.retain(|(_, _, previous, _, _, _, stack_replaced)| {
+                        *stack_replaced || previous.owner != owner
+                    });
                 }
             }
         }
         let ids = plans
             .iter()
-            .map(|(_, id, _, _, _, _)| id.clone())
+            .map(|(_, id, _, _, _, _, _)| id.clone())
             .collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
@@ -829,7 +835,7 @@ impl Game {
         }
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
-            for (_, id, previous, _, _, _) in &plans {
+            for (_, id, previous, ..) in plans.iter().filter(|plan| !plan.6) {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != previous.owner {
                         knowledge.located.remove(id);
@@ -844,9 +850,14 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after_snapshot = SnapshotId(self.state.ir_epoch);
         let group = self.group();
-        for (index, id, previous, from_kind, followup, evolution) in plans {
+        let mut source_departed = false;
+        for (index, id, previous, from_kind, followup, evolution, stack_replaced) in plans {
             self.check_evolution_return(evolution.as_ref())?;
             let current = self.object(&id)?;
+            if stack_replaced {
+                check_stack_replacement(&previous, current)?;
+                continue;
+            }
             let mut after = execution.reference(self, &id)?;
             after.generation = Generation(previous.generation.saturating_add(1));
             if current.generation
@@ -868,6 +879,7 @@ impl Game {
             let result = moves
                 .get_mut(index)
                 .ok_or_else(|| invalid("missing movement result"))?;
+            source_departed |= id == execution.context.source;
             result.after = Some(after);
             result.actual_to = Some(result.requested_to);
             let controller_before = player_id(&previous.controller)?;
@@ -908,7 +920,7 @@ impl Game {
                 );
             }
         }
-        execution.seal_source_departure(departing_source);
+        execution.seal_source_departure(departing_source.filter(|_| source_departed));
         Ok((moves, successful))
     }
 }
@@ -921,6 +933,19 @@ fn public_zone(zone: &str) -> Result<ZoneKind> {
         "banish" => Ok(ZoneKind::Banish),
         _ => Err(unsupported("non-public movement origin")),
     }
+}
+
+fn check_stack_replacement(previous: &Object, current: &Object) -> Result<()> {
+    if current.generation != previous.generation
+        || current.zone != previous.zone
+        || int(&current.state["counters"]["stack_counter"])
+            != int(&previous.state["counters"]["stack_counter"]).saturating_sub(1)
+    {
+        return Err(invalid(
+            "Stack replacement diverged from the admitted proposal",
+        ));
+    }
+    Ok(())
 }
 
 fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<ZoneKind> {

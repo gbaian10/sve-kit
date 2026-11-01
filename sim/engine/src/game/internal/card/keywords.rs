@@ -43,6 +43,7 @@ impl Game {
                     KeywordId::SingleDrive => Some("single_drive"),
                     KeywordId::TwinDrive => Some("twin_drive"),
                     KeywordId::Drain => Some("drain"),
+                    KeywordId::Stack => Some("stack"),
                     _ => grant::keyword(keyword),
                 },
             ) {
@@ -191,16 +192,24 @@ pub(super) fn check(
     printed: &Value,
     keyword: KeywordId,
 ) -> Result<()> {
-    if !matches!(
-        printed["card_type"].as_str(),
-        Some(
-            "フォロワー"
-                | "フォロワー・エボルヴ"
-                | "フォロワー・アドバンス"
-                | "フォロワー・トークン"
+    let card_type = printed["card_type"].as_str();
+    let supported_kind = if keyword == KeywordId::Stack {
+        matches!(card_type, Some("アミュレット" | "アミュレット・トークン"))
+    } else {
+        matches!(
+            card_type,
+            Some(
+                "フォロワー"
+                    | "フォロワー・エボルヴ"
+                    | "フォロワー・アドバンス"
+                    | "フォロワー・トークン"
+            )
         )
-    ) {
-        return Err(unsupported("printed keyword requires a follower face"));
+    };
+    if !supported_kind {
+        return Err(unsupported(
+            "printed keyword requires its supported card kind",
+        ));
     }
     if matches!(
         keyword,
@@ -229,7 +238,8 @@ pub(super) fn check(
         .position(|item| {
             matches!(
                 (item, keyword),
-                (PrintedKeyword::Ward, KeywordId::Ward)
+                (PrintedKeyword::Stack, KeywordId::Stack)
+                    | (PrintedKeyword::Ward, KeywordId::Ward)
                     | (PrintedKeyword::Aura, KeywordId::Aura)
                     | (PrintedKeyword::Storm, KeywordId::Storm)
                     | (PrintedKeyword::Rush, KeywordId::Rush)

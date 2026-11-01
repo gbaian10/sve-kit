@@ -464,6 +464,14 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn stack_replaces_departure(&self, id: &str, zone: &str) -> Result<bool> {
+        let object = self.object(id)?;
+        Ok(object.zone == "field"
+            && zone != "field"
+            && self.keywords(id)?.contains("stack")
+            && int(&object.state["counters"]["stack_counter"]) > 0)
+    }
+
     pub(super) fn initialize_entry_counters(&mut self, id: &str, frame: &Frame) -> Result<()> {
         if self.keywords(id)?.contains("stack") {
             let count = frame

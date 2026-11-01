@@ -55,6 +55,7 @@ pub(super) fn lower(
 
 pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
     match keyword {
+        "stack" => Some(KeywordId::Stack),
         "ward" => Some(KeywordId::Ward),
         "aura" => Some(KeywordId::Aura),
         "storm" => Some(KeywordId::Storm),

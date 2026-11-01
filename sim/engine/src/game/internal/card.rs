@@ -937,7 +937,8 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Intimidate
                 | KeywordId::Assail
                 | KeywordId::SingleDrive
-                | KeywordId::TwinDrive,
+                | KeywordId::TwinDrive
+                | KeywordId::Stack,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {
