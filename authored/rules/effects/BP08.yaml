@@ -54,37 +54,6 @@ cards:
                 fn: and
               zone: cemetery
     status: complete
-  BP08-089:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 2
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          condition:
-            args:
-              - count:
-                  side: self
-                  type: amulet
-                  zone: field
-              - 3
-            fn: ge
-          op: if
-          then:
-            kind: evolve
-            op: adjust_cost
-            set: 0
-            subjects: self
-            until: end-of-turn
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP08-SL15:
     abilities:
       - body:
