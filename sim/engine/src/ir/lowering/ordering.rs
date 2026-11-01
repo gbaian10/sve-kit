@@ -8,6 +8,13 @@ use super::{
     ReceiptId, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
+#[derive(Clone, Copy)]
+enum ObservationUse {
+    Order,
+    Move,
+    Remainder,
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Observation receipts are only exposed to the private movement spine."
@@ -122,7 +129,7 @@ impl BodyContext<'_> {
     fn observed(
         &self,
         value: &ast::Observed,
-        movement: bool,
+        usage: ObservationUse,
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let (name, before) = match &value.r#in {
@@ -136,7 +143,18 @@ impl BodyContext<'_> {
             .observations
             .get(name)
             .ok_or_else(|| unsupported(path))?;
-        if (!before || movement) && !matches!(receipt, ObjectReceipt::Look { .. }) {
+        let look = matches!(receipt, ObjectReceipt::Look { .. });
+        if !look
+            && (!before
+                || matches!(usage, ObservationUse::Move)
+                || matches!(usage, ObservationUse::Remainder)
+                    && !matches!(
+                        receipt,
+                        ObjectReceipt::Movement {
+                            receipt: MovementReceipt::Move { .. }
+                        }
+                    ))
+        {
             return Err(unsupported(path));
         }
         let input = Selector::ReceiptMembers {
@@ -146,7 +164,15 @@ impl BodyContext<'_> {
         if let Some(except) = &value.except {
             Ok(Selector::Difference {
                 input: Box::new(input),
-                except: Box::new(self.observed(except, movement, path)?),
+                except: Box::new(self.observed(
+                    except,
+                    if matches!(usage, ObservationUse::Order) {
+                        ObservationUse::Order
+                    } else {
+                        ObservationUse::Remainder
+                    },
+                    path,
+                )?),
             })
         } else {
             Ok(input)
@@ -267,7 +293,11 @@ impl BodyContext<'_> {
         };
         let cards = self.observed(
             observed,
-            matches!(value.to, ast::Destination::Ex | ast::Destination::Cemetery),
+            if matches!(value.to, ast::Destination::Deck) {
+                ObservationUse::Order
+            } else {
+                ObservationUse::Move
+            },
             path,
         )?;
         match value.to {
