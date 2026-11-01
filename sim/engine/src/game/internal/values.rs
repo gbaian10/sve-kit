@@ -256,6 +256,11 @@ impl Execution {
                 predicate,
                 ..
             } => self.unfiltered_zone_objects(game, players, *zone, predicate)?,
+            Selector::Extremum {
+                input,
+                property,
+                kind,
+            } => super::aggregates::extremum(self, game, input, *property, *kind)?,
             Selector::Union { sets } => sets
                 .iter()
                 .map(|set| self.objects(game, set))
@@ -527,6 +532,12 @@ impl Execution {
                     self.natural(game, value)?.0,
                 )
                 .map_err(invalid)?)),
+                IntOperation::Sum { objects, property } if target_plan(objects).is_some() => {
+                    self.attack_target_sum(game, objects, *property).map(Int)
+                }
+                IntOperation::Sum { objects, property } => {
+                    super::aggregates::sum(self, game, objects, *property).map(Int)
+                }
                 IntOperation::Conditional {
                     condition,
                     then_value,
@@ -549,29 +560,30 @@ impl Execution {
                         .collect::<Result<Vec<_>>>()?;
                     arithmetic(*operation, &values).map(Int)
                 }
-                IntOperation::Sum { objects, property } => {
-                    if target_plan(objects).is_none() {
-                        return Err(unsupported("signed aggregate selector"));
-                    }
-                    let property = match property {
-                        NumericProperty::Attack => Stat::Attack,
-                        NumericProperty::Life => Stat::Life,
-                        NumericProperty::Cost => {
-                            return Err(unsupported("attack target numeric property"));
-                        }
-                    };
-                    self.objects(game, objects)?
-                        .into_iter()
-                        .try_fold(0_i64, |sum, object| {
-                            let value =
-                                game.internal_numeric_stat(self.object_id(object)?, property)?;
-                            sum.checked_add(value)
-                                .ok_or_else(|| invalid("numeric aggregate overflow"))
-                        })
-                        .map(Int)
-                }
             },
         }
+    }
+
+    fn attack_target_sum(
+        &self,
+        game: &Game,
+        objects: &Selector,
+        property: NumericProperty,
+    ) -> Result<i64> {
+        let stat = match property {
+            NumericProperty::Attack => Stat::Attack,
+            NumericProperty::Life => Stat::Life,
+            NumericProperty::Cost | NumericProperty::OriginalCost => {
+                return Err(unsupported("attack target numeric property"));
+            }
+        };
+        self.objects(game, objects)?
+            .into_iter()
+            .try_fold(0_i64, |sum, object| {
+                let value = game.internal_numeric_stat(self.object_id(object)?, stat)?;
+                sum.checked_add(value)
+                    .ok_or_else(|| invalid("numeric aggregate overflow"))
+            })
     }
 
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {

@@ -103,17 +103,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let cardinality = match (target.n, target.upto) {
-            (Some(n), None) => Cardinality {
-                minimum: Nat(n),
-                maximum: Some(Nat(n)),
-            },
-            (None, Some(n)) => Cardinality {
-                minimum: Nat(0),
-                maximum: Some(Nat(n)),
-            },
-            _ => return Err(unsupported(path)),
-        };
+        let cardinality = target_cardinality(target, path)?;
         if target.from.leader.is_some() || target.from.leaders.is_some() || target.from.leader_or {
             if target.from.other {
                 return Err(unsupported(path));
@@ -171,6 +161,7 @@ impl BodyContext<'_> {
                 except: Box::new(super::numeric::holder()),
             };
         }
+        let selector = self.target_extremum(&target.from, selector, path)?;
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
@@ -202,6 +193,8 @@ impl BodyContext<'_> {
             .as_ref()
             .ok_or_else(|| unsupported(path))?;
         if !resolution
+            || target.from.alias.is_some()
+            || target.from.r#where.is_some()
             || target.from.who.is_some()
             || target.from.zone.is_some()
             || target.from.leader.is_some()
@@ -224,12 +217,12 @@ impl BodyContext<'_> {
             .filter(|receipt| matches!(receipt, ObjectReceipt::Look { .. }))
             .ok_or_else(|| unsupported(path))?
             .clone();
-        let cardinality = match (target.n, target.upto) {
-            (Some(count), None) => Cardinality {
+        let cardinality = match (target.n, target.upto, target.any) {
+            (Some(count), None, false) => Cardinality {
                 minimum: Nat(count),
                 maximum: Some(Nat(count)),
             },
-            (None, Some(count)) => Cardinality {
+            (None, Some(count), false) => Cardinality {
                 minimum: Nat(0),
                 maximum: Some(Nat(count)),
             },
@@ -914,4 +907,22 @@ fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, 
         target_players(query.who.as_ref().ok_or_else(|| unsupported(path))?)
     };
     Ok(players)
+}
+
+fn target_cardinality(target: &ast::Target, path: &str) -> Result<Cardinality, LoweringError> {
+    match (target.n, target.upto, target.any) {
+        (Some(n), None, false) => Ok(Cardinality {
+            minimum: Nat(n),
+            maximum: Some(Nat(n)),
+        }),
+        (None, Some(n), false) => Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(n)),
+        }),
+        (None, None, true) => Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        }),
+        _ => Err(unsupported(path)),
+    }
 }

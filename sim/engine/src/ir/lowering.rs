@@ -1,5 +1,6 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
+mod aggregates;
 mod ast;
 mod attack_restrictions;
 mod capture;
@@ -1033,6 +1034,12 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Result<bool, LoweringError> {
         let reserved = self.allocator.next;
         for value in body.define.values() {
+            // Set extrema retain empty-set semantics in their consuming selector.
+            if matches!(value, ast::Number::Aggregate { agg }
+                if matches!(agg.function, ast::AggregateFunction::Min | ast::AggregateFunction::Max))
+            {
+                continue;
+            }
             self.number(value, path, &mut BTreeSet::new())?;
         }
         self.resolution_captures.clear();
@@ -1166,7 +1173,7 @@ impl<'definitions> BodyContext<'definitions> {
                     instruction: Box::new(Instruction {
                         id: InstructionId(instruction_id),
                         receipt: ReceiptId(instruction_id),
-                        actor: PlayerRef::Controller {},
+                        actor: action_actor(&action),
                         source: ability_source.clone(),
                         precondition: None,
                         context: InstructionContext::Effect,
@@ -1330,4 +1337,12 @@ fn source_span(
         fragment: Some(text("/binding_id")?),
         author_path: path.to_owned(),
     })
+}
+
+fn action_actor(action: &Action) -> PlayerRef {
+    if let Action::Discard { player, .. } = action {
+        player.clone()
+    } else {
+        PlayerRef::Controller {}
+    }
 }

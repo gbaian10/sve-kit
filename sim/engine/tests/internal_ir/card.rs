@@ -657,3 +657,5 @@ mod declaration_costs;
 
 #[path = "card/choice_condition_lowering.rs"]
 mod choice_condition_lowering;
+#[path = "card/selection_shape_lowering.rs"]
+mod selection_shape_lowering;

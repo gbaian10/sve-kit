@@ -87,6 +87,10 @@ impl BodyContext<'_> {
         path: &str,
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
+        if choice.from.observation.is_some() && matches!(choice.by, Some(ast::LeaderSide::Opponent))
+        {
+            return Err(unsupported(path));
+        }
         if let Some(groups) = &choice.groups {
             return self.grouped_observed_choose(choice, groups, path, source);
         }
@@ -94,7 +98,7 @@ impl BodyContext<'_> {
         if choice.n == Some(0) || choice.reveal == Some(true) || choice.order == Some(true) {
             return Err(unsupported(path));
         }
-        let (n, upto) = if choice.may == Some(true) {
+        let (n, upto) = if choice.may == Some(true) && !choice.any {
             match (choice.n, choice.upto) {
                 (Some(1), None) => (None, Some(1)),
                 (None, Some(_)) => (None, choice.upto),
@@ -104,6 +108,7 @@ impl BodyContext<'_> {
             (choice.n, choice.upto)
         };
         let target = ast::Target {
+            any: choice.any,
             bind: choice.bind.clone(),
             from: choice.from.clone(),
             distinct_by: choice.distinct_by.clone(),
@@ -135,7 +140,10 @@ impl BodyContext<'_> {
                 decision: Decision {
                     id: DecisionId(self.card_allocator.id(path)?),
                     captures: vec![],
-                    actor: PlayerRef::Controller {},
+                    actor: match choice.by {
+                        Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
+                        Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
+                    },
                     domain,
                     kind: DecisionKind::ResolutionChoice {
                         may: if choice.may == Some(true) {

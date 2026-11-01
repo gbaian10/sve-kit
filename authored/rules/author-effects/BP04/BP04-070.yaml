@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - destroy:
+                ref:
+                  who: opp
+                  zone: field
+                  kind: follower
+                  where:
+                    cmp:
+                      left:
+                        cost_of: item
+                      op: eq
+                      right:
+                        agg:
+                          of:
+                            who: opp
+                            zone: field
+                            kind: follower
+                          attr: cost
+                          fn: min

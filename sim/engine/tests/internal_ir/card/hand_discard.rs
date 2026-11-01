@@ -119,9 +119,9 @@ fn hand_discard_does_not_open_general_hand_effect_selectors() {
 }
 
 #[test]
-fn discard_author_lowering_rejects_opponent_random_filtered_and_zero() {
+fn discard_author_lowering_accepts_opponent_and_rejects_random_filtered_and_zero() {
+    lowerer().lower(&tree(&json!({"who":"opp","n":1}))).unwrap();
     for discard in [
-        json!({"who":"opp","n":1}),
         json!({"who":"self","n":1,"random":true}),
         json!({"who":"self","n":0}),
         json!({"who":"self","n":1,"sel":{"who":"self","zone":"hand","kind":"spell"}}),

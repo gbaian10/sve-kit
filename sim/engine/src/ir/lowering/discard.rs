@@ -16,6 +16,10 @@ impl BodyContext<'_> {
         value: &ast::Discard,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        let player = match value.who {
+            Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
+            Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
+        };
         let mode = match (value.n, value.all) {
             (Some(n), None) if n > 0 && value.random != Some(true) => {
                 let cardinality = Cardinality {
@@ -28,7 +32,7 @@ impl BodyContext<'_> {
                             selector: Selector::Zone {
                                 players: PlayerSet {
                                     relation: PlayerRelation::SelfPlayer,
-                                    relative_to: PlayerRef::Controller {},
+                                    relative_to: player.clone(),
                                     cardinality: Cardinality {
                                         minimum: Nat(1),
                                         maximum: Some(Nat(1)),
@@ -53,7 +57,7 @@ impl BodyContext<'_> {
                 eligible: Selector::Zone {
                     players: PlayerSet {
                         relation: PlayerRelation::SelfPlayer,
-                        relative_to: PlayerRef::Controller {},
+                        relative_to: player.clone(),
                         cardinality: Cardinality {
                             minimum: Nat(1),
                             maximum: Some(Nat(1)),
@@ -68,9 +72,6 @@ impl BodyContext<'_> {
             },
             _ => return Err(unsupported(path)),
         };
-        Ok(Action::Discard {
-            player: PlayerRef::Controller {},
-            mode,
-        })
+        Ok(Action::Discard { player, mode })
     }
 }

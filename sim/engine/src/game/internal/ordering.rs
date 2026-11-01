@@ -3,6 +3,7 @@
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::ir::NumericProperty;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::subject_plan;
 use crate::ir::prevention;
@@ -231,6 +232,10 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
                 | "read.receipt.member-any"
                 | "shape.ObjectView.Snapshot"
                 | "reference.snapshot"
+                | "shape.IntOperation.Sum"
+                | "value.aggregate.sum"
+                | "shape.Selector.Extremum"
+                | "selector.extremum"
         ) || (!private_spine && code == "shape.ObjectReceipt.Look")
             || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
                 && !super::source::count_zone(requirements, requirement))
@@ -349,7 +354,7 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
 }
 
 fn mask_public_number(number: &mut Expr<Int>) {
-    if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, .. } if target_plan(objects).is_some()))
+    if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, property: NumericProperty::Attack | NumericProperty::Life } if target_plan(objects).is_some()))
     {
         *number = Expr::Literal(Int(0));
         return;
@@ -357,6 +362,11 @@ fn mask_public_number(number: &mut Expr<Int>) {
     if let Expr::Compute(operation) = number {
         match operation.as_mut() {
             IntOperation::FromNat { value } => mask_public_natural(value),
+            IntOperation::Sum { objects, property }
+                if super::aggregates::check(objects, *property).is_ok() =>
+            {
+                *number = Expr::Literal(Int(0));
+            }
             IntOperation::Conditional {
                 condition,
                 then_value,
@@ -420,6 +430,11 @@ fn mask_public_predicate(selector: &mut Selector) {
         return;
     }
     match selector {
+        Selector::Extremum {
+            input, property, ..
+        } if super::aggregates::check(input, *property).is_ok() => {
+            *selector = Selector::Objects { objects: vec![] };
+        }
         Selector::Difference { input, except }
             if matches!(except.as_ref(), Selector::Objects { objects }
                 if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])) =>

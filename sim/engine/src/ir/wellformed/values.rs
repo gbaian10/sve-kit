@@ -631,6 +631,7 @@ impl Checker {
                     self.reference(*receipts, BindingKind::Value)
                 }
             },
+            Selector::Extremum { input, .. } => self.selector(input),
             Selector::MoveAfter {
                 receipt,
                 permission,

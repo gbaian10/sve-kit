@@ -2,6 +2,7 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::game::list;
 use crate::ir::effect_evolution;
+use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
@@ -377,23 +378,25 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         selector => target_selector(selector)?,
     }
-    let selector = match &group.selector {
-        Selector::Difference { input, .. } => input.as_ref(),
-        selector => selector,
-    };
-    if decision.actor != (PlayerRef::Controller {})
-        || constraint.cardinality.maximum.is_none()
+    if (decision.actor != (PlayerRef::Controller {}) && decision.actor != opponent())
         || !matches!(
-            selector,
-            Selector::Zone {
-                zone: ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery,
-                ..
-            }
+            selection_zone(&group.selector),
+            Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery)
         )
     {
         return Err(unsupported("resolution public choice actor or selector"));
     }
     Ok(())
+}
+
+fn selection_zone(selector: &Selector) -> Option<ZoneKind> {
+    match selector {
+        Selector::Zone { zone, .. } => Some(*zone),
+        Selector::Difference { input, .. } | Selector::Extremum { input, .. } => {
+            selection_zone(input)
+        }
+        _ => None,
+    }
 }
 
 pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<()> {
@@ -410,6 +413,12 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
         Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
             field_selector(input)
         }
+        Selector::Extremum {
+            input, property, ..
+        } => {
+            super::super::aggregates::check(input, *property)?;
+            field_selector(input)
+        }
         Selector::Captured { .. } | Selector::Bound { .. } | Selector::Objects { .. } => Ok(()),
         Selector::Union { sets } => {
             for set in sets {
@@ -424,6 +433,12 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            public_zone_selector(input)
+        }
+        Selector::Extremum {
+            input, property, ..
+        } => {
+            super::super::aggregates::check(input, *property)?;
             public_zone_selector(input)
         }
         Selector::Filter {
@@ -915,8 +930,7 @@ impl Game {
             let id = execution.object_id(member)?;
             let object = self.object(id)?;
             if private_observed_deck(self, id, actor_seat, observed_deck)
-                || (object.zone != "deck"
-                    && self.targetable_by(id, super::seat_name(execution.context.controller)?)?)
+                || (object.zone != "deck" && self.targetable_by(id, actor_seat)?)
             {
                 members.push(member);
             }
