@@ -9,6 +9,9 @@ mod activation_zones;
 #[path = "card/static_keywords.rs"]
 mod static_keywords;
 
+#[path = "card/dynamic_grant.rs"]
+mod dynamic_grant;
+
 #[path = "card/event_evolved.rs"]
 mod event_evolved;
 

@@ -666,6 +666,7 @@ impl Checker {
                                 | KeywordId::Storm
                                 | KeywordId::Rush
                                 | KeywordId::Bane
+                                | KeywordId::Drain
                                 | KeywordId::Intimidate
                                 | KeywordId::Assail,
                         } => Ok(()),

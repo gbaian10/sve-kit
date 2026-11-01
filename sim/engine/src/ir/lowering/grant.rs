@@ -23,7 +23,7 @@ impl BodyContext<'_> {
             .keywords
             .iter()
             .map(|id| {
-                keywords::basic_keyword_id(id)
+                keywords::grantable_keyword_id(id)
                     .map(|keyword| GrantedAbility::Keyword { keyword })
                     .ok_or_else(|| unsupported(path))
             })

@@ -1004,9 +1004,14 @@ pub(super) struct TargetQuery {
     pub kind: Option<SearchKind>,
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
+    pub token: Option<bool>,
     pub class: Option<String>,
     pub not_class: Option<String>,
     pub name: Option<String>,
+    #[serde(default)]
+    pub names: Vec<String>,
     pub name_contains: Option<String>,
     #[serde(default)]
     pub other: bool,

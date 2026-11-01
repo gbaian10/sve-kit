@@ -69,6 +69,14 @@ pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
     }
 }
 
+pub(super) fn grantable_keyword_id(name: &str) -> Option<KeywordId> {
+    if name == "drain" {
+        Some(KeywordId::Drain)
+    } else {
+        basic_keyword_id(name)
+    }
+}
+
 pub(super) fn basic_keyword_id(name: &str) -> Option<KeywordId> {
     let keyword = keyword_id(name)?;
     matches!(

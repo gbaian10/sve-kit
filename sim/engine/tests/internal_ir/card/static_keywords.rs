@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
 
-fn conditional_keyword() -> Located<Ability> {
+pub(super) fn conditional_keyword() -> Located<Ability> {
     let mut located = ability(2, vec![]);
     let value = &mut located.node;
     value.kind = AbilityKind::Static;
@@ -189,7 +189,7 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
     assert_eq!(state["objects"]["incoming"]["keywords"], json!(["守護"]));
 }
 
-fn keyword_catalog() -> Arc<Catalog> {
+pub(super) fn keyword_catalog() -> Arc<Catalog> {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     Arc::new(
         Catalog::from_documents(

@@ -3,8 +3,8 @@ use super::{Ability, Game, Located, Result, unsupported};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CharacteristicPatch,
     ContinuousLayer, Control, Duration, DurationEnd, Effect, EffectTarget, Expr, FaceId,
-    Generation, GrantedAbility, Instruction, InstructionContext, InstructionId, Node, ObjectId,
-    ObjectOperand, ObjectView, PlayerRef, Program, ReceiptId, Requirements, TextProvider,
+    Generation, GrantedAbility, Instruction, InstructionContext, InstructionId, KeywordId, Node,
+    ObjectId, ObjectOperand, ObjectView, PlayerRef, Program, ReceiptId, Requirements, TextProvider,
     TimeAnchor, TimestampBasis, ZoneKind,
 };
 use alloc::collections::BTreeSet;
@@ -135,9 +135,23 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
 )]
 impl Game {
     pub(super) fn internal_static_keywords(&self, holder: &str) -> Result<BTreeSet<String>> {
+        self.internal_static_keyword_grants(holder)?
+            .into_iter()
+            .map(|(keyword, _)| {
+                grant::keyword(keyword)
+                    .map(str::to_owned)
+                    .ok_or_else(|| unsupported("static keyword"))
+            })
+            .collect()
+    }
+
+    pub(in crate::game::internal) fn internal_static_keyword_grants(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<(KeywordId, grant::GrantOrigin)>> {
         let recipient = self.object(holder)?;
-        let mut keywords = BTreeSet::new();
-        if recipient.zone != "field" {
+        let mut keywords = Vec::new();
+        if recipient.zone != "field" || recipient.state["silenced"] == true {
             return Ok(keywords);
         }
         for source in self.field_ids() {
@@ -177,6 +191,7 @@ impl Game {
                         target: EffectTarget::Dynamic { selector },
                         condition,
                         patch: CharacteristicPatch::GrantAbility { abilities },
+                        id,
                         ..
                     } = effect
                     else {
@@ -195,11 +210,13 @@ impl Game {
                         let GrantedAbility::Keyword { keyword } = ability else {
                             return Err(unsupported("static granted ability"));
                         };
-                        keywords.insert(
-                            grant::keyword(*keyword)
-                                .ok_or_else(|| unsupported("static basic keyword"))?
-                                .into(),
-                        );
+                        keywords.push((
+                            *keyword,
+                            grant::GrantOrigin::Continuous {
+                                provider: self.keyword_provider(&source, located.node.id)?,
+                                effect: id.0,
+                            },
+                        ));
                     }
                 }
             }

@@ -7,7 +7,6 @@ use super::{
 use crate::game::Frame;
 use crate::game::internal::grant;
 use crate::game::{Step, int, string};
-use crate::ir::ExecutionId;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -16,12 +15,18 @@ use crate::ir::{
 };
 use crate::ir::{DamageEvent, DamageFlags, PositiveInt, RuntimeObjectView};
 use crate::ir::{EntryOrigin, Expr, ObjectFrozen, Predicate};
+use crate::ir::{ExecutionId, printed_keywords};
 use core::num::NonZeroU64;
 use serde_json::Value;
 
 use crate::ir::events::timing::{
     attack_predicate, evolve_predicate, opponent, phase_predicate, second_header,
 };
+
+struct DamageAbility {
+    definition: Located<Ability>,
+    grant: Option<grant::GrantOrigin>,
+}
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -360,16 +365,18 @@ impl Game {
         frame: &Frame,
         before: SnapshotId,
     ) -> Result<()> {
-        if !self.card_runtime.definitions.cards.values().any(|program| {
-            program.card().abilities.iter().any(|ability| {
-                matches!(
-                    ability.node.trigger.as_ref().map(|trigger| &trigger.on),
-                    Some(TriggerCondition::Event {
-                        pattern: EventPattern::Damage { .. }
-                    })
-                )
+        if !self.internal_has_drain_grants()
+            && !self.card_runtime.definitions.cards.values().any(|program| {
+                program.card().abilities.iter().any(|ability| {
+                    matches!(
+                        ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                        Some(TriggerCondition::Event {
+                            pattern: EventPattern::Damage { .. }
+                        })
+                    )
+                })
             })
-        }) {
+        {
             return Ok(());
         }
         let active = player_id(self.active())?;
@@ -425,15 +432,54 @@ impl Game {
             };
             let header = self.pending_header(actor, cause, source, before)?;
             for (holder, ability) in observers {
-                pending.push(self.timing_occurrence(
-                    &holder,
-                    ability,
-                    &header,
-                    Event::Damage { event },
-                )?);
+                let occurrence = if let Some(origin) = ability.grant {
+                    let granted_source = self.internal_granted_drain_source(&holder, &origin)?;
+                    let information = SourceInformation::current(self, granted_source)?;
+                    let mut occurrence = self.new_pending(
+                        &holder,
+                        granted_source,
+                        ability.definition,
+                        information,
+                        header.clone(),
+                        None,
+                    )?;
+                    occurrence.card.clone_from(&origin.provider().card);
+                    occurrence.timing = Some(Event::Damage { event });
+                    occurrence
+                } else {
+                    self.timing_occurrence(
+                        &holder,
+                        ability.definition,
+                        &header,
+                        Event::Damage { event },
+                    )?
+                };
+                pending.push(occurrence);
             }
         }
         self.internal_admit_pending(pending)
+    }
+
+    fn damage_abilities(&self, holder: &str) -> Result<Vec<DamageAbility>> {
+        let printed = self.timing_abilities(holder)?;
+        let printed_drain = printed.iter().any(|ability| {
+            printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Drain)
+        });
+        let mut abilities = printed
+            .into_iter()
+            .map(|definition| DamageAbility {
+                definition,
+                grant: None,
+            })
+            .collect::<Vec<_>>();
+        // CR 12.13.3 treats printed and granted copies as a single Drain.
+        if !printed_drain && let Some(origin) = self.internal_drain_grant(holder)? {
+            abilities.push(DamageAbility {
+                definition: origin.drain_ability(),
+                grant: Some(origin),
+            });
+        }
+        Ok(abilities)
     }
 
     fn damage_observers(
@@ -441,15 +487,15 @@ impl Game {
         hit: &Value,
         event: DamageEvent,
         active: PlayerId,
-    ) -> Result<Vec<(String, Located<Ability>)>> {
+    ) -> Result<Vec<(String, DamageAbility)>> {
         use crate::ir::events::damage::{DamageFilter, RecipientFilter};
         let mut observers = Vec::new();
         let mut subject = None;
         for holder in self.field_ids() {
             self.require_internal_abilities(&holder, "field damage observer")?;
             let controller = player_id(&self.object(&holder)?.controller)?;
-            for ability in self.timing_abilities(&holder)? {
-                let Some(trigger) = &ability.node.trigger else {
+            for ability in self.damage_abilities(&holder)? {
+                let Some(trigger) = &ability.definition.node.trigger else {
                     continue;
                 };
                 if trigger.active_zones != [ZoneKind::Field] {
