@@ -1,0 +1,46 @@
+cards:
+  BP07-027:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - act_self: true
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: amulet
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

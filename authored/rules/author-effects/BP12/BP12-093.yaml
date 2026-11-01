@@ -1,0 +1,34 @@
+cards:
+  BP12-093:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - auto:
+          do:
+            - buff:
+                on: this
+                power:
+                  count:
+                    keyword: ward
+                    kind: follower
+                    who: self
+                    zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

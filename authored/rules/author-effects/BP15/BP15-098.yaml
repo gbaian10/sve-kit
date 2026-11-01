@@ -1,0 +1,35 @@
+cards:
+  BP15-098:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                ref: revived
+                result: revived_move
+                to: field
+          targets:
+            - bind: revived
+              from:
+                keyword: ward
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
