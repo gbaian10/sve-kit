@@ -94,7 +94,7 @@ impl BodyContext<'_> {
         let count = ast::Number::Count {
             count: ast::CountQuery {
                 face_up: None,
-                who: ast::LeaderSide::Controller,
+                who: ast::Side::Controller,
                 zone: ast::CountZone::Cemetery,
                 kind: spells.then_some(ast::SearchKind::Spell),
                 keyword: None,
@@ -491,7 +491,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if matches!(count.zone, ast::CountZone::EvolveDeck)
-            && !matches!(count.who, ast::LeaderSide::Controller)
+            && !matches!(count.who, ast::Side::Controller)
         {
             return Err(unsupported(path));
         }
@@ -508,15 +508,21 @@ impl BodyContext<'_> {
             Selector::Zone {
                 players: PlayerSet {
                     relation: match count.who {
-                        ast::LeaderSide::Controller => PlayerRelation::SelfPlayer,
-                        ast::LeaderSide::Opponent => PlayerRelation::Opponents,
+                        ast::Side::Controller => PlayerRelation::SelfPlayer,
+                        ast::Side::Opponent => PlayerRelation::Opponents,
+                        ast::Side::All => PlayerRelation::All,
                     },
                     relative_to: PlayerRef::Controller {},
                     cardinality: Cardinality {
-                        minimum: Nat(1),
-                        maximum: Some(Nat(1)),
+                        minimum: Nat(u64::from(!matches!(count.who, ast::Side::All))),
+                        maximum: matches!(count.who, ast::Side::Controller | ast::Side::Opponent)
+                            .then_some(Nat(1)),
                     },
-                    text_quantifier: TextQuantifier::Implicit,
+                    text_quantifier: if matches!(count.who, ast::Side::All) {
+                        TextQuantifier::All
+                    } else {
+                        TextQuantifier::Implicit
+                    },
                 },
                 zone: match count.zone {
                     ast::CountZone::Field => ZoneKind::Field,

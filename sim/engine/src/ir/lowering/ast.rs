@@ -1159,7 +1159,7 @@ pub(super) enum SelectedStat {
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
     pub face_up: Option<bool>,
-    pub who: LeaderSide,
+    pub who: Side,
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
     pub keyword: Option<FilterKeyword>,
@@ -1316,6 +1316,8 @@ pub(super) enum Follower {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PlayCosts {
+    #[serde(default)]
+    pub define: BTreeMap<String, Number>,
     pub cannot_if: Option<PlayRestriction>,
     pub cost_delta: Option<Value>,
     pub cost_set: Option<Value>,
@@ -1346,6 +1348,7 @@ pub(super) enum CostCondition {
     Awakened(bool),
     Crimson(bool),
     LeaderLife(PlayerThreshold),
+    InZone(PlayRestrictionZone),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
@@ -1441,8 +1444,8 @@ pub(super) enum PublicZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct ConditionalChange {
     pub r#if: CostCondition,
-    pub delta: Option<i64>,
-    pub set: Option<i64>,
+    pub delta: Option<Number>,
+    pub set: Option<Number>,
 }
 
 #[derive(Deserialize)]

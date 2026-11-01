@@ -58,15 +58,15 @@ impl WellFormedCardProgram {
                         checker.at(&format!("modifiers/{modifier_index}"), |checker| {
                             checker.located(modifier, |checker, modifier| {
                                 match &modifier.change {
-                                    CostChange::Delta {
-                                        amount: Expr::Literal(Int(amount)),
-                                    } if *amount <= 0 => {}
+                                    CostChange::Delta { amount } => {
+                                        checker.isolated(|checker| checker.integer(amount))?;
+                                    }
                                     CostChange::Set {
                                         amount: Expr::Literal(Int(amount)),
                                     } if *amount >= 0 && !has_set => {
                                         has_set = true;
                                     }
-                                    CostChange::Delta { .. } | CostChange::Set { .. } => {
+                                    CostChange::Set { .. } => {
                                         return checker.reject();
                                     }
                                 }

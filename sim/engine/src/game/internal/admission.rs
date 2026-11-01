@@ -716,6 +716,8 @@ fn supported(code: &str) -> bool {
             | "shape.IntRead.PlayerResource"
             | "shape.BoolRead.Crimson"
             | "read.crimson"
+            | "shape.BoolRead.CardPlayOrigin"
+            | "read.card-play-origin"
             | "shape.NatRead.Combo"
             | "read.combo"
             | "shape.NatRead.HistoryCount"

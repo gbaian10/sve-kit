@@ -508,6 +508,7 @@ tags!(SpellCountTime {
     AtPlay
 });
 variants!(BoolRead {
+    CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
