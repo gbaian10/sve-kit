@@ -261,6 +261,8 @@ pub enum Answer {
 pub enum InstructionOutcome {
     /// Actual before/after counter values, including an unchanged result.
     Counter(CounterChangeEvent),
+    /// Whether the controller accepted an optional body.
+    Optional(bool),
     /// One effect-driven ordinary evolution and its live physical association.
     Evolution {
         /// The public before/after evolution fact.
@@ -431,6 +433,11 @@ enum Wait {
     ResolutionTargets(card::selection::TargetWait),
     Modes(card::play::ModeWait),
     Alternative(alternatives::AlternativeWait),
+    May {
+        body: Program,
+        binding: Binding<Nat>,
+        receipt: ReceiptId,
+    },
     TokenCapacity(Box<tokens::CapacityWait>),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
@@ -791,6 +798,23 @@ impl Game {
                     rollback = execution.origin.take();
                     execution.prepend(body);
                 }
+                (
+                    Wait::May {
+                        body,
+                        binding,
+                        receipt,
+                    },
+                    Answer::Integer(number),
+                ) if number.0 <= 1 => {
+                    rollback = execution.origin.take();
+                    execution.slots.insert(binding.key(), Slot::Natural(number));
+                    execution
+                        .receipts
+                        .insert(receipt, InstructionOutcome::Optional(number.0 == 1));
+                    if number.0 == 1 {
+                        execution.prepend(body);
+                    }
+                }
                 (Wait::TokenCapacity(wait), Answer::TokenCapacity(handle)) => {
                     let prints = wait.validate(handle)?;
                     rollback = execution.origin.take();
@@ -1129,6 +1153,11 @@ impl Game {
                 return Ok(());
             };
             match node {
+                Node::Control {
+                    control: control @ Control::May { .. },
+                } => {
+                    self.internal_may(execution, control)?;
+                }
                 Node::Control {
                     control:
                         control @ Control::Mode {

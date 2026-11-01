@@ -4,6 +4,30 @@ use crate::ir::{
     ModeId, Nat, PlayerRef, Program, Visibility,
 };
 
+pub(super) fn check_may(control: &Control) -> Result<()> {
+    use crate::ir::{Decision, DecisionKind, Declinable};
+    let bounds = Cardinality {
+        minimum: Nat(0),
+        maximum: Some(Nat(1)),
+    };
+    if !matches!(control, Control::May {
+        choice: Decision {
+            actor: PlayerRef::Controller {},
+            domain: ChoiceDomain::Integer { cardinality, .. },
+            kind: DecisionKind::ResolutionChoice {
+                may: Declinable::MayDecline, cardinality: decision_bounds, precondition: None,
+            },
+            visibility: Visibility::Public {},
+            captures,
+            ..
+        }, ..
+    } if *cardinality == bounds && *decision_bounds == bounds && captures.is_empty())
+    {
+        return Err(unsupported("optional body decision"));
+    }
+    Ok(())
+}
+
 #[derive(Clone, Debug)]
 pub(super) struct AlternativeWait {
     modes: Vec<Mode>,
@@ -28,6 +52,41 @@ impl AlternativeWait {
     reason = "Resolution alternatives share the existing mode decision boundary."
 )]
 impl Game {
+    pub(super) fn internal_may(
+        &mut self,
+        execution: &mut Execution,
+        control: Control,
+    ) -> Result<()> {
+        check_may(&control)?;
+        let Control::May {
+            body,
+            choice,
+            receipt,
+        } = control
+        else {
+            return Err(unsupported("optional body"));
+        };
+        let ChoiceDomain::Integer {
+            cardinality,
+            binding,
+        } = choice.domain
+        else {
+            return Err(unsupported("optional decision domain"));
+        };
+        let actor = execution.player(self, &choice.actor)?;
+        self.internal_wait(
+            execution,
+            choice.id,
+            actor,
+            InputDomain::Integer(cardinality),
+            Wait::May {
+                body,
+                binding,
+                receipt,
+            },
+        )
+    }
+
     pub(super) fn internal_alternative(
         &mut self,
         execution: &mut Execution,

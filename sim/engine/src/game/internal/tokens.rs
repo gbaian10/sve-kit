@@ -361,7 +361,7 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                 }
             }
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => collect_paths(body, &format!("{path}/control/body"), accepted),
             Node::Control {
                 control:

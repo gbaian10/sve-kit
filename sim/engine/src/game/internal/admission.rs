@@ -166,7 +166,7 @@ fn source_paths(
                 }
             }
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => source_paths(body, &format!("{path}/control/body"), origin, paths),
             Node::Control {
                 control:
@@ -373,6 +373,12 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 control: Control::Sequence { body },
             } => check_program(body, source, card)?,
             Node::Control {
+                control: control @ Control::May { body, .. },
+            } => {
+                super::alternatives::check_may(control)?;
+                check_program(body, source, card)?;
+            }
+            Node::Control {
                 control:
                     Control::If {
                         then_body,
@@ -478,6 +484,8 @@ fn supported(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.Pay"
+            | "shape.Control.May"
+            | "control.may"
             | "shape.Action.MealRace"
             | "action.meal-race"
             | "internal.MealRaceOperation.Race"
@@ -821,7 +829,7 @@ fn damage_paths(
                 _ => {}
             },
             Node::Control {
-                control: Control::Sequence { body },
+                control: Control::Sequence { body } | Control::May { body, .. },
             } => damage_paths(body, &format!("{path}/control/body"), event, paths),
             Node::Control {
                 control:

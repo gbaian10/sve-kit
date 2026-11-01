@@ -179,9 +179,11 @@ pub(super) fn field_move(movement: &MoveSpec) -> bool {
 }
 
 pub(super) fn observed_move(action: &Action) -> bool {
-    matches!(action, Action::Move { movement, .. }
+    matches!(action, Action::Move { objects, movement, .. }
         if matches!(&movement.to, MoveDestination::Shared { zone }
-            if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex))
+            if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
+            || (movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
+                && observation_spine(objects)))
 }
 
 fn observation_spine(selector: &Selector) -> bool {
@@ -698,14 +700,17 @@ impl Game {
                 ));
             }
         }
-        let available = usize::try_from(5_i64.saturating_sub(self.zone_count(seat, "ex")).max(0))
-            .map_err(invalid)?;
-        if available > 0 && members.len() > available {
-            return Err(unsupported("observed move needs a capacity selection"));
-        }
         let Action::Move { movement: spec, .. } = &instruction.action else {
             return Err(unsupported("observed move action"));
         };
+        if matches!(&spec.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Ex) {
+            let available =
+                usize::try_from(5_i64.saturating_sub(self.zone_count(seat, "ex")).max(0))
+                    .map_err(invalid)?;
+            if available > 0 && members.len() > available {
+                return Err(unsupported("observed move needs a capacity selection"));
+            }
+        }
         let moved = self.internal_search_move(execution, &members, &spec.to, player)?;
         execution.receipts.insert(
             instruction.receipt,

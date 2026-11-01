@@ -242,7 +242,7 @@ pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
                 continue;
             }
             match control {
-                Control::Sequence { body } => mask(body, origin),
+                Control::Sequence { body } | Control::May { body, .. } => mask(body, origin),
                 Control::If {
                     then_body,
                     else_body,
@@ -260,7 +260,6 @@ pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
                 }
                 Control::Simultaneous { .. }
                 | Control::Match { .. }
-                | Control::May { .. }
                 | Control::Repeat { .. }
                 | Control::EachPlayer { .. }
                 | Control::EachObject { .. }
