@@ -1,0 +1,55 @@
+cards:
+  CP02-017:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        scope: 1
+      - lastword:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        scope: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: hand
+          do:
+            - move:
+                ref: this
+                to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

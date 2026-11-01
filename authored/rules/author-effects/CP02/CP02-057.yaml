@@ -1,0 +1,26 @@
+cards:
+  CP02-057:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - evolve:
+          cost:
+            lesson: 3
+        line: 2
+      - fanfare:
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

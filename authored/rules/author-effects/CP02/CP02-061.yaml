@@ -1,0 +1,38 @@
+cards:
+  CP02-061:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: eq
+                    right: 10
+                else:
+                  - damage:
+                      n: 1
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+                then:
+                  - damage:
+                      n: 4
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
