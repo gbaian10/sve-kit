@@ -226,39 +226,3 @@ cards:
           until: next-opponent-turn-end
         event: evolve
         subject: self
-  BP02-SL20:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 0
-      - line: 2
-        kind: static
-        body:
-          op: restrict
-          action: attack_leader
-          subjects: self
-          condition:
-            fn: ge
-            args:
-              - count:
-                  side: opponent
-                  zone: field
-                  type: follower
-              - 2
-      - line: 3
-        kind: trigger
-        body:
-          op: destroy
-          subjects:
-            side: both
-            zone: field
-            type: follower
-            other: true
-        event: enter
-        subject: self
