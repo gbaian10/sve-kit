@@ -1,62 +1,55 @@
-format: 1
-kind: effect_set
 cards:
   EBD03-005:
-    status: complete
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: select
+            - bind: discarded
+              by: opponent
+              max: 1
+              min: 1
+              op: select
               select:
                 side: opponent
                 zone: hand
-              by: opponent
-              min: 1
-              max: 1
-              bind: discarded
             - op: discard
               subjects: discarded
         event: act
-        subject: self
-      - line: 3
         kind: trigger
-        body:
-          op: if
+        line: 2
+        subject: self
+      - body:
           condition:
-            fn: eq
             args:
               - count:
+                  name: 魔導列車
                   side: self
                   zone: field
-                  name: 魔導列車
               - 0
+            fn: eq
+          op: if
           then:
-            op: create
-            name: 魔導列車
             count: 1
+            name: 魔導列車
+            op: create
             to: field
         event: enter
-        subject: self
-  EBD03-007:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
-          op: if
+        line: 3
+        subject: self
+    status: complete
+  EBD03-007:
+    abilities:
+      - body:
           condition:
-            fn: ge
             args:
               - at: resolution-start
                 value:
@@ -64,34 +57,36 @@ cards:
                     side: self
                     zone: cemetery
               - 10
+            fn: ge
+          op: if
           then:
-            op: pay
             costs:
               - op: move
                 subjects: target.1
                 to: field
+            op: pay
             then:
               op: banish
               subjects: self
         event: enter
+        kind: trigger
+        line: 1
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: cemetery
-              type: follower
               trait: 荒野
+              type: follower
               where:
-                fn: le
                 args:
                   - read: item.cost
                   - 3
-            min: 1
-            max: 1
-      - line: 2
-        kind: trigger
-        body:
+                fn: le
+              zone: cemetery
+      - body:
           op: seq
           steps:
             - op: move
@@ -100,45 +95,42 @@ cards:
             - op: move
               subjects:
                 side: self
-                zone: deck
                 top: 1
+                zone: deck
               to: cemetery
         event: field_to_cemetery
+        kind: trigger
+        line: 2
         subject: self
-  EBD03-008:
     status: complete
+  EBD03-008:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: aura
-          subjects: self
-          keywords:
-            - rush
-            - bane
+      - body:
           condition:
-            fn: ge
             args:
               - count:
                   side: self
                   zone: cemetery
               - 10
-      - line: 2
-        kind: trigger
-        body:
-          op: choice
-          min: 1
+            fn: ge
+          keywords:
+            - rush
+            - bane
+          op: aura
+          subjects: self
+        kind: static
+        line: 1
+      - body:
           max: 1
+          min: 1
           modes:
             - op: seq
               steps:
-                - op: move
+                - bind: moved
+                  op: move
                   subjects: target.1
                   to: ex
-                  bind: moved
-                - op: if
-                  condition:
-                    fn: ge
+                - condition:
                     args:
                       - at: resolution-start
                         value:
@@ -146,159 +138,126 @@ cards:
                             side: self
                             zone: cemetery
                       - 20
+                    fn: ge
+                  op: if
                   then:
+                    amount: -2
                     op: adjust_cost
                     subjects: moved
-                    amount: -2
                     until: end-of-turn
             - op: move
               subjects:
                 side: self
-                zone: deck
                 top: 2
+                zone: deck
               to: cemetery
+          op: choice
         event: enter
+        kind: trigger
+        line: 2
         subject: self
         targets:
           - key: "1"
-            select:
-              side: self
-              zone: cemetery
-              name: 魂の一刀
-            min: 1
             max: 1
+            min: 1
             modes:
               - 1
-  EBD03-011:
+            select:
+              name: 魂の一刀
+              side: self
+              zone: cemetery
     status: complete
+  EBD03-011:
     abilities:
-      - line: 1
-        kind: activated
+      - active_zones:
+          - cemetery
         body:
           op: act
           subjects: target.1
-        active_zones:
-          - cemetery
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
+              name: カオスルーラー・アイシィレンドリング
               side: self
               zone: cemetery
-              name: カオスルーラー・アイシィレンドリング
-            min: 1
-            max: 1
         costs:
           - op: banish
             subjects:
               union:
                 - self
                 - cost.1
-      - line: 1
-        kind: static
-        body:
-          op: macro
+        kind: activated
+        line: 1
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
+      - body:
           name: quick
+          op: macro
+        kind: static
+        line: 1
         section: 0
-      - line: 2
-        kind: spell
-        body:
-          op: modify
-          subjects: target.1
-          power: -2
+      - body:
           hp: -2
+          op: modify
+          power: -2
+          subjects: target.1
+        kind: spell
+        line: 2
         section: 0
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  EBD03-012:
+              zone: field
     status: complete
+  EBD03-012:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
         play_if:
-          fn: eq
           args:
             - read: self.entered_from
             - cemetery
-      - line: 2
-        kind: static
-        body:
-          op: macro
+          fn: eq
+      - body:
           name: rush
-      - line: 3
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: create
-              name: 機動二輪車
-              count: 1
-              to: field
-            - op: move
-              subjects:
-                side: self
-                zone: deck
-                top: 2
-              to: cemetery
-        event: field_to_cemetery
-        subject: self
-  EBD03-013:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
           op: macro
-          name: storm
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount: 5
-        event: evolve
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-      - line: 3
-        kind: trigger
-        body:
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
-            - op: create
+            - count: 1
               name: 機動二輪車
-              count: 1
+              op: create
               to: field
             - op: move
               subjects:
                 side: self
-                zone: deck
                 top: 2
+                zone: deck
               to: cemetery
         event: field_to_cemetery
+        kind: trigger
+        line: 3
         subject: self
+    status: complete
+format: 1
+kind: effect_set

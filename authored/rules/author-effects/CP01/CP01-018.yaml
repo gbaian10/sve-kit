@@ -1,0 +1,36 @@
+cards:
+  CP01-018:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: victim
+            - if:
+                cond:
+                  exists:
+                    in: victim
+                    trait: ウマ娘
+                then:
+                  - buff:
+                      hp: 1
+                      on: victim
+                      power: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

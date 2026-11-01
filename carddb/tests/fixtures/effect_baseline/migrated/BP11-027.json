@@ -1,0 +1,29 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "create",
+        "name": "機動二輪車",
+        "count": 1,
+        "to": "field"
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "opponent.leader",
+        "amount": 2
+      },
+      "event": "field_to_cemetery",
+      "subject": "self",
+      "keyword": "last_words"
+    }
+  ]
+}

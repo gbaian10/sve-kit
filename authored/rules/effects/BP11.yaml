@@ -1,25 +1,4 @@
 cards:
-  BP11-027:
-    abilities:
-      - body:
-          count: 1
-          name: 機動二輪車
-          op: create
-          to: field
-        event: enter
-        kind: trigger
-        line: 1
-        subject: self
-      - body:
-          amount: 2
-          op: damage
-          subjects: opponent.leader
-        event: field_to_cemetery
-        keyword: last_words
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP11-035:
     abilities:
       - body:
