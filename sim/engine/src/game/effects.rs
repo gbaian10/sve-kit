@@ -567,13 +567,8 @@ impl Game {
     ) -> Result<()> {
         let mut movable = Vec::new();
         for id in ids {
-            let object = self.object(id)?;
-            if object.zone == "field"
-                && zone != "field"
-                && self.keywords(id)?.contains("stack")
-                && int(&object.state["counters"]["stack_counter"]) > 0
-            {
-                let count = int(&object.state["counters"]["stack_counter"]);
+            if self.stack_replaces_departure(id, zone)? {
+                let count = int(&self.object(id)?.state["counters"]["stack_counter"]);
                 self.object_mut(id)?.state["counters"]["stack_counter"] =
                     json!(count.saturating_sub(1));
                 let group = self.group();

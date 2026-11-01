@@ -141,7 +141,8 @@ pub(crate) fn definition(
         | KeywordId::Rush
         | KeywordId::Bane
         | KeywordId::Intimidate
-        | KeywordId::Assail => None,
+        | KeywordId::Assail
+        | KeywordId::Stack => None,
         _ => return None,
     };
     Some(Ability {
