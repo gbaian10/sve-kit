@@ -5,7 +5,7 @@ use super::{
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
     DamageKind, DamageRecipient, Duration, Effect, EffectDefinitionId, EventRewrite, Expr,
-    InstallationSubjects, InstallationTime, Nat, ObjectOperand, OncePerEvent, PlayerRef,
+    InstallationSubjects, InstallationTime, Int, Nat, ObjectOperand, OncePerEvent, PlayerRef,
     PlayerRelation, PlayerSet, Predicate, ProposedEventPattern, RecipientPredicate,
     ReplacementScope, ScopeId, Selector, SourcePredicate, TextQuantifier, ZoneKind,
 };
@@ -208,6 +208,10 @@ impl BodyContext<'_> {
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Static prevention and numeric rewrites share one declaration construction."
+)]
 pub(super) fn lower(
     allocator: &mut Allocator,
     key: &CardCoordinates<'_>,
@@ -235,18 +239,82 @@ pub(super) fn lower(
         .transpose()?
         .unwrap_or(Expr::Literal(Bool(true)));
     let mut declarations = Vec::new();
-    for effect in &head.effects {
-        let ast::StaticEffect::Prevent(shape) = effect else {
-            return Err(unsupported(path));
+    for declaration in &head.effects {
+        let (on, damage_source, kind, rewrite) = match declaration {
+            ast::StaticEffect::Prevent(shape) => {
+                declarations.push(context.prevention_effect(
+                    shape,
+                    numeric::holder(),
+                    &origin,
+                    condition.clone(),
+                    numeric::duration(None, path)?,
+                    path,
+                )?);
+                continue;
+            }
+            ast::StaticEffect::DamageMod(shape) => {
+                if shape.next_only == Some(true) {
+                    return Err(unsupported(path));
+                }
+                let kind = match shape.kind {
+                    None | Some(ast::PreventionKind::Any) => DamageKind::Any,
+                    Some(ast::PreventionKind::Combat) => DamageKind::Combat,
+                    Some(ast::PreventionKind::Ability) => DamageKind::Ability,
+                };
+                (
+                    shape.on.as_ref(),
+                    shape.source.as_ref(),
+                    kind,
+                    EventRewrite::AddDamage {
+                        amount: Expr::Literal(Int(shape.delta)),
+                    },
+                )
+            }
+            ast::StaticEffect::DamageCap(shape) => {
+                if shape.threshold <= shape.set || shape.threshold > i64::MAX.unsigned_abs() {
+                    return Err(unsupported(path));
+                }
+                (
+                    shape.on.as_ref(),
+                    None,
+                    DamageKind::Any,
+                    EventRewrite::CapDamage {
+                        threshold: Expr::Literal(Nat(shape.threshold)),
+                        replacement: Expr::Literal(Nat(shape.set)),
+                    },
+                )
+            }
+            ast::StaticEffect::Grant(_) => return Err(unsupported(path)),
         };
-        declarations.push(context.prevention_effect(
-            shape,
-            numeric::holder(),
+        let recipient = if on.is_none() && damage_source.is_some() {
+            None
+        } else {
+            Some(context.prevention_recipients(on, numeric::holder(), path)?)
+        };
+        let damage_source = damage_source
+            .map(|objects| {
+                let objects = context.objects(objects, path)?;
+                context.prevention_source(objects, path)
+            })
+            .transpose()?;
+        let mut effect = context.damage_prevention(
+            ProposedEventPattern::Damage {
+                recipient,
+                source: damage_source,
+                kind,
+            },
             &origin,
             condition.clone(),
             numeric::duration(None, path)?,
             path,
-        )?);
+        )?;
+        if let Effect::Replacement {
+            rewrite: output, ..
+        } = &mut effect
+        {
+            *output = rewrite;
+        }
+        declarations.push(effect);
     }
     Ok(Located {
         source,

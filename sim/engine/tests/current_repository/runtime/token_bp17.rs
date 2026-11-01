@@ -68,6 +68,7 @@ fn finish(game: &mut Game, mut play: CardPlay, choose_ward: bool) {
             | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
             | InputDomain::Order(_)
+            | InputDomain::DamageReplacements(_)
             | InputDomain::Search(_)
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)

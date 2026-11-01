@@ -15,6 +15,7 @@ pub(crate) struct Prevention<'effect> {
     pub damage_source: Option<&'effect Selector>,
     pub kind: DamageKind,
     pub condition: &'effect Expr<Bool>,
+    pub rewrite: &'effect EventRewrite,
     pub duration: &'effect Duration,
 }
 
@@ -65,12 +66,7 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
                 kind,
             },
         condition,
-        rewrite:
-            EventRewrite::PreventDamage {
-                recipient: None,
-                source: None,
-                kind: DamageKind::Any,
-            },
+        rewrite,
         scope: ReplacementScope::General,
         affected_player: PlayerRef::ProposedDamageRecipient {},
         once_per_event: OncePerEvent::Enforced,
@@ -82,6 +78,19 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
     else {
         return None;
     };
+    let supported = matches!(
+        rewrite,
+        EventRewrite::PreventDamage {
+            recipient: None,
+            source: None,
+            kind: DamageKind::Any
+        } | EventRewrite::AddDamage {
+            amount: Expr::Literal(_)
+        }
+    ) || matches!(rewrite, EventRewrite::CapDamage { threshold: Expr::Literal(threshold), replacement: Expr::Literal(replacement) } if threshold.0 > replacement.0 && threshold.0 <= i64::MAX.unsigned_abs());
+    if !supported {
+        return None;
+    }
     if recipient.is_none() && damage_source.is_none() {
         return None;
     }
@@ -99,6 +108,7 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         damage_source,
         kind: *kind,
         condition,
+        rewrite,
         duration,
     })
 }

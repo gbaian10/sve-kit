@@ -1694,6 +1694,8 @@ pub(super) struct Static {
 pub(super) enum StaticEffect {
     Grant(StaticGrant),
     Prevent(Prevent),
+    DamageMod(DamageModifier),
+    DamageCap(DamageCap),
 }
 
 #[derive(Deserialize)]
@@ -1739,4 +1741,21 @@ pub(super) enum PreventionKind {
     Any,
     Combat,
     Ability,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageModifier {
+    pub on: Option<Recipients>,
+    pub source: Option<Objects>,
+    pub kind: Option<PreventionKind>,
+    pub delta: i64,
+    pub next_only: Option<bool>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageCap {
+    pub on: Option<Recipients>,
+    pub threshold: u64,
+    pub set: u64,
 }

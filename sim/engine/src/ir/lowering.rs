@@ -381,7 +381,11 @@ impl Allocator {
         if let Some(declaration) = &entry.r#static {
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
-                Some(ast::StaticEffect::Prevent(_)) => prevention::lower,
+                Some(
+                    ast::StaticEffect::Prevent(_)
+                    | ast::StaticEffect::DamageMod(_)
+                    | ast::StaticEffect::DamageCap(_),
+                ) => prevention::lower,
                 None => return Err(unsupported(path)),
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
