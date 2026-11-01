@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-114:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - ward
+      - line: 2
+        static:
+          effects:
+            - damage_mod:
+                kind: combat
+                delta: -2

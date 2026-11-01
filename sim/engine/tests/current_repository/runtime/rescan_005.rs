@@ -44,6 +44,7 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
             | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
             | InputDomain::Order(_)
+            | InputDomain::DamageReplacements(_)
             | InputDomain::Search(_)
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)

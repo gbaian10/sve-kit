@@ -295,11 +295,11 @@ fn damage_prevention_rejects_unresolved_next_only_usage() {
     assert_eq!(error.code, "unsupported_construct");
 }
 
-fn field_name(name: &str) -> Selector {
+pub(super) fn field_name(name: &str) -> Selector {
     named_field(name, 50)
 }
 
-fn named_field(name: &str, number: u64) -> Selector {
+pub(super) fn named_field(name: &str, number: u64) -> Selector {
     let binding = Binding::new(number, ScopeId(1));
     let mut selector = subjects();
     if let Selector::Zone {
@@ -448,7 +448,7 @@ fn damage_prevention_installation_does_not_grant_destroy_immunity() {
     );
 }
 
-fn recipient_prevention(objects: Selector) -> Action {
+pub(super) fn recipient_prevention(objects: Selector) -> Action {
     let affected = Binding::new(1, ScopeId(2));
     let recipient = Binding::new(1, ScopeId(3));
     let duration = Duration {

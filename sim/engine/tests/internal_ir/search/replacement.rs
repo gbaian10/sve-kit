@@ -476,6 +476,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     | InputDomain::BeforeDraw
                     | InputDomain::Integer(_)
                     | InputDomain::Order(_)
+                    | InputDomain::DamageReplacements(_)
                     | InputDomain::SearchPartition(_)
                     | InputDomain::Targets(_)
                     | InputDomain::Pending(_)

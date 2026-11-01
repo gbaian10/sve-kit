@@ -87,6 +87,7 @@ fn response(question: &DecisionView) -> Answer {
         | InputDomain::SearchReplacement
         | InputDomain::Targets(_)
         | InputDomain::Pending(_)
+        | InputDomain::DamageReplacements(_)
         | InputDomain::TriggerQuota(_)
         | InputDomain::Modes { .. }
         | InputDomain::Quick { .. }

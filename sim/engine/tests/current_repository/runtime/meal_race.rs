@@ -125,6 +125,7 @@ pub(super) fn settle(game: &mut Game) {
                 | InputDomain::TriggerQuota(_)
                 | InputDomain::Integer(_)
                 | InputDomain::Order(_)
+                | InputDomain::DamageReplacements(_)
                 | InputDomain::Search(_)
                 | InputDomain::SearchPartition(_)
                 | InputDomain::Distribution(_)

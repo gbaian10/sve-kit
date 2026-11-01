@@ -71,6 +71,7 @@ fn finish_with_cost(game: &mut Game, mut play: CardPlay, pay_cost: bool) {
             | InputDomain::MealPayment { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
+            | InputDomain::DamageReplacements(_)
             | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
             | InputDomain::SearchPartition(_)

@@ -24,6 +24,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
+            | InputDomain::DamageReplacements(_)
             | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
             | InputDomain::Order(_)

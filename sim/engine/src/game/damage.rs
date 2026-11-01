@@ -8,15 +8,23 @@ use crate::ir::{DamageEvent, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
-#[derive(Clone)]
-struct DamageReplacement {
-    reference: Value,
-    active: bool,
-    depends_on_amount: bool,
-    delta: i64,
-    set: Option<i64>,
-    prevent: bool,
-    consumption: Option<usize>,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Arithmetic {
+    Checked,
+    Saturating,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct DamageReplacement {
+    pub(super) reference: Value,
+    pub(super) active: bool,
+    pub(super) depends_on_amount: bool,
+    pub(super) delta: i64,
+    pub(super) set: Option<i64>,
+    pub(super) cap: Option<(i64, i64)>,
+    pub(super) prevent: bool,
+    arithmetic: Arithmetic,
+    pub(super) consumption: Option<usize>,
 }
 
 #[expect(
@@ -39,10 +47,12 @@ impl Game {
                 continue;
             }
             let replacements = self.damage_replacements(hit, &consumed)?;
-            // Replacement amounts use saturating legacy arithmetic.
+            // Only prototype replacements use saturating arithmetic.
             self.numeric_prototype_operand(
                 id,
-                replacements.iter().all(|replacement| replacement.prevent),
+                replacements.iter().all(|replacement| {
+                    replacement.prevent || replacement.arithmetic == Arithmetic::Checked
+                }),
             )?;
             let mut ordered = replacements.clone();
             if replacements.len() > 1
@@ -83,22 +93,10 @@ impl Game {
                     })
                     .collect();
             }
-            let mut amount = int(&hit["amount"]);
-            for replacement in ordered {
-                if amount <= 0 {
-                    break;
-                }
-                if let Some(index) = replacement.consumption {
-                    let count = consumed.entry(index).or_default();
-                    *count = count.saturating_add(1);
-                }
-                if replacement.prevent {
-                    amount = 0;
-                } else if let Some(value) = replacement.set {
-                    amount = value;
-                } else {
-                    amount = amount.saturating_add(replacement.delta);
-                }
+            let (amount, uses) = DamageReplacement::fold_order(int(&hit["amount"]), ordered)?;
+            for index in uses {
+                let count = consumed.entry(index).or_default();
+                *count = count.saturating_add(1);
             }
             if amount > 0 {
                 actual.push(
@@ -190,7 +188,7 @@ impl Game {
         }
     }
 
-    fn damage_replacements(
+    pub(super) fn damage_replacements(
         &self,
         hit: &Value,
         consumed: &BTreeMap<usize, i64>,
@@ -199,12 +197,16 @@ impl Game {
             .internal_prevention_references(hit)?
             .into_iter()
             .map(|reference| DamageReplacement {
-                reference,
+                reference: reference["reference"].clone(),
                 active: true,
                 depends_on_amount: false,
-                delta: 0,
+                delta: int(&reference["delta"]),
                 set: None,
-                prevent: true,
+                cap: reference["cap"]
+                    .as_array()
+                    .map(|_| (int(&reference["cap"][0]), int(&reference["cap"][1]))),
+                prevent: reference["prevent"] == true,
+                arithmetic: Arithmetic::Checked,
                 consumption: None,
             })
             .collect::<Vec<_>>();
@@ -331,7 +333,9 @@ impl Game {
             depends_on_amount,
             delta: self.number(&body["amount"], &frame)?,
             set,
+            cap: None,
             prevent: body["prevent"] == true,
+            arithmetic: Arithmetic::Saturating,
             consumption: None,
         }))
     }
@@ -345,5 +349,44 @@ fn reads_damage_amount(node: &Value) -> bool {
         Value::Array(values) => values.iter().any(reads_damage_amount),
         Value::Object(fields) => fields.values().any(reads_damage_amount),
         Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => false,
+    }
+}
+
+impl DamageReplacement {
+    pub(super) fn fold_order(mut amount: i64, mut ordered: Vec<Self>) -> Result<(i64, Vec<usize>)> {
+        let mut uses = Vec::new();
+        while amount > 0 {
+            let Some(index) = ordered
+                .iter()
+                .position(|replacement| replacement.applies(amount))
+            else {
+                break;
+            };
+            let replacement = ordered.remove(index);
+            if let Some(use_index) = replacement.consumption {
+                uses.push(use_index);
+            }
+            amount = replacement.apply(amount)?;
+        }
+        Ok((amount.max(0), uses))
+    }
+
+    pub(super) fn applies(&self, amount: i64) -> bool {
+        self.cap.is_none_or(|(threshold, _)| amount >= threshold)
+    }
+    pub(super) fn apply(&self, amount: i64) -> Result<i64> {
+        if self.prevent {
+            Ok(0)
+        } else if let Some(value) = self.set {
+            Ok(value)
+        } else if let Some((_, value)) = self.cap {
+            Ok(value)
+        } else if self.arithmetic == Arithmetic::Checked {
+            amount
+                .checked_add(self.delta)
+                .ok_or_else(|| invalid("damage replacement overflow"))
+        } else {
+            Ok(amount.saturating_add(self.delta))
+        }
     }
 }

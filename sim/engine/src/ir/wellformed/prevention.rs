@@ -1,7 +1,8 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::prevention::{Recipients, projection};
 use crate::ir::{
-    Bool, DurationEnd, Effect, Expr, ProposedEventPattern, Selector, TimeAnchor, ZoneKind,
+    Bool, DurationEnd, Effect, EventRewrite, Expr, ProposedEventPattern, Selector, TimeAnchor,
+    ZoneKind,
 };
 
 #[expect(
@@ -56,6 +57,22 @@ impl Checker {
         }
         if let Some(objects) = shape.damage_source {
             self.selector(objects)?;
+        }
+        match shape.rewrite {
+            EventRewrite::AddDamage { amount } => self.integer(amount)?,
+            EventRewrite::CapDamage {
+                threshold,
+                replacement,
+            } => {
+                self.natural(threshold)?;
+                self.natural(replacement)?;
+            }
+            EventRewrite::PreventDamage { .. } => {}
+            EventRewrite::RedirectMove { .. }
+            | EventRewrite::MultiplyDamage { .. }
+            | EventRewrite::EntryPosture { .. }
+            | EventRewrite::EvolutionCost { .. }
+            | EventRewrite::ReplaceInstruction { .. } => return self.reject(),
         }
         self.boolean(shape.condition)
     }

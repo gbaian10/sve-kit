@@ -8,18 +8,18 @@
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, DamageEvent, DamageFlags,
+    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
     EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
     InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
     LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
     NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
-    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PositiveInt, PostureEvent,
-    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
-    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
-    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
+    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
+    Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
+    RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TriggerIcon, Visibility,
+    WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
@@ -28,13 +28,15 @@ use crate::ir::{
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
-use core::{num::NonZeroU64, result};
+use core::result;
 use serde::ser::Error as _;
 use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
 
 mod admission;
 mod allocation;
+mod damage;
+pub use damage::ReplacementOption;
 mod alternatives;
 mod card;
 mod cost;
@@ -167,6 +169,8 @@ pub enum InputDomain {
     Integer(Cardinality),
     /// Token-scoped handles and printed information, visible only to the chooser.
     Order(Vec<OrderCard>),
+    /// Order the public replacement occurrences affecting one damage recipient.
+    DamageReplacements(Vec<ReplacementOption>),
     /// Optional public trigger icon and token-local follower designations.
     DriveTrigger {
         /// Verified icon on the revealed card.
@@ -427,6 +431,7 @@ enum Wait {
     TokenCapacity(Box<tokens::CapacityWait>),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
+    DamageReplacements(Box<damage::DamageRun>),
     Drive(Box<drive::DriveWait>),
     Search(search::SearchWait),
     SearchPartition(search::PartitionWait),
@@ -812,6 +817,11 @@ impl Game {
                     let selected = wait.validate(accept, target)?;
                     self.internal_drive_answer(&mut execution, *wait, accept, selected)?;
                 }
+                (Wait::DamageReplacements(wait), Answer::Order(handles)) => {
+                    let ordered = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    self.continue_damage(&mut execution, *wait, Some(ordered))?;
+                }
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     let ordered = wait.validate(&handles)?;
                     rollback = execution.origin.take();
@@ -948,6 +958,7 @@ impl Game {
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::DriveTrigger {icon, targets} => json!({"kind":"drive-trigger","icon":drive::icon_name(icon),"targets":targets.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
+                InputDomain::DamageReplacements(options) => json!({"kind":"damage-replacements","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"name":option.name,"line":option.line})).collect::<Vec<_>>()}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Search(domain) => search::packet(&domain),
                 InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
@@ -1326,73 +1337,7 @@ impl Game {
                     }),
                 );
             }
-            Action::Damage {
-                recipients,
-                amount: damage_amount,
-                source: source_view,
-                ..
-            } => {
-                let (shares, requested) =
-                    execution.damage_shares(self, recipients, damage_amount)?;
-                let source = execution.damage_source(self, source_view)?;
-                let source_id = execution.object_id(source.object)?.to_owned();
-                let actor = execution.player(self, &instruction.source.controller)?;
-                let mut hits = Vec::new();
-                let mut facts = Vec::new();
-                let mut actual = 0_u64;
-                for share in shares {
-                    let recipient = share.recipient;
-                    let amount = i64::try_from(share.amount.0).map_err(invalid)?;
-                    let target = match recipient {
-                        RuntimeDamageRecipient::Leader { player } => {
-                            format!("{}.leader", seat_name(player)?)
-                        }
-                        RuntimeDamageRecipient::Object { object } => {
-                            let id = execution.object_id(object)?;
-                            let current = self.object(id)?;
-                            if current.generation != object.generation.0 {
-                                continue;
-                            }
-                            // Requested units for non-follower members are not admitted yet.
-                            if !self.object_type(id)?.contains("フォロワー") {
-                                return Err(unsupported("non-follower damage recipient"));
-                            }
-                            if current.zone != "field" {
-                                return Err(unsupported("non-field damage recipient"));
-                            }
-                            id.to_owned()
-                        }
-                    };
-                    if let Ok(positive) = NonZeroU64::try_from(share.amount.0) {
-                        let hit = json!({"source":source_id,"source_generation":source.object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false});
-                        if !self.internal_prevention_references(&hit)?.is_empty() {
-                            continue;
-                        }
-                        self.internal_damage_arithmetic(&target, amount)?;
-                        actual = actual
-                            .checked_add(positive.get())
-                            .ok_or_else(|| invalid("damage outcome overflow"))?;
-                        hits.push(hit);
-                        facts.push(DamageEvent {
-                            source,
-                            recipient,
-                            amount: PositiveInt(positive),
-                            flags: DamageFlags::Ability,
-                            controller: actor,
-                        });
-                    }
-                }
-                let frame = execution.frame();
-                self.apply_damage(&hits, &frame, Some(&facts))?;
-                execution.facts.extend(facts.into_iter().map(Fact::Damage));
-                execution.receipts.insert(
-                    instruction.receipt,
-                    InstructionOutcome::Damage(DamageQuantityOutcome {
-                        requested: Int(requested),
-                        actual: Nat(actual),
-                    }),
-                );
-            }
+            Action::Damage { .. } => self.internal_damage(execution, &instruction)?,
             Action::Move {
                 objects,
                 movement,

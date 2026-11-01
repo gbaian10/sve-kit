@@ -4,8 +4,8 @@ use crate::game::internal::duration::EffectEnd;
 use crate::ir::prevention::{Recipients, projection};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
-    Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, ExecutionId, Expr,
-    Generation, InstallationSubjects, InstallationTime, Instruction, InstructionContext,
+    Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
+    Expr, Generation, InstallationSubjects, InstallationTime, Instruction, InstructionContext,
     InstructionId, Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView, PlayerRef, Program,
     ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements, Selector, TimeAnchor,
     ZoneKind,
@@ -168,6 +168,9 @@ pub(in crate::game::internal) fn check_install(
         return Err(unsupported("damage prevention installation"));
     };
     let shape = projection(effect).ok_or_else(|| unsupported("damage prevention shape"))?;
+    if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) {
+        return Err(unsupported("installed numeric damage replacement"));
+    }
     let targets = Selector::Bound {
         reference: *affected,
     };
@@ -339,7 +342,7 @@ impl Game {
                 Some(_) => false,
             };
             if target_matches && source_matches {
-                references.push(json!({"kind":"ir-damage-prevention", "effect":effect.effect}));
+                references.push(json!({"reference":{"kind":"ir-damage-prevention", "effect":effect.effect},"prevent":true}));
             }
         }
         self.static_prevention_references(hit, &mut references)?;
@@ -426,7 +429,21 @@ impl Game {
                     let Effect::Replacement { id, .. } = effect else {
                         return Err(unsupported("prevention definition"));
                     };
-                    references.push(json!({"kind":"ir-damage-prevention", "source":provider, "generation":object.generation, "definition":id.0}));
+                    let mut replacement = json!({"reference":{"kind":"ir-damage-prevention", "source":provider, "generation":object.generation, "definition":id.0,"line":located.source.line,"card":card,"name":self.card_name(&provider)?}});
+                    match shape.rewrite {
+                        EventRewrite::PreventDamage { .. } => {
+                            replacement["prevent"] = json!(true);
+                        }
+                        EventRewrite::AddDamage {
+                            amount: Expr::Literal(amount),
+                        } => replacement["delta"] = json!(amount.0),
+                        EventRewrite::CapDamage {
+                            threshold: Expr::Literal(threshold),
+                            replacement: Expr::Literal(amount),
+                        } => replacement["cap"] = json!([threshold.0, amount.0]),
+                        _ => return Err(unsupported("damage rewrite arithmetic")),
+                    }
+                    references.push(replacement);
                 }
             }
         }
