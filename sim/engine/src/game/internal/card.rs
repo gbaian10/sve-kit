@@ -353,10 +353,7 @@ impl Game {
                 quick::check_spell_face(self, card_no, card.card(), ordinal, base_print)?;
                 continue;
             }
-            if card_restriction(ability).is_some() {
-                if ordinal != 0 {
-                    return Err(unsupported("play restriction requires base face"));
-                }
+            if play_restrictions::check(located, ordinal)? {
                 continue;
             }
             if attack_restrictions::is_static(ability) {

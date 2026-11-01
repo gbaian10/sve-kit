@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-003:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 1
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: クール
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+            - reveal:
+                ref: picked
+                bind: shown
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: クール
+              op: ge
+              right: 3
+          per_turn: 1
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"

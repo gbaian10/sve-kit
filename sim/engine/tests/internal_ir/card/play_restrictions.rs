@@ -14,11 +14,15 @@ fn tree(condition: &Value) -> Value {
 }
 
 fn restriction(condition: &Value) -> Located<Ability> {
-    let lowered = lowerer().lower(&tree(condition)).unwrap();
-    let mut ability = lowered["unit-spell"].card().abilities[0].clone();
-    ability.node.id = AbilityId(3);
-    ability.node.scope = ScopeId(3);
-    ability
+    let mut expanded = tree(condition);
+    let mut spell = expanded["cards"]["unit-spell"]["abilities"][0].clone();
+    spell["play"] = json!({"cannot_if":{"my_turn":true}});
+    expanded["cards"]["unit-spell"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .insert(0, spell);
+    let lowered = lowerer().lower(&expanded).unwrap();
+    lowered["unit-spell"].card().abilities[1].clone()
 }
 
 #[test]
@@ -139,4 +143,35 @@ fn printed_play_restrictions_reject_other_conditions_and_forged_permissions_atom
             assert_eq!(format!("{game:?}"), before);
         }
     }
+}
+
+#[test]
+fn printed_play_restrictions_evaluate_nested_public_conditions_and_reject_unknown_reads() {
+    let condition = json!({"all":[{"not":{"awakened":true}}, {"cmp":{"left":{"count":{"who":"self","zone":"field","kind":"follower"}},"op":"le","right":2}}]});
+    let program = card(vec![play::spell(vec![]), restriction(&condition)]);
+    let mut game = play::position(&program, "hand", 0);
+    let before = format!("{game:?}");
+    game.play_internal_card("s", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(format!("{game:?}"), before);
+    for condition in [
+        json!({"cmp":{"left":{"count":{"who":"self","zone":"hand","class":"ロイヤル"}},"op":"le","right":2}}),
+        json!({"did":"later-move"}),
+    ] {
+        lowerer().lower(&tree(&condition)).unwrap_err();
+    }
+    let mut forged = restriction(&json!({"awakened":true}));
+    let Effect::Permission { condition, .. } = &mut forged.node.declarations[0] else {
+        panic!("permission");
+    };
+    *condition = Expr::Compute(Box::new(Predicate::CompareInt {
+        left: Expr::Bound(Binding::new(999, forged.node.scope)),
+        comparison: Comparison::Equal,
+        right: Expr::Literal(Int(1)),
+    }));
+    WellFormedCardProgram::check(CardProgram {
+        abilities: vec![play::spell(vec![]), forged],
+        card_play_costs: vec![],
+    })
+    .unwrap_err();
 }

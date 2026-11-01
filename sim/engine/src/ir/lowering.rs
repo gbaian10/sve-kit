@@ -398,6 +398,7 @@ impl Allocator {
         if let Some(play) = &entry.play {
             if let Some(condition) = &play.cannot_if {
                 abilities.push(play_restrictions::lower(
+                    self,
                     key,
                     path,
                     entry,
