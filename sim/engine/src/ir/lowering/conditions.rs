@@ -29,6 +29,31 @@ pub(super) fn qualify_costs(
     Ok(())
 }
 
+pub(super) fn leader_life_condition(
+    threshold: &ast::PlayerThreshold,
+    path: &str,
+) -> Result<Predicate, LoweringError> {
+    let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
+        (Some(amount), None, None) => (Comparison::Equal, amount),
+        (None, Some(amount), None) => (Comparison::LessEqual, amount),
+        (None, None, Some(amount)) => (Comparison::GreaterEqual, amount),
+        _ => return Err(unsupported(path)),
+    };
+    Ok(Predicate::CompareInt {
+        left: Expr::Live(Box::new(IntRead::PlayerResource {
+            player: match threshold.who {
+                ast::LeaderSide::Controller => PlayerRef::Controller {},
+                ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+            },
+            property: PlayerResource::Life,
+        })),
+        comparison,
+        right: Expr::Literal(Int(
+            i64::try_from(amount).map_err(|_private| unsupported(path))?
+        )),
+    })
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Body expressions share the ability binding and definition environment."
@@ -90,32 +115,6 @@ impl BodyContext<'_> {
         })))
     }
 
-    fn leader_life_condition(
-        &mut self,
-        threshold: &ast::PlayerThreshold,
-        path: &str,
-    ) -> Result<Predicate, LoweringError> {
-        let (comparison, amount) = match (threshold.eq, threshold.le, threshold.ge) {
-            (Some(amount), None, None) => (Comparison::Equal, amount),
-            (None, Some(amount), None) => (Comparison::LessEqual, amount),
-            (None, None, Some(amount)) => (Comparison::GreaterEqual, amount),
-            _ => return Err(unsupported(path)),
-        };
-        Ok(Predicate::CompareInt {
-            left: self.number(
-                &ast::Number::LeaderLife {
-                    leader_life: threshold.who,
-                },
-                path,
-                &mut BTreeSet::new(),
-            )?,
-            comparison,
-            right: Expr::Literal(Int(
-                i64::try_from(amount).map_err(|_private| unsupported(path))?
-            )),
-        })
-    }
-
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
@@ -142,7 +141,7 @@ impl BodyContext<'_> {
                 comparison: Comparison::GreaterEqual,
                 right: Expr::Literal(Int(7)),
             },
-            ast::Condition::LeaderLife(threshold) => self.leader_life_condition(threshold, path)?,
+            ast::Condition::LeaderLife(threshold) => leader_life_condition(threshold, path)?,
 
             ast::Condition::Crimson(true) => {
                 return Ok(Expr::Live(Box::new(super::super::BoolRead::Crimson {

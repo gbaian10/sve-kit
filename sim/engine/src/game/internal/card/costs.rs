@@ -1,9 +1,8 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
-use crate::game::internal::values::compare;
 use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{
-    Bool, CostChange, Expr, Int, IntOperation, Nat, NatOperation, NatRead, ObjectProperty,
-    PlayerRef, Predicate, Selector, SourceSpan,
+    Bool, BoolRead, CostChange, Expr, Int, IntOperation, IntRead, Nat, NatOperation, NatRead,
+    ObjectProperty, PlayerRef, PlayerResource, Predicate, Selector, SourceSpan,
 };
 use alloc::collections::BTreeSet;
 
@@ -101,6 +100,16 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
 fn check_condition(condition: &Expr<Bool>) -> Result<()> {
     match condition {
         Expr::Literal(_) => Ok(()),
+        Expr::Live(read)
+            if matches!(
+                read.as_ref(),
+                BoolRead::Crimson {
+                    player: PlayerRef::Controller {}
+                }
+            ) =>
+        {
+            Ok(())
+        }
         Expr::Compute(predicate) => match predicate.as_ref() {
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for item in predicates {
@@ -128,6 +137,17 @@ fn check_condition(condition: &Expr<Bool>) -> Result<()> {
 
 fn check_integer(value: &Expr<Int>) -> Result<()> {
     match value {
+        Expr::Live(read)
+            if matches!(
+                read.as_ref(),
+                IntRead::PlayerResource {
+                    property: PlayerResource::Life | PlayerResource::PpMaximum,
+                    ..
+                }
+            ) =>
+        {
+            Ok(())
+        }
         Expr::Literal(_) => Ok(()),
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value: count } => check_count(count),
@@ -256,54 +276,5 @@ impl Game {
 }
 
 fn condition_value(game: &Game, execution: &Execution, condition: &Expr<Bool>) -> Result<bool> {
-    match condition {
-        Expr::Literal(Bool(value)) => Ok(*value),
-        Expr::Compute(predicate) => match predicate.as_ref() {
-            Predicate::And { predicates } | Predicate::Or { predicates } => {
-                let values = predicates
-                    .iter()
-                    .map(|item| condition_value(game, execution, item))
-                    .collect::<Result<Vec<_>>>()?;
-                Ok(if matches!(predicate.as_ref(), Predicate::And { .. }) {
-                    values.iter().all(|value| *value)
-                } else {
-                    values.iter().any(|value| *value)
-                })
-            }
-            Predicate::Not { predicate } => Ok(!condition_value(game, execution, predicate)?),
-            Predicate::CompareNat {
-                left,
-                comparison,
-                right: Expr::Literal(right),
-            } => Ok(compare(count(game, execution, left)?, *comparison, right.0)),
-            Predicate::CompareInt {
-                left,
-                comparison,
-                right: Expr::Literal(right),
-            } => {
-                let left = match left {
-                    Expr::Literal(Int(value)) => *value,
-                    Expr::Compute(operation) => match operation.as_ref() {
-                        IntOperation::FromNat { value } => {
-                            i64::try_from(count(game, execution, value)?).map_err(invalid)?
-                        }
-                        _ => return Err(unsupported("play cost count operand")),
-                    },
-                    _ => return Err(unsupported("play cost count operand")),
-                };
-                Ok(compare(left, *comparison, right.0))
-            }
-            Predicate::Exists { objects } => Ok(object_count(game, execution, objects)? > 0),
-            _ => Err(unsupported("play cost public condition")),
-        },
-        _ => Err(unsupported("play cost public condition")),
-    }
-}
-
-fn count(game: &Game, execution: &Execution, value: &Expr<Nat>) -> Result<u64> {
-    execution.natural(game, value).map(|Nat(amount)| amount)
-}
-
-fn object_count(game: &Game, execution: &Execution, objects: &Selector) -> Result<u64> {
-    u64::try_from(execution.public_zone_objects(game, objects)?.len()).map_err(invalid)
+    execution.boolean(game, condition).map(|Bool(value)| value)
 }

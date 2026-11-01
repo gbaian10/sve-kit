@@ -3,7 +3,9 @@ use super::{
     PlayerRelation, PlayerSet, Predicate, ScopeId, SelectionView, Selector, TextQuantifier,
     ZoneKind, ast, decode, source_span, unsupported,
 };
-use crate::ir::{Comparison, CostChange, ObjectRef, PlayCostModifier};
+use crate::ir::{
+    BoolRead, Comparison, CostChange, IntRead, ObjectRef, PlayCostModifier, PlayerResource,
+};
 
 pub(super) fn lower(
     key: &super::CardCoordinates<'_>,
@@ -66,12 +68,76 @@ pub(super) fn lower(
     Ok(())
 }
 
+fn population(
+    spells: bool,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    // Discounts read the payment state; resolution captures would freeze the wrong moment.
+    let binding = Binding::new(allocator.id(path)?, ScopeId(0));
+    let kind = spells.then_some(ast::SearchKind::Spell);
+    let objects = Selector::Zone {
+        players: PlayerSet {
+            relation: PlayerRelation::SelfPlayer,
+            relative_to: PlayerRef::Controller {},
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+            text_quantifier: TextQuantifier::Implicit,
+        },
+        zone: ZoneKind::Cemetery,
+        view: SelectionView::Current {},
+        binding,
+        predicate: Box::new(super::selection::field_filter(
+            &super::selection::ObjectFilter {
+                kind: kind.as_ref(),
+                ..Default::default()
+            },
+            binding,
+        )),
+    };
+    Ok(super::numeric::aggregate_count(objects, None))
+}
+
 fn condition(
     value: &ast::CostCondition,
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Expr<Bool>, LoweringError> {
     Ok(Expr::Compute(Box::new(match value {
+        ast::CostCondition::Spellchain(threshold) | ast::CostCondition::Necro(threshold) => {
+            Predicate::CompareInt {
+                left: population(
+                    matches!(value, ast::CostCondition::Spellchain(_)),
+                    allocator,
+                    path,
+                )?,
+                comparison: Comparison::GreaterEqual,
+                right: Expr::Literal(Int(
+                    i64::try_from(*threshold).map_err(|_private| unsupported(path))?
+                )),
+            }
+        }
+        ast::CostCondition::Awakened(true) => Predicate::CompareInt {
+            left: Expr::Live(Box::new(IntRead::PlayerResource {
+                player: PlayerRef::Controller {},
+                property: PlayerResource::PpMaximum,
+            })),
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Int(7)),
+        },
+        ast::CostCondition::Crimson(true) => {
+            return Ok(Expr::Live(Box::new(BoolRead::Crimson {
+                player: PlayerRef::Controller {},
+            })));
+        }
+        ast::CostCondition::LeaderLife(threshold) => {
+            super::conditions::leader_life_condition(threshold, path)?
+        }
+        ast::CostCondition::Awakened(false) | ast::CostCondition::Crimson(false) => {
+            return Err(unsupported(path));
+        }
         ast::CostCondition::All(items) | ast::CostCondition::Any(items) => {
             let predicates = items
                 .iter()
