@@ -371,6 +371,8 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::CountQuery) -> Self {
         Self {
             face_up: query.face_up,
+            class: query.class.as_deref(),
+            not_class: query.not_class.as_deref(),
             kind: query.kind.as_ref(),
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),

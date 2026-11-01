@@ -420,6 +420,9 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
     match selector {
+        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            public_zone_selector(input)
+        }
         Selector::Filter {
             input,
             binding,

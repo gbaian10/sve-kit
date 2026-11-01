@@ -1082,6 +1082,18 @@ pub(super) enum Number {
         counter: CounterRead,
     },
     Alias(String),
+    Power {
+        power_of: This,
+    },
+    Life {
+        hp_of: This,
+    },
+    Cost {
+        cost_of: This,
+    },
+    OriginalCost {
+        orig_cost_of: This,
+    },
     HistoryCount {
         history_count: PlayedHistory,
     },
@@ -1159,6 +1171,10 @@ pub(super) enum SelectedStat {
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
     pub face_up: Option<bool>,
+    pub class: Option<String>,
+    pub not_class: Option<String>,
+    #[serde(default)]
+    pub other: bool,
     pub who: Side,
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
@@ -1180,6 +1196,7 @@ pub(super) enum CountZone {
     Deck,
     Hand,
     Cemetery,
+    Banish,
 }
 
 #[derive(Deserialize)]

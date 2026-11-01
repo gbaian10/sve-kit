@@ -509,7 +509,7 @@ impl Execution {
                 selector:
                     Selector::Zone {
                         players,
-                        zone: zone @ (ZoneKind::Hand | ZoneKind::Deck),
+                        zone: zone @ (ZoneKind::Hand | ZoneKind::Deck | ZoneKind::Banish),
                         view: SelectionView::Current {},
                         predicate,
                         ..
@@ -518,11 +518,7 @@ impl Execution {
                 if **predicate != Expr::Literal(Bool(true)) {
                     return Err(unsupported("filtered hidden zone count"));
                 }
-                let zone = if *zone == ZoneKind::Hand {
-                    "hand"
-                } else {
-                    "deck"
-                };
+                let zone = zone_name(*zone)?;
                 let count =
                     self.players(game, players)?
                         .into_iter()

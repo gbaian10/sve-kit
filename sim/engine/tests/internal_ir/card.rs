@@ -630,5 +630,7 @@ mod query_conditions;
 
 #[path = "card/counters.rs"]
 mod counters;
+#[path = "card/number_count.rs"]
+mod number_count;
 #[path = "card/observation_filters.rs"]
 mod observation_filters;
