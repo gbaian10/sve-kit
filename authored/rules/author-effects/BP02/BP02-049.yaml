@@ -1,0 +1,34 @@
+cards:
+  BP02-049:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - if:
+                cond:
+                  exists:
+                    kind: evolve_follower
+                    who: self
+                    zone: field
+                then:
+                  - draw:
+                      n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
