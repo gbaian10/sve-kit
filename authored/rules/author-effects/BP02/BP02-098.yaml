@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - if:
+                cond:
+                  history:
+                    event: attacked
+                    window: this_turn
+                    who: self
+                    sel:
+                      kind: follower
+                    at_least: 3
+                then:
+                  - draw:
+                      who: self
+                      n: 3
