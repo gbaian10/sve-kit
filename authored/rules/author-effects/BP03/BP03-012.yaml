@@ -1,0 +1,51 @@
+cards:
+  BP03-012:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - counter:
+                  n: 1
+                  name: 童話カウンター
+                  on: this
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token_sources:
+      - card: BP03-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,64 @@
+cards:
+  BP14-059:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: -1
+                name: 神湯カウンター
+                on: this
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 神湯カウンター
+                        on: this
+                    op: eq
+                    right: 0
+                then:
+                  - move:
+                      ref: this
+                      to: cemetery
+                  - damage:
+                      n: 5
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            enter_field:
+              during:
+                turn: self
+              sel:
+                kind: follower
+                trait: 宴楽
+              who: self
+          per_turn: 1
+        line: 2
+      - fanfare:
+          do:
+            - counter:
+                delta: 10
+                name: 神湯カウンター
+                on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
