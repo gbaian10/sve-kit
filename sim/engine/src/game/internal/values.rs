@@ -626,7 +626,7 @@ impl Execution {
                 self.objects(game, selector)?.len(),
             )
             .map_err(invalid)?)),
-            _ => Err(unsupported("natural read")),
+            NatRead::ZoneCapacity { .. } => Err(unsupported("natural read")),
         }
     }
 

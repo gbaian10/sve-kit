@@ -10,8 +10,8 @@ use crate::ir::{
     ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
-    CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ObjectFrozen, RuntimeObjectView, TraitId, TraitsRead,
+    CardKind, CardName, ClassRead, Info, KindRead, MemberProjection, MovementReceipt, NamesRead,
+    RuntimeObjectView, TraitId, TraitsRead,
 };
 
 #[expect(
