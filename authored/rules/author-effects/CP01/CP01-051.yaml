@@ -1,0 +1,23 @@
+cards:
+  CP01-051:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - life:
+                delta: 5
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

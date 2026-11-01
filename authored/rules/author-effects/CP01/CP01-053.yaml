@@ -1,0 +1,36 @@
+cards:
+  CP01-053:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - buff:
+                      hp: -4
+                      on: enemy
+                      power: -4
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
