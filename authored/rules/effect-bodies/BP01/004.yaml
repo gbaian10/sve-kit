@@ -1,0 +1,28 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    id: buff_source_on_other_allied_follower_entry.v1
+    params:
+      hp_reduction: Int
+    body:
+      auto:
+        on:
+          enter_field:
+            who: self
+            sel:
+              kind: follower
+              other: true
+        do:
+          - buff:
+              on: this
+              power: 1
+              hp:
+                minus:
+                  - 1
+                  - param: hp_reduction
+    written_by:
+      - actor:
+          who: Codex
+          model: gpt-6.1-sol
+        date: "2026-10-31"

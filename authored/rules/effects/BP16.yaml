@@ -250,25 +250,6 @@ cards:
           args:
             - read: self.is_active
             - read: event.to_opposing_leader
-  BP16-109:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: aura
-      - line: 2
-        kind: trigger
-        body:
-          op: modify
-          subjects: self
-          power: 1
-        event: enter
-        subject:
-          side: self
-          zone: field
-          type: amulet
   BP16-SL08:
     status: complete
     review: 抽牌後以同一 choice 的 selection 與 position 標籤選手牌及牌庫上下位置。

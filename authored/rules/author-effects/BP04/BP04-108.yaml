@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-108:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        auto:
+          on:
+            left_field:
+              who: self
+              sel:
+                kind: amulet
+          do:
+            - buff:
+                on: this
+                power: 2
+                hp: 2
+            - grant:
+                on: this
+                keywords:
+                  - assail
+          per_turn: 1

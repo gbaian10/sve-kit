@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-082:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                name: フォレストバット
+              during:
+                turn: self
+          do:
+            - life:
+                who: self
+                delta: 1
+          per_turn: 1
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: フォレストバット
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T15

@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                name: 操り人形
+              during:
+                turn: self
+          do:
+            - create:
+                token: 操り人形
+                to: ex
+                n: 2
+          per_turn: 1
+      - line: 2
+        activate:
+          cost:
+            pp: 4
+          do:
+            - buff:
+                on: this
+                power: 2
+                hp: 2
+            - create:
+                token: 操り人形
+                to: field
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
