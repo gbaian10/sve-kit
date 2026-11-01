@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-109:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - apply:
+                "on":
+                  who: opp
+                  zone: field
+                  kind: follower
+                effect:
+                  cannot:
+                    what: deal_damage
+                    "on": affected
+                until: turn
+      - line: 2
+        activate:
+          cost:
+            pp: 2
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - act: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

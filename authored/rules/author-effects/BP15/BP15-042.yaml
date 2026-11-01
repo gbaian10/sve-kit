@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-042:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        static:
+          effects:
+            - prevent:
+                kind: ability
+      - line: 3
+        fanfare:
+          do:
+            - damage:
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - who: opp
+                      zone: field
+                      kind: follower
+                n: 5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-056:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pp_max:
+                        who: self
+                        delta: 1
+                    - pp:
+                        who: self
+                        delta: 2
+                  - - if:
+                        cond:
+                          awakened: true
+                        then:
+                          - create:
+                              token: 絆の覇竜
+                              n: 1
+                              to: field
+                          - life:
+                              who: self
+                              delta: 2
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP10-T02
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

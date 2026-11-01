@@ -252,16 +252,6 @@ cards:
             hp: 2
         event: enter
         subject: self
-  BP18-075:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: replace_damage
-          subjects: self
-          kind: effect
-          prevent: true
   BP18-P32:
     status: complete
     abilities:

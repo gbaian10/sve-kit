@@ -1,0 +1,17 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-075:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-019:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          per_turn: 1
+          do:
+            - stand: this
+      - line: 3
+        evolve_time:
+          do:
+            - apply:
+                "on": this
+                effect:
+                  prevent:
+                    kind: combat
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"

@@ -54,6 +54,60 @@ fn prevention(head: &Value, line: u64) -> Option<Vec<Value>> {
         .collect()
 }
 
+fn damage_recipient(value: &Value) -> Option<Value> {
+    if let Some(subject) = leader(value) {
+        return Some(subject);
+    }
+    if value == &json!({"who":"opp", "zone":"field", "kind":"follower"}) {
+        return Some(json!({"zone":"field", "side":"opponent", "type":"follower"}));
+    }
+    if !only_keys(value, &["any_of"]) {
+        return None;
+    }
+    let sets = value.get("any_of")?.as_array()?;
+    if sets.is_empty() {
+        return None;
+    }
+    let subjects: Option<Vec<Value>> = sets.iter().map(damage_recipient).collect();
+    Some(json!({"union":subjects?}))
+}
+
+fn damage_body(steps: &Value) -> Option<Value> {
+    let steps: Option<Vec<Value>> = steps.as_array()?.iter().map(|step| {
+        if !only_keys(step, &["damage"]) { return None; }
+        let damage = step.get("damage")?;
+        if !only_keys(damage, &["to", "n"]) { return None; }
+        Some(json!({"op":"damage", "subjects":damage_recipient(damage.get("to")?)?, "amount":damage.get("n")?.as_u64()?}))
+    }).collect();
+    match steps?.as_slice() {
+        [] => None,
+        [step] => Some(step.clone()),
+        steps => Some(json!({"op":"seq", "steps":steps})),
+    }
+}
+
+fn fanfare(head: &Value, line: u64) -> Option<Value> {
+    if !only_keys(head, &["do"]) {
+        return None;
+    }
+    Some(
+        json!({"kind":"trigger", "line":line, "event":"enter", "subject":"self", "body":damage_body(head.get("do")?)?}),
+    )
+}
+
+fn keywords(head: &Value, line: u64) -> Option<Vec<Value>> {
+    head.as_array()?
+        .iter()
+        .map(|keyword| {
+            let name = match keyword.as_str()? {
+                "ward" => "guard",
+                _ => return None,
+            };
+            Some(json!({"kind":"static", "line":line, "body":{"op":"macro", "name":name}}))
+        })
+        .collect()
+}
+
 fn activated(head: &Value, line: u64) -> Option<Value> {
     if !only_keys(head, &["cost", "quick", "do"]) {
         return None;
@@ -71,18 +125,7 @@ fn activated(head: &Value, line: u64) -> Option<Value> {
     {
         costs.push(json!({"op":"act", "subjects":"self"}));
     }
-    let steps: Option<Vec<Value>> = head.get("do")?.as_array()?.iter().map(|step| {
-        if !only_keys(step, &["damage"]) { return None; }
-        let damage = step.get("damage")?;
-        if !only_keys(damage, &["to", "n"]) { return None; }
-        Some(json!({"op":"damage", "subjects":leader(damage.get("to")?)?, "amount":damage.get("n")?.as_u64()?}))
-    }).collect();
-    let steps = steps?;
-    let body = match steps.as_slice() {
-        [] => return None,
-        [step] => step.clone(),
-        _ => json!({"op":"seq", "steps":steps}),
-    };
+    let body = damage_body(head.get("do")?)?;
     Some(
         json!({"kind":"activated", "line":line, "quick":head.get("quick").cloned().unwrap_or(json!(false)), "costs":costs, "body":body}),
     )
@@ -136,6 +179,30 @@ pub(super) fn program(card: &Value) -> Option<Value> {
             ],
         ) {
             abilities.push(activated(entry.get("activate")?, line)?);
+        } else if only_keys(
+            entry,
+            &[
+                "line",
+                "fanfare",
+                "sources",
+                "section",
+                "ports",
+                "generated_by",
+            ],
+        ) {
+            abilities.push(fanfare(entry.get("fanfare")?, line)?);
+        } else if only_keys(
+            entry,
+            &[
+                "line",
+                "keywords",
+                "sources",
+                "section",
+                "ports",
+                "generated_by",
+            ],
+        ) {
+            abilities.extend(keywords(entry.get("keywords")?, line)?);
         } else {
             return None;
         }
@@ -179,6 +246,38 @@ mod tests {
     fn a_live_condition_cannot_become_unconditional_historical_prevention() {
         let card = json!({"faces":{"base":{"abilities":[
             {"line":1_u8,"static":{"while":{"awakened":true},"effects":[{"prevent":{"kind":"ability"}}]}}
+        ]}}});
+        assert!(program(&card).is_none());
+    }
+    #[test]
+    fn ward_and_union_damage_fanfare_are_preserved_as_complete_programs() {
+        let card = json!({"faces":{"base":{"abilities":[
+            {"line":1_u8,"keywords":["ward"]},
+            {"line":2_u8,"static":{"effects":[{"prevent":{"kind":"ability"}}]}},
+            {"line":3_u8,"fanfare":{"do":[{"damage":{"to":{"any_of":[
+                {"leaders":"opponents"},{"who":"opp","zone":"field","kind":"follower"}
+            ]},"n":5_u8}}]}}
+        ]}}});
+        let result = program(&card).unwrap();
+        let abilities = result.get("abilities").unwrap().as_array().unwrap();
+        assert_eq!(abilities.len(), 3);
+        assert_eq!(
+            abilities.first().unwrap().pointer("/body/name"),
+            Some(&json!("guard"))
+        );
+        assert_eq!(
+            abilities.last().unwrap(),
+            &json!({"kind":"trigger","line":3_u8,
+            "event":"enter","subject":"self","body":{"op":"damage","amount":5_u8,
+            "subjects":{"union":["opponent.leader",{"zone":"field","side":"opponent","type":"follower"}]}}})
+        );
+    }
+
+    #[test]
+    fn a_fanfare_cost_cannot_be_dropped_from_a_historical_projection() {
+        let card = json!({"faces":{"base":{"abilities":[
+            {"line":1_u8,"static":{"effects":[{"prevent":{"kind":"ability"}}]}},
+            {"line":2_u8,"fanfare":{"cost":{"pp":2_u8},"do":[{"damage":{"to":{"leaders":"opponents"},"n":5_u8}}]}}
         ]}}});
         assert!(program(&card).is_none());
     }
