@@ -2,9 +2,10 @@ use super::{BindingKind, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, CardName, Cardinality, ChoiceDomain,
     Control, CostSpec, Decision, DecisionKind, Disjointness, EvolutionMode, ExecutionRef, Expr,
-    InputMode, InstructionContext, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
+    InputMode, InstructionContext, Int, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
     PlaySlot, PlayerRef, PlayerRelation, PlayerSet, PreconditionKind, PreconditionReason,
-    Predicate, SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
+    Predicate, Resource, ResourceOperation, SelectionSnapshot, SelectionView, Selector,
+    TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{ObjectRef, Program, effect_evolution};
 
@@ -235,6 +236,19 @@ impl Checker {
                 instruction.precondition = None;
                 checker.instruction_in(&instruction, InstructionContext::Cost, false)
             })?;
+        }
+        // EP and SEP remain resources of the rule procedure, not printed payment instructions.
+        if payments.iter().any(|cost| {
+            matches!(cost.instruction.action, Action::Resource { .. })
+                && !matches!(&cost.instruction.action,
+                    Action::Resource {
+                        player: PlayerRef::Controller {},
+                        resource: Resource::PpCurrent,
+                        operation: ResourceOperation::Pay,
+                        amount: Expr::Literal(Int(amount)),
+                    } if *amount >= 0)
+        }) {
+            return self.reject();
         }
         self.at("payments", |checker| {
             checker.costs(&CostSpec::Ordered {
