@@ -1002,6 +1002,7 @@ fn check_nodes(
         match &located.node {
             Node::Instruction { instruction } => {
                 super::tokens::check_catalog(game, &instruction.action)?;
+                super::transform::check_catalog(game, &instruction.action)?;
                 super::grant::check_action(&instruction.action)?;
                 if let Action::Grant { provider, .. } = &instruction.action
                     && &provider.face != printed_origin(&instruction.source.origin)?.0
@@ -1030,6 +1031,7 @@ fn check_nodes(
                         | Action::Destroy { .. }
                         | Action::Life { .. }
                         | Action::Banish { .. }
+                        | Action::Transform { .. }
                         | Action::Posture { .. }
                         | Action::Modify { .. }
                         | Action::Grant { .. }

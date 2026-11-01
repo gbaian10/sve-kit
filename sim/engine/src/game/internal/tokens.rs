@@ -1,6 +1,8 @@
 mod capacity;
 mod dynamic;
 
+use crate::ir::{ObjectRef, PlayerId};
+
 pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
@@ -72,21 +74,26 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     check_action(action)?;
     if let Some((tokens, zone)) = specification(action) {
         for token in tokens {
-            let card = game.catalog.token_print(&token.template.0)?;
-            if zone.kind == ZoneKind::Field
-                && !matches!(
-                    game.catalog.face(&card, 0)?["card_type"].as_str(),
-                    Some("フォロワー・トークン" | "アミュレット・トークン")
-                )
-            {
-                return Err(unsupported(
-                    "field creation requires a follower or amulet token",
-                ));
-            }
-            if !game.card_runtime.has_definition(&card) {
-                return Err(unsupported("created token requires an admitted whole card"));
-            }
+            check_template(game, &token.template.0, zone.kind)?;
         }
+    }
+    Ok(())
+}
+
+pub(super) fn check_template(game: &Game, name: &str, zone: ZoneKind) -> Result<()> {
+    let card = game.catalog.token_print(name)?;
+    if zone == ZoneKind::Field
+        && !matches!(
+            game.catalog.face(&card, 0)?["card_type"].as_str(),
+            Some("フォロワー・トークン" | "アミュレット・トークン")
+        )
+    {
+        return Err(unsupported(
+            "field creation requires a follower or amulet token",
+        ));
+    }
+    if !game.card_runtime.has_definition(&card) {
+        return Err(unsupported("created token requires an admitted whole card"));
     }
     Ok(())
 }
@@ -207,10 +214,20 @@ impl Game {
     ) -> Result<Option<Vec<String>>> {
         let (tokens, destination) = specification(&instruction.action)
             .ok_or_else(|| unsupported("token creation shape"))?;
-        let destination = destination.clone();
         let actor = execution.player(self, &destination.player)?;
+        self.allocate_token_specs(execution, instruction, tokens, destination.kind, actor)
+    }
+
+    pub(super) fn allocate_token_specs(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        tokens: &[TokenSpec],
+        destination: ZoneKind,
+        actor: PlayerId,
+    ) -> Result<Option<Vec<String>>> {
         let seat = seat_name(actor)?;
-        let zone = if destination.kind == ZoneKind::Field {
+        let zone = if destination == ZoneKind::Field {
             "field"
         } else {
             "ex"
@@ -267,10 +284,6 @@ impl Game {
         retry: Node,
     ) -> Result<()> {
         execution.ids = self.internal_identities()?;
-        let before = ids
-            .iter()
-            .map(|id| execution.reference(self, id))
-            .collect::<Result<Vec<_>>>()?;
         if destination == ZoneKind::Field {
             for id in &ids {
                 if self.internal_ward_entry_choice(execution, id)? {
@@ -283,22 +296,7 @@ impl Game {
                 }
             }
         }
-        let zone = if destination == ZoneKind::Field {
-            "field"
-        } else {
-            "ex"
-        };
-        self.move_objects(&ids, zone, None, None, &execution.frame())?;
-        if destination == ZoneKind::Field {
-            for member in before {
-                self.internal_ward_entry_posture(execution, member)?;
-            }
-        }
-        execution.ids = self.internal_identities()?;
-        let created = ids
-            .iter()
-            .map(|id| execution.reference(self, id))
-            .collect::<Result<Vec<_>>>()?;
+        let created = self.commit_token_objects(execution, destination, &ids)?;
         let Action::Token { output, .. } = &instruction.action else {
             return Err(invalid("token output"));
         };
@@ -310,6 +308,36 @@ impl Game {
             InstructionOutcome::Token(TokenOutcome { created }),
         );
         Ok(())
+    }
+
+    pub(super) fn commit_token_objects(
+        &mut self,
+        execution: &mut Execution,
+        destination: ZoneKind,
+        ids: &[String],
+    ) -> Result<Vec<ObjectRef>> {
+        execution.ids = self.internal_identities()?;
+        let before = ids
+            .iter()
+            .map(|id| execution.reference(self, id))
+            .collect::<Result<Vec<_>>>()?;
+        let zone = if destination == ZoneKind::Field {
+            "field"
+        } else {
+            "ex"
+        };
+        self.move_objects(ids, zone, None, None, &execution.frame())?;
+        if destination == ZoneKind::Field {
+            for member in before {
+                self.internal_ward_entry_posture(execution, member)?;
+            }
+        }
+        execution.ids = self.internal_identities()?;
+        let created = ids
+            .iter()
+            .map(|id| execution.reference(self, id))
+            .collect::<Result<Vec<_>>>()?;
+        Ok(created)
     }
 }
 

@@ -250,6 +250,7 @@ pub(super) enum Step {
     SetLife(SetLife),
     Destroy(ObjectAction),
     Banish(BanishAction),
+    Transform(Transform),
     Act(ObjectAction),
     Stand(ObjectAction),
     Buff(Modify),
@@ -261,6 +262,14 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Transform {
+    #[serde(rename = "ref")]
+    pub reference: Objects,
+    pub into: String,
 }
 
 #[derive(Deserialize)]

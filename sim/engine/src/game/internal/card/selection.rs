@@ -305,6 +305,9 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
 fn target_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Zone {
+            zone: ZoneKind::Ex, ..
+        } => public_zone_selector(selector),
+        Selector::Zone {
             zone: ZoneKind::Cemetery,
             view: SelectionView::Current {},
             players,
@@ -812,11 +815,8 @@ impl Game {
                 let private_observation =
                     private_observed_deck(self, id, actor_seat, observed_deck);
                 if !(private_observation
-                    || object.zone == "field"
-                    || object.zone == "cemetery"
-                    || (evolution && object.zone == "evolve_deck")
-                    || (allow_resolution_zones
-                        && matches!(object.zone.as_str(), "ex" | "cemetery")))
+                    || matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+                    || (evolution && object.zone == "evolve_deck"))
                     || object.generation != reference.generation.0
                     || (object.zone == "field"
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
@@ -1080,7 +1080,7 @@ impl Execution {
             } => {
                 let zone = match zone {
                     ZoneKind::Field => "field",
-                    ZoneKind::Ex if allow_resolution_zones => "ex",
+                    ZoneKind::Ex => "ex",
                     ZoneKind::Evolve
                         if allow_resolution_zones
                             && players.relation == PlayerRelation::SelfPlayer =>

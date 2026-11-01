@@ -131,6 +131,9 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
+        if matches!(target.from.zone, Some(ast::TargetZone::Ex)) {
+            self.ex_targets.insert(target.bind.clone());
+        }
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let mut selector = Selector::Zone {
             players: PlayerSet {
@@ -549,6 +552,7 @@ impl BodyContext<'_> {
                 definitions: self.definitions,
                 searches: BTreeSet::new(),
                 ex_outputs: BTreeMap::new(),
+                ex_targets: BTreeSet::new(),
                 observations: BTreeMap::new(),
                 observed_targets: BTreeSet::new(),
                 targets: BTreeMap::new(),
@@ -563,6 +567,7 @@ impl BodyContext<'_> {
                 context.payment_result.clone_from(&self.payment_result);
                 context.searches.clone_from(&self.searches);
                 context.ex_outputs.clone_from(&self.ex_outputs);
+                context.ex_targets.clone_from(&self.ex_targets);
                 context.observations.clone_from(&self.observations);
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.targets.clone_from(&self.targets);
@@ -808,6 +813,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::SetLife(_)
         | ast::Step::Destroy(_)
         | ast::Step::Banish(_)
+        | ast::Step::Transform(_)
         | ast::Step::Act(_)
         | ast::Step::Stand(_)
         | ast::Step::Buff(_)
