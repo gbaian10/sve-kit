@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-014:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - choose:
+                      bind: enemy
+                      from:
+                        who: opp
+                        zone: field
+                        kind: follower
+                      n: 1
+                  - destroy: enemy
+                  - create:
+                      token: フェアリー
+                      to: field
+                      by: opp
+                      n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T03

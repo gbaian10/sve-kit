@@ -357,6 +357,7 @@ pub(super) struct EachPlayer {
 pub(super) enum TokenCount {
     Fixed(u64),
     Receipt { count: TokenCollection },
+    Query { count: CountQuery },
 }
 
 #[derive(Deserialize)]
