@@ -1,0 +1,30 @@
+cards:
+  BP04-053:
+    abilities:
+      - keywords:
+          - intimidate
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - buff:
+                      hp: 1
+                      "on": this
+                      power: 2
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

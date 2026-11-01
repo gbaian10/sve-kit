@@ -1,0 +1,42 @@
+cards:
+  BP21-054:
+    abilities:
+      - keywords:
+          - stack
+        line: 1
+      - fanfare:
+          do:
+            - act:
+                ref: victim
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    "on": affected
+                    what: stand
+                "on": victim
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

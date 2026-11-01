@@ -1,0 +1,35 @@
+cards:
+  BP01-054:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - create:
+                      n: 2
+                      to: ex
+                      token: 防御型ゴーレム
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP01-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
