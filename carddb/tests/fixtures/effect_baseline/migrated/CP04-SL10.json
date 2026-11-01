@@ -1,0 +1,64 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 5
+      },
+      "event": "evolve",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "move",
+            "subjects": "target.1",
+            "to": "ex",
+            "bind": "moved"
+          },
+          {
+            "op": "adjust_cost",
+            "subjects": "moved",
+            "amount": -2,
+            "until": "end-of-turn"
+          }
+        ]
+      },
+      "event": "super_evolve",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "cemetery",
+            "type": "spell"
+          },
+          "min": 0,
+          "max": 2,
+          "distinct_by": "name"
+        }
+      ]
+    }
+  ]
+}
