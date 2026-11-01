@@ -1,0 +1,28 @@
+cards:
+  CP02-011:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    orig_cost_ge: 5
+                    who: self
+                    zone: field
+                then:
+                  - pp:
+                      delta: 1
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

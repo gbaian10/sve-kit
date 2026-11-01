@@ -1,0 +1,28 @@
+cards:
+  BP09-059:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  class: ドラゴン
+                  kind: spell
+                  orig_cost_eq: 2
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

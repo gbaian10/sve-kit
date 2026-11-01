@@ -1,0 +1,33 @@
+cards:
+  CP02-031:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -3
+            if:
+              exists:
+                kind: follower
+                orig_cost_eq: 1
+                who: self
+                zone: field
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - stand:
+                ref:
+                  kind: follower
+                  who: self
+                  zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
