@@ -1,469 +1,438 @@
-format: 1
-kind: effect_set
 cards:
   BP11-027:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: create
-          name: 機動二輪車
+      - body:
           count: 1
+          name: 機動二輪車
+          op: create
           to: field
         event: enter
-        subject: self
-      - line: 2
         kind: trigger
-        body:
+        line: 1
+        subject: self
+      - body:
+          amount: 2
           op: damage
           subjects: opponent.leader
-          amount: 2
         event: field_to_cemetery
-        subject: self
         keyword: last_words
-  BP11-035:
+        kind: trigger
+        line: 2
+        subject: self
     status: complete
+  BP11-035:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
         play_if:
           read: self.stats_increased_this_turn
-      - line: 2
-        kind: trigger
-        body:
+      - body:
+          max: 1
+          min: 0
           op: search
           select:
             side: self
-            zone: deck
             trait: 荒野
-          min: 0
-          max: 1
+            zone: deck
           to: cemetery
         event: enter
-        subject: self
-  BP11-036:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
+        line: 2
+        subject: self
+    status: complete
+  BP11-036:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: if
-              condition:
-                fn: ge
+            - condition:
                 args:
-                  - fn: distinct
-                    args:
+                  - args:
                       - read: self.cemetery.cost
+                    fn: distinct
                   - 3
+                fn: ge
+              op: if
               then:
+                hp: 3
                 op: modify
                 subjects: self.leader
-                hp: 3
-            - op: if
-              condition:
-                fn: ge
+            - condition:
                 args:
-                  - fn: distinct
-                    args:
+                  - args:
                       - read: self.cemetery.cost
+                    fn: distinct
                   - 6
-              then:
-                op: draw
-                count: 1
-            - op: if
-              condition:
                 fn: ge
-                args:
-                  - fn: distinct
-                    args:
-                      - read: self.cemetery.cost
-                  - 9
+              op: if
               then:
+                count: 1
+                op: draw
+            - condition:
+                args:
+                  - args:
+                      - read: self.cemetery.cost
+                    fn: distinct
+                  - 9
+                fn: ge
+              op: if
+              then:
+                amount: 9
                 op: damage
                 subjects:
                   side: opponent
-                  zone: field
                   type: follower
-                amount: 9
-            - op: if
-              condition:
-                fn: ge
+                  zone: field
+            - condition:
                 args:
-                  - fn: distinct
-                    args:
+                  - args:
                       - read: self.cemetery.cost
+                    fn: distinct
                   - 12
+                fn: ge
+              op: if
               then:
+                amount: 12
                 op: damage
                 subjects: opponent.leader
-                amount: 12
         event: evolve
+        kind: trigger
+        line: 1
         subject: self
-  BP11-041:
     status: complete
+  BP11-041:
     abilities:
-      - line: 1
-        kind: spell
-        body:
+      - body:
           op: seq
           steps:
             - op: modify
-              subjects: target.1
               remove_abilities: true
+              subjects: target.1
               until: end-of-turn
-            - op: if
-              condition:
-                fn: ge
+            - condition:
                 args:
-                  - fn: distinct
-                    args:
+                  - args:
                       - read: self.cemetery.cost
+                    fn: distinct
                   - 6
+                fn: ge
+              op: if
               then:
+                hp: 2
                 op: modify
                 subjects: self.leader
-                hp: 2
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  BP11-042:
+              zone: field
     status: complete
+  BP11-042:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: static
-        body:
-          op: macro
+          - amount: 2
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           name: rush
-      - line: 2
-        kind: static
-        body:
           op: macro
+        kind: static
+        line: 2
+      - body:
           name: bane
-      - line: 2
-        kind: static
-        body:
           op: macro
+        kind: static
+        line: 2
+      - body:
           name: drain
-      - line: 3
-        kind: activated
+          op: macro
+        kind: static
+        line: 2
+      - additional_costs:
+          - costs:
+              - count: 1
+                op: earth_rite
+            key: earth
         body:
-          op: if
           condition:
             read: paid.earth
+          op: if
           then:
-            op: choice
-            timing: resolve
             labels:
               - keyword: rush
               - keyword: bane
               - keyword: drain
-            min: 1
             max: 1
+            min: 1
             modes:
-              - op: modify
-                subjects: target.1
-                keywords:
+              - keywords:
                   - rush
-              - op: modify
+                op: modify
                 subjects: target.1
-                keywords:
+              - keywords:
                   - bane
-              - op: modify
+                op: modify
                 subjects: target.1
-                keywords:
+              - keywords:
                   - drain
+                op: modify
+                subjects: target.1
+            op: choice
+            timing: resolve
+        kind: activated
+        line: 3
         targets:
           - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              other: true
-            min: 1
             max: 1
-        additional_costs:
-          - key: earth
-            costs:
-              - op: earth_rite
-                count: 1
-  BP11-074:
+            min: 1
+            select:
+              other: true
+              side: self
+              type: follower
+              zone: field
     status: complete
+  BP11-074:
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: create
+      - body:
+          count: 1
           name:
             read: event.subject.name
-          count: 1
+          op: create
           to: field
         event: leave
-        subject:
-          side: self
-          zone: field
-          where:
-            fn: and
-            args:
-              - read: item.token
-              - fn: eq
-                args:
-                  - read: item.cost
-                  - 1
+        kind: trigger
         limit: 1
         limit_at: trigger
-      - line: 2
-        kind: trigger
-        body:
+        line: 1
+        subject:
+          side: self
+          where:
+            args:
+              - read: item.token
+              - args:
+                  - read: item.cost
+                  - 1
+                fn: eq
+            fn: and
+          zone: field
+      - body:
+          amount: 4
           op: damage
           subjects: target.1
-          amount: 4
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
+              other: true
               side: self
               zone: field
-              other: true
-            min: 1
-            max: 1
         costs:
           - op: move
             subjects: cost.1
             to: cemetery
-  BP11-075:
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
     status: complete
+  BP11-075:
     abilities:
-      - line: 1
-        kind: activated
+      - active_zones:
+          - cemetery
         body:
           op: act
           subjects: target.1
-        active_zones:
-          - cemetery
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
         cost_selections:
           - key: "1"
-            select:
-              zone: cemetery
-              side: self
-              name: カオスルーラー・アイシィレンドリング
-            min: 1
             max: 1
+            min: 1
+            select:
+              name: カオスルーラー・アイシィレンドリング
+              side: self
+              zone: cemetery
         costs:
           - op: banish
             subjects:
               union:
                 - self
                 - cost.1
-      - line: 1
-        kind: static
-        body:
-          op: macro
+        kind: activated
+        line: 1
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
+      - body:
           name: quick
+          op: macro
+        kind: static
+        line: 1
         section: 0
-      - line: 2
-        kind: spell
-        body:
-          op: modify
-          subjects: target.1
-          power: -2
+      - body:
           hp: -2
+          op: modify
+          power: -2
+          subjects: target.1
+        kind: spell
+        line: 2
         section: 0
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: field
               side: opponent
               type: follower
-            min: 1
-            max: 1
-  BP11-P29:
+              zone: field
     status: complete
+  BP11-P29:
     abilities:
-      - line: 1
-        kind: activated
-        body:
+      - body:
+          by: cost.1
           op: pilot
           subjects: self
-          by: cost.1
         cost_selections:
           - key: "1"
-            select:
-              zone: field
-              side: self
-              type: follower
-              name: ファントムデュオ・バニー＆バロン
-            min: 1
             max: 1
-        costs:
-          - op: act
-            subjects: cost.1
-      - line: 2
-        kind: activated
-        body:
-          op: pilot
-          subjects: self
-          by: cost.1
-        cost_selections:
-          - key: "1"
+            min: 1
             select:
-              zone: field
+              name: ファントムデュオ・バニー＆バロン
               side: self
               type: follower
-            min: 2
-            max: 2
+              zone: field
         costs:
-          - op: pp
-            amount: 1
           - op: act
             subjects: cost.1
-      - line: 3
-        kind: static
-        body:
-          op: macro
+        kind: activated
+        line: 1
+      - body:
+          by: cost.1
+          op: pilot
+          subjects: self
+        cost_selections:
+          - key: "1"
+            max: 2
+            min: 2
+            select:
+              side: self
+              type: follower
+              zone: field
+        costs:
+          - amount: 1
+            op: pp
+          - op: act
+            subjects: cost.1
+        kind: activated
+        line: 2
+      - body:
           name: storm
-      - line: 4
-        kind: trigger
-        body:
-          op: if
+          op: macro
+        kind: static
+        line: 3
+      - body:
           condition:
-            fn: gt
             args:
               - count:
-                  zone: field
-                  side: self
-                  type: follower
-                  trait: 荒野
                   other: true
+                  side: self
+                  trait: 荒野
+                  type: follower
+                  zone: field
               - 0
+            fn: gt
+          op: if
           then:
-            op: draw
             count: 1
+            op: draw
         event: attack
+        kind: trigger
+        line: 4
         subject: self
-  BP11-P30:
     status: complete
+  BP11-P30:
     abilities:
-      - line: 1
-        kind: activated
-        body:
+      - body:
+          by: cost.1
           op: pilot
           subjects: self
-          by: cost.1
-        play_if:
-          fn: ge
-          args:
-            - fn: sum
-              args:
-                - values: cost.1
-                  field: cost
-            - 5
         cost_selections:
           - key: "1"
+            max: 5
+            min: 0
             select:
               side: self
-              zone: field
               type: follower
-            min: 0
-            max: 5
+              zone: field
         costs:
-          - op: pp
-            amount: 1
+          - amount: 1
+            op: pp
           - op: act
             subjects: cost.1
-      - line: 2
-        kind: static
-        body:
-          op: macro
+        kind: activated
+        line: 1
+        play_if:
+          args:
+            - args:
+                - field: cost
+                  values: cost.1
+              fn: sum
+            - 5
+          fn: ge
+      - body:
           name: rush
-      - line: 3
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
             - op: destroy
               subjects: target.1
-            - op: modify
+            - hp: 2
+              op: modify
               subjects: self.leader
-              hp: 2
         event: attack
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
               where:
                 read: item.acted
-            min: 1
-            max: 1
-  BP11-P31:
-    status: complete
-    abilities:
-      - line: 1
-        kind: activated
-        body:
-          op: if
-          condition:
-            fn: gt
-            args:
-              - count:
-                  from: target.1
-                  trait: 荒野
-              - 0
-          then:
-            op: modify
-            subjects: target.1
-            power: 1
-            hp: 1
-        targets:
-          - key: "1"
-            select:
-              side: self
               zone: field
-              type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: move
-            subjects: self
-            to: cemetery
+    status: complete
+format: 1
+kind: effect_set

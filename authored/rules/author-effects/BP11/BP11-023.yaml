@@ -1,0 +1,46 @@
+cards:
+  BP11-023:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 従順な駿馬
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - act:
+                  n: 2
+                  sel:
+                    trait: 乗物
+                    who: self
+                    zone: field
+          do:
+            - damage:
+                n: 2
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token_sources:
+      - card: BP11-P31
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,41 @@
+cards:
+  BP06-065:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    in: victim
+                    name: 覇道の龍人・ガリュウ
+                else:
+                  - buff:
+                      hp: 1
+                      on: victim
+                      power: 1
+                then:
+                  - buff:
+                      hp: 2
+                      on: victim
+                      power: 2
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
