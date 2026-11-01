@@ -67,6 +67,7 @@ fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
     };
     let zone = match from {
         "hand" => Ok(ZoneKind::Hand),
+        "deck" => Ok(ZoneKind::Deck),
         "ex" => Ok(ZoneKind::Ex),
         "cemetery" => Ok(ZoneKind::Cemetery),
         "banish" => Ok(ZoneKind::Banish),

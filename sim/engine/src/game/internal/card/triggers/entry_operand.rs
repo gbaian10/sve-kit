@@ -114,7 +114,7 @@ pub(in crate::game::internal) fn mask_condition(
         match operation.as_mut() {
             Predicate::Equal { operands }
                 if matches!(operands.as_ref(), ValueEquality::EntryOrigin {
-                left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Hand }),
+                left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Hand | ZoneKind::Deck | ZoneKind::Cemetery }),
             } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { event: bound } if event.is_none_or(|event| event == *bound))) =>
             {
                 *condition = Expr::Literal(Bool(false));

@@ -545,7 +545,7 @@ impl Game {
             if object.generation != member.generation.0 {
                 continue;
             }
-            let ordinary = self.object_type(&object.id)? == "フォロワー"
+            let ordinary = matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット")
                 && matches!(object.zone.as_str(), "cemetery" | "ex");
             let private_look = object.zone == "deck"
                 && object.owner == seat
@@ -556,7 +556,7 @@ impl Game {
                     .get(seat)
                     .is_some_and(|knowledge| knowledge.located.contains(&object.id))
                 && execution.is_private_look_target(objects, member)
-                && self.object_type(&object.id)? == "フォロワー";
+                && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && matches!(object.zone.as_str(), "evolve_deck" | "ex");
             if !(ordinary || advance || private_look)
