@@ -1,0 +1,30 @@
+cards:
+  BP11-027:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 機動二輪車
+        line: 1
+      - lastword:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token_sources:
+      - card: BP11-P32
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

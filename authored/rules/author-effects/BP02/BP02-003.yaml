@@ -1,0 +1,45 @@
+cards:
+  BP02-003:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - lastword:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: エルフ
+                  in: seen
+                  kind: follower
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

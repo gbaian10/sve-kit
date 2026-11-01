@@ -1,0 +1,38 @@
+cards:
+  BP01-059:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
