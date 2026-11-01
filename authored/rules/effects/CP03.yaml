@@ -519,35 +519,3 @@ cards:
           name: ドライブポイント
           limit: 10
           zone: evolve_deck
-  CP03-P72:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: single_drive
-      - line: 3
-        kind: trigger
-        body:
-          op: move
-          subjects: target.1
-          to: deck
-          position: 3
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              zone: cemetery
-              side: self
-            min: 0
-            max: 1
