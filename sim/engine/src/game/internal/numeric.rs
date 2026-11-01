@@ -9,10 +9,10 @@ use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Action, Bool, CharacteristicPatch, CommitId, ContinuousLayer, Control, Duration, DurationEnd,
-    Effect, EffectId, EffectReference, EffectTarget, ExecutionId, ExecutionRef, Expr,
+    Effect, EffectId, EffectReference, EffectTarget, EventPayload, ExecutionId, ExecutionRef, Expr,
     InstallationSubjects, Instruction, Int, Interval, Node, NonEmpty, NumericChange, ObjectOperand,
-    ObjectRef, Program, RuntimeHolder, Selector, Stat, StatChangeEvent, StatChangeReason,
-    StatDelta, StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
+    ObjectRef, Program, RuntimeHolder, Selector, SnapshotId, Stat, StatChangeEvent,
+    StatChangeReason, StatDelta, StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use core::iter::once;
 use serde::{Deserialize, Serialize};
@@ -634,6 +634,7 @@ impl Game {
             });
             plans.push((id.to_owned(), subject, state, after, facets));
         }
+        let change_before = SnapshotId(self.state.ir_epoch);
         let installed = !plans.is_empty();
         if installed {
             self.state.next_ir_effect = self
@@ -648,6 +649,7 @@ impl Game {
                 .ok_or_else(|| invalid("numeric commit identities exhausted"))?;
         }
         let installed_subjects = plans.iter().map(|(_, subject, ..)| *subject).collect();
+        let mut changes = Vec::new();
         for (id, subject, state, after, facets) in plans {
             self.state.ir_numeric.insert(id.clone(), state);
             self.internal_numeric_cache(&id, after)?;
@@ -658,7 +660,7 @@ impl Game {
                 {
                     self.object_mut(&id)?.state["stats_increased_this_turn"] = json!(true);
                 }
-                execution.facts.push(Fact::StatChange(StatChangeFact {
+                let fact = StatChangeFact {
                     execution: execution.id,
                     effect,
                     event: StatChangeEvent {
@@ -668,9 +670,14 @@ impl Game {
                         commit: CommitId(self.state.ir_epoch),
                         instruction: Some(instruction.id),
                     },
-                }));
+                };
+                changes.push(EventPayload::StatChange {
+                    event: fact.event.clone(),
+                });
+                execution.facts.push(Fact::StatChange(fact));
             }
         }
+        self.internal_change_events(&changes, &execution.frame().cause, change_before)?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Modified {

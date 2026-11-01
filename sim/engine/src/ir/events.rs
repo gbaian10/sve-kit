@@ -1,4 +1,5 @@
 pub(crate) mod attack;
+pub(crate) mod change;
 pub(crate) mod damage;
 pub(crate) mod life;
 pub(crate) mod played;

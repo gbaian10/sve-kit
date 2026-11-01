@@ -5,13 +5,14 @@ use crate::ir::{
     DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventSnapshotPolicy, EvolveEvent,
     Expr, Info, KindFrozen, KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, ObjectFrozen,
     ObjectOperand, ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef,
-    Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind,
-    ZoneOperation,
+    PostureEvent, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen,
+    ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
 pub(crate) enum SubjectFields {
     Attack(Binding<AttackEvent>),
+    Posture(Binding<PostureEvent>),
     DamageSource(Binding<DamageEvent>),
     Played {
         event: Binding<PlayEvent>,
@@ -52,6 +53,7 @@ impl SubjectFields {
     fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
             Self::Attack(event) => ObjectFrozen::AttackAttacker { event },
+            Self::Posture(event) => ObjectFrozen::PostureObject { event },
             Self::DamageSource(event) => ObjectFrozen::SnapshotObject {
                 snapshot: Expr::Frozen(Box::new(SnapshotFields::DamageSource { event })),
             },
@@ -85,7 +87,7 @@ impl SubjectFields {
             }
             Self::Ex(event) => Expr::Frozen(Box::new(PlayerFrozen::EnterExController { event })),
             // Evolution keeps its field generation; the bridge tests this role at commit.
-            Self::Evolve(_) => Expr::Live(Box::new(PlayerRead::Role {
+            Self::Evolve(_) | Self::Posture(_) => Expr::Live(Box::new(PlayerRead::Role {
                 object: ObjectView::Current {
                     object: Box::new(ObjectOperand::FromExpression {
                         value: Box::new(self.object()),
@@ -97,6 +99,16 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Posture(_) => {
+                return Expr::Live(Box::new(KindRead::Kind {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::FromExpression {
+                            value: Box::new(self.object()),
+                        }),
+                    },
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Attack(event) => {
                 return Expr::Live(Box::new(KindRead::Kind {
                     object: attack_view(event),
@@ -139,6 +151,16 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Posture(_) => {
+                return Expr::Live(Box::new(TraitsRead::Traits {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::FromExpression {
+                            value: Box::new(self.object()),
+                        }),
+                    },
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Attack(event) => {
                 return Expr::Live(Box::new(TraitsRead::Traits {
                     object: attack_view(event),
@@ -181,6 +203,15 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Posture(_) => {
+                return Expr::Live(Box::new(NamesRead::Names {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::FromExpression {
+                            value: Box::new(self.object()),
+                        }),
+                    },
+                }));
+            }
             Self::Attack(event) => {
                 return Expr::Live(Box::new(NamesRead::Names {
                     object: attack_view(event),
@@ -221,6 +252,16 @@ impl SubjectFields {
     }
     fn class(self) -> Expr<Info<ClassId>> {
         let field = match self {
+            Self::Posture(_) => {
+                return Expr::Live(Box::new(ClassRead::Class {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::FromExpression {
+                            value: Box::new(self.object()),
+                        }),
+                    },
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Attack(event) => {
                 return Expr::Live(Box::new(ClassRead::Class {
                     object: attack_view(event),
@@ -278,7 +319,7 @@ impl SubjectFields {
                     }))),
                 }
             }
-            Self::Entry(_) => ObjectView::Current {
+            Self::Entry(_) | Self::Posture(_) => ObjectView::Current {
                 object: Box::new(ObjectOperand::FromExpression {
                     value: Box::new(self.object()),
                 }),
@@ -296,7 +337,8 @@ impl SubjectFields {
             Self::Cemetery(_) | Self::Hand(_) | Self::Leave(_) | Self::Destroy(_) => {
                 EventSnapshotPolicy::BeforeExit
             }
-            Self::Attack(_)
+            Self::Posture(_)
+            | Self::Attack(_)
             | Self::DamageSource(_)
             | Self::Entry(_)
             | Self::Evolve(_)

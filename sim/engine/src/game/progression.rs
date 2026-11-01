@@ -7,7 +7,7 @@ use serde_json::{Value, json};
 
 use super::costs::CostKind;
 use super::{Frame, Game, int, list, scalar, string};
-use crate::ir::Ability;
+use crate::ir::{Ability, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -357,8 +357,10 @@ impl Game {
         }
         // Base replacement is not a stat-change event; only super evolution's explicit +1/+1 counts.
         let previous = self.object(source)?.clone();
+        let stat_before = SnapshotId(self.state.ir_epoch);
         if sep > 0 {
             self.numeric_add_base(source, sep, sep)?;
+            self.internal_super_stat_event(&previous, &evolution_cause, stat_before)?;
         }
         self.bump(
             &format!("{}.evolutions", self.object(source)?.controller),
