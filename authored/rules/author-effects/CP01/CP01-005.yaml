@@ -1,0 +1,39 @@
+cards:
+  CP01-005:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          keyword: storm
+                          kind: follower
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - buff:
+                        hp: 0
+                        on: ally
+                        power: 3
+          targets:
+            - bind: ally
+              from:
+                keyword: storm
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

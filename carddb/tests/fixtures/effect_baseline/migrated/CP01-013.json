@@ -1,0 +1,48 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "meal",
+      "body": {
+        "op": "race",
+        "subjects": "self",
+        "count": 1
+      },
+      "costs": [
+        {
+          "op": "eat",
+          "subjects": "self",
+          "count": 1
+        },
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "modify",
+            "subjects": "self",
+            "power": 1,
+            "hp": 1
+          },
+          {
+            "op": "replace_damage",
+            "subjects": "self",
+            "prevent": true,
+            "until": "end-of-turn"
+          }
+        ]
+      },
+      "event": "race",
+      "subject": "self"
+    }
+  ]
+}
