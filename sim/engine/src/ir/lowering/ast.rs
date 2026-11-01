@@ -1598,6 +1598,8 @@ pub(super) struct EntryOriginCondition {
 #[serde(rename_all = "snake_case")]
 pub(super) enum EntryOriginZone {
     Hand,
+    Deck,
+    Cemetery,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

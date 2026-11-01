@@ -121,6 +121,9 @@ mod second;
 #[path = "card/entry.rs"]
 mod entry;
 
+#[path = "card/entry_origin.rs"]
+mod entry_origin;
+
 #[path = "card/entry_method.rs"]
 mod entry_method;
 

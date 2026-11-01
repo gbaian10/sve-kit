@@ -226,6 +226,8 @@ impl BodyContext<'_> {
                 right: Expr::Literal(super::super::EntryOrigin::Zone {
                     zone: match condition.zone {
                         ast::EntryOriginZone::Hand => ZoneKind::Hand,
+                        ast::EntryOriginZone::Deck => ZoneKind::Deck,
+                        ast::EntryOriginZone::Cemetery => ZoneKind::Cemetery,
                     },
                 }),
             }),
