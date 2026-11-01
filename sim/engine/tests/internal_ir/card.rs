@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/event_combat_life.rs"]
+mod event_combat_life;
 use second::lowerer;
 
 #[path = "card/static_keywords.rs"]

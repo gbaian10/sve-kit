@@ -1,3 +1,6 @@
+pub(crate) mod attack;
+pub(crate) mod damage;
+pub(crate) mod life;
 pub(crate) mod played;
 pub(crate) mod subject;
 pub(crate) mod timing;

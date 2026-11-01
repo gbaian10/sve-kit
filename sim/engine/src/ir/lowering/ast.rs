@@ -1199,6 +1199,12 @@ pub(super) enum PhaseSubscription {
     PlacedEx(ExSubscription),
     #[serde(rename = "damaged")]
     Damage(DamageSubscription),
+    #[serde(rename = "attacked")]
+    Attacked(AttackSubscription),
+    #[serde(rename = "dealt_damage")]
+    Dealt(DealtSubscription),
+    #[serde(rename = "life_changed")]
+    LifeChanged(LifeSubscription),
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -1527,12 +1533,16 @@ pub(super) struct LeaveSubscription {
 #[serde(deny_unknown_fields)]
 pub(super) struct DamageSubscription {
     #[serde(rename = "recipient")]
-    pub _recipient: This,
+    pub recipient: Option<DamageRecipientSubscription>,
     pub kind: Option<AbilityDamage>,
     pub during: Option<DamageDuring>,
 }
 #[derive(Deserialize)]
 pub(super) enum AbilityDamage {
+    #[serde(rename = "attack")]
+    Attack,
+    #[serde(rename = "combat")]
+    Combat,
     #[serde(rename = "ability")]
     Ability,
 }
@@ -1786,4 +1796,78 @@ pub(super) struct DamageCap {
     pub on: Option<Recipients>,
     pub threshold: u64,
     pub set: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackSubscription {
+    pub who: Option<EntryPlayer>,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<AttackSubject>,
+    pub during: Option<DamageDuring>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackSubject {
+    pub class: Option<String>,
+    pub kind: Option<SearchKind>,
+    #[serde(rename = "trait")]
+    pub trait_id: Option<String>,
+    pub name: Option<String>,
+    pub token: Option<bool>,
+    pub not_token: Option<bool>,
+    pub other: Option<bool>,
+    pub keyword: Option<String>,
+    #[serde(rename = "as")]
+    pub alias: Option<String>,
+    pub r#where: Option<AttackCondition>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AttackCondition {
+    Cmp(SearchPowerComparison),
+    Any(Vec<Self>),
+    All(Vec<Self>),
+    Exists(SubjectKeyword),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SubjectKeyword {
+    pub r#in: String,
+    pub keyword: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DealtSubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<MovementSubject>,
+    pub recipient: Option<DamageRecipientSubscription>,
+    pub kind: Option<AbilityDamage>,
+    pub during: Option<DamageDuring>,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DamageRecipientSubscription {
+    Source(This),
+    Leader { leader: EntryPlayer },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct LifeSubscription {
+    pub who: Option<EntryPlayer>,
+    pub direction: Option<LifeDirection>,
+    pub during: Option<DamageDuring>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum LifeDirection {
+    Up,
+    Down,
 }

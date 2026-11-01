@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 use super::{Frame, Game, Object, Pending, int, list, other, string};
+use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 use core::mem::take;
 use serde_json::{Value, json};
@@ -16,6 +17,8 @@ impl Game {
         &mut self,
         changes: &[(String, i64, i64)],
         cause: &Value,
+        battle: bool,
+        snapshot: SnapshotId,
     ) -> Result<()> {
         let mut pending = Vec::new();
         for (seat, before, after) in changes {
@@ -30,6 +33,7 @@ impl Game {
                 &json!({"before_life":before,"after_life":after}),
             )?);
         }
+        self.internal_life_change_events(changes, cause, battle, snapshot)?;
         self.enqueue(pending);
         Ok(())
     }

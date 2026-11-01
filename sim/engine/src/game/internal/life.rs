@@ -2,7 +2,9 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
-use crate::ir::{Action, Instruction, Int, LifeChangeEvent, NumericChange, Quantity, QuantityUnit};
+use crate::ir::{
+    Action, Instruction, Int, LifeChangeEvent, NumericChange, Quantity, QuantityUnit, SnapshotId,
+};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -67,11 +69,14 @@ impl Game {
             after: Int(after),
             delta: Int(delta),
         };
+        let life_before = SnapshotId(self.state.ir_epoch);
         if delta != 0 {
             self.change_life(seat, after)?;
             self.life_change_triggers(
                 &[(seat.to_owned(), before, after)],
                 &execution.frame().cause,
+                false,
+                life_before,
             )?;
             execution.facts.push(Fact::LifeChange(outcome));
         }

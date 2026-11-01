@@ -814,6 +814,7 @@ impl Game {
         }
         let subjects = self.select(&node["subjects"], frame)?;
         let group = self.group();
+        let life_before = SnapshotId(self.state.ir_epoch);
         let mut life_changes = Vec::new();
         let mut previous = Vec::new();
         for id in subjects {
@@ -861,7 +862,7 @@ impl Game {
         }
         let pending = self.stat_change_triggers(&previous, &frame.cause)?;
         self.enqueue(pending);
-        self.life_change_triggers(&life_changes, &frame.cause)?;
+        self.life_change_triggers(&life_changes, &frame.cause, false, life_before)?;
         Ok(())
     }
 
