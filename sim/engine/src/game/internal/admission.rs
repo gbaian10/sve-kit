@@ -3,15 +3,15 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::PlayerStage;
-use crate::ir::effect_evolution;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, Disjointness, EnterFieldEvent,
     KeywordId, MemberProjection, Nat, ObjectReceipt, PlayerRef, PlayerRelation, Requirement,
     Selector,
 };
-use crate::ir::{Action, DamageAmount, IntFrozen, IntOperation, Predicate};
+use crate::ir::{Action, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
+use crate::ir::{effect_evolution, prevention};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
@@ -82,6 +82,38 @@ fn check_body(
     check_program(program, source, origin.is_some())
 }
 
+fn keyword_source_paths(
+    action: &Action,
+    path: &str,
+    origin: &AbilitySource,
+    paths: &mut BTreeSet<String>,
+) {
+    if !matches!(
+        origin.origin,
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Fanfare
+                | KeywordId::Lastword
+                | KeywordId::OnAttack
+                | KeywordId::OnEvolve
+                | KeywordId::OnSuperEvolve
+                | KeywordId::OnRace
+                | KeywordId::Quick,
+            ..
+        }
+    ) {
+        return;
+    }
+    paths.insert(format!("{path}/instruction/source/origin"));
+    paths.insert(format!("{path}/instruction/source/origin/keyword"));
+    if let Action::InstallEffect { effect, .. } = action
+        && prevention::projection(effect).is_some_and(|shape| shape.source == origin)
+    {
+        let prefix = format!("{path}/instruction/action/effect/source/origin");
+        paths.insert(prefix.clone());
+        paths.insert(format!("{prefix}/keyword"));
+    }
+}
+
 fn source_paths(
     program: &Program,
     path: &str,
@@ -102,22 +134,7 @@ fn source_paths(
                 if super::movement::advance_entry(&instruction.action) {
                     paths.insert(format!("{path}/instruction/action/objects/zone"));
                 }
-                if matches!(
-                    origin.origin,
-                    AbilityOrigin::Keyword {
-                        keyword: KeywordId::Fanfare
-                            | KeywordId::Lastword
-                            | KeywordId::OnAttack
-                            | KeywordId::OnEvolve
-                            | KeywordId::OnSuperEvolve
-                            | KeywordId::OnRace
-                            | KeywordId::Quick,
-                        ..
-                    }
-                ) {
-                    paths.insert(format!("{path}/instruction/source/origin"));
-                    paths.insert(format!("{path}/instruction/source/origin/keyword"));
-                }
+                keyword_source_paths(&instruction.action, &path, origin, paths);
             }
             Node::Control {
                 control:
@@ -207,6 +224,7 @@ fn check_requirements(
                     || super::tokens::requirement(requirement, &token_paths)
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
+                    || super::card::prevention::requirement(&requirements, requirement)
                     || entry_field_requirement(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
@@ -292,7 +310,12 @@ fn play_requirement(code: &str) -> bool {
     )
 }
 
-fn check_action(action: &Action) -> Result<()> {
+fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
+    if let Action::InstallEffect { effect, .. } = action
+        && matches!(effect.as_ref(), Effect::Replacement { .. })
+    {
+        return super::card::prevention::check_install(action, source);
+    }
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
     super::movement::check_action(action)?;
@@ -355,7 +378,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 }
             }
             Node::Instruction { instruction } => {
-                check_action(&instruction.action)?;
+                check_action(&instruction.action, &instruction.source)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {

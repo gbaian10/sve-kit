@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
+use crate::ir::prevention;
 use crate::ir::{
     ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, Duration,
     DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects,
@@ -88,6 +89,11 @@ impl Checker {
             reference: affected,
         };
         match effect {
+            Effect::Replacement {
+                duration: inner, ..
+            } if inner == duration && prevention::projection(effect).is_some() => {
+                self.installed_prevention(effect, &targets)
+            }
             Effect::CostModifier {
                 subjects,
                 change,

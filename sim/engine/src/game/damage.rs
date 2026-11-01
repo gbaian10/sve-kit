@@ -40,7 +40,10 @@ impl Game {
             }
             let replacements = self.damage_replacements(hit, &consumed)?;
             // Replacement amounts use saturating legacy arithmetic.
-            self.numeric_prototype_operand(id, replacements.is_empty())?;
+            self.numeric_prototype_operand(
+                id,
+                replacements.iter().all(|replacement| replacement.prevent),
+            )?;
             let mut ordered = replacements.clone();
             if replacements.len() > 1
                 && node["orders"][&order_key].is_null()
@@ -192,7 +195,19 @@ impl Game {
         hit: &Value,
         consumed: &BTreeMap<usize, i64>,
     ) -> Result<Vec<DamageReplacement>> {
-        let mut result = Vec::new();
+        let mut result = self
+            .internal_prevention_references(hit)?
+            .into_iter()
+            .map(|reference| DamageReplacement {
+                reference,
+                active: true,
+                depends_on_amount: false,
+                delta: 0,
+                set: None,
+                prevent: true,
+                consumption: None,
+            })
+            .collect::<Vec<_>>();
         for source in self.ability_sources("damage replacement")? {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];

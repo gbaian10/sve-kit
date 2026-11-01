@@ -279,7 +279,7 @@ impl Game {
                 for id in &targets {
                     self.numeric_prototype_operand(id, node["amount"].is_i64())?;
                 }
-                let hits=targets.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
+                let hits=targets.iter().map(|id|json!({"source":frame.source,"source_generation":frame.source_generation,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
                 Self::prepend(
                     frame,
                     vec![json!({"op":"_damage","hits":hits,"orders":{},"bind":node["bind"]})],

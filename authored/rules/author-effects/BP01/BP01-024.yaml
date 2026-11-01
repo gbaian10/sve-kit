@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-024:
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - apply:
+                "on": enemy
+                effect:
+                  cannot:
+                    what: deal_damage
+                    "on": affected
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-10-31"

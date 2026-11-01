@@ -573,3 +573,33 @@ look 缺牌仍按有限次嘗試處理是專案的保守結構解讀（inferred�
 完整 executor 必須在 Perform 處完成單張操作及資訊
 投影，再開下一個回答。合成測試以 BP01-007／BP01-065、BP07-SL09 的動作為種子；up-to
 本身是 CR5.10.3／5.11.2 的 rule-only 形狀，不冒稱這些卡印有 up-to。
+
+## 傷害防止的封閉投影
+
+`static.effects.prevent` 沿用 `Effect::Replacement`、`ProposedEventPattern::Damage`
+與 `EventRewrite::PreventDamage`。只接受 field 上普通靜態能力，來源與能力一致；
+條件、受傷者與傷害來源集合於 proposed hit 評估時讀取。來源離場或能力被消除後不再提供防止。
+`kind` 區分所有傷害、從者之間的交戰傷害與能力傷害；對領袖的攻擊不是交戰傷害。
+目前傷害管線以 `battle` 標記區分攻擊與能力來源，所有非 `battle` hit 均視為能力傷害；
+若引入第三種傷害來源，必須先擴充此分類，不能沿用非 `battle` 的判斷。
+
+受傷者 predicate 的 binder 僅包裝 `RecipientIsFollower`／`RecipientIsLeader`；
+來源 predicate 僅包裝同一 binder 的 `MemberOf`。事件 binder 的 scope 必須新鮮，
+不能當一般物件集合或玩家值使用。`affected_player` 使用封閉的
+`PlayerRef::ProposedDamageRecipient`，只指本次 proposed hit 的受傷領袖或從者控制者；
+一般 instruction、條件與玩家集合不得讀取這個 resolver。
+
+`apply.effect.prevent` 與 `apply.effect.cannot.deal_damage` 捕捉當下非空的 affected
+物件集合與各自世代，分別限制受傷者或傷害來源。只接受同一安裝的來源、真條件、
+matching duration 與 affected binder；安裝空集合不分配效果身分。
+本回合、下一個指定玩家的回合結束、結算結束與無時限均沿既有 duration 狀態處理。
+來源傷害資訊必須保留世代；無法確定世代時不得以目前的新世代猜測舊來源。
+
+正式能力傷害與既有交戰結算共用防止匹配。純防止可以與數值持續效果並存；
+沒有擴充舊式改變傷害量的算術支援。被防止的傷害不產生 DamageEvent、實際傷害額度、
+生命下降或受傷觸發，也不提供破壞免疫。交戰路徑的重疊取代效果沿既有受影響玩家選序程序；
+每個靜態效果引用含來源世代與 definition id。正式能力路徑僅准入無使用額度的純防止，
+被防止者的實際傷害為零，不因此開放舊式傷害量改寫。
+
+這個投影不准入 `next_only:true`、有限使用次數、傷害量改寫或任意 rewrite predicate。
+`next_only` 的消耗時點仍依作者效果契約保留待裁定；不從「下一次」自行推定消耗規則。

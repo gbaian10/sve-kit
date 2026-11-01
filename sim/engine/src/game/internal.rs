@@ -60,6 +60,7 @@ mod source;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
+pub(super) use card::prevention::PreventionState;
 pub use card::quick::QuickOption;
 pub use card::{
     Activation, CardEntry, CardPlay, PendingOption, QuotaDomain, QuotaSelection, ResumeStage,
@@ -289,7 +290,7 @@ pub enum InstructionOutcome {
     Move(MoveOutcome),
     /// Destruction successes and every attempted movement.
     Destroy(DestroyOutcome),
-    /// Fixed generations protected until this resolution ends.
+    /// Fixed generations receiving an installed effect.
     Installed(Vec<ObjectRef>),
     /// Fixed generations receiving basic printed keywords.
     Granted(Vec<ObjectRef>),
@@ -1085,6 +1086,7 @@ impl Game {
                 self.internal_spell_cleanup(execution)?;
                 self.internal_numeric_cleanup()?;
                 self.internal_numeric_end_resolution(execution.id)?;
+                self.internal_preventions_end_resolution(execution.id);
                 if execution.spell {
                     let group = self.group();
                     self.emit(
@@ -1362,11 +1364,15 @@ impl Game {
                         }
                     };
                     if let Ok(positive) = NonZeroU64::try_from(share.amount.0) {
+                        let hit = json!({"source":source_id,"source_generation":source.object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false});
+                        if !self.internal_prevention_references(&hit)?.is_empty() {
+                            continue;
+                        }
                         self.internal_damage_arithmetic(&target, amount)?;
                         actual = actual
                             .checked_add(positive.get())
                             .ok_or_else(|| invalid("damage outcome overflow"))?;
-                        hits.push(json!({"source":source_id,"target":target,"amount":amount,"battle":false,"attack":false}));
+                        hits.push(hit);
                         facts.push(DamageEvent {
                             source,
                             recipient,
@@ -1422,6 +1428,11 @@ impl Game {
                 ) =>
             {
                 self.internal_install_no_stand(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(effect.as_ref(), Effect::Replacement { .. }) =>
+            {
+                self.internal_install_prevention(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {
@@ -1511,6 +1522,7 @@ impl Execution {
     fn frame(&self) -> Frame {
         Frame {
             source: self.context.source.clone(),
+            source_generation: Some(self.context.generation.0),
             controller: seat_name(self.context.controller)
                 .unwrap_or_default()
                 .to_owned(),

@@ -20,6 +20,7 @@ mod ordering;
 mod payment;
 mod play;
 mod play_restrictions;
+mod prevention;
 mod static_keywords;
 
 mod posture;
@@ -377,14 +378,13 @@ impl Allocator {
         index: usize,
         abilities: &mut Vec<Located<Ability>>,
     ) -> Result<bool, LoweringError> {
-        if entry.r#static.is_some() {
-            abilities.push(static_keywords::lower(
-                self,
-                key,
-                path,
-                entry,
-                entry_scope(index, path)?,
-            )?);
+        if let Some(declaration) = &entry.r#static {
+            let lower = match declaration.effects.first() {
+                Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
+                Some(ast::StaticEffect::Prevent(_)) => prevention::lower,
+                None => return Err(unsupported(path)),
+            };
+            abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
             return Ok(true);
         }
         if let Some(play) = &entry.play {

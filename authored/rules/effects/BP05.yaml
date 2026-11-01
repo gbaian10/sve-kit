@@ -183,26 +183,6 @@ cards:
               fn: le
           fn: and
     status: complete
-  BP05-108:
-    abilities:
-      - body:
-          kind: effect
-          op: replace_damage
-          prevent: true
-          subjects: self.leader
-        kind: static
-        line: 1
-      - body:
-          amount: 2
-          op: damage
-          subjects: opponent.leader
-        costs:
-          - op: act
-            subjects: self
-        kind: activated
-        line: 2
-        quick: true
-    status: complete
   BP05-SL12:
     abilities:
       - body:

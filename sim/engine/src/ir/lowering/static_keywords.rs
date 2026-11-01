@@ -35,7 +35,9 @@ pub(super) fn lower(
         .transpose()?;
     let mut declarations = Vec::new();
     for effect in &head.effects {
-        let ast::StaticEffect::Grant(grant) = effect;
+        let ast::StaticEffect::Grant(grant) = effect else {
+            return Err(unsupported(path));
+        };
         if grant.keywords.is_empty() {
             return Err(unsupported(path));
         }

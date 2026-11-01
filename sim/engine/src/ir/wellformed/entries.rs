@@ -2,6 +2,7 @@ use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFor
 use crate::ir::OncePerEvent;
 use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
+use crate::ir::prevention;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
@@ -512,6 +513,9 @@ impl Checker {
                     TimestampBasis::ProperPlay { .. } => return self.reject(),
                 }
                 self.duration(duration)
+            }
+            Effect::Replacement { .. } if prevention::projection(effect).is_some() => {
+                self.prevention(effect, ability_zones)
             }
             Effect::Replacement {
                 id,

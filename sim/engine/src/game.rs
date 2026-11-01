@@ -139,6 +139,8 @@ struct TriggerAlternative {
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 struct Frame {
     source: String,
+    #[serde(default)]
+    source_generation: Option<u64>,
     controller: String,
     #[serde(default)]
     event: Value,
@@ -227,6 +229,8 @@ struct State {
     ir_no_stand: Vec<internal::StandLock>,
     #[serde(default)]
     ir_no_leader_attack: BTreeMap<String, internal::LeaderAttackLock>,
+    #[serde(default)]
+    ir_preventions: Vec<internal::PreventionState>,
     #[serde(default)]
     next_ir_effect: u64,
     #[serde(default)]
@@ -473,6 +477,7 @@ impl Game {
             ir_cost: BTreeMap::new(),
             ir_no_stand: Vec::new(),
             ir_no_leader_attack: BTreeMap::new(),
+            ir_preventions: Vec::new(),
             next_ir_effect: 0,
             ir_play_clock: 0,
         };
@@ -899,6 +904,7 @@ impl Game {
     fn frame_for(&self, id: &str) -> Result<Frame> {
         Ok(Frame {
             source: id.into(),
+            source_generation: Some(self.object(id)?.generation),
             controller: self.object(id)?.controller.clone(),
             ..Frame::default()
         })
