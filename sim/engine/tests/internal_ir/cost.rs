@@ -73,6 +73,7 @@ pub(super) fn reduce(id: u64, moved: MovementReceipt) -> Located<Node> {
             },
             capture: InstallationTime::InstructionStart,
             effect: Box::new(Effect::CostModifier {
+                kind: CostKind::Play,
                 subjects: Selector::Bound {
                     reference: affected,
                 },

@@ -585,7 +585,11 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
     );
     if let Node::Instruction { instruction } = &mut reduction.node
         && let Action::InstallEffect { effect, .. } = &mut instruction.action
-        && let Effect::CostModifier { change, .. } = effect.as_mut()
+        && let Effect::CostModifier {
+            kind: CostKind::Play,
+            change,
+            ..
+        } = effect.as_mut()
     {
         *change = CostChange::Delta {
             amount: Expr::Literal(Int(-1)),

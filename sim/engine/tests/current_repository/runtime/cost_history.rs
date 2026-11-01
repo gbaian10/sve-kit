@@ -249,6 +249,7 @@ fn created_bound_cost_modifiers_reduce_actual_amulet_token_payment() {
         },
         capture: InstallationTime::InstructionStart,
         effect: Box::new(Effect::CostModifier {
+            kind: CostKind::Play,
             subjects: Selector::Bound {
                 reference: affected,
             },

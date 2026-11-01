@@ -48,6 +48,7 @@ fn buff() -> Effect {
 
 fn discount() -> Effect {
     Effect::CostModifier {
+        kind: CostKind::Play,
         subjects: affected(),
         change: CostChange::Delta {
             amount: Expr::Literal(Int(-1)),
@@ -104,7 +105,9 @@ fn installed_for(mut effect: Effect, duration: Duration) -> Located<Node> {
         duration: inner, ..
     }
     | Effect::CostModifier {
-        duration: inner, ..
+        kind: CostKind::Play,
+        duration: inner,
+        ..
     } = &mut effect
     {
         *inner = duration.clone();

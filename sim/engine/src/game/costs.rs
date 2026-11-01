@@ -8,15 +8,11 @@ use serde_json::{Value, json};
 use super::{Frame, Game, int, list, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(super) enum CostKind {
-    Play,
-    Evolve,
-}
+pub(super) use crate::ir::CostKind;
 
 impl CostKind {
     fn matches(self, effect: &Value) -> bool {
-        (effect["kind"] == "evolve") == (self == Self::Evolve)
+        (effect["kind"] == "evolve") == (self == Self::Evolution)
     }
 }
 

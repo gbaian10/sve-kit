@@ -234,6 +234,7 @@ fn cp04(follow_moved: bool, set: bool) -> Located<CardProgram> {
             subjects: InstallationSubjects::Objects { objects, affected },
             capture: InstallationTime::InstructionStart,
             effect: Box::new(Effect::CostModifier {
+                kind: CostKind::Play,
                 subjects: Selector::Bound {
                     reference: affected,
                 },
@@ -466,6 +467,7 @@ fn static_declarations_and_play_costs_are_not_omitted() {
     let mut seed = card(program(vec![]), "synthetic");
     for ability in &mut seed.node.abilities {
         ability.node.declarations.push(Effect::CostModifier {
+            kind: CostKind::Play,
             subjects: Selector::Objects { objects: vec![] },
             change: CostChange::Set {
                 amount: Expr::Literal(Int(0)),

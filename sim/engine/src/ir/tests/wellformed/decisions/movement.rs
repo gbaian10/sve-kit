@@ -83,6 +83,7 @@ fn install(id: u64, objects: Selector) -> Located<Node> {
             subjects: InstallationSubjects::Objects { objects, affected },
             capture: InstallationTime::InstructionStart,
             effect: Box::new(Effect::CostModifier {
+                kind: CostKind::Play,
                 subjects: Selector::Bound {
                     reference: affected,
                 },
@@ -562,7 +563,11 @@ fn bp18_remainder_subtracts_successful_before_members_and_discount_uses_after() 
     let mut discount = install(4, after(moved(2)));
     discount.source = source("BP18-059");
     if let Action::InstallEffect { effect, .. } = action(&mut discount)
-        && let Effect::CostModifier { change, .. } = effect.as_mut()
+        && let Effect::CostModifier {
+            kind: CostKind::Play,
+            change,
+            ..
+        } = effect.as_mut()
     {
         *change = CostChange::Delta {
             amount: Expr::Literal(Int(-3)),

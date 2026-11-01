@@ -271,7 +271,11 @@ fn installed_cost_set_accepts_nonnegative_values_and_defined_selection() {
     for amount in [0, 3] {
         let mut step = install(1, objects());
         if let Action::InstallEffect { effect, .. } = action(&mut step)
-            && let Effect::CostModifier { change, .. } = effect.as_mut()
+            && let Effect::CostModifier {
+                kind: CostKind::Play,
+                change,
+                ..
+            } = effect.as_mut()
         {
             *change = CostChange::Set {
                 amount: Expr::Literal(Int(amount)),

@@ -65,7 +65,7 @@ pub(super) fn position(
     position_with_decks(seat, base, form, false)
 }
 
-fn position_with_decks(
+pub(super) fn position_with_decks(
     seat: u32,
     base: &WellFormedCardProgram,
     form: &WellFormedCardProgram,

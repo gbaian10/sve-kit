@@ -244,6 +244,9 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::Prevent(_) => {
                 return self.prevent_apply(installation, source, path);
             }
+            ast::InstalledEffect::EvolveCostMod(_) => {
+                return self.evolution_discount(installation, path);
+            }
             ast::InstalledEffect::Stat(_) | ast::InstalledEffect::CostMod(_) => {}
         }
         let ast::InstalledEffect::Stat(statistics) = &installation.effect else {
