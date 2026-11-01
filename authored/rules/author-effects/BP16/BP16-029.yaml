@@ -1,0 +1,54 @@
+cards:
+  BP16-029:
+    abilities:
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: シールドガーディアン
+                  - - create:
+                        n: 1
+                        to: field
+                        token: ナイト
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - draw:
+                n: 1
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                distinct_names:
+                  kind: follower
+                  token: true
+                  trait: 兵士
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

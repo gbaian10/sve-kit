@@ -1,0 +1,44 @@
+cards:
+  BP16-034:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token:
+                  - スティールナイト
+                  - シールドガーディアン
+        line: 2
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - life:
+                delta: 2
+                who: self
+          per_turn: 1
+          usable_if:
+            cmp:
+              left:
+                distinct_names:
+                  kind: follower
+                  token: true
+                  trait: 兵士
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
