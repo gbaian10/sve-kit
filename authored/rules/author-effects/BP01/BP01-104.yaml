@@ -1,0 +1,46 @@
+cards:
+  BP01-104:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              crimson: true
+      - line: 2
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              cmp:
+                left:
+                  count:
+                    who: self
+                    zone: cemetery
+                op: ge
+                right: 10
+      - keywords:
+          - bane
+        line: 3
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - destroy: picked
+          targets:
+            - bind: picked
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

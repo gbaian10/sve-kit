@@ -1,0 +1,27 @@
+cards:
+  BP01-132:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: picked
+                result: returned
+                to: field
+          targets:
+            - bind: picked
+              from:
+                cost_le: 5
+                kind: amulet
+                who: self
+                zone: cemetery
+              upto: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
