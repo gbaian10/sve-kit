@@ -211,7 +211,7 @@ const fn self_player(player: PlayerRef) -> PlayerSet {
     reason = "Entry checks share the structural checker state."
 )]
 impl Checker {
-    fn ability(&mut self, ability: &Ability) -> Checked {
+    pub(super) fn ability(&mut self, ability: &Ability) -> Checked {
         let previous_payment = self.card_payment_body.take();
         let previous_env = self.env.clone();
         let previous_root = self.root;

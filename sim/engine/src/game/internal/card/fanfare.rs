@@ -140,7 +140,7 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn internal_card_source(
+    pub(in crate::game::internal) fn internal_card_source(
         &mut self,
         holder: &str,
         definition: AbilityId,

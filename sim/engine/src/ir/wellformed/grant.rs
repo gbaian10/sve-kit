@@ -16,21 +16,6 @@ impl Checker {
         provider: &TextProvider,
     ) -> Checked {
         if abilities.is_empty()
-            || abilities.iter().any(|ability| {
-                !matches!(
-                    ability,
-                    GrantedAbility::Keyword {
-                        keyword: KeywordId::Ward
-                            | KeywordId::Aura
-                            | KeywordId::Storm
-                            | KeywordId::Rush
-                            | KeywordId::Bane
-                            | KeywordId::Drain
-                            | KeywordId::Intimidate
-                            | KeywordId::Assail
-                    }
-                )
-            })
             || duration.anchor != (TimeAnchor::Installation {})
             || duration.usage.is_some()
             || !duration.intervals.is_empty()
@@ -43,6 +28,23 @@ impl Checker {
             || !matches!(&provider.provider, ObjectView::Current { object } if object.as_ref() == &ObjectOperand::SourceHolder {})
         {
             return self.reject();
+        }
+        for ability in abilities {
+            match ability {
+                GrantedAbility::Definition { ability } => self.ability(ability)?,
+                GrantedAbility::Keyword {
+                    keyword:
+                        KeywordId::Ward
+                        | KeywordId::Aura
+                        | KeywordId::Storm
+                        | KeywordId::Rush
+                        | KeywordId::Bane
+                        | KeywordId::Drain
+                        | KeywordId::Intimidate
+                        | KeywordId::Assail,
+                } => {}
+                GrantedAbility::Keyword { .. } => return self.reject(),
+            }
         }
         self.view(&provider.provider)?;
         self.selector(subjects)

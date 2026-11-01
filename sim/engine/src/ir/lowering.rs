@@ -430,6 +430,17 @@ impl Allocator {
         Ok(self.next)
     }
 
+    fn granted_scope(&mut self, path: &str) -> Result<ScopeId, LoweringError> {
+        // Each entry reserves three scopes for its body and formal choices.
+        const GRANTED_SCOPE_START: u64 = 1 << 63;
+        self.scope(path)?
+            .0
+            .checked_mul(3)
+            .and_then(|offset| offset.checked_add(GRANTED_SCOPE_START))
+            .map(ScopeId)
+            .ok_or_else(|| unsupported(path))
+    }
+
     fn scope(&mut self, path: &str) -> Result<ScopeId, LoweringError> {
         self.next_scope = self
             .next_scope
@@ -460,9 +471,21 @@ impl Allocator {
         if let Some(keywords) = &entry.keywords {
             return quick::lower(key, path, entry, scope, keywords);
         }
+        let source = source_span(key, path, entry)?;
+        self.executable_ability(entry, scope, printed_cost, payment_result, source, path)
+    }
+
+    fn executable_ability(
+        &mut self,
+        entry: &ast::Ability,
+        scope: ScopeId,
+        printed_cost: Option<Nat>,
+        payment_result: Option<(String, ReceiptId)>,
+        source: SourceSpan,
+        path: &str,
+    ) -> Result<Located<Ability>, LoweringError> {
         let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
-        let source = source_span(key, path, entry)?;
         let ability_source = ability_source(&source, keyword);
         let mut context = BodyContext::new(entry, scope, body, payment_result, self);
         let guard = context.activation_qualification(entry.activate.as_ref(), &source, path)?;
@@ -914,6 +937,7 @@ fn lowered_change(
 
 struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
+    source_use: &'definitions ast::SourceUse,
     entry_event: Option<Binding<super::EnterFieldEvent>>,
     cemetery_return: bool,
     departure_to_cemetery: bool,
@@ -942,7 +966,7 @@ struct BodyContext<'definitions> {
 }
 impl<'definitions> BodyContext<'definitions> {
     fn new(
-        entry: &ast::Ability,
+        entry: &'definitions ast::Ability,
         scope: ScopeId,
         body: &'definitions ast::Body,
         payment_result: Option<(String, ReceiptId)>,
@@ -950,6 +974,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             subject_event: None,
+            source_use: &entry.sources[0],
             leave_event: None,
             entry_event: None,
             cemetery_return: false,

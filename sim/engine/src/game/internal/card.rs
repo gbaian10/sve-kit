@@ -10,11 +10,12 @@ use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    AssociationId, Control, CostSpec, DamageAmount, DiscardMode, ExecutionId, Expr, FaceId,
-    Generation, InstructionContext, Int, KeywordId, Located, MealRaceOperation, MoveDestination,
-    MoveReason, Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef,
-    Posture, Quantity, QuantityUnit, Resource, ResourceOperation, RuleId, RuntimeAbilitySource,
-    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
+    AssociationId, CharacteristicPatch, Control, CostSpec, DamageAmount, DiscardMode, Effect,
+    ExecutionId, Expr, FaceId, Generation, GrantedAbility, Instruction, InstructionContext, Int,
+    KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason, Nat, Node, NumericChange,
+    ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit,
+    Requirements, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
@@ -85,7 +86,8 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) instances:
         BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     pub(in crate::game::internal) keyword_instances:
-        BTreeMap<(String, u64, super::grant::GrantOrigin), AbilityInstanceId>,
+        BTreeMap<(String, u64, super::grant::GrantOrigin, AbilityId), AbilityInstanceId>,
+    pub(in crate::game::internal) granted_definitions: BTreeMap<(String, AbilityId), Ability>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
     mode_uses: Vec<ModeUse>,
@@ -363,7 +365,7 @@ impl Game {
             if play_restrictions::check(located, ordinal)? {
                 continue;
             }
-            if check_static(located)? {
+            if check_static(self, located)? {
                 continue;
             }
             if is_printed_quick(ability) && ordinal != 0 {
@@ -729,7 +731,7 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     }
 }
 
-fn check_static(located: &Located<Ability>) -> Result<bool> {
+fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
     if attack_restrictions::is_static(ability) {
         attack_restrictions::check(located)?;
@@ -741,6 +743,7 @@ fn check_static(located: &Located<Ability>) -> Result<bool> {
     }
     if static_keywords::is_static(ability) {
         static_keywords::check(located)?;
+        check_static_granted_definitions(game, located)?;
         return Ok(true);
     }
     if prevention::is_static(ability) {
@@ -750,7 +753,7 @@ fn check_static(located: &Located<Ability>) -> Result<bool> {
     Ok(false)
 }
 
-fn check_header(ability: &Ability) -> Result<()> {
+pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if other_costs::is_static(ability)
         || attack_restrictions::is_static(ability)
         || static_keywords::is_static(ability)
@@ -1036,11 +1039,7 @@ fn check_nodes(
                 super::tokens::check_catalog(game, &instruction.action)?;
                 super::transform::check_catalog(game, &instruction.action)?;
                 super::grant::check_action(&instruction.action)?;
-                if let Action::Grant { provider, .. } = &instruction.action
-                    && &provider.face != printed_origin(&instruction.source.origin)?.0
-                {
-                    return Err(unsupported("grant provider face"));
-                }
+                check_grant_instruction(game, instruction, source, ability_source)?;
                 if instruction.source != *ability_source {
                     return Err(invalid("instruction has a foreign ability source"));
                 }
@@ -1130,11 +1129,83 @@ fn check_nodes(
     Ok(())
 }
 
+fn check_grant_instruction(
+    game: &Game,
+    instruction: &Instruction,
+    source: &SourceSpan,
+    ability_source: &AbilitySource,
+) -> Result<()> {
+    if let Action::Grant {
+        abilities,
+        provider,
+        ..
+    } = &instruction.action
+    {
+        check_granted_definitions(game, abilities, source, ability_source)?;
+        if &provider.face != printed_origin(&instruction.source.origin)?.0 {
+            return Err(unsupported("grant provider face"));
+        }
+    }
+    Ok(())
+}
+
 fn check_node_source(game: &Game, span: &SourceSpan, source: &SourceSpan) -> Result<()> {
     if span.owner != source.owner || span.field != source.field || span.fragment != source.fragment
     {
         return Err(invalid("instruction source evidence mapping mismatch"));
     }
     game.check_card_source(span, &source.card_no, &source.face, u64::from(source.line))?;
+    Ok(())
+}
+
+fn check_static_granted_definitions(game: &Game, located: &Located<Ability>) -> Result<()> {
+    for effect in &located.node.declarations {
+        if let Effect::Continuous {
+            patch: CharacteristicPatch::GrantAbility { abilities },
+            ..
+        } = effect
+        {
+            check_granted_definitions(game, abilities, &located.source, &located.node.source)?;
+        }
+    }
+    Ok(())
+}
+
+fn check_granted_definitions(
+    game: &Game,
+    abilities: &[GrantedAbility],
+    source: &SourceSpan,
+    provider: &AbilitySource,
+) -> Result<()> {
+    for granted in abilities {
+        let GrantedAbility::Definition { ability } = granted else {
+            continue;
+        };
+        if printed_origin(&ability.source.origin)? != printed_origin(&provider.origin)? {
+            return Err(invalid("granted definition has a foreign text provider"));
+        }
+        if !super::grant::supported_definition(ability) {
+            return Err(unsupported("granted definition event"));
+        }
+        check_header(ability)?;
+        let body = ability
+            .body
+            .as_ref()
+            .ok_or_else(|| invalid("granted ability body"))?;
+        let requirements = Requirements::derive_program(&Located {
+            node: body.clone(),
+            source: source.clone(),
+        });
+        if requirements
+            .required
+            .iter()
+            .any(|requirement| requirement.capability.code == "action.grant")
+        {
+            return Err(unsupported("nested grant installation"));
+        }
+        check_nodes(game, &body.steps, source, &ability.source)?;
+        admission::check_card(body, source, &ability.source, ability.trigger.as_ref())?;
+        play::check(ability, source)?;
+    }
     Ok(())
 }

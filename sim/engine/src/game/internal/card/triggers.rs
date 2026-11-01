@@ -256,20 +256,26 @@ impl Game {
             .or_insert(next))
     }
 
-    fn printed_departures(&self, object: &Object, to: &str) -> Result<Vec<Located<Ability>>> {
-        let abilities = self.internal_printed_abilities(&object.id)?;
-        if !self.card_runtime.definitions.cards.values().any(|program| {
-            program.card().abilities.iter().any(|a| {
-                matches!(
-                    a.node.trigger.as_ref().map(|t| &t.on),
-                    Some(TriggerCondition::Event {
-                        pattern: EventPattern::LeaveField { .. }
-                    })
-                )
+    fn printed_departures(
+        &self,
+        object: &Object,
+        to: &str,
+    ) -> Result<Vec<super::super::grant::EffectiveAbility>> {
+        if !self.internal_has_granted_definitions()
+            && !self.card_runtime.definitions.cards.values().any(|program| {
+                program.card().abilities.iter().any(|ability| {
+                    matches!(
+                        ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                        Some(TriggerCondition::Event {
+                            pattern: EventPattern::LeaveField { .. }
+                        })
+                    )
+                })
             })
-        }) {
+        {
             return Ok(Vec::new());
         }
+        let abilities = self.internal_effective_abilities(&object.id)?;
         let own_turn = object.controller == self.active();
         Ok(abilities
             .into_iter()
@@ -342,7 +348,7 @@ impl Game {
                 continue;
             }
             let abilities = self.printed_departures(&object, destination)?;
-            let Some(definition) = abilities.first().map(|ability| ability.node.id) else {
+            let Some(first) = abilities.first() else {
                 continue;
             };
             // Only a subscribed departure needs a typed destination; other moves stay as before.
@@ -357,7 +363,7 @@ impl Game {
             let actor = player_id(&object.controller)?;
             let effect_source = self.card_runtime.active_source;
             let cause = self.departure_cause(id, frame)?;
-            let holder = self.internal_card_source(id, definition, actor)?;
+            let holder = self.internal_effective_source(id, first)?;
             let snapshot = self.information_snapshot(holder.holder)?.at(before);
             let header = if let Some(header) = observed_header {
                 header
@@ -374,7 +380,11 @@ impl Game {
                 )?
             };
             for ability in abilities {
-                let source = self.internal_card_source(id, ability.node.id, actor)?;
+                let source = self.internal_effective_source(id, &ability)?;
+                let provider = ability
+                    .grant
+                    .as_ref()
+                    .map(|origin| origin.provider().card.clone());
                 let mut information = SourceInformation::current(self, source)?;
                 information.seal(Some(snapshot.clone()));
                 let leave = LeaveFieldEvent {
@@ -386,14 +396,17 @@ impl Game {
                         kind: to,
                     },
                 };
-                let occurrence = self.new_pending(
+                let mut occurrence = self.new_pending(
                     id,
                     source,
-                    ability,
+                    ability.definition,
                     information,
                     header.clone(),
                     Some(leave),
                 )?;
+                if let Some(provider) = provider {
+                    occurrence.card = provider;
+                }
                 plan.departures.push((occurrence, object.clone()));
             }
         }

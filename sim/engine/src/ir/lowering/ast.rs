@@ -1868,7 +1868,10 @@ pub(super) struct HandQuery {
 #[serde(deny_unknown_fields)]
 pub(super) struct Grant {
     pub on: Objects,
+    #[serde(default)]
     pub keywords: Vec<String>,
+    #[serde(default)]
+    pub abilities: Vec<Value>,
     pub until: Option<Until>,
 }
 
@@ -1996,7 +1999,10 @@ pub(super) enum StaticEffect {
 #[serde(deny_unknown_fields)]
 pub(super) struct StaticGrant {
     pub on: Option<Objects>,
+    #[serde(default)]
     pub keywords: Vec<String>,
+    #[serde(default)]
+    pub abilities: Vec<Value>,
 }
 
 #[derive(Deserialize)]

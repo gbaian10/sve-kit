@@ -1,11 +1,10 @@
 use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
-    ability_source, ast, keywords, numeric, source_span, unsupported,
+    ability_source, ast, numeric, source_span, unsupported,
 };
 use crate::ir::{
     AbilityKind, AbilityQualification, CharacteristicPatch, ContinuousLayer, Effect,
-    EffectDefinitionId, EffectTarget, GrantedAbility, ObjectOperand, ScopeId, TimestampBasis,
-    ZoneKind,
+    EffectDefinitionId, EffectTarget, ObjectOperand, ScopeId, TimestampBasis, ZoneKind,
 };
 
 pub(super) fn lower(
@@ -38,18 +37,11 @@ pub(super) fn lower(
         let ast::StaticEffect::Grant(grant) = effect else {
             return Err(unsupported(path));
         };
-        if grant.keywords.is_empty() {
+        if grant.keywords.is_empty() && grant.abilities.is_empty() {
             return Err(unsupported(path));
         }
-        let abilities = grant
-            .keywords
-            .iter()
-            .map(|name| {
-                keywords::grantable_keyword_id(name)
-                    .map(|keyword| GrantedAbility::Keyword { keyword })
-                    .ok_or_else(|| unsupported(path))
-            })
-            .collect::<Result<Vec<_>, _>>()?;
+        let abilities =
+            context.granted_abilities(&grant.keywords, &grant.abilities, &source, path)?;
         let selector = grant
             .on
             .as_ref()
