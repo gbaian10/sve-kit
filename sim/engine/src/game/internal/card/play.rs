@@ -1059,7 +1059,15 @@ impl Game {
             }
         });
         if execution.spell {
-            self.internal_played_card_events(execution, &play.costs)?;
+            let CostSpec::Ordered { steps } = &play.costs else {
+                return Err(unsupported("card play costs"));
+            };
+            let receipt = steps
+                .first()
+                .ok_or_else(|| invalid("missing intrinsic payment"))?
+                .instruction
+                .receipt;
+            self.internal_played_card_events(execution, receipt)?;
         }
         execution.prepend(selected_body(play.body, &play.chosen)?);
         Ok(())

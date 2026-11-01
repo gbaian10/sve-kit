@@ -574,11 +574,10 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     }
     if let Some(auto) = &entry.auto {
         let cemetery = auto.cemetery_play();
-        if matches!(auto.on, ast::PhaseSubscription::Played(_)) != cemetery
-            || (!cemetery
-                && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
-                    || (zones == [ZoneKind::Ex]
-                        && !matches!(auto.on, ast::PhaseSubscription::Phase(_)))))
+        if !cemetery
+            && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
+                || (zones == [ZoneKind::Ex]
+                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))))
         {
             return Err(unsupported(path));
         }
@@ -728,22 +727,30 @@ fn lowered_subscription(
 ) -> Result<EventPattern, LoweringError> {
     match on {
         ast::PhaseSubscription::Played(played) => {
-            if played.sel.class.is_empty()
-                || !matches!(played.who, ast::SelfPlayer::Controller)
-                || !matches!(played.sel.kind, ast::PlayedSpell::Spell)
-                || !matches!(played.during.turn, ast::SelfPlayer::Controller)
+            let event = Binding::new(event_id, scope);
+            let card = Binding::new(subject_id, scope);
+            let subject = movement::movement_filter(
+                played
+                    .who
+                    .as_ref()
+                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                false,
+                played.sel.as_ref(),
+                played
+                    .during
+                    .as_ref()
+                    .is_some_and(|during| matches!(during.turn, ast::SelfPlayer::Controller)),
+            );
+            if subject
+                .class
+                .as_ref()
+                .is_some_and(|class| class.0.is_empty())
             {
                 return Err(unsupported(path));
             }
-            let event = Binding::new(event_id, scope);
-            let card = Binding::new(subject_id, scope);
             Ok(EventPattern::Play {
                 binding: event,
-                predicate: super::events::played::PlayedFilter {
-                    class: super::ClassId(played.sel.class.clone()),
-                    card,
-                }
-                .predicate(event),
+                predicate: super::events::played::PlayedFilter { subject, card }.predicate(event),
             })
         }
         ast::PhaseSubscription::Phase(phase) => {

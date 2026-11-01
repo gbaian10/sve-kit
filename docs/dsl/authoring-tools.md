@@ -71,6 +71,8 @@ records:
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；既有 `moved: {from: field, to: cemetery}` 仍只監看送墓。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
+場上或墓場來源的 `auto.on.played` 沿用共用事件主體篩選；`who` 可省略或指定 `self | opp`，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`、`token | not_token`，`during: {turn: self}` 限自己回合。事件以適正打出成功為準，包含已支援的從者、護符、法術及護符／法術 token；付款失敗、效果直接放場與生成 token 不產生打出事件。場上觀測者必須在成功時已位於場上，新打出的卡不倒算自身這次打出；墓場來源同樣在法術本文或入場前擷取，不能事後補觸發。正式目標、付款及每回合一次限制沿用共用觸發流程。
+
 `ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。此入口尚未新增 UB 歷史查詢、UB 發動訂閱或免原費用發動其他 UB 的 consumer，不能據此准入那些本文。
 
 謝幕可用 `cost` 宣告頭付款（例如 `cost: {pp: 2}`），沿用接受／拒絕與不足資源不發動的付款流程；目標在付款前宣告。
@@ -125,7 +127,7 @@ ignored:
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱目前只接受單一區域的 Main／End 時點，並不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 
-墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。只在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。此准入只接必需頭付款與單一步驟自身回場，其他區域、任意目標回場及一般事件欄位讀取仍維持原邊界。
+墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作仍只准已有的自身回場，任意目標回場與一般事件欄位讀取維持原邊界。
 
 自己墓場的卡可放在 `targets`，例如 `from: {who: self, zone: cemetery, kind: follower, trait: 竜族}`；共用正式目標程序在付款前固定候選與宣告，沒有必需目標時不能付款。結算本文用 `move: {ref: returned, to: hand}` 回收。不能用本文的 `choose` 代替正式目標，否則會把本次付款才送墓的卡納入候選。這個目標入口不擴充回場的種類或容量選擇能力。
 
