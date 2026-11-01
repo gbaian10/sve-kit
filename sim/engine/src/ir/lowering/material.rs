@@ -25,7 +25,12 @@ pub(super) fn lower(
     operation: Operation,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.n == 0 || !matches!(material.sel.who, ast::Side::Controller) {
+    if material.n == 0
+        || !(matches!(material.sel.who, ast::Side::Controller)
+            || (matches!(material.sel.who, ast::Side::All)
+                && matches!(material.sel.zone, ast::PublicZone::Field)
+                && matches!(operation, Operation::Put)))
+    {
         return Err(unsupported(path));
     }
     let zone = match material.sel.zone {
@@ -41,11 +46,19 @@ pub(super) fn lower(
     let candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
     let mut selector = Selector::Zone {
         players: PlayerSet {
-            relation: PlayerRelation::SelfPlayer,
+            relation: if matches!(material.sel.who, ast::Side::All) {
+                PlayerRelation::All
+            } else {
+                PlayerRelation::SelfPlayer
+            },
             relative_to: PlayerRef::Controller {},
             cardinality: Cardinality {
                 minimum: Nat(1),
-                maximum: Some(Nat(1)),
+                maximum: Some(Nat(if matches!(material.sel.who, ast::Side::All) {
+                    2
+                } else {
+                    1
+                })),
             },
             text_quantifier: TextQuantifier::Implicit,
         },

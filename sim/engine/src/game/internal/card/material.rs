@@ -1,5 +1,5 @@
 //! Cost materials use their own strict selection, without target permissions.
-use super::{Execution, Game, Result, invalid, seat_name, unsupported};
+use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, search,
 };
@@ -71,12 +71,19 @@ fn zone(selector: &Selector) -> Result<ZoneKind> {
             view: SelectionView::Current {},
             predicate,
             binding,
-        } if players.relation == PlayerRelation::SelfPlayer
+        } if matches!(
+            players.relation,
+            PlayerRelation::SelfPlayer | PlayerRelation::All
+        ) && (players.relation != PlayerRelation::All || *zone == ZoneKind::Field)
             && players.relative_to == (PlayerRef::Controller {})
             && players.cardinality
                 == (Cardinality {
                     minimum: Nat(1),
-                    maximum: Some(Nat(1)),
+                    maximum: Some(Nat(if players.relation == PlayerRelation::All {
+                        2
+                    } else {
+                        1
+                    })),
                 }) =>
         {
             search::check_predicate(predicate, *binding)?;
@@ -88,7 +95,7 @@ fn zone(selector: &Selector) -> Result<ZoneKind> {
         {
             zone(input)
         }
-        _ => Err(unsupported("own public material selector")),
+        _ => Err(unsupported("public material selector")),
     }
 }
 
@@ -209,27 +216,32 @@ impl Game {
                 .collect());
         }
         let Selector::Zone {
-            zone, predicate, ..
+            players,
+            zone,
+            predicate,
+            ..
         } = selector
         else {
             return Err(unsupported("material selector"));
         };
         let mut members = vec![];
-        for id in self.zone_ids(
-            seat_name(execution.context.controller)?,
-            if *zone == ZoneKind::Field {
-                "field"
-            } else if *zone == ZoneKind::Ex {
-                "ex"
-            } else {
-                "cemetery"
-            },
-        ) {
-            if standing && self.object(&id)?.state["acted"] != false {
-                continue;
-            }
-            if search::matches_candidate(self, &id, predicate)? {
-                members.push(execution.reference(self, &id)?);
+        for player in execution.players(self, players)? {
+            for id in self.zone_ids(
+                seat_name(player)?,
+                if *zone == ZoneKind::Field {
+                    "field"
+                } else if *zone == ZoneKind::Ex {
+                    "ex"
+                } else {
+                    "cemetery"
+                },
+            ) {
+                if standing && self.object(&id)?.state["acted"] != false {
+                    continue;
+                }
+                if search::matches_candidate(self, &id, predicate)? {
+                    members.push(execution.reference(self, &id)?);
+                }
             }
         }
         Ok(members)
@@ -269,7 +281,7 @@ impl Game {
                 let id = execution.object_id(*member)?;
                 Ok(DistributionMember {
                     handle: u64::try_from(index).map_err(invalid)?,
-                    player: execution.context.controller,
+                    player: player_id(&self.object(id)?.controller)?,
                     card: Some(self.object(id)?.card.clone()),
                     name: Some(self.card_name(id)?),
                 })
@@ -323,7 +335,8 @@ impl Game {
             let object = self.object(id)?;
             if object.generation != member.generation.0
                 || !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
-                || object.controller != seat_name(execution.context.controller)?
+                || (object.controller != seat_name(execution.context.controller)?
+                    && (!matches!(objects, Selector::Bound { .. }) || object.zone != "field"))
                 || (matches!(instruction.action, Action::Posture { .. })
                     && matches!(objects, Selector::Bound { .. })
                     && object.zone != "field")

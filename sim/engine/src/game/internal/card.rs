@@ -705,7 +705,11 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     match zones {
         [ZoneKind::Field] => matches!(
             kind,
-            "フォロワー" | "フォロワー・エボルヴ" | "アミュレット" | "アミュレット・トークン"
+            "フォロワー"
+                | "フォロワー・エボルヴ"
+                | "フォロワー・トークン"
+                | "アミュレット"
+                | "アミュレット・トークン"
         ),
         [ZoneKind::Ex] => matches!(
             kind,
