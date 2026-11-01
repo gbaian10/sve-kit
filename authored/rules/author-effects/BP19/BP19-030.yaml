@@ -1,0 +1,23 @@
+cards:
+  BP19-030:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 戦慄の海賊旗
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token_sources:
+      - card: BP19-P33
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

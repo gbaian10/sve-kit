@@ -1,0 +1,39 @@
+cards:
+  BP19-P33:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - buff:
+                on: victim
+                power: 1
+            - if:
+                cond:
+                  exists:
+                    in: victim
+                    trait: 八獄
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        leaders: opponents
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                trait: 盗賊
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+    token:
+      name: 戦慄の海賊旗
+      template: true
+format: 2
+kind: author_effect_set

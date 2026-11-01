@@ -1,0 +1,43 @@
+cards:
+  CP02-022:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: 島村卯月
+                    who: self
+                    zone: field
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+        line: 2
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: 渋谷凛
+                    who: self
+                    zone: field
+                then:
+                  - buff:
+                      on: this
+                      power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,47 @@
+cards:
+  BP20-063:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 1
+                to: own
+            - damage:
+                n: 4
+                to: victim
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: ガルミーユ
+                    who: self
+                    zone: field
+                then:
+                  - pp_max:
+                      delta: 1
+                      who: self
+          targets:
+            - bind: own
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
