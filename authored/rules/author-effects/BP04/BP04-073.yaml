@@ -1,0 +1,51 @@
+cards:
+  BP04-073:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: ドラゴン
+                  cost_le: 3
+                  in: seen
+                  kind: follower
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

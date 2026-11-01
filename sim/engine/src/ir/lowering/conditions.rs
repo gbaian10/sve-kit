@@ -72,6 +72,7 @@ impl BodyContext<'_> {
                 who: ast::LeaderSide::Controller,
                 zone: ast::CountZone::Cemetery,
                 kind: spells.then_some(ast::SearchKind::Spell),
+                keyword: None,
                 r#trait: None,
                 name: None,
                 name_contains: None,
@@ -472,7 +473,8 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let filtered = count.face_up.is_some()
+        let filtered = count.keyword.is_some()
+            || count.face_up.is_some()
             || count.kind.is_some()
             || count.r#trait.is_some()
             || count.name.is_some()

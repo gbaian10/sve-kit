@@ -956,6 +956,7 @@ pub(super) struct TargetQuery {
     #[serde(default)]
     pub leader_or: bool,
     pub kind: Option<SearchKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -973,6 +974,29 @@ pub(super) struct TargetQuery {
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
     pub has_evolve: Option<True>,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(try_from = "String")]
+pub(super) struct FilterKeyword(pub super::super::KeywordId);
+
+impl TryFrom<String> for FilterKeyword {
+    type Error = &'static str;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        match super::keywords::keyword_id(&value) {
+            Some(
+                keyword @ (super::super::KeywordId::Ward
+                | super::super::KeywordId::Aura
+                | super::super::KeywordId::Storm
+                | super::super::KeywordId::Rush
+                | super::super::KeywordId::Bane
+                | super::super::KeywordId::Intimidate
+                | super::super::KeywordId::Assail),
+            ) => Ok(Self(keyword)),
+            _ => Err("unsupported filter keyword"),
+        }
+    }
 }
 
 impl TargetQuery {
@@ -1123,6 +1147,7 @@ pub(super) struct CountQuery {
     pub who: LeaderSide,
     pub zone: CountZone,
     pub kind: Option<SearchKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
@@ -1339,6 +1364,7 @@ pub(super) struct PublicQuery {
     pub who: Side,
     pub zone: PublicZone,
     pub kind: Option<SearchKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,

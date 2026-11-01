@@ -3,10 +3,10 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::PlayerStage;
+use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
-    AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, Disjointness, EnterFieldEvent,
-    KeywordId, MemberProjection, Nat, ObjectReceipt, PlayerRef, PlayerRelation, Requirement,
-    Selector,
+    AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
+    Requirement,
 };
 use crate::ir::{Action, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
@@ -433,7 +433,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
                 ..
             }
         );
-    let optional_private_look = private_look_choice(decision);
+    let private_look = private_look_choice(decision);
     if !matches!(
         decision.domain,
         ChoiceDomain::Integer {
@@ -446,7 +446,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             | ChoiceDomain::Objects { .. }
             | ChoiceDomain::Recipients { .. }
     ) || !decision.captures.is_empty()
-        || !(public_required || optional_private_look)
+        || !(public_required || private_look)
     {
         return Err(unsupported("decision metadata"));
     }
@@ -467,62 +467,6 @@ fn entry_field_requirement(requirements: &Requirements, requirement: &Requiremen
                     .any(|at| at.ir_path == location.ir_path)
             })
         })
-}
-
-fn private_look_choice(decision: &Decision) -> bool {
-    let ChoiceDomain::Objects {
-        constraint,
-        target_roles: None,
-        ..
-    } = &decision.domain
-    else {
-        return false;
-    };
-    if constraint.groups.is_empty() || constraint.groups.len() > 2 {
-        return false;
-    }
-    let maximum = u64::try_from(constraint.groups.len()).ok();
-    let expected_bounds = Cardinality {
-        minimum: Nat(0),
-        maximum: maximum.map(Nat),
-    };
-    constraint.groups.iter().all(|group| {
-        private_look_selector(&group.selector)
-            && group.cardinality
-                == (Cardinality {
-                    minimum: Nat(0),
-                    maximum: Some(Nat(1)),
-                })
-    }) && constraint.distinct_by.is_none()
-        && constraint.aggregate_bounds.is_empty()
-        && constraint.disjoint == Disjointness::Disjoint
-        && matches!(
-            &decision.visibility,
-            Visibility::Only { players }
-                if players.relation == PlayerRelation::SelfPlayer
-                    && players.relative_to == decision.actor
-                    && decision.actor == PlayerRef::Controller {}
-        )
-        && matches!(
-            decision.kind,
-            DecisionKind::ResolutionChoice {
-                may: Declinable::MayDecline,
-                cardinality,
-                precondition: None,
-            } if cardinality == expected_bounds
-        )
-        && constraint.cardinality == expected_bounds
-}
-
-fn private_look_selector(selector: &Selector) -> bool {
-    matches!(
-        selector,
-        Selector::Filter { input, .. }
-            if matches!(input.as_ref(), Selector::ReceiptMembers {
-                receipt: ObjectReceipt::Look { .. },
-                projection: MemberProjection::Before,
-            })
-    )
 }
 
 // Every enum arm, internal tag and nested requirement is opt-in, including dead branches.

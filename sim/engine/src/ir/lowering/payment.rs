@@ -61,6 +61,7 @@ fn lower_operations(
                         who: ast::Side::Controller,
                         zone: ast::PublicZone::Ex,
                         kind: None,
+                        keyword: None,
                         r#trait: None,
                         name: Some("魔法のアイテム".to_owned()),
                         name_contains: None,

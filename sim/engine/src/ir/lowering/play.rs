@@ -207,8 +207,6 @@ impl BodyContext<'_> {
             || target.from.other
             || target.from.has_evolve.is_some()
             || target.from.hp_le.is_some()
-            || target.from.class.is_some()
-            || target.from.not_class.is_some()
             || target.distinct_by.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
@@ -285,6 +283,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
         if target.distinct_by.is_some()
+            || target.from.keyword.is_some()
             || target.from.r#trait.is_some()
             || target.from.has_evolve.is_some()
             || target.from.has_numeric_filter()

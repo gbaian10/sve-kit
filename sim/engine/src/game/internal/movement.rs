@@ -460,7 +460,8 @@ impl Game {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
                 let actor = super::seat_name(execution.context.controller)?;
-                let private_observed_move = matches!(kind, ZoneKind::Hand | ZoneKind::Ex)
+                let private_observed_move = method == MoveMethod::Put
+                    && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
                     && object.zone == "deck"
                     && object.owner == actor
                     && object.controller == actor
