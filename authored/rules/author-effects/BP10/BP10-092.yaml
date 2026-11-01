@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-092:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        static:
+          effects:
+            - damage_cap:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                threshold: 4
+                set: 3
