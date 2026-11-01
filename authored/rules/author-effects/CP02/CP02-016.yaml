@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            played:
+              who: self
+          do:
+            - damage:
+                to: chosen
+                n: 1
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
