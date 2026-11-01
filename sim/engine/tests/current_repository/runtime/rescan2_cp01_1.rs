@@ -51,7 +51,7 @@ fn fixture() -> &'static SelectedEffects {
         )
         .unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        Catalog::from_current_selection_with_rules(
+        repository::select_with_rules(
             &snapshot,
             &keywords,
             &input,

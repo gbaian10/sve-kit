@@ -32,7 +32,7 @@ fn fixture(initial: &Value) -> Game {
                 .to_string()
             ]));
         }
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     });
     let mut game = Game::from_selected_effects(
         SELECTED.clone(),

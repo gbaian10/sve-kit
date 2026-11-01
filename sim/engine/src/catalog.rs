@@ -23,7 +23,7 @@ mod semantics;
 
 pub use rule_bindings::{EngineIdentityInput, FaceIdentity};
 pub(crate) use selection::RuntimeCards;
-pub use selection::SelectedEffects;
+pub use selection::{CurrentSelectionLoader, SelectedEffects};
 
 /// Card facts from the sole versioned card database snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]

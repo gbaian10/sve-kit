@@ -39,7 +39,7 @@ fn evolution_selection() -> &'static (SelectedEffects, WellFormedCardProgram) {
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml")
         ).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        let selected = Catalog::from_current_selection_with_rules(&snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap();
+        let selected = repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap();
         (selected, companion)
     })
 }

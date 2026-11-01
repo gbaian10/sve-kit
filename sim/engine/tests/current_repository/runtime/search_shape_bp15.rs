@@ -57,7 +57,7 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        let selected = Catalog::from_current_selection_with_rules(
+        let selected = repository::select_with_rules(
             &snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp,
         ).unwrap();
         (selected, programs)

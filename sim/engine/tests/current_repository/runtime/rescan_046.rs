@@ -111,7 +111,7 @@ fn companions() -> &'static Companions {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot,json!([]),json!([]))["input"].clone();
-        let selected = Catalog::from_current_selection_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap();
+        let selected = repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap();
         tree["cards"] = Value::Object(programs);
         Companions { selected, programs: lowerer().lower(&tree).unwrap() }
     })

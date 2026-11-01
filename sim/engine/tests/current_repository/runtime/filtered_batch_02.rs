@@ -91,7 +91,7 @@ fn maisha_game(initial: &Value) -> Game {
         snapshot.push_str(&json!({"number":"count-companion","faces":[face]}).to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["count-companion.yaml","format: 1\nkind: effect_set\ncards:\n  count-companion:\n    status: complete\n    abilities: []\n"]));
-        Catalog::from_current_selection(&snapshot,&keywords,&input).unwrap()
+        repository::select(&snapshot,&keywords,&input).unwrap()
     });
     let mut game = Game::from_selected_effects(
         selection.clone(),

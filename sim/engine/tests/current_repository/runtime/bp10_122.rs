@@ -146,7 +146,7 @@ fn source_mutations_cannot_change_attack_head_actor_count_or_provenance() {
             _ => candidate["sidecar"] = json!([]),
         }
         assert!(
-            failure(Catalog::from_current_selection(
+            failure(repository::select(
                 snapshot, keywords, &selection
             ))
             .contains(*rejection),

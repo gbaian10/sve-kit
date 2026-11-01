@@ -13,7 +13,7 @@ use super::rule_fixtures;
 
 use serde_json::Value;
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_engine::catalog::{Catalog, EngineIdentityInput, SelectedEffects};
+use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 pub(crate) fn inputs() -> &'static (String, String, Value) {
@@ -34,7 +34,7 @@ pub(crate) fn selection() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
         let (snapshot, keywords, input) = inputs();
-        Catalog::from_current_selection(snapshot, keywords, input).unwrap()
+        select(snapshot, keywords, input).unwrap()
     })
 }
 
@@ -61,7 +61,7 @@ pub(crate) fn selection_with_rules_from(
         .pointer_mut("/input/snapshot_sha256")
         .unwrap() = Value::String(rule_fixtures::hash(snapshot.as_bytes()));
     let bound_rules = serde_json::to_string(&rules_document).unwrap();
-    Catalog::from_current_selection_with_rules(
+    select_with_rules(
         snapshot,
         keywords,
         input,
@@ -74,4 +74,27 @@ pub(crate) fn selection_with_rules_from(
 pub(crate) fn lowerer() -> &'static ExpandedLowerer {
     static LOWERER: OnceLock<ExpandedLowerer> = OnceLock::new();
     LOWERER.get_or_init(|| ExpandedLowerer::new().unwrap())
+}
+
+fn loader() -> &'static CurrentSelectionLoader {
+    static LOADER: OnceLock<CurrentSelectionLoader> = OnceLock::new();
+    LOADER.get_or_init(|| CurrentSelectionLoader::new().unwrap())
+}
+
+pub(crate) fn select(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+) -> sve_engine::Result<SelectedEffects> {
+    loader().select(snapshot, keywords, input)
+}
+
+pub(crate) fn select_with_rules(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+    rules: &str,
+    identity: &EngineIdentityInput,
+) -> sve_engine::Result<SelectedEffects> {
+    loader().select_with_rules(snapshot, keywords, input, rules, identity)
 }

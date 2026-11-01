@@ -21,7 +21,7 @@ fn batch_selection() -> &'static SelectedEffects {
             "frozen-foe.yaml",
             "format: 1\nkind: effect_set\ncards:\n  frozen-foe:\n    status: complete\n    abilities: []\n"
         ]));
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     })
 }
 

@@ -42,7 +42,7 @@ fn batch_selection() -> &'static SelectedEffects {
                 format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
             ]));
         }
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     })
 }
 

@@ -254,7 +254,7 @@ fn lecia_selection() -> &'static SelectedEffects {
         input["documents"].as_array_mut().unwrap().push(json!([
             "named-companion.yaml", "format: 1\nkind: effect_set\ncards:\n  named-companion:\n    status: complete\n    abilities: []\n"
         ]));
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     })
 }
 
