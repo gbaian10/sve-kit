@@ -1,0 +1,32 @@
+cards:
+  ECP01-033:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - damage:
+                n:
+                  count:
+                    face_up: true
+                    name: にんじん
+                    who: self
+                    zone: evolve_deck
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

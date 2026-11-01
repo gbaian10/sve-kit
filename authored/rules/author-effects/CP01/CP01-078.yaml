@@ -1,0 +1,27 @@
+cards:
+  CP01-078:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - banish: enemy
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
