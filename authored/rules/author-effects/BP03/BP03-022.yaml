@@ -1,0 +1,48 @@
+cards:
+  BP03-022:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 童話
+                    who: self
+                    zone: field
+                then:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - counter:
+                  n: 1
+                  name: 童話カウンター
+                  on: this
+          do:
+            - destroy:
+                ref: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

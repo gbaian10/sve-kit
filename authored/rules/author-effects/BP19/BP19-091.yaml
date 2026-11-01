@@ -1,0 +1,49 @@
+cards:
+  BP19-091:
+    abilities:
+      - fanfare:
+          do:
+            - counter:
+                delta: 2
+                name: 加虐カウンター
+                on: this
+            - draw:
+                n: 1
+                who: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - counter:
+                  n: 1
+                  name: 加虐カウンター
+                  on: this
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 加虐カウンター
+                        on: this
+                    op: eq
+                    right: 0
+                then:
+                  - move:
+                      ref: this
+                      to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set

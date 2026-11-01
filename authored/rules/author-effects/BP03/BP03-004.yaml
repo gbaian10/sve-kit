@@ -1,0 +1,40 @@
+cards:
+  BP03-004:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - counter:
+                delta: 1
+                name: 童話カウンター
+                on: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - counter:
+                  n: 1
+                  name: 童話カウンター
+                  on: this
+          do:
+            - destroy:
+                ref: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-01"
+format: 2
+kind: author_effect_set
