@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-105:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: 魔法のアイテム
+                to: ex
+                n: 5
+            - pp:
+                who: self
+                delta: 4
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP02-T01

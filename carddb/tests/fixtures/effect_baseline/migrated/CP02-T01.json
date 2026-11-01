@@ -1,0 +1,25 @@
+{
+  "token_template": true,
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "modify",
+            "subjects": "self.leader",
+            "hp": 1
+          },
+          {
+            "op": "draw",
+            "count": 1
+          }
+        ]
+      }
+    }
+  ],
+  "rules_name": "魔法のアイテム"
+}
