@@ -561,6 +561,10 @@ pub(super) enum Until {
     ThisAndNextOppTurn,
     Game,
     #[serde(untagged)]
+    DuringNextTurn {
+        during_next_turn: AttackTurnInterval,
+    },
+    #[serde(untagged)]
     NextPhase {
         next_phase: PhaseEdge,
     },
@@ -1773,6 +1777,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     Grant(StaticGrant),
+    Cannot(Cannot),
     Prevent(Prevent),
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
@@ -1790,6 +1795,7 @@ pub(super) struct StaticGrant {
 pub(super) enum Cannot {
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
+    Attack(CannotAttack),
 }
 
 #[derive(Deserialize)]
@@ -1912,4 +1918,23 @@ pub(super) struct LifeSubscription {
 pub(super) enum LifeDirection {
     Up,
     Down,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotAttack {
+    pub what: AttackAction,
+    pub on: Option<Objects>,
+    pub target: Option<Recipients>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AttackAction {
+    Attack,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackTurnInterval {
+    pub who: StandPlayer,
 }

@@ -2,7 +2,7 @@
 //!
 //! Cards migrated to author 1.0 leave the prototype set, but the shared scenarios still
 //! pin their original behaviour. This catalogue restores existing frozen prototypes,
-//! or derives the closed prevention subset from current authors, for those scenarios only; it is never a current-selection result and
+//! or derives closed prevention and permission subsets from current authors, for those scenarios only; it is never a current-selection result and
 //! grants no runtime qualification (see `current_repository.rs` for the real selection).
 
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -15,6 +15,8 @@ use std::sync::OnceLock;
 use serde_json::Value;
 use sve_engine::catalog::{Catalog, EngineIdentityInput};
 
+#[path = "historical_permissions.rs"]
+mod historical_permissions;
 #[path = "historical_prevention.rs"]
 mod historical_prevention;
 #[path = "repository.rs"]
@@ -141,7 +143,7 @@ fn prototype_numbers(documents: &[(String, String)]) -> BTreeSet<String> {
         .collect()
 }
 
-fn include_current_prevention(documents: &mut Vec<(String, String)>) {
+fn include_current_subsets(documents: &mut Vec<(String, String)>) {
     let existing = prototype_numbers(documents);
     let mut cards = serde_json::Map::new();
     for (number, current) in &repository::selection().current {
@@ -150,13 +152,16 @@ fn include_current_prevention(documents: &mut Vec<(String, String)>) {
                 .expanded
                 .get("cards")
                 .and_then(|expanded_cards| expanded_cards.get(&current.card_no))
-                .and_then(historical_prevention::program)
+                .and_then(|card| {
+                    historical_prevention::program(card)
+                        .or_else(|| historical_permissions::program(card))
+                })
         {
             cards.insert(number.clone(), program);
         }
     }
     documents.push((
-        "historical/current-prevention.yaml".into(),
+        "historical/current-author-subsets.yaml".into(),
         serde_json::json!({"format":1_u8, "kind":"effect_set", "cards":cards}).to_string(),
     ));
 }
@@ -277,7 +282,7 @@ pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
     Arc::clone(CATALOG.get_or_init(|| {
         let (snapshot, keywords, mut documents, root) = selected_prototypes();
         restore_frozen_programs(&mut documents, &root);
-        include_current_prevention(&mut documents);
+        include_current_subsets(&mut documents);
         let (_, _, input) = repository::inputs();
         include_passive_current_tokens(&mut documents, input, &root, snapshot);
         Arc::new(build(snapshot, keywords, &documents, &root))

@@ -66,7 +66,9 @@ pub(super) fn resource_increase(
 pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duration, LoweringError> {
     Ok(Duration {
         end: match until {
-            Some(ast::Until::NextPhase { .. }) => return Err(unsupported(path)),
+            Some(ast::Until::NextPhase { .. } | ast::Until::DuringNextTurn { .. }) => {
+                return Err(unsupported(path));
+            }
             None | Some(ast::Until::Game) => DurationEnd::NoTemporalExpiry {},
             Some(ast::Until::Turn | ast::Until::ThisAndNextOppTurn) => {
                 DurationEnd::CurrentTurnEnd {}
@@ -232,6 +234,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
+            ast::InstalledEffect::Cannot(ast::Cannot::Attack(_)) => {
+                return self.no_attack(installation, path);
+            }
             ast::InstalledEffect::Cannot(ast::Cannot::Stand(_)) => {
                 return self.no_stand(installation, path);
             }

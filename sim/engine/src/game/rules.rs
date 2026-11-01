@@ -835,6 +835,7 @@ impl Game {
         self.internal_numeric_end_turn(turn)?;
         self.internal_keywords_end_turn(turn);
         self.internal_drive_end_turn(turn);
+        self.internal_attack_restrictions_end_turn(turn);
         self.internal_preventions_end_turn(turn);
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
@@ -842,6 +843,7 @@ impl Game {
         self.state.schedule.begin()?;
         self.internal_numeric_begin_turn()?;
         self.internal_preventions_begin_turn()?;
+        self.internal_attack_restrictions_begin_turn()?;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =

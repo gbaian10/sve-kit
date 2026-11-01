@@ -152,6 +152,10 @@ impl Checker {
                     objects: action_objects,
                     ..
                 }
+                | ActionPattern::Attack {
+                    attacker: action_objects,
+                    ..
+                }
                 | ActionPattern::Stand {
                     objects: action_objects,
                     scope: StandScope::RuleStart { .. },
