@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-073:
+    admission: light
+    abilities:
+      - line: 1
+        keywords:
+          - assail
+          - bane
+          - drain
+      - line: 2
+        attack_time:
+          per_turn: 1
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+            - stand: this
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
