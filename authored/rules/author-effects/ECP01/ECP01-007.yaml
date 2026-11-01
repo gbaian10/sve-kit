@@ -1,0 +1,58 @@
+cards:
+  ECP01-007:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - storm
+        line: 2
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  any:
+                    - cmp:
+                        left:
+                          count:
+                            trait: ウマ娘
+                            who: self
+                            zone: field
+                        op: eq
+                        right: 3
+                    - cmp:
+                        left:
+                          count:
+                            trait: ウマ娘
+                            who: self
+                            zone: field
+                        op: eq
+                        right: 4
+                then:
+                  - draw:
+                      n: 1
+                  - discard:
+                      n: 1
+                      who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ウマ娘
+                        who: self
+                        zone: field
+                    op: eq
+                    right: 5
+                then:
+                  - draw:
+                      n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

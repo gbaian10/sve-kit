@@ -1,0 +1,37 @@
+cards:
+  ECP01-042:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - ward
+        line: 2
+      - auto:
+          do:
+            - destroy: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 3
+      - lastword:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: ウマ娘
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 1
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

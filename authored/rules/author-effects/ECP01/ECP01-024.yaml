@@ -1,0 +1,32 @@
+cards:
+  ECP01-024:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              any:
+                - exists:
+                    name: シュヴァルグラン
+                    who: self
+                    zone: field
+                - exists:
+                    name: ヴィルシーナ
+                    who: self
+                    zone: field
+      - line: 2
+        use: meal_entry.v1
+      - keywords:
+          - rush
+          - assail
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set

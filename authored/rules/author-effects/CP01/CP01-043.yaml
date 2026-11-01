@@ -1,0 +1,24 @@
+cards:
+  CP01-043:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - storm
+          - intimidate
+        line: 2
+      - attack_time:
+          do:
+            - buff:
+                on: this
+                power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-10-31"
+format: 2
+kind: author_effect_set
