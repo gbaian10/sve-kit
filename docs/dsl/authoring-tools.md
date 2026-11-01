@@ -189,3 +189,5 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 公開區域的數值讀取可用 `distinct_names` 計算不同卡名數，或用 `distinct_orig_costs` 計算不同原始費用種類數。兩者與 `count` 共用公開區域選取、種類／職業／類型篩選及費用條件讀值；原始費用取印刷資料，不受物件當前費用影響，同名或同費用的多張卡只計一次；沒有費用資訊的卡不另算作一種 0 費。可用於能力本體條件、動態數值與打出費用修正；`at: resolution` 延續墓場結算起始讀取，不開放隱藏區域或 `other`。
 
 傷害的 `to: {any_of: [{leader: opp}, {who: opp, zone: field, kind: follower}]}` 可把領袖與從者放進同一次傷害的受傷者集合。它沿用既有 `RecipientSet::Union` 與去重規則，只有一個傷害動作及數量回條；傷害替代條件對同批所有受傷者生效。
+
+進化 PP 費用修改可用 `apply: {on: this, effect: {evolve_cost_mod: {on: affected, set: 0}}, until: turn}`，或以 `delta: -1` 取代 `set`；兩者擇一，設定值不得為負。省略期限時持續至該物件世代結束，也可選既有公開場上對象。修改共用費用效果狀態，作用於實際規則進化的 PP 費用，最後以 0 為下限；不改卡片的打出費用，也不修改已離場後重新入場的世代。
