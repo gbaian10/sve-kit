@@ -20,7 +20,7 @@ use crate::ir::{
     ActionPattern, EventRewrite, PermissionSubject, ProposedEventPattern, ReplacementScope,
     Selector,
 };
-use crate::ir::{CostChange, Int, LimitSpec};
+use crate::ir::{CostChange, CostKind, Int, LimitSpec};
 use alloc::collections::BTreeSet;
 
 /// An immutable card whose entire accepted ability tree passed structural checking.
@@ -580,16 +580,53 @@ impl Checker {
                 condition,
                 duration,
                 ..
-            } => {
-                self.at("action", |checker| {
-                    checker.permission_action(subject, action)
-                })?;
-                self.at("condition", |checker| checker.boolean(condition))?;
-                self.duration(duration)
-            }
+            } => self.permission_effect(subject, action, condition, duration),
+            Effect::CostModifier {
+                kind: CostKind::Play,
+                subjects,
+                change,
+                duration,
+                usage: None,
+            } => self.cost_modifier(subjects, change, duration),
             Effect::RuleModifier { .. } | Effect::DeckRule { .. } | Effect::CostModifier { .. } => {
                 self.reject()
             }
+        }
+    }
+
+    fn permission_effect(
+        &mut self,
+        subject: &PermissionSubject,
+        action: &ActionPattern,
+        condition: &Expr<Bool>,
+        duration: &Duration,
+    ) -> Checked {
+        self.at("action", |checker| {
+            checker.permission_action(subject, action)
+        })?;
+        self.at("condition", |checker| checker.boolean(condition))?;
+        self.duration(duration)
+    }
+
+    fn cost_modifier(
+        &mut self,
+        subjects: &Selector,
+        change: &CostChange,
+        duration: &Duration,
+    ) -> Checked {
+        self.selector(subjects)?;
+        match change {
+            CostChange::Delta { amount } | CostChange::Set { amount } => {
+                self.integer(amount)?;
+            }
+        }
+        if let DurationEnd::While { predicate } = &duration.end {
+            self.boolean(predicate)?;
+            let mut duration = duration.clone();
+            duration.end = DurationEnd::NoTemporalExpiry {};
+            self.duration(&duration)
+        } else {
+            self.duration(duration)
         }
     }
 

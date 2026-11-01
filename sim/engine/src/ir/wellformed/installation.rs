@@ -1,7 +1,7 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::prevention;
 use crate::ir::{
-    ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, Duration,
+    ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, CostKind, Duration,
     DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects,
     InstallationTime, Interval, PermissionSubject, Polarity, Selector, StandScope, TimeAnchor,
     TimestampBasis, UsageScope,
@@ -51,6 +51,27 @@ impl Checker {
     ) -> Checked {
         if capture != InstallationTime::InstructionStart {
             return self.reject();
+        }
+        if let InstallationSubjects::Players { players, .. } = subjects {
+            self.players(players)?;
+            self.installed_duration(duration)?;
+            let Effect::CostModifier {
+                kind: CostKind::Play,
+                subjects: filter,
+                change,
+                duration: inner,
+                usage: None,
+            } = effect
+            else {
+                return self.reject();
+            };
+            if inner != duration {
+                return self.reject();
+            }
+            self.selector(filter)?;
+            return match change {
+                CostChange::Delta { amount } | CostChange::Set { amount } => self.integer(amount),
+            };
         }
         let InstallationSubjects::Objects { objects, affected } = subjects else {
             return self.reject();

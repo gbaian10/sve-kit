@@ -320,3 +320,214 @@ fn crimson_discount_uses_a_real_life_decrease_this_turn() {
         );
     }
 }
+
+#[test]
+fn static_cost_set_combines_with_own_delta_before_the_single_zero_floor() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["static"] =
+        json!({"effects":[{"cost_mod":{"when_playing":{"who":"self","kind":"follower"},"set":5}}]});
+    tree["cards"] =
+        json!({"unit-follower":{"meta":tree["cards"]["BP08-038"]["meta"],"abilities":[entry]}});
+    let mut program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+        .card()
+        .clone();
+    program.card_play_costs = own_costs(vec![CostChange::Delta {
+        amount: Expr::Literal(Int(-2)),
+    }])
+    .card()
+    .card_play_costs
+    .clone();
+    let program = WellFormedCardProgram::check(program).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"provider","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"candidate","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("1")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "layered-set",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.play_internal_card("candidate", PlayerId { seat: 1 })
+        .unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        7
+    );
+}
+
+fn player_discount_program(filters: &Value, copies: usize) -> WellFormedCardProgram {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    let step = json!({"player_effect":{"who":"self","until":"turn","effect":{"cost_mod":{"when_playing":filters,"delta":-1,"next_only":true}}}});
+    entry["activate"] = json!({"cost":{"pp":0},"do":vec![step;copies]});
+    tree["cards"] =
+        json!({"unit-follower":{"meta":tree["cards"]["BP08-038"]["meta"],"abilities":[entry]}});
+    lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+}
+
+#[test]
+fn one_matching_play_consumes_all_stacked_player_discounts() {
+    let program = player_discount_program(&json!({"who":"self","kind":"follower"}), 2);
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"provider","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("3")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "stacked-next",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    let activation = game
+        .activate_internal_card(
+            "provider",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap();
+    assert!(matches!(activation, CardPlay::Resolved(_)));
+    game.resume_internal_card().unwrap();
+    assert!(
+        game.legal().unwrap().is_empty(),
+        "prototype enumeration cannot bypass a player cost layer"
+    );
+    game.play_internal_card("first", PlayerId { seat: 1 })
+        .unwrap();
+    game.resume_internal_card().unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        9
+    );
+    game.play_internal_card("second", PlayerId { seat: 1 })
+        .unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        6
+    );
+}
+
+#[test]
+fn explicit_ex_filter_uses_play_origin_and_does_not_consume_on_a_hand_play() {
+    let program = player_discount_program(
+        &json!({"any_of":[{"who":"self","zone":"ex","kind":"follower"},{"who":"self","zone":"ex","name":"nonmatching"}]}),
+        1,
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"provider","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"hand","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"ex","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("3")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "origin-next",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.activate_internal_card(
+        "provider",
+        program.card().abilities[0].node.id,
+        PlayerId { seat: 1 },
+    )
+    .unwrap();
+    game.resume_internal_card().unwrap();
+    game.play_internal_card("hand", PlayerId { seat: 1 })
+        .unwrap();
+    game.resume_internal_card().unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        7
+    );
+    game.play_internal_card("ex", PlayerId { seat: 1 }).unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        5
+    );
+}
+
+#[test]
+fn player_cost_filter_cannot_authorize_a_deck_read() {
+    let mut program = player_discount_program(&json!({"who":"self","kind":"follower"}), 1)
+        .card()
+        .clone();
+    let Node::Instruction { instruction } =
+        &mut program.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("installation")
+    };
+    let Action::InstallEffect { effect, .. } = &mut instruction.action else {
+        panic!("installation")
+    };
+    let Effect::CostModifier {
+        subjects: Selector::Union { sets },
+        ..
+    } = effect.as_mut()
+    else {
+        panic!("cost subjects")
+    };
+    let Selector::Zone { zone, .. } = &mut sets[0] else {
+        panic!("cost zone")
+    };
+    *zone = ZoneKind::Deck;
+    let checked = WellFormedCardProgram::check(program).unwrap();
+    let initial = setup(1, json!([]));
+    let mut game = Game::new(
+        catalog_with_cost(&json!("3")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "private-cost-filter",
+    )
+    .unwrap();
+    assert!(matches!(
+        game.load_internal_card("unit-follower", &checked),
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+}
+
+#[test]
+fn an_unloaded_player_cost_installation_rolls_back_before_save() {
+    let card = player_discount_program(&json!({"who":"self","kind":"follower"}), 1);
+    let body = card.card().abilities[0].node.body.as_ref().unwrap().clone();
+    let program = WellFormedProgram::check(body).unwrap();
+    let initial = setup(1, json!([]));
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "installed-cost-save",
+    )
+    .unwrap();
+    let before = serde_json::to_value(&game).unwrap();
+    assert!(matches!(
+        game.execute_internal(&program, &source("unit-follower"), context(1)),
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(
+        serde_json::to_value(&game).unwrap(),
+        before,
+        "unloaded card authority cannot leave a partially installed fee or lose it on save"
+    );
+}

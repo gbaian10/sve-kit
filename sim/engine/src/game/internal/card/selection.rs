@@ -491,7 +491,7 @@ fn permitted_names(value: &Expr<Vec<CardName>>, allow_source_names: bool) -> boo
         && super::super::search::search_names(value)
 }
 
-fn check_predicate(
+pub(in crate::game::internal) fn check_predicate(
     value: &Expr<Bool>,
     candidate: Binding<ObjectRef>,
     allow_source_names: bool,
@@ -605,7 +605,11 @@ fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
     }
 }
 
-pub(super) fn matches_candidate(game: &Game, id: &str, value: &Expr<Bool>) -> Result<bool> {
+pub(in crate::game::internal) fn matches_candidate(
+    game: &Game,
+    id: &str,
+    value: &Expr<Bool>,
+) -> Result<bool> {
     match value {
         Expr::Literal(Bool(true)) => Ok(true),
         Expr::Live(read) => matches_state(game, id, read),

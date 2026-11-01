@@ -94,7 +94,7 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                     }
                 }
                 if let Some(condition) = &modifier.node.condition {
-                    check_condition(condition)?;
+                    check_condition(condition, true)?;
                 }
                 Ok(())
             };
@@ -104,7 +104,7 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
     Ok(())
 }
 
-fn check_condition(condition: &Expr<Bool>) -> Result<()> {
+pub(super) fn check_condition(condition: &Expr<Bool>, play_origin: bool) -> Result<()> {
     match condition {
         Expr::Literal(_) => Ok(()),
         Expr::Live(read)
@@ -112,22 +112,26 @@ fn check_condition(condition: &Expr<Bool>) -> Result<()> {
                 read.as_ref(),
                 BoolRead::Crimson {
                     player: PlayerRef::Controller {}
-                } | BoolRead::CardPlayOrigin {
-                    execution: ExecutionRef::Current {},
-                    zone: ZoneKind::Hand | ZoneKind::Ex
                 }
-            ) =>
+            ) || (play_origin
+                && matches!(
+                    read.as_ref(),
+                    BoolRead::CardPlayOrigin {
+                        execution: ExecutionRef::Current {},
+                        zone: ZoneKind::Hand | ZoneKind::Ex
+                    }
+                )) =>
         {
             Ok(())
         }
         Expr::Compute(predicate) => match predicate.as_ref() {
             Predicate::And { predicates } | Predicate::Or { predicates } => {
                 for item in predicates {
-                    check_condition(item)?;
+                    check_condition(item, play_origin)?;
                 }
                 Ok(())
             }
-            Predicate::Not { predicate } => check_condition(predicate),
+            Predicate::Not { predicate } => check_condition(predicate, play_origin),
             Predicate::CompareNat {
                 left,
                 right: Expr::Literal(_),
@@ -138,6 +142,10 @@ fn check_condition(condition: &Expr<Bool>) -> Result<()> {
                 right: Expr::Literal(_),
                 ..
             } => check_integer(left),
+            Predicate::PlayerEquals {
+                left: Expr::Literal(PlayerRef::Controller {}),
+                right: Expr::Literal(PlayerRef::Active {}),
+            } => Ok(()),
             Predicate::Exists { objects } => check_objects(objects),
             _ => Err(unsupported("play cost public condition")),
         },
@@ -284,10 +292,7 @@ impl Game {
                 _ => return Err(unsupported("exchange change")),
             }
         }
-        let raw = base
-            .checked_add(delta)
-            .ok_or_else(|| invalid("play cost overflow"))?;
-        self.internal_installed_play_cost(holder, raw)
+        self.internal_other_play_cost(execution, base, delta)
             .map(|cost| cost.max(0))
     }
 }
