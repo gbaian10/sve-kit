@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-005:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - life:
+                who: self
+                delta: 4
+            - if:
+                cond:
+                  history:
+                    event: moved
+                    window: this_turn
+                    from:
+                      who: self
+                      zone: field
+                    to: cemetery
+                    sel:
+                      kind: follower
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2

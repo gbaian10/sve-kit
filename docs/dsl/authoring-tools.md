@@ -77,9 +77,15 @@ records:
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
+事件本文的 `it` 共用標頭的型別綁定，可指向進場、入 EX、攻擊、進化、離場及破壞的主體；`this` 始終是能力來源。進場使用新世代，離場與破壞使用離場前世代；舊事件的主體離場後再回場，不會強化回來的新世代。沒有卡片主體的時點及起動能力不能使用 `it`，也不以來源代替缺少的事件欄位。
+
+`at: selection` 的單一正式目標捕捉可讀 `cost_of` 與 `orig_cost_of`，沿用同一選擇回條與數值捕捉；原始費用取印刷資料，有效費用取當時修正。捕捉發生在選定後、第一個效果指示前，之後目標被破壞或返回手牌都不改變該數值；不授予隱藏區域或任意多物件讀取權限。
+
+攻擊本文可用 `is: {ref: attack_target, kind: follower}` 檢查本次宣告的目標，以及 `hp_of: attack_target` 讀取仍在場同世代目標的當前體力；`attack_target` 也可作已支援數值指示的對象。攻擊領袖仍產生待機能力，條件在解算時查（R-0003）；目標離場或換世代即不符合，不追隨新物件。這些讀值均由同一待機事件提供，不能在起動能力或其他事件偽造攻擊目標。
+
 場上或墓場來源的 `auto.on.played` 沿用共用事件主體篩選；`who` 可省略或指定 `self | opp`，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`、`token | not_token`，`during: {turn: self}` 限自己回合。事件以適正打出成功為準，包含已支援的從者、護符、法術及護符／法術 token；付款失敗、效果直接放場與生成 token 不產生打出事件。場上觀測者必須在成功時已位於場上，新打出的卡不倒算自身這次打出；墓場來源同樣在法術本文或入場前擷取，不能事後補觸發。正式目標、付款及每回合一次限制沿用共用觸發流程。
 
-場上來源的 `auto.on.attacked` 沿用共用事件主體篩選，`who` 可指定 `self | opp`；`sel` 可篩種類、類型、名稱、職業、token 與 `other`，另可用 `keyword` 篩有效關鍵字。`sel.as` 配合 `where` 可檢查該攻擊者的有效攻擊力下限，或用 `any` 組合關鍵字 `exists`；條件在真正宣告攻擊時判斷，先產生待機能力，結算後才進入 Quick。`this` 仍指能力來源，`as` 的事件主體目前只供標頭條件使用，本文尚不能拿它強化本次攻擊者。
+場上來源的 `auto.on.attacked` 沿用共用事件主體篩選，`who` 可指定 `self | opp`；`sel` 可篩種類、類型、名稱、職業、token 與 `other`，另可用 `keyword` 篩有效關鍵字。`sel.as` 配合 `where` 可檢查該攻擊者的有效攻擊力下限，或用 `any` 組合關鍵字 `exists`；條件在真正宣告攻擊時判斷，先產生待機能力，結算後才進入 Quick。`this` 仍指能力來源，`as` 的具名別名只供標頭條件使用；本文可用保留的 `it` 指向本次攻擊者。
 
 `auto.on.dealt_damage` 以同一筆實際傷害的來源套用事件主體篩選；`auto.on.damaged.recipient` 可指定 `this` 或 `{leader: self | opp}`。兩者的 `kind` 可省略或指定 `ability | attack | combat`，`during` 可限制回合；先處理禁止／防止，再以實際正傷害判斷，全防止與零傷害沒有事件。對領袖的攻擊傷害屬 `attack`，不屬 `combat`；從者交戰中攻擊方造成的傷害同時符合兩者，反擊方符合 `combat`（[Q282](https://shadowverse-evolve.com/cardlist/?cardno=BP02-020)）。傷害來源與受傷者各自篩選，正式目標、付款與每回合一次限制沿用共同待機流程。
 

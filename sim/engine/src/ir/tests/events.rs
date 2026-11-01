@@ -91,3 +91,32 @@ fn entry_payment_and_receipt_conditions_have_consumers() {
     assert_missing(&receipt_seed, "predicate.receipt-status", "synthetic");
     assert_missing(&receipt_seed, "predicate.move-any", "synthetic");
 }
+
+#[test]
+fn attack_target_selector_checks_event_authority_and_local_binding_collisions() {
+    let event = Binding::new(1, ScopeId(1));
+    for (event_id, candidate_id, accepted) in [(1, 2, true), (1, 1, false), (3, 2, false)] {
+        let mut seed = triggered(EventPattern::Attack {
+            binding: event,
+            predicate: timing::attack_predicate(event),
+        });
+        seed.node.abilities.first_mut().unwrap().node.body = Some(program(vec![Located {
+            source: source("synthetic"),
+            node: Node::Capture {
+                capture: Capture::Boolean {
+                    at: CaptureTime::AtResolution { scope: ScopeId(1) },
+                    value: Expr::Compute(Box::new(Predicate::Exists {
+                        objects: attack::target_selector(
+                            Binding::new(event_id, ScopeId(1)),
+                            Binding::new(candidate_id, ScopeId(1)),
+                        ),
+                    })),
+                    into: CaptureRef {
+                        binding: Binding::new(99, ScopeId(1)),
+                    },
+                },
+            },
+        }]));
+        assert_eq!(WellFormedCardProgram::check(seed.node).is_ok(), accepted);
+    }
+}

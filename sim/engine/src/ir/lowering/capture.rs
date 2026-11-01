@@ -59,14 +59,35 @@ impl BodyContext<'_> {
         value: &ast::SelectedStat,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let (reference, property) = match value {
-            ast::SelectedStat::HpOf(reference) => (reference, Stat::Life),
-            ast::SelectedStat::PowerOf(reference) => (reference, Stat::Attack),
+        let reference = match value {
+            ast::SelectedStat::Hp(reference)
+            | ast::SelectedStat::Power(reference)
+            | ast::SelectedStat::Cost(reference)
+            | ast::SelectedStat::OriginalCost(reference) => reference,
         };
         if reference != name {
             return Err(unsupported(path));
         }
         let (index, selection) = self.selected_parameter(name, path)?;
+        let information = match value {
+            ast::SelectedStat::Hp(_) | ast::SelectedStat::Power(_) => NumberRead::Stats {
+                object: ObjectView::Selected { selection },
+                property: if matches!(value, ast::SelectedStat::Hp(_)) {
+                    Stat::Life
+                } else {
+                    Stat::Attack
+                },
+                view: CharacteristicView::Effective,
+            },
+            ast::SelectedStat::Cost(_) | ast::SelectedStat::OriginalCost(_) => NumberRead::Cost {
+                object: ObjectView::Selected { selection },
+                view: if matches!(value, ast::SelectedStat::OriginalCost(_)) {
+                    CharacteristicView::Original
+                } else {
+                    CharacteristicView::Effective
+                },
+            },
+        };
         let into = CaptureRef {
             binding: Binding::new(self.allocator.id(path)?, selection.key().0),
         };
@@ -78,13 +99,7 @@ impl BodyContext<'_> {
             at: CaptureTime::AtSelection {
                 decision: decision.id,
             },
-            value: Expr::Compute(Box::new(IntOperation::InformationOrZero {
-                information: NumberRead::Stats {
-                    object: ObjectView::Selected { selection },
-                    property,
-                    view: CharacteristicView::Effective,
-                },
-            })),
+            value: Expr::Compute(Box::new(IntOperation::InformationOrZero { information })),
             into,
         });
         Ok(Expr::Captured(into))

@@ -34,6 +34,7 @@ mod selection;
 mod tokens;
 mod transform;
 
+use super::events::subject::SubjectFields;
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Arithmetic, BatchPolicy, Binding, Bool, CardProgram, Cardinality, DamageAmount, DamageFlags,
@@ -482,6 +483,7 @@ impl Allocator {
             .as_ref()
             .map(|activated| payment::lower(&mut context, &activated.cost, &ability_source, path))
             .transpose()?;
+        let prepared_trigger = context.prepare_event(entry, keyword, body, path)?;
         let mut program =
             context.body(body, &format!("{path}/{head}"), &source, &ability_source)?;
         if let Some(payment) = optional {
@@ -508,7 +510,7 @@ impl Allocator {
         } else if let Some(play) = activated_play {
             (AbilityKind::Activated, Some(play), None)
         } else {
-            let trigger = context.trigger(entry, keyword, body, path)?;
+            let trigger = prepared_trigger.ok_or_else(|| unsupported(path))?;
             (AbilityKind::Triggered, triggered_play, Some(trigger))
         };
         if let Some(play) = &mut play {
@@ -821,7 +823,7 @@ fn lowered_subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                 )
-                .predicate(super::events::subject::SubjectFields::Entry(event)),
+                .predicate(SubjectFields::Entry(event)),
             })
         }
     }
@@ -906,6 +908,7 @@ fn lowered_change(
 }
 
 struct BodyContext<'definitions> {
+    subject_event: Option<SubjectFields>,
     entry_event: Option<Binding<super::EnterFieldEvent>>,
     cemetery_return: bool,
     departure_to_cemetery: bool,
@@ -941,6 +944,7 @@ impl<'definitions> BodyContext<'definitions> {
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
+            subject_event: None,
             leave_event: None,
             entry_event: None,
             cemetery_return: false,
@@ -975,6 +979,23 @@ impl<'definitions> BodyContext<'definitions> {
                 || (entry.activate.is_none() && entry.spell.is_none() && !body.targets.is_empty()),
             local_payment: None,
         }
+    }
+
+    fn prepare_event(
+        &mut self,
+        entry: &ast::Ability,
+        keyword: Option<KeywordId>,
+        body: &ast::Body,
+        path: &str,
+    ) -> Result<Option<TriggerSpec>, LoweringError> {
+        if entry.activate.is_some() || entry.spell.is_some() {
+            return Ok(None);
+        }
+        let trigger = self.trigger(entry, keyword, body, path)?;
+        if let TriggerCondition::Event { pattern } = &trigger.on {
+            self.subject_event = SubjectFields::from_pattern(pattern);
+        }
+        Ok(Some(trigger))
     }
 
     fn trigger(

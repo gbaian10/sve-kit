@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-044:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            enter_field:
+              who: self
+              sel:
+                kind: follower
+                trait: 式神
+          do:
+            - buff:
+                "on": it
+                power: 1
+            - grant:
+                "on": it
+                keywords:
+                  - rush

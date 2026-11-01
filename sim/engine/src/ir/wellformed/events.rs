@@ -4,7 +4,7 @@ use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::history_turn::played_by;
+use crate::ir::history_turn::{played_by, subject_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
@@ -723,6 +723,21 @@ impl Checker {
             return self.local_value(*binding, predicate);
         }
         self.history_window(&query.window, query.include_execution)?;
+        if subject_plan(query).is_some() {
+            return self.isolated(|checker| {
+                if let EventPattern::Attack { binding, .. } = &query.pattern {
+                    checker.define(*binding, BindingKind::Value)
+                } else if let EventPattern::Evolve { binding, .. } = &query.pattern {
+                    checker.define(*binding, BindingKind::Value)
+                } else if let EventPattern::Destroy { binding, .. } = &query.pattern {
+                    checker.define(*binding, BindingKind::Value)
+                } else if let EventPattern::LeaveField { binding, .. } = &query.pattern {
+                    checker.define(*binding, BindingKind::Value)
+                } else {
+                    checker.reject()
+                }
+            });
+        }
         self.isolated(|checker| checker.event_pattern(&query.pattern, None, false))
     }
 

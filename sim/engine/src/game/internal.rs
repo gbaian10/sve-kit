@@ -6,6 +6,7 @@
 )]
 
 use super::{Frame, Game, View, int, string};
+use crate::ir::AttackEvent;
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
     CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, CounterChangeEvent,
@@ -49,6 +50,7 @@ mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod grant;
 mod history_turn;
+pub(super) use history_turn::{SubjectHistoryEvent, SubjectHistoryFact};
 mod life;
 mod movement;
 mod numeric;
@@ -484,7 +486,8 @@ pub(super) struct Execution {
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
     trigger_occurrence: Option<u64>,
-    entry_object: Option<((ScopeId, u64), ObjectRef)>,
+    event_object: Option<(Expr<ObjectRef>, ObjectRef)>,
+    attack_event: Option<(Binding<AttackEvent>, AttackEvent)>,
     entry_method: Option<((ScopeId, u64), EntryMethod)>,
     entry_origin: Option<((ScopeId, u64), EntryOrigin)>,
     damage_event: Option<((ScopeId, u64), DamageEvent)>,
@@ -659,7 +662,8 @@ impl Game {
                 ability: None,
                 source_information: None,
                 trigger_occurrence: None,
-                entry_object: None,
+                event_object: None,
+                attack_event: None,
                 entry_method: None,
                 entry_origin: None,
                 damage_event: None,

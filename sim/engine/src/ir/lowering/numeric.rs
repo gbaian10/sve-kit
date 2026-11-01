@@ -109,6 +109,19 @@ impl BodyContext<'_> {
         let query = match value {
             ast::Objects::This(_) => return Ok(holder()),
             ast::Objects::Bound(name) => {
+                if name == "attack_target" {
+                    return self.attack_target_objects(path);
+                }
+                if name == "it" {
+                    return self
+                        .subject_event
+                        .map(|event| Selector::Objects {
+                            objects: vec![ObjectOperand::FromExpression {
+                                value: Box::new(event.object()),
+                            }],
+                        })
+                        .ok_or_else(|| unsupported(path));
+                }
                 return self
                     .targets
                     .get(name)

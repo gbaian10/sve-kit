@@ -19,6 +19,20 @@ Schema 根拒絕 standalone 文件。節點檢查不提供完整 authored／expa
 `combo: N` 依 CR13.2，在檢查本卡正式出牌時包含正在打出的本張，
 該暫時投影不寫入歷史；完成後與其他結算讀值都只計同一張一次。
 
+非 played 的 `history` 條件與 `history_count` 接通 `attacked`、`evolved`、
+`destroyed`、`left_field`，以及 `moved` 的場上離場子集。視窗只接受 `this_turn`，
+截止為結算讀取當下；`distinct: facts` 計事件，`subjects` 按事件當時的物件與世代去重。
+前四者可用 `who: self|opp`；`moved` 以 `from: field` 或
+`from: {who: self|opp, zone: field}` 表達來源，`to` 可省略或指定 `cemetery|hand`。
+`sel` 沿用已接通的主體種類、職業、類型、名稱、token 與 `other` 篩選。
+`history.at_least` 省略為 1；數值 `history_count` 不收該門檻。
+這些查詢不接受 `at: event`、排除執行、其他視窗或未接通的事件欄位。
+
+歷史在共用攻擊、進化及移區提交入口保存當時的公開特徵，與有無觀測者無關；
+稍後入場的入場曲也能查詢先前事件。移區後不重查新世代，付款送墓不算破壞。
+未准入主體的名稱別名不被猜成空集合；涉及該歷史主體的名稱篩選仍須完整名稱資訊，
+否則明確拒絕。回合切換清空，失敗操作沿用整筆狀態回復。
+
 ## 事件角色與欄位
 
 `A.event-subject-filter` 是非空屬性 filter：

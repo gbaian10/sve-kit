@@ -59,6 +59,17 @@ pub(super) fn leader_life_condition(
     reason = "Body expressions share the ability binding and definition environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn attack_target_objects(&mut self, path: &str) -> Result<Selector, LoweringError> {
+        let Some(super::super::events::subject::SubjectFields::Attack(event)) = self.subject_event
+        else {
+            return Err(unsupported(path));
+        };
+        let candidate = Binding::new(self.allocator.id(path)?, self.scope);
+        Ok(super::super::events::attack::target_selector(
+            event, candidate,
+        ))
+    }
+
     pub(super) fn activation_qualification(
         &mut self,
         activated: Option<&ast::Activate>,
@@ -118,6 +129,21 @@ impl BodyContext<'_> {
         })))
     }
 
+    fn history_condition(
+        &mut self,
+        history: &ast::HistoryQuery,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let threshold = history.at_least.unwrap_or(1);
+        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
+            left: self.history_number(history, path)?,
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Int(
+                i64::try_from(threshold).map_err(|_private| unsupported(path))?
+            )),
+        })))
+    }
+
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
@@ -125,6 +151,14 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::Is(condition) => {
+                let ast::AttackTargetReference::AttackTarget = condition.reference;
+                let ast::FollowerKind::Follower = condition.kind;
+                Predicate::Exists {
+                    objects: self.attack_target_objects(path)?,
+                }
+            }
+            ast::Condition::History(history) => return self.history_condition(history, path),
             ast::Condition::EnteredFrom(condition) => self.entered_from(condition, path)?,
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
@@ -352,22 +386,85 @@ impl BodyContext<'_> {
         })))
     }
 
-    fn played_count(
+    fn history_number(
         &mut self,
-        history: &ast::PlayedHistory,
+        history: &ast::HistoryQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let player = history.who.as_ref().map(|side| match side {
-            ast::LeaderSide::Controller => PlayerRef::Controller {},
-            ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
-        });
-        let event = Binding::new(self.allocator.id(path)?, self.scope);
+        let query = self.history_query(history, path)?;
         Ok(Expr::Compute(Box::new(IntOperation::FromNat {
             value: Expr::Live(Box::new(NatRead::HistoryCount {
-                query: super::super::history_turn::played_query(event, player),
-                count: super::super::HistoryCount::Facts,
+                query,
+                count: match history.distinct {
+                    Some(ast::HistoryDistinct::Subjects) => super::super::HistoryCount::Subjects,
+                    None | Some(ast::HistoryDistinct::Facts) => super::super::HistoryCount::Facts,
+                },
             })),
         })))
+    }
+
+    fn history_query(
+        &mut self,
+        history: &ast::HistoryQuery,
+        path: &str,
+    ) -> Result<super::super::HistoryQuery, LoweringError> {
+        use super::super::history_turn::{SubjectHistoryKind, subject_query};
+        let id = self.allocator.id(path)?;
+        let own = history
+            .who
+            .as_ref()
+            .map(|side| matches!(side, ast::LeaderSide::Controller));
+        if matches!(history.event, ast::HistoryEvent::Played) {
+            if history.sel.is_some()
+                || history.from.is_some()
+                || history.to.is_some()
+                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+            {
+                return Err(unsupported(path));
+            }
+            return Ok(super::super::history_turn::played_query(
+                Binding::new(id, self.scope),
+                own.map(|own| {
+                    if own {
+                        PlayerRef::Controller {}
+                    } else {
+                        super::super::events::timing::opponent()
+                    }
+                }),
+            ));
+        }
+        let mut filter = super::movement::movement_filter(own, false, history.sel.as_ref(), false);
+        let kind = match history.event {
+            ast::HistoryEvent::Attacked => SubjectHistoryKind::Attack,
+            ast::HistoryEvent::Evolved => SubjectHistoryKind::Evolve,
+            ast::HistoryEvent::Destroyed => SubjectHistoryKind::Destroy,
+            ast::HistoryEvent::LeftField => SubjectHistoryKind::Leave,
+            ast::HistoryEvent::Moved => {
+                if history.who.is_some() {
+                    return Err(unsupported(path));
+                }
+                let from = history.from.as_ref().ok_or_else(|| unsupported(path))?;
+                filter.own = match from {
+                    ast::HistoryOrigin::Zone(ast::FieldOrigin::Field) => None,
+                    ast::HistoryOrigin::Owned {
+                        who,
+                        zone: ast::FieldOrigin::Field,
+                    } => Some(matches!(who, ast::LeaderSide::Controller)),
+                };
+                match history.to {
+                    Some(ast::DepartureDestination::Cemetery) => SubjectHistoryKind::Cemetery,
+                    Some(ast::DepartureDestination::Hand) => SubjectHistoryKind::Hand,
+                    None => SubjectHistoryKind::Leave,
+                }
+            }
+            ast::HistoryEvent::Played => return Err(unsupported(path)),
+        };
+        if !matches!(history.event, ast::HistoryEvent::Moved)
+            && (history.from.is_some() || history.to.is_some())
+        {
+            return Err(unsupported(path));
+        }
+        Ok(subject_query(kind, id, self.scope, &filter))
     }
 
     fn public_exists(
@@ -409,6 +506,26 @@ impl BodyContext<'_> {
         Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
     }
 
+    fn body_life(
+        &mut self,
+        hp_of: &ast::BodyStatReference,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        match hp_of {
+            ast::BodyStatReference::This => Ok(this_number(
+                &ast::This::This,
+                Some(Stat::Life),
+                CharacteristicView::Effective,
+            )),
+            ast::BodyStatReference::AttackTarget => {
+                Ok(Expr::Compute(Box::new(IntOperation::Sum {
+                    objects: self.attack_target_objects(path)?,
+                    property: super::super::NumericProperty::Life,
+                })))
+            }
+        }
+    }
+
     pub(super) fn number(
         &mut self,
         value: &ast::Number,
@@ -422,11 +539,7 @@ impl BodyContext<'_> {
                 Some(Stat::Attack),
                 CharacteristicView::Effective,
             )),
-            ast::Number::Life { hp_of } => Ok(this_number(
-                hp_of,
-                Some(Stat::Life),
-                CharacteristicView::Effective,
-            )),
+            ast::Number::Life { hp_of } => self.body_life(hp_of, path),
             ast::Number::Cost { cost_of } => {
                 Ok(this_number(cost_of, None, CharacteristicView::Effective))
             }
@@ -435,7 +548,12 @@ impl BodyContext<'_> {
                 None,
                 CharacteristicView::Original,
             )),
-            ast::Number::HistoryCount { history_count } => self.played_count(history_count, path),
+            ast::Number::HistoryCount { history_count } => {
+                if history_count.at_least.is_some() {
+                    return Err(unsupported(path));
+                }
+                self.history_number(history_count, path)
+            }
             ast::Number::ReceiptCount { count } => self.receipt_count(count, path),
             ast::Number::CountOf { count_of } => self.count_of(count_of, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),

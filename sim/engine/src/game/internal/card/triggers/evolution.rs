@@ -1,6 +1,7 @@
 //! Evolution facts are captured around the actual rule procedure, after its effective print changes.
 use super::{Cause, Game, Result, SnapshotId, player_id, unsupported};
 use crate::game::Frame;
+use crate::game::internal::SubjectHistoryEvent;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{Ability, AbilityOrigin, KeywordId, Located};
 use crate::ir::{
@@ -95,6 +96,11 @@ impl Game {
         original_cause: &serde_json::Value,
         frame: &Frame,
     ) -> Result<()> {
+        if !self.card_runtime.is_empty() {
+            let observation =
+                self.internal_subject_history(holder, SubjectHistoryEvent::Evolve, None, false)?;
+            self.state.ir_subject_history.push(observation);
+        }
         let Some(plan) = plan else { return Ok(()) };
         let observers = self.evolution_observers()?;
         let subject_controller = player_id(&self.object(holder)?.controller)?;

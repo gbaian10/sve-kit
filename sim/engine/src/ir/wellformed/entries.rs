@@ -1,5 +1,6 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
+use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
 use crate::ir::prevention;
@@ -481,7 +482,10 @@ impl Checker {
         match &trigger.on {
             TriggerCondition::Event { pattern } => {
                 self.env.trigger = Some(trigger.view);
-                self.event_pattern(pattern, Some(trigger.view), true)
+                self.event_pattern(pattern, Some(trigger.view), true)?;
+                self.env.trigger_subject =
+                    SubjectFields::from_pattern(pattern).map(SubjectFields::object);
+                Ok(())
             }
             TriggerCondition::State { .. } => self.reject(),
         }

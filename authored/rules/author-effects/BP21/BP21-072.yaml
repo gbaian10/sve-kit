@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-072:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy:
+                ref: enemy
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: selection
+                      selection: enemy
+                      value:
+                        orig_cost_of: enemy
+                    op: ge
+                    right: 4
+                then:
+                  - draw:
+                      who: self
+                      n: 1
