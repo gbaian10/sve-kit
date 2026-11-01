@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-031:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                kind: follower
+                other: true
+          do:
+            - life:
+                who: self
+                delta: 1

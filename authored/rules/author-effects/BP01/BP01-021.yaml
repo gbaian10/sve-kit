@@ -11,15 +11,6 @@ cards:
           date: "2026-10-31"
     abilities:
       - line: 1
-        auto:
-          on:
-            enter_field:
-              who: self
-              sel:
-                kind: follower
-                other: true
-          do:
-            - buff:
-                on: this
-                power: 1
-                hp: 1
+        use: buff_source_on_other_allied_follower_entry.v1
+        params:
+          hp_reduction: 0

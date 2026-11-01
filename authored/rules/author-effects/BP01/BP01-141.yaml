@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-141:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-10-31"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            left_field:
+              who: self
+              sel:
+                kind: amulet
+                other: true
+              during:
+                turn: self
+          do:
+            - create:
+                token: ホーリータイガー
+                to: field
+                n: 1
+                bind: tiger
+            - grant:
+                on: tiger
+                keywords:
+                  - ward
+          per_turn: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T17
