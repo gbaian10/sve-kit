@@ -7,6 +7,7 @@ pub(super) use dynamic::check_each;
 
 use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_name, unsupported};
 use crate::game::tokens::{prints_for_names, token_combinations};
+use crate::ir::events::timing::opponent;
 use crate::ir::{
     Action, Control, Expr, Instruction, Located, Nat, Node, PlayerRef, Posture, Program, ReceiptId,
     Requirement, TokenDestination, TokenOutcome, TokenSpec, ZoneKind, ZoneRef,
@@ -35,10 +36,11 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     if tokens.is_empty() {
         return None;
     }
-    if !matches!(
+    if !(matches!(
         zone.player,
         PlayerRef::Controller {} | PlayerRef::Bound { .. }
-    ) || !matches!(zone.kind, ZoneKind::Ex | ZoneKind::Field)
+    ) || zone.player == opponent())
+        || !matches!(zone.kind, ZoneKind::Ex | ZoneKind::Field)
         || !entry_effects.is_empty()
     {
         return None;
@@ -49,7 +51,8 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
             Expr::Literal(name) => {
                 name.0 == token.template.0
                     && (matches!(token.count, Expr::Literal(_))
-                        || dynamic::projection(&token.count).is_some())
+                        || dynamic::projection(&token.count).is_some()
+                        || dynamic::zone_count(&token.count).is_some())
             }
             _ => false,
         })

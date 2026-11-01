@@ -1,10 +1,34 @@
 use super::super::{Execution, Fact, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Control, DestroyOutcome, Expr, LkiReason, MemberProjection, MoveMethod, MovementReceipt, Nat,
-    NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectView, PlayerOrder, PlayerRead,
-    PlayerRef, PlayerRelation, Predicate, ReceiptLocation, ReceiptReference, Role, Selector,
-    StageMode, ZoneKind,
+    Control, DestroyOutcome, Expr, IntOperation, LkiReason, MemberProjection, MoveMethod,
+    MovementReceipt, Nat, NatOperation, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectView,
+    PlayerOrder, PlayerRead, PlayerRef, PlayerRelation, Predicate, ReceiptLocation,
+    ReceiptReference, Role, Selector, StageMode, ZoneKind,
 };
+
+pub(super) fn zone_count(value: &Expr<Nat>) -> Option<&Selector> {
+    let Expr::Compute(operation) = value else {
+        return None;
+    };
+    let NatOperation::CheckedInt {
+        value: Expr::Compute(integer),
+    } = operation.as_ref()
+    else {
+        return None;
+    };
+    let IntOperation::FromNat {
+        value: Expr::Live(read),
+    } = integer.as_ref()
+    else {
+        return None;
+    };
+    let NatRead::ZoneCount { selector } = read.as_ref() else {
+        return None;
+    };
+    (super::super::card::selection::field_selector(selector).is_ok()
+        || super::super::card::selection::public_zone_selector(selector).is_ok())
+    .then_some(selector)
+}
 
 pub(super) fn projection(
     value: &Expr<Nat>,
@@ -70,6 +94,9 @@ pub(super) fn count(
 ) -> Result<u64> {
     if let Expr::Literal(Nat(count)) = value {
         return Ok(*count);
+    }
+    if zone_count(value).is_some() {
+        return execution.natural(game, value).map(|value| value.0);
     }
     let (receipt, player) =
         projection(value).ok_or_else(|| unsupported("destroyed-controller token count"))?;

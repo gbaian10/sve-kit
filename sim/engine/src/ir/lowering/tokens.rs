@@ -71,6 +71,9 @@ impl BodyContext<'_> {
         if name == "self" {
             return Ok(PlayerRef::Controller {});
         }
+        if name == "opp" {
+            return Ok(super::super::events::timing::opponent());
+        }
         self.players
             .get(name)
             .copied()
@@ -83,6 +86,11 @@ impl BodyContext<'_> {
         value: Option<&ast::TokenCount>,
         path: &str,
     ) -> Result<Expr<Nat>, LoweringError> {
+        if let Some(ast::TokenCount::Query { count }) = value {
+            return Ok(Expr::Compute(Box::new(NatOperation::CheckedInt {
+                value: self.zone_count(count, path)?,
+            })));
+        }
         let Some(ast::TokenCount::Receipt { count }) = value else {
             return Ok(Expr::Literal(Nat(match value {
                 Some(ast::TokenCount::Fixed(count)) => *count,

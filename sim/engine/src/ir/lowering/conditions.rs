@@ -480,7 +480,7 @@ impl BodyContext<'_> {
         }
     }
 
-    fn zone_count(
+    pub(super) fn zone_count(
         &mut self,
         count: &ast::CountQuery,
         path: &str,
