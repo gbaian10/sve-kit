@@ -194,7 +194,9 @@ impl BodyContext<'_> {
             }
             ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
-            | ast::InstalledEffect::Cannot(ast::Cannot::Stand(_)) => return Err(unsupported(path)),
+            | ast::InstalledEffect::Cannot(ast::Cannot::Stand(_) | ast::Cannot::Attack(_)) => {
+                return Err(unsupported(path));
+            }
         };
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Objects {
@@ -284,7 +286,9 @@ pub(super) fn lower(
                     },
                 )
             }
-            ast::StaticEffect::Grant(_) => return Err(unsupported(path)),
+            ast::StaticEffect::Grant(_) | ast::StaticEffect::Cannot(_) => {
+                return Err(unsupported(path));
+            }
         };
         let recipient = if on.is_none() && damage_source.is_some() {
             None

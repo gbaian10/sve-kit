@@ -44,6 +44,7 @@ mod counters;
 mod discard;
 mod drive;
 mod duration;
+pub(in crate::game) use card::attack_restrictions::AttackLock;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod grant;
 mod history_turn;
@@ -1413,6 +1414,17 @@ impl Game {
                 if matches!(effect.as_ref(), Effect::Replacement { .. }) =>
             {
                 self.internal_install_prevention(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(
+                    effect.as_ref(),
+                    Effect::Permission {
+                        action: ActionPattern::Attack { .. },
+                        ..
+                    }
+                ) =>
+            {
+                self.internal_install_attack_restriction(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {

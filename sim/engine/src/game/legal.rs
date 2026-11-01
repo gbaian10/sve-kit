@@ -377,7 +377,8 @@ impl Game {
         }
         let keys = self.keywords(id)?;
         let leader = target.ends_with(".leader");
-        if self.restricted(id, "attack")?
+        if self.internal_attack_restricted(id, target)?
+            || self.restricted(id, "attack")?
             || (leader
                 && (self.restricted(id, "attack_leader")?
                     || self.internal_leader_attack_locked(id)?))

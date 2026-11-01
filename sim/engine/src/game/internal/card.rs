@@ -27,6 +27,7 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+pub(in crate::game) mod attack_restrictions;
 mod costs;
 mod effect_evolution;
 mod evolution;
@@ -356,6 +357,10 @@ impl Game {
                 if ordinal != 0 {
                     return Err(unsupported("play restriction requires base face"));
                 }
+                continue;
+            }
+            if attack_restrictions::is_static(ability) {
+                attack_restrictions::check(located)?;
                 continue;
             }
             if static_keywords::is_static(ability) {
@@ -716,7 +721,8 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if static_keywords::is_static(ability)
+    if attack_restrictions::is_static(ability)
+        || static_keywords::is_static(ability)
         || prevention::is_static(ability)
         || card_permission(ability)
         || printed_keywords::card_declaration(ability).is_some()

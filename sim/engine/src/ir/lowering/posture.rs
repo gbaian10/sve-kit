@@ -5,7 +5,7 @@ use crate::ir::{
     Selector, StandScope, TimeAnchor,
 };
 
-fn player(who: ast::StandPlayer) -> PlayerRef {
+pub(super) fn player(who: ast::StandPlayer) -> PlayerRef {
     match who {
         ast::StandPlayer::Controller => PlayerRef::Controller {},
         ast::StandPlayer::Opponent => super::super::events::timing::opponent(),

@@ -8,7 +8,7 @@ use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
     Requirement,
 };
-use crate::ir::{Action, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
+use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
 use crate::ir::{effect_evolution, prevention};
@@ -323,6 +323,10 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     {
         return super::card::prevention::check_install(action, source);
     }
+    if matches!(action, Action::InstallEffect { effect, .. } if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::Attack { .. }, .. }))
+    {
+        return super::card::attack_restrictions::check_install(action);
+    }
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
     super::movement::check_action(action)?;
@@ -629,6 +633,7 @@ fn supported(code: &str) -> bool {
             | "read.cost"
             | "effect.permission"
             | "shape.PermissionSubject.Objects"
+            | "shape.ActionPattern.Attack"
             | "shape.ActionPattern.Stand"
             | "shape.StandScope.RuleStart"
             | "shape.DurationEnd.NextPhaseEdge"

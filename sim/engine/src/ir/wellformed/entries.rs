@@ -602,9 +602,15 @@ impl Checker {
                 self.selector(objects)?;
                 self.player(player)
             }
+            ActionPattern::Attack { attacker, target } => {
+                self.selector(attacker)?;
+                if let Some(target) = target {
+                    self.recipients(target)?;
+                }
+                Ok(())
+            }
             ActionPattern::PlayCard { .. }
             | ActionPattern::PlayAbility { .. }
-            | ActionPattern::Attack { .. }
             | ActionPattern::ChooseTarget { .. }
             | ActionPattern::Draw { .. }
             | ActionPattern::Stand {

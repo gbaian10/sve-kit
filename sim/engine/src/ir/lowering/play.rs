@@ -337,7 +337,7 @@ impl BodyContext<'_> {
         ))
     }
 
-    fn recipients(
+    pub(super) fn recipients(
         &mut self,
         recipients: &ast::Recipients,
         path: &str,

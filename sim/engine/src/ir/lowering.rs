@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
 mod ast;
+mod attack_restrictions;
 mod capture;
 mod combat;
 mod conditions;
@@ -388,6 +389,7 @@ impl Allocator {
                     | ast::StaticEffect::DamageMod(_)
                     | ast::StaticEffect::DamageCap(_),
                 ) => prevention::lower,
+                Some(ast::StaticEffect::Cannot(_)) => attack_restrictions::lower,
                 None => return Err(unsupported(path)),
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
