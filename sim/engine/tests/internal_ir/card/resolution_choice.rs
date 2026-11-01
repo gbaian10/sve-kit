@@ -653,3 +653,62 @@ fn optional_can_move_an_inherited_look_receipt_but_cannot_invent_one() {
         ["move"]["ref"]["in"] = json!("unseen");
     lowerer().lower(&document).unwrap_err();
 }
+
+#[test]
+fn optional_counter_change_is_visible_to_a_later_counter_read() {
+    let mut input = tree(
+        &json!({"bind":"unused","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"optional":{"do":[{"counter":{"on":"this","name":"test","delta":2}}]}}),
+    );
+    let body = input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap();
+    body.remove(0);
+    body.push(json!({"draw":{"who":"self","n":{"counter":{"on":"this","name":"test"}}}}));
+    let programs = lowerer().lower(&input).unwrap();
+    for accept in [false, true] {
+        let mut initial = setup(
+            1,
+            json!([
+                {"id":"first","card":"unit-spell"},
+                {"id":"second","card":"unit-spell"},
+                {"id":"third","card":"unit-spell"}
+            ]),
+        );
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"source","card":"unit-follower","state":{"counters":{"test":1}}}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "optional-counter-integration",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let choice = awaiting(
+            game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        resolved(
+            game.answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::Integer(Nat(u64::from(accept))),
+            )
+            .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        let expected = if accept { 3_u64 } else { 1 };
+        assert_eq!(state["objects"]["source"]["counters"]["test"], expected);
+        assert_eq!(
+            state["P1"]["hand"].as_array().unwrap().len(),
+            usize::try_from(expected).unwrap()
+        );
+    }
+}
