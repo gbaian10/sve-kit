@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            banish:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+      - line: 2
+        fanfare:
+          cost:
+            act:
+              n: 2
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                n: 3
+                to: enemy
+            - life:
+                who: self
+                delta: 3

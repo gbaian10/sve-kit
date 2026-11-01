@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-086:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 7
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: リペアモード
+                n: 1
+                to: ex
+      - line: 3
+        activate:
+          cost:
+            banish:
+              n: 1
+              sel:
+                who: self
+                zone: ex
+                name: リペアモード
+          do:
+            - apply:
+                "on": this
+                effect:
+                  evolve_cost_mod:
+                    "on": affected
+                    delta: -1
+                until: turn
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP07-T02

@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-052:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        auto:
+          "on":
+            damaged:
+              recipient: this
+              kind: ability
+              during:
+                turn: self
+          do:
+            - apply:
+                "on": this
+                effect:
+                  evolve_cost_mod:
+                    "on": affected
+                    set: 0
+                until: turn
