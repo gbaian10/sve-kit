@@ -1,8 +1,14 @@
 //! Attack subscriptions reuse the committed subject and existing characteristic predicates.
+
 use super::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     AbilitiesRead, Ability, AbilityPredicate, AttackEvent, Binding, Bool, CharacteristicView,
     Comparison, Expr, Int, IntOperation, KeywordId, NumberRead, Predicate, Stat,
+};
+use crate::ir::{
+    CardKind, Cardinality, DamageRecipient, KindRead, Nat, ObjectOperand, ObjectRef, ObjectView,
+    PlayerRef, PlayerRelation, PlayerSet, RecipientFields, SelectionView, Selector, TextQuantifier,
+    ZoneKind,
 };
 
 #[derive(Clone, Default)]
@@ -155,4 +161,74 @@ pub(crate) fn filter(ability: &Ability) -> Option<AttackFilter> {
             ..AttackFilter::default()
         })
     })
+}
+
+pub(crate) fn target_selector(
+    event: Binding<AttackEvent>,
+    candidate: Binding<ObjectRef>,
+) -> Selector {
+    Selector::Filter {
+        input: Box::new(Selector::Zone {
+            players: PlayerSet {
+                relation: PlayerRelation::All,
+                relative_to: PlayerRef::Controller {},
+                cardinality: Cardinality {
+                    minimum: Nat(2),
+                    maximum: Some(Nat(2)),
+                },
+                text_quantifier: TextQuantifier::All,
+            },
+            zone: ZoneKind::Field,
+            view: SelectionView::Current {},
+            binding: candidate,
+            predicate: Box::new(Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Live(Box::new(KindRead::Kind {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::Bound { binding: candidate }),
+                    },
+                    view: CharacteristicView::Effective,
+                })),
+                right: Expr::Literal(CardKind::Follower),
+            }))),
+        }),
+        binding: candidate,
+        predicate: Box::new(Expr::Compute(Box::new(Predicate::RecipientIsFollower {
+            recipient: DamageRecipient::FromExpression {
+                value: Box::new(Expr::Frozen(Box::new(RecipientFields::AttackTarget {
+                    event,
+                }))),
+            },
+            objects: Selector::Objects {
+                objects: vec![ObjectOperand::Bound { binding: candidate }],
+            },
+        }))),
+    }
+}
+
+pub(crate) fn target_plan(
+    selector: &Selector,
+) -> Option<(Binding<AttackEvent>, Binding<ObjectRef>)> {
+    let Selector::Filter {
+        binding, predicate, ..
+    } = selector
+    else {
+        return None;
+    };
+    let Expr::Compute(operation) = predicate.as_ref() else {
+        return None;
+    };
+    let Predicate::RecipientIsFollower {
+        recipient: DamageRecipient::FromExpression { value },
+        ..
+    } = operation.as_ref()
+    else {
+        return None;
+    };
+    let Expr::Frozen(fields) = value.as_ref() else {
+        return None;
+    };
+    let RecipientFields::AttackTarget { event } = fields.as_ref() else {
+        return None;
+    };
+    (*selector == target_selector(*event, *binding)).then_some((*event, *binding))
 }

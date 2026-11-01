@@ -131,13 +131,19 @@ impl Execution {
             _ => None,
         };
         if let Some(reference) = current {
-            // Current keeps its pre-existing Effective-only meaning.
-            if *view != CharacteristicView::Effective {
-                return Err(unsupported("number characteristic view"));
-            }
             let id = self.object_id(reference)?;
             if game.object(id)?.generation != reference.generation.0 {
                 return Err(invalid("stale Current information read"));
+            }
+            // Original cost does not require the target's unrelated abilities or numeric effects.
+            if matches!(object, ObjectView::Selected { .. })
+                && *view == CharacteristicView::Original
+                && matches!(read, NumberRead::Cost { .. })
+            {
+                return super::cost::printed_cost(&game.internal_cost_print(id)?["cost"]);
+            }
+            if *view != CharacteristicView::Effective {
+                return Err(unsupported("number characteristic view"));
             }
             return match read {
                 NumberRead::Cost { .. } => game.internal_effective_cost(id),

@@ -5,6 +5,7 @@ use super::{
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
+use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::grant;
 use crate::game::{Step, int, string};
 use crate::ir::LimitSpec;
@@ -214,6 +215,11 @@ impl Game {
         before: SnapshotId,
     ) -> Result<()> {
         use crate::ir::events::attack::filter;
+        if !self.card_runtime.is_empty() {
+            let observation =
+                self.internal_subject_history(attacker, SubjectHistoryEvent::Attack, None, false)?;
+            self.state.ir_subject_history.push(observation);
+        }
         if !self.card_runtime.definitions.cards.values().any(|program| {
             program
                 .card()

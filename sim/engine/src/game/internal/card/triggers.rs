@@ -20,7 +20,7 @@ use alloc::collections::BTreeMap;
 
 mod change;
 mod entry;
-pub(in crate::game::internal) mod entry_operand;
+pub(in crate::game::internal) mod event_operand;
 mod evolution;
 mod movement;
 mod played;
@@ -60,6 +60,7 @@ pub(super) struct PendingOccurrence {
 }
 
 pub(in crate::game) struct DeparturePlan {
+    history: Vec<super::super::SubjectHistoryFact>,
     updates: Vec<(u64, SourceSnapshot)>,
     departures: Vec<(PendingOccurrence, Object)>,
 }
@@ -302,6 +303,7 @@ impl Game {
         frame: &Frame,
     ) -> Result<DeparturePlan> {
         let mut plan = DeparturePlan {
+            history: Vec::new(),
             updates: Vec::new(),
             departures: Vec::new(),
         };
@@ -322,6 +324,11 @@ impl Game {
             }
         }
         for id in ids {
+            plan.history.extend(self.internal_departure_history(
+                id,
+                destinations.get(id).map(String::as_str),
+                frame,
+            )?);
             let observed = self.movement_departures(id, destinations, before, side, frame)?;
             let observed_header = observed.first().map(|pending| pending.header.clone());
             for pending in observed {
@@ -397,6 +404,7 @@ impl Game {
         &mut self,
         plan: DeparturePlan,
     ) -> Result<()> {
+        self.internal_commit_subject_history(plan.history)?;
         if plan.updates.is_empty() && plan.departures.is_empty() {
             return Ok(());
         }
@@ -589,13 +597,13 @@ impl Game {
             };
             let mut execution = self.new_card_execution(context)?;
             pending.bind_leave_move(&mut execution)?;
+            pending.bind_event_object(&mut execution)?;
             if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)
                 && let TriggerCondition::Event {
                     pattern: EventPattern::EnterField { binding, .. },
                 } = &trigger.on
             {
-                execution.entry_object = Some((binding.key(), event.object));
                 execution.entry_method = Some((binding.key(), event.method));
                 execution.entry_origin = Some((binding.key(), event.from));
             }
@@ -637,6 +645,35 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    fn bind_event_object(&self, execution: &mut Execution) -> Result<()> {
+        use crate::ir::events::subject::SubjectFields;
+        let Some(trigger) = &self.ability.node.trigger else {
+            return Ok(());
+        };
+        let TriggerCondition::Event { pattern } = &trigger.on else {
+            return Ok(());
+        };
+        let Some(fields) = SubjectFields::from_pattern(pattern) else {
+            return Ok(());
+        };
+        let departure = self.leave.map(|event| EventPayload::LeaveField { event });
+        let payload = self
+            .timing
+            .as_ref()
+            .or(departure.as_ref())
+            .ok_or_else(|| invalid("missing triggering subject payload"))?;
+        let object = fields
+            .payload_object(payload)
+            .ok_or_else(|| invalid("triggering subject payload type disagrees"))?;
+        if let (SubjectFields::Attack(binding), Some(EventPayload::Attack { event })) =
+            (fields, self.timing.as_ref())
+        {
+            execution.attack_event = Some((binding, *event));
+        }
+        execution.event_object = Some((fields.object(), object));
+        Ok(())
+    }
+
     fn bind_leave_move(&self, execution: &mut Execution) -> Result<()> {
         if let Some(trigger) = &self.ability.node.trigger
             && let TriggerCondition::Event {

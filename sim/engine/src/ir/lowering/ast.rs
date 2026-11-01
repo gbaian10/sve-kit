@@ -1139,7 +1139,7 @@ pub(super) enum Number {
         power_of: This,
     },
     Life {
-        hp_of: This,
+        hp_of: BodyStatReference,
     },
     Cost {
         cost_of: This,
@@ -1148,7 +1148,7 @@ pub(super) enum Number {
         orig_cost_of: This,
     },
     HistoryCount {
-        history_count: PlayedHistory,
+        history_count: HistoryQuery,
     },
     LeaderLife {
         leader_life: LeaderSide,
@@ -1190,24 +1190,40 @@ pub(super) enum Number {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct PlayedHistory {
+pub(super) struct HistoryQuery {
     #[serde(rename = "event")]
-    pub _event: PlayedEvent,
+    pub event: HistoryEvent,
     #[serde(rename = "window")]
     pub _window: ThisTurn,
     pub who: Option<LeaderSide>,
     #[serde(rename = "distinct")]
-    pub _distinct: Option<FactCount>,
+    pub distinct: Option<HistoryDistinct>,
+    pub sel: Option<MovementSubject>,
+    pub from: Option<HistoryOrigin>,
+    pub to: Option<DepartureDestination>,
+    pub at_least: Option<u64>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum PlayedEvent {
+pub(super) enum HistoryEvent {
     Played,
+    Attacked,
+    Evolved,
+    Destroyed,
+    LeftField,
+    Moved,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum HistoryOrigin {
+    Zone(FieldOrigin),
+    Owned { who: LeaderSide, zone: FieldOrigin },
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum FactCount {
+pub(super) enum HistoryDistinct {
     Facts,
+    Subjects,
 }
 
 #[derive(Deserialize)]
@@ -1225,8 +1241,14 @@ pub(super) enum SelectionTime {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SelectedStat {
-    HpOf(String),
-    PowerOf(String),
+    #[serde(rename = "hp_of")]
+    Hp(String),
+    #[serde(rename = "power_of")]
+    Power(String),
+    #[serde(rename = "cost_of")]
+    Cost(String),
+    #[serde(rename = "orig_cost_of")]
+    OriginalCost(String),
 }
 
 #[derive(Deserialize)]
@@ -1593,6 +1615,8 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    Is(AttackTargetCondition),
+    History(HistoryQuery),
     EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
     PlayedFrom(PlayedFromCondition),
@@ -2093,4 +2117,28 @@ pub(super) enum ChangeStats {
 pub(super) enum ChangeStat {
     Power,
     Hp,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BodyStatReference {
+    This,
+    AttackTarget,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AttackTargetCondition {
+    #[serde(rename = "ref")]
+    pub reference: AttackTargetReference,
+    pub kind: FollowerKind,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AttackTargetReference {
+    AttackTarget,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FollowerKind {
+    Follower,
 }

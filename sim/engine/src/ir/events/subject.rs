@@ -2,11 +2,11 @@
 use crate::ir::{
     AttackEvent, Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView,
     Characteristics, CharacteristicsFields, ClassFrozen, ClassId, ClassRead, DamageEvent,
-    DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventSnapshotPolicy, EvolveEvent,
-    Expr, Info, KindFrozen, KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, ObjectFrozen,
-    ObjectOperand, ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef,
-    PostureEvent, Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, ZoneFrozen,
-    ZoneKind, ZoneOperation,
+    DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventPattern, EventPayload,
+    EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen, KindRead, LeaveFieldEvent,
+    NamesFrozen, NamesRead, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayEvent,
+    PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent, Predicate, Role, SnapshotFields,
+    TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
@@ -50,7 +50,40 @@ pub(super) fn attack_view(event: Binding<AttackEvent>) -> ObjectView {
 }
 
 impl SubjectFields {
-    fn object(self) -> Expr<ObjectRef> {
+    pub(crate) const fn from_pattern(pattern: &EventPattern) -> Option<Self> {
+        if let EventPattern::EnterField { binding, .. } = pattern {
+            Some(Self::Entry(*binding))
+        } else if let EventPattern::EnterEx { binding, .. } = pattern {
+            Some(Self::Ex(*binding))
+        } else if let EventPattern::Attack { binding, .. } = pattern {
+            Some(Self::Attack(*binding))
+        } else if let EventPattern::Evolve { binding, .. } = pattern {
+            Some(Self::Evolve(*binding))
+        } else if let EventPattern::Destroy { binding, .. } = pattern {
+            Some(Self::Destroy(*binding))
+        } else if let EventPattern::LeaveField { binding, .. } = pattern {
+            Some(Self::Leave(*binding))
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn payload_object(self, payload: &EventPayload) -> Option<ObjectRef> {
+        Some(match (self, payload) {
+            (Self::Entry(_), EventPayload::EnterField { event }) => event.object,
+            (Self::Ex(_), EventPayload::EnterEx { event }) => event.object,
+            (Self::Attack(_), EventPayload::Attack { event }) => event.attacker,
+            (Self::Evolve(_), EventPayload::Evolve { event }) => event.subject,
+            (Self::Destroy(_), EventPayload::Destroy { event }) => event.object_before,
+            (
+                Self::Cemetery(_) | Self::Hand(_) | Self::Leave(_),
+                EventPayload::LeaveField { event },
+            ) => event.object_before,
+            _ => return None,
+        })
+    }
+
+    pub(crate) fn object(self) -> Expr<ObjectRef> {
         Expr::Frozen(Box::new(match self {
             Self::Attack(event) => ObjectFrozen::AttackAttacker { event },
             Self::Posture(event) => ObjectFrozen::PostureObject { event },

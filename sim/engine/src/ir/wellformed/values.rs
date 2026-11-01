@@ -4,13 +4,14 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
+use crate::ir::events::attack::target_plan;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
-    CardKind, CardName, ClassRead, EventSnapshotPolicy, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ObjectFrozen, RuntimeObjectView, TraitId, TraitsRead,
+    CardKind, CardName, ClassRead, Info, KindRead, MemberProjection, MovementReceipt, NamesRead,
+    RuntimeObjectView, TraitId, TraitsRead,
 };
 
 #[expect(
@@ -498,8 +499,8 @@ impl Checker {
             }
             ObjectOperand::FollowEventMove { event } => self.follow_event(*event),
             ObjectOperand::FromExpression { value }
-                if self.env.trigger == Some(EventSnapshotPolicy::AfterEntry)
-                    && matches!(value.as_ref(), Expr::Frozen(field) if matches!(field.as_ref(), ObjectFrozen::EnterFieldObject { .. })) =>
+                if self.env.chooser.is_none()
+                    && self.env.trigger_subject.as_ref() == Some(value.as_ref()) =>
             {
                 self.projection(value)
             }
@@ -554,6 +555,13 @@ impl Checker {
     }
 
     pub(super) fn selector(&mut self, selector: &Selector) -> Checked {
+        if let Some((event, candidate)) = target_plan(selector) {
+            if self.env.chooser.is_some() || !self.env.trigger_events.contains(&event.key()) {
+                return self.reject();
+            }
+            self.reference(event, BindingKind::Value)?;
+            return self.candidate(candidate, &Expr::Literal(Bool(true)));
+        }
         // This slice has object snapshots, but no event-scoped collection read.
         if self.event_capture() {
             return self.reject();

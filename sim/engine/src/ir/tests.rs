@@ -86,7 +86,8 @@ fn bp08_body() -> Program {
         players: controller_set(),
         zone: ZoneKind::Deck,
         view: SelectionView::Current {},
-        binding: Binding::new(2, ScopeId(1)),
+        // The trigger reserves its subject and facet before lowering the body.
+        binding: Binding::new(4, ScopeId(1)),
         predicate: Box::new(Expr::Literal(Bool(true))),
     };
     let count = Expr::Compute(Box::new(IntOperation::Arithmetic {

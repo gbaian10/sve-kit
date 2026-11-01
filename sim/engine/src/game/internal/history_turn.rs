@@ -1,26 +1,33 @@
-//! Read the existing committed-play counter; only Combo projects a pending formal card.
+//! Current-turn queries read committed public facts; only Combo projects a pending formal play.
+
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
+use crate::ir::PlayerId;
+use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::{PlayedBy, played_by};
+use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
+use crate::ir::{CardKind, CardName, ClassId, HistoryCount, TraitId};
 use crate::ir::{ExecutionRef, HistoryQuery, PlayerRef, Requirement, Requirements};
+use alloc::collections::BTreeSet;
+use serde::{Deserialize, Serialize};
 
 pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
-    let suffix = match requirement.capability.code {
-        "read.event-field" | "shape.PlayerFrozen.PlayController" => {
-            "/query/pattern/predicate/compute/left/frozen"
-        }
-        "predicate.player-equals" | "shape.Predicate.PlayerEquals" => {
-            "/query/pattern/predicate/compute"
-        }
-        _ => return false,
-    };
     requirement.locations.iter().all(|location| {
-        location.ir_path.strip_suffix(suffix).is_some_and(|read| {
-            requirements.required.iter().any(|other| {
-                other.capability.code == "read.history.count"
-                    && other.locations.iter().any(|at| at.ir_path == read)
+        location
+            .ir_path
+            .strip_suffix("/query/pattern")
+            .or_else(|| {
+                location
+                    .ir_path
+                    .split_once("/query/pattern/")
+                    .map(|(read, _)| read)
             })
-        })
+            .is_some_and(|read| {
+                requirements.required.iter().any(|other| {
+                    other.capability.code == "read.history.count"
+                        && other.locations.iter().any(|at| at.ir_path == read)
+                })
+            })
     })
 }
 
@@ -73,4 +80,112 @@ pub(super) fn played(execution: &Execution, game: &Game, query: &HistoryQuery) -
             .map(Nat)
             .ok_or_else(|| invalid("played-card count overflow"))
     }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(in crate::game) enum SubjectHistoryEvent {
+    Attack,
+    Evolve,
+    Leave,
+}
+
+/// Only public characteristics needed by the admitted current-turn queries are retained.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(in crate::game) struct SubjectHistoryFact {
+    pub(in crate::game::internal) event: SubjectHistoryEvent,
+    pub(in crate::game::internal) destination: Option<String>,
+    pub(in crate::game::internal) object: u64,
+    pub(in crate::game::internal) generation: u64,
+    pub(in crate::game::internal) controller: u32,
+    pub(in crate::game::internal) active: u32,
+    pub(in crate::game::internal) kind: String,
+    pub(in crate::game::internal) class: String,
+    pub(in crate::game::internal) traits: Vec<String>,
+    pub(in crate::game::internal) names: Option<Vec<String>>,
+    pub(in crate::game::internal) token: bool,
+    pub(in crate::game::internal) destroyed: bool,
+}
+
+pub(super) fn subjects(
+    execution: &Execution,
+    game: &Game,
+    query: &HistoryQuery,
+    count: HistoryCount,
+) -> Result<Nat> {
+    let Some((event, filter)) = subject_plan(query) else {
+        if count != HistoryCount::Facts {
+            return Err(unsupported("played history subject count"));
+        }
+        return played(execution, game, query);
+    };
+    let mut facts = 0_u64;
+    let mut identities = BTreeSet::new();
+    for fact in &game.state.ir_subject_history {
+        let eligible = match event {
+            SubjectHistoryKind::Attack => fact.event == SubjectHistoryEvent::Attack,
+            SubjectHistoryKind::Evolve => fact.event == SubjectHistoryEvent::Evolve,
+            SubjectHistoryKind::Destroy => {
+                fact.event == SubjectHistoryEvent::Leave && fact.destroyed
+            }
+            SubjectHistoryKind::Leave => fact.event == SubjectHistoryEvent::Leave,
+            SubjectHistoryKind::Cemetery => {
+                fact.event == SubjectHistoryEvent::Leave
+                    && fact.destination.as_deref() == Some("cemetery")
+            }
+            SubjectHistoryKind::Hand => {
+                fact.event == SubjectHistoryEvent::Leave
+                    && fact.destination.as_deref() == Some("hand")
+            }
+        };
+        if !eligible {
+            continue;
+        }
+        let kind = match fact.kind.as_str() {
+            "follower" => CardKind::Follower,
+            "spell" => CardKind::Spell,
+            "amulet" => CardKind::Amulet,
+            _ => return Err(invalid("invalid saved history kind")),
+        };
+        let class = ClassId(fact.class.clone());
+        let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
+        if filter.name.is_some() && fact.names.is_none() {
+            return Err(unsupported("unadmitted historical subject names"));
+        }
+        let names = fact
+            .names
+            .iter()
+            .flatten()
+            .cloned()
+            .map(CardName)
+            .collect::<Vec<_>>();
+        let information = SubjectInformation {
+            kind,
+            class: Some(&class),
+            traits: &traits,
+            names: &names,
+        };
+        let itself = execution.ability.is_some_and(|source| {
+            source.holder.id.0 == fact.object && source.holder.generation.0 == fact.generation
+        });
+        if filter.matches_information(
+            &information,
+            itself,
+            execution.context.controller,
+            PlayerId {
+                seat: fact.controller,
+            },
+            PlayerId { seat: fact.active },
+            fact.token,
+        ) {
+            facts = facts
+                .checked_add(1)
+                .ok_or_else(|| invalid("history count overflow"))?;
+            identities.insert((fact.object, fact.generation));
+        }
+    }
+    Ok(Nat(match count {
+        HistoryCount::Facts => facts,
+        HistoryCount::Subjects => u64::try_from(identities.len()).map_err(invalid)?,
+    }))
 }

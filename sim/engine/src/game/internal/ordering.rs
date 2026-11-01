@@ -3,6 +3,8 @@
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::ir::events::attack::target_plan;
+use crate::ir::history_turn::subject_plan;
 use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
@@ -347,6 +349,11 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
 }
 
 fn mask_public_number(number: &mut Expr<Int>) {
+    if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, .. } if target_plan(objects).is_some()))
+    {
+        *number = Expr::Literal(Int(0));
+        return;
+    }
     if let Expr::Compute(operation) = number {
         match operation.as_mut() {
             IntOperation::FromNat { value } => mask_public_natural(value),
@@ -370,6 +377,11 @@ fn mask_public_number(number: &mut Expr<Int>) {
 }
 
 fn mask_public_natural(value: &mut Expr<Nat>) {
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some()))
+    {
+        *value = Expr::Literal(Nat(0));
+        return;
+    }
     let selector = match value {
         Expr::Live(read) => match read.as_mut() {
             NatRead::ZoneCount { selector } => selector,
@@ -403,6 +415,10 @@ fn mask_public_recipients(recipients: &mut RecipientSet) {
 }
 
 fn mask_public_predicate(selector: &mut Selector) {
+    if target_plan(selector).is_some() {
+        *selector = Selector::Objects { objects: vec![] };
+        return;
+    }
     match selector {
         Selector::Difference { input, except }
             if matches!(except.as_ref(), Selector::Objects { objects }
@@ -755,6 +771,6 @@ fn mask_entry_origin(inspected: &mut Node) {
         capture: Capture::Boolean { value, .. },
     } = inspected
     {
-        super::card::triggers::entry_operand::mask_condition(value, None);
+        super::card::triggers::event_operand::mask_condition(value, None);
     }
 }

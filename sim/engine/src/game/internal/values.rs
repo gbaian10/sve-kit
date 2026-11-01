@@ -6,14 +6,17 @@ use super::{
     ResolvedRecipients, Result, RuntimeDamageRecipient, Selector, Slot, ZoneKind, contains, int,
     invalid, player_id, seat_name, unsupported,
 };
+use crate::ir::AttackEvent;
+use crate::ir::events::attack::target_plan;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
-    ExecutionRef, HistoryCount, PaymentReference, SpellCountTime, ValueEquality,
+    ExecutionRef, PaymentReference, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
     ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView,
 };
+use crate::ir::{NumericProperty, Stat};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -162,22 +165,68 @@ impl Execution {
                 {
                     self.object(game, &ObjectOperand::SourceHolder {})
                 }
-                Expr::Frozen(frozen) => {
-                    let ObjectFrozen::EnterFieldObject { event } = frozen.as_ref() else {
-                        return Err(unsupported("object expression"));
-                    };
-                    self.entry_object
-                        .filter(|(binding, _)| *binding == event.key())
-                        .map(|(_, saved)| saved)
-                        .ok_or_else(|| invalid("missing entry object authority"))
-                }
+                Expr::Frozen(_) => self
+                    .event_object
+                    .as_ref()
+                    .filter(|(expression, _)| expression == value.as_ref())
+                    .map(|(_, saved)| *saved)
+                    .ok_or_else(|| unsupported("missing triggering object authority")),
                 _ => Err(unsupported("object expression")),
             },
             _ => Err(unsupported("object operand")),
         }
     }
 
+    fn attack_target_objects(
+        &self,
+        game: &Game,
+        binding: Binding<AttackEvent>,
+    ) -> Result<Vec<ObjectRef>> {
+        let event = self
+            .attack_event
+            .filter(|(saved, _)| *saved == binding)
+            .map(|(_, event)| event)
+            .ok_or_else(|| unsupported("missing attack target authority"))?;
+        let RuntimeDamageRecipient::Object { object } = event.target else {
+            return Ok(Vec::new());
+        };
+        let id = self.object_id(object)?;
+        let current = game.object(id)?;
+        Ok(
+            if current.generation == object.generation.0
+                && current.zone == "field"
+                && game.object_type(id)?.contains("フォロワー")
+            {
+                vec![object]
+            } else {
+                Vec::new()
+            },
+        )
+    }
+
+    fn unfiltered_zone_objects(
+        &self,
+        game: &Game,
+        players: &PlayerSet,
+        zone: ZoneKind,
+        predicate: &Expr<Bool>,
+    ) -> Result<Vec<ObjectRef>> {
+        let mut objects = Vec::new();
+        // This fallback's admitted predicates do not read a candidate binding.
+        if self.boolean(game, predicate)?.0 {
+            for player in self.players(game, players)? {
+                for id in game.zone_ids(seat_name(player)?, zone_name(zone)?) {
+                    objects.push(self.reference(game, &id)?);
+                }
+            }
+        }
+        Ok(objects)
+    }
+
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+        if let Some((binding, _)) = target_plan(selector) {
+            return self.attack_target_objects(game, binding);
+        }
         let objects = match selector {
             Selector::Zone {
                 zone: ZoneKind::Field,
@@ -206,18 +255,7 @@ impl Execution {
                 zone,
                 predicate,
                 ..
-            } => {
-                let mut objects = Vec::new();
-                // Other admitted predicates do not read a candidate binding.
-                if self.boolean(game, predicate)?.0 {
-                    for player in self.players(game, players)? {
-                        for id in game.zone_ids(seat_name(player)?, zone_name(*zone)?) {
-                            objects.push(self.reference(game, &id)?);
-                        }
-                    }
-                }
-                objects
-            }
+            } => self.unfiltered_zone_objects(game, players, *zone, predicate)?,
             Selector::Union { sets } => sets
                 .iter()
                 .map(|set| self.objects(game, set))
@@ -511,7 +549,27 @@ impl Execution {
                         .collect::<Result<Vec<_>>>()?;
                     arithmetic(*operation, &values).map(Int)
                 }
-                IntOperation::Sum { .. } => Err(unsupported("signed operation")),
+                IntOperation::Sum { objects, property } => {
+                    if target_plan(objects).is_none() {
+                        return Err(unsupported("signed aggregate selector"));
+                    }
+                    let property = match property {
+                        NumericProperty::Attack => Stat::Attack,
+                        NumericProperty::Life => Stat::Life,
+                        NumericProperty::Cost => {
+                            return Err(unsupported("attack target numeric property"));
+                        }
+                    };
+                    self.objects(game, objects)?
+                        .into_iter()
+                        .try_fold(0_i64, |sum, object| {
+                            let value =
+                                game.internal_numeric_stat(self.object_id(object)?, property)?;
+                            sum.checked_add(value)
+                                .ok_or_else(|| invalid("numeric aggregate overflow"))
+                        })
+                        .map(Int)
+                }
             },
         }
     }
@@ -529,10 +587,9 @@ impl Execution {
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }
-            NatRead::HistoryCount {
-                query,
-                count: HistoryCount::Facts,
-            } => super::history_turn::played(self, game, query),
+            NatRead::HistoryCount { query, count } => {
+                super::history_turn::subjects(self, game, query, *count)
+            }
             NatRead::ZoneCount {
                 selector:
                     Selector::Zone {
@@ -569,7 +626,7 @@ impl Execution {
                 self.objects(game, selector)?.len(),
             )
             .map_err(invalid)?)),
-            _ => Err(unsupported("natural read")),
+            NatRead::ZoneCapacity { .. } => Err(unsupported("natural read")),
         }
     }
 

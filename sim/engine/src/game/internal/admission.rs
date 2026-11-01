@@ -3,20 +3,21 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::PlayerStage;
+use crate::ir::events::subject::SubjectFields;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
     Requirement,
 };
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
-use crate::ir::{Bool, DamageEvent, Expr, Int};
+use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
 use crate::ir::{effect_evolution, prevention};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_body(program.program(), source, None, None, None)
+    check_body(program.program(), source, None, None, None, None)
 }
 
 pub(super) fn check_card(
@@ -34,7 +35,20 @@ pub(super) fn check_card(
         }) => (None, Some(*binding)),
         _ => (None, None),
     };
-    check_body(program, source, Some(origin), entry, damage)
+    let subject = trigger.and_then(|trigger| {
+        let TriggerCondition::Event { pattern } = &trigger.on else {
+            return None;
+        };
+        SubjectFields::from_pattern(pattern).map(SubjectFields::object)
+    });
+    check_body(
+        program,
+        source,
+        Some(origin),
+        entry,
+        damage,
+        subject.as_ref(),
+    )
 }
 
 pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
@@ -59,13 +73,14 @@ fn check_body(
     origin: Option<&AbilitySource>,
     entry: Option<Binding<EnterFieldEvent>>,
     damage: Option<Binding<DamageEvent>>,
+    subject: Option<&Expr<ObjectRef>>,
 ) -> Result<()> {
     let mut paths = BTreeSet::new();
     if let Some(origin) = origin {
         source_paths(program, "", origin, &mut paths);
     }
-    if let Some(event) = entry {
-        super::card::triggers::entry_operand::paths(program, "", event, &mut paths);
+    if let Some(event) = subject {
+        super::card::triggers::event_operand::paths(program, "", event, &mut paths);
     }
     if let Some(event) = damage {
         damage_paths(program, "", event, &mut paths);
@@ -75,7 +90,7 @@ fn check_body(
         effect_evolution::mask(&mut inspected, origin);
     }
     if let Some(event) = entry {
-        super::card::triggers::entry_operand::mask_origin(&mut inspected, event);
+        super::card::triggers::event_operand::mask_origin(&mut inspected, event);
     }
     check_requirements(&inspected, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
@@ -232,6 +247,8 @@ fn check_requirements(
     };
     let requirements = Requirements::derive_program(&located);
     let token_paths = super::tokens::paths(program);
+    let mut attack_targets = BTreeSet::new();
+    super::card::triggers::event_operand::target_paths(program, "", &mut attack_targets);
     let missing = requirements
         .required
         .iter()
@@ -239,6 +256,22 @@ fn check_requirements(
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
                     || super::tokens::requirement(requirement, &token_paths)
+                    || requirement.locations.iter().all(|location| {
+                        attack_targets.iter().any(|path| {
+                            location.ir_path == *path
+                                || location.ir_path.starts_with(&format!("{path}/"))
+                                || (matches!(
+                                    requirement.capability.code,
+                                    "value.aggregate.sum"
+                                        | "shape.IntOperation.Sum"
+                                        | "internal.NumericProperty.Life"
+                                        | "internal.NumericProperty.Attack"
+                                ) && path.strip_suffix("/objects").is_some_and(|parent| {
+                                    location.ir_path == parent
+                                        || location.ir_path == format!("{parent}/property")
+                                }))
+                        })
+                    })
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
                     || super::card::prevention::requirement(&requirements, requirement)
@@ -249,6 +282,11 @@ fn check_requirements(
                         "internal.ZoneKind.Evolve"
                             | "shape.AbilityOrigin.Keyword"
                             | "shape.ObjectFrozen.EnterFieldObject"
+                            | "shape.ObjectFrozen.EnterExObject"
+                            | "shape.ObjectFrozen.AttackAttacker"
+                            | "shape.ObjectFrozen.EvolveSubject"
+                            | "shape.ObjectFrozen.DestroyObjectBefore"
+                            | "shape.ObjectFrozen.LeaveFieldObjectBefore"
                             | "shape.IntFrozen.DamageAmount"
                             | "reference.expression"
                             | "shape.ObjectOperand.FromExpression"
@@ -769,6 +807,7 @@ fn supported(code: &str) -> bool {
             | "shape.HistoryCutoff.CurrentPoint"
             | "shape.InclusionPolicy.IncludeAll"
             | "internal.HistoryCount.Facts"
+            | "internal.HistoryCount.Subjects"
             | "read.player-resource"
             | "internal.PlayerResource.Life"
             | "internal.PlayerResource.PpCurrent"

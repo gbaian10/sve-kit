@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-027:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - assail
+      - line: 2
+        attack_time:
+          do:
+            - if:
+                cond:
+                  all:
+                    - is:
+                        ref: attack_target
+                        kind: follower
+                    - cmp:
+                        left:
+                          hp_of: attack_target
+                        op: le
+                        right: 5
+                then:
+                  - draw:
+                      who: self
+                      n: 1
+                  - discard:
+                      who: self
+                      n: 1
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 童話
+                    other: true
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - rush

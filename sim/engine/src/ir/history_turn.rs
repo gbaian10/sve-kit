@@ -1,4 +1,6 @@
-//! Public played-card counts have no subject filters or historical object reads.
+//! Current-turn queries share the closed public subject filters used by event headers.
+
+use super::events::subject::{SubjectFields, SubjectFilter};
 use super::{
     Binding, Bool, EventPattern, Expr, HistoryCutoff, HistoryQuery, HistoryRange, HistoryWindow,
     InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
@@ -54,4 +56,117 @@ pub(crate) fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {
     };
     (query == &played_query(*binding, player.clone()))
         .then_some(player.map_or(PlayedBy::Any, PlayedBy::Player))
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum SubjectHistoryKind {
+    Attack,
+    Evolve,
+    Destroy,
+    Leave,
+    Cemetery,
+    Hand,
+}
+
+pub(crate) fn subject_query(
+    kind: SubjectHistoryKind,
+    id: u64,
+    scope: super::ScopeId,
+    filter: &SubjectFilter,
+) -> HistoryQuery {
+    let fields = match kind {
+        SubjectHistoryKind::Attack => SubjectFields::Attack(Binding::new(id, scope)),
+        SubjectHistoryKind::Evolve => SubjectFields::Evolve(Binding::new(id, scope)),
+        SubjectHistoryKind::Destroy => SubjectFields::Destroy(Binding::new(id, scope)),
+        SubjectHistoryKind::Leave => SubjectFields::Leave(Binding::new(id, scope)),
+        SubjectHistoryKind::Cemetery => SubjectFields::Cemetery(Binding::new(id, scope)),
+        SubjectHistoryKind::Hand => SubjectFields::Hand(Binding::new(id, scope)),
+    };
+    let predicate = filter.predicate(fields);
+    let pattern = match kind {
+        SubjectHistoryKind::Attack => EventPattern::Attack {
+            binding: Binding::new(id, scope),
+            predicate,
+        },
+        SubjectHistoryKind::Evolve => EventPattern::Evolve {
+            binding: Binding::new(id, scope),
+            predicate,
+        },
+        SubjectHistoryKind::Destroy => EventPattern::Destroy {
+            binding: Binding::new(id, scope),
+            predicate,
+        },
+        SubjectHistoryKind::Leave | SubjectHistoryKind::Cemetery | SubjectHistoryKind::Hand => {
+            EventPattern::LeaveField {
+                binding: Binding::new(id, scope),
+                predicate,
+            }
+        }
+    };
+    HistoryQuery {
+        pattern,
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: None,
+        },
+        include_execution: InclusionPolicy::IncludeAll {},
+    }
+}
+
+fn subject_case(
+    query: &HistoryQuery,
+    kind: SubjectHistoryKind,
+    fields: SubjectFields,
+    predicate: &Expr<Bool>,
+    key: (super::ScopeId, u64),
+) -> Option<(SubjectHistoryKind, SubjectFilter)> {
+    let filter = SubjectFilter::parse(fields, predicate)?;
+    (!filter.own_turn && *query == subject_query(kind, key.1, key.0, &filter))
+        .then_some((kind, filter))
+}
+
+pub(crate) fn subject_plan(query: &HistoryQuery) -> Option<(SubjectHistoryKind, SubjectFilter)> {
+    if let EventPattern::Attack { binding, predicate } = &query.pattern {
+        return subject_case(
+            query,
+            SubjectHistoryKind::Attack,
+            SubjectFields::Attack(*binding),
+            predicate,
+            binding.key(),
+        );
+    }
+    if let EventPattern::Evolve { binding, predicate } = &query.pattern {
+        return subject_case(
+            query,
+            SubjectHistoryKind::Evolve,
+            SubjectFields::Evolve(*binding),
+            predicate,
+            binding.key(),
+        );
+    }
+    if let EventPattern::Destroy { binding, predicate } = &query.pattern {
+        return subject_case(
+            query,
+            SubjectHistoryKind::Destroy,
+            SubjectFields::Destroy(*binding),
+            predicate,
+            binding.key(),
+        );
+    }
+    if let EventPattern::LeaveField { binding, predicate } = &query.pattern {
+        for (kind, fields) in [
+            (
+                SubjectHistoryKind::Cemetery,
+                SubjectFields::Cemetery(*binding),
+            ),
+            (SubjectHistoryKind::Hand, SubjectFields::Hand(*binding)),
+            (SubjectHistoryKind::Leave, SubjectFields::Leave(*binding)),
+        ] {
+            if let Some(plan) = subject_case(query, kind, fields, predicate, binding.key()) {
+                return Some(plan);
+            }
+        }
+    }
+    None
 }

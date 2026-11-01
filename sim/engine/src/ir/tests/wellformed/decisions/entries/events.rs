@@ -587,7 +587,7 @@ fn a_snapshot_player_role_is_stable_but_requires_its_declared_event() {
 }
 
 #[test]
-fn an_evolution_header_does_not_grant_current_event_object_reads_to_its_body() {
+fn evolution_subject_is_available_only_through_its_exact_trigger_binding() {
     use crate::ir::events::subject::{SubjectFields, SubjectFilter};
     let event = Binding::new(1, ScopeId(1));
     let predicate = SubjectFilter {
@@ -607,13 +607,13 @@ fn an_evolution_header_does_not_grant_current_event_object_reads_to_its_body() {
         )
     };
     accept_card(make(vec![]));
-    reject_card(
-        make(vec![instruction(
+    let posture = |bound| {
+        instruction(
             Action::Posture {
                 objects: Selector::Objects {
                     objects: vec![ObjectOperand::FromExpression {
                         value: Box::new(Expr::Frozen(Box::new(ObjectFrozen::EvolveSubject {
-                            event,
+                            event: bound,
                         }))),
                     }],
                 },
@@ -621,7 +621,11 @@ fn an_evolution_header_does_not_grant_current_event_object_reads_to_its_body() {
             },
             2,
             "synthetic",
-        )]),
+        )
+    };
+    accept_card(make(vec![posture(event)]));
+    reject_card(
+        make(vec![posture(Binding::new(2, ScopeId(1)))]),
         WellFormedReason::UnsupportedShape,
     );
     let wrong = SubjectFilter {

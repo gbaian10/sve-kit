@@ -538,6 +538,7 @@ impl BodyContext<'_> {
                 .ok_or_else(|| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                subject_event: self.subject_event,
                 players: self.players.clone(),
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
