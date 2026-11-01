@@ -151,7 +151,7 @@ fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
             _ => candidate["sidecar"] = json!([]),
         }
         assert!(
-            failure(Catalog::from_current_selection(
+            failure(repository::select(
                 snapshot, keywords, &selection
             ))
             .contains(*rejection),
@@ -164,7 +164,7 @@ fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
 fn alternate_printing_uses_the_representatives_whole_card_program() {
     let fixtures = inputs();
     let (snapshot, keywords, input) = &fixtures;
-    let selected = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    let selected = repository::select(snapshot, keywords, input).unwrap();
     assert!(Arc::ptr_eq(
         &selected.current["CP02-068"],
         &selected.current["CP02-P56"]

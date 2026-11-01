@@ -63,7 +63,7 @@ fn prepared() -> &'static SelectedEffects {
                 .unwrap()
                 .push(json!([file, document.to_string()]));
         }
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     })
 }
 

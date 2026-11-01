@@ -118,7 +118,7 @@ fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormed
             .join("../../authored/rules/engine/index.yaml");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        let selected = Catalog::from_current_selection_with_rules(
+        let selected = repository::select_with_rules(
             &snapshot,
             &keywords,
             &input,
@@ -295,7 +295,7 @@ fn vanguard_game(initial: &Value) -> Game {
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml");
     let mut rules: Value = serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
     rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-    let selected = Catalog::from_current_selection_with_rules(
+    let selected = repository::select_with_rules(
         &snapshot,
         &keywords,
         &input,

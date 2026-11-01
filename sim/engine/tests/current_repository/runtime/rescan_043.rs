@@ -168,7 +168,7 @@ fn evolution_fixture() -> &'static EvolutionFixture {
         let rules_text = read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap();
         let mut rules: Value = serde_saphyr::from_str(&rules_text).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        let selected = Catalog::from_current_selection_with_rules(
+        let selected = repository::select_with_rules(
             &snapshot,
             &keywords,
             &input,

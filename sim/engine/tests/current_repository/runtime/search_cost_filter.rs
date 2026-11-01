@@ -65,7 +65,7 @@ fn prepared() -> &'static SelectedEffects {
             .join("../../authored/rules/engine/index.yaml");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        Catalog::from_current_selection_with_rules(
+        repository::select_with_rules(
             &snapshot,
             &keywords,
             &input,

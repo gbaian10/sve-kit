@@ -393,3 +393,57 @@ fn search_shape_union_lowers_filtered_branches_and_rejects_empty_or_unrestricted
         );
     }
 }
+
+#[test]
+fn current_loader_shares_exact_candidates_and_rechecks_changed_inputs() {
+    use alloc::sync::Arc;
+    use std::sync::Barrier;
+    use std::thread;
+    use sve_engine::catalog::CurrentSelectionLoader;
+
+    let (snapshot, keywords, input) = inputs();
+    let snapshot = snapshot
+        .lines()
+        .find(|line| serde_json::from_str::<Value>(line).unwrap()["number"] == "BP01-P25")
+        .unwrap();
+    let mut handoff = json!({"documents":[],"authors":[{
+        "status":"accepted","input":p25(input),"printings":["BP01-P25"]
+    }]});
+    let loader = CurrentSelectionLoader::new().unwrap();
+    let barrier = Barrier::new(2);
+    let (first, second) = thread::scope(|scope| {
+        let select = || {
+            barrier.wait();
+            loader.select(snapshot, keywords, &handoff).unwrap()
+        };
+        let first = scope.spawn(select);
+        let second = scope.spawn(select);
+        (first.join().unwrap(), second.join().unwrap())
+    });
+    assert!(Arc::ptr_eq(
+        &first.current["BP01-P25"],
+        &second.current["BP01-P25"]
+    ));
+
+    handoff["authors"][0]["input"]["tree"]["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]["abilities"]
+        [0]["lastword"]["do"][0]["damage"]["n"] = json!(3_u8);
+    let changed = loader.select(snapshot, keywords, &handoff).unwrap();
+    assert_ne!(
+        first.current["BP01-P25"].program,
+        changed.current["BP01-P25"].program
+    );
+
+    handoff["authors"][0]["input"]["source_payload"]["faces"] = json!([]);
+    assert!(matches!(loader.select(snapshot, keywords, &handoff),
+        Err(EngineFailure::Invalid(reason)) if reason == "invalid_direct_admission at /card_id"));
+    handoff["authors"][0]["input"] = p25(input).clone();
+    assert!(matches!(
+        loader.select("", keywords, &handoff),
+        Err(EngineFailure::Invalid(_))
+    ));
+    assert!(matches!(
+        loader.select(snapshot, "format: bad\nkeywords: {}", &handoff),
+        Err(EngineFailure::Invalid(_))
+    ));
+    loader.select(snapshot, keywords, &handoff).unwrap();
+}

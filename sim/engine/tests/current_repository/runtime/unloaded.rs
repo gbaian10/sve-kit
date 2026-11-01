@@ -260,7 +260,7 @@ fn loaded_spell_payment_stops_before_charging_for_unknown_off_field_abilities() 
 fn empty_current_selection_does_not_leak_hidden_card_diagnostics_to_players() {
     let (snapshot, keywords, mut input) = inputs().clone();
     input["authors"] = json!([]);
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let selected = repository::select(&snapshot, &keywords, &input).unwrap();
     let mut initial = draw_position();
     initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"secret","card":"BP01-170"}]);
     let game = Game::from_selected_effects(

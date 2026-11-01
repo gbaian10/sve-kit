@@ -52,7 +52,7 @@ fn bp01_156_evolution_chooses_only_opposing_ex_and_banishes() {
     .unwrap();
     // The synthetic base extends the input; the existing fixture rebinds only its envelope.
     rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-    let selected = Catalog::from_current_selection_with_rules(
+    let selected = repository::select_with_rules(
         &snapshot,
         &keywords,
         &input,

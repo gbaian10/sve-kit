@@ -111,7 +111,7 @@ fn companions() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardPro
         ]));
         tree["cards"] = Value::Object(programs);
         (
-            Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap(),
+            repository::select(&snapshot, &keywords, &input).unwrap(),
             lowerer().lower(&tree).unwrap(),
         )
     })

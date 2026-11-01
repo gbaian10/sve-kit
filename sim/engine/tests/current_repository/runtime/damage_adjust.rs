@@ -236,7 +236,7 @@ fn different_cap_selection() -> &'static SelectedEffects {
         snapshot.push_str(&json!({"number":"cap-provider","faces":[face]}).to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["cap-provider.yaml","format: 1\nkind: effect_set\ncards:\n  cap-provider:\n    status: complete\n    abilities: []\n"]));
-        Catalog::from_current_selection(&snapshot,&keywords,&input).unwrap()
+        repository::select(&snapshot,&keywords,&input).unwrap()
     })
 }
 

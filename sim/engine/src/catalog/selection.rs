@@ -9,7 +9,7 @@ use alloc::sync::Arc;
 use core::{fmt, ptr::from_ref};
 use serde::Deserialize;
 use serde_json::Value;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock};
 
 /// Disjoint prototype programs and complete, current-source checked D0 candidates.
 #[derive(Clone, Debug)]
@@ -74,6 +74,87 @@ impl SelectedEffects {
     }
 }
 
+/// Reusable compiler for related current selections.
+///
+/// Exact author inputs share immutable lowered candidates. Snapshot, prototype,
+/// token and rule checks still run for every selection. Drop the loader when the
+/// related selections are no longer needed to release its cached candidates.
+/// Selection preparation runs concurrently; only cache access holds a lock.
+#[derive(Debug)]
+pub struct CurrentSelectionLoader {
+    lowerer: ExpandedLowerer,
+    candidates: Mutex<BTreeMap<String, Arc<CurrentCardProgram>>>,
+}
+
+impl CurrentSelectionLoader {
+    /// Prepare a reusable compiler using the bundled expanded schema.
+    ///
+    /// # Errors
+    /// Rejects an invalid bundled schema.
+    pub fn new() -> Result<Self> {
+        Ok(Self {
+            lowerer: ExpandedLowerer::new().map_err(invalid)?,
+            candidates: Mutex::default(),
+        })
+    }
+
+    /// Select complete current candidates, sharing only identical author inputs.
+    ///
+    /// # Errors
+    /// Rejects the same invalid selections as [`Catalog::from_current_selection`].
+    pub fn select(&self, snapshot: &str, keywords: &str, input: &Value) -> Result<SelectedEffects> {
+        select_using(snapshot, keywords, input, None, |candidate| {
+            self.compile(candidate)
+        })
+    }
+
+    /// Select current candidates and bind the exact snapshot's rules.
+    ///
+    /// # Errors
+    /// Also rejects invalid rules and inconsistent rule identities.
+    pub fn select_with_rules(
+        &self,
+        snapshot: &str,
+        keywords: &str,
+        input: &Value,
+        rules: &str,
+        identity: &EngineIdentityInput,
+    ) -> Result<SelectedEffects> {
+        select_using(
+            snapshot,
+            keywords,
+            input,
+            Some((rules, identity)),
+            |candidate| self.compile(candidate),
+        )
+    }
+
+    fn compile(&self, input: &Value) -> Result<Arc<CurrentCardProgram>> {
+        // Key the complete input, including source evidence, rather than trusting caller hashes.
+        let key = serde_json::to_string(input).map_err(invalid)?;
+        let cached = self.candidates.lock().map_err(invalid)?.get(&key).cloned();
+        if let Some(candidate) = cached {
+            return Ok(candidate);
+        }
+        // Lower outside the lock so unrelated selections can prepare in parallel.
+        let candidate = Arc::new(self.lowerer.lower_current(input).map_err(invalid)?);
+        let mut candidates = self.candidates.lock().map_err(invalid)?;
+        Ok(Arc::clone(candidates.entry(key).or_insert(candidate)))
+    }
+}
+
+pub(super) fn select(
+    snapshot: &str,
+    keywords: &str,
+    handoff: &Value,
+    rules: Option<(&str, &EngineIdentityInput)>,
+) -> Result<SelectedEffects> {
+    let lowerer = ExpandedLowerer::new().map_err(invalid)?;
+    select_using(snapshot, keywords, handoff, rules, |input| {
+        lowerer.lower_current(input).map(Arc::new).map_err(invalid)
+    })
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Selection {
@@ -102,16 +183,16 @@ enum Author {
 /// # Errors
 /// Rejects the entire selection on any rejected card, overlap or D0 failure;
 /// callers never receive a partial selection or an implicit prototype fallback.
-pub(super) fn select(
+fn select_using(
     snapshot: &str,
     keywords: &str,
     handoff: &Value,
     rules: Option<(&str, &EngineIdentityInput)>,
+    mut compile: impl FnMut(&Value) -> Result<Arc<CurrentCardProgram>>,
 ) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
         .map_err(|_private| invalid("invalid current selection"))?;
     let mut prototypes = Catalog::read_documents(snapshot, keywords, &selection.documents)?;
-    let lowerer = ExpandedLowerer::new().map_err(invalid)?;
     let mut current = BTreeMap::new();
     let mut identities = BTreeSet::new();
     for author in selection.authors {
@@ -132,13 +213,12 @@ pub(super) fn select(
                 )));
             }
         };
-        let program = lowerer.lower_current(&candidate).map_err(invalid)?;
+        let program = compile(&candidate)?;
         if !identities.insert(program.card_id.clone()) || !printings.contains(&program.card_no) {
             return Err(invalid(
                 "current selection identity or representative missing",
             ));
         }
-        let program = Arc::new(program);
         for number in printings {
             register_printing(&mut prototypes, &number, &program)?;
             if current.insert(number, Arc::clone(&program)).is_some() {

@@ -142,7 +142,7 @@ fn batch_game(initial: &Value) -> Game {
             "count-fairy.yaml",
             "format: 1\nkind: effect_set\ncards:\n  count-fairy:\n    status: complete\n    abilities: []\n"
         ]));
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     });
     let mut game = Game::from_selected_effects(
         selected.clone(),

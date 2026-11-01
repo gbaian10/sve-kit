@@ -44,7 +44,7 @@ pub(super) fn game_from_selection(
     keywords: &str,
     input: &Value,
 ) -> Game {
-    let selected = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    let selected = repository::select(snapshot, keywords, input).unwrap();
     Game::from_selected_effects(
         selected,
         initial,
@@ -243,14 +243,14 @@ pub(super) fn selection_without_abilities(
             .as_str()
             .is_some_and(|number| missing.contains(&number))
     });
-    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+    repository::select(&snapshot, &keywords, &input).unwrap()
 }
 
 fn producer_selection() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
         let (snapshot, keywords, input) = producer_inputs();
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     })
 }
 
@@ -645,7 +645,7 @@ fn construct(selected: SelectedEffects, seed: &str) -> String {
 #[test]
 fn current_admission_rejects_foreign_snapshot_and_program() {
     let (snapshot, keywords, input) = inputs();
-    let mut cleared = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    let mut cleared = repository::select(snapshot, keywords, input).unwrap();
     assert_eq!(construct(cleared.clone(), "warm-cleared"), "");
     cleared.current.clear();
     assert!(
@@ -653,9 +653,9 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         "removing an accepted candidate rejects the whole construction"
     );
     // The prototype closure is part of the accepted selection, even when its content is equal.
-    let mut replaced = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    let mut replaced = repository::select(snapshot, keywords, input).unwrap();
     assert_eq!(construct(replaced.clone(), "warm-replaced"), "");
-    replaced.prototypes = Catalog::from_current_selection(snapshot, keywords, input)
+    replaced.prototypes = repository::select(snapshot, keywords, input)
         .unwrap()
         .prototypes;
     assert!(
@@ -663,7 +663,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         "replacing the prototype catalogue rejects the whole construction"
     );
     // A current candidate cannot gain admission through an unrelated prototype catalogue.
-    let accepted = Catalog::from_current_selection(snapshot, keywords, input).unwrap();
+    let accepted = repository::select(snapshot, keywords, input).unwrap();
     let mut plain = Game::new(
         accepted.prototypes,
         &setup("P1", "P1", [20, 20]),
@@ -690,7 +690,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         })
         .collect::<Vec<_>>()
         .join("\n");
-    let foreign = Catalog::from_current_selection(&changed, keywords, input).unwrap();
+    let foreign = repository::select(&changed, keywords, input).unwrap();
     assert!(
         construct(foreign, "foreign").contains("no unique snapshot source"),
         "source-rebuilt candidates still reject different snapshot face text"
@@ -707,7 +707,7 @@ fn current_admission_rejects_foreign_snapshot_and_program() {
         })
         .collect::<Vec<_>>()
         .join("\n");
-    let direct_foreign = Catalog::from_current_selection(&changed_faces, keywords, input).unwrap();
+    let direct_foreign = repository::select(&changed_faces, keywords, input).unwrap();
     assert!(
         construct(direct_foreign, "foreign-direct")
             .contains("current snapshot closure or prototype overlap"),

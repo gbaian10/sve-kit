@@ -146,7 +146,7 @@ fn bp04_089_grants_aura_to_both_named_friendly_followers_only() {
                 format!("{number}.yaml"), format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
             ]));
         }
-        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap()
+        repository::select(&snapshot, &keywords, &input).unwrap()
     });
     let mut initial = position("BP04-089");
     initial["players"]["P1"]["zones"]["field"]

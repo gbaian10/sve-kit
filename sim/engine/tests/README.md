@@ -16,7 +16,12 @@ Use `selection_with_rules()` for scenarios that require engine rule bindings;
 clone the returned selection when constructing a game.
 
 Tests that change source evidence or catalog contents must clone `inputs()` before
-editing and build their changed selection independently. Keep pointer-identity
+editing. Build related variants with `repository::select()` or
+`repository::select_with_rules()` so identical, fully checked author inputs share
+immutable candidates across variants. Every variant still validates its own
+snapshot, prototype documents, token closure and rule bindings. Only candidate cache lookup and insertion hold a lock;
+variant preparation and game positions can run in parallel.
+Keep pointer-identity
 rejection tests independent too: a fresh equivalent catalog is intentionally a
 different accepted selection. Never put mutable game state in a shared fixture.
 
