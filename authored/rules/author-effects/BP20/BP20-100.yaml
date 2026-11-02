@@ -1,0 +1,43 @@
+cards:
+  BP20-100:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: crest
+                  who: self
+                  zone: ex
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

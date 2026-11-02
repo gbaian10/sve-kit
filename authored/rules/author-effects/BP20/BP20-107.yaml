@@ -1,0 +1,34 @@
+cards:
+  BP20-107:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          define:
+            X:
+              count:
+                kind: crest
+                who: self
+                zone: ex
+          do:
+            - damage:
+                n: X
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

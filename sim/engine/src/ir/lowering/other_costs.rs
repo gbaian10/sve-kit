@@ -57,7 +57,7 @@ fn query(
                 let binding = Binding::new(1, allocator.scope(path)?);
                 let predicate = super::selection::field_filter(
                     &super::selection::ObjectFilter {
-                        kind: value.kind.as_ref(),
+                        kind: value.kind.as_ref().map(super::search::card_kind),
                         trait_id: value.r#trait.as_deref(),
                         all_traits: &value.traits_all,
                         class: value.class.as_deref(),

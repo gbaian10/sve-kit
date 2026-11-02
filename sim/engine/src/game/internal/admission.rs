@@ -843,6 +843,7 @@ fn supported(code: &str) -> bool {
             | "internal.EvolutionState.Evolved"
             | "internal.EvolutionState.SuperEvolved"
             | "internal.CardKind.EvolveFollower"
+            | "internal.CardKind.Crest"
             | "shape.BoolRead.State"
             | "read.state"
             | "internal.ZoneKind.Cemetery"

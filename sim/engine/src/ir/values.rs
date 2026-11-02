@@ -231,6 +231,7 @@ names!(
     CounterKind
 );
 tags!(CardKind {
+    Crest,
     EvolveFollower,
     Follower,
     Spell,

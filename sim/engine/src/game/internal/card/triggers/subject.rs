@@ -143,7 +143,9 @@ impl Game {
                 CardKind::Follower => "follower",
                 CardKind::Spell => "spell",
                 CardKind::Amulet => "amulet",
-                CardKind::EvolveFollower => return Err(unsupported("history subject kind")),
+                CardKind::EvolveFollower | CardKind::Crest => {
+                    return Err(unsupported("history subject kind"));
+                }
             }
             .into(),
             class: information.class.0,

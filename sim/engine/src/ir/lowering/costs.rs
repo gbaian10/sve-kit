@@ -99,7 +99,7 @@ fn population(
         binding,
         predicate: Box::new(super::selection::field_filter(
             &super::selection::ObjectFilter {
-                kind: kind.as_ref(),
+                kind: kind.as_ref().map(super::search::card_kind),
                 ..Default::default()
             },
             binding,

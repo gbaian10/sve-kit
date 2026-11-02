@@ -1,4 +1,4 @@
-use crate::ir::ZoneKind;
+use crate::ir::{CardKind, ZoneKind};
 use alloc::collections::BTreeMap;
 use core::slice::from_ref;
 use serde::Deserialize;
@@ -1460,6 +1460,27 @@ pub(super) enum SelectedStat {
     OriginalCost(String),
 }
 
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CountKind {
+    EvolveFollower,
+    Follower,
+    Spell,
+    Amulet,
+    Crest,
+}
+impl CountKind {
+    pub(super) const fn kind(self) -> CardKind {
+        match self {
+            Self::EvolveFollower => CardKind::EvolveFollower,
+            Self::Follower => CardKind::Follower,
+            Self::Spell => CardKind::Spell,
+            Self::Amulet => CardKind::Amulet,
+            Self::Crest => CardKind::Crest,
+        }
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
@@ -1470,7 +1491,7 @@ pub(super) struct CountQuery {
     pub other: bool,
     pub who: Side,
     pub zone: CountZone,
-    pub kind: Option<SearchKind>,
+    pub kind: Option<CountKind>,
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub name: Option<String>,

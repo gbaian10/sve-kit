@@ -138,11 +138,20 @@ pub(super) fn object_filter(
     name: Option<&str>,
     candidate: Binding<ObjectRef>,
 ) -> Expr<Bool> {
-    view_filter(kind, trait_id, name, view(candidate))
+    view_filter(kind.map(card_kind), trait_id, name, view(candidate))
+}
+
+pub(super) const fn card_kind(kind: &ast::SearchKind) -> CardKind {
+    match kind {
+        ast::SearchKind::Follower => CardKind::Follower,
+        ast::SearchKind::Spell => CardKind::Spell,
+        ast::SearchKind::Amulet => CardKind::Amulet,
+        ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
+    }
 }
 
 pub(super) fn view_filter(
-    kind: Option<&ast::SearchKind>,
+    kind: Option<CardKind>,
     trait_id: Option<&str>,
     name: Option<&str>,
     object: ObjectView,
@@ -154,12 +163,7 @@ pub(super) fn view_filter(
                 object: object.clone(),
                 view: CharacteristicView::Effective,
             })),
-            right: Expr::Literal(match kind {
-                ast::SearchKind::Follower => CardKind::Follower,
-                ast::SearchKind::Spell => CardKind::Spell,
-                ast::SearchKind::Amulet => CardKind::Amulet,
-                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
-            }),
+            right: Expr::Literal(kind),
         })));
     }
     if let Some(trait_id) = trait_id {
