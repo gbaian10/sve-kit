@@ -1,0 +1,55 @@
+cards:
+  BP09-095:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 祈りカウンター
+                on: this
+            - life:
+                delta: 1
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 祈りカウンター
+                        on: this
+                    op: ge
+                    right: 3
+                then:
+                  - move:
+                      ref: this
+                      to: cemetery
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        orig_cost_le: 4
+                        trait: 信仰
+                        who: self
+                        zone: deck
+                      to: field
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
