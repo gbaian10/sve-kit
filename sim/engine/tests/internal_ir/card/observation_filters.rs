@@ -908,38 +908,6 @@ fn offered_answer(game: &mut Game, q: &DecisionView) -> CardPlay {
 }
 
 #[test]
-fn union_entry_inside_later_if_accepts_offered_answer() {
-    let (mut game, q) = flow_look(
-        &json!([
-            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
-            union_choice(),
-            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
-                {"move":{"ref":"picked","to":"field","result":"moved"}}
-            ]}}
-        ]),
-        4,
-    );
-    offered_answer(&mut game, &q);
-}
-
-#[test]
-fn grouped_entry_inside_later_if_accepts_offered_answer() {
-    let (mut game, q) = flow_look(
-        &json!([
-            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
-            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
-                {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
-            ],"upto":2,"may":true}},
-            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
-                {"move":{"ref":"picked","to":"field","result":"moved"}}
-            ]}}
-        ]),
-        4,
-    );
-    offered_answer(&mut game, &q);
-}
-
-#[test]
 fn choice_inside_expanded_if_keeps_field_limit() {
     let (mut game, q) = flow_look(
         &json!([
@@ -992,33 +960,6 @@ fn field_move_of_another_binding_does_not_cap_hand_pick() {
 }
 
 #[test]
-fn a_possible_field_branch_caps_the_offer_even_when_skipped() {
-    let (mut game, q) = flow_look(
-        &json!([
-            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
-            union_choice(),
-            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":0}},"then":[
-                {"move":{"ref":"picked","to":"field","result":"moved"}}
-        ],"else":[{"move":{"ref":"picked","to":"hand","result":"taken"}}]}}
-        ]),
-        4,
-    );
-    let InputDomain::Targets(domain) = &q.domain else {
-        panic!("Look targets")
-    };
-    // The branch condition is read only at resolution, so the offer stays within the free slot.
-    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
-    resolved(offered_answer(&mut game, &q));
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["P1"]["hand"]
-            .as_array()
-            .unwrap()
-            .len(),
-        1
-    );
-}
-
-#[test]
 fn exact_multi_pick_clamps_minimum_with_maximum() {
     let (mut game, q) = flow_look(
         &json!([
@@ -1055,4 +996,32 @@ fn single_card_at_full_field_stays_in_deck() {
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
     assert_eq!(view["P1"]["deck"], json!(["one", "two"]));
+}
+
+#[test]
+fn multi_card_look_picks_enter_the_field_only_as_the_next_step() {
+    let grouped = json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
+        {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
+    ],"upto":2,"may":true}});
+    let look = json!({"look":{"top":{"who":"self","n":2},"bind":"seen"}});
+    let enter = json!({"move":{"ref":"picked","to":"field","result":"moved"}});
+    let later_if = json!({"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[enter]}});
+    let mixed = json!({"if":{"cond":{"cmp":{"left":1,"op":"eq","right":0}},"then":[enter],
+        "else":[{"move":{"ref":"picked","to":"hand","result":"taken"}}]}});
+    let between = json!({"draw":{"n":1}});
+    for choice in [union_choice(), grouped] {
+        lowerer()
+            .lower(&tree(&json!([look, choice, enter])))
+            .unwrap();
+        for steps in [
+            json!([look, choice, later_if]),
+            json!([look, choice, mixed]),
+            json!([look, choice, between, enter]),
+        ] {
+            assert!(
+                lowerer().lower(&tree(&steps)).is_err(),
+                "free field slots read at the question could change before a later entry"
+            );
+        }
+    }
 }

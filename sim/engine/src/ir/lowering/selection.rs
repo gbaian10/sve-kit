@@ -281,6 +281,7 @@ impl BodyContext<'_> {
         }
         // Grouped picks are still private Look members, like a single observed choice.
         self.observed_targets.insert(choice.bind.clone());
+        self.field_entry.multi.insert(choice.bind.clone());
         let domain = super::super::ChoiceDomain::Objects {
             constraint: super::super::SelectionConstraint {
                 groups: lowered_groups,

@@ -77,7 +77,7 @@ records:
 
 場上正式目標另接受 `acted: true | false`（橫置／直立）、`evolved: false | true`（只比對從者；`true` 包含超進化）與 `entered_this_turn: true`（本回合入場，每個回合開始時清除雙方場上的標記）；這些狀態篩選只用於場上候選，不接受領袖、觀察卡或墓場／EX 來源。`not_same_name_as_this: true` 也可用於公開正式目標與本文 `choose`，以能力持有卡本身的卡名比較，因此謝幕在來源離場後仍排除同名卡；與領袖候選並用時拒絕。場上物件來源（傷害、破壞、起身等的 `{who, zone: field, ...}`）接受 `acted`、`kind: amulet`，以及 `except: {in: 已選目標}` 排除同一能力先前選定的目標（例如「それ以外の相手の場のフォロワーすべて」）；與 `as`／`where` 極值並用時拒絕。公開存在與計數查詢可用 `where: {cmp: {left: {power_of: item}, op: ge | le, right: N}}` 依有效攻擊力篩選。場上限定的持續能力可在 `static.while` 以 `standing: this` 讀取能力持有者目前是否直立；起動條件與本文等其他位置讀取持有者姿態仍不支援。
 
-Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示「A 與 B 各至多 1 張」，每組須寫 `kind`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與エルフ法術）；`groups` 不與 `any_of` 並用。
+Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示「A 與 B 各至多 1 張」，每組須寫 `kind`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與エルフ法術）；`groups` 不與 `any_of` 並用。可多選的 Look 選取若要進場，`move: {ref: <選取>, to: field}` 必須緊接在 `choose` 之後、位於同一層本文；選項上限在出題時依空位計算，中間或條件分支內的進場會在載入時拒絕。分組或聯集拿回手牌不受場位限制。
 
 `play.additional_cost` 在卡片宣告打出前必須完整支付，沿用能力費用的 `Cost` 操作與素材選擇；付不起或素材不合法時整次打出取消。目前限法術，且不與模式付款或能力頭的可選付款並用。已接通自己場上素材的送墓／橫置、自己公開 EX／墓場素材的消滅，可用 `steps` 保留多組成本的順序。這不是可選付款，也不會在效果結算時才收費。`result` 可供同次法術本文以 `paid: {receipt: 名稱}` 讀取；指定進場素材條件、私有手牌材料與 Quick 預檢仍須各自的支援入口。
 

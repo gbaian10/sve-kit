@@ -237,6 +237,8 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         if !self.targets.contains_key(name)
+            || (self.field_entry.multi.contains(name)
+                && self.field_entry.adjacent.as_deref() != Some(name.as_str()))
             || value.top.is_some()
             || value.position.is_some()
             || value.order.is_some()

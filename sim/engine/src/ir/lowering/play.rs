@@ -302,6 +302,9 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         self.observed_targets.insert(target.bind.clone());
+        if cardinality.maximum.is_none_or(|maximum| maximum.0 > 1) {
+            self.field_entry.multi.insert(target.bind.clone());
+        }
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let predicate = observed_predicate(branches, candidate).ok_or_else(|| unsupported(path))?;
         let selector = Selector::Filter {
@@ -620,6 +623,7 @@ impl BodyContext<'_> {
                 observations: BTreeMap::new(),
                 single_discards: BTreeSet::new(),
                 observed_targets: BTreeSet::new(),
+                field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
