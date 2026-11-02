@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-085:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  name: 羅刹の咎人・ガロダート
+                delta: -1
+      - line: 2
+        auto:
+          "on":
+            life_changed:
+              who: self
+              direction: down
+              during:
+                turn: self
+          per_turn: 4
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+      - line: 3
+        fanfare:
+          do:
+            - damage:
+                to:
+                  leader: self
+                n: 1
+            - draw:
+                n: 1

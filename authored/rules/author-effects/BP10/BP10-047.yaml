@@ -1,0 +1,57 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-047:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+    abilities:
+      - line: 1
+        auto:
+          zone: ex
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - if:
+                cond:
+                  in_zone:
+                    ref: this
+                    zone: ex
+                then:
+                  - draw:
+                      n: 1
+                  - discard:
+                      who: self
+                      n: 1
+      - section: 1
+        line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - section: 1
+        line: 2
+        spell:
+          do:
+            - life:
+                who: self
+                delta: 2
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 《愚者》・リンクル
+                then:
+                  - move:
+                      ref: this
+                      to: ex
