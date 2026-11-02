@@ -65,6 +65,8 @@ async function openImageTab(changes: Partial<Deck> = {}) {
   prefsStore.set({ uiLanguage: "zh-TW" })
   await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
   const user = userEvent.setup()
+  // Below 1180 px the deck, with its export button, is a sheet over the pool.
+  await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
   await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 25_000 }))
   const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
   await user.click(await within(dialog).findByRole("radio", { name: "圖片" }, { timeout: 25_000 }))

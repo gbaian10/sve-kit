@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next"
-import { NavLink, useSearchParams } from "react-router"
+import { NavLink, useLocation, useSearchParams } from "react-router"
 
 import { CARD_PARAM, useCardPresentation } from "../../app/card-overlay"
+import { isDeckBuilderPath } from "../../app/deck-routes"
 import { useRouteEdition } from "../../app/snapshot"
 import { editionUrl } from "../../domain/query/codec"
 import { cn } from "../ui/cn"
@@ -16,8 +17,11 @@ export function BottomNav() {
   const edition = useRouteEdition()
   const [params] = useSearchParams()
   const presentation = useCardPresentation()
+  const { pathname } = useLocation()
   // The card over the results has its own bottom bar (previous / deck slot / next).
   if (params.has(CARD_PARAM) && presentation === "modal") return null
+  // While a deck is edited its summary bar takes the bottom edge instead.
+  if (isDeckBuilderPath(pathname)) return null
   return (
     <BottomBar className="lg:hidden phone-landscape:inset-y-0 phone-landscape:right-auto phone-landscape:w-16 phone-landscape:border-t-0 phone-landscape:border-r phone-landscape:pb-0">
       <nav aria-label={t("nav.primary")} className="phone-landscape:h-full">

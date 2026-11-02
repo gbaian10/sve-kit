@@ -280,12 +280,13 @@ interface QueryState {
 
 - 斷點依內容寬：`md=600`、`lg=1000`、`xl=1440`。<600 底部列；600–999 底部列＋內容加寬；≥1000 左側欄；橫向手機（高 <480）底部列改左側小列。
 - 底部固定元件共用 `BottomBar`，內建 `env(safe-area-inset-bottom)`；鍵盤彈出時底部導覽收起。
-- 面板與對話框用原生 `<dialog>`（`showModal()`：焦點圈住、Esc、關閉後焦點回原處、背景 inert），開啟時 push 一筆 history 讓瀏覽器返回也能關；
+- 面板與對話框用原生 `<dialog>`（`showModal()`：焦點圈住、Esc、關閉後焦點回原處、背景 inert），開啟時 push 一筆 history 讓瀏覽器返回也能關（記錄所有開著的對話框，對話框裡再開的對話框返回時只關最上層）；
   選單用 Popover API。
 - 焦點環用主文字色，寬 2 px、外距 2 px；skip link；結果數 `aria-live="polite"`；`motion-reduce:` 關動畫。
 - 主要觸控目標至少 44×44 CSS px；主要動作按鈕高 48 px、最小寬 48 px（根字級 16 px 時）。較小的可見控制項須補足點擊區域。
   既有按鈕以 rem 實作，隨根字級縮放，見 [`Button.tsx`](../../sim/web/src/components/ui/Button.tsx)。
 - 職業快捷列 7 格永遠一排；帶字版放得下才顯示文字（離屏量測）。
+- 組牌頁 ≥1180 是牌組｜卡池｜篩選三欄；<1180 卡池全寬，底部的牌組摘要列（名稱、張數、問題數；橫向手機為左側 64 px 窄欄）取代站內導覽，牌組以全螢幕對話框開啟，返回鍵關閉；跨過 1180 時關閉所有對話框並退掉它們的 history。
 
 ## 8. 主題 token
 

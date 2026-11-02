@@ -749,6 +749,9 @@ const zhTW = {
     imageFooter: "sve-kit · {{date}} · 非官方",
     downloadImage: "下載圖片",
     drawImageMissing: "有 {{count}} 張卡圖沒有載入，圖片沒有產生：{{cards}}。稍後再試。",
+    deckSheet: "牌組",
+    openDeckSheet: "打開牌組",
+    continueAdding: "繼續加卡",
   },
   footer: {
     unofficial:

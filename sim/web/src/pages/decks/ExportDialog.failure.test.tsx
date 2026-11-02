@@ -42,14 +42,16 @@ it("offers a retry when the printings fail to load, then exports", async () => {
   prefsStore.set({ uiLanguage: "zh-TW" })
   await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
   const user = userEvent.setup()
-  await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 15_000 }))
+  // Below 1180 px the deck, with its export button, is a sheet over the pool.
+  await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+  await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 25_000 }))
   const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
-  expect(await within(dialog).findByRole("alert", {}, { timeout: 15_000 })).toHaveTextContent(
+  expect(await within(dialog).findByRole("alert", {}, { timeout: 25_000 })).toHaveTextContent(
     "載入失敗",
   )
   printingsOnline = true
   await user.click(within(dialog).getByRole("button", { name: "重試" }))
   expect(
-    await within(dialog).findByRole("textbox", { name: "文字" }, { timeout: 15_000 }),
+    await within(dialog).findByRole("textbox", { name: "文字" }, { timeout: 25_000 }),
   ).toHaveValue("# 重試\n\n## 主牌組 (0)\n\n## 進化牌組 (0)\n")
-}, 45_000)
+}, 60_000)
