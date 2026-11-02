@@ -1,11 +1,12 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, IntRead, NumberRead, ObjectView, PlayerResource,
-    Precondition, PreconditionKind, PreconditionReason, Stat,
+    CharacteristicView, Comparison, CostSpec, CounterKind, IntRead, NatFrozen, NumberRead,
+    ObjectView, PlayerResource, Precondition, PreconditionKind, PreconditionReason, SnapshotFields,
+    Stat,
 };
 use super::{
-    Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, Expr, FaceId, Int, IntOperation,
-    LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView,
-    Selector, SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
+    Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, FaceId,
+    Int, IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet,
+    Predicate, SelectionView, Selector, SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
 pub(super) fn qualify_costs(
@@ -533,7 +534,7 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
-            ast::Number::Counter { counter } => Ok(counter_number(counter)),
+            ast::Number::Counter { counter } => Ok(counter_number(counter, self.counter_read_view)),
             ast::Number::Power { power_of } => Ok(this_number(
                 power_of,
                 Some(Stat::Attack),
@@ -740,12 +741,20 @@ fn this_number(
     Expr::Compute(Box::new(IntOperation::InformationOrZero { information }))
 }
 
-fn counter_number(counter: &ast::CounterRead) -> Expr<Int> {
+fn counter_number(counter: &ast::CounterRead, view: CounterReadView) -> Expr<Int> {
     let ast::This::This = counter.on;
+    if matches!(view, CounterReadView::SourceInformation) {
+        return Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Frozen(Box::new(NatFrozen::SnapshotCounter {
+                object: Expr::Frozen(Box::new(SnapshotFields::SourceInformation {})),
+                kind: CounterKind(counter.name.clone()),
+            })),
+        }));
+    }
     Expr::Compute(Box::new(IntOperation::FromNat {
         value: Expr::Live(Box::new(NatRead::Counter {
             holder: super::counters::holder(),
-            kind: super::super::CounterKind(counter.name.clone()),
+            kind: CounterKind(counter.name.clone()),
         })),
     }))
 }

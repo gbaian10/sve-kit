@@ -1,0 +1,37 @@
+cards:
+  BP03-102:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                ref: recovered
+                result: recovered_ex
+                to: ex
+            - optional:
+                do:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on:
+                        follow: recovered_ex
+          targets:
+            - bind: recovered
+              from:
+                trait: 童話
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

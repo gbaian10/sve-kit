@@ -704,7 +704,7 @@ fn drain_captures_actual_attack_damage_and_survives_its_sources_death() {
             "drain-world",
         )
         .unwrap();
-        for mut candidate in [engine, restored, rebuilt] {
+        for mut candidate in vec![engine, restored, rebuilt].into_boxed_slice() {
             assert_eq!(
                 candidate.decide(&choice, "heal").unwrap().outcome,
                 "resolved"
@@ -828,7 +828,7 @@ fn repeated_race_events_remain_distinct_across_restore_and_turns() {
         "race-world",
     )
     .unwrap();
-    for mut candidate in [engine, restored, rebuilt] {
+    for mut candidate in vec![engine, restored, rebuilt].into_boxed_slice() {
         assert_eq!(candidate.legal().unwrap(), vec![choices[0].clone()]);
         candidate.decide(&choices[0], "first-last").unwrap();
         assert_eq!(
@@ -3067,7 +3067,7 @@ fn future_restrictions_gate_only_the_named_phase_and_expire_after_use() {
         "restore-period",
     )
     .unwrap();
-    for mut instance in [engine, saved, sampled] {
+    for mut instance in vec![engine, saved, sampled].into_boxed_slice() {
         instance.decide(&json!({"do":"end-phase"}), "end").unwrap();
         let before_window = instance.legal().unwrap();
         assert!(before_window.iter().any(|choice| choice["card"] == "c"));
@@ -7664,7 +7664,7 @@ fn evolved_information_uses_the_linked_visible_face_after_load_play_and_observat
             let saved: Game =
                 serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
             let sampled = Game::from_observation(loaded, &packet, "P1", "dual").unwrap();
-            for mut copy in [engine, saved, sampled] {
+            for mut copy in vec![engine, saved, sampled].into_boxed_slice() {
                 assert_eq!(
                     copy.projection(View::P1).unwrap()["objects"]["a"]["name"],
                     packet["objects"]["a"]["name"]
@@ -9049,7 +9049,7 @@ fn a_limited_simultaneous_trigger_preserves_both_events_but_consumes_one_waiting
     }
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     let sampled = Game::from_observation(Arc::clone(&loaded), &packet, "P1", "limited").unwrap();
-    for original in [engine, saved, sampled] {
+    for original in vec![engine, saved, sampled].into_boxed_slice() {
         assert_eq!(original.legal().unwrap(), choices);
         for (choice, name) in choices.iter().zip(["red", "blue"]) {
             let mut resumed = original.clone();

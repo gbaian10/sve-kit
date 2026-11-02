@@ -8,8 +8,9 @@
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Action, Binding, ChoiceDomain, Control, CounterChangeEvent, CounterKind, CounterOperation,
-    Expr, Holder, Instruction, Int, IntOperation, Nat, NatRead, ObjectOperand, ObjectRef, PlaySpec,
-    PlayerRef, PlayerRelation, Quantity, QuantityUnit, RuntimeHolder, Selector, ZoneKind,
+    Expr, FollowPermission, Holder, Instruction, Int, IntOperation, Nat, NatRead, ObjectOperand,
+    ObjectRef, PlaySpec, PlayerRef, PlayerRelation, Quantity, QuantityUnit, RuntimeHolder,
+    Selector, ZoneKind,
 };
 use serde_json::json;
 
@@ -350,7 +351,11 @@ pub(super) fn check_iteration(control: &Control) -> Result<()> {
 fn check_selector(selector: &Selector) -> Result<()> {
     use crate::ir::ZoneKind;
     match selector {
-        Selector::Bound { .. } => Ok(()),
+        Selector::Bound { .. }
+        | Selector::MoveAfter {
+            permission: FollowPermission::SameEffectExplicitReference {},
+            ..
+        } => Ok(()),
         Selector::Zone {
             zone: ZoneKind::Field | ZoneKind::Ex,
             ..

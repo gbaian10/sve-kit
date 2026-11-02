@@ -672,9 +672,6 @@ fn check_base_face(printed: &serde_json::Value) -> Result<()> {
 
 fn check_ability_face(ability: &Ability, printed: &serde_json::Value) -> Result<()> {
     check_printed_face(printed)?;
-    if triggers::ex_phase(ability) && printed["card_type"] == "フォロワー" {
-        return Err(unsupported("EX follower source information"));
-    }
     if is_printed_quick(ability)
         && ability.kind == AbilityKind::Activated
         && printed["card_type"] != "フォロワー"

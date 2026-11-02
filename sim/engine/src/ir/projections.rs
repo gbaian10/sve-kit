@@ -39,6 +39,7 @@ variants!(#[derive(Copy)] OptionZoneKindFields {
 });
 
 variants!(#[derive(Copy)] SnapshotFields {
+    SourceInformation {} => ["reference.source-information"],
     DamageSource { event: Binding<DamageEvent> } => ["read.event-field"],
     LeaveFieldLki { event: Binding<LeaveFieldEvent> } => ["read.event-field"]
 });

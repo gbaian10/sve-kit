@@ -94,7 +94,17 @@ snapshot_fields!(TraitsFrozen);
 payload_fields!(PositionFields; MovePosition);
 payload_fields!(MoveMethodFields; MoveMethod);
 payload_fields!(OptionZoneKindFields; MoveEnteredFrom);
-payload_fields!(SnapshotFields; DamageSource, LeaveFieldLki);
+impl Projected for SnapshotFields {
+    fn check(&self, checker: &Checker) -> Checked {
+        match self {
+            Self::SourceInformation {} => {
+                checker.information_view(&ObjectView::SourceInformation {})
+            }
+            Self::DamageSource { event } => checker.reference(*event, BindingKind::Value),
+            Self::LeaveFieldLki { event } => checker.reference(*event, BindingKind::Value),
+        }
+    }
+}
 payload_fields!(RecipientFields; DamageRecipient, AttackTarget);
 payload_fields!(DamageFlagsFields; DamageFlags);
 payload_fields!(RollIdFields; DiceRoll);

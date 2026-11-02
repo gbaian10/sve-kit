@@ -28,6 +28,24 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
+fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
+    match zone {
+        ast::TargetZone::Single(single) => Some(vec![match single {
+            ast::TargetSingleZone::Field => ZoneKind::Field,
+            ast::TargetSingleZone::Ex => ZoneKind::Ex,
+            ast::TargetSingleZone::Cemetery => ZoneKind::Cemetery,
+        }]),
+        ast::TargetZone::PublicPair(zones)
+            if zones.len() == 2
+                && zones.contains(&ast::TargetSingleZone::Field)
+                && zones.contains(&ast::TargetSingleZone::Ex) =>
+        {
+            Some(vec![ZoneKind::Field, ZoneKind::Ex])
+        }
+        ast::TargetZone::PublicPair(_) => None,
+    }
+}
+
 pub(super) fn trigger_play_spec(
     entry: &ast::Ability,
     body: &ast::Body,
@@ -86,6 +104,60 @@ impl BodyContext<'_> {
         Ok(())
     }
 
+    fn public_target_selector(
+        &mut self,
+        query: &ast::TargetQuery,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let zones = query
+            .zone
+            .as_ref()
+            .and_then(target_zones)
+            .ok_or_else(|| unsupported(path))?;
+        let mut sets = Vec::new();
+        for zone in zones {
+            let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+            sets.push(Selector::Zone {
+                players: PlayerSet {
+                    relation: match query.who.as_ref().ok_or_else(|| unsupported(path))? {
+                        ast::Side::Controller => PlayerRelation::SelfPlayer,
+                        ast::Side::Opponent => PlayerRelation::Opponents,
+                        ast::Side::All => PlayerRelation::All,
+                    },
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(0),
+                        maximum: None,
+                    },
+                    text_quantifier: if matches!(query.who, Some(ast::Side::All)) {
+                        TextQuantifier::All
+                    } else {
+                        TextQuantifier::Implicit
+                    },
+                },
+                zone,
+                view: SelectionView::Current {},
+                binding: candidate,
+                predicate: Box::new(super::selection::field_filter(
+                    &super::selection::ObjectFilter::from(query),
+                    candidate,
+                )),
+            });
+        }
+        let mut selector = if sets.len() == 1 {
+            sets.pop().ok_or_else(|| unsupported(path))?
+        } else {
+            Selector::Union { sets }
+        };
+        if query.other {
+            selector = Selector::Difference {
+                input: Box::new(selector),
+                except: Box::new(super::numeric::holder()),
+            };
+        }
+        Ok(selector)
+    }
+
     pub(super) fn object_choice(
         &mut self,
         target: &ast::Target,
@@ -98,8 +170,10 @@ impl BodyContext<'_> {
         if target.from.not_same_name_as_this {
             return Err(unsupported(path));
         }
-        if matches!(target.from.zone, Some(ast::TargetZone::Cemetery))
-            && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+        ) && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
         {
             return Err(unsupported(path));
         }
@@ -121,46 +195,13 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        if matches!(target.from.zone, Some(ast::TargetZone::Ex)) {
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex))
+        ) {
             self.ex_targets.insert(target.bind.clone());
         }
-        let candidate = Binding::new(1, self.card_allocator.scope(path)?);
-        let mut selector = Selector::Zone {
-            players: PlayerSet {
-                relation: match target.from.who.as_ref().ok_or_else(|| unsupported(path))? {
-                    ast::Side::Controller => PlayerRelation::SelfPlayer,
-                    ast::Side::Opponent => PlayerRelation::Opponents,
-                    ast::Side::All => PlayerRelation::All,
-                },
-                relative_to: PlayerRef::Controller {},
-                cardinality: Cardinality {
-                    minimum: Nat(0),
-                    maximum: None,
-                },
-                text_quantifier: if matches!(target.from.who, Some(ast::Side::All)) {
-                    TextQuantifier::All
-                } else {
-                    TextQuantifier::Implicit
-                },
-            },
-            zone: match target.from.zone.as_ref().ok_or_else(|| unsupported(path))? {
-                ast::TargetZone::Field => ZoneKind::Field,
-                ast::TargetZone::Ex => ZoneKind::Ex,
-                ast::TargetZone::Cemetery => ZoneKind::Cemetery,
-            },
-            view: SelectionView::Current {},
-            binding: candidate,
-            predicate: Box::new(super::selection::field_filter(
-                &super::selection::ObjectFilter::from(&target.from),
-                candidate,
-            )),
-        };
-        if target.from.other {
-            selector = Selector::Difference {
-                input: Box::new(selector),
-                except: Box::new(super::numeric::holder()),
-            };
-        }
+        let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
         Ok((
             ChoiceDomain::Objects {
@@ -533,10 +574,11 @@ impl BodyContext<'_> {
             let mut context = BodyContext {
                 subject_event: self.subject_event,
                 source_use: self.source_use,
+                counter_read_view: self.counter_read_view,
                 players: self.players.clone(),
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
-                cemetery_return: self.cemetery_return,
+                source_can_enter_field: self.source_can_enter_field,
                 departure_to_cemetery: self.departure_to_cemetery,
                 scope,
                 definition: self.definition,

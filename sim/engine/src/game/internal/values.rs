@@ -14,7 +14,7 @@ use crate::ir::{
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
-    ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView,
+    ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView, SnapshotFields,
 };
 use crate::ir::{NumericProperty, Stat};
 use alloc::collections::BTreeSet;
@@ -674,6 +674,12 @@ impl Execution {
                         .get(&seat)
                         .map(|counts| counts.1)
                         .ok_or_else(|| invalid("missing AtPlay cemetery count"))
+                }
+                NatFrozen::SnapshotCounter {
+                    object: Expr::Frozen(view),
+                    kind,
+                } if matches!(view.as_ref(), SnapshotFields::SourceInformation {}) => {
+                    self.source_counter(game, kind)
                 }
                 NatFrozen::ReceiptActual { receipt } => {
                     self.quantity(receipt).map(|(_, actual)| actual)
