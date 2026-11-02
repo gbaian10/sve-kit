@@ -7,23 +7,16 @@ cards:
             - create:
                 n: 1
                 to: field
-                token: 番犬の右腕・ミミ
-                bind: right
-            - create:
-                n: 1
-                to: field
-                token: 番犬の左腕・ココ
-                bind: left
+                token:
+                  - 番犬の右腕・ミミ
+                  - 番犬の左腕・ココ
+                bind: hounds
             - if:
                 cond:
                   necro: 10
                 then:
                   - grant:
-                      "on": right
-                      keywords:
-                        - storm
-                  - grant:
-                      "on": left
+                      "on": hounds
                       keywords:
                         - storm
       - line: 2
