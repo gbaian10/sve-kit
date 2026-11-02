@@ -1,0 +1,63 @@
+cards:
+  BP15-079:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  any_of:
+                    - enemy
+                    - leader_of: enemy
+          on:
+            left_field:
+              sel:
+                kind: follower
+                other: true
+                trait: 妖怪
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: 一ツ尾狐
+        line: 2
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 一ツ尾狐
+            - buff:
+                on:
+                  kind: follower
+                  other: true
+                  trait: 妖怪
+                  who: self
+                  zone: field
+                power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP15-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,58 @@
+cards:
+  CP04-061:
+    abilities:
+      - attack_time:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          resource:
+                            kind: pp_max
+                            who: self
+                        op: eq
+                        right: 10
+                    n: 4
+                n: 2
+                to:
+                  any_of:
+                    - enemy
+                    - leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - keywords:
+          - rush
+        line: 1
+        section: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 1
+                  trait: トゥインクルウィッシュ
+                  who: self
+                  zone: deck
+                to: ex
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

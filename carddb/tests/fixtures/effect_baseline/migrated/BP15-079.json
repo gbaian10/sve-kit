@@ -1,0 +1,86 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": 1,
+        "op": "damage",
+        "subjects": {
+          "union": [
+            "target.1",
+            "target.1.leader"
+          ]
+        }
+      },
+      "event": "leave",
+      "kind": "trigger",
+      "line": 1,
+      "retain_event": true,
+      "subject": {
+        "other": true,
+        "side": "self",
+        "trait": "妖怪",
+        "type": "follower",
+        "zone": "field"
+      },
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    },
+    {
+      "body": {
+        "count": 2,
+        "name": "一ツ尾狐",
+        "op": "create",
+        "to": "field"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "count": 1,
+            "name": "一ツ尾狐",
+            "op": "create",
+            "to": "field"
+          },
+          {
+            "op": "modify",
+            "power": 1,
+            "subjects": {
+              "other": true,
+              "side": "self",
+              "trait": "妖怪",
+              "type": "follower",
+              "zone": "field"
+            }
+          }
+        ]
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

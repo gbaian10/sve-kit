@@ -1,0 +1,35 @@
+cards:
+  BP21-104:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

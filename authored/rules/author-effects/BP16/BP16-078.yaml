@@ -1,0 +1,52 @@
+cards:
+  BP16-078:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - auto:
+          do:
+            - move:
+                ref: this
+                to: cemetery
+          on:
+            phase:
+              which: end
+              whose: opp
+        line: 2
+      - covers:
+          - 3
+          - 4
+        fanfare:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      entered_from:
+                        from: cemetery
+                        ref: this
+                    upto: 2
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 魔導装甲車
+                    - life:
+                        delta: 1
+                        who: self
+                  - - move:
+                        to: cemetery
+                        top:
+                          n: 2
+                          who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

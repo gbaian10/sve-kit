@@ -1,0 +1,57 @@
+cards:
+  BP17-003:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ナテラの大樹
+            - damage:
+                n:
+                  count:
+                    name: ナテラの大樹
+                    who: self
+                    zone: ex
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ナテラの大樹
+            - damage:
+                n:
+                  count:
+                    name: ナテラの大樹
+                    who: self
+                    zone: ex
+                to:
+                  any_of:
+                    - enemy
+                    - leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

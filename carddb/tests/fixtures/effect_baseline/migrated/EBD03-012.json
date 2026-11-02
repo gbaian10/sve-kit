@@ -1,0 +1,62 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1,
+      "play_if": {
+        "args": [
+          {
+            "read": "self.entered_from"
+          },
+          "cemetery"
+        ],
+        "fn": "eq"
+      }
+    },
+    {
+      "body": {
+        "name": "rush",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "count": 1,
+            "name": "機動二輪車",
+            "op": "create",
+            "to": "field"
+          },
+          {
+            "op": "move",
+            "subjects": {
+              "side": "self",
+              "top": 2,
+              "zone": "deck"
+            },
+            "to": "cemetery"
+          }
+        ]
+      },
+      "event": "field_to_cemetery",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

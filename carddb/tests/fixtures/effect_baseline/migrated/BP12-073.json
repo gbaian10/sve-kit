@@ -1,0 +1,39 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "bane",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "count": 1,
+            "name": "プロダクトマシーン",
+            "op": "create",
+            "to": "field"
+          },
+          {
+            "op": "move",
+            "subjects": {
+              "side": "self",
+              "top": 1,
+              "zone": "deck"
+            },
+            "to": "cemetery"
+          }
+        ]
+      },
+      "event": "evolve",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
