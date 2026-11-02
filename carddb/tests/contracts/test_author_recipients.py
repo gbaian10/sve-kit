@@ -149,3 +149,25 @@ def test_collection_fields_and_union_do_not_rewrite_each_other(
     for value in (combined, union):
         _check(name, value, accepted=True)
     assert canonical(combined) != canonical(union)
+
+
+@pytest.mark.parametrize(
+    "limbs",
+    [
+        ["enemy", {"leader_of": "enemy"}],
+        [{"leader_of": "enemy"}, "enemy"],
+    ],
+)
+def test_bound_follower_and_its_leader_share_one_recipient_union(
+    limbs: list[JsonValue],
+) -> None:
+    _check(RECIPIENT_UNION, {"any_of": limbs}, accepted=True)
+
+
+@pytest.mark.parametrize(
+    "limbs", [["enemy"], ["enemy", {"in": "shown"}], ["this", {"leader_of": "enemy"}]]
+)
+def test_object_names_do_not_supply_a_leader_or_a_reserved_reference(
+    limbs: list[JsonValue],
+) -> None:
+    _check(RECIPIENT_UNION, {"any_of": limbs}, accepted=False)
