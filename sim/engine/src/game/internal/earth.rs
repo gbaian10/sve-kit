@@ -76,6 +76,7 @@ impl Game {
                 ZoneKind::Cemetery,
                 MoveMethod::Put,
                 false,
+                None,
             )?;
         }
         execution.facts.push(Fact::Payment {
