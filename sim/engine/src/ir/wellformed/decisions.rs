@@ -554,9 +554,8 @@ impl Checker {
         receipt: ReceiptId,
     ) -> Checked {
         if at == PaymentTime::PlayParameter
-            && (self.env.play_payments != Some(self.root)
-                || self.env.scope != self.root
-                || !on_paid.steps.is_empty())
+            && (self.env.play_payments != Some(self.env.scope)
+                || (self.env.scope == self.root && !on_paid.steps.is_empty()))
         {
             return Err(self.error(WellFormedReason::DecisionTiming));
         }

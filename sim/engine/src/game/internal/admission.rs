@@ -157,6 +157,7 @@ fn source_paths(
                 control:
                     Control::Pay {
                         costs: CostSpec::Ordered { steps },
+                        on_paid,
                         ..
                     },
             } => {
@@ -169,6 +170,7 @@ fn source_paths(
                         paths.insert(format!("{prefix}/keyword"));
                     }
                 }
+                source_paths(on_paid, &format!("{path}/control/on_paid"), origin, paths);
             }
             Node::Control {
                 control: Control::EachPlayer { stages, .. },

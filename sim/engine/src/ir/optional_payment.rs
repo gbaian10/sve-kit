@@ -132,3 +132,24 @@ fn entry_origin_guard(condition: &Expr<Bool>) -> bool {
         left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Hand | ZoneKind::Deck | ZoneKind::Cemetery }),
     } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { .. })))
 }
+
+/// A selected mode owns one optional play-time cost and its guarded continuation.
+pub(crate) const fn mode_declaration(body: &Program) -> Option<(&CostSpec, ReceiptId, &Program)> {
+    let [step] = body.steps.as_slice() else {
+        return None;
+    };
+    let Node::Control {
+        control:
+            Control::Pay {
+                at: PaymentTime::PlayParameter,
+                costs,
+                on_paid,
+                receipt,
+                optional: PaymentOptionality::Optional,
+            },
+    } = &step.node
+    else {
+        return None;
+    };
+    Some((costs, *receipt, on_paid))
+}
