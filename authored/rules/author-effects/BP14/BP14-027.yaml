@@ -1,0 +1,41 @@
+cards:
+  BP14-027:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: victim
+            - damage:
+                n: 1
+                to:
+                  leader_of: victim
+          on:
+            placed_ex:
+              sel:
+                name: 輝く金貨
+              who: self
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 輝く金貨
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,38 @@
+cards:
+  BP14-031:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 2
+                to: victim
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 宴楽
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 3
+                then:
+                  - draw:
+                      n: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

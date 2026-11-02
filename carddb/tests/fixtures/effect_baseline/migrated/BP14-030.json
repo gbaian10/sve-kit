@@ -1,0 +1,56 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "count": 1,
+            "name": "輝く金貨",
+            "op": "create",
+            "to": "ex"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "count": {
+                    "name": "天下の大泥棒・ジエモン",
+                    "side": "self",
+                    "zone": "field"
+                  }
+                },
+                0
+              ],
+              "fn": "gt"
+            },
+            "op": "if",
+            "then": {
+              "op": "evolve",
+              "subjects": "self"
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
