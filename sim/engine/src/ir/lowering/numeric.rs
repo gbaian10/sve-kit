@@ -2,6 +2,7 @@ use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
     EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
     NumericChange, ObjectRef, Resource, ResourceOperation, Stat, TimeAnchor, TimestampBasis,
+    TraitId,
 };
 use super::{
     AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
@@ -263,6 +264,21 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
+            ast::InstalledEffect::AddTrait(value) => {
+                if value.r#trait.is_empty()
+                    || !matches!(installation.until, None | Some(ast::Until::Game))
+                {
+                    return Err(unsupported(path));
+                }
+                return Ok(Action::Modify {
+                    subjects: self.objects(&installation.on, path)?,
+                    patch: CharacteristicPatch::AddTrait {
+                        trait_id: TraitId(value.r#trait.clone()),
+                    },
+                    expires: duration(installation.until.as_ref(), path)?,
+                    source: EffectReference::CurrentInstallation {},
+                });
+            }
             ast::InstalledEffect::Cannot(ast::Cannot::Attack(_)) => {
                 return self.no_attack(installation, path);
             }

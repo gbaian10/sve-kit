@@ -18,7 +18,7 @@ pub(super) struct EventSubjectInformation {
     reason = "The card play commit boundary owns observer admission."
 )]
 impl Game {
-    // No admitted modifier changes class or traits; this subset avoids unrelated title bindings.
+    // This subset avoids unrelated title bindings.
     pub(super) fn event_subject_information(
         &self,
         source: &str,
@@ -50,17 +50,7 @@ impl Game {
                 .ok_or_else(|| invalid("missing subject class"))?
                 .into(),
         );
-        let traits = face["traits"]
-            .as_array()
-            .ok_or_else(|| invalid("missing subject traits"))?
-            .iter()
-            .map(|value| {
-                value
-                    .as_str()
-                    .map(|text| TraitId(text.into()))
-                    .ok_or_else(|| invalid("invalid subject trait"))
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let traits = self.card_traits(source)?.into_iter().map(TraitId).collect();
         Ok(EventSubjectInformation {
             kind,
             token,

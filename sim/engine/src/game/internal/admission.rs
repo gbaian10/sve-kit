@@ -731,6 +731,7 @@ fn supported(code: &str) -> bool {
             | "action.modify"
             | "effect.continuous"
             | "shape.CharacteristicPatch.Numeric"
+            | "shape.CharacteristicPatch.AddTrait"
             | "shape.CharacteristicPatch.Combined"
             | "shape.NumericChange.Add"
             | "numeric.add"

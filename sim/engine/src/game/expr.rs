@@ -211,7 +211,6 @@ impl Game {
         if selector["other"] == true && id == frame.source {
             return Ok(false);
         }
-        let face = self.face(id)?;
         let card_type = self.object_type(id)?;
         let typ = match string(&selector["type"]) {
             "follower" | "evolved_follower" => "フォロワー",
@@ -230,9 +229,7 @@ impl Game {
             return Ok(false);
         }
         if let Some(trait_name) = selector["trait"].as_str()
-            && !list(&face["traits"])
-                .iter()
-                .any(|v| string(v) == trait_name)
+            && !self.card_traits(id)?.contains(trait_name)
         {
             return Ok(false);
         }

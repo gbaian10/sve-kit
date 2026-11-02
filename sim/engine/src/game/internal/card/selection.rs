@@ -52,18 +52,7 @@ pub(in crate::game::internal) fn characteristics(
     game: &Game,
     id: &str,
 ) -> Result<TargetCharacteristics> {
-    // The admitted closure has no trait patches, static effects or base replacement during play.
-    let traits = game.face(id)?["traits"]
-        .as_array()
-        .ok_or_else(|| invalid("missing effective traits"))?
-        .iter()
-        .map(|value| {
-            value
-                .as_str()
-                .map(str::to_owned)
-                .ok_or_else(|| invalid("invalid effective trait"))
-        })
-        .collect::<Result<Vec<_>>>()?;
+    let traits = game.card_traits(id)?.into_iter().collect();
     Ok(TargetCharacteristics {
         names: game.card_names(id)?,
         controller: game.object(id)?.controller.clone(),

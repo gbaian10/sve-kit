@@ -1,11 +1,12 @@
-//! Ability grants retain the text provider and receiving physical generation.
+//! Grants retain the text provider and receiving physical generation.
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
-    Action, CharacteristicPatch, DurationEnd, Effect, EventPattern, GrantedAbility, Instruction,
-    InstructionId, KeywordId, Located, ObjectOperand, ObjectView, PlayerRef, RuntimeAbilitySource,
-    ScopeId, SourceSpan, TimeAnchor, TriggerCondition, ZoneKind, granted_cost, printed_keywords,
+    Action, CharacteristicPatch, DurationEnd, Effect, EffectId, EffectReference, EventPattern,
+    GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand, ObjectRef,
+    ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan, TimeAnchor,
+    TriggerCondition, ZoneKind, granted_cost, printed_keywords,
 };
 use alloc::collections::BTreeSet;
 use core::ops::Deref;
@@ -21,6 +22,7 @@ pub(in crate::game) struct KeywordState {
 struct KeywordGrant {
     end: EffectEnd,
     keywords: BTreeSet<String>,
+    traits: BTreeSet<String>,
     origin: GrantOrigin,
     definitions: Vec<u64>,
 }
@@ -147,6 +149,24 @@ pub(super) const fn keyword(keyword: KeywordId) -> Option<&'static str> {
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
+    if let Action::Modify {
+        patch: CharacteristicPatch::AddTrait { trait_id },
+        expires,
+        source,
+        ..
+    } = action
+    {
+        if trait_id.0.is_empty()
+            || *source != (EffectReference::CurrentInstallation {})
+            || expires.anchor != (TimeAnchor::Installation {})
+            || expires.usage.is_some()
+            || !expires.intervals.is_empty()
+            || expires.end != (DurationEnd::NoTemporalExpiry {})
+        {
+            return Err(unsupported("fixed trait grant"));
+        }
+        return Ok(());
+    }
     let Action::Grant {
         abilities,
         duration,
@@ -218,6 +238,35 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
     reason = "Keyword installation and expiry share generation-bound authority."
 )]
 impl Game {
+    pub(in crate::game) fn card_traits(&self, holder: &str) -> Result<BTreeSet<String>> {
+        let mut traits = self.face(holder)?["traits"]
+            .as_array()
+            .ok_or_else(|| invalid("missing effective traits"))?
+            .iter()
+            .map(|value| {
+                value
+                    .as_str()
+                    .map(str::to_owned)
+                    .ok_or_else(|| invalid("invalid effective trait"))
+            })
+            .collect::<Result<BTreeSet<_>>>()?;
+        let object = self.object(holder)?;
+        if let Some(state) = self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| object.zone == "field" && state.generation == object.generation)
+        {
+            traits.extend(
+                state
+                    .grants
+                    .iter()
+                    .flat_map(|grant| grant.traits.iter().cloned()),
+            );
+        }
+        Ok(traits)
+    }
+
     pub(in crate::game::internal) fn internal_has_granted_definitions(&self) -> bool {
         self.state.ir_keywords.values().any(|state| state.grants.iter().any(|grant| !grant.definitions.is_empty()))
             || self.card_runtime.definitions.cards.values().any(|program| program.card().abilities.iter().any(|ability| ability.node.declarations.iter().any(|effect| {
@@ -489,14 +538,25 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         check_action(&instruction.action)?;
-        let Action::Grant {
-            subjects,
-            abilities,
-            duration,
-            ..
-        } = &instruction.action
-        else {
-            return Err(unsupported("keyword grant instruction"));
+        let (subjects, abilities, duration, traits) = match &instruction.action {
+            Action::Grant {
+                subjects,
+                abilities,
+                duration,
+                ..
+            } => (subjects, abilities.as_slice(), duration, BTreeSet::new()),
+            Action::Modify {
+                subjects,
+                patch: CharacteristicPatch::AddTrait { trait_id },
+                expires,
+                ..
+            } => (
+                subjects,
+                [].as_slice(),
+                expires,
+                BTreeSet::from([trait_id.0.clone()]),
+            ),
+            _ => return Err(unsupported("grant instruction")),
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
         let provider = self.installed_keyword_provider(execution)?;
@@ -528,6 +588,49 @@ impl Game {
                 );
             }
         }
+        let trait_grant = !traits.is_empty();
+        let grant = KeywordGrant {
+            end,
+            keywords,
+            traits,
+            origin,
+            definitions,
+        };
+        let installed = self.install_grant(execution, subjects, &grant)?;
+        let outcome = if trait_grant {
+            let effect = if installed.is_empty() {
+                None
+            } else {
+                let id = EffectId(self.state.next_ir_effect);
+                self.state.next_ir_effect = self
+                    .state
+                    .next_ir_effect
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("trait effect identities exhausted"))?;
+                self.state.ir_epoch = self
+                    .state
+                    .ir_epoch
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("trait commit identities exhausted"))?;
+                Some(id)
+            };
+            InstructionOutcome::Modified {
+                effect,
+                subjects: installed,
+            }
+        } else {
+            InstructionOutcome::Granted(installed)
+        };
+        execution.receipts.insert(instruction.receipt, outcome);
+        Ok(())
+    }
+
+    fn install_grant(
+        &mut self,
+        execution: &Execution,
+        subjects: &Selector,
+        grant: &KeywordGrant,
+    ) -> Result<Vec<ObjectRef>> {
         let mut installed = vec![];
         let mut seen = BTreeSet::new();
         for member in execution.objects(self, subjects)? {
@@ -540,12 +643,17 @@ impl Game {
                 continue;
             }
             if !matches!(object.zone.as_str(), "field" | "ex") {
-                if !definitions.is_empty() {
+                if !grant.definitions.is_empty() {
                     return Err(unsupported("definition grant requires Field or EX"));
                 }
                 continue;
             }
-            if !definitions.is_empty() {
+            if !grant.traits.is_empty()
+                && (object.zone != "field" || !self.object_type(&id)?.contains("フォロワー"))
+            {
+                return Err(unsupported("trait subjects must be field followers"));
+            }
+            if !grant.definitions.is_empty() {
                 // A granted definition needs the receiver's ordinary ability authority too.
                 self.internal_printed_abilities(&id)?;
             }
@@ -564,18 +672,10 @@ impl Game {
                     grants: vec![],
                 };
             }
-            state.grants.push(KeywordGrant {
-                end,
-                keywords: keywords.clone(),
-                origin: origin.clone(),
-                definitions: definitions.clone(),
-            });
+            state.grants.push(grant.clone());
             installed.push(member);
         }
-        execution
-            .receipts
-            .insert(instruction.receipt, InstructionOutcome::Granted(installed));
-        Ok(())
+        Ok(installed)
     }
 
     pub(in crate::game::internal) fn internal_grants_rule_carry(

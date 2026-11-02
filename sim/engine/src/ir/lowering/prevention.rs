@@ -192,7 +192,8 @@ impl BodyContext<'_> {
                     path,
                 )?
             }
-            ast::InstalledEffect::Stat(_)
+            ast::InstalledEffect::AddTrait(_)
+            | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(ast::Cannot::Stand(_) | ast::Cannot::Attack(_)) => {

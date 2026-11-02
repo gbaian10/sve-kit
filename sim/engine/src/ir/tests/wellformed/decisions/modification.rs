@@ -64,6 +64,12 @@ fn cp02_007_buff_bp16_049_set_and_bp05_001_kind_are_action_seeds() {
             },
             "BP05-001",
         ),
+        (
+            CharacteristicPatch::AddTrait {
+                trait_id: TraitId("武装".into()),
+            },
+            "BP02-T07",
+        ),
     ] {
         accept(selected(modify(patch, card_no)));
     }
@@ -91,6 +97,12 @@ fn modify_checks_inputs_and_never_accepts_ability_or_mixed_patches() {
         CharacteristicPatch::GrantAbility { abilities: vec![] },
         CharacteristicPatch::AddName {
             name: CardName("synthetic".into()),
+        },
+        CharacteristicPatch::AddTrait {
+            trait_id: TraitId(String::new()),
+        },
+        CharacteristicPatch::RemoveTrait {
+            trait_id: TraitId("武装".into()),
         },
     ] {
         let error = reject(

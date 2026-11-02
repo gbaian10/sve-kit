@@ -190,7 +190,7 @@ Token 檢查所有模板的常值名稱、數量、Field／Ex 單一目的區及
 ## 搜尋、移動與減費安裝
 
 `Action::Modify` 獨立接受 Numeric Add／Set、非空且全為 Numeric 的遞迴 Combined，
-或單獨 SetKind。GrantAbility、SuppressAbility、名稱／類型增減及混合層 Combined
+或單獨 SetKind、非空 AddTrait。GrantAbility、SuppressAbility、名稱增減、RemoveTrait 及混合層 Combined
 整棵拒絕。subjects、每個數值、source 與 expires 的引用都檢查；數值可以有號，
 不能在 IR 邊界先截為零。CurrentInstallation 表示本指示建立的修正實例，
 Bound source 仍須有支配且型別相符的 EffectId producer（目前沒有此 producer）。
