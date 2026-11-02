@@ -28,6 +28,20 @@ export interface DialogProps {
   readonly className?: string
 }
 
+// Open dialogs share one page scroll lock. A count, not each dialog's saved value: nested dialogs
+// unmounted together clean up outer first, which would restore the inner one's "hidden".
+let scrollLocks = 0
+let unlockedOverflow = ""
+function lockPageScroll() {
+  if (scrollLocks === 0) unlockedOverflow = document.documentElement.style.overflow
+  scrollLocks += 1
+  document.documentElement.style.overflow = "hidden"
+}
+function unlockPageScroll() {
+  scrollLocks -= 1
+  if (scrollLocks === 0) document.documentElement.style.overflow = unlockedOverflow
+}
+
 // Native <dialog> does the modal work (top layer, inert background, focus trap). What it does
 // not do reliably across browsers is picked up here: initial focus on the close button, returning
 // focus to the opener, Escape and backdrop clicks going through onClose so the caller stays in charge.
@@ -66,11 +80,8 @@ export function Dialog({
   // The top layer traps focus but not the wheel: the page behind a modal must not scroll.
   useEffect(() => {
     if (!open) return
-    const previous = document.documentElement.style.overflow
-    document.documentElement.style.overflow = "hidden"
-    return () => {
-      document.documentElement.style.overflow = previous
-    }
+    lockPageScroll()
+    return unlockPageScroll
   }, [open])
 
   const onCancel = (event: SyntheticEvent<HTMLDialogElement>) => {

@@ -2,7 +2,17 @@ import "fake-indexeddb/auto"
 
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
@@ -51,6 +61,32 @@ async function openBuilder(classCode = "royal") {
 function stored(id: string): Deck | undefined {
   const state = decksStore.get()
   return state.status === "ready" ? state.decks.find((deck) => deck.id === id) : undefined
+}
+
+/** A window whose width the test changes: the 1180px query matches once `wide` is set. */
+function resizableWindow() {
+  const listeners = new Set<() => void>()
+  let wide = false
+  const media = vi.spyOn(window, "matchMedia").mockImplementation(
+    (query: string) =>
+      ({
+        matches: wide && query.includes("1180px"),
+        media: query,
+        onchange: null,
+        addEventListener: (_type: string, listener: () => void) => listeners.add(listener),
+        removeEventListener: (_type: string, listener: () => void) => listeners.delete(listener),
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList,
+  )
+  onTestFinished(() => {
+    media.mockRestore()
+  })
+  return (next: boolean) => {
+    wide = next
+    for (const listener of listeners) listener()
+  }
 }
 
 describe("DeckBuilderPage", () => {
@@ -129,5 +165,34 @@ describe("DeckBuilderPage", () => {
     })
     expect(screen.queryByRole("dialog", { name: "牌組" })).not.toBeInTheDocument()
     expect(router.state.location.pathname).toBe(`/decks/${id}`)
+  }, 60_000)
+
+  it("closes the sheet and the dialog opened in it, with their back entries, on widening to three columns", async () => {
+    const setWide = resizableWindow()
+    const { router, id } = await openBuilder()
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+    const sheet = await screen.findByRole("dialog", { name: "牌組" })
+    await user.click(await within(sheet).findByRole("button", { name: "匯出／分享" }))
+    expect(await screen.findByRole("dialog", { name: "匯出／分享" })).toBeInTheDocument()
+    expect(document.documentElement.style.overflow).toBe("hidden")
+
+    await act(async () => {
+      setWide(true)
+      await Promise.resolve()
+    })
+    await waitFor(() => {
+      expect(router.state.location.state).toBeNull()
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(document.documentElement.style.overflow).toBe("")
+    expect(screen.getByRole("complementary", { name: "牌組" })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(`/decks/${id}`)
+
+    await act(async () => {
+      setWide(false)
+      await Promise.resolve()
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   }, 60_000)
 })

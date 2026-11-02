@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react"
+import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useLocation, useNavigate } from "react-router"
 
 interface DialogState {
@@ -67,4 +67,17 @@ export function useDialogHistory(id: string, open: boolean, onClose: () => void)
     onCloseRef.current()
     if (pop) void navigate(-1)
   }
+}
+
+/**
+ * Pops the history entries of every open dialog. Each dialog that stays mounted sees its entry go
+ * as a back press and closes; one that unmounted (its layout changed) leaves no dead entry behind.
+ */
+export function useDropDialogs(): () => void {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const count = dialogsOf(location.state).length
+  return useCallback(() => {
+    if (count > 0) void navigate(-count)
+  }, [count, navigate])
 }

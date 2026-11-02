@@ -25,11 +25,14 @@ export function CountPill({
   count,
   min,
   max,
+  compactInRail = false,
 }: {
   readonly label: string
   readonly count: number
   readonly min: number
   readonly max: number
+  /** In the landscape-phone rail only the count shows; the label stays for screen readers. */
+  readonly compactInRail?: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -43,10 +46,10 @@ export function CountPill({
             : "border-success bg-success-soft text-success",
       )}
     >
-      {label}
+      <span className={cn(compactInRail && "phone-landscape:sr-only")}>{label}</span>
       <span>
         <span className="text-13">{count}</span>
-        <span className="text-text-3">
+        <span className={cn("text-text-3", compactInRail && "phone-landscape:hidden")}>
           {min === 0 ? t("decks.limitMax", { max }) : t("decks.limitRange", { min, max })}
         </span>
       </span>

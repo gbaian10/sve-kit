@@ -1,10 +1,10 @@
 import { Crown } from "lucide-react"
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react"
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams, useSearchParams } from "react-router"
 
 import { useDrawerSide, useSidebarLayout } from "../../app/cards-layout"
-import { useDialogHistory } from "../../app/dialog-history"
+import { useDialogHistory, useDropDialogs } from "../../app/dialog-history"
 import { useMediaQuery } from "../../app/useMediaQuery"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
@@ -106,6 +106,16 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
   const closeSheet = useDialogHistory("deck-sheet", sheetOpen, () => {
     setSheetOpen(false)
   })
+  // Crossing 1180 moves the deck panel between the sheet and its column, remounting it: every
+  // dialog closes with its history entry, so none stays open unseen or leaves a dead back step.
+  const dropDialogs = useDropDialogs()
+  const layout = useRef(threeColumns)
+  useEffect(() => {
+    if (layout.current === threeColumns) return
+    layout.current = threeColumns
+    setSheetOpen(false)
+    dropDialogs()
+  }, [threeColumns, dropDialogs])
   // The pool hands over its card opener once it is ready; the deck list opens cards through it.
   const [opener, setOpener] = useState<{ readonly open: (summary: CardSummary) => void } | null>(
     null,
@@ -243,7 +253,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
         </div>
       ) : (
         // The pool takes the page; the deck's summary bar replaces the site navigation.
-        <div className="pb-24">
+        <div className="pb-24 phone-landscape:pb-6">
           {pool}
           <DeckSummaryBar
             onOpen={() => {

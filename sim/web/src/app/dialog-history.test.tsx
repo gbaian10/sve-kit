@@ -4,7 +4,7 @@ import { type ReactNode, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
 
 import { renderInRouter } from "../test-utils"
-import { useDialogHistory } from "./dialog-history"
+import { useDialogHistory, useDropDialogs } from "./dialog-history"
 
 function Harness({
   onClosed,
@@ -20,6 +20,7 @@ function Harness({
     onClosed()
     setOpen(false)
   })
+  const dropAll = useDropDialogs()
   return (
     <div>
       <button
@@ -29,6 +30,9 @@ function Harness({
         }}
       >
         {`open ${id}`}
+      </button>
+      <button type="button" onClick={dropAll}>
+        {`drop from ${id}`}
       </button>
       {open && (
         <div role="dialog" aria-label={id}>
@@ -98,5 +102,29 @@ describe("useDialogHistory", () => {
     })
     expect(outerClosed).toHaveBeenCalledTimes(1)
     expect(router.state.location.state).toBeNull()
+  })
+
+  it("drops every open dialog with its history entry", async () => {
+    const outerClosed = vi.fn()
+    const innerClosed = vi.fn()
+    const { router } = await renderInRouter(
+      <Harness id="deck" onClosed={outerClosed}>
+        <Harness id="export" onClosed={innerClosed} />
+      </Harness>,
+      { initialEntries: ["/decks/1"] },
+    )
+    // Nothing is open: dropping does not leave the page.
+    await userEvent.click(screen.getByRole("button", { name: "drop from deck" }))
+    expect(router.state.location.pathname).toBe("/decks/1")
+    await userEvent.click(screen.getByRole("button", { name: "open deck" }))
+    await userEvent.click(screen.getByRole("button", { name: "open export" }))
+    await act(async () => {
+      screen.getByRole("button", { name: "drop from export" }).click()
+      await Promise.resolve()
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    expect(outerClosed).toHaveBeenCalledTimes(1)
+    expect(router.state.location.state).toBeNull()
+    expect(router.state.location.pathname).toBe("/decks/1")
   })
 })
