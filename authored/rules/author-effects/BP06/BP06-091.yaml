@@ -1,0 +1,67 @@
+cards:
+  BP06-091:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp
+                        who: self
+                    op: ge
+                    right: 2
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp
+                        who: self
+                    op: ge
+                    right: 4
+                then:
+                  - draw:
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp
+                        who: self
+                    op: ge
+                    right: 6
+                then:
+                  - destroy: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

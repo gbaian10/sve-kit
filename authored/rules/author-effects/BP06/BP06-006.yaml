@@ -1,0 +1,28 @@
+cards:
+  BP06-006:
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: allies
+                from:
+                  kind: follower
+                  orig_cost_le: 2
+                  trait: 狩人
+                  who: self
+                  zone: cemetery
+                upto: 2
+            - move:
+                ref: allies
+                result: returned
+                to: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
