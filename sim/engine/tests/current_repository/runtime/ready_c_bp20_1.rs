@@ -155,7 +155,6 @@ fn evolve(game: &mut Game) {
     evolve_with(game, 1, 1);
 }
 
-
 fn evolve_with(game: &mut Game, cost: u8, mode: u64) {
     assert_eq!(
         game.internal_rule_action(
@@ -193,11 +192,6 @@ fn activate(game: &mut Game, card: &str) -> bool {
     true
 }
 
-
-
-
-
-
 fn settle_combat(game: &mut Game) {
     loop {
         triggers(game);
@@ -210,7 +204,6 @@ fn settle_combat(game: &mut Game) {
         finish(game, step);
     }
 }
-
 
 #[test]
 fn bp20_044_fanfare_pays_another_idol_to_destroy_and_burn() {
@@ -234,6 +227,32 @@ fn bp20_080_second_mode_returns_a_cheap_nightmare_absolute() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["field"], json!(["source", "servant"]));
     assert_eq!(state["objects"]["enemy"]["damage"], 0_u8);
+}
+
+#[test]
+fn bp20_080_second_mode_keeps_its_target_in_the_cemetery_when_the_field_is_full() {
+    let mut initial = evolved_position("BP20-079", "BP20-080");
+    for index in 0..3_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("goblin{index}"),"card":"BP01-171"}));
+    }
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"amulet","card":"BP01-133"}));
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"servant","card":"BP05-080"}]);
+    let mut game = game(&initial);
+    evolve_with(&mut game, 1, 2);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P1"]["field"],
+        json!(["source", "goblin0", "goblin1", "goblin2", "amulet"])
+    );
+    assert_eq!(state["P1"]["cemetery"], json!(["servant"]));
+    assert_eq!(state["P1"]["evolve_deck"], json!([]));
+    assert_eq!(state["P1"]["pp"]["current"], 9_u8);
 }
 
 #[test]

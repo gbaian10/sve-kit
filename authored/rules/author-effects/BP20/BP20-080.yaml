@@ -28,10 +28,20 @@ cards:
                   - - damage:
                         n: 5
                         to: enemy
-                  - - move:
-                        ref: revive
-                        to: field
-                        result: revived
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: field
+                            op: lt
+                            right: 5
+                        then:
+                          - move:
+                              ref: revive
+                              to: field
+                              result: revived
                   - - buff:
                         "on":
                           who: self
