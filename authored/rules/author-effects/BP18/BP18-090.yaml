@@ -1,0 +1,31 @@
+cards:
+  BP18-090:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                orig_cost_eq: 2
+                who: self
+                zone: hand
+          optional_cost_delta: -1
+      - evolve:
+          cost:
+            pp: 4
+        line: 2
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -11,7 +11,7 @@ fn selected() -> &'static SelectedEffects {
     SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
         input["authors"].as_array_mut().unwrap().retain(|author| {
-            author["input"]["card_no"].as_str().is_some_and(|number| ["ECP01-036", "BP14-119", "CP02-038", "CP02-T01", "BP03-T02"].contains(&number))
+            author["input"]["card_no"].as_str().is_some_and(|number| ["ECP01-036", "BP14-119", "CP02-038", "CP02-T01", "BP03-T02", "BP18-090", "CP02-050", "CP02-SP06a", "BP20-018"].contains(&number))
         });
         for (number, cost, traits) in [
             ("exchange-high", "7", vec!["ウマ娘"]),
@@ -19,9 +19,14 @@ fn selected() -> &'static SelectedEffects {
             ("exchange-goblin", "1", vec!["ゴブリン"]),
             ("exchange-idol", "1", vec!["デレマス"]),
             ("exchange-dummy", "1", vec![]),
+            ("exchange-two", "2", vec![]),
+            ("exchange-spell0", "1", vec![]),
+            ("exchange-spell1", "1", vec![]),
+            ("exchange-beast", "1", vec!["獣"]),
         ] {
+            let kind = if number.starts_with("exchange-spell") { "スペル" } else { "フォロワー" };
             if !snapshot.ends_with('\n') { snapshot.push('\n'); }
-            snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","traits":traits,"cost":cost,"power":"1","hp":"20","text":null,"sections":[]}]}).to_string());
+            snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"traits":traits,"cost":cost,"power":if kind=="フォロワー" { "1" } else { "-" },"hp":if kind=="フォロワー" { "20" } else { "-" },"text":null,"sections":[]}]}).to_string());
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
@@ -31,7 +36,7 @@ fn selected() -> &'static SelectedEffects {
     })
 }
 
-fn exchange_game(initial: &Value) -> Game {
+pub(super) fn exchange_game(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
         selected().clone(),
         initial,
@@ -51,13 +56,17 @@ fn exchange_game(initial: &Value) -> Game {
         "exchange-goblin",
         "exchange-idol",
         "exchange-dummy",
+        "exchange-two",
+        "exchange-spell0",
+        "exchange-spell1",
+        "exchange-beast",
     ] {
         game.load_internal_card(number, &blank).unwrap();
     }
     game
 }
 
-fn position(number: &str, hand: Value, pp: u8) -> Value {
+pub(super) fn position(number: &str, hand: Value, pp: u8) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["pp"] = json!({"current":pp,"max":pp});
     initial["players"]["P1"]["zones"]["hand"] = hand;
@@ -72,7 +81,7 @@ fn position(number: &str, hand: Value, pp: u8) -> Value {
     initial
 }
 
-fn finish(game: &mut Game, mut play: CardPlay, accepted: bool, pp: u8) -> CardPlay {
+pub(super) fn finish(game: &mut Game, mut play: CardPlay, accepted: bool, pp: u8) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
             InputDomain::OptionalCost => Answer::OptionalCost(accepted),
