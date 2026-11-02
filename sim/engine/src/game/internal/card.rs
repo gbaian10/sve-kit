@@ -485,7 +485,8 @@ impl Game {
             || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
             || object.state["silenced"] == true
             || !activation_type(self.object_type(holder)?, &ability.node.active_zones)
-            || (is_printed_quick(&ability.node) && self.object_type(holder)? != "フォロワー")
+            || (is_printed_quick(&ability.node)
+                && !quick_activation_type(self.object_type(holder)?, &ability.node.active_zones))
             || !self.prepared.is_empty()
         {
             return Err(unsupported("activation holder, controller or timing"));
@@ -674,11 +675,22 @@ fn check_ability_face(ability: &Ability, printed: &serde_json::Value) -> Result<
     check_printed_face(printed)?;
     if is_printed_quick(ability)
         && ability.kind == AbilityKind::Activated
-        && printed["card_type"] != "フォロワー"
+        && !printed["card_type"]
+            .as_str()
+            .is_some_and(|kind| quick_activation_type(kind, &ability.active_zones))
     {
-        return Err(unsupported(
-            "Quick activation requires an ordinary follower",
-        ));
+        return Err(unsupported("Quick activation on this printed face or zone"));
+    }
+    if is_printed_quick(ability)
+        && ability.kind == AbilityKind::Activated
+        && printed["card_type"] == "フォロワー・エボルヴ"
+        && ability.play.as_ref().is_some_and(|play| {
+            matches!(&play.costs, CostSpec::Ordered { steps }
+                if steps.iter().any(|step| matches!(step.instruction.action,
+                    Action::Move { .. } | Action::Banish { .. })))
+        })
+    {
+        return Err(unsupported("evolved Quick source departure cost"));
     }
     if ability.kind == AbilityKind::Activated
         && !printed["card_type"]
@@ -704,6 +716,11 @@ fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
         return Err(unsupported("amulet with printed combat statistics"));
     }
     Ok(())
+}
+
+fn quick_activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
+    kind == "フォロワー"
+        || (zones == [ZoneKind::Field] && matches!(kind, "アミュレット" | "フォロワー・エボルヴ"))
 }
 
 // Evolved forms carry their own printed definitions.

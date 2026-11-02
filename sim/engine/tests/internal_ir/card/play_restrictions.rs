@@ -104,7 +104,7 @@ fn printed_play_restrictions_reject_other_conditions_and_forged_permissions_atom
         json!({"opp_turn":true}),
         json!({"in_zone":{"ref":"this","zone":"hand"}}),
         json!({"in_zone":{"ref":"target","zone":"ex"}}),
-        json!({"all":[{"my_turn":true}]}),
+        json!({"all":[{"my_turn":false}]}),
     ] {
         lowerer().lower(&tree(&condition)).unwrap_err();
     }
