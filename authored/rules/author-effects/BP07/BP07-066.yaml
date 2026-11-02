@@ -1,0 +1,28 @@
+cards:
+  BP07-066:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: ally
+                result: returned
+                to: field
+          targets:
+            - bind: ally
+              from:
+                class: ドラゴン
+                kind: follower
+                orig_cost_le: 3
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
