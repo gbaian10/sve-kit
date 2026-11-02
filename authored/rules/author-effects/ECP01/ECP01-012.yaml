@@ -1,0 +1,59 @@
+cards:
+  ECP01-012:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - feed:
+          cost:
+            pp: 2
+          times: 2
+        line: 2
+      - feed:
+          cost:
+            pp: 3
+          times: 3
+        line: 3
+      - line: 4
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                "on": this
+                power: 1
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 3
+                  trait: ウマ娘
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

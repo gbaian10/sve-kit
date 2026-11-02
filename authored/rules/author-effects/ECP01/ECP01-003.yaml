@@ -1,0 +1,60 @@
+cards:
+  ECP01-003:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    other: true
+                    trait: ウマ娘
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 2
+                "on": this
+                power: 2
+            - grant:
+                keywords:
+                  - ward
+                "on": this
+            - life:
+                delta: 2
+                who: self
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: ウマ娘
+                  who: self
+                  zone: field
+              op: eq
+              right: 5
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

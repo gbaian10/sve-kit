@@ -1,0 +1,60 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "adjust_cost",
+        "subjects": "self",
+        "amount": {
+          "fn": "sub",
+          "args": [
+            0,
+            {
+              "count": {
+                "zone": "field",
+                "side": "self",
+                "trait": "ウマ娘"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 3,
+      "kind": "meal",
+      "body": {
+        "op": "race",
+        "subjects": "self",
+        "count": 1
+      },
+      "costs": [
+        {
+          "op": "eat",
+          "subjects": "self",
+          "count": 1
+        },
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    }
+  ]
+}

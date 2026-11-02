@@ -1,0 +1,39 @@
+cards:
+  ECP01-025:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    orig_cost_ge: 4
+                    trait: ウマ娘
+                    who: self
+                    zone: field
+                else:
+                  - damage:
+                      n: 1
+                      to: enemy
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

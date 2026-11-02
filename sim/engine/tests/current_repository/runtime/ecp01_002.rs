@@ -310,7 +310,15 @@ fn resolve_evolve_draw(
 fn run_real_evolution(seat: &str) {
     let opponent = other_seat(seat);
     let opponent_view = if seat == "P1" { View::P2 } else { View::P1 };
-    let mut game = game(&evolve_position(seat));
+    // The admitted base needs the registered title bindings for its intrinsic evolution proof.
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &evolve_position(seat),
+        &Value::Null,
+        &Value::Null,
+        "current-runtime",
+    )
+    .unwrap();
     let stage_before = game.internal_card_stage();
     let step = match game.internal_rule_action(&json!({
         "do":"evolve","source":"base","evolve_card":"resource","pay":{"pp":1_u8}

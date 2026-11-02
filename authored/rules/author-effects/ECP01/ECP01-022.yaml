@@ -1,0 +1,43 @@
+cards:
+  ECP01-022:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - storm
+        line: 2
+      - line: 3
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                "on": this
+                power: 1
+      - attack_time:
+          cost:
+            banish:
+              n: 3
+              sel:
+                keyword: storm
+                kind: follower
+                trait: ウマ娘
+                who: self
+                zone: cemetery
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
