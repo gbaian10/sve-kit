@@ -1,0 +1,36 @@
+cards:
+  CSD03a-010:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: ロイヤルパラディン
+                who: self
+                zone: hand
+          do:
+            - move:
+                ref: chosen
+                to: hand
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: ロイヤルパラディン
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
