@@ -1,0 +1,42 @@
+cards:
+  BP18-100:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: main
+              whose: opp
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: エイラの祈祷
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+      - line: 3
+        fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  name: エイラの祈祷
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

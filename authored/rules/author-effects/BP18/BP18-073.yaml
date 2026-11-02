@@ -1,0 +1,39 @@
+cards:
+  BP18-073:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        auto:
+          "on":
+            damaged:
+              recipient: this
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  name: ドラゴスネーク
+                to: field
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
+                      hp: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

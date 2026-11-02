@@ -1,0 +1,36 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "move",
+        "subjects": "target.1",
+        "to": "hand"
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "cemetery",
+            "trait": "透京",
+            "where": {
+              "fn": "le",
+              "args": [
+                {
+                  "read": "item.cost"
+                },
+                2
+              ]
+            }
+          },
+          "min": 0,
+          "max": 3,
+          "distinct_by": "name"
+        }
+      ]
+    }
+  ]
+}

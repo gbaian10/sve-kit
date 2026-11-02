@@ -1,0 +1,28 @@
+cards:
+  BP18-085:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: revive
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: 透京
+                orig_cost_eq: 2
+              n: 1
+          do:
+            - move:
+                ref: revive
+                to: field
+                result: revived
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
