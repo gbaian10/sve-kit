@@ -732,16 +732,16 @@ fn event_amount_compares_the_actual_hit_on_both_sides_of_the_threshold() {
         "auto",
         json!({"on":{"damaged":{"recipient":"this"}},"do":[{"if":{
             "cond":{"cmp":{"left":{"event":"amount"},"op":"ge","right":5}},
-            "then":[{"draw":{"who":"self","n":1}}]
+            "then":[{"draw":{"who":"self","n":1}},{"pp_max":{"who":"self","delta":1}}]
         }}]}),
     );
-    for (amount, hand) in [(4, json!([])), (5, json!(["d"]))] {
+    for (amount, maximum, hand) in [(4, 2_u8, json!([])), (5, 3, json!(["d"]))] {
         let program = card(vec![
             trigger.clone(),
             ability(
                 2,
                 vec![damage(
-                    2,
+                    100,
                     RecipientSet::Objects {
                         objects: Selector::Objects {
                             objects: vec![ObjectOperand::SourceHolder {}],
@@ -757,9 +757,10 @@ fn event_amount_compares_the_actual_hit_on_both_sides_of_the_threshold() {
         game.resume_internal_card().unwrap();
         next(&mut game, 1);
         game.resume_internal_card().unwrap();
+        assert_eq!(game.query(View::Referee, "P1.hand").unwrap().unwrap(), hand);
         assert_eq!(
-            game.query(View::Referee, "P1.hand").unwrap().unwrap(),
-            hand,
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["max"],
+            maximum,
             "a {amount}-point hit is compared with 5"
         );
     }

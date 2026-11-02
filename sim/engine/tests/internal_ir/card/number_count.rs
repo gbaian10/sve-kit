@@ -321,7 +321,6 @@ fn scalar_hand_and_deck_counts_use_each_players_current_population() {
     assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 3_usize);
 }
 
-/// P1's source follower with `banished` own cards in its banish zone, activated once.
 fn arithmetic_game(program: &WellFormedCardProgram, banished: usize) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -418,4 +417,135 @@ fn signed_overflow_fails_the_activation_without_changing_the_game() {
     game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
         .unwrap_err();
     assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
+fn twice_the_field_count_includes_source_and_excludes_amulets() {
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"damage":{"to":{"leaders":"opponents"},"n":{"times":[
+            {"count":{"who":"self","zone":"field","kind":"follower"}},2
+        ]}}}
+    ]}));
+    for (allies, expected) in [(0_usize, 2_u64), (2, 6)] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        let mut field = vec![
+            json!({"id":"s","card":"unit-follower"}),
+            json!({"id":"amulet","card":"unit-amulet"}),
+        ];
+        field.extend((0..allies).map(|n| json!({"id":format!("ally{n}"),"card":"unit-follower"})));
+        initial["players"]["P1"]["zones"]["field"] = json!(field);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "twice-field",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        activate(&mut game, 1);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+            20 - expected
+        );
+    }
+}
+
+#[test]
+fn per_damage_is_a_separate_hit_and_omits_a_zero_hit() {
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"damage":{"to":{"leaders":"opponents"},"n":3}},
+        {"damage":{"to":{"leaders":"opponents"},"n":{"per":{
+            "of":{"count":{"who":"self","zone":"cemetery","kind":"follower"}},"unit":5
+        }}}}
+    ]}));
+    for (followers, expected) in [
+        (4_usize, vec![3_u64]),
+        (5, vec![3, 1]),
+        (9, vec![3, 1]),
+        (10, vec![3, 2]),
+    ] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut grave = vec![json!({"id":"other","card":"unit-spell"})];
+        grave.extend((0..followers).map(|n| json!({"id":format!("f{n}"),"card":"unit-follower"})));
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(grave);
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "per-hits").unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let result = activate(&mut game, 1);
+        let hits: Vec<_> = result
+            .progress
+            .facts
+            .iter()
+            .filter_map(|fact| {
+                if let Fact::Damage(hit) = fact {
+                    Some(hit.amount.0.get())
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(hits, expected);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+            20 - expected.iter().sum::<u64>()
+        );
+    }
+}
+
+#[test]
+fn minimum_pair_discount_requires_the_reduced_cost_in_full() {
+    let mut input = tree(&json!({"cost":{"pp":0},"do":[]}));
+    let mut seed = input["cards"]["BP08-038"].take();
+    let entry = &mut seed["abilities"][0];
+    entry.as_object_mut().unwrap().remove("activate");
+    let count = |kind| json!({"count":{"who":"self","zone":"cemetery","kind":kind}});
+    entry["play"] = json!({"cost_delta":{"minus":[0,{"min":[count("follower"),count("spell")]}]}});
+    input["cards"] = json!({"unit-follower":seed});
+    let programs = lowerer().lower(&input).unwrap();
+    for (followers, spells, pp, remaining) in [
+        (0_usize, 3_usize, 10_u8, Some(0_u8)),
+        (2, 3, 8, Some(0)),
+        (3, 3, 7, Some(0)),
+        (1, 3, 8, None),
+    ] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":pp,"max":10});
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut grave: Vec<_> = (0..followers)
+            .map(|n| json!({"id":format!("f{n}"),"card":"unit-follower"}))
+            .collect();
+        grave.extend((0..spells).map(|n| json!({"id":format!("spell{n}"),"card":"unit-spell"})));
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(grave);
+        let mut game = Game::new(
+            catalog_with_cost(&json!("10")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "pair-cost",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let before = exact_authority(&game);
+        let result = game.play_internal_card("s", PlayerId { seat: 1 });
+        if let Some(pp_left) = remaining {
+            assert!(matches!(result.unwrap(), CardPlay::Entered(_)));
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["pp"]["current"], pp_left);
+            assert_eq!(state["P1"]["field"], json!(["s"]));
+        } else {
+            result.unwrap_err();
+            assert_eq!(exact_authority(&game), before);
+        }
+    }
 }
