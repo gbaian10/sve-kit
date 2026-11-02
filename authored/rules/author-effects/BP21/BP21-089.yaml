@@ -1,0 +1,46 @@
+cards:
+  BP21-089:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+          do:
+            - act:
+                ref: enemy
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    "on": affected
+                    what: stand
+                "on": enemy
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+            - life:
+                delta: 3
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
