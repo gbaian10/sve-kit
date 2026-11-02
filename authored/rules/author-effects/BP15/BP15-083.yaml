@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-083:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+    abilities:
+      - line: 1
+        activate:
+          zone: cemetery
+          cost:
+            banish_self: true
+          do:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  name: 一ツ尾狐
+                keywords:
+                  - storm
+      - section: 1
+        line: 1
+        play:
+          additional_cost:
+            to_cemetery:
+              n: 2
+              sel:
+                who: self
+                zone: field
+                name: 一ツ尾狐
+      - section: 1
+        line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy: enemy
+            - draw:
+                who: self
+                n: 1

@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-045:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            banish:
+              n: 1
+              sel:
+                who: self
+                zone: cemetery
+                kind: follower
+                name_contains: リーシェナ
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        trait: アイドル
+                    op: ge
+                    right: 2
+                then:
+                  - search:
+                      sel:
+                        who: self
+                        zone: deck
+                        kind: follower
+                        name_contains: リーシェナ
+                      n: 1
+                      to: field
