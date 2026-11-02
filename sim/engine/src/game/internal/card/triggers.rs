@@ -65,7 +65,7 @@ pub(in crate::game) struct DeparturePlan {
     departures: Vec<(PendingOccurrence, Object)>,
 }
 
-pub(super) fn ex_phase(ability: &Ability) -> bool {
+pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
     ability.kind == AbilityKind::Triggered
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
         && ability.active_zones == [ZoneKind::Ex]

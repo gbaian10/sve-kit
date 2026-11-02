@@ -1171,10 +1171,35 @@ fn check_static_granted_definitions(game: &Game, located: &Located<Ability>) -> 
             ..
         } = effect
         {
+            for granted in abilities {
+                if let GrantedAbility::Definition { ability } = granted
+                    && (ability.active_zones != [ZoneKind::Field]
+                        || static_keywords::is_static(ability))
+                {
+                    return Err(unsupported("continuous granted zone or transitive aura"));
+                }
+            }
             check_granted_definitions(game, abilities, &located.source, &located.node.source)?;
         }
     }
     Ok(())
+}
+
+fn check_granted_static(located: &Located<Ability>) -> Result<()> {
+    if prevention::is_static(&located.node) {
+        prevention::check(located)
+    } else if static_keywords::is_static(&located.node) {
+        if located.node.declarations.iter().any(|effect| matches!(effect,
+            Effect::Continuous { patch: CharacteristicPatch::GrantAbility { abilities }, .. }
+                if abilities.iter().any(|ability| matches!(ability, GrantedAbility::Definition { .. })))) {
+            return Err(unsupported("nested continuous definitions"));
+        }
+        static_keywords::check(located)
+    } else if super::grant::static_cost(&located.node) {
+        Ok(())
+    } else {
+        Err(unsupported("granted static definition"))
+    }
 }
 
 fn check_granted_definitions(
@@ -1192,6 +1217,13 @@ fn check_granted_definitions(
         }
         if !super::grant::supported_definition(ability) {
             return Err(unsupported("granted definition event"));
+        }
+        if ability.kind == AbilityKind::Static {
+            check_granted_static(&Located {
+                node: *ability.clone(),
+                source: source.clone(),
+            })?;
+            continue;
         }
         check_header(ability)?;
         let body = ability

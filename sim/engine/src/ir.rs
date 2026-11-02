@@ -125,6 +125,7 @@ pub(crate) mod effect_evolution;
 mod effects;
 pub(crate) mod events;
 mod flow;
+pub(crate) mod granted_cost;
 pub(crate) mod history_turn;
 pub mod lowering;
 pub(crate) mod observation_selection;

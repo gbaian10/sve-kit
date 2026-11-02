@@ -170,11 +170,12 @@ impl Game {
         }
         for source in self.field_ids() {
             let (card, _) = self.internal_effective_print(&source)?;
-            if !self.card_runtime.is_loaded(&card) {
+            if !self.card_runtime.is_loaded(&card) && !self.internal_has_local_definitions(&source)
+            {
                 continue;
             }
             let static_abilities = self
-                .internal_printed_abilities(&source)?
+                .internal_local_abilities(&source)?
                 .into_iter()
                 .filter(|located| is_static(&located.node))
                 .collect::<Vec<_>>();
@@ -223,10 +224,7 @@ impl Game {
                     for ability in abilities {
                         keywords.push((
                             ability.clone(),
-                            grant::GrantOrigin::Continuous {
-                                provider: self.keyword_provider(&source, located.node.id)?,
-                                effect: id.0,
-                            },
+                            self.internal_static_origin(&source, &located, id.0)?,
                         ));
                     }
                 }

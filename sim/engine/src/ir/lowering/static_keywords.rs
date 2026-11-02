@@ -14,6 +14,17 @@ pub(super) fn lower(
     entry: &ast::Ability,
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
+    let source = source_span(key, path, entry)?;
+    lower_at_source(allocator, path, entry, scope, source)
+}
+
+pub(super) fn lower_at_source(
+    allocator: &mut Allocator,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+    source: super::SourceSpan,
+) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
     if head.zone.as_ref().is_some_and(|zones| match zones {
         ast::ActivationZones::One(zone) => zone.kind() != ZoneKind::Field,
@@ -23,7 +34,6 @@ pub(super) fn lower(
     }) {
         return Err(unsupported(path));
     }
-    let source = source_span(key, path, entry)?;
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);

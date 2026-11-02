@@ -12,6 +12,9 @@ mod static_keywords;
 #[path = "card/dynamic_grant.rs"]
 mod dynamic_grant;
 
+#[path = "card/static_grant.rs"]
+mod static_grant;
+
 #[path = "card/event_evolved.rs"]
 mod event_evolved;
 
