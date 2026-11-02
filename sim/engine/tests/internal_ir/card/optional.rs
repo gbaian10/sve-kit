@@ -97,3 +97,88 @@ fn optional_declaration_rejects_activation_and_exchange() {
         .push(exchange);
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn ordered_trigger_costs_roll_back_earlier_discard_and_pp_on_late_failure() {
+    let mut tree = tree();
+    tree["cards"]["unit-follower"]["abilities"][0]["fanfare"] = json!({
+        "cost":{"steps":[{"pp":1},{"discard":{"sel":{"who":"self","zone":"hand"},"n":1}},{"pp":3}]},
+        "do":[{"draw":{"n":1}}]
+    });
+    let programs = lowerer().lower(&tree).unwrap();
+    for (accept, pp) in [(false, 5_i64), (true, 5), (true, 4)] {
+        let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
+        initial["players"]["P1"]["zones"]["hand"] =
+            json!([{"id":"s","card":"unit-follower"},{"id":"h","card":"unit-spell"}]);
+        initial["players"]["P1"]["pp"] = json!({"current":pp,"max":pp});
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "multi-pay").unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let CardPlay::Awaiting(declare) = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+            .unwrap()
+        else {
+            panic!("declaration")
+        };
+        let before = game.projection(View::Referee).unwrap();
+        let play = game
+            .answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept))
+            .unwrap();
+        if !accept {
+            assert!(matches!(play, CardPlay::Cancelled));
+            assert_payment_state(&game.projection(View::Referee).unwrap(), &before);
+            continue;
+        }
+        let CardPlay::Awaiting(material) = play else {
+            panic!("hand materials")
+        };
+        assert!(game.internal_decision(View::P2).is_none());
+        assert_payment_state(&game.projection(View::Referee).unwrap(), &before);
+        let result = game.answer_internal_card(
+            material.actor,
+            material.token,
+            Answer::CostMaterials(vec![0]),
+        );
+        let view = game.projection(View::Referee).unwrap();
+        if pp == 4 {
+            assert!(matches!(result.unwrap(), CardPlay::Cancelled));
+            assert_payment_state(&view, &before);
+        } else {
+            resolved(result.unwrap());
+            assert_eq!(view["P1"]["pp"]["current"], 0);
+            assert_eq!(view["P1"]["cemetery"], json!(["h"]));
+            assert_eq!(view["P1"]["hand"], json!(["d"]));
+        }
+    }
+}
+
+#[test]
+fn ordered_trigger_payment_rejects_empty_and_two_hand_material_groups() {
+    for steps in [
+        json!([]),
+        json!([
+            {"pp":1},
+            {"discard":{"sel":{"who":"self","zone":"hand"},"n":1}},
+            {"discard":{"sel":{"who":"self","zone":"hand"},"n":1}}
+        ]),
+    ] {
+        let mut tree = tree();
+        tree["cards"]["unit-follower"]["abilities"][0]["fanfare"] =
+            json!({"cost":{"steps":steps},"do":[{"draw":{"n":1}}]});
+        lowerer().lower(&tree).unwrap_err();
+    }
+}
+
+fn assert_payment_state(view: &Value, before: &Value) {
+    for key in ["P1", "P2", "objects"] {
+        assert_eq!(
+            view[key], before[key],
+            "failed or pending payment preserves resources and objects"
+        );
+    }
+}

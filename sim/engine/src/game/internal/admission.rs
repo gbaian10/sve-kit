@@ -466,17 +466,11 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
             Node::Control { control }
                 if card && effect_evolution::projection(control).is_some() => {}
             Node::Control {
-                control: control @ Control::Pay { costs, on_paid, .. },
+                control: control @ Control::Pay { on_paid, .. },
             } if card => {
                 super::card::optional::check_control(control)?;
                 if !on_paid.steps.is_empty() {
                     return Err(unsupported("optional continuation"));
-                }
-                let CostSpec::Ordered { steps } = costs else {
-                    return Err(unsupported("optional alternatives"));
-                };
-                if steps.len() != 1 {
-                    return Err(unsupported("one optional cost"));
                 }
             }
             Node::Control {
