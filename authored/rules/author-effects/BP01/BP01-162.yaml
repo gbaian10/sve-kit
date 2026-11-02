@@ -1,0 +1,46 @@
+cards:
+  BP01-162:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  leader_life:
+                    le: 6
+                    who: self
+                then:
+                  - pay:
+                      cost:
+                        steps:
+                          - act_self: true
+                          - self_to_cemetery: true
+                      do:
+                        - damage:
+                            n: 6
+                            to:
+                              kind: follower
+                              who: opp
+                              zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - draw:
+                n: 3
+            - damage:
+                n: 3
+                to:
+                  leader: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

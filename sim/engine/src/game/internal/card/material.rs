@@ -7,8 +7,8 @@ use crate::ir::quick::card_permission;
 use crate::ir::{
     AbilityKind, AbilityOrigin, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, KeywordId,
-    MoveDestination, MoveMethod, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot,
-    PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
+    MoveDestination, MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone,
+    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
     SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
     ZoneRef,
 };
@@ -198,6 +198,24 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
             if binding == reference && constraint.groups.first().is_some_and(|group|
                 zone(&group.selector).is_ok_and(|zone| cost_zone(action, zone))))
     })
+}
+
+pub(super) fn source_field_cost(action: &Action) -> bool {
+    matches!(cost_objects(action), Some(Selector::Objects { objects })
+        if objects == &[ObjectOperand::SourceHolder {}])
+        && matches!(
+            action,
+            Action::Posture { .. }
+                | Action::Move {
+                    movement: MoveSpec {
+                        to: MoveDestination::Owners {
+                            zone: OwnerZone::Cemetery
+                        },
+                        ..
+                    },
+                    ..
+                }
+        )
 }
 
 fn cost_zone(action: &Action, zone: ZoneKind) -> bool {

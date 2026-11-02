@@ -580,6 +580,13 @@ impl Game {
         self.internal_use_prerequisite(execution, costs)?;
         for step in steps {
             self.check_keyword_cost(execution, step)?;
+            if material::source_field_cost(&step.instruction.action)
+                && self.object(&execution.context.source)?.zone != "field"
+            {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "source cost requires the field".into(),
+                ));
+            }
             let (quantity, subjects) = match &step.instruction.action {
                 Action::Counter { .. } => (
                     self.internal_counter(execution, &step.instruction, true)?,
