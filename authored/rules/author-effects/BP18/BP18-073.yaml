@@ -10,13 +10,28 @@ cards:
             damaged:
               recipient: this
           do:
-            - search:
-                n: 1
-                sel:
-                  who: self
-                  zone: deck
-                  name: ドラゴスネーク
-                to: field
+            - if:
+                cond:
+                  cmp:
+                    # Other copies cannot stand in for this generation's field presence.
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                    op: gt
+                    right:
+                      count:
+                        who: self
+                        zone: field
+                        other: true
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        who: self
+                        zone: deck
+                        name: ドラゴスネーク
+                      to: field
       - line: 3
         fanfare:
           do:

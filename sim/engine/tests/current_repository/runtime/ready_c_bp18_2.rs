@@ -5,6 +5,7 @@
 )]
 use super::*;
 use crate::{expanded, rule_fixtures};
+use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
 use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::SearchAnswer;
@@ -181,55 +182,72 @@ fn names(state: &Value, zone: &Value) -> Vec<String> {
         .collect()
 }
 
-// Some printed bases are not admitted yet, so a same-name companion supplies only evolution.
-fn synthetic_base(form: &str, initial: &Value) -> Game {
-    let (snapshot, keywords, mut input) = inputs().clone();
-    let printed: Value = snapshot
-        .lines()
-        .map(|line| serde_json::from_str::<Value>(line).unwrap())
-        .find(|record| record["number"] == form)
-        .unwrap();
-    let companion_card = json!({"number":"synthetic-evolution","faces":[{
-        "name":printed["faces"][0]["name"],"card_class":"ニュートラル","card_type":"フォロワー",
-        "cost":"2","power":"2","hp":"2","traits":[],"text":null,"sections":[]
-    }]});
-    let snapshot = format!("{}\n{companion_card}", snapshot.trim_end());
-    input["documents"].as_array_mut().unwrap().push(json!(["ready-c-companion.yaml",json!({
-        "format":1_u8,"kind":"effect_set","cards":{"synthetic-evolution":{"status":"complete","abilities":[]}}
-    }).to_string()]));
-    let mut tree = expanded::tree().clone();
-    tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
-    let companion = lowerer()
-        .lower(&tree)
-        .unwrap()
-        .remove("synthetic-evolution")
-        .unwrap();
-    let mut rules: Value = serde_saphyr::from_str(
-        &read_to_string(
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
+struct SyntheticEvolution {
+    selection: SelectedEffects,
+    programs: BTreeMap<String, WellFormedCardProgram>,
+}
+
+// Some printed bases are not admitted yet, so same-name companions supply only evolution.
+fn evolution_fixtures() -> &'static SyntheticEvolution {
+    static PREPARED: OnceLock<SyntheticEvolution> = OnceLock::new();
+    PREPARED.get_or_init(|| {
+        let (snapshot, keywords, mut input) = inputs().clone();
+        let rows: Vec<Value> = snapshot
+            .lines()
+            .map(|line| serde_json::from_str(line).unwrap())
+            .collect();
+        let mut snapshot = format!("{}\n", snapshot.trim_end());
+        let mut tree = expanded::tree().clone();
+        let template = tree["cards"]["synthetic-evolution"].clone();
+        tree["cards"] = json!({});
+        for form in ["BP18-015", "BP18-087", "BP18-091"] {
+            let printed = rows.iter().find(|record| record["number"] == form).unwrap();
+            let number = format!("synthetic-evolution-{form}");
+            let companion = json!({"number":number,"faces":[{
+                "name":printed["faces"][0]["name"],"card_class":"ニュートラル","card_type":"フォロワー",
+                "cost":"2","power":"2","hp":"2","traits":[],"text":null,"sections":[]
+            }]});
+            snapshot.push_str(&companion.to_string());
+            snapshot.push('\n');
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({
+                "format":1_u8,"kind":"effect_set","cards":{number.clone():{"status":"complete","abilities":[]}}
+            }).to_string()]));
+            tree["cards"][&number] = template.clone();
+        }
+        let programs = lowerer().lower(&tree).unwrap();
+        let mut rules: Value = serde_saphyr::from_str(
+            &read_to_string(
+                PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
+            )
+            .unwrap(),
         )
-        .unwrap(),
-    )
-    .unwrap();
-    rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-    let selected = repository::select_with_rules(
-        &snapshot,
-        &keywords,
-        &input,
-        &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap();
+        .unwrap();
+        rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
+        let selection = repository::select_with_rules(
+            &snapshot,
+            &keywords,
+            &input,
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
+        )
+        .unwrap();
+        SyntheticEvolution { selection, programs }
+    })
+}
+
+fn synthetic_base(initial: &Value) -> Game {
+    let prepared = evolution_fixtures();
     let mut game = Game::from_selected_effects(
-        selected,
+        prepared.selection.clone(),
         initial,
         &Value::Null,
         &Value::Null,
         "ready-c-bp18",
     )
     .unwrap();
-    game.load_internal_card("synthetic-evolution", &companion)
-        .unwrap();
+    for (number, program) in &prepared.programs {
+        game.load_internal_card(number, program).unwrap();
+    }
     game
 }
 
@@ -326,9 +344,9 @@ fn bp18_059_evolution_puts_a_martial_dragonewt_in_ex_three_cheaper() {
 
 #[test]
 fn bp18_091_evolution_destroys_an_enemy_follower() {
-    let mut initial = evolved_position("synthetic-evolution", "BP18-091");
+    let mut initial = evolved_position("synthetic-evolution-BP18-091", "BP18-091");
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    let mut game = synthetic_base("BP18-091", &initial);
+    let mut game = synthetic_base(&initial);
     evolve(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
@@ -373,11 +391,11 @@ fn bp18_p54_returns_differently_named_cheap_tokyo_cards() {
 
 #[test]
 fn bp18_087_evolution_returns_a_demon_follower_to_hand() {
-    let mut initial = evolved_position("synthetic-evolution", "BP18-087");
+    let mut initial = evolved_position("synthetic-evolution-BP18-087", "BP18-087");
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["cemetery"] =
         json!([{"id":"plain","card":"BP01-171"},{"id":"demon","card":"BP01-109"}]);
-    let mut game = synthetic_base("BP18-087", &initial);
+    let mut game = synthetic_base(&initial);
     evolve(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["demon"]));
@@ -393,12 +411,38 @@ fn bp18_049_fanfare_draws_then_mills_one() {
 }
 
 #[test]
-fn bp18_073_awakened_fanfare_adds_two_and_two() {
-    let mut game = game(&position("BP18-073"));
+fn bp18_073_only_searches_while_the_damaged_generation_remains_on_field() {
+    let mut initial = position("BP01-179");
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"source","card":"BP01-179"},
+        {"id":"again","card":"BP01-179"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP18-073"}]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([
+        {"id":"first_snake","card":"BP18-073"},
+        {"id":"second_snake","card":"BP18-073"}
+    ]);
+    let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["source"]["power"], 6_u8);
-    assert_eq!(state["objects"]["source"]["hp"], 5_u8);
+    assert_eq!(state["objects"]["enemy"]["damage"], 2_u8);
+    assert_eq!(state["P2"]["field"].as_array().unwrap().len(), 2);
+    assert_eq!(state["P2"]["deck"].as_array().unwrap().len(), 1);
+    let summoned = state["P2"]["field"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|id| *id != "enemy")
+        .unwrap()
+        .as_str()
+        .unwrap();
+    assert_eq!(state["objects"][summoned]["power"], 6_u8);
+    assert_eq!(state["objects"][summoned]["hp"], 5_u8);
+    play(&mut game, "again");
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
+    assert_eq!(after["P2"]["field"].as_array().unwrap().len(), 1);
+    assert_eq!(after["P2"]["deck"].as_array().unwrap().len(), 1);
 }
 
 #[test]
@@ -446,13 +490,13 @@ fn bp18_038_searches_the_named_luminous_followers() {
 
 #[test]
 fn bp18_015_evolution_returns_another_tokyo_follower_to_hand() {
-    let mut initial = evolved_position("synthetic-evolution", "BP18-015");
+    let mut initial = evolved_position("synthetic-evolution-BP18-015", "BP18-015");
     initial["players"]["P1"]["zones"]["cemetery"] = json!([
         {"id":"same","card":"BP18-015"},
         {"id":"plain","card":"BP01-171"},
         {"id":"clerk","card":"BP18-126"}
     ]);
-    let mut game = synthetic_base("BP18-015", &initial);
+    let mut game = synthetic_base(&initial);
     evolve(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["clerk"]));
