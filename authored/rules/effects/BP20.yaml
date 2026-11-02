@@ -256,28 +256,6 @@ cards:
             - 7
           fn: ge
     status: complete
-  BP20-P44:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: move
-          subjects:
-            side: self
-            top: 3
-            zone: deck
-          to: cemetery
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP20-P47:
     abilities:
       - body:

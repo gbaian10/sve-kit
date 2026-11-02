@@ -1,0 +1,60 @@
+cards:
+  BP20-084:
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: big
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                not_class: ナイトメア
+                orig_cost_le: 5
+              n: 1
+            - bind: small
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                not_class: ナイトメア
+                orig_cost_le: 3
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                    op: lt
+                    right: 5
+                then:
+                  - move:
+                      ref: big
+                      to: field
+                      result: big_in
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                    op: lt
+                    right: 5
+                then:
+                  - move:
+                      ref: small
+                      to: field
+                      result: small_in
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
