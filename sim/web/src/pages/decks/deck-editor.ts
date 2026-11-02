@@ -30,6 +30,11 @@ interface CardStatus {
 export interface DeckEditor {
   readonly deck: Deck
   readonly facts: DeckFacts | null
+  /** All printings of the edition are known (see `useDeckData`). */
+  readonly printingsReady: boolean
+  /** The cards or their printings could not be loaded; `retryData` asks again. */
+  readonly dataFailed: boolean
+  readonly retryData: () => void
   readonly restrictions: ReadonlyMap<string, readonly CardRestriction[]>
   readonly problems: readonly DeckProblem[]
   readonly uiLanguage: UiLanguage
@@ -71,6 +76,9 @@ type EditorView = Pick<
   DeckEditor,
   | "deck"
   | "facts"
+  | "printingsReady"
+  | "dataFailed"
+  | "retryData"
   | "restrictions"
   | "problems"
   | "uiLanguage"

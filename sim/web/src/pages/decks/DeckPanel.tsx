@@ -1,8 +1,9 @@
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Share2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { CLASS_ICON } from "../../components/card/classIcons"
+import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
 import { Link } from "../../components/ui/Link"
 import { Segmented } from "../../components/ui/Segmented"
@@ -16,6 +17,7 @@ import { useDeckLabels } from "./deck-labels"
 import { DeckProblems } from "./DeckProblems"
 import { DeckRow, LeaderRow } from "./DeckRow"
 import { DeckStatsView } from "./DeckStatsView"
+import { ExportDialog } from "./ExportDialog"
 import { PrintingPicker, type PrintingTarget } from "./PrintingPicker"
 
 function CountPill({
@@ -66,6 +68,7 @@ export function DeckPanel({
   const { deck, facts } = editor
   const [groupMode, setGroupMode] = useState<GroupMode>("type")
   const [picking, setPicking] = useState<PrintingTarget | null>(null)
+  const [exporting, setExporting] = useState(false)
   const infoOf = (cardId: string) => facts?.factsOf(cardId)
   const mainCount = totalCount(deck.main)
   const evolveCount = totalCount(deck.evolve)
@@ -210,7 +213,23 @@ export function DeckPanel({
           )}
         </>
       )}
+      <Button
+        variant="primary"
+        className="mx-1"
+        onClick={() => {
+          setExporting(true)
+        }}
+      >
+        <Share2 className="size-4" aria-hidden="true" />
+        {t("decks.export")}
+      </Button>
       <p className="px-1 text-11 text-text-3">{t("decks.savedLocally")}</p>
+      <ExportDialog
+        open={exporting}
+        onClose={() => {
+          setExporting(false)
+        }}
+      />
       <PrintingPicker
         target={picking}
         images={images}
