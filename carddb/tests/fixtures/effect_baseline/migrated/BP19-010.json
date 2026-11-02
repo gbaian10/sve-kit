@@ -1,0 +1,86 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "look",
+            "count": 4,
+            "bind": "seen"
+          },
+          {
+            "op": "optional",
+            "selection": {
+              "select": {
+                "from": "seen",
+                "trait": "八獄"
+              },
+              "min": 1,
+              "max": 1,
+              "bind": "chosen"
+            },
+            "then": {
+              "op": "seq",
+              "steps": [
+                {
+                  "op": "reveal",
+                  "subjects": "chosen",
+                  "to": "all"
+                },
+                {
+                  "op": "move",
+                  "subjects": "chosen",
+                  "to": "hand"
+                }
+              ]
+            }
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "op": "select",
+                "select": {
+                  "difference": [
+                    "seen",
+                    "chosen"
+                  ]
+                },
+                "min": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "chosen"
+                    ]
+                  }
+                },
+                "max": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "chosen"
+                    ]
+                  }
+                },
+                "bind": "ordered",
+                "order": true
+              },
+              {
+                "op": "move",
+                "subjects": "ordered",
+                "to": "deck",
+                "position": "bottom"
+              }
+            ]
+          }
+        ]
+      },
+      "event": "evolve",
+      "subject": "self"
+    }
+  ]
+}
