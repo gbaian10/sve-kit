@@ -1,0 +1,32 @@
+cards:
+  BP21-024:
+    abilities:
+      - line: 1
+        attack_time:
+          optional_cost:
+            pp: 2
+            result: paid
+          per_turn: 1
+          do:
+            - if:
+                cond:
+                  all:
+                    - paid:
+                        receipt: paid
+                    - exists:
+                        who: self
+                        zone: field
+                        kind: follower
+                        trait: 学院
+                        other: true
+                then:
+                  - stand: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

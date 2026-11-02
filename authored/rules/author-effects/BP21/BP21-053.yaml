@@ -1,0 +1,34 @@
+cards:
+  BP21-053:
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        play:
+          cost_delta:
+            if:
+              spellchain: 10
+            delta: -2
+      - line: 3
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 4
+                to: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
