@@ -1,0 +1,73 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "meal",
+      "body": {
+        "op": "race",
+        "subjects": "self",
+        "count": 1
+      },
+      "costs": [
+        {
+          "op": "eat",
+          "subjects": "self",
+          "count": 1
+        },
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": {
+          "if": {
+            "fn": "gt",
+            "args": [
+              {
+                "count": {
+                  "zone": "field",
+                  "side": "self",
+                  "trait": "ウマ娘",
+                  "where": {
+                    "fn": "ge",
+                    "args": [
+                      {
+                        "read": "item.cost"
+                      },
+                      4
+                    ]
+                  }
+                }
+              },
+              0
+            ]
+          },
+          "then": 3,
+          "else": 1
+        }
+      },
+      "event": "enter",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

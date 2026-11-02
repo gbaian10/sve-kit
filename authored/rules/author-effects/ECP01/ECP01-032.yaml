@@ -1,0 +1,48 @@
+cards:
+  ECP01-032:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - life:
+                delta: 3
+                who: self
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - pp_max:
+                      delta: 1
+                      who: self
+        line: 3
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - move:
+                ref: chosen
+                to: hand
+          targets:
+            - bind: chosen
+              from:
+                orig_cost_ge: 7
+                trait: ウマ娘
+                who: self
+                zone: cemetery
+              n: 1
+          usable_if:
+            awakened: true
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

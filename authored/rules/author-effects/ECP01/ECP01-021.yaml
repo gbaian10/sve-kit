@@ -1,0 +1,49 @@
+cards:
+  ECP01-021:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        race_time:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - buff:
+                hp: 1
+                "on": this
+                power: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+      - fanfare:
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      name: ウオッカ
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      kind: spell
+                      orig_cost_eq: 1
+                      trait: ウマ娘
+                      who: self
+                      zone: deck
+                to: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

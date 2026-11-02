@@ -1,0 +1,42 @@
+cards:
+  ECP01-017:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - ward
+        line: 2
+      - line: 3
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                "on": this
+                power: 1
+            - search:
+                distinct_by: name
+                result: searched
+                sel:
+                  trait: BNW
+                  who: self
+                  zone: deck
+                to: ex
+                upto: 3
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: searched
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
