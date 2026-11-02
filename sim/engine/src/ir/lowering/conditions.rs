@@ -284,6 +284,36 @@ impl BodyContext<'_> {
         })))
     }
 
+    pub(super) fn public_evolve_mode_condition(
+        &mut self,
+        comparison: &ast::BodyComparison,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let ast::Number::Count { count } = &comparison.left else {
+            return Err(unsupported(path));
+        };
+        if !matches!(comparison.op, ast::Comparison::Ge)
+            || !matches!(comparison.right, ast::Number::Literal(1..))
+            || !matches!(count.who, ast::Side::Controller)
+            || !matches!(count.zone, ast::CountZone::EvolveDeck)
+            || count.face_up != Some(true)
+            || count.name.as_ref().is_none_or(String::is_empty)
+            || count.kind.is_some()
+            || count.class.is_some()
+            || count.not_class.is_some()
+            || count.keyword.is_some()
+            || count.other
+            || count.r#trait.is_some()
+            || count.name_contains.is_some()
+            || count.orig_cost_eq.is_some()
+            || count.token.is_some()
+            || count.not_token.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        self.comparison_condition(comparison, path)
+    }
+
     fn comparison_condition(
         &mut self,
         value: &ast::BodyComparison,
