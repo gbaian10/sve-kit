@@ -1,0 +1,65 @@
+cards:
+  BP18-021:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 透京
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                else:
+                  - damage:
+                      n: 3
+                      to: enemy
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: アンリミテッドサーチ
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - counter:
+                  holders: 1
+                  n: 10
+                  name: ギガカウンター
+                  on:
+                    name: ギガブレード
+                    who: self
+                    zone: field
+          do:
+            - damage:
+                n: 8
+                to:
+                  leaders: opponents
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

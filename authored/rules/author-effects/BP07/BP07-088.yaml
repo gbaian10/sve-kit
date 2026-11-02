@@ -1,0 +1,47 @@
+cards:
+  BP07-088:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - draw:
+                n:
+                  counter:
+                    name: 祈りカウンター
+                    on: this
+                who: self
+          on:
+            left_field:
+              ref: this
+        line: 2
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 祈りカウンター
+                on: holder
+            - life:
+                delta: 2
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: holder
+              from:
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

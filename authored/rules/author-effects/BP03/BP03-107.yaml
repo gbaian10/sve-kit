@@ -1,0 +1,45 @@
+cards:
+  BP03-107:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - counter:
+                delta: 1
+                name: 童話カウンター
+                on: this
+        line: 2
+      - activate:
+          cost:
+            counter:
+              n: 1
+              name: 童話カウンター
+              on: this
+          do:
+            - counter:
+                delta: 1
+                name: 童話カウンター
+                on: holder
+          targets:
+            - bind: holder
+              from:
+                kind: follower
+                trait: 童話
+                who: self
+                zone:
+                  - field
+                  - ex
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
