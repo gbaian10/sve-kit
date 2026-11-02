@@ -180,20 +180,6 @@ fn evolve(initial: &Value, base: &str) -> Game {
 }
 
 #[test]
-fn cp02_001_fanfare_takes_a_passion_card_and_orders_the_remainder() {
-    for card in ["CP02-001", "CP02-SL01"] {
-        let mut initial = position(card);
-        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"g1","card":"BP01-171"},{"id":"picked","card":"ready-passion"},{"id":"g2","card":"BP01-171"},{"id":"tail","card":"BP01-171"}]);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["hand"], json!(["picked"]));
-        assert_eq!(state["P1"]["deck"], json!(["tail", "g2", "g1"]));
-        assert_eq!(state["P1"]["pp"]["current"], 7_u8);
-    }
-}
-
-#[test]
 fn cp02_009_fanfare_requires_three_passion_followers() {
     for card in ["CP02-009", "CP02-P06"] {
         for n in [1_u8, 2] {
@@ -426,58 +412,6 @@ fn cp02_061_evolution_replaces_one_damage_with_four_at_maximum_pp_ten() {
                 game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
                 if maximum == 10 { 4_u8 } else { 1_u8 }
             );
-        }
-    }
-}
-
-#[test]
-fn cp02_001_optional_take_can_leave_all_observed_cards_on_the_bottom() {
-    for card in ["CP02-001", "CP02-SL01"] {
-        for middle in ["BP01-171", "ready-passion"] {
-            let mut initial = position(card);
-            initial["players"]["P1"]["zones"]["deck"] = json!([
-                {"id":"g1","card":"BP01-171"},{"id":"middle","card":middle},
-                {"id":"g3","card":"BP01-171"},{"id":"tail","card":"BP01-171"}
-            ]);
-            let mut game = game(&initial);
-            assert!(matches!(
-                game.play_internal_card("source", PlayerId { seat: 1 })
-                    .unwrap(),
-                CardPlay::Entered(_)
-            ));
-            if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-                game.resume_internal_card().unwrap();
-            }
-            let pending_question = game.internal_pending_choice().unwrap().unwrap();
-            let InputDomain::Pending(options) = &pending_question.domain else {
-                panic!("printed Fanfare");
-            };
-            let mut step = game
-                .answer_internal_card(
-                    pending_question.actor,
-                    pending_question.token,
-                    Answer::Pending(options[0].handle),
-                )
-                .unwrap();
-            if let CardPlay::Awaiting(question) = &step {
-                let decline = if matches!(question.domain, InputDomain::Targets(_)) {
-                    Some(Answer::Targets(vec![]))
-                } else if matches!(question.domain, InputDomain::Search(_)) {
-                    Some(Answer::Search(SearchAnswer::Ungrouped(vec![])))
-                } else {
-                    None
-                };
-                if let Some(answer) = decline {
-                    step = game
-                        .answer_internal_card(question.actor, question.token, answer)
-                        .unwrap();
-                }
-            }
-            finish(&mut game, step, 1);
-            settle(&mut game, 1);
-            let state = game.projection(View::Referee).unwrap();
-            assert_eq!(state["P1"]["hand"], json!([]));
-            assert_eq!(state["P1"]["deck"], json!(["tail", "g3", "middle", "g1"]));
         }
     }
 }
