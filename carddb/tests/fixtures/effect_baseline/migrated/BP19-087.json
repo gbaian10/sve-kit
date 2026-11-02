@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "both.leaders",
+        "amount": 1
+      },
+      "event": "evolve",
+      "subject": "self"
+    }
+  ]
+}

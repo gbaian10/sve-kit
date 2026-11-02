@@ -1,0 +1,39 @@
+cards:
+  BP19-018:
+    abilities:
+      - line: 1
+        scope: 1
+        play:
+          additional_cost:
+            return_to_hand:
+              n: 1
+              sel:
+                who: self
+                zone: field
+      - line: 1
+        scope: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 6
+                to: enemy
+            - damage:
+                n: 2
+                to:
+                  leader_of: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

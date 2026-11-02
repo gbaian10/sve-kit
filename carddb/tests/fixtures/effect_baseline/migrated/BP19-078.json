@@ -1,0 +1,65 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "aura",
+        "subjects": "self",
+        "keywords": [
+          "storm"
+        ],
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "cemetery"
+              }
+            },
+            10
+          ]
+        }
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": 3
+      },
+      "event": "field_to_cemetery",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
