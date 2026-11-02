@@ -1,0 +1,69 @@
+cards:
+  ECP02-SP05a:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  kind: spell
+                  trait: デレマス
+                  who: self
+                  zone: deck
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: searched
+                until: turn
+        line: 1
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - move:
+                ref: chosen
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: moved
+                until: turn
+          per_turn: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: spell
+                trait: デレマス
+                who: self
+                zone: cemetery
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: パッション
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

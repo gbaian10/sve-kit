@@ -1,0 +1,41 @@
+cards:
+  ECP02-SP12:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 1
+                  trait: デレマス
+                  who: self
+                  zone: deck
+                to: field
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+              - act_self: true
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 1
+                  trait: デレマス
+                  who: self
+                  zone: deck
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
