@@ -40,7 +40,7 @@ fn bp01_041_candidate_amulet_pays_pp_and_act_after_card_entry() {
 
 #[test]
 fn bp20_100_fragments_select_before_act_sacrifice_and_damage() {
-    // usable_if is deliberately excluded; these are fragments, not a complete card.
+    // Isolate payment ordering; the current-card scenario covers the Crest use prerequisite.
     let mut tree = fanfare::expanded::tree().clone();
     let template = tree["cards"]["BP01-041"].clone();
     let mut entry = template["abilities"][0].clone();
@@ -109,6 +109,9 @@ fn bp20_100_fragments_select_before_act_sacrifice_and_damage() {
         json!(["s"])
     );
     tree["cards"]["BP20-100"]["abilities"][1]["activate"]["usable_if"] = json!({"cmp":{"left":{"count":{"who":"self","zone":"ex","kind":"crest"}},"op":"ge","right":3}});
+    lowerer.lower(&tree).unwrap();
+    tree["cards"]["BP20-100"]["abilities"][1]["activate"]["usable_if"]["cmp"]["left"]["count"]["who"] =
+        json!("opp");
     assert_eq!(
         lowerer.lower(&tree).unwrap_err().code,
         "unsupported_construct"
