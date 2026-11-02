@@ -1,0 +1,26 @@
+cards:
+  CSD03a-006:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - keywords:
+          - assail
+        line: 2
+      - drive_time:
+          do:
+            - buff:
+                hp: 2
+                on: this
+                power: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
