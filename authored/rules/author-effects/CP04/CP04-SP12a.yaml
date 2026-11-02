@@ -1,0 +1,72 @@
+cards:
+  CP04-SP12a:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: amulet
+                  who: self
+                  zone: deck
+                to: hand
+          ub: true
+        line: 1
+      - activate:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        section: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  n: 3
+                  sel:
+                    kind: amulet
+                    who: self
+                    zone: field
+          do:
+            - damage:
+                n: 3
+                to:
+                  any_of:
+                    - enemy
+                    - leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

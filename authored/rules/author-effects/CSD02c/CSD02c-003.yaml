@@ -1,0 +1,35 @@
+cards:
+  CSD02c-003:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          cost:
+            steps:
+              - lesson: 3
+              - discard:
+                  n: 2
+                  sel:
+                    trait: パッション
+                    who: self
+                    zone: hand
+          do:
+            - damage:
+                n: 6
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - draw:
+                n: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

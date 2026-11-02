@@ -1,0 +1,43 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "bane",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "condition": {
+          "read": "self.entered_by_effect"
+        },
+        "op": "if",
+        "then": {
+          "op": "evolve",
+          "subjects": "self"
+        }
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

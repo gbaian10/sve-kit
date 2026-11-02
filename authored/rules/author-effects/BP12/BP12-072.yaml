@@ -1,0 +1,30 @@
+cards:
+  BP12-072:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - bane
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    by: ability
+                    ref: this
+                then:
+                  - evolve:
+                      ref: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
