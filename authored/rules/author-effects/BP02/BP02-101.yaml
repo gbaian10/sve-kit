@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-101:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                other: true
+                entered_this_turn: true
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 2
+                hp: 2

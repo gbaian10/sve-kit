@@ -664,5 +664,8 @@ mod choice_condition_lowering;
 #[path = "card/selection_shape_lowering.rs"]
 mod selection_shape_lowering;
 
+#[path = "card/filter_guards.rs"]
+mod filter_guards;
+
 #[path = "card/counter_lifecycle.rs"]
 mod counter_lifecycle;

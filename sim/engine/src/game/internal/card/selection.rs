@@ -6,10 +6,11 @@ use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
-    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, Info, Int,
-    IntOperation, KindRead, MemberProjection, NamesRead, NumberRead, ObjectOperand, ObjectProperty,
-    ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture, PostureRead, Predicate, ScopeId,
-    SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
+    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
+    EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, NumberRead,
+    ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture,
+    PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat,
+    TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -416,7 +417,11 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding, false)
         }
-        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+        // "それ以外" removes an earlier target binding; "他の" removes the source holder.
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}])
+                || matches!(except.as_ref(), Selector::Bound { .. }) =>
+        {
             field_selector(input)
         }
         Selector::Extremum {
@@ -482,7 +487,7 @@ fn candidate_number(read: &NumberRead, candidate: Binding<ObjectRef>) -> bool {
         | NumberRead::Stats {
             object,
             view: CharacteristicView::Effective,
-            property: Stat::Life,
+            property: Stat::Life | Stat::Attack,
         } => candidate_view(object, candidate),
         _ => false,
     }
@@ -507,19 +512,23 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
     .then_some((*binding, predicate))
 }
 
-fn permitted_names(value: &Expr<Vec<CardName>>, allow_source_names: bool) -> bool {
-    (allow_source_names || matches!(value, Expr::Literal(_)))
-        && super::super::search::search_names(value)
+// Private reads use only sealed source information; public candidates may compare against the
+// holder's own card names instead ("これと同名を除く" on formal targets).
+fn permitted_names(value: &Expr<Vec<CardName>>, private_observation: bool) -> bool {
+    if private_observation || matches!(value, Expr::Literal(_)) {
+        return super::super::search::search_names(value);
+    }
+    matches!(value, Expr::Live(read) if matches!(read.as_ref(), NamesRead::Names { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})))
 }
 
 pub(in crate::game::internal) fn check_predicate(
     value: &Expr<Bool>,
     candidate: Binding<ObjectRef>,
-    allow_source_names: bool,
+    private_observation: bool,
 ) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing } if candidate_view(object, candidate)) => {
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing | BooleanState::EnteredThisTurn } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
@@ -527,14 +536,14 @@ pub(in crate::game::internal) fn check_predicate(
                 if !predicates.is_empty() =>
             {
                 for predicate in predicates {
-                    check_predicate(predicate, candidate, allow_source_names)?;
+                    check_predicate(predicate, candidate, private_observation)?;
                 }
                 Ok(())
             }
             Predicate::Not { predicate } => {
-                check_predicate(predicate, candidate, allow_source_names)
+                check_predicate(predicate, candidate, private_observation)
             }
-            _ => check_atomic_predicate(operation, candidate, allow_source_names),
+            _ => check_atomic_predicate(operation, candidate, private_observation),
         },
         _ => Err(unsupported("field target predicate")),
     }
@@ -543,13 +552,19 @@ pub(in crate::game::internal) fn check_predicate(
 fn check_atomic_predicate(
     operation: &Predicate,
     candidate: Binding<ObjectRef>,
-    allow_source_names: bool,
+    private_observation: bool,
 ) -> Result<()> {
     match operation {
         Predicate::PostureEquals {
             left: Expr::Live(read),
             right: Expr::Literal(_),
         } if matches!(read.as_ref(), PostureRead::Posture { object } if candidate_view(object, candidate)) => {
+            Ok(())
+        }
+        Predicate::EvolutionEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), EvolutionRead::Evolution { object } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Predicate::HasAbility {
@@ -573,7 +588,7 @@ fn check_atomic_predicate(
         Predicate::NamesIntersect {
             left: Expr::Live(read),
             right,
-        } if permitted_names(right, allow_source_names)
+        } if permitted_names(right, private_observation)
             && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
         {
             Ok(())
@@ -622,8 +637,36 @@ fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
             property: BooleanState::TokenStatus,
             ..
         } => Ok(game.object_type(id)?.contains("トークン")),
+        BoolRead::State {
+            property: BooleanState::EnteredThisTurn,
+            ..
+        } => {
+            let object = game.object(id)?;
+            Ok(object.zone == "field" && object.state["entered_this_turn"] == true)
+        }
         _ => Err(unsupported("field target state filter")),
     }
+}
+
+fn posture_equals(game: &Game, id: &str, posture: Posture) -> Result<bool> {
+    let object = game.object(id)?;
+    Ok(object.zone == "field"
+        && object.state["acted"].as_bool().unwrap_or(false) == (posture == Posture::Acted))
+}
+
+fn evolution_equals(game: &Game, id: &str, expected: EvolutionState) -> Result<bool> {
+    let object = game.object(id)?;
+    if object.zone != "field" || !game.object_type(id)?.contains("フォロワー") {
+        return Ok(false);
+    }
+    let actual = if object.state["super_evolved"] == true {
+        EvolutionState::SuperEvolved
+    } else if object.state["evolved"] == true {
+        EvolutionState::Evolved
+    } else {
+        EvolutionState::Base
+    };
+    Ok(actual == expected)
 }
 
 pub(in crate::game::internal) fn matches_candidate(
@@ -638,12 +681,11 @@ pub(in crate::game::internal) fn matches_candidate(
             Predicate::PostureEquals {
                 right: Expr::Literal(posture),
                 ..
-            } => {
-                let object = game.object(id)?;
-                Ok(object.zone == "field"
-                    && object.state["acted"].as_bool().unwrap_or(false)
-                        == (*posture == Posture::Acted))
-            }
+            } => posture_equals(game, id, *posture),
+            Predicate::EvolutionEquals {
+                right: Expr::Literal(expected),
+                ..
+            } => evolution_equals(game, id, *expected),
             Predicate::HasAbility { predicate, .. } => {
                 super::super::search::matches_keyword(game, id, predicate)
             }
@@ -1114,11 +1156,13 @@ impl Execution {
                     ZoneKind::Cemetery => "cemetery",
                     _ => return Err(unsupported("public target zone")),
                 };
+                // Public candidates may exclude the source's own names ("これと同名を除く").
                 check_predicate(predicate, *binding, false)?;
+                let predicate = super::super::search::freeze_source_names(game, self, predicate)?;
                 let mut members = Vec::new();
                 for player in self.players(game, players)? {
                     for id in game.zone_ids(super::super::seat_name(player)?, zone) {
-                        if matches_candidate(game, &id, predicate)? {
+                        if matches_candidate(game, &id, &predicate)? {
                             members.push(self.reference(game, &id)?);
                         }
                     }

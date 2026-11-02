@@ -7,7 +7,7 @@ use super::{
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
-    ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
+    EvolutionRead, ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, Info, KindRead, MemberProjection, MovementReceipt, NamesRead,
@@ -273,6 +273,13 @@ impl Checker {
                 right: Expr::Literal(_),
             } if !self.event_capture() => {
                 let PostureRead::Posture { object } = read.as_ref();
+                self.view(object)
+            }
+            Predicate::EvolutionEquals {
+                left: Expr::Live(read),
+                right: Expr::Literal(_),
+            } if !self.event_capture() => {
+                let EvolutionRead::Evolution { object } = read.as_ref();
                 self.view(object)
             }
             Predicate::KindEquals { left, right } => {

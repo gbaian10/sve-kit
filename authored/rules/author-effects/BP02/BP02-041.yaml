@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-041:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                evolved: false
+              n: 1
+          do:
+            - if:
+                cond:
+                  spellchain: 10
+                then:
+                  - move:
+                      ref: victim
+                      to: deck
+                      position: top
+                else:
+                  - move:
+                      ref: victim
+                      to: hand

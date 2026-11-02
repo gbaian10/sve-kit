@@ -202,6 +202,21 @@ pub(in crate::game::internal) fn freeze_source_names(
                 right: Expr::Literal(execution.source_names(game)?),
             }
         }
+        // The holder's printed names stay readable after it leaves the field (Lastword targets).
+        Predicate::NamesIntersect {
+            left,
+            right: Expr::Live(read),
+        } if matches!(read.as_ref(), NamesRead::Names { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})) => {
+            Predicate::NamesIntersect {
+                left: left.clone(),
+                right: Expr::Literal(
+                    game.card_names(&execution.context.source)?
+                        .into_iter()
+                        .map(CardName)
+                        .collect(),
+                ),
+            }
+        }
         Predicate::Not { predicate } => Predicate::Not {
             predicate: freeze_source_names(game, execution, predicate)?,
         },

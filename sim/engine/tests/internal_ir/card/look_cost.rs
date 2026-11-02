@@ -161,7 +161,7 @@ fn observed_names_do_not_admit_an_unsealed_live_source_holder() {
 }
 
 #[test]
-fn source_name_exclusion_stays_scoped_to_observations_and_rejects_other_private_reads() {
+fn source_name_exclusion_reaches_public_choices_and_rejects_other_private_reads() {
     let mut public = tree();
     public["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
         {"choose":{"bind":"picked","from":{"who":"self","zone":"field","kind":"follower"},"n":1}},
@@ -170,9 +170,13 @@ fn source_name_exclusion_stays_scoped_to_observations_and_rejects_other_private_
     lowerer().lower(&public).unwrap();
     public["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["choose"]["from"]["not_same_name_as_this"] =
         json!(true);
+    // "これと同名を除く" on public objects compares against the holder's own card names.
+    lowerer().lower(&public).unwrap();
+    public["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["choose"]["from"]["leader_or"] =
+        json!(true);
     assert!(
         lowerer().lower(&public).is_err(),
-        "the new observed source-name filter does not broaden public field selection"
+        "a leader recipient has no card name to compare"
     );
     for filter in [
         json!({"in":"seen","hp_le":1}),

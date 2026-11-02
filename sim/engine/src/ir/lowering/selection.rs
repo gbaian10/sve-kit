@@ -233,6 +233,7 @@ impl BodyContext<'_> {
             || choice.from.name.is_some()
             || choice.from.name_contains.is_some()
             || choice.from.has_evolve.is_some()
+            || choice.from.has_state_filter()
             || choice.from.not_same_name_as_this
             || choice.from.other
             || choice.from.has_numeric_filter()
@@ -307,6 +308,8 @@ pub(super) struct ObjectFilter<'query> {
     pub face_up: Option<bool>,
     pub racing: Option<bool>,
     pub acted: Option<bool>,
+    pub evolved: Option<bool>,
+    pub entered_this_turn: bool,
     pub kind: Option<&'query ast::SearchKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
@@ -320,6 +323,7 @@ pub(super) struct ObjectFilter<'query> {
     pub original_cost: [Option<u64>; 3],
     pub hp_at_most: Option<u64>,
     pub power_at_most: Option<u64>,
+    pub power_at_least: Option<u64>,
     pub keyword: Option<super::super::KeywordId>,
     pub has_evolve: bool,
 }
@@ -341,6 +345,9 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
             hp_at_most: query.hp_le,
+            acted: query.acted,
+            evolved: query.evolved,
+            entered_this_turn: query.entered_this_turn.is_some(),
             ..Self::default()
         }
     }
@@ -348,7 +355,14 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
 
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
+        let power = query.r#where.map(|condition| condition.cmp);
         Self {
+            power_at_most: power
+                .filter(|cmp| cmp.op == ast::PowerBound::Le)
+                .map(|cmp| cmp.right),
+            power_at_least: power
+                .filter(|cmp| cmp.op == ast::PowerBound::Ge)
+                .map(|cmp| cmp.right),
             racing: query.racing,
             kind: query.kind.as_ref(),
             keyword: query.keyword.map(|keyword| keyword.0),
@@ -539,6 +553,10 @@ fn state_filters(
         (filter.token, super::super::BooleanState::TokenStatus),
         (filter.face_up, super::super::BooleanState::FaceUp),
         (filter.racing, super::super::BooleanState::Racing),
+        (
+            filter.entered_this_turn.then_some(true),
+            super::super::BooleanState::EnteredThisTurn,
+        ),
     ] {
         if let Some(expected) = expected {
             let predicate = super::Expr::Live(Box::new(super::super::BoolRead::State {
@@ -565,6 +583,27 @@ fn state_filters(
                 }),
             },
         )));
+    }
+    if let Some(evolved) = filter.evolved {
+        // Each state is a positive follower read, so amulets match neither side of the filter.
+        let state = |expected| {
+            super::Expr::Compute(Box::new(super::Predicate::EvolutionEquals {
+                left: super::Expr::Live(Box::new(super::super::EvolutionRead::Evolution {
+                    object: object.clone(),
+                })),
+                right: super::Expr::Literal(expected),
+            }))
+        };
+        predicates.push(if evolved {
+            super::Expr::Compute(Box::new(super::Predicate::Or {
+                predicates: vec![
+                    state(super::super::EvolutionState::Evolved),
+                    state(super::super::EvolutionState::SuperEvolved),
+                ],
+            }))
+        } else {
+            state(super::super::EvolutionState::Base)
+        });
     }
     predicates
 }
@@ -596,16 +635,21 @@ fn numeric_limits(
             }
         }
     }
-    if let Some(limit) = filter.power_at_most {
-        predicates.push(number_limit(
-            NumberRead::Stats {
-                object: object.clone(),
-                view: CharacteristicView::Effective,
-                property: super::super::Stat::Attack,
-            },
-            Comparison::LessEqual,
-            limit,
-        ));
+    for (limit, comparison) in [
+        (filter.power_at_most, Comparison::LessEqual),
+        (filter.power_at_least, Comparison::GreaterEqual),
+    ] {
+        if let Some(limit) = limit {
+            predicates.push(number_limit(
+                NumberRead::Stats {
+                    object: object.clone(),
+                    view: CharacteristicView::Effective,
+                    property: super::super::Stat::Attack,
+                },
+                comparison,
+                limit,
+            ));
+        }
     }
     predicates
 }

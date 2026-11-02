@@ -868,6 +868,9 @@ impl Game {
             if !self.restricted(&id, "normal_stand")? && !self.internal_rule_stand_blocked(&id)? {
                 standing.push(id.clone());
             }
+        }
+        // "このターン中に場に出た" covers both fields, so every new turn clears both.
+        for id in [self.zone_ids("P1", "field"), self.zone_ids("P2", "field")].concat() {
             self.object_mut(&id)?.state["entered_this_turn"] = json!(false);
         }
         self.change_posture(&standing, false, &json!({"rule":"7.2.3"}))?;

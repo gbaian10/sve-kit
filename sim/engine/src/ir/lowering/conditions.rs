@@ -210,6 +210,14 @@ impl BodyContext<'_> {
                 return self.frozen_population(*threshold, false, path);
             }
             ast::Condition::Exists(query) => return self.public_exists(query, path),
+            ast::Condition::Standing(ast::This::This) => Predicate::PostureEquals {
+                left: Expr::Live(Box::new(super::super::PostureRead::Posture {
+                    object: ObjectView::Current {
+                        object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+                    },
+                })),
+                right: Expr::Literal(super::super::Posture::Standing),
+            },
             ast::Condition::Awakened(true) => Predicate::CompareInt {
                 left: Expr::Live(Box::new(IntRead::PlayerResource {
                     player: PlayerRef::Controller {},

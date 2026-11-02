@@ -151,8 +151,14 @@ impl BodyContext<'_> {
         zone: ZoneKind,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        // Extremum populations do not carry posture or exclusions; reject them rather than widen.
+        if (query.acted.is_some() || query.except.is_some())
+            && (query.alias.is_some() || query.r#where.is_some())
+        {
+            return Err(unsupported(path));
+        }
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
-        let kind = query.kind.as_ref().map(|_| ast::SearchKind::Follower);
+        let kind = query.kind.map(ast::FieldKind::search);
         let objects = Selector::Zone {
             players: PlayerSet {
                 relation: match query.who {
@@ -186,6 +192,7 @@ impl BodyContext<'_> {
                     original_cost: [None, query.orig_cost_le, None],
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
+                    acted: query.acted,
                     ..super::selection::ObjectFilter::default()
                 },
                 binding,
@@ -198,6 +205,22 @@ impl BodyContext<'_> {
             }
         } else {
             objects
+        };
+        let objects = match &query.except {
+            Some(except) => {
+                // Only a formal or resolution target chosen earlier in this ability qualifies.
+                let reference = self
+                    .targets
+                    .get(&except.reference)
+                    .copied()
+                    .filter(|_| !self.observed_targets.contains(&except.reference))
+                    .ok_or_else(|| unsupported(path))?;
+                Selector::Difference {
+                    input: Box::new(objects),
+                    except: Box::new(Selector::Bound { reference }),
+                }
+            }
+            None => objects,
         };
         self.extremum_query(query, objects, path)
     }

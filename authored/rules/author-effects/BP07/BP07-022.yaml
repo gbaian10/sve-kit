@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        static:
+          while:
+            standing: this
+          effects:
+            - grant:
+                keywords:
+                  - intimidate
+                  - aura
+      - line: 3
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1

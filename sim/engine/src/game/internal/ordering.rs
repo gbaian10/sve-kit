@@ -473,7 +473,8 @@ fn mask_public_predicate(selector: &mut Selector) {
         }
         Selector::Difference { input, except }
             if matches!(except.as_ref(), Selector::Objects { objects }
-                if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])) =>
+                if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}]))
+                || matches!(except.as_ref(), Selector::Bound { .. }) =>
         {
             mask_public_predicate(input);
         }
