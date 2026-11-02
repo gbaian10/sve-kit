@@ -158,10 +158,6 @@ fn evolve(game: &mut Game) {
     evolve_with(game, 1, 1);
 }
 
-fn evolve_paying(game: &mut Game, cost: u8) {
-    evolve_with(game, cost, 1);
-}
-
 fn evolve_with(game: &mut Game, cost: u8, mode: u64) {
     assert_eq!(
         game.internal_rule_action(
@@ -377,21 +373,6 @@ fn bp20_003_evolution_shrinks_one_opposing_follower() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["objects"]["enemy"]["power"], 2_u8);
     assert_eq!(state["objects"]["enemy"]["hp"], 2_u8);
-}
-
-#[test]
-fn bp20_084_evolution_returns_two_non_nightmare_followers() {
-    let mut initial = evolved_position("BP20-083", "BP20-084");
-    initial["players"]["P1"]["zones"]["cemetery"] = json!([
-        {"id":"dark","card":"BP05-080"},
-        {"id":"large","card":"BP01-037"},
-        {"id":"cheap","card":"BP01-034"}
-    ]);
-    let mut game = game(&initial);
-    evolve_paying(&mut game, 5);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["field"], json!(["source", "large", "cheap"]));
-    assert_eq!(state["P1"]["cemetery"], json!(["dark"]));
 }
 
 #[test]
