@@ -1,0 +1,49 @@
+cards:
+  BP08-006:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: opp
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: opp
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - bane
+                on: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

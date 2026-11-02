@@ -1,0 +1,47 @@
+cards:
+  BP08-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 毒蛇
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: opp
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 2
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  orig_cost_le: 2
+                  who: self
+                  zone: deck
+                to: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP08-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

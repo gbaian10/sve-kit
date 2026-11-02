@@ -1,0 +1,43 @@
+cards:
+  BP08-076:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - buff:
+                      hp: 1
+                      on: ally
+                      power: 1
+                  - grant:
+                      keywords:
+                        - ward
+                      on: ally
+                  - act: ally
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

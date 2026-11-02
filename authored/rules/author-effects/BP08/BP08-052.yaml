@@ -1,0 +1,58 @@
+cards:
+  BP08-052:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to: victim
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: self
+                zone: field
+              sel:
+                class: ドラゴン
+                kind: follower
+                other: true
+              to: cemetery
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 竜帝の近衛兵
+                then:
+                  - create:
+                      n: 3
+                      to: field
+                      token: 竜帝の近衛兵
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP08-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
