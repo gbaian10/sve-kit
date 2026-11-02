@@ -4,7 +4,7 @@
     reason = "Unexpected decisions invalidate these game scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::{DamageShare, SearchAnswer};
+use sve_engine::game::internal::SearchAnswer;
 
 const fn actor() -> PlayerId {
     PlayerId { seat: 1 }
@@ -49,24 +49,6 @@ fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
-            InputDomain::Distribution(domain) => {
-                let mut shares: Vec<DamageShare> = domain
-                    .members
-                    .iter()
-                    .map(|member| DamageShare {
-                        handle: member.handle,
-                        amount: Nat(0),
-                    })
-                    .collect();
-                // The first target takes all but one point, the last target the remainder.
-                let last = shares.len().checked_sub(1).unwrap();
-                shares[last].amount = Nat(1);
-                shares[0].amount = Nat(domain.total.0.checked_sub(u64::try_from(last).unwrap()).unwrap());
-                for share in shares.iter_mut().take(last).skip(1) {
-                    share.amount = Nat(1);
-                }
-                Answer::Distribution(shares)
-            }
             InputDomain::Search(domain) => Answer::Search(domain.groups.as_ref().map_or_else(
                 || {
                     SearchAnswer::Ungrouped(
