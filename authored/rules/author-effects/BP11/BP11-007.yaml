@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-007:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            to_cemetery:
+              n: 4
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: 妖精
+                token: true
+      - line: 2
+        spell:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: フェアリープリンセス・アリア
+                n: 1
+                to: field

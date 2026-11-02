@@ -216,54 +216,6 @@ cards:
         line: 3
         subject: self
     status: complete
-  BP15-083:
-    abilities:
-      - active_zones:
-          - cemetery
-        body:
-          keywords:
-            - storm
-          op: modify
-          subjects:
-            name: 一ツ尾狐
-            side: self
-            zone: field
-        costs:
-          - op: banish
-            subjects: self
-        kind: activated
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - op: destroy
-              subjects: target.1
-            - count: 1
-              op: draw
-        cost_selections:
-          - key: "1"
-            max: 2
-            min: 2
-            select:
-              name: 一ツ尾狐
-              side: self
-              zone: field
-        costs:
-          - op: move
-            subjects: cost.1
-            to: cemetery
-        kind: spell
-        line: 2
-        section: 0
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: opponent
-              type: follower
-              zone: field
-    status: complete
   BP15-113:
     abilities:
       - body:

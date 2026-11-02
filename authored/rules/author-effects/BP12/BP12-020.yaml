@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            evolved:
+              who: self
+              sel:
+                name: 黄昏の刃・ナノ
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        token: トワイライトソード
+                        n: 1
+                        to: ex
+                  - - life:
+                        who: self
+                        delta: 2
+      - line: 2
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 黄昏の刃・ナノ
+                n: 1
+                to: field

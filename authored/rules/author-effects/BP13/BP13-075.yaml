@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-075:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP13-P32
+    abilities:
+      - line: 1
+        keywords:
+          - bane
+      - line: 2
+        evolve_time:
+          do:
+            - create:
+                token: インモラルディザイア
+                n: 1
+                to: ex
+      - line: 3
+        lastword:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3

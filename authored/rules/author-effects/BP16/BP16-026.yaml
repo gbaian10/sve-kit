@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-026:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            act:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: レヴィオン
+      - line: 2
+        spell:
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - life:
+                who: self
+                delta: 2
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    name_contains: ユリウス
+                then:
+                  - draw:
+                      who: self
+                      n: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
