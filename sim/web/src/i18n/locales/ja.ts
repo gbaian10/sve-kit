@@ -765,6 +765,21 @@ export default {
     importLine: "{{line}}：{{text}}",
     importCreate: "デッキを作成",
     importedName: "読み込んだデッキ",
+    exportImage: "画像",
+    exportImageHint: "デッキの画像を作ります。リーダーがいればタイトルの横に入ります。",
+    imageSize: "画像サイズ",
+    imageSmall: "小（チャット用）",
+    imageHd: "高画質（テキストが読める）",
+    drawImage: "画像を作る",
+    drawingImage: "作成中…",
+    drawImageFailed: "画像を作れませんでした。もう一度お試しください。",
+    imageAlt: "{{name}} のデッキ画像",
+    imageInfo: "{{width}}×{{height}} px・{{size}}",
+    imageSubtitle: "{{edition}}・{{basis}}・メインデッキ {{main}}・エボルヴデッキ {{evolve}}",
+    imageFooter: "sve-kit · {{date}} · 非公式",
+    downloadImage: "画像を保存",
+    drawImageMissing:
+      "{{count}} 枚のカード画像を読み込めなかったため、画像を作れませんでした：{{cards}}。しばらくしてからお試しください。",
   },
   footer: {
     unofficial:

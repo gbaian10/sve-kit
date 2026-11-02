@@ -783,6 +783,22 @@ export default {
     importLine: "{{line}}: {{text}}",
     importCreate: "Create deck",
     importedName: "Imported deck",
+    exportImage: "Image",
+    exportImageHint:
+      "Make a picture of the deck; the leader sits beside the title when there is one.",
+    imageSize: "Image size",
+    imageSmall: "Small (chat preview)",
+    imageHd: "HD (readable text)",
+    drawImage: "Make image",
+    drawingImage: "Making the image…",
+    drawImageFailed: "The image could not be made. Try again.",
+    imageAlt: "Deck image of {{name}}",
+    imageInfo: "{{width}}×{{height}} px · {{size}}",
+    imageSubtitle: "{{edition}} · {{basis}} · Main deck {{main}} · Evolve deck {{evolve}}",
+    imageFooter: "sve-kit · {{date}} · unofficial",
+    downloadImage: "Download image",
+    drawImageMissing:
+      "{{count}} card images did not load, so no image was made: {{cards}}. Try again later.",
   },
   footer: {
     unofficial:
