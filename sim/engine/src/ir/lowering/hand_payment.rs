@@ -92,6 +92,12 @@ fn filter(
     } else {
         vec![base]
     };
+    for trait_id in &query.traits_all {
+        if trait_id.is_empty() {
+            return Err(unsupported(path));
+        }
+        predicates.push(search::object_filter(None, Some(trait_id), None, binding));
+    }
     if let Some(class) = &query.class {
         if class.is_empty() {
             return Err(unsupported(path));

@@ -120,7 +120,7 @@ fn hand_cost_selection_is_private_strict_and_payment_rolls_back_as_a_whole() {
 }
 
 #[test]
-fn filtered_hand_cost_uses_printed_class_and_cost_without_leaking_other_candidates() {
+fn filtered_hand_cost_uses_class_cost_and_all_traits_without_leaking_other_candidates() {
     let (snapshot, registry, document) = catalog_documents(&json!("1"));
     let snapshot = snapshot
         .lines()
@@ -129,9 +129,14 @@ fn filtered_hand_cost_uses_printed_class_and_cost_without_leaking_other_candidat
             if face["number"] == "unit-spell" {
                 face["faces"][0]["cost"] = json!("7");
                 face["faces"][0]["card_class"] = json!("ドラゴン");
+                face["faces"][0]["traits"] = json!(["絶傑", "魔法使い"]);
+            }
+            if face["number"] == "unit-follower" {
+                face["faces"][0]["traits"] = json!(["魔法使い"]);
             }
             if face["number"] == "unit-amulet" {
                 face["faces"][0]["cost"] = json!("7");
+                face["faces"][0]["traits"] = json!(["絶傑"]);
             }
             face.to_string()
         })
@@ -148,6 +153,11 @@ fn filtered_hand_cost_uses_printed_class_and_cost_without_leaking_other_candidat
         (json!({"orig_cost_eq":7}), vec!["unit-spell", "unit-amulet"]),
         (json!({"orig_cost_le":1}), vec!["unit-follower"]),
         (json!({"class":"ロイヤル","orig_cost_ge":7}), vec![]),
+        (
+            json!({"traits_all":["絶傑","魔法使い"]}),
+            vec!["unit-spell"],
+        ),
+        (json!({"traits_all":["絶傑","missing"]}), vec![]),
     ] {
         let mut query = filter;
         query["who"] = json!("self");
