@@ -701,3 +701,151 @@ fn observed_unions_need_two_filtered_branches_of_the_same_look() {
         "per-group limits apply to one Look query, not to a union"
     );
 }
+
+#[test]
+fn overlapping_observed_union_branches_keep_each_card_once() {
+    let programs = lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"any_of":[
+                {"in":"seen","kind":"follower"},
+                {"in":"seen","class":"ニュートラル"}
+            ]},"upto":2}},
+            {"move":{"ref":"picked","to":"cemetery"}}
+        ])))
+        .unwrap();
+    let mut game = split_game(&programs["unit-follower"]);
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("observed union")
+    };
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("union targets")
+    };
+    assert_eq!(
+        domain.members.len(),
+        2,
+        "two observed cards each match both branches"
+    );
+    assert!(
+        game.internal_decision(View::P2).is_none(),
+        "the opponent gets no private choice"
+    );
+    let handles = domain.members.iter().map(|member| member.handle).collect();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+            .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["deck"], json!(["three", "tail"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["s", "one", "two"]));
+}
+
+fn crowded_look(choose: &Value, destination: &str, deck: Value) -> (Game, Option<DecisionView>) {
+    let mut document = tree(&json!([
+        {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+        {"choose":choose},
+        {"move":{"ref":"picked","to":destination,"result":"moved"}}
+    ]));
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"] = json!({"pp":0});
+    let programs = lowerer().lower(&document).unwrap();
+    let mut initial = setup(1, deck);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!(
+        ["s", "f1", "f2", "f3"]
+            .iter()
+            .map(|id| json!({"id":id,"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "crowded-look",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let play = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let question = match play {
+        CardPlay::Awaiting(q) => Some(q),
+        CardPlay::Resolved(_)
+        | CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_) => None,
+    };
+    (game, question)
+}
+
+#[test]
+fn grouped_look_to_hand_ignores_field_capacity() {
+    let (mut game, q) = crowded_look(
+        &json!({
+            "bind":"picked","from":{"in":"seen"},"groups":[
+                {"kind":"follower","class":"ニュートラル"},
+                {"kind":"spell","class":"ニュートラル"}
+            ],"upto":2,"may":true
+        }),
+        "hand",
+        json!([{"id":"one","card":"unit-follower"},{"id":"two","card":"unit-spell"}]),
+    );
+    let q = q.unwrap();
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("grouped hand targets")
+    };
+    assert_eq!(
+        domain.cardinality.maximum,
+        Some(Nat(2)),
+        "taking cards into hand needs no field slots"
+    );
+    let handles = domain.members.iter().map(|member| member.handle).collect();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+            .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["one", "two"])
+    );
+}
+
+#[test]
+fn union_look_to_field_offers_only_the_free_field_slot() {
+    let (mut game, q) = crowded_look(
+        &json!({
+            "bind":"picked","from":{"any_of":[
+                {"in":"seen","kind":"follower"},
+                {"in":"seen","class":"ニュートラル"}
+            ]},"upto":2,"may":true
+        }),
+        "field",
+        json!([{"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}]),
+    );
+    let q = q.unwrap();
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("union field targets")
+    };
+    assert_eq!(
+        domain.cardinality.maximum,
+        Some(Nat(1)),
+        "only one of two chosen cards fits the field"
+    );
+    resolved(
+        game.answer_internal_card(
+            q.actor,
+            q.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(view["P1"]["deck"], json!(["two"]));
+}

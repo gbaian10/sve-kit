@@ -5,12 +5,12 @@ use crate::ir::effect_evolution;
 use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
-    Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
+    Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
     ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
-    EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, NumberRead,
-    ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef, PlayerRelation, Posture,
-    PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat,
-    TraitsRead,
+    EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, Node,
+    NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
+    PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
+    Selector, Stat, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -239,23 +239,26 @@ fn group_layout(
     }
 }
 
-fn grouped_look_field_bounds(
+/// A multi-card Look pick that later enters the field may only offer the free field slots;
+/// a single card that cannot enter simply stays with the remainder.
+fn look_field_entry_bounds(
     game: &Game,
     actor_seat: &str,
-    observed_deck: bool,
-    group_count: usize,
+    feeds_field: bool,
     mut bounds: Cardinality,
 ) -> Result<Cardinality> {
-    if observed_deck && group_count > 1 {
+    if feeds_field && bounds.maximum.is_none_or(|maximum| maximum.0 > 1) {
         let free_field_slots = u64::try_from(
             5_i64
                 .saturating_sub(game.zone_count(actor_seat, "field"))
                 .max(0),
         )
         .map_err(invalid)?;
-        bounds.maximum = Some(Nat(bounds
+        let maximum = bounds
             .maximum
-            .map_or(free_field_slots, |maximum| maximum.0.min(free_field_slots))));
+            .map_or(free_field_slots, |maximum| maximum.0.min(free_field_slots));
+        bounds.maximum = Some(Nat(maximum));
+        bounds.minimum = Nat(bounds.minimum.0.min(maximum));
     }
     Ok(bounds)
 }
@@ -865,11 +868,10 @@ impl Game {
         let actor_seat = super::seat_name(actor)?;
         let group_members = self.target_group_members(execution, decision, constraint)?;
         let (members, group_bounds, bounds) = group_layout(constraint, &group_members);
-        let bounds = grouped_look_field_bounds(
+        let bounds = look_field_entry_bounds(
             self,
             actor_seat,
-            observed_deck,
-            constraint.groups.len(),
+            observed_deck && execution.feeds_field_entry(binding.key()),
             bounds,
         )?;
         let public = members
@@ -1100,6 +1102,16 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
+    /// Whether a later step of this execution moves the chosen binding onto the field.
+    fn feeds_field_entry(&self, key: (ScopeId, u64)) -> bool {
+        self.todo.iter().any(|node| {
+            matches!(node, Node::Instruction { instruction }
+                if matches!(&instruction.action, Action::Move {
+                    objects: Selector::Bound { reference }, movement, ..
+                } if reference.key() == key && super::super::movement::field_move(movement)))
+        })
+    }
+
     pub(in crate::game::internal) fn is_private_look_target(
         &self,
         selector: &Selector,
