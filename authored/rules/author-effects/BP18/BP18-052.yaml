@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-052:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          define:
+            fives:
+              per:
+                of:
+                  count:
+                    who: self
+                    zone: banish
+                unit: 5
+          do:
+            - buff:
+                on: this
+                power: fives
+                hp: fives
