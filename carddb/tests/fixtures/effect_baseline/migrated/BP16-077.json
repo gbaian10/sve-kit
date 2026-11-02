@@ -1,0 +1,73 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "target.1",
+        "amount": {
+          "at": "play-start",
+          "value": {
+            "if": {
+              "fn": "le",
+              "args": [
+                {
+                  "read": "self.leader.life"
+                },
+                10
+              ]
+            },
+            "then": 10,
+            "else": 5
+          }
+        },
+        "split": "1"
+      },
+      "event": "evolve",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 0,
+          "max": 3,
+          "distribute": {
+            "at": "play-start",
+            "value": {
+              "if": {
+                "fn": "le",
+                "args": [
+                  {
+                    "read": "self.leader.life"
+                  },
+                  10
+                ]
+              },
+              "then": 10,
+              "else": 5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self",
+        "keywords": [
+          "storm"
+        ]
+      },
+      "event": "super_evolve",
+      "subject": "self"
+    }
+  ]
+}

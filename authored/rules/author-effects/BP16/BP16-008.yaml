@@ -1,0 +1,64 @@
+cards:
+  BP16-008:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: 操り人形
+      - line: 2
+        activate:
+          cost:
+            act_self: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 人形
+                  orig_cost_le: 3
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: moved
+                until: turn
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
