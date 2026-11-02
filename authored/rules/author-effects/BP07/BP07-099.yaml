@@ -1,0 +1,68 @@
+cards:
+  BP07-099:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - either:
+                options:
+                  - - choose:
+                        bind: picked
+                        from:
+                          in: seen
+                          kind: follower
+                          orig_cost_le: 5
+                          trait: 童話
+                        may: true
+                        n: 1
+                    - move:
+                        ref: picked
+                        result: moved
+                        to: field
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: moved
+                              view: before
+                          in: seen
+                        to: deck
+                  - - choose:
+                        bind: picked
+                        from:
+                          in: seen
+                          kind: amulet
+                          orig_cost_le: 5
+                          trait: 童話
+                        may: true
+                        n: 1
+                    - move:
+                        ref: picked
+                        result: moved
+                        to: field
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: moved
+                              view: before
+                          in: seen
+                        to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

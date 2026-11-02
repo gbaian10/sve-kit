@@ -1,0 +1,44 @@
+cards:
+  BP07-068:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - create:
+                      n: 1
+                      to: field
+                      token: ナテラの大樹
+                then:
+                  - optional:
+                      do:
+                        - either:
+                            options:
+                              - - create:
+                                    n: 1
+                                    to: field
+                                    token: ナテラの大樹
+                              - - create:
+                                    n: 2
+                                    to: field
+                                    token: ナテラの大樹
+                              - - create:
+                                    n: 3
+                                    to: field
+                                    token: ナテラの大樹
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP07-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

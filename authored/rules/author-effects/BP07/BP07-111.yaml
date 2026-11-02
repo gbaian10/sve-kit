@@ -1,0 +1,26 @@
+cards:
+  BP07-111:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: プロダクトマシーン
+        line: 1
+      - line: 2
+        params: {}
+        use: lastword.create-repair-mode-ex
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP07-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

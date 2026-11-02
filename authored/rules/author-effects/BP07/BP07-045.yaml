@@ -1,0 +1,35 @@
+cards:
+  BP07-045:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                instead:
+                  - if:
+                      exists:
+                        kind: follower
+                        name: 天外の華・エレノア
+                        who: self
+                        zone: field
+                    n: 5
+                n: 3
+                to: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
