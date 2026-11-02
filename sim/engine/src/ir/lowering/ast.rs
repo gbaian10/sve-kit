@@ -66,6 +66,8 @@ pub(super) struct Ability {
     pub super_evolve_time: Option<Body>,
     pub evolve: Option<Evolution>,
     pub feed: Option<Feed>,
+    pub ride: Option<Ride>,
+    pub drive_time: Option<Body>,
     pub race_time: Option<Body>,
     pub activate: Option<Activate>,
     pub spell: Option<Body>,
@@ -236,6 +238,7 @@ pub(super) enum Step {
     StackPlus(Number),
     Optional(Optional),
     Race(Race),
+    GainDrive(EffectEvolution),
     Evolve(EffectEvolution),
     If(Conditional),
     EachPlayer(EachPlayer),
@@ -324,6 +327,12 @@ pub(super) struct Optional {
     #[serde(rename = "who")]
     pub _who: Option<SelfPlayer>,
     pub then: Option<Vec<Step>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Ride {
+    pub cost: EvolutionCost,
 }
 
 #[derive(Deserialize)]

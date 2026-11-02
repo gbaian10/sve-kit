@@ -14,8 +14,8 @@ use crate::ir::{
     ExecutionId, Expr, FaceId, Generation, GrantedAbility, Instruction, InstructionContext, Int,
     KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason, Nat, Node, NumericChange,
     ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit,
-    Requirements, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, ZoneKind,
+    Requirements, Resource, ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource,
+    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
@@ -512,7 +512,7 @@ impl Game {
         self.check_internal_resources()?;
         let source = self.internal_card_source(holder, definition, actor)?;
         if meal::intrinsic(&ability.node) {
-            self.check_meal_available(holder)?;
+            self.check_meal_available(holder, &ability.node)?;
         }
         if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
             && !self.card_runtime.quota_available(
@@ -987,7 +987,7 @@ fn check_source(source: &SourceSpan, card: &str, face: &str, line: u64) -> Resul
     Ok(())
 }
 
-fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
+pub(in crate::game::internal) fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
     match origin {
         AbilityOrigin::Printed { face, line } => Ok((face, line)),
         AbilityOrigin::Keyword {
@@ -1000,6 +1000,8 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Evolution
                 | KeywordId::Meal
                 | KeywordId::OnRace
+                | KeywordId::Ride
+                | KeywordId::OnDriveGain
                 | KeywordId::Quick
                 | KeywordId::Ward
                 | KeywordId::Aura
@@ -1112,6 +1114,10 @@ fn check_nodes(
                         | Action::Search { .. }
                         | Action::Token { .. }
                         | Action::Order { .. }
+                        | Action::RideDrive {
+                            operation: RideDriveOperation::GainDrive {},
+                            ..
+                        }
                         | Action::MealRace {
                             operation: MealRaceOperation::Race,
                             ..

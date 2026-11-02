@@ -53,7 +53,7 @@ fn finish(game: &mut Game, mut play: CardPlay, targets: &[&str]) -> CardPlay {
                 Answer::Order(cards.iter().rev().map(|c| c.handle).collect())
             }
             InputDomain::Modes { modes, .. } => Answer::Modes(vec![modes[0]]),
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

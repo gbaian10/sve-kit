@@ -37,7 +37,7 @@ fn finish(game: &mut Game, mut result: CardPlay) {
                 );
                 Answer::TokenCapacity(0)
             }
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)

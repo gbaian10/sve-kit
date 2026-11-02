@@ -378,14 +378,13 @@ impl Game {
         has_evolution: bool,
     ) -> Result<Option<&'static str>> {
         let card_type = self.object_type(&previous.id)?;
-        let meal_links = previous.state["links"]
-            .as_object()
-            .is_some_and(|links| links.len() == 1 && links.contains_key("出走"))
-            && self.internal_meal_links_valid(&previous.id)?;
+        let resource_links = previous.state["links"].as_object().is_some_and(|links| {
+            links.len() == 1 && (links.contains_key("出走") || links.contains_key("憑依"))
+        }) && self.internal_resource_links_valid(&previous.id)?;
         let special = card_type.contains("トークン")
             || card_type.contains("アドバンス")
             || has_evolution
-            || meal_links;
+            || resource_links;
         if special {
             if execution.ability.is_none() {
                 return Err(unsupported(
@@ -406,7 +405,7 @@ impl Game {
                 .state
                 .get("links")
                 .is_some_and(|value| !value.is_null())
-                && !meal_links)
+                && !resource_links)
             || self
                 .state
                 .objects

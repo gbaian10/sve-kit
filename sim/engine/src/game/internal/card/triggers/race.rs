@@ -1,7 +1,9 @@
 //! Race facts enter the same per-fact pending queue as the other printed events.
 use super::{Game, Result, player_id};
 use crate::game::internal::Execution;
-use crate::ir::{Cause, EventPattern, EventPayload, RaceEvent, SnapshotId, TriggerCondition};
+use crate::ir::{
+    Cause, DriveGainedEvent, EventPattern, EventPayload, RaceEvent, SnapshotId, TriggerCondition,
+};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -44,6 +46,53 @@ impl Game {
                 ability,
                 &header,
                 EventPayload::Race { event },
+            )?);
+        }
+        self.internal_admit_pending(pending)
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Drive gain shares the authority's pending queue."
+)]
+impl Game {
+    pub(in crate::game::internal) fn internal_drive_gained_event(
+        &mut self,
+        holder: &str,
+        event: DriveGainedEvent,
+        execution: &Execution,
+    ) -> Result<()> {
+        let abilities = self
+            .internal_printed_abilities(holder)?
+            .into_iter()
+            .filter(|a| {
+                matches!(
+                    a.node.trigger.as_ref().map(|t| &t.on),
+                    Some(TriggerCondition::Event {
+                        pattern: EventPattern::DriveGained { .. }
+                    })
+                )
+            })
+            .collect::<Vec<_>>();
+        if abilities.is_empty() {
+            return Ok(());
+        }
+        let header = self.pending_header(
+            event.controller,
+            Cause::Effect {
+                execution: execution.id,
+            },
+            execution.ability,
+            SnapshotId(self.state.ir_epoch),
+        )?;
+        let mut pending = vec![];
+        for ability in abilities {
+            pending.push(self.timing_occurrence(
+                holder,
+                ability,
+                &header,
+                EventPayload::DriveGained { event },
             )?);
         }
         self.internal_admit_pending(pending)

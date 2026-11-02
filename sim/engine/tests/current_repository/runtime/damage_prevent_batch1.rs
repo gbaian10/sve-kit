@@ -37,7 +37,7 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize, optional: bool) -> C
             InputDomain::CostMaterials(domain) => {
                 Answer::CostMaterials(vec![domain.members[0].handle])
             }
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

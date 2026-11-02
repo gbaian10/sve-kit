@@ -83,7 +83,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
                 Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle]))
             }
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::BeforeDraw

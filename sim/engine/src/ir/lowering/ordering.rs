@@ -22,6 +22,10 @@ enum ObservationUse {
     reason = "Observation receipts are only exposed to the private movement spine."
 )]
 impl BodyContext<'_> {
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The exhaustive author-step match keeps observation receipts closed."
+    )]
     pub(super) fn remember(
         &mut self,
         step: &ast::Step,
@@ -91,6 +95,7 @@ impl BodyContext<'_> {
             | ast::Step::Optional(_)
             | ast::Step::Pay(_)
             | ast::Step::EachPlayer(_)
+            | ast::Step::GainDrive(_)
             | ast::Step::Race(_)
             | ast::Step::Evolve(_)
             | ast::Step::If(_)

@@ -80,7 +80,7 @@ fn response(question: &DecisionView) -> Answer {
             Answer::SearchPartition(vec![domain.cards[0].handle])
         }
         InputDomain::TokenCapacity { .. }
-        | InputDomain::MealPayment { .. }
+        | InputDomain::ResourceEntryPayment { .. }
         | InputDomain::DriveTrigger { .. }
         | InputDomain::WardEntry { .. }
         | InputDomain::Integer(_)

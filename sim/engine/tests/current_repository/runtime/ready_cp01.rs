@@ -79,7 +79,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().rev().map(|m| m.handle).collect())
             }
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw

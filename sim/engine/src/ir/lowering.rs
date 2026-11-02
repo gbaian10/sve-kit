@@ -1,4 +1,5 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
+use crate::ir::ride;
 
 mod additional;
 mod aggregates;
@@ -527,7 +528,7 @@ impl Allocator {
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
         }
-        if entry.feed.is_some() {
+        if entry.feed.is_some() || entry.ride.is_some() {
             return meal::lower(self, key, path, entry, scope);
         }
         if let Some(keywords) = &entry.keywords {
@@ -718,6 +719,9 @@ fn ability_body<'entry>(
     entry: &'entry ast::Ability,
     path: &str,
 ) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    if let Some(body) = &entry.drive_time {
+        return Ok((body, "drive_time", Some(KeywordId::OnDriveGain)));
+    }
     if let Some(body) = &entry.race_time {
         return Ok((body, "race_time", Some(KeywordId::OnRace)));
     }
@@ -770,7 +774,16 @@ fn lowered_trigger(
     Ok(if keyword == Some(KeywordId::Lastword) {
         TriggerSpec::lastword(Binding::new(event_id, scope))
     } else {
-        let pattern = if keyword == Some(KeywordId::OnRace) {
+        let pattern = if keyword == Some(KeywordId::OnDriveGain) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::DriveGained {
+                binding: event,
+                predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                    left: Expr::Frozen(Box::new(ObjectFrozen::DriveGainedSubject { event })),
+                    right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                })),
+            }
+        } else if keyword == Some(KeywordId::OnRace) {
             let event = Binding::new(event_id, scope);
             EventPattern::Race {
                 binding: event,
@@ -1355,6 +1368,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Result<Action, LoweringError> {
         match step {
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
+            ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
             ast::Step::Race(value) => Ok(meal::action(
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,

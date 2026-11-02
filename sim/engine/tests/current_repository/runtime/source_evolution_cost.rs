@@ -32,7 +32,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
                     Answer::Targets(domain.members.iter().map(|member| member.handle).collect())
                 }
                 InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-                InputDomain::MealPayment { .. }
+                InputDomain::ResourceEntryPayment { .. }
                 | InputDomain::Quick { .. }
                 | InputDomain::OptionalCost
                 | InputDomain::CostMaterials(_)

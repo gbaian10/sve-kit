@@ -1,5 +1,6 @@
-//! The meal entry expands resource payment and race facts into separate instructions.
+//! Meal and Ride share resource-entry payment, followed by their distinct rule procedures.
 use super::{Allocator, CardCoordinates, LoweringError, ast, source_span, unsupported};
+use crate::ir::ride;
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityQualification, Action, CostSpec, CostStep, Expr,
     Instruction, InstructionContext, InstructionId, Int, KeywordId, Located, MealRaceOperation,
@@ -23,11 +24,23 @@ pub(super) fn lower(
     entry: &ast::Ability,
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
-    let head = entry.feed.as_ref().ok_or_else(|| unsupported(path))?;
-    let pp = i64::try_from(head.cost.pp).map_err(|_private| unsupported(path))?;
-    let count = head.times.unwrap_or(1);
+    let ride_head = entry.ride.as_ref();
+    let (pp, count) = if let Some(head) = ride_head {
+        (head.cost.pp, 1)
+    } else {
+        let head = entry.feed.as_ref().ok_or_else(|| unsupported(path))?;
+        (head.cost.pp, head.times.unwrap_or(1))
+    };
+    let pp = i64::try_from(pp).map_err(|_private| unsupported(path))?;
     let source = source_span(key, path, entry)?;
-    let origin = super::ability_source(&source, Some(KeywordId::Meal));
+    let origin = super::ability_source(
+        &source,
+        Some(if ride_head.is_some() {
+            KeywordId::Ride
+        } else {
+            KeywordId::Meal
+        }),
+    );
     let mut make_instruction = |action, context| {
         let id = allocator.id(path)?;
         Ok::<_, LoweringError>(Instruction {
@@ -41,7 +54,11 @@ pub(super) fn lower(
         })
     };
     let meal = make_instruction(
-        action(count, MealRaceOperation::Meal),
+        if ride_head.is_some() {
+            ride::attachment(scope)
+        } else {
+            action(count, MealRaceOperation::Meal)
+        },
         InstructionContext::Cost,
     )?;
     let payment = make_instruction(
@@ -54,7 +71,11 @@ pub(super) fn lower(
         InstructionContext::Cost,
     )?;
     let race = make_instruction(
-        action(count, MealRaceOperation::Race),
+        if ride_head.is_some() {
+            ride::gain_drive()
+        } else {
+            action(count, MealRaceOperation::Race)
+        },
         InstructionContext::Effect,
     )?;
     Ok(Located {
@@ -72,7 +93,11 @@ pub(super) fn lower(
             play: Some(PlaySpec {
                 limit: None,
                 captures: vec![],
-                parameters: vec![],
+                parameters: if ride_head.is_some() {
+                    vec![ride::parameter(scope)]
+                } else {
+                    vec![]
+                },
                 costs: CostSpec::Ordered {
                     steps: vec![meal, payment]
                         .into_iter()

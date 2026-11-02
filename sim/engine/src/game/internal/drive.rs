@@ -353,3 +353,85 @@ impl Game {
             .retain(|_, lock| lock.turn != turn);
     }
 }
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Drive gain uses ordinary generation-bound grants and pending occurrences."
+)]
+impl Game {
+    pub(super) fn internal_gain_drive(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        use crate::ir::{
+            AbilityId, Bool, DriveGainedEvent, GrantedAbility, KeywordId, ObjectOperand,
+            ObjectView, RideDriveOperation, TextProvider, UsageReference,
+        };
+        let Action::RideDrive {
+            subject,
+            operation: RideDriveOperation::GainDrive {},
+            usage: UsageReference::CurrentRulePermission,
+        } = &instruction.action
+        else {
+            return Err(unsupported("Drive gain instruction"));
+        };
+        let reference = execution.object(self, subject)?;
+        let holder = execution.object_id(reference)?.to_owned();
+        let object = self.object(&holder)?;
+        if object.zone != "field"
+            || object.generation != reference.generation.0
+            || !self.object_type(&holder)?.contains("フォロワー")
+            || self.state.ir_drive_gained.get(&holder) == Some(&object.generation)
+        {
+            execution
+                .receipts
+                .insert(instruction.receipt, InstructionOutcome::Granted(vec![]));
+            return Ok(());
+        }
+        let controller = player_id(&object.controller)?;
+        let mut grant = instruction.clone();
+        grant.action = Action::Grant {
+            subjects: Selector::Objects {
+                objects: vec![subject.clone()],
+            },
+            abilities: vec![KeywordId::Drive, KeywordId::SingleDrive, KeywordId::Rush]
+                .into_iter()
+                .map(|keyword| GrantedAbility::Keyword { keyword })
+                .collect(),
+            duration: Duration {
+                end: DurationEnd::NoTemporalExpiry {},
+                anchor: TimeAnchor::Installation {},
+                usage: None,
+                intervals: vec![],
+            },
+            provider: TextProvider {
+                provider: ObjectView::Current {
+                    object: Box::new(ObjectOperand::SourceHolder {}),
+                },
+                face: super::card::printed_origin(&instruction.source.origin)?
+                    .0
+                    .clone(),
+                ability: AbilityId(
+                    execution
+                        .ability
+                        .ok_or_else(|| invalid("Drive gain source"))?
+                        .definition
+                        .0,
+                ),
+            },
+        };
+        self.internal_grant(execution, &grant)?;
+        self.state
+            .ir_drive_gained
+            .insert(holder.clone(), reference.generation.0);
+        let event = DriveGainedEvent {
+            subject: reference,
+            controller,
+            first_gain: Bool(true),
+        };
+        execution.facts.push(Fact::DriveGained(event));
+        self.internal_drive_gained_event(&holder, event, execution)?;
+        Ok(())
+    }
+}

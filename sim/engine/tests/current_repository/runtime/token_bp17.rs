@@ -74,7 +74,7 @@ fn finish(game: &mut Game, mut play: CardPlay, choose_ward: bool) {
             | InputDomain::Distribution(_)
             | InputDomain::SearchReplacement
             | InputDomain::Targets(_)
-            | InputDomain::MealPayment { .. }
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Modes { .. } => {
                 panic!("only name capacity and Ward posture can interrupt the creation")
             }

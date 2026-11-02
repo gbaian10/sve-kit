@@ -884,7 +884,11 @@ impl Game {
             .as_deref()
             .into_iter()
             .flat_map(|(_, payment)| payment.play.parameters.clone())
-            .chain(play.parameters)
+            .chain(if meal.is_some() {
+                vec![]
+            } else {
+                play.parameters
+            })
             .collect();
         execution.play = Some(PlayState {
             qualification: ability.qualification,

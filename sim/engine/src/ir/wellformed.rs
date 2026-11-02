@@ -686,6 +686,17 @@ impl Checker {
                 self.player(player)?;
                 self.integer(amount)
             }
+            Action::RideDrive {
+                subject, operation, ..
+            } => {
+                self.object(subject)?;
+                match operation {
+                    super::RideDriveOperation::AttachDrivePoint { resource } => {
+                        self.object(resource)
+                    }
+                    super::RideDriveOperation::GainDrive {} => Ok(()),
+                }
+            }
             Action::MealRace {
                 subject,
                 amount,

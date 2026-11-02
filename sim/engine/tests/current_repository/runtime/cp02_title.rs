@@ -48,7 +48,7 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                     .collect(),
             ),
             InputDomain::TokenCapacity { .. }
-            | InputDomain::MealPayment { .. }
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::DriveTrigger { .. }
             | InputDomain::Quick { .. }
             | InputDomain::OptionalCost

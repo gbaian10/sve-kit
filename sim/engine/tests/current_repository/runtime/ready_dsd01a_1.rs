@@ -94,7 +94,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
             }
             InputDomain::Modes { .. }
             | InputDomain::Search(_)
-            | InputDomain::MealPayment { .. }
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

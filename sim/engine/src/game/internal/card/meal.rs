@@ -1,14 +1,15 @@
-//! Meal payment uses the same proper-play transaction and evolution-equivalent quota.
+//! Meal and Ride use the same resource payment transaction and evolution-equivalent quota.
 use super::super::{DistributionMember, Execution, Fact, InputDomain, InstructionOutcome, Wait};
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Int, KeywordId, Located, Nat, Node,
     Result, invalid, seat_name, unsupported,
 };
 use crate::game::{int, list};
+use crate::ir::ride;
 use crate::ir::{
     AbilityKind, AssociationId, Cardinality, DecisionId, Instruction, InstructionContext,
     MealRaceOperation, ObjectOperand, ObjectRef, PlayerRef, Quantity, QuantityUnit, RaceEvent,
-    Resource, ResourceOperation,
+    Resource, ResourceOperation, ScopeId,
 };
 use alloc::collections::BTreeSet;
 use serde_json::json;
@@ -19,7 +20,7 @@ pub(super) const fn intrinsic(ability: &Ability) -> bool {
     matches!(
         ability.source.origin,
         AbilityOrigin::Keyword {
-            keyword: KeywordId::Meal,
+            keyword: KeywordId::Meal | KeywordId::Ride,
             ..
         }
     )
@@ -27,6 +28,8 @@ pub(super) const fn intrinsic(ability: &Ability) -> bool {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MealState {
+    ride: bool,
+    scope: ScopeId,
     count: u64,
     pp: i64,
     pub(in crate::game::internal) selected: Option<MealSelection>,
@@ -86,14 +89,32 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
     let [meal, pp] = steps.as_slice() else {
         return Err(unsupported("meal payment projection"));
     };
-    let Action::MealRace {
-        subject: ObjectOperand::SourceHolder {},
-        operation: MealRaceOperation::Meal,
-        amount: Expr::Literal(Nat(count)),
-        resource_links,
-    } = &meal.instruction.action
-    else {
-        return Err(unsupported("meal resource projection"));
+    let ride = matches!(
+        ability.source.origin,
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Ride,
+            ..
+        }
+    );
+    let count = if ride {
+        if meal.instruction.action != ride::attachment(ability.scope) {
+            return Err(unsupported("ride resource projection"));
+        }
+        1
+    } else {
+        let Action::MealRace {
+            subject: ObjectOperand::SourceHolder {},
+            operation: MealRaceOperation::Meal,
+            amount: Expr::Literal(Nat(count)),
+            resource_links,
+        } = &meal.instruction.action
+        else {
+            return Err(unsupported("meal resource projection"));
+        };
+        if !resource_links.is_empty() {
+            return Err(unsupported("explicit meal links"));
+        }
+        *count
     };
     let Action::Resource {
         player: PlayerRef::Controller {},
@@ -104,11 +125,13 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
     else {
         return Err(unsupported("meal PP projection"));
     };
-    if !resource_links.is_empty() || *count == 0 || *count > MAX_RACES || pp < 0 {
+    if count == 0 || count > MAX_RACES || pp < 0 {
         return Err(unsupported("meal amount or explicit links"));
     }
     Ok(Some(MealState {
-        count: *count,
+        ride,
+        scope: ability.scope,
+        count,
         pp,
         selected: None,
     }))
@@ -126,7 +149,11 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     };
     if ability.kind != AbilityKind::Activated
         || ability.trigger.is_some()
-        || !play.parameters.is_empty()
+        || (if state.ride {
+            play.parameters != [ride::parameter(ability.scope)]
+        } else {
+            !play.parameters.is_empty()
+        })
         || !play.captures.is_empty()
         || play.limit.is_some()
         || steps.iter().any(|step| {
@@ -155,11 +182,15 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         || instruction.context != InstructionContext::Effect
         || step.source != located.source
         || instruction.action
-            != (Action::MealRace {
-                subject: ObjectOperand::SourceHolder {},
-                operation: MealRaceOperation::Race,
-                amount: Expr::Literal(Nat(state.count)),
-                resource_links: vec![],
+            != (if state.ride {
+                ride::gain_drive()
+            } else {
+                Action::MealRace {
+                    subject: ObjectOperand::SourceHolder {},
+                    operation: MealRaceOperation::Race,
+                    amount: Expr::Literal(Nat(state.count)),
+                    resource_links: vec![],
+                }
             })
     {
         return Err(unsupported("meal race projection"));
@@ -172,39 +203,56 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     reason = "Meal shares proper-play payment, movement and rollback authority."
 )]
 impl Game {
-    pub(in crate::game) fn internal_meal_links_valid(&self, holder: &str) -> Result<bool> {
+    pub(in crate::game) fn internal_resource_links_valid(&self, holder: &str) -> Result<bool> {
         let source = self.object(holder)?;
-        let links = list(&source.state["links"]["出走"]);
-        for linked in &links {
-            let resource = linked
-                .as_str()
-                .ok_or_else(|| invalid("invalid meal link"))?;
-            let object = self.object(resource)?;
-            let (Some(source_id), Some(resource_id)) = (
-                self.state.ir_objects.get(holder),
-                self.state.ir_objects.get(resource),
-            ) else {
-                return Ok(false);
-            };
-            if source.zone != "field"
-                || object.zone != "race"
-                || !self.card_runtime.links.contains_key(&(
-                    *source_id,
-                    source.generation,
-                    *resource_id,
-                    object.generation,
-                ))
-            {
-                return Ok(false);
+        for (kind, zone) in [("出走", "race"), ("憑依", "drive")] {
+            let links = list(&source.state["links"][kind]);
+            for linked in &links {
+                let resource = linked
+                    .as_str()
+                    .ok_or_else(|| invalid("invalid meal link"))?;
+                let object = self.object(resource)?;
+                let (Some(source_id), Some(resource_id)) = (
+                    self.state.ir_objects.get(holder),
+                    self.state.ir_objects.get(resource),
+                ) else {
+                    return Ok(false);
+                };
+                if source.zone != "field"
+                    || object.zone != zone
+                    || !self.card_runtime.links.contains_key(&(
+                        *source_id,
+                        source.generation,
+                        *resource_id,
+                        object.generation,
+                    ))
+                {
+                    return Ok(false);
+                }
             }
         }
         Ok(true)
     }
 
-    pub(super) fn check_meal_available(&self, holder: &str) -> Result<()> {
+    pub(super) fn check_meal_available(&self, holder: &str, ability: &Ability) -> Result<()> {
+        let ride = matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Ride,
+                ..
+            }
+        );
+        self.check_resource_entry_available(holder, ride)
+    }
+
+    fn check_resource_entry_available(&self, holder: &str, ride: bool) -> Result<()> {
         let object = self.object(holder)?;
         if object.zone != "field"
-            || !list(&object.state["links"]["出走"]).is_empty()
+            || (if ride {
+                object.state["ride_used"] == true
+            } else {
+                !list(&object.state["links"]["出走"]).is_empty()
+            })
             || self
                 .state
                 .counters
@@ -220,18 +268,18 @@ impl Game {
         Ok(())
     }
 
-    fn meal_candidates(&self, execution: &Execution) -> Result<Vec<ObjectRef>> {
+    fn meal_candidates(&self, execution: &Execution, ride: bool) -> Result<Vec<ObjectRef>> {
         let mut members = Vec::new();
         // Missing rule bindings must fail even when the evolve deck is empty.
         self.catalog
             .rule_bindings
-            .matches_resource("meal_item", &[])?;
+            .matches_resource(if ride { "drive_point" } else { "meal_item" }, &[])?;
         for id in self.zone_ids(seat_name(execution.context.controller)?, "evolve_deck") {
             if self.object(&id)?.state["face_up"] != true
-                && self
-                    .catalog
-                    .rule_bindings
-                    .matches_resource("meal_item", &self.card_names(&id)?)?
+                && self.catalog.rule_bindings.matches_resource(
+                    if ride { "drive_point" } else { "meal_item" },
+                    &self.card_names(&id)?,
+                )?
             {
                 members.push(execution.reference(self, &id)?);
             }
@@ -250,8 +298,8 @@ impl Game {
         if meal.selected.is_some() {
             return Ok(false);
         }
-        self.check_meal_available(&execution.context.source)?;
-        let members = self.meal_candidates(execution)?;
+        self.check_resource_entry_available(&execution.context.source, meal.ride)?;
+        let members = self.meal_candidates(execution, meal.ride)?;
         let count = usize::try_from(meal.count).map_err(invalid)?;
         let player = self.player(seat_name(execution.context.controller)?)?;
         let ep_allowed = player.ep > 0 && meal.pp > 0;
@@ -279,7 +327,7 @@ impl Game {
             execution,
             DecisionId(0),
             execution.context.controller,
-            InputDomain::MealPayment {
+            InputDomain::ResourceEntryPayment {
                 materials: super::TargetDomain {
                     distinct_names: false,
                     members: public,
@@ -290,7 +338,7 @@ impl Game {
                 },
                 ep_allowed,
             },
-            Wait::MealPayment(MealWait {
+            Wait::ResourceEntryPayment(MealWait {
                 members,
                 count,
                 ep_allowed,
@@ -299,6 +347,10 @@ impl Game {
         Ok(true)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The transaction keeps resource movement, associations and payment receipts atomic."
+    )]
     pub(super) fn internal_meal_payment(
         &mut self,
         execution: &mut Execution,
@@ -312,8 +364,17 @@ impl Game {
             .selected
             .as_ref()
             .ok_or_else(|| invalid("missing meal selection"))?;
-        self.check_meal_available(&execution.context.source)?;
-        let candidates = self.meal_candidates(execution)?;
+        self.check_resource_entry_available(&execution.context.source, meal.ride)?;
+        if meal.ride {
+            execution.slots.insert(
+                (meal.scope, 0),
+                super::super::Slot::Objects {
+                    members: chosen.resources.clone(),
+                    on_field_at_capture: false,
+                },
+            );
+        }
+        let candidates = self.meal_candidates(execution, meal.ride)?;
         let seat = seat_name(execution.context.controller)?;
         if chosen
             .resources
@@ -336,8 +397,18 @@ impl Game {
             .iter()
             .map(|resource| execution.object_id(*resource).map(str::to_owned))
             .collect::<Result<Vec<_>>>()?;
-        self.move_objects(&ids, "race", None, None, &execution.frame())?;
-        self.object_mut(&execution.context.source)?.state["links"]["出走"] = json!(ids);
+        self.move_objects(
+            &ids,
+            if meal.ride { "drive" } else { "race" },
+            None,
+            None,
+            &execution.frame(),
+        )?;
+        self.object_mut(&execution.context.source)?.state["links"]
+            [if meal.ride { "憑依" } else { "出走" }] = json!(ids);
+        if meal.ride {
+            self.object_mut(&execution.context.source)?.state["ride_used"] = json!(true);
+        }
         let source = self.internal_current_reference(&execution.context.source)?;
         for resource in &ids {
             let resource = self.internal_current_reference(resource)?;
@@ -362,7 +433,10 @@ impl Game {
             return Err(invalid("missing meal steps"));
         };
         for step in steps {
-            let resources = matches!(step.instruction.action, Action::MealRace { .. });
+            let resources = matches!(
+                step.instruction.action,
+                Action::MealRace { .. } | Action::RideDrive { .. }
+            );
             execution.receipts.insert(
                 step.instruction.receipt,
                 InstructionOutcome::Payment {
