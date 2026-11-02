@@ -1,0 +1,45 @@
+cards:
+  BP09-042:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  name: オニオン軍団
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: placed
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
