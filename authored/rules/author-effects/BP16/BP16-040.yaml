@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - damage:
+                to:
+                  leader: opp
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 宴楽
+                    other: true
+      - line: 3
+        fanfare:
+          do:
+            - draw:
+                who: self
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 宴楽
+                    other: true

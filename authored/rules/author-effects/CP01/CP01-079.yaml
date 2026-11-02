@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP01-079:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        kind: follower
+                        other: true
+                    op: eq
+                    right: 0
+                then:
+                  - destroy:
+                      ref: victim
+                  - damage:
+                      to:
+                        leader: opp
+                      n: 3

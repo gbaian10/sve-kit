@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-116:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 4
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 八獄
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: hand
+                result: picked_move
+            - reveal:
+                ref: picked
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: picked_move
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      turn_number:
+                        who: self
+                    op: ge
+                    right: 8
+                then:
+                  - draw:
+                      who: self
+                      n: 1
