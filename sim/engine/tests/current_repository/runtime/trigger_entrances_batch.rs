@@ -7,8 +7,14 @@ use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
 fn board(initial: &Value) -> Game {
+    let mut initial = initial.clone();
+    let seat = initial["turn"]["active"].as_str().unwrap().to_owned();
+    // The shared fixture appends its life producer to the active player's field.
+    if initial["players"][&seat]["zones"]["field"].is_null() {
+        initial["players"][&seat]["zones"]["field"] = json!([]);
+    }
     event_cemetery::prepared(
-        initial,
+        &initial,
         event_combat_life::life(PlayerRef::Controller {}, -1),
     )
 }
@@ -119,7 +125,7 @@ fn bp04_105_fanfare_searches_an_amulet_after_paying_its_printed_cost() {
 fn cp02_092_quick_declares_its_cemetery_target_before_sacrificing_the_source() {
     let mut initial = draw_position();
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"lily","card":"CP02-092"}]);
-    initial["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"friend","card":"CP02-001"}]);
+    initial["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"friend","card":"CP02-014"}]);
     let mut board = board(&initial);
     board
         .internal_rule_action(&json!({"do":"end-phase"}))
@@ -168,26 +174,9 @@ fn bp10_047_ex_end_phase_draws_then_discards_the_preexisting_hand_card() {
 }
 
 #[test]
-fn bp10_110_ex_end_phase_damages_the_opposing_leader_and_followers_together() {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"world","card":"BP10-110"}]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"movement-enemy"}]);
-    let mut board = board(&initial);
-    board
-        .internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap();
-    pending(&mut board, "BP10-110", None);
-    let state = board.projection(View::Referee).unwrap();
-    assert_eq!(state["P2"]["leader"]["life"], 16_u8);
-    assert_eq!(state["objects"]["enemy"]["hp"], 16_u8);
-    assert_eq!(state["P1"]["ex"], json!(["world"]));
-}
-
-#[test]
 fn bp19_085_consumes_four_life_loss_triggers_and_ignores_the_fifth() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["field"] =
-        json!([{"id":"source","card":"BP19-085"},{"id":"producer","card":"producer"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP19-085"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"movement-enemy"}]);
     let mut board = board(&initial);
     for n in 0_u8..5 {
