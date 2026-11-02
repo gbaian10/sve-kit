@@ -199,7 +199,7 @@ impl BodyContext<'_> {
                 }
             }
             ast::Condition::History(history) => return self.history_condition(history, path),
-            ast::Condition::EnteredFrom(condition) => self.entered_from(condition, path)?,
+            ast::Condition::EnteredFrom(condition) => return self.entered_from(condition, path),
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
@@ -323,25 +323,45 @@ impl BodyContext<'_> {
         })))
     }
 
-    fn entered_from(
+    pub(super) fn entered_from(
         &self,
         condition: &ast::EntryOriginCondition,
         path: &str,
-    ) -> Result<Predicate, LoweringError> {
-        Ok(Predicate::Equal {
-            operands: Box::new(super::super::ValueEquality::EntryOrigin {
-                left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
-                    event: self.entry_event.ok_or_else(|| unsupported(path))?,
-                })),
-                right: Expr::Literal(super::super::EntryOrigin::Zone {
-                    zone: match condition.zone {
-                        ast::EntryOriginZone::Hand => ZoneKind::Hand,
-                        ast::EntryOriginZone::Deck => ZoneKind::Deck,
-                        ast::EntryOriginZone::Cemetery => ZoneKind::Cemetery,
-                    },
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let zone = match condition.zone {
+            ast::EntryOriginZone::Hand => ZoneKind::Hand,
+            ast::EntryOriginZone::Deck => ZoneKind::Deck,
+            ast::EntryOriginZone::Cemetery => ZoneKind::Cemetery,
+        };
+        let event = match condition.reference {
+            ast::EntryOriginReference::This => self.entry_event,
+            ast::EntryOriginReference::It => match self.subject_event {
+                Some(super::super::events::subject::SubjectFields::Entry(event)) => Some(event),
+                _ => return Err(unsupported(path)),
+            },
+        };
+        if let Some(event) = event {
+            return Ok(Expr::Compute(Box::new(Predicate::Equal {
+                operands: Box::new(super::super::ValueEquality::EntryOrigin {
+                    left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
+                        event,
+                    })),
+                    right: Expr::Literal(super::super::EntryOrigin::Zone { zone }),
                 }),
-            }),
-        })
+            })));
+        }
+        if self.evolution.is_none()
+            || zone != ZoneKind::Cemetery
+            || !matches!(condition.reference, ast::EntryOriginReference::This)
+        {
+            return Err(unsupported(path));
+        }
+        Ok(Expr::Live(Box::new(
+            super::super::BoolRead::FieldEntryOrigin {
+                object: super::super::ObjectOperand::SourceHolder {},
+                zone,
+            },
+        )))
     }
 
     fn entered_by(

@@ -868,6 +868,8 @@ fn supported(code: &str) -> bool {
             | "read.crimson"
             | "shape.BoolRead.CardPlayOrigin"
             | "read.card-play-origin"
+            | "shape.BoolRead.FieldEntryOrigin"
+            | "read.field-entry-origin"
             | "shape.NatRead.Combo"
             | "read.combo"
             | "shape.NatRead.HistoryCount"

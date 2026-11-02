@@ -913,6 +913,18 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
+            BoolRead::FieldEntryOrigin {
+                object: ObjectOperand::SourceHolder {},
+                zone: ZoneKind::Cemetery,
+            } => {
+                let reference = self.object(game, &ObjectOperand::SourceHolder {})?;
+                let current = game.object(self.object_id(reference)?)?;
+                Ok(Bool(
+                    current.zone == "field"
+                        && current.generation == reference.generation.0
+                        && current.state["entered_from"].as_str() == Some("cemetery"),
+                ))
+            }
             BoolRead::CardPlayOrigin {
                 zone,
                 execution: ExecutionRef::Current {},

@@ -8,9 +8,9 @@ use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::subject_plan;
 use crate::ir::prevention;
 use crate::ir::{
-    Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
-    Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation, Located,
-    LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat, NatRead, Node,
+    Action, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain,
+    Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation,
+    Located, LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat, NatRead, Node,
     ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
     PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
     Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
@@ -110,7 +110,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             mode: StepwiseMode::Exact,
         };
     }
-    mask_entry_origin(&mut inspected);
+    mask_entry_origin(&mut inspected)?;
     mask_public_selectors(&mut inspected)?;
     super::tokens::mask_count(&mut inspected);
     mask_granted_definitions(&mut inspected);
@@ -836,11 +836,37 @@ fn mask_discard(inspected: &mut Node) -> Result<()> {
     Ok(())
 }
 
-fn mask_entry_origin(inspected: &mut Node) {
+fn mask_entry_origin(inspected: &mut Node) -> Result<()> {
     if let Node::Capture {
         capture: Capture::Boolean { value, .. },
     } = inspected
     {
         super::card::triggers::event_operand::mask_condition(value, None);
+        mask_field_entry(value)?;
     }
+    Ok(())
+}
+
+fn mask_field_entry(value: &mut Expr<Bool>) -> Result<()> {
+    match value {
+        Expr::Live(read) => {
+            if let BoolRead::FieldEntryOrigin { object, zone } = read.as_ref() {
+                if *object != (ObjectOperand::SourceHolder {}) || *zone != ZoneKind::Cemetery {
+                    return Err(unsupported("holder field entry origin"));
+                }
+                *value = Expr::Literal(Bool(false));
+            }
+        }
+        Expr::Compute(predicate) => match predicate.as_mut() {
+            Predicate::Not { predicate } => mask_field_entry(predicate)?,
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                for child in predicates {
+                    mask_field_entry(child)?;
+                }
+            }
+            _ => {}
+        },
+        _ => {}
+    }
+    Ok(())
 }

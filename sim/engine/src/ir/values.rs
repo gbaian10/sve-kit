@@ -516,6 +516,7 @@ tags!(SpellCountTime {
     AtPlay
 });
 variants!(BoolRead {
+    FieldEntryOrigin { object: ObjectOperand, zone: ZoneKind } => ["read.field-entry-origin"],
     CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],

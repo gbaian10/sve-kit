@@ -211,6 +211,7 @@ impl Checker {
                     ..
                 } => Ok(()),
                 BoolRead::State { object, .. } => self.view(object),
+                BoolRead::FieldEntryOrigin { object, .. } => self.object(object),
                 BoolRead::HistoryExists { query } => self.history(query),
                 BoolRead::CardPlayOrigin { .. } | BoolRead::LegalAttack { .. } => self.reject(),
             },
