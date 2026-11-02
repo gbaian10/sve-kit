@@ -1,0 +1,40 @@
+cards:
+  BP09-028:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+                on:
+                  kind: follower
+                  name: 白の王・イメラ
+                  who: self
+                  zone: field
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                on: allies
+                power: 1
+          targets:
+            - bind: allies
+              from:
+                class: ロイヤル
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

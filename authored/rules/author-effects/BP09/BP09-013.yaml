@@ -1,0 +1,24 @@
+cards:
+  BP09-013:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  class: エルフ
+                  kind: spell
+                  orig_cost_le: 1
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,39 @@
+cards:
+  BP09-057:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          on:
+            played:
+              during:
+                turn: self
+              sel:
+                class: ドラゴン
+                kind: spell
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - pp:
+                      delta: 2
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
