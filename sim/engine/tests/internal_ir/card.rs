@@ -611,6 +611,8 @@ fn silenced_or_nonfield_card_holder_is_not_activated() {
 
 #[path = "card/deck_top.rs"]
 mod deck_top;
+#[path = "card/life_holder.rs"]
+mod life_holder;
 
 #[path = "card/hand_discard.rs"]
 mod hand_discard;

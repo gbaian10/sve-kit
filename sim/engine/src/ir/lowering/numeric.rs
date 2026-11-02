@@ -102,6 +102,36 @@ fn combined(
 }
 
 impl BodyContext<'_> {
+    /// 「それのリーダー」 follows the chosen object's controller, captured when it was chosen.
+    pub(super) fn life(&mut self, life: &ast::Life, path: &str) -> Result<Action, LoweringError> {
+        let player = match &life.who {
+            ast::LifeHolder::Controller(ast::SelfPlayer::Controller) => PlayerRef::Controller {},
+            ast::LifeHolder::MasterOf { master_of } => {
+                self.selected_player(master_of, super::super::Role::Controller, path)?
+            }
+        };
+        Ok(Action::Life {
+            player,
+            change: NumericChange::Add {
+                amount: self.number(&life.delta, path, &mut BTreeSet::new())?,
+            },
+        })
+    }
+
+    pub(super) fn set_life(
+        &mut self,
+        life: &ast::SetLife,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let ast::SelfPlayer::Controller = life.who;
+        Ok(Action::Life {
+            player: PlayerRef::Controller {},
+            change: NumericChange::Set {
+                amount: self.number(&life.n, path, &mut BTreeSet::new())?,
+            },
+        })
+    }
+
     pub(super) fn objects(
         &mut self,
         value: &ast::Objects,
