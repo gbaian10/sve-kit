@@ -1,0 +1,25 @@
+cards:
+  CSD02b-008:
+    abilities:
+      - evolve_time:
+          cost:
+            pp: 3
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                leader: opp
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
