@@ -994,6 +994,23 @@ enum CounterReadView {
     SourceInformation,
 }
 
+/// Free field slots are read when a multi-card Look pick is asked, so it may enter the field
+/// only as the very next step of the same body.
+#[derive(Default)]
+struct FieldEntryGuard {
+    multi: BTreeSet<String>,
+    /// Binding of the choose step directly before the step being lowered.
+    adjacent: Option<String>,
+}
+
+fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
+    if let Some(ast::Step::Choose(choice)) = index.checked_sub(1).and_then(|i| steps.get(i)) {
+        Some(choice.bind.clone())
+    } else {
+        None
+    }
+}
+
 struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
@@ -1017,6 +1034,7 @@ struct BodyContext<'definitions> {
     observations: BTreeMap<String, super::ObjectReceipt>,
     single_discards: BTreeSet<ReceiptId>,
     observed_targets: BTreeSet<String>,
+    field_entry: FieldEntryGuard,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
@@ -1059,6 +1077,7 @@ impl<'definitions> BodyContext<'definitions> {
             observations: BTreeMap::new(),
             single_discards: BTreeSet::new(),
             observed_targets: BTreeSet::new(),
+            field_entry: FieldEntryGuard::default(),
             targets: BTreeMap::new(),
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
@@ -1199,6 +1218,7 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            self.field_entry.adjacent = choice_before(author_steps, index);
             if let ast::Step::Counter(value) = step
                 && !matches!(value.on, ast::Objects::This(_))
             {

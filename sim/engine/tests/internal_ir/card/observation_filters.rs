@@ -666,3 +666,431 @@ fn no_expiry_play_discount_is_bound_to_the_successful_ex_generation() {
         }
     }
 }
+
+#[test]
+fn observed_unions_need_two_filtered_branches_of_the_same_look() {
+    lowerer()
+        .lower(&observed(&json!({"any_of":[
+            {"in":"seen","kind":"spell"},
+            {"in":"seen","kind":"follower","trait":"妖精"}
+        ]})))
+        .unwrap();
+    for from in [
+        json!({"any_of":[{"in":"seen","kind":"spell"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"seen"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"other","kind":"amulet"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"who":"self","zone":"field","kind":"follower"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"seen","other":true}]}),
+    ] {
+        assert!(
+            lowerer().lower(&observed(&from)).is_err(),
+            "a union cannot widen to the whole Look, another receipt or a public zone"
+        );
+    }
+    let mut grouped = observed(&json!({"any_of":[
+        {"in":"seen","kind":"spell"},{"in":"seen","kind":"amulet"}
+    ]}));
+    let choice =
+        &mut grouped["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["choose"];
+    choice.as_object_mut().unwrap().remove("n");
+    choice["upto"] = json!(2_u8);
+    choice["may"] = json!(true);
+    choice["groups"] = json!([{"kind":"spell"},{"kind":"amulet"}]);
+    assert!(
+        lowerer().lower(&grouped).is_err(),
+        "per-group limits apply to one Look query, not to a union"
+    );
+}
+
+#[test]
+fn overlapping_observed_union_branches_keep_each_card_once() {
+    let programs = lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"any_of":[
+                {"in":"seen","kind":"follower"},
+                {"in":"seen","class":"ニュートラル"}
+            ]},"upto":2}},
+            {"move":{"ref":"picked","to":"cemetery"}}
+        ])))
+        .unwrap();
+    let mut game = split_game(&programs["unit-follower"]);
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("observed union")
+    };
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("union targets")
+    };
+    assert_eq!(
+        domain.members.len(),
+        2,
+        "two observed cards each match both branches"
+    );
+    assert!(
+        game.internal_decision(View::P2).is_none(),
+        "the opponent gets no private choice"
+    );
+    let handles = domain.members.iter().map(|member| member.handle).collect();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+            .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["deck"], json!(["three", "tail"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["s", "one", "two"]));
+}
+
+fn crowded_look(choose: &Value, destination: &str, deck: Value) -> (Game, Option<DecisionView>) {
+    let mut document = tree(&json!([
+        {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+        {"choose":choose},
+        {"move":{"ref":"picked","to":destination,"result":"moved"}}
+    ]));
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"] = json!({"pp":0});
+    let programs = lowerer().lower(&document).unwrap();
+    let mut initial = setup(1, deck);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!(
+        ["s", "f1", "f2", "f3"]
+            .iter()
+            .map(|id| json!({"id":id,"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "crowded-look",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let play = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let question = match play {
+        CardPlay::Awaiting(q) => Some(q),
+        CardPlay::Resolved(_)
+        | CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_) => None,
+    };
+    (game, question)
+}
+
+#[test]
+fn grouped_look_to_hand_ignores_field_capacity() {
+    let (mut game, q) = crowded_look(
+        &json!({
+            "bind":"picked","from":{"in":"seen"},"groups":[
+                {"kind":"follower","class":"ニュートラル"},
+                {"kind":"spell","class":"ニュートラル"}
+            ],"upto":2,"may":true
+        }),
+        "hand",
+        json!([{"id":"one","card":"unit-follower"},{"id":"two","card":"unit-spell"}]),
+    );
+    let q = q.unwrap();
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("grouped hand targets")
+    };
+    assert_eq!(
+        domain.cardinality.maximum,
+        Some(Nat(2)),
+        "taking cards into hand needs no field slots"
+    );
+    let handles = domain.members.iter().map(|member| member.handle).collect();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+            .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["one", "two"])
+    );
+}
+
+#[test]
+fn union_look_to_field_offers_only_the_free_field_slot() {
+    let (mut game, q) = crowded_look(
+        &json!({
+            "bind":"picked","from":{"any_of":[
+                {"in":"seen","kind":"follower"},
+                {"in":"seen","class":"ニュートラル"}
+            ]},"upto":2,"may":true
+        }),
+        "field",
+        json!([{"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}]),
+    );
+    let q = q.unwrap();
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("union field targets")
+    };
+    assert_eq!(
+        domain.cardinality.maximum,
+        Some(Nat(1)),
+        "only one of two chosen cards fits the field"
+    );
+    resolved(
+        game.answer_internal_card(
+            q.actor,
+            q.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(view["P1"]["deck"], json!(["two"]));
+}
+
+fn flow_look(steps: &Value, field_count: usize) -> (Game, DecisionView) {
+    let mut document = tree(steps);
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"] = json!({"pp":0});
+    let programs = lowerer().lower(&document).unwrap();
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}
+        ]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!(
+        (0..field_count).map(|i| json!({"id":if i == 0 { "s".to_owned() } else { format!("f{i}") },"card":"unit-follower"})).collect::<Vec<_>>()
+    );
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "look-flow").unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    let play = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let q = awaiting_any(play).unwrap();
+    (game, q)
+}
+
+fn awaiting_any(play: CardPlay) -> Option<DecisionView> {
+    match play {
+        CardPlay::Awaiting(q) => Some(q),
+        CardPlay::Resolved(_)
+        | CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_) => None,
+    }
+}
+
+fn union_choice() -> Value {
+    json!({"choose":{"bind":"picked","from":{"any_of":[
+        {"in":"seen","kind":"follower"},{"in":"seen","class":"ニュートラル"}
+    ]},"upto":2,"may":true}})
+}
+
+/// Answers with as many cards as the question offers; a legal answer must never abort.
+fn offered_answer(game: &mut Game, q: &DecisionView) -> CardPlay {
+    let handles = if let InputDomain::Targets(domain) = &q.domain {
+        let limit = usize::try_from(domain.cardinality.maximum.unwrap().0).unwrap();
+        domain
+            .members
+            .iter()
+            .take(limit)
+            .map(|member| member.handle)
+            .collect()
+    } else {
+        Vec::new()
+    };
+    game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+        .unwrap()
+}
+
+#[test]
+fn choice_inside_expanded_if_keeps_field_limit() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
+                {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+                union_choice(),
+                {"move":{"ref":"picked","to":"field","result":"moved"}}
+            ]}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .len(),
+        5
+    );
+}
+
+#[test]
+fn field_move_of_another_binding_does_not_cap_hand_pick() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            union_choice(),
+            {"move":{"ref":"picked","to":"hand","result":"taken"}},
+            {"look":{"top":{"who":"self","n":1},"bind":"fresh"}},
+            {"choose":{"bind":"later","from":{"in":"fresh"},"n":1}},
+            {"move":{"ref":"later","to":"field","result":"entered"}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.maximum, Some(Nat(2)));
+    let CardPlay::Awaiting(next) = game
+        .answer_internal_card(q.actor, q.token, Answer::Targets(vec![]))
+        .unwrap()
+    else {
+        panic!("later binding question")
+    };
+    resolved(offered_answer(&mut game, &next));
+}
+
+#[test]
+fn exact_multi_pick_clamps_minimum_with_maximum() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":2}},
+            {"move":{"ref":"picked","to":"field","result":"moved"}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.minimum, Nat(1));
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+}
+
+#[test]
+fn single_card_at_full_field_stays_in_deck() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":1}},
+            {"move":{"ref":"picked","to":"field","result":"moved"}}
+        ]),
+        5,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.minimum, Nat(1));
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(view["P1"]["deck"], json!(["one", "two"]));
+}
+
+#[test]
+fn multi_card_look_picks_enter_the_field_only_as_the_next_step() {
+    let grouped = json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
+        {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
+    ],"upto":2,"may":true}});
+    let look = json!({"look":{"top":{"who":"self","n":2},"bind":"seen"}});
+    let enter = json!({"move":{"ref":"picked","to":"field","result":"moved"}});
+    let later_if = json!({"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[enter]}});
+    let mixed = json!({"if":{"cond":{"cmp":{"left":1,"op":"eq","right":0}},"then":[enter],
+        "else":[{"move":{"ref":"picked","to":"hand","result":"taken"}}]}});
+    let between = json!({"draw":{"n":1}});
+    for choice in [union_choice(), grouped] {
+        lowerer()
+            .lower(&tree(&json!([look, choice, enter])))
+            .unwrap();
+        for steps in [
+            json!([look, choice, later_if]),
+            json!([look, choice, mixed]),
+            json!([look, choice, between, enter]),
+        ] {
+            assert!(
+                lowerer().lower(&tree(&steps)).is_err(),
+                "free field slots read at the question could change before a later entry"
+            );
+        }
+    }
+}
+
+#[test]
+fn resolution_modes_cannot_bypass_an_outer_multi_card_entry_guard() {
+    let grouped = json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
+        {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
+    ],"upto":2,"may":true}});
+    let single_group =
+        json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"upto":2}});
+    for choice in [union_choice(), grouped, single_group] {
+        assert!(
+            lowerer()
+                .lower(&tree(&json!([
+                    {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+                    choice,
+                    {"either":{"options":[
+                        [{"move":{"ref":"picked","to":"field","result":"placed"}}],
+                        [{"move":{"ref":"picked","to":"hand","result":"taken"}}]
+                    ]}}
+                ])))
+                .is_err(),
+            "an inherited multi-card pick still cannot enter from a later mode"
+        );
+    }
+}
+
+#[test]
+fn a_local_multi_card_pick_can_enter_next_inside_a_resolution_mode() {
+    lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"either":{"options":[
+                [union_choice(), {"move":{"ref":"picked","to":"field","result":"placed"}}],
+                [{"draw":{"n":0}}]
+            ]}}
+        ])))
+        .unwrap();
+}
+
+#[test]
+fn optional_local_multi_card_names_do_not_restrict_later_single_picks() {
+    lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"optional":{"do":[union_choice(), {"draw":{"n":0}}]}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":1}},
+            {"draw":{"n":0}},
+            {"move":{"ref":"picked","to":"field","result":"placed"}}
+        ])))
+        .unwrap();
+}
+
+#[test]
+fn an_intervening_entry_is_rejected_before_a_multi_card_look_entry() {
+    let mut document = tree(&json!([
+        {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+        union_choice(),
+        {"move":{"ref":"incoming","to":"field","result":"revived"}},
+        {"move":{"ref":"picked","to":"field","result":"placed"}}
+    ]));
+    let activation = &mut document["cards"]["unit-follower"]["abilities"][0]["activate"];
+    activation["cost"] = json!({"pp":0});
+    activation["targets"] = json!([
+        {"bind":"incoming","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1}
+    ]);
+    assert!(
+        lowerer().lower(&document).is_err(),
+        "field capacity cannot change between the Look choice and its entry"
+    );
+}

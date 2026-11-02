@@ -2,15 +2,16 @@ use super::super::{
     ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
     DecisionKind, Disjointness, ExecutionRef, InputMode, MemberProjection, Mode, ModeChoiceKind,
     ModeDecision, ModeDecisionKind, ModeId, NatFrozen, NatOperation, ObjectProperty, ObjectReceipt,
-    PlaySlot, PlaySpec, Predicate, Resource, SelectionConstraint, SelectionGroup,
+    ObjectRef, PlaySlot, PlaySpec, Predicate, Resource, SelectionConstraint, SelectionGroup,
     SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
-    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext,
+    AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext, Bool,
     Cardinality, DamageAmount, DamageFlags, Expr, Int, Located, LoweringError, Nat, Node,
     ObjectView, PlayerRef, PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector,
     SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use core::slice;
 
 const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     Decision {
@@ -175,7 +176,12 @@ impl BodyContext<'_> {
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
         if target.from.observation.is_some() {
-            return self.observed_object_choice(target, path, resolution);
+            return self.observed_object_choice(
+                target,
+                slice::from_ref(&target.from),
+                path,
+                resolution,
+            );
         }
         if target.from.not_same_name_as_this
             && (target.from.leader.is_some()
@@ -236,9 +242,11 @@ impl BodyContext<'_> {
         ))
     }
 
-    fn observed_object_choice(
+    /// Each branch filters the same Look receipt; several branches form one OR candidate set.
+    pub(super) fn observed_object_choice(
         &mut self,
         target: &ast::Target,
+        branches: &[ast::TargetQuery],
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
@@ -248,17 +256,20 @@ impl BodyContext<'_> {
             .as_ref()
             .ok_or_else(|| unsupported(path))?;
         if !resolution
-            || target.from.alias.is_some()
-            || target.from.r#where.is_some()
-            || target.from.who.is_some()
-            || target.from.zone.is_some()
-            || target.from.leader.is_some()
-            || target.from.leaders.is_some()
-            || target.from.leader_or
-            || target.from.other
-            || target.from.has_evolve.is_some()
-            || target.from.has_state_filter()
-            || target.from.hp_le.is_some()
+            || branches.iter().any(|branch| {
+                branch.observation.as_ref() != Some(observation)
+                    || branch.alias.is_some()
+                    || branch.r#where.is_some()
+                    || branch.who.is_some()
+                    || branch.zone.is_some()
+                    || branch.leader.is_some()
+                    || branch.leaders.is_some()
+                    || branch.leader_or
+                    || branch.other
+                    || branch.has_evolve.is_some()
+                    || branch.has_state_filter()
+                    || branch.hp_le.is_some()
+            })
             || target.distinct_by.is_some()
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
@@ -291,16 +302,11 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         self.observed_targets.insert(target.bind.clone());
+        if cardinality.maximum.is_none_or(|maximum| maximum.0 > 1) {
+            self.field_entry.multi.insert(target.bind.clone());
+        }
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
-        let predicate = super::selection::field_filter(
-            &super::selection::ObjectFilter::from(&target.from),
-            candidate,
-        );
-        let predicate = if target.from.not_same_name_as_this {
-            super::search::exclude_source_name(predicate, candidate)
-        } else {
-            predicate
-        };
+        let predicate = observed_predicate(branches, candidate).ok_or_else(|| unsupported(path))?;
         let selector = Selector::Filter {
             input: Box::new(Selector::ReceiptMembers {
                 receipt,
@@ -586,10 +592,8 @@ impl BodyContext<'_> {
         let resolution = shape.kind == ModeChoiceKind::ResolutionAlternative;
         let mut modes = Vec::new();
         for (index, steps) in shape.options.iter().enumerate() {
-            let mode_id = u64::try_from(index)
-                .ok()
-                .and_then(|i| i.checked_add(1))
-                .ok_or_else(|| unsupported(path))?;
+            let mode_id = index.checked_add(1).ok_or_else(|| unsupported(path))?;
+            let mode_id = u64::try_from(mode_id).map_err(|_error| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
                 subject_event: self.subject_event,
@@ -617,6 +621,7 @@ impl BodyContext<'_> {
                 observations: BTreeMap::new(),
                 single_discards: BTreeSet::new(),
                 observed_targets: BTreeSet::new(),
+                field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
@@ -633,6 +638,7 @@ impl BodyContext<'_> {
                 context.observations.clone_from(&self.observations);
                 context.single_discards.clone_from(&self.single_discards);
                 context.observed_targets.clone_from(&self.observed_targets);
+                context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);
                 context
                     .recipient_targets
@@ -991,4 +997,36 @@ fn target_cardinality(target: &ast::Target, path: &str) -> Result<Cardinality, L
         }),
         _ => Err(unsupported(path)),
     }
+}
+
+/// One branch keeps its filter; a union ORs filtered branches of the same Look.
+fn observed_predicate(
+    branches: &[ast::TargetQuery],
+    candidate: Binding<ObjectRef>,
+) -> Option<Expr<Bool>> {
+    let mut predicates = branches
+        .iter()
+        .map(|branch| {
+            let predicate = super::selection::field_filter(
+                &super::selection::ObjectFilter::from(branch),
+                candidate,
+            );
+            if branch.not_same_name_as_this {
+                super::search::exclude_source_name(predicate, candidate)
+            } else {
+                predicate
+            }
+        })
+        .collect::<Vec<_>>();
+    if predicates.len() == 1 {
+        return predicates.pop();
+    }
+    // An unfiltered branch would make the union a plain choice from the whole Look.
+    if predicates
+        .iter()
+        .any(|predicate| matches!(predicate, Expr::Literal(_)))
+    {
+        return None;
+    }
+    Some(Expr::Compute(Box::new(Predicate::Or { predicates })))
 }
