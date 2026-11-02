@@ -1,0 +1,47 @@
+cards:
+  BP20-018:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                else:
+                  - damage:
+                      n: 3
+                      to: enemy
+                then:
+                  - damage:
+                      n: 5
+                      to: enemy
+            - draw:
+                n: 1
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                trait: 獣
+                who: self
+                zone: hand
+            result: extra
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

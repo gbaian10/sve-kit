@@ -1,0 +1,32 @@
+cards:
+  CP02-050:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          optional_cost_delta: -2
+      - fanfare:
+          do:
+            - search:
+                distinct_by: name
+                sel:
+                  kind: spell
+                  who: self
+                  zone: deck
+                to: hand
+                upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
