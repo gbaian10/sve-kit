@@ -4,8 +4,9 @@ use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
 use crate::ir::{
-    AbilityKind, Action, ChoiceDomain, CostSpec, FaceId, Int, MoveMethod, MoveOutcome, ObjectRef,
-    PlayCostExchange, Posture, PostureEvent, Quantity, QuantityUnit, Selector, ZoneKind,
+    AbilityKind, Action, ChoiceDomain, CostSpec, DiscardOutcome, FaceId, Int, MoveMethod,
+    MoveOutcome, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity, QuantityUnit,
+    Selector, ZoneKind,
 };
 use crate::ir::{
     BanishOutcome, Bool, EventPattern, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId,
@@ -207,14 +208,26 @@ impl Game {
         let zone = match zone {
             ZoneKind::Field => "field",
             ZoneKind::Cemetery => "cemetery",
-            _ => return Err(unsupported("private exchange materials")),
+            ZoneKind::Hand => "hand",
+            _ => return Err(unsupported("exchange material zone")),
         };
         let mut members = Vec::new();
         for id in self.zone_ids(seat_name(execution.context.controller)?, zone) {
-            if !search::matches_candidate(self, &id, predicate)? {
+            if (zone == "hand" && id == execution.context.source)
+                || !search::matches_candidate(self, &id, predicate)?
+            {
                 continue;
             }
             let object = self.object(&id)?;
+            if zone == "hand" {
+                if object.owner != seat_name(execution.context.controller)?
+                    || object.controller != seat_name(execution.context.controller)?
+                {
+                    return Err(invalid("foreign hand exchange material"));
+                }
+                members.push(execution.reference(self, &id)?);
+                continue;
+            }
             if posture && object.state["acted"] == true {
                 continue;
             }
@@ -387,6 +400,15 @@ impl Game {
             if complete {
                 self.pay_exchange_materials(execution, exchange)?;
             }
+            if !complete && matches!(step(&exchange.definition)?.action, Action::Discard { .. }) {
+                execution.receipts.insert(
+                    step(&exchange.definition)?.receipt,
+                    InstructionOutcome::Discard(DiscardOutcome {
+                        successful: vec![],
+                        moves: vec![],
+                    }),
+                );
+            }
             execution.receipts.insert(
                 exchange.definition.receipt,
                 InstructionOutcome::ExchangePayment(PaymentResult {
@@ -422,6 +444,20 @@ impl Game {
             .ok_or_else(|| invalid("missing materials"))?;
         let instruction = step(&exchange.definition)?;
         let outcome = match &instruction.action {
+            Action::Discard { .. } => {
+                let outcome = self.internal_discard_members(execution, members)?;
+                if outcome.moves.len() != members.len()
+                    || outcome
+                        .moves
+                        .iter()
+                        .any(|movement| movement.after.is_none())
+                {
+                    return Err(crate::EngineFailure::IllegalPlay(
+                        "incomplete discard exchange".into(),
+                    ));
+                }
+                InstructionOutcome::Discard(outcome)
+            }
             Action::Posture { .. } => {
                 let ids = members
                     .iter()

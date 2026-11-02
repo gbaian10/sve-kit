@@ -392,3 +392,171 @@ fn exchange_play_does_not_assume_unloaded_cemetery_materials_have_no_abilities()
     );
     assert_eq!(game.internal_card_stage(), None);
 }
+
+fn hand_exchange(count: u64, threshold: u64) -> Value {
+    let mut tree = candidate(
+        "unit-spell",
+        json!({
+            "optional_cost":{"discard":{"sel":{"who":"self","zone":"hand"},"n":count,"result":"fuel"},"result":"exchange"},
+            "optional_cost_delta":-2_i64
+        }),
+        true,
+    );
+    tree["cards"]["unit-spell"]["abilities"][1]["spell"]["do"] = json!([
+        {"if":{"cond":{"cmp":{"left":{"count":{"in":{"objects_of":"fuel","view":"before"},"orig_cost_ge":threshold}},"op":"ge","right":1_u8}},"then":[{"draw":{"n":1_u8}}]}}
+    ]);
+    tree
+}
+
+#[test]
+fn hand_exchange_uses_discarded_printed_cost_after_payment_and_declining_has_no_members() {
+    for (accepted, threshold, draws) in [(true, 7, 1), (true, 8, 0), (false, 7, 0)] {
+        let program = lower(&hand_exchange(1, threshold), 7);
+        let mut initial = initial("unit-spell", "field", 0, 7);
+        initial["players"]["P1"]["zones"]["hand"] = json!([
+            {"id":"s","card":"unit-spell"},
+            {"id":"m","card":"unit-follower","state":{"cost":1}}
+        ]);
+        let mut game = position(&program, &initial, 7, "unit-spell");
+        let decision = start(&mut game);
+        let play = game
+            .answer_internal_card(
+                decision.actor,
+                decision.token,
+                Answer::OptionalCost(accepted),
+            )
+            .unwrap();
+        let play = if accepted {
+            let question = awaiting(play);
+            let InputDomain::CostMaterials(domain) = &question.domain else {
+                panic!("hand materials")
+            };
+            assert_eq!(
+                domain.members.len(),
+                1,
+                "the card being played cannot pay for itself"
+            );
+            assert!(game.internal_decision(View::P2).is_none());
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+                7
+            );
+            let before = exact_authority(&game);
+            for (actor, handles) in [
+                (PlayerId { seat: 2 }, vec![0]),
+                (question.actor, vec![0, 0]),
+                (question.actor, vec![99]),
+            ] {
+                game.answer_internal_card(actor, question.token, Answer::CostMaterials(handles))
+                    .unwrap_err();
+                assert_eq!(exact_authority(&game), before);
+            }
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::CostMaterials(vec![0]),
+            )
+            .unwrap()
+        } else {
+            play
+        };
+        resolved(play);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["pp"]["current"], if accepted { 2 } else { 0 });
+        assert_eq!(
+            view["P1"]["cemetery"],
+            if accepted {
+                json!(["m", "s"])
+            } else {
+                json!(["s"])
+            }
+        );
+        assert_eq!(
+            view["P1"]["deck"].as_array().unwrap().len(),
+            1_usize - draws
+        );
+    }
+}
+
+#[test]
+fn hand_exchange_cannot_pay_with_the_source_and_failed_pp_preserves_all_hand_cards() {
+    let program = lower(&hand_exchange(1, 7), 7);
+    for has_material in [true, false] {
+        let mut initial = initial("unit-spell", "field", 0, if has_material { 4 } else { 7 });
+        if has_material {
+            initial["players"]["P1"]["zones"]["hand"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":"m","card":"unit-follower"}));
+        }
+        let mut game = position(&program, &initial, 7, "unit-spell");
+        let before = game.projection(View::Referee).unwrap();
+        let decision = start(&mut game);
+        let result =
+            game.answer_internal_card(decision.actor, decision.token, Answer::OptionalCost(true));
+        if has_material {
+            let material = awaiting(result.unwrap());
+            game.answer_internal_card(
+                material.actor,
+                material.token,
+                Answer::CostMaterials(vec![0]),
+            )
+            .unwrap_err();
+        } else {
+            result.unwrap_err();
+        }
+        let view = game.projection(View::Referee).unwrap();
+        for key in ["P1", "P2", "objects"] {
+            assert_eq!(view[key], before[key]);
+        }
+    }
+}
+
+#[test]
+fn hand_exchange_rejects_variable_or_mixed_materials_and_receipt_reads_before_payment() {
+    for material in [
+        json!({"sel":{"who":"self","zone":"hand"},"upto":1}),
+        json!({"sel":{"who":"self","zone":"hand"},"n":0}),
+    ] {
+        let mut tree = hand_exchange(1, 7);
+        tree["cards"]["unit-spell"]["abilities"][0]["play"]["optional_cost"]["discard"] = material;
+        lowerer()
+            .lower_with_printed_costs(&tree, &BTreeMap::from([("unit-spell".to_owned(), Nat(7))]))
+            .unwrap_err();
+    }
+    let mut tree = hand_exchange(1, 7);
+    tree["cards"]["unit-spell"]["abilities"][0]["play"]["optional_cost"]["act"] =
+        json!({"sel":{"who":"self","zone":"field"},"n":1});
+    lowerer()
+        .lower_with_printed_costs(&tree, &BTreeMap::from([("unit-spell".to_owned(), Nat(7))]))
+        .unwrap_err();
+    let mut unsupported = hand_exchange(1, 7);
+    unsupported["cards"]["unit-spell"]["abilities"][1]["spell"]["do"] =
+        json!([{"draw":{"n":{"count_of":"fuel"}}}]);
+    lowerer()
+        .lower_with_printed_costs(
+            &unsupported,
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(7))]),
+        )
+        .unwrap_err();
+    let program = lower(&hand_exchange(1, 7), 7);
+    let mut raw = program.card().clone();
+    let Node::Control {
+        control: Control::If { condition, .. },
+    } = &raw.abilities[0].node.body.as_ref().unwrap().steps[0].node
+    else {
+        panic!("receipt condition")
+    };
+    let condition = condition.clone();
+    let span = raw.card_play_costs[0].source.clone();
+    raw.card_play_costs[0].node.modifiers.push(Located {
+        source: span,
+        node: PlayCostModifier {
+            change: CostChange::Delta {
+                amount: Expr::Literal(Int(-1)),
+            },
+            condition: Some(condition),
+        },
+    });
+    WellFormedCardProgram::check(raw).unwrap_err();
+}

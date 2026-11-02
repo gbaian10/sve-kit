@@ -881,7 +881,14 @@ impl Execution {
                     projection,
                     member,
                     predicate,
-                } => super::receipt_counts::any(self, receipt, *projection, *member, predicate)?,
+                } => super::receipt_counts::any(
+                    game,
+                    self,
+                    receipt,
+                    *projection,
+                    *member,
+                    predicate,
+                )?,
                 Predicate::Exists { objects } => !self.objects(game, objects)?.is_empty(),
                 Predicate::PlayerEquals { left, right } => {
                     self.player_value(game, left)? == self.player_value(game, right)?

@@ -252,3 +252,10 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 本文、使用前提及常在條件可用 `my_turn: true` 檢查目前是否為能力控制者的回合；回合序數沿用 `turn_number: {who: self}`，讀取實際開始的玩家回合數。本文的 `in_zone: {ref: this, zone: ex}` 在該指示結算時，以來源原世代與控制者目前 EX 的交集判斷；來源離開 EX 或移區後再回來都不符合。`in_zone` 與其他 Condition 共用語法；此 EX 來源讀值的對局與世代驗證以本文為範圍，其他入口仍須通過各自的執行准入。它不授予新的有效區；打出限制與付款來源區域仍沿各自既有語義。
 
 `auto.per_turn` 與 `activate.per_turn` 接受正安全整數 N，額度按能力實例與每個實際回合分開；觸發在進入待機時消耗，起動在付款成功且適正打出時消耗。`activate.usable_if` 與 `per_turn` 可並用，例如墓場キュート卡至少五張才可每回合起動一次；資格不符、拒付與付款失敗都不消耗起動額度。沒有上限時省略 `per_turn`，不能以零表示無限次。
+
+`play.optional_cost.discard` 支援固定張數的自己手牌，配單一常值 `optional_cost_delta` 或 `optional_cost_set` 交換減費。
+它與場上送墓／橫置、墓場消滅使用同一付款流程：先決定是否交換，再宣告效果目標，最後私下選足額手牌；原 PP 與棄牌都成功才打出。
+正在打出的卡不列為手牌材料，拒付不棄牌且支付原費用，材料或 PP 不足則整次回復。Quick、可變張數及混合材料操作仍拒絕。
+例如 ECP01-036 的 `discard: {sel: {who: self, zone: hand, trait: ウマ娘}, n: 1, result: fuel}`，
+同次普通法術本文可用 `cmp: {left: {count: {in: {objects_of: fuel, view: before}, orig_cost_ge: 7}}, op: ge, right: 1}` 判斷已棄牌的原始印刷費用；拒付時該集合為空。
+這項回條不注入之後的 Fanfare；Follower 的交換只影響打出付款，其入場能力仍使用獨立的待機與結算。

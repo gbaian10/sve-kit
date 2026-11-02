@@ -77,6 +77,7 @@ impl BodyContext<'_> {
                 class: query.class.as_deref(),
                 name: query.name.as_deref(),
                 contains: query.name_contains.as_deref(),
+                original_cost: [None, None, query.orig_cost_ge],
                 ..super::selection::ObjectFilter::default()
             },
             ObjectView::Snapshot {
