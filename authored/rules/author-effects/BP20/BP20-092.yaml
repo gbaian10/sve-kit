@@ -1,0 +1,29 @@
+cards:
+  BP20-092:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: victims
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+          do:
+            - damage:
+                n: 5
+                to: victims
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

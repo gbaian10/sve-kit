@@ -1,0 +1,38 @@
+cards:
+  BP20-062:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            damaged:
+              recipient: this
+              kind: ability
+              during:
+                turn: self
+          per_turn: 1
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        kind: follower
+                        who: all
+                        zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
