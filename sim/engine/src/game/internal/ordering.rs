@@ -78,7 +78,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         // Private selectors are admitted only on the spine evaluated with observation authority.
         let mut leaves = Vec::new();
         if let Some(cards) = cards {
-            order_leaves(cards, &mut leaves);
+            order_leaves(cards, false, &mut leaves);
         }
         for leaf in leaves {
             check_node(
@@ -488,28 +488,32 @@ fn mask_public_predicate(selector: &mut Selector) {
     }
 }
 
-fn order_leaves<'selector>(selector: &'selector Selector, leaves: &mut Vec<&'selector Selector>) {
+fn order_leaves<'selector>(
+    selector: &'selector Selector,
+    remainder: bool,
+    leaves: &mut Vec<&'selector Selector>,
+) {
     match selector {
-        // A reorder receipt only subtracts already ordered cards from the same private spine.
         Selector::ReceiptMembers {
             receipt: ObjectReceipt::Look { .. },
             ..
-        }
-        | Selector::ReceiptMembers {
+        } => {}
+        // A reorder receipt only subtracts already ordered cards from the same private spine.
+        Selector::ReceiptMembers {
             receipt:
                 ObjectReceipt::Movement {
                     receipt: MovementReceipt::Order { .. },
                 },
             projection: MemberProjection::Before,
-        } => {}
+        } if remainder => {}
         Selector::Union { sets } => {
             for set in sets {
-                order_leaves(set, leaves);
+                order_leaves(set, remainder, leaves);
             }
         }
         Selector::Difference { input, except } => {
-            order_leaves(input, leaves);
-            order_leaves(except, leaves);
+            order_leaves(input, remainder, leaves);
+            order_leaves(except, true, leaves);
         }
         _ => leaves.push(selector),
     }
@@ -693,9 +697,8 @@ impl Game {
             "deck".into(),
             deck.into_iter().map(serde_json::Value::String).collect(),
         );
-        // A private rearrangement revokes old locations even when the permutation happens to be identical.
-        // The chooser applied it and still knows the untouched observed cards ("残り"); only the
-        // reordered cards need a fresh Look before another private order or move.
+        // Even an unchanged permutation revokes locations; the chooser retains only untouched cards.
+        // Reordered cards need a fresh Look before another private order or move.
         if !ordered.is_empty() {
             for (viewer, knowledge) in &mut self.state.knowledge {
                 let revoked = if viewer == seat {

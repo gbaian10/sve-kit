@@ -512,3 +512,157 @@ fn deck_order_results_feed_only_remainders_and_top_results_only_ex() {
         );
     }
 }
+
+fn order_receipt_steps() -> Value {
+    json!([
+        {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+        {"choose":{"bind":"kept","from":{"in":"seen"},"n":1}},
+        {"move":{"ref":"kept","to":"deck","position":"top","order":"chooser","result":"placed"}},
+        {"look":{"top":{"who":"self","n":3},"bind":"fresh"}},
+        {"move":{"ref":{"in":"fresh","except":{"in":{"objects_of":"placed","view":"before"}}},
+            "to":"deck","position":"bottom","order":"chooser"}}
+    ])
+}
+
+#[test]
+fn order_receipts_cannot_supply_an_order_domain_even_after_a_fresh_look() {
+    let mut steps = order_receipt_steps();
+    steps[4]["move"]["ref"] = json!({"in":{"objects_of":"placed","view":"before"}});
+    assert!(
+        lowerer().lower(&tree(&steps)).is_err(),
+        "an Order before receipt is only an exclusion, never an Order input"
+    );
+}
+
+#[test]
+fn typed_order_receipts_are_rejected_outside_difference_exclusions() {
+    let programs = lowerer().lower(&tree(&order_receipt_steps())).unwrap();
+    for union in [false, true] {
+        let mut forged = programs["unit-follower"].card().clone();
+        let Node::Instruction { instruction } =
+            &mut forged.abilities[0].node.body.as_mut().unwrap().steps[4].node
+        else {
+            panic!("remainder order")
+        };
+        let Action::Order {
+            cards,
+            destinations,
+            ..
+        } = &mut instruction.action
+        else {
+            panic!("remainder order")
+        };
+        let Selector::Difference { input, except } = cards else {
+            panic!("remainder difference")
+        };
+        let receipt = *except.clone();
+        *cards = if union {
+            Selector::Union {
+                sets: vec![*input.clone(), receipt],
+            }
+        } else {
+            receipt
+        };
+        destinations[0].cards = cards.clone();
+        let forged = WellFormedCardProgram::check(forged).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "order-receipt",
+        )
+        .unwrap();
+        assert!(
+            game.load_internal_card("unit-follower", &forged).is_err(),
+            "typed IR cannot bypass the exclusion-only Order receipt contract"
+        );
+    }
+}
+
+#[test]
+fn no_expiry_play_discount_is_bound_to_the_successful_ex_generation() {
+    for (full, roundtrip) in [(false, false), (false, true), (true, false)] {
+        let moved = |id| MovementReceipt::Move {
+            receipt: ReceiptReference::new(ReceiptId(id)),
+        };
+        let after = |id| Selector::MoveAfter {
+            receipt: moved(id),
+            permission: FollowPermission::SameEffectExplicitReference {},
+        };
+        let mut reduction = cost::reduce(3, moved(2));
+        if let Node::Instruction { instruction } = &mut reduction.node
+            && let Action::InstallEffect {
+                duration, effect, ..
+            } = &mut instruction.action
+            && let Effect::CostModifier {
+                duration: inner, ..
+            } = effect.as_mut()
+        {
+            duration.end = DurationEnd::NoTemporalExpiry {};
+            inner.end = DurationEnd::NoTemporalExpiry {};
+        }
+        let mut steps = vec![
+            movement::put(
+                2,
+                Selector::Ordered {
+                    zone: ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Deck,
+                    },
+                    start: Position::Top {},
+                    count: Expr::Literal(Nat(1)),
+                    direction: SliceDirection::Forward,
+                },
+                OwnerZone::Ex,
+            ),
+            reduction,
+        ];
+        if roundtrip {
+            steps.extend([
+                movement::put(4, after(2), OwnerZone::Cemetery),
+                movement::put(5, after(4), OwnerZone::Ex),
+            ]);
+        }
+        let program = card(vec![ability(1, steps)]);
+        let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
+        if full {
+            initial["players"]["P1"]["zones"]["ex"] = json!(
+                (0..5)
+                    .map(|i| json!({"id":format!("e{i}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let mut game = Game::new(
+            catalog_with_cost(&json!("3")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-cost-generation",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        let result = activate(&mut game, 1);
+        assert!(matches!(
+            &result.progress.receipts[&ReceiptId(3)],
+            InstructionOutcome::Installed(subjects) if subjects.len() == usize::from(!full)
+        ));
+        if !full {
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            assert!(matches!(
+                game.play_internal_card("d", PlayerId { seat: 1 }).unwrap(),
+                CardPlay::Entered(_)
+            ));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+                if roundtrip { 0 } else { 2 },
+                "only the installed generation receives the reduction from cost 3 to 1"
+            );
+        }
+    }
+}

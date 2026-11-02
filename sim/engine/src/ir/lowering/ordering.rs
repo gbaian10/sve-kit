@@ -12,6 +12,7 @@ use core::num::NonZeroU64;
 #[derive(Clone, Copy)]
 enum ObservationUse {
     Order,
+    OrderRemainder,
     Move,
     Remainder,
 }
@@ -147,6 +148,17 @@ impl BodyContext<'_> {
             .get(name)
             .ok_or_else(|| unsupported(path))?;
         let look = matches!(receipt, ObjectReceipt::Look { .. });
+        if matches!(
+            receipt,
+            ObjectReceipt::Movement {
+                receipt: MovementReceipt::Order { .. }
+            }
+        ) && !matches!(
+            usage,
+            ObservationUse::OrderRemainder | ObservationUse::Remainder
+        ) {
+            return Err(unsupported(path));
+        }
         if !look
             && (!before
                 || matches!(usage, ObservationUse::Move)
@@ -169,8 +181,11 @@ impl BodyContext<'_> {
                 input: Box::new(input),
                 except: Box::new(self.observed(
                     except,
-                    if matches!(usage, ObservationUse::Order) {
-                        ObservationUse::Order
+                    if matches!(
+                        usage,
+                        ObservationUse::Order | ObservationUse::OrderRemainder
+                    ) {
+                        ObservationUse::OrderRemainder
                     } else {
                         ObservationUse::Remainder
                     },

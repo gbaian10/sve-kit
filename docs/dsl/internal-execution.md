@@ -343,11 +343,12 @@ Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destro
 此子集以明示合成完整 current 卡驗證 runtime，不代表 BP19-P32 等官方卡已完成作者遷移、
 關鍵字承載或整卡 executed／qualified。
 
-### 成功 After 的當回合減費片段
+### 成功 After 的物件減費片段
 
 `InstallEffect CostModifier` 只接受 InstructionStart、成功 `MoveAfter`、精確 affected binding、
-常值非正 Delta 與 CurrentTurnEnd／Installation；內外 Duration 必須相同，不接受 usage、
-intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
+常值非正 Delta 與 CurrentTurnEnd 或 NoTemporalExpiry／Installation；省略期限時使用
+NoTemporalExpiry。內外 Duration 必須相同，不接受 usage、intervals、Set 或其他期限。
+每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
 安裝 receipt 為空，不配發 EffectId，也不把 found／revealed／chosen 當安裝對象。
 修正保存該 execution、ProperPlay timestamp 與目標世代；下一次移區後不沿同實體追蹤。
 
