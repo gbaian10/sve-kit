@@ -1,0 +1,29 @@
+cards:
+  BP08-005:
+    abilities:
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  prevent:
+                    kind: any
+                on: victoria
+                until: turn
+          targets:
+            - bind: victoria
+              from:
+                kind: follower
+                name: ヴィクトリア
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

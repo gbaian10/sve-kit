@@ -1,0 +1,31 @@
+cards:
+  BP08-080:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - lastword:
+          do:
+            - move:
+                ref: ally
+                result: returned
+                to: field
+          targets:
+            - bind: ally
+              from:
+                class: ナイトメア
+                kind: follower
+                orig_cost_le: 5
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

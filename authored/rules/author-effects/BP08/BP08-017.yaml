@@ -1,0 +1,46 @@
+cards:
+  BP08-017:
+    abilities:
+      - fanfare:
+          do:
+            - buff:
+                on: enemy
+                power: -2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - move:
+                ref: hunter
+                result: returned
+                to: field
+          targets:
+            - bind: hunter
+              from:
+                kind: follower
+                orig_cost_le: 2
+                trait: 狩人
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -19,41 +19,6 @@ cards:
               side: self
               zone: ex
     status: complete
-  BP08-080:
-    abilities:
-      - body:
-          name: rush
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          op: move
-          subjects: target.1
-          to: field
-        event: field_to_cemetery
-        kind: trigger
-        line: 2
-        subject: self
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              type: follower
-              where:
-                args:
-                  - args:
-                      - read: item.class
-                      - ナイトメア
-                    fn: eq
-                  - args:
-                      - read: item.cost
-                      - 5
-                    fn: le
-                fn: and
-              zone: cemetery
-    status: complete
   BP08-SL15:
     abilities:
       - body:
