@@ -1,0 +1,36 @@
+cards:
+  CP03-100:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: シャドウパラディン
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                then:
+                  - life:
+                      delta: 3
+                      who: self
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

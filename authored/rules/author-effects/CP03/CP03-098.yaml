@@ -1,0 +1,37 @@
+cards:
+  CP03-098:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: シャドウパラディン
+                who: self
+                zone: hand
+          do:
+            - move:
+                ref: chosen
+                to: hand
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: シャドウパラディン
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

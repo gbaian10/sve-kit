@@ -1,0 +1,36 @@
+cards:
+  CP03-102:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - destroy: enemy
+            - move:
+                ref: chosen
+                to: hand
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+            - bind: chosen
+              from:
+                kind: follower
+                trait: シャドウパラディン
+                who: self
+                zone: cemetery
+              upto: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

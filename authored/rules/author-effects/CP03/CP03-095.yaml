@@ -1,0 +1,36 @@
+cards:
+  CP03-095:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: ヴァンガード
+                who: self
+                zone: hand
+          do:
+            - search:
+                n: 1
+                sel:
+                  any_of:
+                    - name: ファントム・ブラスター・ドラゴン
+                      who: self
+                      zone: deck
+                    - name: ブラスター・ダーク
+                      who: self
+                      zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

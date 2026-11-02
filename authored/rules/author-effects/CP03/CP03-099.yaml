@@ -1,0 +1,43 @@
+cards:
+  CP03-099:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: シャドウパラディン
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                then:
+                  - stand: chosen
+          "on":
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: シャドウパラディン
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
