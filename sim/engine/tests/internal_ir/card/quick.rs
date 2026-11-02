@@ -376,3 +376,130 @@ fn quick_options_exclude_false_use_prerequisites_before_offering_payment() {
         }
     }
 }
+
+#[test]
+fn field_quick_activation_admits_amulet_and_evolved_faces_with_source_payment() {
+    for kind in [
+        "アミュレット",
+        "フォロワー・エボルヴ",
+        "スペル",
+        "フォロワー・トークン",
+    ] {
+        let stats = if kind == "アミュレット" {
+            "-"
+        } else {
+            "2"
+        };
+        let printed = |number: &str, kind: &str| {
+            json!({"number":number,"faces":[{
+                "name":number,"card_type":kind,"card_class":"ニュートラル",
+                "cost":"1","power":stats,"hp":stats,"traits":[],"text":null,"sections":[]
+            }]})
+            .to_string()
+        };
+        let snapshot = [
+            printed("unit-follower", kind),
+            printed("unit-base", "フォロワー"),
+        ]
+        .join("\n");
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot,
+                "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+                &[(
+                    "quick.yaml".into(),
+                    json!({"format":1,"kind":"effect_set","cards":{
+                        "unit-follower":{"status":"complete","abilities":[]},
+                        "unit-base":{"status":"complete","abilities":[]}
+                    }})
+                    .to_string(),
+                )],
+            )
+            .unwrap(),
+        );
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"] = json!({});
+        // An evolved follower is its base object carrying the form, as after a real evolution.
+        initial["players"]["P2"]["zones"] = if kind == "フォロワー・エボルヴ" {
+            json!({
+                "field":[{"id":"s","card":"unit-base","state":{"evolved":true,"evolved_with":"e"}}],
+                "evolution":[{"id":"e","card":"unit-follower"}]
+            })
+        } else {
+            json!({"field":[{"id":"s","card":"unit-follower"}]})
+        };
+        let mut game =
+            Game::new(catalog, &initial, &Value::Null, &Value::Null, "quick-face").unwrap();
+        let evolved = kind == "フォロワー・エボルヴ";
+        // Internal D1 has no evolved-holder departure yet, so the evolved form pays without leaving.
+        let mut costs = vec![payment::pp(1), payment::act()];
+        if !evolved {
+            costs.push(payment::self_to_cemetery());
+        }
+        let program = card(vec![quick_activated(payment::paid_ability(
+            costs,
+            vec![instruction(
+                1,
+                Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(1)),
+                    },
+                },
+            )],
+        ))]);
+        if matches!(kind, "スペル" | "フォロワー・トークン") {
+            let before = exact_authority(&game);
+            game.load_internal_card("unit-follower", &program)
+                .unwrap_err();
+            assert_eq!(before, exact_authority(&game));
+            continue;
+        }
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let q = question(&mut game);
+        let InputDomain::Quick { options, .. } = &q.domain else {
+            panic!("Quick");
+        };
+        assert_eq!(options.len(), 1);
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P2"]["pp"]["current"], 2);
+        assert_eq!(before["objects"]["s"]["acted"], false);
+        resolved(choose(&mut game, &q, Some(options[0].handle)));
+        let after = game.projection(View::Referee).unwrap();
+        if evolved {
+            assert_eq!(after["objects"]["s"]["acted"], true);
+            assert_eq!(after["P2"]["field"], json!(["s"]));
+        } else {
+            assert_eq!(after["P2"]["cemetery"], json!(["s"]));
+        }
+        assert_eq!(after["P2"]["pp"]["current"], 1);
+        assert_eq!(after["P2"]["leader"]["life"], 21);
+    }
+}
+
+#[test]
+fn evolved_quick_departure_cost_is_rejected_before_a_window_can_offer_it() {
+    let snapshot = json!({"number":"unit-follower","faces":[{"name":"unit-follower","card_type":"フォロワー・エボルヴ","card_class":"ニュートラル","cost":"-","power":"4","hp":"4","traits":[],"text":null,"sections":[]}]}).to_string();
+    let catalog = Arc::new(Catalog::from_documents(&snapshot, "format: 1\nkind: keyword_registry\nkeywords: {}\n", &[("quick.yaml".into(), "format: 1\nkind: effect_set\ncards:\n  unit-follower:\n    status: complete\n    abilities: []\n".into())]).unwrap());
+    let mut initial = setup(1, json!([]));
+    for seat in ["P1", "P2"] {
+        initial["players"][seat]["zones"] = json!({});
+    }
+    let mut board = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "evolved-quick-departure",
+    )
+    .unwrap();
+    let program = card(vec![quick_activated(payment::paid_ability(
+        vec![payment::pp(1), payment::act(), payment::self_to_cemetery()],
+        vec![draw(1, 0)],
+    ))]);
+    let before = exact_authority(&board);
+    assert!(board.load_internal_card("unit-follower", &program).is_err());
+    assert_eq!(before, exact_authority(&board));
+}

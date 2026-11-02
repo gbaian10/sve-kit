@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::internal::InputDomain;
 
 fn own_costs(changes: Vec<CostChange>) -> WellFormedCardProgram {
     let source = source("unit-follower");
@@ -531,4 +532,105 @@ fn an_unloaded_player_cost_installation_rolls_back_before_save() {
         before,
         "unloaded card authority cannot leave a partially installed fee or lose it on save"
     );
+}
+
+#[test]
+fn turn_ordinal_discount_reads_actual_started_turns_and_floors_the_payment() {
+    let program = own_costs(vec![CostChange::Delta {
+        amount: Expr::Compute(Box::new(IntOperation::Arithmetic {
+            operation: Arithmetic::Subtract,
+            arguments: vec![
+                Expr::Literal(Int(0)),
+                Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::TurnOrdinal {
+                        player: PlayerRef::Controller {},
+                    })),
+                })),
+            ],
+        })),
+    }]);
+    for turns in [1, 4, 9, 10] {
+        let mut initial = setup(1, json!([]));
+        initial["turn"]["elapsed_turns"] = json!({"P1":turns,"P2":turns});
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["field"] = json!([]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut board = Game::new(
+            catalog_with_cost(&json!("9")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ordinal-cost",
+        )
+        .unwrap();
+        board.load_internal_card("unit-follower", &program).unwrap();
+        board.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            10 - (9 - turns).max(0)
+        );
+    }
+}
+
+#[test]
+fn static_my_turn_discount_does_not_reduce_a_quick_spell_during_the_opponents_turn() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["static"] = json!({"while":{"my_turn":true},"effects":[{"cost_mod":{"when_playing":{"who":"self","zone":"ex","kind":"spell"},"delta":-1}}]});
+    tree["cards"] =
+        json!({"unit-follower":{"meta":tree["cards"]["BP08-038"]["meta"],"abilities":[entry]}});
+    let provider = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let spell = card(vec![play::spell(vec![]), quick::permit()]);
+    for active in ["P1", "P2"] {
+        let mut initial = setup(1, json!([]));
+        initial["turn"]["active"] = json!(active);
+        initial["players"]["P1"]["zones"] = json!({});
+        initial["players"]["P2"]["zones"] = json!({"field":[{"id":"provider","card":"unit-follower"}],"ex":[{"id":"spell","card":"unit-spell"}]});
+        let mut board = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "static-turn",
+        )
+        .unwrap();
+        board
+            .load_internal_card("unit-follower", &provider)
+            .unwrap();
+        board.load_internal_card("unit-spell", &spell).unwrap();
+        if active == "P2" {
+            resolved(
+                board
+                    .play_internal_card("spell", PlayerId { seat: 2 })
+                    .unwrap(),
+            );
+        } else {
+            board
+                .internal_rule_action(&json!({"do":"end-phase"}))
+                .unwrap();
+            let question = board.internal_quick_choice().unwrap().unwrap();
+            let InputDomain::Quick { options, .. } = &question.domain else {
+                panic!("Quick");
+            };
+            assert_eq!(options.len(), 1);
+            resolved(
+                board
+                    .answer_internal_card(
+                        question.actor,
+                        question.token,
+                        Answer::Quick(Some(options[0].handle)),
+                    )
+                    .unwrap(),
+            );
+        }
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["P2"]["pp"]["current"],
+            if active == "P2" { 2 } else { 1 }
+        );
+    }
 }

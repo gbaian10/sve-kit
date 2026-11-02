@@ -145,6 +145,39 @@ impl BodyContext<'_> {
         })))
     }
 
+    // The source's original generation must still be in its controller's EX at resolution.
+    fn source_in_ex(
+        &mut self,
+        location: &ast::PlayRestrictionZone,
+        path: &str,
+    ) -> Result<Predicate, LoweringError> {
+        if location.r#ref != "this" || location.zone != "ex" {
+            return Err(unsupported(path));
+        }
+        Ok(Predicate::Exists {
+            objects: Selector::Intersection {
+                sets: vec![
+                    super::numeric::holder(),
+                    Selector::Zone {
+                        players: PlayerSet {
+                            relation: PlayerRelation::SelfPlayer,
+                            relative_to: PlayerRef::Controller {},
+                            cardinality: Cardinality {
+                                minimum: Nat(0),
+                                maximum: None,
+                            },
+                            text_quantifier: TextQuantifier::Implicit,
+                        },
+                        zone: ZoneKind::Ex,
+                        view: SelectionView::Current {},
+                        binding: Binding::new(self.allocator.id(path)?, self.scope),
+                        predicate: Box::new(Expr::Literal(Bool(true))),
+                    },
+                ],
+            },
+        })
+    }
+
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
@@ -152,6 +185,12 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
+            ast::Condition::MyTurn(true) => Predicate::PlayerEquals {
+                left: Expr::Literal(PlayerRef::Controller {}),
+                right: Expr::Literal(PlayerRef::Active {}),
+            },
+            ast::Condition::MyTurn(false) => return Err(unsupported(path)),
+            ast::Condition::InZone(location) => self.source_in_ex(location, path)?,
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;

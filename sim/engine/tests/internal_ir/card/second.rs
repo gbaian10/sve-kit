@@ -632,3 +632,96 @@ fn filtered_field_count_cannot_authorize_private_card_filters() {
         assert_eq!(format!("{game:?}"), before);
     }
 }
+
+#[test]
+fn body_my_turn_reads_the_controller_at_resolution() {
+    for (whose, active) in [("self", "P1"), ("opp", "P2")] {
+        let ability = lowered(
+            "auto",
+            json!({
+                "on":{"phase":{"whose":whose,"which":"end"}},
+                "do":[{"if":{"cond":{"my_turn":true},"then":[{"life":{"who":"self","delta":1}}]}}]
+            }),
+        );
+        let mut initial = setup(1, json!([]));
+        initial["turn"]["active"] = json!(active);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "body-turn").unwrap();
+        game.load_internal_card("unit-follower", &card(vec![ability]))
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        next(&mut game, 1);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            if active == "P1" { 21 } else { 20 }
+        );
+    }
+}
+
+#[test]
+fn ex_source_condition_rejects_departure_and_a_returned_generation() {
+    for moves in 0..=2 {
+        let mut ability = lowered(
+            "auto",
+            json!({
+                "zone":"ex", "on":{"phase":{"whose":"self","which":"end"}},
+                "do":[{"if":{"cond":{"in_zone":{"ref":"this","zone":"ex"}},"then":[{"life":{"who":"self","delta":1}}]}}]
+            }),
+        );
+        let steps = &mut ability.node.body.as_mut().unwrap().steps;
+        if moves > 0 {
+            steps.insert(
+                0,
+                movement::put(
+                    20,
+                    Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                    OwnerZone::Cemetery,
+                ),
+            );
+        }
+        if moves > 1 {
+            steps.insert(
+                1,
+                movement::put(21, entry::own_zone(ZoneKind::Cemetery, 22), OwnerZone::Ex),
+            );
+        }
+        locate_steps(steps, &ability.source, &ability.node.source);
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-generation",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &card(vec![ability]))
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        next(&mut game, 1);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["leader"]["life"],
+            if moves == 0 { 21 } else { 20 }
+        );
+        assert_eq!(
+            view["P1"][if moves == 1 { "cemetery" } else { "ex" }],
+            json!(["s"])
+        );
+    }
+}

@@ -204,7 +204,6 @@ impl Game {
             let object = self.object(holder)?.clone();
             if object.controller != seat_name(actor)?
                 || int(&object.state["face"]) != 0
-                || object.state["evolved_with"].is_string()
                 || object.state["silenced"] == true
             {
                 continue;
@@ -232,7 +231,10 @@ impl Game {
                                 | ("hand", [ZoneKind::Hand])
                                 | ("cemetery", [ZoneKind::Cemetery])
                         )
-                        && self.object_type(holder)? == "フォロワー"
+                        && super::quick_activation_type(
+                            self.object_type(holder)?,
+                            &ability.active_zones,
+                        )
                 };
                 if !eligible || !self.internal_quick_preflight(holder, ability, actor, spell)? {
                     continue;

@@ -268,6 +268,7 @@ fn check_count(value: &Expr<Nat>) -> Result<()> {
         Expr::Literal(_) => Ok(()),
         Expr::Live(read) => match read.as_ref() {
             NatRead::ZoneCount { selector } => check_objects(selector),
+            NatRead::TurnOrdinal { .. } => Ok(()),
             _ => Err(unsupported("play cost public count")),
         },
         Expr::Compute(operation) => match operation.as_ref() {

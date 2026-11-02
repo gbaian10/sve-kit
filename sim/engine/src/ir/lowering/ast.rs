@@ -1721,6 +1721,8 @@ pub(super) struct Conditional {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
+    MyTurn(bool),
+    InZone(PlayRestrictionZone),
     Is(AttackTargetCondition),
     History(HistoryQuery),
     EnteredFrom(EntryOriginCondition),

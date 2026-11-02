@@ -316,6 +316,7 @@ impl Execution {
                     .filter(|object| !except.contains(object))
                     .collect()
             }
+            Selector::Intersection { sets } => self.intersection(game, sets)?,
             _ => return Err(unsupported("selector")),
         };
         let mut seen = BTreeSet::new();
@@ -323,6 +324,21 @@ impl Execution {
             .into_iter()
             .filter(|object| seen.insert((object.id, object.generation)))
             .collect())
+    }
+
+    // Members compare by generation, so a returned object is not the one first selected.
+    fn intersection(&self, game: &Game, sets: &[Selector]) -> Result<Vec<ObjectRef>> {
+        let mut sets = sets.iter();
+        let mut members = sets
+            .next()
+            .map(|set| self.objects(game, set))
+            .transpose()?
+            .unwrap_or_default();
+        for set in sets {
+            let other = self.objects(game, set)?;
+            members.retain(|object| other.contains(object));
+        }
+        Ok(members)
     }
 
     fn object_slot(&self, binding: Binding<Selector>) -> Result<Vec<ObjectRef>> {
