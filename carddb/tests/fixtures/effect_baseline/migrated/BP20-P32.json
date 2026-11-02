@@ -1,0 +1,55 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": 1,
+        "op": "max_pp"
+      },
+      "event": "damage",
+      "kind": "trigger",
+      "limit": 1,
+      "limit_at": "trigger",
+      "line": 1,
+      "subject": "self",
+      "trigger_if": {
+        "args": [
+          {
+            "read": "self.is_active"
+          },
+          {
+            "read": "event.effect_damage"
+          }
+        ],
+        "fn": "and"
+      }
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "self.pp.max"
+            },
+            7
+          ],
+          "fn": "ge"
+        },
+        "op": "if",
+        "then": {
+          "amount": 1,
+          "op": "damage",
+          "subjects": {
+            "side": "both",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

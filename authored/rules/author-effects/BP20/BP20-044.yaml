@@ -1,0 +1,59 @@
+cards:
+  BP20-044:
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                trait: アイドル
+                other: true
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - destroy: enemy
+            - damage:
+                n: 2
+                to:
+                  leader_of: enemy
+      - line: 2
+        activate:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                trait: アイドル
+                other: true
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - destroy: enemy
+            - damage:
+                n: 2
+                to:
+                  leader_of: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,95 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "amount": 1,
+        "op": "damage",
+        "subjects": {
+          "side": "opponent",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "event": "damage",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self",
+      "trigger_if": {
+        "args": [
+          {
+            "read": "self.is_active"
+          },
+          {
+            "read": "event.effect_damage"
+          }
+        ],
+        "fn": "and"
+      }
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "count": {
+                "union": [
+                  {
+                    "other": true,
+                    "side": "self",
+                    "trait": "絶傑",
+                    "zone": "field"
+                  },
+                  {
+                    "other": true,
+                    "side": "self",
+                    "trait": "絶傑",
+                    "zone": "ex"
+                  }
+                ]
+              }
+            },
+            0
+          ],
+          "fn": "gt"
+        },
+        "op": "if",
+        "then": {
+          "amount": 1,
+          "op": "damage",
+          "subjects": {
+            "side": "both",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 4,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

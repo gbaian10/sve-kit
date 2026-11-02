@@ -1,0 +1,32 @@
+cards:
+  BP20-022:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - count:
+                  who: self
+                  zone: field
+                  class: ロイヤル
+      - line: 2
+        keywords:
+          - rush
+          - assail
+          - ward
+      - line: 3
+        attack_time:
+          do:
+            - draw:
+                n: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
