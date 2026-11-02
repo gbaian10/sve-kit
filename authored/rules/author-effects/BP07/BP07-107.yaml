@@ -1,0 +1,78 @@
+cards:
+  BP07-107:
+    abilities:
+      - fanfare:
+          do:
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              n: 1
+                              to: field
+                              token: ナテラの大樹
+                        - - create:
+                              n: 1
+                              to: ex
+                              token: ナテラの大樹
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      minus:
+                        - count:
+                            trait: 自然
+                            who: self
+                            zone: field
+                        - minus:
+                            - 0
+                            - count:
+                                trait: 自然
+                                who: self
+                                zone: ex
+                    op: ge
+                    right: 5
+                then:
+                  - look:
+                      bind: seen
+                      top:
+                        n: 3
+                        who: self
+                  - choose:
+                      bind: picked
+                      from:
+                        in: seen
+                        trait: 自然
+                      may: true
+                      n: 1
+                  - move:
+                      ref: picked
+                      result: moved
+                      to: hand
+                  - reveal:
+                      bind: shown
+                      ref: picked
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: moved
+                            view: before
+                        in: seen
+                      to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP07-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

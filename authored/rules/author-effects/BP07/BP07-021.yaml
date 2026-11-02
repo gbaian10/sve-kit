@@ -1,0 +1,52 @@
+cards:
+  BP07-021:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          while:
+            cmp:
+              left:
+                count:
+                  class: ロイヤル
+                  kind: follower
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        class: ロイヤル
+                        kind: follower
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
