@@ -629,6 +629,7 @@ impl BodyContext<'_> {
                 resolution_scope: self.resolution_scope,
                 resolution_captures: vec![],
                 formal_play: false,
+                auto: None,
                 mode_targets: BTreeMap::new(),
             };
             if resolution {

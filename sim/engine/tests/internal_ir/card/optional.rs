@@ -182,3 +182,104 @@ fn assert_payment_state(view: &Value, before: &Value) {
         );
     }
 }
+
+fn resolution_tree(body: Value) -> Value {
+    let mut tree = tree();
+    let entry = &mut tree["cards"]["unit-follower"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["auto"] = body;
+    tree
+}
+
+#[test]
+fn resolution_source_payment_preserves_prior_effects_and_ability_play_on_failure() {
+    for failure in ["none", "late", "gone"] {
+        let costs = if failure == "late" {
+            json!({"steps":[{"act_self":true},{"act_self":true},{"self_to_cemetery":true}]})
+        } else {
+            json!({"steps":[{"act_self":true},{"self_to_cemetery":true}]})
+        };
+        let mut tree = resolution_tree(json!({
+            "on":{"phase":{"whose":"self","which":"end"}},
+            "do":[{"life":{"who":"self","delta":1}},
+                {"pay":{"cost":costs,"do":[{"draw":{"n":1}}]}}]
+        }));
+        if failure == "gone" {
+            tree["cards"]["unit-follower"]["abilities"][0]["auto"]["do"]
+                .as_array_mut()
+                .unwrap()
+                .insert(1, json!({"move":{"ref":"this","to":"cemetery"}}));
+        }
+        let program = lowerer().lower(&tree).unwrap();
+        let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "resolution-cost",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program["unit-follower"])
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let q = game.internal_pending_choice().unwrap().unwrap();
+        let CardPlay::Awaiting(cost) = game
+            .answer_internal_card(q.actor, q.token, Answer::Pending(1))
+            .unwrap()
+        else {
+            panic!("resolution cost")
+        };
+        assert_eq!(cost.domain, InputDomain::OptionalCost);
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P1"]["leader"]["life"], 21);
+        let result = resolved(
+            game.answer_internal_card(cost.actor, cost.token, Answer::OptionalCost(true))
+                .unwrap(),
+        );
+        assert!(
+            result
+                .progress
+                .facts
+                .iter()
+                .any(|fact| matches!(fact, Fact::AbilityPlayed { .. }))
+        );
+        if failure == "none" {
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["cemetery"], json!(["s"]));
+            assert_eq!(state["P1"]["hand"], json!(["d"]));
+        } else {
+            assert_payment_state(&game.projection(View::Referee).unwrap(), &before);
+        }
+    }
+}
+
+#[test]
+fn resolution_source_payment_rejects_nonfield_sources_and_auto_head_spelling() {
+    for body in [
+        json!({"zone":"ex","on":{"phase":{"whose":"self","which":"end"}},
+            "do":[{"pay":{"cost":{"self_to_cemetery":true},"do":[]}}]}),
+        json!({"on":{"phase":{"whose":"self","which":"end"}},
+            "cost":{"self_to_cemetery":true},"do":[]}),
+    ] {
+        let program = lowerer().lower(&resolution_tree(body)).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "reject-source-cost",
+        )
+        .unwrap();
+        let before = exact_authority(&game);
+        game.load_internal_card("unit-follower", &program["unit-follower"])
+            .unwrap_err();
+        assert_eq!(before, exact_authority(&game));
+    }
+}

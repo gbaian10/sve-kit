@@ -1060,6 +1060,7 @@ struct BodyContext<'definitions> {
     resolution_scope: ScopeId,
     resolution_captures: Vec<super::Capture>,
     formal_play: bool,
+    auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
 impl<'definitions> BodyContext<'definitions> {
@@ -1104,6 +1105,7 @@ impl<'definitions> BodyContext<'definitions> {
             resolution_scope: scope,
             resolution_captures: vec![],
             mode_targets: BTreeMap::new(),
+            auto: entry.auto.as_ref(),
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()
@@ -1228,6 +1230,10 @@ impl<'definitions> BodyContext<'definitions> {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Step dispatch shares one binding and receipt environment."
+    )]
     fn steps(
         &mut self,
         author_steps: &[ast::Step],
@@ -1251,6 +1257,10 @@ impl<'definitions> BodyContext<'definitions> {
             }
             if let ast::Step::Optional(optional) = step {
                 steps.push(self.optional(optional, &step_path, source, ability_source)?);
+                continue;
+            }
+            if let ast::Step::Pay(payment) = step {
+                steps.push(self.resolution_payment(payment, &step_path, source, ability_source)?);
                 continue;
             }
             if let ast::Step::EachPlayer(each) = step {
@@ -1284,18 +1294,17 @@ impl<'definitions> BodyContext<'definitions> {
                     None
                 };
                 self.scope = parent;
-                let mut located = source.clone();
-                located.author_path = step_path;
-                steps.push(Located {
-                    source: located,
-                    node: Node::Control {
+                steps.push(Self::located_step(
+                    source,
+                    &step_path,
+                    Node::Control {
                         control: super::Control::If {
                             condition,
                             then_body,
                             else_body,
                         },
                     },
-                });
+                ));
                 continue;
             }
             // The ability entry admits one top-level group; mode bodies reject nested choices.

@@ -1,5 +1,6 @@
 use super::{AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, payment};
 use crate::ir::{Control, Decision, PaymentOptionality, PaymentTime, Program, ReceiptId};
+use core::slice;
 
 pub(super) struct PaymentDeclaration {
     pub node: Located<Node>,
@@ -11,6 +12,51 @@ pub(super) struct PaymentDeclaration {
     reason = "Optional payment shares the body binding environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn resolution_payment(
+        &mut self,
+        payment: &ast::ModePayment,
+        path: &str,
+        source: &SourceSpan,
+        origin: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        if self.auto.is_none() {
+            return Err(super::unsupported(path));
+        }
+        let operations = match &payment.cost {
+            ast::Cost::Short(operation) => slice::from_ref(operation.as_ref()),
+            ast::Cost::Ordered { steps } => steps.as_slice(),
+        };
+        if operations.is_empty()
+            || operations.iter().any(|operation| {
+                !matches!(
+                    operation,
+                    ast::CostOperation::ActSelf(true) | ast::CostOperation::SelfToCemetery(true)
+                )
+            })
+        {
+            return Err(super::unsupported(path));
+        }
+        let play = payment::lower(self, &payment.cost, origin, path)?;
+        let scope = self.scope;
+        self.scope = self.card_allocator.scope(path)?;
+        let body = self.steps(&payment.steps, path, source, origin);
+        self.scope = scope;
+        let receipt = ReceiptId(self.card_allocator.id(path)?);
+        Ok(Self::located_step(
+            source,
+            path,
+            Node::Control {
+                control: Control::Pay {
+                    at: PaymentTime::ResolutionChoice,
+                    costs: play.costs,
+                    optional: PaymentOptionality::Optional,
+                    on_paid: body?,
+                    receipt,
+                },
+            },
+        ))
+    }
+
     pub(super) fn optional_payment(
         &mut self,
         body: &ast::Body,

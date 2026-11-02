@@ -469,9 +469,7 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 control: control @ Control::Pay { on_paid, .. },
             } if card => {
                 super::card::optional::check_control(control)?;
-                if !on_paid.steps.is_empty() {
-                    return Err(unsupported("optional continuation"));
-                }
+                check_program(on_paid, source, card)?;
             }
             Node::Control {
                 control: control @ Control::EachObject { body, .. },
@@ -620,6 +618,7 @@ fn supported(code: &str) -> bool {
             | "internal.MealRaceOperation.Race"
             | "control.pay"
             | "internal.PaymentTime.PlayParameter"
+            | "internal.PaymentTime.ResolutionChoice"
             | "internal.PaymentOptionality.Optional"
             | "internal.PaymentOptionality.Required"
             | "shape.CostSpec.Ordered"

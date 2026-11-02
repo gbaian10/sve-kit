@@ -3,10 +3,10 @@ use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
 use crate::ir::{
-    AbilityKind, Action, Bool, Control, CostSpec, DecisionId, Expr, InstructionContext, Int, Node,
-    PaymentOptionality, PaymentResult, PaymentTime, PlayerId, PlayerRef, Program, ReceiptId,
-    Resource, ResourceOperation, RuntimeReceiptId, Selector, WellFormedCardProgram,
-    optional_payment,
+    AbilityKind, AbilityOrigin, Action, Bool, Control, CostSpec, DecisionId, Expr,
+    InstructionContext, Int, Node, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
+    PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
+    WellFormedCardProgram, ZoneKind, optional_payment,
 };
 
 #[derive(Clone, Debug)]
@@ -35,6 +35,7 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
                 || super::hand_payment::check_cost(&instruction.action)
+                || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
                 || super::material::cost_objects(&instruction.action)
                     .is_some_and(|objects| matches!(objects, Selector::Bound { .. })))
@@ -53,6 +54,15 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         .any(|cost| cost.node.exchange.is_some());
     for ability in &card.card().abilities {
         if let Some(body) = &ability.node.body {
+            if has_resolution_payment(body)
+                && (ability.node.kind != AbilityKind::Triggered
+                    || !matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
+                    || ability.node.active_zones != [ZoneKind::Field])
+            {
+                return Err(unsupported(
+                    "resolution source payment needs a field auto ability",
+                ));
+            }
             if let Some((costs, _)) = optional_payment::declaration(body) {
                 let play = ability
                     .node
@@ -63,6 +73,9 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     return Err(unsupported("payment alternatives"));
                 };
                 for step in steps {
+                    if super::material::source_field_cost(&step.instruction.action) {
+                        return Err(unsupported("source costs require a resolution payment"));
+                    }
                     if !matches!(step.instruction.action, Action::Resource { .. })
                         && !super::hand_payment::check_cost(&step.instruction.action)
                         && !super::material::check_cost(&step.instruction.action, play)
@@ -91,6 +104,17 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
 pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
     for (index, step) in program.steps.iter().enumerate() {
         match &step.node {
+            Node::Control {
+                control:
+                    control @ Control::Pay {
+                        at: PaymentTime::ResolutionChoice,
+                        on_paid,
+                        ..
+                    },
+            } => {
+                check_control(control)?;
+                check_body(on_paid, false)?;
+            }
             Node::Control {
                 control: control @ Control::Pay { .. },
             } => {
@@ -128,6 +152,36 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
     Ok(())
 }
 
+fn has_resolution_payment(program: &Program) -> bool {
+    program.steps.iter().any(|step| match &step.node {
+        Node::Control {
+            control:
+                Control::Pay {
+                    at: PaymentTime::ResolutionChoice,
+                    ..
+                },
+        } => true,
+        Node::Control {
+            control: Control::Sequence { body } | Control::May { body, .. },
+        } => has_resolution_payment(body),
+        Node::Control {
+            control:
+                Control::If {
+                    then_body,
+                    else_body,
+                    ..
+                },
+        } => {
+            has_resolution_payment(then_body)
+                || else_body.as_ref().is_some_and(has_resolution_payment)
+        }
+        Node::Control {
+            control: Control::Mode { modes, .. },
+        } => modes.iter().any(|mode| has_resolution_payment(&mode.body)),
+        _ => false,
+    })
+}
+
 pub(super) fn take(body: &mut Program) -> Option<OptionalState> {
     let (costs, receipt) = optional_payment::declaration(body)?;
     let state = OptionalState {
@@ -155,6 +209,24 @@ pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: boo
 }
 
 pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> {
+    if let Control::Pay {
+        at: PaymentTime::ResolutionChoice,
+        costs: CostSpec::Ordered { steps },
+        optional: PaymentOptionality::Optional,
+        ..
+    } = control
+    {
+        if !steps.is_empty()
+            && steps
+                .iter()
+                .all(|step| super::material::source_field_cost(&step.instruction.action))
+        {
+            return Ok(());
+        }
+        return Err(unsupported(
+            "resolution payment only supports source field costs",
+        ));
+    }
     if !matches!(control, Control::Pay { at: PaymentTime::PlayParameter,
         optional: PaymentOptionality::Optional | PaymentOptionality::Required, on_paid, .. } if on_paid.steps.is_empty())
     {
@@ -168,6 +240,77 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
     reason = "Declaration and payment share the play transaction."
 )]
 impl Game {
+    pub(in crate::game::internal) fn begin_internal_payment(
+        &mut self,
+        execution: &mut Execution,
+        control: Control,
+    ) -> Result<()> {
+        let Control::Pay {
+            at: PaymentTime::ResolutionChoice,
+            costs,
+            on_paid,
+            receipt,
+            ..
+        } = control
+        else {
+            return Err(unsupported("resolution payment timing"));
+        };
+        self.internal_wait(
+            execution,
+            DecisionId(receipt.0),
+            execution.context.controller,
+            InputDomain::OptionalCost,
+            Wait::ResolutionPayment {
+                costs,
+                on_paid,
+                receipt,
+            },
+        )
+    }
+
+    pub(in crate::game::internal) fn resolve_internal_payment(
+        &mut self,
+        execution: &mut Execution,
+        costs: &CostSpec,
+        on_paid: Program,
+        receipt: ReceiptId,
+        accepted: bool,
+    ) -> Result<()> {
+        let mut complete = false;
+        let mut receipts = vec![];
+        if accepted {
+            let mut probe = self.clone();
+            let mut candidate = execution.clone();
+            let previous = probe.card_runtime.active_source;
+            probe.card_runtime.active_source = execution.ability;
+            match probe.internal_card_payment(&mut candidate, costs, false) {
+                Ok(()) => {
+                    probe.card_runtime.active_source = previous;
+                    *self = probe;
+                    *execution = candidate;
+                    complete = true;
+                    let CostSpec::Ordered { steps } = costs else {
+                        return Err(unsupported("resolution costs"));
+                    };
+                    receipts.extend(steps.iter().map(|step| RuntimeReceiptId {
+                        execution: execution.id,
+                        slot: step.instruction.receipt,
+                    }));
+                    execution.prepend(on_paid);
+                }
+                Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        execution.receipts.insert(
+            receipt,
+            InstructionOutcome::ExchangePayment(PaymentResult {
+                complete: Bool(complete),
+                steps: receipts,
+            }),
+        );
+        Ok(())
+    }
     pub(super) fn decline_internal_head_payment(
         &mut self,
         actor: PlayerId,

@@ -9,18 +9,18 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::AttackEvent;
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, CounterChangeEvent,
-    DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind,
-    Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId,
-    EntryMethod, EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
-    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
-    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
-    NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
-    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
-    Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
-    RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
-    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TransformOutcome,
-    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
+    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, CostSpec,
+    CounterChangeEvent, DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision, DecisionId,
+    DecisionKind, Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent,
+    Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
+    InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead,
+    LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome,
+    Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
+    OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent,
+    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
+    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
+    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
+    TransformOutcome, TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentEvent,
@@ -446,6 +446,11 @@ enum Wait {
     CostDiscard(discard::HandWait),
     WardEntry(ObjectRef),
     OptionalCost,
+    ResolutionPayment {
+        costs: CostSpec,
+        on_paid: Program,
+        receipt: ReceiptId,
+    },
     CostMaterials(card::exchange::MaterialWait),
     MaterialParameter(card::material::MaterialWait),
     TriggerQuota {
@@ -781,6 +786,23 @@ impl Game {
                     if !card::optional::accept(&mut execution, accepted)? {
                         card::exchange::accept(&mut execution, accepted)?;
                     }
+                }
+                (
+                    Wait::ResolutionPayment {
+                        costs,
+                        on_paid,
+                        receipt,
+                    },
+                    Answer::OptionalCost(accepted),
+                ) => {
+                    rollback = execution.origin.take();
+                    self.resolve_internal_payment(
+                        &mut execution,
+                        &costs,
+                        on_paid,
+                        receipt,
+                        accepted,
+                    )?;
                 }
                 (Wait::MaterialParameter(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;
@@ -1180,6 +1202,9 @@ impl Game {
                 return Ok(());
             };
             match node {
+                Node::Control {
+                    control: control @ Control::Pay { .. },
+                } => self.begin_internal_payment(execution, control)?,
                 Node::Control {
                     control: control @ Control::May { .. },
                 } => {
