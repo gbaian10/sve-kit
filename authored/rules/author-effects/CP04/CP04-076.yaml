@@ -1,0 +1,45 @@
+cards:
+  CP04-076:
+    abilities:
+      - fanfare:
+          do:
+            - move:
+                ref: chosen
+                result: placed
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: プリコネ
+                who: self
+                zone: cemetery
+              n: 1
+          ub: true
+        line: 1
+      - activate:
+          cost:
+            discard:
+              n: 2
+              sel:
+                who: self
+                zone: hand
+          do:
+            - move:
+                ref: this
+                to: ex
+          zone: cemetery
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

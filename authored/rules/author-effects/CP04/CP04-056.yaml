@@ -1,0 +1,35 @@
+cards:
+  CP04-056:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                distribute: true
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - damage:
+                n: 3
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

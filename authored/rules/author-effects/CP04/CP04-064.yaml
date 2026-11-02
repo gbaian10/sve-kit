@@ -1,0 +1,42 @@
+cards:
+  CP04-064:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 1
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+          ub: true
+          usable_if:
+            awakened: true
+        line: 1
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  not_same_name_as_this: true
+                  trait: ドラゴンズネスト
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

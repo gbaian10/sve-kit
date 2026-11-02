@@ -1,0 +1,43 @@
+cards:
+  CP04-069:
+    abilities:
+      - attack_time:
+          cost:
+            pp: 2
+          do:
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+          ub: true
+        line: 1
+      - keywords:
+          - rush
+        line: 1
+        section: 1
+      - line: 2
+        section: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                "on": this
+          while:
+            exists:
+              kind: follower
+              other: true
+              trait: プリコネ
+              who: self
+              zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
