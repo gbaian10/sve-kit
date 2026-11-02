@@ -1,0 +1,35 @@
+cards:
+  ECP02-037:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: クール
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

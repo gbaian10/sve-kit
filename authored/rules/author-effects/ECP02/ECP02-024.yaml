@@ -1,0 +1,62 @@
+cards:
+  ECP02-024:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 2
+              sel:
+                trait: キュート
+                who: self
+                zone: hand
+          do:
+            - life:
+                delta: 2
+                who: self
+            - draw:
+                n: 2
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - lesson: 1
+              - act_self: true
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: キュート
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                else:
+                  - damage:
+                      n: 2
+                      to: enemy
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
