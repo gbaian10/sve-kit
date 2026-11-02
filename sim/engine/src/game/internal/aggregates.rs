@@ -5,6 +5,9 @@ use crate::ir::{
 };
 
 pub(super) fn check(objects: &Selector, property: NumericProperty) -> Result<()> {
+    if property == NumericProperty::Count {
+        return Err(unsupported("count is a selection bound, not an object sum"));
+    }
     match objects {
         Selector::Zone {
             zone,
@@ -76,6 +79,9 @@ fn values(
                 return Err(unsupported("public current aggregate member"));
             }
             let value = match property {
+                NumericProperty::Count => {
+                    return Err(unsupported("count is a selection bound, not an object sum"));
+                }
                 NumericProperty::OriginalCost => {
                     super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
                 }

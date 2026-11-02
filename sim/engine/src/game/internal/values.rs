@@ -586,7 +586,7 @@ impl Execution {
         let stat = match property {
             NumericProperty::Attack => Stat::Attack,
             NumericProperty::Life => Stat::Life,
-            NumericProperty::Cost | NumericProperty::OriginalCost => {
+            NumericProperty::Count | NumericProperty::Cost | NumericProperty::OriginalCost => {
                 return Err(unsupported("attack target numeric property"));
             }
         };

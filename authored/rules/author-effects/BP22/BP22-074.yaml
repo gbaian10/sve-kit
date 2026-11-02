@@ -1,0 +1,61 @@
+cards:
+  BP22-074:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                what: attack
+          while:
+            cmp:
+              left:
+                count:
+                  orig_cost_eq: 2
+                  who: self
+                  zone: cemetery
+              op: le
+              right: 9
+      - fanfare:
+          do:
+            - choice:
+                options:
+                  - - destroy:
+                        ref: enemy
+                    - damage:
+                        n: 1
+                        to:
+                          any_of:
+                            - leaders: opponents
+                            - kind: follower
+                              who: opp
+                              zone: field
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+                upto:
+                  per:
+                    of:
+                      count:
+                        orig_cost_eq: 2
+                        who: self
+                        zone: cemetery
+                    unit: 10
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

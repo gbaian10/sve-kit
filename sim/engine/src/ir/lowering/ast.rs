@@ -819,8 +819,8 @@ pub(super) enum RuleCause {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct EvolutionCostModifier {
-    pub on: Affected,
-    pub delta: Option<i64>,
+    pub on: EvolutionCostSubject,
+    pub delta: Option<Value>,
     pub set: Option<i64>,
 }
 
@@ -943,10 +943,10 @@ pub(super) struct SearchQuery {
     pub alias: Option<String>,
     pub r#where: Option<SearchWhere>,
     pub cost_eq: Option<u64>,
-    pub cost_le: Option<u64>,
+    pub cost_le: Option<NumericArgument>,
     pub cost_ge: Option<u64>,
     pub orig_cost_eq: Option<u64>,
-    pub orig_cost_le: Option<u64>,
+    pub orig_cost_le: Option<NumericArgument>,
     pub orig_cost_ge: Option<u64>,
     pub has_evolve: Option<True>,
 }
@@ -1118,8 +1118,8 @@ pub(super) struct Target {
     pub bind: String,
     pub from: TargetQuery,
     pub distinct_by: Option<Names>,
-    pub n: Option<u64>,
-    pub upto: Option<u64>,
+    pub n: Option<NumericArgument>,
+    pub upto: Option<NumericArgument>,
 }
 
 #[derive(Deserialize)]
@@ -1186,10 +1186,10 @@ pub(super) struct TargetQuery {
     #[serde(default)]
     pub not_same_name_as_this: bool,
     pub cost_eq: Option<u64>,
-    pub cost_le: Option<u64>,
+    pub cost_le: Option<NumericArgument>,
     pub cost_ge: Option<u64>,
     pub orig_cost_eq: Option<u64>,
-    pub orig_cost_le: Option<u64>,
+    pub orig_cost_le: Option<NumericArgument>,
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
     pub has_evolve: Option<True>,
@@ -1229,14 +1229,14 @@ impl TargetQuery {
     }
 
     pub(super) fn has_numeric_filter(&self) -> bool {
-        self.alias.is_some()
+        self.cost_le.is_some()
+            || self.orig_cost_le.is_some()
+            || self.alias.is_some()
             || self.r#where.is_some()
             || [
                 self.cost_eq,
-                self.cost_le,
                 self.cost_ge,
                 self.orig_cost_eq,
-                self.orig_cost_le,
                 self.orig_cost_ge,
                 self.hp_le,
             ]
@@ -1277,6 +1277,8 @@ pub(super) struct Choice {
 pub(super) enum ModeCap {
     Fixed(u64),
     Count { count: CountQuery },
+    // Structured counts retain their narrower admission before the numeric fallback.
+    Number(Box<Value>),
 }
 
 #[derive(Deserialize)]
@@ -1497,6 +1499,7 @@ pub(super) struct CountQuery {
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
 }
@@ -2190,6 +2193,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    EvolveCostMod(EvolutionCostModifier),
     CostMod(CostModifier),
     Grant(StaticGrant),
     Cannot(Cannot),
@@ -2481,4 +2485,29 @@ pub(super) enum AttackTargetReference {
 #[serde(rename_all = "snake_case")]
 pub(super) enum FollowerKind {
     Follower,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(untagged)]
+pub(super) enum NumericArgument {
+    Literal(u64),
+    Expression(Box<Value>),
+}
+impl NumericArgument {
+    pub(super) const fn literal(&self) -> Option<u64> {
+        match self {
+            Self::Literal(value) => Some(*value),
+            Self::Expression(_) => None,
+        }
+    }
+    pub(super) const fn is_dynamic(&self) -> bool {
+        matches!(self, Self::Expression(_))
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EvolutionCostSubject {
+    This,
+    Affected,
 }

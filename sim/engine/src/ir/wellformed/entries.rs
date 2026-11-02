@@ -4,6 +4,7 @@ use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
 use crate::ir::prevention;
+use crate::ir::public_numbers;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, Capture, CardProgram, Cardinality,
     CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind, Duration,
@@ -603,12 +604,12 @@ impl Checker {
                 ..
             } => self.permission_effect(subject, action, condition, duration),
             Effect::CostModifier {
-                kind: CostKind::Play,
+                kind,
                 subjects,
                 change,
                 duration,
                 usage: None,
-            } => self.cost_modifier(subjects, change, duration),
+            } => self.cost_declaration(*kind, subjects, change, duration),
             Effect::RuleModifier { .. } | Effect::DeckRule { .. } | Effect::CostModifier { .. } => {
                 self.reject()
             }
@@ -627,6 +628,27 @@ impl Checker {
         })?;
         self.at("condition", |checker| checker.boolean(condition))?;
         self.duration(duration)
+    }
+
+    fn cost_declaration(
+        &mut self,
+        kind: CostKind,
+        subjects: &Selector,
+        change: &CostChange,
+        duration: &Duration,
+    ) -> Checked {
+        if kind == CostKind::Evolution {
+            let CostChange::Delta { amount } = change else {
+                return self.reject();
+            };
+            if !matches!(subjects, Selector::Objects { objects } if objects.as_slice() == [ObjectOperand::SourceHolder {}])
+                || !public_numbers::check(amount)
+                || !matches!(duration.end, DurationEnd::NoTemporalExpiry {})
+            {
+                return self.reject();
+            }
+        }
+        self.cost_modifier(subjects, change, duration)
     }
 
     fn cost_modifier(

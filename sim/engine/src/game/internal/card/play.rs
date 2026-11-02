@@ -89,10 +89,15 @@ impl PlayMode {
             {
                 super::material::check_parameter(decision)?;
             }
-            if mode.parameters.iter().filter(|decision| !super::material::is_parameter(decision)).any(|decision| !decision.captures.is_empty()
-                || !matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
-                    if constraint.groups.iter().all(|target| independent_selector(&target.selector)))) {
-                return Err(unsupported("mode targets require independent public selectors"));
+            if mode
+                .parameters
+                .iter()
+                .filter(|decision| !super::material::is_parameter(decision))
+                .any(|decision| !independent_mode_target(decision))
+            {
+                return Err(unsupported(
+                    "mode targets require independent public selectors",
+                ));
             }
             parameters.extend(mode.parameters.clone());
         }
@@ -1716,4 +1721,26 @@ impl Game {
         self.internal_run(&mut execution)?;
         self.card_play_result(execution)
     }
+}
+
+fn independent_mode_target(decision: &Decision) -> bool {
+    use crate::ir::{Capture, CaptureTime, ObjectView, PlayerRead, Role};
+    let ChoiceDomain::Objects {
+        binding,
+        constraint,
+        ..
+    } = &decision.domain
+    else {
+        return false;
+    };
+    if !constraint
+        .groups
+        .iter()
+        .all(|group| independent_selector(&group.selector))
+    {
+        return false;
+    }
+    decision.captures.iter().all(|capture| {
+        constraint.cardinality==(Cardinality{minimum:Nat(1),maximum:Some(Nat(1))}) && matches!(capture,Capture::Player{at:CaptureTime::AtSelection{decision:at},value:Expr::Live(read),..} if *at==decision.id && matches!(read.as_ref(),PlayerRead::Role{object:ObjectView::Selected{selection},role:Role::Controller} if selection==binding))
+    })
 }

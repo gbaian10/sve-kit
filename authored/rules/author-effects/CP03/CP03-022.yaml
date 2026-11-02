@@ -1,0 +1,60 @@
+cards:
+  CP03-022:
+    abilities:
+      - keywords:
+          - storm
+          - twin_drive
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      min:
+                        - count:
+                            name: ブラスター・ブレード
+                            who: self
+                            zone: cemetery
+                        - count:
+                            name: ブラスター・ダーク
+                            who: self
+                            zone: cemetery
+                    op: ge
+                    right: 1
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+        line: 2
+      - fanfare:
+          do:
+            - destroy:
+                ref: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto:
+                min:
+                  - count:
+                      name: ブラスター・ブレード
+                      who: self
+                      zone: cemetery
+                  - count:
+                      name: ブラスター・ダーク
+                      who: self
+                      zone: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

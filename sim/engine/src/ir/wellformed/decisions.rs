@@ -1,6 +1,8 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::NumericProperty;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
+use crate::ir::public_numbers;
 use crate::ir::ride;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
@@ -368,6 +370,10 @@ impl Checker {
     pub(super) fn aggregate_bounds(&mut self, bounds: &[AggregateBound]) -> Checked {
         for (index, bound) in bounds.iter().enumerate() {
             self.at(&format!("aggregate_bounds/{index}"), |checker| {
+                if bound.property == NumericProperty::Count && !public_numbers::check(&bound.value)
+                {
+                    return checker.reject();
+                }
                 checker.integer(&bound.value)
             })?;
         }

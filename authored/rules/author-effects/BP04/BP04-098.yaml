@@ -1,0 +1,33 @@
+cards:
+  BP04-098:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  class: ビショップ
+                  kind: follower
+                  not_same_name_as_this: true
+                  orig_cost_le:
+                    minus:
+                      - resource:
+                          kind: pp_max
+                          who: self
+                      - 1
+                  who: self
+                  zone: deck
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

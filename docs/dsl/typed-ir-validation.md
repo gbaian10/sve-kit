@@ -603,3 +603,7 @@ matching duration 與 affected binder；安裝空集合不分配效果身分。
 
 這個投影不准入 `next_only:true`、有限使用次數、傷害量改寫或任意 rewrite predicate。
 `next_only` 的消耗時點仍依作者效果契約保留待裁定；不從「下一次」自行推定消耗規則。
+
+### 動態正式張數的閉合
+
+`AggregateBound.property = NumericProperty::Count` 衡量所選集合的成員數。其值只接受公開自身數值子集，checker 拒絕隱藏區域與外來讀值。D1 正式目標僅准入單一群組、原群組與總基數相同且為 `0..None`、一個 `Equal` 或 `LessEqual` 張數界限；建立問題時求值並固定為既有群組與總基數。其他 aggregate 形狀維持原有准入規則；`Count` 不授權物件數值總和或極值操作。

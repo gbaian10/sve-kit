@@ -1,6 +1,7 @@
 use super::super::{Context, Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
 use crate::game::internal::duration::EffectEnd;
+use crate::ir::public_numbers;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, CostChange, CostKind, Duration,
     DurationEnd, Effect, EffectReference, Expr, Generation, InstallationSubjects, InstallationTime,
@@ -102,6 +103,23 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         return Err(unsupported("static player cost header"));
     }
     for effect in &ability.declarations {
+        if let Effect::CostModifier {
+            kind: CostKind::Evolution,
+            subjects,
+            change: CostChange::Delta { amount },
+            duration,
+            usage: None,
+        } = effect
+        {
+            if !matches!(subjects,Selector::Objects{objects} if objects.as_slice()==[ObjectOperand::SourceHolder{}])
+                || !public_numbers::check(amount)
+                || !matches!(duration.end, DurationEnd::NoTemporalExpiry {})
+            {
+                return Err(unsupported("static source evolution cost"));
+            }
+            check_duration(duration, false)?;
+            continue;
+        }
         let Effect::CostModifier {
             kind: CostKind::Play,
             subjects,
@@ -317,6 +335,15 @@ impl Game {
             )?;
             for ability in abilities {
                 for effect in &ability.node.declarations {
+                    if matches!(
+                        effect,
+                        Effect::CostModifier {
+                            kind: CostKind::Evolution,
+                            ..
+                        }
+                    ) {
+                        continue;
+                    }
                     let Effect::CostModifier {
                         subjects,
                         change,
@@ -345,5 +372,69 @@ impl Game {
         }
         base.checked_add(delta)
             .ok_or_else(|| invalid("play cost overflow"))
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Evolution quotes reuse live printed cost modifiers without installing state."
+)]
+impl Game {
+    pub(in crate::game) fn internal_static_evolution_delta(&self, holder: &str) -> Result<i64> {
+        let object = self.object(holder)?;
+        if object.zone != "field" {
+            return Ok(0);
+        }
+        let (card, _) = self.internal_effective_print(holder)?;
+        if !self.card_runtime.is_loaded(&card) {
+            return Ok(0);
+        }
+        let abilities = self
+            .internal_printed_abilities(holder)?
+            .into_iter()
+            .filter(|ability| {
+                is_static(&ability.node)
+                    && ability.node.declarations.iter().any(|effect| {
+                        matches!(
+                            effect,
+                            Effect::CostModifier {
+                                kind: CostKind::Evolution,
+                                ..
+                            }
+                        )
+                    })
+            })
+            .collect::<Vec<_>>();
+        if abilities.is_empty() {
+            return Ok(0);
+        }
+        // Quote-local identities leave preview and failed payment attempts read-only.
+        let mut quote = self.clone();
+        let ids = quote.internal_identities()?;
+        let execution = quote.card_execution(
+            Context {
+                source: holder.into(),
+                generation: Generation(object.generation),
+                controller: player_id(&object.controller)?,
+            },
+            ids,
+        )?;
+        let mut total = 0_i64;
+        for ability in &abilities {
+            check(ability)?;
+            for effect in &ability.node.declarations {
+                if let Effect::CostModifier {
+                    kind: CostKind::Evolution,
+                    change: CostChange::Delta { amount },
+                    ..
+                } = effect
+                {
+                    total = total
+                        .checked_add(execution.integer(&quote, amount)?.0)
+                        .ok_or_else(|| invalid("static evolution delta overflow"))?;
+                }
+            }
+        }
+        Ok(total)
     }
 }

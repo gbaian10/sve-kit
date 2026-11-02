@@ -1,5 +1,6 @@
 use super::super::{Decision, DecisionId, DecisionKind, Declinable, Visibility};
 use super::{BodyContext, Located, LoweringError, Node, PlayerRef, SourceSpan, ast, unsupported};
+use crate::ir::public_numbers;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -131,8 +132,8 @@ impl BodyContext<'_> {
             bind: choice.bind.clone(),
             from: from.clone(),
             distinct_by: choice.distinct_by.clone(),
-            n,
-            upto,
+            n: n.map(ast::NumericArgument::Literal),
+            upto: upto.map(ast::NumericArgument::Literal),
             option: None,
         };
         let (domain, cardinality) = match union {
@@ -366,8 +367,22 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             name: query.name.as_deref(),
             names: &query.names,
             contains: query.name_contains.as_deref(),
-            cost: [query.cost_eq, query.cost_le, query.cost_ge],
-            original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
+            cost: [
+                query.cost_eq,
+                query
+                    .cost_le
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
+                query.cost_ge,
+            ],
+            original_cost: [
+                query.orig_cost_eq,
+                query
+                    .orig_cost_le
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
+                query.orig_cost_ge,
+            ],
             hp_at_most: query.hp_le,
             acted: query.acted,
             evolved: query.evolved,
@@ -432,7 +447,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),
-            original_cost: [query.orig_cost_eq, None, None],
+            original_cost: [query.orig_cost_eq, None, query.orig_cost_ge],
             ..Self::default()
         }
     }
@@ -448,8 +463,22 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
             class: query.class.as_deref(),
             contains: query.name_contains.as_deref(),
             name: query.name.as_deref(),
-            cost: [query.cost_eq, query.cost_le, query.cost_ge],
-            original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
+            cost: [
+                query.cost_eq,
+                query
+                    .cost_le
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
+                query.cost_ge,
+            ],
+            original_cost: [
+                query.orig_cost_eq,
+                query
+                    .orig_cost_le
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
+                query.orig_cost_ge,
+            ],
             ..Self::default()
         }
     }
@@ -690,4 +719,55 @@ fn number_limit(
         comparison,
         right: super::Expr::Literal(super::Int(i64::try_from(limit).unwrap_or(i64::MAX))),
     }))
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Public numeric filters share body definitions and checked expression lowering."
+)]
+impl BodyContext<'_> {
+    pub(super) fn numeric_limits(
+        &mut self,
+        predicate: super::Expr<super::Bool>,
+        candidate: super::Binding<super::super::ObjectRef>,
+        cost: Option<&ast::NumericArgument>,
+        original_cost: Option<&ast::NumericArgument>,
+        path: &str,
+    ) -> Result<super::Expr<super::Bool>, LoweringError> {
+        use super::super::{
+            CharacteristicView, Comparison, IntOperation, NumberRead, ObjectOperand, ObjectView,
+            Predicate,
+        };
+        use super::Expr;
+        let mut predicates = vec![predicate];
+        for (argument, view) in [
+            (cost, CharacteristicView::Effective),
+            (original_cost, CharacteristicView::Original),
+        ] {
+            if let Some(ast::NumericArgument::Expression(value)) = argument {
+                let number: ast::Number = super::decode(value.as_ref().clone(), path)?;
+                let right = self.number(&number, path, &mut super::BTreeSet::new())?;
+                if !public_numbers::check(&right) {
+                    return Err(unsupported(path));
+                }
+                predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
+                    left: Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                        information: NumberRead::Cost {
+                            object: ObjectView::Current {
+                                object: Box::new(ObjectOperand::Bound { binding: candidate }),
+                            },
+                            view,
+                        },
+                    })),
+                    comparison: Comparison::LessEqual,
+                    right,
+                })));
+            }
+        }
+        if predicates.len() == 1 {
+            Ok(predicates.remove(0))
+        } else {
+            Ok(Expr::Compute(Box::new(Predicate::And { predicates })))
+        }
+    }
 }

@@ -11,6 +11,7 @@ use super::{
     ObjectView, PlayerRef, PlayerRelation, PlayerSet, RecipientSet, SelectionView, Selector,
     SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use crate::ir::public_numbers;
 use core::slice;
 
 const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
@@ -147,6 +148,13 @@ impl BodyContext<'_> {
                         &super::selection::ObjectFilter::from(query),
                         candidate,
                     );
+                    let predicate = self.numeric_limits(
+                        predicate,
+                        candidate,
+                        query.cost_le.as_ref(),
+                        query.orig_cost_le.as_ref(),
+                        path,
+                    )?;
                     if query.not_same_name_as_this {
                         super::search::exclude_holder_name(predicate, candidate)
                     } else {
@@ -175,7 +183,34 @@ impl BodyContext<'_> {
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        let dynamic_count = target
+            .n
+            .as_ref()
+            .or(target.upto.as_ref())
+            .is_some_and(ast::NumericArgument::is_dynamic);
+        if dynamic_count
+            && (resolution
+                || target.from.observation.is_some()
+                || target.from.leader.is_some()
+                || target.from.leaders.is_some()
+                || target.from.leader_or)
+        {
+            return Err(unsupported(path));
+        }
         if target.from.observation.is_some() {
+            if target
+                .from
+                .cost_le
+                .as_ref()
+                .is_some_and(ast::NumericArgument::is_dynamic)
+                || target
+                    .from
+                    .orig_cost_le
+                    .as_ref()
+                    .is_some_and(ast::NumericArgument::is_dynamic)
+            {
+                return Err(unsupported(path));
+            }
             return self.observed_object_choice(
                 target,
                 slice::from_ref(&target.from),
@@ -223,6 +258,11 @@ impl BodyContext<'_> {
         }
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
+        let aggregate_bounds = if dynamic_count {
+            vec![self.dynamic_target_count(target, path)?]
+        } else {
+            vec![]
+        };
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
@@ -233,13 +273,39 @@ impl BodyContext<'_> {
                     cardinality,
                     distinct_by: target.distinct_by.as_ref().map(|_| ObjectProperty::Names),
                     disjoint: Disjointness::Disjoint,
-                    aggregate_bounds: vec![],
+                    aggregate_bounds,
                 },
                 binding,
                 target_roles: None,
             },
             cardinality,
         ))
+    }
+
+    fn dynamic_target_count(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+    ) -> Result<super::super::AggregateBound, LoweringError> {
+        let Some(ast::NumericArgument::Expression(argument)) =
+            target.n.as_ref().or(target.upto.as_ref())
+        else {
+            return Err(unsupported(path));
+        };
+        let number: ast::Number = super::decode(argument.as_ref().clone(), path)?;
+        let value = self.number(&number, path, &mut BTreeSet::new())?;
+        if !public_numbers::check(&value) {
+            return Err(unsupported(path));
+        }
+        Ok(super::super::AggregateBound {
+            property: super::super::NumericProperty::Count,
+            comparison: if target.n.is_some() {
+                Comparison::Equal
+            } else {
+                Comparison::LessEqual
+            },
+            value,
+        })
     }
 
     /// Each branch filters the same Look receipt; several branches form one OR candidate set.
@@ -284,7 +350,11 @@ impl BodyContext<'_> {
             .filter(|receipt| matches!(receipt, ObjectReceipt::Look { .. }))
             .ok_or_else(|| unsupported(path))?
             .clone();
-        let cardinality = match (target.n, target.upto, target.any) {
+        let cardinality = match (
+            target.n.as_ref().and_then(ast::NumericArgument::literal),
+            target.upto.as_ref().and_then(ast::NumericArgument::literal),
+            target.any,
+        ) {
             (Some(count), None, false) => Cardinality {
                 minimum: Nat(count),
                 maximum: Some(Nat(count)),
@@ -549,6 +619,7 @@ impl BodyContext<'_> {
                 name: None,
                 name_contains: None,
                 orig_cost_eq: None,
+                orig_cost_ge: None,
                 token: None,
                 not_token: None,
             } = count
@@ -564,6 +635,26 @@ impl BodyContext<'_> {
             };
             (
                 value,
+                Cardinality {
+                    minimum: Nat(1),
+                    maximum: None,
+                },
+            )
+        } else if let Some(ast::ModeCap::Number(argument)) = &choice.upto {
+            if choice.n.is_some() || choice.instead.is_some() || choice.exclude_chosen.is_some() {
+                return Err(unsupported(path));
+            }
+            let number: ast::Number = super::decode(argument.as_ref().clone(), path)?;
+            if !matches!(&number,ast::Number::Per{per} if per.unit>0 && matches!(per.of,ast::Number::Count{..}))
+            {
+                return Err(unsupported(path));
+            }
+            let value = self.number(&number, path, &mut BTreeSet::new())?;
+            if !public_numbers::check(&value) {
+                return Err(unsupported(path));
+            }
+            (
+                Expr::Compute(Box::new(NatOperation::CheckedInt { value })),
                 Cardinality {
                     minimum: Nat(1),
                     maximum: None,
@@ -815,7 +906,9 @@ fn choice_count(
     let upto = match &choice.upto {
         None => None,
         Some(ast::ModeCap::Fixed(number)) => Some(*number),
-        Some(ast::ModeCap::Count { .. }) => return Err(unsupported(path)),
+        Some(ast::ModeCap::Count { .. } | ast::ModeCap::Number(_)) => {
+            return Err(unsupported(path));
+        }
     };
     let (number, exact) = quantity(choice.n, upto, path)?;
     let cap = number.min(printed);
@@ -1049,7 +1142,23 @@ fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, 
 }
 
 fn target_cardinality(target: &ast::Target, path: &str) -> Result<Cardinality, LoweringError> {
-    match (target.n, target.upto, target.any) {
+    if target.n.is_some() && target.upto.is_some() {
+        return Err(unsupported(path));
+    }
+    if let Some(ast::NumericArgument::Expression(_)) = target.n.as_ref().or(target.upto.as_ref()) {
+        if target.any {
+            return Err(unsupported(path));
+        }
+        return Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        });
+    }
+    match (
+        target.n.as_ref().and_then(ast::NumericArgument::literal),
+        target.upto.as_ref().and_then(ast::NumericArgument::literal),
+        target.any,
+    ) {
         (Some(n), None, false) => Ok(Cardinality {
             minimum: Nat(n),
             maximum: Some(Nat(n)),
@@ -1071,6 +1180,16 @@ fn observed_predicate(
     branches: &[ast::TargetQuery],
     candidate: Binding<ObjectRef>,
 ) -> Option<Expr<Bool>> {
+    if branches.iter().any(|q| {
+        q.cost_le
+            .as_ref()
+            .is_some_and(ast::NumericArgument::is_dynamic)
+            || q.orig_cost_le
+                .as_ref()
+                .is_some_and(ast::NumericArgument::is_dynamic)
+    }) {
+        return None;
+    }
     let mut predicates = branches
         .iter()
         .map(|branch| {

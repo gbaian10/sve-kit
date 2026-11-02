@@ -454,7 +454,9 @@ impl Allocator {
         if let Some(declaration) = &entry.r#static {
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
-                Some(ast::StaticEffect::CostMod(_)) => other_costs::lower,
+                Some(ast::StaticEffect::CostMod(_) | ast::StaticEffect::EvolveCostMod(_)) => {
+                    other_costs::lower
+                }
                 Some(
                     ast::StaticEffect::Prevent(_)
                     | ast::StaticEffect::DamageMod(_)
