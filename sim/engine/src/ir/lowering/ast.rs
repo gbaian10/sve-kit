@@ -501,8 +501,24 @@ pub(super) struct Look {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct DeckTop {
-    pub who: SelfPlayer,
+    pub who: DeckHolder,
     pub n: u64,
+}
+
+/// Whose deck a fixed top slice reads; `owner_of` follows a chosen object's owner.
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DeckHolder {
+    Side(LeaderSide),
+    Group(DeckGroup),
+    OwnerOf { owner_of: String },
+}
+
+/// 「相手プレイヤーすべて」 keeps its printed set instead of collapsing to `opp`.
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DeckGroup {
+    Opponents,
 }
 
 #[derive(Deserialize)]

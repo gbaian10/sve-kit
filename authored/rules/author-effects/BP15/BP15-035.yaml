@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-035:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+          while:
+            cmp:
+              left:
+                count:
+                  who: opp
+                  zone: cemetery
+              op: ge
+              right: 10
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: 黄金の小剣
+                to: ex
+                n: 1
+            - move:
+                top:
+                  who: opponents
+                  n: 1
+                to: cemetery
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP15-T01
