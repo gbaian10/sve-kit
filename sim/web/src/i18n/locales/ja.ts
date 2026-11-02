@@ -417,7 +417,6 @@ export default {
       atk: "攻撃力",
       def: "体力",
     },
-    descending: "降順",
     thenBy: "次に",
     noSecondary: "なし",
     newestFirst: "新→旧",

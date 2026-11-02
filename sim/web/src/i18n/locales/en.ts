@@ -424,7 +424,6 @@ export default {
       atk: "Attack",
       def: "Defense",
     },
-    descending: "Descending",
     thenBy: "Then by",
     noSecondary: "None",
     newestFirst: "New→old",

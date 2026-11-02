@@ -400,7 +400,6 @@ const zhTW = {
       atk: "攻擊力",
       def: "生命值",
     },
-    descending: "降冪",
     thenBy: "再依",
     noSecondary: "無",
     newestFirst: "新→舊",
