@@ -1,0 +1,42 @@
+cards:
+  CP04-079:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+          ub: true
+        line: 1
+      - line: 1
+        section: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - ward
+                "on": this
+          while:
+            exists:
+              kind: follower
+              other: true
+              trait: 〈ジオ・ニヴルヘル〉
+              who: self
+              zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
