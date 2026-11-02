@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-023:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                trait: 盗賊
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - move:
+                top:
+                  who:
+                    owner_of: enemy
+                  n: 1
+                to: cemetery
+      - line: 2
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - player_effect:
+                        who: self
+                        effect:
+                          cost_mod:
+                            when_playing:
+                              who: self
+                              name: アルビダの号令
+                            delta: -5
+                            next_only: true
+                        until: turn
+                  - - player_effect:
+                        who: self
+                        effect:
+                          cost_mod:
+                            when_playing:
+                              who: self
+                              trait: 盗賊
+                            delta: -3
+                            next_only: true
+                        until: turn

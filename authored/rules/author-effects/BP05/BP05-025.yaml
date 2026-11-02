@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          do:
+            - move:
+                top:
+                  who: opp
+                  n: 1
+                to: cemetery
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                then:
+                  - buff:
+                      "on": this
+                      power: 2
