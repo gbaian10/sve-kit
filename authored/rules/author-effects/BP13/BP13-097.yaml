@@ -1,0 +1,58 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-097:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 5
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: amulet
+                  orig_cost_le: 2
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: field
+                result: placed
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 3
+        activate:
+          cost:
+            act_self: true
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: field
+                kind: amulet
+              n: 1
+          do:
+            - destroy: chosen

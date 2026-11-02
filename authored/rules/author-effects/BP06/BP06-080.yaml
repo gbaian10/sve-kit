@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-080:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
+            - bind: returned
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: 妖怪
+                not_same_name_as_this: true
+              n: 1
+              option: 2
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        to: enemy
+                        n: 1
+                    - move:
+                        to: cemetery
+                        top:
+                          who: self
+                          n: 1
+                  - - move:
+                        ref: returned
+                        to: hand

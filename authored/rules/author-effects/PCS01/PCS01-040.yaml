@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  PCS01-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - damage:
+                n: 1
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                  except:
+                    in: enemy
+      - line: 1
+        section: 1
+        super_evolve_time:
+          do:
+            - damage:
+                n: 2
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - who: opp
+                      zone: field
+                      kind: follower
+    rule_sections:
+      - section: 1

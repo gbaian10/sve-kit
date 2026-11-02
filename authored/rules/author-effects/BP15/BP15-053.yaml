@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-053:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                traits_all:
+                  - 絶傑
+                  - 魔法使い
+                not_same_name_as_this: true
+              n: 1
+          do:
+            - move:
+                ref: chosen
+                to: ex
+                result: placed
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      ref: this
+                      from: hand
+                then:
+                  - grant:
+                      "on":
+                        follow: placed
+                      abilities:
+                        - play:
+                            cost_delta: -3
+                      until: turn

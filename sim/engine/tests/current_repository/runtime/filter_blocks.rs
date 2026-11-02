@@ -9,7 +9,7 @@ use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::SearchAnswer;
 
 pub(super) struct Fixture {
-    selection: SelectedEffects,
+    pub(super) selection: SelectedEffects,
     programs: Vec<(String, WellFormedCardProgram)>,
 }
 
@@ -49,12 +49,16 @@ pub(super) fn fixture() -> &'static Fixture {
             ("flt-dragon4", "フォロワー", "4", "4", json!(["武闘竜人"])),
             ("flt-dragon3", "フォロワー", "3", "4", json!(["武闘竜人"])),
             ("flt-uma", "フォロワー", "1", "1", json!(["ウマ娘"])),
+            ("flt-wizard", "フォロワー", "1", "1", json!(["絶傑", "魔法使い"])),
+            ("flt-geo", "フォロワー", "1", "1", json!(["〈ジオ・テオゴニア〉"])),
+            ("flt-diabolos", "フォロワー", "1", "1", json!(["ディアボロス"])),
+            ("flt-yokai", "フォロワー", "1", "1", json!(["妖怪"])),
         ] {
             add_card(
                 &mut snapshot,
                 &mut input,
                 name,
-                &json!({"name":name,"card_type":kind,"card_class":"ニュートラル","cost":"1","power":power,"hp":hp,"traits":traits,"text":null,"sections":[]}),
+                &json!({"name":name,"card_type":kind,"card_class":"ニュートラル","cost":if name == "flt-wizard" { "3" } else { "1" },"power":power,"hp":hp,"traits":traits,"text":null,"sections":[]}),
             );
             programs.push((
                 name.into(),
@@ -154,7 +158,9 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay, prefer: &[&str]) -> Ca
         let answer = match &question.domain {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
-            InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(1)]),
+            InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(
+                if prefer.contains(&"mode-2") { 2 } else { 1 },
+            )]),
             InputDomain::Targets(domain) | InputDomain::CostMaterials(domain) => {
                 let count = usize::try_from(domain.cardinality.minimum.0.max(1)).unwrap();
                 let mut members: Vec<_> = domain.members.iter().collect();
@@ -220,6 +226,21 @@ pub(super) fn pending(game: &mut Game, card: &str) -> CardPlay {
         Answer::Pending(option.handle),
     )
     .unwrap()
+}
+
+pub(super) fn activate(game: &mut Game, card: &str, index: usize) -> CardPlay {
+    let ability = fixture().selection.current[card]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .filter(|a| a.node.kind == AbilityKind::Activated)
+        .nth(index)
+        .unwrap()
+        .node
+        .id;
+    game.activate_internal_card("source", ability, PlayerId { seat: 1 })
+        .unwrap()
 }
 
 pub(super) fn evolve(game: &mut Game) {
