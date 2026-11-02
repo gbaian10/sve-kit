@@ -1,84 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP19-009:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - read: self.combo
-              - 3
-          then:
-            op: evolve
-            subjects: self
-        event: enter
-        subject: self
-  BP19-010:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: look
-              count: 4
-              bind: seen
-            - op: optional
-              selection:
-                select:
-                  from: seen
-                  trait: 八獄
-                min: 1
-                max: 1
-                bind: chosen
-              then:
-                op: seq
-                steps:
-                  - op: reveal
-                    subjects: chosen
-                    to: all
-                  - op: move
-                    subjects: chosen
-                    to: hand
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    difference:
-                      - seen
-                      - chosen
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - chosen
-                  max:
-                    count:
-                      difference:
-                        - seen
-                        - chosen
-                  bind: ordered
-                  order: true
-                - op: move
-                  subjects: ordered
-                  to: deck
-                  position: bottom
-        event: evolve
-        subject: self
   BP19-042:
     status: complete
     abilities:
@@ -157,27 +79,6 @@ cards:
           - op: move
             subjects: self
             to: ex
-  BP19-051:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount: 2
-        event: evolve
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              union:
-                - side: opponent
-                  zone: field
-                  type: follower
-                - opponent.leader
-            min: 1
-            max: 1
   BP19-080:
     status: complete
     review: 依 Q2595／Q2596／Q2621：入場即誘發、解決時檢查保存的來源區域，同句兩組對象合為單一集合。
@@ -369,39 +270,6 @@ cards:
         costs:
           - op: act
             subjects: self
-  BP19-P30:
-    status: complete
-    abilities:
-      - line: 1
-        kind: activated
-        body:
-          op: damage
-          subjects: target.1
-          amount: 1
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: amulet
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 1
-          - op: act
-            subjects: self
-          - op: move
-            subjects: cost.1
-            to: cemetery
   BP19-P31:
     status: complete
     review: E27 「1枚を場に出してよい」以單次 min:0／max:1 選擇表達；不另插入是否執行的輸入點。

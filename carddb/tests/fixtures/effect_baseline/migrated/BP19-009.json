@@ -1,0 +1,41 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 2
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "read": "self.combo"
+            },
+            3
+          ]
+        },
+        "then": {
+          "op": "evolve",
+          "subjects": "self"
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

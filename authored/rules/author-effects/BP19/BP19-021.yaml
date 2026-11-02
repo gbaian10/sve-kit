@@ -1,0 +1,65 @@
+cards:
+  BP19-021:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+          - ward
+      - line: 2
+        attack_time:
+          per_turn: 2
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      plus:
+                        - count:
+                            who: self
+                            zone: field
+                            kind: follower
+                            class: ロイヤル
+                        - count:
+                            who: self
+                            zone: ex
+                            kind: follower
+                            class: ロイヤル
+                    op: eq
+                    right: 10
+                then:
+                  - stand: this
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      plus:
+                        - count:
+                            who: self
+                            zone: field
+                            kind: follower
+                            class: ロイヤル
+                        - count:
+                            who: self
+                            zone: ex
+                            kind: follower
+                            class: ロイヤル
+                    op: ge
+                    right: 5
+                then:
+                  - banish:
+                      ref:
+                        kind: follower
+                        who: opp
+                        zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
