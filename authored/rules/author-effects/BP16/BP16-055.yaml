@@ -1,0 +1,31 @@
+cards:
+  BP16-055:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: ガーディアンゴーレム
+          optional_cost:
+            earth_rite: 1
+            result: rite
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP16-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

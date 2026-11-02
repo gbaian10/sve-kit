@@ -1,0 +1,26 @@
+cards:
+  BP14-045:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 3
+                to: victim
+            - stack_plus: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
