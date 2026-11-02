@@ -532,7 +532,46 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let maximum = u64::try_from(choice.options.len()).map_err(|_private| unsupported(path))?;
-        let (count, cardinality) = choice_count(self, choice, maximum, path)?;
+        let (count, cardinality) = if let Some(ast::ModeCap::Count { count }) = &choice.upto {
+            if choice.n.is_some() || choice.instead.is_some() || choice.exclude_chosen.is_some() {
+                return Err(unsupported(path));
+            }
+            let ast::CountQuery {
+                face_up: None,
+                class: None,
+                not_class: None,
+                other: false,
+                who: ast::Side::Controller,
+                zone: ast::CountZone::Field,
+                kind: None,
+                keyword: None,
+                r#trait: Some(_),
+                name: None,
+                name_contains: None,
+                orig_cost_eq: None,
+                token: None,
+                not_token: None,
+            } = count
+            else {
+                return Err(unsupported(path));
+            };
+            let count_expression = self.zone_count(count, path)?;
+            let Expr::Compute(operation) = count_expression else {
+                return Err(unsupported(path));
+            };
+            let super::super::IntOperation::FromNat { value } = *operation else {
+                return Err(unsupported(path));
+            };
+            (
+                value,
+                Cardinality {
+                    minimum: Nat(1),
+                    maximum: None,
+                },
+            )
+        } else {
+            choice_count(self, choice, maximum, path)?
+        };
         if choice.exclude_chosen.is_some()
             && (choice.n != Some(1) || choice.upto.is_some() || choice.instead.is_some())
         {
@@ -766,7 +805,12 @@ fn choice_count(
     printed: u64,
     path: &str,
 ) -> Result<(Expr<Nat>, Cardinality), LoweringError> {
-    let (number, exact) = quantity(choice.n, choice.upto, path)?;
+    let upto = match &choice.upto {
+        None => None,
+        Some(ast::ModeCap::Fixed(number)) => Some(*number),
+        Some(ast::ModeCap::Count { .. }) => return Err(unsupported(path)),
+    };
+    let (number, exact) = quantity(choice.n, upto, path)?;
     let cap = number.min(printed);
     let bounds = Cardinality {
         minimum: Nat(if exact { cap } else { u64::from(cap > 0) }),

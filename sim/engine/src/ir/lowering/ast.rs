@@ -1255,12 +1255,19 @@ pub(super) enum TargetSingleZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct Choice {
     pub n: Option<u64>,
-    pub upto: Option<u64>,
+    pub upto: Option<ModeCap>,
     pub instead: Option<Vec<ChoiceInstead>>,
     pub exclude_chosen: Option<ThisTurn>,
     pub options: Vec<Vec<Step>>,
     #[serde(rename = "who")]
     pub _who: Option<SelfPlayer>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum ModeCap {
+    Fixed(u64),
+    Count { count: CountQuery },
 }
 
 #[derive(Deserialize)]

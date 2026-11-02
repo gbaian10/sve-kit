@@ -5,6 +5,10 @@ use crate::ir::{
     ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef,
     Predicate, Program, SpellCountTime, ValueEquality, Visibility, ZoneKind,
 };
+use crate::ir::{
+    CharacteristicView, NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView,
+    Selector, TextQuantifier, TraitsRead,
+};
 use alloc::collections::BTreeSet;
 
 #[expect(
@@ -170,6 +174,51 @@ impl Checker {
                     return Err(self.error(WellFormedReason::InvalidModes));
                 }
                 self.conditional_count(operation)
+            }
+            Expr::Live(read) if bounds.minimum == Nat(1) && bounds.maximum.is_none() => {
+                let NatRead::ZoneCount { selector } = read.as_ref() else {
+                    return self.reject();
+                };
+                let Selector::Zone {
+                    players,
+                    zone: ZoneKind::Field,
+                    view: SelectionView::Current {},
+                    binding,
+                    predicate,
+                } = selector
+                else {
+                    return self.reject();
+                };
+                if players.relation != PlayerRelation::SelfPlayer
+                    || players.relative_to != (PlayerRef::Controller {})
+                    || players.cardinality
+                        != (Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        })
+                    || players.text_quantifier != TextQuantifier::Implicit
+                {
+                    return self.reject();
+                }
+                let Expr::Compute(condition) = predicate.as_ref() else {
+                    return self.reject();
+                };
+                let Predicate::And { predicates } = condition.as_ref() else {
+                    return self.reject();
+                };
+                let [Expr::Compute(trait_check)] = predicates.as_slice() else {
+                    return self.reject();
+                };
+                if !matches!(trait_check.as_ref(), Predicate::HasTrait {
+                    traits: Expr::Live(traits), ..
+                } if matches!(traits.as_ref(), TraitsRead::Traits {
+                    object: ObjectView::Current { object },
+                    view: CharacteristicView::Effective,
+                } if **object == (ObjectOperand::Bound { binding: *binding })))
+                {
+                    return self.reject();
+                }
+                Ok(())
             }
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }

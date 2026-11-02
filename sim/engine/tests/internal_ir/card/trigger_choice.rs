@@ -266,3 +266,106 @@ fn phase_choice_checks_the_public_guard_when_the_occurrence_is_played() {
         );
     }
 }
+
+fn dynamic_choice(cap: &Value) -> Value {
+    json!({"do":[{"choice":{"upto":cap,"options":[[{"life":{"who":"self","delta":1}}],[{"draw":{"n":1}}]]}}]})
+}
+#[test]
+fn dynamic_mode_cap_zero_skips_the_formal_group_without_executing_a_mode() {
+    let programs = lowerer()
+        .lower(&tree(
+            "fanfare",
+            dynamic_choice(&json!({"count":{"who":"self","zone":"field","trait":"absent"}})),
+        ))
+        .unwrap();
+    let mut game = position(&programs["unit-follower"], 2, false);
+    assert!(
+        matches!(
+            game.play_internal_card("s", PlayerId { seat: 1 }).unwrap(),
+            CardPlay::Entered(_)
+        ),
+        "the printed base entry precedes its mode declaration"
+    );
+    if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("printed fanfare");
+    };
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P1"]["leader"]["life"], 20_u8,
+        "a zero cap does not execute even the first mode"
+    );
+    assert_eq!(state["P1"]["hand"], json!([]));
+}
+#[test]
+fn dynamic_mode_caps_reject_other_zones_players_filters_and_arithmetic() {
+    for count in [
+        json!({"who":"opp","zone":"field","trait":"absent"}),
+        json!({"who":"self","zone":"hand","trait":"absent"}),
+        json!({"who":"self","zone":"deck","trait":"absent"}),
+        json!({"who":"self","zone":"cemetery","trait":"absent"}),
+        json!({"who":"self","zone":"field"}),
+        json!({"who":"self","zone":"field","trait":"absent","kind":"follower"}),
+    ] {
+        lowerer()
+            .lower(&tree("fanfare", dynamic_choice(&json!({"count":count}))))
+            .unwrap_err();
+    }
+    lowerer()
+        .lower(&tree(
+            "fanfare",
+            dynamic_choice(
+                &json!({"plus":[1,{"count":{"who":"self","zone":"field","trait":"absent"}}]}),
+            ),
+        ))
+        .unwrap_err();
+    let mut exact =
+        dynamic_choice(&json!({"count":{"who":"self","zone":"field","trait":"absent"}}));
+    exact["do"][0]["choice"]["n"] = exact["do"][0]["choice"]["upto"].take();
+    exact["do"][0]["choice"]
+        .as_object_mut()
+        .unwrap()
+        .remove("upto");
+    lowerer().lower(&tree("fanfare", exact)).unwrap_err();
+}
+#[test]
+fn hand_written_ir_cannot_turn_a_public_mode_count_into_a_hidden_hand_count() {
+    let programs = lowerer()
+        .lower(&tree(
+            "fanfare",
+            dynamic_choice(&json!({"count":{"who":"self","zone":"field","trait":"absent"}})),
+        ))
+        .unwrap();
+    let mut bad = programs["unit-follower"].card().clone();
+    let Node::Control {
+        control: Control::Mode {
+            count: Expr::Live(read),
+            ..
+        },
+    } = &mut bad.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("direct live public count");
+    };
+    let NatRead::ZoneCount {
+        selector: Selector::Zone { zone, .. },
+    } = read.as_mut()
+    else {
+        panic!("a public field selector");
+    };
+    *zone = ZoneKind::Hand;
+    assert!(
+        WellFormedCardProgram::check(bad).is_err(),
+        "the checker keeps hidden mode-count reads closed even when the lowerer is bypassed"
+    );
+}

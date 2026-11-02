@@ -1,0 +1,45 @@
+cards:
+  ECP01-048:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - choice:
+                options:
+                  - - banish:
+                        ref: enemy
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+                  - - life:
+                        delta: 2
+                        who: self
+                    - draw:
+                        n: 1
+                upto:
+                  count:
+                    trait: メジロ家
+                    who: self
+                    zone: field
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
