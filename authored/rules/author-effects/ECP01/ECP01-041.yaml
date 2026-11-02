@@ -1,0 +1,42 @@
+cards:
+  ECP01-041:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        race_time:
+          do:
+            - move:
+                ref: chosen
+                result: placed
+                to: field
+            - buff:
+                hp: 1
+                "on": this
+                power: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: ウマ娘
+                who: self
+                zone: cemetery
+              upto: 1
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
