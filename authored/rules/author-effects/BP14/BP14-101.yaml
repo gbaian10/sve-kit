@@ -1,0 +1,39 @@
+cards:
+  BP14-101:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - pay:
+                cost:
+                  act_self: true
+                do:
+                  - draw:
+                      n: 1
+          on:
+            life_changed:
+              direction: up
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 招来の狐
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP14-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
