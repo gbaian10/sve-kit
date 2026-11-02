@@ -1,0 +1,51 @@
+cards:
+  BP19-104:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  name: ホーリータイガー
+                keywords:
+                  - ward
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+      - line: 4
+        activate:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T17
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

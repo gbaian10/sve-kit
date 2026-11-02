@@ -1,0 +1,39 @@
+cards:
+  BP19-025:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          who: self
+                          zone: deck
+                          name: 尽忠の看守
+                        to: field
+                  - - pay:
+                        cost:
+                          pp: 3
+                        do:
+                          - search:
+                              n: 1
+                              sel:
+                                who: self
+                                zone: deck
+                                name: 武皇の執行者・レーディエル
+                              to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

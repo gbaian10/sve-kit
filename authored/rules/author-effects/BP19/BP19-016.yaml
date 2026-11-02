@@ -1,0 +1,33 @@
+cards:
+  BP19-016:
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: 人形
+          do:
+            - draw:
+                n: 1
+                who: self
+            - create:
+                n: 2
+                to: ex
+                token: 操り人形
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
