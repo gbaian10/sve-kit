@@ -83,7 +83,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::Counter(_)
+            ast::Step::StackPlus(_)
+            | ast::Step::Counter(_)
             | ast::Step::Reveal(_)
             | ast::Step::Optional(_)
             | ast::Step::Pay(_)

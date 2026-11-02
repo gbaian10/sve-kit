@@ -13,25 +13,39 @@ use crate::ir::{
 };
 use serde_json::json;
 
-pub(super) fn check_action(action: &Action) -> Result<()> {
-    if let Action::Counter {
+const fn object_holder(holder: &Holder) -> bool {
+    matches!(
         holder,
+        Holder::Object {
+            object: ObjectOperand::SourceHolder {}
+                | ObjectOperand::Bound { .. }
+                | ObjectOperand::Selected { .. }
+        }
+    )
+}
+
+pub(super) fn check_action(action: &Action) -> Result<()> {
+    let Action::Counter {
+        holder,
+        kind,
         operation,
         amount,
-        ..
     } = action
-        && (!matches!(
-            holder,
-            Holder::Object {
-                object: ObjectOperand::SourceHolder {}
-                    | ObjectOperand::Bound { .. }
-                    | ObjectOperand::Selected { .. }
-            }
-        ) || !matches!(
-            operation,
-            CounterOperation::Add {} | CounterOperation::Remove {}
-        ) || !matches!(amount, Expr::Literal(Nat(n)) if i64::try_from(*n).is_ok()))
-    {
+    else {
+        return Ok(());
+    };
+    let fixed = matches!(amount, Expr::Literal(Nat(n)) if i64::try_from(*n).is_ok());
+    let valid = match operation {
+        CounterOperation::Add {} | CounterOperation::Remove {} => fixed,
+        CounterOperation::Move { to } => {
+            object_holder(to)
+                && (fixed
+                    || matches!(
+                        amount, Expr::Live(read) if matches!(read.as_ref(), NatRead::Counter { holder: source, kind: source_kind } if source == holder && source_kind == kind)
+                    ))
+        }
+    };
+    if !object_holder(holder) || !valid {
         return Err(unsupported("object counter change"));
     }
     Ok(())
@@ -103,6 +117,91 @@ impl Game {
     reason = "Counter costs and effects mutate the authoritative object counter map."
 )]
 impl Game {
+    fn internal_counter_move(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        holder: &Holder,
+        kind: &CounterKind,
+        destination: &Holder,
+        amount: &Expr<Nat>,
+    ) -> Result<Quantity> {
+        let before = execution.counter(self, holder, kind)?;
+        let recipient_before = execution.counter(self, destination, kind)?;
+        let Holder::Object { object: source } = holder else {
+            return Err(unsupported("counter source"));
+        };
+        let Holder::Object { object: recipient } = destination else {
+            return Err(unsupported("counter destination"));
+        };
+        let from = execution.object(self, source)?;
+        let to = execution.object(self, recipient)?;
+        for reference in [from, to] {
+            if !matches!(
+                self.object(execution.object_id(reference)?)?.zone.as_str(),
+                "field" | "ex"
+            ) {
+                return Err(unsupported("counter holder must be in Field or EX"));
+            }
+        }
+        let moved = if from == to {
+            0
+        } else {
+            execution.natural(self, amount)?.0.min(before.0)
+        };
+        let recipient_after = recipient_before
+            .0
+            .checked_add(moved)
+            .filter(|value| i64::try_from(*value).is_ok())
+            .ok_or_else(|| invalid("counter overflow"))?;
+        let key = self.catalog.keyword_id(&kind.0);
+        let removed = counter_change(from, &key, before, Nat(before.0.saturating_sub(moved)))?;
+        let added = counter_change(to, &key, recipient_before, Nat(recipient_after))?;
+        // Validate both endpoints before committing either counter change.
+        let group = self.group();
+        self.commit_counter_change(execution, &removed, group)?;
+        self.commit_counter_change(execution, &added, group)?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::CounterMove {
+                from: removed,
+                to: added,
+            },
+        );
+        Ok(Quantity {
+            amount: Int(i64::try_from(moved).map_err(invalid)?),
+            unit: QuantityUnit::Counters,
+        })
+    }
+
+    fn commit_counter_change(
+        &mut self,
+        execution: &Execution,
+        change: &CounterChangeEvent,
+        group: u64,
+    ) -> Result<()> {
+        let RuntimeHolder::Object { object } = change.holder else {
+            return Err(unsupported("object counter change"));
+        };
+        if change.delta.0 == 0 {
+            return Ok(());
+        }
+        let id = execution.object_id(object)?.to_owned();
+        self.object_mut(&id)?.state["counters"][&change.kind.0] = json!(change.after.0);
+        let translated = self.catalog.keyword_name(&change.kind.0);
+        let name = if translated.is_empty() {
+            change.kind.0.as_str()
+        } else {
+            translated
+        };
+        self.emit(
+            json!({"kind":"カウンター","object":id,"name":name,"delta":change.delta.0}),
+            &execution.frame().cause,
+            group,
+        );
+        Ok(())
+    }
+
     pub(super) fn internal_counter(
         &mut self,
         execution: &mut Execution,
@@ -110,6 +209,18 @@ impl Game {
         payment: bool,
     ) -> Result<Quantity> {
         check_action(&instruction.action)?;
+        if let Action::Counter {
+            holder,
+            kind,
+            operation: CounterOperation::Move { to },
+            amount,
+        } = &instruction.action
+        {
+            if payment {
+                return Err(unsupported("counter movement is not a payment"));
+            }
+            return self.internal_counter_move(execution, instruction, holder, kind, to, amount);
+        }
         let Action::Counter {
             holder,
             kind,
@@ -307,4 +418,23 @@ pub(super) fn candidate_read(read: &IntOperation, candidate: Binding<ObjectRef>)
         if matches!(value.as_ref(), NatRead::Counter {
             holder: Holder::Object { object: ObjectOperand::Bound { binding } }, kind
         } if *binding == candidate && !kind.0.is_empty()))
+}
+
+fn counter_change(
+    reference: ObjectRef,
+    kind: &str,
+    before: Nat,
+    after: Nat,
+) -> Result<CounterChangeEvent> {
+    let delta = i64::try_from(after.0)
+        .map_err(invalid)?
+        .checked_sub(i64::try_from(before.0).map_err(invalid)?)
+        .ok_or_else(|| invalid("counter delta overflow"))?;
+    Ok(CounterChangeEvent {
+        holder: RuntimeHolder::Object { object: reference },
+        kind: CounterKind(kind.into()),
+        before,
+        after,
+        delta: Int(delta),
+    })
 }

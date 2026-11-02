@@ -226,7 +226,7 @@ tags!(PaymentTime {
     ResolutionChoice
 });
 // Materials exposes the instruction's one selection; it never asks for a second decision.
-record!(CostStep { instruction: Box<Instruction>, materials: Option<Binding<Selector>> });
+record!(CostStep { instruction: Box<Instruction>, materials: Option<Binding<Selector>>, keyword: Option<KeywordId> });
 
 tags!(QuantityUnit {
     Cards,

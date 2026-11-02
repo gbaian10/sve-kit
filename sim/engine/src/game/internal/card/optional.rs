@@ -21,23 +21,26 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
     let CostSpec::Ordered { steps } = costs else {
         return Err(unsupported("optional cost alternatives"));
     };
-    let [step] = steps.as_slice() else {
-        return Err(unsupported("one optional payment step"));
-    };
-    let instruction = &step.instruction;
-    if step.materials.is_some()
-        || instruction.precondition.is_some()
-        || instruction.source != *origin
-        || instruction.actor != (PlayerRef::Controller {})
-        || instruction.context != InstructionContext::Cost
-        || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
+    if steps.is_empty() {
+        return Err(unsupported("empty optional payment"));
+    }
+    for step in steps {
+        let instruction = &step.instruction;
+        if step.materials.is_some()
+            || instruction.precondition.is_some()
+            || instruction.source != *origin
+            || instruction.actor != (PlayerRef::Controller {})
+            || instruction.context != InstructionContext::Cost
+            || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
-            || super::hand_payment::check_cost(&instruction.action)
-            || super::material::cost_objects(&instruction.action)
-                .is_some_and(|objects| matches!(objects, Selector::Bound { .. })))
-    {
-        return Err(unsupported("optional payment source or cost"));
+                || super::hand_payment::check_cost(&instruction.action)
+                || super::super::counters::is_cost(&instruction.action)
+                || super::material::cost_objects(&instruction.action)
+                    .is_some_and(|objects| matches!(objects, Selector::Bound { .. })))
+        {
+            return Err(unsupported("optional payment source or cost"));
+        }
     }
     Ok(())
 }
@@ -63,6 +66,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     if !matches!(step.instruction.action, Action::Resource { .. })
                         && !super::hand_payment::check_cost(&step.instruction.action)
                         && !super::material::check_cost(&step.instruction.action, play)
+                        && !super::super::counters::check_cost(&step.instruction.action, play)
                     {
                         return Err(unsupported("payment material parameter"));
                     }

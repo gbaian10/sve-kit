@@ -89,6 +89,7 @@ fn cost(mode: DiscardMode, materials: Option<Binding<Selector>>) -> CostStep {
     };
     instruction.context = InstructionContext::Cost;
     CostStep {
+        keyword: None,
         instruction,
         materials,
     }

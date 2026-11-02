@@ -1,0 +1,47 @@
+cards:
+  BP01-051:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then: &id001
+                  - damage:
+                      n: 6
+                      to: victim
+                  - damage:
+                      n: 2
+                      to:
+                        leader_of: victim
+          optional_cost:
+            earth_rite: 1
+            result: rite
+          targets:
+            - &id002
+              bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do: *id001
+          targets:
+            - *id002
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

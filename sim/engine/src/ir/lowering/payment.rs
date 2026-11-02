@@ -56,7 +56,14 @@ fn lower_operations(
     let mut steps = Vec::new();
     let mut parameters = Vec::new();
     for operation in operations {
+        let keyword = matches!(operation, ast::CostOperation::EarthRite(_))
+            .then_some(super::KeywordId::EarthRite);
         let action = match operation {
+            ast::CostOperation::EarthRite(amount) => {
+                let (action, decision) = super::earth::cost(context, *amount, path)?;
+                parameters.extend(decision);
+                action
+            }
             ast::CostOperation::Counter(value) => {
                 let (action, decision) = super::counters::cost(context, value, path)?;
                 parameters.extend(decision);
@@ -202,6 +209,7 @@ fn lower_operations(
             );
         }
         steps.push(CostStep {
+            keyword,
             materials: None,
             instruction: Box::new(Instruction {
                 id: InstructionId(id),
@@ -236,6 +244,7 @@ fn material_operation(
         ast::CostOperation::Act(_) => Ok(super::material::Operation::Act),
         ast::CostOperation::ToEx(_) => Ok(super::material::Operation::Ex),
         ast::CostOperation::Counter(_)
+        | ast::CostOperation::EarthRite(_)
         | ast::CostOperation::Pp(_)
         | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)

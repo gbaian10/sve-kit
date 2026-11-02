@@ -136,6 +136,7 @@ fn spell_material() -> WellFormedCardProgram {
     ability.active_zones = vec![ZoneKind::Resolution];
     ability.play.as_mut().unwrap().costs = CostSpec::Ordered {
         steps: vec![CostStep {
+            keyword: None,
             instruction: Box::new(Instruction {
                 id: InstructionId(1),
                 receipt: ReceiptId(1),

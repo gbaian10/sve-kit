@@ -1,5 +1,6 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::observation_selection::private_look_choice;
+use crate::ir::printed_keywords;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
@@ -8,7 +9,7 @@ use crate::ir::{
     PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
     SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
 };
-use crate::ir::{AggregateBound, PreconditionKind, PreconditionReason};
+use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use alloc::collections::BTreeSet;
 use core::iter::once;
@@ -74,6 +75,10 @@ impl Checker {
     }
 
     pub(super) fn decision(&mut self, decision: &Decision) -> Checked {
+        if printed_keywords::is_stack_increase_choice(decision) {
+            self.decision_header(decision)?;
+            return self.answer(decision, None);
+        }
         let DecisionKind::ResolutionChoice {
             may,
             cardinality,
@@ -616,6 +621,9 @@ impl Checker {
             CostSpec::Ordered { steps } => {
                 for (index, step) in steps.iter().enumerate() {
                     self.at(&index.to_string(), |checker| {
+                        if !keyword_cost(step) {
+                            return checker.reject();
+                        }
                         if step.instruction.context != InstructionContext::Cost {
                             return Err(checker.error(WellFormedReason::ExpectedCost));
                         }
@@ -683,5 +691,17 @@ fn has_roles(domain: &ChoiceDomain) -> bool {
         | ChoiceDomain::Integer { .. }
         | ChoiceDomain::Names { .. }
         | ChoiceDomain::QuickActionOrPass { .. } => false,
+    }
+}
+
+fn keyword_cost(step: &CostStep) -> bool {
+    match step.keyword {
+        None => true,
+        Some(KeywordId::EarthRite) => matches!(
+            &step.instruction.action,
+            Action::Counter { kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(amount), .. }
+                if kind.0 == "stack_counter" && amount.0 > 0
+        ),
+        Some(_) => false,
     }
 }

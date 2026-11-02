@@ -84,6 +84,7 @@ pub(super) fn lower(
             materials,
             cost: CostSpec::Ordered {
                 steps: vec![CostStep {
+                    keyword: None,
                     materials: None,
                     instruction: Box::new(Instruction {
                         id: InstructionId(id),

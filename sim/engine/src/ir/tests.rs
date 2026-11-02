@@ -482,6 +482,7 @@ fn static_declarations_and_play_costs_are_not_omitted() {
             parameters: vec![],
             costs: CostSpec::Ordered {
                 steps: vec![CostStep {
+                    keyword: None,
                     instruction: Box::new(Instruction {
                         id: InstructionId(9),
                         actor: PlayerRef::Controller {},

@@ -2,7 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, CardCoordinates, KeywordId, Located, LoweringError, ast,
     source_span, unsupported,
 };
-use crate::ir::{FaceId, InstructionId, Nat, printed_keywords};
+use crate::ir::{DecisionId, FaceId, InstructionId, Nat, printed_keywords};
 
 pub(super) fn lower(
     allocator: &mut Allocator,
@@ -23,7 +23,16 @@ pub(super) fn lower(
             source.author_path = format!("{path}/keywords/{index}");
             let scope = allocator.scope(path)?;
             let keyword = keyword_id(keyword).ok_or_else(|| unsupported(path))?;
-            let node = if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
+            let node = if keyword == KeywordId::Stack {
+                Some(printed_keywords::stack_definition(
+                    AbilityId(scope.0),
+                    scope,
+                    DecisionId(allocator.id(path)?),
+                    InstructionId(allocator.id(path)?),
+                    InstructionId(allocator.id(path)?),
+                    &source,
+                ))
+            } else if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
                 printed_keywords::drive_definition(
                     keyword,
                     AbilityId(scope.0),

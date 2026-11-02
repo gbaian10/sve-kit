@@ -12,7 +12,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
-use crate::ir::{effect_evolution, prevention};
+use crate::ir::{effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
@@ -112,7 +112,8 @@ fn keyword_source_paths(
                 | KeywordId::OnEvolve
                 | KeywordId::OnSuperEvolve
                 | KeywordId::OnRace
-                | KeywordId::Quick,
+                | KeywordId::Quick
+                | KeywordId::Stack,
             ..
         }
     ) {
@@ -306,6 +307,7 @@ fn check_requirements(
                             | "internal.KeywordId.Drain"
                             | "internal.KeywordId.Intimidate"
                             | "internal.KeywordId.Assail"
+                            | "internal.KeywordId.Stack"
                     ) && requirement
                         .locations
                         .iter()
@@ -328,12 +330,15 @@ fn play_requirement(code: &str) -> bool {
             | "shape.ObjectOperand.Selected"
             | "reference.selected-object"
             | "shape.NatRead.Counter"
+            | "counter.move"
             | "read.counter"
+            | "internal.KeywordId.EarthRite"
             | "shape.Holder.Object"
             | "shape.Action.Counter"
             | "action.counter"
             | "shape.CounterOperation.Add"
             | "shape.CounterOperation.Remove"
+            | "shape.CounterOperation.Move"
             | "shape.PaymentReference.CardPlay"
             | "internal.OwnerZone.Ex"
             | "shape.ObjectOperand.FollowEventMove"
@@ -510,6 +515,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
                 ..
             }
         );
+    let stack_rule = printed_keywords::is_stack_increase_choice(decision);
     let private_look = private_look_choice(decision);
     if !matches!(
         decision.domain,
@@ -523,7 +529,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             | ChoiceDomain::Objects { .. }
             | ChoiceDomain::Recipients { .. }
     ) || !decision.captures.is_empty()
-        || !(public_required || private_look)
+        || !(public_required || private_look || stack_rule)
     {
         return Err(unsupported("decision metadata"));
     }
@@ -614,6 +620,7 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Token"
             | "action.token"
             | "shape.TokenDestination.Single"
+            | "shape.TokenInitialState.StackCounters"
             | "shape.Action.Resource"
             | "action.resource"
             | "internal.Resource.PpCurrent"
@@ -897,6 +904,9 @@ fn supported(code: &str) -> bool {
             | "shape.ChoiceDomain.Distribution"
             | "shape.DecisionKind.ResolutionChoice"
             | "decision.resolution-choice"
+            | "decision.rule-choice"
+            | "shape.DecisionKind.RuleChoice"
+            | "internal.RuleProcedure.StackRecipient"
             | "internal.Declinable.Required"
             | "internal.Declinable.MayDecline"
             | "shape.Visibility.Public"

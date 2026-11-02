@@ -45,6 +45,7 @@ pub(super) fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Lo
             .map(|(index, action)| {
                 let id = u64::try_from(index).unwrap().checked_add(100).unwrap();
                 CostStep {
+                    keyword: None,
                     instruction: Box::new(Instruction {
                         id: InstructionId(id),
                         actor: PlayerRef::Controller {},
