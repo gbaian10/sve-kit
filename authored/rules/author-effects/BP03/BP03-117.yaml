@@ -1,0 +1,53 @@
+cards:
+  BP03-117:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pay:
+                        cost:
+                          discard:
+                            n: 1
+                            sel:
+                              kind: follower
+                              trait: 天使
+                              who: self
+                              zone: hand
+                        do:
+                          - destroy:
+                              ref: victim
+                  - - pay:
+                        cost:
+                          discard:
+                            n: 1
+                            sel:
+                              kind: follower
+                              trait: 堕天使
+                              who: self
+                              zone: hand
+                        do:
+                          - life:
+                              delta: 3
+                              who: self
+                          - draw:
+                              n: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -91,10 +91,14 @@ impl Game {
         if self.internal_hand_cost_materials(execution, &play.costs)? {
             return Ok(true);
         }
-        if let Some(payment) = &play.optional
-            && payment.accepted == Some(true)
+        for payment in play
+            .optional
+            .iter()
+            .filter(|payment| payment.accepted == Some(true))
         {
-            return self.internal_hand_cost_materials(execution, &payment.costs);
+            if self.internal_hand_cost_materials(execution, &payment.costs)? {
+                return Ok(true);
+            }
         }
         Ok(false)
     }

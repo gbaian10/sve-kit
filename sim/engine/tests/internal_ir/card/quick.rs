@@ -503,3 +503,115 @@ fn evolved_quick_departure_cost_is_rejected_before_a_window_can_offer_it() {
     assert!(board.load_internal_card("unit-follower", &program).is_err());
     assert_eq!(before, exact_authority(&board));
 }
+
+#[expect(
+    clippy::too_many_lines,
+    clippy::wildcard_enum_match_arm,
+    reason = "One table covers accepted, declined, and unavailable fees with shared Quick setup."
+)]
+#[test]
+fn quick_mode_fee_is_declinable_without_materials_and_pays_only_when_accepted() {
+    use alloc::collections::BTreeMap;
+    let ex_fee = json!({"banish":{"sel":{"who":"self","zone":"ex"},"n":1}});
+    let hand_fee = json!({"discard":{"sel":{"who":"self","zone":"hand"},"n":1}});
+    for (cost, materials, accepted) in [
+        (&ex_fee, 0_usize, false),
+        (&ex_fee, 1, true),
+        (&ex_fee, 0, true),
+        (&hand_fee, 1, true),
+    ] {
+        let mut tree = fanfare::expanded::spell_tree().clone();
+        let mut spell = tree["cards"]["SD03-005"].take();
+        spell["abilities"][0]["spell"] = json!({"do":[{"choice":{"n":1,"options":[
+            [{"pay":{"cost":cost,"do":[{"life":{"who":"self","delta":2}}]}}],
+            [{"life":{"who":"self","delta":1}}]
+        ]}}]});
+        tree["cards"] = json!({"unit-spell":spell});
+        let programs = lowerer()
+            .lower_with_printed_costs(&tree, &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]))
+            .unwrap();
+        let mut abilities = programs["unit-spell"].card().abilities.clone();
+        abilities.push(permit());
+        let hand_material = cost == &hand_fee;
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P2"]["pp"] = json!({"current":2,"max":2});
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        initial["players"]["P2"]["zones"]["hand"] = if hand_material {
+            json!([{"id":"q","card":"unit-spell"},{"id":"spare","card":"unit-spell"}])
+        } else {
+            json!([{"id":"q","card":"unit-spell"}])
+        };
+        initial["players"]["P2"]["zones"]["ex"] = json!(
+            (0..if hand_material { 0 } else { materials })
+                .map(|index| json!({"id":format!("ex-{index}"),"card":"unit-amulet"}))
+                .collect::<Vec<_>>()
+        );
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "quick-mode",
+        )
+        .unwrap();
+        game.load_internal_card("unit-spell", &card(abilities))
+            .unwrap();
+        for id in ["unit-follower", "unit-amulet"] {
+            game.load_internal_card(id, &card(vec![])).unwrap();
+        }
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let q = question(&mut game);
+        let InputDomain::Quick { options, .. } = &q.domain else {
+            panic!("quick window")
+        };
+        assert!(
+            !options.is_empty(),
+            "a declinable mode fee never hides the Quick spell"
+        );
+        let before = game.projection(View::Referee).unwrap();
+        let mut play = Ok(choose(&mut game, &q, Some(options[0].handle)));
+        while let Ok(CardPlay::Awaiting(question)) = play {
+            let answer = match &question.domain {
+                InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(1)]),
+                InputDomain::OptionalCost => Answer::OptionalCost(accepted),
+                InputDomain::CostMaterials(domain) => {
+                    assert!(accepted, "a declined fee asks for no materials");
+                    if hand_material {
+                        assert!(
+                            game.internal_decision(View::P1).is_none(),
+                            "hand fee candidates stay private"
+                        );
+                    }
+                    Answer::CostMaterials(vec![domain.members[0].handle])
+                }
+                _ => panic!("unexpected Quick mode question"),
+            };
+            play = game.answer_internal_card(question.actor, question.token, answer);
+        }
+        let after = game.projection(View::Referee).unwrap();
+        if accepted && materials == 0 {
+            play.unwrap_err();
+            assert_eq!(
+                after["P2"], before["P2"],
+                "an unpayable accepted fee restores the play"
+            );
+            continue;
+        }
+        resolved(play.unwrap());
+        assert_eq!(
+            after["P2"]["pp"]["current"], 1_u8,
+            "the fee adds no PP to the printed cost"
+        );
+        assert_eq!(
+            after["P2"]["leader"]["life"],
+            if accepted { 22 } else { 20 }
+        );
+        let zone = if hand_material { "hand" } else { "ex" };
+        assert_eq!(
+            after["P2"][zone].as_array().map_or(0, Vec::len),
+            materials - usize::from(accepted),
+            "only an accepted fee consumes its material"
+        );
+    }
+}

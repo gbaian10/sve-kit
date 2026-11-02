@@ -10,7 +10,8 @@ use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::{
     AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
-    ObjectRef, PlaySpec, PlayerRef, RecipientSet, SelectionSnapshot, Selector, TurnId,
+    ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet, SelectionSnapshot,
+    Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -18,7 +19,7 @@ use crate::ir::{
     Resource, ResourceOperation, ScopeId, SnapshotId, Visibility, ZoneKind,
 };
 use crate::ir::{FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
-use alloc::collections::{BTreeMap, VecDeque};
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -81,7 +82,14 @@ impl PlayMode {
             return Err(unsupported("any-number mode choice"));
         }
         for mode in &self.modes {
-            if mode.parameters.iter().any(|decision| !decision.captures.is_empty()
+            for decision in mode
+                .parameters
+                .iter()
+                .filter(|decision| super::material::is_parameter(decision))
+            {
+                super::material::check_parameter(decision)?;
+            }
+            if mode.parameters.iter().filter(|decision| !super::material::is_parameter(decision)).any(|decision| !decision.captures.is_empty()
                 || !matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
                     if constraint.groups.iter().all(|target| independent_selector(&target.selector)))) {
                 return Err(unsupported("mode targets require independent public selectors"));
@@ -103,7 +111,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(in crate::game::internal) chosen: BTreeMap<DecisionId, Vec<ModeId>>,
     parameters: VecDeque<Decision>,
     pub(super) exchange: Option<super::exchange::ExchangeState>,
-    pub(super) optional: Option<super::optional::OptionalState>,
+    pub(super) optional: Vec<super::optional::OptionalState>,
     pub(super) costs: CostSpec,
     additional: Option<Box<(FaceId, PlayCostPayment)>>,
     mode_costs: CostSpec,
@@ -121,14 +129,28 @@ struct SelectionOrigin {
 
 impl PlayState {
     fn material_posture(&self, decision: &Decision) -> bool {
-        let costs = self
-            .optional
-            .as_ref()
-            .map_or(&self.costs, |payment| &payment.costs);
-        super::material::posture_parameter(costs, decision)
+        super::material::posture_parameter(&self.costs, decision)
+            || self
+                .optional
+                .iter()
+                .any(|payment| super::material::posture_parameter(&payment.costs, decision))
             || self.additional.as_deref().is_some_and(|(_, payment)| {
                 super::material::posture_parameter(&payment.play.costs, decision)
             })
+    }
+
+    fn declined_material(&self, decision: &Decision) -> bool {
+        let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+            return false;
+        };
+        self.optional.iter().any(|payment| {
+            payment.accepted == Some(false)
+                && matches!(&payment.costs, CostSpec::Ordered { steps } if steps.iter().any(|step| {
+                    let action = &step.instruction.action;
+                    matches!(super::material::cost_objects(action), Some(Selector::Bound { reference }) if reference == binding)
+                        || super::super::counters::selected_cost(action) == Some(*binding)
+                }))
+        })
     }
 
     fn freeze_selection(&mut self, game: &Game, execution: &Execution) -> Result<()> {
@@ -141,15 +163,24 @@ impl PlayState {
                 for mode in &group.modes {
                     if chosen.contains(&mode.id) {
                         self.parameters.extend(mode.parameters.clone());
-                        let CostSpec::Ordered { steps } = &mode.costs else {
+                        self.optional
+                            .extend(super::optional::mode_state(&mode.body));
+                        let CostSpec::Ordered { steps: mode_steps } = &mode.costs else {
                             return Err(unsupported("mode cost alternatives"));
                         };
                         let CostSpec::Ordered { steps: selected } = &mut self.mode_costs else {
                             return Err(unsupported("selected mode costs"));
                         };
-                        selected.extend(steps.clone());
+                        selected.extend(mode_steps.clone());
                     }
                 }
+            }
+            // Cost materials of every selected mode follow all formal targets (R-0006).
+            // Without mode merging, additional-cost materials retain their earlier question.
+            if !self.groups.is_empty() {
+                self.parameters
+                    .make_contiguous()
+                    .sort_by_key(super::material::is_parameter);
             }
             // The first target fixes the game view; later answers only extend immutable slots.
             self.snapshot_id = SnapshotId(game.state.ir_epoch);
@@ -172,6 +203,15 @@ impl PlayState {
         }
         Ok(())
     }
+}
+
+pub(super) fn has_mode_payments(body: &Program) -> Result<bool> {
+    Ok(collect_modes(body, true)?.iter().any(|group| {
+        group
+            .modes
+            .iter()
+            .any(|mode| optional_payment::mode_declaration(&mode.body).is_some())
+    }))
 }
 
 pub(super) fn check_additional_body(ability: &Ability) -> Result<()> {
@@ -246,10 +286,22 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     for group in &groups {
         parameters.extend(group.parameters()?);
         for mode in &group.modes {
-            let CostSpec::Ordered { steps } = &mode.costs else {
+            let CostSpec::Ordered { steps: mode_steps } = &mode.costs else {
                 return Err(unsupported("mode cost alternatives"));
             };
-            if steps.iter().any(|step| !matches!(&step.instruction.action,
+            if mode
+                .parameters
+                .iter()
+                .filter(|decision| super::material::is_parameter(decision))
+                .count()
+                > 1
+            {
+                return Err(unsupported("one material group per mode"));
+            }
+            if !mode_steps.is_empty() && optional_payment::mode_declaration(&mode.body).is_some() {
+                return Err(unsupported("one mode payment declaration"));
+            }
+            if mode_steps.iter().any(|step| !matches!(&step.instruction.action,
                 Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
                     operation: ResourceOperation::Pay, amount: Expr::Literal(Int(amount)) } if *amount >= 0)) {
                 return Err(unsupported("mode PP payment"));
@@ -259,11 +311,21 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
                 .play
                 .as_mut()
                 .ok_or_else(|| invalid("mode play"))?;
-            definition.costs = mode.costs.clone();
+            let costs = optional_payment::mode_declaration(&mode.body)
+                .map_or(&mode.costs, |(costs, _, _)| costs);
+            if matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| super::material::source_field_cost(&step.instruction.action)))
+                && ability.active_zones != [ZoneKind::Field]
+            {
+                return Err(unsupported("mode source cost needs the field"));
+            }
+            definition.costs = costs.clone();
             definition.parameters.clone_from(&mode.parameters);
-            super::check_costs(&candidate, source)?;
+            // Declining a mode fee is always available, so it needs no Quick payment quote.
+            super::check_payment(definition, &ability.source, false, source)?;
         }
     }
+    check_overlapping_mode_materials(play, &groups)?;
+    parameters.sort_by_key(super::material::is_parameter);
     check_parameters(&parameters)?;
     let mut steps = play
         .captures
@@ -287,6 +349,41 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     )
 }
 
+/// Selected cost materials share one pool, so only one chosen source of them is admitted.
+fn check_overlapping_mode_materials(play: &PlaySpec, groups: &[PlayMode]) -> Result<()> {
+    let chosen_hand = |costs: &CostSpec| {
+        matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step|
+            matches!(step.instruction.action, Action::Discard { .. })
+                && !super::hand_payment::source_discard(&step.instruction.action)))
+    };
+    let fee = |mode: &Mode| {
+        mode.parameters.iter().any(super::material::is_parameter)
+            || optional_payment::mode_declaration(&mode.body)
+                .is_some_and(|(costs, _, _)| chosen_hand(costs))
+    };
+    let mut paying_groups = 0_usize;
+    for group in groups {
+        let fees = group.modes.iter().filter(|mode| fee(mode)).count();
+        let single = matches!(&group.chosen.domain, ChoiceDomain::Modes { cardinality, .. }
+            if cardinality.maximum.is_some_and(|maximum| maximum.0 <= 1))
+            || matches!(group.count, Expr::Literal(Nat(count)) if count <= 1);
+        if fees > 1 && !single {
+            return Err(unsupported("several selectable mode material fees"));
+        }
+        paying_groups = paying_groups.saturating_add(usize::from(fees > 0));
+    }
+    if paying_groups > 1
+        || (paying_groups == 1
+            && (play.parameters.iter().any(super::material::is_parameter)
+                || chosen_hand(&play.costs)))
+    {
+        return Err(unsupported(
+            "mode material fee beside another material cost",
+        ));
+    }
+    Ok(())
+}
+
 fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
     let mut material = false;
@@ -295,9 +392,6 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     for decision in parameters {
         if super::material::is_parameter(decision) {
             super::material::check_parameter(decision)?;
-            if material {
-                return Err(unsupported("one material group"));
-            }
             material = true;
             continue;
         }
@@ -650,7 +744,12 @@ impl Game {
             let mut parameters = parameters.clone();
             for (index, mode) in group.modes.iter().enumerate() {
                 if selection.contains(&index.to_string()) {
-                    parameters.extend(mode.parameters.clone());
+                    parameters.extend(
+                        mode.parameters
+                            .iter()
+                            .filter(|decision| !super::material::is_parameter(decision))
+                            .cloned(),
+                    );
                 }
             }
             if self.quick_mode_plan(execution, rest, parameters)? {
@@ -905,7 +1004,7 @@ impl Game {
             } else {
                 None
             },
-            optional,
+            optional: optional.into_iter().collect(),
             costs: play.costs,
             mode_costs: CostSpec::Ordered { steps: vec![] },
             limit: play.limit,
@@ -982,7 +1081,7 @@ impl Game {
                 execution
                     .play
                     .as_ref()
-                    .and_then(|play| play.optional.as_ref())
+                    .and_then(|play| play.optional.iter().find(|payment| payment.required))
                     .is_some_and(|payment| payment.required)
             })
             .and_then(|execution| execution.trigger_occurrence.map(|id| (id, execution.id)));
@@ -1024,6 +1123,10 @@ impl Game {
             return Ok(());
         }
         play.freeze_selection(self, execution)?;
+        if self.internal_optional_decision(execution, &play)? {
+            execution.play = Some(play);
+            return Ok(());
+        }
         while let Some(decision) = play.parameters.pop_front() {
             let snapshot = play
                 .snapshot
@@ -1043,11 +1146,7 @@ impl Game {
                 }
                 ChoiceDomain::Objects { .. } => {
                     if super::material::is_parameter(&decision) {
-                        if play
-                            .optional
-                            .as_ref()
-                            .is_some_and(|payment| payment.accepted == Some(false))
-                        {
+                        if play.declined_material(&decision) {
                             continue;
                         }
                         snapshot.internal_material_parameter(
@@ -1255,7 +1354,13 @@ impl Game {
                 .receipt;
             self.internal_played_card_events(execution, receipt)?;
         }
-        execution.prepend(selected_body(play.body, &play.chosen)?);
+        let paid = play
+            .optional
+            .iter()
+            .filter(|payment| payment.accepted == Some(true))
+            .map(|payment| payment.receipt)
+            .collect();
+        execution.prepend(selected_body(play.body, &play.chosen, &paid)?);
         Ok(())
     }
 
@@ -1498,10 +1603,25 @@ fn activation(
 fn selected_body(
     mut program: Program,
     choices: &BTreeMap<DecisionId, Vec<ModeId>>,
+    paid: &BTreeSet<ReceiptId>,
 ) -> Result<Program> {
     let mut steps = Vec::new();
     for mut located in program.steps {
         match located.node {
+            Node::Control {
+                control:
+                    Control::Pay {
+                        at: PaymentTime::PlayParameter,
+                        on_paid,
+                        receipt,
+                        ..
+                    },
+            } => {
+                if paid.contains(&receipt) {
+                    steps.extend(selected_body(on_paid, choices, paid)?.steps);
+                }
+            }
+
             Node::Control {
                 control:
                     Control::Mode {
@@ -1516,7 +1636,7 @@ fn selected_body(
                     .ok_or_else(|| invalid("missing saved mode result"))?;
                 for mode in modes {
                     if chosen.contains(&mode.id) {
-                        steps.extend(mode.body.steps);
+                        steps.extend(selected_body(mode.body, choices, paid)?.steps);
                     }
                 }
             }
@@ -1525,7 +1645,7 @@ fn selected_body(
             } => {
                 located.node = Node::Control {
                     control: Control::Sequence {
-                        body: selected_body(body, choices)?,
+                        body: selected_body(body, choices, paid)?,
                     },
                 };
                 steps.push(located);
@@ -1541,9 +1661,9 @@ fn selected_body(
                 located.node = Node::Control {
                     control: Control::If {
                         condition,
-                        then_body: selected_body(then_body, choices)?,
+                        then_body: selected_body(then_body, choices, paid)?,
                         else_body: else_body
-                            .map(|body| selected_body(body, choices))
+                            .map(|body| selected_body(body, choices, paid))
                             .transpose()?,
                     },
                 };
@@ -1582,7 +1702,7 @@ impl Game {
             chosen: BTreeMap::new(),
             parameters: VecDeque::new(),
             exchange: self.internal_exchange(&execution)?,
-            optional: None,
+            optional: vec![],
             costs: CostSpec::Ordered { steps: vec![] },
             mode_costs: CostSpec::Ordered { steps: vec![] },
             limit: None,

@@ -47,6 +47,10 @@ impl Checker {
         optional_payment::public_mode_guard(condition)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "mode scope and timing checks share one environment lifetime"
+    )]
     pub(super) fn modes(
         &mut self,
         modes: &[Mode],
@@ -150,6 +154,9 @@ impl Checker {
                 checker.at("costs", |checker| checker.costs(&mode.costs))?;
                 // Resolution locals may be read by the selected body, never by play-time inputs.
                 checker.env.inherit_values(&original);
+                if kind == ModeChoiceKind::ChoiceKeyword {
+                    checker.env.play_payments = Some(mode.body.scope);
+                }
                 checker.at("body", |checker| checker.program(&mode.body))
             })?;
         }

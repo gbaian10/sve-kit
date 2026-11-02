@@ -2,8 +2,8 @@ use super::super::{
     ChoiceDomain, Comparison, Control, CostSpec, DamageRecipient, Decision, DecisionId,
     DecisionKind, Disjointness, ExecutionRef, InputMode, MemberProjection, Mode, ModeChoiceKind,
     ModeDecision, ModeDecisionKind, ModeId, NatFrozen, NatOperation, ObjectProperty, ObjectReceipt,
-    ObjectRef, PlaySlot, PlaySpec, Predicate, Resource, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, SpellCountTime, Visibility,
+    ObjectRef, PaymentOptionality, PaymentTime, PlaySlot, PlaySpec, Predicate, Program, ReceiptId,
+    SelectionConstraint, SelectionGroup, SelectionSnapshot, SpellCountTime, Visibility,
 };
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext, Bool,
@@ -690,20 +690,20 @@ impl BodyContext<'_> {
                     context.target(target, path)?;
                 }
             }
-            let (steps, costs) =
-                mode_payment(&mut context, steps, resolution, ability_source, path)?;
             let head = if resolution { "either" } else { "choice" };
-            let body = context.steps(
+            let body = mode_body(
+                &mut context,
                 steps,
-                &format!("{path}/{head}/options/{index}"),
+                resolution,
                 source,
                 ability_source,
+                &format!("{path}/{head}/options/{index}"),
             )?;
             self.allocator.next = context.allocator.next;
             self.resolution_captures
                 .append(&mut context.resolution_captures);
             modes.push(Mode {
-                costs,
+                costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(mode_id),
                 parameters: context.parameters,
                 body,
@@ -731,37 +731,43 @@ impl BodyContext<'_> {
     }
 }
 
-fn mode_payment<'steps>(
+fn mode_body(
     context: &mut BodyContext<'_>,
-    steps: &'steps [ast::Step],
+    steps: &[ast::Step],
     resolution: bool,
-    ability_source: &AbilitySource,
+    source: &SourceSpan,
+    origin: &AbilitySource,
     path: &str,
-) -> Result<(&'steps [ast::Step], CostSpec), LoweringError> {
-    match steps {
-        [ast::Step::Pay(payment)] if !resolution => {
-            let paid = super::payment::lower(context, &payment.cost, ability_source, path)?;
-            let CostSpec::Ordered { steps: charges } = &paid.costs else {
-                return Err(unsupported(path));
-            };
-            if !paid.parameters.is_empty()
-                || charges.iter().any(|charge| {
-                    !matches!(
-                        charge.instruction.action,
-                        Action::Resource {
-                            resource: Resource::PpCurrent,
-                            ..
-                        }
-                    )
-                })
-            {
-                return Err(unsupported(path));
-            }
-            context.parameters.extend(paid.parameters);
-            Ok((payment.steps.as_slice(), paid.costs))
-        }
-        _ => Ok((steps, CostSpec::Ordered { steps: vec![] })),
+) -> Result<Program, LoweringError> {
+    let [ast::Step::Pay(payment)] = steps else {
+        return context.steps(steps, path, source, origin);
+    };
+    if resolution {
+        return Err(unsupported(path));
     }
+    let paid = super::payment::lower(context, &payment.cost, origin, path)?;
+    context.parameters.extend(paid.parameters);
+    let scope = context.scope;
+    context.scope = context.card_allocator.scope(path)?;
+    let body = context.steps(&payment.steps, path, source, origin)?;
+    context.scope = scope;
+    let receipt = ReceiptId(context.card_allocator.id(path)?);
+    Ok(Program {
+        scope,
+        steps: vec![BodyContext::located_step(
+            source,
+            path,
+            Node::Control {
+                control: Control::Pay {
+                    at: PaymentTime::PlayParameter,
+                    costs: paid.costs,
+                    optional: PaymentOptionality::Optional,
+                    on_paid: body,
+                    receipt,
+                },
+            },
+        )],
+    })
 }
 
 struct ModeShape<'options> {

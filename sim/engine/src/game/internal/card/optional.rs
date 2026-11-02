@@ -13,7 +13,7 @@ use crate::ir::{
 pub(super) struct OptionalState {
     pub(super) costs: CostSpec,
     pub(super) required: bool,
-    receipt: ReceiptId,
+    pub(super) receipt: ReceiptId,
     pub(super) accepted: Option<bool>,
 }
 
@@ -88,8 +88,10 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     return Err(unsupported("required head payment outside a trigger"));
                 }
             }
-            if optional_payment::declaration(body).is_some()
-                && (exchange || ability.node.kind == AbilityKind::Activated)
+            let modes = super::play::has_mode_payments(body)?;
+            if (modes && (exchange || optional_payment::declaration(body).is_some()))
+                || (optional_payment::declaration(body).is_some()
+                    && (exchange || ability.node.kind == AbilityKind::Activated))
             {
                 return Err(unsupported(
                     "optional declaration with exchange or activation",
@@ -118,7 +120,10 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
             Node::Control {
                 control: control @ Control::Pay { .. },
             } => {
-                if !root || index != 0 {
+                if !root
+                    || index != 0
+                    || !matches!(control, Control::Pay { on_paid, .. } if on_paid.steps.is_empty())
+                {
                     return Err(unsupported("one root optional declaration"));
                 }
                 check_control(control)?;
@@ -143,7 +148,11 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
                 control: Control::Mode { modes, .. },
             } => {
                 for mode in modes {
-                    check_body(&mode.body, false)?;
+                    if let Some((_, _, on_paid)) = optional_payment::mode_declaration(&mode.body) {
+                        check_body(on_paid, false)?;
+                    } else {
+                        check_body(&mode.body, false)?;
+                    }
                 }
             }
             _ => {}
@@ -194,12 +203,22 @@ pub(super) fn take(body: &mut Program) -> Option<OptionalState> {
     Some(state)
 }
 
+pub(super) fn mode_state(body: &Program) -> Option<OptionalState> {
+    let (costs, receipt, _) = optional_payment::mode_declaration(body)?;
+    Some(OptionalState {
+        costs: costs.clone(),
+        required: false,
+        receipt,
+        accepted: None,
+    })
+}
+
 pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<bool> {
-    let Some(payment) = execution
-        .play
-        .as_mut()
-        .and_then(|play| play.optional.as_mut())
-    else {
+    let Some(payment) = execution.play.as_mut().and_then(|play| {
+        play.optional
+            .iter_mut()
+            .find(|payment| payment.accepted.is_none())
+    }) else {
         return Ok(false);
     };
     if payment.accepted.replace(accepted).is_some() {
@@ -228,7 +247,7 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
         ));
     }
     if !matches!(control, Control::Pay { at: PaymentTime::PlayParameter,
-        optional: PaymentOptionality::Optional | PaymentOptionality::Required, on_paid, .. } if on_paid.steps.is_empty())
+        optional, on_paid, .. } if on_paid.steps.is_empty() || *optional == PaymentOptionality::Optional)
     {
         return Err(unsupported("optional payment timing or continuation"));
     }
@@ -327,7 +346,7 @@ impl Game {
             || !execution
                 .play
                 .as_ref()
-                .and_then(|play| play.optional.as_ref())
+                .and_then(|play| play.optional.iter().find(|payment| payment.required))
                 .is_some_and(|payment| payment.required)
         {
             return Ok(false);
@@ -347,7 +366,11 @@ impl Game {
         execution: &mut Execution,
         play: &PlayState,
     ) -> Result<bool> {
-        let Some(payment) = &play.optional else {
+        let Some(payment) = play
+            .optional
+            .iter()
+            .find(|payment| payment.accepted.is_none())
+        else {
             return Ok(false);
         };
         if payment.accepted.is_some() {
@@ -368,30 +391,29 @@ impl Game {
         execution: &mut Execution,
         play: &PlayState,
     ) -> Result<()> {
-        let Some(payment) = &play.optional else {
-            return Ok(());
-        };
-        let complete = payment
-            .accepted
-            .ok_or_else(|| invalid("missing optional declaration"))?;
-        let mut receipts = vec![];
-        if complete {
-            self.internal_card_payment(execution, &payment.costs, false)?;
-            let CostSpec::Ordered { steps } = &payment.costs else {
-                return Err(unsupported("optional costs"));
-            };
-            receipts.extend(steps.iter().map(|step| RuntimeReceiptId {
-                execution: execution.id,
-                slot: step.instruction.receipt,
-            }));
+        for payment in &play.optional {
+            let complete = payment
+                .accepted
+                .ok_or_else(|| invalid("missing optional declaration"))?;
+            let mut receipts = vec![];
+            if complete {
+                self.internal_card_payment(execution, &payment.costs, false)?;
+                let CostSpec::Ordered { steps } = &payment.costs else {
+                    return Err(unsupported("optional costs"));
+                };
+                receipts.extend(steps.iter().map(|step| RuntimeReceiptId {
+                    execution: execution.id,
+                    slot: step.instruction.receipt,
+                }));
+            }
+            execution.receipts.insert(
+                payment.receipt,
+                InstructionOutcome::ExchangePayment(PaymentResult {
+                    complete: Bool(complete),
+                    steps: receipts,
+                }),
+            );
         }
-        execution.receipts.insert(
-            payment.receipt,
-            InstructionOutcome::ExchangePayment(PaymentResult {
-                complete: Bool(complete),
-                steps: receipts,
-            }),
-        );
         Ok(())
     }
 }

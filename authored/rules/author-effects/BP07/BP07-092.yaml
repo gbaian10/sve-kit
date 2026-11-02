@@ -1,0 +1,54 @@
+cards:
+  BP07-092:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pay:
+                        cost:
+                          banish:
+                            n: 2
+                            sel:
+                              name: リペアモード
+                              who: self
+                              zone: ex
+                        do:
+                          - search:
+                              n: 1
+                              sel:
+                                kind: follower
+                                orig_cost_le: 3
+                                trait: 機械
+                                who: self
+                                zone: deck
+                              to: field
+                  - - pay:
+                        cost:
+                          banish:
+                            n: 5
+                            sel:
+                              name: リペアモード
+                              who: self
+                              zone: ex
+                        do:
+                          - search:
+                              n: 1
+                              sel:
+                                kind: follower
+                                orig_cost_le: 6
+                                trait: 機械
+                                who: self
+                                zone: deck
+                              to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

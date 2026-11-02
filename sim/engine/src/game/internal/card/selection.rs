@@ -998,7 +998,10 @@ impl Game {
         execution: &Execution,
         parameters: &[Decision],
     ) -> Result<bool> {
-        for decision in parameters {
+        for decision in parameters
+            .iter()
+            .filter(|decision| !super::material::is_parameter(decision))
+        {
             let (wait, _) = self.target_domain(execution, decision)?;
             if wait.bounds.minimum.0 > wait.capacity()? {
                 return Ok(false);

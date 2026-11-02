@@ -24,7 +24,9 @@ fn game(initial: &Value) -> Game {
     .unwrap()
 }
 fn answer(input: &InputDomain, modes: &[u64]) -> Answer {
-    if matches!(input, InputDomain::Modes { .. }) {
+    if matches!(input, InputDomain::OptionalCost) {
+        Answer::OptionalCost(true)
+    } else if matches!(input, InputDomain::Modes { .. }) {
         Answer::Modes(modes.iter().copied().map(ModeId).collect())
     } else if let InputDomain::Targets(domain) | InputDomain::CostMaterials(domain) = input {
         let handles = domain
