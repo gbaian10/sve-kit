@@ -1,0 +1,47 @@
+cards:
+  CSD03a-011:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+      - attack_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: ロイヤルパラディン
+                who: self
+                zone: hand
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

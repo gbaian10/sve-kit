@@ -1,0 +1,62 @@
+cards:
+  CP03-122:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 2
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

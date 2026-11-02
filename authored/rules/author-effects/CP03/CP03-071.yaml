@@ -1,0 +1,43 @@
+cards:
+  CP03-071:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                n: 4
+                to: enemy
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 2
+      - fanfare:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

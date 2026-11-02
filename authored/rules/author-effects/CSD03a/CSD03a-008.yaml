@@ -1,0 +1,40 @@
+cards:
+  CSD03a-008:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
