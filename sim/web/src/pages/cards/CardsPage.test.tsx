@@ -68,6 +68,13 @@ function resultCount(unitText = "個版次"): HTMLElement {
   return unit.parentElement
 }
 
+/** The total shown by the result count, once it has arrived. */
+function resultTotal(): number {
+  const match = /^(\d[\d,]*) /u.exec(resultCount().textContent)
+  if (!match?.[1]) throw new Error("count not shown yet")
+  return Number(match[1].replaceAll(",", ""))
+}
+
 /** The condition chips' names, in row order. */
 function chips(conditions: HTMLElement) {
   return within(conditions)
@@ -212,6 +219,15 @@ describe("CardsPage", () => {
       )
     },
   )
+
+  it("reads the view switch before the result count", async () => {
+    await open("/cards?view=table")
+    await expectCount(await waitFor(() => resultTotal()))
+    const switcher = screen.getByRole("radiogroup", { name: "檢視" })
+    expect(
+      switcher.compareDocumentPosition(resultCount()) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
 
   it("loads table illustration crops from the independent visible-image channel", async () => {
     await open("/cards?view=table")
