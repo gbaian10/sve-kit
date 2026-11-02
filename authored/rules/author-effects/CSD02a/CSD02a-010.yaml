@@ -1,0 +1,32 @@
+cards:
+  CSD02a-010:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          cost:
+            pp: 3
+          do:
+            - move:
+                ref: ally
+                result: placed
+                to: field
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: キュート
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
