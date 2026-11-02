@@ -1,0 +1,32 @@
+cards:
+  BP19-099:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 2
+                              to:
+                                leaders: opponents
+                        - - life:
+                              delta: 2
+                              who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
