@@ -49,7 +49,9 @@ impl WellFormedCardProgram {
             checker.at(&format!("card_play_costs/{index}"), |checker| {
                 checker.located(face, |checker, face| {
                     if face.face.0.is_empty()
-                        || (face.modifiers.is_empty() && face.exchange.is_none())
+                        || (face.modifiers.is_empty()
+                            && face.exchange.is_none()
+                            && face.additional.is_none())
                         || !faces.insert(face.face.0.clone())
                     {
                         return Err(checker.error(WellFormedReason::InvalidEntry));
@@ -79,6 +81,17 @@ impl WellFormedCardProgram {
                                 Ok(())
                             })
                         })?;
+                    }
+                    if let Some(additional) = &face.additional {
+                        if face.exchange.is_some() {
+                            return checker.reject();
+                        }
+                        checker.at("additional", |checker| {
+                            checker.located(additional, Checker::additional)
+                        })?;
+                        checker
+                            .card_payments
+                            .insert(face.face.0.clone(), additional.node.receipt);
                     }
                     if let Some(exchange) = &face.exchange {
                         checker.at("exchange", |checker| {

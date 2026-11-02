@@ -2,8 +2,8 @@ use super::{Checked, Checker, WellFormedReason};
 use crate::ir::{
     Action, ChoiceDomain, CostChange, CostSpec, DecisionKind, Disjointness, ExecutionRef, Expr,
     InputMode, InstructionContext, Int, MoveDestination, MoveReason, OwnerZone, PlayCostExchange,
-    PlaySlot, PlayerRef, PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector,
-    Visibility, ZoneKind,
+    PlayCostPayment, PlaySlot, PlayerRef, PlayerRelation, Posture, SelectionSnapshot,
+    SelectionView, Selector, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -11,6 +11,29 @@ use crate::ir::{
     reason = "Exchange has a closed cost entry separate from general payments."
 )]
 impl Checker {
+    pub(super) fn additional(&mut self, payment: &PlayCostPayment) -> Checked {
+        if !self.scopes.insert(payment.scope) {
+            return Err(self.error(WellFormedReason::DuplicateScope));
+        }
+        if !self.receipts.insert(payment.receipt) {
+            return Err(self.error(WellFormedReason::DuplicateReceipt));
+        }
+        if payment.play.limit.is_some()
+            || !payment.play.captures.is_empty()
+            || !matches!(&payment.play.costs, CostSpec::Ordered { steps } if !steps.is_empty())
+        {
+            return self.reject();
+        }
+        self.isolated(|checker| {
+            checker.env.scope = payment.scope;
+            checker.play_entry = Some(checker.env.clone());
+            for decision in &payment.play.parameters {
+                checker.play_decision(decision, &PlayerRef::Controller {})?;
+            }
+            checker.play_costs(&payment.play.costs)
+        })
+    }
+
     pub(super) fn exchange(&mut self, exchange: &PlayCostExchange, has_set: &mut bool) -> Checked {
         match &exchange.change {
             CostChange::Delta {

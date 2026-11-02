@@ -1,5 +1,6 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 
+mod additional;
 mod aggregates;
 mod ast;
 mod attack_restrictions;
@@ -201,35 +202,14 @@ impl ExpandedLowerer {
                     .ok_or_else(|| unsupported(&path))?,
             };
             let mut abilities = Vec::new();
-            let mut modifiers = Vec::new();
-            let mut exchange = None;
-            let mut payment_result = None;
-            for (entry_path, ability) in &entries {
-                if let Some(play) = &ability.play {
-                    costs::lower(
-                        &coordinates,
-                        entry_path,
-                        ability,
-                        play,
-                        &mut allocator,
-                        &mut modifiers,
-                    )?;
-                    let source = source_span(&coordinates, entry_path, ability)?;
-                    if let Some(lowered) = exchange::lower(play, &source, &mut allocator)? {
-                        if exchange.is_some() {
-                            return Err(unsupported(entry_path));
-                        }
-                        payment_result = play
-                            .optional_cost
-                            .as_ref()
-                            .and_then(|cost| cost.result.clone())
-                            .map(|name| (name, lowered.node.receipt));
-                        exchange = Some(lowered);
-                    }
-                }
-            }
-            let play_faces =
-                play_faces(&modifiers, exchange.as_ref()).ok_or_else(|| unsupported(&path))?;
+            let LoweredPlayCosts {
+                modifiers,
+                exchange,
+                additional,
+                payment_result,
+            } = lower_play_costs(&coordinates, &entries, &mut allocator, &path)?;
+            let play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+                .ok_or_else(|| unsupported(&path))?;
             for (index, (entry_path, ability)) in entries.into_iter().enumerate() {
                 if allocator.declarations(
                     &coordinates,
@@ -261,7 +241,7 @@ impl ExpandedLowerer {
             let checked = check_card(
                 CardProgram {
                     abilities,
-                    card_play_costs: face_play_costs(modifiers, exchange),
+                    card_play_costs: face_play_costs(modifiers, exchange, additional),
                 },
                 &path,
             )?;
@@ -269,6 +249,71 @@ impl ExpandedLowerer {
         }
         Ok(cards)
     }
+}
+
+struct LoweredPlayCosts {
+    modifiers: Vec<Located<super::PlayCostModifier>>,
+    exchange: Option<Located<super::PlayCostExchange>>,
+    additional: Option<Located<super::PlayCostPayment>>,
+    payment_result: Option<(String, ReceiptId)>,
+}
+
+fn lower_play_costs(
+    coordinates: &CardCoordinates<'_>,
+    entries: &[(String, ast::Ability)],
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<LoweredPlayCosts, LoweringError> {
+    let mut modifiers = Vec::new();
+    let mut exchange = None;
+    let mut additional = None;
+    let mut payment_result = None;
+    for (entry_path, ability) in entries {
+        if let Some(play) = &ability.play {
+            costs::lower(
+                coordinates,
+                entry_path,
+                ability,
+                play,
+                allocator,
+                &mut modifiers,
+            )?;
+            if let Some(lowered) =
+                additional::lower(ability, play, coordinates, entry_path, allocator)?
+            {
+                if additional.is_some() {
+                    return Err(unsupported(entry_path));
+                }
+                payment_result = play
+                    .additional_cost
+                    .as_ref()
+                    .and_then(|cost| cost.result.clone())
+                    .map(|name| (name, lowered.node.receipt));
+                additional = Some(lowered);
+            }
+            let source = source_span(coordinates, entry_path, ability)?;
+            if let Some(lowered) = exchange::lower(play, &source, allocator)? {
+                if exchange.is_some() {
+                    return Err(unsupported(entry_path));
+                }
+                payment_result = play
+                    .optional_cost
+                    .as_ref()
+                    .and_then(|cost| cost.result.clone())
+                    .map(|name| (name, lowered.node.receipt));
+                exchange = Some(lowered);
+            }
+        }
+    }
+    if additional.is_some() && exchange.is_some() {
+        return Err(unsupported(path));
+    }
+    Ok(LoweredPlayCosts {
+        modifiers,
+        exchange,
+        additional,
+        payment_result,
+    })
 }
 
 fn entry_scope(index: usize, path: &str) -> Result<ScopeId, LoweringError> {
@@ -284,11 +329,13 @@ fn entry_scope(index: usize, path: &str) -> Result<ScopeId, LoweringError> {
 fn play_faces(
     modifiers: &[Located<super::PlayCostModifier>],
     exchange: Option<&Located<super::PlayCostExchange>>,
+    additional: Option<&Located<super::PlayCostPayment>>,
 ) -> Option<BTreeSet<String>> {
     let faces = modifiers
         .iter()
         .map(|item| item.source.face.clone())
         .chain(exchange.map(|item| item.source.face.clone()))
+        .chain(additional.map(|item| item.source.face.clone()))
         .collect::<BTreeSet<_>>();
     (faces.len() <= 1).then_some(faces)
 }
@@ -296,17 +343,20 @@ fn play_faces(
 fn face_play_costs(
     modifiers: Vec<Located<super::PlayCostModifier>>,
     exchange: Option<Located<super::PlayCostExchange>>,
+    additional: Option<Located<super::PlayCostPayment>>,
 ) -> Vec<Located<super::FacePlayCost>> {
     modifiers
         .first()
         .map(|first| first.source.clone())
         .or_else(|| exchange.as_ref().map(|item| item.source.clone()))
+        .or_else(|| additional.as_ref().map(|item| item.source.clone()))
         .map_or_else(Vec::new, |source| {
             vec![Located {
                 node: super::FacePlayCost {
                     face: FaceId(source.face.clone()),
                     modifiers,
                     exchange,
+                    additional,
                 },
                 source,
             }]

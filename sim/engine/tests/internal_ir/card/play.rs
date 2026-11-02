@@ -556,6 +556,7 @@ fn discounted_spell() -> WellFormedCardProgram {
         card_play_costs: vec![Located {
             source: modifier.source.clone(),
             node: FacePlayCost {
+                additional: None,
                 exchange: None,
                 face: FaceId("0".into()),
                 modifiers: vec![modifier],

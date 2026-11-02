@@ -1497,3 +1497,66 @@ fn player_cost_lowering_preserves_shared_next_use_and_rejects_unimplemented_shap
         json!({"when_playing":{"who":"self","zone":"deck"},"delta":-2_i64});
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn mandatory_play_cost_uses_ordered_cost_operations_and_a_card_play_receipt() {
+    let mut tree = expanded::spell_tree().clone();
+    let card = tree["cards"]["SD03-005"].clone();
+    tree["cards"] = json!({"SD03-005":card});
+    let entry = &mut tree["cards"]["SD03-005"]["abilities"][0];
+    entry["play"] = json!({"additional_cost":{
+        "steps":[
+            {"act":{"n":1_u8,"sel":{"who":"self","zone":"field","name":"first"}}},
+            {"banish":{"n":1_u8,"sel":{"who":"self","zone":"ex"}}}
+        ],"result":"extra"}});
+    entry["spell"]["do"] =
+        json!([{"if":{"cond":{"paid":{"receipt":"extra"}},"then":[{"draw":{"n":1_u8}}]}}]);
+    let mut payment_entry = tree["cards"]["SD03-005"]["abilities"][0].clone();
+    payment_entry.as_object_mut().unwrap().remove("spell");
+    tree["cards"]["SD03-005"]["abilities"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("play");
+    let spell_entry = tree["cards"]["SD03-005"]["abilities"][0].clone();
+    tree["cards"]["SD03-005"]["abilities"] = json!([payment_entry, spell_entry]);
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let checked = lowerer().lower_with_printed_costs(&tree, &costs).unwrap();
+    let payment = &checked["SD03-005"].card().card_play_costs[0]
+        .node
+        .additional
+        .as_ref()
+        .unwrap()
+        .node;
+    assert_eq!(payment.play.parameters.len(), 2);
+    let CostSpec::Ordered { steps } = &payment.play.costs else {
+        panic!("ordered costs");
+    };
+    assert!(matches!(
+        steps[0].instruction.action,
+        Action::Posture { .. }
+    ));
+    assert!(matches!(steps[1].instruction.action, Action::Banish { .. }));
+    let mut duplicate = tree.clone();
+    duplicate["cards"]["SD03-005"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(tree["cards"]["SD03-005"]["abilities"][0].clone());
+    lowerer()
+        .lower_with_printed_costs(&duplicate, &costs)
+        .unwrap_err();
+    tree["cards"]["SD03-005"]["abilities"][1]["spell"]["do"][0]["if"]["cond"]["paid"]["receipt"] =
+        json!("foreign");
+    lowerer()
+        .lower_with_printed_costs(&tree, &costs)
+        .unwrap_err();
+}
+
+#[test]
+fn mandatory_play_cost_does_not_relax_ordinary_activation_material_group_limit() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["cost"] = json!({"steps":[
+        {"act":{"n":1_u8,"sel":{"who":"self","zone":"field","kind":"follower"}}},
+        {"act":{"n":1_u8,"sel":{"who":"self","zone":"field","kind":"follower"}}}
+    ]});
+    lowerer().lower(&tree).unwrap_err();
+}

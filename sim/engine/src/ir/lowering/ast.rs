@@ -1511,9 +1511,17 @@ pub(super) struct PlayCosts {
     pub cannot_if: Option<PlayRestriction>,
     pub cost_delta: Option<Value>,
     pub cost_set: Option<Value>,
+    pub additional_cost: Option<AdditionalCost>,
     pub optional_cost: Option<OptionalCost>,
     pub optional_cost_delta: Option<i64>,
     pub optional_cost_set: Option<i64>,
+}
+
+#[derive(Deserialize)]
+pub(super) struct AdditionalCost {
+    #[serde(flatten)]
+    pub cost: Cost,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]

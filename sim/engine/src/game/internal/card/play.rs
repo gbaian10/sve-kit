@@ -4,6 +4,7 @@ use super::{
     Generation, Int, Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource,
     SourceSpan, Step, admission, int, invalid, printed_origin, seat_name, unsupported,
 };
+use crate::game::internal::InstructionOutcome;
 use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
@@ -16,6 +17,7 @@ use crate::ir::{
     Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, NumericChange, PlaySlot, Program,
     Resource, ResourceOperation, ScopeId, SnapshotId, Visibility, ZoneKind,
 };
+use crate::ir::{FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
 use alloc::collections::{BTreeMap, VecDeque};
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -103,6 +105,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(super) exchange: Option<super::exchange::ExchangeState>,
     pub(super) optional: Option<super::optional::OptionalState>,
     pub(super) costs: CostSpec,
+    additional: Option<Box<(FaceId, PlayCostPayment)>>,
     mode_costs: CostSpec,
     limit: Option<LimitSpec>,
     body: Program,
@@ -117,6 +120,17 @@ struct SelectionOrigin {
 }
 
 impl PlayState {
+    fn material_posture(&self, decision: &Decision) -> bool {
+        let costs = self
+            .optional
+            .as_ref()
+            .map_or(&self.costs, |payment| &payment.costs);
+        super::material::posture_parameter(costs, decision)
+            || self.additional.as_deref().is_some_and(|(_, payment)| {
+                super::material::posture_parameter(&payment.play.costs, decision)
+            })
+    }
+
     fn freeze_selection(&mut self, game: &Game, execution: &Execution) -> Result<()> {
         if self.snapshot.is_none() {
             for group in &self.groups {
@@ -158,6 +172,21 @@ impl PlayState {
         }
         Ok(())
     }
+}
+
+pub(super) fn check_additional_body(ability: &Ability) -> Result<()> {
+    let body = ability
+        .body
+        .as_ref()
+        .ok_or_else(|| invalid("missing Spell body"))?;
+    if !collect_modes(body, conditional_play_modes(ability))?.is_empty()
+        || optional_payment::declaration(body).is_some()
+    {
+        return Err(unsupported(
+            "additional with modes or optional head payment",
+        ));
+    }
+    Ok(())
 }
 
 pub(super) fn check_spell(ability: &Ability, printed: &Value) -> Result<()> {
@@ -846,15 +875,27 @@ impl Game {
             parameters: Vec::new(),
             costs: CostSpec::Ordered { steps: Vec::new() },
         });
+        let additional = if execution.spell {
+            self.internal_additional(&execution)?
+        } else {
+            None
+        };
+        let parameters = additional
+            .as_deref()
+            .into_iter()
+            .flat_map(|(_, payment)| payment.play.parameters.clone())
+            .chain(play.parameters)
+            .collect();
         execution.play = Some(PlayState {
             qualification: ability.qualification,
+            additional,
             meal,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: groups.clone().into(),
             groups,
             chosen: BTreeMap::new(),
-            parameters: play.parameters.into(),
+            parameters,
             exchange: if execution.spell {
                 self.internal_exchange(&execution)?
             } else {
@@ -1005,14 +1046,10 @@ impl Game {
                         {
                             continue;
                         }
-                        let costs = play
-                            .optional
-                            .as_ref()
-                            .map_or(&play.costs, |payment| &payment.costs);
                         snapshot.internal_material_parameter(
                             execution,
                             &decision,
-                            super::material::posture_parameter(costs, &decision),
+                            play.material_posture(&decision),
                         )?;
                     } else {
                         snapshot.internal_target(execution, &decision)?;
@@ -1070,6 +1107,54 @@ impl Game {
         self.finish_play_payment(execution, play)
     }
 
+    fn internal_additional(
+        &self,
+        execution: &Execution,
+    ) -> Result<Option<Box<(FaceId, PlayCostPayment)>>> {
+        let object = self.object(&execution.context.source)?;
+        let card = self
+            .card_runtime
+            .definitions
+            .cards
+            .get(&object.card)
+            .ok_or_else(|| invalid("unloaded card"))?;
+        Ok(card.card().card_play_costs.iter().find_map(|face| {
+            face.node
+                .additional
+                .as_ref()
+                .map(|payment| Box::new((face.node.face.clone(), payment.node.clone())))
+        }))
+    }
+
+    fn internal_additional_payment(
+        &mut self,
+        execution: &mut Execution,
+        play: &PlayState,
+    ) -> Result<()> {
+        let Some((face, payment)) = play.additional.as_deref() else {
+            return Ok(());
+        };
+        self.internal_card_payment(execution, &payment.play.costs, false)?;
+        let CostSpec::Ordered { steps } = &payment.play.costs else {
+            return Err(unsupported("additional costs"));
+        };
+        execution.receipts.insert(
+            payment.receipt,
+            InstructionOutcome::ExchangePayment(PaymentResult {
+                complete: Bool(true),
+                steps: steps
+                    .iter()
+                    .map(|step| RuntimeReceiptId {
+                        execution: execution.id,
+                        slot: step.instruction.receipt,
+                    })
+                    .collect(),
+            }),
+        );
+        execution.card_payment = Some((face.clone(), payment.receipt));
+        Ok(())
+    }
+
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let consumed = if execution.spell || execution.field_entry {
             self.internal_matching_player_costs(execution)?
@@ -1087,6 +1172,7 @@ impl Game {
         };
         let payment =
             payment.and_then(|()| self.internal_card_payment(execution, &play.mode_costs, false));
+        let payment = payment.and_then(|()| self.internal_additional_payment(execution, &play));
         let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
         payment?;
@@ -1483,6 +1569,7 @@ impl Game {
         execution.field_entry = true;
         execution.play = Some(PlayState {
             qualification: AbilityQualification::Ordinary,
+            additional: None,
             meal: None,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),

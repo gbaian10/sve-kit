@@ -265,9 +265,16 @@ pub struct FacePlayCost {
     pub face: FaceId,
     /// Independent replacements, retaining each author coordinate.
     pub modifiers: Vec<Located<PlayCostModifier>>,
+    /// Required payment before this card is declared played.
+    pub additional: Option<Located<PlayCostPayment>>,
     /// One optional material payment belonging to this same card play.
     pub exchange: Option<Located<PlayCostExchange>>,
 }
+record!(PlayCostPayment {
+    scope: ScopeId,
+    play: PlaySpec,
+    receipt: ReceiptId
+});
 record!(PlayCostExchange {
     scope: ScopeId,
     decision: DecisionId,
@@ -283,6 +290,7 @@ impl Walk for FacePlayCost {
         visitor.require("card.play-cost", path);
         self.face.walk(visitor, &format!("{path}/face"));
         self.modifiers.walk(visitor, &format!("{path}/modifiers"));
+        self.additional.walk(visitor, &format!("{path}/additional"));
         if let Some(exchange) = &self.exchange {
             visitor.require("card.play-cost.exchange", &format!("{path}/exchange"));
             exchange.walk(visitor, &format!("{path}/exchange"));
