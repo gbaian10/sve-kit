@@ -622,7 +622,7 @@ class LeaderOrFields(TypedDict):
 
 
 type LeaderOr = LeaderOrFields
-type RecipientAtom = ObjectAtom | LeaderRecipient | LeaderOr
+type RecipientAtom = ObjectAtom | LeaderRecipient | LeaderOr | BindingName
 
 
 @with_config(SHAPE_CONFIG)
@@ -633,12 +633,13 @@ class RecipientUnionFields(TypedDict):
             min_length=1,
             json_schema_extra={
                 "contains": {
+                    "type": "object",
                     "anyOf": [
                         {"required": ["leader"]},
                         {"required": ["leaders"]},
                         {"required": ["leader_of"]},
                         {"required": ["leader_or"]},
-                    ]
+                    ],
                 }
             },
         ),
@@ -646,9 +647,10 @@ class RecipientUnionFields(TypedDict):
 
 
 def _require_leader(value: RecipientUnionFields) -> RecipientUnionFields:
-    # Validated object atoms are dicts; the existing leader atoms are models.
+    # A bound object name is a recipient, but cannot satisfy the required leader limb.
     if not any(
-        not isinstance(limb, dict) or limb.get("leader_or") is True
+        (not isinstance(limb, (dict, str)))
+        or (isinstance(limb, dict) and limb.get("leader_or") is True)
         for limb in value["any_of"]
     ):
         raise ValueError("A recipient union requires a leader limb")

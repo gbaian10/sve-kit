@@ -2203,6 +2203,9 @@
         },
         {
           "$ref": "#/$defs/A.sel.leader-or"
+        },
+        {
+          "$ref": "#/$defs/BindingName"
         }
       ]
     },
@@ -2237,7 +2240,8 @@
                   "leader_or"
                 ]
               }
-            ]
+            ],
+            "type": "object"
           }
         }
       },
