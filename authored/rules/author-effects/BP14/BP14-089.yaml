@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-089:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n:
+                  times:
+                    - count:
+                        who: self
+                        zone: field
+                        kind: follower
+                        trait: 狂信
+                    - 2

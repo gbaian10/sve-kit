@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-061:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            # Q1312: one hit of twice the fives, not repeated hits.
+            - damage:
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - who: opp
+                      zone: field
+                      kind: follower
+                n:
+                  times:
+                    - per:
+                        of:
+                          count:
+                            who: self
+                            zone: banish
+                        unit: 5
+                    - 2
