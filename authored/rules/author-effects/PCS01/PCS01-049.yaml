@@ -1,0 +1,40 @@
+cards:
+  PCS01-049:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - ward
+                "on":
+                  kind: follower
+                  other: true
+                  trait: プリコネ
+                  who: self
+                  zone: field
+      - evolve_time:
+          do:
+            - buff:
+                hp: 10
+                "on": chosen
+                power: 10
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                other: true
+                trait: プリコネ
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
