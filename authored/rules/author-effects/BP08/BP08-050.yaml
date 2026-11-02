@@ -1,0 +1,41 @@
+cards:
+  BP08-050:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: アイドル
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - destroy: enemy
+                  - damage:
+                      n: 2
+                      to:
+                        leader_of: enemy
+                  - life:
+                      delta: 2
+                      who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

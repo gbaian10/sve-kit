@@ -1,0 +1,66 @@
+cards:
+  BP08-010:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: ex
+                token: 操り人形
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 人形
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 人形
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP08-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

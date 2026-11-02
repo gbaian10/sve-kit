@@ -1,0 +1,52 @@
+cards:
+  BP08-018:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        class: ロイヤル
+                        kind: follower
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 7
+                then:
+                  - buff:
+                      hp: 1
+                      on:
+                        kind: follower
+                        who: self
+                        zone: field
+                      power: 1
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  any_of:
+                    - trait: 指揮官
+                      who: self
+                      zone: deck
+                    - trait: 兵士
+                      who: self
+                      zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
