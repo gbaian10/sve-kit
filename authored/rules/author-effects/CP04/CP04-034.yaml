@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-034:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        attack_time:
+          do:
+            - damage:
+                to: enemy
+                n: 1
+          ub: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 1
+        keywords:
+          - rush
+        section: 1
+      - line: 2
+        static:
+          while:
+            exists:
+              who: self
+              zone: field
+              kind: follower
+              trait: NIGHTMARE
+              other: true
+          effects:
+            - grant:
+                "on": this
+                keywords:
+                  - assail
+        section: 1
+    rule_sections:
+      - section: 1

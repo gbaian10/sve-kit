@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-027:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        keywords:
+          - storm
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        kind: follower
+                        trait: プリコネ
+                    op: ge
+                    right: 4
+                then:
+                  - evolve:
+                      ref: this
