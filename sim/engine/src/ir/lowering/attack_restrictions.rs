@@ -35,6 +35,13 @@ pub(super) fn lower(
         .unwrap_or(Expr::Literal(Bool(true)));
     let mut declarations = Vec::new();
     for effect in &head.effects {
+        if let ast::StaticEffect::Cannot(ast::Cannot::Stand(restriction)) = effect {
+            if head.r#while.is_some() {
+                return Err(unsupported(path));
+            }
+            declarations.push(super::posture::static_no_stand(restriction, path)?);
+            continue;
+        }
         let ast::StaticEffect::Cannot(ast::Cannot::Attack(shape)) = effect else {
             return Err(unsupported(path));
         };

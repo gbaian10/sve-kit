@@ -30,7 +30,9 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         let ast::StandAction::Stand = restriction.what;
-        let ast::Affected::Affected = restriction.on;
+        let ast::StandSubject::Affected = restriction.on else {
+            return Err(unsupported(path));
+        };
         let ast::StartPhase::Start = restriction.during.phase;
         let ast::RuleCause::Rule = restriction.during.cause;
         let ast::StartPhase::Start = next_phase.phase;
@@ -74,4 +76,31 @@ impl BodyContext<'_> {
             duration,
         })
     }
+}
+
+pub(super) fn static_no_stand(
+    restriction: &ast::CannotStand,
+    path: &str,
+) -> Result<Effect, LoweringError> {
+    if !matches!(restriction.on, ast::StandSubject::This)
+        || restriction.during.who != ast::StandPlayer::Controller
+    {
+        return Err(unsupported(path));
+    }
+    let objects = super::numeric::holder();
+    Ok(Effect::Permission {
+        subject: PermissionSubject::Objects {
+            objects: objects.clone(),
+        },
+        action: ActionPattern::Stand {
+            objects,
+            scope: StandScope::RuleStart {
+                player: PlayerRef::Controller {},
+            },
+        },
+        polarity: Polarity::Forbid,
+        condition: Expr::Literal(Bool(true)),
+        duration: super::numeric::duration(None, path)?,
+        rule: RuleId(723),
+    })
 }

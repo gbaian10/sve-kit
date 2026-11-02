@@ -671,3 +671,6 @@ mod filter_guards;
 
 #[path = "card/counter_lifecycle.rs"]
 mod counter_lifecycle;
+
+#[path = "card/permanent_stand.rs"]
+mod permanent_stand;

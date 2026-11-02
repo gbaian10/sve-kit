@@ -1,0 +1,39 @@
+cards:
+  ECP01-053:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - storm
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - cannot:
+                during:
+                  cause: rule
+                  phase: start
+                  who: self
+                on: this
+                what: stand
+      - auto:
+          cost:
+            pp: 1
+          do:
+            - stand: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

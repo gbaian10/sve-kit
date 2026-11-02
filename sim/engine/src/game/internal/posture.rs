@@ -2,9 +2,10 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, ActionPattern, Bool, DurationEnd, Edge, Effect, Expr, InstallationSubjects,
-    InstallationTime, Instruction, ObjectRef, PermissionSubject, Phase, Polarity, Posture,
-    PostureEvent, Selector, StandScope, TimeAnchor,
+    Ability, AbilityQualification, Action, ActionPattern, Bool, DurationEnd, Edge, Effect, Expr,
+    InstallationSubjects, InstallationTime, Instruction, Located, ObjectOperand, ObjectRef,
+    PermissionSubject, Phase, PlayerRef, Polarity, Posture, PostureEvent, Selector, StandScope,
+    TimeAnchor, ZoneKind, stand_restrictions,
 };
 use serde::{Deserialize, Serialize};
 
@@ -174,6 +175,17 @@ impl Game {
 
     pub(in crate::game) fn internal_rule_stand_blocked(&self, id: &str) -> Result<bool> {
         let object = self.object(id)?;
+        if object.zone == "field" && object.controller == self.active() {
+            let (card, _) = self.internal_effective_print(id)?;
+            if self.card_runtime.is_loaded(&card)
+                && self
+                    .internal_printed_abilities(id)?
+                    .iter()
+                    .any(|ability| stand_restrictions::is_static(&ability.node))
+            {
+                return Ok(true);
+            }
+        }
         let Some(number) = self.state.ir_objects.get(id) else {
             return Ok(false);
         };
@@ -195,4 +207,21 @@ impl Game {
             .retain(|lock| lock.player != player || turn <= lock.after);
         Ok(())
     }
+}
+
+pub(super) fn check_static(located: &Located<Ability>) -> Result<()> {
+    let ability = &located.node;
+    if !stand_restrictions::is_static(ability)
+        || ability.qualification != AbilityQualification::Ordinary
+        || ability.active_zones != [ZoneKind::Field]
+        || ability.source.holder != (ObjectOperand::SourceHolder {})
+        || ability.source.controller != (PlayerRef::Controller {})
+        || ability.play.is_some()
+        || ability.trigger.is_some()
+        || ability.body.is_some()
+        || !ability.event_captures.is_empty()
+    {
+        return Err(unsupported("printed holder rule-start stand restriction"));
+    }
+    Ok(())
 }

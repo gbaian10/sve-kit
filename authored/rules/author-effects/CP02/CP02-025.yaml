@@ -1,0 +1,48 @@
+cards:
+  CP02-025:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                during:
+                  cause: rule
+                  phase: start
+                  who: self
+                on: this
+                what: stand
+      - auto:
+          cost:
+            pp: 2
+          do:
+            - stand: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: デレマス
+                        who: self
+                        zone: field
+                    op: le
+                    right: 2
+                then:
+                  - act: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
