@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-044:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: payment
+                then:
+                  - draw:
+                      n: 2
+                  - if:
+                      cond:
+                        exists:
+                          who: self
+                          zone: field
+                          kind: follower
+                          trait: なかよし部
+                      then:
+                        - life:
+                            who: self
+                            delta: 2
+          optional_cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: プリコネ
+              n: 1
+            result: payment
