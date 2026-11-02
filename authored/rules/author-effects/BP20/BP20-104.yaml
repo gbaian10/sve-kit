@@ -1,0 +1,40 @@
+cards:
+  BP20-104:
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+              - to_cemetery:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: field
+                    kind: amulet
+                    other: true
+          do:
+            - create:
+                n: 1
+                to: field
+                token:
+                  - ホーリーファルコン
+                  - ホーリータイガー
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T16
+      - section: 1
+        line: 2
+        card: BP01-T17
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,34 @@
+cards:
+  BP20-006:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                trait: 精霊
+          do:
+            - life:
+                delta: 1
+                who: self
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  trait: 精霊
+                  not_same_name_as_this: true
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

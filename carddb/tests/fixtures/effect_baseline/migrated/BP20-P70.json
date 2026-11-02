@@ -1,0 +1,33 @@
+{
+  "abilities": [
+    {
+      "active_zones": [
+        "ex"
+      ],
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "hand"
+              }
+            },
+            1
+          ],
+          "fn": "le"
+        },
+        "op": "if",
+        "then": {
+          "count": 1,
+          "op": "draw"
+        }
+      },
+      "event": "end",
+      "kind": "trigger",
+      "line": 1
+    }
+  ],
+  "review": "E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。",
+  "status": "complete"
+}
