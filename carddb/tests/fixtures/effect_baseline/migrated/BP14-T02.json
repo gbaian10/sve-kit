@@ -1,0 +1,55 @@
+{
+  "abilities": [
+    {
+      "active_zones": [
+        "ex"
+      ],
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "hp": 1,
+            "op": "modify",
+            "subjects": "self.leader"
+          },
+          {
+            "count": 1,
+            "op": "draw"
+          }
+        ]
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "name": "輝く金貨",
+            "other": true,
+            "side": "self",
+            "zone": "ex"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        },
+        {
+          "op": "banish",
+          "subjects": {
+            "union": [
+              "self",
+              "cost.1"
+            ]
+          }
+        }
+      ],
+      "kind": "activated",
+      "line": 1
+    }
+  ],
+  "status": "complete",
+  "token_template": true
+}

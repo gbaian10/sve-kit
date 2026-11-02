@@ -1,0 +1,36 @@
+cards:
+  BP14-030:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 輝く金貨
+            - if:
+                cond:
+                  exists:
+                    name: 天下の大泥棒・ジエモン
+                    who: self
+                    zone: field
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP14-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

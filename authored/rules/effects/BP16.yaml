@@ -256,38 +256,6 @@ cards:
             max: 1
             modes:
               - 1
-  BP16-T15:
-    status: complete
-    abilities:
-      - line: 1
-        kind: activated
-        body:
-          op: seq
-          steps:
-            - op: modify
-              subjects: self.leader
-              hp: 1
-            - op: draw
-              count: 1
-        active_zones:
-          - ex
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: ex
-              name: 輝く金貨
-              other: true
-            min: 2
-            max: 2
-        costs:
-          - op: pp
-            amount: 1
-          - op: banish
-            subjects:
-              union:
-                - self
-                - cost.1
   BP16-T18:
     status: complete
     abilities:

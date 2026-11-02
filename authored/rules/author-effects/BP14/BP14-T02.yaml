@@ -1,0 +1,35 @@
+cards:
+  BP14-T02:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - banish_self: true
+              - banish:
+                  n: 2
+                  sel:
+                    name: 輝く金貨
+                    other: true
+                    who: self
+                    zone: ex
+          do:
+            - life:
+                delta: 1
+                who: self
+            - draw:
+                n: 1
+          zone: ex
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: 輝く金貨
+      template: true
+format: 2
+kind: author_effect_set
