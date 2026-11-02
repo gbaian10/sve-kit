@@ -207,7 +207,7 @@ impl BodyContext<'_> {
                     binding,
                     predicate: Box::new(field_filter(
                         &ObjectFilter {
-                            kind: group.kind.as_ref(),
+                            kind: group.kind.as_ref().map(super::search::card_kind),
                             class: group.class.as_deref(),
                             original_cost: [None, group.orig_cost_le, None],
                             ..ObjectFilter::default()
@@ -334,7 +334,7 @@ pub(super) struct ObjectFilter<'query> {
     pub acted: Option<bool>,
     pub evolved: Option<bool>,
     pub entered_this_turn: bool,
-    pub kind: Option<&'query ast::SearchKind>,
+    pub kind: Option<super::super::CardKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
     pub class: Option<&'query str>,
@@ -355,7 +355,7 @@ pub(super) struct ObjectFilter<'query> {
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::TargetQuery) -> Self {
         Self {
-            kind: query.kind.as_ref(),
+            kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
@@ -388,7 +388,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
                 .filter(|cmp| cmp.op == ast::PowerBound::Ge)
                 .map(|cmp| cmp.right),
             racing: query.racing,
-            kind: query.kind.as_ref(),
+            kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -407,7 +407,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::SelectedQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SelectedQuery) -> Self {
         Self {
-            kind: query.kind.as_ref(),
+            kind: query.kind.as_ref().map(super::search::card_kind),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
             class: query.class.as_deref(),
@@ -426,7 +426,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
             face_up: query.face_up,
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
-            kind: query.kind.as_ref(),
+            kind: query.kind.map(ast::CountKind::kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
@@ -441,7 +441,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SearchQuery) -> Self {
         Self {
-            kind: query.kind.as_ref(),
+            kind: query.kind.as_ref().map(super::search::card_kind),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,

@@ -9,6 +9,9 @@ mod expanded;
 #[path = "current_keywords.rs"]
 mod current_keywords;
 
+#[path = "crest_count.rs"]
+mod crest_count;
+
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
     env::temp_dir,

@@ -72,7 +72,7 @@ impl BodyContext<'_> {
         let member = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
         let predicate = super::selection::view_filter(
             &super::selection::ObjectFilter {
-                kind: query.kind.as_ref(),
+                kind: query.kind.as_ref().map(super::search::card_kind),
                 trait_id: query.r#trait.as_deref(),
                 class: query.class.as_deref(),
                 name: query.name.as_deref(),

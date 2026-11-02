@@ -111,7 +111,7 @@ impl BodyContext<'_> {
                 other: false,
                 who: ast::Side::Controller,
                 zone: ast::CountZone::Cemetery,
-                kind: spells.then_some(ast::SearchKind::Spell),
+                kind: spells.then_some(ast::CountKind::Spell),
                 keyword: None,
                 r#trait: None,
                 name: None,
@@ -767,6 +767,12 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        if matches!(count.kind, Some(ast::CountKind::Crest))
+            && (!matches!(count.zone, ast::CountZone::Ex)
+                || !matches!(count.who, ast::Side::Controller))
+        {
+            return Err(unsupported(path));
+        }
         let filtered = count.face_up.is_some()
             || count.class.is_some()
             || count.not_class.is_some()

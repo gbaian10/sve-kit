@@ -707,6 +707,7 @@ pub(in crate::game::internal) fn matches_candidate(
                 CardKind::Spell => "スペル",
                 CardKind::Amulet => "アミュレット",
                 CardKind::EvolveFollower => "フォロワー・エボルヴ",
+                CardKind::Crest => "クレスト",
             })),
             Predicate::NamesIntersect {
                 right: Expr::Literal(names),
