@@ -24,7 +24,6 @@ export interface DeckImageInput {
     readonly muted: string
     readonly badge: string
     readonly badgeText: string
-    readonly empty: string
   }
 }
 
@@ -45,9 +44,8 @@ interface DeckImageLayout {
   readonly height: number
   /** Multiplier from the 1200-wide layout to the picture's pixels. */
   readonly scale: number
+  /** Top of the first section's title, in layout units. */
   readonly header: number
-  /** Top of each section's title, in layout units. */
-  readonly sectionTops: readonly number[]
 }
 
 const rows = (count: number) => Math.ceil(count / COLUMNS)
@@ -61,18 +59,12 @@ function deckImageLayout(
 ): DeckImageLayout {
   const scale = size === "hd" ? CARD_L_WIDTH / CARD_W : 1
   const header = hasLeader ? 20 + CARD_H + 20 : HEADER_WITHOUT_LEADER
-  const sectionTops: number[] = []
-  let y = header
-  for (const count of sectionCounts) {
-    sectionTops.push(y)
-    y += sectionHeight(count)
-  }
+  const sections = sectionCounts.reduce((sum, count) => sum + sectionHeight(count), 0)
   return {
     width: Math.round(WIDTH * scale),
-    height: Math.round((y + FOOTER) * scale),
+    height: Math.round((header + sections + FOOTER) * scale),
     scale,
     header,
-    sectionTops,
   }
 }
 
@@ -110,18 +102,28 @@ export async function renderDeckImage(
   input: DeckImageInput,
   load: LoadImage = loadImage,
 ): Promise<HTMLCanvasElement> {
-  const wanted = [
-    ...(input.leader ? [input.leader] : []),
-    ...input.sections.flatMap((section) => section.cards),
-  ]
-  const loaded = await Promise.all(
-    wanted.map((card) => (card.src === undefined ? Promise.resolve(null) : load(card.src))),
-  )
-  const missing = wanted.filter((_card, index) => loaded[index] === null).map((card) => card.label)
+  const withImage = async <T extends { readonly src: string | undefined }>(item: T) => ({
+    ...item,
+    image: item.src === undefined ? null : await load(item.src),
+  })
+  const [leader, sections] = await Promise.all([
+    input.leader ? withImage(input.leader) : null,
+    Promise.all(
+      input.sections.map(async (section) => ({
+        label: section.label,
+        cards: await Promise.all(section.cards.map(withImage)),
+      })),
+    ),
+  ])
+  const missing = [...(leader ? [leader] : []), ...sections.flatMap((section) => section.cards)]
+    .filter((item) => item.image === null)
+    .map((item) => item.label)
   if (missing.length > 0) throw new DeckImageMissing(missing)
-  const images = loaded.filter((image): image is HTMLImageElement => image !== null)
-  let next = 0
-  const take = () => images[next++] ?? null
+  // Every image loaded; the filters below only narrow the types.
+  const loaded = <T extends { readonly image: HTMLImageElement | null }>(
+    item: T,
+  ): item is T & { readonly image: HTMLImageElement } => item.image !== null
+  const [drawnLeader] = (leader ? [leader] : []).filter(loaded)
   const layout = deckImageLayout(
     input.size,
     input.leader !== null,
@@ -141,25 +143,12 @@ export async function renderDeckImage(
   const font = (px: number, weight = 400) =>
     `${String(weight)} ${String(px)}px "IBM Plex Sans", "Noto Sans TC", "Noto Sans JP", sans-serif`
 
-  const drawCard = (
-    image: HTMLImageElement | null,
-    label: string,
-    x: number,
-    y: number,
-    count: number | null,
-  ) => {
+  const drawCard = (image: HTMLImageElement, x: number, y: number, count: number | null) => {
     ctx.save()
     ctx.beginPath()
     ctx.roundRect(x, y, CARD_W, CARD_H, 6)
     ctx.clip()
-    if (image) ctx.drawImage(image, x, y, CARD_W, CARD_H)
-    else {
-      ctx.fillStyle = colors.empty
-      ctx.fillRect(x, y, CARD_W, CARD_H)
-      ctx.fillStyle = colors.muted
-      ctx.font = font(12)
-      ctx.fillText(label, x + 6, y + 8, CARD_W - 12)
-    }
+    ctx.drawImage(image, x, y, CARD_W, CARD_H)
     ctx.restore()
     if (count === null) return
     // The count sits top right as on the pool's cards: a disc ringed in the page colour.
@@ -184,8 +173,8 @@ export async function renderDeckImage(
   }
 
   let textX = PAD
-  if (input.leader) {
-    drawCard(take(), input.leader.label, PAD, 20, null)
+  if (drawnLeader) {
+    drawCard(drawnLeader.image, PAD, 20, null)
     textX = PAD + CARD_W + 18
   }
   const textWidth = WIDTH - textX - PAD
@@ -195,27 +184,28 @@ export async function renderDeckImage(
   ctx.fillStyle = colors.muted
   ctx.font = font(18)
   ctx.fillText(input.subtitle, textX, 72, textWidth)
-  if (input.leader) {
+  if (drawnLeader) {
     ctx.fillStyle = colors.text
     ctx.font = font(16, 600)
     ctx.fillText(input.leaderLine, textX, 104, textWidth)
   }
-  input.sections.forEach((section, index) => {
-    if (section.cards.length === 0) return
-    const top = layout.sectionTops[index] ?? 0
+  let top = layout.header
+  for (const section of sections) {
+    const cards = section.cards.filter(loaded)
+    if (cards.length === 0) continue
     ctx.fillStyle = colors.text
     ctx.font = font(20, 600)
     ctx.fillText(section.label, PAD, top)
-    section.cards.forEach((card, i) => {
+    cards.forEach((card, i) => {
       drawCard(
-        take(),
-        card.label,
+        card.image,
         PAD + (i % COLUMNS) * (CARD_W + GAP),
         top + SECTION_TITLE + Math.floor(i / COLUMNS) * (CARD_H + GAP),
         card.count,
       )
     })
-  })
+    top += sectionHeight(cards.length)
+  }
   ctx.fillStyle = colors.muted
   ctx.font = font(13)
   ctx.fillText(input.footer, PAD, height - 28, WIDTH - PAD * 2)

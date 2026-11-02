@@ -49,7 +49,6 @@ function canvasColors() {
     muted: token("--text-3"),
     badge: token("--accent"),
     badgeText: token("--accent-ink"),
-    empty: token("--surface-2"),
   }
 }
 
