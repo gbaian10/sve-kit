@@ -103,7 +103,7 @@ records:
 
 `auto.on.dealt_damage` 以同一筆實際傷害的來源套用事件主體篩選；`auto.on.damaged.recipient` 可指定 `this` 或 `{leader: self | opp}`。兩者的 `kind` 可省略或指定 `ability | attack | combat`，`during` 可限制回合；先處理禁止／防止，再以實際正傷害判斷，全防止與零傷害沒有事件。對領袖的攻擊傷害屬 `attack`，不屬 `combat`；從者交戰中攻擊方造成的傷害同時符合兩者，反擊方符合 `combat`（[Q282](https://shadowverse-evolve.com/cardlist/?cardno=BP02-020)）。傷害來源與受傷者各自篩選，正式目標、付款與每回合一次限制沿用共同待機流程。
 
-`auto.on.life_changed` 可用 `who: self | opp`、`direction: up | down` 與 `during` 篩選領袖生命實際變更；省略條件即不限制。加減或設定生命都按變更前後的實際差額產生事件，差額為零不產生事件；生命不封頂於 20。生命支付與傷害造成的減少亦經同一變更入口，但直接加減生命不是傷害，不會因此觸發 `damaged`。這些事件頭保留既有每回合一次 consumer，尚未擴充任意多次 quota。
+`auto.on.life_changed` 可用 `who: self | opp`、`direction: up | down` 與 `during` 篩選領袖生命實際變更；省略條件即不限制。加減或設定生命都按變更前後的實際差額產生事件，差額為零不產生事件；生命不封頂於 20。生命支付與傷害造成的減少亦經同一變更入口，但直接加減生命不是傷害，不會因此觸發 `damaged`。這些事件頭沿共用觸發額度，可用 `per_turn: N` 宣告每個實際回合的正整數上限。
 
 觸發頭的 `cost.act_self` 與 `cost.self_to_cemetery` 目前尚未通過執行端准入，不能以同名物件代替持有者付款，也不能移除費用代替。
 
@@ -236,3 +236,5 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 印刷 `evolve.cost` 與起動能力共用 `Cost` 語法，例如 `{leader_life: 3}`、`{discard: {n: 1, sel: {who: self, zone: hand}}}`、`{banish: {n: 2, sel: {who: self, zone: cemetery}}}`。同名進化卡、進化次數、PP／EP／SEP 與超進化時點仍由原規則程序檢查，費用成功後才揭露及安裝進化卡。規則動作的材料使用既有 `costs` 輸入容器，公開材料為 `costs.materials`、手牌丟棄為 `costs.discard`，值為物件 ID 陣列；每項仍經正式材料候選與嚴格數量驗證，不能以目標選取代替付款。
 
 本文、使用前提及常在條件可用 `my_turn: true` 檢查目前是否為能力控制者的回合；回合序數沿用 `turn_number: {who: self}`，讀取實際開始的玩家回合數。本文的 `in_zone: {ref: this, zone: ex}` 在該指示結算時，以來源原世代與控制者目前 EX 的交集判斷；來源離開 EX 或移區後再回來都不符合。`in_zone` 與其他 Condition 共用語法；此 EX 來源讀值的對局與世代驗證以本文為範圍，其他入口仍須通過各自的執行准入。它不授予新的有效區；打出限制與付款來源區域仍沿各自既有語義。
+
+`auto.per_turn` 與 `activate.per_turn` 接受正安全整數 N，額度按能力實例與每個實際回合分開；觸發在進入待機時消耗，起動在付款成功且適正打出時消耗。`activate.usable_if` 與 `per_turn` 可並用，例如墓場キュート卡至少五張才可每回合起動一次；資格不符、拒付與付款失敗都不消耗起動額度。沒有上限時省略 `per_turn`，不能以零表示無限次。

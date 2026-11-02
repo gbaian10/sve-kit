@@ -19,12 +19,12 @@ PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`�
 | --- | --- | --- |
 | 模式數 | 常值 exact／upto；既有 SC／NC 條件式模式數子集，限 §2.1 的表示 | 5.18.2–.3、10.6.2.2.3 |
 | 本回合模式排除 | `exclude_chosen: this_turn`，固定 exact 1，唯一模式群組 | 卡文及 Q1567、Q1779、Q2563；IR 的 H.mode-use |
-| 起動限次 | 普通 Printed Activated、Field、常值 `per_turn=1` 或 `2` | 卡文、10.6.2.5.4／.7、5.16.2.2.1 |
+| 起動限次 | 普通 Printed Activated、Field、常值正安全整數 `per_turn=N` | 卡文、10.6.2.5.4／.7、5.16.2.2.1 |
 
 先拒絕：對手／其他 actor 選模式、巢狀或多個 ChoiceKeyword、If／Repeat 內的
 ChoiceKeyword、模式內 Distribution、無 option 的根 targets 與模式 targets 混用、
 任意私有選擇、可變 X、通用條件模式數、選擇數取代、共享／玩家／整局額度、授予能力限次。
-觸發 `per_turn>1` 仍拒絕，`per_turn=1` 完全沿用觸發契約。
+觸發 `per_turn=N` 使用同一 LimitSpec 與能力實例，於 PendingAdmission 消耗；同時批次依剩餘額度選足可收集的發生，詳見觸發契約。
 
 這些是第一版支援界線，不是否認合法卡文。模式內既有 Search 等獨立已驗操作不因本文件
 擴成通用 ResolutionChoice；未選模式也須通過靜態支援閉包，不能靠選其他模式規避拒絕。
@@ -105,7 +105,7 @@ Q2563（2026-03-25）證明兩個持有者互不耗用對方的選項。
 
 ### 3.1 共用 LimitSpec，分開消耗點
 
-首批起動限次使用既有 `LimitSpec {maximum:1|2, window:Turn,
+起動限次使用既有 `LimitSpec {maximum:N>0, window:Turn,
 scope:AbilityInstance, consume_at:PlayCommitted}`；不另造起動 counter 型別或玩家額度。
 同一 authority 額度服務依 consume_at 區分：觸發是 PendingAdmission，起動是
 PlayCommitted。`PlayCommitted` 在此精確對應 CR 10.6.2.7，不是收到起動要求、
@@ -163,11 +163,11 @@ Q471（2022-12-09）確認自己與對手的回合各可使用一次，不因此
   `PlaySpec.limit: Option<LimitSpec>`，僅 Activated 能力允許 Some；Spell／Triggered 能力
   及 `Action::PlayCard.parameters` 的 PlaySpec 必須 None，Triggered 額度仍在
   `TriggerSpec.limit`，不重複承載。無限次明示 None，不能以 maximum=0 表示；
-  首批 Some 只收 1／2。
+  Some 接受正安全整數。
 
 ### 4.2 良構與准入
 
-良構須遞迴驗新 PlaySpec.limit 只在 Activated 出現，且 maximum（1／2）、window、
+良構須遞迴驗新 PlaySpec.limit 只在 Activated 出現，且 maximum（正整數）、window、
 scope、consume_at 為 §3.1 的精確組合；
 不更改既有 Duration.usage 的 UseLimit 或其零值規則。模式排除只在 §4.1 的入口成立，
 不能令封閉 Program、ResolutionAlternative 或巢狀 Mode 憑 enum 取得歷史權限。

@@ -73,14 +73,15 @@ pending id、epoch 及仍可選資格。選序不等於可以不打出（10.7.3.
 
 ## 3. 限次與同時批次
 
-首批支援無限次，以及 `LimitSpec {maximum:1, window:Turn, scope:AbilityInstance,
+支援無限次，以及 `LimitSpec {maximum:N>0, window:Turn, scope:AbilityInstance,
 consume_at:PendingAdmission}`。自分回合限定另外匹配事件的 TurnId／回合玩家；
-不是把 Turn window 改成「下次自己回合」。其他數值、Game、ObjectGeneration、
+不是把 Turn window 改成「下次自己回合」。零額度、Game、ObjectGeneration、
 RulePermission、PlayCommitted 與共享額度先拒絕。
 
 依 10.7.2.2，以該 AbilityInstance 在當前 TurnId **進入待機的次數**扣除額度。
-同時符合多個事實但只餘一格時，該能力 controller 選其中一個事件進待機，
-不是執行器任取第一筆，也不是先全入列再丟棄。只有一個候選就直接建立；
+同時符合的事實數多於剩餘額度時，該能力 controller 選足剩餘格數的事件進待機，
+不是執行器任取前幾筆，也不是先全入列再丟棄。各格沿同一額度問題逐次選擇，
+前次選擇保留為公開資訊；同一來源選完後才輪下一來源。候選數未超過剩餘額度時全部直接建立；
 沒有額度不詢問。多位玩家須同時選時依 1.3.4 回合玩家先選，另一方可知其選擇。
 這是事件提交中的額度選擇，不開 Quick 窗口、不提前解算 pending。
 

@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-019:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+      - line: 2
+        auto:
+          "on":
+            dealt_damage:
+              ref: this
+              kind: combat
+              during:
+                turn: self
+          per_turn: 10
+          do:
+            - stand: this
+      - line: 3
+        attack_time:
+          do:
+            - buff:
+                "on": this
+                hp: 1
+            - pp:
+                who: self
+                delta: 1

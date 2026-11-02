@@ -488,7 +488,7 @@ impl Checker {
         if trigger.aggregation != (TriggerAggregation::PerFact {})
             || trigger
                 .limit
-                .is_some_and(|limit| limit != LimitSpec::once_per_turn())
+                .is_some_and(|limit| !LimitSpec::is_triggered(limit))
         {
             return self.reject();
         }

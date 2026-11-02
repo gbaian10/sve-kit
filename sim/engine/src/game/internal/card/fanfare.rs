@@ -30,7 +30,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || trigger.view != EventSnapshotPolicy::AfterEntry
         || trigger
             .limit
-            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
+            .is_some_and(|limit| !LimitSpec::is_triggered(limit))
         || trigger.aggregation != (TriggerAggregation::PerFact {})
         || *predicate != expected
     {

@@ -570,9 +570,10 @@ impl Allocator {
             program.steps.insert(0, payment.node);
             context.parameters.extend(payment.parameters);
         }
-        if body.per_turn.is_some_and(|maximum| {
-            entry.spell.is_some() || (entry.activate.is_some() && !matches!(maximum, 1 | 2))
-        }) {
+        if body
+            .per_turn
+            .is_some_and(|maximum| entry.spell.is_some() || maximum == 0)
+        {
             return Err(unsupported(path));
         }
         let (kind, mut play, trigger) = if entry.spell.is_some() {
@@ -1108,10 +1109,12 @@ impl<'definitions> BodyContext<'definitions> {
         let mut trigger = lowered_trigger(
             entry, keyword, event_id, subject_id, facet_id, self.scope, path,
         )?;
-        if body.per_turn.is_some_and(|maximum| maximum != 1) {
+        if body.per_turn == Some(0) {
             return Err(unsupported(path));
         }
-        trigger.limit = body.per_turn.map(|_| super::LimitSpec::once_per_turn());
+        trigger.limit = body
+            .per_turn
+            .map(|maximum| super::LimitSpec::triggered_per_turn(Nat(maximum)));
         Ok(trigger)
     }
 

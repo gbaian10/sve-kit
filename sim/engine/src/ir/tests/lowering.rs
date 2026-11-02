@@ -980,18 +980,33 @@ fn activated_payment_order_and_trigger_limit_remain_separate() {
             .as_ref()
             .unwrap()
             .limit,
-        Some(LimitSpec::once_per_turn())
+        Some(LimitSpec::triggered_per_turn(Nat(1)))
     );
-    tree["cards"]["BP01-041"]["abilities"][0]["activate"]["per_turn"] = json!(2_u64);
-    assert_eq!(
-        lowerer.lower(&tree).unwrap()["BP01-041"].card().abilities[0]
-            .node
-            .play
-            .as_ref()
-            .unwrap()
-            .limit,
-        Some(LimitSpec::activated_per_turn(Nat(2)))
-    );
+    for maximum in [2_u64, 3, 4, 10] {
+        tree["cards"]["BP01-041"]["abilities"][0]["activate"]["per_turn"] = json!(maximum);
+        tree["cards"]["BP08-067"]["abilities"][0]["auto"]["per_turn"] = json!(maximum);
+        let limited = lowerer.lower(&tree).unwrap();
+        assert_eq!(
+            limited["BP01-041"].card().abilities[0]
+                .node
+                .play
+                .as_ref()
+                .unwrap()
+                .limit,
+            Some(LimitSpec::activated_per_turn(Nat(maximum)))
+        );
+        assert_eq!(
+            limited["BP08-067"].card().abilities[0]
+                .node
+                .trigger
+                .as_ref()
+                .unwrap()
+                .limit,
+            Some(LimitSpec::triggered_per_turn(Nat(maximum)))
+        );
+    }
+    tree["cards"]["BP08-067"]["abilities"][0]["auto"]["per_turn"] = json!(0_u64);
+    lowerer.lower(&tree).unwrap_err();
 }
 
 #[test]
