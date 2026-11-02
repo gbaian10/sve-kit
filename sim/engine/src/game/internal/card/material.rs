@@ -402,8 +402,15 @@ impl Game {
                     ));
                 }
             }
-            let (moved, _) =
-                self.internal_move_members(execution, &members, destination, kind, method, false)?;
+            let (moved, _) = self.internal_move_members(
+                execution,
+                &members,
+                destination,
+                kind,
+                method,
+                false,
+                None,
+            )?;
             if moved.len() != members.len() || moved.iter().any(|result| result.after.is_none()) {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "incomplete material movement cost".into(),

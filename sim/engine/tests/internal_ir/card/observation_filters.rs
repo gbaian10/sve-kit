@@ -42,6 +42,60 @@ fn observed_remainders_reject_foreign_receipts_and_movement_receipts_as_the_inpu
 }
 
 #[test]
+fn move_deck_orders_a_chosen_observed_subset_without_changing_generations() {
+    let document = tree(&json!([
+        {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+        {"choose":{"bind":"picked","from":{"in":"seen"},"upto":2,"may":true}},
+        {"move":{"ref":"picked","to":"deck","position":"bottom","order":"chooser"}}
+    ]));
+    let programs = lowerer().lower(&document).unwrap();
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"one","card":"unit-follower"}, {"id":"two","card":"unit-follower"},
+            {"id":"tail","card":"unit-follower"}
+        ]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "chosen-order",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("private subset")
+    };
+    let CardPlay::Awaiting(order) = game
+        .answer_internal_card(q.actor, q.token, Answer::Targets(vec![0, 1]))
+        .unwrap()
+    else {
+        panic!("private subset order")
+    };
+    let InputDomain::Order(domain) = &order.domain else {
+        panic!("order of the chosen subset")
+    };
+    assert_eq!(domain.len(), 2);
+    assert!(game.internal_decision(View::P2).is_none());
+    resolved(
+        game.answer_internal_card(order.actor, order.token, Answer::Order(vec![1, 0]))
+            .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["deck"], json!(["tail", "two", "one"]));
+    assert_eq!(view["objects"]["one"]["generation"], 0_u8);
+    assert_eq!(view["objects"]["two"]["generation"], 0_u8);
+}
+
+#[test]
 fn observation_filters_lower_class_not_class_and_basic_keywords_through_the_shared_filter() {
     for filter in [
         json!({"in":"seen","class":"ドラゴン"}),

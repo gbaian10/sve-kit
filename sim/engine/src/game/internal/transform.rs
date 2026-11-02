@@ -73,6 +73,7 @@ impl Game {
             ZoneKind::Banish,
             MoveMethod::Banish,
             false,
+            None,
         )?;
         let banished = successful
             .into_iter()
