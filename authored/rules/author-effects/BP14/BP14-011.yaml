@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-011:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-02"
+    token_sources:
+      - { section: 1, line: 1, card: BP08-T09 }
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            banish:
+              n: 1
+              sel: { who: self, zone: ex }
+      - line: 2
+        spell:
+          do:
+            - create: { token: 操り人形, n: 3, to: ex }

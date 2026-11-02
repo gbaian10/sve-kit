@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-070:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            to_cemetery:
+              n: 1
+              sel: { who: self, zone: field, kind: follower, trait: ドラゴニュート }
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 4 }
+            - draw: { who: self, n: 1 }
