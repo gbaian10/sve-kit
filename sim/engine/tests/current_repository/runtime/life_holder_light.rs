@@ -59,6 +59,9 @@ fn bp02_115_destroys_a_cheap_follower_and_heals_its_controllers_leader() {
     finish(&mut game, step);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
-    assert_eq!(state["P2"]["leader"]["life"], 15_u8, "それのリーダー heals 3");
+    assert_eq!(
+        state["P2"]["leader"]["life"], 15_u8,
+        "the chosen follower's controller heals 3"
+    );
     assert_eq!(state["P1"]["leader"]["life"], 20_u8);
 }

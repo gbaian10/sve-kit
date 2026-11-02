@@ -1,23 +1,24 @@
 use super::*;
 
-fn fanfare_follower(body: &Value) -> WellFormedCardProgram {
+fn tree(body: &Value) -> Value {
     let mut expanded = fanfare::expanded::tree().clone();
     expanded["cards"]["BP08-038"]["abilities"][0]["fanfare"] = body.clone();
     expanded["cards"] = json!({"unit-follower":expanded["cards"]["BP08-038"]});
+    expanded
+}
+
+fn fanfare_follower(body: &Value) -> WellFormedCardProgram {
     lowerer()
-        .lower(&expanded)
+        .lower(&tree(body))
         .unwrap()
         .remove("unit-follower")
         .unwrap()
 }
 
 fn rejected(body: &Value) {
-    let mut expanded = fanfare::expanded::tree().clone();
-    expanded["cards"]["BP08-038"]["abilities"][0]["fanfare"] = body.clone();
-    lowerer().lower(&expanded).unwrap_err();
+    lowerer().lower(&tree(body)).unwrap_err();
 }
 
-/// P1 plays the follower and answers the fanfare and its first target question.
 fn play_fanfare(initial: &Value, body: &Value) -> Value {
     let mut game = Game::new(
         catalog(),
