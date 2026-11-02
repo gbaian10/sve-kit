@@ -1,0 +1,23 @@
+cards:
+  BP17-097:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: エスカマリの巡回者
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T10
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

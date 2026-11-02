@@ -1,0 +1,53 @@
+cards:
+  BP17-044:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: ex
+                  trait: 機械
+              op: le
+              right: 2
+      - covers:
+          - 2
+          - 3
+        line: 2
+        spell:
+          optional_cost:
+            pp: 2
+            result: enhanced
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  name_contains: ベルフォメット
+                to: hand
+            - create:
+                n: 1
+                to: field
+                token: 遮断の触手
+            - if:
+                cond:
+                  paid:
+                    receipt: enhanced
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 蹂躙の触手
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

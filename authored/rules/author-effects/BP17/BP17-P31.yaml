@@ -1,0 +1,39 @@
+cards:
+  BP17-P31:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            if:
+              spellchain: 5
+            delta: -1
+      - line: 2
+        spell:
+          targets:
+            - bind: victims
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+          do:
+            - damage:
+                n: 2
+                to: victims
+            - create:
+                n: 1
+                to: ex
+                token: アルティメット・マジック
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-P32
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

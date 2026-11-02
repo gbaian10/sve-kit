@@ -1,0 +1,40 @@
+cards:
+  BP17-012:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - option: 1
+              bind: doll
+              from:
+                kind: follower
+                who: self
+                zone: field
+                trait: 人形
+                token: true
+              n: 1
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        "on": doll
+                        power: 2
+                        hp: 2
+                  - - create:
+                        n: 2
+                        to: ex
+                        token: 操り人形
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
