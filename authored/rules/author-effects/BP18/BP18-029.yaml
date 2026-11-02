@@ -1,0 +1,25 @@
+cards:
+  BP18-029:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - attack_time:
+          do:
+            - counter:
+                delta: 2
+                name: ギガカウンター
+                on:
+                  name: ギガブレード
+                  who: self
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

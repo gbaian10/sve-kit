@@ -1,0 +1,39 @@
+cards:
+  BP07-016:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    other: true
+                    trait: 童話
+                    who: self
+                    zone: field
+                then:
+                  - search:
+                      n: 1
+                      result: hatter_ex
+                      sel:
+                        kind: follower
+                        trait: 童話
+                        who: self
+                        zone: deck
+                      to: ex
+                  - optional:
+                      do:
+                        - counter:
+                            delta: 1
+                            name: 童話カウンター
+                            on:
+                              follow: hatter_ex
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

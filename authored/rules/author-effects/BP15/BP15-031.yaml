@@ -1,0 +1,42 @@
+cards:
+  BP15-031:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                options:
+                  - - damage:
+                        n: 2
+                        to: enemy
+                  - - counter:
+                        delta: 1
+                        name: 戦意カウンター
+                        on: kagemitsu
+                upto: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: kagemitsu
+              from:
+                name: ロストサムライ・カゲミツ
+                who: self
+                zone:
+                  - field
+                  - ex
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

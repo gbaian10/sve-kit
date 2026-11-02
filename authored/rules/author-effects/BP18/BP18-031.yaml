@@ -1,0 +1,29 @@
+cards:
+  BP18-031:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: 全識の六銘伝・シンラ
+                  who: self
+                  zone: deck
+                to: hand
+            - counter:
+                delta: 2
+                name: ギガカウンター
+                on:
+                  name: ギガブレード
+                  who: self
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
