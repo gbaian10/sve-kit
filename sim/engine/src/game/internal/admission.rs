@@ -635,6 +635,7 @@ fn supported(code: &str) -> bool {
             | "action.order"
             | "shape.Position.Top"
             | "shape.Position.Bottom"
+            | "shape.Position.Index"
             | "shape.Selector.ReceiptMembers"
             | "read.receipt.members"
             | "shape.ObjectReceipt.Look"

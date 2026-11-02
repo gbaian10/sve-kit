@@ -1,12 +1,13 @@
 use super::super::{
     DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
-    MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position,
+    MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position, PositiveNat,
     ReceiptReference, Visibility,
 };
 use super::{
     Action, BodyContext, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
     ReceiptId, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use core::num::NonZeroU64;
 
 #[derive(Clone, Copy)]
 enum ObservationUse {
@@ -258,6 +259,9 @@ impl BodyContext<'_> {
             return top_move(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
+            if matches!(value.to, ast::Destination::Deck) {
+                return self.selected_deck_move(value, objects, path);
+            }
             if value.position.is_some()
                 || value.order.is_some()
                 || !self.supports_move_result(value, objects)
@@ -309,34 +313,7 @@ impl BodyContext<'_> {
                 Ok(owner_put(cards, OwnerZone::Cemetery))
             }
             ast::Destination::Deck if value.order.is_some() => {
-                let position = match value.position {
-                    Some(ast::Placement::Top) => Position::Top {},
-                    Some(ast::Placement::Bottom) => Position::Bottom {},
-                    None => return Err(unsupported(path)),
-                };
-                Ok(Action::Order {
-                    decision: DecisionId(self.card_allocator.id(path)?),
-                    cards: cards.clone(),
-                    destinations: vec![Placement {
-                        cards,
-                        zone: MoveDestination::Owners {
-                            zone: OwnerZone::Deck,
-                        },
-                        position,
-                    }],
-                    chooser: PlayerRef::Controller {},
-                    visibility: Visibility::Only {
-                        players: PlayerSet {
-                            relation: PlayerRelation::SelfPlayer,
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(1),
-                                maximum: Some(Nat(1)),
-                            },
-                            text_quantifier: TextQuantifier::Implicit,
-                        },
-                    },
-                })
+                self.observed_order(cards, value.position.as_ref(), path)
             }
             ast::Destination::Field
             | ast::Destination::Deck
@@ -345,6 +322,84 @@ impl BodyContext<'_> {
             | ast::Destination::Cemetery => Err(unsupported(path)),
         }
     }
+    fn selected_deck_move(
+        &mut self,
+        value: &ast::Move,
+        objects: &ast::Objects,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if matches!(objects, ast::Objects::Bound(name) if self.observed_targets.contains(name)) {
+            if value.order.is_none() || value.result.is_some() {
+                return Err(unsupported(path));
+            }
+            let cards = self.objects(objects, path)?;
+            return self.observed_order(cards, value.position.as_ref(), path);
+        }
+        if value.order.is_some() || value.result.is_some() {
+            return Err(unsupported(path));
+        }
+        let objects = if let (ast::Objects::This(_), Some(event)) = (objects, self.leave_event) {
+            if !self.departure_to_cemetery {
+                return Err(unsupported(path));
+            }
+            Selector::Objects {
+                objects: vec![ObjectOperand::FollowEventMove {
+                    event: MovementEvent::LeaveField { event },
+                }],
+            }
+        } else {
+            self.objects(objects, path)?
+        };
+        Ok(Action::Move {
+            objects,
+            movement: MoveSpec {
+                to: MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                },
+                initial_posture: None,
+                entry_effects: vec![],
+                position: Some(deck_position(value.position.as_ref(), path)?),
+                order: None,
+            },
+            reason: MoveReason::Put,
+        })
+    }
+
+    fn observed_order(
+        &mut self,
+        cards: Selector,
+        placement: Option<&ast::Placement>,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let position = deck_position(placement, path)?;
+        if matches!(position, Position::Index { .. }) {
+            return Err(unsupported(path));
+        }
+        Ok(Action::Order {
+            decision: DecisionId(self.card_allocator.id(path)?),
+            cards: cards.clone(),
+            destinations: vec![Placement {
+                cards,
+                zone: MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                },
+                position,
+            }],
+            chooser: PlayerRef::Controller {},
+            visibility: Visibility::Only {
+                players: PlayerSet {
+                    relation: PlayerRelation::SelfPlayer,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::Implicit,
+                },
+            },
+        })
+    }
+
     pub(super) fn reveal(
         &mut self,
         value: &ast::Reveal,
@@ -466,5 +521,18 @@ const fn owner_put(objects: Selector, zone: OwnerZone) -> Action {
             order: None,
         },
         reason: MoveReason::Put,
+    }
+}
+
+fn deck_position(position: Option<&ast::Placement>, path: &str) -> Result<Position, LoweringError> {
+    match position {
+        Some(ast::Placement::Edge(ast::DeckEdge::Top)) => Ok(Position::Top {}),
+        Some(ast::Placement::Edge(ast::DeckEdge::Bottom)) => Ok(Position::Bottom {}),
+        Some(ast::Placement::Nth { nth }) => NonZeroU64::new(*nth)
+            .map(|index| Position::Index {
+                index: PositiveNat(index),
+            })
+            .ok_or_else(|| unsupported(path)),
+        None => Err(unsupported(path)),
     }
 }

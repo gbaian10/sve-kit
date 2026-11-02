@@ -554,8 +554,19 @@ pub(super) enum Destination {
 }
 
 #[derive(Deserialize)]
-#[serde(rename_all = "snake_case")]
+#[serde(untagged, deny_unknown_fields)]
+#[expect(
+    variant_size_differences,
+    reason = "A fixed index and an edge string keep the authored placement grammar unboxed."
+)]
 pub(super) enum Placement {
+    Edge(DeckEdge),
+    Nth { nth: u64 },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DeckEdge {
     Top,
     Bottom,
 }

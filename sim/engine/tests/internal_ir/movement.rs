@@ -4,6 +4,7 @@
 )]
 
 use super::*;
+use core::num::NonZeroU64;
 
 fn destroy(id: u64, objects: Selector) -> Located<Node> {
     instruction(id, Action::Destroy { objects })
@@ -106,6 +107,206 @@ fn field_followers(zone: ZoneKind) -> Selector {
             }))],
         }))),
     }
+}
+
+fn to_deck(id: u64, objects: Selector, position: Position) -> Located<Node> {
+    instruction(
+        id,
+        Action::Move {
+            objects,
+            movement: MoveSpec {
+                to: MoveDestination::Owners {
+                    zone: OwnerZone::Deck,
+                },
+                initial_posture: None,
+                entry_effects: vec![],
+                position: Some(position),
+                order: None,
+            },
+            reason: MoveReason::Put,
+        },
+    )
+}
+
+#[test]
+fn move_deck_positions_use_the_owner_and_clamp_a_deep_index_to_the_bottom() {
+    let third = Position::Index {
+        index: PositiveNat(NonZeroU64::new(3).unwrap()),
+    };
+    let ninth = Position::Index {
+        index: PositiveNat(NonZeroU64::new(9).unwrap()),
+    };
+    for (position, expected, actual) in [
+        (Position::Top {}, json!(["f", "d0", "d1", "d2"]), 1_u64),
+        (Position::Bottom {}, json!(["d0", "d1", "d2", "f"]), 4),
+        (third, json!(["d0", "d1", "f", "d2"]), 3),
+        (ninth, json!(["d0", "d1", "d2", "f"]), 4),
+    ] {
+        let mut initial = setup(
+            1,
+            json!([
+                {"id":"d0","card":"unit-follower"}, {"id":"d1","card":"unit-follower"},
+                {"id":"d2","card":"unit-follower"}
+            ]),
+        );
+        initial["players"]["P2"]["zones"]["field"] =
+            json!([{"id":"f","card":"unit-follower","owner":"P1"}]);
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "move-deck").unwrap();
+        let result = game
+            .execute_internal(
+                &checked(vec![to_deck(1, field_followers(ZoneKind::Field), position)]),
+                &source("synthetic"),
+                context(1),
+            )
+            .unwrap();
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["deck"], expected);
+        assert_eq!(view["P2"]["field"], json!([]));
+        assert_eq!(view["P2"]["deck"], json!([]));
+        assert_eq!(view["objects"]["f"]["generation"], 1_u8);
+        let Some(InstructionOutcome::Move(outcome)) = result.receipts.get(&ReceiptId(1)) else {
+            panic!("move receipt")
+        };
+        assert_eq!(outcome.moved[0].requested_position, Some(position));
+        assert!(
+            matches!(outcome.moved[0].actual_position, Some(Position::Index { index }) if index.0.get() == actual)
+        );
+    }
+}
+
+#[test]
+fn move_deck_invalidates_an_older_look_before_a_later_private_order() {
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"d0","card":"unit-follower"}, {"id":"d1","card":"unit-follower"}
+        ]),
+    );
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"f","card":"unit-follower","owner":"P1"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "stale-look",
+    )
+    .unwrap();
+    let before = exact_authority(&game);
+    game.execute_internal(
+        &checked(vec![
+            ordering::look(1, 2),
+            to_deck(2, field_followers(ZoneKind::Field), Position::Top {}),
+            ordering::order(3, ordering::looked(1), Position::Bottom {}),
+        ]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap_err();
+    assert_eq!(
+        exact_authority(&game),
+        before,
+        "a stale Look cannot be reused to order the changed deck"
+    );
+    let progress = game
+        .execute_internal(
+            &checked(vec![
+                to_deck(1, field_followers(ZoneKind::Field), Position::Top {}),
+                ordering::look(2, 2),
+                ordering::order(3, ordering::looked(2), Position::Bottom {}),
+            ]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap();
+    assert!(!progress.complete);
+    let question = game.internal_decision(View::P1).unwrap();
+    game.answer_internal(question.actor, question.token, Answer::Order(vec![1, 0]))
+        .unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["deck"],
+        json!(["d1", "d0", "f"])
+    );
+}
+
+#[test]
+fn move_deck_does_not_grant_unobserved_hand_or_deck_authority() {
+    for zone in ["hand", "deck"] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"s","card":"unit-spell"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "hidden-source",
+        )
+        .unwrap();
+        let before = exact_authority(&game);
+        let objects = Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        };
+        game.execute_internal(
+            &checked(vec![to_deck(1, objects, Position::Top {})]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap_err();
+        assert_eq!(exact_authority(&game), before);
+    }
+}
+
+#[test]
+fn move_deck_rejects_multiple_arrivals_to_one_owner_without_an_order_choice() {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"one","card":"unit-follower"}, {"id":"two","card":"unit-follower"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "multiple-arrivals",
+    )
+    .unwrap();
+    let before = exact_authority(&game);
+    game.execute_internal(
+        &checked(vec![to_deck(
+            1,
+            field_followers(ZoneKind::Field),
+            Position::Top {},
+        )]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
+fn move_deck_keeps_a_look_into_an_unchanged_deck_valid() {
+    let mut game = game(1, 2);
+    let progress = game
+        .execute_internal(
+            &checked(vec![
+                ordering::look(1, 2),
+                to_deck(2, field_followers(ZoneKind::Field), Position::Top {}),
+                ordering::order(3, ordering::looked(1), Position::Bottom {}),
+            ]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap();
+    assert!(!progress.complete);
+    let question = game.internal_decision(View::P1).unwrap();
+    game.answer_internal(question.actor, question.token, Answer::Order(vec![1, 0]))
+        .unwrap();
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["deck"], json!(["d1", "d0"]));
+    assert_eq!(view["P2"]["deck"], json!(["f"]));
 }
 
 #[test]

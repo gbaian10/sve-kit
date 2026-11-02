@@ -1,0 +1,45 @@
+cards:
+  BP10-062:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  played_from:
+                    from: ex
+                    ref: this
+                then:
+                  - pp:
+                      delta: 4
+                      who: self
+        line: 2
+      - lastword:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+            - either:
+                options:
+                  - - move:
+                        position:
+                          nth: 2
+                        ref: this
+                        to: deck
+                  - - move:
+                        position: bottom
+                        ref: this
+                        to: deck
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,29 @@
+cards:
+  CP01-002:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                position: top
+                ref: returned
+                to: deck
+          targets:
+            - bind: returned
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

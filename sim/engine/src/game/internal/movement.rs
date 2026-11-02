@@ -9,11 +9,12 @@ use crate::ir::{
     Effect, EffectSource, Expr, Generation, Instruction, MemberProjection, MoveDestination,
     MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node,
     ObjectOperand, ObjectReceipt, ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation,
-    Polarity, Position, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
+    Polarity, Position, PositiveNat, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
     RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId,
     TimeAnchor, ZoneKind,
 };
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
+use core::num::NonZeroU64;
 use serde_json::json;
 
 /// One authority-only fact. No hidden destination reference is delivered to a player.
@@ -68,6 +69,11 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         {
             Ok(())
         }
+        Action::Move {
+            movement,
+            reason: MoveReason::Put,
+            ..
+        } if fixed_deck_destination(movement) => Ok(()),
         Action::Move { movement, .. }
             if !matches!(
                 movement.to,
@@ -428,6 +434,7 @@ impl Game {
             ZoneKind::Banish,
             MoveMethod::Banish,
             false,
+            None,
         )?;
         execution.receipts.insert(
             instruction.receipt,
@@ -460,7 +467,7 @@ impl Game {
                     OwnerZone::Banish => ("banish", ZoneKind::Banish),
                     OwnerZone::Hand => ("hand", ZoneKind::Hand),
                     OwnerZone::Ex => ("ex", ZoneKind::Ex),
-                    OwnerZone::Deck => return Err(unsupported("private movement destination")),
+                    OwnerZone::Deck => ("deck", ZoneKind::Deck),
                 };
                 if reason != MoveReason::Put {
                     return Err(unsupported("movement reason"));
@@ -523,6 +530,7 @@ impl Game {
             kind,
             method,
             kind == ZoneKind::Ex,
+            movement.and_then(|(spec, _)| spec.position),
         )?;
         let outcome = if method == MoveMethod::Destroy {
             InstructionOutcome::Destroy(DestroyOutcome { successful, moves })
@@ -679,6 +687,7 @@ impl Game {
             ZoneKind::Field,
             MoveMethod::Put,
             false,
+            None,
         )?;
         for member in &moved {
             if member.after.is_some() {
@@ -740,7 +749,9 @@ impl Game {
 
     #[expect(
         clippy::too_many_lines,
-        reason = "Planning and receipt construction share the atomic movement boundary."
+        clippy::too_many_arguments,
+        clippy::cognitive_complexity,
+        reason = "Planning, replacements, generations and receipts commit at one atomic boundary."
     )]
     pub(super) fn internal_move_members(
         &mut self,
@@ -750,7 +761,18 @@ impl Game {
         kind: ZoneKind,
         method: MoveMethod,
         owner_ex: bool,
+        position: Option<Position>,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
+        let old_deck = if kind == ZoneKind::Deck {
+            self.state
+                .objects
+                .values()
+                .filter(|object| object.zone == "deck")
+                .map(|object| (object.id.clone(), object.owner.clone()))
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
         let snapshot = SnapshotId(self.state.ir_epoch);
         let mut moves = Vec::new();
         let mut successful = Vec::new();
@@ -770,7 +792,7 @@ impl Game {
                 before,
                 after: None,
                 requested_to,
-                requested_position: None,
+                requested_position: position,
                 actual_to: None,
                 actual_position: None,
                 replacements: Vec::new(),
@@ -817,6 +839,18 @@ impl Game {
                 }
             }
         }
+        if kind == ZoneKind::Deck {
+            let mut owners = BTreeSet::new();
+            if plans
+                .iter()
+                .filter(|plan| !plan.6)
+                .any(|(_, _, previous, ..)| !owners.insert(&previous.owner))
+            {
+                return Err(unsupported(
+                    "simultaneous deck placement needs an order choice",
+                ));
+            }
+        }
         let ids = plans
             .iter()
             .map(|(_, id, _, _, _, _, _)| id.clone())
@@ -835,6 +869,11 @@ impl Game {
                 .values
                 .insert("banish_instruction".into(), json!(true));
         }
+        let placement = position.map(|position| match position {
+            Position::Top {} => json!(1_u8),
+            Position::Bottom {} => json!("bottom"),
+            Position::Index { index } => json!(index.0.get()),
+        });
         if method == MoveMethod::Discard {
             self.discard(&ids, &frame)?;
         } else {
@@ -846,7 +885,7 @@ impl Game {
                 } else {
                     None
                 },
-                None,
+                placement.as_ref(),
                 &frame,
             )?;
         }
@@ -899,6 +938,14 @@ impl Game {
             source_departed |= id == execution.context.source;
             result.after = Some(after);
             result.actual_to = Some(result.requested_to);
+            if kind == ZoneKind::Deck && followup.is_none() {
+                result.actual_position = self
+                    .object_position(&id)?
+                    .and_then(|offset| offset.checked_add(1).and_then(NonZeroU64::new))
+                    .map(|deck_index| Position::Index {
+                        index: PositiveNat(deck_index),
+                    });
+            }
             let controller_before = player_id(&previous.controller)?;
             execution.facts.push(Fact::Movement(Box::new(MovementFact {
                 movement: result.clone(),
@@ -938,8 +985,52 @@ impl Game {
             }
         }
         execution.seal_source_departure(departing_source.filter(|_| source_departed));
+        if kind == ZoneKind::Deck {
+            self.invalidate_deck_observations(execution, &moves, &old_deck)?;
+        }
         Ok((moves, successful))
     }
+
+    fn invalidate_deck_observations(
+        &mut self,
+        execution: &mut Execution,
+        moves: &[MoveResult],
+        old_deck: &[(String, String)],
+    ) -> Result<()> {
+        let changed_players = moves
+            .iter()
+            .filter_map(|movement| movement.actual_to.map(|to| to.player))
+            .collect::<Vec<_>>();
+        if changed_players.is_empty() {
+            return Ok(());
+        }
+        execution
+            .look_viewers
+            .retain(|_, viewer| !changed_players.contains(viewer));
+        let changed_owners = changed_players
+            .iter()
+            .map(|player| super::seat_name(*player))
+            .collect::<Result<Vec<_>>>()?;
+        for knowledge in self.state.knowledge.values_mut() {
+            for (id, owner) in old_deck {
+                if changed_owners.contains(&owner.as_str()) {
+                    knowledge.located.remove(id);
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+fn fixed_deck_destination(movement: &MoveSpec) -> bool {
+    movement.to
+        == (MoveDestination::Owners {
+            zone: OwnerZone::Deck,
+        })
+        && movement.position.is_some()
+        && movement.order.is_none()
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty()
 }
 
 fn public_zone(zone: &str) -> Result<ZoneKind> {
