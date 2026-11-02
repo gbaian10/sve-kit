@@ -64,7 +64,6 @@ fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
                     )
                 },
                 |groups| {
-                    // Each printed group greedily takes cards no earlier group used.
                     let mut used = Vec::new();
                     SearchAnswer::Grouped(
                         groups
@@ -240,7 +239,7 @@ fn synthetic_base(form: &str, initial: &Value) -> Game {
         initial,
         &Value::Null,
         &Value::Null,
-        "ready-c-bp18",
+        "ready-c-bp20",
     )
     .unwrap();
     game.load_internal_card("synthetic-evolution", &companion)
@@ -309,7 +308,6 @@ fn bp20_112_evolution_adds_the_crest_which_draws_at_end_with_a_small_hand() {
     );
     end_turn(&mut game);
     let after = game.projection(View::Referee).unwrap();
-    // Empty hand: the follower destroys at end and the crest draws one.
     assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
     assert_eq!(after["P1"]["hand"], json!(["first"]));
 }
