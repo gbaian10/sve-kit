@@ -1,0 +1,43 @@
+cards:
+  BP03-072:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: ally
+                to: ex
+            - damage:
+                n: 3
+                to: victim
+            - create:
+                n: 1
+                to: field
+                token: ドラゴウェポン
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: 武装
+                who: self
+                zone: field
+              n: 1
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP02-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
