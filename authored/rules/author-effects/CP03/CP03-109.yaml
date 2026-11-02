@@ -1,0 +1,34 @@
+cards:
+  CP03-109:
+    abilities:
+      - keywords:
+          - single_drive
+        line: 1
+      - evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: オラクルシンクタンク
+                who: self
+                zone: hand
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                hp_le: 5
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
