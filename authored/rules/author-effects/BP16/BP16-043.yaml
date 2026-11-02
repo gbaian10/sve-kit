@@ -1,0 +1,38 @@
+cards:
+  BP16-043:
+    abilities:
+      - auto:
+          do:
+            - stack_plus: 1
+          "on":
+            enter_field:
+              sel:
+                kind: follower
+                trait: ゴーレム
+              who: self
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 攻撃型ゴーレム
+            - create:
+                n: 1
+                to: ex
+                token: 防御型ゴーレム
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - draw:
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
