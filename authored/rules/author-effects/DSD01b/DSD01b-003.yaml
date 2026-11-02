@@ -1,0 +1,37 @@
+cards:
+  DSD01b-003:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 武闘竜人
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      hp: 2
+                      "on": this
+                      power: 2
+                  - grant:
+                      keywords:
+                        - storm
+                      "on": this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

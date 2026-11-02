@@ -1,0 +1,74 @@
+cards:
+  DSD01b-T01:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 雷カウンター
+                "on": this
+          "on":
+            enter_field:
+              sel:
+                kind: follower
+                trait: 武闘竜人
+              who: self
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                "on": chosen
+                power: 2
+          targets:
+            - bind: chosen
+              from:
+                class: ドラゴン
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                counter:
+                  name: 雷カウンター
+                  "on": this
+              op: ge
+              right: 5
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - destroy: chosen
+            - damage:
+                n: 3
+                to:
+                  leader_of: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                counter:
+                  name: 雷カウンター
+                  "on": this
+              op: ge
+              right: 10
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
