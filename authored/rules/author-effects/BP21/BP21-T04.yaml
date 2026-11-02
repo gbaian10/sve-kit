@@ -1,0 +1,45 @@
+cards:
+  BP21-T04:
+    abilities:
+      - keywords:
+          - stack
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 防御型ゴーレム
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    orig_cost_ge: 3
+                    trait: 錬金術師
+                    who: self
+                    zone: field
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: ガーディアンゴーレム
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: 緊急召喚
+      template: true
+    token_sources:
+      - card: BP01-T09
+        line: 1
+        section: 1
+      - card: BP16-T01
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

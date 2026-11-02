@@ -1,0 +1,35 @@
+cards:
+  BP21-044:
+    abilities:
+      - keywords:
+          - stack
+        line: 1
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: 緊急召喚
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: 術式結界
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP21-T04
+        line: 1
+        section: 1
+      - card: BP21-T05
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

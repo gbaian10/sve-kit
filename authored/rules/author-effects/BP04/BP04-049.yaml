@@ -1,0 +1,31 @@
+cards:
+  BP04-049:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - life:
+                delta: 3
+                who: self
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                else:
+                  - draw:
+                      n: 1
+                then:
+                  - draw:
+                      n: 2
+          optional_cost:
+            earth_rite: 1
+            result: rite
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

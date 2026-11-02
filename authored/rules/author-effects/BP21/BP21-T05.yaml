@@ -1,0 +1,35 @@
+cards:
+  BP21-T05:
+    abilities:
+      - keywords:
+          - stack
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    orig_cost_ge: 3
+                    trait: 錬金術師
+                    who: self
+                    zone: field
+                else:
+                  - draw:
+                      n: 1
+                then:
+                  - draw:
+                      n: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: 術式結界
+      template: true
+format: 2
+kind: author_effect_set

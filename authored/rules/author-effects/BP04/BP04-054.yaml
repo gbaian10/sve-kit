@@ -1,0 +1,33 @@
+cards:
+  BP04-054:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - buff:
+                      hp: 1
+                      "on":
+                        kind: follower
+                        who: self
+                        zone: field
+                      power: 1
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
