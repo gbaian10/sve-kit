@@ -1,0 +1,38 @@
+cards:
+  BP22-053:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 攻撃型ゴーレム
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+          do:
+            - act:
+                ref: enemy
+    token_sources:
+      - card: BP22-T08
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
