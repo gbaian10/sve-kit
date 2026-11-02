@@ -1,4 +1,4 @@
-import { Copy, Layers, Pencil, Plus, Trash2 } from "lucide-react"
+import { Copy, Layers, Pencil, Plus, Trash2, Upload } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router"
@@ -69,7 +69,17 @@ export function DecksPage() {
     <div className="flex flex-col gap-4 pb-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <PageTitle>{t("decks.pageTitle")}</PageTitle>
-        {newButton}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => {
+              void navigate("/decks/import")
+            }}
+          >
+            <Upload className="size-4" aria-hidden="true" />
+            {t("decks.import")}
+          </Button>
+          {newButton}
+        </div>
       </div>
       <p className="text-13 text-text-2">{t("decks.listHint")}</p>
       {state.status === "unavailable" && (

@@ -5,7 +5,7 @@ export function deckPath(deck: { readonly id: string; readonly edition: Region }
   return `/decks/${encodeURIComponent(deck.id)}${deck.edition === "en" ? "?ed=en" : ""}`
 }
 
-/** `/decks/<id>` is the builder; the list (`/decks`) is not. */
+/** `/decks/<id>` is the builder; the list (`/decks`) and the import page are not. */
 export function isDeckBuilderPath(pathname: string): boolean {
-  return /^\/decks\/[^/]+$/u.test(pathname)
+  return /^\/decks\/(?!import$)[^/]+$/u.test(pathname)
 }

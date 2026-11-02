@@ -142,6 +142,9 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
         {
           deck,
           facts,
+          printingsReady: data.printingsReady,
+          dataFailed: data.failed,
+          retryData: data.retry,
           restrictions,
           problems,
           uiLanguage,
@@ -170,6 +173,9 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
       ),
     [
       deck,
+      data.printingsReady,
+      data.failed,
+      data.retry,
       facts,
       restrictions,
       problems,

@@ -43,12 +43,41 @@ export interface DeckFacts {
    * of the main-deck follower of the same name, the card it evolves from.
    */
   readonly chartCostOf: (cardId: string) => number | null
+  /** The card number of an entry's printing (its chosen one, else the card's default). */
+  readonly cardNoOf: (entry: {
+    readonly cardId: string
+    readonly printingId?: string
+  }) => string | undefined
+  /** The permanent printing integer a share code carries for an entry. */
+  readonly intIdOf: (entry: {
+    readonly cardId: string
+    readonly printingId?: string
+  }) => number | undefined
+  /** A pasted card number (any case, the EN suffix optional) to a printing of the edition. */
+  readonly printingByCardNo: (cardNo: string) => DeckPrinting | undefined
+  /** A share code's printing integer to a printing of the edition. */
+  readonly printingByIntId: (intId: number) => DeckPrinting | undefined
+}
+
+interface DeckPrinting {
+  readonly cardId: string
+  readonly printingId: string
 }
 
 const strings = (value: unknown): string[] =>
   Array.isArray(value)
     ? (value as unknown[]).filter((item): item is string => typeof item === "string")
     : []
+
+/**
+ * A pasted card number matched loosely: any case, with or without the EN mark, which EN numbers
+ * carry after the set code or at the end. Card numbers themselves stay as printed.
+ */
+const cardNoKey = (cardNo: string) =>
+  cardNo
+    .trim()
+    .toUpperCase()
+    .replace(/EN(?=-)|EN$/u, "")
 
 const numberOrNull = (value: unknown): number | null => (typeof value === "number" ? value : null)
 
@@ -159,10 +188,53 @@ export function createDeckFacts(catalog: Catalog, edition: Region): DeckFacts {
       printingId === undefined ? undefined : facts?.printings.find((item) => item.id === printingId)
     return chosen?.summary ?? facts?.summary
   }
+  const printingOf = (row: Row | undefined): DeckPrinting | undefined =>
+    row ? { cardId: stringValue(row["card_id"]), printingId: stringValue(row["id"]) } : undefined
+  let byIntId: Map<number, DeckPrinting> | undefined
+  let byCardNo: Map<string, DeckPrinting> | undefined
+  const entryPrinting = (entry: { readonly cardId: string; readonly printingId?: string }) => {
+    const id = entry.printingId ?? factsOf(entry.cardId)?.defaultPrintingId
+    return id === undefined ? undefined : index.printing(id)
+  }
   return {
     edition,
     factsOf,
     summaryOf,
+    cardNoOf: (entry) => {
+      const row = entryPrinting(entry)
+      return row ? stringValue(row["card_no"]) : undefined
+    },
+    intIdOf: (entry) => {
+      const value = entryPrinting(entry)?.["int_id"]
+      // Reprints exist on the main thread only as locators; their summary still knows the integer.
+      return typeof value === "number" ? value : summaryOf(entry.cardId, entry.printingId)?.intId
+    },
+    printingByCardNo: (cardNo) => {
+      if (!byCardNo) {
+        byCardNo = new Map()
+        for (const card of index.cards)
+          for (const row of index.printingsOf(stringValue(card["id"])))
+            if (row["region"] === edition) {
+              const key = cardNoKey(stringValue(row["card_no"]))
+              const hit = printingOf(row)
+              if (hit && !byCardNo.has(key)) byCardNo.set(key, hit)
+            }
+      }
+      return byCardNo.get(cardNoKey(cardNo))
+    },
+    printingByIntId: (intId) => {
+      if (!byIntId) {
+        byIntId = new Map()
+        for (const card of index.cards)
+          for (const row of index.printingsOf(stringValue(card["id"])))
+            if (row["region"] === edition && typeof row["int_id"] === "number")
+              byIntId.set(row["int_id"], {
+                cardId: stringValue(row["card_id"]),
+                printingId: stringValue(row["id"]),
+              })
+      }
+      return byIntId.get(intId)
+    },
     setsOfTitle: (titleCode) => [...(setsByTitle().get(titleCode) ?? [])],
     chartCostOf: (cardId) => {
       const facts = factsOf(cardId)

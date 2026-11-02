@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import { useCardSnapshot, useImageIndex, useRecentSummaries } from "../../app/snapshot"
 import {
@@ -17,13 +17,21 @@ export interface DeckData {
   readonly restrictionStatus: RestrictionStatus | undefined
   /** Image metadata of the main-thread snapshot (base printings). */
   readonly images: ImageIndex | undefined
+  /**
+   * Every printing of the edition is loaded, reprints included, so card numbers and permanent
+   * printing integers resolve completely (share codes and imports wait for it).
+   */
+  readonly printingsReady: boolean
+  /** The cards could not be loaded; `retry` asks again. */
+  readonly failed: boolean
+  readonly retry: () => void
 }
 
 const NO_RESTRICTIONS: ReadonlyMap<string, readonly CardRestriction[]> = new Map()
 
 /** The main-thread snapshot (the card page's path) as the deck builder's card facts. */
 export function useDeckData(edition: Region): DeckData {
-  const { client, catalog } = useCardSnapshot()
+  const { client, catalog, status } = useCardSnapshot()
   const snapshot = client.snapshot()
   // The previous region's catalog stays until the deck's edition has loaded.
   const current =
@@ -54,7 +62,35 @@ export function useDeckData(edition: Region): DeckData {
     }
   }, [client, snapshot, current, edition, key])
   const images = useImageIndex(client, current !== null)
+  // The basic catalog holds reprints only as locators; the full printing data replaces the
+  // snapshot when it arrives, and the facts are rebuilt from it.
+  const [attempt, setAttempt] = useState(0)
+  const [printingFailure, setPrintingFailure] = useState<string | null>(null)
+  useEffect(() => {
+    if (!snapshot || !current || snapshot.printingReady === true) return
+    let active = true
+    client.prefetchPrintings?.().catch(() => {
+      if (active) setPrintingFailure(snapshot.manifestHash)
+    })
+    return () => {
+      active = false
+    }
+  }, [client, snapshot, current, attempt])
+  const printingsReady =
+    current !== null && (snapshot?.printingReady === true || client.prefetchPrintings === undefined)
+  const failed =
+    status.state === "error" ||
+    (!printingsReady && printingFailure !== null && printingFailure === snapshot?.manifestHash)
+  const snapshotFailed = status.state === "error"
+  const retry = useCallback(() => {
+    setPrintingFailure(null)
+    if (snapshotFailed) void client.retry()
+    else setAttempt((count) => count + 1)
+  }, [client, snapshotFailed])
   return {
+    printingsReady,
+    failed,
+    retry,
     facts,
     restrictions: selection.key === key ? selection.map : NO_RESTRICTIONS,
     restrictionStatus: selection.key === key ? selection.status : undefined,
