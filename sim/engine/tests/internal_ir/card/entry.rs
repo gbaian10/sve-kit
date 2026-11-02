@@ -1,4 +1,5 @@
 use super::*;
+use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{Answer, InputDomain};
 
 pub(super) fn own_zone(kind: ZoneKind, scope: u64) -> Selector {
@@ -487,4 +488,170 @@ fn returning_source_keeps_old_pending_lki_and_assigns_new_entry_generation() {
         game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
         1
     );
+}
+
+#[test]
+fn multi_trigger_quota_admits_all_facts_that_fit_and_stops_at_the_remaining_allowance() {
+    for maximum in [2, 3] {
+        let mut trigger = seed();
+        trigger
+            .node
+            .trigger
+            .as_mut()
+            .unwrap()
+            .limit
+            .as_mut()
+            .unwrap()
+            .maximum = Nat(maximum);
+        let base = card(vec![
+            trigger,
+            ability(20, vec![enter(20, own_zone(ZoneKind::Cemetery, 20))]),
+            ability(21, vec![enter(21, own_zone(ZoneKind::Ex, 21))]),
+        ]);
+        let mut game = position(&base, &card(vec![]), true);
+        resolved(
+            game.activate_internal_card("s", AbilityId(20), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        game.resume_internal_card().unwrap();
+        let first = drain(&mut game);
+        assert_eq!(
+            first.len(),
+            6,
+            "three observers each admit both simultaneous entries"
+        );
+        resolved(
+            game.activate_internal_card("s", AbilityId(21), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        game.resume_internal_card().unwrap();
+        assert_eq!(
+            drain(&mut game).len(),
+            if maximum == 2 { 1 } else { 4 },
+            "each observer uses only its own remaining allowance"
+        );
+    }
+}
+
+#[test]
+fn simultaneous_three_facts_select_two_per_instance_before_any_body_resolves() {
+    let mut trigger = seed();
+    trigger
+        .node
+        .trigger
+        .as_mut()
+        .unwrap()
+        .limit
+        .as_mut()
+        .unwrap()
+        .maximum = Nat(2);
+    let base = card(vec![
+        trigger,
+        ability(20, vec![enter(20, own_zone(ZoneKind::Cemetery, 20))]),
+    ]);
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"a","card":"unit-follower"},{"id":"b","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!(
+        (0..12)
+            .map(|n| json!({"id":format!("d{n}"),"card":"unit-spell"}))
+            .collect::<Vec<_>>()
+    );
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            row["faces"][0]["traits"] = json!(["兵士"]);
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("quota.yaml".into(), document)]).unwrap(),
+    );
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "quota-two-of-three",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &base).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let mut play = game
+        .activate_internal_card("s", AbilityId(20), PlayerId { seat: 1 })
+        .unwrap();
+    let mut answered = None;
+    for ordinal in 0..8 {
+        let CardPlay::Awaiting(question) = play else {
+            panic!("quota subset");
+        };
+        let InputDomain::TriggerQuota(domain) = &question.domain else {
+            panic!("quota domain");
+        };
+        assert_eq!(question.actor, PlayerId { seat: 1 });
+        if let Some(stale) = answered {
+            let before = exact_authority(&game);
+            game.answer_internal_card(question.actor, stale, Answer::TriggerQuota(1))
+                .unwrap_err();
+            assert_eq!(
+                before,
+                exact_authority(&game),
+                "an answered quota token cannot pick another slot"
+            );
+        }
+        answered = Some(question.token);
+        assert_eq!(
+            domain.candidates.len(),
+            if ordinal % 2 == 0 { 3 } else { 2 }
+        );
+        assert_eq!(domain.earlier.len(), ordinal);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["hand"],
+            json!([])
+        );
+        play = game
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::TriggerQuota(domain.candidates[0].handle),
+            )
+            .unwrap();
+    }
+    resolved(play);
+    game.resume_internal_card().unwrap();
+    let pending = drain(&mut game);
+    assert_eq!(pending.len(), 8);
+    let mut per_instance = BTreeMap::new();
+    for result in pending {
+        *per_instance.entry(result.source.instance).or_insert(0) += 1;
+    }
+    assert_eq!(per_instance.len(), 4);
+    assert!(per_instance.values().all(|count| *count == 2));
+}
+
+#[test]
+fn trigger_quotas_reject_zero_and_the_activation_consumption_point() {
+    for (maximum, consume_at) in [
+        (0, ConsumptionPoint::PendingAdmission),
+        (2, ConsumptionPoint::PlayCommitted),
+    ] {
+        let mut trigger = seed();
+        trigger.node.trigger.as_mut().unwrap().limit = Some(LimitSpec {
+            maximum: Nat(maximum),
+            window: LimitWindow::Turn,
+            scope: LimitScope::AbilityInstance,
+            consume_at,
+        });
+        WellFormedCardProgram::check(CardProgram {
+            abilities: vec![trigger],
+            card_play_costs: vec![],
+        })
+        .unwrap_err();
+    }
 }

@@ -25,8 +25,14 @@ pub struct QuotaDomain {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game::internal) struct Admission {
     ready: Vec<PendingOccurrence>,
-    groups: VecDeque<Vec<PendingOccurrence>>,
+    groups: VecDeque<QuotaGroup>,
     earlier: Vec<QuotaSelection>,
+}
+
+#[derive(Clone, Debug)]
+struct QuotaGroup {
+    candidates: Vec<PendingOccurrence>,
+    remaining: u64,
 }
 
 #[expect(
@@ -42,43 +48,57 @@ impl Game {
             return Err(invalid("another trigger admission is still pending"));
         }
         let mut plan = Admission::default();
-        let mut limited: BTreeMap<AbilityInstanceId, Vec<PendingOccurrence>> = BTreeMap::new();
+        let mut limited: BTreeMap<AbilityInstanceId, (LimitSpec, Vec<PendingOccurrence>)> =
+            BTreeMap::new();
         for candidate in candidates {
-            let limited_entry = candidate
+            let limit = candidate
                 .ability
                 .node
                 .trigger
                 .as_ref()
-                .is_some_and(|trigger| trigger.limit.is_some());
-            if limited_entry
-                && !self.card_runtime.quota_available(
+                .and_then(|trigger| trigger.limit);
+            if let Some(limit) = limit {
+                if self.card_runtime.quota_available(
                     candidate.source.instance,
                     candidate.header.time.turn,
-                    LimitSpec::once_per_turn(),
-                )
-            {
-                continue;
-            }
-            if limited_entry {
-                limited
-                    .entry(candidate.source.instance)
-                    .or_default()
-                    .push(candidate);
+                    limit,
+                ) {
+                    limited
+                        .entry(candidate.source.instance)
+                        .or_insert_with(|| (limit, Vec::new()))
+                        .1
+                        .push(candidate);
+                }
             } else {
                 plan.ready.push(candidate);
             }
         }
-        for group in limited.into_values() {
-            if group.len() == 1 {
+        for (limit, group) in limited.into_values() {
+            // One producer supplies a simultaneous batch, so every candidate shares a turn.
+            let first = group
+                .first()
+                .ok_or_else(|| invalid("empty limited trigger group"))?;
+            let remaining = self.card_runtime.quota_remaining(
+                first.source.instance,
+                first.header.time.turn,
+                limit,
+            );
+            if u64::try_from(group.len()).map_err(invalid)? <= remaining {
                 plan.ready.extend(group);
             } else {
-                plan.groups.push_back(group);
+                plan.groups.push_back(QuotaGroup {
+                    candidates: group,
+                    remaining,
+                });
             }
         }
         let active = player_id(self.active())?;
-        plan.groups
-            .make_contiguous()
-            .sort_by_key(|group| group.first().is_some_and(|p| p.source.controller != active));
+        plan.groups.make_contiguous().sort_by_key(|group| {
+            group
+                .candidates
+                .first()
+                .is_some_and(|p| p.source.controller != active)
+        });
         self.internal_commit_admission(plan)
     }
 
@@ -88,17 +108,17 @@ impl Game {
             return Ok(());
         }
         for pending in plan.ready {
-            if pending
+            if let Some(limit) = pending
                 .ability
                 .node
                 .trigger
                 .as_ref()
-                .is_some_and(|trigger| trigger.limit.is_some())
+                .and_then(|trigger| trigger.limit)
             {
                 self.card_runtime.consume_quota(
                     pending.source.instance,
                     pending.header.time.turn,
-                    LimitSpec::once_per_turn(),
+                    limit,
                 )?;
             }
             self.card_runtime.pending.push(pending);
@@ -118,11 +138,13 @@ impl Game {
             .front()
             .ok_or_else(|| invalid("missing quota group"))?;
         let actor = group
+            .candidates
             .first()
             .ok_or_else(|| invalid("empty quota group"))?
             .source
             .controller;
         let candidates = group
+            .candidates
             .iter()
             .enumerate()
             .map(|(index, pending)| {
@@ -165,15 +187,22 @@ impl Game {
                 .ok_or_else(|| invalid("unknown quota handle"))?,
         )
         .map_err(invalid)?;
-        if index >= group.len() {
+        if index >= group.candidates.len() {
             return Err(invalid("unknown quota handle"));
         }
-        let chosen = group.remove(index);
+        let chosen = group.candidates.remove(index);
         plan.earlier.push(QuotaSelection {
             actor: chosen.source.controller,
             occurrence: chosen.public_option(handle)?,
         });
         plan.ready.push(chosen);
+        group.remaining = group
+            .remaining
+            .checked_sub(1)
+            .ok_or_else(|| invalid("empty quota allowance"))?;
+        if group.remaining > 0 {
+            plan.groups.push_front(group);
+        }
         self.internal_commit_admission(plan)
     }
 }

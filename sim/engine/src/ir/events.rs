@@ -215,15 +215,19 @@ impl LimitSpec {
     }
 
     pub(crate) fn is_activated(self) -> bool {
-        matches!(self.maximum, Nat(1 | 2)) && self == Self::activated_per_turn(self.maximum)
+        self.maximum.0 > 0 && self == Self::activated_per_turn(self.maximum)
     }
 
-    pub(crate) const fn once_per_turn() -> Self {
+    pub(crate) const fn triggered_per_turn(maximum: Nat) -> Self {
         Self {
-            maximum: Nat(1),
+            maximum,
             window: LimitWindow::Turn,
             scope: LimitScope::AbilityInstance,
             consume_at: ConsumptionPoint::PendingAdmission,
         }
+    }
+
+    pub(crate) fn is_triggered(self) -> bool {
+        self.maximum.0 > 0 && self == Self::triggered_per_turn(self.maximum)
     }
 }

@@ -219,6 +219,10 @@ fn activated_limit_requires_play_committed() {
     let limit = LimitSpec::activated_per_turn(Nat(1));
     play_mut(&mut card).limit = Some(limit);
     accept_card(card.clone());
+    play_mut(&mut card).limit = Some(LimitSpec::activated_per_turn(Nat(3)));
+    accept_card(card.clone());
+    play_mut(&mut card).limit = Some(LimitSpec::activated_per_turn(Nat(0)));
+    reject_card(card.clone(), WellFormedReason::UnsupportedShape);
     play_mut(&mut card).limit = Some(LimitSpec {
         consume_at: ConsumptionPoint::PendingAdmission,
         ..limit

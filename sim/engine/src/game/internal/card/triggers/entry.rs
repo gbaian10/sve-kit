@@ -30,7 +30,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || trigger.aggregation != (TriggerAggregation::PerFact {})
         || trigger
             .limit
-            .is_some_and(|limit| limit != LimitSpec::once_per_turn())
+            .is_some_and(|limit| !LimitSpec::is_triggered(limit))
         || SubjectFilter::parse(SubjectFields::Entry(*binding), predicate).is_none()
     {
         return Err(unsupported("printed per-fact entry header"));

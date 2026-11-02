@@ -107,9 +107,16 @@ pub(in crate::game) struct CardRuntime {
 
 impl CardRuntime {
     fn quota_available(&self, instance: AbilityInstanceId, turn: TurnId, limit: LimitSpec) -> bool {
-        self.quotas
+        self.quota_remaining(instance, turn, limit) > 0
+    }
+
+    fn quota_remaining(&self, instance: AbilityInstanceId, turn: TurnId, limit: LimitSpec) -> u64 {
+        let used = self
+            .quotas
             .get(&(instance, limit.consume_at))
-            .is_none_or(|(used_turn, used)| *used_turn != turn || *used < limit.maximum.0)
+            .filter(|(used_turn, _)| *used_turn == turn)
+            .map_or(0, |(_, used)| *used);
+        limit.maximum.0.saturating_sub(used)
     }
 
     fn consume_quota(

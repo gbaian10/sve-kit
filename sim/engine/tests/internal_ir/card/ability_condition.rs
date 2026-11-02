@@ -129,3 +129,97 @@ fn author_use_prerequisites_reject_hidden_filters_and_later_resolution_values() 
         );
     }
 }
+
+#[test]
+fn three_activations_consume_one_slot_each_and_refuse_the_fourth_without_changes() {
+    let mut activated = payment::paid_ability(
+        vec![payment::pp(0)],
+        vec![instruction(
+            1,
+            Action::Life {
+                player: PlayerRef::Controller {},
+                change: NumericChange::Add {
+                    amount: Expr::Literal(Int(1)),
+                },
+            },
+        )],
+    );
+    activated.node.play.as_mut().unwrap().limit = Some(LimitSpec {
+        maximum: Nat(3),
+        window: LimitWindow::Turn,
+        scope: LimitScope::AbilityInstance,
+        consume_at: ConsumptionPoint::PlayCommitted,
+    });
+    let mut board = position_with_card(1, &card(vec![activated]));
+    for _ in 0..3 {
+        resolved(
+            board
+                .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        board.resume_internal_card().unwrap();
+    }
+    assert_eq!(
+        board.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        23
+    );
+    let before = exact_authority(&board);
+    board
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(before, exact_authority(&board));
+}
+
+#[test]
+fn cemetery_threshold_and_once_limit_check_eligibility_before_spending_or_consuming_quota() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut seed = tree["cards"]["BP01-041"].clone();
+    seed["abilities"][0]["activate"] = json!({
+        "cost":{"pp":1}, "per_turn":1,
+        "usable_if":{"cmp":{"left":{"count":{"who":"self","zone":"cemetery","kind":"follower"}},"op":"ge","right":5}},
+        "do":[{"life":{"who":"self","delta":1}}]
+    });
+    tree["cards"] = json!({"unit-follower":seed});
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for count in [4, 5] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(
+            (0..count)
+                .map(|n| json!({"id":format!("g{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let mut board = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "conditional-quota",
+        )
+        .unwrap();
+        board.load_internal_card("unit-follower", &program).unwrap();
+        if count == 5 {
+            resolved(
+                board
+                    .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+                    .unwrap(),
+            );
+            board.resume_internal_card().unwrap();
+            let state = board.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["pp"]["current"], 1);
+            assert_eq!(state["P1"]["leader"]["life"], 21);
+        }
+        // Four cards fail eligibility; five spend the only slot, so the next try fails either way.
+        let before = exact_authority(&board);
+        board
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap_err();
+        assert_eq!(before, exact_authority(&board));
+    }
+}

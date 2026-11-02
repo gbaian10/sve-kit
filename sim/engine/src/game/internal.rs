@@ -171,7 +171,7 @@ pub enum InputDomain {
     BeforeDraw,
     /// Public occurrence handles for exactly one player at the current check timing.
     Pending(Vec<PendingOption>),
-    /// Select one simultaneous fact before its once-per-turn admission commits.
+    /// Select one simultaneous fact before its limited per-turn admission commits.
     TriggerQuota(QuotaDomain),
     /// One natural number in the checked inclusive range.
     Integer(Cardinality),
