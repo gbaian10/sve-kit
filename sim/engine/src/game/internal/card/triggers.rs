@@ -352,14 +352,7 @@ impl Game {
                 continue;
             };
             // Only a subscribed departure needs a typed destination; other moves stay as before.
-            let to = match destination {
-                "cemetery" => ZoneKind::Cemetery,
-                "hand" => ZoneKind::Hand,
-                "deck" => ZoneKind::Deck,
-                "banish" => ZoneKind::Banish,
-                "ex" => ZoneKind::Ex,
-                _ => return Err(unsupported("departure destination")),
-            };
+            let to = departure_destination(destination)?;
             let actor = player_id(&object.controller)?;
             let effect_source = self.card_runtime.active_source;
             let cause = self.departure_cause(id, frame)?;
@@ -715,5 +708,16 @@ impl PendingOccurrence {
                 return Err(invalid("pending occurrence without a public event"));
             },
         })
+    }
+}
+
+fn departure_destination(destination: &str) -> Result<ZoneKind> {
+    match destination {
+        "cemetery" => Ok(ZoneKind::Cemetery),
+        "hand" => Ok(ZoneKind::Hand),
+        "deck" => Ok(ZoneKind::Deck),
+        "banish" => Ok(ZoneKind::Banish),
+        "ex" => Ok(ZoneKind::Ex),
+        _ => Err(unsupported("departure destination")),
     }
 }
