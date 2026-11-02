@@ -46,7 +46,7 @@ impl BodyContext<'_> {
         let population = ast::PublicQuery {
             who: query.who.clone(),
             zone: ast::PublicZone::Field,
-            kind: query.kind.as_ref().map(|_| ast::SearchKind::Follower),
+            kind: query.kind.map(ast::FieldKind::search),
             keyword: None,
             r#trait: query.r#trait.clone(),
             class: query.class.clone(),
@@ -63,6 +63,7 @@ impl BodyContext<'_> {
             cost_le: None,
             cost_ge: None,
             hp_le: None,
+            r#where: None,
         };
         self.checked_extremum(
             query.alias.as_deref(),
@@ -91,6 +92,7 @@ impl BodyContext<'_> {
             || query.leader_or
             || query.not_same_name_as_this
             || query.has_evolve.is_some()
+            || query.has_state_filter()
             || !query.traits_all.is_empty()
             || !query.names.is_empty()
         {
@@ -116,6 +118,7 @@ impl BodyContext<'_> {
             cost_le: query.cost_le,
             cost_ge: query.cost_ge,
             hp_le: query.hp_le,
+            r#where: None,
         };
         self.checked_extremum(
             query.alias.as_deref(),

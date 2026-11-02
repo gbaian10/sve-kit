@@ -4,8 +4,8 @@ use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CharacteristicPatch,
     ContinuousLayer, Control, Duration, DurationEnd, Effect, EffectTarget, Expr, FaceId,
     Generation, GrantedAbility, Instruction, InstructionContext, InstructionId, KeywordId, Node,
-    ObjectId, ObjectOperand, ObjectView, PlayerRef, Program, ReceiptId, Requirements, TextProvider,
-    TimeAnchor, TimestampBasis, ZoneKind,
+    ObjectId, ObjectOperand, ObjectView, PlayerRef, PostureRead, Predicate, Program, ReceiptId,
+    Requirements, TextProvider, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -105,7 +105,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                 source: located.source.clone(),
                 node: Node::Control {
                     control: Control::If {
-                        condition: condition.clone().unwrap_or(Expr::Literal(Bool(true))),
+                        condition: scoped_condition(condition.as_ref()),
                         then_body: body,
                         else_body: None,
                     },
@@ -231,5 +231,34 @@ impl Game {
             }
         }
         Ok(keywords)
+    }
+}
+
+fn scoped_condition(condition: Option<&Expr<Bool>>) -> Expr<Bool> {
+    condition.map_or(Expr::Literal(Bool(true)), field_holder_posture)
+}
+
+// A field-only static's holder is public, so its own posture is a scoped live holder read.
+fn field_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
+    let Expr::Compute(operation) = condition else {
+        return condition.clone();
+    };
+    match operation.as_ref() {
+        Predicate::PostureEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), PostureRead::Posture { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})) => {
+            Expr::Literal(Bool(true))
+        }
+        Predicate::And { predicates } => Expr::Compute(Box::new(Predicate::And {
+            predicates: predicates.iter().map(field_holder_posture).collect(),
+        })),
+        Predicate::Or { predicates } => Expr::Compute(Box::new(Predicate::Or {
+            predicates: predicates.iter().map(field_holder_posture).collect(),
+        })),
+        Predicate::Not { predicate } => Expr::Compute(Box::new(Predicate::Not {
+            predicate: field_holder_posture(predicate),
+        })),
+        _ => condition.clone(),
     }
 }

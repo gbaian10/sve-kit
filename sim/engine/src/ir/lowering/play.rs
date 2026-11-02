@@ -114,6 +114,9 @@ impl BodyContext<'_> {
             .as_ref()
             .and_then(target_zones)
             .ok_or_else(|| unsupported(path))?;
+        if query.has_state_filter() && zones != [ZoneKind::Field] {
+            return Err(unsupported(path));
+        }
         let mut sets = Vec::new();
         for zone in zones {
             let candidate = Binding::new(1, self.card_allocator.scope(path)?);
@@ -138,10 +141,17 @@ impl BodyContext<'_> {
                 zone,
                 view: SelectionView::Current {},
                 binding: candidate,
-                predicate: Box::new(super::selection::field_filter(
-                    &super::selection::ObjectFilter::from(query),
-                    candidate,
-                )),
+                predicate: Box::new({
+                    let predicate = super::selection::field_filter(
+                        &super::selection::ObjectFilter::from(query),
+                        candidate,
+                    );
+                    if query.not_same_name_as_this {
+                        super::search::exclude_holder_name(predicate, candidate)
+                    } else {
+                        predicate
+                    }
+                }),
             });
         }
         let mut selector = if sets.len() == 1 {
@@ -167,7 +177,11 @@ impl BodyContext<'_> {
         if target.from.observation.is_some() {
             return self.observed_object_choice(target, path, resolution);
         }
-        if target.from.not_same_name_as_this {
+        if target.from.not_same_name_as_this
+            && (target.from.leader.is_some()
+                || target.from.leaders.is_some()
+                || target.from.leader_or)
+        {
             return Err(unsupported(path));
         }
         if matches!(
@@ -243,6 +257,7 @@ impl BodyContext<'_> {
             || target.from.leader_or
             || target.from.other
             || target.from.has_evolve.is_some()
+            || target.from.has_state_filter()
             || target.from.hp_le.is_some()
             || target.distinct_by.is_some()
             || self.recipient_targets.contains_key(&target.bind)
@@ -326,6 +341,7 @@ impl BodyContext<'_> {
             || target.from.token.is_some()
             || !target.from.names.is_empty()
             || target.from.has_evolve.is_some()
+            || target.from.has_state_filter()
             || target.from.has_numeric_filter()
             || target.from.class.is_some()
             || target.from.not_class.is_some()

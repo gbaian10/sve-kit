@@ -106,6 +106,7 @@ fn lower_operations(
                         not_class: None,
                         token: None,
                         racing: None,
+                        r#where: None,
                     },
                 };
                 let (action, decision) = super::material::lower(

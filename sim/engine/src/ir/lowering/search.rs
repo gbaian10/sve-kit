@@ -107,6 +107,31 @@ pub(super) fn exclude_source_name(
     }))
 }
 
+/// Formal targets precede the body's source snapshot, so "これと同名" reads the holder's card.
+pub(super) fn exclude_holder_name(
+    predicate: Expr<Bool>,
+    candidate: Binding<ObjectRef>,
+) -> Expr<Bool> {
+    let same_name = Expr::Compute(Box::new(Predicate::NamesIntersect {
+        left: Expr::Live(Box::new(NamesRead::Names {
+            object: view(candidate),
+        })),
+        right: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            },
+        })),
+    }));
+    Expr::Compute(Box::new(Predicate::And {
+        predicates: vec![
+            predicate,
+            Expr::Compute(Box::new(Predicate::Not {
+                predicate: same_name,
+            })),
+        ],
+    }))
+}
+
 pub(super) fn object_filter(
     kind: Option<&ast::SearchKind>,
     trait_id: Option<&str>,

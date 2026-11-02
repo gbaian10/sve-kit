@@ -529,7 +529,8 @@ tags!(BooleanState {
     FaceUp,
     Boxed,
     Racing,
-    AdvanceFollower
+    AdvanceFollower,
+    EnteredThisTurn
 });
 variants!(NameRead { CollaborationName { object: ObjectView } => ["read.collaboration-name"] });
 variants!(ZoneRead { Zone { object: ObjectView } => ["read.zone"] });

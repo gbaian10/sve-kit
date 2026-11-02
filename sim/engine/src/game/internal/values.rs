@@ -16,7 +16,7 @@ use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
     ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView, SnapshotFields,
 };
-use crate::ir::{NumericProperty, Stat};
+use crate::ir::{NumericProperty, Posture, PostureRead, Stat};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -887,10 +887,28 @@ impl Execution {
                     self.player_value(game, left)? == self.player_value(game, right)?
                 }
                 Predicate::Equal { operands } => self.event_equality(operands)?,
+                Predicate::PostureEquals {
+                    left: Expr::Live(read),
+                    right: Expr::Literal(posture),
+                } => self.posture_equals(game, read, *posture)?,
                 _ => return Err(unsupported("predicate")),
             })),
             Expr::Live(read) => self.live_boolean(game, read),
         }
+    }
+
+    fn posture_equals(&self, game: &Game, read: &PostureRead, posture: Posture) -> Result<bool> {
+        let PostureRead::Posture {
+            object: ObjectView::Current { object },
+        } = read
+        else {
+            return Err(unsupported("posture view"));
+        };
+        let reference = self.object(game, object)?;
+        let current = game.object(self.object_id(reference)?)?;
+        Ok(current.generation == reference.generation.0
+            && current.zone == "field"
+            && current.state["acted"].as_bool().unwrap_or(false) == (posture == Posture::Acted))
     }
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {

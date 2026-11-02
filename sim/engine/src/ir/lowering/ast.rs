@@ -683,7 +683,7 @@ pub(super) struct ObjectQuery {
     pub r#where: Option<Box<QueryExtremumWhere>>,
     pub who: Side,
     pub zone: Zone,
-    pub kind: Option<Follower>,
+    pub kind: Option<FieldKind>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -692,8 +692,34 @@ pub(super) struct ObjectQuery {
     pub orig_cost_le: Option<u64>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
+    pub acted: Option<bool>,
+    pub except: Option<Box<BoundExcept>>,
     #[serde(default)]
     pub other: bool,
+}
+
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FieldKind {
+    Follower,
+    Amulet,
+}
+
+impl FieldKind {
+    pub(super) const fn search(self) -> SearchKind {
+        match self {
+            Self::Follower => SearchKind::Follower,
+            Self::Amulet => SearchKind::Amulet,
+        }
+    }
+}
+
+/// `except: {in: binding}` removes an already chosen target from a zone source.
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BoundExcept {
+    #[serde(rename = "in")]
+    pub reference: String,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]
@@ -1134,6 +1160,9 @@ pub(super) struct TargetQuery {
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
     pub has_evolve: Option<True>,
+    pub acted: Option<bool>,
+    pub evolved: Option<bool>,
+    pub entered_this_turn: Option<True>,
 }
 
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
@@ -1161,6 +1190,11 @@ impl TryFrom<String> for FilterKeyword {
 }
 
 impl TargetQuery {
+    /// Field-state filters exist only on current field objects, not leaders or looked cards.
+    pub(super) const fn has_state_filter(&self) -> bool {
+        self.acted.is_some() || self.evolved.is_some() || self.entered_this_turn.is_some()
+    }
+
     pub(super) fn has_numeric_filter(&self) -> bool {
         self.alias.is_some()
             || self.r#where.is_some()
@@ -1557,12 +1591,6 @@ pub(super) enum EntryPlayer {
 pub(super) struct During {
     pub turn: SelfPlayer,
 }
-#[derive(Clone, Deserialize)]
-pub(super) enum Follower {
-    #[serde(rename = "follower")]
-    Follower,
-}
-
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PlayCosts {
@@ -1672,6 +1700,38 @@ pub(super) struct PublicQuery {
     pub cost_le: Option<u64>,
     pub cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
+    pub r#where: Option<PublicPowerWhere>,
+}
+
+/// `where: {cmp: {left: {power_of: item}, op: ge|le, right: N}}` on each public candidate.
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicPowerWhere {
+    pub cmp: PublicPowerComparison,
+}
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicPowerComparison {
+    pub left: ItemPower,
+    pub op: PowerBound,
+    pub right: u64,
+}
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ItemPower {
+    #[serde(rename = "power_of")]
+    pub _power_of: Item,
+}
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Item {
+    Item,
+}
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PowerBound {
+    Ge,
+    Le,
 }
 
 #[derive(Deserialize)]
@@ -1766,6 +1826,7 @@ pub(super) enum Condition {
     EnteredBy(EntryCondition),
     PlayedFrom(PlayedFromCondition),
     Exists(Box<ExistsQuery>),
+    Standing(This),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
 

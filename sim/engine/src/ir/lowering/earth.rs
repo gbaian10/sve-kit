@@ -42,5 +42,6 @@ pub(super) const fn amulets() -> ast::PublicQuery {
         class: None,
         not_class: None,
         token: None,
+        r#where: None,
     }
 }
