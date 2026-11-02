@@ -1,0 +1,33 @@
+cards:
+  BP04-086:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      name: 毒牙の姫・メドゥーサ
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      name: ステンノ
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      name: エウリュアレー
+                      who: self
+                      zone: deck
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

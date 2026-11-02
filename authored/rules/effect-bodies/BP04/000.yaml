@@ -1,0 +1,69 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      static:
+        effects:
+          - grant:
+              keywords:
+                - rush
+              on:
+                class: ナイトメア
+                kind: follower
+                who: self
+                zone: field
+    id: nightmare_field_rush.v1
+    written_by:
+      - actor:
+          model: gpt-6.1-sol
+          who: Codex
+        date: "2026-11-02"
+  - admission: shared
+    body:
+      fanfare:
+        do:
+          - if:
+              cond:
+                necro: 10
+              then:
+                - choose:
+                    bind: allies
+                    from:
+                      class: ナイトメア
+                      cost_le: 2
+                      kind: follower
+                      who: self
+                      zone: cemetery
+                    upto: 2
+                - move:
+                    ref: allies
+                    result: returned
+                    to: field
+                - if:
+                    cond:
+                      necro: 20
+                    else:
+                      - buff:
+                          hp: 1
+                          on:
+                            kind: follower
+                            other: true
+                            who: self
+                            zone: field
+                          power: 1
+                    then:
+                      - buff:
+                          hp: 3
+                          on:
+                            kind: follower
+                            other: true
+                            who: self
+                            zone: field
+                          power: 3
+    id: hector_necro_revival.v1
+    written_by:
+      - actor:
+          model: gpt-6.1-sol
+          who: Codex
+        date: "2026-11-02"

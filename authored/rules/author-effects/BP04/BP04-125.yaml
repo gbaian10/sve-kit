@@ -1,0 +1,23 @@
+cards:
+  BP04-125:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ゴブリンキング
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP04-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

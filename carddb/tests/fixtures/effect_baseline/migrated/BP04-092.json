@@ -1,0 +1,48 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "max": 1,
+        "min": 0,
+        "op": "search",
+        "select": {
+          "name": "デモンビーター",
+          "side": "self",
+          "zone": "deck"
+        },
+        "to": "field"
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    },
+    {
+      "body": {
+        "hp": 1,
+        "op": "modify",
+        "subjects": "self.leader"
+      },
+      "event": "field_to_cemetery",
+      "keyword": "last_words",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

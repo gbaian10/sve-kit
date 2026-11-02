@@ -1,0 +1,70 @@
+cards:
+  BP04-122:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 魂カウンター
+                on: this
+          on:
+            moved:
+              from:
+                who: self
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                upto: 2
+            - move:
+                ref: picked
+                result: to_hand
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: to_hand
+                      view: before
+                  in: seen
+                to: deck
+          usable_if:
+            cmp:
+              left:
+                counter:
+                  name: 魂カウンター
+                  on: this
+              op: ge
+              right: 6
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
