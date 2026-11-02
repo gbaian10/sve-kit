@@ -53,7 +53,7 @@ pub(super) fn lower(
             action,
         })
     };
-    let meal = make_instruction(
+    let resource = make_instruction(
         if ride_head.is_some() {
             ride::attachment(scope)
         } else {
@@ -99,7 +99,7 @@ pub(super) fn lower(
                     vec![]
                 },
                 costs: CostSpec::Ordered {
-                    steps: vec![meal, payment]
+                    steps: vec![resource, payment]
                         .into_iter()
                         .map(|instruction| CostStep {
                             keyword: None,

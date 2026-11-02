@@ -37,13 +37,13 @@ mod fanfare;
 pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
-pub(in crate::game::internal) mod meal;
 pub(super) mod optional;
 pub(super) mod other_costs;
 mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
 pub(super) mod quick;
+pub(in crate::game::internal) mod resource_entry;
 mod resources;
 mod static_keywords;
 pub(in crate::game::internal) mod triggers;
@@ -170,7 +170,7 @@ impl CardRuntime {
                     })
                     || card.card().abilities.iter().any(|ability| {
                         evolution::intrinsic(&ability.node)
-                            || meal::intrinsic(&ability.node)
+                            || resource_entry::intrinsic(&ability.node)
                             || matches!(
                                 ability.node.kind,
                                 AbilityKind::Spell | AbilityKind::Triggered
@@ -382,8 +382,8 @@ impl Game {
                 evolution::check(self, located)?;
                 continue;
             }
-            if meal::intrinsic(ability) {
-                meal::check(located)?;
+            if resource_entry::intrinsic(ability) {
+                resource_entry::check(located)?;
                 continue;
             }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
@@ -511,8 +511,8 @@ impl Game {
         self.internal_context(&context)?;
         self.check_internal_resources()?;
         let source = self.internal_card_source(holder, definition, actor)?;
-        if meal::intrinsic(&ability.node) {
-            self.check_meal_available(holder, &ability.node)?;
+        if resource_entry::intrinsic(&ability.node) {
+            self.check_resource_entry_available(holder, &ability.node)?;
         }
         if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
             && !self.card_runtime.quota_available(
@@ -819,7 +819,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("whole-card ability header"));
     }
-    if evolution::intrinsic(ability) || meal::intrinsic(ability) {
+    if evolution::intrinsic(ability) || resource_entry::intrinsic(ability) {
         return Ok(());
     }
     if ability.kind == AbilityKind::Triggered {

@@ -20,7 +20,6 @@ mod granted_play;
 mod hand_payment;
 mod keywords;
 mod material;
-mod meal;
 mod movement;
 mod numeric;
 mod optional_payment;
@@ -31,6 +30,7 @@ mod play;
 mod play_restrictions;
 mod prevention;
 mod receipt_counts;
+mod resource_entry;
 mod stack;
 mod static_keywords;
 
@@ -529,7 +529,7 @@ impl Allocator {
             return evolution::lower(self, key, path, entry, scope);
         }
         if entry.feed.is_some() || entry.ride.is_some() {
-            return meal::lower(self, key, path, entry, scope);
+            return resource_entry::lower(self, key, path, entry, scope);
         }
         if let Some(keywords) = &entry.keywords {
             return quick::lower(key, path, entry, scope, keywords);
@@ -1369,7 +1369,7 @@ impl<'definitions> BodyContext<'definitions> {
         match step {
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
             ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
-            ast::Step::Race(value) => Ok(meal::action(
+            ast::Step::Race(value) => Ok(resource_entry::action(
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,
             )),

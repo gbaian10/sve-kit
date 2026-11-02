@@ -118,3 +118,85 @@ fn acquired_single_drive_subscribes_even_without_any_printed_attack_abilities() 
         1
     );
 }
+
+#[test]
+fn ordinary_grants_cannot_bypass_drive_acquisition_or_expand_single_drive() {
+    for keyword in [KeywordId::Drive, KeywordId::SingleDrive] {
+        let grant = instruction(
+            1,
+            Action::Grant {
+                subjects: Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                abilities: vec![GrantedAbility::Keyword { keyword }],
+                duration: Duration {
+                    end: DurationEnd::NoTemporalExpiry {},
+                    anchor: TimeAnchor::Installation {},
+                    usage: None,
+                    intervals: vec![],
+                },
+                provider: TextProvider {
+                    provider: ObjectView::Current {
+                        object: Box::new(ObjectOperand::SourceHolder {}),
+                    },
+                    face: FaceId("0".into()),
+                    ability: AbilityId(1),
+                },
+            },
+        );
+        WellFormedCardProgram::check(CardProgram {
+            abilities: vec![ability(1, vec![grant])],
+            card_play_costs: vec![],
+        })
+        .unwrap_err();
+    }
+}
+
+#[test]
+fn a_departed_holder_cannot_acquire_drive_from_the_rest_of_its_body() {
+    let bounce = movement::put(
+        1,
+        Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        },
+        OwnerZone::Hand,
+    );
+    let mut game = position(1, vec![bounce, gain(2)]);
+    assert_eq!(gained(&activate(&mut game, 1)), 0);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["s"]["keywords"],
+        json!([])
+    );
+}
+
+#[test]
+fn gain_drive_ignores_a_non_follower_holder() {
+    let mut entry = ability(1, vec![gain(1)]);
+    entry.source.card_id = "unit-amulet".into();
+    entry.source.card_no = "unit-amulet".into();
+    locate_steps(
+        &mut entry.node.body.as_mut().unwrap().steps,
+        &entry.source,
+        &entry.node.source,
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-amulet"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "amulet-drive",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![entry]))
+        .unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    assert_eq!(gained(&activate(&mut game, 1)), 0);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["s"]["keywords"],
+        json!([])
+    );
+}

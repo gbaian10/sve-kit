@@ -27,67 +27,67 @@ pub(super) const fn intrinsic(ability: &Ability) -> bool {
 }
 
 #[derive(Clone, Debug)]
-pub(in crate::game::internal) struct MealState {
+pub(in crate::game::internal) struct ResourceEntryState {
     ride: bool,
     scope: ScopeId,
     count: u64,
     pp: i64,
-    pub(in crate::game::internal) selected: Option<MealSelection>,
+    pub(in crate::game::internal) selected: Option<ResourceEntrySelection>,
 }
 
 #[derive(Clone, Debug)]
-pub(in crate::game::internal) struct MealSelection {
+pub(in crate::game::internal) struct ResourceEntrySelection {
     resources: Vec<ObjectRef>,
     ep: bool,
 }
 
 #[derive(Clone, Debug)]
-pub(in crate::game::internal) struct MealWait {
+pub(in crate::game::internal) struct ResourceEntryWait {
     members: Vec<ObjectRef>,
     count: usize,
     ep_allowed: bool,
 }
 
-impl MealWait {
+impl ResourceEntryWait {
     pub(in crate::game::internal) fn validate(
         &self,
         handles: &[u64],
         ep: bool,
-    ) -> Result<MealSelection> {
+    ) -> Result<ResourceEntrySelection> {
         if handles.len() != self.count || (ep && !self.ep_allowed) {
-            return Err(invalid("invalid meal payment"));
+            return Err(invalid("invalid resource entry payment"));
         }
         let mut unique = BTreeSet::new();
         let resources = handles
             .iter()
             .map(|handle| {
                 if !unique.insert(*handle) {
-                    return Err(invalid("duplicate meal resource"));
+                    return Err(invalid("duplicate entry resource"));
                 }
                 self.members
                     .get(usize::try_from(*handle).map_err(invalid)?)
                     .copied()
-                    .ok_or_else(|| invalid("unknown meal resource"))
+                    .ok_or_else(|| invalid("unknown resource entry resource"))
             })
             .collect::<Result<Vec<_>>>()?;
-        Ok(MealSelection { resources, ep })
+        Ok(ResourceEntrySelection { resources, ep })
     }
 }
 
-pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
+pub(super) fn payment(ability: &Ability) -> Result<Option<ResourceEntryState>> {
     if !intrinsic(ability) {
         return Ok(None);
     }
     let CostSpec::Ordered { steps } = &ability
         .play
         .as_ref()
-        .ok_or_else(|| invalid("missing meal play"))?
+        .ok_or_else(|| invalid("missing resource entry play"))?
         .costs
     else {
-        return Err(unsupported("meal costs"));
+        return Err(unsupported("entry costs"));
     };
-    let [meal, pp] = steps.as_slice() else {
-        return Err(unsupported("meal payment projection"));
+    let [entry, pp] = steps.as_slice() else {
+        return Err(unsupported("resource entry payment projection"));
     };
     let ride = matches!(
         ability.source.origin,
@@ -97,7 +97,7 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
         }
     );
     let count = if ride {
-        if meal.instruction.action != ride::attachment(ability.scope) {
+        if entry.instruction.action != ride::attachment(ability.scope) {
             return Err(unsupported("ride resource projection"));
         }
         1
@@ -107,12 +107,12 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
             operation: MealRaceOperation::Meal,
             amount: Expr::Literal(Nat(count)),
             resource_links,
-        } = &meal.instruction.action
+        } = &entry.instruction.action
         else {
-            return Err(unsupported("meal resource projection"));
+            return Err(unsupported("resource entry projection"));
         };
         if !resource_links.is_empty() {
-            return Err(unsupported("explicit meal links"));
+            return Err(unsupported("explicit entry links"));
         }
         *count
     };
@@ -123,12 +123,12 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
         amount: Expr::Literal(Int(pp)),
     } = pp.instruction.action
     else {
-        return Err(unsupported("meal PP projection"));
+        return Err(unsupported("resource entry PP projection"));
     };
     if count == 0 || count > MAX_RACES || pp < 0 {
-        return Err(unsupported("meal amount or explicit links"));
+        return Err(unsupported("resource entry amount or explicit links"));
     }
-    Ok(Some(MealState {
+    Ok(Some(ResourceEntryState {
         ride,
         scope: ability.scope,
         count,
@@ -139,13 +139,13 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<MealState>> {
 
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     let ability = &located.node;
-    let state = payment(ability)?.ok_or_else(|| invalid("missing meal projection"))?;
+    let state = payment(ability)?.ok_or_else(|| invalid("missing resource entry projection"))?;
     let play = ability
         .play
         .as_ref()
-        .ok_or_else(|| invalid("missing meal play"))?;
+        .ok_or_else(|| invalid("missing resource entry play"))?;
     let CostSpec::Ordered { steps } = &play.costs else {
-        return Err(unsupported("meal cost alternatives"));
+        return Err(unsupported("entry cost alternatives"));
     };
     if ability.kind != AbilityKind::Activated
         || ability.trigger.is_some()
@@ -164,17 +164,17 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                 || step.instruction.precondition.is_some()
         })
     {
-        return Err(unsupported("meal play metadata"));
+        return Err(unsupported("resource entry play metadata"));
     }
     let body = ability
         .body
         .as_ref()
-        .ok_or_else(|| invalid("missing meal body"))?;
+        .ok_or_else(|| invalid("missing resource entry body"))?;
     let [step] = body.steps.as_slice() else {
-        return Err(unsupported("meal body projection"));
+        return Err(unsupported("resource entry body projection"));
     };
     let Node::Instruction { instruction } = &step.node else {
-        return Err(unsupported("meal body instruction"));
+        return Err(unsupported("resource entry body instruction"));
     };
     if instruction.source != ability.source
         || instruction.actor != (PlayerRef::Controller {})
@@ -193,7 +193,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                 }
             })
     {
-        return Err(unsupported("meal race projection"));
+        return Err(unsupported("resource entry result projection"));
     }
     Ok(())
 }
@@ -210,7 +210,7 @@ impl Game {
             for linked in &links {
                 let resource = linked
                     .as_str()
-                    .ok_or_else(|| invalid("invalid meal link"))?;
+                    .ok_or_else(|| invalid("invalid resource entry link"))?;
                 let object = self.object(resource)?;
                 let (Some(source_id), Some(resource_id)) = (
                     self.state.ir_objects.get(holder),
@@ -234,7 +234,11 @@ impl Game {
         Ok(true)
     }
 
-    pub(super) fn check_meal_available(&self, holder: &str, ability: &Ability) -> Result<()> {
+    pub(super) fn check_resource_entry_available(
+        &self,
+        holder: &str,
+        ability: &Ability,
+    ) -> Result<()> {
         let ride = matches!(
             ability.source.origin,
             AbilityOrigin::Keyword {
@@ -242,10 +246,10 @@ impl Game {
                 ..
             }
         );
-        self.check_resource_entry_available(holder, ride)
+        self.check_resource_entry_kind_available(holder, ride)
     }
 
-    fn check_resource_entry_available(&self, holder: &str, ride: bool) -> Result<()> {
+    fn check_resource_entry_kind_available(&self, holder: &str, ride: bool) -> Result<()> {
         let object = self.object(holder)?;
         if object.zone != "field"
             || (if ride {
@@ -262,13 +266,17 @@ impl Game {
                 > 0
         {
             return Err(crate::EngineFailure::IllegalPlay(
-                "meal or evolution quota unavailable".into(),
+                "resource entry or evolution quota unavailable".into(),
             ));
         }
         Ok(())
     }
 
-    fn meal_candidates(&self, execution: &Execution, ride: bool) -> Result<Vec<ObjectRef>> {
+    fn resource_entry_candidates(
+        &self,
+        execution: &Execution,
+        ride: bool,
+    ) -> Result<Vec<ObjectRef>> {
         let mut members = Vec::new();
         // Missing rule bindings must fail even when the evolve deck is empty.
         self.catalog
@@ -287,27 +295,27 @@ impl Game {
         Ok(members)
     }
 
-    pub(super) fn internal_meal_question(
+    pub(super) fn internal_resource_entry_question(
         &mut self,
         execution: &mut Execution,
         play: &super::play::PlayState,
     ) -> Result<bool> {
-        let Some(meal) = &play.meal else {
+        let Some(entry) = &play.resource_entry else {
             return Ok(false);
         };
-        if meal.selected.is_some() {
+        if entry.selected.is_some() {
             return Ok(false);
         }
-        self.check_resource_entry_available(&execution.context.source, meal.ride)?;
-        let members = self.meal_candidates(execution, meal.ride)?;
-        let count = usize::try_from(meal.count).map_err(invalid)?;
+        self.check_resource_entry_kind_available(&execution.context.source, entry.ride)?;
+        let members = self.resource_entry_candidates(execution, entry.ride)?;
+        let count = usize::try_from(entry.count).map_err(invalid)?;
         let player = self.player(seat_name(execution.context.controller)?)?;
-        let ep_allowed = player.ep > 0 && meal.pp > 0;
+        let ep_allowed = player.ep > 0 && entry.pp > 0;
         if members.len() < count
-            || int(&player.pp["current"]).saturating_add(i64::from(ep_allowed)) < meal.pp
+            || int(&player.pp["current"]).saturating_add(i64::from(ep_allowed)) < entry.pp
         {
             return Err(crate::EngineFailure::IllegalPlay(
-                "insufficient meal resources".into(),
+                "insufficient entry resources".into(),
             ));
         }
         let public = members
@@ -332,13 +340,13 @@ impl Game {
                     distinct_names: false,
                     members: public,
                     cardinality: Cardinality {
-                        minimum: Nat(meal.count),
-                        maximum: Some(Nat(meal.count)),
+                        minimum: Nat(entry.count),
+                        maximum: Some(Nat(entry.count)),
                     },
                 },
                 ep_allowed,
             },
-            Wait::ResourceEntryPayment(MealWait {
+            Wait::ResourceEntryPayment(ResourceEntryWait {
                 members,
                 count,
                 ep_allowed,
@@ -351,44 +359,44 @@ impl Game {
         clippy::too_many_lines,
         reason = "The transaction keeps resource movement, associations and payment receipts atomic."
     )]
-    pub(super) fn internal_meal_payment(
+    pub(super) fn internal_resource_entry_payment(
         &mut self,
         execution: &mut Execution,
         play: &super::play::PlayState,
     ) -> Result<()> {
-        let meal = play
-            .meal
+        let entry = play
+            .resource_entry
             .as_ref()
-            .ok_or_else(|| invalid("missing meal payment"))?;
-        let chosen = meal
+            .ok_or_else(|| invalid("missing resource entry payment"))?;
+        let chosen = entry
             .selected
             .as_ref()
-            .ok_or_else(|| invalid("missing meal selection"))?;
-        self.check_resource_entry_available(&execution.context.source, meal.ride)?;
-        if meal.ride {
+            .ok_or_else(|| invalid("missing resource entry selection"))?;
+        self.check_resource_entry_kind_available(&execution.context.source, entry.ride)?;
+        if entry.ride {
             execution.slots.insert(
-                (meal.scope, 0),
+                (entry.scope, 0),
                 super::super::Slot::Objects {
                     members: chosen.resources.clone(),
                     on_field_at_capture: false,
                 },
             );
         }
-        let candidates = self.meal_candidates(execution, meal.ride)?;
+        let candidates = self.resource_entry_candidates(execution, entry.ride)?;
         let seat = seat_name(execution.context.controller)?;
         if chosen
             .resources
             .iter()
             .any(|resource| !candidates.contains(resource))
-            || (chosen.ep && (meal.pp == 0 || self.player(seat)?.ep == 0))
+            || (chosen.ep && (entry.pp == 0 || self.player(seat)?.ep == 0))
         {
             return Err(crate::EngineFailure::IllegalPlay(
-                "meal payment changed".into(),
+                "resource entry payment changed".into(),
             ));
         }
         let paid = self.internal_pay_pp(
             execution.context.controller,
-            Int(meal.pp.saturating_sub(i64::from(chosen.ep))),
+            Int(entry.pp.saturating_sub(i64::from(chosen.ep))),
         )?;
         let player = self.player_mut(seat)?;
         player.ep = player.ep.saturating_sub(i64::from(chosen.ep));
@@ -399,14 +407,14 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         self.move_objects(
             &ids,
-            if meal.ride { "drive" } else { "race" },
+            if entry.ride { "drive" } else { "race" },
             None,
             None,
             &execution.frame(),
         )?;
         self.object_mut(&execution.context.source)?.state["links"]
-            [if meal.ride { "憑依" } else { "出走" }] = json!(ids);
-        if meal.ride {
+            [if entry.ride { "憑依" } else { "出走" }] = json!(ids);
+        if entry.ride {
             self.object_mut(&execution.context.source)?.state["ride_used"] = json!(true);
         }
         let source = self.internal_current_reference(&execution.context.source)?;
@@ -416,7 +424,7 @@ impl Game {
                 u64::try_from(self.card_runtime.links.len())
                     .map_err(invalid)?
                     .checked_add(1)
-                    .ok_or_else(|| invalid("meal association overflow"))?,
+                    .ok_or_else(|| invalid("entry association overflow"))?,
             );
             self.card_runtime
                 .links
@@ -430,7 +438,7 @@ impl Game {
         }
         self.bump(&format!("{seat}.evolve_played"), 1);
         let CostSpec::Ordered { steps } = &play.costs else {
-            return Err(invalid("missing meal steps"));
+            return Err(invalid("missing resource entry steps"));
         };
         for step in steps {
             let resources = matches!(
@@ -442,7 +450,7 @@ impl Game {
                 InstructionOutcome::Payment {
                     quantity: if resources {
                         Quantity {
-                            amount: Int(i64::try_from(meal.count).map_err(invalid)?),
+                            amount: Int(i64::try_from(entry.count).map_err(invalid)?),
                             unit: QuantityUnit::Cards,
                         }
                     } else {

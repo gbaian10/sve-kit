@@ -298,3 +298,39 @@ fn leaving_the_field_releases_the_drive_point_and_returns_it_face_up() {
             .contains(&json!("source"))
     );
 }
+
+#[test]
+fn ride_is_unavailable_on_a_later_turn_while_a_fresh_copy_can_still_use_it() {
+    let card = "CSD03a-006";
+    let mut initial = position(card);
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"fresh","card":card}));
+    initial["players"]["P2"]["zones"]["deck"] =
+        json!([{"id":"opponent-top","card":"BP01-037"},{"id":"opponent-tail","card":"BP01-009"}]);
+    let mut game = from_position(&initial);
+    ride(&mut game, card, false);
+    settle(&mut game);
+    for _ in 0_u8..2_u8 {
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let q = game.internal_quick_choice().unwrap().unwrap();
+        game.answer_internal_card(q.actor, q.token, Answer::Quick(None))
+            .unwrap();
+    }
+    let before = game.projection(View::Referee).unwrap();
+    game.activate_internal_card("source", definition(card), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card("fresh", definition(card), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("fresh copy's Ride payment")
+    };
+    assert!(
+        matches!(q.domain, InputDomain::ResourceEntryPayment { .. }),
+        "a fresh copy proves the turn quota and resources are available"
+    );
+}

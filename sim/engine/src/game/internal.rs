@@ -443,7 +443,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
-    ResourceEntryPayment(card::meal::MealWait),
+    ResourceEntryPayment(card::resource_entry::ResourceEntryWait),
     Discard(discard::HandWait),
     CostDiscard(discard::HandWait),
     WardEntry(ObjectRef),
@@ -768,8 +768,8 @@ impl Game {
                     execution
                         .play
                         .as_mut()
-                        .and_then(|play| play.meal.as_mut())
-                        .ok_or_else(|| invalid("missing meal payment"))?
+                        .and_then(|play| play.resource_entry.as_mut())
+                        .ok_or_else(|| invalid("missing resource entry payment"))?
                         .selected = Some(payment);
                 }
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {

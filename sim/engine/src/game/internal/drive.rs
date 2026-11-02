@@ -364,10 +364,7 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        use crate::ir::{
-            AbilityId, Bool, DriveGainedEvent, GrantedAbility, KeywordId, ObjectOperand,
-            ObjectView, RideDriveOperation, TextProvider, UsageReference,
-        };
+        use crate::ir::{Bool, DriveGainedEvent, RideDriveOperation, UsageReference};
         let Action::RideDrive {
             subject,
             operation: RideDriveOperation::GainDrive {},
@@ -390,38 +387,7 @@ impl Game {
             return Ok(());
         }
         let controller = player_id(&object.controller)?;
-        let mut grant = instruction.clone();
-        grant.action = Action::Grant {
-            subjects: Selector::Objects {
-                objects: vec![subject.clone()],
-            },
-            abilities: vec![KeywordId::Drive, KeywordId::SingleDrive, KeywordId::Rush]
-                .into_iter()
-                .map(|keyword| GrantedAbility::Keyword { keyword })
-                .collect(),
-            duration: Duration {
-                end: DurationEnd::NoTemporalExpiry {},
-                anchor: TimeAnchor::Installation {},
-                usage: None,
-                intervals: vec![],
-            },
-            provider: TextProvider {
-                provider: ObjectView::Current {
-                    object: Box::new(ObjectOperand::SourceHolder {}),
-                },
-                face: super::card::printed_origin(&instruction.source.origin)?
-                    .0
-                    .clone(),
-                ability: AbilityId(
-                    execution
-                        .ability
-                        .ok_or_else(|| invalid("Drive gain source"))?
-                        .definition
-                        .0,
-                ),
-            },
-        };
-        self.internal_grant(execution, &grant)?;
+        self.internal_drive_grant(execution, instruction)?;
         self.state
             .ir_drive_gained
             .insert(holder.clone(), reference.generation.0);
