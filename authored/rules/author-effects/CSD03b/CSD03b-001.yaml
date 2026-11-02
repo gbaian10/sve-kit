@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD03b-001:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - twin_drive
+      - line: 3
+        static:
+          while:
+            all:
+              - awakened: true
+              - exists:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: かげろう
+                  other: true
+          effects:
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

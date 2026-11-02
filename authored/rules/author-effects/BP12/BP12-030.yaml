@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-030:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  name: ミストデューク・アゾード
+                abilities:
+                  - attack_time:
+                      do:
+                        - buff:
+                            "on": this
+                            power: 2
+                            hp: 2
+                keywords:
+                  - storm
+      - line: 3
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: ミストデューク・アゾード
+                n: 1
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

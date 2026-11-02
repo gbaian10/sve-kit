@@ -1,0 +1,61 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-015:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: キュート
+                    op: ge
+                    right: 5
+                then:
+                  - search:
+                      sel:
+                        who: self
+                        zone: deck
+                        trait: デレマス
+                        not_same_name_as_this: true
+                      to: ex
+                      upto: 2
+                else:
+                  - search:
+                      sel:
+                        who: self
+                        zone: deck
+                        trait: デレマス
+                        not_same_name_as_this: true
+                      to: ex
+                      n: 1
+      - line: 2
+        activate:
+          cost:
+            lesson: 1
+          per_turn: 1
+          targets:
+            - bind: discounted
+              from:
+                who: self
+                zone: ex
+                trait: デレマス
+              n: 1
+          do:
+            - grant:
+                "on": discounted
+                abilities:
+                  - play:
+                      cost_delta: -5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

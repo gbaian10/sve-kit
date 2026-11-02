@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-017:
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                other: true
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+            - grant:
+                "on": ally
+                keywords:
+                  - rush
+            - grant:
+                "on": ally
+                abilities:
+                  - static:
+                      effects:
+                        - prevent:
+                            kind: any
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

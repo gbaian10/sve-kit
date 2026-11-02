@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-018:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        fanfare:
+          define:
+            x:
+              count:
+                who: self
+                zone: evolve_deck
+                kind: evolve_follower
+                face_up: true
+          do:
+            - buff:
+                "on": this
+                power: x
+                hp: x
+            - if:
+                cond:
+                  cmp:
+                    left: x
+                    op: ge
+                    right: 3
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - assail
+            - if:
+                cond:
+                  cmp:
+                    left: x
+                    op: ge
+                    right: 7
+                then:
+                  - grant:
+                      "on": this
+                      abilities:
+                        - attack_time:
+                            per_turn: 1
+                            do:
+                              - stand: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

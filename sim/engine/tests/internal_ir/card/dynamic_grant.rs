@@ -826,3 +826,193 @@ fn a_later_grant_restores_drain_and_basic_keywords_after_printed_ability_loss() 
         22_u8
     );
 }
+
+#[test]
+fn keyword_origins_at_both_grant_levels_preserve_independent_private_read_checks() {
+    for private_site in 0_u8..3 {
+        let mut granted = definition_grant(DurationEnd::NoTemporalExpiry {});
+        let mut steps = Vec::new();
+        if private_site != 0 {
+            let mut objects = followers(if private_site == 1 { 1 } else { 99 });
+            let Selector::Zone { zone, .. } = &mut objects else {
+                panic!("zone");
+            };
+            *zone = ZoneKind::Hand;
+            let private = damage(
+                if private_site == 1 { 2 } else { 99 },
+                RecipientSet::Objects { objects },
+                1,
+            );
+            if private_site == 1 {
+                steps.push(private);
+            } else {
+                let Node::Instruction { instruction } = &mut granted.node else {
+                    panic!("grant");
+                };
+                let Action::Grant { abilities, .. } = &mut instruction.action else {
+                    panic!("grant");
+                };
+                let GrantedAbility::Definition { ability: nested } = &mut abilities[0] else {
+                    panic!("definition");
+                };
+                nested.body.as_mut().unwrap().steps = vec![private];
+                let mut span = source("unit-amulet");
+                span.fragment = None;
+                locate_steps(
+                    &mut nested.body.as_mut().unwrap().steps,
+                    &span,
+                    &nested.source,
+                );
+            }
+        }
+        steps.push(granted);
+        let program = grant_program(vec![timing::on_attack(ability(1, steps))]);
+        let mut game = Game::new(
+            static_keywords::keyword_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "mixed-grant-origins",
+        )
+        .unwrap();
+        let result = game.load_internal_card("unit-amulet", &program);
+        if private_site == 0 {
+            result.unwrap();
+        } else {
+            assert!(
+                result
+                    .unwrap_err()
+                    .to_string()
+                    .contains("private observation"),
+                "neither the parent nor the nested definition gains permission to inspect a private hand"
+            );
+        }
+    }
+}
+
+#[test]
+fn shared_original_view_requirement_keeps_the_parent_read_restricted() {
+    for parent_uses_source_information in [true, false] {
+        let mut granted = definition_grant(DurationEnd::NoTemporalExpiry {});
+        let Node::Instruction {
+            instruction: grant_instruction,
+        } = &mut granted.node
+        else {
+            panic!("grant");
+        };
+        let Action::Grant { abilities, .. } = &mut grant_instruction.action else {
+            panic!("grant");
+        };
+        let GrantedAbility::Definition { ability: nested } = &mut abilities[0] else {
+            panic!("definition");
+        };
+        let Node::Instruction {
+            instruction: inner_instruction,
+        } = &mut nested.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("nested body");
+        };
+        let Action::Life { change, .. } = &mut inner_instruction.action else {
+            panic!("life");
+        };
+        *change = NumericChange::Add {
+            amount: source_information::source_read(
+                &ObjectView::SourceInformation {},
+                CharacteristicView::Original,
+                None,
+            ),
+        };
+        let outer_view = if parent_uses_source_information {
+            ObjectView::SourceInformation {}
+        } else {
+            ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            }
+        };
+        let read = instruction(
+            2,
+            Action::Life {
+                player: PlayerRef::Controller {},
+                change: NumericChange::Add {
+                    amount: source_information::source_read(
+                        &outer_view,
+                        CharacteristicView::Original,
+                        None,
+                    ),
+                },
+            },
+        );
+        let program = grant_program(vec![timing::on_attack(ability(1, vec![read, granted]))]);
+        let mut game = Game::new(
+            static_keywords::keyword_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "shared-original-view",
+        )
+        .unwrap();
+        let result = game.load_internal_card("unit-amulet", &program);
+        if parent_uses_source_information {
+            result.unwrap();
+        } else {
+            let failure = result.unwrap_err().to_string();
+            assert!(failure.contains("private observation"), "{failure}");
+        }
+    }
+}
+
+#[test]
+fn granted_damage_definitions_reject_predicates_outside_the_closed_damage_header() {
+    for malformed in [false, true] {
+        let mut granted = definition_grant(DurationEnd::NoTemporalExpiry {});
+        let Node::Instruction { instruction } = &mut granted.node else {
+            panic!("grant");
+        };
+        let Action::Grant { abilities, .. } = &mut instruction.action else {
+            panic!("grant");
+        };
+        let GrantedAbility::Definition { ability: nested } = &mut abilities[0] else {
+            panic!("definition");
+        };
+        nested.source.origin = AbilityOrigin::Printed {
+            face: FaceId("0".into()),
+            line: Nat(1),
+        };
+        nested.trigger.as_mut().unwrap().on = TriggerCondition::Event {
+            pattern: EventPattern::Damage {
+                binding: Binding::new(90, nested.scope),
+                predicate: if malformed {
+                    Expr::Literal(Bool(true))
+                } else {
+                    Expr::Compute(Box::new(Predicate::And { predicates: vec![] }))
+                },
+            },
+        };
+        let mut span = source("unit-amulet");
+        span.fragment = None;
+        locate_steps(
+            &mut nested.body.as_mut().unwrap().steps,
+            &span,
+            &nested.source,
+        );
+        let program = grant_program(vec![ability(1, vec![granted])]);
+        let mut game = Game::new(
+            static_keywords::keyword_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "grant-damage-header",
+        )
+        .unwrap();
+        let result = game.load_internal_card("unit-amulet", &program);
+        if malformed {
+            let failure = result.unwrap_err().to_string();
+            assert!(
+                failure.contains("printed per-fact timing or self-event header"),
+                "{failure}"
+            );
+        } else {
+            result.unwrap();
+        }
+    }
+}

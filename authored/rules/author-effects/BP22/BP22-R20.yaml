@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-R20:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        keywords:
+          - storm
+          - intimidate
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        trait: ウマ娘
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      "on": this
+                      hp: 1
+                  - grant:
+                      "on": this
+                      abilities:
+                        - attack_time:
+                            do:
+                              - draw:
+                                  n: 1
+                              - discard:
+                                  n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

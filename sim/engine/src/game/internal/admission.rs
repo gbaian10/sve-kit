@@ -236,13 +236,27 @@ fn source_paths(
     }
 }
 
-fn inside_granted_definition(requirement: &Requirement, definitions: &[(String, String)]) -> bool {
-    !definitions.is_empty()
-        && requirement.locations.iter().all(|location| {
-            definitions.iter().any(|(root, prefix)| {
+fn parent_requirements(program: &Located<Program>, card: bool) -> Requirements {
+    let mut requirements = Requirements::derive_program(program);
+    let definitions = granted_definition_roots(&requirements, card);
+    if definitions.is_empty() {
+        return requirements;
+    }
+    for requirement in &mut requirements.required {
+        if requirement.capability.version != NonZeroU32::MIN {
+            continue;
+        }
+        // Nested definitions are checked independently, including shared capability names.
+        requirement.locations.retain(|location| {
+            !definitions.iter().any(|(root, prefix)| {
                 location.ir_path == *root || location.ir_path.starts_with(prefix)
             })
-        })
+        });
+    }
+    requirements
+        .required
+        .retain(|requirement| !requirement.locations.is_empty());
+    requirements
 }
 
 fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(String, String)> {
@@ -272,76 +286,74 @@ fn check_requirements(
         node: program.clone(),
         source: source.clone(),
     };
-    let requirements = Requirements::derive_program(&located);
+    let requirements = parent_requirements(&located, card);
     let token_paths = super::tokens::paths(program);
     let mut attack_targets = BTreeSet::new();
     super::card::triggers::event_operand::target_paths(program, "", &mut attack_targets);
-    let definitions = granted_definition_roots(&requirements, card);
     let missing = requirements
         .required
         .iter()
         .filter(|requirement| {
             requirement.capability.version != NonZeroU32::MIN
-                || !inside_granted_definition(requirement, &definitions)
-                    && !(supported(requirement.capability.code)
-                        || super::tokens::requirement(requirement, &token_paths)
-                        || requirement.locations.iter().all(|location| {
-                            attack_targets.iter().any(|path| {
-                                location.ir_path == *path
-                                    || location.ir_path.starts_with(&format!("{path}/"))
-                                    || (matches!(
-                                        requirement.capability.code,
-                                        "value.aggregate.sum"
-                                            | "shape.IntOperation.Sum"
-                                            | "internal.NumericProperty.Life"
-                                            | "internal.NumericProperty.Attack"
-                                    ) && path.strip_suffix("/objects").is_some_and(|parent| {
-                                        location.ir_path == parent
-                                            || location.ir_path == format!("{parent}/property")
-                                    }))
-                            })
+                || !(supported(requirement.capability.code)
+                    || super::tokens::requirement(requirement, &token_paths)
+                    || requirement.locations.iter().all(|location| {
+                        attack_targets.iter().any(|path| {
+                            location.ir_path == *path
+                                || location.ir_path.starts_with(&format!("{path}/"))
+                                || (matches!(
+                                    requirement.capability.code,
+                                    "value.aggregate.sum"
+                                        | "shape.IntOperation.Sum"
+                                        | "internal.NumericProperty.Life"
+                                        | "internal.NumericProperty.Attack"
+                                ) && path.strip_suffix("/objects").is_some_and(|parent| {
+                                    location.ir_path == parent
+                                        || location.ir_path == format!("{parent}/property")
+                                }))
                         })
-                        || super::source::count_zone(&requirements, requirement)
-                        || super::history_turn::public_requirement(&requirements, requirement)
-                        || super::card::prevention::requirement(&requirements, requirement)
-                        || entry_field_requirement(&requirements, requirement)
-                        || (card && play_requirement(requirement.capability.code))
-                        || (matches!(
-                            requirement.capability.code,
-                            "internal.ZoneKind.Evolve"
-                                | "shape.AbilityOrigin.Keyword"
-                                | "shape.ObjectFrozen.EnterFieldObject"
-                                | "shape.ObjectFrozen.EnterExObject"
-                                | "shape.ObjectFrozen.AttackAttacker"
-                                | "shape.ObjectFrozen.EvolveSubject"
-                                | "shape.ObjectFrozen.DestroyObjectBefore"
-                                | "shape.ObjectFrozen.LeaveFieldObjectBefore"
-                                | "shape.IntFrozen.DamageAmount"
-                                | "reference.expression"
-                                | "shape.ObjectOperand.FromExpression"
-                                | "read.event-field"
-                                | "internal.KeywordId.Fanfare"
-                                | "internal.KeywordId.Lastword"
-                                | "internal.KeywordId.OnAttack"
-                                | "internal.KeywordId.OnEvolve"
-                                | "internal.KeywordId.OnSuperEvolve"
-                                | "internal.KeywordId.OnRace"
-                                | "internal.KeywordId.Quick"
-                                | "internal.KeywordId.Ward"
-                                | "internal.KeywordId.Aura"
-                                | "internal.KeywordId.Storm"
-                                | "internal.KeywordId.Rush"
-                                | "internal.KeywordId.Bane"
-                                | "internal.KeywordId.Drain"
-                                | "internal.KeywordId.Intimidate"
-                                | "internal.KeywordId.Assail"
-                                | "internal.KeywordId.Stack"
-                        ) && requirement
-                            .locations
-                            .iter()
-                            .all(|location| origins.contains(&location.ir_path)))
-                        || super::search::keyword_requirement(&requirements, requirement, origins)
-                        || super::search::private_requirement(requirement.capability.code))
+                    })
+                    || super::source::count_zone(&requirements, requirement)
+                    || super::history_turn::public_requirement(&requirements, requirement)
+                    || super::card::prevention::requirement(&requirements, requirement)
+                    || entry_field_requirement(&requirements, requirement)
+                    || (card && play_requirement(requirement.capability.code))
+                    || (matches!(
+                        requirement.capability.code,
+                        "internal.ZoneKind.Evolve"
+                            | "shape.AbilityOrigin.Keyword"
+                            | "shape.ObjectFrozen.EnterFieldObject"
+                            | "shape.ObjectFrozen.EnterExObject"
+                            | "shape.ObjectFrozen.AttackAttacker"
+                            | "shape.ObjectFrozen.EvolveSubject"
+                            | "shape.ObjectFrozen.DestroyObjectBefore"
+                            | "shape.ObjectFrozen.LeaveFieldObjectBefore"
+                            | "shape.IntFrozen.DamageAmount"
+                            | "reference.expression"
+                            | "shape.ObjectOperand.FromExpression"
+                            | "read.event-field"
+                            | "internal.KeywordId.Fanfare"
+                            | "internal.KeywordId.Lastword"
+                            | "internal.KeywordId.OnAttack"
+                            | "internal.KeywordId.OnEvolve"
+                            | "internal.KeywordId.OnSuperEvolve"
+                            | "internal.KeywordId.OnRace"
+                            | "internal.KeywordId.Quick"
+                            | "internal.KeywordId.Ward"
+                            | "internal.KeywordId.Aura"
+                            | "internal.KeywordId.Storm"
+                            | "internal.KeywordId.Rush"
+                            | "internal.KeywordId.Bane"
+                            | "internal.KeywordId.Drain"
+                            | "internal.KeywordId.Intimidate"
+                            | "internal.KeywordId.Assail"
+                            | "internal.KeywordId.Stack"
+                    ) && requirement
+                        .locations
+                        .iter()
+                        .all(|location| origins.contains(&location.ir_path)))
+                    || super::search::keyword_requirement(&requirements, requirement, origins)
+                    || super::search::private_requirement(requirement.capability.code))
         })
         .collect::<Vec<_>>();
     if !missing.is_empty() {
