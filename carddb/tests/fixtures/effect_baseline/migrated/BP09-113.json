@@ -1,0 +1,62 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "quick",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "destroy",
+            "subjects": "target.1"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "count": {
+                    "side": "self",
+                    "type": "follower",
+                    "where": {
+                      "read": "item.evolved"
+                    },
+                    "zone": "field"
+                  }
+                },
+                0
+              ],
+              "fn": "gt"
+            },
+            "op": "if",
+            "then": {
+              "op": "move",
+              "subjects": "self",
+              "to": "ex"
+            }
+          }
+        ]
+      },
+      "kind": "spell",
+      "line": 2,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

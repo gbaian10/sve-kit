@@ -1,0 +1,36 @@
+cards:
+  BP09-113:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - destroy: enemy
+            - if:
+                cond:
+                  exists:
+                    kind: evolve_follower
+                    who: self
+                    zone: field
+                then:
+                  - move:
+                      ref: this
+                      to: ex
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
