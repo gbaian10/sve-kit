@@ -254,7 +254,7 @@ fn bp13_041_needs_six_original_costs_for_its_damage() {
 
 #[test]
 fn bp13_101_declined_discard_looks_at_nothing() {
-    let deck = [("goblin", "BP01-171"), ("spell", "BP01-007"), ("tail", "BP01-171")];
+    let deck = [("goblin", "BP01-171"), ("spell", "BP01-007"), ("follower", "BP01-034"), ("amulet", "BP01-016"), ("tail", "BP01-171")];
     let mut game = game(&position("BP13-101", &deck));
     let entered = game
         .play_internal_card("source", PlayerId { seat: 1 })
@@ -264,18 +264,18 @@ fn bp13_101_declined_discard_looks_at_nothing() {
     let InputDomain::Pending(options) = &pending.domain else {
         panic!("fanfare")
     };
-    let mut play = game
+    let CardPlay::Awaiting(cost) = game
         .answer_internal_card(pending.actor, pending.token, Answer::Pending(options[0].handle))
+        .unwrap() else {
+            panic!("expected optional head payment")
+        };
+    assert!(matches!(cost.domain, InputDomain::OptionalCost), "the head cost must be offered");
+    let play = game
+        .answer_internal_card(cost.actor, cost.token, Answer::OptionalCost(false))
         .unwrap();
-    if let CardPlay::Awaiting(cost) = &play
-        && matches!(cost.domain, InputDomain::OptionalCost)
-    {
-        play = game
-            .answer_internal_card(cost.actor, cost.token, Answer::OptionalCost(false))
-            .unwrap();
-    }
+    assert!(matches!(play, CardPlay::Cancelled), "declining must cancel before any Look decision");
     settle(&mut game, play, &[], &mut Vec::new());
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P1"]["hand"], json!(["spare"]), "the cost is not paid");
-    assert_eq!(view["P1"]["deck"], json!(["goblin", "spell", "tail"]), "nothing is looked at or moved");
+    assert_eq!(view["P1"]["deck"], json!(["goblin", "spell", "follower", "amulet", "tail"]), "nothing is looked at or moved");
 }
