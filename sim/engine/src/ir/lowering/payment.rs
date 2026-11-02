@@ -18,7 +18,7 @@ pub(super) fn lower(
         ast::Cost::Short(operation) => from_ref(operation.as_ref()),
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
-    lower_operations(context, operations, source, path)
+    lower_operations(context, operations, source, path, false)
 }
 
 pub(super) fn lower_one(
@@ -27,7 +27,20 @@ pub(super) fn lower_one(
     source: &AbilitySource,
     path: &str,
 ) -> Result<PlaySpec, LoweringError> {
-    lower_operations(context, from_ref(operation), source, path)
+    lower_operations(context, from_ref(operation), source, path, false)
+}
+
+pub(super) fn lower_additional(
+    context: &mut BodyContext<'_>,
+    cost: &ast::Cost,
+    source: &AbilitySource,
+    path: &str,
+) -> Result<PlaySpec, LoweringError> {
+    let operations = match cost {
+        ast::Cost::Short(operation) => from_ref(operation.as_ref()),
+        ast::Cost::Ordered { steps } => steps.as_slice(),
+    };
+    lower_operations(context, operations, source, path, true)
 }
 
 #[expect(
@@ -39,6 +52,7 @@ fn lower_operations(
     operations: &[ast::CostOperation],
     source: &AbilitySource,
     path: &str,
+    multiple_materials: bool,
 ) -> Result<PlaySpec, LoweringError> {
     if operations
         .iter()
@@ -222,7 +236,7 @@ fn lower_operations(
             }),
         });
     }
-    if parameters.len() > 1 {
+    if !multiple_materials && parameters.len() > 1 {
         return Err(unsupported(path));
     }
     Ok(PlaySpec {

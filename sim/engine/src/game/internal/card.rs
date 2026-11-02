@@ -17,7 +17,7 @@ use crate::ir::{
     Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
-use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse};
+use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -827,13 +827,22 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
         .play
         .as_ref()
         .ok_or_else(|| invalid("missing play"))?;
+    check_payment(play, &ability.source, is_printed_quick(ability), source)
+}
+
+pub(super) fn check_payment(
+    play: &PlaySpec,
+    origin: &AbilitySource,
+    quick: bool,
+    source: &SourceSpan,
+) -> Result<()> {
     let CostSpec::Ordered { steps } = &play.costs else {
         return Err(unsupported("whole-card cost alternatives"));
     };
     if let Some(predicate) = qualification(&play.costs)? {
         super::ordering::check_condition(predicate, source)?;
     }
-    if is_printed_quick(ability)
+    if quick
         && steps.iter().rev().skip(1).any(|step| {
             matches!(
                 step.instruction.action,
@@ -858,10 +867,10 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
             )
         })
         .count();
-    if discards > 1 || (discards > 0 && is_printed_quick(ability)) {
+    if discards > 1 || (discards > 0 && quick) {
         return Err(unsupported("one non-Quick hand cost group"));
     }
-    if is_printed_quick(ability)
+    if quick
         && steps
             .iter()
             .any(|step| super::counters::selected_cost(&step.instruction.action).is_some())
@@ -872,7 +881,7 @@ fn check_costs(ability: &Ability, source: &SourceSpan) -> Result<()> {
         let instruction = &step.instruction;
         if step.materials.is_some()
             || instruction.context != InstructionContext::Cost
-            || instruction.source != ability.source
+            || instruction.source != *origin
             || instruction.actor != (PlayerRef::Controller {})
         {
             return Err(unsupported("whole-card cost metadata or source"));

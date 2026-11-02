@@ -1,4 +1,6 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
+use crate::ir::quick::card_permission;
+use crate::ir::{AbilityKind, FaceId, Located, PlayCostPayment};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, ObjectOperand, ZoneKind,
 };
@@ -25,7 +27,10 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 return Err(unsupported("play cost requires base face"));
             }
             let printed = game.catalog.face(card_no, 0)?;
-            if !matches!(printed["card_type"].as_str(), Some("フォロワー" | "スペル")) {
+            if !matches!(
+                printed["card_type"].as_str(),
+                Some("フォロワー" | "スペル" | "スペル・トークン")
+            ) {
                 return Err(unsupported("play cost card kind"));
             }
             super::super::cost::printed_play_cost(&printed["cost"])?;
@@ -38,6 +43,10 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
             Ok(())
         };
         check().map_err(|error| at_source(error, &face.source))?;
+        if let Some(payment) = &face.node.additional {
+            check_additional(game, card_no, card, &face.node.face, payment)
+                .map_err(|error| at_source(error, &payment.source))?;
+        }
         if let Some(exchange) = &face.node.exchange {
             if exchange.source.line == 0
                 || exchange.source.scope.is_empty()
@@ -100,6 +109,76 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
             };
             check_modifier().map_err(|error| at_source(error, &modifier.source))?;
         }
+    }
+    Ok(())
+}
+
+fn check_additional(
+    game: &Game,
+    card_no: &str,
+    card: &WellFormedCardProgram,
+    face: &FaceId,
+    payment: &Located<PlayCostPayment>,
+) -> Result<()> {
+    if !matches!(
+        game.catalog.face(card_no, 0)?["card_type"].as_str(),
+        Some("スペル" | "スペル・トークン")
+    ) {
+        return Err(unsupported("additional cost requires a Spell"));
+    }
+    for ability in &card.card().abilities {
+        if ability.node.kind == AbilityKind::Spell {
+            super::play::check_additional_body(&ability.node)?;
+        }
+    }
+    if card
+        .card()
+        .abilities
+        .iter()
+        .any(|ability| card_permission(&ability.node))
+    {
+        return Err(unsupported("additional Quick payment preflight"));
+    }
+    let CostSpec::Ordered { steps } = &payment.node.play.costs else {
+        return Err(unsupported("additional ordered costs"));
+    };
+    if steps.is_empty()
+        || steps.iter().any(|step| {
+            !super::material::check_cost(&step.instruction.action, &payment.node.play)
+                || !matches!(
+                    super::material::cost_objects(&step.instruction.action),
+                    Some(Selector::Bound { .. })
+                )
+        })
+    {
+        return Err(unsupported("additional public material costs"));
+    }
+    game.check_card_source(
+        &payment.source,
+        card_no,
+        &face.0,
+        u64::from(payment.source.line),
+    )?;
+    let origin = AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin: AbilityOrigin::Printed {
+            face: face.clone(),
+            line: Nat(u64::from(payment.source.line)),
+        },
+        controller: PlayerRef::Controller {},
+    };
+    super::check_payment(&payment.node.play, &origin, false, &payment.source)?;
+    for decision in &payment.node.play.parameters {
+        super::material::check_parameter(decision)?;
+    }
+    if payment
+        .node
+        .play
+        .parameters
+        .iter()
+        .any(|parameter| !super::material::is_parameter(parameter))
+    {
+        return Err(unsupported("additional public materials"));
     }
     Ok(())
 }

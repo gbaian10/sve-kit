@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-024:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            act:
+              n: 2
+              sel: { who: self, zone: field, name: ナテラの大樹 }
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+            - bind: friend
+              from: { who: self, zone: field, kind: follower, trait: 自然 }
+              upto: 1
+          do:
+            - damage: { to: enemy, n: 5 }
+            - damage: { to: { leader_of: enemy }, n: 2 }
+            - buff: { on: friend, power: 1, hp: 1 }
