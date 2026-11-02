@@ -741,6 +741,7 @@ impl Game {
             }
             if previous.zone == "ex"
                 && destination == "banish"
+                && self.catalog.rule_bindings.has_resource("lesson_item")
                 && self.single_rules_name_matches_role(id, "lesson_item")?
             {
                 self.bump(&format!("{}.magic_item_banished", previous.controller), 1);

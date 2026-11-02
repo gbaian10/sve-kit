@@ -116,6 +116,8 @@ EX 移到 banish 的 lesson_item 計數，只查既有 card_name 語意取得的
 目的區用 destination，歸屬用 previous.controller。其他來源／目的區、非角色或
 只有 alias 命中的物件不計；rules_name 覆寫及 information_source 轉接會影響單一名稱。
 計數鍵仍為 controller 的 magic_item_banished，既有 authored 效果讀取保持相同。
+未綁定 lesson_item 的 catalog 不做此附帶計數，一般 EX 消滅仍可執行；
+需要角色的 selector 與 program 仍須提供有效綁定。
 
 ## 5. 建立、還原與公開邊界
 

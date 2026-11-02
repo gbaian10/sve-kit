@@ -125,3 +125,102 @@ fn quick_ability_with_public_material_costs_still_rejects_at_admission() {
     assert!(board.load_internal_card("unit-follower", &program).is_err());
     assert_eq!(exact_authority(&board), before);
 }
+
+fn ex_source_and_material_program() -> WellFormedCardProgram {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut seed = tree["cards"]["BP01-041"].clone();
+    seed["abilities"][0]["activate"] = json!({
+        "zone":"ex", "cost":{"steps":[{"pp":1},{"banish_self":true},
+            {"banish":{"sel":{"who":"self","zone":"ex","name":"unit-amulet","other":true},"n":2}}]},
+        "do":[{"life":{"who":"self","delta":1}}]
+    });
+    tree["cards"] = json!({"unit-amulet":seed});
+    lowerer().lower(&tree).unwrap()["unit-amulet"].clone()
+}
+
+#[test]
+fn ex_self_banish_and_two_named_materials_reserve_distinct_own_objects_atomically() {
+    let program = ex_source_and_material_program();
+    for (extras, pp, source_zone) in [
+        (0_usize, 1, "ex"),
+        (1, 1, "ex"),
+        (2, 0, "ex"),
+        (2, 1, "field"),
+        (2, 1, "ex"),
+    ] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"]["current"] = json!(pp);
+        initial["players"]["P1"]["zones"]["field"] = json!([]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        let mut ex = vec![json!({"id":"unrelated","card":"unit-follower"})];
+        if source_zone == "ex" {
+            ex.push(json!({"id":"source","card":"unit-amulet"}));
+        } else {
+            initial["players"]["P1"]["zones"]["field"] =
+                json!([{"id":"source","card":"unit-amulet"}]);
+        }
+        ex.extend((0..extras).map(|i| json!({"id":format!("material-{i}"),"card":"unit-amulet"})));
+        initial["players"]["P1"]["zones"]["ex"] = json!(ex);
+        initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"foreign","card":"unit-amulet"}]);
+        let mut board = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-self-cost",
+        )
+        .unwrap();
+        board.load_internal_card("unit-amulet", &program).unwrap();
+        board
+            .load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        board
+            .load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let origin = board.clone();
+        let before = exact_authority(&board);
+        let play = board.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 });
+        if extras < 2 || source_zone != "ex" {
+            play.unwrap_err();
+            assert_eq!(exact_authority(&board), before);
+            continue;
+        }
+        let CardPlay::Awaiting(question) = play.unwrap() else {
+            panic!("materials");
+        };
+        let InputDomain::CostMaterials(domain) = &question.domain else {
+            panic!("materials");
+        };
+        assert_eq!(domain.members.len(), 2);
+        if pp == 0 {
+            board
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::CostMaterials(domain.members.iter().map(|m| m.handle).collect()),
+                )
+                .unwrap_err();
+            transactions::assert_restored(&board, &origin);
+            continue;
+        }
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            1
+        );
+        resolved(
+            board
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::CostMaterials(domain.members.iter().map(|m| m.handle).collect()),
+                )
+                .unwrap(),
+        );
+        let state = board.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["ex"], json!(["unrelated"]));
+        assert_eq!(state["P2"]["ex"], json!(["foreign"]));
+        assert_eq!(state["P1"]["banish"].as_array().unwrap().len(), 3);
+        assert_eq!(state["P1"]["pp"]["current"], 0);
+        assert_eq!(state["P1"]["leader"]["life"], 21);
+    }
+}

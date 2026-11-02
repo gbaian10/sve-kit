@@ -502,6 +502,10 @@ impl RuleBindings {
             .is_some_and(|set| set.contains(capability))
     }
 
+    pub(crate) fn has_resource(&self, role: &str) -> bool {
+        self.resources.contains_key(role)
+    }
+
     pub(crate) fn matches_resource(&self, role: &str, labels: &[String]) -> Result<bool> {
         let resource = self
             .resources
