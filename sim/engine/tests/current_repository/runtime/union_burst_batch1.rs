@@ -111,7 +111,7 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                 }
             }
             InputDomain::TokenCapacity { .. }
-            | InputDomain::MealPayment { .. }
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::DriveTrigger { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw

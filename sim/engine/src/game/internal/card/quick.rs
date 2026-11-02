@@ -205,6 +205,7 @@ impl Game {
             if object.controller != seat_name(actor)?
                 || int(&object.state["face"]) != 0
                 || object.state["silenced"] == true
+                || !matches!(object.zone.as_str(), "field" | "hand" | "ex" | "cemetery")
             {
                 continue;
             }

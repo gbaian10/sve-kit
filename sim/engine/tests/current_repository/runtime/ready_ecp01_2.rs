@@ -108,7 +108,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) -> CardPlay {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().rev().map(|m| m.handle).collect())
             }
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
@@ -230,7 +230,7 @@ fn feed(game: &mut Game, card: &str, index: usize) -> Activation {
     else {
         panic!("printed meal payment")
     };
-    let InputDomain::MealPayment { materials, .. } = &question.domain else {
+    let InputDomain::ResourceEntryPayment { materials, .. } = &question.domain else {
         panic!("printed meal resource domain")
     };
     let handles = materials
@@ -243,7 +243,7 @@ fn feed(game: &mut Game, card: &str, index: usize) -> Activation {
         game.answer_internal_card(
             question.actor,
             question.token,
-            Answer::MealPayment {
+            Answer::ResourceEntryPayment {
                 materials: handles,
                 use_ep: false,
             },

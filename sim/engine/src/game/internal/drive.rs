@@ -353,3 +353,51 @@ impl Game {
             .retain(|_, lock| lock.turn != turn);
     }
 }
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Drive gain uses ordinary generation-bound grants and pending occurrences."
+)]
+impl Game {
+    pub(super) fn internal_gain_drive(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        use crate::ir::{Bool, DriveGainedEvent, RideDriveOperation, UsageReference};
+        let Action::RideDrive {
+            subject,
+            operation: RideDriveOperation::GainDrive {},
+            usage: UsageReference::CurrentRulePermission,
+        } = &instruction.action
+        else {
+            return Err(unsupported("Drive gain instruction"));
+        };
+        let reference = execution.object(self, subject)?;
+        let holder = execution.object_id(reference)?.to_owned();
+        let object = self.object(&holder)?;
+        if object.zone != "field"
+            || object.generation != reference.generation.0
+            || !self.object_type(&holder)?.contains("フォロワー")
+            || self.state.ir_drive_gained.get(&holder) == Some(&object.generation)
+        {
+            execution
+                .receipts
+                .insert(instruction.receipt, InstructionOutcome::Granted(vec![]));
+            return Ok(());
+        }
+        let controller = player_id(&object.controller)?;
+        self.internal_drive_grant(execution, instruction)?;
+        self.state
+            .ir_drive_gained
+            .insert(holder.clone(), reference.generation.0);
+        let event = DriveGainedEvent {
+            subject: reference,
+            controller,
+            first_gain: Bool(true),
+        };
+        execution.facts.push(Fact::DriveGained(event));
+        self.internal_drive_gained_event(&holder, event, execution)?;
+        Ok(())
+    }
+}

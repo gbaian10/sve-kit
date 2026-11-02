@@ -1,6 +1,7 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
+use crate::ir::ride;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
@@ -257,6 +258,16 @@ impl Checker {
             return Err(self.error(WellFormedReason::DecisionTiming));
         };
         self.play_input(play_scope, input, &decision.actor, controller)?;
+        if *decision == ride::parameter(self.env.scope) {
+            // Only the fixed DrivePoint cost may inspect the controller's hidden evolve deck.
+            let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+                return self.reject();
+            };
+            self.decision_header(decision)?;
+            self.define(*binding, BindingKind::Value)?;
+            self.answer_access(&decision.domain, &decision.visibility);
+            return Ok(());
+        }
         if decision.visibility != (Visibility::Public {}) {
             return self.reject();
         }
@@ -635,6 +646,7 @@ impl Checker {
                             | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }
                             | Action::Posture { posture: Posture::Acted, .. })
+                            || step.instruction.action == ride::attachment(checker.env.scope)
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
                             || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
                         let source_move = matches!(&step.instruction.action,

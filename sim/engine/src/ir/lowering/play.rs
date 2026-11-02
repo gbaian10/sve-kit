@@ -923,6 +923,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         }
         ast::Step::StackPlus(_)
         | ast::Step::Counter(_)
+        | ast::Step::GainDrive(_)
         | ast::Step::Race(_)
         | ast::Step::Evolve(_)
         | ast::Step::Either(_)

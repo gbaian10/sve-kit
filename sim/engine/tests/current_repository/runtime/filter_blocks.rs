@@ -184,7 +184,7 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay, prefer: &[&str]) -> Ca
                 ))
             }
             InputDomain::Order(cards) => Answer::Order(cards.iter().map(|m| m.handle).collect()),
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

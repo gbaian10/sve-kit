@@ -130,6 +130,9 @@ mod entry_origin;
 #[path = "card/entry_method.rs"]
 mod entry_method;
 
+#[path = "card/ride.rs"]
+mod ride;
+
 #[path = "card/amulet.rs"]
 mod amulet;
 
@@ -530,7 +533,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                         assert_eq!(fact.execution, activation.execution);
                         Some(fact.effect)
                     }
-                    Fact::Raced(_)
+                    Fact::DriveGained(_)
+                    | Fact::Raced(_)
                     | Fact::Evolved(_)
                     | Fact::CardPlayed { .. }
                     | Fact::CardResolved { .. }

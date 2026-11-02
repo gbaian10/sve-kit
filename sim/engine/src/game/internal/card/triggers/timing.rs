@@ -38,6 +38,24 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         match (&ability.source.origin, &trigger.on) {
             (
                 AbilityOrigin::Keyword {
+                    keyword: KeywordId::OnDriveGain,
+                    origin,
+                },
+                TriggerCondition::Event {
+                    pattern: EventPattern::DriveGained { binding, predicate },
+                },
+            ) => {
+                matches!(origin.as_ref(), AbilityOrigin::Printed { .. })
+                    && *predicate
+                        == Expr::Compute(Box::new(Predicate::ObjectEquals {
+                            left: Expr::Frozen(Box::new(ObjectFrozen::DriveGainedSubject {
+                                event: *binding,
+                            })),
+                            right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                        }))
+            }
+            (
+                AbilityOrigin::Keyword {
                     keyword: KeywordId::OnRace,
                     origin,
                 },
@@ -108,6 +126,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 
 pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
     match event {
+        Event::DriveGained { .. } => Ok(format!("DriveGained at field slot {position}")),
         Event::Race { event } => Ok(format!("Race {} at field slot {position}", event.ordinal.0)),
         Event::EnterField { event } => {
             let origin = match event.from {

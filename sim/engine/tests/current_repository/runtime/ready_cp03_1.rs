@@ -91,7 +91,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
                     .map(|m| m.handle)
                     .collect(),
             ),
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

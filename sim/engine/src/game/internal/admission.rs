@@ -112,6 +112,7 @@ fn keyword_source_paths(
                 | KeywordId::OnEvolve
                 | KeywordId::OnSuperEvolve
                 | KeywordId::OnRace
+                | KeywordId::OnDriveGain
                 | KeywordId::Quick
                 | KeywordId::Stack,
             ..
@@ -338,6 +339,7 @@ fn check_requirements(
                             | "internal.KeywordId.OnEvolve"
                             | "internal.KeywordId.OnSuperEvolve"
                             | "internal.KeywordId.OnRace"
+                            | "internal.KeywordId.OnDriveGain"
                             | "internal.KeywordId.Quick"
                             | "internal.KeywordId.Ward"
                             | "internal.KeywordId.Aura"
@@ -613,6 +615,10 @@ fn supported(code: &str) -> bool {
             | "shape.Control.Pay"
             | "shape.Control.May"
             | "control.may"
+            | "shape.Action.RideDrive"
+            | "action.ride-drive"
+            | "shape.RideDriveOperation.GainDrive"
+            | "internal.UsageReference.CurrentRulePermission"
             | "shape.Action.MealRace"
             | "action.meal-race"
             | "internal.MealRaceOperation.Race"

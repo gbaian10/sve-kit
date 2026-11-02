@@ -95,7 +95,7 @@ impl PlayMode {
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PlayState {
     qualification: AbilityQualification,
-    pub(in crate::game::internal) meal: Option<super::meal::MealState>,
+    pub(in crate::game::internal) resource_entry: Option<super::resource_entry::ResourceEntryState>,
     snapshot: Option<Box<Game>>,
     pub(in crate::game::internal) snapshot_id: SnapshotId,
     modes: VecDeque<PlayMode>,
@@ -865,7 +865,7 @@ impl Game {
         ability: Ability,
     ) -> Result<CardPlay> {
         let conditional = conditional_play_modes(&ability);
-        let meal = super::meal::payment(&ability)?;
+        let resource_entry = super::resource_entry::payment(&ability)?;
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let optional = super::optional::take(&mut body);
         let groups = collect_modes(&body, conditional)?;
@@ -884,12 +884,16 @@ impl Game {
             .as_deref()
             .into_iter()
             .flat_map(|(_, payment)| payment.play.parameters.clone())
-            .chain(play.parameters)
+            .chain(if resource_entry.is_some() {
+                vec![]
+            } else {
+                play.parameters
+            })
             .collect();
         execution.play = Some(PlayState {
             qualification: ability.qualification,
             additional,
-            meal,
+            resource_entry,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: groups.clone().into(),
@@ -1012,7 +1016,7 @@ impl Game {
             return Ok(());
         };
         if self.internal_optional_decision(execution, &play)?
-            || self.internal_meal_question(execution, &play)?
+            || self.internal_resource_entry_question(execution, &play)?
             || self.internal_exchange_decision(execution, &play)?
             || self.internal_play_modes(execution, &mut play)?
         {
@@ -1163,8 +1167,8 @@ impl Game {
         };
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
-        let payment = if play.meal.is_some() {
-            self.internal_meal_payment(execution, &play)
+        let payment = if play.resource_entry.is_some() {
+            self.internal_resource_entry_payment(execution, &play)
         } else if play.exchange.is_some() || execution.field_entry {
             self.internal_exchange_payment(execution, &play)
         } else {
@@ -1570,7 +1574,7 @@ impl Game {
         execution.play = Some(PlayState {
             qualification: AbilityQualification::Ordinary,
             additional: None,
-            meal: None,
+            resource_entry: None,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: VecDeque::new(),

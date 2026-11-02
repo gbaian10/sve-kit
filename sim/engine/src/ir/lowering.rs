@@ -1,4 +1,5 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
+use crate::ir::ride;
 
 mod additional;
 mod aggregates;
@@ -19,7 +20,6 @@ mod granted_play;
 mod hand_payment;
 mod keywords;
 mod material;
-mod meal;
 mod movement;
 mod numeric;
 mod optional_payment;
@@ -30,6 +30,7 @@ mod play;
 mod play_restrictions;
 mod prevention;
 mod receipt_counts;
+mod resource_entry;
 mod stack;
 mod static_keywords;
 
@@ -527,8 +528,8 @@ impl Allocator {
         if entry.evolve.is_some() {
             return evolution::lower(self, key, path, entry, scope);
         }
-        if entry.feed.is_some() {
-            return meal::lower(self, key, path, entry, scope);
+        if entry.feed.is_some() || entry.ride.is_some() {
+            return resource_entry::lower(self, key, path, entry, scope);
         }
         if let Some(keywords) = &entry.keywords {
             return quick::lower(key, path, entry, scope, keywords);
@@ -718,6 +719,9 @@ fn ability_body<'entry>(
     entry: &'entry ast::Ability,
     path: &str,
 ) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    if let Some(body) = &entry.drive_time {
+        return Ok((body, "drive_time", Some(KeywordId::OnDriveGain)));
+    }
     if let Some(body) = &entry.race_time {
         return Ok((body, "race_time", Some(KeywordId::OnRace)));
     }
@@ -770,7 +774,16 @@ fn lowered_trigger(
     Ok(if keyword == Some(KeywordId::Lastword) {
         TriggerSpec::lastword(Binding::new(event_id, scope))
     } else {
-        let pattern = if keyword == Some(KeywordId::OnRace) {
+        let pattern = if keyword == Some(KeywordId::OnDriveGain) {
+            let event = Binding::new(event_id, scope);
+            EventPattern::DriveGained {
+                binding: event,
+                predicate: Expr::Compute(Box::new(Predicate::ObjectEquals {
+                    left: Expr::Frozen(Box::new(ObjectFrozen::DriveGainedSubject { event })),
+                    right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+                })),
+            }
+        } else if keyword == Some(KeywordId::OnRace) {
             let event = Binding::new(event_id, scope);
             EventPattern::Race {
                 binding: event,
@@ -1355,7 +1368,8 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Result<Action, LoweringError> {
         match step {
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
-            ast::Step::Race(value) => Ok(meal::action(
+            ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
+            ast::Step::Race(value) => Ok(resource_entry::action(
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,
             )),

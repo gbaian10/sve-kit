@@ -1,4 +1,4 @@
-//! Physical evolution and meal resources carry snapshot information, never prototype programs.
+//! Physical evolution, meal and Drive resources carry snapshot information, never prototype programs.
 use super::{Game, Result, invalid};
 use crate::game::string;
 
@@ -42,6 +42,7 @@ impl Game {
         }
         match object.zone.as_str() {
             "race" if self.single_rules_name_matches_role(holder, "meal_item")? => Ok(true),
+            "drive" if self.single_rules_name_matches_role(holder, "drive_point")? => Ok(true),
             "evolve_deck" => Ok(true),
             "evolution" => {
                 let bases = self

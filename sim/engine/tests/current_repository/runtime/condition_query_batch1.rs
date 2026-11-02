@@ -106,7 +106,7 @@ fn finish(game: &mut Game, mut play: CardPlay, targets: &[&str]) -> CardPlay {
                     .handle;
                 Answer::Targets(vec![handle])
             }
-            InputDomain::MealPayment { .. }
+            InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

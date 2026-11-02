@@ -14,8 +14,8 @@ use crate::ir::{
     ExecutionId, Expr, FaceId, Generation, GrantedAbility, Instruction, InstructionContext, Int,
     KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason, Nat, Node, NumericChange,
     ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit,
-    Requirements, Resource, ResourceOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, ZoneKind,
+    Requirements, Resource, ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource,
+    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
@@ -37,13 +37,13 @@ mod fanfare;
 pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
-pub(in crate::game::internal) mod meal;
 pub(super) mod optional;
 pub(super) mod other_costs;
 mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
 pub(super) mod quick;
+pub(in crate::game::internal) mod resource_entry;
 mod resources;
 mod static_keywords;
 pub(in crate::game::internal) mod triggers;
@@ -170,7 +170,7 @@ impl CardRuntime {
                     })
                     || card.card().abilities.iter().any(|ability| {
                         evolution::intrinsic(&ability.node)
-                            || meal::intrinsic(&ability.node)
+                            || resource_entry::intrinsic(&ability.node)
                             || matches!(
                                 ability.node.kind,
                                 AbilityKind::Spell | AbilityKind::Triggered
@@ -382,8 +382,8 @@ impl Game {
                 evolution::check(self, located)?;
                 continue;
             }
-            if meal::intrinsic(ability) {
-                meal::check(located)?;
+            if resource_entry::intrinsic(ability) {
+                resource_entry::check(located)?;
                 continue;
             }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
@@ -511,8 +511,8 @@ impl Game {
         self.internal_context(&context)?;
         self.check_internal_resources()?;
         let source = self.internal_card_source(holder, definition, actor)?;
-        if meal::intrinsic(&ability.node) {
-            self.check_meal_available(holder)?;
+        if resource_entry::intrinsic(&ability.node) {
+            self.check_resource_entry_available(holder, &ability.node)?;
         }
         if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
             && !self.card_runtime.quota_available(
@@ -819,7 +819,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     {
         return Err(unsupported("whole-card ability header"));
     }
-    if evolution::intrinsic(ability) || meal::intrinsic(ability) {
+    if evolution::intrinsic(ability) || resource_entry::intrinsic(ability) {
         return Ok(());
     }
     if ability.kind == AbilityKind::Triggered {
@@ -987,7 +987,7 @@ fn check_source(source: &SourceSpan, card: &str, face: &str, line: u64) -> Resul
     Ok(())
 }
 
-fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
+pub(in crate::game::internal) fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
     match origin {
         AbilityOrigin::Printed { face, line } => Ok((face, line)),
         AbilityOrigin::Keyword {
@@ -1000,6 +1000,8 @@ fn printed_origin(origin: &AbilityOrigin) -> Result<(&FaceId, &Nat)> {
                 | KeywordId::Evolution
                 | KeywordId::Meal
                 | KeywordId::OnRace
+                | KeywordId::Ride
+                | KeywordId::OnDriveGain
                 | KeywordId::Quick
                 | KeywordId::Ward
                 | KeywordId::Aura
@@ -1112,6 +1114,10 @@ fn check_nodes(
                         | Action::Search { .. }
                         | Action::Token { .. }
                         | Action::Order { .. }
+                        | Action::RideDrive {
+                            operation: RideDriveOperation::GainDrive {},
+                            ..
+                        }
                         | Action::MealRace {
                             operation: MealRaceOperation::Race,
                             ..

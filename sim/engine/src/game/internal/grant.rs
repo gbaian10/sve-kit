@@ -3,11 +3,12 @@ use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
-    Action, CharacteristicPatch, DurationEnd, Effect, EffectId, EffectReference, EventPattern,
-    GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand, ObjectRef,
-    ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan, TimeAnchor,
-    TriggerCondition, ZoneKind, granted_cost, printed_keywords,
+    Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
+    EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand,
+    ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan,
+    TimeAnchor, TriggerCondition, ZoneKind, granted_cost, printed_keywords,
 };
+use crate::ir::{RideDriveOperation, TextProvider, UsageReference};
 use alloc::collections::BTreeSet;
 use core::ops::Deref;
 use serde::{Deserialize, Serialize};
@@ -148,6 +149,18 @@ pub(super) const fn keyword(keyword: KeywordId) -> Option<&'static str> {
     }
 }
 
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "The fixed Drive grant extends ordinary keyword names."
+)]
+const fn drive_keyword(id: KeywordId) -> Option<&'static str> {
+    match id {
+        KeywordId::Drive => Some("drive"),
+        KeywordId::SingleDrive => Some("single_drive"),
+        _ => keyword(id),
+    }
+}
+
 pub(super) fn check_action(action: &Action) -> Result<()> {
     if let Action::Modify {
         patch: CharacteristicPatch::AddTrait { trait_id },
@@ -268,7 +281,7 @@ impl Game {
     }
 
     pub(in crate::game::internal) fn internal_has_granted_definitions(&self) -> bool {
-        self.state.ir_keywords.values().any(|state| state.grants.iter().any(|grant| !grant.definitions.is_empty()))
+        self.state.ir_keywords.values().any(|state| state.grants.iter().any(|grant| !grant.definitions.is_empty() || grant.keywords.contains("single_drive")))
             || self.card_runtime.definitions.cards.values().any(|program| program.card().abilities.iter().any(|ability| ability.node.declarations.iter().any(|effect| {
                 matches!(effect, Effect::Continuous { patch: CharacteristicPatch::GrantAbility { abilities }, .. } if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { .. })))
             })))
@@ -280,10 +293,9 @@ impl Game {
                 .objects
                 .get(holder)
                 .is_some_and(|object| object.generation == state.generation)
-                && state
-                    .grants
-                    .iter()
-                    .any(|grant| !grant.definitions.is_empty())
+                && state.grants.iter().any(|grant| {
+                    !grant.definitions.is_empty() || grant.keywords.contains("single_drive")
+                })
         })
     }
 
@@ -313,6 +325,24 @@ impl Game {
             .filter(|state| state.generation == object.generation)
         {
             for grant in &state.grants {
+                if zone == ZoneKind::Field && grant.keywords.contains("single_drive") {
+                    let provider = grant.origin.provider();
+                    let definition = printed_keywords::drive_definition(
+                        KeywordId::SingleDrive,
+                        AbilityId(provider.ability),
+                        ScopeId(provider.ability),
+                        InstructionId(1),
+                        &provider.span,
+                    )
+                    .ok_or_else(|| invalid("Drive definition"))?;
+                    result.push(EffectiveAbility {
+                        definition: Located {
+                            node: definition,
+                            source: provider.span.clone(),
+                        },
+                        grant: Some(grant.origin.clone()),
+                    });
+                }
                 for definition in &grant.definitions {
                     let ability = self
                         .card_runtime
@@ -538,6 +568,59 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         check_action(&instruction.action)?;
+        self.install_instruction_grant(execution, instruction, keyword)
+    }
+
+    pub(super) fn internal_drive_grant(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        let Action::RideDrive {
+            subject,
+            operation: RideDriveOperation::GainDrive {},
+            usage: UsageReference::CurrentRulePermission,
+        } = &instruction.action
+        else {
+            return Err(unsupported("implicit Drive grant"));
+        };
+        let mut grant = instruction.clone();
+        grant.action = Action::Grant {
+            subjects: Selector::Objects {
+                objects: vec![subject.clone()],
+            },
+            abilities: vec![KeywordId::Drive, KeywordId::SingleDrive, KeywordId::Rush]
+                .into_iter()
+                .map(|keyword| GrantedAbility::Keyword { keyword })
+                .collect(),
+            duration: Duration {
+                end: DurationEnd::NoTemporalExpiry {},
+                anchor: TimeAnchor::Installation {},
+                usage: None,
+                intervals: vec![],
+            },
+            provider: TextProvider {
+                provider: ObjectView::Current {
+                    object: Box::new(ObjectOperand::SourceHolder {}),
+                },
+                face: super::card::printed_origin(&instruction.source.origin)?
+                    .0
+                    .clone(),
+                ability: execution
+                    .ability
+                    .ok_or_else(|| invalid("Drive gain source"))?
+                    .definition,
+            },
+        };
+        self.install_instruction_grant(execution, &grant, drive_keyword)
+    }
+
+    fn install_instruction_grant(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        keyword_name: fn(KeywordId) -> Option<&'static str>,
+    ) -> Result<()> {
         let (subjects, abilities, duration, traits) = match &instruction.action {
             Action::Grant {
                 subjects,
@@ -572,7 +655,7 @@ impl Game {
                     return None;
                 };
                 Some(
-                    keyword(*id)
+                    keyword_name(*id)
                         .map(str::to_owned)
                         .ok_or_else(|| unsupported("unsupported keyword grant")),
                 )

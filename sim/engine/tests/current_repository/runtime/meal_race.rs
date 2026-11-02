@@ -55,7 +55,7 @@ pub(super) fn feed(game: &mut Game, card: &str, index: usize, ep: bool) -> Activ
     else {
         panic!("meal payment");
     };
-    let InputDomain::MealPayment {
+    let InputDomain::ResourceEntryPayment {
         materials,
         ep_allowed,
     } = &question.domain
@@ -77,7 +77,7 @@ pub(super) fn feed(game: &mut Game, card: &str, index: usize, ep: bool) -> Activ
         game.answer_internal_card(
             question.actor,
             question.token,
-            Answer::MealPayment {
+            Answer::ResourceEntryPayment {
                 materials: handles,
                 use_ep: ep,
             },
@@ -116,7 +116,7 @@ pub(super) fn settle(game: &mut Game) {
                 InputDomain::OptionalCost => Answer::OptionalCost(false),
                 InputDomain::DriveTrigger { .. }
                 | InputDomain::TokenCapacity { .. }
-                | InputDomain::MealPayment { .. }
+                | InputDomain::ResourceEntryPayment { .. }
                 | InputDomain::WardEntry { .. }
                 | InputDomain::Quick { .. }
                 | InputDomain::CostMaterials(_)
@@ -244,7 +244,7 @@ fn meal_resource_answers_reject_duplicates_and_wrong_actors_without_spending() {
     game.answer_internal_card(
         question.actor,
         question.token,
-        Answer::MealPayment {
+        Answer::ResourceEntryPayment {
             materials: vec![0, 1, 2],
             use_ep: true,
         },
@@ -259,7 +259,7 @@ fn meal_resource_answers_reject_duplicates_and_wrong_actors_without_spending() {
         game.answer_internal_card(
             actor,
             question.token,
-            Answer::MealPayment {
+            Answer::ResourceEntryPayment {
                 materials,
                 use_ep: false,
             },
@@ -273,7 +273,7 @@ fn meal_resource_answers_reject_duplicates_and_wrong_actors_without_spending() {
         game.answer_internal_card(
             question.actor,
             question.token,
-            Answer::MealPayment {
+            Answer::ResourceEntryPayment {
                 materials: vec![0, 1, 2],
                 use_ep: false,
             },
