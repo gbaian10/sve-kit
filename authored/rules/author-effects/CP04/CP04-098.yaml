@@ -1,0 +1,57 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          ub: true
+          optional_cost:
+            act:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+            result: materials
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                other: true
+              n: 1
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: materials
+                then:
+                  - buff:
+                      "on": ally
+                      hp: 2
+      - line: 1
+        section: 1
+        keywords:
+          - ward
+      - line: 2
+        section: 1
+        activate:
+          cost:
+            act_self: true
+          do:
+            - stand:
+                ref:
+                  who: self
+                  zone: field
+                  kind: amulet
+    rule_sections:
+      - section: 1

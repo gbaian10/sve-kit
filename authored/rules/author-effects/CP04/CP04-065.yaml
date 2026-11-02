@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        activate:
+          ub: true
+          cost:
+            act_self: true
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: 〈ジオ・テオゴニア〉
+                not_same_name_as_this: true
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+                hp: 1
+            - stand: ally
+            - apply:
+                effect:
+                  cannot:
+                    "on": affected
+                    what: attack
+                "on": ally
+                until: turn
+      - line: 1
+        section: 1
+        keywords:
+          - ward
+    rule_sections:
+      - section: 1

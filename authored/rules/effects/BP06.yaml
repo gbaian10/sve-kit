@@ -169,53 +169,6 @@ cards:
             amount: 3
           - op: discard
             subjects: self
-  BP06-080:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: choice
-          min: 1
-          max: 1
-          modes:
-            - op: seq
-              steps:
-                - op: damage
-                  subjects: target.1
-                  amount: 1
-                - op: move
-                  subjects:
-                    side: self
-                    zone: deck
-                    top: 1
-                  to: cemetery
-            - op: move
-              subjects: target.1
-              to: hand
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-            modes:
-              - 1
-          - key: "1"
-            select:
-              side: self
-              zone: cemetery
-              type: follower
-              trait: 妖怪
-              not_name: self
-            min: 1
-            max: 1
-            modes:
-              - 2
   BP06-117:
     status: complete
     abilities:
