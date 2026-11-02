@@ -1,0 +1,33 @@
+cards:
+  CP03-035:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: ヴァンガード
+                who: self
+                zone: hand
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: ブラスター・ブレード
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

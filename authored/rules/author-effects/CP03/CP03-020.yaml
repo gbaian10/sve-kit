@@ -1,0 +1,28 @@
+cards:
+  CP03-020:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: chosen
+                result: placed
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_eq: 1
+                trait: アクアフォース
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

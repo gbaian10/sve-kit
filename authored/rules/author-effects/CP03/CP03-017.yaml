@@ -1,0 +1,33 @@
+cards:
+  CP03-017:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - act: enemy
+                  - - stand: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
