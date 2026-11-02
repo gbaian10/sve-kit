@@ -783,6 +783,13 @@ fn choice_count(
     if (exact && number != 1) || (changed_exact && changed != 1) {
         return Err(unsupported(path));
     }
+    let at_least = |read, threshold| {
+        Expr::Compute(Box::new(Predicate::CompareNat {
+            left: Expr::Frozen(Box::new(read)),
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Nat(threshold)),
+        }))
+    };
     let condition = match &replacement.r#if {
         ast::ModeCondition::EnteredFrom(origin)
             if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
@@ -790,26 +797,22 @@ fn choice_count(
             context.entered_from(origin, path)?
         }
         ast::ModeCondition::EnteredFrom(_) => return Err(unsupported(path)),
-        ast::ModeCondition::Spellchain(threshold) | ast::ModeCondition::Necro(threshold) => {
-            let read = if matches!(replacement.r#if, ast::ModeCondition::Spellchain(_)) {
-                NatFrozen::SpellChain {
-                    player: PlayerRef::Controller {},
-                    execution: ExecutionRef::Current {},
-                    at: SpellCountTime::AtPlay,
-                }
-            } else {
-                NatFrozen::NecroCharge {
-                    player: PlayerRef::Controller {},
-                    execution: ExecutionRef::Current {},
-                    at: SpellCountTime::AtPlay,
-                }
-            };
-            Expr::Compute(Box::new(Predicate::CompareNat {
-                left: Expr::Frozen(Box::new(read)),
-                comparison: Comparison::GreaterEqual,
-                right: Expr::Literal(Nat(*threshold)),
-            }))
-        }
+        ast::ModeCondition::Spellchain(threshold) => at_least(
+            NatFrozen::SpellChain {
+                player: PlayerRef::Controller {},
+                execution: ExecutionRef::Current {},
+                at: SpellCountTime::AtPlay,
+            },
+            *threshold,
+        ),
+        ast::ModeCondition::Necro(threshold) => at_least(
+            NatFrozen::NecroCharge {
+                player: PlayerRef::Controller {},
+                execution: ExecutionRef::Current {},
+                at: SpellCountTime::AtPlay,
+            },
+            *threshold,
+        ),
     };
     Ok((
         Expr::Compute(Box::new(NatOperation::Conditional {
