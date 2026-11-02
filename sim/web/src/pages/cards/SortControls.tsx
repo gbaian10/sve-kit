@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 
-import { QUERY_SORTS, type QueryState } from "../../domain/query/model"
+import { defaultSecondarySort, QUERY_SORTS, type QueryState } from "../../domain/query/model"
 
 export function SortControls({
   query,
@@ -11,7 +11,7 @@ export function SortControls({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="grid w-full gap-1 md:w-auto">
+    <div className="grid w-max gap-2">
       {([false, true] as const).map((secondary) => {
         const sort = secondary ? query.secondarySort : query.sort
         const descending = (secondary ? query.secondaryOrder : query.order) === "desc"
@@ -25,50 +25,42 @@ export function SortControls({
               ? t("results.largestFirst")
               : t("results.smallestFirst")
         return (
-          <div
-            key={String(secondary)}
-            className="grid grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-1 text-13 md:flex"
-          >
-            <label className="contents md:flex md:items-center md:gap-1">
-              <span className="w-12 shrink-0">{label}</span>
-              <select
-                aria-label={label}
-                value={sort ?? ""}
-                className="h-7 w-full min-w-0 rounded-control border border-border bg-surface-1 px-1 text-text-1 md:h-8 md:w-24 md:px-2"
-                onChange={(event) => {
-                  const next = QUERY_SORTS.find((sort) => sort === event.target.value)
-                  if (secondary) {
-                    const { secondaryOrder, ...rest } = query
-                    onChange({
-                      ...rest,
-                      secondarySort: next ?? null,
-                      ...(next && secondaryOrder === "desc" ? { secondaryOrder } : {}),
-                    })
-                  } else if (next) {
-                    if (query.secondarySort === next) {
-                      const nextQuery = { ...query, sort: next, secondarySort: null }
-                      delete nextQuery.secondaryOrder
-                      onChange(nextQuery)
-                    } else onChange({ ...query, sort: next })
-                  }
-                }}
-              >
-                {secondary && <option value="">{t("results.noSecondary")}</option>}
-                {QUERY_SORTS.map((value) => (
-                  <option key={value} value={value} disabled={secondary && value === query.sort}>
-                    {t(`results.sortBy.${value}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+          <div key={String(secondary)} className="flex items-center gap-2 text-13">
+            <select
+              aria-label={label}
+              value={sort ?? ""}
+              className="h-8 w-auto shrink-0 rounded-control border border-border bg-surface-1 px-2 text-text-1"
+              onChange={(event) => {
+                const next = QUERY_SORTS.find((sort) => sort === event.target.value)
+                if (secondary) {
+                  const { secondaryOrder, ...rest } = query
+                  onChange({
+                    ...rest,
+                    secondarySort: next ?? null,
+                    ...(next && secondaryOrder === "desc" ? { secondaryOrder } : {}),
+                  })
+                } else if (next) {
+                  if (query.secondarySort === next) {
+                    const { secondaryOrder: _secondaryOrder, ...rest } = query
+                    onChange({ ...rest, sort: next, secondarySort: defaultSecondarySort(next) })
+                  } else onChange({ ...query, sort: next })
+                }
+              }}
+            >
+              {secondary && <option value="">{t("results.noSecondary")}</option>}
+              {QUERY_SORTS.map((value) => (
+                <option key={value} value={value} disabled={secondary && value === query.sort}>
+                  {t(`results.sortBy.${value}`)}
+                </option>
+              ))}
+            </select>
             {sort !== null ? (
               <button
                 type="button"
-                aria-label={
-                  secondary ? `${label}：${t("results.descending")}` : t("results.descending")
-                }
+                aria-label={`${label}：${direction}`}
+                title={direction}
                 aria-pressed={descending}
-                className="h-7 w-full min-w-0 rounded-control border border-border bg-surface-1 px-1 text-13 md:h-8 md:min-w-24 md:px-2"
+                className="h-8 shrink-0 rounded-control border border-border bg-surface-1 px-2 text-13 whitespace-nowrap"
                 onClick={() => {
                   if (secondary) {
                     const { secondaryOrder, ...rest } = query
@@ -86,8 +78,10 @@ export function SortControls({
                 type="button"
                 aria-label={label}
                 disabled
-                className="h-7 w-full min-w-0 rounded-control border border-border bg-surface-1 px-1 text-13 text-text-3 opacity-50 md:h-8 md:min-w-24 md:px-2"
-              />
+                className="h-8 shrink-0 rounded-control border border-border bg-surface-1 px-2 text-13 whitespace-nowrap text-text-3 opacity-50"
+              >
+                {t("results.noSecondary")}
+              </button>
             )}
           </div>
         )

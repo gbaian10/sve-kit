@@ -17,6 +17,11 @@ type ReprintMode = (typeof REPRINT_MODES)[number]
 export const QUERY_SORTS = ["set", "no", "cost", "atk", "def"] as const
 type QuerySort = (typeof QUERY_SORTS)[number]
 
+/** Card number breaks ties unless it is already the primary sort. */
+export function defaultSecondarySort(primary: QuerySort): QuerySort {
+  return primary === "no" ? "set" : "no"
+}
+
 export const VIEW_MODES = ["grid", "table", "list"] as const
 type ViewMode = (typeof VIEW_MODES)[number]
 

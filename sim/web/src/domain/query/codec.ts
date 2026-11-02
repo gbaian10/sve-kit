@@ -6,6 +6,7 @@ import { REPRESENTATIVE_RARITIES } from "../representative"
 import {
   COST_CAP,
   DEFAULT_QUERY,
+  defaultSecondarySort,
   type MechanicState,
   QUERY_SORTS,
   QUERY_UNITS,
@@ -91,7 +92,7 @@ function parseSort(
   if (legacy)
     return {
       sort: legacy,
-      secondarySort: "no",
+      secondarySort: defaultSecondarySort(legacy),
       ...(params.get("order") === "desc" ? { order: "desc" } : {}),
     }
   const clauses = raw.split(",")
@@ -104,13 +105,21 @@ function parseSort(
       : undefined
   }
   const first = read(clauses[0])
+  const disabled = clauses[1] === "none"
   const second = read(clauses[1])
-  if (!first || (clauses.length === 2 && !second)) return fallback
+  if (!first || (clauses.length === 2 && !second && !disabled)) return fallback
+  const secondarySort = disabled
+    ? null
+    : second && second.sort !== first.sort
+      ? second.sort
+      : defaultSecondarySort(first.sort)
   return {
     sort: first.sort,
     ...(first.direction === "desc" ? { order: "desc" } : {}),
-    secondarySort: second?.sort ?? null,
-    ...(second?.direction === "desc" ? { secondaryOrder: "desc" } : {}),
+    secondarySort,
+    ...(second?.direction === "desc" && second.sort === secondarySort
+      ? { secondaryOrder: "desc" }
+      : {}),
   }
 }
 
@@ -198,6 +207,7 @@ export function formatQuery(state: QueryState): URLSearchParams {
     const clauses = [`${state.sort}:${state.order === "desc" ? "desc" : "asc"}`]
     if (state.secondarySort !== null)
       clauses.push(`${state.secondarySort}:${state.secondaryOrder === "desc" ? "desc" : "asc"}`)
+    else clauses.push("none")
     params.set("sort", clauses.join(","))
   }
   if (state.view !== undefined) params.set("view", state.view)

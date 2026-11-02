@@ -61,7 +61,7 @@ async function open(path = "/cards", { panel = true } = {}) {
   return rendered
 }
 
-/** The result count line: its unit sits in a span that narrow screens hide. */
+/** The result count line, including its unit at every screen width. */
 function resultCount(unitText = "個版次"): HTMLElement {
   const unit = screen.getByText(unitText)
   if (!unit.parentElement) throw new Error("missing result count")
@@ -381,17 +381,20 @@ describe("CardsPage", () => {
     const secondary = screen.getByRole("combobox", { name: "再依" })
     expect(sort).toHaveValue("set")
     expect(secondary).toHaveValue("no")
-    expect(screen.getByRole("button", { name: "降冪" })).toHaveTextContent("新→舊 ↓")
+    expect(
+      within(screen.getByRole("group", { name: "排序" })).getByRole("combobox", { name: "排序" }),
+    ).toBe(sort)
+    expect(screen.getByRole("button", { name: "排序：新→舊" })).toHaveTextContent("↓")
     expect(screen.queryByRole("option", { name: "發售日" })).not.toBeInTheDocument()
     expect(screen.queryByRole("option", { name: "名稱" })).not.toBeInTheDocument()
     await user.selectOptions(secondary, "cost")
-    await user.click(screen.getByRole("button", { name: "再依：降冪" }))
+    await user.click(screen.getByRole("button", { name: "再依：小→大" }))
     expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:desc,cost:desc")
-    await user.click(await screen.findByRole("button", { name: "降冪" }))
+    await user.click(await screen.findByRole("button", { name: "排序：新→舊" }))
     expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc,cost:desc")
     await user.selectOptions(await screen.findByRole("combobox", { name: "再依" }), "")
-    expect(screen.queryByRole("button", { name: "再依：降冪" })).not.toBeInTheDocument()
-    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc")
+    expect(screen.queryByRole("button", { name: "再依：大→小" })).not.toBeInTheDocument()
+    expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("set:asc,none")
     expect(new URLSearchParams(router.state.location.search).get("class")).toBe("bishop")
   })
 
@@ -406,12 +409,12 @@ describe("CardsPage", () => {
 
     await user.selectOptions(sort, "cost")
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("")
-      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost:asc")
+      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("no")
+      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("cost:asc,no:asc")
     })
   })
 
-  it("clears the default card-number secondary sort when card number becomes primary", async () => {
+  it("replaces the default secondary sort when card number becomes primary", async () => {
     const { router } = await open("/cards")
     const user = userEvent.setup()
     const sort = await screen.findByRole("combobox", { name: "排序" })
@@ -420,8 +423,8 @@ describe("CardsPage", () => {
     await user.selectOptions(sort, "no")
 
     await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("")
-      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("no:desc")
+      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("set")
+      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("no:desc,set:asc")
     })
   })
 

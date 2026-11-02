@@ -1,4 +1,3 @@
-import { ListFilter, SlidersHorizontal } from "lucide-react"
 import {
   type KeyboardEvent,
   useCallback,
@@ -84,6 +83,7 @@ import { formatQuery, parseQuery, querySearch } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
+  defaultSecondarySort,
   NEUTRAL_CLASS,
   type QueryState,
   toggleClass,
@@ -95,12 +95,11 @@ import { setCaption } from "../../domain/sets"
 import { currentUiLanguage } from "../../i18n"
 import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 import { useCardOverlay } from "./CardOverlay"
-import { CompactHeaderMenu } from "./CompactHeaderMenu"
 import { FilterSheet } from "./FilterSheet"
 import { FilterSidebar } from "./FilterSidebar"
 import { sidebarGridClass } from "./sidebar-layout"
 import { SortControls } from "./SortControls"
-import { useCompactHeader } from "./useCompactHeader"
+import { useResultsHeaderWidth } from "./useResultsHeaderWidth"
 
 const DEBOUNCE_MS = 150
 /** How long a cell returned to from a card stays outlined (#522: about a second). */
@@ -181,6 +180,7 @@ export function CardsPage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const listId = useId()
   const panelId = useId()
+  const sidebarId = useId()
   const debounced = useDebouncedValue(input, DEBOUNCE_MS)
   const active =
     focused && highlight !== null && highlight.text === debounced ? highlight.index : -1
@@ -596,12 +596,14 @@ export function CardsPage() {
   }
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
+  // Alt-art is a legacy URL flag without a condition chip.
+  const hasVisibleConditions = query.text !== "" || filterCount > (query.altArtOnly ? 1 : 0)
   const panelOpen = prefs.filterPanelOpen
   const wideEnoughForBoth = useMediaQuery(`(min-width: ${String(BOTH_PANES_MIN_PX)}px)`)
   const sidebar = useSidebarLayout()
   const drawerSide = useDrawerSide()
-  const { sentinelRef, headRef, compact, narrow, foldedGap } = useCompactHeader(sidebar)
-  const headerMenus = compact && narrow
+  const { headRef, width } = useResultsHeaderWidth()
+  const inlineControls = sidebar || width >= 600
   const [sidebarChoice, setSidebarChoice] = useState<boolean | null>(null)
   // With a card open the sidebar folds unless the window is wide enough for both, or it was chosen.
   const sidebarEdge = drawerSide === "left" ? ("right" as const) : ("left" as const)
@@ -617,18 +619,15 @@ export function CardsPage() {
   const resultCount =
     total !== null ? (
       <div
-        className={cn(
-          "shrink-0 text-right text-13 whitespace-nowrap text-text-2",
-          compact && "@max-[640px]:hidden",
-        )}
+        className="shrink-0 text-right text-13 whitespace-nowrap text-text-2"
         aria-live="polite"
         aria-busy={page === null}
       >
         <p>
-          <b className="inline-block min-w-14 font-semibold text-text-1 tabular-nums">
+          <b className="font-semibold text-text-1 tabular-nums">
             {new Intl.NumberFormat(uiLanguage).format(total)}
           </b>{" "}
-          <span className="max-[479px]:hidden">
+          <span>
             {query.unit === "printing"
               ? t("results.countPrintingUnit")
               : query.unit === "art"
@@ -724,6 +723,7 @@ export function CardsPage() {
       onChange={commit}
       edition={edition}
       onEditionChange={commitEdition}
+      sortControls={<SortControls query={query} onChange={commit} />}
       restrictions={printingOptions?.restrictions}
       resultTotal={page?.total}
       onClose={() => {
@@ -888,24 +888,17 @@ export function CardsPage() {
     />
   )
   const sortRow =
-    page !== null && page.total > 0 ? (
+    total !== null && total > 0 ? (
       <div
         className={cn(
-          "flex flex-col items-stretch gap-x-3 gap-y-2 md:flex-row md:items-center",
-          !compact && "md:flex-wrap",
+          "flex min-w-0 items-center gap-2",
+          inlineControls ? "justify-end" : "justify-between",
         )}
       >
-        <div
-          className={cn(
-            "flex w-full flex-col items-start gap-2 md:w-auto md:flex-1 md:flex-row md:items-center",
-            !headerMenus && "md:flex-wrap",
-          )}
-        >
-          <SortControls query={query} onChange={commit} />
+        <div className="flex shrink-0 items-center gap-2">
           <Segmented
             size="sm"
             tone="accent"
-            className="self-end md:ml-auto"
             label={t("results.view")}
             options={VIEW_MODES.map((value) => ({
               value,
@@ -923,7 +916,6 @@ export function CardsPage() {
             }}
           />
         </div>
-        {view === "list" && <ListColumnPicker inline={headerMenus} />}
       </div>
     ) : null
   return (
@@ -958,6 +950,7 @@ export function CardsPage() {
       >
         {sidebar && (
           <FilterSidebar
+            id={sidebarId}
             edge={sidebarEdge}
             collapsed={sidebarCollapsed}
             onToggle={() => {
@@ -970,111 +963,110 @@ export function CardsPage() {
             {panelEl}
           </FilterSidebar>
         )}
-        <div className="flex min-w-0 flex-col gap-3">
-          {sidebar && <div ref={sentinelRef} aria-hidden="true" className="-mb-3 h-px" />}
+        <div ref={headRef} className="flex min-w-0 flex-col gap-3">
           <div
-            ref={headRef}
-            style={foldedGap > 0 ? { marginBottom: foldedGap } : undefined}
+            data-results-header=""
             className={cn(
-              sidebar ? `@container sticky top-13 z-30 flex gap-3 ${FULL_BLEED}` : "contents",
-              compact ? "h-14 flex-row items-center border-b border-border" : "flex-col",
+              inlineControls
+                ? `@container sticky top-13 z-30 flex gap-3 ${FULL_BLEED}`
+                : "contents",
+              inlineControls && "flex-col",
             )}
           >
-            <div
-              className={cn(
-                "relative z-20",
-                !sidebar && `sticky top-13 z-30 py-2 ${FULL_BLEED}`,
-                compact && "max-w-96 flex-1 basis-40",
-                compact && (headerMenus ? "min-w-0" : "min-w-52"),
-              )}
-            >
-              <SearchBar
-                value={input}
-                onChange={(value) => {
-                  armed.current = null
-                  setInput(value)
-                  setFocused(true)
-                }}
-                onKeyDown={onKeyDown}
-                onFocus={() => {
-                  setFocused(true)
-                }}
-                onBlur={() => {
-                  armed.current = null
-                  setFocused(false)
-                }}
-                inputRef={inputRef}
-                listId={listId}
-                expanded={listOpen}
-                {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
-                {...(sidebar ? {} : { filterCount })}
-                filtersOpen={panelOpen}
-                filtersId={panelId}
-                onToggleFilters={() => {
-                  prefsStore.set({ filterPanelOpen: !panelOpen })
-                }}
-                summary={resultCount}
-              />
-              {focused && !listOpen && readiness.phase !== "error" && (
-                <p role="status" className="mt-2 text-13 text-text-2">
-                  {t("home.searchPending")}
-                </p>
-              )}
-              {listOpen && (
-                <div className="absolute inset-x-0 top-full mt-1">
-                  <SuggestList
-                    id={listId}
-                    rows={rows}
-                    activeIndex={active}
-                    images={suggestionImages}
-                    onPick={openSuggestion}
-                    onHover={setActive}
-                    stale={stale}
-                    {...(debounced !== ""
-                      ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
-                      : {
-                          onClearRecent: () => {
-                            recentStore.clear()
-                          },
-                        })}
-                  />
+            <>
+              <div
+                className={cn(
+                  "relative z-20",
+                  !inlineControls && `sticky top-13 z-30 py-2 ${FULL_BLEED}`,
+                )}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="min-w-0 flex-1">
+                    <SearchBar
+                      value={input}
+                      onChange={(value) => {
+                        armed.current = null
+                        setInput(value)
+                        setFocused(true)
+                      }}
+                      onKeyDown={onKeyDown}
+                      onFocus={() => {
+                        setFocused(true)
+                      }}
+                      onBlur={() => {
+                        armed.current = null
+                        setFocused(false)
+                      }}
+                      inputRef={inputRef}
+                      listId={listId}
+                      expanded={listOpen}
+                      {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
+                      filterCount={filterCount}
+                      filtersOpen={sidebar ? !sidebarCollapsed : panelOpen}
+                      filtersId={sidebar ? sidebarId : panelId}
+                      onToggleFilters={() => {
+                        if (sidebar) setSidebarChoice(!sidebarCollapsed)
+                        else prefsStore.set({ filterPanelOpen: !panelOpen })
+                      }}
+                    />
+                  </div>
+                  {inlineControls && sortRow}
                 </div>
-              )}
-            </div>
-            {headerMenus ? (
-              <>
-                {hasConditions && (
-                  <CompactHeaderMenu
-                    label={t("results.conditions")}
-                    icon={<ListFilter aria-hidden="true" className="size-4" />}
-                    fallbackFocusRef={inputRef}
-                  >
-                    {conditionChips}
-                  </CompactHeaderMenu>
+                {focused && !listOpen && readiness.phase !== "error" && (
+                  <p role="status" className="mt-2 text-13 text-text-2">
+                    {t("home.searchPending")}
+                  </p>
                 )}
-                {sortRow && (
-                  <CompactHeaderMenu
-                    label={`${t("results.sort")} / ${t("results.view")}`}
-                    icon={<SlidersHorizontal aria-hidden="true" className="size-4" />}
-                    fallbackFocusRef={inputRef}
-                  >
-                    {sortRow}
-                  </CompactHeaderMenu>
+                {listOpen && (
+                  <div className="absolute inset-x-0 top-full mt-1">
+                    <SuggestList
+                      id={listId}
+                      rows={rows}
+                      activeIndex={active}
+                      images={suggestionImages}
+                      onPick={openSuggestion}
+                      onHover={setActive}
+                      stale={stale}
+                      {...(debounced !== ""
+                        ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
+                        : {
+                            onClearRecent: () => {
+                              recentStore.clear()
+                            },
+                          })}
+                    />
+                  </div>
                 )}
-              </>
-            ) : (
-              <>
+              </div>
+              {(resultCount || hasVisibleConditions) && (
                 <div
                   className={cn(
-                    compact &&
-                      "min-w-0 flex-1 overflow-x-auto [&>[role=group]]:flex-nowrap [&>[role=group]>*]:shrink-0",
+                    "flex min-w-0 items-center gap-3",
+                    !inlineControls && "justify-between",
                   )}
+                >
+                  {resultCount}
+                  {inlineControls && hasVisibleConditions && (
+                    // Chip hit areas extend vertically; reserve room so the row has no vertical overflow.
+                    <div
+                      data-condition-scroll=""
+                      className="min-w-0 flex-1 overflow-x-auto py-2 [&>[role=group]]:flex-nowrap [&>[role=group]>*]:shrink-0"
+                    >
+                      {conditionChips}
+                    </div>
+                  )}
+                  {!inlineControls && sortRow}
+                </div>
+              )}
+              {!inlineControls && hasVisibleConditions && (
+                <div
+                  data-condition-scroll=""
+                  className="min-w-0 overflow-x-auto py-2 [&>[role=group]]:flex-nowrap [&>[role=group]>*]:shrink-0"
                 >
                   {conditionChips}
                 </div>
-                {sidebar && sortRow}
-              </>
-            )}
+              )}
+            </>
           </div>
           {!sidebar && (
             <FilterSheet
@@ -1160,7 +1152,7 @@ export function CardsPage() {
             )}
             {page !== null && page.total > 0 && (
               <>
-                {!sidebar && sortRow}
+                {view === "list" && <ListColumnPicker />}
                 {view === "grid" && (
                   <CardGrid
                     cells={cells}
@@ -1194,11 +1186,14 @@ export function CardsPage() {
                     descending={query.order === "desc"}
                     onSort={(sort) => {
                       const { order, ...rest } = query
-                      commit(
+                      const next =
                         sort === query.sort && order !== "desc"
-                          ? { ...rest, sort, order: "desc" }
-                          : { ...rest, sort },
-                      )
+                          ? { ...rest, sort, order: "desc" as const }
+                          : { ...rest, sort }
+                      if (next.secondarySort === sort) {
+                        const { secondaryOrder: _secondaryOrder, ...distinct } = next
+                        commit({ ...distinct, secondarySort: defaultSecondarySort(sort) })
+                      } else commit(next)
                     }}
                     scrollPositionRef={listScroll}
                     cells={cells}
