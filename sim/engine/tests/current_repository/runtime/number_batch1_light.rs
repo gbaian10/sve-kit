@@ -26,8 +26,7 @@ fn game(initial: &Value) -> Game {
     .unwrap()
 }
 
-// Targets take the first legal member; cost materials take every offered card.
-fn finish(game: &mut Game, mut play: CardPlay) {
+fn finish(game: &mut Game, mut play: CardPlay) -> Vec<u64> {
     while let CardPlay::Awaiting(question) = play {
         let answer = if let InputDomain::Targets(domain) = &question.domain {
             Answer::Targets(vec![domain.members[0].handle])
@@ -44,16 +43,34 @@ fn finish(game: &mut Game, mut play: CardPlay) {
             .answer_internal_card(question.actor, question.token, answer)
             .unwrap();
     }
-    triggers(game);
+    let mut hits = if let CardPlay::Resolved(activation) = play {
+        activation
+            .progress
+            .facts
+            .iter()
+            .filter_map(|fact| {
+                if let Fact::Damage(hit) = fact {
+                    Some(hit.amount.0.get())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>()
+    } else {
+        vec![]
+    };
+    hits.extend(triggers(game));
+    hits
 }
 
-fn triggers(game: &mut Game) {
+fn triggers(game: &mut Game) -> Vec<u64> {
+    let mut hits = vec![];
     loop {
         while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
             game.resume_internal_card().unwrap();
         }
         let Some(question) = game.internal_pending_choice().unwrap() else {
-            return;
+            return hits;
         };
         let InputDomain::Pending(options) = &question.domain else {
             panic!("pending ability expected")
@@ -65,7 +82,7 @@ fn triggers(game: &mut Game) {
                 Answer::Pending(options[0].handle),
             )
             .unwrap();
-        finish(game, step);
+        hits.extend(finish(game, step));
     }
 }
 
@@ -74,7 +91,7 @@ fn play(game: &mut Game) {
     finish(game, step);
 }
 
-fn evolve(game: &mut Game, cost: u8) {
+fn evolve(game: &mut Game, cost: u8) -> Vec<u64> {
     assert_eq!(
         game.internal_rule_action(
             &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":cost}})
@@ -84,10 +101,9 @@ fn evolve(game: &mut Game, cost: u8) {
         "resolved",
         "the real base evolves for its printed cost"
     );
-    triggers(game);
+    triggers(game)
 }
 
-/// P2 has a 12-health follower and full life; P1 holds `card` in `zone` as `source`.
 fn position(card: &str, zone: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":card}]);
@@ -123,34 +139,35 @@ fn keyword(state: &Value, id: &str, name: &str) -> bool {
 #[test]
 fn bp07_043_doubles_the_machines_in_its_ex_area() {
     let mut initial = evolution("BP07-042", "BP07-043");
-    let mut ex = cards("machine", "BP07-042", 2);
+    let mut ex = cards("machine", "BP07-042", 3);
     ex.extend(cards("goblin", "BP01-171", 1));
     with(&mut initial, "ex", ex);
     let mut game = game(&initial);
     evolve(&mut game, 2);
-    assert_eq!(state(&game)["objects"]["enemy"]["damage"], 4_u8);
+    assert_eq!(state(&game)["objects"]["enemy"]["damage"], 6_u8);
 }
 
 #[test]
 fn bp08_087_fanfare_heals_twice_the_allied_amulets() {
     let mut initial = position("BP08-087", "hand");
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    with(&mut initial, "field", cards("amulet", "BP01-141", 2));
+    with(&mut initial, "field", cards("amulet", "BP01-141", 3));
     let mut game = game(&initial);
     play(&mut game);
-    assert_eq!(state(&game)["P1"]["leader"]["life"], 14_u8);
+    assert_eq!(state(&game)["P1"]["leader"]["life"], 16_u8);
 }
 
 #[test]
 fn bp10_061_deals_one_hit_of_two_per_five_banished_cards() {
     let mut initial = evolution("BP10-060", "BP10-061");
-    with(&mut initial, "banish", cards("gone", "BP01-171", 10));
+    with(&mut initial, "banish", cards("gone", "BP01-171", 15));
     let mut game = game(&initial);
-    evolve(&mut game, 3);
+    let hits = evolve(&mut game, 3);
     let state = state(&game);
-    // Q1312: ten banished cards make a single 4-damage hit.
-    assert_eq!(state["objects"]["enemy"]["damage"], 4_u8);
-    assert_eq!(state["P2"]["leader"]["life"], 16_u8);
+    // Q1312 scales a single hit per recipient; three groups also distinguish multiplication from addition.
+    assert_eq!(hits, vec![6_u64, 6]);
+    assert_eq!(state["objects"]["enemy"]["damage"], 6_u8);
+    assert_eq!(state["P2"]["leader"]["life"], 14_u8);
 }
 
 #[test]
@@ -162,17 +179,20 @@ fn bp12_001_costs_five_less_per_five_natura_cards_then_destroys() {
     let mut game = game(&initial);
     play(&mut game);
     let state = state(&game);
-    assert_eq!(state["P1"]["pp"]["current"], 0_u8, "Q1622: printed 11 minus 10");
+    assert_eq!(
+        state["P1"]["pp"]["current"], 0_u8,
+        "Q1622: printed 11 minus 10"
+    );
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
 }
 
 #[test]
 fn bp14_089_doubles_the_allied_fanatic_followers_including_itself() {
     let mut initial = evolution("BP14-088", "BP14-089");
-    with(&mut initial, "field", cards("fanatic", "BP01-146", 1));
+    with(&mut initial, "field", cards("fanatic", "BP01-146", 2));
     let mut game = game(&initial);
     evolve(&mut game, 1);
-    assert_eq!(state(&game)["objects"]["enemy"]["damage"], 4_u8);
+    assert_eq!(state(&game)["objects"]["enemy"]["damage"], 6_u8);
 }
 
 #[test]
@@ -190,7 +210,10 @@ fn bp18_052_attack_gains_one_one_per_five_banished_cards() {
     );
     triggers(&mut game);
     let state = state(&game);
-    assert_eq!(state["objects"]["source"]["power"], 4_u8, "printed 2 plus 2");
+    assert_eq!(
+        state["objects"]["source"]["power"], 4_u8,
+        "printed 2 plus 2"
+    );
     assert_eq!(state["objects"]["source"]["hp"], 5_u8, "printed 3 plus 2");
 }
 
@@ -203,7 +226,10 @@ fn bp18_056_costs_one_less_per_five_spells_and_buffs_a_wizard() {
     let mut game = game(&initial);
     play(&mut game);
     let state = state(&game);
-    assert_eq!(state["P1"]["pp"]["current"], 0_u8, "Q2340: printed 3 minus 2");
+    assert_eq!(
+        state["P1"]["pp"]["current"], 0_u8,
+        "Q2340: printed 3 minus 2"
+    );
     assert_eq!(state["objects"]["wizard0"]["power"], 4_u8);
 }
 
@@ -222,8 +248,7 @@ fn bp22_117_costs_two_less_per_allied_umamusume() {
 #[test]
 fn ecp02_055_evolves_beside_a_big_idol_and_ecp02_056_doubles_passion_followers() {
     let mut initial = position("ECP02-055", "hand");
-    initial["players"]["P1"]["zones"]["evolve_deck"] =
-        json!([{"id":"form","card":"ECP02-056"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"ECP02-056"}]);
     // CP02-006 is a cost-5 Cinderella Girls follower without the Passion trait.
     with(&mut initial, "field", cards("idol", "CP02-006", 1));
     with(&mut initial, "cemetery", cards("passion", "CP02-047", 10));
@@ -231,6 +256,12 @@ fn ecp02_055_evolves_beside_a_big_idol_and_ecp02_056_doubles_passion_followers()
     play(&mut game);
     let state = state(&game);
     assert_eq!(state["P1"]["field"], json!(["idol0", "source"]));
-    assert_eq!(state["objects"]["enemy"]["damage"], 2_u8, "only the evolved card is Passion");
-    assert!(keyword(&state, "source", "疾走"), "ten Passion cards grant Storm");
+    assert_eq!(
+        state["objects"]["enemy"]["damage"], 2_u8,
+        "only the evolved card is Passion"
+    );
+    assert!(
+        keyword(&state, "source", "疾走"),
+        "ten Passion cards grant Storm"
+    );
 }
