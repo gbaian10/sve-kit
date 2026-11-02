@@ -1,0 +1,23 @@
+cards:
+  BP06-028:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 3
+                  who: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
