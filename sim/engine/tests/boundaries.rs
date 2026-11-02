@@ -339,10 +339,19 @@ fn chosen_and_actual_movement_results_diverge_at_ex_capacity() {
 
 #[test]
 fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
-    let authored: Value =
-        serde_saphyr::from_str(include_str!("../../../authored/rules/effects/BP18.yaml")).unwrap();
-    for number in ["BP18-059", "BP18-SL14"] {
-        let body = &authored["cards"][number]["abilities"][0]["body"];
+    // Both cards left the prototype set; their original bodies stay frozen as migration fixtures.
+    for (number, frozen) in [
+        (
+            "BP18-059",
+            include_str!("../../../carddb/tests/fixtures/effect_baseline/migrated/BP18-059.json"),
+        ),
+        (
+            "BP18-SL14",
+            include_str!("../../../carddb/tests/fixtures/effect_baseline/migrated/BP18-SL14.json"),
+        ),
+    ] {
+        let original: Value = serde_json::from_str(frozen).unwrap();
+        let body = &original["abilities"][0]["body"];
         let facts = snapshot()
             .lines()
             .map(|line| {
