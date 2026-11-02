@@ -1,0 +1,57 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 0
+        }
+      ],
+      "play_if": {
+        "fn": "eq",
+        "args": [
+          {
+            "read": "self.entered_from"
+          },
+          "cemetery"
+        ]
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "move",
+        "subjects": {
+          "side": "self",
+          "zone": "deck",
+          "top": 1
+        },
+        "to": "cemetery"
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

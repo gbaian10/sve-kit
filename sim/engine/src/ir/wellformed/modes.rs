@@ -1,9 +1,9 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Control, CostSpec, Expr, Mode, ModeChoiceKind, ModeDecision,
-    ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef, Predicate, Program,
-    SpellCountTime, Visibility,
+    Bool, Cardinality, ChoiceDomain, Control, CostSpec, EntryOrigin, EntryOriginFields, Expr, Mode,
+    ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef,
+    Predicate, Program, SpellCountTime, ValueEquality, Visibility, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -201,6 +201,13 @@ impl Checker {
         match condition {
             Expr::Literal(_) => Ok(()),
             Expr::Compute(predicate) => match predicate.as_ref() {
+                Predicate::Equal { operands }
+                    if matches!(operands.as_ref(), ValueEquality::EntryOrigin {
+                    left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Cemetery }),
+                } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { .. })) =>
+                {
+                    self.boolean(condition)
+                }
                 Predicate::CompareNat { left, right, .. } => {
                     for value in [left, right] {
                         if !matches!(value, Expr::Literal(_) | Expr::Frozen(_)) {

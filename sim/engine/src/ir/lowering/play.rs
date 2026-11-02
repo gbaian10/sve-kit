@@ -532,7 +532,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let maximum = u64::try_from(choice.options.len()).map_err(|_private| unsupported(path))?;
-        let (count, cardinality) = choice_count(choice, maximum, path)?;
+        let (count, cardinality) = choice_count(self, choice, maximum, path)?;
         if choice.exclude_chosen.is_some()
             && (choice.n != Some(1) || choice.upto.is_some() || choice.instead.is_some())
         {
@@ -603,6 +603,7 @@ impl BodyContext<'_> {
                 players: self.players.clone(),
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
+                evolution: None,
                 source_can_enter_field: self.source_can_enter_field,
                 departure_to_cemetery: self.departure_to_cemetery,
                 scope,
@@ -651,12 +652,10 @@ impl BodyContext<'_> {
             }
             let (steps, costs) =
                 mode_payment(&mut context, steps, resolution, ability_source, path)?;
+            let head = if resolution { "either" } else { "choice" };
             let body = context.steps(
                 steps,
-                &format!(
-                    "{path}/{}/options/{index}",
-                    if resolution { "either" } else { "choice" }
-                ),
+                &format!("{path}/{head}/options/{index}"),
                 source,
                 ability_source,
             )?;
@@ -762,6 +761,7 @@ impl ModeShape<'_> {
 }
 
 fn choice_count(
+    context: &BodyContext<'_>,
     choice: &ast::Choice,
     printed: u64,
     path: &str,
@@ -783,31 +783,40 @@ fn choice_count(
     if (exact && number != 1) || (changed_exact && changed != 1) {
         return Err(unsupported(path));
     }
-    let (read, threshold) = match replacement.r#if {
-        ast::ModeCondition::Spellchain(threshold) => (
+    let at_least = |read, threshold| {
+        Expr::Compute(Box::new(Predicate::CompareNat {
+            left: Expr::Frozen(Box::new(read)),
+            comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Nat(threshold)),
+        }))
+    };
+    let condition = match &replacement.r#if {
+        ast::ModeCondition::EnteredFrom(origin)
+            if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
+        {
+            context.entered_from(origin, path)?
+        }
+        ast::ModeCondition::EnteredFrom(_) => return Err(unsupported(path)),
+        ast::ModeCondition::Spellchain(threshold) => at_least(
             NatFrozen::SpellChain {
                 player: PlayerRef::Controller {},
                 execution: ExecutionRef::Current {},
                 at: SpellCountTime::AtPlay,
             },
-            threshold,
+            *threshold,
         ),
-        ast::ModeCondition::Necro(threshold) => (
+        ast::ModeCondition::Necro(threshold) => at_least(
             NatFrozen::NecroCharge {
                 player: PlayerRef::Controller {},
                 execution: ExecutionRef::Current {},
                 at: SpellCountTime::AtPlay,
             },
-            threshold,
+            *threshold,
         ),
     };
     Ok((
         Expr::Compute(Box::new(NatOperation::Conditional {
-            condition: Expr::Compute(Box::new(Predicate::CompareNat {
-                left: Expr::Frozen(Box::new(read)),
-                comparison: Comparison::GreaterEqual,
-                right: Expr::Literal(Nat(threshold)),
-            })),
+            condition,
             then_value: Expr::Literal(Nat(changed)),
             else_value: Expr::Literal(Nat(number)),
         })),
@@ -910,7 +919,10 @@ pub(super) fn trigger_choice(
     match body.steps.as_slice() {
         [ast::Step::Choice(_)] => Ok(true),
         [ast::Step::If(branch)]
-            if matches!(branch.cond, ast::Condition::Awakened(true))
+            if (matches!(
+                branch.cond,
+                ast::Condition::Awakened(true) | ast::Condition::EnteredFrom(_)
+            ) || matches!(&branch.cond, ast::Condition::Not(inner) if matches!(inner.as_ref(), ast::Condition::EnteredFrom(_))))
                 && branch.r#else.is_none()
                 && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
         {

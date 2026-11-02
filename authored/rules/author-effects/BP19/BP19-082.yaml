@@ -1,0 +1,32 @@
+cards:
+  BP19-082:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - evolve:
+          cost:
+            pp: 0
+          usable_if:
+            entered_from:
+              from: cemetery
+              ref: this
+        line: 2
+      - lastword:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

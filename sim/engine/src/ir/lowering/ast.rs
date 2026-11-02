@@ -1809,6 +1809,7 @@ pub(super) struct ChoiceInstead {
 pub(super) enum ModeCondition {
     Spellchain(u64),
     Necro(u64),
+    EnteredFrom(EntryOriginCondition),
 }
 
 #[derive(Deserialize)]
@@ -1862,9 +1863,15 @@ pub(super) enum Condition {
 #[serde(deny_unknown_fields)]
 pub(super) struct EntryOriginCondition {
     #[serde(rename = "ref")]
-    pub _reference: This,
+    pub reference: EntryOriginReference,
     #[serde(rename = "from")]
     pub zone: EntryOriginZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EntryOriginReference {
+    This,
+    It,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

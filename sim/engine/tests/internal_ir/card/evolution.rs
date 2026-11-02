@@ -818,3 +818,44 @@ fn commander_evolution_keeps_both_printed_evolution_definitions() {
         "ordinary and conditional intrinsic abilities retain distinct scopes"
     );
 }
+
+#[test]
+fn entry_origin_evolution_rejects_unknown_zones_and_event_subjects_without_an_event() {
+    for condition in [
+        json!({"entered_from":{"ref":"this","from":"banish"}}),
+        json!({"entered_from":{"ref":"this","from":"hand"}}),
+        json!({"entered_from":{"ref":"this","from":"deck"}}),
+        json!({"entered_from":{"ref":"it","from":"cemetery"}}),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = condition;
+        lowerer().lower(&tree).unwrap_err();
+    }
+    for zone in [
+        ZoneKind::Hand,
+        ZoneKind::Deck,
+        ZoneKind::Ex,
+        ZoneKind::Evolve,
+    ] {
+        let mut candidate =
+            cemetery_program(&json!({"entered_from":{"ref":"this","from":"cemetery"}}))
+                .card()
+                .clone();
+        let CostSpec::Ordered { steps } =
+            &mut candidate.abilities[0].node.play.as_mut().unwrap().costs
+        else {
+            panic!("ordered evolution cost")
+        };
+        let predicate = &mut steps[0]
+            .instruction
+            .precondition
+            .as_mut()
+            .unwrap()
+            .predicate;
+        *predicate = Expr::Live(Box::new(BoolRead::FieldEntryOrigin {
+            object: ObjectOperand::SourceHolder {},
+            zone,
+        }));
+        assert_cemetery_qualification_rejected(candidate);
+    }
+}

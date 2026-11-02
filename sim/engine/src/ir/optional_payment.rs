@@ -103,6 +103,9 @@ fn resolution_capture(node: &Node, scope: ScopeId) -> bool {
 }
 
 pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
+    if entry_origin_guard(condition) {
+        return true;
+    }
     matches!(condition, Expr::Compute(predicate)
     if matches!(predicate.as_ref(), Predicate::CompareInt {
         left: Expr::Live(read), comparison: Comparison::GreaterEqual,
@@ -110,4 +113,22 @@ pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
     } if *minimum >= 0 && matches!(read.as_ref(), IntRead::PlayerResource {
         player: PlayerRef::Controller {}, property: PlayerResource::PpMaximum,
     })))
+}
+
+fn entry_origin_guard(condition: &Expr<Bool>) -> bool {
+    use crate::ir::{EntryOrigin, EntryOriginFields, ValueEquality, ZoneKind};
+    let Expr::Compute(outer) = condition else {
+        return false;
+    };
+    let candidate = if let Predicate::Not { predicate } = outer.as_ref() {
+        predicate
+    } else {
+        condition
+    };
+    let Expr::Compute(inner) = candidate else {
+        return false;
+    };
+    matches!(inner.as_ref(), Predicate::Equal { operands } if matches!(operands.as_ref(), ValueEquality::EntryOrigin {
+        left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Hand | ZoneKind::Deck | ZoneKind::Cemetery }),
+    } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { .. })))
 }
