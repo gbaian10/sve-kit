@@ -1,0 +1,57 @@
+cards:
+  BP16-020:
+    abilities:
+      - auto:
+          do:
+            - choice:
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: スティールナイト
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: シールドガーディアン
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: ナイト
+                upto: 1
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - buff:
+                hp: 4
+                on: ally
+                power: 4
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: 兵士
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
