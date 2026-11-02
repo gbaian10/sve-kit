@@ -1,0 +1,28 @@
+cards:
+  ECP02-010:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - lastword:
+          cost:
+            lesson: 1
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  name_contains: 前川みく
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

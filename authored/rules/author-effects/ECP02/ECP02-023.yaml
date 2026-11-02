@@ -1,0 +1,68 @@
+cards:
+  ECP02-023:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: デレマス
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - search:
+                      n: 1
+                      result: searched
+                      sel:
+                        name: トキメキ☆ホーダイ
+                        who: self
+                        zone: deck
+                      to: ex
+                  - apply:
+                      effect:
+                        cost_mod:
+                          delta: -1
+                          when_playing:
+                            in: affected
+                      "on":
+                        follow: searched
+                      until: turn
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  name_contains: 久川凪
+                  who: self
+                  zone: deck
+                to: field
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: デレマス
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
