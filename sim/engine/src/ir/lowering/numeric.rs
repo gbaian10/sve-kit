@@ -138,6 +138,18 @@ impl BodyContext<'_> {
             }
             ast::Objects::Zone(query) => query,
         };
+        match query.zone {
+            ast::Zone::Field => self.zone_objects(query, ZoneKind::Field, path),
+            ast::Zone::Ex => Err(unsupported(path)),
+        }
+    }
+
+    pub(super) fn zone_objects(
+        &mut self,
+        query: &ast::ObjectQuery,
+        zone: ZoneKind,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.as_ref().map(|_| ast::SearchKind::Follower);
         let objects = Selector::Zone {
@@ -158,10 +170,7 @@ impl BodyContext<'_> {
                     TextQuantifier::Implicit
                 },
             },
-            zone: match query.zone {
-                ast::Zone::Field => ZoneKind::Field,
-                ast::Zone::Ex => return Err(unsupported(path)),
-            },
+            zone,
             view: SelectionView::Current {},
             binding,
             predicate: Box::new(super::selection::field_filter(

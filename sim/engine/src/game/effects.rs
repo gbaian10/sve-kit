@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 use crate::ir::SnapshotId;
+use alloc::collections::BTreeMap;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -553,10 +554,6 @@ impl Game {
         Ok(())
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Simultaneous leave snapshots, moves, token rules and entry triggers share one transaction."
-    )]
     pub(super) fn move_objects(
         &mut self,
         ids: &[String],
@@ -564,6 +561,65 @@ impl Game {
         side: Option<&str>,
         position: Option<&Value>,
         frame: &Frame,
+    ) -> Result<()> {
+        self.move_objects_with_play_grants(ids, zone, side, position, frame, false)
+    }
+
+    pub(super) fn move_playing_card(
+        &mut self,
+        holder: &str,
+        zone: &str,
+        frame: &Frame,
+    ) -> Result<()> {
+        self.move_objects_with_play_grants(&[holder.into()], zone, None, None, frame, true)
+    }
+
+    fn commit_movement_grants(
+        &mut self,
+        id: &str,
+        generation: u64,
+        from: &str,
+        destination: &str,
+        carry_grants: bool,
+    ) -> Result<()> {
+        if carry_grants || (from == "ex" && destination == "field") {
+            // Arriving characteristics and entry observers must see carried effects.
+            self.internal_commit_rule_carry(id, generation)?;
+        }
+        Ok(())
+    }
+
+    fn rule_carry_movement_ready(
+        &self,
+        ids: &[String],
+        destinations: &BTreeMap<String, String>,
+        carry_grants: bool,
+    ) -> Result<()> {
+        for id in ids {
+            if carry_grants
+                || (self.object(id)?.zone == "ex"
+                    && destinations
+                        .get(id)
+                        .is_some_and(|destination| destination == "field"))
+            {
+                self.internal_rule_carry_ready(id)?;
+            }
+        }
+        Ok(())
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Simultaneous leave snapshots, moves, token rules and entry triggers share one transaction."
+    )]
+    fn move_objects_with_play_grants(
+        &mut self,
+        ids: &[String],
+        zone: &str,
+        side: Option<&str>,
+        position: Option<&Value>,
+        frame: &Frame,
+        carry_grants: bool,
     ) -> Result<()> {
         let mut movable = Vec::new();
         for id in ids {
@@ -584,6 +640,7 @@ impl Game {
         }
         let typed_entry_before = SnapshotId(self.state.ir_epoch);
         let destinations = self.movement_destinations(&movable, zone, frame)?;
+        self.rule_carry_movement_ready(&movable, &destinations, carry_grants)?;
         self.emit_banish_instruction(&movable, &destinations, frame)?;
         let leaving = movable
             .iter()
@@ -657,6 +714,13 @@ impl Game {
             } else {
                 self.emit_zone_movement(previous, destination, position, frame, group)?;
             }
+            self.commit_movement_grants(
+                id,
+                previous.generation,
+                &previous.zone,
+                destination,
+                carry_grants,
+            )?;
             if (previous.zone != destination || previous.controller != *owner)
                 && let Some(count) = self.state.counters.get_mut(&format!("{id}.attacks"))
             {

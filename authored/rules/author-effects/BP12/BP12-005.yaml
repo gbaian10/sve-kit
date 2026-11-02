@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-005:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token: カーバンクルの煌めき
+                n: 1
+                to: ex
+            - grant:
+                "on":
+                  who: self
+                  zone: ex
+                  name: カーバンクルの煌めき
+                abilities:
+                  - play:
+                      cost_delta: -2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

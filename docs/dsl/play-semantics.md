@@ -79,10 +79,11 @@ epoch 高水位，失效 token 不復活。遊戲規則的非法 play、協定�
 
 10.6.2.1.3 明定 EX→Resolution 承接既有效果與 counters；.8.1.1 明定
 Resolution→Field 同樣承接。這是已知規則，不是來源不明，也不是一般跨區跟隨權。
-第一版可只接既有受驗 CostModifier：authority 在這兩個規則移動中把適用對象承接到
+目前接通受驗 CostModifier 與既有授予狀態：authority 在這兩個規則移動中把適用對象承接到
 新世代，保留原 EffectId、來源、值、時間戳與期限，不重新安裝、不重設期限、不產生額外
-安裝 receipt。若其他效果／counter 需要承接而尚未實作，整次 play 在移動前拒絕。
-不新增泛用 RuleCarry，也不把此例外套到普通 Move 或 Resolution→Cemetery。
+安裝 receipt。承接在移動提交後、入場觀察前完成，關鍵字與一般定義一併保留，不能僅留下減費。
+EX 直接入場也依 4.8.3.3 經同一提交邊界承接。尚未接通的數值效果或 counter 會在移動前拒絕。
+不新增泛用 RuleCarry，也不把此例外套到其他普通 Move 或 Resolution→Cemetery。
 
 因此付款費用須在步驟 5 依 Resolution 上承接後的有效資訊及受驗 play-cost 規則決定；
 不能先移區清掉減費再用印刷成本，也不能僅抄一個舊 EX scalar 冒充完整承接。

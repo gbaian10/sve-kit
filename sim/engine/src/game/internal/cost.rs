@@ -128,21 +128,24 @@ pub(super) fn printed_play_cost(value: &Value) -> Result<i64> {
 )]
 impl Game {
     pub(in crate::game) fn internal_cost_active(&self) -> bool {
-        self.state
-            .ir_cost
-            .keys()
-            .any(|id| self.internal_cost_layered(id))
+        self.internal_granted_cost_active(None)
+            || self
+                .state
+                .ir_cost
+                .keys()
+                .any(|id| self.internal_cost_layered(id))
     }
 
     pub(in crate::game) fn internal_cost_layered(&self, id: &str) -> bool {
-        self.state.ir_cost.get(id).is_some_and(|state| {
-            state.effects.iter().any(|effect| !effect.evolution)
-                && self
-                    .state
-                    .objects
-                    .get(id)
-                    .is_some_and(|object| object.generation == state.generation)
-        })
+        self.internal_granted_cost_active(Some(id))
+            || self.state.ir_cost.get(id).is_some_and(|state| {
+                state.effects.iter().any(|effect| !effect.evolution)
+                    && self
+                        .state
+                        .objects
+                        .get(id)
+                        .is_some_and(|object| object.generation == state.generation)
+            })
     }
 
     pub(in crate::game) fn internal_effective_cost(&self, id: &str) -> Result<i64> {
@@ -179,6 +182,9 @@ impl Game {
         mut base: i64,
         mut delta: i64,
     ) -> Result<(i64, i64)> {
+        delta = delta
+            .checked_add(self.internal_granted_play_delta(id)?)
+            .ok_or_else(|| invalid("granted play cost overflow"))?;
         let generation = self.object(id)?.generation;
         if let Some(state) = self
             .state
@@ -226,7 +232,11 @@ impl Game {
             .filter(|effect| effect.evolution == (kind == CostKind::Evolution))
             .map(|effect| effect.change)
             .chain(extra.map(fixed_change).transpose()?);
-        let mut delta = 0_i64;
+        let mut delta = if kind == CostKind::Play {
+            self.internal_granted_play_delta(id)?
+        } else {
+            0
+        };
         for change in changes {
             match change {
                 Change::Delta(amount) => {
@@ -344,30 +354,42 @@ impl Game {
         ) {
             return Err(unsupported("card play rule movement"));
         }
+        self.internal_rule_carry_ready(holder)?;
+        self.move_playing_card(holder, destination, frame)
+    }
+
+    pub(in crate::game) fn internal_rule_carry_ready(&self, holder: &str) -> Result<()> {
+        let object = self.object(holder)?;
         object
             .generation
             .checked_add(1)
-            .ok_or_else(|| invalid("play generation exhausted"))?;
+            .ok_or_else(|| invalid("rule movement generation exhausted"))?;
         if !object.state["counters"]
             .as_object()
             .is_none_or(|counters| counters.values().all(|count| count.as_i64() == Some(0)))
             || self.state.ir_numeric.contains_key(holder)
         {
-            return Err(unsupported("unimplemented play carry"));
-        }
-        // Hold the full effect instances across exactly these two rule movements.
-        let generation = object.generation;
-        let carried = self
-            .state
-            .ir_cost
-            .remove(holder)
-            .filter(|state| state.generation == generation);
-        self.move_objects(&[holder.into()], destination, None, None, frame)?;
-        if let Some(mut carried) = carried {
-            carried.generation = self.object(holder)?.generation;
-            self.state.ir_cost.insert(holder.into(), carried);
+            return Err(unsupported("unimplemented numeric or counter rule carry"));
         }
         Ok(())
+    }
+
+    // Every supported per-object effect crosses rule movements at this shared commit boundary.
+    pub(in crate::game) fn internal_commit_rule_carry(
+        &mut self,
+        holder: &str,
+        before: u64,
+    ) -> Result<()> {
+        let generation = self.object(holder)?.generation;
+        if let Some(state) = self
+            .state
+            .ir_cost
+            .get_mut(holder)
+            .filter(|state| state.generation == before)
+        {
+            state.generation = generation;
+        }
+        self.internal_grants_rule_carry(holder, before)
     }
 
     pub(super) fn internal_cost_cleanup(&mut self) {

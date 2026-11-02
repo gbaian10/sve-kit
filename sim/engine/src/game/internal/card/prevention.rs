@@ -1,3 +1,4 @@
+use super::super::grant::EffectiveAbility;
 use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
@@ -5,10 +6,10 @@ use crate::ir::prevention::{Recipients, projection};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
-    Expr, Generation, InstallationSubjects, InstallationTime, Instruction, InstructionContext,
-    InstructionId, Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView, PlayerRef, Program,
-    ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements, Selector, TimeAnchor,
-    ZoneKind,
+    Expr, FaceId, Generation, InstallationSubjects, InstallationTime, Instruction,
+    InstructionContext, InstructionId, Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView,
+    PlayerRef, Program, ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements,
+    Selector, TimeAnchor, ZoneKind,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -358,11 +359,13 @@ impl Game {
             .ok_or_else(|| crate::invalid("damage source"))?;
         for provider in self.field_ids() {
             let (card, _) = self.internal_effective_print(&provider)?;
-            if !self.card_runtime.is_loaded(&card) {
+            if !self.card_runtime.is_loaded(&card)
+                && !self.internal_has_local_definitions(&provider)
+            {
                 continue;
             }
             let abilities = self
-                .internal_printed_abilities(&provider)?
+                .internal_effective_abilities(&provider)?
                 .into_iter()
                 .filter(|ability| is_static(&ability.node))
                 .collect::<Vec<_>>();
@@ -370,22 +373,7 @@ impl Game {
                 continue;
             }
             let object = self.object(&provider)?;
-            let ids = self
-                .state
-                .objects
-                .keys()
-                .cloned()
-                .zip(1_u64..)
-                .map(|(id, number)| (ObjectId(number), id))
-                .collect();
-            let execution = self.card_execution(
-                Context {
-                    source: provider.clone(),
-                    generation: Generation(object.generation),
-                    controller: player_id(&object.controller)?,
-                },
-                ids,
-            )?;
+            let execution = self.static_prevention_execution(&provider)?;
             for located in abilities {
                 for effect in &located.node.declarations {
                     let shape = projection(effect)
@@ -430,6 +418,7 @@ impl Game {
                         return Err(unsupported("prevention definition"));
                     };
                     let mut replacement = json!({"reference":{"kind":"ir-damage-prevention", "source":provider, "generation":object.generation, "definition":id.0,"line":located.source.line,"card":card,"name":self.card_name(&provider)?}});
+                    self.granted_prevention_label(&located, &mut replacement)?;
                     match shape.rewrite {
                         EventRewrite::PreventDamage { .. } => {
                             replacement["prevent"] = json!(true);
@@ -446,6 +435,41 @@ impl Game {
                     references.push(replacement);
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn static_prevention_execution(&self, provider: &str) -> Result<Execution> {
+        let object = self.object(provider)?;
+        let ids = self
+            .state
+            .objects
+            .keys()
+            .cloned()
+            .zip(1_u64..)
+            .map(|(id, number)| (ObjectId(number), id))
+            .collect();
+        self.card_execution(
+            Context {
+                source: provider.into(),
+                generation: Generation(object.generation),
+                controller: player_id(&object.controller)?,
+            },
+            ids,
+        )
+    }
+
+    fn granted_prevention_label(
+        &self,
+        located: &EffectiveAbility,
+        replacement: &mut Value,
+    ) -> Result<()> {
+        if let Some(origin) = &located.grant {
+            let text = origin.provider();
+            let face = self.printed_face_ordinal(&text.card, &FaceId(text.span.face.clone()))?;
+            replacement["reference"]["card"] = json!(text.card);
+            replacement["reference"]["name"] = self.catalog.face(&text.card, face)?["name"].clone();
+            replacement["reference"]["grant"] = origin.public_stamp();
         }
         Ok(())
     }

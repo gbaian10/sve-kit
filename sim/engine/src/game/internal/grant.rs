@@ -1,15 +1,16 @@
-//! Keyword grants retain the provider and the receiving physical generation.
+//! Ability grants retain the text provider and receiving physical generation.
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Ability, AbilityId, AbilityInstanceId, AbilityKind, Action, CharacteristicPatch, DurationEnd,
-    Effect, EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located,
-    ObjectOperand, ObjectView, RuntimeAbilitySource, ScopeId, SourceSpan, TimeAnchor,
-    TriggerCondition, ZoneKind, printed_keywords,
+    Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
+    Action, CharacteristicPatch, DurationEnd, Effect, EventPattern, GrantedAbility, Instruction,
+    InstructionId, KeywordId, Located, ObjectOperand, ObjectView, PlayerRef, RuntimeAbilitySource,
+    ScopeId, SourceSpan, TimeAnchor, TriggerCondition, ZoneKind, granted_cost, printed_keywords,
 };
 use alloc::collections::BTreeSet;
 use core::ops::Deref;
 use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct KeywordState {
@@ -65,10 +66,30 @@ pub(in crate::game::internal) enum GrantOrigin {
     Continuous {
         provider: KeywordProvider,
         effect: u64,
+        through: Option<Box<Self>>,
     },
 }
 
 impl GrantOrigin {
+    pub(in crate::game::internal) fn public_stamp(&self) -> Value {
+        match self {
+            Self::Installed {
+                execution,
+                instruction,
+                ..
+            } => json!({"execution":execution,"instruction":instruction}),
+            // Continuous providers are current public field objects; a departed installer stays opaque.
+            Self::Continuous {
+                provider,
+                effect,
+                through,
+            } => json!({
+                "provider":provider.holder,"generation":provider.generation,"effect":effect,
+                "through":through.as_ref().map(|origin| origin.public_stamp()),
+            }),
+        }
+    }
+
     pub(in crate::game::internal) fn drain_ability(&self) -> Located<Ability> {
         let provider = self.provider();
         Located {
@@ -159,9 +180,13 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 pub(super) fn supported_definition(ability: &Ability) -> bool {
+    if ability.kind == AbilityKind::Static {
+        return ability.active_zones == [ZoneKind::Field] || static_cost(ability);
+    }
     // The closed trigger grammar supplies the nested entry's private-read proof.
     ability.kind == AbilityKind::Triggered
-        && ability.active_zones == [ZoneKind::Field]
+        && ability.qualification == AbilityQualification::Ordinary
+        && (ability.active_zones == [ZoneKind::Field] || super::card::triggers::ex_phase(ability))
         && matches!(
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {
@@ -170,6 +195,21 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
                     | EventPattern::LeaveField { .. }
             })
         )
+}
+
+// The shared delta helper checks effect shape; this additionally closes the ability header.
+pub(super) fn static_cost(ability: &Ability) -> bool {
+    ability.kind == AbilityKind::Static
+        && ability.active_zones == [ZoneKind::Ex, ZoneKind::Resolution]
+        && ability.qualification == AbilityQualification::Ordinary
+        && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        && ability.source.holder == (ObjectOperand::SourceHolder {})
+        && ability.source.controller == (PlayerRef::Controller {})
+        && ability.event_captures.is_empty()
+        && ability.play.is_none()
+        && ability.trigger.is_none()
+        && ability.body.is_none()
+        && matches!(ability.declarations.as_slice(), [effect] if granted_cost::delta(effect).is_some())
 }
 
 #[expect(
@@ -184,7 +224,20 @@ impl Game {
             })))
     }
 
-    pub(in crate::game::internal) fn internal_effective_abilities(
+    pub(in crate::game::internal) fn internal_has_local_definitions(&self, holder: &str) -> bool {
+        self.state.ir_keywords.get(holder).is_some_and(|state| {
+            self.state
+                .objects
+                .get(holder)
+                .is_some_and(|object| object.generation == state.generation)
+                && state
+                    .grants
+                    .iter()
+                    .any(|grant| !grant.definitions.is_empty())
+        })
+    }
+
+    pub(in crate::game::internal) fn internal_local_abilities(
         &self,
         holder: &str,
     ) -> Result<Vec<EffectiveAbility>> {
@@ -197,9 +250,12 @@ impl Game {
             })
             .collect::<Vec<_>>();
         let object = self.object(holder)?;
-        if object.zone != "field" {
-            return Ok(result);
-        }
+        let zone = match object.zone.as_str() {
+            "field" => ZoneKind::Field,
+            "ex" => ZoneKind::Ex,
+            "resolution" => ZoneKind::Resolution,
+            _ => return Ok(result),
+        };
         if let Some(state) = self
             .state
             .ir_keywords
@@ -213,6 +269,9 @@ impl Game {
                         .granted_definitions
                         .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
                         .ok_or_else(|| invalid("missing installed definition"))?;
+                    if !ability.active_zones.contains(&zone) {
+                        continue;
+                    }
                     result.push(EffectiveAbility {
                         definition: Located {
                             node: ability.clone(),
@@ -223,6 +282,14 @@ impl Game {
                 }
             }
         }
+        Ok(result)
+    }
+
+    pub(in crate::game::internal) fn internal_effective_abilities(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<EffectiveAbility>> {
+        let mut result = self.internal_local_abilities(holder)?;
         for (ability, origin) in self.internal_static_grants(holder)? {
             if let GrantedAbility::Definition { ability } = ability {
                 result.push(EffectiveAbility {
@@ -320,7 +387,11 @@ impl Game {
                 .abilities
                 .iter()
                 .any(|ability| ability.node.declarations.iter().any(grants_drain))
-        })
+        }) || self
+            .card_runtime
+            .granted_definitions
+            .values()
+            .any(|ability| ability.declarations.iter().any(grants_drain))
     }
 
     pub(super) fn internal_drain_grant(&self, holder: &str) -> Result<Option<GrantOrigin>> {
@@ -446,8 +517,10 @@ impl Game {
                 )
             })
             .collect::<Result<BTreeSet<_>>>()?;
+        let mut definitions = vec![];
         for ability in abilities {
             if let GrantedAbility::Definition { ability } = ability {
+                definitions.push(ability.id.0);
                 self.card_runtime.granted_definitions.insert(
                     (origin.provider().card.clone(), ability.id),
                     *ability.clone(),
@@ -462,8 +535,18 @@ impl Game {
             }
             let id = execution.object_id(member)?.to_owned();
             let object = self.object(&id)?;
-            if object.generation != member.generation.0 || object.zone != "field" {
+            if object.generation != member.generation.0 {
                 continue;
+            }
+            if !matches!(object.zone.as_str(), "field" | "ex") {
+                if !definitions.is_empty() {
+                    return Err(unsupported("definition grant requires Field or EX"));
+                }
+                continue;
+            }
+            if !definitions.is_empty() {
+                // A granted definition needs the receiver's ordinary ability authority too.
+                self.internal_printed_abilities(&id)?;
             }
             let generation = object.generation;
             let state = self
@@ -484,13 +567,7 @@ impl Game {
                 end,
                 keywords: keywords.clone(),
                 origin: origin.clone(),
-                definitions: abilities
-                    .iter()
-                    .filter_map(|ability| match ability {
-                        GrantedAbility::Definition { ability } => Some(ability.id.0),
-                        GrantedAbility::Keyword { .. } => None,
-                    })
-                    .collect(),
+                definitions: definitions.clone(),
             });
             installed.push(member);
         }
@@ -498,6 +575,106 @@ impl Game {
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Granted(installed));
         Ok(())
+    }
+
+    pub(in crate::game::internal) fn internal_grants_rule_carry(
+        &mut self,
+        holder: &str,
+        before: u64,
+    ) -> Result<()> {
+        let generation = self.object(holder)?.generation;
+        if let Some(state) = self
+            .state
+            .ir_keywords
+            .get_mut(holder)
+            .filter(|state| state.generation == before)
+        {
+            state.generation = generation;
+        }
+        Ok(())
+    }
+
+    pub(in crate::game::internal) fn internal_static_origin(
+        &self,
+        holder: &str,
+        located: &EffectiveAbility,
+        effect: u64,
+    ) -> Result<GrantOrigin> {
+        let provider = if let Some(origin) = &located.grant {
+            KeywordProvider {
+                holder: holder.into(),
+                generation: self.object(holder)?.generation,
+                card: origin.provider().card.clone(),
+                span: located.source.clone(),
+                ability: located.node.id.0,
+            }
+        } else {
+            self.keyword_provider(holder, located.node.id)?
+        };
+        Ok(GrantOrigin::Continuous {
+            provider,
+            effect,
+            through: located.grant.clone().map(Box::new),
+        })
+    }
+
+    pub(in crate::game::internal) fn internal_granted_cost_active(
+        &self,
+        holder: Option<&str>,
+    ) -> bool {
+        self.state.ir_keywords.iter().any(|(id, state)| {
+            holder.is_none_or(|holder| holder == id)
+                && self.state.objects.get(id).is_some_and(|object| {
+                    state.generation == object.generation
+                        && matches!(object.zone.as_str(), "ex" | "resolution")
+                })
+                && state.grants.iter().any(|grant| {
+                    grant.definitions.iter().any(|definition| {
+                        self.card_runtime
+                            .granted_definitions
+                            .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
+                            .is_some_and(static_cost)
+                    })
+                })
+        })
+    }
+
+    pub(in crate::game::internal) fn internal_granted_play_delta(
+        &self,
+        holder: &str,
+    ) -> Result<i64> {
+        let object = self.object(holder)?;
+        if !matches!(object.zone.as_str(), "ex" | "resolution") {
+            return Ok(0);
+        }
+        let mut delta = 0_i64;
+        if let Some(state) = self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+        {
+            for grant in &state.grants {
+                for id in &grant.definitions {
+                    let ability = self
+                        .card_runtime
+                        .granted_definitions
+                        .get(&(grant.origin.provider().card.clone(), AbilityId(*id)))
+                        .ok_or_else(|| invalid("missing granted cost definition"))?;
+                    if !static_cost(ability) {
+                        continue;
+                    }
+                    for effect in &ability.declarations {
+                        if let Some(amount) = granted_cost::delta(effect) {
+                            delta = delta
+                                .checked_add(amount)
+                                .ok_or_else(|| invalid("granted play cost overflow"))?;
+                        }
+                    }
+                }
+            }
+        }
+        Ok(delta)
     }
 
     pub(in crate::game) fn internal_keywords_end_turn(&mut self, turn: u64) {
