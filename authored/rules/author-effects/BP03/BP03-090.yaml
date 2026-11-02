@@ -1,0 +1,58 @@
+cards:
+  BP03-090:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_from:
+                    from: hand
+                    ref: this
+                then:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on: this
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 3
+      - lastword:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 童話カウンター
+                        on: this
+                    op: ge
+                    right: 1
+                then:
+                  - move:
+                      ref: this
+                      to: ex
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

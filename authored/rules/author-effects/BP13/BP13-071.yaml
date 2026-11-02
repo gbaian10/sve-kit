@@ -1,0 +1,64 @@
+cards:
+  BP13-071:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            cmp:
+              left:
+                counter:
+                  name: 休眠カウンター
+                  on: this
+              op: ge
+              right: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - auto:
+          cost:
+            counter:
+              n: 1
+              name: 休眠カウンター
+              on: this
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 休眠カウンター
+                        on: this
+                    op: eq
+                    right: 0
+                then:
+                  - move:
+                      ref: this
+                      to: field
+          on:
+            phase:
+              which: main
+              whose: self
+          zone: ex
+        line: 3
+      - lastword:
+          do:
+            - move:
+                ref: this
+                result: dormant
+                to: ex
+            - counter:
+                delta: 2
+                name: 休眠カウンター
+                on:
+                  follow: dormant
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
