@@ -1255,8 +1255,20 @@ pub(super) enum Number {
     LeaderLife {
         leader_life: LeaderSide,
     },
+    Plus {
+        plus: Box<[Self; 2]>,
+    },
     Minus {
         minus: Box<[Self; 2]>,
+    },
+    Times {
+        times: Box<[Self; 2]>,
+    },
+    Per {
+        per: Box<Per>,
+    },
+    Min {
+        min: Vec<Self>,
     },
     Count {
         count: CountQuery,
@@ -1291,6 +1303,24 @@ pub(super) enum Number {
         selection: String,
         value: SelectedStat,
     },
+    Event {
+        event: EventNumber,
+    },
+}
+
+/// A numeric field of the triggering event; only damage's actual amount is wired.
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EventNumber {
+    Amount,
+}
+
+/// 「N枚につき」: how many whole `unit`s fit in `of`, rounded down.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Per {
+    pub of: Number,
+    pub unit: u64,
 }
 
 #[derive(Deserialize)]

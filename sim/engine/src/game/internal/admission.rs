@@ -897,6 +897,7 @@ fn supported(code: &str) -> bool {
             | "internal.Arithmetic.Add"
             | "internal.Arithmetic.Subtract"
             | "internal.Arithmetic.Multiply"
+            | "internal.Arithmetic.FloorDivide"
             | "internal.Arithmetic.Minimum"
             | "internal.Arithmetic.Maximum"
             | "shape.NatOperation.Count"

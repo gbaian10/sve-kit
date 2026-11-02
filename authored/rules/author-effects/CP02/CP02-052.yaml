@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-052:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          on:
+            damaged:
+              recipient: this
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      event: amount
+                    op: ge
+                    right: 5
+                then:
+                  - pp_max:
+                      who: self
+                      delta: 1
+      - line: 3
+        fanfare:
+          do:
+            - life:
+                who: self
+                delta: 3
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        who: self
+                        kind: pp_max
+                    op: eq
+                    right: 10
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 3

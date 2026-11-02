@@ -966,7 +966,10 @@ fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
             Arithmetic::Multiply => left.checked_mul(right),
             Arithmetic::Minimum => Some(left.min(right)),
             Arithmetic::Maximum => Some(left.max(right)),
-            _ => None,
+            // 「切り捨て」: Euclidean division equals floor once the divisor is positive.
+            Arithmetic::FloorDivide if right > 0 => Some(left.div_euclid(right)),
+            Arithmetic::FloorDivide => return Err(invalid("non-positive divisor")),
+            Arithmetic::HalfUp => None,
         }
         .ok_or_else(|| invalid("signed arithmetic overflow"))
     })

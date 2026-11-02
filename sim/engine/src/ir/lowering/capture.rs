@@ -136,7 +136,12 @@ impl BodyContext<'_> {
             | ast::Number::CountOf { .. }
             | ast::Number::TurnOrdinal { .. }
             | ast::Number::LeaderLife { .. }
+            | ast::Number::Plus { .. }
             | ast::Number::Minus { .. }
+            | ast::Number::Times { .. }
+            | ast::Number::Per { .. }
+            | ast::Number::Min { .. }
+            | ast::Number::Event { .. }
             | ast::Number::Resource { .. }
             | ast::Number::Resolution { .. }
             | ast::Number::Selection { .. } => false,

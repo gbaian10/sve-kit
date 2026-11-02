@@ -320,3 +320,102 @@ fn scalar_hand_and_deck_counts_use_each_players_current_population() {
     assert_eq!(state["P2"]["leader"]["life"], 1_u8);
     assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 3_usize);
 }
+
+/// P1's source follower with `banished` own cards in its banish zone, activated once.
+fn arithmetic_game(program: &WellFormedCardProgram, banished: usize) -> Game {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["banish"] = json!(
+        (0..banished)
+            .map(|n| json!({"id":format!("b{n}"),"card":"unit-spell"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "arith").unwrap();
+    game.load_internal_card("unit-follower", program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game
+}
+
+fn life_after(payload: &Value, banished: usize) -> i64 {
+    let mut game = arithmetic_game(&lowered(payload), banished);
+    activate(&mut game, 1);
+    game.projection(View::Referee).unwrap()["P1"]["leader"]["life"]
+        .as_i64()
+        .unwrap()
+}
+
+#[test]
+fn plus_times_and_min_combine_public_counts_with_literals() {
+    let count = json!({"count":{"who":"self","zone":"banish"}});
+    let gain = |delta: Value| json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":delta}}]});
+    for (banished, plus, times, min) in [(0_usize, 3, 0, 0), (3, 6, 6, 2), (7, 10, 14, 2)] {
+        assert_eq!(
+            life_after(&gain(json!({"plus":[3,count]})), banished),
+            20 + plus
+        );
+        assert_eq!(
+            life_after(&gain(json!({"times":[count,2]})), banished),
+            20 + times,
+            "「の2倍」 doubles the current count"
+        );
+        assert_eq!(
+            life_after(&gain(json!({"min":[count,2,5]})), banished),
+            20 + min,
+            "min takes the smallest operand"
+        );
+    }
+}
+
+#[test]
+fn per_rounds_down_on_both_sides_of_each_unit() {
+    let count = json!({"count":{"who":"self","zone":"banish"}});
+    let per = json!({"per":{"of":count,"unit":5}});
+    let payload = json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":{"plus":[1,per]}}}]});
+    for (banished, gained) in [(0_usize, 1_i64), (4, 1), (5, 2), (9, 2), (10, 3)] {
+        assert_eq!(
+            life_after(&payload, banished),
+            20 + gained,
+            "{banished} cards hold {} whole fives",
+            gained - 1
+        );
+    }
+    // A negative dividend floors toward negative infinity instead of truncating toward zero.
+    let negative = json!({"per":{"of":{"minus":[0,count]},"unit":5}});
+    let check = json!({"cost":{"pp":0},"do":[{"if":{
+        "cond":{"cmp":{"left":negative,"op":"eq","right":-2}},
+        "then":[{"life":{"who":"self","delta":1}}]
+    }}]});
+    assert_eq!(life_after(&check, 7), 21, "floor(-7 / 5) is -2");
+    assert_eq!(life_after(&check, 5), 20, "floor(-5 / 5) is -1");
+}
+
+#[test]
+fn arithmetic_lowering_rejects_a_zero_unit_an_empty_min_and_unopened_max() {
+    for n in [
+        json!({"per":{"of":3,"unit":0}}),
+        json!({"min":[]}),
+        json!({"max":[1,2]}),
+        json!({"half_up":3}),
+        json!({"times":[1,2,3]}),
+    ] {
+        lowerer()
+            .lower(&tree(&json!({"cost":{"pp":0},"do":[{"draw":{"n":n}}]})))
+            .unwrap_err();
+    }
+}
+
+#[test]
+fn signed_overflow_fails_the_activation_without_changing_the_game() {
+    // The author grammar caps literals at 2^53 - 1; their product still exceeds i64.
+    const MAX_SAFE: i64 = 0x001F_FFFF_FFFF_FFFF;
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"life":{"who":"self","delta":{"times":[{"times":[MAX_SAFE,MAX_SAFE]},2]}}}
+    ]}));
+    let mut game = arithmetic_game(&program, 0);
+    let before = exact_authority(&game);
+    game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+}
