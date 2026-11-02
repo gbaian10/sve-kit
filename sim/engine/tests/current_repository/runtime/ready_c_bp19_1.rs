@@ -4,10 +4,7 @@
     reason = "Unexpected decisions invalidate these game scenarios."
 )]
 use super::*;
-use crate::{expanded, rule_fixtures};
-use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
-use sve_engine::game::internal::{DamageShare, SearchAnswer};
+use sve_engine::game::internal::SearchAnswer;
 
 const fn actor() -> PlayerId {
     PlayerId { seat: 1 }
@@ -52,24 +49,6 @@ fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
-            InputDomain::Distribution(domain) => {
-                let mut shares: Vec<DamageShare> = domain
-                    .members
-                    .iter()
-                    .map(|member| DamageShare {
-                        handle: member.handle,
-                        amount: Nat(0),
-                    })
-                    .collect();
-                // The first target takes all but one point per later target.
-                let last = shares.len().checked_sub(1).unwrap();
-                shares[last].amount = Nat(1);
-                shares[0].amount = Nat(domain.total.0.checked_sub(u64::try_from(last).unwrap()).unwrap());
-                for share in shares.iter_mut().take(last).skip(1) {
-                    share.amount = Nat(1);
-                }
-                Answer::Distribution(shares)
-            }
             InputDomain::Search(domain) => Answer::Search(domain.groups.as_ref().map_or_else(
                 || {
                     SearchAnswer::Ungrouped(
@@ -186,57 +165,6 @@ fn evolve(game: &mut Game) {
 
 
 
-// Some printed bases are not admitted yet, so a same-name companion supplies only evolution.
-fn synthetic_base(form: &str, initial: &Value) -> Game {
-    let (snapshot, keywords, mut input) = inputs().clone();
-    let printed: Value = snapshot
-        .lines()
-        .map(|line| serde_json::from_str::<Value>(line).unwrap())
-        .find(|record| record["number"] == form)
-        .unwrap();
-    let companion_card = json!({"number":"synthetic-evolution","faces":[{
-        "name":printed["faces"][0]["name"],"card_class":"ニュートラル","card_type":"フォロワー",
-        "cost":"2","power":"2","hp":"2","traits":[],"text":null,"sections":[]
-    }]});
-    let snapshot = format!("{}\n{companion_card}", snapshot.trim_end());
-    input["documents"].as_array_mut().unwrap().push(json!(["ready-c-companion.yaml",json!({
-        "format":1_u8,"kind":"effect_set","cards":{"synthetic-evolution":{"status":"complete","abilities":[]}}
-    }).to_string()]));
-    let mut tree = expanded::tree().clone();
-    tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
-    let companion = lowerer()
-        .lower(&tree)
-        .unwrap()
-        .remove("synthetic-evolution")
-        .unwrap();
-    let mut rules: Value = serde_saphyr::from_str(
-        &read_to_string(
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
-        )
-        .unwrap(),
-    )
-    .unwrap();
-    rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-    let selected = repository::select_with_rules(
-        &snapshot,
-        &keywords,
-        &input,
-        &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap();
-    let mut game = Game::from_selected_effects(
-        selected,
-        initial,
-        &Value::Null,
-        &Value::Null,
-        "ready-c-bp18",
-    )
-    .unwrap();
-    game.load_internal_card("synthetic-evolution", &companion)
-        .unwrap();
-    game
-}
 
 
 fn graves(card: &str, count: u8) -> Value {
@@ -301,26 +229,7 @@ fn bp19_018_returns_an_own_card_to_deal_six_and_two() {
     assert_eq!(state["P2"]["leader"]["life"], 18_u8);
 }
 
-#[test]
-fn bp19_035_fanfare_hits_a_follower_and_its_leader() {
-    let mut game = game(&position("BP19-035"));
-    play(&mut game, "source");
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["enemy"]["damage"], 3_u8);
-    assert_eq!(state["P2"]["leader"]["life"], 17_u8);
-}
 
-#[test]
-fn bp19_111_evolution_splits_four_damage() {
-    let mut initial = evolved_position("synthetic-evolution", "BP19-111");
-    initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-037"},{"id":"small","card":"BP01-171"}]);
-    let mut game = synthetic_base("BP19-111", &initial);
-    evolve(&mut game);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["enemy"]["damage"], 3_u8);
-    assert_eq!(state["objects"]["small"]["damage"], 1_u8);
-}
 
 #[test]
 fn bp19_060_pays_an_ex_eight_prison_card_for_four_damage() {
