@@ -239,9 +239,31 @@ fn bp19_118_evolution_heals_four_without_a_cutthroat() {
 #[test]
 fn bp19_089_own_fanfare_damage_is_healed_back() {
     let mut game = game(&position("BP19-089"));
-    play(&mut game, "source");
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["leader"]["life"], 20_u8);
+    let step = game.play_internal_card("source", actor()).unwrap();
+    finish(&mut game, step);
+    // Record the leader after each pending ability: the fanfare hits, then the decrease heals.
+    let mut lives = Vec::new();
+    loop {
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let Some(question) = game.internal_pending_choice().unwrap() else {
+            break;
+        };
+        let InputDomain::Pending(options) = &question.domain else {
+            panic!("pending ability expected")
+        };
+        let next = game
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap();
+        finish(&mut game, next);
+        lives.push(game.projection(View::Referee).unwrap()["P1"]["leader"]["life"].clone());
+    }
+    assert_eq!(lives, [json!(19_u8), json!(20_u8)]);
 }
 
 #[test]
