@@ -1,0 +1,39 @@
+cards:
+  BP18-123:
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 魔汚区役所職員・災藤
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        leader_of: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
