@@ -328,8 +328,9 @@ Each grid cell shows the name with the card number at the right of the same line
 2026-09-29), then the translation line when the name display asks for one. The `view` URL
 parameter (else the `viewMode` preference) picks the grid, the table rows (48×67 thumbnail, stats,
 a two-line effect preview) or the list rows (52px, class-coloured edge);
-the result count sits beside the search bar's filter button; the control row holds the sort
-control and the view switch.
+the toolbar row under the search bar ends with the view switch and the result count (the count
+keeps its width while a query is pending). The card list is the shared `CardBrowser`
+(`src/pages/cards/CardBrowser.tsx`); a page supplies the query state, the search results and what a click opens.
 
 Type and deck-location labels use SVG outlines traced from official card images,
 with glyph paths derived from OFL fonts and no embedded bitmap data. Their sources and exclusions are
