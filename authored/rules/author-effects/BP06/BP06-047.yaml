@@ -1,0 +1,31 @@
+cards:
+  BP06-047:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              spellchain: 10
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 6
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - damage:
+                n: 3
+                to:
+                  leaders: opponents
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

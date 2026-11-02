@@ -1,0 +1,27 @@
+cards:
+  BP06-005:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    by: ability
+                    ref: this
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

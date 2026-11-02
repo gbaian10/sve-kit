@@ -1,0 +1,50 @@
+cards:
+  BP06-007:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                on: this
+                power:
+                  minus:
+                    - count:
+                        token: true
+                        trait: 妖精
+                        who: self
+                        zone: field
+                    - minus:
+                        - 0
+                        - count:
+                            token: true
+                            trait: 妖精
+                            who: self
+                            zone: ex
+        line: 2
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token:
+                  - フェアリーウィスプ
+                  - フェアリー
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP01-T02
+        line: 1
+        section: 1
+      - card: BP01-T03
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

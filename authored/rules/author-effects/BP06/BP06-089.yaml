@@ -1,0 +1,47 @@
+cards:
+  BP06-089:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+          on:
+            life_changed:
+              direction: down
+              during:
+                turn: self
+              who: self
+          per_turn: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - life:
+                delta: 2
+                who: self
+          usable_if:
+            leader_life:
+              le: 10
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
