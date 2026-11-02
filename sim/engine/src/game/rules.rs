@@ -549,8 +549,8 @@ impl Game {
             .flat_map(|costs| costs.values())
         {
             for id in list(selected) {
-                for name in list(&self.face(string(&id))?["traits"]) {
-                    traits.insert(string(&name).into(), json!(true));
+                for name in self.card_traits(string(&id))? {
+                    traits.insert(name, json!(true));
                 }
             }
         }
@@ -694,11 +694,8 @@ impl Game {
         self.bump(&format!("{id}.attacks"), 1);
         let attacks = int(&self.object(id)?.state["attacks_this_turn"]);
         self.object_mut(id)?.state["attacks_this_turn"] = json!(attacks.saturating_add(1));
-        for trait_name in list(&self.face(id)?["traits"]) {
-            self.bump(
-                &format!("{}.trait_attacks.{}", self.active(), string(&trait_name)),
-                1,
-            );
+        for trait_name in self.card_traits(id)? {
+            self.bump(&format!("{}.trait_attacks.{trait_name}", self.active()), 1);
         }
         let group = self.group();
         let event = self.emit(

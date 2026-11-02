@@ -85,6 +85,7 @@ impl Game {
                         card["damage"] =
                             json!(int(&card["max_hp"]).saturating_sub(int(&card["hp"])));
                         if zone == "field" {
+                            card["traits"] = json!(self.card_traits(id)?);
                             card["keywords"] = json!(
                                 self.keywords(id)?
                                     .iter()

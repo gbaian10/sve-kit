@@ -1,0 +1,38 @@
+cards:
+  BP02-T07:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - buff:
+                hp: 1
+                on: armed
+            - apply:
+                effect:
+                  add_trait:
+                    trait: 武装
+                on: armed
+          targets:
+            - bind: armed
+              from:
+                class: ドラゴン
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: ドラゴウェポン
+      template: true
+format: 2
+kind: author_effect_set

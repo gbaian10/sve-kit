@@ -224,12 +224,16 @@ impl Game {
             }
             _ => return Err(EngineFailure::Unsupported("event card kind".into())),
         };
-        let traits = printed["traits"]
-            .as_array()
-            .ok_or_else(|| invalid("unknown printed traits"))?
-            .iter()
-            .map(|value| text(value).map(|s| TraitId(s.into())))
-            .collect::<Result<Vec<_>>>()?;
+        let traits = if printed_only {
+            printed["traits"]
+                .as_array()
+                .ok_or_else(|| invalid("unknown printed traits"))?
+                .iter()
+                .map(|value| text(value).map(|s| TraitId(s.into())))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            self.card_traits(holder)?.into_iter().map(TraitId).collect()
+        };
         let class = Some(ClassId(text(&printed["card_class"])?.into()));
         let title = self
             .catalog

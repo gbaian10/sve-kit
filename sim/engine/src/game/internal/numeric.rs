@@ -136,6 +136,10 @@ fn collect_patches<'program>(
     for step in &program.steps {
         match &step.node {
             Node::Instruction { instruction } => match &instruction.action {
+                Action::Modify {
+                    patch: CharacteristicPatch::AddTrait { .. },
+                    ..
+                } => {}
                 Action::Modify { patch, .. } => patches.push(patch),
                 Action::InstallEffect { effect, .. } => {
                     if let Effect::Continuous { patch, .. } = effect.as_ref() {
@@ -215,6 +219,15 @@ fn merge(left: Option<Change>, right: Option<Change>) -> Result<Option<Change>> 
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
+    if matches!(
+        action,
+        Action::Modify {
+            patch: CharacteristicPatch::AddTrait { .. },
+            ..
+        }
+    ) {
+        return super::grant::check_action(action);
+    }
     match action {
         Action::Modify {
             patch,
@@ -472,6 +485,15 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
+        if matches!(
+            instruction.action,
+            Action::Modify {
+                patch: CharacteristicPatch::AddTrait { .. },
+                ..
+            }
+        ) {
+            return self.internal_grant(execution, instruction);
+        }
         self.internal_modify_options(execution, instruction, true, true, None)
     }
 

@@ -17,6 +17,9 @@ cargo run --locked -p sve-engine --bin sve-prototype -- /absolute/path/to/new-ca
 機器可讀清單在 [rejected-yaml.yaml](../../tests/engine/rejected-yaml.yaml)；共用測試
 `authored_yaml_loads_or_is_a_listed_rejection` 要求實際結果與清單完全相同（多一張、少一張都失敗）。
 
+原型 `modify.traits` 仍拒絕執行；`ドラゴウェポン` 的類型授予改由作者 1.0 的
+[`apply.effect.add_trait`](../dsl/authoring-tools.md) 經型別化 IR 執行，不再依賴該原型。
+
 ## 檢查項目
 
 | 項目 | 拒絕的情況 |

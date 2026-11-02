@@ -724,11 +724,18 @@ pub(super) struct Apply {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum InstalledEffect {
+    AddTrait(TraitEffect),
     Stat(ConstantStats),
     CostMod(CostModifier),
     EvolveCostMod(EvolutionCostModifier),
     Cannot(Cannot),
     Prevent(Prevent),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TraitEffect {
+    pub r#trait: String,
 }
 
 #[derive(Deserialize)]

@@ -31,6 +31,7 @@ impl Checker {
         self.at("expires", |checker| checker.installed_duration(expires))?;
         self.at("patch", |checker| match patch {
             CharacteristicPatch::SetKind { .. } => Ok(()),
+            CharacteristicPatch::AddTrait { trait_id } if !trait_id.0.is_empty() => Ok(()),
             CharacteristicPatch::Numeric { .. } | CharacteristicPatch::Combined { .. } => {
                 checker.patch(patch, ContinuousLayer::Numeric)
             }
