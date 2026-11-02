@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 5
+            - choose:
+                bind: chosen
+                from:
+                  any_of:
+                    - { in: seen, kind: follower, trait: 学院, orig_cost_eq: 1 }
+                    - { in: seen, kind: follower, trait: 獣, orig_cost_eq: 1 }
+                upto: 2
+                may: true
+            - move:
+                ref: chosen
+                to: field
+                result: placed
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in: { objects_of: placed, view: before }
+                to: deck
+                position: bottom
+                order: chooser

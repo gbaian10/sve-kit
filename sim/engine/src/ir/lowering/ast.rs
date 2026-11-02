@@ -1112,7 +1112,7 @@ pub(super) struct Choose {
     #[serde(default)]
     pub any: bool,
     pub bind: String,
-    pub from: TargetQuery,
+    pub from: ChooseFrom,
     pub groups: Option<Vec<ChooseGroup>>,
     pub distinct_by: Option<Names>,
     pub n: Option<u64>,
@@ -1123,10 +1123,19 @@ pub(super) struct Choose {
     pub by: Option<LeaderSide>,
 }
 
+/// A union keeps one candidate set: a card matching several branches is still one choice.
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum ChooseFrom {
+    Union { any_of: Vec<TargetQuery> },
+    Query(Box<TargetQuery>),
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct ChooseGroup {
     pub kind: Option<SearchKind>,
+    pub class: Option<String>,
     pub orig_cost_le: Option<u64>,
 }
 

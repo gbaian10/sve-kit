@@ -666,3 +666,38 @@ fn no_expiry_play_discount_is_bound_to_the_successful_ex_generation() {
         }
     }
 }
+
+#[test]
+fn observed_unions_need_two_filtered_branches_of_the_same_look() {
+    lowerer()
+        .lower(&observed(&json!({"any_of":[
+            {"in":"seen","kind":"spell"},
+            {"in":"seen","kind":"follower","trait":"妖精"}
+        ]})))
+        .unwrap();
+    for from in [
+        json!({"any_of":[{"in":"seen","kind":"spell"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"seen"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"other","kind":"amulet"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"who":"self","zone":"field","kind":"follower"}]}),
+        json!({"any_of":[{"in":"seen","kind":"spell"},{"in":"seen","other":true}]}),
+    ] {
+        assert!(
+            lowerer().lower(&observed(&from)).is_err(),
+            "a union cannot widen to the whole Look, another receipt or a public zone"
+        );
+    }
+    let mut grouped = observed(&json!({"any_of":[
+        {"in":"seen","kind":"spell"},{"in":"seen","kind":"amulet"}
+    ]}));
+    let choice =
+        &mut grouped["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["choose"];
+    choice.as_object_mut().unwrap().remove("n");
+    choice["upto"] = json!(2_u8);
+    choice["may"] = json!(true);
+    choice["groups"] = json!([{"kind":"spell"},{"kind":"amulet"}]);
+    assert!(
+        lowerer().lower(&grouped).is_err(),
+        "per-group limits apply to one Look query, not to a union"
+    );
+}

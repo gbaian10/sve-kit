@@ -87,12 +87,29 @@ impl BodyContext<'_> {
         path: &str,
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
-        if choice.from.observation.is_some() && matches!(choice.by, Some(ast::LeaderSide::Opponent))
-        {
+        let (from, union) = match &choice.from {
+            ast::ChooseFrom::Query(query) => (query.as_ref(), None),
+            // Only a private Look receipt is admitted as the shared input of every branch.
+            ast::ChooseFrom::Union { any_of } => match any_of.as_slice() {
+                [first, _, ..]
+                    if first.observation.is_some()
+                        && any_of
+                            .iter()
+                            .all(|branch| branch.observation == first.observation) =>
+                {
+                    (first, Some(any_of.as_slice()))
+                }
+                _ => return Err(unsupported(path)),
+            },
+        };
+        if from.observation.is_some() && matches!(choice.by, Some(ast::LeaderSide::Opponent)) {
             return Err(unsupported(path));
         }
         if let Some(groups) = &choice.groups {
-            return self.grouped_observed_choose(choice, groups, path, source);
+            if union.is_some() {
+                return Err(unsupported(path));
+            }
+            return self.grouped_observed_choose(choice, from, groups, path, source);
         }
         // Exact zero needs the distinct ForcedZeroUnits instruction-start contract.
         if choice.n == Some(0) || choice.reveal == Some(true) || choice.order == Some(true) {
@@ -110,13 +127,16 @@ impl BodyContext<'_> {
         let target = ast::Target {
             any: choice.any,
             bind: choice.bind.clone(),
-            from: choice.from.clone(),
+            from: from.clone(),
             distinct_by: choice.distinct_by.clone(),
             n,
             upto,
             option: None,
         };
-        let (domain, cardinality) = self.object_choice(&target, path, true)?;
+        let (domain, cardinality) = match union {
+            None => self.object_choice(&target, path, true)?,
+            Some(branches) => self.observed_object_choice(&target, branches, path, true)?,
+        };
         let visibility = if target.from.observation.is_some() {
             Visibility::Only {
                 players: super::super::PlayerSet {
@@ -172,9 +192,7 @@ impl BodyContext<'_> {
         };
         let mut lowered_groups = Vec::with_capacity(groups.len());
         for group in groups {
-            if !matches!(&group.kind, Some(ast::SearchKind::Follower))
-                || group.orig_cost_le.is_none()
-            {
+            if group.kind.is_none() {
                 return Err(unsupported(path));
             }
             let binding = super::Binding::new(1, self.card_allocator.scope(path)?);
@@ -188,6 +206,7 @@ impl BodyContext<'_> {
                     predicate: Box::new(field_filter(
                         &ObjectFilter {
                             kind: group.kind.as_ref(),
+                            class: group.class.as_deref(),
                             original_cost: [None, group.orig_cost_le, None],
                             ..ObjectFilter::default()
                         },
@@ -203,15 +222,12 @@ impl BodyContext<'_> {
     fn grouped_observed_choose(
         &mut self,
         choice: &ast::Choose,
+        from: &ast::TargetQuery,
         groups: &[ast::ChooseGroup],
         path: &str,
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
-        let observation = choice
-            .from
-            .observation
-            .as_ref()
-            .ok_or_else(|| unsupported(path))?;
+        let observation = from.observation.as_ref().ok_or_else(|| unsupported(path))?;
         if groups.len() != 2
             || choice.may != Some(true)
             || choice.n.is_some()
@@ -219,26 +235,29 @@ impl BodyContext<'_> {
             || choice.reveal == Some(true)
             || choice.order == Some(true)
             || choice.distinct_by.is_some()
-            || choice.from.who.is_some()
-            || choice.from.zone.is_some()
-            || choice.from.leader.is_some()
-            || choice.from.leaders.is_some()
-            || choice.from.leader_or
-            || !matches!(&choice.from.kind, Some(ast::SearchKind::Follower))
-            || choice.from.keyword.is_some()
-            || choice.from.r#trait.is_some()
-            || !choice.from.traits_all.is_empty()
-            || choice.from.token.is_some()
-            || !choice.from.names.is_empty()
-            || choice.from.name.is_some()
-            || choice.from.name_contains.is_some()
-            || choice.from.has_evolve.is_some()
-            || choice.from.has_state_filter()
-            || choice.from.not_same_name_as_this
-            || choice.from.other
-            || choice.from.has_numeric_filter()
-            || choice.from.class.is_some()
-            || choice.from.not_class.is_some()
+            || from.who.is_some()
+            || from.zone.is_some()
+            || from.leader.is_some()
+            || from.leaders.is_some()
+            || from.leader_or
+            || from
+                .kind
+                .as_ref()
+                .is_some_and(|kind| groups.iter().any(|group| group.kind.as_ref() != Some(kind)))
+            || from.keyword.is_some()
+            || from.r#trait.is_some()
+            || !from.traits_all.is_empty()
+            || from.token.is_some()
+            || !from.names.is_empty()
+            || from.name.is_some()
+            || from.name_contains.is_some()
+            || from.has_evolve.is_some()
+            || from.has_state_filter()
+            || from.not_same_name_as_this
+            || from.other
+            || from.has_numeric_filter()
+            || from.class.is_some()
+            || from.not_class.is_some()
             || self.targets.contains_key(&choice.bind)
             || self.searches.contains(&choice.bind)
             || self.observations.contains_key(&choice.bind)
@@ -260,6 +279,8 @@ impl BodyContext<'_> {
         if self.targets.insert(choice.bind.clone(), binding).is_some() {
             return Err(unsupported(path));
         }
+        // Grouped picks are still private Look members, like a single observed choice.
+        self.observed_targets.insert(choice.bind.clone());
         let domain = super::super::ChoiceDomain::Objects {
             constraint: super::super::SelectionConstraint {
                 groups: lowered_groups,
