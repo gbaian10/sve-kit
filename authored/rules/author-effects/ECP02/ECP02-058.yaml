@@ -1,0 +1,66 @@
+cards:
+  ECP02-058:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: クール
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - move:
+                      ref: chosen
+                      result: placed
+                      to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                not_same_name_as_this: true
+                orig_cost_le: 3
+                trait: クール
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+              - act_self: true
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  name: ラストデイライト
+                  who: self
+                  zone: deck
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: searched
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
