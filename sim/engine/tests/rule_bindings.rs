@@ -834,8 +834,60 @@ fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() 
     )
     .unwrap();
     let before = game.digest().unwrap();
-    game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "unbound").unwrap_err();
+    let error = game
+        .decide(
+            &json!({"do":"activate","ability":{"source":"actor","line":1_u8}}),
+            "unbound",
+        )
+        .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("unbound resource role: lesson_item"),
+        "{error}"
+    );
     assert_eq!(before, game.digest().unwrap());
+}
+
+#[test]
+fn ordinary_ex_banish_without_a_role_binding_erases_the_token_without_a_lesson_counter() {
+    let mut fixture = Fixture::new();
+    resource_programs(&mut fixture);
+    let ordinary = fixture.programs["cards"]["actor"]["abilities"][4].clone();
+    fixture.programs["cards"]["actor"]["abilities"] = json!([ordinary]);
+    let unbound = Catalog::from_documents(
+        &fixture.snapshot(),
+        &fixture.keywords.to_string(),
+        &fixture.documents(),
+    )
+    .unwrap();
+    let mut setup = position();
+    setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"lesson"}]);
+    let mut game = Game::new(
+        Arc::new(unbound),
+        &setup,
+        &Value::Null,
+        &Value::Null,
+        "ordinary-banish",
+    )
+    .unwrap();
+    let result = game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "ordinary-banish").unwrap();
+    assert_eq!(result.outcome, "resolved");
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["ex"], json!([]));
+    assert_eq!(view["P1"]["banish"], json!([]));
+    assert!(
+        result
+            .events
+            .iter()
+            .any(|event| event["kind"] == "消去" && event["object"] == "target")
+    );
+    assert_eq!(
+        view["semantic_state"]["counters_this_turn"]["P1"]["magic_item_banished"]
+            .as_i64()
+            .unwrap_or(0),
+        0
+    );
 }
 
 #[test]
