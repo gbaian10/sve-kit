@@ -1,0 +1,35 @@
+cards:
+  BP05-040:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                on: this
+                power:
+                  count:
+                    class: ウィッチ
+                    kind: follower
+                    who: self
+                    zone: cemetery
+        line: 2
+      - activate:
+          cost:
+            pp: 5
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

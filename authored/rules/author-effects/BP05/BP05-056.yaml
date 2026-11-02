@@ -1,0 +1,65 @@
+cards:
+  BP05-056:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                on: this
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+        line: 1
+      - evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 絶傑
+                upto: 2
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

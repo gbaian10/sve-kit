@@ -1,0 +1,27 @@
+cards:
+  BP05-002:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - if:
+                cond:
+                  leader_life:
+                    ge: 10
+                    who: opp
+                then:
+                  - damage:
+                      n: 6
+                      to:
+                        leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
