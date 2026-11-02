@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-031:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create: { token: ナテラの大樹, to: field, n: 1 }
+                        - - create: { token: ナテラの大樹, to: ex, n: 1 }
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP07-T03

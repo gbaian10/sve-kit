@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-SP02:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 4
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          agg:
+                            of:
+                              who: self
+                              zone: field
+                              trait: パッション
+                            attr: orig_cost
+                            fn: sum
+                        op: ge
+                        right: 10
+                    n: 8
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      agg:
+                        of:
+                          who: self
+                          zone: field
+                          trait: パッション
+                        attr: orig_cost
+                        fn: sum
+                    op: ge
+                    right: 20
+                then:
+                  - damage:
+                      to:
+                        leader: opp
+                      n: 4

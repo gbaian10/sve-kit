@@ -1,0 +1,24 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-116:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: Codex gpt-6.1-sol }
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - if:
+                cond: { cmp: { left: { resource: { who: self, kind: sep } }, op: eq, right: 0 } }
+                then:
+                  - damage: { to: enemy, n: 5 }
+            - life: { who: self, delta: 2 }

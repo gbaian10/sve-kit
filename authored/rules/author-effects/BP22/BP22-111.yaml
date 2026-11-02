@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-111:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - destroy:
+                ref: victim
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        who: self
+                        kind: sep
+                    op: eq
+                    right: 0
+                then:
+                  - create:
+                      token: シャドウジェネラル
+                      to: field
+                      n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP22-P69

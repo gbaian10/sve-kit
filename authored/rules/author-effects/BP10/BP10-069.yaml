@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-069:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        evolve_time:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+              n: 1
+              result: discarded
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 4
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: discarded
+                          view: before
+                        trait: アルカナ
+                    op: ge
+                    right: 1
+                then:
+                  - draw:
+                      who: self
+                      n: 1

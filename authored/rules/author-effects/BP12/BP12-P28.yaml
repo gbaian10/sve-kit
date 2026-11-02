@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-P28:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-01"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+          - bane
+      - line: 2
+        fanfare:
+          do:
+            - life:
+                who: self
+                delta:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+                    trait: 魔界
+      - line: 3
+        lastword:
+          do:
+            - choose:
+                bind: sacrifice
+                by: opp
+                from:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 1
+            - move:
+                ref: sacrifice
+                to: cemetery
+    token:
+      name: メドゥシアナ
+      template: true
