@@ -1,0 +1,51 @@
+cards:
+  ECP01-044:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - move:
+                ref: chosen
+                result: placed
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_eq: 2
+                trait: ウマ娘
+                who: self
+                zone: cemetery
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: ウマ娘
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

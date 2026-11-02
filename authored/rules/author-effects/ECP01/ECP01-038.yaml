@@ -1,0 +1,49 @@
+cards:
+  ECP01-038:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        name: にんじん
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 9
+                then:
+                  - move:
+                      to: cemetery
+                      top:
+                        n: 20
+                        who: opponents
+          "on":
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - evolve_time:
+          cost:
+            discard:
+              n: 2
+              sel:
+                trait: ウマ娘
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
