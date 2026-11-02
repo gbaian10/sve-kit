@@ -1,0 +1,60 @@
+cards:
+  BP17-008:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            enter_field:
+              who: self
+              sel:
+                kind: follower
+                class: エルフ
+          per_turn: 1
+          do:
+            - counter:
+                "on": this
+                name: 矢カウンター
+                delta: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 深緑の弓使い・アリサ
+                then:
+                  - counter:
+                      "on": this
+                      name: 矢カウンター
+                      delta: 2
+      - line: 3
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  counter:
+                    "on": this
+                    name: 矢カウンター
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

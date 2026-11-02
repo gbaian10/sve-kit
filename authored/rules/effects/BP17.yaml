@@ -171,44 +171,6 @@ cards:
             costs:
               - op: pp
                 amount: 2
-  BP17-P21:
-    status: complete
-    abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 4
-            - op: if
-              condition:
-                fn: ge
-                args:
-                  - at: resolution-start
-                    value:
-                      count:
-                        side: self
-                        zone: cemetery
-                  - 10
-              then:
-                op: search
-                select:
-                  side: self
-                  zone: deck
-                  name: 友魂の少女・ルナ
-                min: 0
-                max: 1
-                to: field
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP17-SL28:
     status: complete
     abilities:
