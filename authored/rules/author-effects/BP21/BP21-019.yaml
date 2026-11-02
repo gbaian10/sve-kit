@@ -1,0 +1,36 @@
+cards:
+  BP21-019:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - bane
+          while:
+            exists:
+              who: self
+              zone: field
+              kind: follower
+              trait: 学院
+              other: true
+      - line: 2
+        fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  orig_cost_eq: 1
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

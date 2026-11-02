@@ -1,0 +1,26 @@
+cards:
+  BP21-036:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: soldiers
+              from:
+                kind: follower
+                who: self
+                zone: cemetery
+                trait: 兵士
+              upto: 2
+          do:
+            - move:
+                ref: soldiers
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

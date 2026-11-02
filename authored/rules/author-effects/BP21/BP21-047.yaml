@@ -1,0 +1,47 @@
+cards:
+  BP21-047:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - banish:
+                top:
+                  n: 1
+                  who: self
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish_self: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: banish
+              op: ge
+              right: 5
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - draw:
+                n: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
