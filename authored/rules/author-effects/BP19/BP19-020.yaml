@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        static:
+          while:
+            my_turn: true
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  zone: ex
+                  trait: 財宝
+                delta: -1
+      - line: 2
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                trait: 財宝
+              during:
+                turn: self
+          do:
+            - choice:
+                n: 1
+                exclude_chosen: this_turn
+                options:
+                  - - destroy: enemy
+                  - - move:
+                        top:
+                          who: opp
+                          n: 2
+                        to: cemetery
+                  - - pp:
+                        who: self
+                        delta: 2
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1

@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: spell
+                  trait: デレマス
+                n: 1
+                to: hand
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: キュート
+              op: ge
+              right: 5
+          per_turn: 1
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      kind: spell
+                      trait: デレマス
+                      orig_cost_le: 2
+                    delta: -2
+                    next_only: true
+                until: turn

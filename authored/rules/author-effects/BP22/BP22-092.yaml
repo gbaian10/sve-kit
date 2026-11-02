@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-092:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - turn_number:
+                  who: self
+      - line: 2
+        auto:
+          "on":
+            phase:
+              whose: self
+              which: end
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+            - life:
+                who: self
+                delta: 2
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - buff:
+                "on": enemy
+                power: -5
+                hp: -5
