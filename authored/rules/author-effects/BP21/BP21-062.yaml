@@ -1,0 +1,38 @@
+cards:
+  BP21-062:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 金色の威信・リュミオール
+                then:
+                  - life:
+                      delta: 3
+                      who: self
+      - line: 3
+        fanfare:
+          do:
+            - draw:
+                n: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

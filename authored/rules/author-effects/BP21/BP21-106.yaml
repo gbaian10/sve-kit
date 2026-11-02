@@ -1,0 +1,36 @@
+cards:
+  BP21-106:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  who: self
+                  zone: deck
+                  kind: spell
+                  orig_cost_le: 5
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -5
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: searched
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

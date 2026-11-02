@@ -1,0 +1,32 @@
+cards:
+  BP21-111:
+    abilities:
+      - line: 1
+        evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: 学院
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 4
+                to: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
