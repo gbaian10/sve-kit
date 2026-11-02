@@ -1,0 +1,47 @@
+cards:
+  BP08-001:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: 2
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 2
+            - life:
+                delta: 4
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                position: top
+                ref: enemy
+                to: deck
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

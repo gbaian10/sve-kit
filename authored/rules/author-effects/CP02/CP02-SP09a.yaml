@@ -1,0 +1,55 @@
+cards:
+  CP02-SP09a:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: cemetery
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 2
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

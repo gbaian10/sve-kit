@@ -1,0 +1,59 @@
+cards:
+  BP07-052:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - evolve:
+          cost:
+            pp: 0
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 自然
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 2
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 自然
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

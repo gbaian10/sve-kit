@@ -1,0 +1,64 @@
+cards:
+  BP03-019:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          cost:
+            counter:
+              n: 1
+              name: 童話カウンター
+              on: this
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  cost_le: 5
+                  in: seen
+                  kind: follower
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: field
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: cemetery
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 童話
+                    who: self
+                    zone: field
+                then:
+                  - counter:
+                      delta: 1
+                      name: 童話カウンター
+                      on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
