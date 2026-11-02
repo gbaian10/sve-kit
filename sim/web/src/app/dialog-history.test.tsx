@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { type ReactNode, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
@@ -126,5 +126,23 @@ describe("useDialogHistory", () => {
     expect(outerClosed).toHaveBeenCalledTimes(1)
     expect(router.state.location.state).toBeNull()
     expect(router.state.location.pathname).toBe("/decks/1")
+  })
+
+  it("also drops entries pushed over a dialog that keep its state, such as a card opened from it", async () => {
+    const onClosed = vi.fn()
+    const { router } = await renderInRouter(<Harness id="deck" onClosed={onClosed} />, {
+      initialEntries: ["/decks/1"],
+    })
+    await userEvent.click(screen.getByRole("button", { name: "open deck" }))
+    await act(async () => {
+      await router.navigate("/decks/1?card=c1", { state: router.state.location.state })
+    })
+    expect(router.state.location.state).toMatchObject({ dialogs: ["deck"] })
+    await userEvent.click(screen.getByRole("button", { name: "drop from deck" }))
+    await waitFor(() => {
+      expect(router.state.location.state).toBeNull()
+    })
+    expect(router.state.location.pathname + router.state.location.search).toBe("/decks/1")
+    expect(onClosed).toHaveBeenCalledTimes(1)
   })
 })

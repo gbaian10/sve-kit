@@ -195,4 +195,33 @@ describe("DeckBuilderPage", () => {
     })
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   }, 60_000)
+
+  it("also drops a card opened from the sheet when the layout widens", async () => {
+    const setWide = resizableWindow()
+    const deck = createDeck(
+      { name: "單卡", edition: "jp", basis: { kind: "class", classCode: "royal" } },
+      new Date("2026-11-03T00:00:00.000Z"),
+    )
+    await decksStore.save({ ...deck, main: [{ cardId: "c:bp01-001", count: 1 }] })
+    prefsStore.set({ uiLanguage: "zh-TW", viewMode: "grid" })
+    const { router } = await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+    const list = await screen.findByRole("region", { name: "主牌組" }, { timeout: 25_000 })
+    await user.click(
+      await within(list).findByRole("button", { name: "試作の見習い兵" }, { timeout: 25_000 }),
+    )
+    await waitFor(() => {
+      expect(router.state.location.search).toContain("card=")
+    })
+
+    await act(async () => {
+      setWide(true)
+      await Promise.resolve()
+    })
+    await waitFor(() => {
+      expect(router.state.location.state).toBeNull()
+    })
+    expect(router.state.location.pathname + router.state.location.search).toBe(`/decks/${deck.id}`)
+  }, 60_000)
 })

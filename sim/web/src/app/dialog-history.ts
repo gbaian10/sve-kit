@@ -70,14 +70,25 @@ export function useDialogHistory(id: string, open: boolean, onClose: () => void)
 }
 
 /**
- * Pops the history entries of every open dialog. Each dialog that stays mounted sees its entry go
- * as a back press and closes; one that unmounted (its layout changed) leaves no dead entry behind.
+ * Pops history entries until none of the open dialogs is left. Each dialog that stays mounted sees
+ * its entry go as a back press and closes; one that unmounted (its layout changed) leaves no dead
+ * entry behind. It steps back one entry at a time: entries pushed over a dialog without one of
+ * their own (a card opened from it keeps the dialog's state) count too.
  */
 export function useDropDialogs(): () => void {
   const navigate = useNavigate()
   const location = useLocation()
-  const count = dialogsOf(location.state).length
+  const dropping = useRef(false)
+  const inDialog = dialogsOf(location.state).length > 0
+  // Each step back lands on a new entry; keep stepping while it still belongs to a dialog.
+  useEffect(() => {
+    if (!dropping.current) return
+    if (inDialog) void navigate(-1)
+    else dropping.current = false
+  }, [inDialog, location.key, navigate])
   return useCallback(() => {
-    if (count > 0) void navigate(-count)
-  }, [count, navigate])
+    if (!inDialog) return
+    dropping.current = true
+    void navigate(-1)
+  }, [inDialog, navigate])
 }

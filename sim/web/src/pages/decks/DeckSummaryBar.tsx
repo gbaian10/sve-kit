@@ -59,7 +59,7 @@ export function DeckSummaryBar({ onOpen }: { readonly onOpen: () => void }) {
           type="button"
           onClick={onOpen}
           aria-label={t("decks.openDeckSheet")}
-          className="flex min-h-11 min-w-0 flex-1 flex-col items-start justify-center gap-0.5 text-start phone-landscape:flex-none phone-landscape:items-center"
+          className="flex min-h-11 min-w-0 flex-1 flex-col items-start justify-center gap-0.5 text-start phone-landscape:w-14 phone-landscape:flex-none phone-landscape:items-center"
         >
           <span className="w-full truncate text-13 font-semibold text-text-1 phone-landscape:hidden">
             {deck.name}
@@ -86,7 +86,7 @@ export function DeckSummaryBar({ onOpen }: { readonly onOpen: () => void }) {
           type="button"
           data-deck-open=""
           onClick={onOpen}
-          className="inline-flex h-11 shrink-0 items-center gap-1 rounded-button bg-accent px-3 text-14 font-semibold text-accent-ink phone-landscape:px-1.5 phone-landscape:text-12"
+          className="inline-flex h-11 shrink-0 items-center justify-center gap-1 rounded-button bg-accent px-3 text-14 font-semibold text-accent-ink phone-landscape:w-14 phone-landscape:px-1 phone-landscape:text-12"
         >
           {t("decks.deckSheet")}
           <ChevronUp className="size-4 phone-landscape:hidden" aria-hidden="true" />
