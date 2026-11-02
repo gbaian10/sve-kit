@@ -40,7 +40,7 @@ sim/web/
 路由用 `react-router` v7（`createBrowserRouter`）。
 
 | 路徑                         | 頁面 | 備註                                                      |
-| ---------------------------- | ---- | ----------------------------------------------------      |
+| ---------------------------- | ---- | --------------------------------------------------------- |
 | `/`                          | 主頁 | 搜尋為主                                                  |
 | `/cards`                     | 查卡 | 條件全部在 URL（§2.1）                                    |
 | `/cards/:cardNo/:slug?`      | 單卡 | 疊層或整頁，由 `location.state` 能否重建決定（§2.2）      |
@@ -48,10 +48,10 @@ sim/web/
 | `/sets`                      | 卡包 | 卡包清單；點擊後前往 `/cards?set=…`                       |
 | `/sets/:code`                | 轉址 | 舊連結轉到對應的 `/cards?set=…`，保留 `ed` 與其他查詢條件 |
 | `/settings`                  | 設定 | 顯示設定；R1 沒有登入                                     |
-| `/decks`                     | 佔位 | 建牌器的入口，佔位頁                                      |
+| `/decks`                     | 牌組 | 存在瀏覽器的牌組列表：新增、複製、改名、刪除              |
 | `*`                          | 404  | 含搜尋框                                                  |
 
-保留、不實作：`/cards/unimplemented`、`/decks/*`、`/play`。
+保留、不實作：`/cards/unimplemented`、`/decks/*`（牌組編輯頁，之後加入）、`/play`。
 
 `:slug?` 是原文卡名的可讀片段，可有可無：決定卡片的永遠是卡號；slug 缺少或錯誤時照常開啟，並把網址 `replace` 成 canonical
 （`/cards/{卡號}/{原文卡名}`）。`card_route_alias` 永久轉址、`route_override` 與暫定號碼依快照格式 §8；找不到的卡號進 404 頁。
@@ -145,6 +145,7 @@ interface QueryState {
 | 查詢、篩選、排序、檢視、目前卡 | URL（§2.1）＋ `location.state`（§2.2）                                                                                                    |
 | 偏好                           | `settings/prefs.ts`：一個 `Prefs` 物件、`useSyncExternalStore`、localStorage `sve-kit:prefs`（有版本欄、無效值回預設、讀寫都 try／catch） |
 | 最近查看                       | `settings/recent.ts`：最多 8 筆                                                                                                           |
+| 牌組                           | `settings/decks.ts`：IndexedDB 資料庫 `sve-kit-decks`（每副一筆，以 `id` 為鍵）；讀回時逐筆驗證，壞掉的跳過；「清除本機資料」不刪它       |
 | 快照載入狀態與索引             | `data/status.ts` 的 store，`useSnapshot()`／`useCard()`／`useDetail()` 訂閱                                                               |
 | 篩選面板開合                   | 偏好 `filterPanelOpen`（§3 `Prefs`）；條件本身在 URL，按鈕即時生效                                                                        |
 | toast                          | React state／context，離開頁面即丟                                                                                                        |

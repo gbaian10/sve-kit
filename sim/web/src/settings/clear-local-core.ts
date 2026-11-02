@@ -1,3 +1,4 @@
+import { DECKS_DB_NAME } from "./decks-db"
 import { PREFS_KEY } from "./prefs"
 import { RECENT_KEY } from "./recent"
 
@@ -16,7 +17,8 @@ function deleteDatabase(name: string): Promise<void> {
 
 /**
  * Drops everything this origin stored (verified snapshots, search index, image caches, service
- * workers) so the next load is a true cold load; display settings and recent searches stay.
+ * workers) so the next load is a true cold load; display settings, recent searches and saved
+ * decks stay.
  */
 export async function clearLocalData(): Promise<void> {
   const keep = new Set([PREFS_KEY, RECENT_KEY])
@@ -28,7 +30,11 @@ export async function clearLocalData(): Promise<void> {
       indexedDB
         .databases()
         .then((databases) =>
-          Promise.all(databases.flatMap(({ name }) => (name ? [deleteDatabase(name)] : []))),
+          Promise.all(
+            databases.flatMap(({ name }) =>
+              name && name !== DECKS_DB_NAME ? [deleteDatabase(name)] : [],
+            ),
+          ),
         ),
     )
   if ("serviceWorker" in navigator)

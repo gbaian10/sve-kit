@@ -3,7 +3,7 @@ import { redirect, type RouteObject } from "react-router"
 import { SettingsPage } from "../pages/account/SettingsPage"
 import { CardPage } from "../pages/card/CardPage"
 import { CardsPage } from "../pages/cards/CardsPage"
-import { DecksStubPage } from "../pages/decks/DecksStubPage"
+import { DecksPage } from "../pages/decks/DecksPage"
 import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
 import { NotFoundPage } from "../pages/not-found/NotFoundPage"
@@ -32,7 +32,7 @@ export const routes: RouteObject[] = [
         },
       },
       { path: "settings", Component: SettingsPage },
-      { path: "decks", Component: DecksStubPage },
+      { path: "decks", Component: DecksPage },
       { path: "errata", Component: ErrataPage },
       { path: "*", Component: NotFoundPage },
     ],

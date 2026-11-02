@@ -1,4 +1,5 @@
 export { getCacheClearResult, requestColdStart, runRequestedColdStart } from "./clear-local"
+export { decksStore, useDecks } from "./decks"
 export {
   LIST_MIN_WIDTHS,
   type ListColumn,
