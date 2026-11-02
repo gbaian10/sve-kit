@@ -154,7 +154,7 @@ impl BodyContext<'_> {
                     && !matches!(
                         receipt,
                         ObjectReceipt::Movement {
-                            receipt: MovementReceipt::Move { .. }
+                            receipt: MovementReceipt::Move { .. } | MovementReceipt::Order { .. }
                         }
                     ))
         {
@@ -331,7 +331,8 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         if matches!(objects, ast::Objects::Bound(name) if self.observed_targets.contains(name)) {
-            if value.order.is_none() || value.result.is_some() {
+            // The Order receipt lets a later remainder subtract the reordered cards.
+            if value.order.is_none() {
                 return Err(unsupported(path));
             }
             let cards = self.objects(objects, path)?;
@@ -458,10 +459,11 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             }
         };
+        // Only the EX output is public enough to follow; a top-to-cemetery result has no consumer.
         if value.r#ref.is_some()
             || value.position.is_some()
             || value.order.is_some()
-            || value.result.is_some()
+            || (value.result.is_some() && zone != OwnerZone::Ex)
         {
             return Err(unsupported(path));
         }
@@ -526,6 +528,7 @@ impl BodyContext<'_> {
 const fn own_deck(top: &ast::DeckTop) -> bool {
     matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
 }
+
 const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
     Action::Move {
         objects,

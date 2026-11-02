@@ -284,10 +284,7 @@ impl Execution {
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },
                 projection: MemberProjection::Before,
-            } => self
-                .successful_moves(receipt)?
-                .map(|movement| movement.before)
-                .collect(),
+            } => self.movement_before(receipt)?,
             Selector::MoveAfter {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},

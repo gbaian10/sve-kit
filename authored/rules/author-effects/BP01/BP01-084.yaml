@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-084:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 1
+                to: ex
+                result: placed
+            - apply:
+                "on":
+                  follow: placed
+                effect:
+                  cost_mod:
+                    when_playing:
+                      in: affected
+                    delta: -2

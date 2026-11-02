@@ -67,7 +67,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             CostKind::Play => {
                 matches!(objects, Selector::MoveAfter { .. } | Selector::Bound { .. })
                     && matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
-                    && duration.end == (DurationEnd::CurrentTurnEnd {})
+                    && matches!(
+                        duration.end,
+                        DurationEnd::CurrentTurnEnd {} | DurationEnd::NoTemporalExpiry {}
+                    )
             }
             CostKind::Evolution => {
                 (matches!(objects, Selector::Objects { .. } | Selector::Bound { .. })

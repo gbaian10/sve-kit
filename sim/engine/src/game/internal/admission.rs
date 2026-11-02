@@ -691,6 +691,7 @@ fn supported(code: &str) -> bool {
             | "shape.ObjectReceipt.Look"
             | "shape.ObjectReceipt.Movement"
             | "shape.MovementReceipt.Move"
+            | "shape.MovementReceipt.Order"
             | "shape.MovementReceipt.Search"
             | "shape.MovementReceipt.Destroy"
             | "shape.MovementReceipt.Banish"

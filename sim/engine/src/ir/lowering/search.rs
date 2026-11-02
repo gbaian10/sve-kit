@@ -487,7 +487,7 @@ impl BodyContext<'_> {
         if delta > 0
             || modifier.set.is_some()
             || modifier.next_only.is_some()
-            || !matches!(installation.until, Some(ast::Until::Turn))
+            || !matches!(installation.until, None | Some(ast::Until::Turn))
         {
             return Err(unsupported(path));
         }
