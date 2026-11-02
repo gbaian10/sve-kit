@@ -1,0 +1,33 @@
+cards:
+  CP03-079:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - life:
+                      delta: 1
+                      who: self
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

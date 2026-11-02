@@ -1,0 +1,29 @@
+cards:
+  CP03-059:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - life:
+                delta: 2
+                who: self
+            - banish:
+                top:
+                  n: 1
+                  who: self
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,50 @@
+cards:
+  CP03-078:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            exists:
+              kind: follower
+              other: true
+              trait: かげろう
+              who: self
+              zone: field
+        line: 1
+      - activate:
+          cost:
+            pp: 2
+          do:
+            - stand: this
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                "on": this
+                until: turn
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

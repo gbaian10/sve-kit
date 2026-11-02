@@ -1,0 +1,38 @@
+cards:
+  CP03-085:
+    abilities:
+      - keywords:
+          - storm
+          - twin_drive
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: シャドウパラディン
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 10
+                then:
+                  - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
