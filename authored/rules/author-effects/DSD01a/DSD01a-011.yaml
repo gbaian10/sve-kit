@@ -1,0 +1,51 @@
+cards:
+  DSD01a-011:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  orig_cost_le: 2
+                  trait: 学院
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: moved
+                until: turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
