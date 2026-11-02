@@ -73,14 +73,20 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().map(|card| card.handle).collect())
             }
-            InputDomain::CostMaterials(domain) => Answer::CostMaterials(
-                domain
-                    .members
-                    .iter()
-                    .take(take(&domain.cardinality, domain.members.len()))
-                    .map(|member| member.handle)
-                    .collect(),
-            ),
+            InputDomain::CostMaterials(domain) => {
+                assert!(
+                    domain.members.iter().all(|member| member.player == actor()),
+                    "payment materials must belong to the paying player"
+                );
+                Answer::CostMaterials(
+                    domain
+                        .members
+                        .iter()
+                        .take(take(&domain.cardinality, domain.members.len()))
+                        .map(|member| member.handle)
+                        .collect(),
+                )
+            }
             InputDomain::Targets(domain) => Answer::Targets(
                 domain
                     .members
@@ -185,7 +191,6 @@ fn settle_combat(game: &mut Game) {
         finish(game, step);
     }
 }
-
 
 fn attack(game: &mut Game, attacker: &str, target: &str) {
     assert_eq!(
@@ -337,10 +342,12 @@ fn bp22_106_gives_rush_and_heals_when_a_follower_attacks() {
         .push(json!({"id":"goblin","card":"BP01-171"}));
     let mut game = game(&initial);
     let before = game.projection(View::Referee).unwrap();
-    assert!(before["objects"]["goblin"]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!("突進")));
+    assert!(
+        before["objects"]["goblin"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("突進"))
+    );
     attack(&mut game, "goblin", "P2.leader");
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["leader"]["life"], 22_u8);
@@ -360,10 +367,15 @@ fn bp22_107_activation_grows_a_beast_by_four() {
 fn bp22_108_pays_an_amulet_to_destroy_and_grow() {
     let mut initial = position("BP22-108");
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"amulet","card":"BP01-133"}]);
+    initial["players"]["P2"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"opponent_amulet","card":"BP01-133"}));
     let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["cemetery"], json!(["amulet"]));
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
+    assert_eq!(state["P2"]["field"], json!(["opponent_amulet"]));
     assert_eq!(state["objects"]["source"]["power"], 5_u8);
 }
