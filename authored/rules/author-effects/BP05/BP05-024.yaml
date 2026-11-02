@@ -1,0 +1,44 @@
+cards:
+  BP05-024:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 1
+                result: created
+                to: field
+                token:
+                  - シールドガーディアン
+                  - ナイト
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    orig_cost_ge: 6
+                    who: opp
+                    zone: field
+                then:
+                  - buff:
+                      hp: 3
+                      on: created
+                      power: 3
+                  - pp:
+                      delta: 2
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP05-T07
+        line: 1
+        section: 1
+      - card: BP05-T06
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
