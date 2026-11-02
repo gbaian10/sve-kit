@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 1
+                to: ex
+            - player_effect:
+                who: self
+                until: turn
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      zone: ex
+                    delta: -10
+                    next_only: true

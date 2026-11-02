@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-024:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve_time:
+          ub: true
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  trait: NIGHTMARE
+                  not_same_name_as_this: true
+                upto: 2
+                to: ex
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      kind: follower
+                      trait: NIGHTMARE
+                    delta: -2
+                    next_only: true
+                until: turn
+      - line: 1
+        keywords:
+          - ward
+        section: 1
+    rule_sections:
+      - section: 1

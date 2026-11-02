@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                kind: spell
+                trait: パッション
+          per_turn: 1
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2
+      - line: 2
+        fanfare:
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      kind: spell
+                      trait: パッション
+                      orig_cost_le: 3
+                    delta: -3
+                    next_only: true
+                until: turn

@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  name: ナテラの大樹
+                delta: -1
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: ナテラの大樹
+                to: ex
+                n: 1
+    token_sources:
+      - card: BP07-T03
+        section: 1
+        line: 1

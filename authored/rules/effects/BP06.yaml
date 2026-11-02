@@ -91,42 +91,6 @@ cards:
         costs:
           - op: act
             subjects: self
-  BP06-074:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects:
-            side: self
-            zone: any
-            type: follower
-            trait: 妖怪
-          amount: -2
-      - line: 2
-        kind: static
-        body:
-          op: replace_damage
-          sources:
-            side: self
-            zone: field
-            type: follower
-            trait: 妖怪
-          amount: 1
-          kind: any
-      - line: 3
-        kind: trigger
-        body:
-          op: modify
-          subjects: self
-          power: 1
-        event: leave
-        subject:
-          side: self
-          zone: field
-          type: follower
-          trait: 妖怪
   BP06-079:
     status: complete
     abilities:
