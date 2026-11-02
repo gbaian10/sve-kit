@@ -1,0 +1,47 @@
+cards:
+  BP17-107:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: リペアモード
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    by: ability
+                    ref: this
+                then:
+                  - damage:
+                      to: enemy
+                      n:
+                        count:
+                          who: self
+                          zone: field
+                          kind: follower
+                          trait: 機械
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP07-T02
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

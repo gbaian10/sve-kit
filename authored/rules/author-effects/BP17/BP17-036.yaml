@@ -1,0 +1,43 @@
+cards:
+  BP17-036:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+                name_contains: ベイリオン
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+                hp: 1
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              n: 1
+                              to: field
+                              token: ナテラの大樹
+                        - - create:
+                              n: 1
+                              to: ex
+                              token: ナテラの大樹
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP07-T03
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
