@@ -107,6 +107,14 @@ carries `v: 1`; a missing or different version is treated as another build's dat
 `prefsStore.reload()` re-reads storage. Recently viewed cards use `sve-kit:recent`
 (`src/settings/recent.ts`), capped and de-duplicated on read as well as on write.
 
+Saved decks live in their own IndexedDB database, `sve-kit-decks` (`src/settings/decks.ts`, one
+record per deck keyed by its `id`), because a deck list outgrows `localStorage` and is not a
+preference. Each record is checked on read (`src/domain/deck/parse.ts`) and a damaged one is
+skipped, not deleted. The list shows a change at once; writes then reach storage one at a time in
+order, and a failed write takes back only its own change, keeping the others still on their way.
+Other tabs re-read storage when told through a `BroadcastChannel`. Clearing local data drops every other database but keeps this one.
+Storage tests import `fake-indexeddb/auto`.
+
 ## i18n
 
 UI text comes from `t()`. A `label` fails lint when its own fixed text (a string, or the literal

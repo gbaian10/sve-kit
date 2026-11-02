@@ -13,8 +13,7 @@
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
-  // The font is only referenced by CSS; fake-indexeddb is imported by the deck store tests that land next.
-  "ignoreDependencies": ["@fontsource/ibm-plex-sans", "fake-indexeddb"],
+  "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
   "entry": [
     "bench/driver.ts",
     "scripts/ci/public-junit-reporter.ts",

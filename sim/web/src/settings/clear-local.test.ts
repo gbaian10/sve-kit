@@ -3,13 +3,14 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { memoryCache } from "../test-utils/cache"
 import { getCacheClearResult, requestColdStart, runRequestedColdStart } from "./clear-local"
 import { clearLocalData } from "./clear-local-core"
+import { DECKS_DB_NAME } from "./decks-db"
 
 afterEach(() => {
   vi.unstubAllGlobals()
 })
 
 describe("clearLocalData", () => {
-  it("drops caches, databases, workers and stored data but keeps settings", async () => {
+  it("drops caches, databases, workers and stored data but keeps settings and decks", async () => {
     const deleted: string[] = []
     vi.stubGlobal("caches", {
       keys: () => Promise.resolve(["snapshots", "images"]),
@@ -19,7 +20,7 @@ describe("clearLocalData", () => {
       },
     })
     vi.stubGlobal("indexedDB", {
-      databases: () => Promise.resolve([{ name: "search" }, {}]),
+      databases: () => Promise.resolve([{ name: "search" }, { name: DECKS_DB_NAME }, {}]),
       deleteDatabase: (name: string) => {
         const request: { onsuccess?: () => void } = {}
         // The deletion only counts once the request reports success.
