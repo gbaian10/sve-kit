@@ -1,0 +1,27 @@
+cards:
+  BP18-P54:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: picked
+              from:
+                who: self
+                zone: cemetery
+                trait: 透京
+                orig_cost_le: 2
+              distinct_by: name
+              upto: 3
+          do:
+            - move:
+                ref: picked
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,51 @@
+cards:
+  BP18-045:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - drain
+      - line: 2
+        fanfare:
+          do:
+            - banish:
+                top:
+                  n: 2
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 5
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - assail
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 10
+                then:
+                  - buff:
+                      "on": this
+                      power: 1
+                      hp: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

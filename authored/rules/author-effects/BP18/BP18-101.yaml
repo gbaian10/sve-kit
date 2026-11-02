@@ -1,0 +1,35 @@
+cards:
+  BP18-101:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            pp: 2
+          targets:
+            - bind: revive
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: 透京
+                orig_cost_le: 4
+                not_same_name_as_this: true
+              n: 1
+          do:
+            - move:
+                ref: revive
+                to: field
+                result: revived
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
