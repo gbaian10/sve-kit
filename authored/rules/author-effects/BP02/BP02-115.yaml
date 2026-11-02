@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-115:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                orig_cost_le: 2
+              n: 1
+          do:
+            - destroy: victim
+            # 「それのリーダー」 is the chosen follower's controller, fixed when it was chosen.
+            - life:
+                who:
+                  master_of: victim
+                delta: 3

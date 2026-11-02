@@ -462,8 +462,16 @@ pub(super) enum CreateZone {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Life {
-    pub who: SelfPlayer,
+    pub who: LifeHolder,
     pub delta: Number,
+}
+
+/// Whose leader a life change reaches; `master_of` is the chosen object's controller.
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum LifeHolder {
+    Controller(SelfPlayer),
+    MasterOf { master_of: String },
 }
 
 #[derive(Deserialize)]

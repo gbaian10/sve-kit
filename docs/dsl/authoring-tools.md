@@ -105,6 +105,8 @@ records:
 
 `auto.on.dealt_damage` 以同一筆實際傷害的來源套用事件主體篩選；`auto.on.damaged.recipient` 可指定 `this` 或 `{leader: self | opp}`。兩者的 `kind` 可省略或指定 `ability | attack | combat`，`during` 可限制回合；先處理禁止／防止，再以實際正傷害判斷，全防止與零傷害沒有事件。對領袖的攻擊傷害屬 `attack`，不屬 `combat`；從者交戰中攻擊方造成的傷害同時符合兩者，反擊方符合 `combat`（[Q282](https://shadowverse-evolve.com/cardlist/?cardno=BP02-020)）。傷害來源與受傷者各自篩選，正式目標、付款與每回合一次限制沿用共同待機流程。
 
+`life` 的 `who` 接受 `self` 與 `{master_of: <目標>}`：後者是「それのリーダー」，取已選目標在選取時的控制者，目標隨後被破壞或移區仍回復同一位領袖。對手或對手集合的 `life`、`set_life` 的其他對象尚未接線，載入時拒絕。
+
 `auto.on.life_changed` 可用 `who: self | opp`、`direction: up | down` 與 `during` 篩選領袖生命實際變更；省略條件即不限制。加減或設定生命都按變更前後的實際差額產生事件，差額為零不產生事件；生命不封頂於 20。生命支付與傷害造成的減少亦經同一變更入口，但直接加減生命不是傷害，不會因此觸發 `damaged`。這些事件頭沿共用觸發額度，可用 `per_turn: N` 宣告每個實際回合的正整數上限。
 
 觸發頭的 `cost.act_self` 與 `cost.self_to_cemetery` 目前尚未通過執行端准入，不能以同名物件代替持有者付款，也不能移除費用代替。

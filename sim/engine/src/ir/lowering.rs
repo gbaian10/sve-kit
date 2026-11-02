@@ -1377,24 +1377,8 @@ impl<'definitions> BodyContext<'definitions> {
                 mode: StepwiseMode::Exact,
             }),
             ast::Step::Damage(damage) => self.damage(damage, span, path),
-            ast::Step::Life(life) => {
-                let ast::SelfPlayer::Controller = life.who;
-                Ok(Action::Life {
-                    player: PlayerRef::Controller {},
-                    change: super::NumericChange::Add {
-                        amount: self.number(&life.delta, path, &mut BTreeSet::new())?,
-                    },
-                })
-            }
-            ast::Step::SetLife(life) => {
-                let ast::SelfPlayer::Controller = life.who;
-                Ok(Action::Life {
-                    player: PlayerRef::Controller {},
-                    change: super::NumericChange::Set {
-                        amount: self.number(&life.n, path, &mut BTreeSet::new())?,
-                    },
-                })
-            }
+            ast::Step::Life(life) => self.life(life, path),
+            ast::Step::SetLife(life) => self.set_life(life, path),
         }
     }
 }
