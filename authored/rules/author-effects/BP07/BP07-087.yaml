@@ -1,0 +1,39 @@
+cards:
+  BP07-087:
+    abilities:
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - move:
+                ref: ally
+                result: returned
+                to: field
+          per_turn: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                orig_cost_le: 2
+                trait: 機械
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

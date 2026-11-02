@@ -1,0 +1,41 @@
+cards:
+  BP07-069:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: follower
+                  trait: 機械
+                  who: self
+                  zone: field
+              op: eq
+              right: 5
+        line: 1
+      - activate:
+          cost:
+            banish:
+              n: 2
+              sel:
+                trait: 機械
+                who: self
+                zone: cemetery
+          do:
+            - create:
+                n: 1
+                to: field
+                token: プロダクトマシーン
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

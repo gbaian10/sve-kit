@@ -1,0 +1,50 @@
+cards:
+  BP07-056:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - look:
+                      bind: seen
+                      top:
+                        n: 3
+                        who: self
+                  - choose:
+                      bind: picked
+                      from:
+                        class: ドラゴン
+                        in: seen
+                        kind: follower
+                      may: true
+                      n: 1
+                  - move:
+                      ref: picked
+                      result: moved
+                      to: ex
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: moved
+                            view: before
+                        in: seen
+                      to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
