@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP01-043:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        static:
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: ウマ娘
+              op: ge
+              right: 20
+          effects:
+            - grant:
+                "on": this
+                abilities:
+                  - attack_time:
+                      do:
+                        - buff:
+                            "on": this
+                            power: 3
+                            hp: 3
+                keywords:
+                  - storm
+      - line: 3
+        race_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
+            - move:
+                top:
+                  who: self
+                  n: 2
+                to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

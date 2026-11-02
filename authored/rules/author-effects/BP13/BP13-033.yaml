@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-033:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        static:
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: レヴィオン
+              op: ge
+              right: 5
+          effects:
+            - grant:
+                "on": this
+                abilities:
+                  - attack_time:
+                      do:
+                        - buff:
+                            "on": this
+                            power: 2
+                            hp: 1
+                keywords:
+                  - assail
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

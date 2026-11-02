@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD03b-002:
+    abilities:
+      - line: 1
+        keywords:
+          - twin_drive
+      - line: 2
+        static:
+          while:
+            all:
+              - awakened: true
+              - exists:
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: かげろう
+                  other: true
+          effects:
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+      - line: 3
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 5
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - grant:
+                      "on": this
+                      until: turn
+                      abilities:
+                        - auto:
+                            "on":
+                              dealt_damage:
+                                ref: this
+                                kind: combat
+                            per_turn: 1
+                            do:
+                              - stand: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
