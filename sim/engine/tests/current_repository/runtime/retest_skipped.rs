@@ -303,7 +303,16 @@ fn bp16_024_evolution_makes_two_soldiers_and_super_evolution_arms_two_tokens() {
         for id in armed {
             let object = &view["objects"][id.as_str().unwrap()];
             assert!(object["card"].as_str().unwrap().contains("-T"));
-            assert!(object["power"].as_u64().unwrap() >= 2);
+            let expected = match object["name"].as_str().unwrap() {
+                "スティールナイト" => 3_u8,
+                "シールドガーディアン" | "ナイト" => 2_u8,
+                other => panic!("unexpected soldier token: {other}"),
+            };
+            assert_eq!(
+                object["power"], expected,
+                "the chosen token gains exactly +1/+1"
+            );
+            assert_eq!(object["hp"], expected, "the chosen token gains exactly +1/+1");
         }
         assert_eq!(
             view["objects"]["printed"]["power"], 1_u8,
@@ -363,7 +372,7 @@ fn bp17_019_attack_buff_counts_five_royal_cards_and_fanfare_picks_a_token() {
     for card in ["BP17-019", "BP17-SL05", "BP17-U03"] {
         let mut fanfare = new_game(&position(card));
         play(&mut fanfare, "source", Policy { mode: 2, ..ACCEPT });
-        assert_eq!(field_tokens(&state(&fanfare)).len(), 1);
+        assert_eq!(field_tokens(&state(&fanfare)), ["シールドガーディアン"]);
 
         for royal in [false, true] {
             let mut initial = position(card);
@@ -413,6 +422,8 @@ fn bp19_022_fanfare_evolves_itself_when_five_royal_cards_are_present() {
             play(&mut game, "source", ACCEPT);
             let view = state(&game);
             assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
+            assert_eq!(named(&view, "field", "スティールナイト"), 1);
+            assert_eq!(named(&view, "field", "ナイト"), 1);
             assert_eq!(view["objects"]["source"]["evolved"], royal);
         }
     }
@@ -570,6 +581,17 @@ fn ecp02_063_keeps_a_chosen_card_on_top_and_sends_the_rest_to_the_bottom() {
         activate(&mut game, "source", card, ACCEPT);
         let view = state(&game);
         assert_eq!(view["P1"]["hand"], json!(["idol"]));
+        assert_eq!(deck(&view), ["tail"]);
+        let public = game.projection(View::P2).unwrap();
+        let known = public["known_cards"].as_array().unwrap();
+        assert!(
+            known.iter().any(|entry| entry["id"] == "idol"),
+            "the chosen card is publicly revealed"
+        );
+        assert!(
+            !known.iter().any(|entry| entry["id"] == "tail"),
+            "the untouched deck card stays private"
+        );
         assert_eq!(
             view["P1"]["ex"].as_array().unwrap().len(),
             1,
