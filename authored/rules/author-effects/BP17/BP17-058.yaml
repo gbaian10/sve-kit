@@ -1,0 +1,49 @@
+cards:
+  BP17-058:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - buff:
+                "on":
+                  kind: follower
+                  who: opp
+                  zone: field
+                power: &x
+                  minus:
+                    - 0
+                    - count:
+                        who: self
+                        zone: ex
+                        trait: 海洋
+                hp: *x
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 2
+              - to_cemetery:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: ex
+                    trait: 海洋
+          per_turn: 1
+          do:
+            - buff:
+                "on": this
+                power: 2
+                hp: 2
+            - grant:
+                "on": this
+                keywords:
+                  - storm
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

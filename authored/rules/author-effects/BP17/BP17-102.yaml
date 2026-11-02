@@ -1,0 +1,33 @@
+cards:
+  BP17-102:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      who: self
+                      zone: deck
+                      kind: follower
+                      name_contains: マーロン
+                  - n: 1
+                    sel:
+                      who: self
+                      zone: deck
+                      kind: follower
+                      orig_cost_le: 2
+                to: field
+            - life:
+                delta: 2
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
