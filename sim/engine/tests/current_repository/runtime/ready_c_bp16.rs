@@ -398,3 +398,25 @@ fn bp16_075_necrocharge_hounds_get_storm_and_one_is_paid_for_damage() {
     assert_eq!(after["objects"]["enemy"]["damage"], 4_u8);
     assert_eq!(after["P1"]["field"].as_array().unwrap().len(), 2);
 }
+
+#[test]
+fn bp16_080_full_field_does_not_emit_entry_or_healing() {
+    let mut initial = evolved_position("BP16-079", "BP16-080");
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"skeleton","card":"BP01-117"},{"id":"large","card":"BP01-037"}]);
+    for index in 0..4_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("full{index}"),"card":"BP01-171"}));
+    }
+    let mut game = game(&initial);
+    evolve(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(state["P1"]["cemetery"], json!(["skeleton", "large"]));
+    assert_eq!(
+        state["P1"]["leader"]["life"], 20_u8,
+        "a failed entry must not trigger the printed heal"
+    );
+}

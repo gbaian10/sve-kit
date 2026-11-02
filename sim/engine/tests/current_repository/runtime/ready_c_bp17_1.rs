@@ -499,3 +499,21 @@ fn bp17_001_fifth_played_card_unlocks_the_bow_search() {
     assert!(after["P1"]["field"].as_array().unwrap().contains(&json!("bow")));
     assert_eq!(after["P1"]["deck"], json!(["wrong"]));
 }
+
+#[test]
+fn bp17_103_full_field_keeps_the_target_and_cleans_up_the_spell() {
+    let mut initial = position("BP17-103");
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"munyal","card":"BP17-095"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    for index in 0..5_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("full{index}"),"card":"BP01-171"}));
+    }
+    let mut game = game(&initial);
+    play_with(&mut game, "source", 2);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(state["P1"]["cemetery"], json!(["munyal", "source"]));
+}

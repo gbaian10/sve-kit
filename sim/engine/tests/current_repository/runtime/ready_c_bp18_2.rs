@@ -501,3 +501,61 @@ fn bp18_015_evolution_returns_another_tokyo_follower_to_hand() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["clerk"]));
 }
+
+#[test]
+fn bp18_101_paid_fanfare_returns_another_tokyo_follower_full_field() {
+    let mut initial = position("BP18-101");
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"same","card":"BP18-101"},{"id":"clerk","card":"BP18-126"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    for index in 0..4_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("full{index}"),"card":"BP01-171"}));
+    }
+    let mut game = game(&initial);
+    play(&mut game, "source");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(state["P1"]["cemetery"], json!(["same", "clerk"]));
+    assert_eq!(state["P1"]["pp"]["current"], 5_u8);
+}
+
+#[test]
+fn bp18_094_fanfare_returns_a_one_cost_follower_full_field() {
+    let mut initial = position("BP18-094");
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"large","card":"BP01-037"},{"id":"skeleton","card":"BP01-117"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    for index in 0..4_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("full{index}"),"card":"BP01-171"}));
+    }
+    let mut game = game(&initial);
+    play(&mut game, "source");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(state["P1"]["cemetery"], json!(["large", "skeleton"]));
+}
+
+#[test]
+fn bp18_085_full_field_keeps_the_target_and_cleans_up_the_spell() {
+    let mut initial = position("BP18-085");
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"clerk","card":"BP18-126"},{"id":"punk","card":"BP18-124"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    for index in 0..5_u8 {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":format!("full{index}"),"card":"BP01-171"}));
+    }
+    let mut game = game(&initial);
+    play(&mut game, "source");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(state["P1"]["cemetery"], json!(["clerk", "punk", "source"]));
+}
