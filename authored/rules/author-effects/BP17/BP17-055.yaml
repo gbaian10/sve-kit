@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-055:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+      - line: 2
+        attack_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 2
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      to:
+                        leader_of: victim
+                      n: 1
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: 黒龍の呪い
+                to: ex
+                n: 1
+      - line: 4
+        activate:
+          cost:
+            pp: 4
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 3
+            - damage:
+                to:
+                  leader_of: victim
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

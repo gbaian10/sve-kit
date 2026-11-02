@@ -1,0 +1,61 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-P33:
+    abilities:
+      - line: 1
+        auto:
+          zone: ex
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  not:
+                    awakened: true
+                then:
+                  - damage:
+                      to:
+                        leader: self
+                      n: 1
+      - line: 1
+        section: 1
+        play:
+          cannot_if:
+            not:
+              awakened: true
+      - line: 2
+        section: 1
+        spell:
+          targets:
+            - bind: rowen
+              from:
+                who: self
+                zone: field
+                kind: follower
+                name: 竜槍の戦士・ローウェン
+              n: 1
+          do:
+            - grant:
+                "on": rowen
+                until: turn
+                abilities:
+                  - static:
+                      effects:
+                        - damage_mod:
+                            source: this
+                            delta: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    token:
+      name: 黒龍の呪い
+      template: true
+    rule_sections:
+      - section: 1

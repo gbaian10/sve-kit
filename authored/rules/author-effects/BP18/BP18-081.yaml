@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-081:
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 2
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                "on": this
+                abilities:
+                  - static:
+                      effects:
+                        - grant:
+                            "on":
+                              who: self
+                              zone: field
+                              kind: follower
+                              name: フォレストバット
+                            keywords:
+                              - storm
+                              - bane
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

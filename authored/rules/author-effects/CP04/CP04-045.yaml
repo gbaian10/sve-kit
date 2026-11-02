@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-045:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          targets:
+            - bind: recover
+              from:
+                who: self
+                zone: cemetery
+                kind: spell
+                trait: プリコネ
+              n: 1
+          do:
+            - move:
+                ref: recover
+                to: ex
+                result: recovered
+            - grant:
+                "on":
+                  follow: recovered
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      zone: ex
+                      do:
+                        - move:
+                            ref: this
+                            to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

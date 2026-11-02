@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-080:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 吸血鬼
+              n: 1
+          do:
+            - create:
+                token: フォレストバット
+                to: ex
+                n: 1
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T15

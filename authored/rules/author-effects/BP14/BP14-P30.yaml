@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-P30:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            evolved:
+              who: self
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 2
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: 指揮官
+              n: 1
+          do:
+            - grant:
+                "on": ally
+                abilities:
+                  - attack_time:
+                      do:
+                        - damage:
+                            to:
+                              leaders: opponents
+                            n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    token:
+      name: 炎将の二槍
+      template: true
