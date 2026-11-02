@@ -1,5 +1,5 @@
 use super::*;
-use sve_engine::game::internal::{DamageShare, InputDomain};
+use sve_engine::game::internal::{DamageShare, InputDomain, ResumeStage};
 
 fn tree(head: &str, body: Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -281,21 +281,85 @@ fn damaged_targets_are_declared_by_the_controller_on_the_opponents_turn() {
 }
 
 #[test]
-fn ex_follower_phase_is_rejected_before_play() {
-    let program = program(
-        "auto",
-        json!({"zone":"ex", "on":{"phase":{"whose":"self","which":"end"}}, "do":[]}),
+fn ex_follower_phase_runs_only_on_its_controllers_turn_and_reads_its_counter() {
+    for active in ["P1", "P2"] {
+        let program = program(
+            "auto",
+            json!({"zone":"ex", "on":{"phase":{"whose":"self","which":"end"}},
+                "do":[{"damage":{"to":{"leader":"opp"},
+                    "n":{"counter":{"on":"this","name":"phase"}}}}]}),
+        );
+        let mut initial = setup(1, json!([]));
+        initial["turn"]["active"] = json!(active);
+        for player in ["P1", "P2"] {
+            initial["players"][player]["zones"]["hand"] = json!([]);
+            initial["players"][player]["zones"]["field"] = json!([]);
+        }
+        initial["players"]["P1"]["zones"]["ex"] = json!([
+            {"id":"source","card":"unit-follower","state":{"counters":{"phase":3}}}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-follower-phase",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        assert_eq!(
+            game.internal_rule_action(&json!({"do":"end-phase"}))
+                .unwrap()
+                .outcome,
+            "resolved"
+        );
+        let pending = game.internal_pending_choice().unwrap();
+        if active == "P1" {
+            let question = pending.unwrap();
+            assert_eq!(question.actor, PlayerId { seat: 1 });
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("phase trigger")
+            };
+            assert_eq!(options.len(), 1);
+            resolved(
+                game.answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap(),
+            );
+            if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+        } else {
+            assert!(
+                pending.is_none(),
+                "an opponent end phase does not trigger the own-phase ability"
+            );
+        }
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P2"]["leader"]["life"],
+            if active == "P1" { 17 } else { 20 }
+        );
+        assert_eq!(view["P1"]["ex"], json!(["source"]));
+        assert_eq!(view["objects"]["source"]["generation"], 0);
+        assert_eq!(view["objects"]["source"]["counters"]["phase"], 3);
+    }
+}
+
+#[test]
+fn ex_follower_non_phase_entry_is_rejected_at_lowering() {
+    let mut body = json!({"zone":"field", "on":{"enter_field":{"ref":"this"}}, "do":[]});
+    lowerer().lower(&tree("auto", body.clone())).unwrap();
+    body["zone"] = json!("ex");
+    let error = lowerer().lower(&tree("auto", body)).unwrap_err();
+    assert_eq!(
+        error.code, "unsupported_construct",
+        "the valid entry observer cannot acquire an EX observation scope"
     );
-    let mut game = Game::new(
-        catalog(),
-        &setup(1, json!([])),
-        &Value::Null,
-        &Value::Null,
-        "ex-follower",
-    )
-    .unwrap();
-    game.load_internal_card("unit-follower", &program)
-        .unwrap_err();
+    assert_eq!(error.path, "/cards/BP08-038/abilities/0");
 }
 
 #[test]
