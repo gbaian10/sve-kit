@@ -19,7 +19,7 @@ use crate::ir::{
 };
 use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
-use crate::ir::{TurnId, printed_keywords};
+use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -754,6 +754,10 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if stand_restrictions::is_static(ability) {
+        super::posture::check_static(located)?;
+        return Ok(true);
+    }
     if attack_restrictions::is_static(ability) {
         attack_restrictions::check(located)?;
         return Ok(true);
@@ -776,6 +780,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if other_costs::is_static(ability)
+        || stand_restrictions::is_static(ability)
         || attack_restrictions::is_static(ability)
         || static_keywords::is_static(ability)
         || prevention::is_static(ability)

@@ -776,8 +776,15 @@ pub(super) struct TraitEffect {
 #[serde(deny_unknown_fields)]
 pub(super) struct CannotStand {
     pub what: StandAction,
-    pub on: Affected,
+    pub on: StandSubject,
     pub during: StandDuring,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StandSubject {
+    This,
+    Affected,
 }
 
 #[derive(Deserialize)]

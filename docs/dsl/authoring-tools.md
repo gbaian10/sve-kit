@@ -216,6 +216,8 @@ apply:
     next_phase: { who: opp, phase: start, edge: end }
 ```
 
+持有者永久不能在自己的開始階段依規則起身時，寫 `static.effects: [{cannot: {what: stand, on: this, during: {phase: start, who: self, cause: rule}}}]`（CP02-025、ECP01-053）。宣告只在持有者仍在場上且保有此能力時有效，沒有回合期限；每次自己的開始階段都重新讀取。它不阻止效果的 `stand`，因此 Main 階段的印刷付費能力仍可使其起身；沿用頭費用的拒付流程，拒付時保持橫置。此入口不接受 `affected`、對手開始階段或 `static.while`；有期限的施加仍使用上方既有 `apply`。
+
 ## 寫入與驗證
 
 ```bash
