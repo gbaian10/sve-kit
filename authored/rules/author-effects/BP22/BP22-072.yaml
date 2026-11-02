@@ -1,0 +1,42 @@
+cards:
+  BP22-072:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          optional_cost:
+            pp: 2
+            result: enhanced
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - if:
+                cond:
+                  paid:
+                    receipt: enhanced
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

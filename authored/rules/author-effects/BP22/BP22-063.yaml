@@ -1,0 +1,62 @@
+cards:
+  BP22-063:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n:
+                  count:
+                    who: self
+                    zone: ex
+                    trait: ドラゴニュート
+                to: enemy
+      - line: 3
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  trait: ドラゴニュート
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
