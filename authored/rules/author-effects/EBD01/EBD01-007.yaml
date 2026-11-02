@@ -1,0 +1,48 @@
+cards:
+  EBD01-007:
+    abilities:
+      - auto:
+          do:
+            - life:
+                delta: 2
+                who: self
+          "on":
+            evolved:
+              sel:
+                kind: follower
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                ref: ally
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: moved
+                until: turn
+          targets:
+            - bind: ally
+              from:
+                class: エルフ
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
