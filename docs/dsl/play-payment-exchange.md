@@ -10,7 +10,7 @@
 
 ## 1. 首批形狀
 
-每個可打出 face 至多一組交換；材料恰為自己公開區域的一個集合、固定正整數張數，
+每個可打出 face 至多一組交換；材料恰為自己公開區域或手牌的一個集合、固定正整數張數，
 同一實體不得重選。交換的修正恰為一個 literal Delta≤0 或 Set≥0，無另附條件或列表。
 一般無付款修正仍沿原契約；所有 set 宣告合計至多一個，包括未選的交換 set。
 
@@ -19,6 +19,7 @@
 | `to_cemetery` | 自己場上 → 各材料 owner 的墓地；是 Move，不是 Destroy | BP07-004 プライマルギガント：自然卡 4 張，delta −4 |
 | `banish` | 自己墓地 → 各材料 owner 的消滅領域 | BP01-P11 次元の超越（同 BP01-057）：Spell 10 張，set 7 |
 | `act` | 自己場上 Stand 材料 → Act；已 Act 者不能支付 | BP07-024 王の一閃：『ナテラの大樹』2 張，delta −2 |
+| `discard` | 自己手牌 → 墓場；沿用一般棄牌動作與回條 | ECP01-036 天まで焦がせ祈りの火：ウマ娘 1 張，delta −2 |
 
 材料篩選沿受驗 ObjectSel 的公開種類、種族、規則名稱／名稱條件與原費用常值比較；
 缺受驗讀值、名稱解析或 selector lowering 就拒絕該卡，不能靠卡號或私人別名比對。
@@ -26,8 +27,8 @@
 橫置 11）。這是片段形狀數，包含本文不同的同名卡；不是整卡可用數或 runtime 覆蓋率。
 
 以下整卡拒絕，包含未選分支：`one_of`／「または」、多組交換、`steps`、材料 groups、
-upto／any、random、distinct_by、cost_sum_ge、材料 payload.result、動態張數、X、
-非公開材料、EX 材料、其他操作、額外／模式內 optional 或 additional、alt、+N、正 delta、
+upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payload.result、動態張數、X、
+其他非公開區域的材料、EX 材料、其他操作、額外／模式內 optional 或 additional、alt、+N、正 delta、
 複數 set、未受驗的 aura／next-play／期限。BP01-SL15 骸の王的兩種材料不能拆成只收其中
 一支；開闢の予言者的十組原費用不能縮成任選十張。付款交換本身依 CR 屬可選追加成本，
 本節拒絕的是**除此單一交換以外**的追加費用，不是把交換改稱另一種遊戲規則。
@@ -46,7 +47,7 @@ upto／any、random、distinct_by、cost_sum_ge、材料 payload.result、動態
 | 步驟 6–9 | 付款後檢查場容量，成功後才 played／本文／resolved／CheckTiming；付款產生的事件不在步驟 5 插入能力解決 |
 
 材料由 play controller 選，預設所屬玩家依 CR 10.4.3；第一版只收 self，不詢問對手。
-回答綁當次 execution、DecisionId、材料選擇狀態版本與世代，公開合法候選及選中材料。
+回答綁當次 execution、DecisionId、材料選擇狀態版本與世代。公開區域材料公開候選；手牌候選與選擇只送付款者，棄牌完成後才公開已支付的卡。
 材料選擇是付款前的 `CostMaterials`，不是步驟 2 接受決定的一部分，也不是本文 choose。
 它使用步驟 5a 的未付款狀態；不得重用本文 targets binding 或在扣 PP 後重新求候選。
 這個狀態是付款階段的內部快照，不新增 capture 種類或放寬其他 play 參數的快照規則。
@@ -143,8 +144,10 @@ face 可以只有 exchange 而沒有普通 modifiers；兩者都空才是空項�
 
 `receipt` 是整組交換的 PaymentResult：拒絕在步驟 5 結束記 Declined／不完整；接受且
 固有 PP 與材料都付完才記 PaymentComplete=true。付不起不產生可供本文消費的結果。
-材料自身的動作 receipt 仍供 authority 記錄；本片不將其 actual、before／after 或成功
-材料集合開放給 DSL 本文。既有合法置換可算付款成功是 CR 10.6.2.5.2 的一般規則，
+公開材料自身的動作 receipt 仍只供 authority 記錄。手牌交換的 `discard.result` 可具名其棄牌回條，
+僅同 face、同次普通 Spell 在完整付款後可用 `cmp: {left: {count: {in: {objects_of: fuel, view: before}, orig_cost_ge: 7}}, op: ge, right: 1}`
+讀取已棄卡的原始印刷費用，沿用 `Predicate::ReceiptAny`，不受目前費用或移區後狀態影響。拒付時回條為空，查詢為 false；
+成本、目標、captures 與其他能力不能提前或跨次讀取。這個結果不是 Fanfare 的付款來源，亦不授權讀取其他手牌。既有合法置換可算付款成功是 CR 10.6.2.5.2 的一般規則，
 但本版依 §3.2 拒絕置換，不據物理移動數替未支援置換猜付款成功。
 
 wrapper.result 若有名稱，只降低為上述 CardPlay 的具名 PaymentComplete 讀值；
@@ -154,7 +157,7 @@ wrapper.result 若有名稱，只降低為上述 CardPlay 的具名 PaymentCompl
 查歷史。Follower 沒有同次 Spell body，不能把它的付款結果直接注入 Fanfare／Lastword
 或下一次 play。成本、captures、targets、模式數及材料 selector 中的讀取一律拒絕。
 lowering 不為交換產生本文 `K.pay PlayParameter`；本文另有這種付款節點屬 §1 的額外
-optional，整卡拒絕。同次本文只透過上述 PaymentComplete 讀值，不保留兩份付款描述。
+optional，整卡拒絕。同次本文除上述 PaymentComplete 外，只增加前述已棄卡回條查詢；不保留兩份付款描述。
 
 ## 5. lowering、良構與准入
 

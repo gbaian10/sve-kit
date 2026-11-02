@@ -257,6 +257,7 @@ struct Checker {
     source_information_entry: bool,
     card_payments: BTreeMap<String, ReceiptId>,
     card_payment_body: Option<super::FaceId>,
+    card_discards: BTreeMap<String, ReceiptId>,
     path: String,
 }
 #[expect(
@@ -306,6 +307,7 @@ impl Checker {
             ability_source: None,
             source_information_entry: false,
             card_payments: BTreeMap::new(),
+            card_discards: BTreeMap::new(),
             card_payment_body: None,
             path: String::new(),
         }

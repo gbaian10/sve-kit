@@ -1,8 +1,9 @@
-use super::{Execution, Fact, InstructionOutcome, Result, invalid, unsupported};
+use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Binding, Bool, Characteristics, ClassRead, Expr, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ObjectReceipt, ObjectView, Predicate, ReceiptLocation,
-    RuntimeObjectView, TraitsRead,
+    Binding, Bool, CharacteristicView, Characteristics, ClassRead, Comparison, Expr, Info, Int,
+    IntOperation, KindRead, MemberProjection, MovementReceipt, NamesRead, NumberRead,
+    ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptLocation, RuntimeObjectView,
+    TraitsRead,
 };
 use core::convert::identity;
 
@@ -23,10 +24,11 @@ pub(super) fn check(
     {
         return Err(unsupported("discard member projection"));
     }
-    matches(predicate, member, None).map(|_| ())
+    matches(predicate, member, None, None).map(|_| ())
 }
 
 pub(super) fn any(
+    game: &Game,
     execution: &Execution,
     receipt: &ObjectReceipt,
     projection: MemberProjection,
@@ -60,7 +62,12 @@ pub(super) fn any(
                 _ => None,
             })
             .ok_or_else(|| invalid("missing discarded characteristics"))?;
-        if matches(predicate, member, Some(characters))? {
+        if matches(
+            predicate,
+            member,
+            Some(characters),
+            Some((game, execution, before.object)),
+        )? {
             return Ok(true);
         }
     }
@@ -78,6 +85,7 @@ fn matches(
     expression: &Expr<Bool>,
     member: Binding<RuntimeObjectView>,
     characters: Option<&Characteristics>,
+    original: Option<(&Game, &Execution, ObjectRef)>,
 ) -> Result<bool> {
     let Expr::Compute(predicate) = expression else {
         return match expression {
@@ -90,7 +98,7 @@ fn matches(
             // Validate every branch even when an earlier value determines the result.
             let values = predicates
                 .iter()
-                .map(|item| matches(item, member, characters))
+                .map(|item| matches(item, member, characters, original))
                 .collect::<Result<Vec<_>>>()?;
             Ok(if matches!(predicate.as_ref(), Predicate::And { .. }) {
                 values.into_iter().all(identity)
@@ -98,7 +106,16 @@ fn matches(
                 values.into_iter().any(identity)
             })
         }
-        Predicate::Not { predicate } => matches(predicate, member, characters).map(|value| !value),
+        Predicate::Not { predicate } => {
+            matches(predicate, member, characters, original).map(|value| !value)
+        }
+        Predicate::CompareInt {
+            left: Expr::Compute(operation),
+            comparison,
+            right: Expr::Literal(Int(threshold)),
+        } if *threshold >= 0 && *comparison == Comparison::GreaterEqual => {
+            original_cost_matches(operation, member, *threshold, original)
+        }
         Predicate::KindEquals {
             left: Expr::Live(read),
             right: Expr::Literal(expected),
@@ -153,4 +170,30 @@ fn matches(
         }
         _ => Err(unsupported("discard member predicate shape")),
     }
+}
+
+fn original_cost_matches(
+    operation: &IntOperation,
+    member: Binding<RuntimeObjectView>,
+    threshold: i64,
+    original: Option<(&Game, &Execution, ObjectRef)>,
+) -> Result<bool> {
+    let IntOperation::InformationOrZero {
+        information:
+            NumberRead::Cost {
+                object,
+                view: CharacteristicView::Original,
+            },
+    } = operation
+    else {
+        return Err(unsupported("discard original cost comparison"));
+    };
+    snapshot(object, member)?;
+    let Some((game, execution, before)) = original else {
+        return Ok(false);
+    };
+    // The immutable base printing survives movement and effective-cost changes.
+    let card = &game.object(execution.object_id(before)?)?.card;
+    let cost = super::cost::printed_cost(&game.catalog.face(card, 0)?["cost"])?;
+    Ok(cost >= threshold)
 }

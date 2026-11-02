@@ -5,10 +5,10 @@ use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::{
-    Ability, AbilityKind, AbilityQualification, Capture, CardProgram, Cardinality,
-    CharacteristicPatch, ChoiceDomain, ContinuousLayer, DecisionKind, Duration, DurationEnd,
-    Effect, EffectTarget, EventContext, EventPattern, ExecutionRef, GrantedAbility, Nat,
-    NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, StandScope,
+    Ability, AbilityKind, AbilityQualification, Action, Capture, CardProgram, Cardinality,
+    CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind, Duration,
+    DurationEnd, Effect, EffectTarget, EventContext, EventPattern, ExecutionRef, GrantedAbility,
+    Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, StandScope,
     TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec,
     Visibility, ZoneKind,
 };
@@ -97,6 +97,14 @@ impl WellFormedCardProgram {
                         checker.at("exchange", |checker| {
                             checker.located(exchange, |checker, exchange| {
                                 checker.exchange(exchange, &mut has_set)?;
+                                if let CostSpec::Ordered { steps } = &exchange.cost
+                                    && let Some(step) = steps.first()
+                                    && matches!(step.instruction.action, Action::Discard { .. })
+                                {
+                                    checker
+                                        .card_discards
+                                        .insert(face.face.0.clone(), step.instruction.receipt);
+                                }
                                 checker
                                     .card_payments
                                     .insert(face.face.0.clone(), exchange.receipt);

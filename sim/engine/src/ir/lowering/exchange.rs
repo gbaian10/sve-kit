@@ -1,10 +1,10 @@
 use super::{Allocator, Located, LoweringError, SourceSpan, ast, costs, unsupported};
 use crate::ir::{
-    Action, Binding, Cardinality, ChoiceDomain, CostChange, CostSpec, CostStep, Decision,
-    DecisionId, DecisionKind, Disjointness, ExecutionRef, Expr, InputMode, Instruction,
-    InstructionContext, InstructionId, Int, MoveDestination, MoveReason, MoveSpec, Nat, OwnerZone,
-    PlayCostExchange, PlaySlot, PlayerRef, Posture, ReceiptId, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, Selector, Visibility,
+    Action, Binding, Bool, Cardinality, ChoiceDomain, CostChange, CostSpec, CostStep, Decision,
+    DecisionId, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, InputMode,
+    Instruction, InstructionContext, InstructionId, Int, MoveDestination, MoveReason, MoveSpec,
+    Nat, OwnerZone, PlayCostExchange, PlaySlot, PlayerRef, Posture, ReceiptId, SelectionConstraint,
+    SelectionGroup, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 enum MaterialAction {
@@ -34,45 +34,9 @@ pub(super) fn lower(
         },
         _ => return Err(unsupported(&path)),
     };
-    let (material, operation) = match (&optional.to_cemetery, &optional.banish, &optional.act) {
-        (Some(material), None, None) if matches!(material.sel.zone, ast::PublicZone::Field) => {
-            (material, MaterialAction::Put)
-        }
-        (None, Some(material), None) if matches!(material.sel.zone, ast::PublicZone::Cemetery) => {
-            (material, MaterialAction::Banish)
-        }
-        (None, None, Some(material)) if matches!(material.sel.zone, ast::PublicZone::Field) => {
-            (material, MaterialAction::Act)
-        }
-        _ => return Err(unsupported(&path)),
-    };
-    if material.n == 0 || !matches!(material.sel.who, ast::Side::Controller) {
-        return Err(unsupported(&path));
-    }
     let scope = allocator.scope(&path)?;
     let binding = Binding::new(allocator.id(&path)?, scope);
-    let materials = materials(material, binding, allocator, &path)?;
-    let objects = Selector::Bound { reference: binding };
-    let action = match operation {
-        MaterialAction::Put => Action::Move {
-            objects,
-            movement: MoveSpec {
-                to: MoveDestination::Owners {
-                    zone: OwnerZone::Cemetery,
-                },
-                position: None,
-                order: None,
-                initial_posture: None,
-                entry_effects: vec![],
-            },
-            reason: MoveReason::Put,
-        },
-        MaterialAction::Banish => Action::Banish { objects },
-        MaterialAction::Act => Action::Posture {
-            objects,
-            posture: Posture::Acted,
-        },
-    };
+    let (materials, action) = lower_material(optional, binding, allocator, &path)?;
     let id = allocator.id(&path)?;
     let mut located = source.clone();
     located.author_path.clone_from(&path);
@@ -103,6 +67,99 @@ pub(super) fn lower(
     }))
 }
 
+fn lower_material(
+    optional: &ast::OptionalCost,
+    binding: Binding<Selector>,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<(Decision, Action), LoweringError> {
+    if let Some(discard) = &optional.discard {
+        if optional.to_cemetery.is_some() || optional.banish.is_some() || optional.act.is_some() {
+            return Err(unsupported(path));
+        }
+        let Action::Discard {
+            mode: DiscardMode::Chosen { constraint },
+            ..
+        } = super::hand_payment::lower(allocator, discard, path)?
+        else {
+            return Err(unsupported(path));
+        };
+        if constraint.cardinality.minimum.0 == 0
+            || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
+        {
+            return Err(unsupported(path));
+        }
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported(path));
+        };
+        let Selector::Zone { players, .. } = &group.selector else {
+            return Err(unsupported(path));
+        };
+        let visibility = Visibility::Only {
+            players: players.clone(),
+        };
+        let action = Action::Discard {
+            player: PlayerRef::Controller {},
+            mode: DiscardMode::All {
+                eligible: Selector::Intersection {
+                    sets: vec![
+                        Selector::Zone {
+                            players: players.clone(),
+                            zone: ZoneKind::Hand,
+                            view: SelectionView::Current {},
+                            binding: Binding::new(allocator.id(path)?, allocator.scope(path)?),
+                            predicate: Box::new(Expr::Literal(Bool(true))),
+                        },
+                        Selector::Bound { reference: binding },
+                    ],
+                },
+            },
+        };
+        return Ok((
+            decision(binding, constraint, visibility, allocator, path)?,
+            action,
+        ));
+    }
+    let (material, operation) = match (&optional.to_cemetery, &optional.banish, &optional.act) {
+        (Some(material), None, None) if matches!(material.sel.zone, ast::PublicZone::Field) => {
+            (material, MaterialAction::Put)
+        }
+        (None, Some(material), None) if matches!(material.sel.zone, ast::PublicZone::Cemetery) => {
+            (material, MaterialAction::Banish)
+        }
+        (None, None, Some(material)) if matches!(material.sel.zone, ast::PublicZone::Field) => {
+            (material, MaterialAction::Act)
+        }
+        _ => return Err(unsupported(path)),
+    };
+    if material.n == 0 || !matches!(material.sel.who, ast::Side::Controller) {
+        return Err(unsupported(path));
+    }
+    let materials = materials(material, binding, allocator, path)?;
+    let objects = Selector::Bound { reference: binding };
+    let action = match operation {
+        MaterialAction::Put => Action::Move {
+            objects,
+            movement: MoveSpec {
+                to: MoveDestination::Owners {
+                    zone: OwnerZone::Cemetery,
+                },
+                position: None,
+                order: None,
+                initial_posture: None,
+                entry_effects: vec![],
+            },
+            reason: MoveReason::Put,
+        },
+        MaterialAction::Banish => Action::Banish { objects },
+        MaterialAction::Act => Action::Posture {
+            objects,
+            posture: Posture::Acted,
+        },
+    };
+    Ok((materials, action))
+}
+
 fn materials(
     material: &ast::Material,
     binding: Binding<Selector>,
@@ -128,21 +185,37 @@ fn materials(
             *candidate,
         );
     }
-    let decision = Decision {
+    decision(
+        binding,
+        SelectionConstraint {
+            groups: vec![SelectionGroup {
+                selector,
+                cardinality,
+            }],
+            cardinality,
+            distinct_by: None,
+            disjoint: Disjointness::Disjoint,
+            aggregate_bounds: vec![],
+        },
+        Visibility::Public {},
+        allocator,
+        path,
+    )
+}
+
+fn decision(
+    binding: Binding<Selector>,
+    constraint: SelectionConstraint,
+    visibility: Visibility,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Decision, LoweringError> {
+    Ok(Decision {
         id: DecisionId(allocator.id(path)?),
         captures: vec![],
         actor: PlayerRef::Controller {},
         domain: ChoiceDomain::Objects {
-            constraint: SelectionConstraint {
-                groups: vec![SelectionGroup {
-                    selector,
-                    cardinality,
-                }],
-                cardinality,
-                distinct_by: None,
-                disjoint: Disjointness::Disjoint,
-                aggregate_bounds: vec![],
-            },
+            constraint,
             binding,
             target_roles: None,
         },
@@ -152,7 +225,38 @@ fn materials(
             play_scope: ExecutionRef::Current {},
             input: InputMode::Inline,
         },
-        visibility: Visibility::Public {},
+        visibility,
+    })
+}
+
+pub(super) fn bindings(
+    cost: &ast::OptionalCost,
+    exchange: &PlayCostExchange,
+    path: &str,
+) -> Result<super::PaymentBindings, LoweringError> {
+    let complete = cost.result.clone().map(|name| (name, exchange.receipt));
+    let discard = if let Some(material) = &cost.discard {
+        let CostSpec::Ordered { steps } = &exchange.cost else {
+            return Err(unsupported(path));
+        };
+        let receipt = steps
+            .first()
+            .ok_or_else(|| unsupported(path))?
+            .instruction
+            .receipt;
+        material
+            .result
+            .clone()
+            .map(|name| (name, receipt, material.n == Some(1)))
+    } else {
+        None
     };
-    Ok(decision)
+    if complete
+        .as_ref()
+        .zip(discard.as_ref())
+        .is_some_and(|((name, _), (other, ..))| name == other)
+    {
+        return Err(unsupported(path));
+    }
+    Ok(super::PaymentBindings { complete, discard })
 }

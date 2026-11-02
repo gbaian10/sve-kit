@@ -10,9 +10,12 @@ use crate::ir::{
     EvolutionRead, ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
-    CardKind, CardName, ClassRead, Info, KindRead, MemberProjection, MovementReceipt, NamesRead,
-    RuntimeObjectView, TraitId, TraitsRead,
+    CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, MemberProjection,
+    MovementReceipt, NamesRead, ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
+    Visibility,
 };
+
+use core::any::TypeId;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -666,14 +669,45 @@ impl Checker {
         member: Binding<RuntimeObjectView>,
         predicate: &Expr<Bool>,
     ) -> Checked {
-        let selector = Selector::ReceiptMembers {
-            receipt: receipt.clone(),
-            projection,
+        let card_discard = match (receipt, self.card_payment_body.as_ref()) {
+            (
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Discard { receipt },
+                },
+                Some(face),
+            ) if self.capture_time.is_none()
+                && self.count_time.is_none()
+                && self.env.chooser.is_none() =>
+            {
+                match receipt.location() {
+                    ReceiptLocation::Local { id }
+                        if self.card_discards.get(&face.0) == Some(id) =>
+                    {
+                        Some(*id)
+                    }
+                    ReceiptLocation::Local { .. } | ReceiptLocation::Iteration { .. } => None,
+                }
+            }
+            _ => None,
         };
-        self.selector(&selector)?;
-        self.selection_visibility(&selector)?;
-        let access = self.infer_access(|checker| checker.selection_visibility(&selector));
         self.isolated(|checker| {
+            if let Some(id) = card_discard {
+                checker
+                    .env
+                    .receipts
+                    .insert(id, TypeId::of::<DiscardOutcome>());
+                checker
+                    .env
+                    .movement_before_access
+                    .insert(id, Visibility::Public {});
+            }
+            let selector = Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection,
+            };
+            checker.selector(&selector)?;
+            checker.selection_visibility(&selector)?;
+            let access = checker.infer_access(|probe| probe.selection_visibility(&selector));
             checker.save_access(member.key(), access);
             checker.local_value(member, predicate)
         })

@@ -1815,6 +1815,7 @@ pub(super) enum ModeCondition {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
+    pub discard: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
     pub banish: Option<Material>,
     pub act: Option<Material>,
@@ -2262,6 +2263,7 @@ pub(super) struct ReceiptCountQuery {
     pub class: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
+    pub orig_cost_ge: Option<u64>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

@@ -1,9 +1,9 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::{
-    Action, ChoiceDomain, CostChange, CostSpec, DecisionKind, Disjointness, ExecutionRef, Expr,
-    InputMode, InstructionContext, Int, MoveDestination, MoveReason, OwnerZone, PlayCostExchange,
-    PlayCostPayment, PlaySlot, PlayerRef, PlayerRelation, Posture, SelectionSnapshot,
-    SelectionView, Selector, Visibility, ZoneKind,
+    Action, Bool, ChoiceDomain, CostChange, CostSpec, DecisionKind, DiscardMode, Disjointness,
+    ExecutionRef, Expr, InputMode, InstructionContext, Int, MoveDestination, MoveReason, OwnerZone,
+    PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef, PlayerRelation, Posture,
+    SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -82,7 +82,7 @@ impl Checker {
         };
         if players.relative_to != (PlayerRef::Controller {})
             || players.relation != PlayerRelation::SelfPlayer
-            || !matches!(zone, ZoneKind::Field | ZoneKind::Cemetery)
+            || !matches!(zone, ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Hand)
             || constraint.cardinality.minimum.0 == 0
             || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
             || group.cardinality != constraint.cardinality
@@ -91,7 +91,14 @@ impl Checker {
             || !constraint.aggregate_bounds.is_empty()
             || !decision.captures.is_empty()
             || decision.actor != (PlayerRef::Controller {})
-            || decision.visibility != (Visibility::Public {})
+            || decision.visibility
+                != if *zone == ZoneKind::Hand {
+                    Visibility::Only {
+                        players: players.clone(),
+                    }
+                } else {
+                    Visibility::Public {}
+                }
             || decision.kind
                 != (DecisionKind::PlayParameter {
                     slot: PlaySlot::CostMaterials,
@@ -124,7 +131,11 @@ impl Checker {
             || matches!(&step.instruction.action, Action::Banish { objects }
                 if *zone == ZoneKind::Cemetery && *objects == selected)
             || matches!(&step.instruction.action, Action::Posture { objects, posture: Posture::Acted }
-                if *zone == ZoneKind::Field && *objects == selected);
+                if *zone == ZoneKind::Field && *objects == selected)
+            || matches!(&step.instruction.action, Action::Discard { player: PlayerRef::Controller {}, mode: DiscardMode::All { eligible } }
+                if *zone == ZoneKind::Hand && matches!(eligible, Selector::Intersection { sets }
+                    if matches!(sets.as_slice(), [Selector::Zone {players: hand_players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..}, other]
+                        if hand_players == players && **predicate == Expr::Literal(Bool(true)) && *other == selected)));
         if !valid
             || step.materials.is_some()
             || step.instruction.precondition.is_some()

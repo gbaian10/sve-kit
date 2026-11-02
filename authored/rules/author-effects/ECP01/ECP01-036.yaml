@@ -1,0 +1,50 @@
+cards:
+  ECP01-036:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            discard:
+              n: 1
+              result: fuel
+              sel:
+                trait: ウマ娘
+                who: self
+                zone: hand
+          optional_cost_delta: -2
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: fuel
+                          view: before
+                        orig_cost_ge: 7
+                    op: ge
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

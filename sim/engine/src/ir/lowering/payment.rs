@@ -198,30 +198,15 @@ fn lower_operations(
         if let ast::CostOperation::Discard(ast::DiscardCost::Material(material)) = operation
             && let Some(name) = &material.result
         {
-            if name.is_empty()
-                || context.observations.contains_key(name)
-                || context.targets.contains_key(name)
-                || context.recipient_targets.contains_key(name)
-                || context.definitions.contains_key(name)
-                || context.searches.contains(name)
-                || context.ex_outputs.contains_key(name)
-            {
-                return Err(unsupported(path));
-            }
-            if super::hand_payment::cardinality(material, path)?
-                .maximum
-                .is_some_and(|maximum| maximum.0 <= 1)
-            {
-                context.single_discards.insert(ReceiptId(id));
-            }
-            context.observations.insert(
-                name.clone(),
-                super::super::ObjectReceipt::Movement {
-                    receipt: super::super::MovementReceipt::Discard {
-                        receipt: super::super::ReceiptReference::new(ReceiptId(id)),
-                    },
-                },
-            );
+            record_discard(
+                context,
+                name,
+                ReceiptId(id),
+                super::hand_payment::cardinality(material, path)?
+                    .maximum
+                    .is_some_and(|maximum| maximum.0 <= 1),
+                path,
+            )?;
         }
         steps.push(CostStep {
             keyword,
@@ -268,4 +253,35 @@ fn material_operation(
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_) => Err(unsupported(path)),
     }
+}
+
+pub(super) fn record_discard(
+    context: &mut BodyContext<'_>,
+    name: &str,
+    receipt: ReceiptId,
+    single: bool,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if name.is_empty()
+        || context.observations.contains_key(name)
+        || context.targets.contains_key(name)
+        || context.recipient_targets.contains_key(name)
+        || context.definitions.contains_key(name)
+        || context.searches.contains(name)
+        || context.ex_outputs.contains_key(name)
+    {
+        return Err(unsupported(path));
+    }
+    if single {
+        context.single_discards.insert(receipt);
+    }
+    context.observations.insert(
+        name.to_owned(),
+        super::super::ObjectReceipt::Movement {
+            receipt: super::super::MovementReceipt::Discard {
+                receipt: super::super::ReceiptReference::new(receipt),
+            },
+        },
+    );
+    Ok(())
 }

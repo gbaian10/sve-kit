@@ -256,7 +256,13 @@ struct LoweredPlayCosts {
     modifiers: Vec<Located<super::PlayCostModifier>>,
     exchange: Option<Located<super::PlayCostExchange>>,
     additional: Option<Located<super::PlayCostPayment>>,
-    payment_result: Option<(String, ReceiptId)>,
+    payment_result: Option<PaymentBindings>,
+}
+
+#[derive(Clone)]
+struct PaymentBindings {
+    complete: Option<(String, ReceiptId)>,
+    discard: Option<(String, ReceiptId, bool)>,
 }
 
 fn lower_play_costs(
@@ -289,7 +295,10 @@ fn lower_play_costs(
                     .additional_cost
                     .as_ref()
                     .and_then(|cost| cost.result.clone())
-                    .map(|name| (name, lowered.node.receipt));
+                    .map(|name| PaymentBindings {
+                        complete: Some((name, lowered.node.receipt)),
+                        discard: None,
+                    });
                 additional = Some(lowered);
             }
             let source = source_span(coordinates, entry_path, ability)?;
@@ -297,11 +306,13 @@ fn lower_play_costs(
                 if exchange.is_some() {
                     return Err(unsupported(entry_path));
                 }
-                payment_result = play
-                    .optional_cost
-                    .as_ref()
-                    .and_then(|cost| cost.result.clone())
-                    .map(|name| (name, lowered.node.receipt));
+                payment_result = Some(exchange::bindings(
+                    play.optional_cost
+                        .as_ref()
+                        .ok_or_else(|| unsupported(entry_path))?,
+                    &lowered.node,
+                    entry_path,
+                )?);
                 exchange = Some(lowered);
             }
         }
@@ -507,7 +518,7 @@ impl Allocator {
         entry: &ast::Ability,
         scope: ScopeId,
         printed_cost: Option<Nat>,
-        payment_result: Option<(String, ReceiptId)>,
+        payment_result: Option<PaymentBindings>,
     ) -> Result<Located<Ability>, LoweringError> {
         if entry.imports.is_some() {
             return Err(unsupported(path));
@@ -531,14 +542,21 @@ impl Allocator {
         entry: &ast::Ability,
         scope: ScopeId,
         printed_cost: Option<Nat>,
-        payment_result: Option<(String, ReceiptId)>,
+        payment_result: Option<PaymentBindings>,
         source: SourceSpan,
         path: &str,
     ) -> Result<Located<Ability>, LoweringError> {
         let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
         let ability_source = ability_source(&source, keyword);
-        let mut context = BodyContext::new(entry, scope, body, payment_result, self);
+        let payment_result = payment_result.filter(|_| entry.spell.is_some());
+        let complete = payment_result
+            .as_ref()
+            .and_then(|binding| binding.complete.clone());
+        let mut context = BodyContext::new(entry, scope, body, complete, self);
+        if let Some((name, receipt, single)) = payment_result.and_then(|binding| binding.discard) {
+            payment::record_discard(&mut context, &name, receipt, single, path)?;
+        }
         let guard = context.activation_qualification(entry.activate.as_ref(), &source, path)?;
         let trigger_choice = context.prepare_parameters(
             body,

@@ -1,0 +1,35 @@
+cards:
+  BP14-119:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                trait: ゴブリン
+                who: self
+                zone: hand
+          optional_cost_delta: -2
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
