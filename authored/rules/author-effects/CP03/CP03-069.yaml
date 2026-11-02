@@ -1,0 +1,30 @@
+cards:
+  CP03-069:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 3
+              sel:
+                trait: かげろう
+                who: self
+                zone: cemetery
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
