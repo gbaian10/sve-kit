@@ -105,26 +105,6 @@ cards:
         line: 1
         side: opponent
     status: complete
-  BP20-111:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: discard
-          subjects:
-            side: self
-            zone: hand
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP20-P12:
     abilities:
       - additional_costs:
@@ -518,27 +498,6 @@ cards:
               type: follower
               zone: field
     status: complete
-  BP20-P70:
-    abilities:
-      - active_zones:
-          - ex
-        body:
-          condition:
-            args:
-              - count:
-                  side: self
-                  zone: hand
-              - 1
-            fn: le
-          op: if
-          then:
-            count: 1
-            op: draw
-        event: end
-        kind: trigger
-        line: 1
-    review: E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
-    status: complete
   BP20-R13:
     abilities:
       - body:
@@ -558,26 +517,6 @@ cards:
             side: self
         kind: evolve
         line: 2
-    status: complete
-  BP20-SL29:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: discard
-          subjects:
-            side: self
-            zone: hand
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
     status: complete
 format: 1
 kind: effect_set

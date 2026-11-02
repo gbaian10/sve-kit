@@ -1,0 +1,38 @@
+cards:
+  BP20-045:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - option: 1
+              bind: idol
+              from:
+                who: self
+                zone: field
+                trait: アイドル
+              n: 1
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy: idol
+                    - draw:
+                        n: 1
+                        who: self
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 新約・白の章
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP20-P62
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

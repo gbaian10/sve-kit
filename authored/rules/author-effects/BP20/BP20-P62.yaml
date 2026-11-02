@@ -1,0 +1,39 @@
+cards:
+  BP20-P62:
+    abilities:
+      - line: 1
+        lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 新約・黒の章
+            - life:
+                delta: 1
+                who: self
+      - line: 2
+        activate:
+          cost:
+            act:
+              n: 3
+              sel:
+                who: self
+                zone: field
+                trait: アイドル
+          do:
+            - move:
+                ref: this
+                to: cemetery
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP20-P63
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

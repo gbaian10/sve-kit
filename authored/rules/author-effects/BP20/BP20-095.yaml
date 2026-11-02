@@ -1,0 +1,42 @@
+cards:
+  BP20-095:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  traits_all:
+                    - 絶傑
+                    - 狂信
+                  not_same_name_as_this: true
+                to: hand
+      - line: 2
+        super_evolve_time:
+          cost:
+            pp: 2
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  traits_all:
+                    - 絶傑
+                    - 狂信
+                  orig_cost_le: 4
+                  not_same_name_as_this: true
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

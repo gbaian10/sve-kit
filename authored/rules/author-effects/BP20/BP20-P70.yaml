@@ -1,0 +1,33 @@
+cards:
+  BP20-P70:
+    abilities:
+      - line: 1
+        auto:
+          zone: ex
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: le
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

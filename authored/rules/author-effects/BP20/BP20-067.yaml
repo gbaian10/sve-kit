@@ -1,0 +1,63 @@
+cards:
+  BP20-067:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  traits_all:
+                    - 絶傑
+                    - 竜族
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 1
+                to: ally
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
