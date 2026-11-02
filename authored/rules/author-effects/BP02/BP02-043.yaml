@@ -1,0 +1,35 @@
+cards:
+  BP02-043:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                result: golem
+                to: field
+                token: 攻撃型ゴーレム
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - buff:
+                      "on": golem
+                      power: 2
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP01-T08
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

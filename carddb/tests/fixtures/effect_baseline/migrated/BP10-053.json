@@ -1,0 +1,57 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "if",
+        "condition": {
+          "read": "paid.earth"
+        },
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "damage",
+              "subjects": "target.1",
+              "amount": 4
+            },
+            {
+              "op": "draw",
+              "count": 1
+            }
+          ]
+        },
+        "else": {
+          "op": "damage",
+          "subjects": "target.1",
+          "amount": 2
+        }
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ],
+      "additional_costs": [
+        {
+          "key": "earth",
+          "costs": [
+            {
+              "op": "earth_rite",
+              "count": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

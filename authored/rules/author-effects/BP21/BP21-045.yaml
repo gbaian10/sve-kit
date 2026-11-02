@@ -1,0 +1,33 @@
+cards:
+  BP21-045:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - stack_plus: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 2
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

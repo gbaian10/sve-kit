@@ -1,0 +1,32 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "spell",
+      "body": {
+        "op": "if",
+        "condition": {
+          "read": "paid.earth"
+        },
+        "then": {
+          "op": "create",
+          "name": "ガーディアンゴーレム",
+          "count": 1,
+          "to": "field"
+        }
+      },
+      "additional_costs": [
+        {
+          "key": "earth",
+          "costs": [
+            {
+              "op": "earth_rite",
+              "count": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

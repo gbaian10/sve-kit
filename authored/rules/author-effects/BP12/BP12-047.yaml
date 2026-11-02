@@ -1,0 +1,47 @@
+cards:
+  BP12-047:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token:
+                  - 防御型ゴーレム
+                  - 攻撃型ゴーレム
+        line: 1
+      - activate:
+          cost:
+            earth_rite: 1
+          do:
+            - buff:
+                hp: 2
+                "on": ally
+                power: 2
+          per_turn: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: ゴーレム
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP01-T09
+        line: 1
+        section: 1
+      - card: BP01-T08
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
