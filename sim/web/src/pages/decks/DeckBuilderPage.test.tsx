@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto"
 
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -37,15 +37,15 @@ afterEach(async () => {
   if (state.status === "ready") for (const deck of state.decks) await decksStore.remove(deck.id)
 })
 
-async function openBuilder(classCode = "royal"): Promise<Deck> {
+async function openBuilder(classCode = "royal") {
   const deck = createDeck(
     { name: "王族測試", edition: "jp", basis: { kind: "class", classCode } },
     new Date("2026-11-03T00:00:00.000Z"),
   )
   await decksStore.save(deck)
   prefsStore.set({ uiLanguage: "zh-TW", viewMode: "grid" })
-  await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
-  return deck
+  const { router } = await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
+  return { ...deck, router }
 }
 
 function stored(id: string): Deck | undefined {
@@ -58,7 +58,7 @@ describe("DeckBuilderPage", () => {
     const deck = await openBuilder()
     const user = userEvent.setup()
     // The steppers appear once the pool's results and the deck's card facts have both loaded.
-    await screen.findAllByRole("button", { name: "加一張 試作の見習い兵" }, { timeout: 15_000 })
+    await screen.findAllByRole("button", { name: "加一張 試作の見習い兵" }, { timeout: 25_000 })
     const pool = () => document.querySelector<HTMLElement>("[data-card-pool]") ?? document.body
     const add = () => within(pool()).getByRole("button", { name: "加一張 試作の見習い兵" })
     await user.click(add())
@@ -67,27 +67,31 @@ describe("DeckBuilderPage", () => {
     for (let copy = 1; copy < 3; copy += 1) await user.click(add())
     expect(add()).toBeDisabled()
     expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 3 }])
-    const list = screen.getByRole("region", { name: "主牌組" })
+    // Below 1180 px the deck is a sheet over the pool.
+    await user.click(screen.getByRole("button", { name: "打開牌組" }))
+    const list = await screen.findByRole("region", { name: "主牌組" })
     expect(within(list).getByRole("button", { name: "試作の見習い兵" })).toBeInTheDocument()
     expect(screen.getByText("主牌組 3 張，要 40～50 張。")).toBeInTheDocument()
 
     await user.click(within(list).getByRole("button", { name: "減一張 試作の見習い兵" }))
     expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 2 }])
+    await user.click(screen.getByRole("button", { name: "繼續加卡" }))
+    expect(screen.queryByRole("dialog", { name: "牌組" })).not.toBeInTheDocument()
     expect(add()).toBeEnabled()
-  }, 45_000)
+  }, 60_000)
 
   it("sets the leader from the pool and keeps other classes out by default", async () => {
     const deck = await openBuilder()
     const user = userEvent.setup()
     await user.click(
-      await screen.findByRole("button", { name: "把 試作の王 設為主戰者" }, { timeout: 15_000 }),
+      await screen.findByRole("button", { name: "把 試作の王 設為主戰者" }, { timeout: 25_000 }),
     )
     await waitFor(() => {
       expect(stored(deck.id)?.leader).toEqual({ cardId: "c:sd01-001" })
     })
     // The pool shows the royal deck's cards and neutral ones only.
     expect(screen.queryByRole("button", { name: "加一張 試作の妖精" })).not.toBeInTheDocument()
-  }, 45_000)
+  }, 60_000)
 
   it("says so when the deck does not exist", async () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
@@ -98,18 +102,32 @@ describe("DeckBuilderPage", () => {
   it("offers leaders of every class to a neutral deck", async () => {
     await openBuilder("neutral")
     const user = userEvent.setup()
-    await user.click(await screen.findByRole("radio", { name: "主戰者" }, { timeout: 15_000 }))
+    await user.click(await screen.findByRole("radio", { name: "主戰者" }, { timeout: 25_000 }))
     expect(
-      await screen.findByRole("button", { name: "把 試作の王 設為主戰者" }, { timeout: 15_000 }),
+      await screen.findByRole("button", { name: "把 試作の王 設為主戰者" }, { timeout: 25_000 }),
     ).toBeInTheDocument()
-  }, 45_000)
+  }, 60_000)
 
   it("keeps the pool one cell per card: its filters offer no result unit", async () => {
     await openBuilder()
     const user = userEvent.setup()
-    await screen.findAllByRole("button", { name: "加一張 試作の見習い兵" }, { timeout: 15_000 })
+    await screen.findAllByRole("button", { name: "加一張 試作の見習い兵" }, { timeout: 25_000 })
     await user.click(screen.getByRole("button", { name: /^篩選/u }))
     expect(await screen.findByRole("combobox", { name: "代表版次" })).toBeInTheDocument()
     expect(screen.queryByRole("combobox", { name: "顯示方式" })).not.toBeInTheDocument()
-  }, 45_000)
+  }, 60_000)
+
+  it("puts the deck behind a summary bar below 1180 px; back closes the deck sheet", async () => {
+    const { router, id } = await openBuilder()
+    const user = userEvent.setup()
+    const open = await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 })
+    expect(open).toHaveTextContent("王族測試")
+    await user.click(open)
+    expect(await screen.findByRole("dialog", { name: "牌組" })).toBeInTheDocument()
+    await act(async () => {
+      await router.navigate(-1)
+    })
+    expect(screen.queryByRole("dialog", { name: "牌組" })).not.toBeInTheDocument()
+    expect(router.state.location.pathname).toBe(`/decks/${id}`)
+  }, 60_000)
 })

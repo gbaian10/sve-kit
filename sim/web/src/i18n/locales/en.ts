@@ -799,6 +799,9 @@ export default {
     downloadImage: "Download image",
     drawImageMissing:
       "{{count}} card images did not load, so no image was made: {{cards}}. Try again later.",
+    deckSheet: "Deck",
+    openDeckSheet: "Open the deck",
+    continueAdding: "Keep adding cards",
   },
   footer: {
     unofficial:

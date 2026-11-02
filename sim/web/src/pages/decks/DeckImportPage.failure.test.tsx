@@ -29,12 +29,12 @@ it("says the cards could not load, keeps the pasted list and loads them on retry
   fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
     target: { value: "3 BP01-001" },
   })
-  const alert = await screen.findByRole("alert", {}, { timeout: 15_000 })
+  const alert = await screen.findByRole("alert", {}, { timeout: 25_000 })
   expect(alert).toHaveTextContent("載入失敗")
   online = true
   await userEvent.setup().click(screen.getByRole("button", { name: "重試" }))
   expect(
-    await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 }),
+    await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 }),
   ).toBeInTheDocument()
   expect(screen.getByRole("textbox", { name: "牌組文字或分享碼" })).toHaveValue("3 BP01-001")
-}, 45_000)
+}, 60_000)

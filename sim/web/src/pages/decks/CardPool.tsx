@@ -217,8 +217,9 @@ export function CardPool({
         value={scope}
         options={[
           { value: "all", label: t("decks.pool.all") },
-          { value: "main", label: t("decks.section.main") },
-          { value: "evolve", label: t("decks.section.evolve") },
+          // Short labels keep the four tabs within a phone's width in every language.
+          { value: "main", label: t("decks.pill.main") },
+          { value: "evolve", label: t("decks.pill.evolve") },
           { value: "leader", label: t("decks.leader") },
         ]}
         onChange={onScopeChange}

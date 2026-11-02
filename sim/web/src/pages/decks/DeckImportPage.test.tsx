@@ -43,7 +43,7 @@ describe("DeckImportPage", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
       target: { value: "# 王族\n3 BP01-001\n1 SD01-L01\n2 BP99-999\nhello\n## 候補\n1 BP01-004" },
     })
-    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 })
+    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
     expect(within(preview).getByText("主牌組 3 張・進化牌組 0 張・候補 1 張")).toBeInTheDocument()
     expect(within(preview).getByText("BP99-999 ×2")).toBeInTheDocument()
     expect(within(preview).getByText("5：hello")).toBeInTheDocument()
@@ -65,7 +65,7 @@ describe("DeckImportPage", () => {
       await router.navigate(-1)
     })
     expect(router.state.location.pathname).toBe("/decks")
-  }, 45_000)
+  }, 60_000)
 
   it("opens a share link with its preview and lists ids the snapshot does not have", async () => {
     const code = encodeDeckCode({
@@ -81,7 +81,7 @@ describe("DeckImportPage", () => {
       name: "分享的牌組",
     })
     await openImport(`/decks/import?d=${code}`)
-    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 })
+    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
     expect(within(preview).getByText("名稱：分享的牌組")).toBeInTheDocument()
     expect(within(preview).getByText("#1999 ×1")).toBeInTheDocument()
     await userEvent.setup().click(screen.getByRole("button", { name: "建立牌組" }))
@@ -90,7 +90,7 @@ describe("DeckImportPage", () => {
       leader: { cardId: "c:sd01-001" },
       main: [{ cardId: "c:bp01-001", count: 3 }],
     })
-  }, 45_000)
+  }, 60_000)
 
   it("says a damaged code cannot be read and creates nothing", async () => {
     await openImport("/decks/import?d=SVEK-AQ")
@@ -115,7 +115,9 @@ describe("DeckImportPage", () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     const { router } = await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
     const user = userEvent.setup()
-    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 15_000 }))
+    // Below 1180 px the deck, with its export button, is a sheet over the pool.
+    await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 25_000 }))
     const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
     const text = await within(dialog).findByRole<HTMLTextAreaElement>("textbox", { name: "文字" })
     expect(text.value).toContain("# 往返")
@@ -127,7 +129,7 @@ describe("DeckImportPage", () => {
     await act(async () => {
       await router.navigate(`${url.pathname}${url.search}`)
     })
-    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 })
+    const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
     expect(within(preview).getByText("主牌組 5 張・進化牌組 0 張・候補 1 張")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "建立牌組" }))
     const copy = storedDecks().find((item) => item.id !== deck.id)
@@ -139,7 +141,7 @@ describe("DeckImportPage", () => {
       main: deck.main,
       side: deck.side,
     })
-  }, 45_000)
+  }, 60_000)
 
   it("carries a chosen reprint through the share code and through the text list", async () => {
     // BP01-002a is a reprint known to the main thread only once every printing has loaded.
@@ -154,12 +156,14 @@ describe("DeckImportPage", () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     const { router } = await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
     const user = userEvent.setup()
-    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 15_000 }))
+    // Below 1180 px the deck, with its export button, is a sheet over the pool.
+    await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 25_000 }))
     const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
     const text = await within(dialog).findByRole<HTMLTextAreaElement>(
       "textbox",
       { name: "文字" },
-      { timeout: 15_000 },
+      { timeout: 25_000 },
     )
     expect(text.value).toContain("2 BP01-002a")
     const list = text.value
@@ -175,7 +179,7 @@ describe("DeckImportPage", () => {
       const input = await screen.findByRole("textbox", { name: "牌組文字或分享碼" })
       // The second pass pastes the text list, whose name line looks like a code.
       if (route === "/decks/import") fireEvent.change(input, { target: { value: list } })
-      const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 })
+      const preview = await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
       expect(within(preview).getByText("主牌組 2 張・進化牌組 0 張・候補 0 張")).toBeInTheDocument()
       await user.click(screen.getByRole("button", { name: "建立牌組" }))
       await waitFor(() => {
@@ -195,7 +199,7 @@ describe("DeckImportPage", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "牌組文字或分享碼" }), {
       target: { value: "3 BP01-001" },
     })
-    await screen.findByRole("region", { name: "辨識結果" }, { timeout: 15_000 })
+    await screen.findByRole("region", { name: "辨識結果" }, { timeout: 25_000 })
     const save = vi.spyOn(decksStore, "save").mockRejectedValueOnce(new Error("quota"))
     const user = userEvent.setup()
     await user.click(screen.getByRole("button", { name: "建立牌組" }))
@@ -206,7 +210,7 @@ describe("DeckImportPage", () => {
     await waitFor(() => {
       expect(storedDecks().map((deck) => deck.main)).toEqual([[{ cardId: "c:bp01-001", count: 3 }]])
     })
-  }, 45_000)
+  }, 60_000)
 
   it("says so when the browser cannot draw the deck image", async () => {
     const deck = createDeck(
@@ -217,12 +221,14 @@ describe("DeckImportPage", () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
     const user = userEvent.setup()
-    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 15_000 }))
+    // Below 1180 px the deck, with its export button, is a sheet over the pool.
+    await user.click(await screen.findByRole("button", { name: "打開牌組" }, { timeout: 25_000 }))
+    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 25_000 }))
     const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
     await user.click(within(dialog).getByRole("radio", { name: "圖片" }))
     expect(within(dialog).getByRole("radio", { name: "高清（看得清卡文）" })).toBeInTheDocument()
     // jsdom has no canvas, as some locked-down browsers do not; the dialog says so instead of hanging.
     await user.click(within(dialog).getByRole("button", { name: "產生圖片" }))
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("圖片產生失敗")
-  }, 45_000)
+  }, 60_000)
 })

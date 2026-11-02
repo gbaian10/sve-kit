@@ -20,7 +20,7 @@ import { DeckStatsView } from "./DeckStatsView"
 import { ExportDialog } from "./ExportDialog"
 import { PrintingPicker, type PrintingTarget } from "./PrintingPicker"
 
-function CountPill({
+export function CountPill({
   label,
   count,
   min,

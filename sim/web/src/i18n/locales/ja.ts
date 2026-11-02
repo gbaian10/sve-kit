@@ -780,6 +780,9 @@ export default {
     downloadImage: "画像を保存",
     drawImageMissing:
       "{{count}} 枚のカード画像を読み込めなかったため、画像を作れませんでした：{{cards}}。しばらくしてからお試しください。",
+    deckSheet: "デッキ",
+    openDeckSheet: "デッキを開く",
+    continueAdding: "カードを追加する",
   },
   footer: {
     unofficial:

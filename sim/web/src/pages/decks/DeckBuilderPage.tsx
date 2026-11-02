@@ -4,9 +4,11 @@ import { useTranslation } from "react-i18next"
 import { useParams, useSearchParams } from "react-router"
 
 import { useDrawerSide, useSidebarLayout } from "../../app/cards-layout"
+import { useDialogHistory } from "../../app/dialog-history"
 import { useMediaQuery } from "../../app/useMediaQuery"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
+import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import type { CardSummary } from "../../data"
@@ -21,6 +23,7 @@ import { CardPool, type PoolScope } from "./CardPool"
 import { CountStepper } from "./CountStepper"
 import { createDeckEditor, DeckEditorContext, useDeckEditor } from "./deck-editor"
 import { DeckPanel } from "./DeckPanel"
+import { DeckSummaryBar } from "./DeckSummaryBar"
 import { useDeckData, useDeckImages } from "./useDeckData"
 
 const HIGHLIGHT_MS = 1600
@@ -98,6 +101,11 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
   const images = useDeckImages(deck, facts, data.images)
   const [scope, setScope] = useState<PoolScope>("all")
   const [highlight, setHighlight] = useState<string | null>(null)
+  // Below the three-column width the deck is a full-screen sheet over the pool; back closes it.
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const closeSheet = useDialogHistory("deck-sheet", sheetOpen, () => {
+    setSheetOpen(false)
+  })
   // The pool hands over its card opener once it is ready; the deck list opens cards through it.
   const [opener, setOpener] = useState<{ readonly open: (summary: CardSummary) => void } | null>(
     null,
@@ -154,6 +162,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
           highlight,
           focusCard: (cardId) => {
             setHighlight(cardId)
+            if (!threeColumns) setSheetOpen(true)
             requestAnimationFrame(() => {
               document
                 .querySelector(`[data-deck-panel] [data-deck-card="${CSS.escape(cardId)}"]`)
@@ -161,6 +170,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
             })
           },
           pickLeader: () => {
+            if (sheetOpen) closeSheet()
             setScope("leader")
             window.scrollTo({ top: 0, behavior: "smooth" })
           },
@@ -183,6 +193,9 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
       prefs.nameDisplay,
       openCard,
       highlight,
+      threeColumns,
+      sheetOpen,
+      closeSheet,
       toast,
       t,
     ],
@@ -229,9 +242,27 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
           {pool}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 pt-3 pb-6">
-          {panel}
+        // The pool takes the page; the deck's summary bar replaces the site navigation.
+        <div className="pb-24">
           {pool}
+          <DeckSummaryBar
+            onOpen={() => {
+              setSheetOpen(true)
+            }}
+          />
+          <Dialog
+            open={sheetOpen}
+            onClose={closeSheet}
+            title={t("decks.deckSheet")}
+            variant="card"
+            footer={
+              <Button variant="primary" size="lg" className="w-full" onClick={closeSheet}>
+                {t("decks.continueAdding")}
+              </Button>
+            }
+          >
+            {panel}
+          </Dialog>
         </div>
       )}
     </DeckEditorContext>
