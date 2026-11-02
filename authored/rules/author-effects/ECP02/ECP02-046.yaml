@@ -1,0 +1,42 @@
+cards:
+  ECP02-046:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - destroy: enemy
+            - if:
+                cond:
+                  paid:
+                    receipt: payment
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        name_contains: 桐生つかさ
+                        who: self
+                        zone: deck
+                      to: field
+          optional_cost:
+            pp: 3
+            result: payment
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

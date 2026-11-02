@@ -1,0 +1,51 @@
+cards:
+  ECP02-048:
+    abilities:
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 2
+              - act_self: true
+          do:
+            - move:
+                ref: chosen
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: moved
+                until: turn
+          per_turn: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le: 2
+                trait: デレマス
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
