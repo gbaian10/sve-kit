@@ -1,0 +1,48 @@
+cards:
+  CP04-099:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - activate:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - either:
+                options:
+                  - - grant:
+                        keywords:
+                          - rush
+                        "on": ally
+                  - - grant:
+                        keywords:
+                          - bane
+                        "on": ally
+                  - - grant:
+                        keywords:
+                          - ward
+                        "on": ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
