@@ -169,8 +169,18 @@ export function useRouteEdition(): Region {
   const { cardEdition } = usePrefs()
   const pathname = location.pathname
   const search = location.search
-  if (pathname === "/cards" || pathname === "/sets" || pathname.startsWith("/sets/"))
+  if (
+    pathname === "/cards" ||
+    pathname === "/sets" ||
+    pathname.startsWith("/sets/") ||
+    pathname.startsWith("/decks/")
+  )
     return new URLSearchParams(search).get("ed") === "en" ? "en" : "jp"
+  // The deck list loads the edition a new deck is being made in; otherwise the preference.
+  if (pathname === "/decks") {
+    const ed = new URLSearchParams(search).get("ed")
+    if (ed === "en" || ed === "jp") return ed
+  }
   if (pathname.startsWith("/cards/")) {
     const params = new URLSearchParams(search)
     if (params.has("ed")) return params.get("ed") === "en" ? "en" : "jp"

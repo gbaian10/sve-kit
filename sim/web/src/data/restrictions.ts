@@ -190,11 +190,22 @@ export async function loadCardRestrictionDetails(
   cardId: string,
   edition: Region,
 ): Promise<CardRestrictionDetails> {
+  const selection = await loadRestrictionSelection(client, snapshot, edition)
+  return { status: selection.status, restrictions: selection.details.get(cardId) ?? [] }
+}
+
+/** The edition's whole Standard restriction list, for checking a deck. */
+export async function loadRestrictionSelection(
+  client: SnapshotClient,
+  snapshot: LoadedSnapshot,
+  edition: Region,
+): Promise<RestrictionSelection> {
   const keys = restrictionKeys(snapshot.manifest, snapshot.files, edition)
   if (!keys.length)
     return {
       status: { state: "unknown", onDate: stringValue(snapshot.manifest["data_as_of"]) },
-      restrictions: [],
+      cards: new Set(),
+      details: new Map(),
     }
   const fragments = [
     ...snapshot.bootstrap,
@@ -202,11 +213,10 @@ export async function loadCardRestrictionDetails(
   ]
   if (client.snapshot()?.manifestHash !== snapshot.manifestHash)
     throw new Error("snapshot replaced")
-  const selection = selectRestrictions(
+  return selectRestrictions(
     snapshot.manifest,
     (table) => mergedRows(fragments, table),
     createCardIndex(snapshot),
     edition,
   )
-  return { status: selection.status, restrictions: selection.details.get(cardId) ?? [] }
 }

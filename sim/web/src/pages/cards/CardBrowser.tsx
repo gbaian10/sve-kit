@@ -128,6 +128,17 @@ export interface CardBrowserProps {
   }
   readonly sheetOpen: boolean
   readonly onSheetOpenChange: (open: boolean) => void
+  /** Left end of the toolbar row: the deck builder's scope tabs and legal-only switch. */
+  readonly toolbarStart?: ReactNode
+  /**
+   * Whether the result unit ("one row per card") is the user's to choose, with its chip and its
+   * count in the filter badge. The deck builder's pool is always per card, so it passes false.
+   */
+  readonly unitChoice?: boolean
+  /** A control per result (the deck builder's stepper); the cards page has none. */
+  readonly renderAction?: CardGridProps["renderAction"]
+  /** Badges over a grid cell's image (copies in the deck). */
+  readonly renderOverlay?: CardGridProps["renderOverlay"]
   /** Rendered inside the root after the results (the card overlay's drawer and modal). */
   readonly children?: ReactNode
 }
@@ -160,6 +171,10 @@ export function CardBrowser({
   sidebar,
   sheetOpen,
   onSheetOpenChange,
+  toolbarStart,
+  unitChoice = true,
+  renderAction,
+  renderOverlay,
   children,
 }: CardBrowserProps) {
   const { t } = useTranslation()
@@ -193,7 +208,9 @@ export function CardBrowser({
     return option ? vocabularyOptionLabel(option.name, textLang) : code
   }
   const commit = onQueryChange
-  const filterCount = activeFilterCount(query)
+  // With the unit chip off, the unit is neither counted nor shown, and chips never change it.
+  const chipQuery = unitChoice ? query : { ...query, unit: "printing" as const }
+  const filterCount = activeFilterCount(chipQuery)
   const hasConditions = query.text !== "" || filterCount > 0
   // Alt-art is a legacy URL flag without a condition chip.
   const hasVisibleConditions = query.text !== "" || filterCount > (query.altArtOnly ? 1 : 0)
@@ -314,6 +331,7 @@ export function CardBrowser({
   const panelEl = (
     <FilterPanel
       sidebar={sidebar.layout}
+      unitChoice={unitChoice}
       id={panelId}
       open={sheetOpen}
       query={query}
@@ -445,7 +463,7 @@ export function CardBrowser({
   )
   const conditionChips = (
     <ConditionChips
-      query={query}
+      query={chipQuery}
       edition={edition}
       classLabel={classLabel}
       rarityLabel={(code) => {
@@ -479,7 +497,7 @@ export function CardBrowser({
         leader: leaderFrameTokens(printingOptions?.location.counts ?? {}),
       }}
       onChange={(next) => {
-        commit(next)
+        commit(unitChoice ? next : { ...next, unit: query.unit })
       }}
       onClear={onClearAll}
     />
@@ -499,6 +517,7 @@ export function CardBrowser({
     onOpen,
     ...(anchor === undefined ? {} : { anchor }),
     ...(selected === undefined ? {} : { selected }),
+    ...(renderAction ? { renderAction } : {}),
   }
   return (
     <div ref={imageRoot} className="flex flex-col gap-3 pt-2 pb-6">
@@ -571,6 +590,7 @@ export function CardBrowser({
               {search.below}
             </div>
             <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+              {toolbarStart}
               {total !== null && (
                 <div className="ml-auto flex shrink-0 items-center gap-3">
                   {viewSwitch}
@@ -655,7 +675,13 @@ export function CardBrowser({
             {page !== null && page.total > 0 && (
               <>
                 {view === "list" && <ListColumnPicker />}
-                {view === "grid" && <CardGrid images={images} {...viewProps} />}
+                {view === "grid" && (
+                  <CardGrid
+                    images={images}
+                    {...viewProps}
+                    {...(renderOverlay ? { renderOverlay } : {})}
+                  />
+                )}
                 {view === "table" && (
                   <CardTable typeLabel={typeLabel} images={images} artOf={artOf} {...viewProps} />
                 )}

@@ -210,6 +210,7 @@ const TableRow = memo(function TableRow({
   artOf,
   labels,
   typeLabel,
+  renderAction,
 }: {
   readonly cell: GridCell
   readonly images: CardRowsProps["images"]
@@ -219,17 +220,19 @@ const TableRow = memo(function TableRow({
   readonly artOf: CardRowsProps["artOf"]
   readonly labels: ResultLabels
   readonly typeLabel: string
+  readonly renderAction?: CardRowsProps["renderAction"]
 }) {
   const ref = useRef<HTMLLIElement>(null)
   const seen = useVisible(ref)
+  const action = renderAction?.(cell)
   return (
-    <li ref={ref} className="min-w-0">
+    <li ref={ref} className={cn("min-w-0", action && "flex items-stretch border-b border-border")}>
       <RowLink
         cell={cell}
         onOpen={onOpen}
         highlighted={highlighted}
         selected={selected}
-        className="flex-wrap py-2"
+        className={cn("flex-wrap py-2", action && "min-w-0 flex-1 border-b-0")}
       >
         <ArtThumb
           summary={cell.summary}
@@ -296,6 +299,7 @@ const TableRow = memo(function TableRow({
           )}
         </span>
       </RowLink>
+      {action && <span className="flex shrink-0 items-center pl-3">{action}</span>}
     </li>
   )
 })
@@ -308,6 +312,7 @@ export function CardTable({
   selected,
   artOf,
   typeLabel,
+  renderAction,
 }: CardRowsProps) {
   const labels = useResultLabels()
   return (
@@ -323,6 +328,7 @@ export function CardTable({
           artOf={artOf}
           labels={labels}
           typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
+          renderAction={renderAction}
         />
       ))}
     </ul>
@@ -354,6 +360,7 @@ const ListRow = memo(function ListRow({
   columns,
   classLabel,
   typeLabel,
+  renderAction,
 }: {
   readonly cell: GridCell
   readonly onOpen: CardRowsProps["onOpen"]
@@ -365,6 +372,7 @@ const ListRow = memo(function ListRow({
   readonly columns: readonly ListColumn[]
   readonly classLabel: string
   readonly typeLabel: string
+  readonly renderAction?: CardRowsProps["renderAction"]
 }) {
   const row = useRef<HTMLTableRowElement>(null)
   const link = useRef<HTMLAnchorElement>(null)
@@ -419,7 +427,7 @@ const ListRow = memo(function ListRow({
       data-highlighted={highlighted || undefined}
       data-selected={selected || undefined}
       onClick={(event) => {
-        if (event.target instanceof Element && event.target.closest("a")) return
+        if (event.target instanceof Element && event.target.closest("a, button")) return
         if (window.getSelection()?.isCollapsed === false) return
         link.current?.click()
       }}
@@ -514,6 +522,7 @@ const ListRow = memo(function ListRow({
             )
         }
       })}
+      {renderAction && <td data-list-action="">{renderAction(cell)}</td>}
     </tr>
   )
 })
@@ -530,6 +539,7 @@ export function CardList({
   footer,
   classLabel,
   typeLabel,
+  renderAction,
 }: CardListProps) {
   const labels = useResultLabels()
   const scroll = useRef<HTMLDivElement>(null)
@@ -594,8 +604,9 @@ export function CardList({
         `${String(width)}px`,
       ]),
     ),
-    minWidth: `calc(${columns.map((column) => `var(--list-size-${column})`).join(" + ")})`,
+    minWidth: `calc(${columns.map((column) => `var(--list-size-${column})`).join(" + ")}${renderAction ? " + 140px" : ""})`,
   } as CSSProperties
+  const actionLabel = labels.t("decks.countColumn")
   return (
     <div
       ref={scroll}
@@ -627,6 +638,7 @@ export function CardList({
               data-list-effect-col={column === "effect" ? "" : undefined}
             />
           ))}
+          {renderAction && <col data-list-col="action" style={{ width: 140 }} />}
         </colgroup>
         <thead>
           <tr aria-rowindex={1} data-column-order="">
@@ -707,12 +719,25 @@ export function CardList({
                 </th>
               )
             })}
+            {renderAction && (
+              <th
+                scope="col"
+                data-list-heading="action"
+                aria-label={actionLabel}
+                title={actionLabel}
+              >
+                <span data-list-heading-label="">{actionLabel}</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody ref={body}>
           {windowed.before > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={columns.length} style={{ height: windowed.before }} />
+              <td
+                colSpan={columns.length + (renderAction ? 1 : 0)}
+                style={{ height: windowed.before }}
+              />
             </tr>
           )}
           {cells.slice(windowed.start, windowed.end).map((cell, index) => (
@@ -728,11 +753,15 @@ export function CardList({
               columns={columns}
               classLabel={classLabel(cell.summary.classCode)}
               typeLabel={cell.summary.typeCode ? typeLabel(cell.summary.typeCode) : ""}
+              renderAction={renderAction}
             />
           ))}
           {windowed.after > 0 && (
             <tr data-list-spacer="" aria-hidden="true">
-              <td colSpan={columns.length} style={{ height: windowed.after }} />
+              <td
+                colSpan={columns.length + (renderAction ? 1 : 0)}
+                style={{ height: windowed.after }}
+              />
             </tr>
           )}
         </tbody>

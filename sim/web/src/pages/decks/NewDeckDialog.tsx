@@ -21,33 +21,41 @@ export interface NewDeckInput {
 
 /**
  * One step: name, edition and the construction basis (a class, neutral, or a title). The edition
- * is the card edition preference, as on the cards page, so the title list always belongs to it.
+ * belongs to the new deck alone; the page loads that edition's cards for the title list.
  */
 export function NewDeckDialog({
   open,
   onClose,
-  edition,
+  defaultEdition,
   onEditionChange,
   defaultName,
   classOptions,
   titles,
+  titlesEdition,
   titleName,
   onCreate,
 }: {
   readonly open: boolean
   readonly onClose: () => void
-  readonly edition: Region
+  readonly defaultEdition: Region
+  /** The page should load this edition's cards. */
   readonly onEditionChange: (edition: Region) => void
   /** Used when the name is left empty. */
   readonly defaultName: string
   readonly classOptions: readonly ClassOption[] | undefined
-  /** The edition's titles; undefined while its cards load. */
+  /** The titles of `titlesEdition`; undefined while its cards load. */
   readonly titles: readonly TitleOption[] | undefined
+  readonly titlesEdition: Region
   readonly titleName: (code: string) => string
+  /** Creates the deck; the page then moves on to it, which takes the dialog away. */
   readonly onCreate: (input: NewDeckInput) => void
 }) {
   const { t } = useTranslation()
   const [name, setName] = useState("")
+  const [chosenEdition, setChosenEdition] = useState<Region | null>(null)
+  const edition = chosenEdition ?? defaultEdition
+  // Until the chosen edition's cards are in, the other edition's titles must not be offered.
+  const editionTitles = titlesEdition === edition ? titles : undefined
   const [kind, setKind] = useState<DeckBasis["kind"]>("class")
   const [classCode, setClassCode] = useState<string | null>(null)
   const [titleCode, setTitleCode] = useState<string | null>(null)
@@ -55,9 +63,9 @@ export function NewDeckDialog({
   const chosenClass = classOptions?.some((option) => option.code === classCode)
     ? (classCode ?? undefined)
     : classOptions?.[0]?.code
-  const chosenTitle = titles?.some((title) => title.code === titleCode)
+  const chosenTitle = editionTitles?.some((title) => title.code === titleCode)
     ? (titleCode ?? undefined)
-    : titles?.[0]?.code
+    : editionTitles?.[0]?.code
   const basis: DeckBasis | undefined =
     kind === "class"
       ? chosenClass === undefined
@@ -68,6 +76,7 @@ export function NewDeckDialog({
         : { kind, titleCode: chosenTitle }
   const close = useDialogHistory("new-deck", open, () => {
     setName("")
+    setChosenEdition(null)
     setKind("class")
     setClassCode(null)
     setTitleCode(null)
@@ -87,7 +96,6 @@ export function NewDeckDialog({
             onClick={() => {
               if (!basis) return
               onCreate({ name: name.trim() || defaultName, edition, basis })
-              close()
             }}
           >
             {t("decks.create")}
@@ -120,7 +128,10 @@ export function NewDeckDialog({
               { value: "jp", label: t("options.edition.jp") },
               { value: "en", label: t("options.edition.en") },
             ]}
-            onChange={onEditionChange}
+            onChange={(next) => {
+              setChosenEdition(next)
+              onEditionChange(next)
+            }}
           />
           <span className="text-11 text-text-3">{t("decks.editionHint")}</span>
         </div>
@@ -170,7 +181,7 @@ export function NewDeckDialog({
                 className="grid grid-cols-1 gap-2 md:grid-cols-2"
                 aria-label={t("decks.basis.title")}
               >
-                {(titles ?? []).map((title) => {
+                {(editionTitles ?? []).map((title) => {
                   const selected = title.code === chosenTitle
                   return (
                     <li key={title.code}>
@@ -199,7 +210,7 @@ export function NewDeckDialog({
               <span className="text-11 text-text-3">{t("decks.basis.titleHint")}</span>
             </>
           )}
-          {(kind === "class" ? classOptions : titles) === undefined && (
+          {(kind === "class" ? classOptions : editionTitles) === undefined && (
             <span role="status" className="text-12 text-text-3">
               {t("results.dependenciesPending")}
             </span>

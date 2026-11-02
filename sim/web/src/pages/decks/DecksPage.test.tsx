@@ -6,11 +6,12 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
+import { createDeck } from "../../domain/deck/model"
 import { decksStore, DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
-import { TestSearchWorker } from "../../test-utils/search-worker"
+import { TestAppWorker } from "../../test-utils/app-workers"
 
-beforeEach(() => vi.stubGlobal("Worker", TestSearchWorker))
+beforeEach(() => vi.stubGlobal("Worker", TestAppWorker))
 
 const built = await buildSnapshot({
   encodeImage: () => Promise.resolve(new TextEncoder().encode("stub")),
@@ -35,11 +36,26 @@ afterEach(async () => {
   if (state.status === "ready") for (const deck of state.decks) await decksStore.remove(deck.id)
 })
 
-async function openList(initialEntries = ["/decks"]) {
+async function openList(initialEntries = ["/decks"], waitFor = "還沒有牌組") {
   prefsStore.set({ uiLanguage: "zh-TW" })
   const rendered = await renderRoutes(routes, { initialEntries })
-  await screen.findByText("還沒有牌組", {}, { timeout: 4000 })
+  await screen.findByText(waitFor, {}, { timeout: 4000 })
   return rendered
+}
+
+/** Opens the new-deck dialog and waits until it can create (class choices have arrived). */
+async function openNewDeck(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getAllByRole("button", { name: "新牌組" })[0] as HTMLElement)
+  const dialog = await screen.findByRole("dialog", { name: "新牌組" })
+  await waitFor(() => {
+    expect(within(dialog).getByRole("button", { name: "建立" })).toBeEnabled()
+  })
+  return dialog
+}
+
+function storedDecks() {
+  const state = decksStore.get()
+  return state.status === "ready" ? state.decks : []
 }
 
 /** The saved decks' names, in list order. */
@@ -53,27 +69,15 @@ function deckNames(): string[] {
 }
 
 describe("DecksPage", () => {
-  it("creates, duplicates, renames and deletes decks kept in the browser", async () => {
-    await openList()
+  it("duplicates, renames and deletes decks kept in the browser", async () => {
+    await decksStore.save(
+      createDeck(
+        { name: "精靈快攻", edition: "jp", basis: { kind: "class", classCode: "elf" } },
+        new Date("2026-11-03T00:00:00.000Z"),
+      ),
+    )
+    await openList(["/decks"], "精靈快攻")
     const user = userEvent.setup()
-    await user.click(screen.getAllByRole("button", { name: "新牌組" })[0] as HTMLElement)
-    const dialog = await screen.findByRole("dialog", { name: "新牌組" })
-    await user.type(within(dialog).getByLabelText("牌組名稱"), "精靈快攻")
-    // Class choices come from the snapshot; the first one is preselected once they arrive.
-    await waitFor(() => {
-      expect(within(dialog).getByRole("button", { name: "建立" })).toBeEnabled()
-    })
-    await user.click(within(dialog).getByRole("button", { name: "建立" }))
-    await waitFor(() => {
-      expect(deckNames()).toEqual(["精靈快攻"])
-    })
-    const stored = decksStore.get()
-    expect(stored.status === "ready" && stored.decks[0]).toMatchObject({
-      name: "精靈快攻",
-      edition: "jp",
-      basis: { kind: "class" },
-      revision: 1,
-    })
 
     await user.click(screen.getByRole("button", { name: "複製 精靈快攻" }))
     await waitFor(() => {
@@ -98,18 +102,30 @@ describe("DecksPage", () => {
     })
   }, 20_000)
 
+  it("creates a deck and opens it, with back returning to the list", async () => {
+    const { router } = await openList()
+    const user = userEvent.setup()
+    const dialog = await openNewDeck(user)
+    await user.type(within(dialog).getByLabelText("牌組名稱"), "精靈快攻")
+    await user.click(within(dialog).getByRole("button", { name: "建立" }))
+    const [deck] = storedDecks()
+    expect(deck).toMatchObject({ name: "精靈快攻", edition: "jp", basis: { kind: "class" } })
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe(`/decks/${deck?.id ?? ""}`)
+    })
+    await act(async () => {
+      await router.navigate(-1)
+    })
+    expect(router.state.location.pathname).toBe("/decks")
+    expect(screen.queryByRole("dialog", { name: "新牌組" })).not.toBeInTheDocument()
+  }, 20_000)
+
   it("names an unnamed deck after its position", async () => {
     await openList()
     const user = userEvent.setup()
-    await user.click(screen.getAllByRole("button", { name: "新牌組" })[0] as HTMLElement)
-    const dialog = await screen.findByRole("dialog", { name: "新牌組" })
-    await waitFor(() => {
-      expect(within(dialog).getByRole("button", { name: "建立" })).toBeEnabled()
-    })
+    const dialog = await openNewDeck(user)
     await user.click(within(dialog).getByRole("button", { name: "建立" }))
-    await waitFor(() => {
-      expect(deckNames()).toEqual(["新牌組 1"])
-    })
+    expect(storedDecks().map((deck) => deck.name)).toEqual(["新牌組 1"])
   }, 20_000)
 
   it("closes the dialog on back and stays on the list", async () => {
@@ -126,20 +142,31 @@ describe("DecksPage", () => {
     expect(router.state.location.pathname).toBe("/decks")
   }, 20_000)
 
-  it("creates the deck in the edition chosen in the dialog, which becomes the card edition", async () => {
-    await openList()
+  it("keeps the edition chosen in the dialog to the new deck, not the card edition preference", async () => {
+    const { router } = await openList()
     const user = userEvent.setup()
-    await user.click(screen.getAllByRole("button", { name: "新牌組" })[0] as HTMLElement)
-    const dialog = await screen.findByRole("dialog", { name: "新牌組" })
+    const dialog = await openNewDeck(user)
     await user.click(within(dialog).getByRole("radio", { name: "英版" }))
-    expect(prefsStore.get().cardEdition).toBe("en")
+    expect(prefsStore.get().cardEdition).toBe("jp")
+    // The list loads the dialog's edition for its title list, on the dialog's own history entry.
+    expect(router.state.location.search).toBe("?ed=en")
     await waitFor(() => {
       expect(within(dialog).getByRole("button", { name: "建立" })).toBeEnabled()
     })
     await user.click(within(dialog).getByRole("button", { name: "建立" }))
+    expect(storedDecks()[0]?.edition).toBe("en")
+    expect(prefsStore.get().cardEdition).toBe("jp")
+  }, 20_000)
+
+  it("drops the dialog's edition from the list when the dialog is cancelled", async () => {
+    const { router } = await openList()
+    const user = userEvent.setup()
+    const dialog = await openNewDeck(user)
+    await user.click(within(dialog).getByRole("radio", { name: "英版" }))
+    await user.click(within(dialog).getByRole("button", { name: "取消" }))
     await waitFor(() => {
-      const state = decksStore.get()
-      expect(state.status === "ready" && state.decks[0]?.edition).toBe("en")
+      expect(router.state.location.search).toBe("")
     })
+    expect(prefsStore.get().cardEdition).toBe("jp")
   }, 20_000)
 })

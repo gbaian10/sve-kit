@@ -42,6 +42,7 @@ export {
   type CardRestriction,
   type CardRestrictionDetails,
   loadCardRestrictionDetails,
+  loadRestrictionSelection,
   type RestrictionStatus,
 } from "./restrictions"
 export {

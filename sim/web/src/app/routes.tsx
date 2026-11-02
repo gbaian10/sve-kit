@@ -3,6 +3,7 @@ import { redirect, type RouteObject } from "react-router"
 import { SettingsPage } from "../pages/account/SettingsPage"
 import { CardPage } from "../pages/card/CardPage"
 import { CardsPage } from "../pages/cards/CardsPage"
+import { DeckBuilderPage } from "../pages/decks/DeckBuilderPage"
 import { DecksPage } from "../pages/decks/DecksPage"
 import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
@@ -33,6 +34,7 @@ export const routes: RouteObject[] = [
       },
       { path: "settings", Component: SettingsPage },
       { path: "decks", Component: DecksPage },
+      { path: "decks/:deckId", Component: DeckBuilderPage },
       { path: "errata", Component: ErrataPage },
       { path: "*", Component: NotFoundPage },
     ],

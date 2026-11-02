@@ -56,6 +56,10 @@ export interface CardOverlayArgs {
   readonly root: RefObject<HTMLElement | null>
   /** The closed card's cell is back in place and focused; the list flashes it. */
   readonly onReturned: (key: string) => void
+  /** What the bottom bar's deck slot shows for the open card (the deck builder's stepper). */
+  readonly deckAction?: (summary: CardSummary | undefined) => ReactNode
+  /** Overrides the preferred presentation (the deck builder opens cards in the centre). */
+  readonly presentation?: CardPresentation
 }
 
 export interface CardOverlay {
@@ -133,13 +137,16 @@ export function useCardOverlay({
   listScroll,
   root,
   onReturned,
+  deckAction,
+  presentation: presentationOverride,
 }: CardOverlayArgs): CardOverlay {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [params] = useSearchParams()
   const edition = useRouteEdition()
-  const presentation = useCardPresentation()
+  const preferred = useCardPresentation()
+  const presentation = presentationOverride ?? preferred
   const side = useDrawerSide()
   const { drawerWidth } = usePrefs()
   const viewportWidth = useViewportWidth()
@@ -459,6 +466,7 @@ export function useCardOverlay({
           if (contentParam !== null) setPlaced({ param: contentParam, key: resultKey })
         },
         onClose: close,
+        ...(deckAction ? { deckAction } : {}),
       }
     : null
   const content = input && frame ? <CardOverlayContent input={input} frame={frame} /> : null

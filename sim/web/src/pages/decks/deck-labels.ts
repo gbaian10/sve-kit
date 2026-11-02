@@ -6,6 +6,7 @@ import { quickBarClasses } from "../../domain/classes"
 import type { DeckBasis } from "../../domain/deck/types"
 import { UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { NEUTRAL_CLASS } from "../../domain/query/model"
+import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { titleLabel, type TitleOption, titleOptions } from "./deck-titles"
@@ -19,6 +20,8 @@ export interface ClassOption {
 export function useDeckLabels(): {
   readonly classOptions: readonly ClassOption[] | undefined
   readonly titles: readonly TitleOption[] | undefined
+  /** The edition `titles` belong to (the page's edition). */
+  readonly titlesEdition: Region
   readonly titleName: (code: string) => string
   readonly basisLabel: (basis: DeckBasis) => string
 } {
@@ -57,5 +60,5 @@ export function useDeckLabels(): {
       ? (classOptions?.find((option) => option.code === basis.classCode)?.label ??
         (basis.classCode === NEUTRAL_CLASS ? t("search.neutral") : basis.classCode))
       : t("decks.basis.titleNamed", { title: titleName(basis.titleCode) })
-  return { classOptions, titles, titleName, basisLabel }
+  return { classOptions, titles, titlesEdition: edition, titleName, basisLabel }
 }

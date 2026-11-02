@@ -1,6 +1,6 @@
 import "./results.css"
 
-import { memo, type MouseEvent } from "react"
+import { memo, type MouseEvent, type ReactNode } from "react"
 import { useHref, useNavigate } from "react-router"
 
 import type { CardSummary, ImageIndex } from "../../data"
@@ -29,6 +29,10 @@ export interface CardGridProps {
   readonly anchor?: string
   /** Cell whose card is open beside or over the results. */
   readonly selected?: string
+  /** Deck builder: a control under each cell (the "− n ＋" stepper); nothing on the cards page. */
+  readonly renderAction?: (cell: GridCell) => ReactNode
+  /** Deck builder: badges drawn over the image (copies in the deck, limits). */
+  readonly renderOverlay?: (cell: GridCell) => ReactNode
 }
 
 // Design: 2 columns under 600 (gap 14×12), 4 up to 999, 5–6 on desktop; each cell is the image
@@ -41,6 +45,8 @@ const CardCell = memo(function CardCell({
   highlighted,
   selected,
   labels,
+  renderAction,
+  renderOverlay,
 }: {
   readonly cell: GridCell
   readonly images: ImageIndex | undefined
@@ -48,6 +54,8 @@ const CardCell = memo(function CardCell({
   readonly highlighted: boolean
   readonly selected: boolean
   readonly labels: ResultLabels
+  readonly renderAction?: CardGridProps["renderAction"]
+  readonly renderOverlay?: CardGridProps["renderOverlay"]
 }) {
   const navigate = useNavigate()
   const href = useHref(cell.to)
@@ -56,7 +64,9 @@ const CardCell = memo(function CardCell({
     Object.entries(rarity?.translations ?? {}).find(([lang]) => lang === labels.language)?.[1] ??
     rarity?.original.text ??
     ""
-  return (
+  const overlay = renderOverlay?.(cell)
+  const action = renderAction?.(cell)
+  const link = (
     <a
       href={href}
       data-result-key={cell.key}
@@ -70,15 +80,18 @@ const CardCell = memo(function CardCell({
         selected && "ring-2 ring-accent ring-offset-2 ring-offset-bg",
       )}
     >
-      <CardImage
-        summary={cell.summary}
-        name={cell.name.primary}
-        images={images}
-        alt="redundant"
-        size="large"
-        className="w-full"
-        translate={labels.t}
-      />
+      <span className="relative block">
+        <CardImage
+          summary={cell.summary}
+          name={cell.name.primary}
+          images={images}
+          alt="redundant"
+          size="large"
+          className="w-full"
+          translate={labels.t}
+        />
+        {overlay}
+      </span>
       <span className="flex min-w-0 flex-col leading-tight">
         <span className="flex h-5.5 items-center justify-between gap-1 text-11 font-semibold text-text-3">
           <span className="truncate">{rarityLabel}</span>
@@ -106,9 +119,26 @@ const CardCell = memo(function CardCell({
       </span>
     </a>
   )
+  // The control is a sibling of the link, never inside it: buttons must not nest in an anchor.
+  return action ? (
+    <div className="flex flex-col gap-1.5">
+      {link}
+      {action}
+    </div>
+  ) : (
+    link
+  )
 })
 
-export function CardGrid({ cells, images, onOpen, anchor, selected }: CardGridProps) {
+export function CardGrid({
+  cells,
+  images,
+  onOpen,
+  anchor,
+  selected,
+  renderAction,
+  renderOverlay,
+}: CardGridProps) {
   const labels = useResultLabels()
   return (
     // One column count drives both the grid and the off-screen height estimate in results.css. The
@@ -128,6 +158,8 @@ export function CardGrid({ cells, images, onOpen, anchor, selected }: CardGridPr
               highlighted={anchor === cell.key}
               selected={selected === cell.key}
               labels={labels}
+              renderAction={renderAction}
+              renderOverlay={renderOverlay}
             />
           </li>
         ))}
