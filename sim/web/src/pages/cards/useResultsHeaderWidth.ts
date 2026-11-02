@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 export function useResultsHeaderWidth() {
   const headRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(0)
-  useEffect(() => {
+  // Layout effect: measure before first paint so the header does not flash the narrow layout.
+  useLayoutEffect(() => {
     const head = headRef.current
     if (!head) return
     const measure = () => {
