@@ -1,0 +1,32 @@
+cards:
+  BP18-110:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    name: 戒信の六銘伝・聖士郎
+                then:
+                  - life:
+                      delta: 1
+                      who: self
+            - draw:
+                n: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

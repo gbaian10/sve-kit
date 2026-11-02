@@ -1,0 +1,48 @@
+cards:
+  BP18-035:
+    abilities:
+      - line: 1
+        scope: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+      - line: 1
+        scope: 2
+        attack_time:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: field
+                    kind: follower
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
