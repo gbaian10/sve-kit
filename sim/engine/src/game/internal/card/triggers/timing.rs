@@ -1,7 +1,7 @@
 //! Completed rule actions produce immutable contexts before Quick or end-phase progression.
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventHeader, EventPattern, EventSnapshotPolicy,
-    Game, KeywordId, Located, PendingOccurrence, Phase, Result, SnapshotId, SourceInformation,
+    Game, KeywordId, PendingOccurrence, Phase, Result, SnapshotId, SourceInformation,
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
@@ -24,10 +24,7 @@ use crate::ir::events::timing::{
     attack_predicate, evolve_predicate, opponent, phase_predicate, second_header,
 };
 
-struct DamageAbility {
-    definition: Located<Ability>,
-    grant: Option<grant::GrantOrigin>,
-}
+use crate::game::internal::grant::EffectiveAbility;
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -184,9 +181,9 @@ impl Game {
         Ok(result)
     }
 
-    fn timing_abilities(&self, holder: &str) -> Result<Vec<Located<Ability>>> {
+    fn timing_abilities(&self, holder: &str) -> Result<Vec<EffectiveAbility>> {
         Ok(self
-            .internal_printed_abilities(holder)?
+            .internal_effective_abilities(holder)?
             .into_iter()
             .filter(|a| is_timing(&a.node))
             .collect())
@@ -195,15 +192,28 @@ impl Game {
     pub(super) fn timing_occurrence(
         &mut self,
         holder: &str,
-        ability: Located<Ability>,
+        ability: impl Into<EffectiveAbility>,
         header: &EventHeader,
         event: Event,
     ) -> Result<PendingOccurrence> {
-        let actor = player_id(&self.object(holder)?.controller)?;
-        let source = self.internal_card_source(holder, ability.node.id, actor)?;
+        let ability = ability.into();
+        let source = self.internal_effective_source(holder, &ability)?;
+        let provider = ability
+            .grant
+            .as_ref()
+            .map(|origin| origin.provider().card.clone());
         let information = SourceInformation::current(self, source)?;
-        let mut pending =
-            self.new_pending(holder, source, ability, information, header.clone(), None)?;
+        let mut pending = self.new_pending(
+            holder,
+            source,
+            ability.definition,
+            information,
+            header.clone(),
+            None,
+        )?;
+        if let Some(provider) = provider {
+            pending.card = provider;
+        }
         pending.timing = Some(event);
         Ok(pending)
     }
@@ -220,13 +230,15 @@ impl Game {
                 self.internal_subject_history(attacker, SubjectHistoryEvent::Attack, None, false)?;
             self.state.ir_subject_history.push(observation);
         }
-        if !self.card_runtime.definitions.cards.values().any(|program| {
-            program
-                .card()
-                .abilities
-                .iter()
-                .any(|ability| filter(&ability.node).is_some())
-        }) {
+        if !self.internal_has_granted_definitions()
+            && !self.card_runtime.definitions.cards.values().any(|program| {
+                program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| filter(&ability.node).is_some())
+            })
+        {
             return Ok(());
         }
         let actor = player_id(&self.object(attacker)?.controller)?;
@@ -270,7 +282,7 @@ impl Game {
         attacker: &str,
         actor: PlayerId,
         active: PlayerId,
-    ) -> Result<Vec<(String, Located<Ability>)>> {
+    ) -> Result<Vec<(String, EffectiveAbility)>> {
         use crate::ir::Stat;
         use crate::ir::events::attack::filter;
         let mut observers = Vec::new();
@@ -458,12 +470,7 @@ impl Game {
                     occurrence.timing = Some(Event::Damage { event });
                     occurrence
                 } else {
-                    self.timing_occurrence(
-                        &holder,
-                        ability.definition,
-                        &header,
-                        Event::Damage { event },
-                    )?
+                    self.timing_occurrence(&holder, ability, &header, Event::Damage { event })?
                 };
                 pending.push(occurrence);
             }
@@ -471,21 +478,15 @@ impl Game {
         self.internal_admit_pending(pending)
     }
 
-    fn damage_abilities(&self, holder: &str) -> Result<Vec<DamageAbility>> {
+    fn damage_abilities(&self, holder: &str) -> Result<Vec<EffectiveAbility>> {
         let printed = self.timing_abilities(holder)?;
         let printed_drain = printed.iter().any(|ability| {
             printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Drain)
         });
-        let mut abilities = printed
-            .into_iter()
-            .map(|definition| DamageAbility {
-                definition,
-                grant: None,
-            })
-            .collect::<Vec<_>>();
+        let mut abilities = printed;
         // CR 12.13.3 treats printed and granted copies as a single Drain.
         if !printed_drain && let Some(origin) = self.internal_drain_grant(holder)? {
-            abilities.push(DamageAbility {
+            abilities.push(EffectiveAbility {
                 definition: origin.drain_ability(),
                 grant: Some(origin),
             });
@@ -498,7 +499,7 @@ impl Game {
         hit: &Value,
         event: DamageEvent,
         active: PlayerId,
-    ) -> Result<Vec<(String, DamageAbility)>> {
+    ) -> Result<Vec<(String, EffectiveAbility)>> {
         use crate::ir::events::damage::{DamageFilter, RecipientFilter};
         let mut observers = Vec::new();
         let mut subject = None;

@@ -9,12 +9,12 @@ use crate::ir::history_turn::subject_plan;
 use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
-    Expr, Holder, InstallationSubjects, Instruction, Int, IntOperation, Located, LookOutcome,
-    MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
-    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
-    Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
-    RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility,
-    ZoneKind,
+    Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation, Located,
+    LookOutcome, MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand,
+    ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef,
+    PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet, Requirements,
+    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan,
+    StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
@@ -113,6 +113,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     mask_entry_origin(&mut inspected);
     mask_public_selectors(&mut inspected)?;
     super::tokens::mask_count(&mut inspected);
+    mask_granted_definitions(&mut inspected);
 
     if let Node::Instruction { instruction } = &mut inspected
         && super::movement::deck_top(&instruction.action).is_some()
@@ -225,6 +226,15 @@ fn mask_player_cost_filter(inspected: &mut Node) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn mask_granted_definitions(inspected: &mut Node) {
+    if let Node::Instruction { instruction } = inspected
+        && let Action::Grant { abilities, .. } = &mut instruction.action
+    {
+        // Granted bodies have their own checked target and observation authority.
+        abilities.retain(|ability| matches!(ability, GrantedAbility::Keyword { .. }));
+    }
 }
 
 fn mask_prevention(inspected: &mut Node) -> Result<()> {

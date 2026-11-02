@@ -149,6 +149,20 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Vec<(KeywordId, grant::GrantOrigin)>> {
+        Ok(self
+            .internal_static_grants(holder)?
+            .into_iter()
+            .filter_map(|(ability, origin)| match ability {
+                GrantedAbility::Keyword { keyword } => Some((keyword, origin)),
+                GrantedAbility::Definition { .. } => None,
+            })
+            .collect())
+    }
+
+    pub(in crate::game::internal) fn internal_static_grants(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<(GrantedAbility, grant::GrantOrigin)>> {
         let recipient = self.object(holder)?;
         let mut keywords = Vec::new();
         if recipient.zone != "field" {
@@ -207,11 +221,8 @@ impl Game {
                         continue;
                     }
                     for ability in abilities {
-                        let GrantedAbility::Keyword { keyword } = ability else {
-                            return Err(unsupported("static granted ability"));
-                        };
                         keywords.push((
-                            *keyword,
+                            ability.clone(),
                             grant::GrantOrigin::Continuous {
                                 provider: self.keyword_provider(&source, located.node.id)?,
                                 effect: id.0,

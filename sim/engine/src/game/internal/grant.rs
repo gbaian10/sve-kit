@@ -2,11 +2,13 @@
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Ability, AbilityId, AbilityInstanceId, Action, CharacteristicPatch, DurationEnd, Effect,
-    GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand, ObjectView,
-    RuntimeAbilitySource, ScopeId, SourceSpan, TimeAnchor, printed_keywords,
+    Ability, AbilityId, AbilityInstanceId, AbilityKind, Action, CharacteristicPatch, DurationEnd,
+    Effect, EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located,
+    ObjectOperand, ObjectView, RuntimeAbilitySource, ScopeId, SourceSpan, TimeAnchor,
+    TriggerCondition, ZoneKind, printed_keywords,
 };
 use alloc::collections::BTreeSet;
+use core::ops::Deref;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -19,6 +21,29 @@ struct KeywordGrant {
     end: EffectEnd,
     keywords: BTreeSet<String>,
     origin: GrantOrigin,
+    definitions: Vec<u64>,
+}
+
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct EffectiveAbility {
+    pub definition: Located<Ability>,
+    pub grant: Option<GrantOrigin>,
+}
+
+impl From<Located<Ability>> for EffectiveAbility {
+    fn from(definition: Located<Ability>) -> Self {
+        Self {
+            definition,
+            grant: None,
+        }
+    }
+}
+
+impl Deref for EffectiveAbility {
+    type Target = Located<Ability>;
+    fn deref(&self) -> &Self::Target {
+        &self.definition
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -110,9 +135,11 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     else {
         return Ok(());
     };
-    let supported_keywords = !abilities.is_empty() && abilities.iter().all(|ability| {
-        matches!(ability, GrantedAbility::Keyword { keyword: id } if keyword(*id).is_some())
-    });
+    let supported_keywords = !abilities.is_empty()
+        && abilities.iter().all(|ability| match ability {
+            GrantedAbility::Keyword { keyword: id } => keyword(*id).is_some(),
+            GrantedAbility::Definition { ability } => supported_definition(ability),
+        });
     let current_provider = matches!(&provider.provider, ObjectView::Current { object }
         if object.as_ref() == &ObjectOperand::SourceHolder {});
     let fixed_duration = duration.anchor == (TimeAnchor::Installation {})
@@ -122,10 +149,27 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             duration.end,
             DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
         );
-    if !supported_keywords || !current_provider || !fixed_duration {
+    if !supported_keywords {
+        return Err(unsupported("granted definition event or keyword"));
+    }
+    if !current_provider || !fixed_duration {
         return Err(unsupported("fixed keyword grant"));
     }
     Ok(())
+}
+
+pub(super) fn supported_definition(ability: &Ability) -> bool {
+    // The closed trigger grammar supplies the nested entry's private-read proof.
+    ability.kind == AbilityKind::Triggered
+        && ability.active_zones == [ZoneKind::Field]
+        && matches!(
+            ability.trigger.as_ref().map(|trigger| &trigger.on),
+            Some(TriggerCondition::Event {
+                pattern: EventPattern::Attack { .. }
+                    | EventPattern::Phase { .. }
+                    | EventPattern::LeaveField { .. }
+            })
+        )
 }
 
 #[expect(
@@ -133,6 +177,81 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     reason = "Keyword installation and expiry share generation-bound authority."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_has_granted_definitions(&self) -> bool {
+        self.state.ir_keywords.values().any(|state| state.grants.iter().any(|grant| !grant.definitions.is_empty()))
+            || self.card_runtime.definitions.cards.values().any(|program| program.card().abilities.iter().any(|ability| ability.node.declarations.iter().any(|effect| {
+                matches!(effect, Effect::Continuous { patch: CharacteristicPatch::GrantAbility { abilities }, .. } if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { .. })))
+            })))
+    }
+
+    pub(in crate::game::internal) fn internal_effective_abilities(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<EffectiveAbility>> {
+        let mut result = self
+            .internal_printed_abilities(holder)?
+            .into_iter()
+            .map(|definition| EffectiveAbility {
+                definition,
+                grant: None,
+            })
+            .collect::<Vec<_>>();
+        let object = self.object(holder)?;
+        if object.zone != "field" {
+            return Ok(result);
+        }
+        if let Some(state) = self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+        {
+            for grant in &state.grants {
+                for definition in &grant.definitions {
+                    let ability = self
+                        .card_runtime
+                        .granted_definitions
+                        .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
+                        .ok_or_else(|| invalid("missing installed definition"))?;
+                    result.push(EffectiveAbility {
+                        definition: Located {
+                            node: ability.clone(),
+                            source: grant.origin.provider().span.clone(),
+                        },
+                        grant: Some(grant.origin.clone()),
+                    });
+                }
+            }
+        }
+        for (ability, origin) in self.internal_static_grants(holder)? {
+            if let GrantedAbility::Definition { ability } = ability {
+                result.push(EffectiveAbility {
+                    definition: Located {
+                        node: *ability,
+                        source: origin.provider().span.clone(),
+                    },
+                    grant: Some(origin),
+                });
+            }
+        }
+        Ok(result)
+    }
+
+    pub(in crate::game::internal) fn internal_effective_source(
+        &mut self,
+        holder: &str,
+        ability: &EffectiveAbility,
+    ) -> Result<RuntimeAbilitySource> {
+        match &ability.grant {
+            Some(origin) => self.internal_definition_source(holder, origin, ability.node.id),
+            None => self.internal_card_source(
+                holder,
+                ability.node.id,
+                super::player_id(&self.object(holder)?.controller)?,
+            ),
+        }
+    }
+
     pub(in crate::game) fn internal_granted_keywords(
         &self,
         holder: &str,
@@ -234,8 +353,22 @@ impl Game {
         holder: &str,
         origin: &GrantOrigin,
     ) -> Result<RuntimeAbilitySource> {
+        self.internal_definition_source(holder, origin, AbilityId(origin.provider().ability))
+    }
+
+    fn internal_definition_source(
+        &mut self,
+        holder: &str,
+        origin: &GrantOrigin,
+        definition: AbilityId,
+    ) -> Result<RuntimeAbilitySource> {
         let reference = self.internal_current_reference(holder)?;
-        let key = (holder.into(), reference.generation.0, origin.clone());
+        let key = (
+            holder.into(),
+            reference.generation.0,
+            origin.clone(),
+            definition,
+        );
         let instance = if let Some(instance) = self.card_runtime.keyword_instances.get(&key) {
             *instance
         } else {
@@ -249,12 +382,11 @@ impl Game {
             self.card_runtime.keyword_instances.insert(key, instance);
             instance
         };
-        let provider = origin.provider();
         let source = RuntimeAbilitySource {
             holder: reference,
             instance,
             controller: super::player_id(&self.object(holder)?.controller)?,
-            definition: AbilityId(provider.ability),
+            definition,
         };
         Ok(source)
     }
@@ -303,15 +435,25 @@ impl Game {
         };
         let keywords = abilities
             .iter()
-            .map(|ability| {
+            .filter_map(|ability| {
                 let GrantedAbility::Keyword { keyword: id } = ability else {
-                    return Err(unsupported("keyword grant definition"));
+                    return None;
                 };
-                keyword(*id)
-                    .map(str::to_owned)
-                    .ok_or_else(|| unsupported("unsupported keyword grant"))
+                Some(
+                    keyword(*id)
+                        .map(str::to_owned)
+                        .ok_or_else(|| unsupported("unsupported keyword grant")),
+                )
             })
             .collect::<Result<BTreeSet<_>>>()?;
+        for ability in abilities {
+            if let GrantedAbility::Definition { ability } = ability {
+                self.card_runtime.granted_definitions.insert(
+                    (origin.provider().card.clone(), ability.id),
+                    *ability.clone(),
+                );
+            }
+        }
         let mut installed = vec![];
         let mut seen = BTreeSet::new();
         for member in execution.objects(self, subjects)? {
@@ -342,6 +484,13 @@ impl Game {
                 end,
                 keywords: keywords.clone(),
                 origin: origin.clone(),
+                definitions: abilities
+                    .iter()
+                    .filter_map(|ability| match ability {
+                        GrantedAbility::Definition { ability } => Some(ability.id.0),
+                        GrantedAbility::Keyword { .. } => None,
+                    })
+                    .collect(),
             });
             installed.push(member);
         }
