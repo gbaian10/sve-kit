@@ -39,15 +39,15 @@ cards:
         activate:
           cost:
             self_to_cemetery: true
-          targets:
-            - bind: idol
-              from:
-                who: self
-                zone: field
-                trait: アイドル
-                other: true
-              n: 1
           do:
+            - choose:
+                bind: idol
+                from:
+                  who: self
+                  zone: field
+                  trait: アイドル
+                  other: true
+                n: 1
             - move:
                 ref: idol
                 to: cemetery

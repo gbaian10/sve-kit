@@ -158,7 +158,6 @@ fn evolve(game: &mut Game) {
     evolve_with(game, 1, 1);
 }
 
-
 fn evolve_with(game: &mut Game, cost: u8, mode: u64) {
     assert_eq!(
         game.internal_rule_action(
@@ -196,8 +195,6 @@ fn activate(game: &mut Game, card: &str) -> bool {
     true
 }
 
-
-
 // Some printed bases are not admitted yet, so a same-name companion supplies only evolution.
 fn synthetic_base(form: &str, initial: &Value) -> Game {
     let (snapshot, keywords, mut input) = inputs().clone();
@@ -223,7 +220,8 @@ fn synthetic_base(form: &str, initial: &Value) -> Game {
         .unwrap();
     let mut rules: Value = serde_saphyr::from_str(
         &read_to_string(
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("../../authored/rules/engine/index.yaml"),
         )
         .unwrap(),
     )
@@ -263,8 +261,6 @@ fn names(state: &Value, zone: &Value) -> Vec<String> {
         .collect()
 }
 
-
-
 fn settle_combat(game: &mut Game) {
     loop {
         triggers(game);
@@ -292,8 +288,7 @@ fn end_turn(game: &mut Game) {
 #[test]
 fn bp20_111_fanfare_discards_the_whole_hand() {
     let mut initial = position("BP20-111");
-    initial["players"]["P1"]["zones"]["hand"] =
-        json!([{"id":"source","card":"BP20-111"},{"id":"a","card":"BP01-171"},{"id":"b","card":"BP01-171"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP20-111"},{"id":"a","card":"BP01-171"},{"id":"b","card":"BP01-171"}]);
     let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
@@ -350,10 +345,33 @@ fn bp20_055_activation_sends_another_idol_to_the_cemetery() {
         .unwrap()
         .push(json!({"id":"idol","card":"BP05-048"}));
     let mut game = game(&initial);
-    assert!(activate(&mut game, "BP20-055"));
+    let step = game
+        .activate_internal_card("source", printed_activation("BP20-055"), actor())
+        .unwrap();
+    let CardPlay::Awaiting(question) = &step else {
+        panic!("the resolving instruction must choose another idol")
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("a public object choice is expected")
+    };
+    assert_eq!(domain.cardinality.minimum.0, 1);
+    assert_eq!(domain.members.len(), 1);
+    let paid = game.projection(View::Referee).unwrap();
+    assert_eq!(paid["P1"]["cemetery"], json!(["source"]));
+    finish(&mut game, step);
+    triggers(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["field"], json!([]));
     assert_eq!(state["P1"]["cemetery"], json!(["source", "idol"]));
+}
+
+#[test]
+fn bp20_055_activation_without_another_idol_only_sends_itself() {
+    let mut game = game(&on_field("BP20-055"));
+    assert!(activate(&mut game, "BP20-055"));
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!([]));
+    assert_eq!(state["P1"]["cemetery"], json!(["source"]));
 }
 
 #[test]
