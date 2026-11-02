@@ -1,0 +1,53 @@
+cards:
+  BP20-042:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - discard:
+                  ref: this
+              - discard:
+                  n: 1
+                  sel:
+                    kind: spell
+                    traits_all:
+                      - 絶傑
+                      - 魔法使い
+                    who: self
+                    zone: hand
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 絶尽の偽証
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP20-T14
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

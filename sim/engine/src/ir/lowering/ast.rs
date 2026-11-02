@@ -2027,6 +2027,8 @@ pub(super) struct HandQuery {
     pub _zone: HandZone,
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
     pub name: Option<String>,
     pub class: Option<String>,
     pub orig_cost_eq: Option<u64>,
