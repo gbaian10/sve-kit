@@ -259,3 +259,6 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 例如 ECP01-036 的 `discard: {sel: {who: self, zone: hand, trait: ウマ娘}, n: 1, result: fuel}`，
 同次普通法術本文可用 `cmp: {left: {count: {in: {objects_of: fuel, view: before}, orig_cost_ge: 7}}, op: ge, right: 1}` 判斷已棄牌的原始印刷費用；拒付時該集合為空。
 這項回條不注入之後的 Fanfare；Follower 的交換只影響打出付款，其入場能力仍使用獨立的待機與結算。
+
+手牌交換不會產生離場事件，故載入的謝幕／離場訂閱不阻擋這類付款，也不因棄手牌而觸發。
+其他可能觀察付款的觸發仍保守拒絕；場上送墓交換的離場限制維持原規則。

@@ -132,16 +132,23 @@ impl Game {
         if self.card_runtime.quick_start {
             return Err(unsupported("exchange Quick payment"));
         }
+        let hand_payment = matches!(step(&exchange.node)?.action, Action::Discard { .. });
         // A definition that can consume payment facts is unsafe even when its holder is hidden.
         for definition in self.card_runtime.definitions.cards.values() {
             for ability in &definition.card().abilities {
                 if ability.node.trigger.as_ref().is_some_and(|trigger| {
-                    !matches!(
+                    !(matches!(
                         trigger.on,
                         TriggerCondition::Event {
                             pattern: EventPattern::EnterField { .. } | EventPattern::Phase { .. }
                         }
-                    )
+                    ) || (hand_payment
+                        && matches!(
+                            trigger.on,
+                            TriggerCondition::Event {
+                                pattern: EventPattern::LeaveField { .. }
+                            }
+                        )))
                 }) {
                     return Err(unsupported("exchange payment or material triggers"));
                 }

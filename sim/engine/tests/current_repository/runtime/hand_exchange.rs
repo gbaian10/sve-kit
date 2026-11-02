@@ -11,9 +11,8 @@ fn selected() -> &'static SelectedEffects {
     SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
         input["authors"].as_array_mut().unwrap().retain(|author| {
-            author["input"]["card_no"].as_str().is_some_and(|number| ["ECP01-036", "BP14-119", "CP02-038"].contains(&number))
+            author["input"]["card_no"].as_str().is_some_and(|number| ["ECP01-036", "BP14-119", "CP02-038", "CP02-T01", "BP03-T02"].contains(&number))
         });
-        input["documents"] = json!([]);
         for (number, cost, traits) in [
             ("exchange-high", "7", vec!["ウマ娘"]),
             ("exchange-low", "1", vec!["ウマ娘"]),
@@ -28,7 +27,7 @@ fn selected() -> &'static SelectedEffects {
                 format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
             ]));
         }
-        repository::select(&snapshot,&keywords,&input).unwrap()
+        repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })
 }
 
