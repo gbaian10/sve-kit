@@ -1,0 +1,66 @@
+cards:
+  ECP02-063:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 2
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: topped
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: topped
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            lesson: 2
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: デレマス
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

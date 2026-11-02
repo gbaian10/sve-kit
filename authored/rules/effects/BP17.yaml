@@ -1,58 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP17-019:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
-      - line: 2
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: eq
-            args:
-              - count:
-                  side: self
-                  zone: field
-                  where:
-                    fn: eq
-                    args:
-                      - read: item.class
-                      - ロイヤル
-              - 5
-          then:
-            op: modify
-            subjects: self
-            power: 2
-        event: attack
-        subject: self
-      - line: 3
-        kind: trigger
-        body:
-          op: choice
-          timing: resolve
-          min: 1
-          max: 1
-          modes:
-            - op: create
-              name: スティールナイト
-              count: 1
-              to: field
-            - op: create
-              name: シールドガーディアン
-              count: 1
-              to: field
-            - op: create
-              name: ナイト
-              count: 1
-              to: field
-        event: enter
-        subject: self
   BP17-030:
     status: complete
     abilities:

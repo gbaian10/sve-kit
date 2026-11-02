@@ -1,0 +1,52 @@
+cards:
+  BP16-033:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: スティールナイト
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - buff:
+                on: soldier
+                power: 2
+            - grant:
+                keywords:
+                  - storm
+                on: soldier
+          per_turn: 1
+          targets:
+            - bind: soldier
+              from:
+                kind: follower
+                token: true
+                trait: 兵士
+                who: self
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                distinct_names:
+                  kind: follower
+                  token: true
+                  trait: 兵士
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

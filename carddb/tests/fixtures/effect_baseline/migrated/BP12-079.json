@@ -1,0 +1,70 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "max": 1,
+        "min": 1,
+        "modes": [
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "amount": 2,
+                "op": "damage",
+                "subjects": "opponent.leader"
+              },
+              {
+                "amount": 1,
+                "op": "damage",
+                "subjects": "self.leader"
+              }
+            ]
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "count": 1,
+                "name": "プロダクトマシーン",
+                "op": "create",
+                "to": "field"
+              },
+              {
+                "condition": {
+                  "args": [
+                    {
+                      "count": {
+                        "name": "真紅の抗戦者・モノ",
+                        "side": "self",
+                        "zone": "field"
+                      }
+                    },
+                    0
+                  ],
+                  "fn": "gt"
+                },
+                "else": {
+                  "count": 1,
+                  "name": "プロダクトマシーン",
+                  "op": "create",
+                  "to": "ex"
+                },
+                "op": "if",
+                "then": {
+                  "count": 1,
+                  "name": "プロダクトマシーン",
+                  "op": "create",
+                  "to": "field"
+                }
+              }
+            ]
+          }
+        ],
+        "op": "choice"
+      },
+      "kind": "spell",
+      "line": 1
+    }
+  ],
+  "status": "complete"
+}

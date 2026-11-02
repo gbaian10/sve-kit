@@ -1,0 +1,46 @@
+cards:
+  BP12-079:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 2
+                        to:
+                          leaders: opponents
+                    - damage:
+                        n: 1
+                        to:
+                          leader: self
+                  - - create:
+                        n: 1
+                        to: field
+                        token: プロダクトマシーン
+                    - if:
+                        cond:
+                          exists:
+                            name: 真紅の抗戦者・モノ
+                            who: self
+                            zone: field
+                        else:
+                          - create:
+                              n: 1
+                              to: ex
+                              token: プロダクトマシーン
+                        then:
+                          - create:
+                              n: 1
+                              to: field
+                              token: プロダクトマシーン
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
