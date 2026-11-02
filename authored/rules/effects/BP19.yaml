@@ -178,47 +178,6 @@ cards:
                 - opponent.leader
             min: 1
             max: 1
-  BP19-078:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: aura
-          subjects: self
-          keywords:
-            - storm
-          condition:
-            fn: ge
-            args:
-              - count:
-                  side: self
-                  zone: cemetery
-              - 10
-      - line: 3
-        kind: trigger
-        body:
-          op: damage
-          subjects: target.1
-          amount: 3
-        event: field_to_cemetery
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
   BP19-080:
     status: complete
     review: 依 Q2595／Q2596／Q2621：入場即誘發、解決時檢查保存的來源區域，同句兩組對象合為單一集合。
@@ -330,50 +289,6 @@ cards:
             top: 1
           to: cemetery
         event: field_to_cemetery
-        subject: self
-  BP19-086:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: self.leader
-              amount: 1
-            - op: if
-              condition:
-                fn: gt
-                args:
-                  - count:
-                      side: self
-                      zone: field
-                      name: 羅刹の咎人・ガロダート
-                  - 0
-              then:
-                op: evolve
-                subjects: self
-        event: enter
-        subject: self
-  BP19-087:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: damage
-          subjects: both.leaders
-          amount: 1
-        event: evolve
         subject: self
   BP19-P21:
     status: complete

@@ -1,0 +1,36 @@
+cards:
+  BP19-036:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 2
+                instead:
+                  - if:
+                      exists:
+                        who: self
+                        zone: field
+                        kind: follower
+                        trait: 忍者
+                    n: 3
+                to: enemy
+            - draw:
+                n: 1
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

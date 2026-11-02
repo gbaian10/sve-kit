@@ -1,0 +1,55 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "damage",
+            "subjects": "self.leader",
+            "amount": 1
+          },
+          {
+            "op": "if",
+            "condition": {
+              "fn": "gt",
+              "args": [
+                {
+                  "count": {
+                    "side": "self",
+                    "zone": "field",
+                    "name": "羅刹の咎人・ガロダート"
+                  }
+                },
+                0
+              ]
+            },
+            "then": {
+              "op": "evolve",
+              "subjects": "self"
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}
