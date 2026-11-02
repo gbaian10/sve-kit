@@ -249,7 +249,11 @@ fn check_integer(value: &Expr<Int>) -> Result<()> {
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value: count } => check_count(count),
             IntOperation::Arithmetic {
-                operation: Arithmetic::Subtract,
+                operation:
+                    Arithmetic::Subtract
+                    | Arithmetic::Multiply
+                    | Arithmetic::FloorDivide
+                    | Arithmetic::Minimum,
                 arguments,
             } => {
                 for argument in arguments {

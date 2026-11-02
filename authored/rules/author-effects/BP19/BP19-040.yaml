@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - min:
+                  - count:
+                      who: self
+                      zone: cemetery
+                      kind: follower
+                      trait: 魔法使い
+                  - count:
+                      who: self
+                      zone: cemetery
+                      kind: spell
+                      trait: 魔法使い
+      - line: 2
+        keywords:
+          - storm
+          - bane
+          - ward

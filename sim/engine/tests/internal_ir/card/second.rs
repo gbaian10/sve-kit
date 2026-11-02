@@ -725,3 +725,71 @@ fn ex_source_condition_rejects_departure_and_a_returned_generation() {
         );
     }
 }
+
+#[test]
+fn event_amount_compares_the_actual_hit_on_both_sides_of_the_threshold() {
+    let trigger = lowered(
+        "auto",
+        json!({"on":{"damaged":{"recipient":"this"}},"do":[{"if":{
+            "cond":{"cmp":{"left":{"event":"amount"},"op":"ge","right":5}},
+            "then":[{"draw":{"who":"self","n":1}},{"pp_max":{"who":"self","delta":1}}]
+        }}]}),
+    );
+    for (amount, maximum, hand) in [(4, 2_u8, json!([])), (5, 3, json!(["d"]))] {
+        let program = card(vec![
+            trigger.clone(),
+            ability(
+                2,
+                vec![damage(
+                    100,
+                    RecipientSet::Objects {
+                        objects: Selector::Objects {
+                            objects: vec![ObjectOperand::SourceHolder {}],
+                        },
+                    },
+                    amount,
+                )],
+            ),
+        ]);
+        let mut game = position_with_card(1, &program);
+        game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
+            .unwrap();
+        game.resume_internal_card().unwrap();
+        next(&mut game, 1);
+        game.resume_internal_card().unwrap();
+        assert_eq!(game.query(View::Referee, "P1.hand").unwrap().unwrap(), hand);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["max"],
+            maximum,
+            "a {amount}-point hit is compared with 5"
+        );
+    }
+}
+
+#[test]
+fn event_amount_needs_a_damage_event_header() {
+    let ask = json!({"if":{
+        "cond":{"cmp":{"left":{"event":"amount"},"op":"ge","right":5}},
+        "then":[{"draw":{"who":"self","n":1}}]
+    }});
+    for (header, payload) in [
+        ("fanfare", json!({"do":[ask]})),
+        (
+            "auto",
+            json!({"on":{"enter_field":{"who":"self"}},"do":[ask]}),
+        ),
+        (
+            "auto",
+            json!({"on":{"damaged":{"recipient":"this"}},"do":[{"if":{
+                "cond":{"cmp":{"left":{"event":"value"},"op":"eq","right":6}},
+                "then":[{"draw":{"who":"self","n":1}}]
+            }}]}),
+        ),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        let entry = &mut tree["cards"]["BP08-038"]["abilities"][0];
+        entry.as_object_mut().unwrap().remove("fanfare");
+        entry[header] = payload;
+        lowerer().lower(&tree).unwrap_err();
+    }
+}

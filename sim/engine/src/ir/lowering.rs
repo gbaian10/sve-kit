@@ -996,6 +996,7 @@ enum CounterReadView {
 
 struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
+    damage_event: Option<Binding<super::DamageEvent>>,
     source_use: &'definitions ast::SourceUse,
     counter_read_view: CounterReadView,
     entry_event: Option<Binding<super::EnterFieldEvent>>,
@@ -1034,6 +1035,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             subject_event: None,
+            damage_event: None,
             source_use: &entry.sources[0],
             counter_read_view: CounterReadView::Current,
             leave_event: None,
@@ -1085,6 +1087,9 @@ impl<'definitions> BodyContext<'definitions> {
         let trigger = self.trigger(entry, keyword, body, path)?;
         if let TriggerCondition::Event { pattern } = &trigger.on {
             self.subject_event = SubjectFields::from_pattern(pattern);
+            if let EventPattern::Damage { binding, .. } = pattern {
+                self.damage_event = Some(*binding);
+            }
         }
         Ok(Some(trigger))
     }

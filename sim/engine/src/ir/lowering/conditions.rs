@@ -1,7 +1,7 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, CounterKind, IntRead, NatFrozen, NumberRead,
-    ObjectView, PlayerResource, Precondition, PreconditionKind, PreconditionReason, SnapshotFields,
-    Stat,
+    CharacteristicView, Comparison, CostSpec, CounterKind, IntFrozen, IntRead, NatFrozen,
+    NumberRead, ObjectView, PlayerResource, Precondition, PreconditionKind, PreconditionReason,
+    SnapshotFields, Stat,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, FaceId,
@@ -631,16 +631,16 @@ impl BodyContext<'_> {
                 active.remove(name);
                 result
             }
+            ast::Number::Plus { plus } => self.arithmetic(Arithmetic::Add, &plus[..], path, active),
             ast::Number::Minus { minus } => {
-                let [left, right] = minus.as_ref();
-                Ok(Expr::Compute(Box::new(IntOperation::Arithmetic {
-                    operation: Arithmetic::Subtract,
-                    arguments: vec![
-                        self.number(left, path, active)?,
-                        self.number(right, path, active)?,
-                    ],
-                })))
+                self.arithmetic(Arithmetic::Subtract, &minus[..], path, active)
             }
+            ast::Number::Times { times } => {
+                self.arithmetic(Arithmetic::Multiply, &times[..], path, active)
+            }
+            ast::Number::Min { min } => self.minimum(min, path, active),
+            ast::Number::Per { per } => self.per(per, path, active),
+            ast::Number::Event { event } => self.event_number(event, path),
             ast::Number::Count { count } => self.zone_count(count, path),
             ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(
                 distinct_names,
@@ -672,6 +672,66 @@ impl BodyContext<'_> {
                 })))
             }
         }
+    }
+
+    fn minimum(
+        &mut self,
+        operands: &[ast::Number],
+        path: &str,
+        active: &mut BTreeSet<String>,
+    ) -> Result<Expr<Int>, LoweringError> {
+        if operands.is_empty() {
+            return Err(unsupported(path));
+        }
+        self.arithmetic(Arithmetic::Minimum, operands, path, active)
+    }
+
+    /// 「N枚につき」 rounds down; the IR also requires a positive literal divisor.
+    fn per(
+        &mut self,
+        per: &ast::Per,
+        path: &str,
+        active: &mut BTreeSet<String>,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let unit = i64::try_from(per.unit)
+            .ok()
+            .filter(|unit| *unit > 0)
+            .ok_or_else(|| unsupported(path))?;
+        Ok(Expr::Compute(Box::new(IntOperation::Arithmetic {
+            operation: Arithmetic::FloorDivide,
+            arguments: vec![
+                self.number(&per.of, path, active)?,
+                Expr::Literal(Int(unit)),
+            ],
+        })))
+    }
+
+    /// Only a damage event header provides its actual amount.
+    fn event_number(
+        &self,
+        field: &ast::EventNumber,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let ast::EventNumber::Amount = field;
+        self.damage_event
+            .map(|event| Expr::Frozen(Box::new(IntFrozen::DamageAmount { event })))
+            .ok_or_else(|| unsupported(path))
+    }
+
+    fn arithmetic(
+        &mut self,
+        operation: Arithmetic,
+        operands: &[ast::Number],
+        path: &str,
+        active: &mut BTreeSet<String>,
+    ) -> Result<Expr<Int>, LoweringError> {
+        Ok(Expr::Compute(Box::new(IntOperation::Arithmetic {
+            operation,
+            arguments: operands
+                .iter()
+                .map(|operand| self.number(operand, path, active))
+                .collect::<Result<_, _>>()?,
+        })))
     }
 
     pub(super) fn zone_count(
