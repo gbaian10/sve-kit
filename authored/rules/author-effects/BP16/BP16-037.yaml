@@ -1,0 +1,72 @@
+cards:
+  BP16-037:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: 学院
+              op: ge
+              right: 10
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 学院
+                    op: ge
+                    right: 5
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: アンの大英霊
+      - line: 3
+        fanfare:
+          cost:
+            discard:
+              n: 2
+              sel:
+                who: self
+                zone: hand
+                trait: 学院
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - draw:
+                n: 2
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,40 @@
+cards:
+  BP16-077:
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 3
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                instead:
+                  - if:
+                      leader_life:
+                        le: 10
+                        who: self
+                    n: 10
+                n: 5
+                to: victim
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                "on": this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
