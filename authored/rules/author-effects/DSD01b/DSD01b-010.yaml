@@ -1,0 +1,36 @@
+cards:
+  DSD01b-010:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - buff:
+                      hp: 1
+                      "on": ally
+                      power: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: 武闘竜人
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
