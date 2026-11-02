@@ -1,0 +1,29 @@
+cards:
+  CP04-PR24:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - lastword:
+          do:
+            - buff:
+                "on": allies
+                power: 1
+          targets:
+            - bind: allies
+              from:
+                kind: follower
+                trait: ディアボロス
+                who: self
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
