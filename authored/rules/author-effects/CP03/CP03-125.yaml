@@ -1,0 +1,57 @@
+cards:
+  CP03-125:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            face_up: true
+                            name: ドライブポイント
+                            who: self
+                            zone: evolve_deck
+                        op: ge
+                        right: 3
+                    upto: 3
+                n: 1
+                options:
+                  - - damage:
+                        n: 4
+                        to: enemy
+                  - - move:
+                        ref: returned
+                        to: hand
+                  - - life:
+                        delta: 4
+                        who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: returned
+              from:
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

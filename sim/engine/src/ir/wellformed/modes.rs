@@ -1,6 +1,9 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
 use crate::ir::{
+    Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, NamesRead, ObjectRef,
+};
+use crate::ir::{
     Bool, Cardinality, ChoiceDomain, Control, CostSpec, EntryOrigin, EntryOriginFields, Expr, Mode,
     ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef,
     Predicate, Program, SpellCountTime, ValueEquality, Visibility, ZoneKind,
@@ -233,6 +236,7 @@ impl Checker {
         else {
             return self.reject();
         };
+        // The earlier natural() pass already validates and defines the count's local bindings.
         self.mode_condition(condition)?;
         for value in [then_value, else_value] {
             match value {
@@ -257,6 +261,11 @@ impl Checker {
                 {
                     self.boolean(condition)
                 }
+                Predicate::CompareInt {
+                    left,
+                    comparison: Comparison::GreaterEqual,
+                    right: Expr::Literal(Int(1..)),
+                } if public_evolve_mode_count(left) => Ok(()),
                 Predicate::CompareNat { left, right, .. } => {
                     for value in [left, right] {
                         if !matches!(value, Expr::Literal(_) | Expr::Frozen(_)) {
@@ -353,4 +362,78 @@ fn exact_play_mode(kind: ModeChoiceKind, count: &Expr<Nat>, cardinality: Cardina
                 minimum: Nat(1),
                 maximum: Some(Nat(1)),
             })
+}
+
+fn public_evolve_mode_count(value: &Expr<Int>) -> bool {
+    let Expr::Compute(operation) = value else {
+        return false;
+    };
+    let IntOperation::FromNat {
+        value: Expr::Live(read),
+    } = operation.as_ref()
+    else {
+        return false;
+    };
+    let NatRead::ZoneCount {
+        selector:
+            Selector::Zone {
+                players,
+                zone: ZoneKind::Evolve,
+                view: SelectionView::Current {},
+                binding,
+                predicate,
+            },
+    } = read.as_ref()
+    else {
+        return false;
+    };
+    players.relation == PlayerRelation::SelfPlayer
+        && players.relative_to == (PlayerRef::Controller {})
+        && players.cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
+        && players.text_quantifier == TextQuantifier::Implicit
+        && evolve_mode_filter(predicate, *binding) == Some((1, 1))
+}
+
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only the closed public count predicate shapes are admitted here."
+)]
+fn evolve_mode_filter(predicate: &Expr<Bool>, binding: Binding<ObjectRef>) -> Option<(u8, u8)> {
+    let object = ObjectView::Current {
+        object: Box::new(ObjectOperand::Bound { binding }),
+    };
+    match predicate {
+        Expr::Live(read)
+            if matches!(read.as_ref(), BoolRead::State {
+            object: actual, property: BooleanState::FaceUp,
+        } if actual == &object) =>
+        {
+            Some((0, 1))
+        }
+        Expr::Compute(condition) => match condition.as_ref() {
+            Predicate::And { predicates } => {
+                let mut total = (0_u8, 0_u8);
+                for child in predicates {
+                    let next = evolve_mode_filter(child, binding)?;
+                    total.0 = total.0.checked_add(next.0)?;
+                    total.1 = total.1.checked_add(next.1)?;
+                }
+                Some(total)
+            }
+            Predicate::NamesIntersect {
+                left: Expr::Live(read),
+                right: Expr::Literal(names),
+            } if matches!(read.as_ref(), NamesRead::Names { object: actual } if actual == &object)
+                && matches!(names.as_slice(), [name] if !name.0.is_empty()) =>
+            {
+                Some((1, 0))
+            }
+            _ => None,
+        },
+        _ => None,
+    }
 }

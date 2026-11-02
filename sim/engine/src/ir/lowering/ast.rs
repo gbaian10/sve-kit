@@ -1851,6 +1851,7 @@ pub(super) struct ChoiceInstead {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum ModeCondition {
+    Cmp(Box<BodyComparison>),
     Spellchain(u64),
     Necro(u64),
     EnteredFrom(EntryOriginCondition),

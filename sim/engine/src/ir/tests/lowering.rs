@@ -12,6 +12,9 @@ mod current_keywords;
 #[path = "crest_count.rs"]
 mod crest_count;
 
+#[path = "drive_mode_count.rs"]
+mod drive_mode_count;
+
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
     env::temp_dir,

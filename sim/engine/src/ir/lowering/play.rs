@@ -801,7 +801,7 @@ impl ModeShape<'_> {
 }
 
 fn choice_count(
-    context: &BodyContext<'_>,
+    context: &mut BodyContext<'_>,
     choice: &ast::Choice,
     printed: u64,
     path: &str,
@@ -836,6 +836,9 @@ fn choice_count(
         }))
     };
     let condition = match &replacement.r#if {
+        ast::ModeCondition::Cmp(comparison) => {
+            context.public_evolve_mode_condition(comparison, path)?
+        }
         ast::ModeCondition::EnteredFrom(origin)
             if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
         {
