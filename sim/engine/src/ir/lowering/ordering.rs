@@ -239,7 +239,8 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         Ok(Action::Banish {
             objects: match value {
-                ast::BanishAction::Top { top } => deck_slice(top, path)?,
+                ast::BanishAction::Top { top } if own_deck(top) => self.deck_slice(top, path)?,
+                ast::BanishAction::Top { .. } => return Err(unsupported(path)),
                 ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
             },
         })
@@ -257,7 +258,7 @@ impl BodyContext<'_> {
             return self.field_entry_move(value, path);
         }
         if let Some(top) = &value.top {
-            return top_move(value, top, path);
+            return self.top_move(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
             if matches!(value.to, ast::Destination::Deck) {
@@ -440,6 +441,79 @@ impl BodyContext<'_> {
         }
     }
 
+    /// Another player's top cards may only go to their owner's cemetery; EX stays own-deck only.
+    fn top_move(
+        &mut self,
+        value: &ast::Move,
+        top: &ast::DeckTop,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let zone = match value.to {
+            ast::Destination::Cemetery => OwnerZone::Cemetery,
+            ast::Destination::Ex if own_deck(top) => OwnerZone::Ex,
+            ast::Destination::Ex
+            | ast::Destination::Field
+            | ast::Destination::Deck
+            | ast::Destination::Hand => {
+                return Err(unsupported(path));
+            }
+        };
+        if value.r#ref.is_some()
+            || value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        Ok(Action::Move {
+            objects: self.deck_slice(top, path)?,
+            movement: MoveSpec {
+                to: MoveDestination::Owners { zone },
+                initial_posture: None,
+                entry_effects: vec![],
+                position: None,
+                order: None,
+            },
+            reason: MoveReason::Put,
+        })
+    }
+
+    fn deck_slice(&mut self, top: &ast::DeckTop, path: &str) -> Result<Selector, LoweringError> {
+        if top.n == 0 {
+            return Err(unsupported(path));
+        }
+        let player = match &top.who {
+            ast::DeckHolder::Side(ast::LeaderSide::Controller) => PlayerRef::Controller {},
+            ast::DeckHolder::Side(ast::LeaderSide::Opponent) => {
+                super::super::events::timing::opponent()
+            }
+            // The set survives in the IR; resolution fails loudly unless it has exactly one seat.
+            ast::DeckHolder::Group(ast::DeckGroup::Opponents) => PlayerRef::RequireOne {
+                players: Box::new(PlayerSet {
+                    relation: PlayerRelation::Opponents,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(0),
+                        maximum: None,
+                    },
+                    text_quantifier: TextQuantifier::All,
+                }),
+            },
+            ast::DeckHolder::OwnerOf { owner_of } => {
+                self.selected_player(owner_of, super::super::Role::Owner, path)?
+            }
+        };
+        Ok(Selector::Ordered {
+            zone: super::super::ZoneRef {
+                player,
+                kind: ZoneKind::Deck,
+            },
+            start: Position::Top {},
+            count: super::Expr::Literal(Nat(top.n)),
+            direction: super::super::SliceDirection::Forward,
+        })
+    }
+
     fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
         value.result.is_none()
             || matches!(value.to, ast::Destination::Ex)
@@ -449,49 +523,9 @@ impl BodyContext<'_> {
     }
 }
 
-fn top_move(value: &ast::Move, top: &ast::DeckTop, path: &str) -> Result<Action, LoweringError> {
-    let zone = match value.to {
-        ast::Destination::Cemetery => OwnerZone::Cemetery,
-        ast::Destination::Ex => OwnerZone::Ex,
-        ast::Destination::Field | ast::Destination::Deck | ast::Destination::Hand => {
-            return Err(unsupported(path));
-        }
-    };
-    if value.r#ref.is_some()
-        || value.position.is_some()
-        || value.order.is_some()
-        || value.result.is_some()
-    {
-        return Err(unsupported(path));
-    }
-    Ok(Action::Move {
-        objects: deck_slice(top, path)?,
-        movement: MoveSpec {
-            to: MoveDestination::Owners { zone },
-            initial_posture: None,
-            entry_effects: vec![],
-            position: None,
-            order: None,
-        },
-        reason: MoveReason::Put,
-    })
+const fn own_deck(top: &ast::DeckTop) -> bool {
+    matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
 }
-
-fn deck_slice(top: &ast::DeckTop, path: &str) -> Result<Selector, LoweringError> {
-    if top.n == 0 || !matches!(top.who, ast::SelfPlayer::Controller) {
-        return Err(unsupported(path));
-    }
-    Ok(Selector::Ordered {
-        zone: super::super::ZoneRef {
-            player: PlayerRef::Controller {},
-            kind: ZoneKind::Deck,
-        },
-        start: Position::Top {},
-        count: super::Expr::Literal(Nat(top.n)),
-        direction: super::super::SliceDirection::Forward,
-    })
-}
-
 const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
     Action::Move {
         objects,

@@ -418,7 +418,11 @@ impl BodyContext<'_> {
             }
             ast::Recipients::LeaderOf { leader_of } => RecipientSet::Explicit {
                 recipients: vec![DamageRecipient::Leader {
-                    player: self.selected_controller(leader_of, path)?,
+                    player: self.selected_player(
+                        leader_of,
+                        super::super::Role::Controller,
+                        path,
+                    )?,
                 }],
             },
             ast::Recipients::Target(name) => RecipientSet::Objects {

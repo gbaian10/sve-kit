@@ -40,7 +40,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         | Action::Banish {
             objects: Selector::Ordered { .. },
-        } if deck_top(action).is_none() => Err(unsupported("fixed own-deck top movement")),
+        } if deck_top(action).is_none() => Err(unsupported("fixed deck top movement")),
         Action::Move {
             objects,
             movement,
@@ -134,9 +134,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     }
 }
 
-pub(super) fn deck_top(action: &Action) -> Option<u64> {
-    let objects = match action {
-        Action::Banish { objects } => objects,
+/// A checked fixed top slice: another player's deck may only be put into its owner's cemetery.
+pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
+    let (objects, own_only) = match action {
+        Action::Banish { objects } => (objects, true),
         Action::Move {
             objects,
             movement,
@@ -151,7 +152,13 @@ pub(super) fn deck_top(action: &Action) -> Option<u64> {
             && movement.initial_posture.is_none()
             && movement.entry_effects.is_empty() =>
         {
-            objects
+            (
+                objects,
+                movement.to
+                    != (MoveDestination::Owners {
+                        zone: OwnerZone::Cemetery,
+                    }),
+            )
         }
         _ => return None,
     };
@@ -163,9 +170,9 @@ pub(super) fn deck_top(action: &Action) -> Option<u64> {
             direction: SliceDirection::Forward,
         } if *count > 0
             && zone.kind == ZoneKind::Deck
-            && zone.player == (PlayerRef::Controller {}) =>
+            && (!own_only || zone.player == (PlayerRef::Controller {})) =>
         {
-            Some(*count)
+            Some((&zone.player, *count))
         }
         _ => None,
     }
@@ -418,8 +425,8 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let members = if let Some(count) = deck_top(&instruction.action) {
-            self.deck_top_members(execution, count)?
+        let members = if let Some((player, count)) = deck_top(&instruction.action) {
+            self.deck_top_members(execution, player, count)?
         } else {
             let members = execution.objects(self, objects)?;
             for member in &members {
@@ -475,9 +482,9 @@ impl Game {
                 (zone, kind, MoveMethod::Put)
             }
         };
-        let top_count = deck_top(&instruction.action);
-        let members = if let Some(count) = top_count {
-            self.deck_top_members(execution, count)?
+        let top = deck_top(&instruction.action);
+        let members = if let Some((player, count)) = top {
+            self.deck_top_members(execution, player, count)?
         } else {
             execution.objects(self, objects)?
         };
@@ -511,14 +518,14 @@ impl Game {
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
                 if kind == ZoneKind::Ex
-                    && top_count.is_none()
+                    && top.is_none()
                     && !private_observed_move
                     && !resolving_source
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top_count.is_none() && !resolving_source && !private_observed_move {
+                if top.is_none() && !resolving_source && !private_observed_move {
                     public_zone(&object.zone)?;
                 }
             }
@@ -541,15 +548,20 @@ impl Game {
         Ok(())
     }
 
-    fn deck_top_members(&self, execution: &Execution, count: u64) -> Result<Vec<ObjectRef>> {
-        let seat = super::seat_name(execution.context.controller)?;
+    fn deck_top_members(
+        &self,
+        execution: &Execution,
+        player: &PlayerRef,
+        count: u64,
+    ) -> Result<Vec<ObjectRef>> {
+        let seat = super::seat_name(execution.player(self, player)?)?;
         self.zone_ids(seat, "deck")
             .iter()
             .take(usize::try_from(count).map_err(invalid)?)
             .map(|id| {
                 let object = self.object(id)?;
                 if object.zone != "deck" || object.owner != seat || object.controller != seat {
-                    return Err(unsupported("own-deck top ownership"));
+                    return Err(unsupported("deck top ownership"));
                 }
                 execution.reference(self, id)
             })

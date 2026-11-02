@@ -1338,7 +1338,12 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Create(value) => self.create(value, path),
             ast::Step::Look(value) => {
-                let ast::SelfPlayer::Controller = value.top.who;
+                if !matches!(
+                    value.top.who,
+                    ast::DeckHolder::Side(ast::LeaderSide::Controller)
+                ) {
+                    return Err(unsupported(path));
+                }
                 Ok(Action::Look {
                     viewer: PlayerRef::Controller {},
                     zone: super::ZoneRef {

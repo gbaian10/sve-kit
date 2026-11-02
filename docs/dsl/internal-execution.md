@@ -560,14 +560,20 @@ BP02-089 只驗能力破壞禁止述詞，測試的 EndResolution 為合成期�
 
 ## 牌組頂固定張數送墓
 
-本文 `move: {top: {who: self, n: N}, to: cemetery}` 接受正整數常值 N，
-降低為自己 Deck 的 Top／Forward Ordered selector 與 Put 至 Owners(Cemetery)。
-結算時直接取當前牌組頂端至多 N 張，沿既有移動原語產生 MoveOutcome 與 MovementFact；
-不先 Look、不詢問、不抽牌，牌組不足或為空仍盡可能執行，不造成抽牌失敗。
+本文 `move: {top: {who: P, n: N}, to: cemetery}` 接受正整數常值 N，
+降低為 P 的 Deck 的 Top／Forward Ordered selector 與 Put 至 Owners(Cemetery)。
+P 為 `self`（Controller）、`opp`（RequireOne 唯一對手，與對手棄牌同一形狀）、
+`opponents` 或 `{owner_of: <目標>}`。`opponents` 對應「相手プレイヤーすべては、自身のデッキの上N枚」，
+IR 保留 Opponents 集合與 All 量詞，外層 RequireOne 只在恰為一席時解析；目前兩席對戰即唯一對手，
+多席時明確失敗而不是只處理其中一人（BP15-035）。`owner_of` 在選取時捕捉已選目標的 owner，
+與 `leader_of` 共用捕捉；沒有選到目標時不讀任何牌庫（BP12-023「それのプレイヤーのデッキ」）。
+結算時才解析 P，直接取其當前牌組頂端至多 N 張，沿既有移動原語產生 MoveOutcome 與 MovementFact；
+不先 Look、不詢問、不抽牌，牌組不足或為空仍盡可能執行，不造成抽牌失敗（Q696）。
 移入墓場的卡成為公開資訊，剩餘牌序與未移動牌的秘密性維持。
 
 此權限僅屬於已驗證的送墓 selector；其他動作、指示 metadata、任意秘密區域
-selector、牌底、非固定張數與其他目的地不因此准入。作者入口不接受 result、
+selector、牌底、非固定張數與其他目的地不因此准入。他人牌庫頂只開放送墓：
+`to: ex`、`banish: {top: …}` 與 `look` 仍只接受 `self`。作者入口不接受 result、
 placement 或額外進場效果，精確零張亦未開放。
 
 ## 自己選定手牌棄牌

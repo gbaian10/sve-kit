@@ -25,9 +25,11 @@ impl BodyContext<'_> {
         Ok((index, selection))
     }
 
-    pub(super) fn selected_controller(
+    /// Captures the chosen object's player at selection, so later moves cannot change it.
+    pub(super) fn selected_player(
         &mut self,
         name: &str,
+        role: Role,
         path: &str,
     ) -> Result<PlayerRef, LoweringError> {
         let (index, selection) = self.selected_parameter(name, path)?;
@@ -44,7 +46,7 @@ impl BodyContext<'_> {
             },
             value: Expr::Live(Box::new(PlayerRead::Role {
                 object: ObjectView::Selected { selection },
-                role: Role::Controller,
+                role,
             })),
             into: into.clone(),
         });
