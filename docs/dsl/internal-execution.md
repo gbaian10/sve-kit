@@ -343,11 +343,12 @@ Spell 的來源資訊綁定進 Resolution 後的新世代；本文 Move／Destro
 此子集以明示合成完整 current 卡驗證 runtime，不代表 BP19-P32 等官方卡已完成作者遷移、
 關鍵字承載或整卡 executed／qualified。
 
-### 成功 After 的當回合減費片段
+### 成功 After 的物件減費片段
 
 `InstallEffect CostModifier` 只接受 InstructionStart、成功 `MoveAfter`、精確 affected binding、
-常值非正 Delta 與 CurrentTurnEnd／Installation；內外 Duration 必須相同，不接受 usage、
-intervals、Set 或其他期限。每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
+常值非正 Delta 與 CurrentTurnEnd 或 NoTemporalExpiry／Installation；省略期限時使用
+NoTemporalExpiry。內外 Duration 必須相同，不接受 usage、intervals、Set 或其他期限。
+每個成功的新世代必須仍在 EX；EX 滿、沒有找到或沒有實際移動時，
 安裝 receipt 為空，不配發 EffectId，也不把 found／revealed／chosen 當安裝對象。
 修正保存該 execution、ProperPlay timestamp 與目標世代；下一次移區後不沿同實體追蹤。
 
@@ -627,8 +628,11 @@ DecisionView 的 Order domain 只向 chooser／Referee 給出本次 token 範圍
 
 排列方向為頂至底，Bottom 的第一項位於底部區塊最上方。一次移除域並插入整個區塊，
 保留域外相對順序；OrderOutcome 的 moves 空、成功成員不換世代，沒有移區／入場／離場
-事實。非空重排撤銷該牌庫舊位置證據及先前 Look receipt 的排列授權，即使回答沒有改變
-順序也一樣；需要再次排列時先取得新的 Look 證據。
+事實。非空重排撤銷其他玩家在該牌庫的舊位置證據，以及 chooser 對本次重排成員的位置證據，
+即使回答沒有改變順序也一樣；這些成員需要再次排列或移動時先取得新的 Look 證據。chooser 自己
+套用排列，仍知道同一 Look 中未重排者的位置，Look receipt 保持有效，因此「好きな枚数を上に、
+残りを下に」可先排所選成員，再以 Look 減去該 Order 收據的 before 排列或移動餘牌。Order 收據
+只在這條私有主幹的差集扣除項准入，不能作為移動輸入、追蹤或條件讀值。
 
 BP07-SL09、BP06-024 僅驗「看五張、已決定零張入場、餘牌放底」片段；沒有實作中間的
 選牌、總費用、入場、觸發及整卡其他能力。成功移動 remainder 已有上述受限 EX 流程，

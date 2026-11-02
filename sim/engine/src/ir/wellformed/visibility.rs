@@ -188,7 +188,8 @@ impl Checker {
         if let Action::Move { objects, .. }
         | Action::Destroy { objects }
         | Action::Banish { objects }
-        | Action::Transform { objects, .. } = action
+        | Action::Transform { objects, .. }
+        | Action::Order { cards: objects, .. } = action
         {
             self.infer_access(|checker| checker.selector(objects))
         } else {

@@ -1,5 +1,8 @@
 use super::*;
-use sve_engine::{EngineFailure, game::internal::InputDomain};
+use sve_engine::{
+    EngineFailure,
+    game::internal::{DecisionView, InputDomain},
+};
 
 fn tree(steps: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -408,4 +411,258 @@ fn keyword_identifier_admission_does_not_authorize_ambient_ability_reads() {
         before,
         "rejected ambient readers preserve authority"
     );
+}
+
+fn split_game(program: &WellFormedCardProgram) -> Game {
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"one","card":"unit-follower"}, {"id":"two","card":"unit-follower"},
+            {"id":"three","card":"unit-follower"}, {"id":"tail","card":"unit-follower"}
+        ]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "split").unwrap();
+    game.load_internal_card("unit-follower", program).unwrap();
+    game
+}
+
+fn awaiting_order(play: CardPlay) -> Option<DecisionView> {
+    match play {
+        CardPlay::Awaiting(q) if matches!(q.domain, InputDomain::Order(_)) => Some(q),
+        CardPlay::Awaiting(_)
+        | CardPlay::Resolved(_)
+        | CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_) => None,
+    }
+}
+
+#[test]
+fn chosen_top_and_unchosen_remainder_bottom_reuse_one_look() {
+    let programs = lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+            {"choose":{"bind":"kept","from":{"in":"seen"},"upto":3}},
+            {"move":{"ref":"kept","to":"deck","position":"top","order":"chooser","result":"placed"}},
+            {"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"placed","view":"before"}}},
+                "to":"deck","position":"bottom","order":"chooser"}}
+        ])))
+        .unwrap();
+    // Choosing nothing skips the empty top block and still orders every observed card.
+    for (kept, top, bottom, deck) in [
+        (
+            vec![0, 2],
+            vec![1, 0],
+            vec![0],
+            json!(["three", "one", "tail", "two"]),
+        ),
+        (
+            vec![],
+            vec![],
+            vec![2, 1, 0],
+            json!(["tail", "three", "two", "one"]),
+        ),
+    ] {
+        let mut game = split_game(&programs["unit-follower"]);
+        let CardPlay::Awaiting(q) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("private subset")
+        };
+        let mut next = game
+            .answer_internal_card(q.actor, q.token, Answer::Targets(kept.clone()))
+            .unwrap();
+        if !kept.is_empty() {
+            let first = awaiting_order(next).unwrap();
+            next = game
+                .answer_internal_card(first.actor, first.token, Answer::Order(top))
+                .unwrap();
+        }
+        let second = awaiting_order(next).unwrap();
+        assert!(
+            game.internal_decision(View::P2).is_none(),
+            "the opponent gets no private order"
+        );
+        resolved(
+            game.answer_internal_card(second.actor, second.token, Answer::Order(bottom))
+                .unwrap(),
+        );
+        assert_eq!(game.projection(View::Referee).unwrap()["P1"]["deck"], deck);
+    }
+}
+
+#[test]
+fn deck_order_results_feed_only_remainders_and_top_results_only_ex() {
+    for steps in [
+        // The reordered cards themselves need a fresh Look before another private order.
+        json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"kept","from":{"in":"seen"},"n":1}},
+            {"move":{"ref":"kept","to":"deck","position":"top","order":"chooser","result":"placed"}},
+            {"move":{"ref":{"in":{"objects_of":"placed","view":"before"}},"to":"cemetery"}}
+        ]),
+        json!([{"move":{"top":{"who":"self","n":1},"to":"cemetery","result":"milled"}}]),
+    ] {
+        assert!(
+            lowerer().lower(&tree(&steps)).is_err(),
+            "an order receipt is not a movement input and a milled card has no followable output"
+        );
+    }
+}
+
+fn order_receipt_steps() -> Value {
+    json!([
+        {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+        {"choose":{"bind":"kept","from":{"in":"seen"},"n":1}},
+        {"move":{"ref":"kept","to":"deck","position":"top","order":"chooser","result":"placed"}},
+        {"look":{"top":{"who":"self","n":3},"bind":"fresh"}},
+        {"move":{"ref":{"in":"fresh","except":{"in":{"objects_of":"placed","view":"before"}}},
+            "to":"deck","position":"bottom","order":"chooser"}}
+    ])
+}
+
+#[test]
+fn order_receipts_cannot_supply_an_order_domain_even_after_a_fresh_look() {
+    let mut steps = order_receipt_steps();
+    steps[4]["move"]["ref"] = json!({"in":{"objects_of":"placed","view":"before"}});
+    assert!(
+        lowerer().lower(&tree(&steps)).is_err(),
+        "an Order before receipt is only an exclusion, never an Order input"
+    );
+}
+
+#[test]
+fn typed_order_receipts_are_rejected_outside_difference_exclusions() {
+    let programs = lowerer().lower(&tree(&order_receipt_steps())).unwrap();
+    for union in [false, true] {
+        let mut forged = programs["unit-follower"].card().clone();
+        let Node::Instruction { instruction } =
+            &mut forged.abilities[0].node.body.as_mut().unwrap().steps[4].node
+        else {
+            panic!("remainder order")
+        };
+        let Action::Order {
+            cards,
+            destinations,
+            ..
+        } = &mut instruction.action
+        else {
+            panic!("remainder order")
+        };
+        let Selector::Difference { input, except } = cards else {
+            panic!("remainder difference")
+        };
+        let receipt = *except.clone();
+        *cards = if union {
+            Selector::Union {
+                sets: vec![*input.clone(), receipt],
+            }
+        } else {
+            receipt
+        };
+        destinations[0].cards = cards.clone();
+        let forged = WellFormedCardProgram::check(forged).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "order-receipt",
+        )
+        .unwrap();
+        assert!(
+            game.load_internal_card("unit-follower", &forged).is_err(),
+            "typed IR cannot bypass the exclusion-only Order receipt contract"
+        );
+    }
+}
+
+#[test]
+fn no_expiry_play_discount_is_bound_to_the_successful_ex_generation() {
+    for (full, roundtrip) in [(false, false), (false, true), (true, false)] {
+        let moved = |id| MovementReceipt::Move {
+            receipt: ReceiptReference::new(ReceiptId(id)),
+        };
+        let after = |id| Selector::MoveAfter {
+            receipt: moved(id),
+            permission: FollowPermission::SameEffectExplicitReference {},
+        };
+        let mut reduction = cost::reduce(3, moved(2));
+        if let Node::Instruction { instruction } = &mut reduction.node
+            && let Action::InstallEffect {
+                duration, effect, ..
+            } = &mut instruction.action
+            && let Effect::CostModifier {
+                duration: inner, ..
+            } = effect.as_mut()
+        {
+            duration.end = DurationEnd::NoTemporalExpiry {};
+            inner.end = DurationEnd::NoTemporalExpiry {};
+        }
+        let mut steps = vec![
+            movement::put(
+                2,
+                Selector::Ordered {
+                    zone: ZoneRef {
+                        player: PlayerRef::Controller {},
+                        kind: ZoneKind::Deck,
+                    },
+                    start: Position::Top {},
+                    count: Expr::Literal(Nat(1)),
+                    direction: SliceDirection::Forward,
+                },
+                OwnerZone::Ex,
+            ),
+            reduction,
+        ];
+        if roundtrip {
+            steps.extend([
+                movement::put(4, after(2), OwnerZone::Cemetery),
+                movement::put(5, after(4), OwnerZone::Ex),
+            ]);
+        }
+        let program = card(vec![ability(1, steps)]);
+        let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
+        if full {
+            initial["players"]["P1"]["zones"]["ex"] = json!(
+                (0..5)
+                    .map(|i| json!({"id":format!("e{i}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let mut game = Game::new(
+            catalog_with_cost(&json!("3")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "ex-cost-generation",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        let result = activate(&mut game, 1);
+        assert!(matches!(
+            &result.progress.receipts[&ReceiptId(3)],
+            InstructionOutcome::Installed(subjects) if subjects.len() == usize::from(!full)
+        ));
+        if !full {
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            assert!(matches!(
+                game.play_internal_card("d", PlayerId { seat: 1 }).unwrap(),
+                CardPlay::Entered(_)
+            ));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+                if roundtrip { 0 } else { 2 },
+                "only the installed generation receives the reduction from cost 3 to 1"
+            );
+        }
+    }
 }

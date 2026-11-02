@@ -10,11 +10,11 @@ use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain, Control,
     Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation, Located,
-    LookOutcome, MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand,
-    ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef,
-    PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet, Requirements,
-    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId, SourceSpan,
-    StepwiseMode, Visibility, ZoneKind,
+    LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat, NatRead, Node,
+    ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
+    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
+    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
+    SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
@@ -78,7 +78,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         // Private selectors are admitted only on the spine evaluated with observation authority.
         let mut leaves = Vec::new();
         if let Some(cards) = cards {
-            order_leaves(cards, &mut leaves);
+            order_leaves(cards, false, &mut leaves);
         }
         for leaf in leaves {
             check_node(
@@ -268,7 +268,11 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
                 | "value.aggregate.sum"
                 | "shape.Selector.Extremum"
                 | "selector.extremum"
-        ) || (!private_spine && code == "shape.ObjectReceipt.Look")
+        ) || (!private_spine
+            && matches!(
+                code,
+                "shape.ObjectReceipt.Look" | "shape.MovementReceipt.Order"
+            ))
             || (matches!(code, "internal.ZoneKind.Deck" | "internal.ZoneKind.Hand")
                 && !super::source::count_zone(requirements, requirement))
             || (super::search::private_requirement(code)
@@ -484,20 +488,32 @@ fn mask_public_predicate(selector: &mut Selector) {
     }
 }
 
-fn order_leaves<'selector>(selector: &'selector Selector, leaves: &mut Vec<&'selector Selector>) {
+fn order_leaves<'selector>(
+    selector: &'selector Selector,
+    remainder: bool,
+    leaves: &mut Vec<&'selector Selector>,
+) {
     match selector {
         Selector::ReceiptMembers {
             receipt: ObjectReceipt::Look { .. },
             ..
         } => {}
+        // A reorder receipt only subtracts already ordered cards from the same private spine.
+        Selector::ReceiptMembers {
+            receipt:
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Order { .. },
+                },
+            projection: MemberProjection::Before,
+        } if remainder => {}
         Selector::Union { sets } => {
             for set in sets {
-                order_leaves(set, leaves);
+                order_leaves(set, remainder, leaves);
             }
         }
         Selector::Difference { input, except } => {
-            order_leaves(input, leaves);
-            order_leaves(except, leaves);
+            order_leaves(input, remainder, leaves);
+            order_leaves(except, true, leaves);
         }
         _ => leaves.push(selector),
     }
@@ -668,6 +684,7 @@ impl Game {
             .filter(|id| !ids.contains(id))
             .cloned()
             .collect::<Vec<_>>();
+        let reordered = ids.clone();
         let deck = match placement.position {
             Position::Top {} => ids.into_iter().chain(remaining).collect::<Vec<_>>(),
             Position::Bottom {} => {
@@ -680,11 +697,16 @@ impl Game {
             "deck".into(),
             deck.into_iter().map(serde_json::Value::String).collect(),
         );
-        // A private rearrangement revokes old locations even when the permutation happens to be identical.
+        // Even an unchanged permutation revokes locations; the chooser retains only untouched cards.
+        // Reordered cards need a fresh Look before another private order or move.
         if !ordered.is_empty() {
-            execution.look_viewers.clear();
-            for knowledge in self.state.knowledge.values_mut() {
-                for id in &wait.deck {
+            for (viewer, knowledge) in &mut self.state.knowledge {
+                let revoked = if viewer == seat {
+                    &reordered
+                } else {
+                    &wait.deck
+                };
+                for id in revoked {
                     knowledge.located.remove(id);
                 }
             }

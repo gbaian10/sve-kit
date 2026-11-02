@@ -12,6 +12,7 @@ use core::num::NonZeroU64;
 #[derive(Clone, Copy)]
 enum ObservationUse {
     Order,
+    OrderRemainder,
     Move,
     Remainder,
 }
@@ -147,6 +148,17 @@ impl BodyContext<'_> {
             .get(name)
             .ok_or_else(|| unsupported(path))?;
         let look = matches!(receipt, ObjectReceipt::Look { .. });
+        if matches!(
+            receipt,
+            ObjectReceipt::Movement {
+                receipt: MovementReceipt::Order { .. }
+            }
+        ) && !matches!(
+            usage,
+            ObservationUse::OrderRemainder | ObservationUse::Remainder
+        ) {
+            return Err(unsupported(path));
+        }
         if !look
             && (!before
                 || matches!(usage, ObservationUse::Move)
@@ -154,7 +166,7 @@ impl BodyContext<'_> {
                     && !matches!(
                         receipt,
                         ObjectReceipt::Movement {
-                            receipt: MovementReceipt::Move { .. }
+                            receipt: MovementReceipt::Move { .. } | MovementReceipt::Order { .. }
                         }
                     ))
         {
@@ -169,8 +181,11 @@ impl BodyContext<'_> {
                 input: Box::new(input),
                 except: Box::new(self.observed(
                     except,
-                    if matches!(usage, ObservationUse::Order) {
-                        ObservationUse::Order
+                    if matches!(
+                        usage,
+                        ObservationUse::Order | ObservationUse::OrderRemainder
+                    ) {
+                        ObservationUse::OrderRemainder
                     } else {
                         ObservationUse::Remainder
                     },
@@ -331,7 +346,8 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         if matches!(objects, ast::Objects::Bound(name) if self.observed_targets.contains(name)) {
-            if value.order.is_none() || value.result.is_some() {
+            // The Order receipt lets a later remainder subtract the reordered cards.
+            if value.order.is_none() {
                 return Err(unsupported(path));
             }
             let cards = self.objects(objects, path)?;
@@ -458,10 +474,11 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             }
         };
+        // Only the EX output is public enough to follow; a top-to-cemetery result has no consumer.
         if value.r#ref.is_some()
             || value.position.is_some()
             || value.order.is_some()
-            || value.result.is_some()
+            || (value.result.is_some() && zone != OwnerZone::Ex)
         {
             return Err(unsupported(path));
         }
@@ -526,6 +543,7 @@ impl BodyContext<'_> {
 const fn own_deck(top: &ast::DeckTop) -> bool {
     matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
 }
+
 const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
     Action::Move {
         objects,

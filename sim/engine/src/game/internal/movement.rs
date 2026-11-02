@@ -211,7 +211,7 @@ fn observation_spine(selector: &Selector, remainder: bool) -> bool {
         Selector::ReceiptMembers {
             receipt:
                 ObjectReceipt::Movement {
-                    receipt: MovementReceipt::Move { .. },
+                    receipt: MovementReceipt::Move { .. } | MovementReceipt::Order { .. },
                 },
             projection: MemberProjection::Before,
         } => remainder,
@@ -266,6 +266,24 @@ impl Execution {
                 after.id == movement.before.id && after.generation != movement.before.generation
             }) && movement.actual_to.is_some()
         }))
+    }
+
+    /// Successful before members; a same-deck reorder keeps generations, so all ordered cards count.
+    pub(super) fn movement_before(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
+        let MovementReceipt::Order { receipt } = receipt else {
+            return Ok(self
+                .successful_moves(receipt)?
+                .map(|movement| movement.before)
+                .collect());
+        };
+        match self.receipts.get(local_id(receipt.location())?) {
+            Some(InstructionOutcome::Order(outcome)) => Ok(outcome
+                .successful
+                .iter()
+                .filter_map(|member| member.before.map(|view| view.object))
+                .collect()),
+            _ => Err(invalid("missing order receipt")),
+        }
     }
 }
 
