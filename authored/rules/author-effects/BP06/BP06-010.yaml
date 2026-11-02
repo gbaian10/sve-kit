@@ -1,0 +1,45 @@
+cards:
+  BP06-010:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - lastword:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 狩人
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
