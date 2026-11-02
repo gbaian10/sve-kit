@@ -1,0 +1,40 @@
+cards:
+  BP19-070:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: 海洋
+                who: self
+                zone: hand
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 2
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,29 @@
+cards:
+  BP19-071:
+    abilities:
+      - fanfare:
+          do:
+            - destroy:
+                ref: enemy
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

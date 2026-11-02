@@ -1,0 +1,32 @@
+cards:
+  BP04-130:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 0
+                then:
+                  - move:
+                      to: ex
+                      top:
+                        n: 1
+                        who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,27 @@
+cards:
+  BP19-024:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

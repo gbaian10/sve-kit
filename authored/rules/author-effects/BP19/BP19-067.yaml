@@ -1,0 +1,39 @@
+cards:
+  BP19-067:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+                on:
+                  name: オルカ
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: オルカ
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP19-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,26 @@
+cards:
+  BP10-067:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+            - damage:
+                n: 4
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
