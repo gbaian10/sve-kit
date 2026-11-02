@@ -389,6 +389,7 @@ impl Game {
         before: SnapshotId,
     ) -> Result<()> {
         if !self.internal_has_drain_grants()
+            && !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
                 program.card().abilities.iter().any(|ability| {
                     matches!(
@@ -455,8 +456,10 @@ impl Game {
             };
             let header = self.pending_header(actor, cause, source, before)?;
             for (holder, ability) in observers {
-                let occurrence = if let Some(origin) = ability.grant {
-                    let granted_source = self.internal_granted_drain_source(&holder, &origin)?;
+                let occurrence = if let Some(origin) = ability.grant.as_ref().filter(|_| {
+                    printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Drain)
+                }) {
+                    let granted_source = self.internal_granted_drain_source(&holder, origin)?;
                     let information = SourceInformation::current(self, granted_source)?;
                     let mut occurrence = self.new_pending(
                         &holder,

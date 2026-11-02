@@ -193,6 +193,7 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
                 pattern: EventPattern::Attack { .. }
                     | EventPattern::Phase { .. }
                     | EventPattern::LeaveField { .. }
+                    | EventPattern::Damage { .. }
             })
         )
 }
