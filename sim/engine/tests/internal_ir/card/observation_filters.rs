@@ -1025,3 +1025,72 @@ fn multi_card_look_picks_enter_the_field_only_as_the_next_step() {
         }
     }
 }
+
+#[test]
+fn resolution_modes_cannot_bypass_an_outer_multi_card_entry_guard() {
+    let grouped = json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
+        {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
+    ],"upto":2,"may":true}});
+    let single_group =
+        json!({"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"upto":2}});
+    for choice in [union_choice(), grouped, single_group] {
+        assert!(
+            lowerer()
+                .lower(&tree(&json!([
+                    {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+                    choice,
+                    {"either":{"options":[
+                        [{"move":{"ref":"picked","to":"field","result":"placed"}}],
+                        [{"move":{"ref":"picked","to":"hand","result":"taken"}}]
+                    ]}}
+                ])))
+                .is_err(),
+            "an inherited multi-card pick still cannot enter from a later mode"
+        );
+    }
+}
+
+#[test]
+fn a_local_multi_card_pick_can_enter_next_inside_a_resolution_mode() {
+    lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"either":{"options":[
+                [union_choice(), {"move":{"ref":"picked","to":"field","result":"placed"}}],
+                [{"draw":{"n":0}}]
+            ]}}
+        ])))
+        .unwrap();
+}
+
+#[test]
+fn optional_local_multi_card_names_do_not_restrict_later_single_picks() {
+    lowerer()
+        .lower(&tree(&json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"optional":{"do":[union_choice(), {"draw":{"n":0}}]}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":1}},
+            {"draw":{"n":0}},
+            {"move":{"ref":"picked","to":"field","result":"placed"}}
+        ])))
+        .unwrap();
+}
+
+#[test]
+fn an_intervening_entry_is_rejected_before_a_multi_card_look_entry() {
+    let mut document = tree(&json!([
+        {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+        union_choice(),
+        {"move":{"ref":"incoming","to":"field","result":"revived"}},
+        {"move":{"ref":"picked","to":"field","result":"placed"}}
+    ]));
+    let activation = &mut document["cards"]["unit-follower"]["abilities"][0]["activate"];
+    activation["cost"] = json!({"pp":0});
+    activation["targets"] = json!([
+        {"bind":"incoming","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1}
+    ]);
+    assert!(
+        lowerer().lower(&document).is_err(),
+        "field capacity cannot change between the Look choice and its entry"
+    );
+}

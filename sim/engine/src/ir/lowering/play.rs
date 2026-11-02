@@ -592,10 +592,8 @@ impl BodyContext<'_> {
         let resolution = shape.kind == ModeChoiceKind::ResolutionAlternative;
         let mut modes = Vec::new();
         for (index, steps) in shape.options.iter().enumerate() {
-            let mode_id = u64::try_from(index)
-                .ok()
-                .and_then(|i| i.checked_add(1))
-                .ok_or_else(|| unsupported(path))?;
+            let mode_id = index.checked_add(1).ok_or_else(|| unsupported(path))?;
+            let mode_id = u64::try_from(mode_id).map_err(|_error| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
                 subject_event: self.subject_event,
@@ -640,6 +638,7 @@ impl BodyContext<'_> {
                 context.observations.clone_from(&self.observations);
                 context.single_discards.clone_from(&self.single_discards);
                 context.observed_targets.clone_from(&self.observed_targets);
+                context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);
                 context
                     .recipient_targets

@@ -18,6 +18,7 @@ impl BodyContext<'_> {
         let recipients = self.recipient_targets.clone();
         let observations = self.observations.clone();
         let observed_targets = self.observed_targets.clone();
+        let field_entry_multi = self.field_entry.multi.clone();
         let searches = self.searches.clone();
         let outputs = self.ex_outputs.clone();
         let ex_targets = self.ex_targets.clone();
@@ -45,6 +46,7 @@ impl BodyContext<'_> {
         self.recipient_targets = recipients;
         self.observations = observations;
         self.observed_targets = observed_targets;
+        self.field_entry.multi = field_entry_multi;
         self.searches = searches;
         self.ex_outputs = outputs;
         self.ex_targets = ex_targets;
