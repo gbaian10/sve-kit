@@ -409,3 +409,24 @@ html:has([data-card-list]) {
   border: 0;
   pointer-events: none;
 }
+
+/* Deck builder: the copies column of the list view (a "− n ＋" stepper per row) stays at the
+   right edge while the wide list scrolls sideways; the columns it covers scroll out from under it.
+   Its heading sits above the other sticky headings (z 3) like a frozen column's. */
+[data-card-list] td[data-list-action],
+[data-card-list] th[data-list-heading="action"] {
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  width: 140px;
+  padding-inline: 8px;
+  text-align: center;
+  white-space: nowrap;
+  background: var(--color-surface-1);
+  box-shadow: -1px 0 0 var(--color-border);
+}
+
+[data-card-list] th[data-list-heading="action"] {
+  z-index: 4;
+  background: var(--color-surface-2);
+}

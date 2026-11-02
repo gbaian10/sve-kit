@@ -46,6 +46,8 @@ export interface FilterPanelProps {
   readonly onClose?: () => void
   /** One column of titled groups for the cards page sidebar, instead of the panel grid. */
   readonly sidebar?: boolean
+  /** Whether the result unit can be changed; the deck builder's pool is always one cell per card. */
+  readonly unitChoice?: boolean
 }
 
 const EDITIONS = ["jp", "en"] as const
@@ -119,6 +121,7 @@ export function FilterPanel({
   restrictions,
   onClose,
   sidebar = false,
+  unitChoice = true,
 }: FilterPanelProps) {
   const { t } = useTranslation()
   const collapsible = useMediaQuery("(width < 600px)")
@@ -159,21 +162,23 @@ export function FilterPanel({
   const displayBlock = (
     <>
       <div className="flex flex-wrap items-center gap-1.5">
-        <select
-          aria-label={t("filters.display")}
-          value={query.unit}
-          className={SELECT}
-          onChange={(event) => {
-            const unit = QUERY_UNITS.find((unit) => unit === event.target.value)
-            if (unit) onChange({ ...query, unit })
-          }}
-        >
-          {QUERY_UNITS.map((unit) => (
-            <option key={unit} value={unit}>
-              {t(`filters.displayUnit.${unit}`)}
-            </option>
-          ))}
-        </select>
+        {unitChoice && (
+          <select
+            aria-label={t("filters.display")}
+            value={query.unit}
+            className={SELECT}
+            onChange={(event) => {
+              const unit = QUERY_UNITS.find((unit) => unit === event.target.value)
+              if (unit) onChange({ ...query, unit })
+            }}
+          >
+            {QUERY_UNITS.map((unit) => (
+              <option key={unit} value={unit}>
+                {t(`filters.displayUnit.${unit}`)}
+              </option>
+            ))}
+          </select>
+        )}
         <select
           aria-label={t("filters.representative")}
           value={query.representative}

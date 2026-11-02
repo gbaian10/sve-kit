@@ -1,20 +1,23 @@
 import { Copy, Layers, Pencil, Plus, Trash2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useLocation, useNavigate } from "react-router"
 
+import { deckPath } from "../../app/deck-routes"
 import { useDialogHistory } from "../../app/dialog-history"
 import { useRouteEdition } from "../../app/snapshot"
 import { CLASS_ICON } from "../../components/card/classIcons"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
 import { Dialog } from "../../components/ui/Dialog"
+import { Link } from "../../components/ui/Link"
 import { Notice } from "../../components/ui/Notice"
 import { useToast } from "../../components/ui/toast-context"
 import { classStyle } from "../../domain/classes"
 import { createDeck, duplicateDeck, renameDeck, totalCount } from "../../domain/deck/model"
 import type { Deck } from "../../domain/deck/types"
 import { currentUiLanguage } from "../../i18n"
-import { decksStore, prefsStore, useDecks, usePrefs } from "../../settings"
+import { decksStore, useDecks, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 import { useDeckLabels } from "./deck-labels"
 import { NewDeckDialog } from "./NewDeckDialog"
@@ -27,6 +30,8 @@ export function DecksPage() {
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const labels = useDeckLabels()
   const toast = useToast()
+  const navigate = useNavigate()
+  const location = useLocation()
   const [newOpen, setNewOpen] = useState(false)
   const [deleting, setDeleting] = useState<Deck | null>(null)
   const [renaming, setRenaming] = useState<Deck | null>(null)
@@ -99,7 +104,11 @@ export function DecksPage() {
                   <img src={CLASS_ICON[style]} alt="" className="size-7 opacity-70" />
                 </span>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <h2 className="truncate text-16 font-bold text-text-1">{deck.name}</h2>
+                  <h2 className="truncate text-16 font-bold">
+                    <Link to={deckPath(deck)} className="text-text-1 no-underline hover:underline">
+                      {deck.name}
+                    </Link>
+                  </h2>
                   <p className="flex flex-wrap items-center gap-1.5 text-12 text-text-2">
                     <span className="font-semibold text-class-current">
                       {labels.basisLabel(deck.basis)}
@@ -168,16 +177,26 @@ export function DecksPage() {
         onClose={() => {
           setNewOpen(false)
         }}
-        edition={edition}
+        defaultEdition={edition}
         onEditionChange={(next) => {
-          prefsStore.set({ cardEdition: next })
+          // Only the dialog's own history entry names the edition, so leaving it drops `ed` again.
+          const params = new URLSearchParams(location.search)
+          params.set("ed", next)
+          void navigate(
+            { pathname: location.pathname, search: `?${params.toString()}` },
+            { replace: true, state: location.state as unknown },
+          )
         }}
         defaultName={t("decks.newNamePlaceholder", { n: decks.length + 1 })}
         classOptions={labels.classOptions}
         titles={labels.titles}
+        titlesEdition={labels.titlesEdition}
         titleName={labels.titleName}
         onCreate={(input) => {
-          persist(decksStore.save(createDeck(input, new Date())))
+          const deck = createDeck(input, new Date())
+          persist(decksStore.save(deck))
+          // The new deck takes the dialog's history entry, so back returns to the list.
+          void navigate(deckPath(deck), { replace: true })
         }}
       />
       <Dialog

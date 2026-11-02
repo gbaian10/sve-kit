@@ -1,5 +1,91 @@
 import type { Region } from "../search"
-import type { Deck, DeckBasis, DeckEntry } from "./types"
+import type { Deck, DeckBasis, DeckCardInfo, DeckEntry, DeckSection } from "./types"
+
+// Deck construction limits of the Comprehensive Rules (ver. 1.28.0 §6.1.1).
+export const MAIN_MIN = 40
+export const MAIN_MAX = 50
+export const EVOLVE_MAX = 10
+/** 6.1.1.4: three cards of one name in the main deck and three in the evolve deck. */
+export const SAME_NAME_LIMIT = 3
+
+export type Placement = "main" | "evolve" | "leader" | "none"
+
+/** Where a card goes (6.1.1.2, 6.1.1.3): leaders lead, tokens and unknown kinds go nowhere. */
+export function placementOf(
+  info: Pick<DeckCardInfo, "typeCode" | "specialKinds" | "deckRole">,
+): Placement {
+  if (info.typeCode === "leader") return "leader"
+  if (info.specialKinds.includes("token")) return "none"
+  if (info.specialKinds.includes("evolve") || info.specialKinds.includes("advance")) return "evolve"
+  if (info.deckRole === "evolve") return "evolve"
+  if (
+    info.typeCode === "follower" ||
+    info.typeCode === "spell" ||
+    info.typeCode === "amulet" ||
+    info.deckRole === "main"
+  )
+    return "main"
+  return "none"
+}
+
+export function countOf(entries: readonly DeckEntry[], cardId: string): number {
+  return entries.find((entry) => entry.cardId === cardId)?.count ?? 0
+}
+
+/**
+ * The section with one card at `count` (0 removes it); a new card goes last. A printing given
+ * here replaces the entry's chosen printing, none keeps it.
+ */
+export function withCount(
+  entries: readonly DeckEntry[],
+  cardId: string,
+  count: number,
+  printingId?: string,
+): DeckEntry[] {
+  if (count <= 0) return entries.filter((entry) => entry.cardId !== cardId)
+  const chosen = printingId === undefined ? {} : { printingId }
+  if (!entries.some((entry) => entry.cardId === cardId))
+    return [...entries, { cardId, count, ...chosen }]
+  return entries.map((entry) => (entry.cardId === cardId ? { ...entry, count, ...chosen } : entry))
+}
+
+/** The section with the card's printing set, or back to the edition's default (undefined). */
+export function withPrinting(
+  entries: readonly DeckEntry[],
+  cardId: string,
+  printingId: string | undefined,
+): DeckEntry[] {
+  return entries.map((entry) => {
+    if (entry.cardId !== cardId) return entry
+    const { printingId: _previous, ...rest } = entry
+    return printingId === undefined ? rest : { ...rest, printingId }
+  })
+}
+
+/**
+ * The most copies of one card its section may hold: three per card name (6.1.1.4) minus the other
+ * cards of that name there. Restrictions do not cap adding; the deck's problem list reports them.
+ */
+export function copyLimit(
+  deck: Deck,
+  section: Exclude<DeckSection, "side">,
+  info: Pick<DeckCardInfo, "cardId" | "name">,
+  nameOf: (cardId: string) => string | undefined,
+): number {
+  const others = deck[section]
+    .filter((entry) => entry.cardId !== info.cardId && nameOf(entry.cardId) === info.name)
+    .reduce((sum, entry) => sum + entry.count, 0)
+  return Math.max(0, SAME_NAME_LIMIT - others)
+}
+
+/** Any change to a deck's content: the same deck, a newer time and the next revision. */
+export function editDeck(
+  deck: Deck,
+  change: Partial<Omit<Deck, "id" | "createdAt">>,
+  now: Date,
+): Deck {
+  return { ...deck, ...change, updatedAt: now.toISOString(), revision: deck.revision + 1 }
+}
 
 export function totalCount(entries: readonly DeckEntry[]): number {
   return entries.reduce((sum, entry) => sum + entry.count, 0)
@@ -32,5 +118,5 @@ export function duplicateDeck(deck: Deck, name: string, now: Date): Deck {
 }
 
 export function renameDeck(deck: Deck, name: string, now: Date): Deck {
-  return { ...deck, name, updatedAt: now.toISOString(), revision: deck.revision + 1 }
+  return editDeck(deck, { name }, now)
 }

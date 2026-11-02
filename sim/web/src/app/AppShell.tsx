@@ -9,6 +9,7 @@ import { ToastProvider } from "../components/ui/Toast"
 import { snapshotClient } from "../data"
 import { showsOtherEdition, usePrefs } from "../settings"
 import { CARD_PARAM } from "./card-overlay"
+import { isDeckBuilderPath } from "./deck-routes"
 import { useUiLanguageSync } from "./language"
 import { useOtherEdition } from "./other-edition"
 import { useActiveSnapshot, useRouteEdition, useSearchReadiness } from "./snapshot"
@@ -30,8 +31,9 @@ function scrollKeySearch(search: string): string {
 export function AppShell() {
   const { t } = useTranslation()
   useThemeAttributes()
-  // The cards list is not centred or capped, so its filter sidebar sits at the window edge.
-  const fullWidth = useLocation().pathname === "/cards"
+  // The cards list and the deck builder are not centred or capped: their sidebars sit at the window edge.
+  const pathname = useLocation().pathname
+  const fullWidth = pathname === "/cards" || isDeckBuilderPath(pathname)
   useUiLanguageSync()
   const { client, status, root } = useActiveSnapshot()
   const edition = useRouteEdition()

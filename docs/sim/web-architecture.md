@@ -49,9 +49,10 @@ sim/web/
 | `/sets/:code`                | 轉址 | 舊連結轉到對應的 `/cards?set=…`，保留 `ed` 與其他查詢條件 |
 | `/settings`                  | 設定 | 顯示設定；R1 沒有登入                                     |
 | `/decks`                     | 牌組 | 存在瀏覽器的牌組列表：新增、複製、改名、刪除              |
+| `/decks/:deckId`             | 組牌 | 牌組欄、卡池（與查卡頁共用）、篩選；`ed` 是牌組的版本     |
 | `*`                          | 404  | 含搜尋框                                                  |
 
-保留、不實作：`/cards/unimplemented`、`/decks/*`（牌組編輯頁，之後加入）、`/play`。
+保留、不實作：`/cards/unimplemented`、`/play`。
 
 `:slug?` 是原文卡名的可讀片段，可有可無：決定卡片的永遠是卡號；slug 缺少或錯誤時照常開啟，並把網址 `replace` 成 canonical
 （`/cards/{卡號}/{原文卡名}`）。`card_route_alias` 永久轉址、`route_override` 與暫定號碼依快照格式 §8；找不到的卡號進 404 頁。

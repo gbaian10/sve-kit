@@ -1,5 +1,13 @@
 import { ArrowLeft, ChevronLeft, ChevronRight, Link2, Maximize2, X } from "lucide-react"
-import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { useTranslation } from "react-i18next"
 import { Link as RouterLink, type To, useLocation, useNavigate, useParams } from "react-router"
 
@@ -122,6 +130,8 @@ export interface CardFrame {
   /** The card was found in the list under another key (its card or art cell). */
   readonly onPlaced: (resultKey: string) => void
   readonly onClose: () => void
+  /** The deck builder's control for the shown card, in the bottom bar's deck slot. */
+  readonly deckAction?: (summary: CardSummary | undefined) => ReactNode
 }
 
 export interface CardViewProps {
@@ -669,8 +679,15 @@ export function CardView({
         <ChevronLeft className="size-4.5" aria-hidden="true" />
         {t("cardPage.previous")}
       </Button>
-      {/* Where "add to deck" will sit; there is no deck builder yet, so no control is rendered. */}
-      {frame && <span aria-hidden="true" data-deck-slot="" className="w-14 shrink-0" />}
+      {/* The deck builder fills the deck slot; elsewhere it only keeps the bar balanced. */}
+      {frame &&
+        (frame.deckAction ? (
+          <span data-deck-slot="" className="flex shrink-0 items-center justify-center">
+            {frame.deckAction(summary)}
+          </span>
+        ) : (
+          <span aria-hidden="true" data-deck-slot="" className="w-14 shrink-0" />
+        ))}
       <Button
         data-card-navigation
         className={cn("h-10 gap-1 px-3 text-14", frame && "flex-1")}
