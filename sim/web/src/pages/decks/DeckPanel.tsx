@@ -225,6 +225,7 @@ export function DeckPanel({
       </Button>
       <p className="px-1 text-11 text-text-3">{t("decks.savedLocally")}</p>
       <ExportDialog
+        images={images}
         open={exporting}
         onClose={() => {
           setExporting(false)

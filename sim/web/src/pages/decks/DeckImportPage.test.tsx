@@ -207,4 +207,22 @@ describe("DeckImportPage", () => {
       expect(storedDecks().map((deck) => deck.main)).toEqual([[{ cardId: "c:bp01-001", count: 3 }]])
     })
   }, 45_000)
+
+  it("says so when the browser cannot draw the deck image", async () => {
+    const deck = createDeck(
+      { name: "圖片", edition: "jp", basis: { kind: "class", classCode: "royal" } },
+      new Date("2026-11-03T00:00:00.000Z"),
+    )
+    await decksStore.save(deck)
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    await renderRoutes(routes, { initialEntries: [`/decks/${deck.id}`] })
+    const user = userEvent.setup()
+    await user.click(await screen.findByRole("button", { name: "匯出／分享" }, { timeout: 15_000 }))
+    const dialog = await screen.findByRole("dialog", { name: "匯出／分享" })
+    await user.click(within(dialog).getByRole("radio", { name: "圖片" }))
+    expect(within(dialog).getByRole("radio", { name: "高清（看得清卡文）" })).toBeInTheDocument()
+    // jsdom has no canvas, as some locked-down browsers do not; the dialog says so instead of hanging.
+    await user.click(within(dialog).getByRole("button", { name: "產生圖片" }))
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("圖片產生失敗")
+  }, 45_000)
 })
