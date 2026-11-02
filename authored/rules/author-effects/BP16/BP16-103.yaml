@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-103:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 1
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    ref: this
+                    by: ability
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - assail
+                  - grant:
+                      "on": this
+                      until: turn
+                      abilities:
+                        - static:
+                            effects:
+                              - prevent:
+                                  kind: any
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
