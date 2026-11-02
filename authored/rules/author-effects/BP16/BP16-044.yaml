@@ -1,0 +1,39 @@
+cards:
+  BP16-044:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do:
+            - create:
+                n: 2
+                to: field
+                token: ガーディアンゴーレム
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - discard:
+                  ref: this
+          do:
+            - stack_plus: 2
+            - draw:
+                n: 1
+          zone: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP16-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
