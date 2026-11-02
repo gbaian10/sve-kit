@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-001:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                kind: amulet
+              during:
+                turn: self
+          per_turn: 3
+          do:
+            - pp:
+                who: self
+                delta: 1
+      - line: 3
+        activate:
+          cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+              n: 3
+          do:
+            - draw:
+                n: 1

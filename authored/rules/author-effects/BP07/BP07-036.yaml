@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  zone: ex
+                  trait: 機械
+                delta: -1
+      - line: 2
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                trait: 機械
+          per_turn: 4
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
