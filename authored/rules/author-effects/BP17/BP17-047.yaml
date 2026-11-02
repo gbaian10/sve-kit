@@ -1,0 +1,43 @@
+cards:
+  BP17-047:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 機械
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      on: this
+                      power: 3
+                  - grant:
+                      keywords:
+                        - assail
+                      on: this
+        line: 2
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: プロダクトマシーン
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

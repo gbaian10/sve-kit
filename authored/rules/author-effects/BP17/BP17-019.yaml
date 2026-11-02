@@ -1,0 +1,49 @@
+cards:
+  BP17-019:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        class: ロイヤル
+                        who: self
+                        zone: field
+                    op: eq
+                    right: 5
+                then:
+                  - buff:
+                      on: this
+                      power: 2
+        line: 2
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: スティールナイト
+                  - - create:
+                        n: 1
+                        to: field
+                        token: シールドガーディアン
+                  - - create:
+                        n: 1
+                        to: field
+                        token: ナイト
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

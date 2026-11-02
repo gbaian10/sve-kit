@@ -1,0 +1,47 @@
+cards:
+  BP19-022:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: スティールナイト
+            - create:
+                n: 1
+                to: field
+                token: ナイト
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        class: ロイヤル
+                        who: self
+                        zone: field
+                    op: eq
+                    right: 5
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+    token_sources:
+      - card: BP19-T05
+        line: 1
+        section: 1
+      - card: BP19-T04
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
