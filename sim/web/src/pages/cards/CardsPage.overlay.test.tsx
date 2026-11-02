@@ -126,12 +126,27 @@ describe("the layout setting", () => {
       await renderRoutes(routes, { initialEntries: ["/cards?q=bp01&sort=no%3Aasc&card=BP01-001"] })
       await screen.findByRole("complementary", { name: "單卡面板" })
       expect(panel()).toHaveAttribute("data-side", drawerSide)
+      await userEvent.click(screen.getByRole("button", { name: "篩選" }))
       expect(screen.getByRole("complementary", { name: "篩選條件" })).toHaveAttribute(
         "data-edge",
         sidebarEdge,
       )
     },
   )
+
+  it("keeps the search filter button available while the sidebar opens and closes", async () => {
+    sidebarWidth = true
+    await open("/cards", "panel")
+    const toggle = screen.getByRole("button", { name: "篩選" })
+    expect(toggle).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("no")
+    await userEvent.click(toggle)
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByRole("combobox", { name: "再依" })).not.toBeInTheDocument()
+    await userEvent.click(toggle)
+    expect(toggle).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("no")
+  })
 
   it("below sidebar width there is no sidebar, but the drawer still follows the setting", async () => {
     await open("/cards?q=bp01&sort=no%3Aasc&card=BP01-001", "panel", "cardLeft")
@@ -248,7 +263,7 @@ describe("opening a card beside the results", () => {
       )
     })
     expect(router.state.location.state).toMatchObject({
-      background: "?q=bp01&sort=no%3Aasc",
+      background: "?q=bp01&sort=no%3Aasc%2Cset%3Aasc",
       source: "results",
       resultKey: "p:bp01-001",
     })
@@ -461,20 +476,22 @@ describe("opening a card beside the results", () => {
   )
 
   it.each([
-    ["sort", "sort=cost%3Aasc"],
-    ["view", "sort=no%3Aasc&view=table"],
+    ["sort", "sort=cost%3Aasc%2Cset%3Aasc"],
+    ["view", "sort=no%3Aasc%2Cset%3Aasc&view=table"],
   ] as const)(
     "keeps the card through a %s change, yet back closes it and back again is the old list",
     async (change, expected) => {
+      sidebarWidth = true
       const { router } = await open("/cards?q=bp01&sort=no%3Aasc", "panel")
       const user = userEvent.setup()
       const [first] = await cells()
       if (!first) throw new Error("missing cell")
       await user.click(first)
       await within(panel()).findByRole("heading", { name: "試作見習兵" }, { timeout: 5000 })
-      if (change === "sort")
+      if (change === "sort") {
+        await user.click(screen.getByRole("button", { name: "篩選" }))
         await user.selectOptions(screen.getByRole("combobox", { name: "排序" }), "cost")
-      else await user.click(screen.getByRole("radio", { name: "表格" }))
+      } else await user.click(screen.getByRole("radio", { name: "表格" }))
       await waitFor(() => {
         expect(router.state.location.search).toBe(`?q=bp01&${expected}&card=BP01-001`)
       })
@@ -551,7 +568,7 @@ describe("opening a card beside the results", () => {
     const older = router.state.location.state as ListEntryState
     await act(() => router.navigate(1))
     await waitFor(() => {
-      expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc&view=table")
+      expect(router.state.location.search).toBe("?q=bp01&sort=no%3Aasc%2Cset%3Aasc&view=table")
       const current = router.state.location.state as ListEntryState
       expect({ olderPages: older.pages, currentPages: current.pages }).toEqual({
         olderPages: 1,
@@ -585,7 +602,8 @@ describe("opening a card beside the results", () => {
           router.navigate(pathname + search, { replace: true, state: { ...state, pages } }),
         )
       }
-      const list = how === "view" ? "?q=bp01&sort=no%3Aasc&view=table" : "?q=bp01&sort=no%3Aasc"
+      const list =
+        how === "view" ? "?q=bp01&sort=no%3Aasc%2Cset%3Aasc&view=table" : "?q=bp01&sort=no%3Aasc"
       await loadBeside(2)
       if (how === "page") {
         act(() => {

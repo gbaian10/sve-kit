@@ -31,6 +31,7 @@ export interface FilterPanelProps {
   readonly onEditionChange: (edition: Region) => void
   readonly types?: ReactNode
   readonly locations?: ReactNode
+  readonly sortControls?: ReactNode
   readonly facets: {
     readonly rarity: ReactNode
     readonly traits: ReactNode
@@ -113,6 +114,7 @@ export function FilterPanel({
   facets,
   types,
   locations,
+  sortControls,
   resultTotal,
   restrictions,
   onClose,
@@ -316,25 +318,37 @@ export function FilterPanel({
       {children}
     </section>
   )
+  const editionAndSort = (
+    <div className="flex flex-wrap items-start gap-x-4 gap-y-3">
+      <div className="shrink-0">
+        <Section title={t("filters.edition")}>
+          {EDITIONS.map((code) => (
+            <Toggle
+              key={code}
+              pressed={edition === code}
+              onClick={() => {
+                if (edition !== code) onEditionChange(code)
+              }}
+            >
+              {t(`options.edition.${code}`)}
+            </Toggle>
+          ))}
+        </Section>
+      </div>
+      {sortControls && (
+        <div className="shrink-0">
+          <Section title={t("results.sort")}>{sortControls}</Section>
+        </div>
+      )}
+    </div>
+  )
   if (sidebar) {
     return (
       <section id={id} aria-label={t("filters.panel")} className="flex min-w-0 flex-col gap-4">
         {group(
           t("filters.groups.basic"),
           <>
-            <Section title={t("filters.edition")}>
-              {EDITIONS.map((code) => (
-                <Toggle
-                  key={code}
-                  pressed={edition === code}
-                  onClick={() => {
-                    if (edition !== code) onEditionChange(code)
-                  }}
-                >
-                  {t(`options.edition.${code}`)}
-                </Toggle>
-              ))}
-            </Section>
+            {editionAndSort}
             {types}
             {locations}
           </>,
@@ -388,21 +402,7 @@ export function FilterPanel({
         defaultOpen
         desktopClassName="md:row-start-1 md:col-span-3 md:grid md:grid-cols-3 md:border-b md:border-border md:px-0 md:py-4"
       >
-        <div className="md:px-4">
-          <Section title={t("filters.edition")}>
-            {EDITIONS.map((code) => (
-              <Toggle
-                key={code}
-                pressed={edition === code}
-                onClick={() => {
-                  if (edition !== code) onEditionChange(code)
-                }}
-              >
-                {t(`options.edition.${code}`)}
-              </Toggle>
-            ))}
-          </Section>
-        </div>
+        <div className="md:px-4">{editionAndSort}</div>
         <div className="md:px-4">{types}</div>
         <div className="md:px-4">{locations}</div>
       </FilterGroup>

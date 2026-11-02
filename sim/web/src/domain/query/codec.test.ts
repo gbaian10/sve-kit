@@ -248,18 +248,35 @@ it.each(["name", "date", "bogus", "set:wrong", "cost:asc,name:desc", "set:desc,n
     expect(parseQuery(new URLSearchParams({ sort, order: "desc" }))).toEqual(DEFAULT_QUERY)
   },
 )
-it("omits explicit defaults, reads legacy directions and round-trips a disabled secondary sort", () => {
+it("defaults a missing secondary sort and preserves an explicitly disabled one", () => {
   expect(querySearch(parseQuery(new URLSearchParams("sort=set:desc,no:asc")))).toBe("")
   const noSecondary = { ...DEFAULT_QUERY, secondarySort: null }
-  expect(querySearch(noSecondary)).toBe("?sort=set%3Adesc")
+  expect(querySearch(noSecondary)).toBe("?sort=set%3Adesc%2Cnone")
   expect(parseQuery(new URLSearchParams(querySearch(noSecondary)))).toEqual(noSecondary)
   expect(parseQuery(new URLSearchParams("sort=cost&order=desc"))).toMatchObject({
     sort: "cost",
     order: "desc",
     secondarySort: "no",
   })
-  const single = parseQuery(new URLSearchParams("sort=atk:asc"))
-  expect(single.secondarySort).toBeNull()
-  expect(formatQuery(single).get("sort")).toBe("atk:asc")
-  expect(parseQuery(formatQuery(single))).toEqual(single)
+  expect(parseQuery(new URLSearchParams("sort=cost:desc"))).toMatchObject({
+    sort: "cost",
+    order: "desc",
+    secondarySort: "no",
+  })
+  expect(parseQuery(new URLSearchParams("sort=atk:asc"))).toMatchObject({
+    sort: "atk",
+    secondarySort: "no",
+  })
+  for (const sort of ["no", "no:asc", "no:desc"]) {
+    expect(parseQuery(new URLSearchParams({ sort }))).toMatchObject({
+      sort: "no",
+      secondarySort: "set",
+    })
+  }
+  const explicit = parseQuery(new URLSearchParams("sort=cost:desc,atk:desc"))
+  expect(explicit).toMatchObject({ sort: "cost", secondarySort: "atk", secondaryOrder: "desc" })
+  expect(parseQuery(formatQuery(explicit))).toEqual(explicit)
+  const duplicate = parseQuery(new URLSearchParams("sort=cost:asc,cost:desc"))
+  expect(duplicate).toMatchObject({ sort: "cost", secondarySort: "no" })
+  expect(duplicate).not.toHaveProperty("secondaryOrder")
 })

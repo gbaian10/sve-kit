@@ -6,6 +6,7 @@ import { cn } from "../../components/ui/cn"
 import type { SidebarEdge } from "./sidebar-layout"
 
 export interface FilterSidebarProps {
+  readonly id: string
   readonly edge: SidebarEdge
   readonly collapsed: boolean
   readonly onToggle: () => void
@@ -16,9 +17,10 @@ export interface FilterSidebarProps {
 
 /**
  * The filter sidebar of the cards page: pinned below the top bar and scrolling on its own, so the
- * filters stay reachable however far the results are scrolled. It folds into a thin strip.
+ * filters stay reachable however far the results are scrolled. It disappears when folded.
  */
 export function FilterSidebar({
+  id,
   edge,
   collapsed,
   onToggle,
@@ -31,6 +33,8 @@ export function FilterSidebar({
   const label = collapsed ? t("filters.sidebarExpand") : t("filters.sidebarCollapse")
   return (
     <aside
+      id={id}
+      hidden={collapsed}
       aria-label={t("filters.panel")}
       data-edge={edge}
       className={cn(

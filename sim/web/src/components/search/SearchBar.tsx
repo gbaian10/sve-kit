@@ -162,7 +162,7 @@ export function SearchBar({
           )}
         </button>
       )}
-      {summary}
+      {summary && <div>{summary}</div>}
     </div>
   )
 }

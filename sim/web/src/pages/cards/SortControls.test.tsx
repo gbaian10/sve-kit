@@ -6,13 +6,21 @@ import { SortControls } from "./SortControls"
 
 vi.mock("react-i18next", () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
 
-it("keeps an empty secondary direction slot when no secondary sort is selected", () => {
+it("explains the disabled direction when no secondary sort is selected", () => {
   render(<SortControls query={{ ...DEFAULT_QUERY, secondarySort: null }} onChange={vi.fn()} />)
 
   const select = screen.getByRole("combobox", { name: "results.thenBy" })
   const direction = screen.getByRole("button", { name: "results.thenBy" })
   expect(direction).toBeDisabled()
-  expect(direction).toBeEmptyDOMElement()
-  expect(direction.parentElement).toHaveClass("grid-cols-[3rem_minmax(0,1fr)_minmax(0,1fr)]")
-  expect(select).toHaveClass("md:w-24")
+  expect(direction).toHaveTextContent("results.noSecondary")
+  expect(direction.parentElement).toHaveClass("gap-2")
+  expect(select).toHaveClass("w-auto")
+})
+
+it("shows the direction as a button with its full meaning", () => {
+  render(<SortControls query={DEFAULT_QUERY} onChange={vi.fn()} />)
+  const direction = screen.getByRole("button", { name: "results.sort：results.newestFirst" })
+  expect(direction).toHaveTextContent("results.newestFirst ↓")
+  expect(direction).toHaveAttribute("title", "results.newestFirst")
+  expect(screen.getByRole("combobox", { name: "results.sort" })).toHaveValue("set")
 })
