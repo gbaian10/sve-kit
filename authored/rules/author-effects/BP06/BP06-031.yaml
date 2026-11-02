@@ -1,0 +1,28 @@
+cards:
+  BP06-031:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        to: cemetery
+                        top:
+                          n: 1
+                          who: opp
+                  - - draw:
+                        n: 1
+                    - discard:
+                        n: 1
+                        who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
