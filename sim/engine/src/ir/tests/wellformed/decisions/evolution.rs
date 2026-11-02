@@ -122,6 +122,7 @@ fn evolution_cost(action: Action, id: u64, source: &AbilitySource) -> CostStep {
     instruction.context = InstructionContext::Cost;
     instruction.source = source.clone();
     CostStep {
+        keyword: None,
         instruction,
         materials: None,
     }

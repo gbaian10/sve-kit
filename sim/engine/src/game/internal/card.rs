@@ -569,6 +569,7 @@ impl Game {
         };
         self.internal_use_prerequisite(execution, costs)?;
         for step in steps {
+            self.check_keyword_cost(execution, step)?;
             let (quantity, subjects) = match &step.instruction.action {
                 Action::Counter { .. } => (
                     self.internal_counter(execution, &step.instruction, true)?,
@@ -637,6 +638,7 @@ impl Game {
                 ),
                 _ => return Err(unsupported("whole-card cost step")),
             };
+            self.finish_keyword_payment(execution, step)?;
             if !matches!(step.instruction.action, Action::Discard { .. }) {
                 execution.receipts.insert(
                     step.instruction.receipt,

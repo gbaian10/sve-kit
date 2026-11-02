@@ -183,6 +183,7 @@ pub(super) enum CostOperation {
     Pp(u64),
     Lesson(u64),
     Counter(CounterCost),
+    EarthRite(u64),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
@@ -232,6 +233,7 @@ pub(super) struct Body {
 pub(super) enum Step {
     Pay(ModePayment),
     Counter(CounterChange),
+    StackPlus(Number),
     Optional(Optional),
     Race(Race),
     Evolve(EffectEvolution),
@@ -1127,7 +1129,8 @@ impl TryFrom<String> for FilterKeyword {
                 | super::super::KeywordId::Rush
                 | super::super::KeywordId::Bane
                 | super::super::KeywordId::Intimidate
-                | super::super::KeywordId::Assail),
+                | super::super::KeywordId::Assail
+                | super::super::KeywordId::Stack),
             ) => Ok(Self(keyword)),
             _ => Err("unsupported filter keyword"),
         }

@@ -77,6 +77,7 @@ pub(super) fn lower(
                     steps: vec![meal, payment]
                         .into_iter()
                         .map(|instruction| CostStep {
+                            keyword: None,
                             instruction: Box::new(instruction),
                             materials: None,
                         })

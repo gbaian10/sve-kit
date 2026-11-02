@@ -109,6 +109,7 @@ fn bp01_p25_lowered_lastword_survives_non_destroy_source_cost() {
     cost.context = InstructionContext::Cost;
     sacrifice.node.play.as_mut().unwrap().costs = CostSpec::Ordered {
         steps: vec![CostStep {
+            keyword: None,
             instruction: Box::new(cost),
             materials: None,
         }],

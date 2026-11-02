@@ -10,6 +10,7 @@ mod costs;
 mod counters;
 mod current;
 mod discard;
+mod earth;
 mod evolution;
 mod exchange;
 mod grant;
@@ -27,6 +28,7 @@ mod play;
 mod play_restrictions;
 mod prevention;
 mod receipt_counts;
+mod stack;
 mod static_keywords;
 
 mod posture;
@@ -1081,6 +1083,15 @@ impl<'definitions> BodyContext<'definitions> {
         Ok(program)
     }
 
+    fn located_step(source: &SourceSpan, path: &str, node: Node) -> Located<Node> {
+        let mut located = source.clone();
+        path.clone_into(&mut located.author_path);
+        Located {
+            source: located,
+            node,
+        }
+    }
+
     fn steps(
         &mut self,
         author_steps: &[ast::Step],
@@ -1097,18 +1108,17 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(self.counter_step(value, &step_path, source, ability_source)?);
                 continue;
             }
+            if let ast::Step::StackPlus(amount) = step {
+                steps.push(self.stack_plus(amount, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::Optional(optional) = step {
                 steps.push(self.optional(optional, &step_path, source, ability_source)?);
                 continue;
             }
             if let ast::Step::EachPlayer(each) = step {
                 let node = self.each_player(each, &step_path, source, ability_source)?;
-                let mut located = source.clone();
-                located.author_path = step_path;
-                steps.push(Located {
-                    source: located,
-                    node,
-                });
+                steps.push(Self::located_step(source, &step_path, node));
                 continue;
             }
             if matches!(step, ast::Step::Evolve(_)) {
@@ -1203,7 +1213,8 @@ impl<'definitions> BodyContext<'definitions> {
                 value.n.unwrap_or(1),
                 super::MealRaceOperation::Race,
             )),
-            ast::Step::Choice(_)
+            ast::Step::StackPlus(_)
+            | ast::Step::Choice(_)
             | ast::Step::Optional(_)
             | ast::Step::Pay(_)
             | ast::Step::Either(_)

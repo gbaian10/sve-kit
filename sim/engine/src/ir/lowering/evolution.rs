@@ -194,6 +194,7 @@ pub(super) fn lower(
     steps.insert(
         0,
         CostStep {
+            keyword: None,
             instruction: Box::new(reveal),
             materials: None,
         },

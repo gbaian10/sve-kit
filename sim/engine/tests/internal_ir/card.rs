@@ -532,6 +532,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::CardPlayed { .. }
                     | Fact::CardResolved { .. }
                     | Fact::AbilityPlayed { .. }
+                    | Fact::Payment { .. }
                     | Fact::AbilityResolved { .. }
                     | Fact::Shuffled { .. }
                     | Fact::Draw(_)

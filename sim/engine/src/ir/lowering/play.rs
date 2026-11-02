@@ -797,7 +797,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
-        ast::Step::Counter(_)
+        ast::Step::StackPlus(_)
+        | ast::Step::Counter(_)
         | ast::Step::Race(_)
         | ast::Step::Evolve(_)
         | ast::Step::Either(_)

@@ -1,7 +1,8 @@
 mod capacity;
 mod dynamic;
 
-use crate::ir::{ObjectRef, PlayerId};
+use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
+use alloc::sync::Arc;
 
 pub(super) use capacity::CapacityWait;
 
@@ -12,7 +13,7 @@ use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
 use crate::ir::{
     Action, Control, Expr, Instruction, Located, Nat, Node, PlayerRef, Posture, Program, ReceiptId,
-    Requirement, TokenDestination, TokenOutcome, TokenSpec, ZoneKind, ZoneRef,
+    Requirement, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -27,7 +28,7 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
         destination: TokenDestination::Single {
             zone: Expr::Literal(zone),
         },
-        initial_state: None,
+        initial_state,
         initial_posture: Posture::Standing,
         entry_effects,
         ..
@@ -44,6 +45,13 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     ) || zone.player == opponent())
         || !matches!(zone.kind, ZoneKind::Ex | ZoneKind::Field)
         || !entry_effects.is_empty()
+        || match initial_state {
+            None => false,
+            Some(TokenInitialState::StackCounters {
+                amount: Expr::Literal(amount),
+            }) => zone.kind != ZoneKind::Field || amount.0 == 0 || i64::try_from(amount.0).is_err(),
+            Some(_) => true,
+        }
     {
         return None;
     }
@@ -75,6 +83,32 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     if let Some((tokens, zone)) = specification(action) {
         for token in tokens {
             check_template(game, &token.template.0, zone.kind)?;
+            if matches!(
+                action,
+                Action::Token {
+                    initial_state: Some(_),
+                    ..
+                }
+            ) {
+                let card = game.catalog.token_print(&token.template.0)?;
+                let definitions = &game.card_runtime.definitions;
+                let program = definitions
+                    .cards
+                    .get(&card)
+                    .map(Arc::as_ref)
+                    .or_else(|| {
+                        definitions
+                            .current
+                            .get(&card)
+                            .map(|current| &current.candidate.program)
+                    })
+                    .ok_or_else(|| unsupported("Stack token definition"))?;
+                if !program.card().abilities.iter().any(|ability| {
+                    printed_keywords::card_declaration(&ability.node) == Some(KeywordId::Stack)
+                }) {
+                    return Err(unsupported("Stack initial state requires a Stack token"));
+                }
+            }
         }
     }
     Ok(())
@@ -296,7 +330,17 @@ impl Game {
                 }
             }
         }
-        let created = self.commit_token_objects(execution, destination, &ids)?;
+        let stack = match &instruction.action {
+            Action::Token {
+                initial_state:
+                    Some(TokenInitialState::StackCounters {
+                        amount: Expr::Literal(amount),
+                    }),
+                ..
+            } => Some(*amount),
+            _ => None,
+        };
+        let created = self.commit_token_objects_with_stack(execution, destination, &ids, stack)?;
         let Action::Token { output, .. } = &instruction.action else {
             return Err(invalid("token output"));
         };
@@ -316,6 +360,16 @@ impl Game {
         destination: ZoneKind,
         ids: &[String],
     ) -> Result<Vec<ObjectRef>> {
+        self.commit_token_objects_with_stack(execution, destination, ids, None)
+    }
+
+    fn commit_token_objects_with_stack(
+        &mut self,
+        execution: &mut Execution,
+        destination: ZoneKind,
+        ids: &[String],
+        stack: Option<Nat>,
+    ) -> Result<Vec<ObjectRef>> {
         execution.ids = self.internal_identities()?;
         let before = ids
             .iter()
@@ -326,7 +380,18 @@ impl Game {
         } else {
             "ex"
         };
-        self.move_objects(ids, zone, None, None, &execution.frame())?;
+        let mut frame = execution.frame();
+        if let Some(amount) = stack {
+            frame.values.insert(
+                "stack_entry_counts".into(),
+                serde_json::Value::Object(
+                    ids.iter()
+                        .map(|id| (id.clone(), serde_json::json!(amount.0)))
+                        .collect(),
+                ),
+            );
+        }
+        self.move_objects(ids, zone, None, None, &frame)?;
         if destination == ZoneKind::Field {
             for member in before {
                 self.internal_ward_entry_posture(execution, member)?;

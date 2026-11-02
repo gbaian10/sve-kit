@@ -17,6 +17,7 @@ fn resource(id: u64, amount: i64) -> CostStep {
     };
     instruction.context = InstructionContext::Cost;
     CostStep {
+        keyword: None,
         instruction,
         materials: None,
     }

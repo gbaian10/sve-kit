@@ -243,6 +243,7 @@ pub(super) fn keyword_filter(
         && predicate.holder.is_none()
         && predicate.origin.is_none()
         && (predicate.keyword == Some(KeywordId::Evolution)
+            || predicate.keyword == Some(KeywordId::Stack)
             || predicate.keyword.and_then(super::grant::keyword).is_some())
 }
 
@@ -436,6 +437,7 @@ pub(super) fn keyword_requirement(
             | "internal.KeywordId.Bane"
             | "internal.KeywordId.Intimidate"
             | "internal.KeywordId.Assail"
+            | "internal.KeywordId.Stack"
     ) {
         return false;
     }

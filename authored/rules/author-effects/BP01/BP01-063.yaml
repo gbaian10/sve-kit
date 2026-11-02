@@ -1,0 +1,40 @@
+cards:
+  BP01-063:
+    abilities:
+      - line: 1
+        covers: [1, 2]
+        spell:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: 防御型ゴーレム
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - buff:
+                      hp: 1
+                      "on":
+                        kind: follower
+                        trait: ゴーレム
+                        who: self
+                        zone: field
+                      power: 1
+          optional_cost:
+            earth_rite: 1
+            result: rite
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token_sources:
+      - card: BP01-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

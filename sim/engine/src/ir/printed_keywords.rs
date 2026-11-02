@@ -8,6 +8,13 @@ use super::{
     Selector, TextQuantifier, TimeAnchor, ZoneKind,
 };
 
+mod stack;
+
+pub(crate) use stack::{
+    increase_choice as stack_increase_choice, is_increase_choice as is_stack_increase_choice,
+    recipients as stack_recipients, stack_definition,
+};
+
 const fn players(relation: PlayerRelation) -> PlayerSet {
     PlayerSet {
         relation,
@@ -141,8 +148,7 @@ pub(crate) fn definition(
         | KeywordId::Rush
         | KeywordId::Bane
         | KeywordId::Intimidate
-        | KeywordId::Assail
-        | KeywordId::Stack => None,
+        | KeywordId::Assail => None,
         _ => return None,
     };
     Some(Ability {
@@ -192,7 +198,9 @@ pub(crate) fn card_declaration(ability: &Ability) -> Option<KeywordId> {
     let AbilityOrigin::Printed { face, line } = origin.as_ref() else {
         return None;
     };
-    let expected = if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
+    let expected = if *keyword == KeywordId::Stack {
+        stack::rebuild(ability)
+    } else if matches!(keyword, KeywordId::SingleDrive | KeywordId::TwinDrive) {
         let step = ability.body.as_ref()?.steps.first()?;
         let super::Node::Instruction { instruction } = &step.node else {
             return None;

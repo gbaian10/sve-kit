@@ -23,8 +23,8 @@ use crate::ir::{
     TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
-    AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentResult,
-    QuickWindow, RaceEvent,
+    AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, EvolveEvent, FaceId, PaymentEvent,
+    PaymentResult, QuickWindow, RaceEvent,
 };
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
@@ -46,6 +46,7 @@ mod counters;
 mod discard;
 mod drive;
 mod duration;
+mod earth;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
@@ -267,6 +268,13 @@ pub enum Answer {
 pub enum InstructionOutcome {
     /// Actual before/after counter values, including an unchanged result.
     Counter(CounterChangeEvent),
+    /// One atomic transfer preserves both holders' before and after values.
+    CounterMove {
+        /// Counters removed from the source generation.
+        from: CounterChangeEvent,
+        /// Counters added to the recipient generation.
+        to: CounterChangeEvent,
+    },
     /// Whether the controller accepted an optional body.
     Optional(bool),
     /// One effect-driven ordinary evolution and its live physical association.
@@ -346,6 +354,13 @@ pub struct Progress {
 pub enum Fact {
     /// One race fact, independent of the number of meal resources paid.
     Raced(RaceEvent),
+    /// Only a completed keyword payment produces this public cost component.
+    Payment {
+        /// The payer remains known after the paid amulet leaves.
+        player: PlayerId,
+        /// This component excludes ordinary counter removals.
+        event: PaymentEvent,
+    },
     /// Accepted trigger effect, before the revealed card leaves the trigger zone.
     DriveTrigger(Box<DriveTriggerEvent>),
     /// One completed Drive check and its actual destination.

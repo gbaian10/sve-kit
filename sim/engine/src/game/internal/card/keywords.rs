@@ -213,7 +213,7 @@ pub(super) fn check(
     }
     if matches!(
         keyword,
-        KeywordId::SingleDrive | KeywordId::TwinDrive | KeywordId::Drain
+        KeywordId::SingleDrive | KeywordId::TwinDrive | KeywordId::Drain | KeywordId::Stack
     ) && located
         .node
         .body
