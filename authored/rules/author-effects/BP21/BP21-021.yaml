@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-021:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  trait: 学院
+                  orig_cost_le: 3
+                n: 1
+                to: field
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                "on": this
+                abilities:
+                  - static:
+                      effects:
+                        - damage_mod:
+                            "on":
+                              who: self
+                              zone: field
+                              kind: follower
+                              trait: 学院
+                            delta: -2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

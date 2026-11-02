@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-079:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - bane
+          while:
+            exists:
+              who: self
+              zone: field
+              kind: follower
+              other: true
+              trait: 機械
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      ref: this
+                      from: hand
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - assail
+      - line: 3
+        lastword:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 機械
+              n: 2
+          do:
+            - move:
+                ref: this
+                to: ex
+                result: returned
+            - grant:
+                "on":
+                  follow: returned
+                abilities:
+                  - play:
+                      cost_delta: -1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

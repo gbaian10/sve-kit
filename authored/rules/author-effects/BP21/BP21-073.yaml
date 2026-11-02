@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-073:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          targets:
+            - bind: revive
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: 学院
+                orig_cost_le: 2
+              n: 1
+          do:
+            - move:
+                ref: revive
+                to: field
+                result: revived
+            - grant:
+                "on":
+                  follow: revived
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - move:
+                            ref: this
+                            to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

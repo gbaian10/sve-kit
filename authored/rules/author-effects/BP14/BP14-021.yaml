@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-021:
+    abilities:
+      - line: 1
+        keywords:
+          - bane
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: victim
+                n: 2
+      - line: 3
+        lastword:
+          do:
+            - create:
+                token: 炎将の二槍
+                to: field
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

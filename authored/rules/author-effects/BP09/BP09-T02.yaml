@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-T02:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: revive
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                class: ウィッチ
+                orig_cost_le: 3
+              n: 1
+          do:
+            - move:
+                ref: revive
+                to: field
+                result: revived
+            - grant:
+                "on":
+                  follow: revived
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - destroy: this
+                keywords:
+                  - rush
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
+    token:
+      name: 久遠の秘薬
+      template: true

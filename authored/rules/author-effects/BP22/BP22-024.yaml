@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-024:
+    abilities:
+      - line: 1
+        keywords:
+          - assail
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - grant:
+                "on": ally
+                abilities:
+                  - static:
+                      effects:
+                        - prevent:
+                            kind: combat
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

@@ -1,0 +1,113 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "aura",
+        "subjects": "self",
+        "keywords": [
+          "rush",
+          "bane"
+        ],
+        "condition": {
+          "fn": "gt",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "field",
+                "type": "follower",
+                "trait": "機械",
+                "other": true
+              }
+            },
+            0
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ne",
+          "args": [
+            {
+              "read": "self.entered_from"
+            },
+            "hand"
+          ]
+        },
+        "then": {
+          "op": "modify",
+          "subjects": "self",
+          "keywords": [
+            "assail"
+          ]
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "pay",
+        "cost_selections": [
+          {
+            "key": "1",
+            "select": {
+              "side": "self",
+              "zone": "hand",
+              "trait": "機械"
+            },
+            "min": 2,
+            "max": 2
+          }
+        ],
+        "costs": [
+          {
+            "op": "discard",
+            "subjects": "cost.1"
+          }
+        ],
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "move",
+              "subjects": "self",
+              "to": "ex",
+              "bind": "returned"
+            },
+            {
+              "op": "modify",
+              "subjects": "returned",
+              "abilities": [
+                {
+                  "line": 3,
+                  "kind": "static",
+                  "body": {
+                    "op": "adjust_cost",
+                    "subjects": "self",
+                    "amount": -1
+                  },
+                  "active_zones": [
+                    "ex"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

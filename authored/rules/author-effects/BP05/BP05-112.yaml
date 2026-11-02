@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-112:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  exists:
+                    in: ally
+                    name: 唯我の絶傑・マゼルベイン
+                then:
+                  - buff:
+                      "on": ally
+                      power: 3
+                      hp: 3
+                  - grant:
+                      "on": ally
+                      keywords:
+                        - assail
+                  - grant:
+                      "on": ally
+                      abilities:
+                        - static:
+                            effects:
+                              - prevent:
+                                  kind: any
+                      until: turn
+                else:
+                  - buff:
+                      "on": ally
+                      power: 1
+                      hp: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"

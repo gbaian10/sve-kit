@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-026:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+      - line: 2
+        fanfare:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: opp
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - destroy: victim
+                  - grant:
+                      "on": this
+                      keywords:
+                        - aura
+                  - grant:
+                      "on": this
+                      abilities:
+                        - static:
+                            effects:
+                              - prevent:
+                                  kind: any
+                      until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-02"
