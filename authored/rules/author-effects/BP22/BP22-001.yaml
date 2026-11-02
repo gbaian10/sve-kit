@@ -1,0 +1,44 @@
+cards:
+  BP22-001:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                "on":
+                  kind: follower
+                  trait: 妖精
+                  token: true
+                  who: self
+                  zone: field
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n:
+                  history_count:
+                    event: played
+                    who: self
+                    window: this_turn
+                to: enemy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

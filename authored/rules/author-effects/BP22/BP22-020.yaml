@@ -1,0 +1,51 @@
+cards:
+  BP22-020:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            placed_ex:
+              sel:
+                name: 輝く金貨
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          do:
+            - damage:
+                n: 1
+                to: enemy
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 輝く金貨
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                        name: 輝く金貨
+                    op: ge
+                    right: 4
+                then:
+                  - pp:
+                      delta: 3
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
