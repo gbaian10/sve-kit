@@ -849,3 +849,210 @@ fn union_look_to_field_offers_only_the_free_field_slot() {
     assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
     assert_eq!(view["P1"]["deck"], json!(["two"]));
 }
+
+fn flow_look(steps: &Value, field_count: usize) -> (Game, DecisionView) {
+    let mut document = tree(steps);
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"] = json!({"pp":0});
+    let programs = lowerer().lower(&document).unwrap();
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}
+        ]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!(
+        (0..field_count).map(|i| json!({"id":if i == 0 { "s".to_owned() } else { format!("f{i}") },"card":"unit-follower"})).collect::<Vec<_>>()
+    );
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "look-flow").unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    let play = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let q = awaiting_any(play).unwrap();
+    (game, q)
+}
+
+fn awaiting_any(play: CardPlay) -> Option<DecisionView> {
+    match play {
+        CardPlay::Awaiting(q) => Some(q),
+        CardPlay::Resolved(_)
+        | CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_) => None,
+    }
+}
+
+fn union_choice() -> Value {
+    json!({"choose":{"bind":"picked","from":{"any_of":[
+        {"in":"seen","kind":"follower"},{"in":"seen","class":"ニュートラル"}
+    ]},"upto":2,"may":true}})
+}
+
+/// Answers with as many cards as the question offers; a legal answer must never abort.
+fn offered_answer(game: &mut Game, q: &DecisionView) -> CardPlay {
+    let handles = if let InputDomain::Targets(domain) = &q.domain {
+        let limit = usize::try_from(domain.cardinality.maximum.unwrap().0).unwrap();
+        domain
+            .members
+            .iter()
+            .take(limit)
+            .map(|member| member.handle)
+            .collect()
+    } else {
+        Vec::new()
+    };
+    game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+        .unwrap()
+}
+
+#[test]
+fn union_entry_inside_later_if_accepts_offered_answer() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            union_choice(),
+            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
+                {"move":{"ref":"picked","to":"field","result":"moved"}}
+            ]}}
+        ]),
+        4,
+    );
+    offered_answer(&mut game, &q);
+}
+
+#[test]
+fn grouped_entry_inside_later_if_accepts_offered_answer() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"groups":[
+                {"kind":"follower","orig_cost_le":2},{"kind":"follower","orig_cost_le":3}
+            ],"upto":2,"may":true}},
+            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
+                {"move":{"ref":"picked","to":"field","result":"moved"}}
+            ]}}
+        ]),
+        4,
+    );
+    offered_answer(&mut game, &q);
+}
+
+#[test]
+fn choice_inside_expanded_if_keeps_field_limit() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[
+                {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+                union_choice(),
+                {"move":{"ref":"picked","to":"field","result":"moved"}}
+            ]}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .len(),
+        5
+    );
+}
+
+#[test]
+fn field_move_of_another_binding_does_not_cap_hand_pick() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            union_choice(),
+            {"move":{"ref":"picked","to":"hand","result":"taken"}},
+            {"look":{"top":{"who":"self","n":1},"bind":"fresh"}},
+            {"choose":{"bind":"later","from":{"in":"fresh"},"n":1}},
+            {"move":{"ref":"later","to":"field","result":"entered"}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.maximum, Some(Nat(2)));
+    let CardPlay::Awaiting(next) = game
+        .answer_internal_card(q.actor, q.token, Answer::Targets(vec![]))
+        .unwrap()
+    else {
+        panic!("later binding question")
+    };
+    resolved(offered_answer(&mut game, &next));
+}
+
+#[test]
+fn a_possible_field_branch_caps_the_offer_even_when_skipped() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            union_choice(),
+            {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":0}},"then":[
+                {"move":{"ref":"picked","to":"field","result":"moved"}}
+        ],"else":[{"move":{"ref":"picked","to":"hand","result":"taken"}}]}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    // The branch condition is read only at resolution, so the offer stays within the free slot.
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+}
+
+#[test]
+fn exact_multi_pick_clamps_minimum_with_maximum() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":2}},
+            {"move":{"ref":"picked","to":"field","result":"moved"}}
+        ]),
+        4,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.minimum, Nat(1));
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+}
+
+#[test]
+fn single_card_at_full_field_stays_in_deck() {
+    let (mut game, q) = flow_look(
+        &json!([
+            {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+            {"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"n":1}},
+            {"move":{"ref":"picked","to":"field","result":"moved"}}
+        ]),
+        5,
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("Look targets")
+    };
+    assert_eq!(domain.cardinality.minimum, Nat(1));
+    assert_eq!(domain.cardinality.maximum, Some(Nat(1)));
+    resolved(offered_answer(&mut game, &q));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(view["P1"]["deck"], json!(["one", "two"]));
+}

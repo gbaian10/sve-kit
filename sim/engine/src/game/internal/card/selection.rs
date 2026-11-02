@@ -6,11 +6,11 @@ use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
-    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
-    EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, Node,
-    NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
-    PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
-    Selector, Stat, TraitsRead,
+    ChoiceDomain, ClassRead, Comparison, Control, Decision, DecisionKind, Disjointness,
+    EvolutionRead, EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead,
+    Node, NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
+    PlayerRelation, Posture, PostureRead, Predicate, Program, RepeatBody, ScopeId,
+    SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -1102,14 +1102,9 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
-    /// Whether a later step of this execution moves the chosen binding onto the field.
+    /// Whether any pending step, including unexpanded control bodies, moves the binding onto the field.
     fn feeds_field_entry(&self, key: (ScopeId, u64)) -> bool {
-        self.todo.iter().any(|node| {
-            matches!(node, Node::Instruction { instruction }
-                if matches!(&instruction.action, Action::Move {
-                    objects: Selector::Bound { reference }, movement, ..
-                } if reference.key() == key && super::super::movement::field_move(movement)))
-        })
+        self.todo.iter().any(|node| enters_field(node, key))
     }
 
     pub(in crate::game::internal) fn is_private_look_target(
@@ -1252,5 +1247,48 @@ impl Execution {
                 on_field_at_capture: wait.on_field_at_capture,
             },
         );
+    }
+}
+
+/// Conservative on purpose: an unexecuted entry branch can only lower the offer, never abort a legal answer.
+fn enters_field(node: &Node, key: (ScopeId, u64)) -> bool {
+    let program = |program: &Program| {
+        program
+            .steps
+            .iter()
+            .any(|step| enters_field(&step.node, key))
+    };
+    match node {
+        Node::Instruction { instruction } => matches!(&instruction.action, Action::Move {
+            objects: Selector::Bound { reference }, movement, ..
+        } if reference.key() == key && super::super::movement::field_move(movement)),
+        Node::Control { control } => match control {
+            Control::Sequence { body }
+            | Control::May { body, .. }
+            | Control::EachObject { body, .. }
+            | Control::Pay { on_paid: body, .. }
+            | Control::Repeat {
+                body: RepeatBody::Program { body },
+                ..
+            } => program(body),
+            Control::If {
+                then_body,
+                else_body,
+                ..
+            } => program(then_body) || else_body.as_ref().is_some_and(program),
+            Control::Match {
+                leader_body,
+                follower_body,
+                ..
+            } => program(leader_body) || program(follower_body),
+            Control::Mode { modes, .. } => modes.iter().any(|mode| program(&mode.body)),
+            Control::Simultaneous { .. }
+            | Control::EachPlayer { .. }
+            | Control::Repeat {
+                body: RepeatBody::BodyReference { .. },
+                ..
+            } => false,
+        },
+        Node::Decision { .. } | Node::Capture { .. } => false,
     }
 }
