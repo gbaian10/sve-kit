@@ -1,0 +1,47 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "rush"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "choice",
+        "timing": "resolve",
+        "min": 1,
+        "max": 1,
+        "modes": [
+          {
+            "op": "act",
+            "subjects": "target.1"
+          },
+          {
+            "op": "stand",
+            "subjects": "target.1"
+          }
+        ]
+      },
+      "event": "enter",
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "zone": "field",
+            "side": "opponent",
+            "type": "follower"
+          },
+          "min": 0,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}

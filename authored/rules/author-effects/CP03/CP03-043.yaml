@@ -1,0 +1,38 @@
+cards:
+  CP03-043:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - twin_drive
+        line: 2
+      - fanfare:
+          do:
+            - banish:
+                top:
+                  n: 1
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 5
+                then:
+                  - draw:
+                      n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

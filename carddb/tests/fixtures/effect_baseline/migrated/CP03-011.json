@@ -1,0 +1,37 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "gt",
+          "args": [
+            {
+              "count": {
+                "zone": "field",
+                "side": "self",
+                "type": "follower",
+                "trait": "アクアフォース",
+                "other": true
+              }
+            },
+            0
+          ]
+        },
+        "then": {
+          "op": "modify",
+          "subjects": "self",
+          "keywords": [
+            "rush",
+            "assail"
+          ]
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+cards:
+  CP03-011:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: アクアフォース
+                    who: self
+                    zone: field
+                then:
+                  - grant:
+                      keywords:
+                        - rush
+                        - assail
+                      "on": this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
