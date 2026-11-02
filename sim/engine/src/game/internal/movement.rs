@@ -631,7 +631,8 @@ impl Game {
         {
             if members.len() == 1
                 && incoming == 1
-                && (matches!(objects,
+                && (matches!(objects, Selector::Bound { .. })
+                    || matches!(objects,
                 Selector::Objects { objects } if matches!(objects.as_slice(),
                     [ObjectOperand::FollowEventMove { .. } | ObjectOperand::SourceHolder {}]))
                     || members
