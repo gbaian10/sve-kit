@@ -1,0 +1,63 @@
+cards:
+  ECP02-SP01:
+    abilities:
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  kind: follower
+                  name_contains: アナスタシア
+                  who: self
+                  zone: deck
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                "on":
+                  follow: searched
+                until: turn
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - lesson: 1
+              - act_self: true
+          do:
+            - act: enemy
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    "on": affected
+                    what: stand
+                "on": enemy
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
