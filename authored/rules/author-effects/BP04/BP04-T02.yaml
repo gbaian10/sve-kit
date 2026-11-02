@@ -1,0 +1,30 @@
+cards:
+  BP04-T02:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: 1
+                on:
+                  kind: follower
+                  other: true
+                  trait: ゴブリン
+                  who: self
+                  zone: field
+                power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+    token:
+      name: ゴブリンキング
+      template: true
+format: 2
+kind: author_effect_set

@@ -1,0 +1,54 @@
+cards:
+  BP04-044:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: ウィッチ
+                  in: seen
+                  kind: follower
+                upto: 1
+            - move:
+                ref: picked
+                result: to_hand
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: to_hand
+                      view: before
+                  in: seen
+                to: deck
+            - if:
+                cond:
+                  spellchain: 10
+                then:
+                  - pp:
+                      delta: 1
+                      who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

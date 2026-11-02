@@ -1,0 +1,18 @@
+cards:
+  BP04-083:
+    abilities:
+      - admission: light
+        line: 1
+        use: nightmare_field_rush.v1
+      - admission: light
+        line: 2
+        use: hector_necro_revival.v1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
