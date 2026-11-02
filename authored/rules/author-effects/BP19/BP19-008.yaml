@@ -1,0 +1,40 @@
+cards:
+  BP19-008:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      who: self
+                      zone: deck
+                      kind: follower
+                      name_contains: オーキス
+                      orig_cost_le: 3
+                  - n: 1
+                    sel:
+                      who: self
+                      zone: deck
+                      kind: follower
+                      name_contains: ツヴァイ
+                      orig_cost_le: 3
+                to: field
+            - create:
+                n: 2
+                to: ex
+                token: 操り人形
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP08-T09
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

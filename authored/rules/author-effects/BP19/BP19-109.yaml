@@ -1,0 +1,32 @@
+cards:
+  BP19-109:
+    abilities:
+      - line: 1
+        scope: 1
+        fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+      - line: 1
+        scope: 2
+        lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ホーリータイガー
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP01-T17
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,32 @@
+cards:
+  BP19-101:
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - life:
+                delta: 1
+                who: self
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  who: self
+                  zone: deck
+                  name: 結盟の咎人・エルラーデ
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-02"
+format: 2
+kind: author_effect_set
