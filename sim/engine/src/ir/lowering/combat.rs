@@ -65,6 +65,7 @@ pub(super) fn attack(
         return Err(unsupported(path));
     }
     let subject_filter = entry.sel.as_ref().map(|subject| ast::MovementSubject {
+        orig_cost_eq: None,
         class: subject.class.clone(),
         kind: subject.kind.clone(),
         trait_id: subject.trait_id.clone(),
@@ -82,7 +83,9 @@ pub(super) fn attack(
             entry.reference.is_some(),
             subject_filter.as_ref(),
             false,
-        ),
+            path,
+            false,
+        )?,
         own_turn: entry
             .during
             .as_ref()
@@ -164,7 +167,9 @@ pub(super) fn dealt(
                 entry.reference.is_some(),
                 entry.sel.as_ref(),
                 false,
-            )),
+                path,
+                false,
+            )?),
             recipient: entry.recipient.as_ref().map(recipient),
             kind: entry.kind.as_ref().map(kind),
             own_turn: entry

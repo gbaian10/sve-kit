@@ -1,9 +1,9 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
-use crate::ir::LimitSpec;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
+use crate::ir::{LimitSpec, Requirements};
 
-use super::super::source::{SourceInformation, SourceSnapshot};
+use super::super::source::{EventObject, SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
 use super::{
     Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Execution, Game, Located, PlayerId,
@@ -55,6 +55,7 @@ pub(super) struct PendingOccurrence {
     source: RuntimeAbilitySource,
     ability: Located<Ability>,
     information: SourceInformation,
+    subject_information: Option<SourceSnapshot>,
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
     leave_after: Option<ObjectRef>,
@@ -201,12 +202,13 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
         let (card, _) = self.internal_effective_print(holder)?;
-        Ok(PendingOccurrence {
+        let mut pending = PendingOccurrence {
             id: self.card_runtime.next_pending,
             holder: holder.into(),
             source,
             ability,
             information,
+            subject_information: None,
             header,
             leave,
             leave_after: None,
@@ -224,7 +226,11 @@ impl Game {
             .map_err(invalid)?
             .checked_add(1)
             .ok_or_else(|| invalid("source position overflow"))?,
-        })
+        };
+        if pending.leave.is_some() {
+            pending.capture_subject_information(self)?;
+        }
+        Ok(pending)
     }
 
     fn departure_cause(&mut self, id: &str, frame: &Frame) -> Result<Cause> {
@@ -657,6 +663,33 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    pub(super) fn capture_subject_information(&mut self, game: &Game) -> Result<()> {
+        let Some(body) = &self.ability.node.body else {
+            return Ok(());
+        };
+        let requirements = Requirements::derive_program(&Located {
+            node: body.clone(),
+            source: self.ability.source.clone(),
+        });
+        if !requirements
+            .required
+            .iter()
+            .any(|required| required.capability.code == "value.unique-name")
+        {
+            return Ok(());
+        }
+        let event = match (&self.timing, self.leave) {
+            (Some(EventPayload::LeaveField { event }), _) => *event,
+            (_, Some(event)) => event,
+            _ => return Err(unsupported("copied triggering name requires a departure")),
+        };
+        self.subject_information = Some(
+            game.information_snapshot(event.object_before)?
+                .at(event.lki.snapshot),
+        );
+        Ok(())
+    }
+
     fn bind_event_object(&self, execution: &mut Execution) -> Result<()> {
         use crate::ir::events::subject::SubjectFields;
         let Some(trigger) = &self.ability.node.trigger else {
@@ -682,7 +715,11 @@ impl PendingOccurrence {
         {
             execution.attack_event = Some((binding, *event));
         }
-        execution.event_object = Some((fields.object(), object));
+        execution.event_object = Some(EventObject {
+            expression: fields.object(),
+            reference: object,
+            information: self.subject_information.clone(),
+        });
         Ok(())
     }
 

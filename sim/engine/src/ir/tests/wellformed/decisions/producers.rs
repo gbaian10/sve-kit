@@ -40,8 +40,9 @@ fn token(id: u64, scope: u64) -> Located<Node> {
     instruction(
         Action::Token {
             tokens: vec![TokenSpec {
-                template: TokenTemplateId("synthetic-fairy".into()),
-                name: Expr::Literal(CardName("フェアリー".into())),
+                template: TokenTemplate::Fixed {
+                    template: TokenTemplateId("synthetic-fairy".into()),
+                },
                 count: Expr::Literal(Nat(3)),
             }],
             destination: TokenDestination::Single {

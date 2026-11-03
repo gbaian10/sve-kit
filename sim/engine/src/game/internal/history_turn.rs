@@ -237,6 +237,7 @@ pub(super) fn subjects(
             .map(CardName)
             .collect::<Vec<_>>();
         let information = SubjectInformation {
+            original_cost: None,
             kind,
             class: Some(&class),
             traits: &traits,

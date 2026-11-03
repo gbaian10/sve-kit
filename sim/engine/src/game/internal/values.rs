@@ -169,8 +169,8 @@ impl Execution {
                 Expr::Frozen(_) => self
                     .event_object
                     .as_ref()
-                    .filter(|(expression, _)| expression == value.as_ref())
-                    .map(|(_, saved)| *saved)
+                    .filter(|subject| &subject.expression == value.as_ref())
+                    .map(|subject| subject.reference)
                     .ok_or_else(|| unsupported("missing triggering object authority")),
                 _ => Err(unsupported("object expression")),
             },
@@ -481,6 +481,9 @@ impl Execution {
                 into.binding.key(),
                 Slot::Boolean(self.boolean(game, value)?),
             ),
+            Capture::Name { value, into, .. } => {
+                (into.binding.key(), Slot::Name(self.name(game, value)?))
+            }
             Capture::Player { value, into, .. } => (
                 into.binding.key(),
                 Slot::Player(self.player_value(game, value)?),

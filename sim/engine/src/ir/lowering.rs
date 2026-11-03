@@ -867,6 +867,10 @@ fn lowered_trigger(
     })
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "The closed event mapping shares one subject binding allocator."
+)]
 fn lowered_subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
@@ -900,7 +904,9 @@ fn lowered_subscription(
                     .during
                     .as_ref()
                     .is_some_and(|during| matches!(during.turn, ast::SelfPlayer::Controller)),
-            );
+                path,
+                false,
+            )?;
             if subject
                 .class
                 .as_ref()
@@ -969,7 +975,9 @@ fn lowered_subscription(
                     entry.reference.is_some(),
                     entry.sel.as_ref(),
                     entry.during.is_some(),
-                )
+                    path,
+                    false,
+                )?
                 .predicate(SubjectFields::Entry(event)),
             })
         }
@@ -998,7 +1006,9 @@ fn lowered_change(
                         entry.reference.is_some(),
                         entry.sel.as_ref(),
                         false,
-                    ),
+                        path,
+                        false,
+                    )?,
                     after: if matches!(on, ast::PhaseSubscription::Acted(_)) {
                         super::Posture::Acted
                     } else {

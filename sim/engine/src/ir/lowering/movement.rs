@@ -3,6 +3,10 @@ use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{CardKind, CardName, ClassId, TraitId};
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "The closed movement event mapping keeps its subject filters together."
+)]
 pub(super) fn subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
@@ -25,7 +29,9 @@ pub(super) fn subscription(
                     entry.reference.is_some(),
                     entry.sel.as_ref(),
                     entry.during.is_some(),
-                )
+                    path,
+                    false,
+                )?
                 .predicate(match entry.to {
                     ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
                     ast::DepartureDestination::Hand => SubjectFields::Hand(event),
@@ -51,7 +57,9 @@ pub(super) fn subscription(
                     entry.reference.is_some(),
                     entry.sel.as_ref(),
                     entry.during.is_some(),
-                )
+                    path,
+                    false,
+                )?
                 .predicate(SubjectFields::Ex(event)),
             })
         }
@@ -67,7 +75,9 @@ pub(super) fn subscription(
                     entry.reference.is_some(),
                     entry.sel.as_ref(),
                     entry.during.is_some(),
-                )
+                    path,
+                    true,
+                )?
                 .predicate(SubjectFields::Leave(event)),
             })
         }
@@ -90,7 +100,9 @@ pub(super) fn subscription(
                     entry.reference.is_some(),
                     entry.sel.as_ref(),
                     entry.during.is_some(),
-                )
+                    path,
+                    false,
+                )?
                 .predicate(SubjectFields::Destroy(event)),
             })
         }
@@ -115,8 +127,18 @@ pub(super) fn movement_filter(
     itself: bool,
     subject: Option<&ast::MovementSubject>,
     own_turn: bool,
-) -> SubjectFilter {
-    SubjectFilter {
+    path: &str,
+    allow_original_cost: bool,
+) -> Result<SubjectFilter, LoweringError> {
+    let original_cost = subject.and_then(|sel| sel.orig_cost_eq);
+    if original_cost == Some(0) || (original_cost.is_some() && !allow_original_cost) {
+        return Err(unsupported(path));
+    }
+    Ok(SubjectFilter {
+        original_cost: original_cost
+            .map(i64::try_from)
+            .transpose()
+            .map_err(|_overflow| unsupported(path))?,
         own,
         itself: if itself {
             Some(true)
@@ -145,5 +167,5 @@ pub(super) fn movement_filter(
             .map(|class| ClassId(class.clone())),
         token: subject.and_then(|sel| sel.token.or_else(|| sel.not_token.map(|value| !value))),
         own_turn,
-    }
+    })
 }

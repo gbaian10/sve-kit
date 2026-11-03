@@ -120,8 +120,9 @@ fn bp17_t09_created_on_field_chooses_ward_then_draws() {
     ]);
     let action = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("エスカマリの助言者".into()),
-            name: Expr::Literal(CardName("エスカマリの助言者".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("エスカマリの助言者".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

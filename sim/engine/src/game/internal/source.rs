@@ -1,9 +1,10 @@
 //! Source information belongs to the checked ability execution, never to a caller's snapshot.
 
-use super::{Execution, Game, Result, invalid, unsupported};
+use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::ir::{
-    CardName, CharacteristicView, CounterKind, Nat, NumberRead, ObjectRef, ObjectView, Requirement,
-    Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat,
+    CardName, CharacteristicView, CounterKind, Expr, LkiReason, NameOperation, Nat, NumberRead,
+    ObjectRef, ObjectView, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView,
+    SnapshotId, Stat,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -22,6 +23,13 @@ pub(super) struct SourceSnapshot {
     effective: [i64; 3],
     names: Vec<CardName>,
     counters: BTreeMap<String, Nat>,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct EventObject {
+    pub(super) expression: Expr<ObjectRef>,
+    pub(super) reference: ObjectRef,
+    pub(super) information: Option<SourceSnapshot>,
 }
 
 /// Original is a private read elsewhere; only a checked source's own number read is exempt.
@@ -92,6 +100,54 @@ impl Execution {
         let snapshot = self.source_snapshot(game)?;
         let key = game.catalog.keyword_id(&kind.0);
         Ok(snapshot.counters.get(&key).copied().unwrap_or(Nat(0)))
+    }
+
+    pub(super) fn name(&self, game: &Game, value: &Expr<CardName>) -> Result<CardName> {
+        match value {
+            Expr::Literal(name) => Ok(name.clone()),
+            Expr::Captured(reference) => match self.slots.get(&reference.binding.key()) {
+                Some(Slot::Name(name)) => Ok(name.clone()),
+                _ => Err(invalid("missing captured name")),
+            },
+            Expr::Compute(operation) => {
+                let NameOperation::UniqueName { object } = operation.as_ref();
+                let names = match object {
+                    ObjectView::Selected { selection } => {
+                        let reference = self.selected_object(game, *selection)?;
+                        let id = self.object_id(reference)?;
+                        if game.object(id)?.generation != reference.generation.0 {
+                            return Err(invalid("stale selected name"));
+                        }
+                        game.card_names(id)?
+                            .into_iter()
+                            .map(CardName)
+                            .collect::<Vec<_>>()
+                    }
+                    ObjectView::LastKnown {
+                        object,
+                        reason: LkiReason::ZoneExit,
+                    } => {
+                        let reference = self.object(game, object)?;
+                        let information = self
+                            .event_object
+                            .as_ref()
+                            .filter(|subject| subject.reference == reference)
+                            .and_then(|subject| subject.information.as_ref())
+                            .ok_or_else(|| invalid("missing triggering subject information"))?;
+                        if information.view.object != reference {
+                            return Err(invalid("foreign triggering subject information"));
+                        }
+                        information.names.clone()
+                    }
+                    _ => return Err(unsupported("name information view")),
+                };
+                match names.as_slice() {
+                    [name] => Ok(name.clone()),
+                    _ => Err(unsupported("a copied token requires one name")),
+                }
+            }
+            _ => Err(unsupported("name value")),
+        }
     }
 
     pub(super) fn source_names(&self, game: &Game) -> Result<Vec<CardName>> {
@@ -255,6 +311,10 @@ impl SourceInformation {
 }
 
 impl SourceSnapshot {
+    pub(super) const fn original_cost(&self) -> i64 {
+        self.original[0]
+    }
+
     pub(super) const fn at(mut self, snapshot: SnapshotId) -> Self {
         self.view.snapshot = snapshot;
         self

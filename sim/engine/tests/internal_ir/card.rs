@@ -709,3 +709,6 @@ mod filtered_mill;
 
 #[path = "card/quick_hand.rs"]
 mod quick_hand;
+
+#[path = "card/same_name.rs"]
+mod same_name;

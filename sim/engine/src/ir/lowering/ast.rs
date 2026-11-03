@@ -391,17 +391,19 @@ pub(super) struct Create {
 }
 
 #[derive(Deserialize)]
-#[serde(untagged)]
+#[serde(untagged, deny_unknown_fields)]
 pub(super) enum CreateToken {
     One(String),
     Many(Vec<String>),
+    SameName { same_name_as: String },
 }
 
 impl CreateToken {
-    pub(super) fn names(&self) -> &[String] {
+    pub(super) fn names(&self) -> Option<&[String]> {
         match self {
-            Self::One(name) => from_ref(name),
-            Self::Many(names) => names,
+            Self::One(name) => Some(from_ref(name)),
+            Self::Many(names) => Some(names),
+            Self::SameName { .. } => None,
         }
     }
 }
@@ -2319,6 +2321,7 @@ pub(super) struct ExSubscription {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
+    pub orig_cost_eq: Option<u64>,
     pub class: Option<String>,
     pub kind: Option<SearchKind>,
     #[serde(rename = "trait")]

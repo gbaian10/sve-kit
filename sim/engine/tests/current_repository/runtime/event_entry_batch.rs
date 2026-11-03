@@ -33,8 +33,9 @@ fn material_objects() -> Selector {
 fn create_token(name: &str) -> Action {
     Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId(name.into()),
-            name: Expr::Literal(CardName(name.into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId(name.into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

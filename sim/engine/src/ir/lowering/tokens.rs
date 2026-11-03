@@ -1,11 +1,13 @@
 use super::{
     Action, Binding, BodyContext, Expr, LoweringError, Nat, PlayerRef, ZoneKind, ast, unsupported,
 };
+use crate::ir::events::subject::SubjectFields;
 use crate::ir::{
-    AbilitySource, CardName, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
-    NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView, PlayerOrder,
-    PlayerRead, PlayerRelation, PlayerSet, PlayerStage, Posture, Predicate, Role, Selector,
-    SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec, TokenTemplateId, ZoneRef,
+    AbilitySource, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
+    NameOperation, NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView,
+    PlayerOrder, PlayerRead, PlayerRelation, PlayerSet, PlayerStage, Posture, Predicate, Role,
+    Selector, SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec, TokenTemplate,
+    TokenTemplateId, ZoneRef,
 };
 
 #[expect(
@@ -39,20 +41,48 @@ impl BodyContext<'_> {
             self.ex_outputs
                 .insert(name.clone(), Selector::Bound { reference: output });
         }
-        let names = value.token.names();
-        if names.is_empty() || names.iter().any(String::is_empty) {
-            return Err(unsupported(path));
-        }
-        let tokens = names
-            .iter()
-            .map(|name| {
-                Ok(TokenSpec {
-                    template: TokenTemplateId(name.clone()),
-                    name: Expr::Literal(CardName(name.clone())),
-                    count: self.token_count(value.n.as_ref(), path)?,
+        let tokens = if let ast::CreateToken::SameName { same_name_as } = &value.token {
+            if !matches!(value.n, None | Some(ast::TokenCount::Fixed(1)))
+                || value.by.as_deref().is_some_and(|who| who != "self")
+            {
+                return Err(unsupported(path));
+            }
+            let name = if same_name_as == "it" {
+                let Some(SubjectFields::Leave(event)) = self.subject_event else {
+                    return Err(unsupported(path));
+                };
+                Expr::Compute(Box::new(NameOperation::UniqueName {
+                    object: ObjectView::LastKnown {
+                        object: Box::new(ObjectOperand::FromExpression {
+                            value: Box::new(SubjectFields::Leave(event).object()),
+                        }),
+                        reason: LkiReason::ZoneExit,
+                    },
+                }))
+            } else {
+                self.selected_name(same_name_as, path)?
+            };
+            vec![TokenSpec {
+                template: TokenTemplate::Name { name },
+                count: Expr::Literal(Nat(1)),
+            }]
+        } else {
+            let names = value.token.names().ok_or_else(|| unsupported(path))?;
+            if names.is_empty() || names.iter().any(String::is_empty) {
+                return Err(unsupported(path));
+            }
+            names
+                .iter()
+                .map(|name| {
+                    Ok(TokenSpec {
+                        template: TokenTemplate::Fixed {
+                            template: TokenTemplateId(name.clone()),
+                        },
+                        count: self.token_count(value.n.as_ref(), path)?,
+                    })
                 })
-            })
-            .collect::<Result<Vec<_>, LoweringError>>()?;
+                .collect::<Result<Vec<_>, LoweringError>>()?
+        };
         Ok(Action::Token {
             tokens,
             destination: TokenDestination::Single {

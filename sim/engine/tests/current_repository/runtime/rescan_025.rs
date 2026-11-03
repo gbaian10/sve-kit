@@ -80,8 +80,9 @@ fn bp17_t10_creation_heals_then_rush_attacks_only_a_follower() {
         json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
     let action = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("エスカマリの巡回者".into()),
-            name: Expr::Literal(CardName("エスカマリの巡回者".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("エスカマリの巡回者".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

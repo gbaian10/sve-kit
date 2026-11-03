@@ -13,8 +13,9 @@ use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_nam
 use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
 use crate::ir::{
-    Action, Control, Expr, Instruction, Located, Nat, Node, PlayerRef, Posture, Program, ReceiptId,
-    Requirement, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, ZoneKind, ZoneRef,
+    Action, CardName, Control, Expr, Instruction, LkiReason, Located, NameOperation, Nat, Node,
+    ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture, Program, ReceiptId, Requirement,
+    TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate, ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -58,16 +59,40 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     }
     tokens
         .iter()
-        .all(|token| match &token.name {
-            Expr::Literal(name) => {
-                name.0 == token.template.0
-                    && (matches!(token.count, Expr::Literal(_))
-                        || dynamic::projection(&token.count).is_some()
-                        || dynamic::zone_count(&token.count).is_some())
+        .all(|token| match &token.template {
+            TokenTemplate::Fixed { .. } => {
+                matches!(token.count, Expr::Literal(_))
+                    || dynamic::projection(&token.count).is_some()
+                    || dynamic::zone_count(&token.count).is_some()
             }
-            _ => false,
+            TokenTemplate::Name { name } => {
+                tokens.len() == 1
+                    && token.count == Expr::Literal(Nat(1))
+                    && zone.player == (PlayerRef::Controller {})
+                    && initial_state.is_none()
+                    && (matches!(name, Expr::Captured(_)) || departure_name(name))
+            }
         })
         .then_some((tokens, zone))
+}
+
+pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
+    let Expr::Compute(operation) = name else {
+        return false;
+    };
+    let NameOperation::UniqueName {
+        object:
+            ObjectView::LastKnown {
+                object,
+                reason: LkiReason::ZoneExit,
+            },
+    } = operation.as_ref()
+    else {
+        return false;
+    };
+    matches!(object.as_ref(), ObjectOperand::FromExpression { value }
+        if matches!(value.as_ref(), Expr::Frozen(frozen)
+            if matches!(frozen.as_ref(), ObjectFrozen::LeaveFieldObjectBefore { .. })))
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -83,7 +108,10 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     check_action(action)?;
     if let Some((tokens, zone)) = specification(action) {
         for token in tokens {
-            check_template(game, &token.template.0, zone.kind)?;
+            let TokenTemplate::Fixed { template } = &token.template else {
+                continue;
+            };
+            check_template(game, &template.0, zone.kind)?;
             if matches!(
                 action,
                 Action::Token {
@@ -91,7 +119,7 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
                     ..
                 }
             ) {
-                let card = game.catalog.token_print(&token.template.0)?;
+                let card = game.catalog.token_print(&template.0)?;
                 let definitions = &game.card_runtime.definitions;
                 let program = definitions
                     .cards
@@ -271,7 +299,12 @@ impl Game {
         let mut requested = Vec::new();
         for token in tokens {
             let count = dynamic::count(execution, self, &token.count)?;
-            let card = self.catalog.token_print(&token.template.0)?;
+            let name = match &token.template {
+                TokenTemplate::Fixed { template } => template.0.clone(),
+                TokenTemplate::Name { name } => execution.name(self, name)?.0,
+            };
+            check_template(self, &name, destination)?;
+            let card = self.catalog.token_print(&name)?;
             if !self.card_runtime.is_loaded(&card) {
                 return Err(unsupported("created token requires an admitted whole card"));
             }
@@ -412,6 +445,7 @@ impl Game {
 pub(super) struct Paths {
     stages: Vec<String>,
     counts: Vec<String>,
+    names: Vec<String>,
 }
 
 pub(super) fn paths(program: &Program) -> Paths {
@@ -427,6 +461,12 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
             Node::Instruction { instruction } => {
                 if let Some((tokens, _)) = specification(&instruction.action) {
                     for (token_index, token) in tokens.iter().enumerate() {
+                        if matches!(&token.template, TokenTemplate::Name { name } if departure_name(name))
+                        {
+                            accepted.names.push(format!(
+                                "{path}/instruction/action/tokens/{token_index}/template/name"
+                            ));
+                        }
                         if dynamic::projection(&token.count).is_some() {
                             accepted.counts.push(format!(
                                 "{path}/instruction/action/tokens/{token_index}/count"
@@ -480,25 +520,25 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
 }
 
 pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
-    let allowed = match requirement.capability.code {
+    let (allowed, more): (&[String], &[String]) = match requirement.capability.code {
         "shape.Control.EachPlayer"
         | "control.each-player"
         | "shape.PlayerStage"
         | "internal.StageMode.NonChoiceSimultaneous"
         | "shape.StageMode.NonChoiceSimultaneous"
         | "internal.PlayerOrder.TurnPlayerFirst"
-        | "shape.PlayerRef.Bound" => &paths.stages,
+        | "shape.PlayerRef.Bound" => (&paths.stages, &[]),
+        "shape.ObjectView.LastKnown" | "reference.lki" | "internal.LkiReason.ZoneExit" => {
+            (&paths.counts, &paths.names)
+        }
         "selector.filter"
         | "shape.Selector.Filter"
-        | "shape.ObjectView.LastKnown"
-        | "reference.lki"
-        | "internal.LkiReason.ZoneExit"
         | "shape.Predicate.PlayerEquals"
-        | "predicate.player-equals" => &paths.counts,
+        | "predicate.player-equals" => (&paths.counts, &[]),
         _ => return false,
     };
     requirement.locations.iter().all(|location| {
-        allowed.iter().any(|prefix| {
+        allowed.iter().chain(more).any(|prefix| {
             location.ir_path == *prefix
                 || location
                     .ir_path

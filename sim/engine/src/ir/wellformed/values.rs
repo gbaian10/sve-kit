@@ -11,9 +11,9 @@ use crate::ir::{
     EvolutionRead, ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
-    CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
-    Visibility,
+    CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
+    MovementReceipt, NameOperation, NamesRead, ObjectFrozen, ReceiptLocation, RuntimeObjectView,
+    TraitId, TraitsRead, Visibility,
 };
 
 use core::any::TypeId;
@@ -413,6 +413,31 @@ impl Checker {
             }
             Expr::Frozen(_) => self.projection(traits),
             Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
+        }
+    }
+
+    pub(super) fn name(&self, expression: &Expr<CardName>) -> Checked {
+        match expression {
+            Expr::Literal(_) => Ok(()),
+            Expr::Captured(reference) => {
+                self.reference(reference.binding, BindingKind::Capture)?;
+                self.visible(self.env.access.get(&reference.binding.key()))
+            }
+            Expr::Compute(operation) => match operation.as_ref() {
+                NameOperation::UniqueName {
+                    object:
+                        ObjectView::LastKnown {
+                            object,
+                            reason: LkiReason::ZoneExit,
+                        },
+                } if self.capture_time.is_none()
+                    && matches!(object.as_ref(), ObjectOperand::FromExpression { value } if matches!(value.as_ref(), Expr::Frozen(frozen) if matches!(frozen.as_ref(), ObjectFrozen::LeaveFieldObjectBefore { .. }))) =>
+                {
+                    self.object(object)
+                }
+                NameOperation::UniqueName { object } => self.information_view(object),
+            },
+            Expr::Frozen(_) | Expr::Live(_) | Expr::Bound(_) => self.reject(),
         }
     }
 

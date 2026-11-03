@@ -576,8 +576,9 @@ fn after_a_possible_flip_no_new_observation_restores_object_proof() {
     let token = instruction(
         Action::Token {
             tokens: vec![TokenSpec {
-                template: TokenTemplateId("synthetic-fairy".into()),
-                name: Expr::Literal(CardName("フェアリー".into())),
+                template: TokenTemplate::Fixed {
+                    template: TokenTemplateId("synthetic-fairy".into()),
+                },
                 count: Expr::Literal(Nat(1)),
             }],
             destination: TokenDestination::Single {

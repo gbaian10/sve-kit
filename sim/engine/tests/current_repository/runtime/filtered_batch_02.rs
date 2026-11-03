@@ -293,8 +293,9 @@ fn filtered_batch_02_bp19_p34_checks_printed_effect() {
             &initial,
             Action::Token {
                 tokens: vec![TokenSpec {
-                    template: TokenTemplateId("多頭の実験体".into()),
-                    name: Expr::Literal(CardName("多頭の実験体".into())),
+                    template: TokenTemplate::Fixed {
+                        template: TokenTemplateId("多頭の実験体".into()),
+                    },
                     count: Expr::Literal(Nat(1)),
                 }],
                 destination: TokenDestination::Single {

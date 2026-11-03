@@ -887,6 +887,24 @@ impl Checker {
                 self.save_access(into.binding.key(), access);
                 Ok(())
             }
+            Capture::Name {
+                at: at @ CaptureTime::AtSelection { .. },
+                value: Expr::Compute(operation),
+                into,
+            } if matches!(
+                operation.as_ref(),
+                super::NameOperation::UniqueName {
+                    object: ObjectView::Selected { .. }
+                }
+            ) =>
+            {
+                let value = &Expr::Compute(operation.clone());
+                let access = self.capture_access(*at, |checker| checker.name(value));
+                self.frozen(*at, |checker| checker.name(value))?;
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
+            }
             Capture::Player { at, value, into } => {
                 let access = self.capture_access(*at, |checker| checker.player_value(value));
                 self.frozen(*at, |checker| checker.player_value(value))?;
