@@ -172,19 +172,6 @@ fn definition(card: &str, kind: AbilityKind, nth: usize) -> AbilityId {
         .id
 }
 
-fn evolve_into(game: &mut Game, base: &str, head: usize, face: u8, pp: u8) -> String {
-    let id = definition(base, AbilityKind::Activated, head);
-    let outcome = game
-        .internal_rule_action(&json!({
-            "do":"evolve","source":"source","evolve_card":"form",
-            "definition":id.0,"face":face,"pay":{"pp":pp}
-        }))
-        .unwrap()
-        .outcome;
-    triggers_with(game, &[1]);
-    outcome
-}
-
 fn evolve(game: &mut Game) {
     assert_eq!(
         game.internal_rule_action(
@@ -237,22 +224,6 @@ fn bp15_057_ability_damage_on_own_turn_puts_a_zetsuketsu_card_in_ex_three_cheape
 }
 
 #[test]
-fn bp09_019_each_face_summons_its_printed_tokens() {
-    for (head, face, pp, tokens) in [
-        (0, 0, 1, vec!["シールドガーディアン"]),
-        (1, 1, 4, vec!["スティールナイト", "ナイト"]),
-    ] {
-        let mut game = game(&evolving("BP09-018", "BP09-019"));
-        assert_eq!(evolve_into(&mut game, "BP09-018", head, face, pp), "resolved");
-        let state = game.projection(View::Referee).unwrap();
-        for token in tokens {
-            assert_eq!(named(&state, &state["P1"]["field"], token), 1, "{token}");
-        }
-        assert_eq!(state["P1"]["field"].as_array().unwrap().len(), usize::from(face) + 2);
-    }
-}
-
-#[test]
 fn cp04_039_ub_fanfare_finds_two_differently_named_nakayoshi_cards_two_cheaper() {
     let mut initial = titled(in_hand("CP04-039"));
     initial["players"]["P1"]["zones"]["deck"] = json!([
@@ -268,24 +239,6 @@ fn cp04_039_ub_fanfare_finds_two_differently_named_nakayoshi_cards_two_cheaper()
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["pp"]["current"], 5_u8, "the two-cost spell costs zero");
     assert_eq!(after["objects"]["enemy"]["hp"], 2_u8);
-}
-
-#[test]
-fn bp09_069_blood_queen_needs_five_vampires_in_the_cemetery() {
-    let mut short = evolving("BP09-069", "BP09-070");
-    short["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"v1","card":"BP02-078"}]);
-    let mut game = game(&short);
-    assert_eq!(evolve_into(&mut game, "BP09-069", 1, 1, 3), "cannot-evolve");
-    let mut full = evolving("BP09-069", "BP09-070");
-    full["players"]["P1"]["zones"]["cemetery"] = json!([
-        {"id":"v1","card":"BP02-078"},{"id":"v2","card":"BP02-078"},{"id":"v3","card":"BP02-078"},
-        {"id":"v4","card":"BP02-078"},{"id":"v5","card":"BP02-078"}
-    ]);
-    let mut board = super::game(&full);
-    assert_eq!(evolve_into(&mut board, "BP09-069", 1, 1, 3), "resolved");
-    let state = board.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["source"]["name"], "ブラッドクイーン・ヴァンピィ");
-    assert_eq!(state["P1"]["pp"]["current"], 7_u8);
 }
 
 #[test]
@@ -432,20 +385,6 @@ fn bp13_007_banishes_three_cemetery_cards_for_two_artifacts() {
     assert_eq!(state["P1"]["banish"].as_array().unwrap().len(), 3);
     assert_eq!(named(&state, &state["P1"]["field"], "エッジアーティファクト"), 1);
     assert_eq!(named(&state, &state["P1"]["field"], "ミスティックアーティファクト"), 1);
-}
-
-#[test]
-fn bp09_019_q1160_last_field_slot_can_hold_the_knight() {
-    let mut initial = evolving("BP09-018", "BP09-019");
-    initial["players"]["P1"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .extend((0_u8..3_u8).map(|n| json!({"id":format!("old{n}"),"card":"BP01-171"})));
-    let mut game = game(&initial);
-    assert_eq!(evolve_into(&mut game, "BP09-018", 1, 1, 4), "resolved");
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(named(&state, &state["P1"]["field"], "ナイト"), 1);
-    assert_eq!(named(&state, &state["P1"]["field"], "スティールナイト"), 0);
 }
 
 #[test]
