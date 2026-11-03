@@ -9,6 +9,8 @@
 
 只有一種卡片 YAML。`A.*` 是DSL 構造的穩定 ID，動作為 `A.act.<鍵>`，`each_player / foreach / repeat / instead / simultaneous` 為 `A.comb.<鍵>`；`A.if / A.pay / A.optional / A.choice / A.either` 不加 comb 前綴。讀值與條件是 `A.expr / A.cond`，效果子鍵統一 `A.effect`。巨集在載入時展開成有型別 IR，不能從物件所在公開區域猜決定時點。
 
+`static.effects` 的項目使用 `A.static-effect`：既有 `A.effect`，或只含自身能力防傷的靜態專用 `if`。此條件式形式僅用於印刷 `static`，不提供施加式或授予式移動免疫；完整准入子集見[效果作者工具](authoring-tools.md)。
+
 `Expr` 是純表達式，`Cond` 是布林表達式，`Sel` 是有型別集合或保序視圖，`Ref` 是物件／目標引用，`Steps` 是有序步驟列表。`n` 精確數量、`upto` 0..N、`any: true` 0..候選上限，三者互斥；只有チョイス的 `upto` 依 CR 5.18.2.1 為 1..N。`may` 表示可以拒絕整項，與選零個分開。
 
 任何構造的 mapping 鍵序都沒有語義；需要順序的語義一律用陣列承載。陣列是否具有語義順序由各構造定義，不能只因使用陣列就推定逐項執行。

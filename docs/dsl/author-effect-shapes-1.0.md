@@ -157,7 +157,7 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 | cannot.attack | apply BP05-061 | 對手從者或領袖；BP06-113 的可攻擊判斷尚有缺口 |
 | cannot.choose_target | Aura 提醒文，不是獨立能力 | 合成，不能算直接真例 |
 | cannot.draw | player_effect BP05-006；static BP10-076 | 規則 start 抽牌／非 start；兩種 during |
-| cannot.destroy／banish | static BP02-090；banish 的能力限定有疑義 | destroy 真例；banish:by:ability 合成 |
+| cannot.destroy／banish | 無條件自身 static：destroy 必帶 by: ability；banish 不帶 by；省略 on 等同 this | BP22-061、BP17-092、BP06-022；banish:by:ability 仍不准入 |
 | cannot.stand | static ECP01-053 | 僅自己的規則 start 起身 |
 | cannot.win／lose | static BP05-092 | win:opp／lose:self |
 | cannot.pp_max_increase | player_effect BP05-006 | 省略 who 交父節點 |
