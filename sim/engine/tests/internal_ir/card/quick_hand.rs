@@ -261,3 +261,52 @@ fn additional_quick_hand_payment_rejects_wider_raw_ir_shapes() {
     game.load_internal_card("unit-spell", &ordinary)
         .unwrap_err();
 }
+
+#[test]
+fn quick_additional_payment_does_not_accept_a_grouped_source_and_other_card() {
+    let mut card = raw_program(1, PlayerRelation::SelfPlayer);
+    let payment = &mut card.card_play_costs[0]
+        .node
+        .additional
+        .as_mut()
+        .unwrap()
+        .node;
+    let CostSpec::Ordered { steps } = &mut payment.play.costs else {
+        panic!("ordered additional cost");
+    };
+    let Action::Discard {
+        mode: DiscardMode::Chosen { constraint },
+        ..
+    } = &mut steps[0].instruction.action
+    else {
+        panic!("chosen hand material");
+    };
+    let mut own = constraint.groups[0].clone();
+    let Selector::Zone { binding, .. } = &mut own.selector else {
+        panic!("own hand selector");
+    };
+    *binding = Binding::new(303, ScopeId(303));
+    own.selector = Selector::Intersection {
+        sets: vec![
+            own.selector,
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            },
+        ],
+    };
+    constraint.groups.insert(0, own);
+    constraint.cardinality = Cardinality {
+        minimum: Nat(2),
+        maximum: Some(Nat(2)),
+    };
+    let typed = WellFormedCardProgram::check(card).unwrap();
+    let mut board = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "grouped-quick-reject",
+    )
+    .unwrap();
+    board.load_internal_card("unit-spell", &typed).unwrap_err();
+}

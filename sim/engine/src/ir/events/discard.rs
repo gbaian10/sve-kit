@@ -1,5 +1,5 @@
 //! Discard headers use the committed hand action and its original subject identity.
-use super::timing::opponent;
+use super::timing::{opponent, turn_predicate};
 use crate::ir::{
     Binding, Bool, DiscardEvent, Expr, ObjectFrozen, ObjectRef, PlayerFrozen, PlayerId, PlayerRef,
     Predicate,
@@ -9,6 +9,7 @@ use crate::ir::{
 pub(crate) struct DiscardFilter {
     pub(crate) own: Option<bool>,
     pub(crate) itself: bool,
+    pub(crate) own_turn: bool,
 }
 impl DiscardFilter {
     pub(crate) fn predicate(self, event: Binding<DiscardEvent>) -> Expr<Bool> {
@@ -29,12 +30,23 @@ impl DiscardFilter {
                 right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
             })));
         }
+        if self.own_turn {
+            predicates.push(turn_predicate(true));
+        }
         Expr::Compute(Box::new(Predicate::And { predicates }))
     }
     pub(crate) fn parse(event: Binding<DiscardEvent>, expression: &Expr<Bool>) -> Option<Self> {
         [None, Some(false), Some(true)]
             .into_iter()
-            .flat_map(|own| [false, true].map(|itself| Self { own, itself }))
+            .flat_map(|own| {
+                [false, true].into_iter().flat_map(move |itself| {
+                    [false, true].map(move |own_turn| Self {
+                        own,
+                        itself,
+                        own_turn,
+                    })
+                })
+            })
             .find(|plan| plan.predicate(event) == *expression)
     }
     pub(crate) fn matches(
@@ -43,7 +55,10 @@ impl DiscardFilter {
         card: ObjectRef,
         source: ObjectRef,
         controller: PlayerId,
+        active: PlayerId,
     ) -> bool {
-        self.own.is_none_or(|own| own == (player == controller)) && (!self.itself || card == source)
+        self.own.is_none_or(|own| own == (player == controller))
+            && (!self.itself || card == source)
+            && (!self.own_turn || active == controller)
     }
 }

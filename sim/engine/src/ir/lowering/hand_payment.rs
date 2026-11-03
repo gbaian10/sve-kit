@@ -69,6 +69,52 @@ pub(super) fn lower(
     })
 }
 
+pub(super) fn grouped(
+    allocator: &mut Allocator,
+    material: &ast::HandMaterialGroups,
+    path: &str,
+) -> Result<Action, LoweringError> {
+    let ([
+        ast::HandMaterialGroup::Source { n: 1, .. },
+        ast::HandMaterialGroup::Material(other),
+    ]
+    | [
+        ast::HandMaterialGroup::Material(other),
+        ast::HandMaterialGroup::Source { n: 1, .. },
+    ]) = material.groups.as_slice()
+    else {
+        return Err(unsupported(path));
+    };
+    if other.result.is_some() || other.n != Some(1) || other.upto.is_some() || other.any {
+        return Err(unsupported(path));
+    }
+    let Action::Discard {
+        mode: DiscardMode::Chosen { mut constraint },
+        ..
+    } = lower(allocator, other, path)?
+    else {
+        return Err(unsupported(path));
+    };
+    constraint.groups.insert(
+        0,
+        SelectionGroup {
+            selector: source(allocator, path)?,
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+        },
+    );
+    constraint.cardinality = Cardinality {
+        minimum: Nat(2),
+        maximum: Some(Nat(2)),
+    };
+    Ok(Action::Discard {
+        player: PlayerRef::Controller {},
+        mode: DiscardMode::Chosen { constraint },
+    })
+}
+
 fn filter(
     query: &ast::HandQuery,
     binding: Binding<ObjectRef>,

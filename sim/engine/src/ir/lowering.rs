@@ -50,8 +50,7 @@ use super::{
     InstructionId, Int, IntOperation, KeywordId, Located, Nat, NatRead, Node, ObjectFrozen,
     ObjectOperand, ObjectView, PaymentReference, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     Program, ReceiptId, RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode,
-    TextQuantifier, TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram,
-    ZoneKind,
+    TextQuantifier, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
 };
 pub use current::{
     CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
@@ -862,7 +861,7 @@ fn lowered_trigger(
             },
             on: TriggerCondition::Event { pattern },
             limit: None,
-            aggregation: TriggerAggregation::PerFact {},
+            aggregation: discard::aggregation(entry.auto.as_ref(), path)?,
         }
     })
 }

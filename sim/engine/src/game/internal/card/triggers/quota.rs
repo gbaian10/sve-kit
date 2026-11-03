@@ -1,8 +1,10 @@
 //! A simultaneous admission commits quota and occurrences only after every controller chooses.
-use super::{Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id};
+use super::{
+    Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id, unsupported,
+};
 use crate::game::internal::{Execution, InputDomain, Wait};
-use crate::ir::{AbilityInstanceId, DecisionId, LimitSpec};
-use alloc::collections::{BTreeMap, VecDeque};
+use crate::ir::{AbilityInstanceId, BatchPolicy, DecisionId, LimitSpec, TriggerAggregation};
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 
 /// One earlier controller's public choice in the same simultaneous admission.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,7 +52,29 @@ impl Game {
         let mut plan = Admission::default();
         let mut limited: BTreeMap<AbilityInstanceId, (LimitSpec, Vec<PendingOccurrence>)> =
             BTreeMap::new();
+        let mut batches = BTreeSet::new();
         for candidate in candidates {
+            if let Some(trigger) = &candidate.ability.node.trigger {
+                match trigger.aggregation {
+                    TriggerAggregation::PerFact {} => {}
+                    TriggerAggregation::PerBatch {
+                        key: BatchPolicy::Instruction {},
+                    } => {
+                        let batch = candidate
+                            .header
+                            .batch
+                            .ok_or_else(|| invalid("missing instruction batch"))?;
+                        if !batches.insert((candidate.source.instance, batch)) {
+                            continue;
+                        }
+                    }
+                    TriggerAggregation::PerBatch {
+                        key: BatchPolicy::Simultaneous { .. },
+                    } => {
+                        return Err(unsupported("simultaneous trigger aggregation"));
+                    }
+                }
+            }
             let limit = candidate
                 .ability
                 .node
