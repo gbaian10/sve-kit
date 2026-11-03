@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-117:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        lastword:
+          cost:
+            steps:
+              - pp: 1
+              - banish:
+                  sel:
+                    who: self
+                    zone:
+                      - field
+                      - ex
+                    name: ナテラの大樹
+                  n: 1
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: エクストリームキャロット
+                n: 1
+                to: field
+            - life:
+                who: self
+                delta: 1
