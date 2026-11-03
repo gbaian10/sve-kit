@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-068:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        covers: [2, 3]
+        spell:
+          optional_cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                class: ドラゴン
+                orig_cost_ge: 7
+              n: 1
+            result: extra
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: extra
+                then:
+                  - damage:
+                      to: enemy
+                      n: 4
+                  - draw:
+                      n: 1
+                else:
+                  - damage:
+                      to: enemy
+                      n: 3
