@@ -1,0 +1,32 @@
+cards:
+  BP10-002:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
