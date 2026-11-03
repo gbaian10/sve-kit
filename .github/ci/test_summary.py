@@ -13,6 +13,8 @@ from typing import cast
 
 EXPECTED_ARGS = 2
 FULL_THRESHOLD = 90
+# python and rust summarise one CI shard; the -coverage kinds gate the merged shards.
+KINDS = ("python", "publish", "web", "rust", "python-coverage", "rust-coverage")
 
 
 @dataclass(frozen=True)
@@ -152,6 +154,77 @@ def failure_section(locations: list[str]) -> list[str]:
     ]
 
 
+def shard_report(path: Path) -> dict[str, int]:
+    """Read one shard's index, shard count, collected and selected test counts."""
+    report = json_object(path)
+    values = {key: report[key] for key in ("index", "total", "collected", "selected")}
+    if not all(type(value) is int and value >= 0 for value in values.values()):
+        msg = "Invalid shard report"
+        raise ValueError(msg)
+    return cast("dict[str, int]", values)
+
+
+def shard_description(folder: Path, ran: int) -> tuple[str, bool]:
+    """Every test this shard selected must have reported a result."""
+    try:
+        report = shard_report(folder / "shard.json")
+    except (OSError, ValueError, TypeError, KeyError):
+        return "Shard counts unavailable; the coverage job will fail.", False
+    complete = ran == report["selected"]
+    return (
+        f"Shard **{report['index']}/{report['total']}**: ran **{ran}** of the "
+        f"**{report['selected']}** tests assigned here ({report['collected']} collected in total)"
+        + ("." if complete else "; **some assigned tests did not report a result**."),
+        complete,
+    )
+
+
+def partition_description(folder: Path) -> tuple[str, bool]:
+    """The shards must be one complete set that ran every collected test exactly once."""
+    reports = [shard_report(path) for path in sorted(folder.glob("shard-*.json"))]
+    if not reports:
+        msg = "No shard reports"
+        raise ValueError(msg)
+    total = reports[0]["total"]
+    collected = reports[0]["collected"]
+    selected = sum(report["selected"] for report in reports)
+    complete = (
+        sorted(report["index"] for report in reports) == list(range(1, total + 1))
+        and all(report["total"] == total for report in reports)
+        and all(report["collected"] == collected for report in reports)
+        and selected == collected
+    )
+    return (
+        f"Shards: **{len(reports)}** of **{total}** · collected **{collected}** · "
+        f"run across shards **{selected}**"
+        + (
+            " (every collected test ran exactly once)."
+            if complete
+            else "; **the shards do not add up to the collected tests**."
+        ),
+        complete,
+    )
+
+
+def combined_summary(kind: str, folder: Path) -> tuple[str, int]:
+    """Check the shard partition and the full coverage gate on the merged data."""
+    component = kind.removesuffix("-coverage")
+    rust = component == "rust"
+    _, minimum = coverage_scope(component)
+    label = "Line" if rust else "Combined line + branch"
+    partition, complete = partition_description(folder)
+    # python-coverage writes coverage.json with `coverage json`, rust_coverage.py with llvm-cov.
+    percent = coverage(folder / "coverage.json", rust=rust)
+    lines = [
+        f"## {component.title()} coverage (all shards)",
+        "",
+        scope_description(component),
+        partition,
+        f"{label} coverage: **{percent:.2f}%**, required **{minimum:g}%**.",
+    ]
+    return "\n".join(lines) + "\n", int(not complete or percent < minimum)
+
+
 def junit_summary(kind: str, folder: Path) -> str:
     """Render counts, timings and safe locations for Python or Web."""
     cases, elapsed = junit(folder / "junit.xml", python=kind in {"python", "publish"})
@@ -173,13 +246,15 @@ def junit_summary(kind: str, folder: Path) -> str:
         lines.append(
             f"Command wall time (including startup/coverage): **{wall:.2f} s**."
         )
-    if kind in {"python", "publish"}:
+    if kind == "publish":
         lines.extend(
             [
                 scope_description(kind),
                 coverage_description(folder, rust=False, kind=kind),
             ]
         )
+    if kind == "python":
+        lines.append(shard_description(folder, len(cases))[0])
     lines.extend(
         failure_section(
             [f"{case.file}::{case.name}" for case in cases if case.state == "failed"]
@@ -217,61 +292,69 @@ def junit_summary(kind: str, folder: Path) -> str:
     return "\n".join(lines) + "\n"
 
 
-def rust_summary(folder: Path) -> str:
-    """Aggregate stable libtest result lines without exposing panic output."""
-    pattern = re.compile(
-        r"^test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; .*?finished in ([0-9.]+)s$",
-        re.MULTILINE,
-    )
+RUST_RESULT = re.compile(
+    r"^test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; .*?finished in ([0-9.]+)s$",
+    re.MULTILINE,
+)
+
+
+def rust_results(folder: Path) -> tuple[str, list[tuple[str, str, str, str]]]:
+    """Return the raw log and its stable libtest result lines (passed, failed, ignored, seconds)."""
     source = (folder / "test.log").read_text(encoding="utf-8")
-    results = pattern.findall(source)
+    results = RUST_RESULT.findall(source)
     if not results:
         msg = "No Rust test result lines"
         raise ValueError(msg)
+    return source, results
+
+
+def ran(kind: str, folder: Path) -> int:
+    """Count every test of this shard that reported a result, including failures and skips."""
+    if kind == "rust":
+        _, results = rust_results(folder)
+        return sum(int(row[0]) + int(row[1]) + int(row[2]) for row in results)
+    return len(junit(folder / "junit.xml", python=True)[0])
+
+
+def rust_summary(folder: Path) -> str:
+    """Aggregate stable libtest result lines without exposing panic output."""
+    source, results = rust_results(folder)
     passed = sum(int(row[0]) for row in results)
     failed = sum(int(row[1]) for row in results)
     skipped = sum(int(row[2]) for row in results)
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
-    coverage_line = (
-        scope_description("rust")
-        + "\n"
-        + coverage_description(folder, rust=True, kind="rust")
-    )
+    shard_line, _ = shard_description(folder, passed + failed + skipped)
     locations = re.findall(
         r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
         source,
         re.MULTILINE,
     )
     failures = "\n".join(failure_section(locations))
-    return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{coverage_line}\n{failures}\n"
+    return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{shard_line}\n{failures}\n"
 
 
 def main(argv: list[str]) -> int:
     """Append safe statistics to the job summary, including an explicit missing-report failure."""
-    if len(argv) != EXPECTED_ARGS or argv[0] not in {
-        "python",
-        "publish",
-        "web",
-        "rust",
-    }:
-        sys.stderr.write(
-            "Usage: test_summary.py python|publish|web|rust REPORT_DIRECTORY\n"
-        )
+    if len(argv) != EXPECTED_ARGS or argv[0] not in KINDS:
+        sys.stderr.write(f"Usage: test_summary.py {'|'.join(KINDS)} REPORT_DIRECTORY\n")
         return 2
     kind, directory = argv
     status = 0
     try:
         folder = Path(directory)
-        summary = (
-            rust_summary(folder) if kind == "rust" else junit_summary(kind, folder)
-        )
-        if kind != "web":
+        if kind.endswith("-coverage"):
+            summary, status = combined_summary(kind, folder)
+        elif kind == "rust":
+            summary = rust_summary(folder)
+        else:
+            summary = junit_summary(kind, folder)
+        if kind in {"python", "rust"}:
+            status = int(not shard_description(folder, ran(kind, folder))[1])
+        if kind == "publish":
             try:
                 _, minimum = coverage_scope(kind)
-                status = int(
-                    coverage(folder / "coverage.json", rust=kind == "rust") < minimum
-                )
+                status = int(coverage(folder / "coverage.json", rust=False) < minimum)
             except (OSError, ValueError, TypeError, KeyError, IndexError):
                 status = 1
     except (OSError, ValueError, TypeError, KeyError, IndexError, ET.ParseError):

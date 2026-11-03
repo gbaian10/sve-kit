@@ -414,16 +414,32 @@ pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI calls the s
 
 ### CI tests and summaries
 
-CI keeps the existing component jobs and the required `ci-ok` gate. Python lint and types
-run through pre-commit; pytest runs once in its own step with `--cov`, the same combined
-line + branch coverage threshold of 90%, `--durations=30` and JUnit. Cargo llvm-cov likewise
-runs directly with its 90% line threshold. Web formatting, lint, types, Vitest, dependency
+CI keeps the existing component jobs and the required `ci-ok` gate. The `python` and `rust`
+jobs run the component's hooks (and the publish tests); the carddb tests and the Rust tests
+run in parallel shards (`python-tests`, `rust-tests`). A shard runs every test whose name
+hashes to it, so each collected test runs in exactly one shard and new tests need no setup:
+pytest selects with `--shard=I/N` (`carddb/tests/support/sharding.py`), and
+`.github/ci/rust_tests.py --shard=I/N` lists the whole workspace and passes this shard's names
+to libtest with `--exact`. Each shard records how many tests it collected and selected; its
+summary fails if any selected test did not report a result. `python-coverage` and
+`rust-coverage` then check that the shards together ran every collected test exactly once
+and gate the merged coverage at the same thresholds as a single run: `coverage combine`
+followed by the 90% combined line + branch check for carddb. LLVM's line total counts a line
+once per function, so it cannot be rebuilt from per-line reports; each Rust shard therefore
+ships its merged profile, the coverage sections of its test objects and the exact
+`llvm-cov export` filter cargo-llvm-cov used (`.github/ci/rust_coverage.py`), and
+`rust-coverage` merges the profiles and applies the 90% line gate to llvm-cov's own total.
+It first requires identical objects from every shard and that llvm-cov reproduces each
+shard's own totals, so a mismatch fails rather than changing the measurement.
+pytest still records `--durations=30` and JUnit. Web formatting, lint, types, Vitest, dependency
 checks and build use the existing package scripts in separate steps. Local manual test hooks
-remain available. The hook ownership table marks direct steps so pre-commit skips them.
+remain available and run the whole suite at once. The hook ownership table marks direct steps
+so pre-commit skips them.
 
 CI also uploads the carddb, Web and Rust coverage reports (file names and line hits, no card text) and the
-Web bundle size to Codecov for reference. Codecov statuses are informational; the gates above stay in the
-test steps, and a failed or slow upload never fails the job (each upload step has its own timeout).
+Web bundle size to Codecov for reference; carddb and Rust upload the merged coverage from the coverage jobs.
+Codecov statuses are informational; the gates above stay in the test and coverage steps, and a failed or
+slow upload never fails the job (each upload step has its own timeout).
 The carddb pytest results go to Codecov Test Analytics only after `.github/ci/junit_public.py` rewrites them:
 parameters become a short hash, failure messages and captured output are dropped, because the raw JUnit
 can hold card wording. The Web results come from `sim/web/scripts/ci/public-junit-reporter.ts`, which names
@@ -445,12 +461,16 @@ Open **Actions → a workflow run → Summary** for test totals, passed/skipped/
 elapsed time and coverage. Python and Web include the slowest 30 cases and counts/time per
 source file. Case times include setup/teardown and overlap under parallel execution; they
 are not wall time. Rust reports aggregate test-binary counts/time and build/coverage wall time.
+Each shard has its own test summary; the coverage jobs add the shard totals and merged coverage.
 Rust per-case timings are not collected by the stable libtest reporter.
 The **Failed tests** section lists all reported failures regardless of duration: Python
 file/function with parameters removed, Web file/case ordinal, and Rust libtest test paths.
 
 Raw test output and JUnit may contain official card wording. They stay in runner temporary
-files, are removed after the job and are never uploaded or cached. Summaries omit failure
+files, are removed after the job and are never uploaded or cached. Only each passing shard's
+coverage data and test counts reach the coverage job, as a one-day workflow artifact: carddb
+coverage data (source paths, line and branch hits) or the Rust profile with the objects'
+coverage sections (function names, source paths and counters). Summaries omit failure
 messages, captured output, parameter values and arbitrary Web case descriptions; use the
 safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
 report is reported explicitly and cannot make a failing test step pass.
@@ -460,9 +480,9 @@ the latest `main` and its CI must be green**; the ruleset does not enforce this 
 so the maintainer and merge coordinator must check it.
 
 `CI_PYTEST_WORKERS` is an optional repository variable, default `4`, accepted range `1`–`4`.
-CI never uses `-n auto`; Cargo and Vitest are also limited to four workers. The existing
-jobs are retained rather than adding a job per test step, so summaries do not add per-job
-billing overhead. Concurrency cancels older PR runs; `main` runs are never cancelled by a
+CI never uses `-n auto`; Cargo and Vitest are also limited to four workers. Only the two
+slowest suites are sharded, three ways each; every Rust shard builds the same binaries itself,
+because building once would add a sequential job and a large artifact to the critical path. Concurrency cancels older PR runs; `main` runs are never cancelled by a
 newer push. Dependency caches retain their existing keys and only `main` writes them;
 PRs read the default-branch caches. Each hook cache is restored,
 prepared and saved separately to avoid mixing pre-commit databases. Existing mypy data
@@ -486,7 +506,7 @@ rule names and token selection. This is a test adapter, not a production snapsho
 or a separate maintained card list. Update the batch pin explicitly when changing
 the test baseline. `.github/ci/rust_tests.py` generates a fresh file, replaces any
 inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the temporary data. Both the
-manual `cargo-test` hook and CI use it. Project and fork PRs run the same complete
+manual `cargo-test` hook and the CI shards use it. Project and fork PRs run the same complete
 workspace with the 90% line coverage gate, without private credentials. Direct
 Cargo snapshot tests fail if the generated input is missing; they never skip.
 
