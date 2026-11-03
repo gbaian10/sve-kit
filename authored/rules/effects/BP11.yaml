@@ -117,59 +117,6 @@ cards:
               type: follower
               zone: field
     status: complete
-  BP11-074:
-    abilities:
-      - body:
-          count: 1
-          name:
-            read: event.subject.name
-          op: create
-          to: field
-        event: leave
-        kind: trigger
-        limit: 1
-        limit_at: trigger
-        line: 1
-        subject:
-          side: self
-          where:
-            args:
-              - read: item.token
-              - args:
-                  - read: item.cost
-                  - 1
-                fn: eq
-            fn: and
-          zone: field
-      - body:
-          amount: 4
-          op: damage
-          subjects: target.1
-        cost_selections:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              other: true
-              side: self
-              zone: field
-        costs:
-          - op: move
-            subjects: cost.1
-            to: cemetery
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: opponent
-              type: follower
-              zone: field
-    status: complete
   BP11-P29:
     abilities:
       - body:

@@ -1,0 +1,46 @@
+cards:
+  BP11-074:
+    abilities:
+      - auto:
+          do:
+            - create:
+                to: field
+                token:
+                  same_name_as: it
+          on:
+            left_field:
+              sel:
+                orig_cost_eq: 1
+                token: true
+              who: self
+          per_turn: 1
+        line: 1
+      - fanfare:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                other: true
+                who: all
+                zone: field
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

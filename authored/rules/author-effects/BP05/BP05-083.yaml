@@ -1,0 +1,26 @@
+cards:
+  BP05-083:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                to: ex
+                token:
+                  same_name_as: chosen
+          targets:
+            - bind: chosen
+              from:
+                token: true
+                who: self
+                zone: ex
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
