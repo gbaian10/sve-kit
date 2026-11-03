@@ -1,0 +1,32 @@
+cards:
+  BP11-098:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        keyword: ward
+                        kind: follower
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 4
+                then:
+                  - draw:
+                      n: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

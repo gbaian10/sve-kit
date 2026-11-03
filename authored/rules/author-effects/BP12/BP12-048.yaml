@@ -1,0 +1,38 @@
+cards:
+  BP12-048:
+    abilities:
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            played:
+              sel:
+                trait: 機械
+              who: self
+          per_turn: 1
+        line: 1
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: プロダクトマシーン
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: リペアモード
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

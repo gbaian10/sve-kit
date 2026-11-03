@@ -1,0 +1,46 @@
+cards:
+  BP12-049:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                trait: 機械
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 1
+            - create:
+                n: 1
+                to: ex
+                token: プロダクトマシーン
+            - create:
+                n: 1
+                to: ex
+                token: リペアモード
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 機械
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 5
+                then:
+                  - pp:
+                      delta: 1
+                      who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

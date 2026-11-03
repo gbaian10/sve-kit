@@ -1,0 +1,27 @@
+cards:
+  BP11-072:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            crimson: true
+        line: 2
+      - keywords:
+          - assail
+          - bane
+          - drain
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,43 @@
+cards:
+  BP12-040:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: 魔法使い
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - buff:
+                      on: this
+                      power: 4
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  spellchain: 5
+                then:
+                  - buff:
+                      hp: 4
+                      on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

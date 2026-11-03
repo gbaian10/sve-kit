@@ -1,0 +1,42 @@
+cards:
+  BP12-094:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - buff:
+                on: this
+                power:
+                  count:
+                    keyword: ward
+                    kind: follower
+                    who: self
+                    zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  keyword: ward
+                  kind: follower
+                  orig_cost_le: 3
+                  who: self
+                  zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
