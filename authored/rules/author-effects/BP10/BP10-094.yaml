@@ -1,0 +1,43 @@
+cards:
+  BP10-094:
+    abilities:
+      - auto:
+          do:
+            - pay:
+                cost:
+                  act_self: true
+                do:
+                  - destroy: victim
+          on:
+            placed_ex:
+              who: self
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: amulet
+                  name: 惨禍の円環
+                  who: self
+                  zone: deck
+                to: ex
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
