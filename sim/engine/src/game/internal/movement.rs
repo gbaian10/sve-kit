@@ -447,7 +447,17 @@ impl Game {
         } else {
             let members = execution.objects(self, objects)?;
             for member in &members {
-                public_zone(&self.object(execution.object_id(*member)?)?.zone)?;
+                let object = self.object(execution.object_id(*member)?)?;
+                if object.generation != member.generation.0 {
+                    continue;
+                }
+                if !(object.zone == "hand"
+                    && object.owner == super::seat_name(execution.context.controller)?
+                    && object.controller == object.owner
+                    && execution.is_private_hand_target(objects, *member))
+                {
+                    public_zone(&object.zone)?;
+                }
             }
             members
         };
@@ -509,6 +519,12 @@ impl Game {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
                 let actor = super::seat_name(execution.context.controller)?;
+                let private_hand_move = method == MoveMethod::Put
+                    && matches!(kind, ZoneKind::Ex | ZoneKind::Deck)
+                    && object.zone == "hand"
+                    && object.owner == actor
+                    && object.controller == actor
+                    && execution.is_private_hand_target(objects, member);
                 let private_observed_move = method == MoveMethod::Put
                     && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
                     && object.zone == "deck"
@@ -537,12 +553,17 @@ impl Game {
                 if kind == ZoneKind::Ex
                     && top.is_none()
                     && !private_observed_move
+                    && !private_hand_move
                     && !resolving_source
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top.is_none() && !resolving_source && !private_observed_move {
+                if top.is_none()
+                    && !resolving_source
+                    && !private_observed_move
+                    && !private_hand_move
+                {
                     public_zone(&object.zone)?;
                 }
             }
@@ -600,6 +621,11 @@ impl Game {
             }
             let ordinary = matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット")
                 && matches!(object.zone.as_str(), "cemetery" | "ex");
+            let private_hand = object.zone == "hand"
+                && object.owner == seat
+                && object.controller == seat
+                && execution.is_private_hand_target(objects, member)
+                && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let private_look = object.zone == "deck"
                 && object.owner == seat
                 && object.controller == seat
@@ -612,7 +638,7 @@ impl Game {
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && matches!(object.zone.as_str(), "evolve_deck" | "ex");
-            if !(ordinary || advance || private_look)
+            if !(ordinary || advance || private_look || private_hand)
                 || object.owner != seat
                 || object.controller != seat
                 || object.state["face"] != 0_i64
@@ -1106,7 +1132,9 @@ fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<
     match (zone, method, destination) {
         ("evolve_deck", MoveMethod::Put, "field") => Ok(ZoneKind::Evolve),
         ("resolution", MoveMethod::Put, "ex") => Ok(ZoneKind::Resolution),
-        ("hand", MoveMethod::Discard, "cemetery") => Ok(ZoneKind::Hand),
+        ("hand", MoveMethod::Discard, "cemetery")
+        | ("hand", MoveMethod::Banish, "banish")
+        | ("hand", MoveMethod::Put, "deck" | "ex" | "field") => Ok(ZoneKind::Hand),
         ("deck", MoveMethod::Put | MoveMethod::Banish, _) => Ok(ZoneKind::Deck),
         (zone, _, _) => public_zone(zone),
     }

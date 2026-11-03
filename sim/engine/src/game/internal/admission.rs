@@ -4,7 +4,7 @@ use super::{
 };
 use crate::ir::PlayerStage;
 use crate::ir::events::subject::SubjectFields;
-use crate::ir::observation_selection::private_look_choice;
+use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
     Requirement,
@@ -555,7 +555,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             }
         );
     let stack_rule = printed_keywords::is_stack_increase_choice(decision);
-    let private_look = private_look_choice(decision);
+    let private_look = private_look_choice(decision) || private_hand_choice(decision);
     if !matches!(
         decision.domain,
         ChoiceDomain::Integer {

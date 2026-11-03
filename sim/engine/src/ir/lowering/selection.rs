@@ -23,6 +23,7 @@ impl BodyContext<'_> {
         let searches = self.searches.clone();
         let outputs = self.ex_outputs.clone();
         let ex_targets = self.ex_targets.clone();
+        let hand_targets = self.hand_targets.clone();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         let mut body = self.steps(
@@ -51,6 +52,7 @@ impl BodyContext<'_> {
         self.searches = searches;
         self.ex_outputs = outputs;
         self.ex_targets = ex_targets;
+        self.hand_targets = hand_targets;
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
             maximum: Some(super::Nat(1)),
@@ -105,7 +107,13 @@ impl BodyContext<'_> {
                 _ => return Err(unsupported(path)),
             },
         };
-        if from.observation.is_some() && matches!(choice.by, Some(ast::LeaderSide::Opponent)) {
+        let hand = matches!(
+            from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+        );
+        if (from.observation.is_some() || hand)
+            && matches!(choice.by, Some(ast::LeaderSide::Opponent))
+        {
             return Err(unsupported(path));
         }
         if let Some(groups) = &choice.groups {
@@ -140,7 +148,7 @@ impl BodyContext<'_> {
             None => self.object_choice(&target, path, true)?,
             Some(branches) => self.observed_object_choice(&target, branches, path, true)?,
         };
-        let visibility = if target.from.observation.is_some() {
+        let visibility = if target.from.observation.is_some() || hand {
             Visibility::Only {
                 players: super::super::PlayerSet {
                     relation: super::super::PlayerRelation::SelfPlayer,

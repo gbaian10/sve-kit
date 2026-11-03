@@ -30,9 +30,33 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
+fn check_hand_choice(
+    target: &ast::Target,
+    resolution: bool,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if matches!(
+        target.from.zone,
+        Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+    ) && (!resolution
+        || !matches!(target.from.who, Some(ast::Side::Controller))
+        || target.from.other
+        || target.from.not_same_name_as_this
+        || target.from.has_state_filter()
+        || target.distinct_by.is_some()
+        || target.from.leader.is_some()
+        || target.from.leaders.is_some()
+        || target.from.leader_or)
+    {
+        return Err(unsupported(path));
+    }
+    Ok(())
+}
+
 fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
     match zone {
         ast::TargetZone::Single(single) => Some(vec![match single {
+            ast::TargetSingleZone::Hand => ZoneKind::Hand,
             ast::TargetSingleZone::Field => ZoneKind::Field,
             ast::TargetSingleZone::Ex => ZoneKind::Ex,
             ast::TargetSingleZone::Cemetery => ZoneKind::Cemetery,
@@ -183,6 +207,7 @@ impl BodyContext<'_> {
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        check_hand_choice(target, resolution, path)?;
         let dynamic_count = target
             .n
             .as_ref()
@@ -250,19 +275,17 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        if matches!(
-            target.from.zone,
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex))
-        ) {
-            self.ex_targets.insert(target.bind.clone());
+        match &target.from.zone {
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex)) => {
+                self.ex_targets.insert(target.bind.clone());
+            }
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand)) => {
+                self.hand_targets.insert(target.bind.clone());
+            }
+            _ => {}
         }
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
-        let aggregate_bounds = if dynamic_count {
-            vec![self.dynamic_target_count(target, path)?]
-        } else {
-            vec![]
-        };
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
@@ -273,7 +296,11 @@ impl BodyContext<'_> {
                     cardinality,
                     distinct_by: target.distinct_by.as_ref().map(|_| ObjectProperty::Names),
                     disjoint: Disjointness::Disjoint,
-                    aggregate_bounds,
+                    aggregate_bounds: if dynamic_count {
+                        vec![self.dynamic_target_count(target, path)?]
+                    } else {
+                        vec![]
+                    },
                 },
                 binding,
                 target_roles: None,
@@ -711,6 +738,10 @@ impl BodyContext<'_> {
         )
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Mode-local contexts preserve the complete binding environment at one boundary."
+    )]
     fn modes(
         &mut self,
         shape: ModeShape<'_>,
@@ -748,6 +779,7 @@ impl BodyContext<'_> {
                 searches: BTreeSet::new(),
                 ex_outputs: BTreeMap::new(),
                 ex_targets: BTreeSet::new(),
+                hand_targets: BTreeSet::new(),
                 observations: BTreeMap::new(),
                 single_discards: BTreeSet::new(),
                 observed_targets: BTreeSet::new(),
@@ -766,6 +798,7 @@ impl BodyContext<'_> {
                 context.searches.clone_from(&self.searches);
                 context.ex_outputs.clone_from(&self.ex_outputs);
                 context.ex_targets.clone_from(&self.ex_targets);
+                context.hand_targets.clone_from(&self.hand_targets);
                 context.observations.clone_from(&self.observations);
                 context.single_discards.clone_from(&self.single_discards);
                 context.observed_targets.clone_from(&self.observed_targets);

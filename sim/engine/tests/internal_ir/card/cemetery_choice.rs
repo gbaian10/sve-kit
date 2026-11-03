@@ -60,8 +60,9 @@ fn cemetery_choice_can_return_a_spell_without_selecting_a_field_follower() {
 }
 
 #[test]
-fn cemetery_choice_keeps_other_owners_and_private_sources_closed() {
+fn cemetery_recovery_keeps_foreign_owners_and_hand_origins_closed() {
     for query in [
+        // Choosing a hand card does not grant arbitrary hidden-zone recovery.
         json!({"who":"self","zone":"hand"}),
         json!({"who":"opp","zone":"cemetery"}),
         json!({"who":"all","zone":"cemetery"}),

@@ -73,6 +73,13 @@ impl Game {
         for member in &members {
             let id = execution.object_id(*member)?.to_owned();
             let object = self.object(&id)?;
+            // Look choices deliberately reveal their selected card after moving it to hand.
+            if selected
+                && object.generation != member.generation.0
+                && execution.is_private_hand_target(objects, *member)
+            {
+                continue;
+            }
             if object.zone != "hand"
                 || object.controller != object.owner
                 || (selected && object.controller != seat_name(execution.context.controller)?)

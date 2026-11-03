@@ -1255,6 +1255,7 @@ pub(super) enum TargetZone {
 #[derive(Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum TargetSingleZone {
+    Hand,
     Field,
     Ex,
     Cemetery,
