@@ -194,26 +194,6 @@ cards:
             - 7
           fn: ge
     status: complete
-  BP20-P47:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          count: 1
-          name: クレスト 安息の団結者
-          op: create
-          to: ex
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP20-P59:
     abilities:
       - active_zones:
@@ -381,80 +361,6 @@ cards:
           side: self
         kind: static
         line: 1
-    status: complete
-  BP20-P66:
-    abilities:
-      - active_zones:
-          - ex
-        body:
-          amount:
-            else:
-              else: 1
-              if:
-                args:
-                  - count:
-                      side: self
-                      type: crest
-                      zone: ex
-                  - 3
-                fn: ge
-              then: 2
-            if:
-              args:
-                - count:
-                    side: self
-                    type: crest
-                    zone: ex
-                - 5
-              fn: eq
-            then: 4
-          op: damage
-          subjects: target.1
-        event: end
-        kind: trigger
-        line: 1
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              union:
-                - side: opponent
-                  type: follower
-                  zone: field
-                - opponent.leader
-    status: complete
-  BP20-P68:
-    abilities:
-      - active_zones:
-          - ex
-        body:
-          condition:
-            args:
-              - count:
-                  side: self
-                  type: crest
-                  zone: ex
-              - 3
-            fn: ge
-          op: if
-          then:
-            hp: 1
-            op: modify
-            power: 1
-            subjects: target.1
-        event: end
-        kind: trigger
-        line: 1
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              trait: 絶傑
-              type: follower
-              zone: field
     status: complete
   BP20-R13:
     abilities:

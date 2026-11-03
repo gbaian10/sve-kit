@@ -1,0 +1,23 @@
+cards:
+  BP20-102:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: クレスト 安息の祈祷者
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP20-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

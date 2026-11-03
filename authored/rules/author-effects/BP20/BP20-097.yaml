@@ -1,0 +1,27 @@
+cards:
+  BP20-097:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: クレスト 安息の団結者
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP20-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
