@@ -1,0 +1,31 @@
+{
+  "abilities": [
+    {
+      "active_zones": [
+        "equipment"
+      ],
+      "body": {
+        "amount": 2,
+        "kind": "any",
+        "op": "replace_damage",
+        "sources": "linked"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "active_zones": [
+        "equipment"
+      ],
+      "body": {
+        "amount": -2,
+        "kind": "any",
+        "op": "replace_damage",
+        "subjects": "linked"
+      },
+      "kind": "static",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}
