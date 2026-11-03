@@ -534,7 +534,6 @@ impl BodyContext<'_> {
     pub(super) fn damage(
         &mut self,
         damage: &ast::Damage,
-        source: &SourceSpan,
         path: &str,
     ) -> Result<Action, LoweringError> {
         let recipients = self.recipients(&damage.to, path)?;
@@ -544,7 +543,7 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             };
             value = Expr::Compute(Box::new(super::IntOperation::Conditional {
-                condition: self.condition(&replacement.r#if, source, path)?,
+                condition: self.condition(&replacement.r#if, path)?,
                 then_value: self.number(&replacement.n, path, &mut BTreeSet::new())?,
                 else_value: value,
             }));

@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-PR12:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    token:
+      name: 奏絶の独唱
+      template: true
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                trait: アイドル
+              any: true
+            result: materials
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  times:
+                    - x_paid: materials
+                    - 2

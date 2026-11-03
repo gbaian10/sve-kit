@@ -176,7 +176,7 @@ pub(super) fn lower(
     let predicate = head
         .usable_if
         .as_ref()
-        .map(|condition| context.qualification(condition, &source, path))
+        .map(|condition| context.qualification(condition, path))
         .transpose()?;
     let reveal = instruction(
         Action::Reveal {

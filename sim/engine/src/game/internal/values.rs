@@ -10,7 +10,7 @@ use crate::ir::AttackEvent;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
-    ExecutionRef, PaymentReference, SpellCountTime, ValueEquality,
+    ExecutionRef, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
@@ -967,11 +967,63 @@ impl Execution {
         }
     }
 
+    fn paid_quantity(
+        &self,
+        reference: &PaymentReference,
+        unit: QuantityUnit,
+    ) -> Result<(Int, Nat)> {
+        let receipt = match reference {
+            PaymentReference::Local { receipt } => *local_receipt(receipt.location())?,
+            PaymentReference::CardPlay { face, receipt }
+                if self.spell
+                    && self
+                        .card_payment
+                        .as_ref()
+                        .is_some_and(|(paid_face, paid_receipt)| {
+                            paid_face == face && paid_receipt == receipt
+                        }) =>
+            {
+                *receipt
+            }
+            PaymentReference::CardPlay { .. } | PaymentReference::Entry { .. } => {
+                return Err(invalid("unavailable payment amount"));
+            }
+        };
+        let Some(InstructionOutcome::ExchangePayment(payment)) = self.receipts.get(&receipt) else {
+            return Err(invalid("missing payment amount"));
+        };
+        let mut amount = 0_u64;
+        for step in &payment.steps {
+            if step.execution != self.id {
+                return Err(unsupported("foreign payment step"));
+            }
+            let count = match self.receipts.get(&step.slot) {
+                Some(InstructionOutcome::Payment { quantity, .. }) if quantity.unit == unit => {
+                    u64::try_from(quantity.amount.0).map_err(invalid)?
+                }
+                Some(InstructionOutcome::Payment { .. }) => 0,
+                Some(InstructionOutcome::Discard(outcome)) if unit == QuantityUnit::Cards => {
+                    u64::try_from(outcome.moves.len()).map_err(invalid)?
+                }
+                _ => return Err(unsupported("payment amount outcome")),
+            };
+            amount = amount
+                .checked_add(count)
+                .ok_or_else(|| invalid("payment amount overflow"))?;
+        }
+        Ok((Int(i64::try_from(amount).map_err(invalid)?), Nat(amount)))
+    }
+
     fn quantity(&self, receipt: &MeasuredReceipt) -> Result<(Int, Nat)> {
+        if let MeasuredReceipt::Payment { receipt, unit } = receipt {
+            return self.paid_quantity(receipt, *unit);
+        }
         let (id, damage) = match receipt {
             MeasuredReceipt::Cards { receipt } => (local_receipt(receipt.location())?, false),
             MeasuredReceipt::Damage { receipt } => (local_receipt(receipt.location())?, true),
-            MeasuredReceipt::Counters { .. } => return Err(unsupported("quantity receipt")),
+            MeasuredReceipt::Counters { .. } | MeasuredReceipt::Payment { .. } => {
+                return Err(unsupported("quantity receipt"));
+            }
         };
         match (self.receipts.get(id), damage) {
             (Some(InstructionOutcome::Cards(outcome)), false) => {

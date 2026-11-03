@@ -340,3 +340,36 @@ fn declining_one_head_keeps_the_other_pending_ability_of_the_same_holder() {
         1
     );
 }
+
+#[test]
+fn variable_public_materials_reject_conflicting_quantities_and_unavailable_paid_results() {
+    let valid = json!({
+        "cost":{"return_to_hand":{"sel":{"who":"self","zone":"field","other":true},"any":true,"result":"materials"}},
+        "do":[{"draw":{"n":{"x_paid":"materials"}}}]
+    });
+    let lowerer = ExpandedLowerer::new().unwrap();
+    lowerer
+        .lower(&expanded("unit-follower", "fanfare", valid.clone()))
+        .unwrap();
+    for material in [
+        json!({"sel":{"who":"self","zone":"field"},"any":true,"n":1_u8,"result":"materials"}),
+        json!({"sel":{"who":"self","zone":"field"},"n":0_u8,"result":"materials"}),
+        json!({"sel":{"who":"self","zone":"field"},"any":false,"result":"materials"}),
+    ] {
+        let mut body = valid.clone();
+        body["cost"]["return_to_hand"] = material;
+        lowerer
+            .lower(&expanded("unit-follower", "fanfare", body))
+            .unwrap_err();
+    }
+    let mut unknown = valid.clone();
+    unknown["do"][0]["draw"]["n"] = json!({"x_paid":"unknown"});
+    lowerer
+        .lower(&expanded("unit-follower", "fanfare", unknown))
+        .unwrap_err();
+    let mut early = valid;
+    early["targets"] = json!([{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":{"x_paid":"materials"}}]);
+    lowerer
+        .lower(&expanded("unit-follower", "fanfare", early))
+        .unwrap_err();
+}

@@ -1,7 +1,7 @@
 //! Cost materials use their own strict selection, without target permissions.
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
 use crate::game::internal::{
-    DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, search,
+    DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
 };
 use crate::ir::quick::card_permission;
 use crate::ir::{
@@ -18,7 +18,7 @@ use alloc::collections::BTreeSet;
 pub(in crate::game::internal) struct MaterialWait {
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
-    count: usize,
+    bounds: Cardinality,
     field: bool,
 }
 impl MaterialWait {
@@ -32,7 +32,10 @@ impl MaterialWait {
     }
 
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
-        if handles.len() != self.count {
+        if !contains(
+            self.bounds,
+            Nat(u64::try_from(handles.len()).map_err(invalid)?),
+        ) {
             return Err(invalid("material cardinality"));
         }
         let mut seen = BTreeSet::new();
@@ -132,8 +135,13 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
                 play_scope: ExecutionRef::Current {},
                 input: InputMode::Inline,
             })
-        || constraint.cardinality.minimum.0 == 0
-        || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
+        || !(constraint.cardinality
+            == (Cardinality {
+                minimum: Nat(0),
+                maximum: None,
+            })
+            || (constraint.cardinality.minimum.0 > 0
+                && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
         || group.cardinality != constraint.cardinality
         || constraint.distinct_by.is_some()
         || constraint.disjoint != Disjointness::Disjoint
@@ -338,7 +346,7 @@ impl Game {
             Wait::MaterialParameter(MaterialWait {
                 binding: *binding,
                 members,
-                count,
+                bounds: constraint.cardinality,
                 field: zone(selector)? == ZoneKind::Field,
             }),
         ));

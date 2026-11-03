@@ -34,7 +34,7 @@ pub(super) fn lower(
             let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
             (
                 vec![ZoneKind::Hand, ZoneKind::Ex],
-                context.qualification(condition, &source, &format!("{path}/play/cannot_if"))?,
+                context.qualification(condition, &format!("{path}/play/cannot_if"))?,
             )
         }
         ast::PlayRestriction::Named(_) => {

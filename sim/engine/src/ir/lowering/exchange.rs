@@ -132,7 +132,11 @@ fn lower_material(
         }
         _ => return Err(unsupported(path)),
     };
-    if material.n == 0 || !matches!(material.sel.who, ast::Side::Controller) {
+    if material.n.is_none_or(|n| n == 0)
+        || material.any
+        || material.result.is_some()
+        || !matches!(material.sel.who, ast::Side::Controller)
+    {
         return Err(unsupported(path));
     }
     let materials = materials(material, binding, allocator, path)?;
@@ -167,8 +171,8 @@ fn materials(
     path: &str,
 ) -> Result<Decision, LoweringError> {
     let cardinality = Cardinality {
-        minimum: Nat(material.n),
-        maximum: Some(Nat(material.n)),
+        minimum: Nat(material.n.ok_or_else(|| unsupported(path))?),
+        maximum: Some(Nat(material.n.ok_or_else(|| unsupported(path))?)),
     };
     costs::query(&material.sel, allocator, path)?;
     let selector = costs::public_query(

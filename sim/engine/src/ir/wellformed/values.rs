@@ -777,8 +777,13 @@ impl Checker {
         })
     }
 
-    fn measured(&self, receipt: &MeasuredReceipt) -> Checked {
+    fn measured(&mut self, receipt: &MeasuredReceipt) -> Checked {
         match receipt {
+            MeasuredReceipt::Payment { receipt, .. } => {
+                self.boolean(&Expr::Frozen(Box::new(BoolFrozen::PaymentComplete {
+                    receipt: receipt.clone(),
+                })))
+            }
             MeasuredReceipt::Cards { receipt } => self.receipt(receipt),
             MeasuredReceipt::Damage { receipt } => self.receipt(receipt),
             MeasuredReceipt::Counters { receipt } => self.receipt(receipt),

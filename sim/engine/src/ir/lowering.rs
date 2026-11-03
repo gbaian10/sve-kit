@@ -47,9 +47,10 @@ use super::{
     Arithmetic, BatchPolicy, Binding, Bool, CardProgram, Cardinality, DamageAmount, DamageFlags,
     EventPattern, EventSnapshotPolicy, Expr, FaceId, Instruction, InstructionContext,
     InstructionId, Int, IntOperation, KeywordId, Located, Nat, NatRead, Node, ObjectFrozen,
-    ObjectOperand, ObjectView, PlayerRef, PlayerRelation, PlayerSet, Predicate, Program, ReceiptId,
-    RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode, TextQuantifier,
-    TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
+    ObjectOperand, ObjectView, PaymentReference, PlayerRef, PlayerRelation, PlayerSet, Predicate,
+    Program, ReceiptId, RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode,
+    TextQuantifier, TriggerAggregation, TriggerCondition, TriggerSpec, WellFormedCardProgram,
+    ZoneKind,
 };
 pub use current::{
     CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
@@ -553,14 +554,16 @@ impl Allocator {
         let (body, head, keyword) = ability_body(entry, path)?;
         let ability_source = ability_source(&source, keyword);
         let payment_result = payment_result.filter(|_| entry.spell.is_some());
+        let face = FaceId(source.face.clone());
         let complete = payment_result
             .as_ref()
-            .and_then(|binding| binding.complete.clone());
+            .and_then(|binding| binding.complete.clone())
+            .map(|(name, receipt)| (name, PaymentReference::CardPlay { face, receipt }));
         let mut context = BodyContext::new(entry, scope, body, complete, self);
         if let Some((name, receipt, single)) = payment_result.and_then(|binding| binding.discard) {
             payment::record_discard(&mut context, &name, receipt, single, path)?;
         }
-        let guard = context.activation_qualification(entry.activate.as_ref(), &source, path)?;
+        let guard = context.activation_qualification(entry.activate.as_ref(), path)?;
         let trigger_choice = context.prepare_parameters(
             body,
             path,
@@ -1057,7 +1060,7 @@ struct BodyContext<'definitions> {
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
     definition: AbilityId,
-    payment_result: Option<(String, ReceiptId)>,
+    payment_result: Option<(String, PaymentReference)>,
     allocator: Allocator,
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
@@ -1083,7 +1086,7 @@ impl<'definitions> BodyContext<'definitions> {
         entry: &'definitions ast::Ability,
         scope: ScopeId,
         body: &'definitions ast::Body,
-        payment_result: Option<(String, ReceiptId)>,
+        payment_result: Option<(String, PaymentReference)>,
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
@@ -1288,7 +1291,7 @@ impl<'definitions> BodyContext<'definitions> {
                 continue;
             }
             if let ast::Step::If(conditional) = step {
-                let condition = self.condition(&conditional.cond, source, &step_path)?;
+                let condition = self.condition(&conditional.cond, &step_path)?;
                 let parent = self.scope;
                 self.scope = self.card_allocator.scope(&step_path)?;
                 let then_body = self.steps(
@@ -1441,7 +1444,7 @@ impl<'definitions> BodyContext<'definitions> {
                 count: self.number(&draw.n, path, &mut BTreeSet::new())?,
                 mode: StepwiseMode::Exact,
             }),
-            ast::Step::Damage(damage) => self.damage(damage, span, path),
+            ast::Step::Damage(damage) => self.damage(damage, path),
             ast::Step::Life(life) => self.life(life, path),
             ast::Step::SetLife(life) => self.set_life(life, path),
         }

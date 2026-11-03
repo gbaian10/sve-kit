@@ -1,5 +1,5 @@
 use super::{Action, BodyContext, Expr, LoweringError, Nat, ObjectOperand, ast, unsupported};
-use crate::ir::{CounterKind, CounterOperation, Decision, Holder, Selector};
+use crate::ir::{Cardinality, CounterKind, CounterOperation, Decision, Holder, Selector};
 
 pub(super) const fn holder() -> Holder {
     Holder::Object {
@@ -46,7 +46,10 @@ pub(super) fn cost(
                 &mut context.allocator,
                 context.scope,
                 query,
-                1,
+                Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
                 path,
             )?;
             let ChoiceDomain::Objects {

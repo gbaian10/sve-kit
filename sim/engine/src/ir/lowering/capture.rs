@@ -134,6 +134,7 @@ impl BodyContext<'_> {
             | ast::Number::HistoryCount { .. }
             | ast::Number::ReceiptCount { .. }
             | ast::Number::CountOf { .. }
+            | ast::Number::PaidAmount { .. }
             | ast::Number::TurnOrdinal { .. }
             | ast::Number::LeaderLife { .. }
             | ast::Number::Plus { .. }

@@ -362,6 +362,7 @@ variants!(MovementReceipt {
 });
 
 variants!(MeasuredReceipt {
+    Payment { receipt: super::PaymentReference, unit: QuantityUnit } => [],
     Cards { receipt: ReceiptReference<CardQuantityOutcome> } => [],
     Damage { receipt: ReceiptReference<DamageQuantityOutcome> } => [],
     Counters { receipt: ReceiptReference<CounterQuantityOutcome> } => []

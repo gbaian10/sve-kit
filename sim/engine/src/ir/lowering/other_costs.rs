@@ -123,7 +123,7 @@ pub(super) fn lower(
     let condition = head
         .r#while
         .as_ref()
-        .map(|value| context.qualification(value, &source, path))
+        .map(|value| context.qualification(value, path))
         .transpose()?;
     let mut declarations = Vec::new();
     for value in &head.effects {
