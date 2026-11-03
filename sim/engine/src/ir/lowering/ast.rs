@@ -1849,11 +1849,44 @@ pub(super) struct SelectedQuery {
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
+#[serde(try_from = "PublicZones")]
 pub(super) enum PublicZone {
     Field,
     Ex,
     Cemetery,
+    FieldEx,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum PublicZones {
+    One(PublicZoneName),
+    Many(Vec<PublicZoneName>),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum PublicZoneName {
+    Field,
+    Ex,
+    Cemetery,
+}
+
+impl TryFrom<PublicZones> for PublicZone {
+    type Error = &'static str;
+
+    fn try_from(zones: PublicZones) -> Result<Self, Self::Error> {
+        Ok(match zones {
+            PublicZones::One(PublicZoneName::Field) => Self::Field,
+            PublicZones::One(PublicZoneName::Ex) => Self::Ex,
+            PublicZones::One(PublicZoneName::Cemetery) => Self::Cemetery,
+            PublicZones::Many(zones) => match zones.as_slice() {
+                [PublicZoneName::Field, PublicZoneName::Ex]
+                | [PublicZoneName::Ex, PublicZoneName::Field] => Self::FieldEx,
+                _ => return Err("unsupported public zone union"),
+            },
+        })
+    }
 }
 
 #[derive(Deserialize)]

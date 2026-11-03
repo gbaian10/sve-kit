@@ -24,7 +24,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
-        let mut objects = super::costs::public_query(&aggregate.of, binding);
+        let mut objects = super::costs::public_query(&aggregate.of, binding, path)?;
         if aggregate.of.other {
             objects = Selector::Difference {
                 input: Box::new(objects),

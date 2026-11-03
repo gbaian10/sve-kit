@@ -217,16 +217,35 @@ pub(super) fn query(
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if value.other || value.class.is_some() || value.not_class.is_some() || value.token.is_some() {
+    if value.other
+        || value.class.is_some()
+        || value.not_class.is_some()
+        || value.token.is_some()
+        || matches!(value.zone, ast::PublicZone::FieldEx)
+    {
         return Err(unsupported(path));
     }
-    Ok(public_query(
-        value,
-        Binding::new(allocator.id(path)?, ScopeId(0)),
-    ))
+    public_query(value, Binding::new(allocator.id(path)?, ScopeId(0)), path)
 }
 
-pub(super) fn public_query(value: &ast::PublicQuery, binding: Binding<ObjectRef>) -> Selector {
+pub(super) fn public_query(
+    value: &ast::PublicQuery,
+    binding: Binding<ObjectRef>,
+    path: &str,
+) -> Result<Selector, LoweringError> {
+    Ok(match value.zone {
+        ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field),
+        ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex),
+        ast::PublicZone::Cemetery => public_zone_query(value, binding, ZoneKind::Cemetery),
+        ast::PublicZone::FieldEx => return Err(unsupported(path)),
+    })
+}
+
+fn public_zone_query(
+    value: &ast::PublicQuery,
+    binding: Binding<ObjectRef>,
+    zone: ZoneKind,
+) -> Selector {
     Selector::Zone {
         players: PlayerSet {
             relation: match value.who {
@@ -241,11 +260,7 @@ pub(super) fn public_query(value: &ast::PublicQuery, binding: Binding<ObjectRef>
             },
             text_quantifier: TextQuantifier::Implicit,
         },
-        zone: match value.zone {
-            ast::PublicZone::Field => ZoneKind::Field,
-            ast::PublicZone::Ex => ZoneKind::Ex,
-            ast::PublicZone::Cemetery => ZoneKind::Cemetery,
-        },
+        zone,
         view: SelectionView::Current {},
         binding,
         predicate: Box::new(super::selection::field_filter(
