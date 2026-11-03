@@ -962,6 +962,8 @@ fn supported(code: &str) -> bool {
             | "read.receipt.actual"
             | "shape.MeasuredReceipt.Cards"
             | "shape.MeasuredReceipt.Damage"
+            | "shape.MeasuredReceipt.Payment"
+            | "internal.QuantityUnit.Cards"
             | "receipt.local"
             | "decision.input"
             | "shape.ChoiceDomain.Integer"

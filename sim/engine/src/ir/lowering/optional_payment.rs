@@ -83,7 +83,25 @@ impl BodyContext<'_> {
             (
                 payment::lower(self, cost, origin, &path)?,
                 PaymentOptionality::Required,
-                None,
+                match cost {
+                    ast::Cost::Short(operation) => match operation.as_ref() {
+                        ast::CostOperation::ToCemetery(material)
+                        | ast::CostOperation::ReturnToHand(material)
+                        | ast::CostOperation::Banish(material)
+                        | ast::CostOperation::Act(material)
+                        | ast::CostOperation::ToEx(material) => material.result.as_ref(),
+                        ast::CostOperation::Pp(_)
+                        | ast::CostOperation::Lesson(_)
+                        | ast::CostOperation::Counter(_)
+                        | ast::CostOperation::EarthRite(_)
+                        | ast::CostOperation::LeaderLife(_)
+                        | ast::CostOperation::Discard(_)
+                        | ast::CostOperation::BanishSelf(_)
+                        | ast::CostOperation::ActSelf(_)
+                        | ast::CostOperation::SelfToCemetery(_) => None,
+                    },
+                    ast::Cost::Ordered { .. } => None,
+                },
             )
         } else {
             return Ok(None);

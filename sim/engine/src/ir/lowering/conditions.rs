@@ -4,9 +4,9 @@ use super::super::{
     SnapshotFields, Stat,
 };
 use super::{
-    Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, FaceId,
-    Int, IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet,
-    Predicate, SelectionView, Selector, SourceSpan, TextQuantifier, ZoneKind, ast, unsupported,
+    Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
+    IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate,
+    SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 
 pub(super) fn qualify_costs(
@@ -74,22 +74,20 @@ impl BodyContext<'_> {
     pub(super) fn activation_qualification(
         &mut self,
         activated: Option<&ast::Activate>,
-        source: &SourceSpan,
         path: &str,
     ) -> Result<Option<Expr<Bool>>, LoweringError> {
         activated
             .and_then(|head| head.usable_if.as_ref())
-            .map(|condition| self.qualification(condition, source, path))
+            .map(|condition| self.qualification(condition, path))
             .transpose()
     }
 
     pub(super) fn qualification(
         &mut self,
         condition: &ast::Condition,
-        source: &SourceSpan,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        let predicate = self.condition(condition, source, path)?;
+        let predicate = self.condition(condition, path)?;
         // A use prerequisite cannot depend on a later resolution capture or choice.
         if !self.resolution_captures.is_empty() {
             return Err(unsupported(path));
@@ -182,7 +180,6 @@ impl BodyContext<'_> {
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
-        source: &SourceSpan,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Compute(Box::new(match value {
@@ -240,7 +237,7 @@ impl BodyContext<'_> {
             ast::Condition::All(items) | ast::Condition::Any(items) => {
                 let predicates = items
                     .iter()
-                    .map(|item| self.condition(item, source, path))
+                    .map(|item| self.condition(item, path))
                     .collect::<Result<Vec<_>, _>>()?;
                 if matches!(value, ast::Condition::All(_)) {
                     Predicate::And { predicates }
@@ -249,36 +246,14 @@ impl BodyContext<'_> {
                 }
             }
             ast::Condition::Not(item) => Predicate::Not {
-                predicate: self.condition(item, source, path)?,
+                predicate: self.condition(item, path)?,
             },
             ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
             ast::Condition::Did(name) => return self.move_success(name, path),
             ast::Condition::Paid(paid) => {
-                if let Some((name, receipt)) = &self.local_payment {
-                    if name != &paid.receipt {
-                        return Err(unsupported(path));
-                    }
-                    return Ok(Expr::Frozen(Box::new(
-                        super::super::BoolFrozen::PaymentComplete {
-                            receipt: super::super::PaymentReference::Local {
-                                receipt: super::super::ReceiptReference::new(*receipt),
-                            },
-                        },
-                    )));
-                }
-                let (name, receipt) = self
-                    .payment_result
-                    .as_ref()
-                    .ok_or_else(|| unsupported(path))?;
-                if name != &paid.receipt {
-                    return Err(unsupported(path));
-                }
                 return Ok(Expr::Frozen(Box::new(
                     super::super::BoolFrozen::PaymentComplete {
-                        receipt: super::super::PaymentReference::CardPlay {
-                            face: FaceId(source.face.clone()),
-                            receipt: *receipt,
-                        },
+                        receipt: self.payment_reference(&paid.receipt, path)?,
                     },
                 )));
             }
@@ -625,6 +600,40 @@ impl BodyContext<'_> {
         }
     }
 
+    fn payment_reference(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<super::super::PaymentReference, LoweringError> {
+        if let Some((bound_name, receipt)) = &self.local_payment {
+            if bound_name != name {
+                return Err(unsupported(path));
+            }
+            return Ok(super::super::PaymentReference::Local {
+                receipt: super::super::ReceiptReference::new(*receipt),
+            });
+        }
+        let (bound_name, reference) = self
+            .payment_result
+            .as_ref()
+            .ok_or_else(|| unsupported(path))?;
+        if bound_name != name {
+            return Err(unsupported(path));
+        }
+        Ok(reference.clone())
+    }
+
+    fn paid_amount(&self, name: &str, path: &str) -> Result<Expr<Int>, LoweringError> {
+        Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+            value: Expr::Frozen(Box::new(NatFrozen::ReceiptActual {
+                receipt: super::super::MeasuredReceipt::Payment {
+                    receipt: self.payment_reference(name, path)?,
+                    unit: super::super::QuantityUnit::Cards,
+                },
+            })),
+        })))
+    }
+
     pub(super) fn number(
         &mut self,
         value: &ast::Number,
@@ -656,6 +665,7 @@ impl BodyContext<'_> {
             ast::Number::ReceiptCount { count } => self.receipt_count(count, path),
             ast::Number::CountOf { count_of } => self.count_of(count_of, path),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
+            ast::Number::PaidAmount { x_paid } => self.paid_amount(x_paid, path),
             ast::Number::Aggregate { agg } => self.aggregate(agg, path),
             ast::Number::Resolution { at, value } => {
                 let ast::ResolutionTime::Resolution = at;
@@ -670,13 +680,7 @@ impl BodyContext<'_> {
                 self.selected_stat(selection, value, path)
             }
             ast::Number::LeaderLife { leader_life } => {
-                Ok(Expr::Live(Box::new(IntRead::PlayerResource {
-                    player: match leader_life {
-                        ast::LeaderSide::Controller => PlayerRef::Controller {},
-                        ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
-                    },
-                    property: PlayerResource::Life,
-                })))
+                Ok(player_resource(*leader_life, PlayerResource::Life))
             }
             ast::Number::Alias(name) => {
                 if !active.insert(name.clone()) {
@@ -716,20 +720,15 @@ impl BodyContext<'_> {
                 path,
             ),
             ast::Number::TurnOrdinal { turn_number } => Ok(turn_ordinal(turn_number.who)),
-            ast::Number::Resource { resource } => {
-                Ok(Expr::Live(Box::new(IntRead::PlayerResource {
-                    player: match resource.who {
-                        ast::LeaderSide::Controller => PlayerRef::Controller {},
-                        ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
-                    },
-                    property: match resource.kind {
-                        ast::PpResource::Pp => PlayerResource::PpCurrent,
-                        ast::PpResource::PpMax => PlayerResource::PpMaximum,
-                        ast::PpResource::Ep => PlayerResource::Ep,
-                        ast::PpResource::Sep => PlayerResource::Sep,
-                    },
-                })))
-            }
+            ast::Number::Resource { resource } => Ok(player_resource(
+                resource.who,
+                match resource.kind {
+                    ast::PpResource::Pp => PlayerResource::PpCurrent,
+                    ast::PpResource::PpMax => PlayerResource::PpMaximum,
+                    ast::PpResource::Ep => PlayerResource::Ep,
+                    ast::PpResource::Sep => PlayerResource::Sep,
+                },
+            )),
         }
     }
 
@@ -934,5 +933,15 @@ fn turn_ordinal(who: ast::LeaderSide) -> Expr<Int> {
                 ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
             },
         })),
+    }))
+}
+
+fn player_resource(who: ast::LeaderSide, property: PlayerResource) -> Expr<Int> {
+    Expr::Live(Box::new(IntRead::PlayerResource {
+        player: match who {
+            ast::LeaderSide::Controller => PlayerRef::Controller {},
+            ast::LeaderSide::Opponent => super::super::events::timing::opponent(),
+        },
+        property,
     }))
 }

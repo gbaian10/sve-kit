@@ -1309,6 +1309,9 @@ pub(super) enum LeaderSide {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
     Literal(i64),
+    PaidAmount {
+        x_paid: String,
+    },
     Counter {
         counter: CounterRead,
     },
@@ -1873,7 +1876,10 @@ pub(super) struct OptionalCost {
 #[serde(deny_unknown_fields)]
 pub(super) struct Material {
     pub sel: PublicQuery,
-    pub n: u64,
+    pub n: Option<u64>,
+    #[serde(default)]
+    pub any: bool,
+    pub result: Option<String>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

@@ -85,7 +85,9 @@ fn lower_operations(
             }
             ast::CostOperation::Lesson(amount) => {
                 let material = ast::Material {
-                    n: *amount,
+                    n: Some(*amount),
+                    any: false,
+                    result: None,
                     sel: ast::PublicQuery {
                         other: false,
                         who: ast::Side::Controller,

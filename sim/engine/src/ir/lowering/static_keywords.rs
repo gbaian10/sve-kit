@@ -40,7 +40,7 @@ pub(super) fn lower_at_source(
     let condition = head
         .r#while
         .as_ref()
-        .map(|condition| context.qualification(condition, &source, path))
+        .map(|condition| context.qualification(condition, path))
         .transpose()?;
     let mut declarations = Vec::new();
     for effect in &head.effects {

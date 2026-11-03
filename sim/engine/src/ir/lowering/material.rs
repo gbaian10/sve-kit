@@ -25,11 +25,11 @@ pub(super) fn lower(
     operation: Operation,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.n == 0
-        || !(matches!(material.sel.who, ast::Side::Controller)
-            || (matches!(material.sel.who, ast::Side::All)
-                && matches!(material.sel.zone, ast::PublicZone::Field)
-                && matches!(operation, Operation::Put)))
+    let cardinality = cardinality(material, path)?;
+    if !(matches!(material.sel.who, ast::Side::Controller)
+        || (matches!(material.sel.who, ast::Side::All)
+            && matches!(material.sel.zone, ast::PublicZone::Field)
+            && matches!(operation, Operation::Put)))
     {
         return Err(unsupported(path));
     }
@@ -42,8 +42,25 @@ pub(super) fn lower(
     if matches!(operation, Operation::Act | Operation::Ex) && zone != ZoneKind::Field {
         return Err(unsupported(path));
     }
-    let (objects, decision) = choice(allocator, bindings, scope, &material.sel, material.n, path)?;
+    let (objects, decision) = choice(allocator, bindings, scope, &material.sel, cardinality, path)?;
     Ok((material_action(objects, operation), decision))
+}
+
+pub(super) fn cardinality(
+    material: &ast::Material,
+    path: &str,
+) -> Result<Cardinality, LoweringError> {
+    match (material.n, material.any) {
+        (Some(count), false) if count > 0 => Ok(Cardinality {
+            minimum: Nat(count),
+            maximum: Some(Nat(count)),
+        }),
+        (None, true) => Ok(Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        }),
+        _ => Err(unsupported(path)),
+    }
 }
 
 pub(super) fn choice(
@@ -51,10 +68,10 @@ pub(super) fn choice(
     bindings: &mut Allocator,
     scope: ScopeId,
     query: &ast::PublicQuery,
-    count: u64,
+    cardinality: Cardinality,
     path: &str,
 ) -> Result<(Selector, Decision), LoweringError> {
-    if count == 0 || !matches!(query.who, ast::Side::Controller | ast::Side::All) {
+    if !matches!(query.who, ast::Side::Controller | ast::Side::All) {
         return Err(unsupported(path));
     }
     let zone = match query.zone {
@@ -96,10 +113,6 @@ pub(super) fn choice(
             except: Box::new(numeric::holder()),
         };
     }
-    let cardinality = Cardinality {
-        minimum: Nat(count),
-        maximum: Some(Nat(count)),
-    };
     let objects = Selector::Bound { reference: binding };
     Ok((
         objects,
