@@ -1,0 +1,26 @@
+cards:
+  BP01-T14:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - auto:
+          do:
+            - banish: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token:
+      name: ゴースト
+      template: true
+format: 2
+kind: author_effect_set

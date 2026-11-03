@@ -1,0 +1,41 @@
+cards:
+  BP20-082:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 3
+                        to: enemy
+                  - - damage:
+                        n: 2
+                        to:
+                          leaders: opponents
+                  - - draw:
+                        n: 1
+                    - discard:
+                        n: 1
+                        who: self
+                  - - pp:
+                        delta: 1
+                        who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

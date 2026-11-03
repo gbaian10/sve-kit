@@ -1,0 +1,35 @@
+cards:
+  BP09-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 刹那の劇薬
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP09-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
