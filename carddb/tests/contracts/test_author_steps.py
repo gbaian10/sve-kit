@@ -71,3 +71,16 @@ def test_payment_decision_has_a_separate_preserved_wire_key() -> None:
         {"all": [{"payment_decided": "optional"}, {"not": {"paid": "optional"}}]},
         name="A.cond",
     )
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        {},
+        {"same_name_as": ""},
+        {"same_name_as": "self"},
+        {"same_name_as": "it", "extra": True},
+    ],
+)
+def test_same_name_token_requires_a_closed_object_reference(token: JsonValue) -> None:
+    _check({"create": {"token": token, "to": "field"}}, accepted=False, name="A.action")

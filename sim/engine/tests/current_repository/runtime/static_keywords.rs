@@ -112,8 +112,9 @@ fn neptune_applies_to_orcas_created_after_it_and_enables_an_attack() {
         &initial,
         Action::Token {
             tokens: vec![TokenSpec {
-                template: TokenTemplateId("オルカ".into()),
-                name: Expr::Literal(CardName("オルカ".into())),
+                template: TokenTemplate::Fixed {
+                    template: TokenTemplateId("オルカ".into()),
+                },
                 count: Expr::Literal(Nat(1)),
             }],
             destination: TokenDestination::Single {

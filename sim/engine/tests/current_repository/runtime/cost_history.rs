@@ -220,8 +220,9 @@ fn created_bound_cost_modifiers_reduce_actual_amulet_token_payment() {
     let output = Binding::new(50, ScopeId(1));
     let create = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("ナテラの大樹".into()),
-            name: Expr::Literal(CardName("ナテラの大樹".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("ナテラの大樹".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

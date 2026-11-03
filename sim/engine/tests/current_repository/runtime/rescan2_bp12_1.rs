@@ -571,8 +571,9 @@ fn bp12_102_creates_tiger_in_ex_then_acts_to_grant_its_field_storm() {
     let initial = position("BP12-102");
     let action = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("ホーリータイガー".into()),
-            name: Expr::Literal(CardName("ホーリータイガー".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("ホーリータイガー".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

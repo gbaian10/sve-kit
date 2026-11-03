@@ -1,7 +1,7 @@
 use super::{BindingKind, Checked, Checker, Expr, WellFormedReason};
 use crate::ir::{
     BatchPolicy, DamageAmount, DamageFlags, DamageRecipient, ObjectView, RecipientSet,
-    TokenDestination, TokenInitialState, TokenSpec, ZoneKind, ZoneOperation,
+    TokenDestination, TokenInitialState, TokenSpec, TokenTemplate, ZoneKind, ZoneOperation,
 };
 
 #[expect(
@@ -74,8 +74,8 @@ impl Checker {
         }
         for (index, token) in tokens.iter().enumerate() {
             self.at(&format!("tokens/{index}"), |checker| {
-                if !matches!(token.name, Expr::Literal(_)) {
-                    return checker.reject();
+                if let TokenTemplate::Name { name } = &token.template {
+                    checker.name(name)?;
                 }
                 checker.natural(&token.count)
             })?;

@@ -73,8 +73,9 @@ fn simultaneous_move_and_token_share_capacity_and_release_receipts_together() {
         batch_member(
             Action::Token {
                 tokens: vec![TokenSpec {
-                    template: TokenTemplateId("synthetic".into()),
-                    name: Expr::Literal(CardName("synthetic".into())),
+                    template: TokenTemplate::Fixed {
+                        template: TokenTemplateId("synthetic".into()),
+                    },
                     count: Expr::Literal(Nat(1)),
                 }],
                 destination: TokenDestination::Single {

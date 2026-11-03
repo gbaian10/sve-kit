@@ -139,8 +139,9 @@ fn bp16_p34_created_on_field_chooses_ward_then_fanfare_deals_six() {
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     let action = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("辺獄の悪鬼".into()),
-            name: Expr::Literal(CardName("辺獄の悪鬼".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("辺獄の悪鬼".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

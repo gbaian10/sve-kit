@@ -239,6 +239,7 @@ impl Game {
             pending.card = provider;
         }
         pending.timing = Some(event);
+        pending.capture_subject_information(self)?;
         Ok(pending)
     }
 

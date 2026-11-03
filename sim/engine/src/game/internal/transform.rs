@@ -1,7 +1,7 @@
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, CardName, Expr, Instruction, MoveMethod, Nat, Selector, TokenAllocation, TokenSpec,
-    TokenTemplateId, TransformOutcome, ZoneKind,
+    Action, Expr, Instruction, MoveMethod, Nat, Selector, TokenAllocation, TokenSpec,
+    TokenTemplate, TokenTemplateId, TransformOutcome, ZoneKind,
 };
 
 fn specification(action: &Action) -> Option<(&Selector, &TokenTemplateId)> {
@@ -96,8 +96,9 @@ impl Game {
                 })
                 .count();
             let specs = [TokenSpec {
-                template: template.clone(),
-                name: Expr::Literal(CardName(template.0.clone())),
+                template: TokenTemplate::Fixed {
+                    template: template.clone(),
+                },
                 count: Expr::Literal(Nat(u64::try_from(count).map_err(invalid)?)),
             }];
             ids.extend(

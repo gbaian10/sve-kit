@@ -2286,11 +2286,17 @@ class AllocatedTokensFields(TypedDict):
 type AllocatedTokens = AllocatedTokensFields
 
 
+@with_config(CONFIG)
+class SameNameTokenFields(TypedDict):
+    same_name_as: Ref
+
+
 type CreatedToken = (
     Text
     | ParamRef
     | Annotated[tuple[Text | ParamRef, ...], Field(min_length=1)]
     | AllocatedTokens
+    | SameNameTokenFields
 )
 
 

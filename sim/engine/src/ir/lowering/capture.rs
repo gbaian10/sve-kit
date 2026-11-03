@@ -3,8 +3,8 @@ use super::{
     PlayerRef, Selector, ast, unsupported,
 };
 use crate::ir::{
-    Capture, CaptureRef, CaptureTime, CharacteristicView, ChoiceDomain, IntOperation, NumberRead,
-    PlayerRead, Role, Stat,
+    Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, IntOperation,
+    NameOperation, NumberRead, PlayerRead, Role, Stat,
 };
 
 #[expect(
@@ -53,6 +53,31 @@ impl BodyContext<'_> {
         Ok(PlayerRef::FromExpression {
             value: Box::new(Expr::Captured(into)),
         })
+    }
+
+    pub(super) fn selected_name(
+        &mut self,
+        name: &str,
+        path: &str,
+    ) -> Result<Expr<CardName>, LoweringError> {
+        let (index, selection) = self.selected_parameter(name, path)?;
+        let into = CaptureRef {
+            binding: Binding::new(self.allocator.id(path)?, selection.key().0),
+        };
+        let decision = self
+            .parameters
+            .get_mut(index)
+            .ok_or_else(|| unsupported(path))?;
+        decision.captures.push(Capture::Name {
+            at: CaptureTime::AtSelection {
+                decision: decision.id,
+            },
+            value: Expr::Compute(Box::new(NameOperation::UniqueName {
+                object: ObjectView::Selected { selection },
+            })),
+            into: into.clone(),
+        });
+        Ok(Expr::Captured(into))
     }
 
     pub(super) fn selected_stat(

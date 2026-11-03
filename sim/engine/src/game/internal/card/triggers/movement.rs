@@ -5,7 +5,7 @@ use super::{
     PendingOccurrence, Result, RuntimeZoneRef, SnapshotId, SourceInformation, TriggerAggregation,
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
-use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, PlayerId};
 use alloc::collections::BTreeMap;
 
@@ -206,6 +206,10 @@ impl Game {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Departure observers share one atomic movement transaction."
+    )]
     pub(super) fn movement_departures(
         &mut self,
         id: &str,
@@ -226,7 +230,8 @@ impl Game {
             return Ok(Vec::new());
         }
         let object = self.internal_current_reference(id)?;
-        let lki = self.information_snapshot(object)?.at(before).view();
+        let snapshot = self.information_snapshot(object)?.at(before);
+        let lki = snapshot.view();
         let characters = self.internal_characteristics(id)?;
         let controller = player_id(&previous.controller)?;
         let token = self.object_type(id)?.contains("トークン");
@@ -261,7 +266,20 @@ impl Game {
                 }
                 let plan =
                     filter(&ability.node).ok_or_else(|| invalid("missing movement filter"))?;
-                if !plan.matches(&characters, holder == id, actor, controller, active, token) {
+                if !plan.matches_information(
+                    &SubjectInformation {
+                        original_cost: Some(snapshot.original_cost()),
+                        kind: characters.kind,
+                        traits: &characters.traits,
+                        names: &characters.names,
+                        class: characters.class.as_ref(),
+                    },
+                    holder == id,
+                    actor,
+                    controller,
+                    active,
+                    token,
+                ) {
                     continue;
                 }
                 let source = self.internal_card_source(&holder, ability.node.id, actor)?;

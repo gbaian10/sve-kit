@@ -132,7 +132,11 @@ tags!(EvolutionMode {
     Super,
     Effect
 });
-record!(TokenSpec { template: TokenTemplateId, name: Expr<CardName>, count: Expr<Nat> });
+record!(TokenSpec { template: TokenTemplate, count: Expr<Nat> });
+variants!(TokenTemplate {
+    Fixed { template: TokenTemplateId } => [],
+    Name { name: Expr<CardName> } => ["token.dynamic-name"]
+});
 variants!(TokenAllocation {
     Unrestricted { templates: Vec<TokenTemplateId>, total: Expr<Nat>, counts: Binding<Vec<TokenCount>>, actor: PlayerRef, decision: DecisionId } => ["transform.token-allocation"],
     Single { template: TokenTemplateId } => [],

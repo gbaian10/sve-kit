@@ -105,6 +105,7 @@ STEP_NAMES = {
     "A.act.make-type": "MakeTypeAction",
     "A.create.allocation": "TokenAllocation",
     "A.create.allocated": "AllocatedTokens",
+    "A.create.same-name": "SameNameTokenFields",
     "A.create.token": "CreatedToken",
     "A.create.destination-choice": "CreateDestinationChoice",
     "A.create.destination": "CreateDestination",

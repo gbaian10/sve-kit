@@ -1,10 +1,10 @@
 //! Stack increase expands into ordinary selection, counters and token creation.
 use super::{AbilitySource, BodyContext, Located, LoweringError, SourceSpan, ast, unsupported};
 use crate::ir::{
-    Action, Binding, CardName, ChoiceDomain, Control, CounterKind, CounterOperation, DecisionId,
-    Expr, Holder, Instruction, InstructionContext, InstructionId, Nat, Node, ObjectOperand,
-    PlayerRef, Posture, Predicate, Program, ReceiptId, TokenDestination, TokenInitialState,
-    TokenSpec, TokenTemplateId, ZoneKind, ZoneRef, printed_keywords,
+    Action, Binding, ChoiceDomain, Control, CounterKind, CounterOperation, DecisionId, Expr,
+    Holder, Instruction, InstructionContext, InstructionId, Nat, Node, ObjectOperand, PlayerRef,
+    Posture, Predicate, Program, ReceiptId, TokenDestination, TokenInitialState, TokenSpec,
+    TokenTemplate, TokenTemplateId, ZoneKind, ZoneRef, printed_keywords,
 };
 
 #[expect(
@@ -79,8 +79,9 @@ impl BodyContext<'_> {
         let output = Binding::new(2, else_scope);
         let create = instruction(Action::Token {
             tokens: vec![TokenSpec {
-                template: TokenTemplateId("大地の魔片".into()),
-                name: Expr::Literal(CardName("大地の魔片".into())),
+                template: TokenTemplate::Fixed {
+                    template: TokenTemplateId("大地の魔片".into()),
+                },
                 count: Expr::Literal(Nat(1)),
             }],
             destination: TokenDestination::Single {

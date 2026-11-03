@@ -305,8 +305,9 @@ fn bp13_p29_created_on_field_heals_then_banishes_at_next_own_main_phase() {
     initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"oppdraw","card":"BP01-171"}]);
     let action = Action::Token {
         tokens: vec![TokenSpec {
-            template: TokenTemplateId("アンの大英霊".into()),
-            name: Expr::Literal(CardName("アンの大英霊".into())),
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId("アンの大英霊".into()),
+            },
             count: Expr::Literal(Nat(1)),
         }],
         destination: TokenDestination::Single {

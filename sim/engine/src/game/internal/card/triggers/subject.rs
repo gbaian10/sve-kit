@@ -64,6 +64,7 @@ impl Game {
 impl EventSubjectInformation {
     pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
         SubjectInformation {
+            original_cost: None,
             kind: self.kind,
             class: Some(&self.class),
             traits: &self.traits,

@@ -1,8 +1,8 @@
 //! Direct action subjects may consume only this pending occurrence's exact subject.
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
-    Action, Binding, Bool, Control, EnterFieldEvent, Expr, InstallationSubjects, Node,
-    ObjectOperand, ObjectRef, Program, Selector,
+    Action, Binding, Bool, Control, EnterFieldEvent, Expr, InstallationSubjects, LkiReason,
+    NameOperation, Node, ObjectOperand, ObjectRef, ObjectView, Program, Selector, TokenTemplate,
 };
 use crate::ir::{Int, IntOperation, Predicate};
 use alloc::collections::BTreeSet;
@@ -45,6 +45,28 @@ pub(in crate::game::internal) fn paths(
                     event,
                     allowed,
                 ),
+                Action::Token { tokens, .. } => {
+                    for (token_index, token) in tokens.iter().enumerate() {
+                        if let TokenTemplate::Name {
+                            name: Expr::Compute(operation),
+                        } = &token.template
+                            && let NameOperation::UniqueName {
+                                object:
+                                    ObjectView::LastKnown {
+                                        object,
+                                        reason: LkiReason::ZoneExit,
+                                    },
+                            } = operation.as_ref()
+                            && matches!(object.as_ref(), ObjectOperand::FromExpression { value } if value.as_ref() == event)
+                        {
+                            let prefix = format!(
+                                "{path}/instruction/action/tokens/{token_index}/template/name/compute/object/object"
+                            );
+                            allowed.insert(prefix.clone());
+                            allowed.insert(format!("{prefix}/value/frozen"));
+                        }
+                    }
+                }
                 Action::Move { objects, .. } => subjects(
                     objects,
                     &format!("{path}/instruction/action/objects"),

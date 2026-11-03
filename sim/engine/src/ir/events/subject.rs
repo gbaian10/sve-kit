@@ -1,12 +1,13 @@
 //! Public event subscriptions share one closed plan over the committed event subject.
 use crate::ir::{
     AttackEvent, Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView,
-    Characteristics, CharacteristicsFields, ClassFrozen, ClassId, ClassRead, DamageEvent,
-    DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventPattern, EventPayload,
-    EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen, KindRead, LeaveFieldEvent,
-    NamesFrozen, NamesRead, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayEvent,
-    PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent, Predicate, Role, SnapshotFields,
-    TraitId, TraitsFrozen, TraitsRead, UbActivatedEvent, ZoneFrozen, ZoneKind, ZoneOperation,
+    Characteristics, CharacteristicsFields, ClassFrozen, ClassId, ClassRead, Comparison,
+    DamageEvent, DestroyEvent, EnterExEvent, EnterFieldEvent, EventContext, EventPattern,
+    EventPayload, EventSnapshotPolicy, EvolveEvent, Expr, Info, Int, IntOperation, KindFrozen,
+    KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, NumberRead, ObjectFrozen, ObjectOperand,
+    ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent,
+    Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, UbActivatedEvent,
+    ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
@@ -97,6 +98,24 @@ impl SubjectFields {
             ) => event.object_before,
             _ => return None,
         })
+    }
+
+    fn original_cost(self) -> Option<Expr<Int>> {
+        let Self::Leave(event) = self else {
+            return None;
+        };
+        Some(Expr::Compute(Box::new(IntOperation::InformationOrZero {
+            information: NumberRead::Cost {
+                object: ObjectView::EventSnapshot {
+                    object: Box::new(ObjectOperand::FromExpression {
+                        value: Box::new(self.object()),
+                    }),
+                    event: EventContext::LeaveField { event },
+                    policy: EventSnapshotPolicy::BeforeExit,
+                },
+                view: CharacteristicView::Original,
+            },
+        })))
     }
 
     pub(crate) fn object(self) -> Expr<ObjectRef> {
@@ -457,6 +476,7 @@ impl SubjectFields {
 }
 
 pub(crate) struct SubjectInformation<'subject> {
+    pub(crate) original_cost: Option<i64>,
     pub(crate) kind: CardKind,
     pub(crate) traits: &'subject [TraitId],
     pub(crate) names: &'subject [CardName],
@@ -465,6 +485,7 @@ pub(crate) struct SubjectInformation<'subject> {
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct SubjectFilter {
+    pub(crate) original_cost: Option<i64>,
     pub(crate) own: Option<bool>,
     pub(crate) itself: Option<bool>,
     pub(crate) kind: Option<CardKind>,
@@ -536,6 +557,16 @@ impl SubjectFilter {
                 right: Expr::Literal(PlayerRef::Controller {}),
             })));
         }
+        if let Some(cost) = self.original_cost {
+            let Some(left) = fields.original_cost() else {
+                return Expr::Literal(Bool(false));
+            };
+            predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
+                left,
+                comparison: Comparison::Equal,
+                right: Expr::Literal(Int(cost)),
+            })));
+        }
         Expr::Compute(Box::new(Predicate::And { predicates }))
     }
 
@@ -588,6 +619,16 @@ impl SubjectFilter {
             } else if matches!(predicate.as_ref(), Predicate::PlayerEquals { left, right } if *left == Expr::Literal(PlayerRef::Active {}) && *right == Expr::Literal(PlayerRef::Controller {}))
             {
                 plan.own_turn = true;
+            } else if let Predicate::CompareInt {
+                left,
+                comparison: Comparison::Equal,
+                right: Expr::Literal(Int(cost)),
+            } = predicate.as_ref()
+            {
+                if *cost <= 0 || fields.original_cost().as_ref() != Some(left) {
+                    return None;
+                }
+                plan.original_cost = Some(*cost);
             } else if let Predicate::KindEquals {
                 left,
                 right: Expr::Literal(kind),
@@ -638,6 +679,7 @@ impl SubjectFilter {
     ) -> bool {
         self.matches_information(
             &SubjectInformation {
+                original_cost: None,
                 kind: characters.kind,
                 traits: &characters.traits,
                 names: &characters.names,
@@ -660,7 +702,9 @@ impl SubjectFilter {
         active: PlayerId,
         token: bool,
     ) -> bool {
-        self.token.is_none_or(|expected| expected == token)
+        self.original_cost
+            .is_none_or(|expected| characters.original_cost == Some(expected))
+            && self.token.is_none_or(|expected| expected == token)
             && self.itself.is_none_or(|itself| itself == same)
             && self
                 .own

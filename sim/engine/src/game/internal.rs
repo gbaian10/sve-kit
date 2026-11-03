@@ -8,10 +8,10 @@
 use super::{Frame, Game, View, int, string};
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control, CostSpec,
-    CounterChangeEvent, DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision, DecisionId,
-    DecisionKind, Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent,
-    Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
+    CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control,
+    CostSpec, CounterChangeEvent, DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision,
+    DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent,
+    DriveTriggerEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
     InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead,
     LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome,
     Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
@@ -439,6 +439,7 @@ enum Slot {
     },
     Integer(Int),
     Natural(Nat),
+    Name(CardName),
     Boolean(Bool),
     Player(PlayerId),
     Objects {
@@ -515,7 +516,7 @@ pub(super) struct Execution {
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
     trigger_occurrence: Option<u64>,
-    event_object: Option<(Expr<ObjectRef>, ObjectRef)>,
+    event_object: Option<source::EventObject>,
     attack_event: Option<(Binding<AttackEvent>, AttackEvent)>,
     entry_method: Option<((ScopeId, u64), EntryMethod)>,
     entry_origin: Option<((ScopeId, u64), EntryOrigin)>,
