@@ -1,0 +1,17 @@
+cards:
+  CP01-T22:
+    abilities: []
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+      - line: 2
+        reason: reminder
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
