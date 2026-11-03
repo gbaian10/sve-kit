@@ -275,7 +275,7 @@ pub(super) fn record_discard(
         return Err(unsupported(path));
     }
     if single {
-        context.single_discards.insert(receipt);
+        context.receipt_reads.single_discards.insert(receipt);
     }
     context.observations.insert(
         name.to_owned(),

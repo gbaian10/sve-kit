@@ -200,7 +200,9 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 自己墓場的卡可放在 `targets`，例如 `from: {who: self, zone: cemetery, kind: follower, trait: 竜族}`；共用正式目標程序在付款前固定候選與宣告，沒有必需目標時不能付款。結算本文用 `move: {ref: returned, to: hand}` 回收。不能用本文的 `choose` 代替正式目標，否則會把本次付款才送墓的卡納入候選。這個目標入口不擴充回場的種類或容量選擇能力。
 
-Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084），其他牌庫頂目的地仍不接受 `result`。
+Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。
+
+牌庫頂送墓（含對手牌庫）也可帶 `result`，但只供卡片條件讀取，不能當移動輸入或追蹤對象。離開牌庫的卡沒有修正，條件讀其印刷資訊：`cmp: {left: {count: {in: {objects_of: milled, view: before}, not_class: ウィッチ}}, op: ge, right: 1}` 表示「{ウィッチ}でないカードを墓場に置いたなら」（BP17-045）；`kind`、`trait`、`class`、`not_class`、`name`、`name_contains`、`orig_cost_ge` 可組合，多種卡擇一用 `any` 連接多個條件（ECP02-040 依キュート／クール／パッション分別判斷）。看牌後選取再移動的收據（`move: {ref: picked, to: hand, result: taken}`）同樣可讀，表示「〜を公開したなら」（CP02-015）。只接受「至少一張符合／沒有符合」的比較；從場上或其他公開區移動的收據可能帶有場上修正，仍拒絕。
 
 公開場上物件移至 EX 的 `move` 可用 `result: moved`，後續 `if: {cond: {did: moved}, then: [...]}` 只在至少一個成員實際移動成功時執行；選零或目的 EX 已滿不算成功，搬兩張也只執行一次後句。這個子集只接受已綁定的 Move 收據名稱，不接受其他結果種類、過濾條件或前向／分支外引用；一般 EX 搬移的部分容量選擇仍明確拒絕並還原，不因此擴充容量決策。
 

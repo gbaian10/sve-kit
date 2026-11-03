@@ -781,7 +781,7 @@ impl BodyContext<'_> {
                 ex_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
                 observations: BTreeMap::new(),
-                single_discards: BTreeSet::new(),
+                receipt_reads: super::ReceiptReads::default(),
                 observed_targets: BTreeSet::new(),
                 field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
@@ -800,7 +800,7 @@ impl BodyContext<'_> {
                 context.ex_targets.clone_from(&self.ex_targets);
                 context.hand_targets.clone_from(&self.hand_targets);
                 context.observations.clone_from(&self.observations);
-                context.single_discards.clone_from(&self.single_discards);
+                context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);

@@ -1,11 +1,50 @@
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Binding, Bool, CharacteristicView, Characteristics, ClassRead, Comparison, Expr, Info, Int,
-    IntOperation, KindRead, MemberProjection, MovementReceipt, NamesRead, NumberRead,
-    ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptLocation, RuntimeObjectView,
-    TraitsRead,
+    Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
+    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
+    NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptId,
+    ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
 };
 use core::convert::identity;
+
+/// The member information a receipt condition may read.
+struct MemberCard {
+    names: Vec<CardName>,
+    kind: CardKind,
+    traits: Vec<TraitId>,
+    class: Option<ClassId>,
+}
+
+impl From<&Characteristics> for MemberCard {
+    fn from(characters: &Characteristics) -> Self {
+        Self {
+            names: characters.names.clone(),
+            kind: characters.kind,
+            traits: characters.traits.clone(),
+            class: characters.class.clone(),
+        }
+    }
+}
+
+fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
+    let id = match receipt {
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Discard { receipt },
+        } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Move { receipt },
+        } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
+        _ => return Err(unsupported("receipt member condition")),
+    };
+    id.copied()
+        .ok_or_else(|| unsupported("iterated receipt member condition"))
+}
 
 pub(super) fn check(
     receipt: &ObjectReceipt,
@@ -13,16 +52,9 @@ pub(super) fn check(
     member: Binding<RuntimeObjectView>,
     predicate: &Expr<Bool>,
 ) -> Result<()> {
-    let ObjectReceipt::Movement {
-        receipt: MovementReceipt::Discard { receipt },
-    } = receipt
-    else {
-        return Err(unsupported("discard member condition"));
-    };
-    if projection != MemberProjection::Before
-        || !matches!(receipt.location(), ReceiptLocation::Local { .. })
-    {
-        return Err(unsupported("discard member projection"));
+    local_receipt(receipt)?;
+    if projection != MemberProjection::Before {
+        return Err(unsupported("receipt member projection"));
     }
     matches(predicate, member, None, None).map(|_| ())
 }
@@ -36,42 +68,81 @@ pub(super) fn any(
     predicate: &Expr<Bool>,
 ) -> Result<bool> {
     check(receipt, projection, member, predicate)?;
-    let ObjectReceipt::Movement {
-        receipt: MovementReceipt::Discard { receipt },
-    } = receipt
-    else {
-        return Err(unsupported("discard member condition"));
-    };
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated discard condition"));
-    };
-    let Some(InstructionOutcome::Discard(outcome)) = execution.receipts.get(id) else {
-        return Err(invalid("missing discard producer"));
-    };
-    for result in &outcome.successful {
-        let before = result
-            .before
-            .ok_or_else(|| invalid("missing discard before member"))?;
-        let characters = execution
-            .facts
+    let id = local_receipt(receipt)?;
+    let members = match execution.receipts.get(&id) {
+        Some(InstructionOutcome::Discard(outcome)) => outcome
+            .successful
             .iter()
-            .find_map(|fact| match fact {
-                Fact::Discard(event) if event.card_before == before.object => {
-                    Some(&event.characters)
-                }
-                _ => None,
+            .map(|result| {
+                let before = result
+                    .before
+                    .ok_or_else(|| invalid("missing discard before member"))?;
+                let characters = execution
+                    .facts
+                    .iter()
+                    .find_map(|fact| match fact {
+                        Fact::Discard(event) if event.card_before == before.object => {
+                            Some(&event.characters)
+                        }
+                        _ => None,
+                    })
+                    .ok_or_else(|| invalid("missing discarded characteristics"))?;
+                Ok((MemberCard::from(characters), before.object))
             })
-            .ok_or_else(|| invalid("missing discarded characteristics"))?;
+            .collect::<Result<Vec<_>>>()?,
+        Some(InstructionOutcome::Move(outcome)) => outcome
+            .moved
+            .iter()
+            .filter(|movement| movement.after.is_some())
+            .map(|movement| {
+                Ok((
+                    printed_card(game, execution, movement.before)?,
+                    movement.before,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?,
+        _ => return Err(invalid("missing receipt member producer")),
+    };
+    for (card, before) in &members {
         if matches(
             predicate,
             member,
-            Some(characters),
-            Some((game, execution, before.object)),
+            Some(card),
+            Some((game, execution, *before)),
         )? {
             return Ok(true);
         }
     }
     Ok(false)
+}
+
+/// Cards leaving the deck carry no modifications, so their printing is their information.
+fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result<MemberCard> {
+    let card = &game.object(execution.object_id(before)?)?.card;
+    let printed = game.catalog.face(card, 0)?;
+    let kind = match printed["card_type"].as_str().unwrap_or_default() {
+        kind if kind.contains("フォロワー") => CardKind::Follower,
+        kind if kind.starts_with("スペル") => CardKind::Spell,
+        kind if kind.starts_with("アミュレット") => CardKind::Amulet,
+        _ => return Err(unsupported("receipt member card kind")),
+    };
+    let text = |value: &serde_json::Value| {
+        value
+            .as_str()
+            .map(str::to_owned)
+            .ok_or_else(|| invalid("unknown printed receipt member text"))
+    };
+    Ok(MemberCard {
+        names: vec![CardName(text(&printed["name"])?)],
+        kind,
+        traits: printed["traits"]
+            .as_array()
+            .ok_or_else(|| invalid("unknown printed traits"))?
+            .iter()
+            .map(|value| text(value).map(TraitId))
+            .collect::<Result<_>>()?,
+        class: Some(ClassId(text(&printed["card_class"])?)),
+    })
 }
 
 fn snapshot(object: &ObjectView, member: Binding<RuntimeObjectView>) -> Result<()> {
@@ -84,7 +155,7 @@ fn snapshot(object: &ObjectView, member: Binding<RuntimeObjectView>) -> Result<(
 fn matches(
     expression: &Expr<Bool>,
     member: Binding<RuntimeObjectView>,
-    characters: Option<&Characteristics>,
+    characters: Option<&MemberCard>,
     original: Option<(&Game, &Execution, ObjectRef)>,
 ) -> Result<bool> {
     let Expr::Compute(predicate) = expression else {
@@ -168,7 +239,7 @@ fn matches(
                     .any(|candidate| candidate.0.contains(&name.0))
             }))
         }
-        _ => Err(unsupported("discard member predicate shape")),
+        _ => Err(unsupported("receipt member predicate shape")),
     }
 }
 
@@ -186,7 +257,7 @@ fn original_cost_matches(
             },
     } = operation
     else {
-        return Err(unsupported("discard original cost comparison"));
+        return Err(unsupported("receipt member original cost comparison"));
     };
     snapshot(object, member)?;
     let Some((game, execution, before)) = original else {

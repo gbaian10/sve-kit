@@ -1047,6 +1047,15 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
     }
 }
 
+/// Receipts whose members' card information a body condition may read.
+#[derive(Clone, Default)]
+struct ReceiptReads {
+    /// Fixed one-card discards, also countable as a number.
+    single_discards: BTreeSet<ReceiptId>,
+    /// Movements of cards leaving the deck, which carry no modifications.
+    deck_moves: BTreeSet<ReceiptId>,
+}
+
 struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
@@ -1070,7 +1079,7 @@ struct BodyContext<'definitions> {
     ex_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
-    single_discards: BTreeSet<ReceiptId>,
+    receipt_reads: ReceiptReads,
     observed_targets: BTreeSet<String>,
     field_entry: FieldEntryGuard,
     targets: BTreeMap<String, Binding<Selector>>,
@@ -1116,7 +1125,7 @@ impl<'definitions> BodyContext<'definitions> {
             ex_targets: BTreeSet::new(),
             hand_targets: BTreeSet::new(),
             observations: BTreeMap::new(),
-            single_discards: BTreeSet::new(),
+            receipt_reads: ReceiptReads::default(),
             observed_targets: BTreeSet::new(),
             field_entry: FieldEntryGuard::default(),
             targets: BTreeMap::new(),

@@ -46,6 +46,14 @@ impl BodyContext<'_> {
                 },
             );
         }
+        if let ast::Step::Move(value) = step
+            && value.result.is_some()
+            && (value.top.is_some()
+                || matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name)))
+                    if self.observed_targets.contains(name)))
+        {
+            self.receipt_reads.deck_moves.insert(receipt);
+        }
         let saved = match step {
             ast::Step::Destroy(ast::ObjectAction::Long {
                 result: Some(name), ..
@@ -489,12 +497,8 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             }
         };
-        // Only the EX output is public enough to follow; a top-to-cemetery result has no consumer.
-        if value.r#ref.is_some()
-            || value.position.is_some()
-            || value.order.is_some()
-            || (value.result.is_some() && zone != OwnerZone::Ex)
-        {
+        // A top-to-cemetery result is read only by receipt member conditions.
+        if value.r#ref.is_some() || value.position.is_some() || value.order.is_some() {
             return Err(unsupported(path));
         }
         Ok(Action::Move {

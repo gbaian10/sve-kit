@@ -15,7 +15,6 @@ fn deck_top_lowering_rejects_unadmitted_source_destination_and_followup() {
         json!({"top":{"who":"opponents","n":1},"to":"ex"}),
         json!({"top":{"who":"self","n":2},"to":"hand"}),
         json!({"top":{"who":"self","n":0},"to":"cemetery"}),
-        json!({"top":{"who":"self","n":2},"to":"cemetery","result":"m"}),
     ] {
         let error = lowerer().lower(&tree(&movement)).unwrap_err();
         assert_eq!(error.code, "unsupported_construct");

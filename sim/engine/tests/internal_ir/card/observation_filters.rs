@@ -495,7 +495,7 @@ fn chosen_top_and_unchosen_remainder_bottom_reuse_one_look() {
 }
 
 #[test]
-fn deck_order_results_feed_only_remainders_and_top_results_only_ex() {
+fn deck_order_results_feed_only_remainders_and_milled_results_only_conditions() {
     for steps in [
         // The reordered cards themselves need a fresh Look before another private order.
         json!([
@@ -504,13 +504,41 @@ fn deck_order_results_feed_only_remainders_and_top_results_only_ex() {
             {"move":{"ref":"kept","to":"deck","position":"top","order":"chooser","result":"placed"}},
             {"move":{"ref":{"in":{"objects_of":"placed","view":"before"}},"to":"cemetery"}}
         ]),
-        json!([{"move":{"top":{"who":"self","n":1},"to":"cemetery","result":"milled"}}]),
+        json!([
+            {"move":{"top":{"who":"self","n":1},"to":"cemetery","result":"milled"}},
+            {"move":{"ref":{"in":{"objects_of":"milled","view":"before"}},"to":"hand"}}
+        ]),
     ] {
         assert!(
             lowerer().lower(&tree(&steps)).is_err(),
-            "an order receipt is not a movement input and a milled card has no followable output"
+            "an order receipt is not a movement input and a milled card is not a movement input"
         );
     }
+}
+
+fn milled_condition(source: &Value) -> Value {
+    tree(&json!([
+        {"move":source},
+        {"if":{"cond":{"cmp":{"left":{"count":{"in":{"objects_of":"moved","view":"before"},"not_class":"ウィッチ"}},"op":"ge","right":1_u8}},
+            "then":[{"draw":{"n":1_u8}}]}}
+    ]))
+}
+
+#[test]
+fn receipt_card_conditions_read_only_cards_that_left_the_deck() {
+    lowerer()
+        .lower(&milled_condition(
+            &json!({"top":{"who":"self","n":2},"to":"cemetery","result":"moved"}),
+        ))
+        .unwrap();
+    // A card leaving the field may carry modifications that its printing does not show.
+    let field = milled_condition(
+        &json!({"ref":{"who":"self","zone":"field","kind":"follower"},"to":"cemetery","result":"moved"}),
+    );
+    assert_eq!(
+        lowerer().lower(&field).unwrap_err().code,
+        "unsupported_construct"
+    );
 }
 
 fn order_receipt_steps() -> Value {

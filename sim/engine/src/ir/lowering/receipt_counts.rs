@@ -40,7 +40,7 @@ impl BodyContext<'_> {
         let ReceiptLocation::Local { id } = receipt.location() else {
             return Err(unsupported(path));
         };
-        if !self.single_discards.contains(id) {
+        if !self.receipt_reads.single_discards.contains(id) {
             return Err(unsupported(path));
         }
         let condition = self.receipt_any(query, path)?;
@@ -61,12 +61,26 @@ impl BodyContext<'_> {
             .get(&query.r#in.objects_of)
             .ok_or_else(|| unsupported(path))?
             .clone();
-        if !matches!(
-            receipt,
+        let readable = match &receipt {
             ObjectReceipt::Movement {
-                receipt: MovementReceipt::Discard { .. }
-            }
-        ) {
+                receipt: MovementReceipt::Discard { .. },
+            } => true,
+            // Only cards leaving the deck carry no field modifications to read as LKI.
+            ObjectReceipt::Movement {
+                receipt: MovementReceipt::Move { receipt },
+            } => matches!(
+                receipt.location(),
+                ReceiptLocation::Local { id } if self.receipt_reads.deck_moves.contains(id)
+            ),
+            ObjectReceipt::Movement { .. }
+            | ObjectReceipt::Batch { .. }
+            | ObjectReceipt::TransformBanished { .. }
+            | ObjectReceipt::TransformCreated { .. }
+            | ObjectReceipt::Token { .. }
+            | ObjectReceipt::Flip { .. }
+            | ObjectReceipt::Look { .. } => false,
+        };
+        if !readable {
             return Err(unsupported(path));
         }
         let member = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
@@ -75,6 +89,7 @@ impl BodyContext<'_> {
                 kind: query.kind.as_ref().map(super::search::card_kind),
                 trait_id: query.r#trait.as_deref(),
                 class: query.class.as_deref(),
+                not_class: query.not_class.as_deref(),
                 name: query.name.as_deref(),
                 contains: query.name_contains.as_deref(),
                 original_cost: [None, None, query.orig_cost_ge],
