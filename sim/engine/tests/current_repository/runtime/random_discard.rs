@@ -132,3 +132,39 @@ fn bp15_114_places_the_nectar_whose_play_discards_two_random_cards() {
     assert_eq!(state["P2"]["hand"], json!(["b"]));
     assert_eq!(state["P2"]["cemetery"], json!(["c", "a"]), "two random cards are discarded");
 }
+
+#[test]
+fn bp02_074_refuses_to_draw_around_anonymous_hand_cards() {
+    for script in [
+        Value::Null,
+        json!({"random_selections":[{"n":1_u8,"from":"P2.hand","result":["h0"]}]}),
+    ] {
+        let mut initial = position(&["h0"]);
+        initial["players"]["P2"]["zones"]["hand"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"filler":2_u8}));
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP02-074"}]);
+        let mut game = game(&initial, &script);
+        let step = game.play_internal_card("source", actor()).unwrap();
+        finish(&mut game, step);
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let question = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &question.domain else {
+            panic!("pending fanfare expected")
+        };
+        let before = game.projection(View::Referee).unwrap();
+        assert!(
+            game.answer_internal_card(question.actor, question.token, Answer::Pending(options[0].handle))
+                .is_err(),
+            "the anonymous cards stay in the random population"
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap(),
+            before,
+            "the refused discard leaves the whole position unchanged"
+        );
+    }
+}

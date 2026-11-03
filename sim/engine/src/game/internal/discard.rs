@@ -247,10 +247,12 @@ impl Game {
         {
             let count = random_count(&instruction.action)?;
             let seat = seat_name(execution.player(self, player)?)?;
-            let chosen = self.random_members(
-                self.zone_ids(seat, "hand"),
-                usize::try_from(count).map_err(invalid)?,
-            )?;
+            let hand = self.zone_ids(seat, "hand");
+            // Anonymous hand cards still belong to the population; never draw around them.
+            if i64::try_from(hand.len()).map_err(invalid)? != self.zone_count(seat, "hand") {
+                return Err(unsupported("random discard from anonymous hand cards"));
+            }
+            let chosen = self.random_members(hand, usize::try_from(count).map_err(invalid)?)?;
             let members = chosen
                 .iter()
                 .map(|id| execution.reference(self, id))
