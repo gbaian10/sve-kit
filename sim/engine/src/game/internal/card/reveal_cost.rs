@@ -21,21 +21,28 @@ impl Game {
         {
             return Ok(());
         }
-        let source = self.object(&execution.context.source)?;
-        let (printing, _) = self.internal_effective_print(&execution.context.source)?;
+        let authority = execution
+            .ability
+            .ok_or_else(|| invalid("missing reveal ability source"))?;
+        // Pending triggers retain their original printing after the holder leaves or changes form.
+        let printing = self
+            .card_runtime
+            .instances
+            .iter()
+            .find_map(|((_, _, printing, _, _), instance)| {
+                (*instance == authority.instance).then_some(printing)
+            })
+            .ok_or_else(|| invalid("missing reveal source instance"))?;
         let card = self
             .card_runtime
             .definitions
             .cards
-            .get(&printing)
+            .get(printing)
             .ok_or_else(|| invalid("missing reveal cost card"))?;
-        let field = source.zone == "field"
-            && source.generation == execution.context.generation.0
-            && card
-                .card()
-                .abilities
-                .iter()
-                .any(|ability| reveal_payment::field_cost(&ability.node, costs));
+        let field = card.card().abilities.iter().any(|ability| {
+            ability.node.id == authority.definition
+                && reveal_payment::field_cost(&ability.node, costs)
+        });
         if !field
             && !card.card().card_play_costs.iter().any(|face| {
                 face.node.additional.as_ref().is_some_and(|payment| {

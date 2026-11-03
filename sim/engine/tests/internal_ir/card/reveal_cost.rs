@@ -559,3 +559,100 @@ fn paid_reveal_material_bindings_are_unavailable_to_the_ability_body() {
         assert_eq!(error.reason, WellFormedReason::UnavailableBinding);
     }
 }
+
+#[test]
+fn a_departed_lastword_source_can_pay_its_reveal_head_from_the_original_definition() {
+    let mut expanded = tree(&json!({"pp":0}), &json!([]));
+    let entry = &mut expanded["cards"]["unit-follower"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("activate");
+    entry["lastword"] = json!({"cost":{"reveal":{"sel":{"who":"self","zone":"hand","kind":"spell"},"n":1}},"do":[{"draw":{"n":1}}]});
+    let program = lowerer()
+        .lower(&expanded)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let program = card(vec![
+        program.card().abilities[0].clone(),
+        ability(
+            99,
+            vec![instruction(
+                99,
+                Action::Destroy {
+                    objects: Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                },
+            )],
+        ),
+    ]);
+    let activated = AbilityId(99);
+    let mut initial = setup(1, json!([{"id":"drawn","card":"unit-spell"}]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"h","card":"unit-spell"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "departed-reveal-head",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    resolved(
+        game.activate_internal_card("s", activated, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("lastword occurrence");
+    };
+    assert_eq!(options.len(), 1);
+    let CardPlay::Awaiting(declare) = game
+        .answer_internal_card(
+            pending.actor,
+            pending.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap()
+    else {
+        panic!("head declaration");
+    };
+    assert_eq!(declare.domain, InputDomain::OptionalCost);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+        json!(["s"])
+    );
+    let CardPlay::Awaiting(materials) = game
+        .answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(true))
+        .unwrap()
+    else {
+        panic!("head materials");
+    };
+    assert!(game.internal_decision(View::P2).is_none());
+    let result = resolved(
+        game.answer_internal_card(
+            materials.actor,
+            materials.token,
+            Answer::CostMaterials(vec![0]),
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["h", "drawn"])
+    );
+    assert!(game.projection(View::P2).unwrap()["objects"]["h"].is_null());
+    assert!(
+        !result
+            .progress
+            .facts
+            .iter()
+            .any(|fact| matches!(fact, Fact::Discard(_)))
+    );
+}
