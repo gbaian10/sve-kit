@@ -1,0 +1,33 @@
+cards:
+  BP05-081:
+    abilities:
+      - evolve_time:
+          cost:
+            leader_life: 1
+          do:
+            - damage:
+                n:
+                  history_count:
+                    event: life_changed
+                    where:
+                      direction: down
+                    who: self
+                    window: this_turn
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
