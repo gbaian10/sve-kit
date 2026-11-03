@@ -1,0 +1,34 @@
+cards:
+  BP05-090:
+    abilities:
+      - auto:
+          do:
+            - pp:
+                delta: 2
+                who: self
+          on:
+            phase:
+              which: main
+              whose: opp
+        line: 1
+      - evolve_time:
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                acted: false
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
