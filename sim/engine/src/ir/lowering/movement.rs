@@ -4,10 +4,6 @@ use crate::ir::events::mill::MillFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{CardKind, CardName, ClassId, TraitId};
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "The closed movement event mapping keeps its subject filters together."
-)]
 pub(super) fn subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
