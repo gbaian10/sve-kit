@@ -686,3 +686,6 @@ mod dynamic_declarations;
 
 #[path = "card/hand_selection.rs"]
 mod hand_selection;
+
+#[path = "card/event_ability.rs"]
+mod event_ability;

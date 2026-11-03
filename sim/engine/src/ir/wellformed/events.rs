@@ -456,6 +456,10 @@ impl Checker {
         )
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "All subject events share one exhaustive binding admission boundary."
+    )]
     fn subject_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -487,6 +491,13 @@ impl Checker {
             EventPattern::EnterField { binding, predicate } => self.subject_header(
                 *binding,
                 SubjectFields::Entry(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
+            EventPattern::UbActivated { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Ub(*binding),
                 predicate,
                 view,
                 triggering,
@@ -554,7 +565,6 @@ impl Checker {
             | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }
             | EventPattern::DriveTrigger { .. }
-            | EventPattern::UbActivated { .. }
             | EventPattern::Fused { .. }
             | EventPattern::Equip { .. }
             | EventPattern::Dice { .. }

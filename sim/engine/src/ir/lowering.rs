@@ -830,7 +830,10 @@ fn lowered_trigger(
         };
         TriggerSpec {
             active_zones: active_zones(entry, path)?,
-            view: if matches!(pattern, EventPattern::Play { .. }) {
+            view: if matches!(
+                pattern,
+                EventPattern::Play { .. } | EventPattern::UbActivated { .. }
+            ) {
                 EventSnapshotPolicy::AtReveal
             } else if matches!(
                 pattern,
@@ -856,6 +859,13 @@ fn lowered_subscription(
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
     match on {
+        ast::PhaseSubscription::UbActivated(_ub) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::UbActivated {
+                binding: event,
+                predicate: super::events::ability::subject().predicate(SubjectFields::Ub(event)),
+            })
+        }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
@@ -1010,6 +1020,7 @@ fn lowered_change(
             })
         }
         ast::PhaseSubscription::Evolved(_)
+        | ast::PhaseSubscription::UbActivated(_)
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)

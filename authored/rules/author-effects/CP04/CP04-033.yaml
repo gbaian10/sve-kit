@@ -1,0 +1,52 @@
+cards:
+  CP04-033:
+    abilities:
+      - fanfare:
+          do:
+            - buff:
+                hp: -2
+                on: t
+                power: -2
+          targets:
+            - bind: t
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+          ub: true
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: -1
+                on: t
+                power: -1
+          on:
+            ub_activated:
+              holder:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              who: self
+          targets:
+            - bind: t
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

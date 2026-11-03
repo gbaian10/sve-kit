@@ -98,6 +98,7 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::Stood(_)
         | ast::PhaseSubscription::StatChanged(_)
         | ast::PhaseSubscription::Evolved(_)
+        | ast::PhaseSubscription::UbActivated(_)
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
         | ast::PhaseSubscription::EnterField(_)

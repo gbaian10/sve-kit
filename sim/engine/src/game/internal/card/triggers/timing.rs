@@ -145,6 +145,9 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
             event.after
         )),
         Event::Destroy { .. } => Ok(format!("Destroy while source at field slot {position}")),
+        Event::UbActivated { .. } => {
+            Ok(format!("UbActivated while source at field slot {position}"))
+        }
         Event::Play { .. } => Ok(format!("Play while source at slot {position}")),
         Event::Attack { event } => Ok(format!(
             "Attack {} from field slot {position}",

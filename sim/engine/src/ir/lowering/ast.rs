@@ -1618,6 +1618,8 @@ pub(super) enum PhaseSubscription {
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
     Played(PlayedSubscription),
+    #[serde(rename = "ub_activated")]
+    UbActivated(UbSubscription),
     #[serde(rename = "phase")]
     Phase(PhaseSubscriptionPayload),
     #[serde(rename = "enter_field")]
@@ -1645,6 +1647,32 @@ pub(super) enum PhaseSubscription {
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UbSubscription {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "holder")]
+    pub _holder: UbHolder,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UbHolder {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: UbHolderZone,
+    #[serde(rename = "kind")]
+    pub _kind: FollowerKind,
+    #[serde(rename = "other")]
+    pub _other: True,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum UbHolderZone {
+    Field,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PhaseSubscriptionPayload {
