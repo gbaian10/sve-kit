@@ -281,7 +281,9 @@ impl Checker {
             _ => return self.reject(),
         }
         self.decision_header(decision)?;
-        self.answer(decision, None)
+        self.answer(decision, None)?;
+        self.record_field_material(decision);
+        Ok(())
     }
 
     pub(super) fn play_input(
@@ -582,6 +584,9 @@ impl Checker {
         })?;
         if let Some(paid) = paid {
             self.env.receipts.extend(paid.receipts);
+            self.env
+                .single_material_moves
+                .extend(paid.single_material_moves);
             self.env.single_discards.extend(paid.single_discards);
             self.env.receipt_access.extend(paid.receipt_access);
             self.env

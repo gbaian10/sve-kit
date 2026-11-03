@@ -532,6 +532,9 @@ impl Execution {
                         .ok_or_else(|| invalid("missing damage event authority"))?;
                     Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
                 }
+                IntFrozen::PaidMaterialAttack { receipt } => {
+                    super::receipt_counts::paid_material_attack(self, receipt)
+                }
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)
                 }

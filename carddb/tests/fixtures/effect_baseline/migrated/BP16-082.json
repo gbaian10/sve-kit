@@ -1,0 +1,73 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "bane",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "cemetery"
+              }
+            },
+            5
+          ],
+          "fn": "ge"
+        },
+        "keywords": [
+          "storm"
+        ],
+        "op": "aura",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "bind": "discarded",
+            "by": "opponent",
+            "max": 1,
+            "min": 1,
+            "op": "select",
+            "select": {
+              "side": "opponent",
+              "zone": "hand"
+            }
+          },
+          {
+            "op": "discard",
+            "subjects": "discarded"
+          }
+        ]
+      },
+      "event": "deal_damage",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self",
+      "trigger_if": {
+        "args": [
+          {
+            "read": "self.is_active"
+          },
+          {
+            "read": "event.to_opposing_leader"
+          }
+        ],
+        "fn": "and"
+      }
+    }
+  ],
+  "status": "complete"
+}

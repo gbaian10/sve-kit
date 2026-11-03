@@ -1,0 +1,49 @@
+cards:
+  BP03-086:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              result: discarded
+              sel:
+                who: self
+                zone: hand
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ゴースト
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: discarded
+                          view: before
+                        trait: 死者
+                    op: ge
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP01-T14
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

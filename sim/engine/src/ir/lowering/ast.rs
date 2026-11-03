@@ -1326,7 +1326,7 @@ pub(super) enum Number {
     },
     Alias(String),
     Power {
-        power_of: This,
+        power_of: Observation,
     },
     Life {
         hp_of: BodyStatReference,
@@ -1859,6 +1859,8 @@ pub(super) struct PublicQuery {
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub name: Option<String>,
+    #[serde(default)]
+    pub names: Vec<String>,
     pub name_contains: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,

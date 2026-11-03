@@ -1,0 +1,42 @@
+cards:
+  BP16-082:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 5
+      - auto:
+          do:
+            - discard:
+                n: 1
+                who: opp
+          on:
+            dealt_damage:
+              during:
+                turn: self
+              recipient:
+                leader: opp
+              ref: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

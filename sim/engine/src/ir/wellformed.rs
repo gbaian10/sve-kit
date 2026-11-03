@@ -24,6 +24,7 @@ mod evolution;
 mod exchange;
 mod grant;
 mod installation;
+mod material_values;
 mod modes;
 mod movement;
 mod prevention;
@@ -221,12 +222,18 @@ struct Environment {
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
+    field_materials: BTreeSet<Key>,
+    single_material_moves: BTreeSet<ReceiptId>,
     single_discards: BTreeSet<ReceiptId>,
 }
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
         self.bindings.extend(other.bindings.clone());
         self.receipts.extend(other.receipts.clone());
+        self.field_materials
+            .extend(other.field_materials.iter().copied());
+        self.single_material_moves
+            .extend(other.single_material_moves.iter().copied());
         self.single_discards
             .extend(other.single_discards.iter().copied());
         self.access.extend(other.access.clone());
@@ -288,6 +295,8 @@ impl Checker {
             movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            field_materials: BTreeSet::new(),
+            single_material_moves: BTreeSet::new(),
             single_discards: BTreeSet::new(),
         };
         Self {
@@ -541,6 +550,7 @@ impl Checker {
             return self.reject();
         }
         self.produce(instruction.receipt, outcome(&instruction.action))?;
+        self.record_material_move(instruction, context);
         if let Action::Discard {
             mode: super::DiscardMode::Chosen { constraint },
             ..

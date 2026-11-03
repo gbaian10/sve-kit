@@ -26,6 +26,17 @@ pub(super) fn lower(
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
     let cardinality = cardinality(material, path)?;
+    let named = matches!(operation, Operation::Put)
+        && matches!(material.sel.who, ast::Side::Controller)
+        && matches!(material.sel.zone, ast::PublicZone::Field)
+        && cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            });
+    if !(material.sel.names.is_empty() || named) {
+        return Err(unsupported(path));
+    }
     if !(matches!(material.sel.who, ast::Side::Controller)
         || (matches!(material.sel.who, ast::Side::All)
             && matches!(material.sel.zone, ast::PublicZone::Field)

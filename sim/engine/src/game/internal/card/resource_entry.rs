@@ -448,6 +448,7 @@ impl Game {
             execution.receipts.insert(
                 step.instruction.receipt,
                 InstructionOutcome::Payment {
+                    characters: vec![],
                     quantity: if resources {
                         Quantity {
                             amount: Int(i64::try_from(entry.count).map_err(invalid)?),

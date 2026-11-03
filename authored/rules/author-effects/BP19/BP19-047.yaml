@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-047:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  name: 没頭の実験体
+                n: 1
+                to: ex
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel:
+                    who: self
+                    zone: field
+                    kind: follower
+                    names:
+                      - 没頭の実験体
+                      - 多頭の実験体
+                  n: 1
+                  result: material
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  power_of:
+                    objects_of: material
+                    view: before
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
