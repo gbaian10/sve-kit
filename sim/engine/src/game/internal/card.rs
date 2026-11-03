@@ -517,7 +517,13 @@ impl Game {
         key: ActivationKey,
         actor: PlayerId,
     ) -> Result<CardPlay> {
-        self.require_internal_abilities(holder, "activate effective ability")?;
+        let query = match key {
+            ActivationKey::Definition(definition) => format!("activate ability {}", definition.0),
+            ActivationKey::Instance(instance) => {
+                format!("activate ability instance {}", instance.0)
+            }
+        };
+        self.require_internal_abilities(holder, &query)?;
         let object = self.object(holder)?.clone();
         let mut selected = None;
         for candidate in self

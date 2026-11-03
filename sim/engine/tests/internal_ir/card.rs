@@ -693,7 +693,7 @@ mod event_ability;
 #[path = "card/removal_immunity.rs"]
 mod removal_immunity;
 
-#[path = "card/material_power.rs"]
-mod material_power;
 #[path = "card/equipment.rs"]
 mod equipment;
+#[path = "card/material_power.rs"]
+mod material_power;

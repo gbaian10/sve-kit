@@ -58,12 +58,14 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_equipment_links(&self, holder: &str) -> Result<bool> {
         let mut attached = false;
-        for equipment in
-            self.state.objects.values().filter(|object| {
-                object.zone == "equipment" && object.state["equipped_to"] == holder
-            })
+        for equipment in self
+            .state
+            .objects
+            .values()
+            .filter(|object| object.state["equipped_to"] == holder)
         {
-            if self.object(holder)?.zone != "field"
+            if equipment.zone != "equipment"
+                || self.object(holder)?.zone != "field"
                 || self.object_type(&equipment.id)? != "イクイップメント・トークン"
                 || !self.card_runtime.has_definition(&equipment.card)
             {
