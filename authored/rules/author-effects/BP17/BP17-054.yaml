@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-054:
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            steps:
+              - reveal:
+                  sel:
+                    who: self
+                    zone: hand
+                    trait: 学院
+                  n: 1
+                  result: shown
+              - to_deck_bottom:
+                  sel:
+                    in: shown
+                  n: 1
+      - line: 2
+        spell:
+          do:
+            - draw:
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
