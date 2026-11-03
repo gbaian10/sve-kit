@@ -1000,6 +1000,7 @@ impl Game {
             receipts: BTreeMap::new(),
             cost_discards: BTreeMap::new(),
             material_selections: BTreeMap::new(),
+            effect_evolution_destinations: BTreeMap::new(),
             facts: Vec::new(),
             waiting: None,
             destroy_guards: Vec::new(),

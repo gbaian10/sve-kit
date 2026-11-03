@@ -33,6 +33,8 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 
 「残り」寫 `{in:seen,except:{in:{objects_of:moved,view:before}}}`，扣除成功搬移的 before，保留容量不足而未搬走者。多次搬移可用 except.any_of。差集保留觀察順序，不重新查牌庫頂；不新增 rest/first/second/底來源節點。前者／後者使用兩個 Target binding 或既有 roles；分組搜尋使用 per_group。同牌庫 move 重排降低為 Order，不變世代；其 receipt 仍須提供成功 before 成員供差集消費。獨立 order DSL 鍵不接受；既有分類 ID A.order 對應 choose.order／move.order。
 
+執行期的私有 Look 選卡可用 `choose.from: {in: seen, except: {in: seen, name: 指定名字}}` 排除一個字面名字，並與既有種類／特徵條件交集。此准入要求相同 observation 與非空名字，不接受公開目標、搜尋、聯集、分組或和 `not_same_name_as_this` 合用；這不改變下方一般 schema 的其他尚未准入形狀。
+
 ## 動作逐 variant
 
 | 動作 | 必填／變體 | 可選與互斥（長形另有 M） | 真例／合成 |

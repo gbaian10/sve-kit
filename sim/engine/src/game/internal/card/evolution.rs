@@ -11,6 +11,16 @@ use crate::ir::{
 };
 use serde_json::{Value, json};
 
+pub(super) fn destination_spec(destination: &Destination) -> Value {
+    match destination {
+        Destination::SameName => json!({}),
+        Destination::Names(names) => {
+            json!({"names": names.iter().map(|name| &name.0).collect::<Vec<_>>()})
+        }
+        Destination::Contains(name) => json!({"name_contains": name.0}),
+    }
+}
+
 pub(super) const fn intrinsic(ability: &Ability) -> bool {
     matches!(
         ability.source.origin,
@@ -290,16 +300,10 @@ impl Game {
         }
         let amount = cost(&entry.node)?;
         let mut code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});
-        match destination(&entry.node)? {
-            Destination::SameName => {}
-            Destination::Names(names) => {
-                code["body"]["names"] =
-                    json!(names.into_iter().map(|name| name.0).collect::<Vec<_>>());
-            }
-            Destination::Contains(name) => {
-                code["body"]["name_contains"] = json!(name.0);
-            }
-        }
+        let mut body = destination_spec(&destination(&entry.node)?);
+        body["op"] = json!("evolve");
+        body["subjects"] = json!("self");
+        code["body"] = body;
         let resource = self.object(string(&decision["evolve_card"]))?;
         if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);

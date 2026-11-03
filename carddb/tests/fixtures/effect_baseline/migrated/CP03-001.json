@@ -1,0 +1,64 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self",
+        "name": "蒼嵐覇竜 グローリー・メイルストローム"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 4
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "storm"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "drive",
+        "count": 2
+      },
+      "event": "attack",
+      "subject": "self",
+      "keyword": "twin_drive",
+      "rule": "14.4.6.3"
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "eq",
+          "args": [
+            {
+              "read": "self.turn.trait_attacks.アクアフォース"
+            },
+            4
+          ]
+        },
+        "then": {
+          "op": "evolve",
+          "subjects": "self",
+          "name": "蒼嵐覇竜 グローリー・メイルストローム"
+        }
+      },
+      "event": "attack",
+      "subject": "self",
+      "keyword": "on_attack"
+    }
+  ]
+}

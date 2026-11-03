@@ -1,0 +1,57 @@
+cards:
+  CSD03b-005:
+    abilities:
+      - keywords:
+          - twin_drive
+        line: 1
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  except:
+                    in: seen
+                    name: ドラゴンナイト アリフ
+                  in: seen
+                  kind: follower
+                  trait: かげろう
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

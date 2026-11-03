@@ -297,6 +297,8 @@ Quick 法術的公開材料、墓地材料、Field＋EX 聯集、變動張數與
 不信任輸入的 kind。全部程序完成後才從進化卡有效印刷面取得 Printed OnEvolve，自身、AfterEntry、PerFact、
 PlaySpec 沿用共同准入。進化相當能力仍拒絕；OnSuperEvolve 見〈第二批自動能力入口〉。
 
+效果本文的受驗自進化是封閉的 ResolutionChoice→EachObject→Evolve 投影，與上面的固有進化入口共用實際進化程序。目的地只收同名或明示的一個名字，沿 `Destination` 的同一 predicate 建立及辨認決策；名稱清單、包含篩選及其他投影變形仍拒絕。回答只攜帶私有 handle，不能指定目的地。iteration 從本次選擇的 `TargetWait` 讀取受驗決策，把目的地權威綁到內層進化資源 binding；Evolve 指示取用即移除，再檢查資源仍屬該目的地、控制者、世代與可進化狀態。缺失或重複使用的權威拒絕。它不扣一般進化的 PP／EP／SEP、不消耗每回合進化次數，仍產生真正 Evolve 事實、進化關聯與進化時待機；沒有合法目的形時允許空選擇並不進化。
+
 進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
 新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。
 成本依規則 5.16.1.2 保留 base face 0 的印刷值與既有成本修正；Original 攻／體改讀進化卡。
@@ -673,6 +675,8 @@ LookOutcome 保存觀察的舊世代及 snapshot，並只向 viewer 增加觀察
 Order 使用自己的 DecisionId，先固定 cards、chooser、單一 Owners(Deck) Placement
 及完整牌庫 snapshot。可見性只准入以 chooser 為基準的 Only(SelfPlayer)；Public、AuthorityOnly
 及其他 audience 的題目與結果投影尚未定義，包含未執行分支都拒絕。只准入 Top／Bottom、位於 chooser 自己牌庫的目前世代；
+私有 Look 的單一 `choose` 可把同一 observation 中的非空字面名字作為排除條件，降低為既有 `Not(NamesIntersect(candidate, literal))`，與種類／特徵交集。來源名字仍依原契約凍結；字面名字不改讀持有者，也不把觀察範圍改成整副牌庫。其他 receipt、公開／手牌選擇、搜尋、聯集、分組與多名字排除在降低前拒絕；runtime 不新增選卡路徑。
+
 跨 owner、跨區與 Index 拒絕。cards 可由本次執行的私有 Look receipt、Union／Difference 及原有
 公開 selector 求得；Look receipt 必須屬於 chooser，且仍有有效觀察證據。
 Look 的私有 selector 只在 Order cards 或下述受限 Move 的 Union／Difference 主幹准入，

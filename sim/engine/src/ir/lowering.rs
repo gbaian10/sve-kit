@@ -1405,8 +1405,8 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(Self::located_step(source, &step_path, node));
                 continue;
             }
-            if matches!(step, ast::Step::Evolve(_)) {
-                steps.push(self.effect_evolution(&step_path, source, ability_source)?);
+            if let ast::Step::Evolve(evolution) = step {
+                steps.push(self.effect_evolution(evolution, &step_path, source, ability_source)?);
                 continue;
             }
             if let ast::Step::If(conditional) = step {

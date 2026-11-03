@@ -354,8 +354,13 @@ fn unexpected_stumble_acts_after_discard_and_draws_even_if_the_spell_target_is_a
     quiet(&mut board);
 
     let mut position = initial("BP07-034", true);
-    position["players"]["P2"]["zones"]["field"][0]["acted"] = json!(true);
+    position["players"]["P2"]["zones"]["field"][0]["state"]["acted"] = json!(true);
     let mut spell_board = prepared_program(&position, &discard_all());
+    assert_eq!(
+        spell_board.projection(View::Referee).unwrap()["objects"]["enemy"]["acted"],
+        true,
+        "Q1000 starts with the explicitly selected follower already acted"
+    );
     let CardPlay::Awaiting(question) = spell_board
         .play_internal_card("source", PlayerId { seat: 1 })
         .unwrap()

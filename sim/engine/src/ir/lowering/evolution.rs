@@ -21,10 +21,19 @@ use crate::ir::{CardKind, EventPattern, TraitId};
 impl super::BodyContext<'_> {
     pub(super) fn effect_evolution(
         &mut self,
+        evolution: &ast::NamedEffectEvolution,
         path: &str,
         source: &super::SourceSpan,
         origin: &AbilitySource,
     ) -> Result<Located<Node>, LoweringError> {
+        if matches!(
+            evolution.into,
+            Some(ast::EvolutionDestination::Names(_) | ast::EvolutionDestination::Contains(_))
+        ) || matches!(&evolution.into, Some(ast::EvolutionDestination::Name(name)) if name.is_empty())
+        {
+            return Err(unsupported(path));
+        }
+        let destination = destination(evolution.into.as_ref(), path)?;
         let mut source = source.clone();
         source.author_path = path.into();
         let id = self.card_allocator.id(path)?;
@@ -38,7 +47,7 @@ impl super::BodyContext<'_> {
         };
         Ok(Located {
             node: Node::Control {
-                control: effect_evolution::build(&keys, &source, origin),
+                control: effect_evolution::build(&keys, &source, origin, &destination),
             },
             source,
         })

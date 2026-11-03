@@ -4,6 +4,7 @@ use super::{
     ObjectOperand, ObjectRef, ObjectView, Predicate,
 };
 
+#[derive(Clone, Debug)]
 pub(crate) enum Destination {
     SameName,
     Names(Vec<CardName>),
