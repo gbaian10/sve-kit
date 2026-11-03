@@ -470,7 +470,7 @@ Controller 與 active_zones=[Field]，採下列封閉形狀：
 
 1. 唯一 Face PlayParameter：AtDecision、Current、Inline、Only(Controller)，沒有 capture。
    Objects 域恰選一張自己的 Evolve 卡，唯一群組也為 exact 1；沒有 roles、distinct_by 或 aggregate bounds。
-   述詞為目前候選卡名稱與 SourceHolder 名稱的 NamesIntersect、與非空常值名稱清單的 NamesIntersect，或候選卡的 NameContains（非空常值）。不接受未過濾的整個進化牌組。
+   述詞為目前候選卡名稱與 SourceHolder 名稱的 NamesIntersect、與非空常值名稱清單的 NamesIntersect，或 `And[KindEquals(EvolveFollower), NameContains]`（非空常值）。名稱包含的卡種條件不得省略。不接受未過濾的整個進化牌組。
 2. 唯一 Ordered 費用：先 Reveal 同一選取 binding，再 Pay 非負常值的 PpCurrent。
    兩步都是 Controller 的 Cost 指示，無 guard、無材料再選；不接受 EP Alternative。
 3. 本文用 EachObject 對該 exact-one 集合取元素，唯一指示為 Evolve：
