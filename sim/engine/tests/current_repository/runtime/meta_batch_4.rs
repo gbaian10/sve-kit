@@ -49,7 +49,23 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Modes { .. } => Answer::Modes(modes.iter().copied().map(ModeId).collect()),
-            InputDomain::Integer(bounds) => Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum)),
+            InputDomain::Integer(bounds) => {
+                Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum))
+            }
+            InputDomain::TokenCapacity { choices } => Answer::TokenCapacity(
+                u64::try_from(
+                    choices
+                        .iter()
+                        .position(|choice| {
+                            choice
+                                .iter()
+                                .map(String::as_str)
+                                .eq(["シールドガーディアン"])
+                        })
+                        .unwrap(),
+                )
+                .unwrap(),
+            ),
             InputDomain::Search(domain) => Answer::Search(SearchAnswer::Ungrouped(
                 domain
                     .cards
@@ -233,7 +249,11 @@ fn bp11_038_its_bike_entering_strikes_and_loots() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(named(&state, &state["P1"]["field"], "機動二輪車").len(), 1);
     assert_eq!(state["objects"]["enemy"]["damage"], 2_u8);
-    assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 1, "draws one and discards one");
+    assert_eq!(
+        state["P1"]["cemetery"].as_array().unwrap().len(),
+        1,
+        "draws one and discards one"
+    );
 }
 
 #[test]
@@ -250,7 +270,10 @@ fn bp11_039_six_original_costs_bring_an_armored_car_that_strikes() {
     evolve(&mut game, 1);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(named(&state, &state["P1"]["field"], "魔導装甲車").len(), 1);
-    assert_eq!(state["objects"]["enemy"]["damage"], 2_u8, "the vehicle entering triggers");
+    assert_eq!(
+        state["objects"]["enemy"]["damage"], 2_u8,
+        "the vehicle entering triggers"
+    );
 }
 
 #[test]
@@ -264,7 +287,11 @@ fn bp11_106_lastword_may_place_all_three_vehicles() {
     attack(&mut game, "source", "enemy");
     let state = game.projection(View::Referee).unwrap();
     for name in ["従順な駿馬", "機動二輪車", "魔導装甲車"] {
-        assert_eq!(named(&state, &state["P1"]["field"], name).len(), 1, "{name}");
+        assert_eq!(
+            named(&state, &state["P1"]["field"], name).len(),
+            1,
+            "{name}"
+        );
     }
 }
 
@@ -276,17 +303,60 @@ fn bp13_029_paid_fanfare_summons_royal_tokens_that_each_strike() {
     let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(named(&state, &state["P1"]["field"], "スティールナイト").len(), 1);
-    assert_eq!(named(&state, &state["P1"]["field"], "シールドガーディアン").len(), 1);
+    assert_eq!(
+        named(&state, &state["P1"]["field"], "スティールナイト").len(),
+        1
+    );
+    assert_eq!(
+        named(&state, &state["P1"]["field"], "シールドガーディアン").len(),
+        1
+    );
     assert_eq!(state["objects"]["enemy"]["damage"], 2_u8);
     assert_eq!(state["P1"]["pp"]["current"], 6_u8, "1 + 3");
+
+    let mut crowded = in_hand("BP13-029");
+    crowded["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"first-ally","card":"BP01-171"},
+        {"id":"second-ally","card":"BP01-171"},
+        {"id":"third-ally","card":"BP01-171"}
+    ]);
+    let mut crowded_game = super::game(&crowded);
+    play(&mut crowded_game, "source");
+    let crowded_state = crowded_game.projection(View::Referee).unwrap();
+    assert_eq!(crowded_state["P1"]["field"].as_array().unwrap().len(), 5);
+    assert_eq!(
+        named(
+            &crowded_state,
+            &crowded_state["P1"]["field"],
+            "スティールナイト"
+        )
+        .len(),
+        0
+    );
+    assert_eq!(
+        named(
+            &crowded_state,
+            &crowded_state["P1"]["field"],
+            "シールドガーディアン"
+        )
+        .len(),
+        1,
+        "Q1741 permits choosing the Shield Guardian for the last field slot"
+    );
+    assert_eq!(crowded_state["objects"]["enemy"]["damage"], 1_u8);
+    assert_eq!(crowded_state["P1"]["pp"]["current"], 6_u8);
 }
 
 #[test]
 fn bp18_063_evolution_deals_three_with_a_strong_martial_dragonewt() {
     let mut initial = on_field("BP18-062");
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP18-063"}]);
-    push(&mut initial, "P1", "field", json!({"id":"strong","card":"BP18-071"}));
+    push(
+        &mut initial,
+        "P1",
+        "field",
+        json!({"id":"strong","card":"BP18-071"}),
+    );
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-037","state":{"hp":20_u8,"max_hp":20_u8}}]);
     let mut game = game(&initial);
