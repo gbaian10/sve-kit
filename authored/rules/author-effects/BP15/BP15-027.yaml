@@ -1,0 +1,39 @@
+cards:
+  BP15-027:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          name_contains: ララミア
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - pay:
+                        cost:
+                          pp: 4
+                        do:
+                          - search:
+                              distinct_by: name
+                              sel:
+                                kind: follower
+                                name_contains: ララミア
+                                who: self
+                                zone: deck
+                              to: field
+                              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

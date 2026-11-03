@@ -1,0 +1,46 @@
+cards:
+  BP20-096:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - lastword:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - life:
+                        delta: 2
+                        who: self
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - search:
+                              n: 1
+                              sel:
+                                kind: amulet
+                                name: 聖蛇の加護
+                                who: self
+                                zone: deck
+                              to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
