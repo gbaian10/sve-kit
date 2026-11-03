@@ -54,9 +54,3 @@ export interface DeckCardInfo {
   /** The snapshot's region `deck_role` when it knows one. */
   readonly deckRole: string | null
 }
-
-/** The facts of a Standard restriction a deck check needs. */
-export interface DeckRestriction {
-  readonly id: string
-  readonly maxCopies: number | null
-}

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next"
 
 import type { GridCell } from "../../components/results/CardGrid"
 import { cn } from "../../components/ui/cn"
-import { SAME_NAME_LIMIT } from "../../domain/deck/model"
 import { CountStepper } from "./CountStepper"
 import { useDeckEditor } from "./deck-editor"
 
@@ -97,8 +96,7 @@ export function PoolCellAction({
   return (
     <CountStepper
       count={status.count}
-      max={Math.max(status.max, status.count)}
-      limit={SAME_NAME_LIMIT}
+      limit={status.limit}
       name={name}
       stretch={!compact}
       onChange={(count) => {

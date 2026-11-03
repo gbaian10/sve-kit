@@ -1798,6 +1798,47 @@
       }
     },
     {
+      "id": "title-leader-not-leader",
+      "rule": "6.1.1.5.2",
+      "note": "作品名基準：主戰者欄放了沒有作品名的フォロワー，兩項都報",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "BP01-001",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderNotLeader",
+            "clause": "6.1.1.1",
+            "cards": ["BP01-001"]
+          },
+          {
+            "code": "leaderTitleMismatch",
+            "clause": "6.1.1.5.2",
+            "cards": ["BP01-001"],
+            "values": {
+              "title": "umamusume_pretty_derby"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
       "id": "vanguard-ok",
       "rule": "14.4.2.1.1",
       "note": "ヴァンガード作品名基準：有スタートアミュレット",

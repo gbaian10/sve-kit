@@ -1,12 +1,5 @@
 import type { Region } from "../search"
-import type { Deck, DeckBasis, DeckCardInfo, DeckEntry, DeckSection } from "./types"
-
-// Deck construction limits of the Comprehensive Rules (ver. 1.28.0 §6.1.1).
-export const MAIN_MIN = 40
-export const MAIN_MAX = 50
-export const EVOLVE_MAX = 10
-/** 6.1.1.4: three cards of one name in the main deck and three in the evolve deck. */
-export const SAME_NAME_LIMIT = 3
+import type { Deck, DeckBasis, DeckCardInfo, DeckEntry } from "./types"
 
 export type Placement = "main" | "evolve" | "leader" | "none"
 
@@ -60,22 +53,6 @@ export function withPrinting(
     const { printingId: _previous, ...rest } = entry
     return printingId === undefined ? rest : { ...rest, printingId }
   })
-}
-
-/**
- * The most copies of one card its section may hold: three per card name (6.1.1.4) minus the other
- * cards of that name there. Restrictions do not cap adding; the deck's problem list reports them.
- */
-export function copyLimit(
-  deck: Deck,
-  section: Exclude<DeckSection, "side">,
-  info: Pick<DeckCardInfo, "cardId" | "name">,
-  nameOf: (cardId: string) => string | undefined,
-): number {
-  const others = deck[section]
-    .filter((entry) => entry.cardId !== info.cardId && nameOf(entry.cardId) === info.name)
-    .reduce((sum, entry) => sum + entry.count, 0)
-  return Math.max(0, SAME_NAME_LIMIT - others)
 }
 
 /** Any change to a deck's content: the same deck, a newer time and the next revision. */

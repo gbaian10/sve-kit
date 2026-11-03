@@ -683,6 +683,9 @@ export default {
     problemsLess: "折りたたむ",
     clause: "総合ルール {{clause}}",
     clauseRestriction: "禁止・制限",
+    rulesLoading: "構築ルールのデータを読み込み中",
+    rulesFailed: "構築ルールのデータを読み込めません",
+    clauseFormat: "フォーマット",
     problems: {
       leaderMissing: "リーダーが選ばれていません。",
       leaderNotLeader: "「{{name}}」はリーダーカードではありません。",
@@ -693,19 +696,23 @@ export default {
       evolveTooMany: "エボルヴデッキが {{count}} 枚です。{{max}} 枚以下にしてください。",
       mainWrongCard: "「{{name}}」はメインデッキに入れられません。",
       evolveWrongCard: "「{{name}}」はエボルヴデッキに入れられません。",
-      tokenInDeck: "「{{name}}」はトークンなのでデッキに入れられません。",
       sameNameOver:
         "{{section}}に「{{name}}」が {{count}} 枚あります。同名は {{limit}} 枚までです。",
       classMismatch:
         "「{{name}}」は{{cardClass}}です。{{deckClass}}デッキには{{deckClass}}とニュートラルしか入れられません。",
-      classMismatchNeutral:
-        "「{{name}}」は{{cardClass}}です。ニュートラルデッキにはニュートラルのカードしか入れられません。",
       titleMismatch: "「{{name}}」にタイトル「{{title}}」がありません。",
       restricted: "「{{name}}」は殿堂入り（{{max}} 枚まで、現在 {{count}} 枚）。",
       banned: "「{{name}}」は禁止カードです。",
       unknownCard: "カード {{cardId}} がデータにありません。",
-      titleRulesUnchecked:
-        "タイトル「{{title}}」には独自の構築条件（総合ルール 14）があり、まだ自動チェックしていません。",
+      startAmuletMissing:
+        "ヴァンガードのタイトルデッキには【スタートアミュレット】を持つカードが 1 枚以上必要です。",
+      startAmuletNames: "【スタートアミュレット】を持つカードはすべて同じカード名にしてください。",
+      choiceRestricted: "この制限のカードは {{max}} 種類までです（現在 {{count}} 種類）。",
+      formatUnsupported: "このフォーマットはまだチェックできません。",
+      triggerClassUnchecked:
+        "トリガーを持つカードはリーダーと同じクラスである必要があります。アイコンのデータがないためチェックしていません。",
+      restrictionsUnknown:
+        "公式の禁止・制限一覧が今日の時点まで確認できていません。新しい制限があるかもしれません。",
     },
     cell: {
       notAllowed: "デッキに入れられません",
