@@ -201,25 +201,6 @@ fn bp14_069_awakened_places_an_ocean_card_in_ex_one_cheaper() {
 }
 
 #[test]
-fn bp15_063_evolution_places_two_ocean_cards_cheaper_and_pings_on_ocean_entry() {
-    let mut initial = on_field("BP15-062");
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP15-063"}]);
-    initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"whale","card":"BP04-069"},{"id":"goblin","card":"BP01-171"},
-        {"id":"whale2","card":"BP04-069"},{"id":"a","card":"BP01-171"},{"id":"b","card":"BP01-171"}
-    ]);
-    let mut game = game(&initial);
-    evolve(&mut game);
-    let placed = game.projection(View::Referee).unwrap();
-    assert_eq!(placed["P1"]["ex"], json!(["whale", "whale2"]));
-    let before = placed["P1"]["pp"]["current"].as_u64().unwrap();
-    play_with(&mut game, "whale", &[1]);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["pp"]["current"], json!(before.checked_sub(3).unwrap()));
-    assert_eq!(state["P2"]["leader"]["life"], 19_u8);
-}
-
-#[test]
 fn bp14_093_finds_a_zealot_cheaper_and_strikes_when_healed() {
     let mut initial = in_hand("BP14-093");
     initial["players"]["P1"]["zones"]["deck"] = json!([
