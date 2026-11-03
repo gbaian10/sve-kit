@@ -822,6 +822,7 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
         [ZoneKind::Field] => matches!(
             kind,
             "フォロワー"
+                | "フォロワー・アドバンス"
                 | "フォロワー・エボルヴ"
                 | "フォロワー・トークン"
                 | "アミュレット"
@@ -911,7 +912,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         )
         && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
             || is_printed_quick(ability));
-    let ex_trigger = triggers::ex_phase(ability);
+    let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
     let played_trigger = filter(ability).is_some();
     let hand_discard_trigger = triggers::hand_discard(ability);
     if (ability.active_zones != [zones]
