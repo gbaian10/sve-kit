@@ -239,10 +239,8 @@ pub(super) fn bindings(
             .ok_or_else(|| unsupported(path))?
             .instruction
             .receipt;
-        material
-            .result
-            .clone()
-            .map(|name| (name, receipt, material.n == Some(1)))
+        let bounds = super::hand_payment::cardinality(material, path)?;
+        material.result.clone().map(|name| (name, receipt, bounds))
     } else {
         None
     };

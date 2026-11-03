@@ -686,3 +686,6 @@ mod dynamic_declarations;
 
 #[path = "card/hand_selection.rs"]
 mod hand_selection;
+
+#[path = "card/material_read.rs"]
+mod material_read;

@@ -396,13 +396,22 @@ fn arithmetic_lowering_rejects_a_zero_unit_an_empty_min_and_unopened_max() {
         json!({"per":{"of":3,"unit":0}}),
         json!({"min":[]}),
         json!({"max":[1,2]}),
-        json!({"half_up":3}),
         json!({"times":[1,2,3]}),
     ] {
         lowerer()
             .lower(&tree(&json!({"cost":{"pp":0},"do":[{"draw":{"n":n}}]})))
             .unwrap_err();
     }
+}
+
+#[test]
+fn half_up_rounds_an_odd_constant_in_a_body_expression() {
+    let payload = json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":{"half_up":3}}}]});
+    assert_eq!(
+        life_after(&payload, 0),
+        22,
+        "half of three rounds upward to two"
+    );
 }
 
 #[test]

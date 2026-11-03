@@ -264,7 +264,7 @@ struct LoweredPlayCosts {
 #[derive(Clone)]
 struct PaymentBindings {
     complete: Option<(String, ReceiptId)>,
-    discard: Option<(String, ReceiptId, bool)>,
+    discard: Option<(String, ReceiptId, Cardinality)>,
 }
 
 fn lower_play_costs(
@@ -560,8 +560,8 @@ impl Allocator {
             .and_then(|binding| binding.complete.clone())
             .map(|(name, receipt)| (name, PaymentReference::CardPlay { face, receipt }));
         let mut context = BodyContext::new(entry, scope, body, complete, self);
-        if let Some((name, receipt, single)) = payment_result.and_then(|binding| binding.discard) {
-            payment::record_discard(&mut context, &name, receipt, single, path)?;
+        if let Some((name, receipt, bounds)) = payment_result.and_then(|binding| binding.discard) {
+            payment::record_discard(&mut context, &name, receipt, bounds, path)?;
         }
         let guard = context.activation_qualification(entry.activate.as_ref(), path)?;
         let trigger_choice = context.prepare_parameters(
@@ -1050,8 +1050,8 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
-    /// Fixed one-card discards, also countable as a number.
-    single_discards: BTreeSet<ReceiptId>,
+    /// Declared bounds of named discard payments.
+    discard_bounds: BTreeMap<ReceiptId, Cardinality>,
     /// Movements of cards leaving the deck, which carry no modifications.
     deck_moves: BTreeSet<ReceiptId>,
 }

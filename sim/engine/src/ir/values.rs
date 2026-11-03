@@ -1,16 +1,16 @@
 use super::{
     AbilityPredicate, AbilityReference, AttackEvent, BanishEvent, Characteristics,
     CounterChangeEvent, DamageEvent, DamageRecipient, DestroyEvent, DiceEvent, DiscardEvent,
-    DrawEvent, DriveCheckedEvent, DriveGainedEvent, DriveTriggerEvent, EarthRitePaidComponent,
-    EnterExEvent, EnterFieldEvent, EquipEvent, Event, EventSnapshotPolicy, EvolutionStateFields,
-    EvolveEvent, FusedEvent, HistoryCount, HistoryQuery, Info, LeaveFieldEvent, LifeChangeEvent,
-    MeasuredReceipt, MeasuredReceiptList, MoveEvent, MoveResult, MovementReceipt,
-    MovementReceiptList, NonEmpty, NumericHistoryQuery, ObjectReceipt, ObjectReceiptList,
-    ObjectRef, PaymentEvent, PaymentReceipt, PaymentResult, PhaseEvent, PhaseFields, PlayEvent,
-    PlaySubject, PostureEvent, PostureFields, RaceEvent, ReceiptList, ReceiptReference,
-    ReceiptStatus, ResolveEvent, RuntimeAbilityReference, RuntimeObjectView, SourcePredicate,
-    StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome, TurnIdFields, UbActivatedEvent,
-    ValueEquality, Visitor, Walk,
+    DiscardOutcome, DrawEvent, DriveCheckedEvent, DriveGainedEvent, DriveTriggerEvent,
+    EarthRitePaidComponent, EnterExEvent, EnterFieldEvent, EquipEvent, Event, EventSnapshotPolicy,
+    EvolutionStateFields, EvolveEvent, FusedEvent, HistoryCount, HistoryQuery, Info,
+    LeaveFieldEvent, LifeChangeEvent, MeasuredReceipt, MeasuredReceiptList, MoveEvent, MoveResult,
+    MovementReceipt, MovementReceiptList, NonEmpty, NumericHistoryQuery, ObjectReceipt,
+    ObjectReceiptList, ObjectRef, PaymentEvent, PaymentReceipt, PaymentResult, PhaseEvent,
+    PhaseFields, PlayEvent, PlaySubject, PostureEvent, PostureFields, RaceEvent, ReceiptList,
+    ReceiptReference, ReceiptStatus, ResolveEvent, RuntimeAbilityReference, RuntimeObjectView,
+    SourcePredicate, StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome, TurnIdFields,
+    UbActivatedEvent, ValueEquality, Visitor, Walk,
 };
 use core::fmt::Debug;
 use core::marker::PhantomData;
@@ -591,6 +591,7 @@ impl Walk for NoRead {
     }
 }
 variants!(IntFrozen {
+    DiscardedCost { receipt: ReceiptReference<DiscardOutcome> } => ["read.receipt.discarded-cost"],
     StatBefore { facet: Binding<StatDelta> } => ["read.event-field"],
     StatAfter { facet: Binding<StatDelta> } => ["read.event-field"],
     LifeChangeBefore { event: Binding<LifeChangeEvent> } => ["read.event-field"],

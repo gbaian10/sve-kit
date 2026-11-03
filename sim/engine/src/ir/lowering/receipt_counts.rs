@@ -1,7 +1,7 @@
 use super::{Binding, BodyContext, Bool, Expr, Int, LoweringError, ast, unsupported};
 use crate::ir::{
-    IntOperation, MemberProjection, MovementReceipt, ObjectReceipt, ObjectView, Predicate,
-    ReceiptLocation, Selector,
+    Cardinality, IntFrozen, IntOperation, MemberProjection, MovementReceipt, Nat, ObjectReceipt,
+    ObjectView, Predicate, ReceiptLocation, Selector,
 };
 
 #[expect(
@@ -9,6 +9,33 @@ use crate::ir::{
     reason = "Receipt counts use the body's checked producer environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn discarded_cost(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let Some(ObjectReceipt::Movement {
+            receipt: MovementReceipt::Discard { receipt },
+        }) = self.observations.get(name)
+        else {
+            return Err(unsupported(path));
+        };
+        let ReceiptLocation::Local { id } = receipt.location() else {
+            return Err(unsupported(path));
+        };
+        if self.receipt_reads.discard_bounds.get(id)
+            != Some(&Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
+        {
+            return Err(unsupported(path));
+        }
+        Ok(Expr::Frozen(Box::new(IntFrozen::DiscardedCost {
+            receipt: receipt.clone(),
+        })))
+    }
+
     pub(super) fn count_of(&self, name: &str, path: &str) -> Result<Expr<Int>, LoweringError> {
         let receipt = self
             .observations
@@ -40,7 +67,12 @@ impl BodyContext<'_> {
         let ReceiptLocation::Local { id } = receipt.location() else {
             return Err(unsupported(path));
         };
-        if !self.receipt_reads.single_discards.contains(id) {
+        if self
+            .receipt_reads
+            .discard_bounds
+            .get(id)
+            .is_none_or(|bounds| bounds.maximum.is_none_or(|maximum| maximum.0 > 1))
+        {
             return Err(unsupported(path));
         }
         let condition = self.receipt_any(query, path)?;

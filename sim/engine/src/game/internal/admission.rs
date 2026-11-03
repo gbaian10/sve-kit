@@ -612,6 +612,9 @@ fn supported(code: &str) -> bool {
     matches!(
         code,
         "shape.MovementReceipt.Discard"
+            | "shape.IntFrozen.DiscardedCost"
+            | "read.receipt.discarded-cost"
+            | "internal.Arithmetic.HalfUp"
             | "shape.Predicate.ReceiptAny"
             | "read.receipt.member-any"
             | "shape.ObjectView.Snapshot"

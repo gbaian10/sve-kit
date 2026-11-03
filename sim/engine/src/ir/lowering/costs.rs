@@ -179,9 +179,10 @@ fn condition(
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
             left: match &value.left {
                 ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
-                ast::PublicNumber::Count { count } => {
-                    super::numeric::aggregate_count(query(count, allocator, path)?, None)
-                }
+                ast::PublicNumber::Count { count } => super::numeric::aggregate_count(
+                    condition_count_query(count, allocator, path)?,
+                    None,
+                ),
                 ast::PublicNumber::DistinctNames { distinct_names } => {
                     super::numeric::distinct_count(
                         distinct_names,
@@ -210,6 +211,23 @@ fn condition(
             right: Expr::Literal(Int(value.right)),
         },
     })))
+}
+
+fn condition_count_query(
+    value: &ast::PublicQuery,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Selector, LoweringError> {
+    if value.class.is_some()
+        && matches!(value.zone, ast::PublicZone::Cemetery)
+        && matches!(value.who, ast::Side::Controller)
+        && !value.other
+        && value.not_class.is_none()
+        && value.token.is_none()
+    {
+        return public_query(value, Binding::new(allocator.id(path)?, ScopeId(0)), path);
+    }
+    query(value, allocator, path)
 }
 
 pub(super) fn query(

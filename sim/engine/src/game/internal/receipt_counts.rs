@@ -4,9 +4,9 @@ use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
-    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
-    NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptId,
-    ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
+    Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MemberProjection,
+    MovementReceipt, NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate,
+    ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId, TraitsRead,
 };
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -250,6 +250,36 @@ fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result
             .collect::<Result<_>>()?,
         class: Some(ClassId(text(&printed["card_class"])?)),
     })
+}
+
+pub(super) fn discarded_cost(
+    execution: &Execution,
+    receipt: &ReceiptReference<DiscardOutcome>,
+) -> Result<Int> {
+    let ReceiptLocation::Local { id } = receipt.location() else {
+        return Err(unsupported("iteration discarded cost"));
+    };
+    let Some(InstructionOutcome::Discard(outcome)) = execution.receipts.get(id) else {
+        return Err(invalid("missing discarded cost producer"));
+    };
+    let [member] = outcome.successful.as_slice() else {
+        return Err(invalid("discarded cost requires exactly one card"));
+    };
+    let before = member
+        .before
+        .ok_or_else(|| invalid("missing discarded cost before member"))?;
+    let characters = execution
+        .facts
+        .iter()
+        .find_map(|fact| match fact {
+            Fact::Discard(event) if event.card_before == before.object => Some(&event.characters),
+            _ => None,
+        })
+        .ok_or_else(|| invalid("missing discarded cost characteristics"))?;
+    match characters.cost {
+        Info::Present(amount) if amount.0 >= 0 => Ok(amount),
+        _ => Err(invalid("missing discarded numeric cost")),
+    }
 }
 
 fn snapshot(object: &ObjectView, member: Binding<RuntimeObjectView>) -> Result<()> {

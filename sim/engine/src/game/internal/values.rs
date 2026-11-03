@@ -535,6 +535,9 @@ impl Execution {
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)
                 }
+                IntFrozen::DiscardedCost { receipt } => {
+                    super::receipt_counts::discarded_cost(self, receipt)
+                }
                 _ => Err(unsupported("signed projection")),
             },
             Expr::Compute(operation) => match operation.as_ref() {
@@ -1048,6 +1051,15 @@ fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
     let (&first, rest) = values
         .split_first()
         .ok_or_else(|| invalid("empty arithmetic"))?;
+    if matches!(operation, Arithmetic::HalfUp) {
+        if !rest.is_empty() {
+            return Err(invalid("half-up requires one value"));
+        }
+        return first
+            .div_euclid(2)
+            .checked_add(first.rem_euclid(2))
+            .ok_or_else(|| invalid("half-up overflow"));
+    }
     rest.iter().try_fold(first, |left, &right| {
         match operation {
             Arithmetic::Add => left.checked_add(right),

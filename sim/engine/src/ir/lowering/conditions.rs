@@ -8,6 +8,7 @@ use super::{
     IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use core::slice::from_ref;
 
 pub(super) fn qualify_costs(
     costs: &mut CostSpec,
@@ -709,6 +710,10 @@ impl BodyContext<'_> {
         })))
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Numeric variants share the checked body expression environment."
+    )]
     pub(super) fn number(
         &mut self,
         value: &ast::Number,
@@ -723,9 +728,17 @@ impl BodyContext<'_> {
                 CharacteristicView::Effective,
             )),
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
-            ast::Number::Cost { cost_of } => {
-                Ok(this_number(cost_of, None, CharacteristicView::Effective))
-            }
+            ast::Number::Cost { cost_of } => match cost_of {
+                ast::Observation::Binding(name) if name == "this" => Ok(this_number(
+                    &ast::This::This,
+                    None,
+                    CharacteristicView::Effective,
+                )),
+                ast::Observation::Before { objects_of, .. } => {
+                    self.discarded_cost(objects_of, path)
+                }
+                ast::Observation::Binding(_) => Err(unsupported(path)),
+            },
             ast::Number::OriginalCost { orig_cost_of } => Ok(this_number(
                 orig_cost_of,
                 None,
@@ -779,6 +792,9 @@ impl BodyContext<'_> {
             }
             ast::Number::Min { min } => self.minimum(min, path, active),
             ast::Number::Per { per } => self.per(per, path, active),
+            ast::Number::HalfUp { half_up } => {
+                self.arithmetic(Arithmetic::HalfUp, from_ref(half_up.as_ref()), path, active)
+            }
             ast::Number::Event { event } => self.event_number(event, path),
             ast::Number::Count { count } => self.zone_count(count, path),
             ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(

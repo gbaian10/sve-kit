@@ -221,11 +221,14 @@ struct Environment {
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
+    single_discards: BTreeSet<ReceiptId>,
 }
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
         self.bindings.extend(other.bindings.clone());
         self.receipts.extend(other.receipts.clone());
+        self.single_discards
+            .extend(other.single_discards.iter().copied());
         self.access.extend(other.access.clone());
         self.receipt_access.extend(other.receipt_access.clone());
         self.movement_before_access
@@ -285,6 +288,7 @@ impl Checker {
             movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            single_discards: BTreeSet::new(),
         };
         Self {
             resolution_entry: env.clone(),
@@ -537,6 +541,20 @@ impl Checker {
             return self.reject();
         }
         self.produce(instruction.receipt, outcome(&instruction.action))?;
+        if let Action::Discard {
+            mode: super::DiscardMode::Chosen { constraint },
+            ..
+        } = &instruction.action
+            && constraint.cardinality
+                == (Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                })
+            && instruction.precondition.is_none()
+            && context == InstructionContext::Cost
+        {
+            self.env.single_discards.insert(instruction.receipt);
+        }
         if let Some(access) = before_access {
             self.env
                 .movement_before_access

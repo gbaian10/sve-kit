@@ -39,6 +39,14 @@ impl Checker {
             },
             Expr::Frozen(read) => match read.as_ref() {
                 IntFrozen::ReceiptRequested { receipt } => self.measured(receipt),
+                IntFrozen::DiscardedCost { receipt } => {
+                    self.receipt(receipt)?;
+                    if !matches!(receipt.location(), ReceiptLocation::Local { id } if self.env.single_discards.contains(id))
+                    {
+                        return self.reject();
+                    }
+                    Ok(())
+                }
                 IntFrozen::StatBefore { facet } | IntFrozen::StatAfter { facet } => {
                     self.event_field(*facet)
                 }
