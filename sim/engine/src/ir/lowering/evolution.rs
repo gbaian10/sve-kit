@@ -2,14 +2,15 @@
 use super::{Allocator, LoweringError, ast, source_span, unsupported};
 use crate::ir::effect_evolution;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::evolution_destination::Destination;
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
-    DecisionId, DecisionKind, Disjointness, EvolutionCardRef, EvolutionMode, ExecutionRef, Expr,
-    FaceId, InputMode, Instruction, InstructionContext, InstructionId, KeywordId, Located,
-    NamesRead, Nat, Node, ObjectOperand, ObjectView, PlaySlot, PlaySpec, PlayerRef, PlayerRelation,
-    PlayerSet, Predicate, Program, ReceiptId, ScopeId, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
+    DecisionId, DecisionKind, Disjointness, EvolutionCardRef, EvolutionMode, ExecutionRef, FaceId,
+    InputMode, Instruction, InstructionContext, InstructionId, KeywordId, Located, Nat, Node,
+    ObjectOperand, PlaySlot, PlaySpec, PlayerRef, PlayerRelation, PlayerSet, Program, ReceiptId,
+    ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
+    TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{CardKind, EventPattern, TraitId};
 
@@ -58,15 +59,8 @@ const fn controller() -> PlayerSet {
         text_quantifier: TextQuantifier::Implicit,
     }
 }
-fn names(object: ObjectOperand) -> Expr<Vec<CardName>> {
-    Expr::Live(Box::new(NamesRead::Names {
-        object: ObjectView::Current {
-            object: Box::new(object),
-        },
-    }))
-}
 
-fn face(scope: ScopeId, candidate_scope: ScopeId, id: u64) -> Decision {
+fn face(scope: ScopeId, candidate_scope: ScopeId, id: u64, destination: &Destination) -> Decision {
     let candidate = Binding::new(3, candidate_scope);
     Decision {
         id: DecisionId(id),
@@ -92,10 +86,7 @@ fn face(scope: ScopeId, candidate_scope: ScopeId, id: u64) -> Decision {
                         zone: ZoneKind::Evolve,
                         view: SelectionView::Current {},
                         binding: candidate,
-                        predicate: Box::new(Expr::Compute(Box::new(Predicate::NamesIntersect {
-                            left: names(ObjectOperand::Bound { binding: candidate }),
-                            right: names(ObjectOperand::SourceHolder {}),
-                        }))),
+                        predicate: Box::new(destination.predicate(candidate)),
                     },
                 }],
                 cardinality: one(),
@@ -154,6 +145,29 @@ fn intrinsic_origin(
     Ok((source, origin))
 }
 
+fn destination(
+    into: Option<&ast::EvolutionDestination>,
+    path: &str,
+) -> Result<Destination, LoweringError> {
+    Ok(match into {
+        None => Destination::SameName,
+        Some(ast::EvolutionDestination::Name(name)) => {
+            Destination::Names(vec![CardName(name.clone())])
+        }
+        Some(ast::EvolutionDestination::Names(names)) => {
+            Destination::Names(names.iter().cloned().map(CardName).collect())
+        }
+        Some(ast::EvolutionDestination::Contains(selector)) => {
+            let ast::SelfPlayer::Controller = selector.who;
+            let ast::EvolutionZone::Evolve = selector.zone;
+            if !matches!(selector.kind, ast::SearchKind::EvolveFollower) {
+                return Err(unsupported(path));
+            }
+            Destination::Contains(CardName(selector.name_contains.clone()))
+        }
+    })
+}
+
 pub(super) fn lower(
     allocator: &mut Allocator,
     key: &super::CardCoordinates<'_>,
@@ -164,7 +178,8 @@ pub(super) fn lower(
     let (source, origin) = intrinsic_origin(key, path, entry)?;
     let head = entry.evolve.as_ref().ok_or_else(|| unsupported(path))?;
     let candidate_scope = ScopeId(scope.0.checked_add(1).ok_or_else(|| unsupported(path))?);
-    let parameter = face(scope, candidate_scope, allocator.id(path)?);
+    let destination = destination(head.into.as_ref(), path)?;
+    let parameter = face(scope, candidate_scope, allocator.id(path)?, &destination);
     let selection = Binding::new(1, scope);
     let inner_scope = ScopeId(scope.0.checked_add(2).ok_or_else(|| unsupported(path))?);
     let element = Binding::new(1, inner_scope);

@@ -131,6 +131,9 @@ impl Game {
         if !string(&new["card_type"]).contains("エボルヴ") {
             return Ok(false);
         }
+        if let Some(name) = node.get("name_contains").and_then(Value::as_str) {
+            return Ok(string(&new["name"]).contains(name));
+        }
         let names = node.get("names").map_or_else(
             || {
                 node["name"].as_str().map_or_else(

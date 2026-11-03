@@ -429,3 +429,54 @@ fn evolve_is_rejected_outside_the_printed_evolution_entry() {
         "/abilities/0/body/steps/0/control/steps/0/instruction/action"
     );
 }
+
+#[test]
+fn evolution_names_and_name_contains_keep_the_candidate_binding_closed() {
+    for contains in [false, true] {
+        let mut card = mitra();
+        let ChoiceDomain::Objects { constraint, .. } = &mut play(&mut card).parameters[0].domain
+        else {
+            panic!("evolution face fixture")
+        };
+        let Selector::Zone {
+            binding, predicate, ..
+        } = &mut constraint.groups[0].selector
+        else {
+            panic!("evolution face fixture")
+        };
+        **predicate = if contains {
+            Expr::Compute(Box::new(Predicate::NameContains {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                },
+                name: Expr::Literal(CardName("dragon".into())),
+            }))
+        } else {
+            Expr::Compute(Box::new(Predicate::NamesIntersect {
+                left: Expr::Live(Box::new(NamesRead::Names {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                    },
+                })),
+                right: Expr::Literal(vec![CardName("front".into()), CardName("back".into())]),
+            }))
+        };
+        WellFormedCardProgram::check(card.clone()).unwrap();
+        let ChoiceDomain::Objects {
+            constraint: after_constraint,
+            ..
+        } = &mut play(&mut card).parameters[0].domain
+        else {
+            panic!("evolution face fixture")
+        };
+        let Selector::Zone {
+            binding: after_binding,
+            ..
+        } = &mut after_constraint.groups[0].selector
+        else {
+            panic!("evolution face fixture")
+        };
+        *after_binding = Binding::new(99, ScopeId(999));
+        invalid(card);
+    }
+}

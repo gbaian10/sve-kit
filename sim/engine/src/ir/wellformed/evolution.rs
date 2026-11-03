@@ -1,17 +1,17 @@
 use super::{BindingKind, Checked, Checker, WellFormedError, WellFormedReason};
+use crate::ir::evolution_destination::Destination;
 use crate::ir::{
-    Ability, AbilityKind, AbilityOrigin, Action, Binding, CardName, Cardinality, ChoiceDomain,
-    Control, CostSpec, Decision, DecisionKind, Disjointness, EvolutionMode, ExecutionRef, Expr,
-    InputMode, InstructionContext, Int, KeywordId, NamesRead, Nat, Node, ObjectOperand, ObjectView,
-    PlaySlot, PlayerRef, PlayerRelation, PlayerSet, PreconditionKind, PreconditionReason,
-    Predicate, Resource, ResourceOperation, SelectionSnapshot, SelectionView, Selector,
-    TextQuantifier, Visibility, ZoneKind,
+    Ability, AbilityKind, AbilityOrigin, Action, Binding, Cardinality, ChoiceDomain, Control,
+    CostSpec, Decision, DecisionKind, Disjointness, EvolutionMode, ExecutionRef, Expr, InputMode,
+    InstructionContext, Int, KeywordId, Nat, Node, ObjectOperand, PlaySlot, PlayerRef,
+    PlayerRelation, PlayerSet, PreconditionKind, PreconditionReason, Resource, ResourceOperation,
+    SelectionSnapshot, SelectionView, Selector, TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{ObjectRef, Program, effect_evolution};
 
 #[expect(
     clippy::multiple_inherent_impl,
-    reason = "The temporary single-face evolution entry shares the closed checker state."
+    reason = "The intrinsic evolution projection shares the closed checker state."
 )]
 impl Checker {
     pub(super) fn evolution_entry(&mut self, ability: &Ability) -> Checked {
@@ -182,11 +182,7 @@ impl Checker {
         else {
             return self.reject();
         };
-        let same_name = Expr::Compute(Box::new(Predicate::NamesIntersect {
-            left: names(ObjectOperand::Bound { binding: *binding }),
-            right: names(ObjectOperand::SourceHolder {}),
-        }));
-        if *players != controller() || **predicate != same_name {
+        if *players != controller() || Destination::from_predicate(predicate, *binding).is_none() {
             return self.reject();
         }
         // The complete predicate shape is checked above; its candidate never escapes the domain.
@@ -273,12 +269,4 @@ const fn controller() -> PlayerSet {
         cardinality: one(),
         text_quantifier: TextQuantifier::Implicit,
     }
-}
-
-fn names(object: ObjectOperand) -> Expr<Vec<CardName>> {
-    Expr::Live(Box::new(NamesRead::Names {
-        object: ObjectView::Current {
-            object: Box::new(object),
-        },
-    }))
 }
