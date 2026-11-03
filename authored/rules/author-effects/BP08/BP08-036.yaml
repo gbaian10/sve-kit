@@ -1,0 +1,69 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-03"
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            moved:
+              from:
+                who: opp
+                zone: field
+              to: cemetery
+              sel:
+                kind: follower
+              during:
+                turn: self
+          do:
+            - create:
+                token: 毒蛇
+                n: 1
+                to: field
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 2
+          do:
+            - damage:
+                to: victim
+                n: 5
+                distribute: true
+                distribute_at: play
+      - line: 3
+        activate:
+          quick: true
+          cost:
+            to_cemetery:
+              n: 2
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                name: 毒蛇
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                    delta: -2
+                    next_only: true
+                until: turn
