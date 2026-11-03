@@ -1,0 +1,41 @@
+cards:
+  BP10-015:
+    abilities:
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            moved:
+              from: field
+              ref: this
+              to: hand
+        line: 1
+      - fanfare:
+          cost:
+            pp: 5
+          do:
+            - move:
+                position: bottom
+                ref: enemy
+                to: deck
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
