@@ -1,0 +1,69 @@
+cards:
+  BP06-035:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - minus:
+                  - minus:
+                      - 0
+                      - count:
+                          kind: follower
+                          trait: 陰陽師
+                          who: self
+                          zone: cemetery
+                  - count:
+                      kind: amulet
+                      trait: 陰陽師
+                      who: self
+                      zone: cemetery
+              - count:
+                  kind: spell
+                  who: self
+                  zone: cemetery
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      name: 天后
+                      who: self
+                      zone: field
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 天后
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: shiki
+          targets:
+            - bind: shiki
+              from:
+                kind: follower
+                trait: 式神
+                who: self
+                zone: field
+              upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP06-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

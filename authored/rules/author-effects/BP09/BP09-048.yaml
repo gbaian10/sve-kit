@@ -1,0 +1,40 @@
+cards:
+  BP09-048:
+    abilities:
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 大地の魔片
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP09-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
