@@ -106,3 +106,63 @@ fn conditional_modes_do_not_accept_unrelated_integer_conditions_in_ir() {
         WellFormedCardProgram::check(card).unwrap_err();
     }
 }
+
+#[test]
+fn conditional_modes_read_only_the_size_of_a_banish_zone_in_ir() {
+    let valid = lowerer()
+        .lower(&tree(&json!({"who":"self","zone":"field","trait":"trait"})))
+        .unwrap();
+    for filtered in [true, false] {
+        let mut card = valid["synthetic"].card().clone();
+        let Node::Control {
+            control:
+                Control::Mode {
+                    count: Expr::Compute(operation),
+                    ..
+                },
+        } = &mut card.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("mode")
+        };
+        let NatOperation::Conditional {
+            condition: Expr::Compute(predicate),
+            ..
+        } = operation.as_mut()
+        else {
+            panic!("conditional cap")
+        };
+        let Predicate::CompareInt {
+            left: Expr::Compute(left),
+            ..
+        } = predicate.as_mut()
+        else {
+            panic!("public count comparison")
+        };
+        let IntOperation::FromNat {
+            value: Expr::Live(read),
+        } = left.as_mut()
+        else {
+            panic!("zone count")
+        };
+        let NatRead::ZoneCount {
+            selector:
+                Selector::Zone {
+                    zone,
+                    predicate: filter,
+                    ..
+                },
+        } = read.as_mut()
+        else {
+            panic!("zone selector")
+        };
+        *zone = ZoneKind::Banish;
+        if !filtered {
+            **filter = Expr::Literal(Bool(true));
+        }
+        assert_eq!(
+            WellFormedCardProgram::check(card).is_ok(),
+            !filtered,
+            "only the unfiltered banish size is public"
+        );
+    }
+}

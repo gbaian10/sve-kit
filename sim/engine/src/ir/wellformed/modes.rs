@@ -401,13 +401,21 @@ fn public_mode_count(value: &Expr<Int>) -> bool {
     };
     match read.as_ref() {
         NatRead::ZoneCount {
-            selector: Selector::Zone { zone, view, .. },
+            selector:
+                Selector::Zone {
+                    zone,
+                    view,
+                    predicate,
+                    ..
+                },
         } => {
             *view == (SelectionView::Current {})
-                && matches!(
-                    zone,
-                    ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Ex | ZoneKind::Banish
-                )
+                && match zone {
+                    ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Ex => true,
+                    // Face-down banished cards keep their contents private; only the size is public.
+                    ZoneKind::Banish => **predicate == Expr::Literal(Bool(true)),
+                    _ => false,
+                }
         }
         NatRead::HistoryCount { .. } => true,
         _ => false,

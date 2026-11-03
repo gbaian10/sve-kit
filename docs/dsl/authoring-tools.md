@@ -316,7 +316,7 @@ cmp:
 張數沿用公開計數與既有條件式模式流程，不使用另一套執行器。
 エボルヴ牌庫的計數不接受對手、裏向卡、未指定名稱或額外篩選條件。
 
-場上、EX、墓場與消滅區屬公開區域，`instead[].if.cmp` 可讀任一玩家在這些區域的一般計數並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。兩者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
+`instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（消滅區可能有裏向卡，內容不公開，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。兩者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
 
 ## 公開數值宣告與查詢上限
 
