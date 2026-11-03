@@ -8,6 +8,7 @@ cards:
                 to: field
                 token:
                   same_name_as: chosen
+                  kind: follower
           targets:
             - bind: chosen
               from:
