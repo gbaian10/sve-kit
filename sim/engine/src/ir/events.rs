@@ -1,3 +1,4 @@
+pub(crate) mod ability;
 pub(crate) mod attack;
 pub(crate) mod change;
 pub(crate) mod damage;

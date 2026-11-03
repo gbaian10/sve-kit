@@ -55,6 +55,8 @@ EFFECT_NAMES = {
     "A.effect.cannot.deal-damage": "CannotDealDamage",
     "A.effect.cannot": "Cannot",
     "A.effect": "EffectSpec",
+    "A.static-effect": "StaticEffect",
+    "A.static-prevention-if": "StaticPreventionIf",
 }
 
 

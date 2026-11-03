@@ -877,7 +877,18 @@ impl Game {
                 return Err(unsupported("off-field destruction"));
             }
             let from_kind = movement_origin(&previous.zone, method, zone)?;
-            if previous.zone == zone
+            let prohibited = match method {
+                MoveMethod::Destroy => self.restricted(&id, "ability_destroy")?,
+                MoveMethod::Banish => self.restricted(&id, "banish")?,
+                MoveMethod::Put
+                | MoveMethod::Return
+                | MoveMethod::Mill
+                | MoveMethod::Draw
+                | MoveMethod::Discard
+                | MoveMethod::Play => false,
+            };
+            if prohibited
+                || previous.zone == zone
                 || (method == MoveMethod::Destroy && execution.destroy_guards.contains(&before))
             {
                 continue;

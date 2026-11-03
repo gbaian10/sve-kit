@@ -1,0 +1,32 @@
+cards:
+  BP20-T18:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+            - life:
+                delta: 2
+                who: self
+            - draw:
+                n: 2
+                who: self
+            - discard:
+                n: 2
+                random: true
+                who: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token:
+      name: 干絶の甘露
+      template: true
+format: 2
+kind: author_effect_set

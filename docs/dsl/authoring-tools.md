@@ -93,7 +93,7 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 
 實體 token 使用同一主檔、具名本體及行覆蓋入口。卡片層的 `token: {name: 操り人形, template: true}` 指定規則名稱與同名 token 的代表印刷；`template` 預設為 false，省略整個 `token` 時使用快照卡名。同名 token 有多個已選用程式時須恰有一個代表。卡面、數值與型別仍來自快照，`token` 只能標在單面的 token 卡上；印刷的突進、守護等以 `keywords` 宣告，與一般從者共用 lowering 與執行規則。
 
-所有觸發能力都可用 `targets` 宣告正式目標；費用時點依[作者語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)區分頭付款與本文付款。控制者在檢查時點打出待機能力時選擇目標，沒有足夠合法目標就不發動，不執行後續效果。謝幕在來源離場後選擇目標。目標宣告前不執行本體；同一印刷行的入場曲與謝幕仍以不同 `scope` 區分。模式目標、單一目標組的分配傷害，以及 `at: resolution` 公開計數讀值沿用共同打出規則。
+所有觸發能力都可用 `targets` 宣告正式目標；費用時點依[作者語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)區分頭付款與本文付款。控制者在檢查時點打出待機能力時選擇目標，沒有足夠合法目標就不發動，不執行後續效果。謝幕在來源離場後選擇目標。目標宣告前不執行本體；同一印刷行的入場曲與謝幕仍以不同 `scope` 區分。模式目標、單一目標組的分配傷害，以及 `at: resolution` 公開計數讀值沿用共同打出規則。模式目標（`option: N`）的候選須是不依賴其他選擇的公開集合；「場の他のフォロワー」的 `other: true` 只排除能力持有者自身，可用於模式目標（BP15-114）。
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
@@ -132,9 +132,15 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 
 `auto.on.stat_changed` 接受 `ref: this`、`stat: power | hp`（或清單）及 `direction: up | down`。省略欄位表示不加該項限制；一個指示對同一物件的攻擊力／體力差額合為一個事實，清單採任一欄位符合，不因兩項都增加而重複觸發。零差額不產生事件；明示數值指示與超進化的 +1/+1 會產生，普通進化換底值、持續條件重算與期限到期不產生。這兩類事件頭目前使用場上來源與既有每回合一次限制，不忽略其他未支援欄位。
 
-`ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。`history`／`history_count` 可查 `event: ub_activated`、`window: this_turn`，以 `who: self | opp` 篩選能力控制者，省略時計算雙方；`exclude: this_execution` 依執行 ID 排除本次正式發動。計次沿用既有 `ub_activated` 回合計數器，包括明示歷史開局；IR 執行紀錄只識別要排除的本次。只計事實次數，不接受主體篩選或 `distinct: subjects`；每回合重置。記錄在正式打出提交時即對本文與巢狀執行可見，並非解決完成後才計次。UB 發動訂閱與免原費用發動其他 UB 的 consumer 尚未准入。
+`ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。`history`／`history_count` 可查 `event: ub_activated`、`window: this_turn`，以 `who: self | opp` 篩選能力控制者，省略時計算雙方；`exclude: this_execution` 依執行 ID 排除本次正式發動。計次沿用既有 `ub_activated` 回合計數器，包括明示歷史開局；IR 執行紀錄只識別要排除的本次。只計事實次數，不接受主體篩選或 `distinct: subjects`；每回合重置。記錄在正式打出提交時即對本文與巢狀執行可見，並非解決完成後才計次。免原費用發動其他 UB 的 consumer 尚未准入。
 
 `buff.instead` 可在只有 `power` 的強化指示上放一筆 `{if, power}`，以既有條件數值一次選定攻擊力增量；不先加基本值再補差額。`hp` 取代、同時攻體強化、複數取代與 `set_stat.instead` 尚未准入。
+
+`auto.on.ub_activated` 可訂閱「其他己方場上從者發動 UB」：`who: self`，
+`holder: { who: self, zone: field, kind: follower, other: true }`。發動點是正式目標與付款成立後、
+本文開始前；一般能力、自己、他方或非從者不符合。事件固定本次 execution、能力實例、holder 世代與控制者，
+在發動時截取場上觀察者，再沿既有 pending／次數限制流程處理；本文使觀察者離場也不抹除既有待處理能力。
+此入口只准上述 holder 形狀，不開放墓場 UB 頭、其他玩家、任意能力使用頭。
 
 入場曲、進化時與謝幕可用 `cost` 宣告頭付款（例如 `cost: {pp: 2}` 或 `cost: {leader_life: 2}`），沿用接受／拒絕與不足資源不發動的付款流程；目標在付款前宣告。`optional_cost` 與模式付款尚不接受 `leader_life`。
 
@@ -232,6 +238,8 @@ apply:
 
 持有者永久不能在自己的開始階段依規則起身時，寫 `static.effects: [{cannot: {what: stand, on: this, during: {phase: start, who: self, cause: rule}}}]`（CP02-025、ECP01-053）。宣告只在持有者仍在場上且保有此能力時有效，沒有回合期限；每次自己的開始階段都重新讀取。它不阻止效果的 `stand`，因此 Main 階段的印刷付費能力仍可使其起身；沿用頭費用的拒付流程，拒付時保持橫置。此入口不接受 `affected`、對手開始階段或 `static.while`；有期限的施加仍使用上方既有 `apply`。
 
+印刷的自身移動免疫使用 `static.effects`：`cannot: {what: destroy, on: this, by: ability}` 阻止能力直接破壞，`cannot: {what: banish, on: this}` 阻止消滅；`on` 省略也指自身。每次處理依持有者當下有效卡面及能力重讀，失去能力後不再保護；不另安裝有期限的狀態。禁止的指示沒有成功移動回條，也不產生離場或破壞事件。能力傷害或交戰傷害造成體力歸零仍會規則破壞，直接送墓不等於破壞（Q802、Q2263、Q2836）。本入口只接受無條件的自身宣告，不接受其他接受者、`static.while`、施加式免疫、未限定原因的 `destroy` 或 `banish:by:ability`。同一段印刷能力同時包含自身能力防傷時，須保留為一個 `static` 宣告；能力防傷可用靜態專用的 `if: {cond, then: [{prevent: {kind: ability}}]}` 控制，無條件的 `cannot` 放在同層。此形式只收自身能力防傷與自身移動免疫，不接受 `else`、巢狀分支或其他持續效果。
+
 ## 寫入與驗證
 
 ```bash
@@ -314,7 +322,9 @@ cmp:
 配合 `choice.n: 1` 與該替代項的 `upto: 3`，宣告模式時讀取公開張數並保存本次上限；
 選項仍不重複，選中的模式依印刷順序結算，正式目標在效果結算前宣告。
 張數沿用公開計數與既有條件式模式流程，不使用另一套執行器。
-這個入口不接受對手、裏向卡、未指定名稱、其他區域或額外篩選條件。
+エボルヴ牌庫的計數不接受對手、裏向卡、未指定名稱或額外篩選條件。
+
+`instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（消滅區可能有裏向卡，內容不公開，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。兩者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
 
 ## 公開數值宣告與查詢上限
 

@@ -8,6 +8,7 @@ use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
+use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, CharacteristicPatch, Control, CostSpec, DamageAmount, DiscardMode, Effect,
@@ -43,6 +44,7 @@ mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
 pub(super) mod quick;
+mod removal_restrictions;
 pub(in crate::game::internal) mod resource_entry;
 mod resources;
 mod static_keywords;
@@ -761,6 +763,27 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if holder_removal::is_mixed_static(ability) {
+        for effect in &ability.declarations {
+            let mut single = located.clone();
+            let mut declaration = effect.clone();
+            if let Effect::Replacement { condition, .. } = &mut declaration {
+                // Field-only admission can reuse the holder's public-posture proof.
+                *condition = static_keywords::field_holder_posture(condition);
+            }
+            single.node.declarations = vec![declaration];
+            if holder_removal::is_static(&single.node) {
+                removal_restrictions::check(&single)?;
+            } else {
+                prevention::check(&single)?;
+            }
+        }
+        return Ok(true);
+    }
+    if holder_removal::is_static(ability) {
+        removal_restrictions::check(located)?;
+        return Ok(true);
+    }
     if stand_restrictions::is_static(ability) {
         super::posture::check_static(located)?;
         return Ok(true);
@@ -786,7 +809,9 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
-    if other_costs::is_static(ability)
+    if holder_removal::is_static(ability)
+        || holder_removal::is_mixed_static(ability)
+        || other_costs::is_static(ability)
         || stand_restrictions::is_static(ability)
         || attack_restrictions::is_static(ability)
         || static_keywords::is_static(ability)

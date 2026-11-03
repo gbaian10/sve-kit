@@ -239,7 +239,7 @@ fn scoped_condition(condition: Option<&Expr<Bool>>) -> Expr<Bool> {
 }
 
 // A field-only static's holder is public, so its own posture is a scoped live holder read.
-fn field_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
+pub(super) fn field_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
     let Expr::Compute(operation) = condition else {
         return condition.clone();
     };

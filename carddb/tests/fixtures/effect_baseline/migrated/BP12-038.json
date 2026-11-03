@@ -1,0 +1,49 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": {
+          "args": [
+            0,
+            {
+              "args": [
+                {
+                  "read": "self.cemetery.cost"
+                }
+              ],
+              "fn": "distinct"
+            }
+          ],
+          "fn": "sub"
+        },
+        "op": "adjust_cost",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 2
+    },
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 3
+    }
+  ],
+  "status": "complete"
+}

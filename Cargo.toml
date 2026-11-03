@@ -86,3 +86,8 @@ missing_docs_in_private_items = "allow"
 [profile.release]
 lto = "fat"
 codegen-units = 1
+
+# Full debuginfo made the current_repository test binary 412 MB (74% debuginfo), and every
+# relink rewrote it; line tables still give file:line in panics and backtraces.
+[profile.dev]
+debug = "line-tables-only"

@@ -1,0 +1,33 @@
+cards:
+  BP12-057:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+                on:
+                  kind: follower
+                  other: true
+                  trait: 海洋
+                  who: self
+                  zone: field
+          while:
+            awakened: true
+      - fanfare:
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

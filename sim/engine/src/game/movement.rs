@@ -110,7 +110,18 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn banish_objects(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
+    pub(super) fn banish_objects(&mut self, candidates: &[String], frame: &Frame) -> Result<()> {
+        let mut permitted = Vec::new();
+        for id in candidates {
+            if !self.restricted(id, "banish")? {
+                permitted.push(id.clone());
+            }
+        }
+        if permitted.is_empty() {
+            return Ok(());
+        }
+        let ids = &permitted;
+
         let mut movement = frame.clone();
         movement
             .values

@@ -1,0 +1,58 @@
+cards:
+  DSD01b-002:
+    abilities:
+      - keywords:
+          - assail
+          - bane
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: amulet
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - lastword:
+          do:
+            - if:
+                cond:
+                  exists:
+                    name: 遺されし電撃
+                    who: self
+                    zone: field
+                else:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 遺されし電撃
+                then:
+                  - counter:
+                      delta: 1
+                      name: 雷カウンター
+                      on:
+                        name: 遺されし電撃
+                        who: self
+                        zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

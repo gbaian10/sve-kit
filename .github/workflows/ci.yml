@@ -105,7 +105,7 @@ jobs:
           sparse-checkout: card-data
           persist-credentials: false
           clean: true
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -128,15 +128,15 @@ jobs:
           persist-credentials: false
           clean: true
       # The bun-fmt hook runs Bun from mise.toml.
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -195,7 +195,7 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
-    # Exceeding this limit means a test regression: fix the tests, do not raise the timeout.
+    # Hooks, installed-wheel smokes and the publish tests; the carddb tests run in python-tests.
     timeout-minutes: 20
     env:
       MISE_TASK_RUN_AUTO_INSTALL: "false"
@@ -206,14 +206,14 @@ jobs:
           persist-credentials: false
           clean: true
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
-      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           install: false
           cache: false
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -268,67 +268,6 @@ jobs:
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" images gc --help > /dev/null
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" snapshot upload --help > /dev/null
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" snapshot gc --help > /dev/null
-      - name: pytest (coverage gate for the explicit test scope)
-        id: tests
-        env:
-          TMPDIR: ${{ runner.temp }}
-          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
-          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
-        run: |
-          umask 077
-          rm -rf "$REPORT_DIR" "$SVE_DATA_DIR"
-          mkdir -p "$REPORT_DIR"
-          start=$SECONDS
-          [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
-          status=0
-          uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
-            --cov-fail-under=90 \
-            --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
-            --cov-report="xml:$REPORT_DIR/coverage.xml" \
-            > "$REPORT_DIR/test.log" 2>&1 || status=$?
-          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
-          echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
-          exit "$status"
-      - name: Python test summary
-        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
-        env:
-          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
-        run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
-      # Informational only: the 90% gate stays in pytest. continue-on-error keeps a failure of the action's
-      # own setup steps (fail_ci_if_error only covers the upload) from failing the job and so ci-ok.
-      # The report holds file names and line hits, no card text. Fork PRs have no secret and upload tokenless.
-      - name: Upload carddb coverage to Codecov
-        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
-        continue-on-error: true
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ runner.temp }}/sve-python-reports/coverage.xml
-          disable_search: true
-          flags: carddb
-          fail_ci_if_error: false
-      # Test Analytics gets a copy with parameters hashed and no failure text or output: the raw report can hold
-      # card wording. Informational, so a failure or slow upload here never reaches the job result.
-      - name: Sanitize carddb test results
-        id: public-junit
-        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
-        continue-on-error: true
-        timeout-minutes: 5
-        env:
-          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
-        run: python3 .github/ci/junit_public.py "$REPORT_DIR/junit.xml" "$REPORT_DIR/junit-public.xml"
-      - name: Upload carddb test results to Codecov
-        if: ${{ !cancelled() && steps.public-junit.outcome == 'success' }}
-        continue-on-error: true
-        timeout-minutes: 5
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          report_type: test_results
-          files: ${{ runner.temp }}/sve-python-reports/junit-public.xml
-          disable_search: true
-          flags: carddb
-          fail_ci_if_error: false
       - name: publish pytest (independent synthetic coverage gate)
         id: publish-tests
         if: ${{ !cancelled() }}
@@ -355,9 +294,9 @@ jobs:
       - name: Remove Python reports and test data
         if: always()
         env:
-          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+          REPORT_DIR: ${{ runner.temp }}/sve-publish-reports
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
-        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache publish/htmlcov publish/.pytest_cache "${RUNNER_TEMP}/sve-publish-reports" "${RUNNER_TEMP}"/pytest-of-*
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov publish/htmlcov publish/.pytest_cache "${RUNNER_TEMP}"/pytest-of-*
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
@@ -371,18 +310,187 @@ jobs:
           path: ~/.cache/pre-commit
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
+  python-tests:
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' }}
+    runs-on: ubuntu-latest
+    # Exceeding this limit means a test regression: fix the tests, do not raise the timeout.
+    timeout-minutes: 15
+    strategy:
+      # Every shard reports its own failures.
+      fail-fast: false
+      matrix:
+        # Each test runs in exactly one shard; python-coverage checks that and gates the combined coverage.
+        shard: [1, 2, 3]
+    env:
+      MISE_TASK_RUN_AUTO_INSTALL: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # identity-only authoring verifies committed transition bases
+          persist-credentials: false
+          clean: true
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          install: false
+          cache: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
+      - name: pytest (one shard; the 90% gate runs on the combined shards)
+        id: tests
+        env:
+          TMPDIR: ${{ runner.temp }}
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+          COVERAGE_DIR: ${{ runner.temp }}/sve-python-coverage
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+        run: |
+          umask 077
+          rm -rf "$REPORT_DIR" "$SVE_DATA_DIR"
+          mkdir -p "$REPORT_DIR"
+          start=$SECONDS
+          [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
+          status=0
+          # One shard's coverage is partial, so the 90% fail-under applies in python-coverage instead.
+          uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
+            --cov-fail-under=0 --shard="$SHARD" --shard-report="$REPORT_DIR/shard.json" \
+            --junitxml="$REPORT_DIR/junit.xml" \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
+          if [ "$status" -eq 0 ]; then
+            mkdir -p "$COVERAGE_DIR"
+            cp carddb/htmlcov/.coverage "$COVERAGE_DIR/shard-${SHARD%/*}.coverage"
+            cp "$REPORT_DIR/shard.json" "$COVERAGE_DIR/shard-${SHARD%/*}.json"
+          fi
+          exit "$status"
+      - name: Python test summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+        run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
+      # Test Analytics gets a copy with parameters hashed and no failure text or output: the raw report can hold
+      # card wording. Informational, so a failure or slow upload here never reaches the job result.
+      - name: Sanitize carddb test results
+        id: public-junit
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+        run: python3 .github/ci/junit_public.py "$REPORT_DIR/junit.xml" "$REPORT_DIR/junit-public.xml"
+      - name: Upload carddb test results to Codecov
+        if: ${{ !cancelled() && steps.public-junit.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: ${{ runner.temp }}/sve-python-reports/junit-public.xml
+          disable_search: true
+          flags: carddb
+          fail_ci_if_error: false
+      # Coverage data holds source paths and line/branch hits only: no card text, test names or output.
+      - name: Hand the shard's coverage data to python-coverage
+        if: ${{ steps.tests.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-coverage-${{ matrix.shard }}
+          path: ${{ runner.temp }}/sve-python-coverage/
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
+      - name: Remove Python reports and test data
+        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+          COVERAGE_DIR: ${{ runner.temp }}/sve-python-coverage
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+        run: rm -rf "$REPORT_DIR" "$COVERAGE_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache "${RUNNER_TEMP}"/pytest-of-*
+
+  python-coverage:
+    needs: [changes, python-tests]
+    if: ${{ needs.changes.outputs.python == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          clean: true
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: python-coverage-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/sve-python-coverage
+      - name: Combined coverage (full 90% gate)
+        id: coverage
+        env:
+          DATA_DIR: ${{ runner.temp }}/sve-python-coverage
+        run: |
+          mkdir -p carddb/htmlcov
+          # Every shard ran in the same checkout path, so the data files combine without remapping.
+          uv --directory carddb run --locked coverage combine --keep "$DATA_DIR"/shard-*.coverage
+          uv --directory carddb run --locked coverage json -o "$DATA_DIR/coverage.json"
+          uv --directory carddb run --locked coverage xml -o "$DATA_DIR/coverage.xml"
+          uv --directory carddb run --locked coverage report --format=total --fail-under=90
+      - name: Python coverage summary
+        if: ${{ !cancelled() && (steps.coverage.outcome == 'success' || steps.coverage.outcome == 'failure') }}
+        env:
+          DATA_DIR: ${{ runner.temp }}/sve-python-coverage
+        run: python3 .github/ci/test_summary.py python-coverage "$DATA_DIR"
+      # Informational only: the 90% gate stays in the two steps above. continue-on-error keeps a failure of the
+      # action's own setup steps (fail_ci_if_error only covers the upload) from failing the job and so ci-ok.
+      # The report holds file names and line hits, no card text. Fork PRs have no secret and upload tokenless.
+      - name: Upload carddb coverage to Codecov
+        if: ${{ !cancelled() && (steps.coverage.outcome == 'success' || steps.coverage.outcome == 'failure') }}
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ${{ runner.temp }}/sve-python-coverage/coverage.xml
+          disable_search: true
+          flags: carddb
+          fail_ci_if_error: false
+      - name: Remove Python coverage data
+        if: always()
+        env:
+          DATA_DIR: ${{ runner.temp }}/sve-python-coverage
+        run: rm -rf "$DATA_DIR" carddb/htmlcov
+
   rust:
     needs: changes
     if: ${{ needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
-    # The required steps keep 45 minutes; each of the two Codecov steps has its own 5.
-    timeout-minutes: 55
+    # fmt, clippy, deny and machete; the tests run in rust-tests.
+    timeout-minutes: 30
     env:
       MISE_EXEC_AUTO_INSTALL: "false" # the cargo hooks go through `mise exec`; Rust itself comes from rustup
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0 # the public authoring selection verifies transition bases
           persist-credentials: false
           clean: true
       - name: Install the pinned Rust toolchain
@@ -391,14 +499,14 @@ jobs:
         id: rust-cache
         with:
           save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      - uses: taiki-e/install-action@8cca0918f8471c33515202b73f56ab27f2bed283 # v2.87.29
+      - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
         with:
-          tool: cargo-llvm-cov@0.9.1,cargo-deny@0.19.9,cargo-machete@0.9.2
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+          tool: cargo-deny@0.19.9,cargo-machete@0.9.2
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           install: false
           cache: false
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -414,7 +522,7 @@ jobs:
           # partial cache that the others hit exactly and then could never update.
           key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
           restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
-      # The coverage test hook runs directly below; the other checks keep their local hooks.
+      # The coverage test hook runs in rust-tests; the other checks keep their local hooks.
       - name: pre-commit (rust hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip rust)"
@@ -424,58 +532,148 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
-      - name: Rust tests (public inputs, full 90% coverage gate)
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
+
+  rust-tests:
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
+    runs-on: ubuntu-latest
+    # Exceeding this limit means a test regression: fix the tests, do not raise the timeout.
+    timeout-minutes: 25
+    strategy:
+      # Every shard reports its own failures.
+      fail-fast: false
+      matrix:
+        # Each test runs in exactly one shard; rust-coverage checks that and gates the merged coverage.
+        # Every shard builds the same binaries itself: building once would add a sequential job and a large artifact.
+        shard: [1, 2, 3]
+    env:
+      MISE_EXEC_AUTO_INSTALL: "false" # Cargo goes through `mise exec`; Rust itself comes from rustup
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the public authoring selection verifies transition bases
+          persist-credentials: false
+          clean: true
+      - name: Install the pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      # Dependencies parse the large public inputs; optimising only them ("*" excludes workspace members) keeps
+      # every workspace crate unoptimised and instrumented, and the report already excludes dependency sources.
+      - name: Optimise dependencies only
+        run: printf '[profile.dev.package."*"]\nopt-level = 2\n' >> "${CARGO_HOME:-$HOME/.cargo}/config.toml"
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      - uses: taiki-e/install-action@5488ac5a951645ce95062214902ac4b6bc1a1037 # v2.87.32
+        with:
+          tool: cargo-llvm-cov@0.9.1
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+        with:
+          install: false
+          cache: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
+          cache-dependency-glob: |
+            carddb/uv.lock
+            publish/uv.lock
+      - name: Rust tests (public inputs, one shard; the 90% gate runs on the merged shards)
         id: tests
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+          COVERAGE_DIR: ${{ runner.temp }}/sve-rust-coverage
+          SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
         run: |
           umask 077
           rm -rf "$REPORT_DIR"
           mkdir -p "$REPORT_DIR"
           start=$SECONDS
           status=0
-          python3 .github/ci/rust_tests.py llvm-cov --locked --workspace --summary-only \
-            --fail-under-lines 90 --json --output-path "$REPORT_DIR/coverage.json" \
+          python3 .github/ci/rust_tests.py --shard="$SHARD" --shard-report="$REPORT_DIR" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
+          if [ "$status" -eq 0 ]; then
+            mkdir -p "$COVERAGE_DIR"
+            cp -r "$REPORT_DIR/coverage" "$COVERAGE_DIR/shard-${SHARD%/*}"
+            cp "$REPORT_DIR/shard.json" "$COVERAGE_DIR/shard-${SHARD%/*}.json"
+          fi
           exit "$status"
       - name: Rust test summary
         if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
         run: python3 .github/ci/test_summary.py rust "$REPORT_DIR"
-      # Informational: the 90% line gate above stays the gate. The profile data from the run is still
-      # in target/, so the lcov export needs no second test run; both steps have their own 5 minutes.
-      - name: Export Rust coverage as lcov
-        id: lcov
-        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
-        continue-on-error: true
-        timeout-minutes: 5
+      # The profile and the objects' coverage sections hold function names, source paths and counters only:
+      # no card text or test output (official test data is read at runtime, never compiled in).
+      - name: Hand the shard's coverage to rust-coverage
+        if: ${{ steps.tests.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rust-coverage-${{ matrix.shard }}
+          path: ${{ runner.temp }}/sve-rust-coverage/
+          if-no-files-found: error
+          retention-days: 1
+          overwrite: true
+      - name: Remove Rust reports
+        if: always()
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
-        run: mise exec -- cargo llvm-cov report --lcov --output-path "$REPORT_DIR/lcov.info"
+          COVERAGE_DIR: ${{ runner.temp }}/sve-rust-coverage
+        run: rm -rf "$REPORT_DIR" "$COVERAGE_DIR"
+
+  rust-coverage:
+    needs: [changes, rust-tests]
+    if: ${{ needs.changes.outputs.rust == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          clean: true
+      # llvm-profdata and llvm-cov come from the pinned toolchain's llvm-tools component.
+      - name: Install the pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: rust-coverage-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/sve-rust-coverage
+      # llvm-cov reports the merged profiles with each shard's exact filter, as a single run would.
+      - name: Merged line coverage (full 90% gate)
+        id: coverage
+        env:
+          DATA_DIR: ${{ runner.temp }}/sve-rust-coverage
+        run: python3 .github/ci/rust_coverage.py "$DATA_DIR"
+      - name: Rust coverage summary
+        if: ${{ !cancelled() && (steps.coverage.outcome == 'success' || steps.coverage.outcome == 'failure') }}
+        env:
+          DATA_DIR: ${{ runner.temp }}/sve-rust-coverage
+        run: python3 .github/ci/test_summary.py rust-coverage "$DATA_DIR"
+      # Informational: the 90% line gate above stays the gate.
       - name: Upload Rust coverage to Codecov
-        if: ${{ !cancelled() && steps.lcov.outcome == 'success' }}
+        if: ${{ !cancelled() && (steps.coverage.outcome == 'success' || steps.coverage.outcome == 'failure') }}
         continue-on-error: true
         timeout-minutes: 5
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ${{ runner.temp }}/sve-rust-reports/lcov.info
+          files: ${{ runner.temp }}/sve-rust-coverage/lcov.info
           disable_search: true
           flags: rust
           fail_ci_if_error: false
-      - name: Remove Rust reports
+      - name: Remove Rust coverage data
         if: always()
         env:
-          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
-        run: rm -rf "$REPORT_DIR"
-      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
-        with:
-          path: ~/.cache/pre-commit
-          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
+          DATA_DIR: ${{ runner.temp }}/sve-rust-coverage
+        run: rm -rf "$DATA_DIR"
 
   web:
     needs: changes
@@ -492,7 +690,7 @@ jobs:
           persist-credentials: false
           clean: true
       # Bun and Node versions come from mise.toml.
-      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -588,7 +786,17 @@ jobs:
 
   ci-ok:
     if: always()
-    needs: [changes, repo, card-data, python, rust, web]
+    needs:
+      - changes
+      - repo
+      - card-data
+      - python
+      - python-tests
+      - python-coverage
+      - rust
+      - rust-tests
+      - rust-coverage
+      - web
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -597,7 +805,7 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
         run: |
           # Unmapped jobs are mandatory; only unchanged components may skip.
-          component='{"card-data":"card_data","python":"python","rust":"rust","web":"web"}'
+          component='{"card-data":"card_data","python":"python","python-tests":"python","python-coverage":"python","rust":"rust","rust-tests":"rust","rust-coverage":"rust","web":"web"}'
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do

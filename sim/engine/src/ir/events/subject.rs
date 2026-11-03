@@ -6,7 +6,7 @@ use crate::ir::{
     EventSnapshotPolicy, EvolveEvent, Expr, Info, KindFrozen, KindRead, LeaveFieldEvent,
     NamesFrozen, NamesRead, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayEvent,
     PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent, Predicate, Role, SnapshotFields,
-    TraitId, TraitsFrozen, TraitsRead, ZoneFrozen, ZoneKind, ZoneOperation,
+    TraitId, TraitsFrozen, TraitsRead, UbActivatedEvent, ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
@@ -25,6 +25,7 @@ pub(crate) enum SubjectFields {
     Hand(Binding<LeaveFieldEvent>),
     Leave(Binding<LeaveFieldEvent>),
     Ex(Binding<EnterExEvent>),
+    Ub(Binding<UbActivatedEvent>),
 }
 
 fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectView {
@@ -33,6 +34,18 @@ fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectVie
             value: Box::new(Expr::Bound(card)),
         }),
         event: EventContext::Play { event },
+        policy: EventSnapshotPolicy::AtReveal,
+    }
+}
+
+fn ub_view(event: Binding<UbActivatedEvent>) -> ObjectView {
+    ObjectView::EventSnapshot {
+        object: Box::new(ObjectOperand::FromExpression {
+            value: Box::new(Expr::Frozen(Box::new(ObjectFrozen::UbActivatedHolder {
+                event,
+            }))),
+        }),
+        event: EventContext::UbActivated { event },
         policy: EventSnapshotPolicy::AtReveal,
     }
 }
@@ -51,7 +64,9 @@ pub(super) fn attack_view(event: Binding<AttackEvent>) -> ObjectView {
 
 impl SubjectFields {
     pub(crate) const fn from_pattern(pattern: &EventPattern) -> Option<Self> {
-        if let EventPattern::EnterField { binding, .. } = pattern {
+        if let EventPattern::UbActivated { binding, .. } = pattern {
+            Some(Self::Ub(*binding))
+        } else if let EventPattern::EnterField { binding, .. } = pattern {
             Some(Self::Entry(*binding))
         } else if let EventPattern::EnterEx { binding, .. } = pattern {
             Some(Self::Ex(*binding))
@@ -70,6 +85,7 @@ impl SubjectFields {
 
     pub(crate) fn payload_object(self, payload: &EventPayload) -> Option<ObjectRef> {
         Some(match (self, payload) {
+            (Self::Ub(_), EventPayload::UbActivated { event }) => event.holder,
             (Self::Entry(_), EventPayload::EnterField { event }) => event.object,
             (Self::Ex(_), EventPayload::EnterEx { event }) => event.object,
             (Self::Attack(_), EventPayload::Attack { event }) => event.attacker,
@@ -98,10 +114,14 @@ impl SubjectFields {
             Self::Destroy(event) => ObjectFrozen::DestroyObjectBefore { event },
             Self::Evolve(event) => ObjectFrozen::EvolveSubject { event },
             Self::Ex(event) => ObjectFrozen::EnterExObject { event },
+            Self::Ub(event) => ObjectFrozen::UbActivatedHolder { event },
         }))
     }
     fn controller(self) -> Expr<PlayerRef> {
         match self {
+            Self::Ub(event) => {
+                Expr::Frozen(Box::new(PlayerFrozen::UbActivatedController { event }))
+            }
             Self::Attack(event) => Expr::Frozen(Box::new(PlayerFrozen::AttackController { event })),
             Self::DamageSource(event) => {
                 Expr::Frozen(Box::new(PlayerFrozen::DamageController { event }))
@@ -132,6 +152,12 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Ub(event) => {
+                return Expr::Live(Box::new(KindRead::Kind {
+                    object: ub_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Posture(_) => {
                 return Expr::Live(Box::new(KindRead::Kind {
                     object: ObjectView::Current {
@@ -184,6 +210,12 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Ub(event) => {
+                return Expr::Live(Box::new(TraitsRead::Traits {
+                    object: ub_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Posture(_) => {
                 return Expr::Live(Box::new(TraitsRead::Traits {
                     object: ObjectView::Current {
@@ -236,6 +268,11 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Ub(event) => {
+                return Expr::Live(Box::new(NamesRead::Names {
+                    object: ub_view(event),
+                }));
+            }
             Self::Posture(_) => {
                 return Expr::Live(Box::new(NamesRead::Names {
                     object: ObjectView::Current {
@@ -285,6 +322,12 @@ impl SubjectFields {
     }
     fn class(self) -> Expr<Info<ClassId>> {
         let field = match self {
+            Self::Ub(event) => {
+                return Expr::Live(Box::new(ClassRead::Class {
+                    object: ub_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Posture(_) => {
                 return Expr::Live(Box::new(ClassRead::Class {
                     object: ObjectView::Current {
@@ -338,6 +381,7 @@ impl SubjectFields {
     }
     fn token(self) -> Option<Expr<Bool>> {
         let object = match self {
+            Self::Ub(event) => ub_view(event),
             Self::Attack(event) => attack_view(event),
             Self::DamageSource(event) => ObjectView::Snapshot {
                 value: Box::new(Expr::Frozen(Box::new(SnapshotFields::DamageSource {
@@ -366,7 +410,7 @@ impl SubjectFields {
     }
     pub(crate) const fn view(self) -> EventSnapshotPolicy {
         match self {
-            Self::Played { .. } => EventSnapshotPolicy::AtReveal,
+            Self::Played { .. } | Self::Ub(_) => EventSnapshotPolicy::AtReveal,
             Self::Cemetery(_) | Self::Hand(_) | Self::Leave(_) | Self::Destroy(_) => {
                 EventSnapshotPolicy::BeforeExit
             }
@@ -382,7 +426,8 @@ impl SubjectFields {
         let (event, kind) = match self {
             Self::Cemetery(event) => (event, ZoneKind::Cemetery),
             Self::Hand(event) => (event, ZoneKind::Hand),
-            Self::Attack(_)
+            Self::Ub(_)
+            | Self::Attack(_)
             | Self::Posture(_)
             | Self::DamageSource(_)
             | Self::Played { .. }

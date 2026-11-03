@@ -1,56 +1,4 @@
 cards:
-  BP15-004:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - amount: 1
-              op: damage
-              subjects: opponent.leader
-            - amount: 2
-              op: damage
-              subjects:
-                side: opponent
-                type: follower
-                zone: field
-            - hp: 1
-              op: modify
-              subjects: self.leader
-        event: evolve
-        kind: trigger
-        line: 2
-        subject:
-          side: self
-          type: follower
-          zone: field
-      - body:
-          condition:
-            args:
-              - count:
-                  side: self
-                  type: follower
-                  where:
-                    read: item.face_up
-                  zone: evolve_deck
-              - 3
-            fn: ge
-          op: if
-          then:
-            op: evolve
-            subjects: self
-        event: enter
-        kind: trigger
-        line: 3
-        subject: self
-    status: complete
   BP15-008:
     abilities:
       - body:
@@ -156,29 +104,6 @@ cards:
         kind: trigger
         line: 2
         subject: self
-    status: complete
-  BP15-113:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          condition:
-            args:
-              - read: self.leader.life
-              - 10
-            fn: le
-          keywords:
-            - drain
-          op: aura
-          subjects: self
-        kind: static
-        line: 2
     status: complete
   BP15-PR10:
     abilities:

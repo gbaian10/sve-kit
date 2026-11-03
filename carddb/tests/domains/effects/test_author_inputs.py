@@ -8,8 +8,11 @@ import pytest
 
 from sve_carddb.core.json import object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
+from sve_carddb.domains.effects.author_sites import NodeSites
 
 if TYPE_CHECKING:
+    from pydantic import JsonValue
+
     from sve_carddb.domains.effects.author_inputs import Leaf
 
 SCHEMAS = Path(__file__).resolve().parents[4] / "dsl"
@@ -230,3 +233,108 @@ def test_schema_diagnostic_identifies_bad_key(
 def test_authored_size_bound(schemas: AuthorSchemas) -> None:
     with pytest.raises(AuthorInputError, match="size_limit"):
         schemas.leaf(b"#" * (1024 * 1024 + 1), "A.param")
+
+
+def _static_file(head: dict[str, JsonValue]) -> bytes:
+    return json.dumps(
+        {
+            "format": 2,
+            "kind": "author_effect_set",
+            "cards": {
+                "SYN-01": {
+                    "meta": {
+                        "written_by": [
+                            {
+                                "actor": {"who": "Codex", "model": "gpt-6.1-sol"},
+                                "date": "2026-11-03",
+                            }
+                        ]
+                    },
+                    "abilities": [{"line": 1, **head}],
+                }
+            },
+        }
+    ).encode()
+
+
+def test_conditional_ability_prevention_is_a_static_only_shape(
+    schemas: AuthorSchemas,
+) -> None:
+    guarded: JsonValue = {
+        "if": {
+            "cond": {"not": {"standing": "this"}},
+            "then": [{"prevent": {"kind": "ability"}}],
+        }
+    }
+    schemas.storage_tree(
+        _static_file(
+            {
+                "static": {
+                    "effects": [
+                        guarded,
+                        {"cannot": {"what": "destroy", "by": "ability"}},
+                    ]
+                }
+            }
+        ),
+        "author_effect_set",
+    )
+    NodeSites.decode_head(
+        {
+            "static": {
+                "effects": [guarded, {"cannot": {"what": "destroy", "by": "ability"}}]
+            }
+        }
+    )
+    with pytest.raises(AuthorInputError):
+        schemas.storage_tree(
+            _static_file(
+                {
+                    "activate": {
+                        "cost": {"pp": 0},
+                        "do": [
+                            {
+                                "apply": {
+                                    "on": "this",
+                                    "until": "turn",
+                                    "effect": guarded,
+                                }
+                            }
+                        ],
+                    }
+                }
+            ),
+            "author_effect_set",
+        )
+
+
+@pytest.mark.parametrize(
+    "branch",
+    [
+        {
+            "cond": {"my_turn": True},
+            "then": [{"prevent": {"kind": "ability"}}],
+            "else": [{"prevent": {"kind": "ability"}}],
+        },
+        {"cond": {"my_turn": True}, "then": []},
+        {
+            "cond": {"my_turn": True},
+            "then": [
+                {"prevent": {"kind": "ability"}},
+                {"prevent": {"kind": "ability"}},
+            ],
+        },
+        {"cond": {"my_turn": True}, "then": [{"prevent": {"kind": "combat"}}]},
+        {
+            "cond": {"my_turn": True},
+            "then": [{"prevent": {"kind": "ability", "on": {"leader": "self"}}}],
+        },
+    ],
+)
+def test_conditional_static_prevention_does_not_open_wider_effects(
+    schemas: AuthorSchemas, branch: JsonValue
+) -> None:
+    with pytest.raises(AuthorInputError):
+        schemas.storage_tree(
+            _static_file({"static": {"effects": [{"if": branch}]}}), "author_effect_set"
+        )

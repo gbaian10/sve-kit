@@ -1,0 +1,41 @@
+cards:
+  BP02-021:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - choose:
+                        bind: selected
+                        from:
+                          cost_le: 3
+                          kind: follower
+                          who: self
+                          zone: hand
+                        n: 1
+                    - move:
+                        ref: selected
+                        to: field
+                        result: entered
+                  - - damage:
+                        n: 4
+                        to: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

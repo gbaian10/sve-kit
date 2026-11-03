@@ -1621,6 +1621,8 @@ pub(super) enum PhaseSubscription {
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
     Played(PlayedSubscription),
+    #[serde(rename = "ub_activated")]
+    UbActivated(UbSubscription),
     #[serde(rename = "phase")]
     Phase(PhaseSubscriptionPayload),
     #[serde(rename = "enter_field")]
@@ -1648,6 +1650,32 @@ pub(super) enum PhaseSubscription {
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UbSubscription {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "holder")]
+    pub _holder: UbHolder,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UbHolder {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: UbHolderZone,
+    #[serde(rename = "kind")]
+    pub _kind: FollowerKind,
+    #[serde(rename = "other")]
+    pub _other: True,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum UbHolderZone {
+    Field,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PhaseSubscriptionPayload {
@@ -1966,6 +1994,7 @@ pub(super) struct ChoiceInstead {
 #[serde(rename_all = "snake_case")]
 pub(super) enum ModeCondition {
     Cmp(Box<BodyComparison>),
+    History(HistoryQuery),
     Spellchain(u64),
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
@@ -2307,6 +2336,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    If(Box<StaticConditional>),
     EvolveCostMod(EvolutionCostModifier),
     CostMod(CostModifier),
     Grant(StaticGrant),
@@ -2314,6 +2344,14 @@ pub(super) enum StaticEffect {
     Prevent(Prevent),
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StaticConditional {
+    pub cond: Condition,
+    pub then: Vec<StaticEffect>,
+    pub r#else: Option<Vec<StaticEffect>>,
 }
 
 #[derive(Deserialize)]
@@ -2329,9 +2367,31 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotRemoval {
+    pub what: RemovalAction,
+    pub on: Option<Objects>,
+    pub by: Option<RemovalBy>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RemovalAction {
+    Destroy,
+    Banish,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RemovalBy {
+    Ability,
 }
 
 #[derive(Deserialize)]

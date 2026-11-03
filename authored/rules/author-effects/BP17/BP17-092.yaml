@@ -1,0 +1,38 @@
+cards:
+  BP17-092:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+      - auto:
+          do:
+            - life:
+                delta:
+                  per:
+                    of:
+                      count:
+                        kind: amulet
+                        who: self
+                        zone: field
+                    unit: 2
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

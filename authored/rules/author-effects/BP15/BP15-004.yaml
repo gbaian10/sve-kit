@@ -1,0 +1,54 @@
+cards:
+  BP15-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - damage:
+                n: 2
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - life:
+                delta: 1
+                who: self
+          on:
+            evolved:
+              sel:
+                kind: follower
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        face_up: true
+                        kind: evolve_follower
+                        who: self
+                        zone: evolve_deck
+                    op: ge
+                    right: 3
+                then:
+                  - evolve:
+                      ref: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

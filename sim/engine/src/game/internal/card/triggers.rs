@@ -18,6 +18,7 @@ use crate::ir::{
 };
 use alloc::collections::BTreeMap;
 
+mod ability;
 mod change;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
@@ -90,7 +91,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     ) {
         return super::fanfare::check_header(ability);
     }
-    if change::check_header(ability)?
+    if ability::check_header(ability)?
+        || change::check_header(ability)?
         || movement::check_header(ability)?
         || entry::check_header(ability)?
         || timing::check_header(ability)?

@@ -18,12 +18,11 @@ fn query() -> Value {
 }
 
 #[test]
-fn conditional_modes_accept_only_a_public_named_evolve_count() {
+fn conditional_evolve_deck_modes_accept_only_a_public_named_count() {
     lowerer().lower(&tree(&query())).unwrap();
     for (key, value) in [
         ("who", json!("opp")),
         ("zone", json!("hand")),
-        ("zone", json!("field")),
         ("face_up", json!(false)),
         ("face_up", Value::Null),
         ("name", Value::Null),
@@ -40,6 +39,30 @@ fn conditional_modes_accept_only_a_public_named_evolve_count() {
             lowerer().lower(&tree(&invalid)).unwrap_err().code,
             "unsupported_construct",
             "the semantic count restriction rejects {key}"
+        );
+    }
+}
+
+#[test]
+fn conditional_modes_accept_public_zone_counts_of_either_player() {
+    for (who, zone) in [
+        ("self", "cemetery"),
+        ("opp", "cemetery"),
+        ("self", "field"),
+        ("opp", "ex"),
+    ] {
+        lowerer()
+            .lower(&tree(&json!({"who":who,"zone":zone,"trait":"trait"})))
+            .unwrap();
+    }
+    for zone in ["hand", "deck"] {
+        assert_eq!(
+            lowerer()
+                .lower(&tree(&json!({"who":"self","zone":zone,"trait":"trait"})))
+                .unwrap_err()
+                .code,
+            "unsupported_construct",
+            "a hidden {zone} count does not set the mode cap"
         );
     }
 }
@@ -81,5 +104,65 @@ fn conditional_modes_do_not_accept_unrelated_integer_conditions_in_ir() {
             *comparison = Comparison::LessEqual;
         }
         WellFormedCardProgram::check(card).unwrap_err();
+    }
+}
+
+#[test]
+fn conditional_modes_read_only_the_size_of_a_banish_zone_in_ir() {
+    let valid = lowerer()
+        .lower(&tree(&json!({"who":"self","zone":"field","trait":"trait"})))
+        .unwrap();
+    for filtered in [true, false] {
+        let mut card = valid["synthetic"].card().clone();
+        let Node::Control {
+            control:
+                Control::Mode {
+                    count: Expr::Compute(operation),
+                    ..
+                },
+        } = &mut card.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("mode")
+        };
+        let NatOperation::Conditional {
+            condition: Expr::Compute(predicate),
+            ..
+        } = operation.as_mut()
+        else {
+            panic!("conditional cap")
+        };
+        let Predicate::CompareInt {
+            left: Expr::Compute(left),
+            ..
+        } = predicate.as_mut()
+        else {
+            panic!("public count comparison")
+        };
+        let IntOperation::FromNat {
+            value: Expr::Live(read),
+        } = left.as_mut()
+        else {
+            panic!("zone count")
+        };
+        let NatRead::ZoneCount {
+            selector:
+                Selector::Zone {
+                    zone,
+                    predicate: filter,
+                    ..
+                },
+        } = read.as_mut()
+        else {
+            panic!("zone selector")
+        };
+        *zone = ZoneKind::Banish;
+        if !filtered {
+            **filter = Expr::Literal(Bool(true));
+        }
+        assert_eq!(
+            WellFormedCardProgram::check(card).is_ok(),
+            !filtered,
+            "only the unfiltered banish size is public"
+        );
     }
 }

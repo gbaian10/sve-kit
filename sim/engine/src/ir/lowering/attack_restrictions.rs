@@ -23,6 +23,14 @@ pub(super) fn lower(
     }) {
         return Err(unsupported(path));
     }
+    if head.effects.iter().any(|effect| {
+        matches!(
+            effect,
+            ast::StaticEffect::Prevent(_) | ast::StaticEffect::If(_)
+        )
+    }) {
+        return super::prevention::lower(allocator, key, path, entry, scope);
+    }
     let source = source_span(key, path, entry)?;
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
@@ -35,6 +43,13 @@ pub(super) fn lower(
         .unwrap_or(Expr::Literal(Bool(true)));
     let mut declarations = Vec::new();
     for effect in &head.effects {
+        if let ast::StaticEffect::Cannot(ast::Cannot::Removal(shape)) = effect {
+            if head.r#while.is_some() {
+                return Err(unsupported(path));
+            }
+            declarations.push(removal(shape, path)?);
+            continue;
+        }
         if let ast::StaticEffect::Cannot(ast::Cannot::Stand(restriction)) = effect {
             if head.r#while.is_some() {
                 return Err(unsupported(path));
@@ -148,4 +163,37 @@ impl BodyContext<'_> {
             duration,
         })
     }
+}
+
+pub(super) fn removal(shape: &ast::CannotRemoval, path: &str) -> Result<Effect, LoweringError> {
+    use crate::ir::{CausePattern, EffectSource};
+    if shape
+        .on
+        .as_ref()
+        .is_some_and(|on| !matches!(on, ast::Objects::This(ast::This::This)))
+    {
+        return Err(unsupported(path));
+    }
+    let objects = numeric::holder();
+    let action = match (&shape.what, &shape.by) {
+        (ast::RemovalAction::Destroy, Some(ast::RemovalBy::Ability)) => ActionPattern::Destroy {
+            objects: objects.clone(),
+            cause: CausePattern::Effect {
+                source: EffectSource::Any {},
+            },
+        },
+        (ast::RemovalAction::Banish, None) => ActionPattern::Banish {
+            objects: objects.clone(),
+            cause: CausePattern::Any {},
+        },
+        _ => return Err(unsupported(path)),
+    };
+    Ok(Effect::Permission {
+        subject: PermissionSubject::Objects { objects },
+        action,
+        polarity: Polarity::Forbid,
+        condition: Expr::Literal(Bool(true)),
+        duration: numeric::duration(None, path)?,
+        rule: RuleId(133),
+    })
 }

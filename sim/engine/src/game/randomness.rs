@@ -58,27 +58,38 @@ impl Game {
 
     pub(super) fn random_selection(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let count = usize::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
-        let mut chosen = Vec::new();
-        if count > 0 {
+        let chosen = if count > 0 {
             self.check_random_population(&node["select"], frame)?;
-            let mut candidates = self.select(&node["select"], frame)?;
-            let count = count.min(candidates.len());
-            if count > 0 {
-                if let Some(script) = self.next_random_script("random_selections")? {
-                    chosen = self.scripted_selection(&script, &candidates, count)?;
-                } else {
-                    for _ in 0..count {
-                        let bound = u64::try_from(candidates.len()).map_err(invalid)?;
-                        let index =
-                            usize::try_from(self.bounded_random(bound)?).map_err(invalid)?;
-                        chosen.push(candidates.remove(index));
-                    }
-                }
-            }
-        }
+            let candidates = self.select(&node["select"], frame)?;
+            self.random_members(candidates, count)?
+        } else {
+            Vec::new()
+        };
         frame.performed = i64::try_from(chosen.len()).map_err(invalid)?;
         frame.bindings.insert(string(&node["bind"]).into(), chosen);
         Ok(())
+    }
+
+    /// Chooses up to `count` candidates with the shared random stream or its test script.
+    pub(super) fn random_members(
+        &mut self,
+        mut candidates: Vec<String>,
+        count: usize,
+    ) -> Result<Vec<String>> {
+        let count = count.min(candidates.len());
+        if count == 0 {
+            return Ok(vec![]);
+        }
+        if let Some(script) = self.next_random_script("random_selections")? {
+            return self.scripted_selection(&script, &candidates, count);
+        }
+        let mut chosen = Vec::new();
+        for _ in 0..count {
+            let bound = u64::try_from(candidates.len()).map_err(invalid)?;
+            let index = usize::try_from(self.bounded_random(bound)?).map_err(invalid)?;
+            chosen.push(candidates.remove(index));
+        }
+        Ok(chosen)
     }
 
     fn scripted_selection(

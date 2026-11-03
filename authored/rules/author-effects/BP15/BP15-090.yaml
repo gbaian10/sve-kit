@@ -1,0 +1,30 @@
+cards:
+  BP15-090:
+    abilities:
+      - fanfare:
+          cost:
+            leader_life: 1
+          do:
+            - grant:
+                keywords:
+                  - intimidate
+                on: this
+        line: 1
+      - activate:
+          cost:
+            leader_life: 1
+          do:
+            - buff:
+                on: this
+                power: 1
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -23,7 +23,7 @@ dependencies = [
     "brotli==1.2.1",
     "psutil>=7.2.2",
     "yamlrocks==0.7.1",
-    "jsonschema-rs==0.59.0",
+    "jsonschema-rs==0.60.1",
 ]
 
 [project.scripts]
@@ -156,6 +156,10 @@ env_files = [
 env_override_existing_values = false
 addopts = [
     "--import-mode=importlib",
+    # Keep fixture-heavy files together; independent fresh imports can use idle workers.
+    "--dist=loadgroup",
+    # Preserve the cost ordering supplied by tests.support.scheduling.
+    "--no-loadscope-reorder",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",
