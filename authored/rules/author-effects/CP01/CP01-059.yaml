@@ -1,0 +1,53 @@
+cards:
+  CP01-059:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - keywords:
+          - rush
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        other: true
+                        trait: ウマ娘
+                        who: self
+                        zone: field
+                    op: eq
+                    right: 4
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+        line: 3
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ウマ娘
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - buff:
+                      on: this
+                      power: 2
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

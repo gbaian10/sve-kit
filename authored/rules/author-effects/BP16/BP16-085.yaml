@@ -1,0 +1,32 @@
+cards:
+  BP16-085:
+    abilities:
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 2
+                        to: ex
+                        token: ゴースト
+                  - - create:
+                        n: 2
+                        to: ex
+                        token: フォレストバット
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP16-T18
+        line: 1
+        section: 1
+      - card: BP16-T19
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

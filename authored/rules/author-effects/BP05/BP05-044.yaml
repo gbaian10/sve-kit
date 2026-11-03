@@ -1,0 +1,51 @@
+cards:
+  BP05-044:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            kind: follower
+                            trait: 魔法使い
+                            who: self
+                            zone: field
+                        op: ge
+                        right: 2
+                    upto: 2
+                n: 1
+                options:
+                  - - draw:
+                        n: 2
+                        who: self
+                  - - damage:
+                        n: 3
+                        to:
+                          leaders: opponents
+                  - - damage:
+                        n: 3
+                        to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

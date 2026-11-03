@@ -1,0 +1,35 @@
+cards:
+  BP05-100:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          name: 安息の絶傑・マーウィン
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                hp_le: 2
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
