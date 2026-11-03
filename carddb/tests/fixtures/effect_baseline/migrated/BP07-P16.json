@@ -1,0 +1,109 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "eq",
+          "args": [
+            {
+              "read": "self.zone"
+            },
+            "ex"
+          ]
+        },
+        "then": {
+          "op": "damage",
+          "subjects": "opponent.leader",
+          "amount": {
+            "fn": "div",
+            "args": [
+              {
+                "count": {
+                  "side": "self",
+                  "zone": "cemetery",
+                  "trait": "自然"
+                }
+              },
+              5
+            ]
+          }
+        }
+      },
+      "event": "end",
+      "active_zones": [
+        "ex"
+      ]
+    },
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "restrict",
+        "subjects": "self",
+        "action": "play",
+        "condition": {
+          "fn": "eq",
+          "args": [
+            {
+              "read": "self.zone"
+            },
+            "ex"
+          ]
+        }
+      },
+      "section": 0
+    },
+    {
+      "line": 2,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "damage",
+            "subjects": "target.1",
+            "amount": 4
+          },
+          {
+            "op": "if",
+            "condition": {
+              "fn": "gt",
+              "args": [
+                {
+                  "count": {
+                    "side": "self",
+                    "zone": "field",
+                    "name": "呪われし影・ヴァイディ"
+                  }
+                },
+                0
+              ]
+            },
+            "then": {
+              "op": "move",
+              "subjects": "self",
+              "to": "ex"
+            }
+          }
+        ]
+      },
+      "section": 0,
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    }
+  ]
+}
