@@ -1,0 +1,42 @@
+cards:
+  BP13-012:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - draw:
+                n: 2
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: follower
+                  trait: 妖精
+                  who: self
+                  zone: ex
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

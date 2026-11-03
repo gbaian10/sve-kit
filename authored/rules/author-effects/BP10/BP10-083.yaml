@@ -1,0 +1,24 @@
+cards:
+  BP10-083:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ゴースト
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

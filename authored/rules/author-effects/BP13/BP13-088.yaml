@@ -1,0 +1,30 @@
+cards:
+  BP13-088:
+    abilities:
+      - evolve:
+          cost:
+            pp: 5
+        line: 1
+      - fanfare:
+          cost:
+            leader_life: 2
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                orig_cost_le: 2
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
