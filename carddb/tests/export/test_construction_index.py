@@ -6,13 +6,22 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.core.json import array, canonical, digest, integer, object_value, parse
+from sve_carddb.core.json import (
+    array,
+    canonical,
+    digest,
+    integer,
+    object_value,
+    parse,
+    string,
+)
 from sve_carddb.export.construction_index import (
     ConstructionIndexError,
     build_construction_index,
 )
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_export
+from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from .test_name_annotations import name_snapshot
 
@@ -22,6 +31,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.export.reader import Row, View
+    from sve_carddb.export.transport import Snapshot
 
 MANIFEST_SHA = "sha256:" + "a" * 64
 
@@ -29,7 +39,8 @@ MANIFEST_SHA = "sha256:" + "a" * 64
 class Pool:
     """The smallest snapshot tables that describe a handful of cards in one region."""
 
-    def __init__(self) -> None:
+    def __init__(self, region: str = "jp") -> None:
+        self.region = region
         vocabulary: list[Row] = [
             {"kind": kind, "code": code}
             for kind, codes in (
@@ -48,8 +59,8 @@ class Pool:
             "card_mechanic_coverage": [],
             "rules_profile": [
                 {
-                    "id": "rules-profile:jp:standard",
-                    "region": "jp",
+                    "id": f"rules-profile:{region}:standard",
+                    "region": region,
                     "format_code": "standard",
                 }
             ],
@@ -58,6 +69,7 @@ class Pool:
         }
         self.manifest: dict[str, JsonValue] = {
             "data_version": "preview-20261103T000000Z-0001",
+            "data_as_of": "2026-11-03",
             "restriction_coverage": [],
         }
 
@@ -65,7 +77,7 @@ class Pool:
         rules_name_id = f"rn:{name}"
         if not any(row["id"] == rules_name_id for row in self.tables["rules_name"]):
             self.tables["rules_name"].append(
-                {"id": rules_name_id, "region": "jp", "official_name": name}
+                {"id": rules_name_id, "region": self.region, "official_name": name}
             )
         return rules_name_id
 
@@ -88,7 +100,11 @@ class Pool:
             unit = None if value is None else f"t:{card_id}:{ordinal}"
             if unit is not None:
                 self.tables["text_unit"].append(
-                    {"id": unit, "lang": "ja", "text": value}
+                    {
+                        "id": unit,
+                        "lang": "ja" if self.region == "jp" else "en",
+                        "text": value,
+                    }
                 )
             units.append(unit)
         self.tables["card"].append(
@@ -97,7 +113,7 @@ class Pool:
                 "faces": [face],
                 "regions": [
                     {
-                        "region": "jp",
+                        "region": self.region,
                         "release_state": "released" if released else "unknown",
                         "deck_role": role,
                     }
@@ -108,14 +124,14 @@ class Pool:
             {
                 "id": face,
                 "card_id": card_id,
-                "current": [{"region": "jp", "revision_id": revision}],
+                "current": [{"region": self.region, "revision_id": revision}],
             }
         )
         self.tables["face_revision"].append(
             {
                 "id": revision,
                 "face_id": face,
-                "region": "jp",
+                "region": self.region,
                 "class_code": class_code,
                 "titles": list(titles),
                 "effect_unit_id": units[0],
@@ -128,7 +144,7 @@ class Pool:
         self.tables["face_rules_name"].append(
             {
                 "face_id": face,
-                "region": "jp",
+                "region": self.region,
                 "rules_name_id": self.name(name),
                 "role": "primary",
             }
@@ -136,10 +152,11 @@ class Pool:
         self.tables["card_mechanic_coverage"].append(
             {
                 "card_id": card_id,
-                "scope": "shared",
+                "scope": "shared" if self.region == "jp" else "en_override",
                 "printed_mechanisms": [{"code": "starting_amulet", "thresholds": []}]
                 if starting_amulet
                 else [],
+                "checked_mechanisms": ["starting_amulet"],
             }
         )
 
@@ -147,7 +164,9 @@ class Pool:
         """The index as a reader sees it after parsing the written bytes."""
         view: View = self.tables
         return parse(
-            canonical(build_construction_index(self.manifest, view, "jp", MANIFEST_SHA))
+            canonical(
+                build_construction_index(self.manifest, view, self.region, MANIFEST_SHA)
+            )
         )
 
 
@@ -163,6 +182,24 @@ def cards_by_id(index: JsonValue) -> dict[str, dict[str, JsonValue]]:
         str(card_id): {key: array(values)[i] for key, values in columns.items()}
         for i, card_id in enumerate(array(columns["id"]))
     }
+
+
+def construction_snapshot() -> Snapshot:
+    projection, _snapshot, _plan = name_snapshot()
+    for row in projection.tables["card_mechanic_coverage"]:
+        row["checked_mechanisms"] = ["starting_amulet"]
+    return export_snapshot(
+        projection,
+        Ownership(
+            {string(row["id"]): "family" for row in projection.tables["printing"]}
+        ),
+        Batch(
+            "preview-20261103T000000Z-0001",
+            "2026-11-03T00:00:00Z",
+            "2026-11-03",
+            ("jp",),
+        ),
+    )
 
 
 def test_same_name_cards_share_one_code_and_zones_follow_deck_role() -> None:
@@ -282,6 +319,84 @@ def test_copy_rule_for_the_wrong_deck_is_rejected() -> None:
         pool.build()
 
 
+def test_english_copy_and_singleton_sentences() -> None:
+    pool = Pool("en")
+    pool.card(
+        "c:onion",
+        "Onion Patch",
+        sections=("You can put up to 50 of this card into your deck.",),
+    )
+    pool.card(
+        "c:rapid",
+        "Rapid Fire",
+        sections=("You can put up to 6 of this card into your deck.",),
+    )
+    pool.card(
+        "c:carrot",
+        "Carrot",
+        role="evolve",
+        sections=("You can put up to 10 of this card into your evolve deck.",),
+    )
+    pool.card(
+        "c:cut",
+        "Synthetic Cutthroat",
+        sections=(
+            'Your main deck and evolve deck may only contain 1 copy of any card without "Cutthroat" in its name.',
+        ),
+    )
+    index = pool.build()
+    ids = list(cards_by_id(index))
+    copies = [array(row) for row in array(get(index, "copies"))]
+    assert [(ids[integer(row[0])], row[1], row[2]) for row in copies] == [
+        ("c:carrot", "evolve", 10),
+        ("c:onion", "main", 50),
+        ("c:rapid", "main", 6),
+    ]
+    assert get(index, "singleton_except") == [
+        [ids.index("c:cut"), [cards_by_id(index)["c:cut"]["name"]]]
+    ]
+
+
+def test_unrecognised_english_copy_sentence_stops_the_export() -> None:
+    pool = Pool("en")
+    pool.card(
+        "c:odd",
+        "Synthetic",
+        sections=("You can put up to 5 of this card into your main deck.",),
+    )
+    with pytest.raises(ConstructionIndexError):
+        pool.build()
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_unknown_starting_amulet_facts_stop_the_export(missing: bool) -> None:
+    pool = Pool()
+    pool.card("c:unknown", "合成：未確認")
+    if missing:
+        pool.tables["card_mechanic_coverage"] = []
+    else:
+        pool.tables["card_mechanic_coverage"][0]["checked_mechanisms"] = []
+    with pytest.raises(ConstructionIndexError):
+        pool.build()
+
+
+def test_english_mechanisms_do_not_inherit_shared_facts() -> None:
+    pool = Pool("en")
+    pool.card("c:amulet", "Synthetic Amulet", starting_amulet=True)
+    pool.tables["card_mechanic_coverage"][0]["scope"] = "shared"
+    with pytest.raises(ConstructionIndexError):
+        pool.build()
+    pool.tables["card_mechanic_coverage"].append(
+        {
+            "card_id": "c:amulet",
+            "scope": "en_override",
+            "printed_mechanisms": [],
+            "checked_mechanisms": ["starting_amulet"],
+        }
+    )
+    assert get(pool.build(), "start_amulet") == []
+
+
 def test_conflicting_copy_rules_for_one_name_are_rejected() -> None:
     pool = Pool()
     pool.card(
@@ -388,8 +503,75 @@ def test_unknown_restriction_state_is_not_guessed() -> None:
         pool.build()
 
 
+def test_coverage_stops_after_the_snapshots_last_known_day() -> None:
+    pool = Pool()
+    pool.manifest["data_as_of"] = "2026-11-02"
+    pool.manifest["restriction_coverage"] = [
+        {
+            "profile_id": "rules-profile:jp:standard",
+            "from_date": start,
+            "until_date": until,
+            "state": "complete",
+        }
+        for start, until in (
+            ("2026-10-26", "2026-10-27"),
+            ("2026-11-01", None),
+            ("2026-11-03", "2026-11-04"),
+        )
+    ]
+    assert get(pool.build(), "formats", "standard", "coverage") == [
+        ["2026-10-26", "2026-10-27"],
+        ["2026-11-01", "2026-11-03"],
+    ]
+
+
+def test_partial_windows_and_announced_rules_leave_coverage_gaps() -> None:
+    pool = Pool()
+    pool.manifest["data_as_of"] = "2026-11-06"
+    pool.manifest["restriction_coverage"] = [
+        {
+            "profile_id": "rules-profile:jp:standard",
+            "from_date": "2026-11-01",
+            "until_date": None,
+            "state": "complete",
+        },
+        {
+            "profile_id": "rules-profile:jp:standard",
+            "from_date": "2026-11-02",
+            "until_date": "2026-11-03",
+            "state": "partial",
+        },
+    ]
+    pool.tables["restriction"].append(
+        {
+            "id": "r:announced",
+            "profile_id": "rules-profile:jp:standard",
+            "effective_from": "2026-11-04",
+            "effective_until": "2026-11-05",
+            "kind": "copy_limit",
+            "state": "announced",
+            "max_copies": 1,
+            "max_selected_groups": None,
+            "members": [
+                {
+                    "rules_name_id": pool.name("合成：未確認の制限"),
+                    "deck_scope": "main",
+                    "choice_option": 0,
+                }
+            ],
+        }
+    )
+    standard = get(pool.build(), "formats", "standard")
+    assert get(standard, "coverage") == [
+        ["2026-11-01", "2026-11-02"],
+        ["2026-11-03", "2026-11-04"],
+        ["2026-11-05", "2026-11-07"],
+    ]
+    assert get(standard, "restrictions") == []
+
+
 def test_command_writes_each_region_of_an_export(tmp_path: Path) -> None:
-    _projection, snapshot, _plan = name_snapshot()
+    snapshot = construction_snapshot()
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     out = tmp_path / "construction"
@@ -417,7 +599,7 @@ def test_command_writes_each_region_of_an_export(tmp_path: Path) -> None:
 
 
 def test_command_refuses_to_write_inside_the_public_root(tmp_path: Path) -> None:
-    _projection, snapshot, _plan = name_snapshot()
+    snapshot = construction_snapshot()
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     result = CliRunner().invoke(
@@ -433,3 +615,30 @@ def test_command_refuses_to_write_inside_the_public_root(tmp_path: Path) -> None
     )
     assert result.exit_code != 0
     assert not (roots.preview / "construction").exists()
+
+
+def test_command_replaces_output_symlinks_without_modifying_targets(
+    tmp_path: Path,
+) -> None:
+    snapshot = construction_snapshot()
+    roots = Roots(tmp_path / "public", tmp_path / "private")
+    write_preview(snapshot, roots, {})
+    pointer = roots.preview / "snapshots/preview/current.json"
+    before = pointer.read_bytes()
+    out = tmp_path / "construction"
+    out.mkdir()
+    (out / "jp.json").symlink_to(pointer)
+    result = CliRunner().invoke(
+        cli.app,
+        [
+            "snapshot",
+            "construction-index",
+            "--export-dir",
+            str(roots.preview),
+            "--out-dir",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert pointer.read_bytes() == before
+    assert not (out / "jp.json").is_symlink()

@@ -17,7 +17,7 @@ uv --directory carddb run sve-carddb snapshot export-offline … --construction-
 - 讀匯出根的 `snapshots/preview/current.json`，跟 publish 用同一套閉包驗證；輸出目錄不能在匯出根裡
 - 檔案是 canonical-json-v1 bytes；指令印出每個檔的 bytes 與 SHA-256
 - 綁定：檔內 `snapshot.data_version`、`snapshot.manifest_sha256` 指向來源快照；同一場對局固定快照與索引，兩邊用這兩個值核對
-- 尚未上傳 R2；之後由大廳讀取時再定發布位置
+- 本契約的範圍是本機產出
 
 ## 2. 形狀（`construction_index_format: 1`）
 
@@ -49,11 +49,14 @@ uv --directory carddb run sve-carddb snapshot export-offline … --construction-
 | `name` | 第 1 面在該地區 `role=primary` 的 `face_rules_name`（CR 6.1.1.4.1）；不是恰好一個就停止 |
 | `class`、`titles` | 第 1 面該地區的 current `face_revision` |
 | `zone` | 該地區的 `deck_role`：`leader`、`main`、`evolve` 照用，`extra` 與缺值是 `none` |
-| `start_amulet` | `card_mechanic_coverage.printed_mechanisms` 有 `starting_amulet`（地區覆寫優先於 shared） |
+| `start_amulet` | `card_mechanic_coverage.printed_mechanisms` 有 `starting_amulet`；JP 地區覆寫優先於 shared，EN 只用自己的 `en_override` |
 | `copies`、`singleton_except` | 第 1 面 current 效果文與 sections 的固定句型，見 §4 |
-| `formats` | 該地區的 `rules_profile`；`coverage` 取 `restriction_coverage` 中 `state=complete` 的區間；`restrictions` 取 `confirmed` 列 |
+| `formats` | 該地區的 `rules_profile`；`coverage` 取完整且不晚於 `manifest.data_as_of` 的日期，扣除 partial 與 announced 限制的區間；`restrictions` 取 `confirmed` 列 |
 
 `announced`、`withdrawn` 的禁限不投影；其他狀態或種類停止匯出，不猜。
+`coverage` 的有限終點最多是 `data_as_of` 的隔日（不含當天）；開放終點也不能代表未來完整。
+主牌組／進化牌組可放卡的 `starting_amulet` 無正標籤時，必須在 `checked_mechanisms` 中才能判為沒有；
+缺少紀錄或尚未檢查就停止匯出，不能把未知當成沒有。不可放入牌組的卡與主戰者不要求這項否定證據。
 
 ## 4. 本文另定張數的句型
 

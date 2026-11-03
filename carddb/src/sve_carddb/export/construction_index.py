@@ -4,15 +4,18 @@ The logical fields and rules are specified in docs/sim/deck-construction.md; the
 layout is in docs/schema/export/construction-index.md.
 """
 
+import os
 import re
+import tempfile
 from collections import defaultdict
+from datetime import date, timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
-    from pathlib import Path
 
     from pydantic import JsonValue
 
@@ -115,7 +118,14 @@ def write_construction_indexes(
                 snapshot.manifest, snapshot.tables, region, snapshot.manifest_sha256
             )
         )
-        (out_dir / f"{region}.json").write_bytes(raw)
+        descriptor, temporary = tempfile.mkstemp(dir=out_dir, prefix=".construction-")
+        try:
+            with os.fdopen(descriptor, "wb") as stream:
+                stream.write(raw)
+            # Replacing the directory entry never follows an existing output link.
+            Path(temporary).replace(out_dir / f"{region}.json")
+        finally:
+            Path(temporary).unlink(missing_ok=True)
         report[region] = {"bytes": len(raw), "sha256": digest(raw)}
     return report
 
@@ -156,7 +166,11 @@ class _Cards:
                 sum(1 << titles.index(string(t)) for t in array(revision["titles"]))
             )
             self.zones.append(zone)
-            if card_id in starting_amulet:
+            if zone in {2, 3} and card_id not in starting_amulet:
+                raise ConstructionIndexError(
+                    f"Card {card_id} has unknown starting amulet status in {region}"
+                )
+            if starting_amulet.get(card_id, False):
                 self.amulets.append(position)
             lines = _effect_lines(revision, texts)
             if lines:
@@ -229,17 +243,24 @@ def _current(face: Row, region: str) -> str:
     raise ConstructionIndexError(f"Face {face['id']} has no current {region} wording")
 
 
-def _starting_amulets(rows: Iterable[Row], region: str) -> set[str]:
-    """The region's coverage row wins over the shared one, as in the snapshot contract."""
+def _starting_amulets(rows: Iterable[Row], region: str) -> dict[str, bool]:
+    """Unknown is distinct from absence; EN cannot inherit JP's shared observations."""
     found: dict[str, bool] = {}
-    for scope in ("shared", region + "_override"):
-        for row in rows:
+    observations = list(rows)
+    scopes = ("shared", "jp_override") if region == "jp" else ("en_override",)
+    for scope in scopes:
+        for row in observations:
             if row["scope"] == scope:
-                found[string(row["card_id"])] = any(
+                card = string(row["card_id"])
+                present = any(
                     object_value(m)["code"] == "starting_amulet"
                     for m in array(row["printed_mechanisms"] or [])
                 )
-    return {card for card, has in found.items() if has}
+                if present or "starting_amulet" in array(row["checked_mechanisms"]):
+                    found[card] = present
+                else:
+                    found.pop(card, None)
+    return found
 
 
 def _effect_lines(revision: Row, texts: Mapping[str, str]) -> list[str]:
@@ -303,11 +324,14 @@ def _formats(
         if profile["region"] != region:
             continue
         profile_id = string(profile["id"])
-        coverage: list[JsonValue] = [
-            [w["from_date"], w["until_date"]]
-            for w in windows
-            if w["profile_id"] == profile_id and w["state"] == "complete"
+        profile_rows = [
+            r for r in tables["restriction"] if r["profile_id"] == profile_id
         ]
+        coverage = _coverage(
+            manifest,
+            [w for w in windows if w["profile_id"] == profile_id],
+            profile_rows,
+        )
         restrictions: list[JsonValue] = []
         for row in sorted(tables["restriction"], key=lambda r: string(r["id"])):
             # Only confirmed rows apply; announced and withdrawn ones never bind a deck.
@@ -347,3 +371,38 @@ def _formats(
             "restrictions": restrictions,
         }
     return formats
+
+
+def _coverage(
+    manifest: Mapping[str, JsonValue], windows: list[Row], restrictions: list[Row]
+) -> list[JsonValue]:
+    cutoff = (
+        date.fromisoformat(string(manifest["data_as_of"])) + timedelta(days=1)
+    ).isoformat()
+    covered = [
+        (string(w["from_date"]), min(string(w["until_date"] or cutoff), cutoff))
+        for w in windows
+        if w["state"] == "complete" and string(w["from_date"]) < cutoff
+    ]
+    unknown = [
+        (string(w["from_date"]), string(w["until_date"] or cutoff))
+        for w in windows
+        if w["state"] != "complete"
+    ] + [
+        (string(r["effective_from"]), string(r["effective_until"] or cutoff))
+        for r in restrictions
+        if r["state"] == "announced"
+    ]
+    # A complete observation cannot override a conflicting or unconfirmed interval.
+    for start, until in unknown:
+        remaining: list[tuple[str, str]] = []
+        for left, right in covered:
+            if until <= left or right <= start:
+                remaining.append((left, right))
+                continue
+            if left < start:
+                remaining.append((left, start))
+            if until < right:
+                remaining.append((until, right))
+        covered = remaining
+    return [[left, right] for left, right in sorted(set(covered))]
