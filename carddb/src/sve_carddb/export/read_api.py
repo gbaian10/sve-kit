@@ -19,6 +19,7 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
+from sve_carddb.export import construction_index
 from sve_carddb.export.image_scope import ImageScope
 from sve_carddb.export.image_upload import (
     IMAGE_KEY,
@@ -204,15 +205,15 @@ def load_export(root: Path) -> Export:
         | {"manifest_path": path, "manifest_sha256": hashed},
         members,
         image_files(tables),
-        _construction(root, hashed, array(manifest["regions"])),
+        _construction(root, hashed, manifest),
     )
 
 
 def _construction(
-    root: Path, manifest_sha256: str, regions: list[JsonValue]
+    root: Path, manifest_sha256: str, manifest: dict[str, JsonValue]
 ) -> tuple[Member, ...]:
     try:
-        return _construction_members(root, manifest_sha256, regions)
+        return _construction_members(root, manifest_sha256, manifest)
     except ExportError:
         raise
     except ValueError, OSError, KeyError, TypeError:
@@ -220,10 +221,11 @@ def _construction(
 
 
 def _construction_members(
-    root: Path, manifest_sha256: str, regions: list[JsonValue]
+    root: Path, manifest_sha256: str, manifest: dict[str, JsonValue]
 ) -> tuple[Member, ...]:
     """Each region's index must exist, be canonical and name this snapshot and region."""
     found: list[Member] = []
+    regions = array(manifest["regions"])
     for key, region in zip(
         construction_keys(manifest_sha256, regions), regions, strict=True
     ):
@@ -235,8 +237,10 @@ def _construction_members(
         snapshot = object_value(value["snapshot"])
         if (
             canonical(value) != raw
+            or integer(value["construction_index_format"]) != construction_index.FORMAT
             or value["region"] != region
             or snapshot["manifest_sha256"] != manifest_sha256
+            or string(snapshot["data_version"]) != manifest["data_version"]
         ):
             raise ExportError("Construction index differs from its snapshot")
         found.append(Member(key, raw))

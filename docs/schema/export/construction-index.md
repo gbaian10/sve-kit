@@ -9,7 +9,7 @@
 `export-offline` 寫完快照後一併產生；既有匯出根可用下面的指令補產。
 快照缺少判斷所需的事實（例如沒跑機制 adapter，見 §3）時，`export-offline` 不寫索引、在輸出報告註明
 `construction_index: skipped` 與原因；`construction-index` 指令則直接失敗。
-publish 要求每地區的索引都在、是 canonical bytes 且綁定同一 manifest 與地區，否則不發布；
+publish 要求每地區的索引都在、是 canonical bytes、使用支援的索引格式，且版號、manifest 與地區皆符合來源快照，否則不發布；
 上傳時跟快照一起送，GC 保留 current／previous 快照的索引（見 publish README）。
 
 ```bash

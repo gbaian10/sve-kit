@@ -23,7 +23,7 @@ from sve_carddb.export.construction_index import (
     write_construction_indexes,
 )
 from sve_carddb.export.preview import Roots, write_preview
-from sve_carddb.export.read_api import load_export, load_snapshot
+from sve_carddb.export.read_api import ExportError, load_export, load_snapshot
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from .test_name_annotations import name_snapshot
@@ -617,6 +617,46 @@ def test_command_writes_each_region_beside_the_snapshot(tmp_path: Path) -> None:
     assert array(get(parse(raw), "cards", "id"))
     # The snapshot closure publish reads is unchanged by the extra files.
     load_export(roots.preview)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "data_version",
+        "missing_data_version",
+        "format",
+        "missing_format",
+        "boolean_format",
+        "canonical",
+        "manifest",
+    ],
+)
+def test_publication_rejects_invalid_index_binding_or_format(
+    tmp_path: Path, mutation: str
+) -> None:
+    roots = Roots(tmp_path / "public", tmp_path / "private")
+    write_preview(construction_snapshot(), roots, {})
+    result = _command(roots.preview)
+    assert result.exit_code == 0, result.exception
+    [member] = load_export(roots.preview).construction
+    value = object_value(parse(member.raw))
+    snapshot = object_value(value["snapshot"])
+    if mutation == "data_version":
+        snapshot["data_version"] = "preview-20261005T000000Z-0001"
+    elif mutation == "missing_data_version":
+        del snapshot["data_version"]
+    elif mutation == "format":
+        value["construction_index_format"] = 2
+    elif mutation == "missing_format":
+        del value["construction_index_format"]
+    elif mutation == "boolean_format":
+        value["construction_index_format"] = True
+    elif mutation == "manifest":
+        snapshot["manifest_sha256"] = "sha256:" + "0" * 64
+    raw = canonical(value) + (b"\n" if mutation == "canonical" else b"")
+    (roots.preview / member.key).write_bytes(raw)
+    with pytest.raises(ExportError):
+        load_export(roots.preview)
 
 
 def test_command_replaces_output_symlinks_without_modifying_targets(
