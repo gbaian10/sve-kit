@@ -151,12 +151,14 @@ def verify_application(registry: RegistrySnapshot, application: Application) -> 
         != data
     ):
         raise ValueError("Correction typed data differs from its exact authored record")
+    if any(evidence.region != item.region for evidence in data.evidence):
+        raise ValueError("Correction image evidence metadata mismatch")
     if application.images is None:
         return
     if len(data.evidence) != len(application.images):
         raise ValueError("Correction image evidence inventory mismatch")
     for evidence, source in zip(data.evidence, application.images, strict=True):
-        if evidence.region != item.region or (
+        if (
             source.kind,
             source.url,
             source.sha256,

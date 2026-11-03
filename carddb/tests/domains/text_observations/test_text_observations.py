@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import create_database
+from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.review import Correction
@@ -66,6 +66,46 @@ def test_exact_initial_keeps_every_physical_source_and_one_revision_per_face_reg
         assert {
             row.values["source_id"] for row in db.rows("printing_face_observation")
         } == {item.card.source.id for item in case.plan.observations}
+
+
+def test_empty_correction_plan_rejects_stale_correction_rows(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    case = make_case(tmp_path / "authored", inputs)
+    assert case.plan.corrections == ()
+    item = case.plan.observations[0]
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+            db.insert(
+                "source_correction",
+                {
+                    "id": "stale-correction",
+                    "printing_id": item.printing_id,
+                    "face_id": item.face_id,
+                    "field": "card_type",
+                    "expected_source_unit_id": None,
+                    "expected_raw_value": Json("Spell"),
+                    "corrected_value": Json("Follower"),
+                    "expected_raw_sections": None,
+                    "corrected_sections": None,
+                    "expected_source_hash": item.card.observation.observation_hash,
+                    "reason": "Stale synthetic correction",
+                    "reported_to_official": False,
+                    "reported_on": None,
+                    "report_url": None,
+                    "state": "needs_review",
+                },
+            )
+        with pytest.raises(ValueError, match="Correction database inventory"):
+            with db.transaction():
+                case.compose().populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+        assert not db.rows("face_revision")
 
 
 @pytest.mark.parametrize("missing", [None, ""])

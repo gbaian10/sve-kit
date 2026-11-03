@@ -336,9 +336,9 @@ def populate_text_observations(
     _groups_to_database(db, plan, selected, parents, texts, vocabulary)
     for item in materialized:
         _physical(db, item, texts)
+    populate_corrections(db, plan, texts)
     # Builds without scoped corrections may omit the correction tables entirely.
-    if plan.corrections:
-        populate_corrections(db, plan, texts)
+    if db.has_table("source_correction"):
         verify_corrections(db, plan, vocabulary)
     populate_wording_basis(db, plan)
     mark_wording_pending(db, plan)

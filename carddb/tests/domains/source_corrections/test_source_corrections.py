@@ -476,8 +476,13 @@ class TestDefaultCorrectionInputs:
             with pytest.raises(ValueError, match="original physical observation"):
                 verify_corrections(db, case.plan, case.vocabulary)
 
-    def test_other_image_provider_cannot_accept_cross_region_evidence(
-        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    @pytest.mark.parametrize("with_images", [True, False])
+    def test_cross_region_evidence_is_rejected_with_or_without_images(
+        self,
+        tmp_path: Path,
+        default_correction_case: CorrectionCaseTemplate,
+        *,
+        with_images: bool,
     ) -> None:
         fixture = default_correction_case.copy(tmp_path)
         case = fixture.texts
@@ -502,7 +507,32 @@ class TestDefaultCorrectionInputs:
         with pytest.raises(
             ValueError, match="Correction image evidence metadata mismatch"
         ):
-            plan_applications(identity, case.plan.observations, FixedImages())
+            plan_applications(
+                identity,
+                case.plan.observations,
+                FixedImages() if with_images else None,
+            )
+
+    def test_importer_rejects_omitted_corrections(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        observations = case.compose()
+        case.plan = replace(case.plan, corrections=())
+        # A recomputed context must not legitimize an incomplete application inventory.
+        object.__setattr__(observations, "plan", case.plan)  # ruff: ignore[unnecessary-dunder-call] -- inject an incomplete immutable plan at the importer boundary
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            with pytest.raises(ValueError, match="Correction application inventory"):
+                with db.transaction():
+                    observations.populate(
+                        db,
+                        build=case.context(),
+                        vocabulary=case.vocabulary,
+                        published=(),
+                    )
+            assert not db.rows("face_revision")
 
     def test_selected_correction_requires_raw_observation_at_planning_boundary(
         self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
