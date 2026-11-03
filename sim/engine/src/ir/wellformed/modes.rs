@@ -281,6 +281,11 @@ impl Checker {
                     comparison: Comparison::GreaterEqual,
                     right: Expr::Literal(Int(1..)),
                 } if public_evolve_mode_count(left) => Ok(()),
+                Predicate::CompareInt {
+                    left,
+                    right: Expr::Literal(_),
+                    ..
+                } if public_mode_count(left) => Ok(()),
                 Predicate::CompareNat { left, right, .. } => {
                     for value in [left, right] {
                         if !matches!(value, Expr::Literal(_) | Expr::Frozen(_)) {
@@ -377,6 +382,44 @@ fn exact_play_mode(kind: ModeChoiceKind, count: &Expr<Nat>, cardinality: Cardina
                 minimum: Nat(1),
                 maximum: Some(Nat(1)),
             })
+}
+
+/// Public zone sizes and this turn's history are known when the modes are chosen.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only public zone counts and turn history are admitted here."
+)]
+fn public_mode_count(value: &Expr<Int>) -> bool {
+    let Expr::Compute(operation) = value else {
+        return false;
+    };
+    let IntOperation::FromNat {
+        value: Expr::Live(read),
+    } = operation.as_ref()
+    else {
+        return false;
+    };
+    match read.as_ref() {
+        NatRead::ZoneCount {
+            selector:
+                Selector::Zone {
+                    zone,
+                    view,
+                    predicate,
+                    ..
+                },
+        } => {
+            *view == (SelectionView::Current {})
+                && match zone {
+                    ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Ex => true,
+                    // Face-down banished cards keep their contents private; only the size is public.
+                    ZoneKind::Banish => **predicate == Expr::Literal(Bool(true)),
+                    _ => false,
+                }
+        }
+        NatRead::HistoryCount { .. } => true,
+        _ => false,
+    }
 }
 
 fn public_evolve_mode_count(value: &Expr<Int>) -> bool {
