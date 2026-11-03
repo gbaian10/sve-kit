@@ -6,7 +6,7 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome, Disjointness,
-    Expr, Instruction, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId, SelectionView,
+    Expr, Instruction, Int, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId, SelectionView,
     Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
@@ -27,7 +27,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             DiscardMode::All { .. } => {
                 eligible(action)?;
             }
-            _ => return Err(unsupported("self hand discard mode")),
+            DiscardMode::Random { .. } => {
+                random_count(action)?;
+            }
+            DiscardMode::DownTo { .. } => return Err(unsupported("self hand discard mode")),
         }
     }
     Ok(())
@@ -60,6 +63,38 @@ fn eligible(action: &Action) -> Result<&Selector> {
         return Err(unsupported("unfiltered own hand discard"));
     }
     Ok(eligible)
+}
+
+/// A random discard draws from its player's whole current hand by a fixed positive count.
+fn random_count(action: &Action) -> Result<u64> {
+    let Action::Discard {
+        player,
+        mode:
+            DiscardMode::Random {
+                population:
+                    Selector::Zone {
+                        players,
+                        zone: ZoneKind::Hand,
+                        view: SelectionView::Current {},
+                        predicate,
+                        ..
+                    },
+                count: Expr::Literal(Int(count)),
+            },
+    } = action
+    else {
+        return Err(unsupported("random whole-hand discard"));
+    };
+    if players.relative_to != *player
+        || players.relation != PlayerRelation::SelfPlayer
+        || players.cardinality.minimum != Nat(1)
+        || players.cardinality.maximum != Some(Nat(1))
+        || **predicate != Expr::Literal(Bool(true))
+        || *count <= 0
+    {
+        return Err(unsupported("unfiltered random hand discard"));
+    }
+    u64::try_from(*count).map_err(invalid)
 }
 
 fn bounds(action: &Action) -> Result<Cardinality> {
@@ -198,6 +233,27 @@ impl Game {
                 .zone_ids(seat, "hand")
                 .into_iter()
                 .map(|id| execution.reference(self, &id))
+                .collect::<Result<Vec<_>>>()?;
+            let outcome = self.internal_discard_members(execution, &members)?;
+            execution
+                .receipts
+                .insert(instruction.receipt, InstructionOutcome::Discard(outcome));
+            return Ok(());
+        }
+        if let Action::Discard {
+            player,
+            mode: DiscardMode::Random { .. },
+        } = &instruction.action
+        {
+            let count = random_count(&instruction.action)?;
+            let seat = seat_name(execution.player(self, player)?)?;
+            let chosen = self.random_members(
+                self.zone_ids(seat, "hand"),
+                usize::try_from(count).map_err(invalid)?,
+            )?;
+            let members = chosen
+                .iter()
+                .map(|id| execution.reference(self, id))
                 .collect::<Result<Vec<_>>>()?;
             let outcome = self.internal_discard_members(execution, &members)?;
             execution
