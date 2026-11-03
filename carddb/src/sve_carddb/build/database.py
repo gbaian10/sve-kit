@@ -254,6 +254,10 @@ class Database:
         """Report declared capability availability without probing SQLite internals."""
         return name in self._tables
 
+    def revision(self) -> int:
+        """Change whenever this connection inserts, updates or deletes any row."""
+        return self._connection.total_changes
+
     def columns(self, name: str) -> tuple[str, ...]:
         """Expose declaration names, never unvalidated SQLite schema metadata."""
         return tuple(column.name for column in self._tables[name].columns)

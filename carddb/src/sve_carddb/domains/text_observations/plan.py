@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -50,6 +51,21 @@ class TextPlan:
     diagnostic_exclusions: PreviewPlan
     corrections: tuple[Application, ...] = ()
     wording_decisions: tuple[WordingDecision, ...] = ()
+
+    @cached_property
+    def unapplied_corrections(self) -> dict[str, tuple[str, ...]]:
+        """Group printings of registry corrections that were neither applied nor already fixed."""
+        applied = {
+            item.data.id
+            for item in self.corrections
+            if item.status in {"applied", "already_fixed"}
+        }
+        faces: dict[str, list[str]] = defaultdict(list)
+        for record in self.identity.snapshot.records.values():
+            data = record.data
+            if isinstance(data, CorrectionData) and data.id not in applied:
+                faces[data.face_id].append(data.printing_id)
+        return {face: tuple(printings) for face, printings in faces.items()}
 
     def candidates(self) -> tuple[FaceObservation, ...]:
         """Keep raw source observations immutable while exposing corrected candidates."""

@@ -202,9 +202,13 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     if selected - supplied.cards.keys():
         raise AuthorInputError(Diagnostic("schema", "handwritten_card_missing"))
     schemas = workspace.expander.schemas
-    original = load_author_set(output_root, schemas)
+    original = (
+        workspace.author_set()
+        if output_root == workspace.authored
+        else load_author_set(output_root, schemas)
+    )
     if output_root != workspace.authored:
-        reference = load_author_set(workspace.authored, schemas)
+        reference = workspace.author_set()
         expected = {
             f.path
             for f in (
@@ -451,6 +455,9 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             written.append(path)
     except OSError:
         raise WriteError(tuple(written), path) from None
+    finally:
+        if written:
+            workspace.forget_author_set(output_root)
     return {
         "status": "ok",
         "cards": list[JsonValue](sorted(selected)),

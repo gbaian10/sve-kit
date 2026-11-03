@@ -5,6 +5,7 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal, get_args
 
 import jsonschema_rs
+import orjson
 import yamlrocks
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import best_match
@@ -419,7 +420,37 @@ def _json_value(
     return scalar
 
 
+# Validators re-read the same inventory bytes many times in one command.
+_DECODED: dict[bytes, bytes] = {}
+_DECODED_LIMIT = 8192
+
+
+def _locations(raw: bytes) -> yamlrocks.YAMLRocksDocument:
+    # Round-trip decoding supplies locations; only the strict parser supplies values.
+    locations = yamlrocks.loads(raw, option=yamlrocks.OPT_ROUND_TRIP)
+    if not isinstance(locations, yamlrocks.YAMLRocksDocument):
+        raise AuthorInputError(Diagnostic("yaml", "missing_document"))
+    return locations
+
+
 def parse_document(raw: bytes) -> ParsedDocument:
+    """Decode identical bytes once; every caller still receives its own value tree."""
+    cached = _DECODED.get(raw)
+    if cached is not None:
+        return ParsedDocument(_locations(raw), orjson.loads(cached))
+    document = _parse_document(raw)
+    try:
+        encoded = orjson.dumps(document.value)
+    except orjson.JSONEncodeError:
+        # Deeper than orjson's nesting limit: such documents are decoded every time.
+        return document
+    if len(_DECODED) >= _DECODED_LIMIT:
+        _DECODED.clear()
+    _DECODED[raw] = encoded
+    return document
+
+
+def _parse_document(raw: bytes) -> ParsedDocument:
     """Decode strict, bounded JSON-compatible YAML with safe source coordinates."""
     if len(raw) >= MAX_BYTES:
         raise AuthorInputError(Diagnostic("yaml", "size_limit"))
@@ -431,10 +462,7 @@ def parse_document(raw: bytes) -> ParsedDocument:
         ) from None
     except ValueError:
         raise AuthorInputError(Diagnostic("yaml", "invalid_document")) from None
-    # Round-trip decoding supplies locations; only the strict parser supplies values.
-    locations = yamlrocks.loads(raw, option=yamlrocks.OPT_ROUND_TRIP)
-    if not isinstance(locations, yamlrocks.YAMLRocksDocument):
-        raise AuthorInputError(Diagnostic("yaml", "missing_document"))
+    locations = _locations(raw)
     return ParsedDocument(locations, _json_value(parsed, _Locations(locations)))
 
 
