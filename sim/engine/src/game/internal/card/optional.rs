@@ -2,12 +2,14 @@
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     AbilityKind, AbilityOrigin, Action, Bool, Control, CostSpec, DecisionId, Expr,
     InstructionContext, Int, Node, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
     PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
     WellFormedCardProgram, ZoneKind, optional_payment,
 };
+use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
 pub(super) struct OptionalState {
@@ -42,6 +44,13 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
                 || (required && super::super::life::is_cost(&instruction.action))
+                || (required
+                    && matches!(
+                        instruction.action,
+                        Action::Reveal {
+                            objects: Selector::Bound { .. }
+                        }
+                    ))
                 || super::hand_payment::check_cost(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
@@ -88,6 +97,13 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                         || (optional_payment::required(body)
                             && super::super::life::is_cost(&step.instruction.action))
                         || super::hand_payment::check_cost(&step.instruction.action)
+                        || play.parameters.iter().any(|decision| {
+                            reveal_payment::field_parameter(&ability.node, decision)
+                                && reveal_payment::selected(
+                                    &step.instruction.action,
+                                    from_ref(decision),
+                                )
+                        })
                         || super::material::check_cost(&step.instruction.action, play)
                         || super::super::counters::check_cost(&step.instruction.action, play);
                     if !supported {

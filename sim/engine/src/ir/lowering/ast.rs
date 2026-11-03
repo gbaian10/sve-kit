@@ -2304,6 +2304,7 @@ pub(super) struct HandQuery {
     #[serde(default)]
     pub traits_all: Vec<String>,
     pub name: Option<String>,
+    pub name_contains: Option<String>,
     pub class: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,

@@ -1,250 +1,202 @@
-format: 1
-kind: effect_set
 cards:
   BP18-001:
-    status: complete
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: rule_override
           rule: evolve_per_turn
-          value: unlimited
           side: self
-      - line: 3
-        kind: trigger
-        body:
+          value: unlimited
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
             - op: move
               subjects: target.1
               to: ex
-            - op: adjust_cost
+            - amount: -2
+              op: adjust_cost
               subjects: target.1
-              amount: -2
               until: end-of-turn
         event: enter
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: cemetery
               side: self
               trait: 透京
-            min: 1
-            max: 1
-  BP18-007:
+              zone: cemetery
     status: complete
+  BP18-007:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: play_permission
-          subjects: self
+      - body:
           condition:
-            fn: ge
             args:
               - read: self.turn.cards_played
               - 3
+            fn: ge
           from:
             - cemetery
-      - line: 2
-        kind: trigger
-        body:
+          op: play_permission
+          subjects: self
+        kind: static
+        line: 1
+      - body:
+          amount: 1
           op: damage
           subjects: target.1
-          amount: 1
         event: leave
+        kind: trigger
+        line: 2
         subject: self
-        trigger_if:
-          read: self.is_active
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: field
               side: opponent
               type: follower
-            min: 1
-            max: 1
-      - line: 3
-        kind: trigger
-        body:
+              zone: field
+        trigger_if:
+          read: self.is_active
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 1
+              op: damage
               subjects: target.1
-              amount: 1
-            - op: if
-              condition:
-                fn: ne
+            - condition:
                 args:
                   - read: self.entered_from
                   - hand
+                fn: ne
+              op: if
               then:
                 op: move
+                position: bottom
                 subjects: self
                 to: deck
-                position: bottom
         event: enter
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: field
               side: opponent
               type: follower
-            min: 1
-            max: 1
-  BP18-P32:
+              zone: field
     status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 5
-      - line: 2
-        kind: activated
-        body:
-          op: damage
-          subjects: target.1
-          amount: 4
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: hand
-              where:
-                fn: eq
-                args:
-                  - read: item.cost
-                  - 2
-            min: 2
-            max: 2
-        costs:
-          - op: act
-            subjects: self
-          - op: reveal
-            subjects: cost.1
-            to: all
   BP18-P35:
-    status: complete
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          hp: 2
           op: modify
           subjects: self.leader
-          hp: 2
-        event: enter
-        subject: self
         cost_selections:
           - key: "1"
+            max: 2
+            min: 2
             select:
               side: self
-              zone: hand
               where:
-                fn: eq
                 args:
                   - read: item.cost
                   - 2
-            min: 2
-            max: 2
+                fn: eq
+              zone: hand
         costs:
           - op: reveal
             subjects: cost.1
             to: all
-  BP18-SL16:
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
     status: complete
+  BP18-SL16:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: guard
-      - line: 2
+          op: macro
         kind: static
-        body:
+        line: 1
+      - body:
+          from: field
           op: replace_move
+          replacement: banish
           subjects:
-            zone: field
             side: opponent
             type: follower
-          from: field
+            zone: field
           to: cemetery
-          replacement: banish
-      - line: 3
-        kind: trigger
-        body:
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 8
+              op: damage
               subjects:
-                zone: field
                 side: opponent
                 type: follower
-              amount: 8
-            - op: damage
+                zone: field
+            - amount: 4
+              op: damage
               subjects: opponent.leader
-              amount: 4
         event: enter
-        subject: self
-  BP18-SP01:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
+        line: 3
+        subject: self
+    status: complete
+  BP18-SP01:
+    abilities:
+      - body:
+          max: 1
+          min: 0
           op: search
           select:
             side: self
-            zone: deck
             where:
-              fn: and
               args:
-                - fn: eq
-                  args:
+                - args:
                     - read: item.class
                     - ロイヤル
-                - fn: eq
-                  args:
+                  fn: eq
+                - args:
                     - read: item.cost
                     - 1
-          min: 0
-          max: 1
+                  fn: eq
+              fn: and
+            zone: deck
           to: ex
         event: enter
+        kind: trigger
+        line: 1
         subject: self
-      - line: 2
-        kind: activated
-        body:
+      - body:
           op: seq
           steps:
             - op: act
@@ -252,15 +204,20 @@ cards:
             - op: box
               subjects: target.1
               until: next-controller-end
+        costs:
+          - amount: 0
+            op: pp
+        kind: activated
         limit: 1
+        line: 2
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 0
+              zone: field
+    status: complete
+format: 1
+kind: effect_set

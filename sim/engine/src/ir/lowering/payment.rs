@@ -69,7 +69,7 @@ fn lower_operations(
                 op,
                 ast::CostOperation::Discard(
                     ast::DiscardCost::Material(_) | ast::DiscardCost::Groups(_)
-                )
+                ) | ast::CostOperation::Reveal(_)
             )
         })
         .count()
@@ -83,6 +83,20 @@ fn lower_operations(
                     ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
                 )
             }))
+    {
+        return Err(unsupported(path));
+    }
+    if operations
+        .iter()
+        .any(|op| matches!(op, ast::CostOperation::Reveal(_)))
+        && operations.iter().any(|op| {
+            !matches!(
+                op,
+                ast::CostOperation::Reveal(_)
+                    | ast::CostOperation::Pp(_)
+                    | ast::CostOperation::ActSelf(true)
+            )
+        })
     {
         return Err(unsupported(path));
     }
@@ -212,8 +226,12 @@ fn lower_operations(
                 },
                 reason: MoveReason::Put,
             },
+            ast::CostOperation::Reveal(material) => {
+                let (action, decision) = super::reveal_cost::field(context, material, path)?;
+                parameters.push(decision);
+                action
+            }
             ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
-            | ast::CostOperation::Reveal(_)
             | ast::CostOperation::ToDeckBottom(_)
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)

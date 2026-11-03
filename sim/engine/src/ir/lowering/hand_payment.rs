@@ -35,37 +35,47 @@ pub(super) fn lower(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<Action, LoweringError> {
-    let cardinality = cardinality(material, path)?;
-    let binding = Binding::new(allocator.id(path)?, allocator.scope(path)?);
-
+    if material.sel.name_contains.is_some() {
+        return Err(unsupported(path));
+    }
     Ok(Action::Discard {
         player: PlayerRef::Controller {},
         mode: DiscardMode::Chosen {
-            constraint: SelectionConstraint {
-                groups: vec![SelectionGroup {
-                    selector: Selector::Zone {
-                        players: PlayerSet {
-                            relation: PlayerRelation::SelfPlayer,
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(1),
-                                maximum: Some(Nat(1)),
-                            },
-                            text_quantifier: TextQuantifier::Implicit,
-                        },
-                        zone: ZoneKind::Hand,
-                        view: SelectionView::Current {},
-                        binding,
-                        predicate: Box::new(filter(&material.sel, binding, path)?),
-                    },
-                    cardinality,
-                }],
-                cardinality,
-                distinct_by: None,
-                disjoint: Disjointness::Disjoint,
-                aggregate_bounds: vec![],
-            },
+            constraint: constraint(allocator, material, path)?,
         },
+    })
+}
+
+pub(super) fn constraint(
+    allocator: &mut Allocator,
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<SelectionConstraint, LoweringError> {
+    let cardinality = cardinality(material, path)?;
+    let binding = Binding::new(allocator.id(path)?, allocator.scope(path)?);
+    Ok(SelectionConstraint {
+        groups: vec![SelectionGroup {
+            selector: Selector::Zone {
+                players: PlayerSet {
+                    relation: PlayerRelation::SelfPlayer,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::Implicit,
+                },
+                zone: ZoneKind::Hand,
+                view: SelectionView::Current {},
+                binding,
+                predicate: Box::new(filter(&material.sel, binding, path)?),
+            },
+            cardinality,
+        }],
+        cardinality,
+        distinct_by: None,
+        disjoint: Disjointness::Disjoint,
+        aggregate_bounds: vec![],
     })
 }
 
@@ -121,8 +131,8 @@ fn filter(
     path: &str,
 ) -> Result<Expr<Bool>, LoweringError> {
     use crate::ir::{
-        CharacteristicView, ClassId, ClassRead, Comparison, Info, Int, IntOperation, NumberRead,
-        ObjectOperand, ObjectView, Predicate,
+        CardName, CharacteristicView, ClassId, ClassRead, Comparison, Info, Int, IntOperation,
+        NumberRead, ObjectOperand, ObjectView, Predicate,
     };
     let view = ObjectView::Current {
         object: Box::new(ObjectOperand::Bound { binding }),
@@ -138,6 +148,15 @@ fn filter(
     } else {
         vec![base]
     };
+    if let Some(fragment) = &query.name_contains {
+        if fragment.is_empty() {
+            return Err(unsupported(path));
+        }
+        predicates.push(Expr::Compute(Box::new(Predicate::NameContains {
+            object: view.clone(),
+            name: Expr::Literal(CardName(fragment.clone())),
+        })));
+    }
     for trait_id in &query.traits_all {
         if trait_id.is_empty() {
             return Err(unsupported(path));

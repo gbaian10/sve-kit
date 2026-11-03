@@ -21,8 +21,28 @@ pub(in crate::game::internal) struct MaterialWait {
     members: Vec<ObjectRef>,
     bounds: Cardinality,
     field: bool,
+    selector: Selector,
 }
 impl MaterialWait {
+    pub(super) fn revalidate(
+        &self,
+        game: &Game,
+        execution: &Execution,
+        members: &[ObjectRef],
+    ) -> Result<()> {
+        let eligible = game.material_candidates(execution, &self.selector, false)?;
+        if !contains(
+            self.bounds,
+            Nat(u64::try_from(members.len()).map_err(invalid)?),
+        ) || members.iter().any(|member| !eligible.contains(member))
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "reveal materials changed".into(),
+            ));
+        }
+        Ok(())
+    }
+
     pub(super) fn inline_bind(&self, execution: &mut Execution, ids: &[String]) -> Result<()> {
         let handles = execution.inline_material_handles(&self.members, ids)?;
         let members = self.validate(&handles).map_err(|_error| {
@@ -58,6 +78,17 @@ impl MaterialWait {
         execution: &mut Execution,
         members: Vec<ObjectRef>,
     ) {
+        if matches!(
+            self.selector,
+            Selector::Zone {
+                zone: ZoneKind::Hand,
+                ..
+            }
+        ) {
+            execution
+                .material_selections
+                .insert(self.binding.key(), self.clone());
+        }
         execution.slots.insert(
             self.binding.key(),
             Slot::Objects {
@@ -151,6 +182,9 @@ pub(super) fn check_reveal_parameter(decision: &Decision) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<()> {
+    if reveal_payment::parameter(decision).is_some() {
+        return check_reveal_parameter(decision);
+    }
     let ChoiceDomain::Objects {
         constraint,
         target_roles: None,
@@ -433,6 +467,7 @@ impl Game {
                 bounds: constraint.cardinality,
                 field: reveal_payment::parameter(decision).is_none()
                     && zones(selector)? == [ZoneKind::Field],
+                selector: selector.clone(),
             }),
         ));
         Ok(())
@@ -596,6 +631,14 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         }
     }
     for ability in &card.card().abilities {
+        if ability.node.play.as_ref().is_some_and(|play| {
+            play.parameters.iter().any(|decision| {
+                reveal_payment::parameter(decision).is_some()
+                    && !reveal_payment::field_parameter(&ability.node, decision)
+            })
+        }) {
+            return Err(unsupported("unconsumed field reveal parameter"));
+        }
         if ability.node.play.as_ref().is_some_and(|play| {
             play.parameters
                 .iter()

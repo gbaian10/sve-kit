@@ -1,0 +1,71 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 5,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "amount": 4,
+        "op": "damage",
+        "subjects": "target.1"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "side": "self",
+            "where": {
+              "args": [
+                {
+                  "read": "item.cost"
+                },
+                2
+              ],
+              "fn": "eq"
+            },
+            "zone": "hand"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "self"
+        },
+        {
+          "op": "reveal",
+          "subjects": "cost.1",
+          "to": "all"
+        }
+      ],
+      "kind": "activated",
+      "line": 2,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

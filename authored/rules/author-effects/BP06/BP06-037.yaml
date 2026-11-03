@@ -1,0 +1,46 @@
+cards:
+  BP06-037:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  kind: follower
+                  trait: 学院
+                  who: self
+      - fanfare:
+          cost:
+            reveal:
+              n: 1
+              sel:
+                kind: follower
+                trait: 学院
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
