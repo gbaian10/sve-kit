@@ -3154,12 +3154,45 @@ class SpellHeadFields(TypedDict):
 type SpellHead = SpellHeadFields
 
 
+@with_config(CONFIG)
+class StaticAbilityPreventionFields(TypedDict):
+    kind: Literal["ability"]
+    on: NotRequired[Literal["this"]]
+
+
+@with_config(CONFIG)
+class StaticPreventionEffectFields(TypedDict):
+    prevent: StaticAbilityPreventionFields
+
+
+@with_config(CONFIG)
+class StaticPreventionBranchFields(TypedDict):
+    cond: Condition
+    then: Annotated[
+        tuple[StaticPreventionEffectFields, ...], Field(min_length=1, max_length=1)
+    ]
+
+
+_StaticPreventionIfKeys = TypedDict(
+    "_StaticPreventionIfKeys", {"if": StaticPreventionBranchFields}
+)
+
+
+@with_config(CONFIG)
+class StaticPreventionIfFields(_StaticPreventionIfKeys):
+    pass
+
+
+type StaticPreventionIf = StaticPreventionIfFields
+type StaticEffect = EffectSpec | StaticPreventionIf
+
+
 _StaticHeadKeys = TypedDict("_StaticHeadKeys", {"while": NotRequired[Condition]})
 
 
 @with_config(CONFIG)
 class StaticHeadFields(_StaticHeadKeys):
-    effects: Annotated[tuple[EffectSpec, ...], Field(min_length=1)]
+    effects: Annotated[tuple[StaticEffect, ...], Field(min_length=1)]
 
     zone: NotRequired[AbilityZones]
 
