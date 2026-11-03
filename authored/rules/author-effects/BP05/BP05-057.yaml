@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-057:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                what: attack
+                target:
+                  leader: opp
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel:
+                    who: self
+                    zone: field
+                    kind: follower
+                    other: true
+                  n: 1
+                  result: material
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                leader_or: true
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  power_of:
+                    objects_of: material
+                    view: before
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
