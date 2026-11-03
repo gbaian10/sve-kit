@@ -2042,6 +2042,14 @@ type DeclareAction = DeclareNumber | DeclareName
 
 
 @with_config(CONFIG)
+class PilotActionFields(TypedDict):
+    ref: Ref
+
+
+type PilotAction = PilotActionFields
+
+
+@with_config(CONFIG)
 class EquipActionFields(TypedDict):
     on: EffectObject
 
@@ -2289,6 +2297,8 @@ type AllocatedTokens = AllocatedTokensFields
 @with_config(CONFIG)
 class SameNameTokenFields(TypedDict):
     same_name_as: Ref
+
+    kind: NotRequired[Literal["follower"]]
 
 
 type CreatedToken = (
@@ -2755,6 +2765,8 @@ class ActionFields(TypedDict):
 
     declare: NotRequired[DeclareAction]
 
+    pilot: NotRequired[PilotAction]
+
     equip: NotRequired[EquipAction]
 
     steal: NotRequired[StealAction]
@@ -2864,6 +2876,8 @@ class StepFields(_StepKeys):
     dice: NotRequired[DiceAction]
 
     declare: NotRequired[DeclareAction]
+
+    pilot: NotRequired[PilotAction]
 
     equip: NotRequired[EquipAction]
 

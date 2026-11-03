@@ -1,0 +1,100 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "by": "cost.1",
+        "op": "pilot",
+        "subjects": "self"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "name": "ファントムデュオ・バニー＆バロン",
+            "side": "self",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "cost.1"
+        }
+      ],
+      "kind": "activated",
+      "line": 1
+    },
+    {
+      "body": {
+        "by": "cost.1",
+        "op": "pilot",
+        "subjects": "self"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "side": "self",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        },
+        {
+          "op": "act",
+          "subjects": "cost.1"
+        }
+      ],
+      "kind": "activated",
+      "line": 2
+    },
+    {
+      "body": {
+        "name": "storm",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 3
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "count": {
+                "other": true,
+                "side": "self",
+                "trait": "荒野",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            0
+          ],
+          "fn": "gt"
+        },
+        "op": "if",
+        "then": {
+          "count": 1,
+          "op": "draw"
+        }
+      },
+      "event": "attack",
+      "kind": "trigger",
+      "line": 4,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
