@@ -1,0 +1,37 @@
+cards:
+  CP04-T06:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - damage:
+                            n:
+                              half_up:
+                                power_of: this
+                            to:
+                              leaders: opponents
+                      on:
+                        played:
+                          sel:
+                            kind: spell
+                          who: self
+                      per_turn: 2
+                on: host
+          zone: equipment
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
