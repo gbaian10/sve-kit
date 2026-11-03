@@ -1799,7 +1799,7 @@ spell:
 
 ### A-016d 兩種付款擇一
 
-**BP01-SL15 骸の王**；`BP01-SL15#0/text/0`。one_of 在 optional_cost 所屬 PlayParameter 選，材料與是否付款合併；不是本文 either。
+**BP01-SL15 骸の王**；`BP01-SL15#0/text/0`。是否付款與 one_of 方案都屬於這次 optional_cost 的付款決定：先接受，再於付款前選方案與材料；不是本文 either。
 
 **官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL15)；不在本專案授權內）。
 
