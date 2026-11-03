@@ -1,0 +1,49 @@
+cards:
+  BP14-006:
+    abilities:
+      - auto:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - activate:
+          cost:
+            return_to_hand:
+              n: 1
+              sel:
+                who: self
+                zone: ex
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - move:
+                ref: selected
+                to: ex
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

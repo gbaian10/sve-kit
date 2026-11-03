@@ -1,0 +1,43 @@
+cards:
+  BP09-087:
+    abilities:
+      - attack_time:
+          do:
+            - buff:
+                on: ally
+                power: 1
+          targets:
+            - bind: ally
+              from:
+                class: ビショップ
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  class: ビショップ
+                  kind: follower
+                  orig_cost_le: 2
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
