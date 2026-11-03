@@ -39,7 +39,7 @@ repos:
         args: [-o, array_auto_collapse=false, -o, "indent_string=    "] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.1
+    rev: v0.17.3
     hooks:
       # tools/schema-er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
@@ -49,7 +49,7 @@ repos:
         files: ^(carddb|publish|tools/schema-er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.23.3
+    rev: v0.24.0
     hooks:
       # The Node hook installs the exact version pinned by `rev` (the Docker image tag was mutable);
       # a pinned Node (same as mise.toml) keeps it off whatever `node` happens to be on PATH.
@@ -92,7 +92,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.3
+    rev: 0.13.6
     hooks:
       # Each Python project maintains its own dependency lock.
       - id: uv-lock
@@ -116,7 +116,7 @@ repos:
       - id: zizmor
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.19.2
+    rev: v4.19.3
     hooks:
       - id: commitizen
         stages: [commit-msg]
