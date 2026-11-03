@@ -15,14 +15,16 @@ cards:
             steps:
               - pp: 1
               - discard:
-                  ref: this
-              - discard:
-                  n: 1
-                  sel:
-                    who: self
-                    zone: hand
-                    class: ドラゴン
-                    orig_cost_ge: 7
+                  groups:
+                    - sel:
+                        in: this
+                      n: 1
+                    - sel:
+                        who: self
+                        zone: hand
+                        class: ドラゴン
+                        orig_cost_ge: 7
+                      n: 1
           do:
             - draw:
                 n: 2
