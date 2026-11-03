@@ -38,6 +38,7 @@ impl Checker {
                 IntRead::HistorySum { query } => self.numeric_history(query),
             },
             Expr::Frozen(read) => match read.as_ref() {
+                IntFrozen::PaidMaterialAttack { receipt } => self.paid_material_attack(receipt),
                 IntFrozen::ReceiptRequested { receipt } => self.measured(receipt),
                 IntFrozen::StatBefore { facet } | IntFrozen::StatAfter { facet } => {
                     self.event_field(*facet)

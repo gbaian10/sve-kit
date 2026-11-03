@@ -20,6 +20,7 @@ mod granted_play;
 mod hand_payment;
 mod keywords;
 mod material;
+mod material_values;
 mod movement;
 mod numeric;
 mod optional_payment;
@@ -1068,6 +1069,7 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
+    paid_materials: BTreeMap<String, ReceiptId>,
     /// Fixed one-card discards, also countable as a number.
     single_discards: BTreeSet<ReceiptId>,
     /// Movements of cards leaving the deck, which carry no modifications.
@@ -1291,6 +1293,7 @@ impl<'definitions> BodyContext<'definitions> {
         let mut steps = Vec::new();
         for (index, step) in author_steps.iter().enumerate() {
             let step_path = format!("{path}/{index}");
+            self.check_paid_material_name(step, &step_path)?;
             self.field_entry.adjacent = choice_before(author_steps, index);
             if let ast::Step::Counter(value) = step
                 && !matches!(value.on, ast::Objects::This(_))

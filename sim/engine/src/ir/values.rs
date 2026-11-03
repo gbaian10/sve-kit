@@ -4,7 +4,7 @@ use super::{
     DrawEvent, DriveCheckedEvent, DriveGainedEvent, DriveTriggerEvent, EarthRitePaidComponent,
     EnterExEvent, EnterFieldEvent, EquipEvent, Event, EventSnapshotPolicy, EvolutionStateFields,
     EvolveEvent, FusedEvent, HistoryCount, HistoryQuery, Info, LeaveFieldEvent, LifeChangeEvent,
-    MeasuredReceipt, MeasuredReceiptList, MoveEvent, MoveResult, MovementReceipt,
+    MeasuredReceipt, MeasuredReceiptList, MoveEvent, MoveOutcome, MoveResult, MovementReceipt,
     MovementReceiptList, NonEmpty, NumericHistoryQuery, ObjectReceipt, ObjectReceiptList,
     ObjectRef, PaymentEvent, PaymentReceipt, PaymentResult, PhaseEvent, PhaseFields, PlayEvent,
     PlaySubject, PostureEvent, PostureFields, RaceEvent, ReceiptList, ReceiptReference,
@@ -591,6 +591,7 @@ impl Walk for NoRead {
     }
 }
 variants!(IntFrozen {
+    PaidMaterialAttack { receipt: ReceiptReference<MoveOutcome> } => ["read.receipt.paid-material-attack"],
     StatBefore { facet: Binding<StatDelta> } => ["read.event-field"],
     StatAfter { facet: Binding<StatDelta> } => ["read.event-field"],
     LifeChangeBefore { event: Binding<LifeChangeEvent> } => ["read.event-field"],

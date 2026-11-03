@@ -23,7 +23,7 @@ fn bp08_084_pays_life_before_damage_and_stops_after_two_activations() {
                 .unwrap(),
         );
         assert!(result.progress.receipts.values().any(|receipt| matches!(receipt,
-            InstructionOutcome::Payment { quantity: Quantity { amount: Int(1), unit: QuantityUnit::Life }, subjects } if subjects.is_empty())));
+            InstructionOutcome::Payment { quantity: Quantity { amount: Int(1), unit: QuantityUnit::Life }, subjects, .. } if subjects.is_empty())));
         assert!(
             matches!(result.progress.facts.as_slice(), [Fact::LifeChange(life), Fact::AbilityPlayed { .. }, Fact::Damage(_), Fact::AbilityResolved { .. }] if life.delta == Int(-1))
         );

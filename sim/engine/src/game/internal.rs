@@ -9,7 +9,7 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::AttackEvent;
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardQuantityOutcome, Cardinality, ChoiceDomain, Comparison, Control, CostSpec,
+    CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control, CostSpec,
     CounterChangeEvent, DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision, DecisionId,
     DecisionKind, Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent,
     Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
@@ -306,6 +306,8 @@ pub enum InstructionOutcome {
         quantity: Quantity,
         /// Generations whose posture changed, empty for resource payments.
         subjects: Vec<ObjectRef>,
+        /// Frozen field information for a single follower moved to the cemetery.
+        characters: Vec<Characteristics>,
     },
     /// One outcome for the whole draw instruction.
     Cards(CardQuantityOutcome),

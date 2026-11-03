@@ -612,7 +612,9 @@ fn entry_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.MovementReceipt.Discard"
+        "shape.IntFrozen.PaidMaterialAttack"
+            | "read.receipt.paid-material-attack"
+            | "shape.MovementReceipt.Discard"
             | "shape.Predicate.ReceiptAny"
             | "read.receipt.member-any"
             | "shape.ObjectView.Snapshot"

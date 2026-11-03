@@ -730,11 +730,17 @@ impl BodyContext<'_> {
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
             ast::Number::Counter { counter } => Ok(counter_number(counter, self.counter_read_view)),
-            ast::Number::Power { power_of } => Ok(this_number(
-                power_of,
-                Some(Stat::Attack),
-                CharacteristicView::Effective,
-            )),
+            ast::Number::Power { power_of } => match power_of {
+                ast::Observation::Binding(name) if name == "this" => Ok(this_number(
+                    &ast::This::This,
+                    Some(Stat::Attack),
+                    CharacteristicView::Effective,
+                )),
+                ast::Observation::Before { objects_of, .. } => {
+                    self.paid_material_attack(objects_of, path)
+                }
+                ast::Observation::Binding(_) => Err(unsupported(path)),
+            },
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
             ast::Number::Cost { cost_of } => {
                 Ok(this_number(cost_of, None, CharacteristicView::Effective))

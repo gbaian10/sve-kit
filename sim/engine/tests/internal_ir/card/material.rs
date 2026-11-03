@@ -194,7 +194,7 @@ fn move_material(action: Action, zone: ZoneKind, destination: &str) {
         "source posture is also paid"
     );
     assert!(
-        matches!(result.progress.receipts.get(&ReceiptId(101)), Some(InstructionOutcome::Payment { quantity: Quantity { amount: Int(1), unit: QuantityUnit::Cards }, subjects }) if subjects.len() == 1),
+        matches!(result.progress.receipts.get(&ReceiptId(101)), Some(InstructionOutcome::Payment { quantity: Quantity { amount: Int(1), unit: QuantityUnit::Cards }, subjects, .. }) if subjects.len() == 1),
         "one material payment receipt"
     );
 }

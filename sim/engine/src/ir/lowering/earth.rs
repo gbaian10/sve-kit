@@ -31,6 +31,7 @@ pub(super) const fn amulets() -> ast::PublicQuery {
         racing: None,
         r#trait: None,
         name: None,
+        names: Vec::new(),
         name_contains: None,
         cost_eq: None,
         cost_le: None,

@@ -415,6 +415,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
             name: query.name.as_deref(),
+            names: &query.names,
             contains: query.name_contains.as_deref(),
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
