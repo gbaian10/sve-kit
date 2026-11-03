@@ -5,12 +5,12 @@ use crate::game::internal::{
 };
 use crate::ir::quick::card_permission;
 use crate::ir::{
-    AbilityKind, AbilityOrigin, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision,
-    DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, KeywordId,
-    MoveDestination, MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone,
-    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
-    SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
-    ZoneRef,
+    AbilityKind, AbilityOrigin, Action, Binding, Cardinality, Characteristics, ChoiceDomain,
+    CostSpec, Decision, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
+    KeywordId, MoveDestination, MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef,
+    OwnerZone, PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity,
+    QuantityUnit, SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram,
+    ZoneKind, ZoneRef,
 };
 use alloc::collections::BTreeSet;
 
@@ -385,12 +385,16 @@ impl Game {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Validation, freezing and movement form one atomic payment step."
+    )]
     pub(super) fn internal_material_payment(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
         objects: &Selector,
-    ) -> Result<(Quantity, Vec<ObjectRef>)> {
+    ) -> Result<(Quantity, Vec<ObjectRef>, Vec<Characteristics>)> {
         let members = match objects {
             Selector::Bound { reference } => {
                 let Some(Slot::Objects { members, .. }) = execution.slots.get(&reference.key())
@@ -420,6 +424,19 @@ impl Game {
                 ));
             }
         }
+        let characters = if let [member] = members.as_slice()
+            && matches!(objects, Selector::Bound { .. })
+            && matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
+                if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
+            && self.object(execution.object_id(*member)?)?.zone == "field"
+            && self
+                .object_type(execution.object_id(*member)?)?
+                .contains("フォロワー")
+        {
+            vec![self.internal_characteristics(execution.object_id(*member)?)?]
+        } else {
+            vec![]
+        };
         if matches!(instruction.action, Action::Posture { .. }) {
             let ids = members
                 .iter()
@@ -481,6 +498,7 @@ impl Game {
                 unit: QuantityUnit::Cards,
             },
             members,
+            characters,
         ))
     }
 }

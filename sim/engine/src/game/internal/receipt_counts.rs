@@ -4,9 +4,10 @@ use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
-    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
-    NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptId,
-    ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
+    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MoveOutcome,
+    MovementReceipt, NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate,
+    QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId,
+    TraitsRead,
 };
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -250,6 +251,33 @@ fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result
             .collect::<Result<_>>()?,
         class: Some(ClassId(text(&printed["card_class"])?)),
     })
+}
+
+pub(super) fn paid_material_attack(
+    execution: &Execution,
+    receipt: &ReceiptReference<MoveOutcome>,
+) -> Result<Int> {
+    let ReceiptLocation::Local { id } = receipt.location() else {
+        return Err(unsupported("iterated paid material attack"));
+    };
+    let Some(InstructionOutcome::Payment {
+        quantity,
+        subjects,
+        characters,
+    }) = execution.receipts.get(id)
+    else {
+        return Err(invalid("missing material payment"));
+    };
+    let ([_], [characters]) = (subjects.as_slice(), characters.as_slice()) else {
+        return Err(invalid("material attack requires one frozen follower"));
+    };
+    if quantity.unit != QuantityUnit::Cards || quantity.amount != Int(1) {
+        return Err(invalid("material attack quantity"));
+    }
+    match characters.attack {
+        Info::Present(amount) => Ok(amount),
+        Info::AbsentByRules => Err(invalid("missing frozen material attack")),
+    }
 }
 
 fn snapshot(object: &ObjectView, member: Binding<RuntimeObjectView>) -> Result<()> {

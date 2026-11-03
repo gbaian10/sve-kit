@@ -83,6 +83,7 @@ fn full_payment_precedes_play_and_body_both_seats() {
         assert_eq!(
             result.progress.receipts[&ReceiptId(100)],
             InstructionOutcome::Payment {
+                characters: vec![],
                 quantity: Quantity {
                     amount: Int(1),
                     unit: QuantityUnit::Pp
@@ -93,6 +94,7 @@ fn full_payment_precedes_play_and_body_both_seats() {
         assert_eq!(
             result.progress.receipts[&ReceiptId(101)],
             InstructionOutcome::Payment {
+                characters: vec![],
                 quantity: Quantity {
                     amount: Int(1),
                     unit: QuantityUnit::Cards
@@ -166,6 +168,7 @@ fn zero_and_exact_pp_payments_keep_receipts_and_share_the_instance() {
             assert_eq!(
                 first.progress.receipts[&ReceiptId(100)],
                 InstructionOutcome::Payment {
+                    characters: vec![],
                     quantity: Quantity {
                         amount: Int(amount),
                         unit: QuantityUnit::Pp

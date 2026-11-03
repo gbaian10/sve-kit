@@ -589,13 +589,16 @@ impl Game {
                     "source cost requires the field".into(),
                 ));
             }
-            let (quantity, subjects) = match &step.instruction.action {
+            let (quantity, subjects, characters) = match &step.instruction.action {
                 Action::Counter { .. } => (
                     self.internal_counter(execution, &step.instruction, true)?,
                     Vec::new(),
+                    Vec::new(),
                 ),
                 Action::Discard { .. } => {
-                    self.internal_hand_cost_payment(execution, &step.instruction)?
+                    let (quantity, subjects) =
+                        self.internal_hand_cost_payment(execution, &step.instruction)?;
+                    (quantity, subjects, vec![])
                 }
                 Action::Resource {
                     amount: Expr::Literal(amount),
@@ -608,6 +611,7 @@ impl Game {
                     };
                     (
                         self.internal_pay_pp(execution.context.controller, amount)?,
+                        Vec::new(),
                         Vec::new(),
                     )
                 }
@@ -643,6 +647,7 @@ impl Game {
                             unit: QuantityUnit::Cards,
                         },
                         vec![original],
+                        vec![],
                     )
                 }
                 Action::Life {
@@ -654,6 +659,7 @@ impl Game {
                 } if *delta <= 0 => (
                     self.internal_pay_life(execution, &step.instruction, *delta)?,
                     Vec::new(),
+                    Vec::new(),
                 ),
                 _ => return Err(unsupported("whole-card cost step")),
             };
@@ -661,7 +667,11 @@ impl Game {
             if !matches!(step.instruction.action, Action::Discard { .. }) {
                 execution.receipts.insert(
                     step.instruction.receipt,
-                    InstructionOutcome::Payment { quantity, subjects },
+                    InstructionOutcome::Payment {
+                        quantity,
+                        subjects,
+                        characters,
+                    },
                 );
             }
         }

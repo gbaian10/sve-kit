@@ -129,6 +129,7 @@ fn ordinary_spell_uses_resolution_generation_and_single_payment_before_check_tim
         assert_eq!(
             result.progress.receipts[&ReceiptId(100)],
             InstructionOutcome::Payment {
+                characters: vec![],
                 quantity: Quantity {
                     amount: Int(1),
                     unit: QuantityUnit::Pp
@@ -637,6 +638,7 @@ fn ex_spell_preserves_the_installed_reduction_until_its_single_intrinsic_payment
     assert_eq!(
         result.progress.receipts[&ReceiptId(100)],
         InstructionOutcome::Payment {
+            characters: vec![],
             quantity: Quantity {
                 amount: Int(2),
                 unit: QuantityUnit::Pp

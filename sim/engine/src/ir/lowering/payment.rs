@@ -96,6 +96,7 @@ fn lower_operations(
                         keyword: None,
                         r#trait: None,
                         name: Some("魔法のアイテム".to_owned()),
+                        names: Vec::new(),
                         name_contains: None,
                         cost_eq: None,
                         cost_le: None,
@@ -210,6 +211,9 @@ fn lower_operations(
                 path,
             )?;
         }
+        if let ast::CostOperation::ToCemetery(material) = operation {
+            context.record_paid_material(material, ReceiptId(id), path)?;
+        }
         steps.push(CostStep {
             keyword,
             materials: None,
@@ -271,6 +275,7 @@ pub(super) fn record_discard(
         || context.definitions.contains_key(name)
         || context.searches.contains(name)
         || context.ex_outputs.contains_key(name)
+        || context.receipt_reads.paid_materials.contains_key(name)
     {
         return Err(unsupported(path));
     }

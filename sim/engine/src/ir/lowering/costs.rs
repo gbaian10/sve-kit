@@ -233,6 +233,9 @@ pub(super) fn public_query(
     binding: Binding<ObjectRef>,
     path: &str,
 ) -> Result<Selector, LoweringError> {
+    if !value.names.is_empty() {
+        return Err(unsupported(path));
+    }
     Ok(match value.zone {
         ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field),
         ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex),

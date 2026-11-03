@@ -407,6 +407,7 @@ impl Game {
         execution.receipts.insert(
             intrinsic,
             InstructionOutcome::Payment {
+                characters: vec![],
                 quantity,
                 subjects: vec![],
             },
@@ -492,6 +493,7 @@ impl Game {
                     }));
                 }
                 InstructionOutcome::Payment {
+                    characters: vec![],
                     quantity: Quantity {
                         amount: Int(i64::try_from(members.len()).map_err(invalid)?),
                         unit: QuantityUnit::Cards,
