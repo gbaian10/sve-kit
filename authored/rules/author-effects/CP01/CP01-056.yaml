@@ -1,0 +1,36 @@
+cards:
+  CP01-056:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: -1
+                on: enemy
+                power: -1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - lastword:
+          do:
+            - discard:
+                n: 1
+                who: opp
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

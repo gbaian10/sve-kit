@@ -1,0 +1,67 @@
+cards:
+  BP15-024:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                result: milled
+                to: cemetery
+                top:
+                  n: 1
+                  who: opp
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: milled
+                          view: before
+                        kind: follower
+                    op: ge
+                    right: 1
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 黄金の小剣
+            - if:
+                cond:
+                  any:
+                    - cmp:
+                        left:
+                          count:
+                            in:
+                              objects_of: milled
+                              view: before
+                            kind: spell
+                        op: ge
+                        right: 1
+                    - cmp:
+                        left:
+                          count:
+                            in:
+                              objects_of: milled
+                              view: before
+                            kind: amulet
+                        op: ge
+                        right: 1
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 黄金の杯
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
