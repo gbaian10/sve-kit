@@ -1,0 +1,40 @@
+cards:
+  BP05-085:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      necro: 10
+                    upto: 2
+                n: 1
+                options:
+                  - - discard:
+                        n: 1
+                        random: true
+                        who: opp
+                  - - damage:
+                        n: 3
+                        to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

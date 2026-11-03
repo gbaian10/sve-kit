@@ -1,0 +1,87 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "storm",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "amount": 2,
+        "op": "damage",
+        "subjects": "opponent.leader"
+      },
+      "event": "ub_activated",
+      "kind": "trigger",
+      "line": 3,
+      "subject": {
+        "other": true,
+        "side": "self",
+        "type": "follower",
+        "zone": "field"
+      }
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "amount": 4,
+            "op": "damage",
+            "subjects": "target.1"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "read": "self.pp.max"
+                },
+                10
+              ],
+              "fn": "eq"
+            },
+            "op": "if",
+            "then": {
+              "op": "evolve",
+              "subjects": "self"
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 4,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

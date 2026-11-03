@@ -24,33 +24,6 @@ cards:
         kind: trigger
         line: 1
     status: complete
-  BP05-071:
-    abilities:
-      - body:
-          amount: 1
-          op: adjust_cost
-          subjects:
-            side: opponent
-            type: spell
-            zone: any
-        kind: static
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - bind: random-discard
-              count: 1
-              op: random
-              select:
-                side: opponent
-                zone: hand
-            - op: discard
-              subjects: random-discard
-        event: evolve
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP05-092:
     abilities:
       - body:
@@ -149,33 +122,6 @@ cards:
               name: 魔導電磁サイ
               side: self
               zone: cemetery
-    status: complete
-  BP05-SL15:
-    abilities:
-      - body:
-          amount: 1
-          op: adjust_cost
-          subjects:
-            side: opponent
-            type: spell
-            zone: any
-        kind: static
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - bind: random-discard
-              count: 1
-              op: random
-              select:
-                side: opponent
-                zone: hand
-            - op: discard
-              subjects: random-discard
-        event: evolve
-        kind: trigger
-        line: 2
-        subject: self
     status: complete
 format: 1
 kind: effect_set

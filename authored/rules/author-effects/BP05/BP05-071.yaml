@@ -1,0 +1,27 @@
+cards:
+  BP05-071:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: 1
+                when_playing:
+                  kind: spell
+                  who: opp
+      - evolve_time:
+          do:
+            - discard:
+                n: 1
+                random: true
+                who: opp
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

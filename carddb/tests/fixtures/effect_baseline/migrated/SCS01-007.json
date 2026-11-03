@@ -1,0 +1,71 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 5,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "self.turn.leader_hp_decreased"
+            },
+            4
+          ],
+          "fn": "ge"
+        },
+        "op": "if",
+        "then": {
+          "op": "evolve",
+          "subjects": "self"
+        }
+      },
+      "event": "leader_life_change",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self.leader",
+      "trigger_if": {
+        "args": [
+          {
+            "read": "self.is_active"
+          },
+          {
+            "args": [
+              {
+                "read": "event.after_life"
+              },
+              {
+                "read": "event.before_life"
+              }
+            ],
+            "fn": "lt"
+          }
+        ],
+        "fn": "and"
+      }
+    },
+    {
+      "body": {
+        "amount": 1,
+        "op": "damage",
+        "subjects": "self.leader"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
