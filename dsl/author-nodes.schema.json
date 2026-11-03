@@ -16711,6 +16711,9 @@
         },
         {
           "$ref": "#/$defs/A.create.allocated"
+        },
+        {
+          "$ref": "#/$defs/A.create.same-name"
         }
       ]
     },
@@ -21368,6 +21371,18 @@
           }
         }
       }
+    },
+    "A.create.same-name": {
+      "type": "object",
+      "properties": {
+        "same_name_as": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "same_name_as"
+      ]
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."
