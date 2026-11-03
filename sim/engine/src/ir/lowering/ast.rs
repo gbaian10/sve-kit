@@ -1390,7 +1390,7 @@ pub(super) enum Number {
         count: ReceiptCountQuery,
     },
     CountOf {
-        count_of: String,
+        count_of: CountOf,
     },
     Aggregate {
         agg: Aggregate,
@@ -2718,4 +2718,25 @@ impl NumericArgument {
 pub(super) enum EvolutionCostSubject {
     This,
     Affected,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum CountOf {
+    Named(String),
+    Filtered(FilteredCountOf),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FilteredCountOf {
+    pub receipt: String,
+    #[serde(rename = "where")]
+    pub filter: ReceiptTraitFilter,
+    #[serde(rename = "view")]
+    pub _view: Before,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ReceiptTraitFilter {
+    pub r#trait: String,
 }

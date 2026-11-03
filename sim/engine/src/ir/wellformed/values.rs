@@ -168,6 +168,12 @@ impl Checker {
                 }
             },
             Expr::Compute(operation) => match operation.as_ref() {
+                NatOperation::ReceiptCount {
+                    receipt,
+                    projection,
+                    member,
+                    predicate,
+                } => self.receipt_member_condition(receipt, *projection, *member, predicate),
                 NatOperation::ReceiptActualSum { receipts } => match receipts {
                     MeasuredReceiptList::Cards { receipts } => {
                         self.reference(*receipts, BindingKind::Value)

@@ -667,6 +667,10 @@ impl Execution {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Natural operations share the checked execution context."
+    )]
     pub(super) fn natural(&self, game: &Game, expr: &Expr<Nat>) -> Result<Nat> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -759,6 +763,19 @@ impl Execution {
                     } else {
                         else_value
                     },
+                ),
+                NatOperation::ReceiptCount {
+                    receipt,
+                    projection,
+                    member,
+                    predicate,
+                } => super::receipt_counts::count(
+                    game,
+                    self,
+                    receipt,
+                    *projection,
+                    *member,
+                    predicate,
                 ),
                 NatOperation::ReceiptActualSum { .. } => Err(unsupported("natural operation")),
             },

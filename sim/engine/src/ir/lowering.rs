@@ -1084,6 +1084,7 @@ struct ReceiptReads {
     single_discards: BTreeSet<ReceiptId>,
     /// Movements of cards leaving the deck, which carry no modifications.
     deck_moves: BTreeSet<ReceiptId>,
+    deck_cemetery: BTreeSet<ReceiptId>,
 }
 
 struct BodyContext<'definitions> {
