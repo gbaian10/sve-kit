@@ -1,0 +1,45 @@
+cards:
+  DSD01b-011:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  trait: 武闘竜人
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: to_hand
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: to_hand
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,141 +1,82 @@
-format: 1
-kind: effect_set
 cards:
-  CP02-001:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: look
-              count: 3
-              bind: looked
-            - op: optional
-              selection:
-                select:
-                  from: looked
-                  trait: パッション
-                min: 1
-                max: 1
-                bind: chosen
-              then:
-                op: seq
-                steps:
-                  - op: reveal
-                    subjects: chosen
-                    to: all
-                  - op: move
-                    subjects: chosen
-                    to: hand
-            - op: select
-              select:
-                difference:
-                  - looked
-                  - chosen
-              min:
-                count:
-                  difference:
-                    - looked
-                    - chosen
-              max:
-                count:
-                  difference:
-                    - looked
-                    - chosen
-              bind: ordered
-              order: true
-            - op: move
-              subjects: ordered
-              to: deck
-              position: bottom
-        event: enter
-        subject: self
   CP02-007:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
+      - body:
           condition:
-            fn: gt
             args:
               - read: self.turn.magic_item_banished
               - 0
+            fn: gt
+          op: if
           then:
-            op: draw
             count: 1
+            op: draw
         event: leave
+        kind: trigger
+        line: 1
         subject: self
-      - line: 2
-        kind: activated
-        body:
-          op: modify
-          subjects: target.1
-          power: 1
+      - body:
           hp: 1
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: self
-              type: follower
-            min: 1
-            max: 1
+          op: modify
+          power: 1
+          subjects: target.1
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: self
             to: cemetery
+        kind: activated
+        line: 2
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: self
+              type: follower
+              zone: field
+    status: complete
   CP02-LD01:
-    status: complete
     abilities: []
-  CP02-P59:
     status: complete
+  CP02-P59:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          condition:
+            read: self.is_active
+          kind: effect
           op: replace_damage
+          prevent: true
           subjects:
             union:
               - self.leader
-              - side: self
-                zone: field
+              - other: true
+                side: self
                 type: follower
-                other: true
-          prevent: true
-          kind: effect
-          condition:
-            read: self.is_active
-      - line: 2
-        kind: activated
-        body:
+                zone: field
+        kind: static
+        line: 1
+      - body:
+          amount: 3
           op: damage
           subjects: target.1
-          amount: 3
+        costs:
+          - amount: 1
+            op: pp
+          - count: 1
+            op: lesson
+        kind: activated
+        limit: 1
+        line: 2
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 1
-          - op: lesson
-            count: 1
-        limit: 1
+              zone: field
+    status: complete
+format: 1
+kind: effect_set

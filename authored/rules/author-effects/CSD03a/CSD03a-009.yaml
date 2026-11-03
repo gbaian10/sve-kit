@@ -1,0 +1,47 @@
+cards:
+  CSD03a-009:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: ロイヤルパラディン
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: to_hand
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: to_hand
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
