@@ -3,6 +3,8 @@ use super::*;
 mod event_combat_life;
 #[path = "card/exchange_routes.rs"]
 mod exchange_routes;
+#[path = "card/material_acts.rs"]
+mod material_acts;
 use second::lowerer;
 
 #[path = "card/pilot.rs"]

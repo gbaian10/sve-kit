@@ -255,6 +255,9 @@ fn lower_operations(
         if let ast::CostOperation::ToCemetery(material) = operation {
             context.record_paid_material(material, ReceiptId(id), path)?;
         }
+        if let ast::CostOperation::Act(material) = operation {
+            context.record_paid_material_acts(material, ReceiptId(id), path)?;
+        }
         steps.push(CostStep {
             keyword,
             materials: None,
@@ -318,6 +321,7 @@ pub(super) fn record_discard(
         || context.definitions.contains_key(name)
         || context.searches.contains(name)
         || context.ex_outputs.contains_key(name)
+        || context.receipt_reads.paid_material_acts.contains_key(name)
         || context.receipt_reads.paid_materials.contains_key(name)
     {
         return Err(unsupported(path));

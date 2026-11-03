@@ -39,6 +39,14 @@ impl Checker {
                 IntRead::HistorySum { query } => self.numeric_history(query),
             },
             Expr::Frozen(read) => match read.as_ref() {
+                IntFrozen::PaidMaterialActs { receipt } => {
+                    self.receipt(receipt)?;
+                    if matches!(receipt.location(), ReceiptLocation::Local { .. }) {
+                        Ok(())
+                    } else {
+                        Err(self.error(WellFormedReason::UnavailableReceipt))
+                    }
+                }
                 IntFrozen::PaidMaterialAttack { receipt } => self.paid_material_attack(receipt),
                 IntFrozen::ReceiptRequested { receipt } => self.measured(receipt),
                 IntFrozen::DiscardedCost { receipt } => {

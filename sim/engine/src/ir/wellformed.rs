@@ -222,6 +222,7 @@ struct Environment {
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
+    field_act_materials: BTreeSet<Key>,
     field_materials: BTreeSet<Key>,
     reveal_materials: BTreeSet<Key>,
     single_material_moves: BTreeSet<ReceiptId>,
@@ -231,6 +232,8 @@ impl Environment {
     fn inherit_values(&mut self, other: &Self) {
         self.bindings.extend(other.bindings.clone());
         self.receipts.extend(other.receipts.clone());
+        self.field_act_materials
+            .extend(other.field_act_materials.iter().copied());
         self.field_materials
             .extend(other.field_materials.iter().copied());
         self.reveal_materials
@@ -298,6 +301,7 @@ impl Checker {
             movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            field_act_materials: BTreeSet::new(),
             field_materials: BTreeSet::new(),
             reveal_materials: BTreeSet::new(),
             single_material_moves: BTreeSet::new(),
@@ -559,7 +563,12 @@ impl Checker {
         {
             return self.reject();
         }
-        self.produce(instruction.receipt, outcome(&instruction.action))?;
+        let kind = if self.material_act_cost(instruction, context) {
+            TypeId::of::<super::MaterialActOutcome>()
+        } else {
+            outcome(&instruction.action)
+        };
+        self.produce(instruction.receipt, kind)?;
         self.record_material_move(instruction, context);
         if let Action::Discard {
             mode: super::DiscardMode::Chosen { constraint },

@@ -614,7 +614,9 @@ fn entry_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.IntFrozen.PaidMaterialAttack"
+        "shape.IntFrozen.PaidMaterialActs"
+            | "read.receipt.paid-material-acts"
+            | "shape.IntFrozen.PaidMaterialAttack"
             | "read.receipt.paid-material-attack"
             | "shape.MovementReceipt.Discard"
             | "shape.IntFrozen.DiscardedCost"

@@ -809,7 +809,8 @@ fn check_ability_face(ability: &Ability, printed: &serde_json::Value, pilot: boo
         && ability.play.as_ref().is_some_and(|play| {
             matches!(&play.costs, CostSpec::Ordered { steps }
                 if steps.iter().any(|step| matches!(step.instruction.action,
-                    Action::Move { .. } | Action::Banish { .. })))
+                    Action::Move { .. } | Action::Banish { .. })
+                    && !material::uses_parameter(&step.instruction.action,play)))
         })
     {
         return Err(unsupported("evolved Quick source departure cost"));

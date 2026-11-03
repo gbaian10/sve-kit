@@ -4,10 +4,10 @@ use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
-    Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MemberProjection,
-    MoveOutcome, MovementReceipt, NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView,
-    Predicate, QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView,
-    TraitId, TraitsRead,
+    Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MaterialActOutcome,
+    MemberProjection, MoveOutcome, MovementReceipt, NamesRead, NumberRead, ObjectReceipt,
+    ObjectRef, ObjectView, Predicate, QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference,
+    RuntimeObjectView, TraitId, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -339,6 +339,28 @@ fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result
             .collect::<Result<_>>()?,
         class: Some(ClassId(text(&printed["card_class"])?)),
     })
+}
+
+pub(super) fn paid_material_acts(
+    execution: &Execution,
+    receipt: &ReceiptReference<MaterialActOutcome>,
+) -> Result<Int> {
+    let ReceiptLocation::Local { id } = receipt.location() else {
+        return Err(unsupported("iterated paid material Acts"));
+    };
+    let Some(InstructionOutcome::Payment {
+        quantity, subjects, ..
+    }) = execution.receipts.get(id)
+    else {
+        return Err(invalid("missing material Act payment"));
+    };
+    if quantity.unit != QuantityUnit::Cards
+        || quantity.amount.0 < 0
+        || usize::try_from(quantity.amount.0).map_err(invalid)? != subjects.len()
+    {
+        return Err(invalid("material Act quantity"));
+    }
+    Ok(quantity.amount)
 }
 
 pub(super) fn paid_material_attack(
