@@ -2320,15 +2320,18 @@ pub(super) struct PlayedSubscription {
     pub during: Option<During>,
 }
 impl Auto {
-    pub(super) const fn cemetery_play(&self) -> bool {
-        matches!(self.on, PhaseSubscription::Played(_))
-            && match &self.zone {
-                Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
-                Some(ActivationZones::Many(zones)) => {
-                    matches!(zones.as_slice(), [ActivationZone::Cemetery])
-                }
-                _ => false,
+    /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.
+    pub(super) const fn cemetery_observer(&self) -> bool {
+        matches!(
+            self.on,
+            PhaseSubscription::Played(_) | PhaseSubscription::EnterField(_)
+        ) && match &self.zone {
+            Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
+            Some(ActivationZones::Many(zones)) => {
+                matches!(zones.as_slice(), [ActivationZone::Cemetery])
             }
+            _ => false,
+        }
     }
 }
 
@@ -2345,12 +2348,15 @@ pub(super) struct MoveSubscription {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum MoveOrigin {
-    Zone(FieldOrigin),
-    Owned {
-        who: EntryPlayer,
-        #[serde(rename = "zone")]
-        _zone: FieldOrigin,
-    },
+    Zone(MoveZone),
+    Owned { who: EntryPlayer, zone: MoveZone },
+}
+#[derive(Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum MoveZone {
+    Field,
+    /// Only a public deck-to-cemetery move; the deck owner must be named.
+    Deck,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

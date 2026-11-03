@@ -1,5 +1,6 @@
 //! Printed movement headers share the immutable event filter plan.
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
+use crate::ir::events::mill::MillFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{CardKind, CardName, ClassId, TraitId};
 
@@ -14,30 +15,7 @@ pub(super) fn subscription(
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
     match on {
-        ast::PhaseSubscription::Moved(entry) => {
-            let own = match &entry.from {
-                ast::MoveOrigin::Zone(_) => None,
-                ast::MoveOrigin::Owned { who, .. } => {
-                    Some(matches!(who, ast::EntryPlayer::Controller))
-                }
-            };
-            let event = Binding::new(event_id, scope);
-            Ok(EventPattern::LeaveField {
-                binding: event,
-                predicate: movement_filter(
-                    own,
-                    entry.reference.is_some(),
-                    entry.sel.as_ref(),
-                    entry.during.is_some(),
-                    path,
-                    false,
-                )?
-                .predicate(match entry.to {
-                    ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
-                    ast::DepartureDestination::Hand => SubjectFields::Hand(event),
-                }),
-            })
-        }
+        ast::PhaseSubscription::Moved(entry) => moved(entry, event_id, scope, path),
         ast::PhaseSubscription::PlacedEx(entry) => {
             if entry
                 .sel
@@ -120,6 +98,68 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }
+}
+
+/// 「…が墓場／手札に置かれたとき」 from the field, or from a named player's deck.
+fn moved(
+    entry: &ast::MoveSubscription,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    let (own, zone) = match &entry.from {
+        ast::MoveOrigin::Zone(zone) => (None, zone),
+        ast::MoveOrigin::Owned { who, zone } => {
+            (Some(matches!(who, ast::EntryPlayer::Controller)), zone)
+        }
+    };
+    if *zone == ast::MoveZone::Deck {
+        return mill(entry, own, event_id, scope, path);
+    }
+    let event = Binding::new(event_id, scope);
+    Ok(EventPattern::LeaveField {
+        binding: event,
+        predicate: movement_filter(
+            own,
+            entry.reference.is_some(),
+            entry.sel.as_ref(),
+            entry.during.is_some(),
+            path,
+            false,
+        )?
+        .predicate(match entry.to {
+            ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
+            ast::DepartureDestination::Hand => SubjectFields::Hand(event),
+        }),
+    })
+}
+
+/// A milled card has no field information, so only its owner and the turn can filter it.
+fn mill(
+    entry: &ast::MoveSubscription,
+    own: Option<bool>,
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    let Some(own) = own else {
+        return Err(unsupported(path));
+    };
+    if entry.reference.is_some()
+        || entry.sel.is_some()
+        || !matches!(entry.to, ast::DepartureDestination::Cemetery)
+    {
+        return Err(unsupported(path));
+    }
+    let event = Binding::new(event_id, scope);
+    Ok(EventPattern::Move {
+        binding: event,
+        predicate: MillFilter {
+            own,
+            own_turn: entry.during.is_some(),
+        }
+        .predicate(event),
+    })
 }
 
 pub(super) fn movement_filter(

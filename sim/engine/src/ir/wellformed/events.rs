@@ -846,20 +846,32 @@ impl Checker {
         let Expr::Frozen(field) = left else {
             return self.reject();
         };
-        let ZoneFrozen::LeaveFieldTo { event } = field.as_ref() else {
-            return self.reject();
+        // A leave or mill names one public destination; the deck origin is mill-only.
+        let expected = match field.as_ref() {
+            ZoneFrozen::LeaveFieldTo { event } => {
+                self.reference(*event, BindingKind::Value)?;
+                ZoneKind::Cemetery
+            }
+            ZoneFrozen::MoveFrom { event } => {
+                self.reference(*event, BindingKind::Value)?;
+                ZoneKind::Deck
+            }
+            ZoneFrozen::MoveTo { event } => {
+                self.reference(*event, BindingKind::Value)?;
+                ZoneKind::Cemetery
+            }
+            ZoneFrozen::PlayOriginZone { .. }
+            | ZoneFrozen::DiscardActualTo { .. }
+            | ZoneFrozen::BanishFrom { .. }
+            | ZoneFrozen::DriveCheckedFinalDestination { .. } => return self.reject(),
         };
-        self.reference(*event, BindingKind::Value)?;
         let Expr::Compute(operation) = right else {
             return self.reject();
         };
-        let ZoneOperation::OfPlayer {
-            player,
-            kind: ZoneKind::Cemetery,
-        } = operation.as_ref()
-        else {
+        let ZoneOperation::OfPlayer { player, kind } = operation.as_ref();
+        if *kind != expected {
             return self.reject();
-        };
+        }
         self.player(player)
     }
 

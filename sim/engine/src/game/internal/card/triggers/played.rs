@@ -9,8 +9,8 @@ use crate::ir::events::played::filter;
 use crate::ir::optional_payment;
 use crate::ir::{
     Action, CharacteristicPatch, Control, Effect, GrantedAbility, LimitSpec, Located,
-    MoveDestination, MoveReason, Node, ObjectOperand, PlayEvent, PlaySubject, PlayerId, PlayerRef,
-    Program, ReceiptId, Requirements, RuntimeReceiptId, RuntimeZoneRef, Selector,
+    MoveDestination, MoveReason, Node, ObjectOperand, OwnerZone, PlayEvent, PlaySubject, PlayerId,
+    PlayerRef, Program, ReceiptId, Requirements, RuntimeReceiptId, RuntimeZoneRef, Selector,
 };
 
 use alloc::collections::BTreeSet;
@@ -47,7 +47,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-fn cemetery_body(ability: &Ability) -> bool {
+/// A cemetery source may only move itself back to the field or into its owner's EX area.
+pub(super) fn cemetery_body(ability: &Ability) -> bool {
     let Some(body) = &ability.body else {
         return false;
     };
@@ -55,7 +56,7 @@ fn cemetery_body(ability: &Ability) -> bool {
         return true;
     };
     let mut returns = BTreeSet::new();
-    field_return_paths(body, "", &mut returns);
+    holder_move_paths(body, "", &mut returns);
     Requirements::derive_program(&Located {
         node: body.clone(),
         source: first.source.clone(),
@@ -75,12 +76,15 @@ fn returns_holder(action: &Action) -> bool {
     matches!(action,
         Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
             if matches!(objects.as_slice(), [ObjectOperand::SourceHolder {}])
-                && matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
+                && match &movement.to {
+                    MoveDestination::Shared { zone } => zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field,
+                    MoveDestination::Owners { zone } => *zone == OwnerZone::Ex,
+                }
                 && movement.initial_posture.is_none() && movement.entry_effects.is_empty()
                 && movement.position.is_none() && movement.order.is_none())
 }
 
-fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<String>) {
+fn holder_move_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<String>) {
     for (index, step) in program.steps.iter().enumerate() {
         let path = format!("{prefix}/steps/{index}");
         match &step.node {
@@ -90,7 +94,7 @@ fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Stri
             Node::Control {
                 control: Control::Sequence { body },
             } => {
-                field_return_paths(body, &format!("{path}/control/body"), paths);
+                holder_move_paths(body, &format!("{path}/control/body"), paths);
             }
             Node::Control {
                 control:
@@ -100,16 +104,16 @@ fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Stri
                         ..
                     },
             } => {
-                field_return_paths(then_body, &format!("{path}/control/then_body"), paths);
+                holder_move_paths(then_body, &format!("{path}/control/then_body"), paths);
                 if let Some(body) = else_body {
-                    field_return_paths(body, &format!("{path}/control/else_body"), paths);
+                    holder_move_paths(body, &format!("{path}/control/else_body"), paths);
                 }
             }
             Node::Control {
                 control: Control::Mode { modes, .. },
             } => {
                 for (mode_index, mode) in modes.iter().enumerate() {
-                    field_return_paths(
+                    holder_move_paths(
                         &mode.body,
                         &format!("{path}/control/modes/{mode_index}/body"),
                         paths,
@@ -120,7 +124,7 @@ fn field_return_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Stri
                 control: Control::EachPlayer { stages, .. },
             } => {
                 for (stage_index, stage) in stages.iter().enumerate() {
-                    field_return_paths(
+                    holder_move_paths(
                         &stage.body,
                         &format!("{path}/control/stages/{stage_index}/body"),
                         paths,

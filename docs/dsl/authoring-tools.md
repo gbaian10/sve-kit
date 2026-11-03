@@ -222,6 +222,10 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作仍只准已有的自身回場，任意目標回場與一般事件欄位讀取維持原邊界。
 
+墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 只准移回場上或移到自己的 EX，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。
+
+牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
+
 手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定，不把捨棄者或能力因果當成回合玩家；自身手牌訂閱與 `during` 的組合仍拒絕。
 
 「自己回合、自己捨棄一張以上」另用 `auto.aggregation: batch` 搭配 `on.discarded: {who: self, during: {turn: self}}`（BP12-052／053）。單一捨棄指令中的多張成功棄牌，只讓每個來源能力待機一次；分開的兩次捨棄仍各觸發，去重先於每回合額度。
