@@ -884,7 +884,7 @@ impl Game {
             ..Frame::default()
         };
         if !prevent_draw {
-            self.draw(&seat, &frame)?;
+            drop(self.draw(&seat, &frame)?);
         }
         let elapsed = int(&self.state.turn["elapsed_turns"][&seat]);
         self.state.continuous.retain(|entry| {

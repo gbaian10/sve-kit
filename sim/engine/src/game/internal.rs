@@ -1612,25 +1612,24 @@ impl Game {
         {
             return Err(invalid("draw generation exhausted"));
         }
-        let before = self.zone_ids(seat, "hand");
-        self.draw(seat, &execution.frame())?;
-        let after = self.zone_ids(seat, "hand");
-        let Some(id) = after.iter().find(|id| !before.contains(id)) else {
+        let Some(id) = self.draw(seat, &execution.frame())? else {
             return Ok(false);
         };
         // Historical identity may remain known; it must not locate the new private slot.
         for (viewer, knowledge) in &mut self.state.knowledge {
             if viewer != seat {
-                knowledge.located.remove(id);
+                knowledge.located.remove(&id);
             }
         }
-        let object = execution.reference(self, id)?;
-        execution.facts.push(Fact::Draw(DrawEvent {
+        let object = execution.reference(self, &id)?;
+        let event = DrawEvent {
             player,
             object,
             ordinal,
             instruction: instruction.id,
-        }));
+        };
+        self.internal_draw_event(event, execution)?;
+        execution.facts.push(Fact::Draw(event));
         Ok(true)
     }
 }

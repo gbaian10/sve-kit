@@ -3,6 +3,7 @@ pub(crate) mod attack;
 pub(crate) mod change;
 pub(crate) mod damage;
 pub(crate) mod discard;
+pub(crate) mod draw;
 pub(crate) mod life;
 pub(crate) mod mill;
 pub(crate) mod played;

@@ -642,6 +642,9 @@ impl Checker {
             EventPattern::EnterEx { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
+            EventPattern::Draw { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Discard { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
@@ -683,7 +686,6 @@ impl Checker {
             }
             EventPattern::Targeted { .. }
             | EventPattern::Resolve { .. }
-            | EventPattern::Draw { .. }
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
             | EventPattern::DriveTrigger { .. }

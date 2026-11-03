@@ -329,7 +329,7 @@ impl Game {
                     let before = self.zone_ids(&seat, "hand");
                     let count = self.zone_count(&seat, "hand");
                     for _ in 0..self.number(&node["count"], frame)?.max(0) {
-                        self.draw(&seat, frame)?;
+                        drop(self.draw(&seat, frame)?);
                     }
                     frame.performed = frame
                         .performed
@@ -957,28 +957,33 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn draw(&mut self, seat: &str, frame: &Frame) -> Result<()> {
+    pub(super) fn draw(&mut self, seat: &str, frame: &Frame) -> Result<Option<String>> {
         // "カードを引けない": the draw does not happen; it is not a failed draw either.
         if self.restricted(&format!("{seat}.leader"), "draw")? {
-            return Ok(());
+            return Ok(None);
         }
         let deck = self.zone(seat, "deck");
         let Some(top) = deck.first() else {
             self.state.draws_failed.insert(seat.into());
-            return Ok(());
+            return Ok(None);
         };
         let id = top
             .as_str()
             .ok_or_else(|| EngineFailure::Unsupported("a filler was observed by drawing".into()))?
             .to_owned();
+        let generation = self.object(&id)?.generation;
         self.move_objects(from_ref(&id), "hand", None, None, frame)?;
+        let actual = self.object(&id)?;
+        if actual.generation == generation || actual.zone != "hand" || actual.controller != seat {
+            return Ok(None);
+        }
         let group = self.group();
         self.emit(
             json!({"kind":"引く","player":seat,"object":id}),
             &frame.cause,
             group,
         );
-        Ok(())
+        Ok(Some(id))
     }
 
     fn drive(&mut self, frame: &mut Frame) -> Result<()> {
