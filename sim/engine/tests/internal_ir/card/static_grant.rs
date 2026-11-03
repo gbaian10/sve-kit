@@ -974,7 +974,7 @@ fn direct_ex_entry_rejects_unimplemented_counter_carry_before_moving_the_object(
     assert!(
         error
             .to_string()
-            .contains("unimplemented numeric or counter rule carry")
+            .contains("unimplemented counter rule carry")
     );
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(
@@ -985,7 +985,7 @@ fn direct_ex_entry_rejects_unimplemented_counter_carry_before_moving_the_object(
 }
 
 #[test]
-fn c0_grants_query_ex_through_public_filters_without_admitting_ex_stat_patches() {
+fn c0_grants_query_ex_through_public_filters_and_only_numeric_patches_reach_ex() {
     let mut tree = fanfare::expanded::tree().clone();
     let mut seed = tree["cards"]["BP01-041"].clone();
     let query = json!({"who":"self","zone":"ex","kind":"follower"});
@@ -1004,9 +1004,15 @@ fn c0_grants_query_ex_through_public_filters_without_admitting_ex_stat_patches()
     );
     tree["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
         json!([{"buff":{"on":query,"power":1}}]);
+    assert!(
+        lowerer().lower(&tree).is_ok(),
+        "numeric modification reaches EX followers (CR 4.8.3.3)"
+    );
+    tree["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+        json!([{"damage":{"to":query,"n":1}}]);
     assert_eq!(
         lowerer().lower(&tree).unwrap_err().code,
         "unsupported_construct",
-        "grant selector admission does not widen numeric EX mutation"
+        "the EX buff entry does not widen other actions to EX"
     );
 }

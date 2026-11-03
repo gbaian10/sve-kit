@@ -1,0 +1,2524 @@
+{
+  "cases_format": 1,
+  "cr_version": "1.28.0",
+  "spec": "deck-construction.md",
+  "index": {
+    "cards": {
+      "BP01-LD01": {
+        "name": "アリサ",
+        "class": "elf",
+        "titles": [],
+        "zone": "leader"
+      },
+      "BP01-LD03": {
+        "name": "エリカ",
+        "class": "royal",
+        "titles": [],
+        "zone": "leader"
+      },
+      "BP01-LD05": {
+        "name": "イザベル",
+        "class": "witch",
+        "titles": [],
+        "zone": "leader"
+      },
+      "LCS01-007": {
+        "name": "ドライツェーン",
+        "class": "neutral",
+        "titles": [],
+        "zone": "leader"
+      },
+      "CP01-LD01": {
+        "name": "〔ふるさと直送エール！〕ユキノビジン",
+        "class": "elf",
+        "titles": ["umamusume_pretty_derby"],
+        "zone": "leader"
+      },
+      "CP03-LD01": {
+        "name": "〔正義の風〕蒼龍レオン",
+        "class": "elf",
+        "titles": ["cardfight_vanguard"],
+        "zone": "leader"
+      },
+      "BP01-001": {
+        "name": "ローズクイーン",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-ROSE-B": {
+        "name": "ローズクイーン",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "BP04-037": {
+        "name": "星の鎧",
+        "class": "royal",
+        "titles": [],
+        "zone": "main"
+      },
+      "BP02-062": {
+        "name": "竜巫女の儀式",
+        "class": "dragon",
+        "titles": [],
+        "zone": "main"
+      },
+      "BP09-049": {
+        "name": "オニオン軍団",
+        "class": "witch",
+        "titles": [],
+        "zone": "main",
+        "copies": {
+          "main": 50
+        }
+      },
+      "BP11-045": {
+        "name": "ラピッドファイア",
+        "class": "witch",
+        "titles": [],
+        "zone": "main",
+        "copies": {
+          "main": 6
+        }
+      },
+      "BP19-110": {
+        "name": "機鋒の咎人・カットスロート",
+        "class": "neutral",
+        "titles": [],
+        "zone": "main",
+        "singleton_except": ["機鋒の咎人・カットスロート"]
+      },
+      "CP03-008": {
+        "name": "波状螺旋の水将 ベネディクト",
+        "class": "elf",
+        "titles": ["cardfight_vanguard"],
+        "zone": "main"
+      },
+      "CP03-021": {
+        "name": "士官候補生 エリック",
+        "class": "elf",
+        "titles": ["cardfight_vanguard"],
+        "zone": "main",
+        "start_amulet": true
+      },
+      "CP03-041": {
+        "name": "ういんがる・ぶれいぶ",
+        "class": "royal",
+        "titles": ["cardfight_vanguard"],
+        "zone": "main",
+        "start_amulet": true
+      },
+      "SYN-PAIR-A": {
+        "name": "合成：二擇一 A",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-PAIR-B": {
+        "name": "合成：二擇一 B",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "BP19-111": {
+        "name": "機鋒の咎人・カットスロート",
+        "class": "neutral",
+        "titles": [],
+        "zone": "evolve"
+      },
+      "BP08-003": {
+        "name": "決意の人形・オーキス",
+        "class": "elf",
+        "titles": [],
+        "zone": "evolve"
+      },
+      "CP01-085": {
+        "name": "にんじん",
+        "class": "neutral",
+        "titles": ["umamusume_pretty_derby"],
+        "zone": "evolve",
+        "copies": {
+          "evolve": 10
+        }
+      },
+      "BP01-T01": {
+        "name": "薔薇の一撃",
+        "class": "elf",
+        "titles": [],
+        "zone": "none"
+      },
+      "BP01-LD07": {
+        "name": "ローウェン",
+        "class": "dragon",
+        "titles": [],
+        "zone": "leader"
+      },
+      "SYN-PAIR-C": {
+        "name": "合成：二擇一 C",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-ALL-M": {
+        "name": "合成：範圍 all",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-ALL-E": {
+        "name": "合成：範圍 all",
+        "class": "elf",
+        "titles": [],
+        "zone": "evolve"
+      },
+      "SYN-SCOPE-EVO-M": {
+        "name": "合成：範圍 evolve",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-EVO-E": {
+        "name": "合成：範圍 evolve",
+        "class": "elf",
+        "titles": [],
+        "zone": "evolve"
+      }
+    },
+    "title_rules": {
+      "cardfight_vanguard": "vanguard"
+    },
+    "formats": {
+      "standard": {
+        "coverage": [
+          {
+            "from": "2024-06-28",
+            "until": "2026-12-01"
+          }
+        ],
+        "restrictions": [
+          {
+            "id": "r-armor",
+            "kind": "copy_limit",
+            "from": "2025-10-01",
+            "max": 0,
+            "members": [
+              {
+                "name": "星の鎧",
+                "scope": "main"
+              }
+            ]
+          },
+          {
+            "id": "r-rites",
+            "kind": "copy_limit",
+            "from": "2026-01-30",
+            "max": 1,
+            "members": [
+              {
+                "name": "竜巫女の儀式",
+                "scope": "main"
+              }
+            ]
+          },
+          {
+            "id": "r-rose-lifted",
+            "kind": "copy_limit",
+            "from": "2025-01-01",
+            "until": "2025-06-01",
+            "max": 1,
+            "members": [
+              {
+                "name": "ローズクイーン",
+                "scope": "main"
+              }
+            ]
+          },
+          {
+            "id": "r-pair",
+            "kind": "choice_group",
+            "from": "2025-01-01",
+            "max_groups": 1,
+            "members": [
+              {
+                "name": "合成：二擇一 A",
+                "scope": "main",
+                "option": 0
+              },
+              {
+                "name": "合成：二擇一 B",
+                "scope": "main",
+                "option": 1
+              },
+              {
+                "name": "合成：二擇一 C",
+                "scope": "main",
+                "option": 0
+              }
+            ]
+          },
+          {
+            "id": "r-scope-all",
+            "kind": "copy_limit",
+            "from": "2025-01-01",
+            "max": 1,
+            "members": [
+              {
+                "name": "合成：範圍 all",
+                "scope": "all"
+              }
+            ]
+          },
+          {
+            "id": "r-scope-evolve",
+            "kind": "copy_limit",
+            "from": "2025-01-01",
+            "max": 0,
+            "members": [
+              {
+                "name": "合成：範圍 evolve",
+                "scope": "evolve"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "fillers": {
+    "elf": {
+      "class": "elf",
+      "titles": [],
+      "count": 20
+    },
+    "witch": {
+      "class": "witch",
+      "titles": [],
+      "count": 20
+    },
+    "neutral": {
+      "class": "neutral",
+      "titles": [],
+      "count": 20
+    },
+    "uma": {
+      "class": "neutral",
+      "titles": ["umamusume_pretty_derby"],
+      "count": 20
+    },
+    "vanguard": {
+      "class": "elf",
+      "titles": ["cardfight_vanguard"],
+      "count": 20
+    }
+  },
+  "cases": [
+    {
+      "id": "leader-ok",
+      "rule": "6.1.1.1",
+      "note": "主戰者 1 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "leader-missing",
+      "rule": "6.1.1.1",
+      "note": "沒有主戰者",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": null,
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderMissing",
+            "clause": "6.1.1.1",
+            "cards": []
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "leader-not-leader",
+      "rule": "6.1.1.1",
+      "note": "主戰者欄放了フォロワー",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-001",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderNotLeader",
+            "clause": "6.1.1.1",
+            "cards": ["BP01-001"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-40",
+      "rule": "6.1.1.2",
+      "note": "主牌組 40 張（下限）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-50",
+      "rule": "6.1.1.2",
+      "note": "主牌組 50 張（上限）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 50
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-39",
+      "rule": "6.1.1.2",
+      "note": "主牌組 39 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainTooFew",
+            "clause": "6.1.1.2",
+            "cards": [],
+            "values": {
+              "count": 39,
+              "min": 40
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-51",
+      "rule": "6.1.1.2",
+      "note": "主牌組 51 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 51
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainTooMany",
+            "clause": "6.1.1.2",
+            "cards": [],
+            "values": {
+              "count": 51,
+              "max": 50
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-wrong-token",
+      "rule": "6.1.1.2",
+      "note": "トークン不能放主牌組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-T01", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainWrongCard",
+            "clause": "6.1.1.2",
+            "cards": ["BP01-T01"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-wrong-evolve",
+      "rule": "6.1.1.2",
+      "note": "エボルヴ不能放主牌組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP08-003", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainWrongCard",
+            "clause": "6.1.1.2",
+            "cards": ["BP08-003"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "main-wrong-leader",
+      "rule": "6.1.1.2",
+      "note": "主戰者卡不能放主牌組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-LD01", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainWrongCard",
+            "clause": "6.1.1.2",
+            "cards": ["BP01-LD01"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "evolve-10",
+      "rule": "6.1.1.3",
+      "note": "進化牌組 10 張（上限）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [
+          ["BP08-003", 3],
+          ["CP01-085", 7]
+        ],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "evolve-11",
+      "rule": "6.1.1.3",
+      "note": "進化牌組 11 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [
+          ["BP08-003", 3],
+          ["CP01-085", 8]
+        ],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "evolveTooMany",
+            "clause": "6.1.1.3",
+            "cards": [],
+            "values": {
+              "count": 11,
+              "max": 10
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "evolve-wrong-follower",
+      "rule": "6.1.1.3",
+      "note": "一般フォロワー不能放進化牌組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [["BP01-001", 1]],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "evolveWrongCard",
+            "clause": "6.1.1.3",
+            "cards": ["BP01-001"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "same-name-3",
+      "rule": "6.1.1.4",
+      "note": "同名 3 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-001", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "same-name-4",
+      "rule": "6.1.1.4",
+      "note": "同名 4 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-001", 4]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 36
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.1.4",
+            "cards": ["BP01-001"],
+            "values": {
+              "name": "ローズクイーン",
+              "section": "main",
+              "count": 4,
+              "limit": 3
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "same-name-across-ids",
+      "rule": "6.1.1.4",
+      "note": "不同卡片 ID 同名合計（2＋2）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["BP01-001", 2],
+          ["SYN-ROSE-B", 2]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 36
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.1.4",
+            "cards": ["BP01-001", "SYN-ROSE-B"],
+            "values": {
+              "name": "ローズクイーン",
+              "section": "main",
+              "count": 4,
+              "limit": 3
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "double-faced-first-face",
+      "rule": "6.1.1.4.1",
+      "note": "兩面卡以第 1 面卡名計：決意の人形・オーキス 4 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [["BP08-003", 4]],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.1.4",
+            "cards": ["BP08-003"],
+            "values": {
+              "name": "決意の人形・オーキス",
+              "section": "evolve",
+              "count": 4,
+              "limit": 3
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "same-name-section-only",
+      "rule": "6.1.1.4",
+      "note": "主牌組 BP19-110 3 張、進化牌組同名 BP19-111 4 張：只有進化牌組超限，cards 只列進化牌組的 ID",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [
+          ["BP19-110", 3],
+          ["FILL-NEUTRAL-01", 1],
+          ["FILL-NEUTRAL-02", 1],
+          ["FILL-NEUTRAL-03", 1],
+          ["FILL-NEUTRAL-04", 1],
+          ["FILL-NEUTRAL-05", 1],
+          ["FILL-NEUTRAL-06", 1],
+          ["FILL-NEUTRAL-07", 1],
+          ["FILL-NEUTRAL-08", 1],
+          ["FILL-NEUTRAL-09", 1],
+          ["FILL-NEUTRAL-10", 1],
+          ["FILL-NEUTRAL-11", 1],
+          ["FILL-NEUTRAL-12", 1],
+          ["FILL-NEUTRAL-13", 1],
+          ["FILL-NEUTRAL-14", 1],
+          ["FILL-NEUTRAL-15", 1],
+          ["FILL-NEUTRAL-16", 1],
+          ["FILL-NEUTRAL-17", 1],
+          ["FILL-NEUTRAL-18", 1],
+          ["FILL-NEUTRAL-19", 1],
+          ["FILL-NEUTRAL-20", 1],
+          ["FILL-UMA-01", 1],
+          ["FILL-UMA-02", 1],
+          ["FILL-UMA-03", 1],
+          ["FILL-UMA-04", 1],
+          ["FILL-UMA-05", 1],
+          ["FILL-UMA-06", 1],
+          ["FILL-UMA-07", 1],
+          ["FILL-UMA-08", 1],
+          ["FILL-UMA-09", 1],
+          ["FILL-UMA-10", 1],
+          ["FILL-UMA-11", 1],
+          ["FILL-UMA-12", 1],
+          ["FILL-UMA-13", 1],
+          ["FILL-UMA-14", 1],
+          ["FILL-UMA-15", 1],
+          ["FILL-UMA-16", 1],
+          ["FILL-UMA-17", 1]
+        ],
+        "evolve": [["BP19-111", 4]]
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.1.4",
+            "cards": ["BP19-111"],
+            "values": {
+              "name": "機鋒の咎人・カットスロート",
+              "section": "evolve",
+              "count": 4,
+              "limit": 3
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "onion-50",
+      "rule": "6.1.2",
+      "note": "オニオン軍団 50 張（Q1184）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [["BP09-049", 50]],
+        "evolve": []
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "onion-51",
+      "rule": "6.1.2",
+      "note": "オニオン軍団 51 張：同時超過主牌組上限與本文 50 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [["BP09-049", 51]],
+        "evolve": []
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "mainTooMany",
+            "clause": "6.1.1.2",
+            "cards": [],
+            "values": {
+              "count": 51,
+              "max": 50
+            }
+          },
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["BP09-049"],
+            "values": {
+              "name": "オニオン軍団",
+              "section": "main",
+              "count": 51,
+              "limit": 50
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "rapid-fire-6",
+      "rule": "6.1.2",
+      "note": "ラピッドファイア 6 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [["BP11-045", 6]],
+        "evolve": [],
+        "fill": {
+          "set": "witch",
+          "count": 34
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "rapid-fire-7",
+      "rule": "6.1.2",
+      "note": "ラピッドファイア 7 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [["BP11-045", 7]],
+        "evolve": [],
+        "fill": {
+          "set": "witch",
+          "count": 33
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["BP11-045"],
+            "values": {
+              "name": "ラピッドファイア",
+              "section": "main",
+              "count": 7,
+              "limit": 6
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "carrot-10",
+      "rule": "6.1.2",
+      "note": "にんじん 10 張（Q407）",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "CP01-LD01",
+        "main": [],
+        "evolve": [["CP01-085", 10]],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "carrot-11",
+      "rule": "6.1.2",
+      "note": "にんじん 11 張",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "CP01-LD01",
+        "main": [],
+        "evolve": [["CP01-085", 11]],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "evolveTooMany",
+            "clause": "6.1.1.3",
+            "cards": [],
+            "values": {
+              "count": 11,
+              "max": 10
+            }
+          },
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["CP01-085"],
+            "values": {
+              "name": "にんじん",
+              "section": "evolve",
+              "count": 11,
+              "limit": 10
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "cutthroat-ok",
+      "rule": "6.1.2",
+      "note": "カットスロート在主牌組：其他卡各 1 張，カットスロート主 3＋進化 3（Q2609、Q2612）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [
+          ["BP19-110", 3],
+          ["FILL-NEUTRAL-01", 1],
+          ["FILL-NEUTRAL-02", 1],
+          ["FILL-NEUTRAL-03", 1],
+          ["FILL-NEUTRAL-04", 1],
+          ["FILL-NEUTRAL-05", 1],
+          ["FILL-NEUTRAL-06", 1],
+          ["FILL-NEUTRAL-07", 1],
+          ["FILL-NEUTRAL-08", 1],
+          ["FILL-NEUTRAL-09", 1],
+          ["FILL-NEUTRAL-10", 1],
+          ["FILL-NEUTRAL-11", 1],
+          ["FILL-NEUTRAL-12", 1],
+          ["FILL-NEUTRAL-13", 1],
+          ["FILL-NEUTRAL-14", 1],
+          ["FILL-NEUTRAL-15", 1],
+          ["FILL-NEUTRAL-16", 1],
+          ["FILL-NEUTRAL-17", 1],
+          ["FILL-NEUTRAL-18", 1],
+          ["FILL-NEUTRAL-19", 1],
+          ["FILL-NEUTRAL-20", 1],
+          ["FILL-UMA-01", 1],
+          ["FILL-UMA-02", 1],
+          ["FILL-UMA-03", 1],
+          ["FILL-UMA-04", 1],
+          ["FILL-UMA-05", 1],
+          ["FILL-UMA-06", 1],
+          ["FILL-UMA-07", 1],
+          ["FILL-UMA-08", 1],
+          ["FILL-UMA-09", 1],
+          ["FILL-UMA-10", 1],
+          ["FILL-UMA-11", 1],
+          ["FILL-UMA-12", 1],
+          ["FILL-UMA-13", 1],
+          ["FILL-UMA-14", 1],
+          ["FILL-UMA-15", 1],
+          ["FILL-UMA-16", 1],
+          ["FILL-UMA-17", 1]
+        ],
+        "evolve": [
+          ["BP19-111", 3],
+          ["CP01-085", 1]
+        ]
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "cutthroat-carrot",
+      "rule": "6.1.2",
+      "note": "カットスロート在主牌組：にんじん只能 1 張（Q2611）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [
+          ["BP19-110", 3],
+          ["FILL-NEUTRAL-01", 1],
+          ["FILL-NEUTRAL-02", 1],
+          ["FILL-NEUTRAL-03", 1],
+          ["FILL-NEUTRAL-04", 1],
+          ["FILL-NEUTRAL-05", 1],
+          ["FILL-NEUTRAL-06", 1],
+          ["FILL-NEUTRAL-07", 1],
+          ["FILL-NEUTRAL-08", 1],
+          ["FILL-NEUTRAL-09", 1],
+          ["FILL-NEUTRAL-10", 1],
+          ["FILL-NEUTRAL-11", 1],
+          ["FILL-NEUTRAL-12", 1],
+          ["FILL-NEUTRAL-13", 1],
+          ["FILL-NEUTRAL-14", 1],
+          ["FILL-NEUTRAL-15", 1],
+          ["FILL-NEUTRAL-16", 1],
+          ["FILL-NEUTRAL-17", 1],
+          ["FILL-NEUTRAL-18", 1],
+          ["FILL-NEUTRAL-19", 1],
+          ["FILL-NEUTRAL-20", 1],
+          ["FILL-UMA-01", 1],
+          ["FILL-UMA-02", 1],
+          ["FILL-UMA-03", 1],
+          ["FILL-UMA-04", 1],
+          ["FILL-UMA-05", 1],
+          ["FILL-UMA-06", 1],
+          ["FILL-UMA-07", 1],
+          ["FILL-UMA-08", 1],
+          ["FILL-UMA-09", 1],
+          ["FILL-UMA-10", 1],
+          ["FILL-UMA-11", 1],
+          ["FILL-UMA-12", 1],
+          ["FILL-UMA-13", 1],
+          ["FILL-UMA-14", 1],
+          ["FILL-UMA-15", 1],
+          ["FILL-UMA-16", 1],
+          ["FILL-UMA-17", 1]
+        ],
+        "evolve": [["CP01-085", 2]]
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["CP01-085"],
+            "values": {
+              "name": "にんじん",
+              "section": "evolve",
+              "count": 2,
+              "limit": 1
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "cutthroat-main-two",
+      "rule": "6.1.2",
+      "note": "カットスロート在主牌組：一般卡 2 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [
+          ["BP19-110", 3],
+          ["FILL-NEUTRAL-01", 2],
+          ["FILL-NEUTRAL-02", 1],
+          ["FILL-NEUTRAL-03", 1],
+          ["FILL-NEUTRAL-04", 1],
+          ["FILL-NEUTRAL-05", 1],
+          ["FILL-NEUTRAL-06", 1],
+          ["FILL-NEUTRAL-07", 1],
+          ["FILL-NEUTRAL-08", 1],
+          ["FILL-NEUTRAL-09", 1],
+          ["FILL-NEUTRAL-10", 1],
+          ["FILL-NEUTRAL-11", 1],
+          ["FILL-NEUTRAL-12", 1],
+          ["FILL-NEUTRAL-13", 1],
+          ["FILL-NEUTRAL-14", 1],
+          ["FILL-NEUTRAL-15", 1],
+          ["FILL-NEUTRAL-16", 1],
+          ["FILL-NEUTRAL-17", 1],
+          ["FILL-NEUTRAL-18", 1],
+          ["FILL-NEUTRAL-19", 1],
+          ["FILL-NEUTRAL-20", 1],
+          ["FILL-UMA-01", 1],
+          ["FILL-UMA-02", 1],
+          ["FILL-UMA-03", 1],
+          ["FILL-UMA-04", 1],
+          ["FILL-UMA-05", 1],
+          ["FILL-UMA-06", 1],
+          ["FILL-UMA-07", 1],
+          ["FILL-UMA-08", 1],
+          ["FILL-UMA-09", 1],
+          ["FILL-UMA-10", 1],
+          ["FILL-UMA-11", 1],
+          ["FILL-UMA-12", 1],
+          ["FILL-UMA-13", 1],
+          ["FILL-UMA-14", 1],
+          ["FILL-UMA-15", 1],
+          ["FILL-UMA-16", 1]
+        ],
+        "evolve": []
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["FILL-NEUTRAL-01"],
+            "values": {
+              "name": "合成：neutral 填充 01",
+              "section": "main",
+              "count": 2,
+              "limit": 1
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "cutthroat-onion",
+      "rule": "6.1.2",
+      "note": "カットスロート在主牌組：オニオン軍団的 50 張上限被覆蓋為 1 張（Q2610）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [
+          ["BP19-110", 1],
+          ["BP09-049", 49]
+        ],
+        "evolve": []
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["BP09-049"],
+            "values": {
+              "name": "オニオン軍団",
+              "section": "main",
+              "count": 49,
+              "limit": 1
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "cutthroat-evolve-only",
+      "rule": "6.1.2",
+      "note": "只有進化面 BP19-111 在進化牌組：沒有這段本文，不觸發",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [],
+        "evolve": [["BP19-111", 3]],
+        "fill": {
+          "set": "neutral",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-ok",
+      "rule": "6.1.1.5.1",
+      "note": "職業基準：エルフ＋中立",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["FILL-NEUTRAL-01", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-mismatch",
+      "rule": "6.1.1.5.1",
+      "note": "職業基準：エルフ牌組放ロイヤル卡",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP04-037", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-09-30"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP04-037"],
+            "values": {
+              "cardClass": "royal",
+              "deckClass": "elf"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-mismatch-two",
+      "rule": "6.1.1.5.1",
+      "note": "兩張不同職業的卡：每個卡片 ID 各一筆",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["BP04-037", 1],
+          ["BP09-049", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-09-30"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP04-037"],
+            "values": {
+              "cardClass": "royal",
+              "deckClass": "elf"
+            }
+          },
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP09-049"],
+            "values": {
+              "cardClass": "witch",
+              "deckClass": "elf"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-leader-mismatch",
+      "rule": "6.1.1.5.1",
+      "note": "牌組記下エルフ、主戰者是ロイヤル：卡依主戰者職業檢查",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD03",
+        "main": [["BP04-037", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-09-30"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderClassMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP01-LD03"],
+            "values": {
+              "deckClass": "elf",
+              "leaderClass": "royal"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-neutral-leader",
+      "rule": "6.1.1.5.1",
+      "note": "中立主戰者：只能放中立卡",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [["BP01-001", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP01-001"],
+            "values": {
+              "cardClass": "elf",
+              "deckClass": "neutral"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-neutral-basis",
+      "rule": "6.1.1.5.1",
+      "note": "牌組記下中立（建牌器篩選）＋エルフ主戰者：エルフ卡合法",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-001", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-no-leader",
+      "rule": "6.1.1.5.1",
+      "note": "沒有主戰者時依牌組記下的職業",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": null,
+        "main": [["BP09-049", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderMissing",
+            "clause": "6.1.1.1",
+            "cards": []
+          },
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP09-049"],
+            "values": {
+              "cardClass": "witch",
+              "deckClass": "elf"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "title-ok",
+      "rule": "6.1.1.5.2",
+      "note": "作品名基準：ウマ娘",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "CP01-LD01",
+        "main": [],
+        "evolve": [["CP01-085", 3]],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "title-card-mismatch",
+      "rule": "6.1.1.5.2",
+      "note": "作品名基準：放了沒有作品名的中立卡",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "CP01-LD01",
+        "main": [["FILL-NEUTRAL-01", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "uma",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "titleMismatch",
+            "clause": "6.1.1.5.2",
+            "cards": ["FILL-NEUTRAL-01"],
+            "values": {
+              "title": "umamusume_pretty_derby"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "title-leader-mismatch",
+      "rule": "6.1.1.5.2",
+      "note": "作品名基準：主戰者沒有該作品名",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderTitleMismatch",
+            "clause": "6.1.1.5.2",
+            "cards": ["BP01-LD01"],
+            "values": {
+              "title": "umamusume_pretty_derby"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "title-leader-not-leader",
+      "rule": "6.1.1.5.2",
+      "note": "作品名基準：主戰者欄放了沒有作品名的フォロワー，兩項都報",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "umamusume_pretty_derby"
+        },
+        "leader": "BP01-001",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "uma",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "leaderNotLeader",
+            "clause": "6.1.1.1",
+            "cards": ["BP01-001"]
+          },
+          {
+            "code": "leaderTitleMismatch",
+            "clause": "6.1.1.5.2",
+            "cards": ["BP01-001"],
+            "values": {
+              "title": "umamusume_pretty_derby"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "vanguard-ok",
+      "rule": "14.4.2.1.1",
+      "note": "ヴァンガード作品名基準：有スタートアミュレット",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "cardfight_vanguard"
+        },
+        "leader": "CP03-LD01",
+        "main": [
+          ["CP03-021", 1],
+          ["CP03-008", 3]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "vanguard",
+          "count": 36
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": [
+          {
+            "code": "triggerClassUnchecked",
+            "clause": "14.4.2.1.2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "vanguard-no-amulet",
+      "rule": "14.4.2.1.1",
+      "note": "ヴァンガード作品名基準：沒有スタートアミュレット",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "cardfight_vanguard"
+        },
+        "leader": "CP03-LD01",
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "vanguard",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "startAmuletMissing",
+            "clause": "14.4.2.1.1",
+            "cards": []
+          }
+        ],
+        "notes": [
+          {
+            "code": "triggerClassUnchecked",
+            "clause": "14.4.2.1.2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "start-amulet-names",
+      "rule": "14.4.4.1.1",
+      "note": "兩種不同名的スタートアミュレット",
+      "deck": {
+        "basis": {
+          "kind": "title",
+          "title": "cardfight_vanguard"
+        },
+        "leader": "CP03-LD01",
+        "main": [
+          ["CP03-021", 1],
+          ["CP03-041", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "vanguard",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "startAmuletNames",
+            "clause": "14.4.4.1.1",
+            "cards": ["CP03-021", "CP03-041"]
+          }
+        ],
+        "notes": [
+          {
+            "code": "triggerClassUnchecked",
+            "clause": "14.4.2.1.2"
+          }
+        ]
+      }
+    },
+    {
+      "id": "start-amulet-class-deck",
+      "rule": "14.4.4.1.1",
+      "note": "職業基準也適用：同名スタートアミュレット 3 張合法",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["CP03-021", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "unknown-card",
+      "rule": "6.1.1",
+      "note": "卡片 ID 不在索引",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["NO-SUCH-CARD", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "unknownCard",
+            "clause": "6.1.1",
+            "cards": ["NO-SUCH-CARD"]
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "banned-before",
+      "rule": "restriction",
+      "note": "星の鎧生效日前一天：不受禁止（職業不符另計）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "royal"
+        },
+        "leader": "BP01-LD03",
+        "main": [["BP04-037", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-09-30"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "banned",
+      "rule": "restriction",
+      "note": "星の鎧 2025-10-01 起禁止",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "royal"
+        },
+        "leader": "BP01-LD03",
+        "main": [["BP04-037", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-10-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "banned",
+            "clause": "restriction",
+            "cards": ["BP04-037"],
+            "values": {
+              "name": "星の鎧",
+              "count": 1,
+              "max": 0,
+              "from": "2025-10-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "restricted-1",
+      "rule": "restriction",
+      "note": "竜巫女の儀式殿堂入り：1 張合法",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "dragon"
+        },
+        "leader": "BP01-LD07",
+        "main": [["BP02-062", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "restricted-2",
+      "rule": "restriction",
+      "note": "竜巫女の儀式殿堂入り：2 張",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "dragon"
+        },
+        "leader": "BP01-LD07",
+        "main": [["BP02-062", 2]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "restricted",
+            "clause": "restriction",
+            "cards": ["BP02-062"],
+            "values": {
+              "name": "竜巫女の儀式",
+              "count": 2,
+              "max": 1,
+              "from": "2026-01-30"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "restricted-before",
+      "rule": "restriction",
+      "note": "殿堂入り生效前（2026-01-29）：2 張合法",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "dragon"
+        },
+        "leader": "BP01-LD07",
+        "main": [["BP02-062", 2]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-01-29"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "restriction-lifted",
+      "rule": "restriction",
+      "note": "解除日當天起不再限制（until 不含當天）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-001", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-06-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "restriction-until",
+      "rule": "restriction",
+      "note": "解除日前一天仍限制",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["BP01-001", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-05-31"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "restricted",
+            "clause": "restriction",
+            "cards": ["BP01-001"],
+            "values": {
+              "name": "ローズクイーン",
+              "count": 3,
+              "max": 1,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "choice-one",
+      "rule": "restriction",
+      "note": "二擇一只放其中一組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["SYN-PAIR-A", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "choice-both",
+      "rule": "restriction",
+      "note": "二擇一兩組都放",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["SYN-PAIR-A", 1],
+          ["SYN-PAIR-B", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "choiceRestricted",
+            "clause": "restriction",
+            "cards": ["SYN-PAIR-A", "SYN-PAIR-B"],
+            "values": {
+              "count": 2,
+              "max": 1,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "choice-same-option",
+      "rule": "restriction",
+      "note": "二擇一：同一選項的兩個構築名稱一起放算一組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["SYN-PAIR-A", 1],
+          ["SYN-PAIR-C", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-all",
+      "rule": "restriction",
+      "note": "scope=all：主牌組與進化牌組合計",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["SYN-SCOPE-ALL-M", 1]],
+        "evolve": [["SYN-SCOPE-ALL-E", 1]],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "restricted",
+            "clause": "restriction",
+            "cards": ["SYN-SCOPE-ALL-E", "SYN-SCOPE-ALL-M"],
+            "values": {
+              "name": "合成：範圍 all",
+              "count": 2,
+              "max": 1,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-evolve-main",
+      "rule": "restriction",
+      "note": "scope=evolve：主牌組的同名卡不計",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["SYN-SCOPE-EVO-M", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-evolve",
+      "rule": "restriction",
+      "note": "scope=evolve：進化牌組 1 張即違規",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [["SYN-SCOPE-EVO-E", 1]],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "banned",
+            "clause": "restriction",
+            "cards": ["SYN-SCOPE-EVO-E"],
+            "values": {
+              "name": "合成：範圍 evolve",
+              "count": 1,
+              "max": 0,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "restrictions-uncovered",
+      "rule": "restriction",
+      "note": "判定日等於覆蓋區間 until：星の鎧仍禁止，並提示覆蓋未知",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "royal"
+        },
+        "leader": "BP01-LD03",
+        "main": [["BP04-037", 1]],
+        "evolve": [],
+        "fill": {
+          "set": "neutral",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-12-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "banned",
+            "clause": "restriction",
+            "cards": ["BP04-037"],
+            "values": {
+              "name": "星の鎧",
+              "count": 1,
+              "max": 0,
+              "from": "2025-10-01"
+            }
+          }
+        ],
+        "notes": [
+          {
+            "code": "restrictionsUnknown",
+            "clause": "restriction"
+          }
+        ]
+      }
+    },
+    {
+      "id": "format-unsupported",
+      "rule": "format",
+      "note": "未支援的賽制只回 formatUnsupported",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": null,
+        "main": [],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 10
+        }
+      },
+      "context": {
+        "format": "crossover",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "formatUnsupported",
+            "clause": "format",
+            "cards": [],
+            "values": {
+              "format": "crossover"
+            }
+          }
+        ],
+        "notes": []
+      }
+    }
+  ]
+}

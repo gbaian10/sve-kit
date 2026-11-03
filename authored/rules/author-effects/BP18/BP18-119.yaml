@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-119:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        keywords:
+          - quick
+      - line: 2
+        play:
+          additional_cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 透京
+              n: 1
+      - line: 3
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - life:
+                who: self
+                delta: 1
+            - draw:
+                n: 1

@@ -78,7 +78,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 
 16 個 SVE 日英官方頁面 fixture 存在 `carddb/tests/fixtures/official_jp/`、`official_en/`，來源說明及原有逐欄 hash 保存在旁邊。Python 測試使用這些公開 fixture 與合成案例，主 repo 與 fork 跑相同完整範圍及 90% 行／分支覆蓋率門檻，不需要私有 checkout 或憑證。
 引擎測試由 carddb 讀取 `card-data/` 及 `tests/engine/card-input.json` 明示的 JP 批次，產生暫存 JSONL；不提交衍生卡表。引擎仍自行載入 authored 效果、規則名稱與 token 選用，不另造一套卡表規則。
-本機 `cargo-test` hook 與 Rust CI 共用 `.github/ci/rust_tests.py`，每次重產輸入且清除暫存；缺資料必須失敗。Rust 不需要私有 checkout 或 deploy key，主 repo 與 fork 均跑完整 workspace，行覆蓋率門檻 90%。
+本機 `cargo-test` hook 與 Rust CI 共用 `.github/ci/rust_tests.py`：CI 每次重產輸入；本機在產生器讀取的完整輸入逐位元組相同時重用上次產生的一份（見 CONTRIBUTING）；兩者都清除私有暫存，缺資料必須失敗。Rust 不需要私有 checkout 或 deploy key，主 repo 與 fork 均跑完整 workspace，行覆蓋率門檻 90%。
 永久私有 testdata 保存舊 JSONL、19 個原檔及全部歷史；不得刪除、公開或改寫。Python 不讀取這個 repo。
 測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開保存也是專案的風險決定，不是官方許可。授權相關 PR 仍須審查並在合併前交維護者確認。
 

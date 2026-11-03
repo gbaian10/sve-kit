@@ -546,6 +546,23 @@ impl Game {
         Ok(())
     }
 
+    /// The same modifications follow a card across EX, Resolution and Field rule movements.
+    pub(in crate::game::internal) fn internal_numeric_rule_carry(
+        &mut self,
+        holder: &str,
+        before: u64,
+        generation: u64,
+    ) {
+        if let Some(state) = self
+            .state
+            .ir_numeric
+            .get_mut(holder)
+            .filter(|state| state.generation == before)
+        {
+            state.generation = generation;
+        }
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "Freezing, planning and committing form one atomic numeric instruction."
@@ -581,8 +598,13 @@ impl Game {
             if object.generation != subject.generation.0 {
                 continue;
             }
-            if object.zone != "field" || !self.object_type(id)?.contains("フォロワー") {
-                return Err(unsupported("numeric subjects must be field followers"));
+            // EX followers keep their modifications when they later enter the field (CR 4.8.3.3).
+            if !matches!(object.zone.as_str(), "field" | "ex")
+                || !self.object_type(id)?.contains("フォロワー")
+            {
+                return Err(unsupported(
+                    "numeric subjects must be field or EX followers",
+                ));
             }
             if self.state.continuous.iter().any(|entry| {
                 entry["effect"]["op"] == "pilot"

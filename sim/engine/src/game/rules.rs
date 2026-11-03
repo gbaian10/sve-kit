@@ -824,7 +824,9 @@ impl Game {
             cause: json!({"rule":"7.4.7"}),
             ..Frame::default()
         };
+        let pending = self.internal_prepare_rule_discard(&selected, &frame)?;
         self.discard(&selected, &frame)?;
+        self.internal_commit_rule_discard(pending)?;
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
@@ -956,7 +958,7 @@ impl Game {
             self.internal_terminal_cleanup();
             return Ok(());
         }
-        if self.clean_field_rules()? {
+        if self.clean_equipment_rules()? || self.clean_field_rules()? {
             return self.checks();
         }
         if self.state.pending.is_empty()

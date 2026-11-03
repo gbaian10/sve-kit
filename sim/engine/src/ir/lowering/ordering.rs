@@ -53,6 +53,14 @@ impl BodyContext<'_> {
                     if self.observed_targets.contains(name)))
         {
             self.receipt_reads.deck_moves.insert(receipt);
+            if matches!(value.to, ast::Destination::Cemetery)
+                && matches!(
+                    value.top.as_ref().map(|top| &top.who),
+                    Some(ast::DeckHolder::Side(ast::LeaderSide::Controller))
+                )
+            {
+                self.receipt_reads.deck_cemetery.insert(receipt);
+            }
         }
         let saved = match step {
             ast::Step::Destroy(ast::ObjectAction::Long {
@@ -128,7 +136,8 @@ impl BodyContext<'_> {
             | ast::Step::SetStat(_)
             | ast::Step::Apply(_)
             | ast::Step::PlayerEffect(_)
-            | ast::Step::Create(_) => None,
+            | ast::Step::Create(_)
+            | ast::Step::Equip(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)

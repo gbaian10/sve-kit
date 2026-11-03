@@ -52,6 +52,7 @@ import {
   type Text,
   type Vocabulary,
 } from "./cards"
+import { constructionIndexFiles } from "./construction"
 
 export interface ImageRequest {
   readonly width: number
@@ -2175,6 +2176,12 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   const manifestHash = digest(manifestBytes)
   const manifestPath = `snapshots/manifests/${manifestHash.slice(7)}.json`
   files.set(manifestPath, manifestBytes)
+  for (const [path, bytes] of constructionIndexFiles(
+    (table) => fragmentsOf(builder, table),
+    manifest,
+    manifestHash,
+  ))
+    files.set(path, bytes)
 
   const entry = {
     data_version: dataVersion,

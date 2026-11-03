@@ -4,15 +4,26 @@ use super::{
     TriggerAggregation, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::internal::Execution;
+use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::played::filter;
 use crate::ir::optional_payment;
 use crate::ir::{
-    Action, Control, LimitSpec, Located, MoveDestination, MoveReason, Node, ObjectOperand,
-    PlayEvent, PlaySubject, PlayerId, PlayerRef, Program, ReceiptId, Requirements,
-    RuntimeReceiptId, RuntimeZoneRef, Selector,
+    Action, CharacteristicPatch, Control, Effect, GrantedAbility, LimitSpec, Located,
+    MoveDestination, MoveReason, Node, ObjectOperand, PlayEvent, PlaySubject, PlayerId, PlayerRef,
+    Program, ReceiptId, Requirements, RuntimeReceiptId, RuntimeZoneRef, Selector,
 };
 
 use alloc::collections::BTreeSet;
+
+fn observes_play(ability: &Ability) -> bool {
+    filter(ability).is_some()
+        || ability.declarations.iter().any(|effect| {
+            matches!(effect, Effect::Continuous {
+                patch: CharacteristicPatch::GrantAbility { abilities }, ..
+            } if abilities.iter().any(|granted| matches!(granted,
+                GrantedAbility::Definition { ability: definition } if filter(definition).is_some())))
+        })
+}
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if filter(ability).is_none() {
@@ -133,7 +144,7 @@ impl Game {
         source: &str,
         info: &EventSubjectInformation,
         actor: PlayerId,
-    ) -> Result<Vec<(String, Located<Ability>)>> {
+    ) -> Result<Vec<(String, EffectiveAbility)>> {
         let subject = info.borrowed();
         let active = player_id(self.active())?;
         let mut observers = self.field_ids();
@@ -154,7 +165,7 @@ impl Game {
                 continue;
             }
             let controller = player_id(&self.object(&holder)?.controller)?;
-            for ability in self.internal_printed_abilities(&holder)? {
+            for ability in self.internal_effective_abilities(&holder)? {
                 if ability.node.active_zones == [zone]
                     && let Some(plan) = filter(&ability.node)
                     && plan.subject.matches_information(
@@ -183,8 +194,13 @@ impl Game {
                 .card()
                 .abilities
                 .iter()
-                .any(|ability| filter(&ability.node).is_some())
-        }) {
+                .any(|ability| observes_play(&ability.node))
+        }) && !self
+            .card_runtime
+            .granted_definitions
+            .values()
+            .any(|ability| filter(ability).is_some())
+        {
             return Ok(());
         }
         if !execution.receipts.contains_key(&cost) {

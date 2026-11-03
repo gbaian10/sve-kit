@@ -10,10 +10,15 @@ from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.stage_log import mark
+from sve_carddb.export.construction_index import (
+    ConstructionIndexError,
+    write_construction_indexes,
+)
 from sve_carddb.export.image_index import ImageIndex
 from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.publication import require_preview
+from sve_carddb.export.read_api import load_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
 from sve_carddb.workflows.offline import Built, Inputs
@@ -83,6 +88,28 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     mark("load image index")
     built = build_offline(recipe, bundle_dir=bundle_dir, image_index=index)
     _finish(built, roots, recipe.batch(), codec, format_version)
+    try:
+        _write_construction(preview_dir)
+    except ConstructionIndexError as error:
+        # Incomplete facts still permit previews; index completeness is a publication requirement.
+        typer.echo(
+            canonical({"construction_index": "skipped", "reason": str(error)}).decode()
+        )
+
+
+@app.command("construction-index")
+def construction_index_command(
+    export_dir: Annotated[Path, typer.Option(envvar="SVE_EXPORT_DIR")],
+) -> None:
+    """Write each region's construction index beside the export's current preview snapshot."""
+    _write_construction(export_dir)
+
+
+def _write_construction(export_dir: Path) -> None:
+    root = export_dir.resolve()
+    report = write_construction_indexes(load_snapshot(root), root)
+    mark("write construction indexes")
+    typer.echo(canonical(report).decode())
 
 
 if TYPE_CHECKING:

@@ -1,0 +1,34 @@
+cards:
+  CP03-077:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - draw:
+                n: 1
+          usable_if:
+            history:
+              at_least: 1
+              event: moved
+              from:
+                who: opp
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+              window: this_turn
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -396,6 +396,7 @@ fn arithmetic_lowering_rejects_a_zero_unit_an_empty_min_and_unopened_max() {
         json!({"per":{"of":3,"unit":0}}),
         json!({"min":[]}),
         json!({"max":[1,2]}),
+        json!({"half_up":[1,2]}),
         json!({"times":[1,2,3]}),
     ] {
         lowerer()
@@ -412,6 +413,44 @@ fn half_up_rounds_an_odd_constant_in_a_body_expression() {
         22,
         "half of three rounds upward to two"
     );
+}
+
+#[test]
+fn half_up_rounds_signed_halves_towards_positive_infinity() {
+    const MAX_SAFE: i64 = 0x001F_FFFF_FFFF_FFFF;
+    for (amount, rounded) in [
+        (0_i64, 0_i64),
+        (1, 1),
+        (2, 1),
+        (3, 2),
+        (-1, 0),
+        (-2, -1),
+        (-3, -1),
+        (-4, -2),
+    ] {
+        let payload =
+            json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":{"half_up":amount}}}]});
+        assert_eq!(life_after(&payload, 0), 20 + rounded);
+    }
+    let composed = json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":{"half_up":{"plus":[{"power_of":"this"},1]}}}}]});
+    assert_eq!(life_after(&composed, 0), 22);
+
+    for (amount, rounded) in [
+        (
+            json!({"plus":[{"times":[MAX_SAFE,1024]},1023]}),
+            json!({"times":[1024,{"times":[1_i64 << 31,1_i64 << 21]}]}),
+        ),
+        (
+            json!({"minus":[{"times":[-MAX_SAFE,1024]},1024]}),
+            json!({"times":[-1024,{"times":[1_i64 << 31,1_i64 << 21]}]}),
+        ),
+    ] {
+        let payload = json!({"cost":{"pp":0},"do":[{"if":{
+            "cond":{"cmp":{"left":{"half_up":amount},"op":"eq","right":rounded}},
+            "then":[{"life":{"who":"self","delta":1}}]
+        }}]});
+        assert_eq!(life_after(&payload, 0), 21);
+    }
 }
 
 #[test]

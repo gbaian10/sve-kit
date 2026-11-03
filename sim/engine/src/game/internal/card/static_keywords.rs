@@ -4,8 +4,8 @@ use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CharacteristicPatch,
     ContinuousLayer, Control, Duration, DurationEnd, Effect, EffectTarget, Expr, FaceId,
     Generation, GrantedAbility, Instruction, InstructionContext, InstructionId, KeywordId, Node,
-    ObjectId, ObjectOperand, ObjectView, PlayerRef, PostureRead, Predicate, Program, ReceiptId,
-    Requirements, TextProvider, TimeAnchor, TimestampBasis, ZoneKind,
+    ObjectId, ObjectOperand, ObjectRelation, ObjectView, PlayerRef, PostureRead, Predicate,
+    Program, ReceiptId, Requirements, Selector, TextProvider, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -25,10 +25,34 @@ pub(super) fn is_static(ability: &Ability) -> bool {
         })
 }
 
-pub(super) fn check(located: &Located<Ability>) -> Result<()> {
-    let ability = &located.node;
+fn grant_subjects(
+    ability: &Ability,
+    selector: &Selector,
+    condition: Option<&Expr<Bool>>,
+) -> Result<Selector> {
+    Ok(if ability.active_zones == [ZoneKind::Equipment] {
+        if condition.is_some()
+            || !matches!(selector, Selector::Relation {
+                object: ObjectView::Current { object }, relation: ObjectRelation::Equipment
+            } if object.as_ref() == &ObjectOperand::SourceHolder {})
+        {
+            return Err(unsupported("equipment grants to its associated follower"));
+        }
+        // The scoped host relation reads only the public field endpoint.
+        Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        }
+    } else {
+        selector.clone()
+    })
+}
+
+fn check_header(ability: &Ability) -> Result<()> {
     if !is_static(ability)
-        || ability.active_zones != [ZoneKind::Field]
+        || !matches!(
+            ability.active_zones.as_slice(),
+            [ZoneKind::Field | ZoneKind::Equipment]
+        )
         || ability.qualification != AbilityQualification::Ordinary
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
@@ -40,6 +64,12 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     {
         return Err(unsupported("static keyword header"));
     }
+    Ok(())
+}
+
+pub(super) fn check(located: &Located<Ability>) -> Result<()> {
+    let ability = &located.node;
+    check_header(ability)?;
     for effect in &ability.declarations {
         let Effect::Continuous {
             source,
@@ -56,7 +86,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
             return Err(unsupported("static keyword declaration"));
         };
         if source != &ability.source
-            || active_zones != &[ZoneKind::Field]
+            || active_zones != &ability.active_zones
             || timestamp
                 != &(TimestampBasis::ZoneEntry {
                     object: ObjectOperand::SourceHolder {},
@@ -71,6 +101,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         {
             return Err(unsupported("static keyword lifetime"));
         }
+        let subjects = grant_subjects(ability, selector, condition.as_ref())?;
         let body = Program {
             scope: ability.scope,
             steps: vec![Located {
@@ -84,7 +115,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                         context: InstructionContext::Effect,
                         receipt: ReceiptId(1),
                         action: Action::Grant {
-                            subjects: selector.clone(),
+                            subjects,
                             abilities: abilities.clone(),
                             duration: duration.clone(),
                             provider: TextProvider {
@@ -168,7 +199,22 @@ impl Game {
         if recipient.zone != "field" {
             return Ok(keywords);
         }
-        for source in self.field_ids() {
+        let providers = self.field_ids().into_iter().chain(
+            self.state
+                .objects
+                .values()
+                .filter(|object| object.zone == "equipment")
+                .map(|object| object.id.clone()),
+        );
+        for source in providers {
+            let zone = if self.object(&source)?.zone == "equipment" {
+                if recipient.state["silenced"] == true {
+                    continue;
+                }
+                ZoneKind::Equipment
+            } else {
+                ZoneKind::Field
+            };
             let (card, _) = self.internal_effective_print(&source)?;
             if !self.card_runtime.is_loaded(&card) && !self.internal_has_local_definitions(&source)
             {
@@ -177,7 +223,7 @@ impl Game {
             let static_abilities = self
                 .internal_local_abilities(&source)?
                 .into_iter()
-                .filter(|located| is_static(&located.node))
+                .filter(|located| is_static(&located.node) && located.node.active_zones == [zone])
                 .collect::<Vec<_>>();
             if static_abilities.is_empty() {
                 continue;

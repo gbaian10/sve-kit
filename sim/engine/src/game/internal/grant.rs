@@ -213,6 +213,11 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 pub(super) fn supported_definition(ability: &Ability) -> bool {
+    if ability.kind == AbilityKind::Activated {
+        return ability.active_zones == [ZoneKind::Field]
+            && ability.qualification == AbilityQualification::Ordinary
+            && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
+    }
     if ability.kind == AbilityKind::Static {
         return ability.active_zones == [ZoneKind::Field] || static_cost(ability);
     }
@@ -224,6 +229,7 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {
                 pattern: EventPattern::Attack { .. }
+                    | EventPattern::Play { .. }
                     | EventPattern::Phase { .. }
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Damage { .. }

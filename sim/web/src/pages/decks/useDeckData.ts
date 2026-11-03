@@ -4,9 +4,11 @@ import { useCardSnapshot, useImageIndex, useRecentSummaries } from "../../app/sn
 import {
   type CardRestriction,
   type ImageIndex,
+  loadConstructionIndex,
   loadRestrictionSelection,
   type RestrictionStatus,
 } from "../../data"
+import type { ConstructionIndex } from "../../domain/deck/construction"
 import type { Deck } from "../../domain/deck/types"
 import type { Region } from "../../domain/search"
 import { createDeckFacts, type DeckFacts } from "./deck-info"
@@ -15,6 +17,8 @@ export interface DeckData {
   readonly facts: DeckFacts | null
   readonly restrictions: ReadonlyMap<string, readonly CardRestriction[]>
   readonly restrictionStatus: RestrictionStatus | undefined
+  /** The construction rules of the snapshot's edition; `failed` when the index is missing. */
+  readonly construction: ConstructionState
   /** Image metadata of the main-thread snapshot (base printings). */
   readonly images: ImageIndex | undefined
   /**
@@ -26,6 +30,11 @@ export interface DeckData {
   readonly failed: boolean
   readonly retry: () => void
 }
+
+export type ConstructionState =
+  | { readonly state: "loading" }
+  | { readonly state: "failed" }
+  | { readonly state: "ready"; readonly index: ConstructionIndex }
 
 const NO_RESTRICTIONS: ReadonlyMap<string, readonly CardRestriction[]> = new Map()
 
@@ -55,6 +64,25 @@ export function useDeckData(edition: Region): DeckData {
       },
       () => {
         if (active) setSelection({ key, map: NO_RESTRICTIONS, status: undefined })
+      },
+    )
+    return () => {
+      active = false
+    }
+  }, [client, snapshot, current, edition, key])
+  const [construction, setConstruction] = useState<{
+    readonly key: string
+    readonly value: ConstructionState
+  }>({ key: "", value: { state: "loading" } })
+  useEffect(() => {
+    if (!snapshot || !current) return
+    let active = true
+    loadConstructionIndex(client.base, snapshot, edition).then(
+      (index) => {
+        if (active) setConstruction({ key, value: { state: "ready", index } })
+      },
+      () => {
+        if (active) setConstruction({ key, value: { state: "failed" } })
       },
     )
     return () => {
@@ -94,6 +122,7 @@ export function useDeckData(edition: Region): DeckData {
     facts,
     restrictions: selection.key === key ? selection.map : NO_RESTRICTIONS,
     restrictionStatus: selection.key === key ? selection.status : undefined,
+    construction: construction.key === key ? construction.value : { state: "loading" },
     images,
   }
 }

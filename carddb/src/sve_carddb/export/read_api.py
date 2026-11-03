@@ -51,6 +51,7 @@ __all__ = [
     "ImageScope",
     "ImageUpload",
     "Member",
+    "Snapshot",
     "array",
     "canonical",
     "closure",
@@ -62,6 +63,7 @@ __all__ = [
     "load_export",
     "load_image_scope",
     "load_image_upload",
+    "load_snapshot",
     "object_value",
     "parse",
     "read_image_inventory",
@@ -179,6 +181,34 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
 
 def load_export(root: Path) -> Export:
     """Validate the pointer's whole public JSON closure before credentials or HTTP."""
+    path, raw, manifest, members, tables = _verified(root)
+    return Export(
+        root,
+        {k: manifest[k] for k in _ENTRY}
+        | {"manifest_path": path, "manifest_sha256": digest(raw)},
+        members,
+        image_files(tables),
+    )
+
+
+@dataclass(frozen=True, repr=False)
+class Snapshot:
+    """The pointer's verified manifest and its joined logical rows."""
+
+    manifest: dict[str, JsonValue]
+    manifest_sha256: str
+    tables: dict[str, list[Row]]
+
+
+def load_snapshot(root: Path) -> Snapshot:
+    """The same closure check as `load_export`, keeping the rows instead of the bytes."""
+    _path, raw, manifest, _members, tables = _verified(root)
+    return Snapshot(manifest, digest(raw), tables)
+
+
+def _verified(
+    root: Path,
+) -> tuple[str, bytes, dict[str, JsonValue], tuple[Member, ...], dict[str, list[Row]]]:
     directory(root)
     try:
         return _load(root)
@@ -188,7 +218,9 @@ def load_export(root: Path) -> Export:
         raise ExportError("Export validation failed") from None
 
 
-def _load(root: Path) -> Export:
+def _load(
+    root: Path,
+) -> tuple[str, bytes, dict[str, JsonValue], tuple[Member, ...], dict[str, list[Row]]]:
     path, raw, manifest = _manifest(root)
     members = list(_encoded(root, path, raw, br=(root / (path + ".br")).exists()))
     blobs: dict[str, bytes] = {}
@@ -219,13 +251,7 @@ def _load(root: Path) -> Export:
     unique = {m.key: m for m in members}
     if set(unique) - {path + ".br"} != closure(path, manifest):
         raise ExportError("Export members differ from the manifest closure")
-    return Export(
-        root,
-        {k: manifest[k] for k in _ENTRY}
-        | {"manifest_path": path, "manifest_sha256": digest(raw)},
-        tuple(unique[k] for k in sorted(unique)),
-        image_files(tables),
-    )
+    return path, raw, manifest, tuple(unique[k] for k in sorted(unique)), tables
 
 
 def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:

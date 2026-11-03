@@ -681,6 +681,14 @@ impl Checker {
                 source,
                 batch,
             } => self.damage(recipients, amount, *flags, source, *batch),
+            Action::Equip {
+                holder, template, ..
+            } => {
+                if template.0.is_empty() {
+                    return self.reject();
+                }
+                self.object(holder)
+            }
             Action::Token {
                 tokens,
                 destination,

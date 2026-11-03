@@ -7,6 +7,7 @@ use super::{
     invalid, player_id, seat_name, unsupported,
 };
 use crate::ir::AttackEvent;
+use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
@@ -246,6 +247,12 @@ impl Execution {
             {
                 self.public_target_objects(game, selector, false)?
             }
+            Selector::Relation {
+                object: ObjectView::Current { object },
+                relation: ObjectRelation::Equipment,
+            } if object.as_ref() == &ObjectOperand::SourceHolder {} => {
+                game.internal_equipment_host(self)?
+            }
             Selector::Objects { objects } => objects
                 .iter()
                 .map(|object| self.object(game, object))
@@ -288,23 +295,7 @@ impl Execution {
             Selector::MoveAfter {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
-            } => {
-                let moves = self.successful_moves(receipt)?.collect::<Vec<_>>();
-                // A bounced card's new hand generation must not become trackable (second batch §5).
-                if matches!(receipt, MovementReceipt::Move { .. })
-                    && moves.iter().any(|movement| {
-                        movement
-                            .actual_to
-                            .is_some_and(|to| to.kind == ZoneKind::Hand)
-                    })
-                {
-                    return Err(unsupported("hidden hand after follow"));
-                }
-                moves
-                    .into_iter()
-                    .filter_map(|movement| movement.after)
-                    .collect()
-            }
+            } => self.followed_members(receipt)?,
             Selector::Difference { input, except } => {
                 let input = self.objects(game, input)?;
                 let except = self.objects(game, except)?;
@@ -320,6 +311,24 @@ impl Execution {
         Ok(objects
             .into_iter()
             .filter(|object| seen.insert((object.id, object.generation)))
+            .collect())
+    }
+
+    fn followed_members(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
+        let moves = self.successful_moves(receipt)?.collect::<Vec<_>>();
+        // A bounced card's new hand generation must not become trackable (second batch §5).
+        if matches!(receipt, MovementReceipt::Move { .. })
+            && moves.iter().any(|movement| {
+                movement
+                    .actual_to
+                    .is_some_and(|to| to.kind == ZoneKind::Hand)
+            })
+        {
+            return Err(unsupported("hidden hand after follow"));
+        }
+        Ok(moves
+            .into_iter()
+            .filter_map(|movement| movement.after)
             .collect())
     }
 
@@ -661,6 +670,10 @@ impl Execution {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Natural operations share the checked execution context."
+    )]
     pub(super) fn natural(&self, game: &Game, expr: &Expr<Nat>) -> Result<Nat> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -753,6 +766,19 @@ impl Execution {
                     } else {
                         else_value
                     },
+                ),
+                NatOperation::ReceiptCount {
+                    receipt,
+                    projection,
+                    member,
+                    predicate,
+                } => super::receipt_counts::count(
+                    game,
+                    self,
+                    receipt,
+                    *projection,
+                    *member,
+                    predicate,
                 ),
                 NatOperation::ReceiptActualSum { .. } => Err(unsupported("natural operation")),
             },
@@ -1054,14 +1080,14 @@ fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
     let (&first, rest) = values
         .split_first()
         .ok_or_else(|| invalid("empty arithmetic"))?;
-    if matches!(operation, Arithmetic::HalfUp) {
+    if operation == Arithmetic::HalfUp {
         if !rest.is_empty() {
-            return Err(invalid("half-up requires one value"));
+            return Err(invalid("half-up requires one operand"));
         }
         return first
             .div_euclid(2)
-            .checked_add(first.rem_euclid(2))
-            .ok_or_else(|| invalid("half-up overflow"));
+            .checked_add(i64::from(first.rem_euclid(2) != 0))
+            .ok_or_else(|| invalid("signed arithmetic overflow"));
     }
     rest.iter().try_fold(first, |left, &right| {
         match operation {

@@ -1,0 +1,31 @@
+cards:
+  BP01-170:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

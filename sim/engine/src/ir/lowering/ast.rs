@@ -152,9 +152,22 @@ pub(super) enum ActivationZones {
     Many(Vec<ActivationZone>),
 }
 
+impl ActivationZones {
+    pub(super) const fn single(&self) -> Option<ZoneKind> {
+        match self {
+            Self::One(zone) => Some(zone.kind()),
+            Self::Many(zones) => match zones.as_slice() {
+                [zone] => Some(zone.kind()),
+                _ => None,
+            },
+        }
+    }
+}
+
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum ActivationZone {
+    Equipment,
     Hand,
     Cemetery,
     Field,
@@ -164,6 +177,7 @@ pub(super) enum ActivationZone {
 impl ActivationZone {
     pub(super) const fn kind(self) -> ZoneKind {
         match self {
+            Self::Equipment => ZoneKind::Equipment,
             Self::Hand => ZoneKind::Hand,
             Self::Cemetery => ZoneKind::Cemetery,
             Self::Field => ZoneKind::Field,
@@ -268,6 +282,7 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+    Equip(Equip),
 }
 
 #[derive(Deserialize)]
@@ -355,6 +370,13 @@ pub(super) struct Race {
 pub(super) struct EffectEvolution {
     #[serde(rename = "ref")]
     pub _reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Equip {
+    pub on: This,
+    pub token: String,
 }
 
 #[derive(Deserialize)]
@@ -1355,11 +1377,11 @@ pub(super) enum Number {
     Times {
         times: Box<[Self; 2]>,
     },
-    Per {
-        per: Box<Per>,
-    },
     HalfUp {
         half_up: Box<Self>,
+    },
+    Per {
+        per: Box<Per>,
     },
     Min {
         min: Vec<Self>,
@@ -1371,7 +1393,7 @@ pub(super) enum Number {
         count: ReceiptCountQuery,
     },
     CountOf {
-        count_of: String,
+        count_of: CountOf,
     },
     Aggregate {
         agg: Aggregate,
@@ -1617,6 +1639,8 @@ pub(super) struct Auto {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "discarded")]
+    Discarded(DiscardSubscription),
     #[serde(rename = "evolved")]
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
@@ -1733,6 +1757,16 @@ pub(super) enum EvolutionZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct EvolutionCost {
     pub pp: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiscardSubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    #[serde(rename = "from")]
+    pub _from: Option<HandZone>,
+    pub who: Option<EntryPlayer>,
 }
 
 #[derive(Deserialize)]
@@ -2687,4 +2721,25 @@ impl NumericArgument {
 pub(super) enum EvolutionCostSubject {
     This,
     Affected,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum CountOf {
+    Named(String),
+    Filtered(FilteredCountOf),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FilteredCountOf {
+    pub receipt: String,
+    #[serde(rename = "where")]
+    pub filter: ReceiptTraitFilter,
+    #[serde(rename = "view")]
+    pub _view: Before,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ReceiptTraitFilter {
+    pub r#trait: String,
 }

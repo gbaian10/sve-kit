@@ -1,0 +1,51 @@
+cards:
+  CP02-055:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                other: true
+                trait: デレマス
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 3
+                  who: self
+                  zone: deck
+                to: field
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 1
+                  who: self
+                  zone: deck
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

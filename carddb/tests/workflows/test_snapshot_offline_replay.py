@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.cli import app
-from sve_carddb.core.json import array, canonical, digest, object_value, parse
+from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.core.provenance import InputRecord
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.registry.build import build as build_identity
@@ -20,6 +20,7 @@ from sve_carddb.domains.registry.inputs import Card, Mapping
 from sve_carddb.domains.registry.review import InitDecisions
 from sve_carddb.domains.registry.review import Inputs as IdentityInputs
 from sve_carddb.domains.registry.storage import Index, plan_files, write_files
+from sve_carddb.export.construction_index import ConstructionIndexError
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.ingest.archive.manifest import Kind
 from sve_carddb.ingest.archive.source_archive import Scope, seal_batch
@@ -313,6 +314,18 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         ],
     )
     assert result.exit_code == 0, repr(result.exception)
+    skipped = object_value(parse(result.stdout.strip().splitlines()[-1].encode()))
+    assert set(skipped) == {"construction_index", "reason"}
+    assert skipped["construction_index"] == "skipped"
+    assert string(skipped["reason"])
+    assert not (tmp_path / "preview/construction").exists()
+    standalone = CliRunner().invoke(
+        app,
+        ["snapshot", "construction-index", "--export-dir", str(tmp_path / "preview")],
+    )
+    assert standalone.exit_code != 0
+    assert isinstance(standalone.exception, ConstructionIndexError)
+    assert not (tmp_path / "preview/construction").exists()
     assert prepare.call_count == populate.call_count == 1
     assert {p.name for p in (tmp_path / "bundle").iterdir()} == {
         "build.sqlite",

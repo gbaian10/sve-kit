@@ -9,6 +9,7 @@ use crate::ir::{
     Predicate, QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView,
     TraitId, TraitsRead,
 };
+use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -89,6 +90,7 @@ fn check_shape(
 pub(super) struct DeckReads {
     looks: Vec<Binding<Selector>>,
     moves: BTreeSet<ReceiptId>,
+    cemetery: BTreeSet<ReceiptId>,
 }
 
 impl DeckReads {
@@ -106,6 +108,11 @@ impl DeckReads {
                         if self.looks.contains(reference));
                 if looked || super::movement::deck_top(&instruction.action).is_some() {
                     self.moves.insert(instruction.receipt);
+                    if matches!(&instruction.action, Action::Move { objects: Selector::Ordered { zone, .. }, movement, .. }
+                        if zone.kind == ZoneKind::Deck && zone.player == (PlayerRef::Controller {}) && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
+                    {
+                        self.cemetery.insert(instruction.receipt);
+                    }
                 }
             }
             _ => {}
@@ -120,6 +127,30 @@ impl DeckReads {
         } = &mut inspected
         {
             self.mask_condition(condition)?;
+        }
+        if let Node::Instruction { instruction } = &mut inspected
+            && let Action::Damage {
+                amount: DamageAmount::Uniform { amount },
+                ..
+            } = &mut instruction.action
+            && let Expr::Compute(operation) = amount
+            && let IntOperation::FromNat {
+                value: Expr::Compute(operation),
+            } = operation.as_mut()
+            && let NatOperation::ReceiptCount {
+                receipt,
+                projection,
+                member,
+                predicate,
+            } = operation.as_ref()
+        {
+            if !self.cemetery.contains(&local_receipt(receipt)?) {
+                return Err(unsupported(
+                    "filtered count outside a deck-to-cemetery producer",
+                ));
+            }
+            check_count(receipt, *projection, *member, predicate)?;
+            *amount = Expr::Literal(Int(0));
         }
         Ok(inspected)
     }
@@ -167,8 +198,28 @@ pub(super) fn any(
     predicate: &Expr<Bool>,
 ) -> Result<bool> {
     check_shape(receipt, projection, member, predicate)?;
+    let members = members(game, execution, receipt, None)?;
+    for (card, before) in &members {
+        if matches(
+            predicate,
+            member,
+            Some(card),
+            Some((game, execution, *before)),
+        )? {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn members(
+    game: &Game,
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+    destination: Option<ZoneKind>,
+) -> Result<Vec<(MemberCard, ObjectRef)>> {
     let id = local_receipt(receipt)?;
-    let members = match execution.receipts.get(&id) {
+    match execution.receipts.get(&id) {
         Some(InstructionOutcome::Discard(outcome)) => outcome
             .successful
             .iter()
@@ -188,11 +239,15 @@ pub(super) fn any(
                     .ok_or_else(|| invalid("missing discarded characteristics"))?;
                 Ok((MemberCard::from(characters), before.object))
             })
-            .collect::<Result<Vec<_>>>()?,
+            .collect::<Result<Vec<_>>>(),
         Some(InstructionOutcome::Move(outcome)) => outcome
             .moved
             .iter()
-            .filter(|movement| movement.after.is_some())
+            .filter(|movement| {
+                movement.after.is_some()
+                    && destination
+                        .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
+            })
             .map(|movement| {
                 // Printed information stands in only for a card that left the deck.
                 let from_deck = execution.facts.iter().any(|fact| {
@@ -208,9 +263,40 @@ pub(super) fn any(
                     movement.before,
                 ))
             })
-            .collect::<Result<Vec<_>>>()?,
-        _ => return Err(invalid("missing receipt member producer")),
-    };
+            .collect::<Result<Vec<_>>>(),
+        _ => Err(invalid("missing receipt member producer")),
+    }
+}
+
+fn check_count(
+    receipt: &ObjectReceipt,
+    projection: MemberProjection,
+    member: Binding<RuntimeObjectView>,
+    predicate: &Expr<Bool>,
+) -> Result<()> {
+    if !matches!(
+        receipt,
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Move { .. }
+        }
+    ) || !matches!(predicate, Expr::Compute(outer) if matches!(outer.as_ref(), Predicate::And { predicates } if matches!(predicates.as_slice(), [Expr::Compute(inner)] if matches!(inner.as_ref(), Predicate::HasTrait { .. }))))
+    {
+        return Err(unsupported("filtered deck movement trait count"));
+    }
+    check_shape(receipt, projection, member, predicate)
+}
+
+pub(super) fn count(
+    game: &Game,
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+    projection: MemberProjection,
+    member: Binding<RuntimeObjectView>,
+    predicate: &Expr<Bool>,
+) -> Result<Nat> {
+    check_count(receipt, projection, member, predicate)?;
+    let members = members(game, execution, receipt, Some(ZoneKind::Cemetery))?;
+    let mut count = 0_u64;
     for (card, before) in &members {
         if matches(
             predicate,
@@ -218,10 +304,12 @@ pub(super) fn any(
             Some(card),
             Some((game, execution, *before)),
         )? {
-            return Ok(true);
+            count = count
+                .checked_add(1)
+                .ok_or_else(|| invalid("receipt member count overflow"))?;
         }
     }
-    Ok(false)
+    Ok(Nat(count))
 }
 
 /// Cards leaving the deck carry no modifications, so their printing is their information.

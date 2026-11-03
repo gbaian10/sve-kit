@@ -5,9 +5,9 @@ use super::{
     unsupported,
 };
 use crate::ir::{
-    Action, Bool, Cardinality, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome, Disjointness,
-    Expr, Instruction, Int, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId, SelectionView,
-    Selector, ZoneKind,
+    Action, Bool, Cardinality, Cause, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome,
+    Disjointness, Expr, Instruction, Int, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId,
+    SelectionView, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -322,14 +322,24 @@ impl Game {
         members: &[ObjectRef],
     ) -> Result<DiscardOutcome> {
         let mut snapshots = Vec::new();
+        let mut ids = Vec::new();
         for &member in members {
             let id = execution.object_id(member)?.to_owned();
+            ids.push(id.clone());
             snapshots.push((
                 member,
                 super::player_id(&self.object(&id)?.controller)?,
                 self.internal_hand_characteristics(&id)?,
             ));
         }
+        let pending = self.internal_prepare_discard_events(
+            &ids,
+            execution.context.controller,
+            Cause::Effect {
+                execution: execution.id,
+            },
+            execution.ability,
+        )?;
         let (moves, successful) = self.internal_move_members(
             execution,
             members,
@@ -339,22 +349,26 @@ impl Game {
             false,
             None,
         )?;
+        let mut events = Vec::new();
         for (before, player, characters) in snapshots {
             if let Some(actual_to) = moves
                 .iter()
                 .find(|movement| movement.before == before && movement.after.is_some())
                 .and_then(|movement| movement.actual_to)
             {
+                let event = DiscardEvent {
+                    player,
+                    card_before: before,
+                    characters,
+                    actual_to,
+                };
                 execution
                     .facts
-                    .push(super::Fact::Discard(Box::new(DiscardEvent {
-                        player,
-                        card_before: before,
-                        characters,
-                        actual_to,
-                    })));
+                    .push(super::Fact::Discard(Box::new(event.clone())));
+                events.push(event);
             }
         }
+        self.internal_commit_discard_events(pending, &events)?;
         Ok(DiscardOutcome { successful, moves })
     }
 }

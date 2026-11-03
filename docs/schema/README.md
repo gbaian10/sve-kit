@@ -71,6 +71,7 @@
 
 | 文件 | 內容 |
 | --- | --- |
+| [構築索引](export/construction-index.md) | 牌組驗證器用的每地區小檔：形狀、投影來源、本文張數句型與大小 |
 | [preview 建置與前端接線](export/preview-handoff.md) | 本機配方、匯出根、圖片快取與前端載入 |
 | [公開投影](export/public-projection.md) | 發布版次、區域閉包與公開文字集合的篩選 |
 | [公開 annotation 與 JP 依據](export/public-annotation.md) | 4.0.0 的稀疏位置集合、公開來源指標、逐 owner 語言與引用閉包 |

@@ -700,6 +700,9 @@ export default {
     problemsLess: "Show fewer",
     clause: "CR {{clause}}",
     clauseRestriction: "Restriction",
+    rulesLoading: "Loading construction rules",
+    rulesFailed: "Construction rules could not be loaded",
+    clauseFormat: "Format",
     problems: {
       leaderMissing: "No leader chosen yet.",
       leaderNotLeader: "“{{name}}” is not a leader card.",
@@ -710,19 +713,24 @@ export default {
       evolveTooMany: "Evolve deck has {{count}} cards; at most {{max}}.",
       mainWrongCard: "“{{name}}” cannot be in the main deck.",
       evolveWrongCard: "“{{name}}” cannot be in the evolve deck.",
-      tokenInDeck: "“{{name}}” is a token and cannot be in a deck.",
       sameNameOver:
         "{{section}} has {{count}} copies of “{{name}}”; at most {{limit}} of one name.",
       classMismatch:
         "“{{name}}” is {{cardClass}}; a {{deckClass}} deck may only hold {{deckClass}} and neutral cards.",
-      classMismatchNeutral:
-        "“{{name}}” is {{cardClass}}; a neutral deck may only hold neutral cards.",
       titleMismatch: "“{{name}}” does not carry the title “{{title}}”.",
       restricted: "“{{name}}” is restricted to {{max}} (deck has {{count}}).",
       banned: "“{{name}}” is banned.",
       unknownCard: "Card {{cardId}} is not in the data.",
-      titleRulesUnchecked:
-        "The title “{{title}}” has construction rules of its own (CR 14) that are not checked yet.",
+      startAmuletMissing:
+        "A Cardfight!! Vanguard deck needs at least one card with Starting Amulet.",
+      startAmuletNames: "All cards with Starting Amulet must share the same name.",
+      choiceRestricted:
+        "Only {{max}} of these restricted choices may be used; the deck has {{count}}.",
+      formatUnsupported: "This format cannot be checked yet.",
+      triggerClassUnchecked:
+        "Cards with a trigger icon must match the leader’s class; icon data is missing, so this is not checked.",
+      restrictionsUnknown:
+        "The official restriction list is not confirmed up to today; newer restrictions may apply.",
     },
     cell: {
       notAllowed: "Cannot be in a deck",

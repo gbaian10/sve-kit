@@ -681,6 +681,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     let zones = match requested {
         Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
+        None if entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None => vec![ZoneKind::Field],
     };
@@ -698,10 +699,16 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     }
     if let Some(auto) = &entry.auto {
         let cemetery = auto.cemetery_play();
+        let hand_discard = zones == [ZoneKind::Hand]
+            && matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some());
         if !cemetery
+            && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
                 || (zones == [ZoneKind::Ex]
-                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))))
+                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))
+                    // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
+                    && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
+                        if placed.reference.is_some())))
         {
             return Err(unsupported(path));
         }
@@ -845,7 +852,9 @@ fn lowered_trigger(
                 EventSnapshotPolicy::AtReveal
             } else if matches!(
                 pattern,
-                EventPattern::LeaveField { .. } | EventPattern::Destroy { .. }
+                EventPattern::LeaveField { .. }
+                    | EventPattern::Destroy { .. }
+                    | EventPattern::Discard { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
             } else {
@@ -873,6 +882,9 @@ fn lowered_subscription(
                 binding: event,
                 predicate: super::events::ability::subject().predicate(SubjectFields::Ub(event)),
             })
+        }
+        ast::PhaseSubscription::Discarded(event) => {
+            discard::subscription(event, event_id, scope, path)
         }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
@@ -1039,6 +1051,7 @@ fn lowered_change(
         | ast::PhaseSubscription::Damage(_)
         | ast::PhaseSubscription::Attacked(_)
         | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }
 }
@@ -1074,9 +1087,11 @@ struct ReceiptReads {
     discard_bounds: BTreeMap<ReceiptId, Cardinality>,
     /// Movements of cards leaving the deck, which carry no modifications.
     deck_moves: BTreeSet<ReceiptId>,
+    deck_cemetery: BTreeSet<ReceiptId>,
 }
 
 struct BodyContext<'definitions> {
+    static_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
     source_use: &'definitions ast::SourceUse,
@@ -1120,6 +1135,11 @@ impl<'definitions> BodyContext<'definitions> {
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
+            static_zone: entry
+                .r#static
+                .as_ref()
+                .and_then(|head| head.zone.as_ref())
+                .and_then(ast::ActivationZones::single),
             subject_event: None,
             damage_event: None,
             source_use: &entry.sources[0],
@@ -1449,6 +1469,17 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Search(value) => self.search(value, path),
             ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Create(value) => self.create(value, path),
+            ast::Step::Equip(value) => {
+                let ast::This::This = value.on;
+                if value.token.is_empty() {
+                    return Err(unsupported(path));
+                }
+                Ok(Action::Equip {
+                    holder: ObjectOperand::SourceHolder {},
+                    template: super::TokenTemplateId(value.token.clone()),
+                    count: Nat(1),
+                })
+            }
             ast::Step::Look(value) => {
                 if !matches!(
                     value.top.who,

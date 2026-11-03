@@ -31,6 +31,7 @@ function editorOf(deck: Partial<Deck> = {}, withFacts: DeckFacts | null = facts)
       dataFailed: false,
       retryData: () => undefined,
       restrictions: new Map(),
+      construction: { state: "loading" },
       problems: [],
       uiLanguage: "zh-TW",
       textLang: "ja",
@@ -60,15 +61,17 @@ describe("deck editor", () => {
     ])
   })
 
-  it("stops adding at the same-name limit and removes only copies that are in", () => {
+  it("keeps adding past the same-name limit and removes only copies that are in", () => {
+    // Construction rules only warn in the builder (maintainer decision 2026-11-03).
     const { editor, saved } = editorOf({ main: [{ cardId: "c:follower", count: 3 }] })
-    expect(editor.statusOf("c:follower")).toMatchObject({ placement: "main", count: 3, max: 3 })
+    expect(editor.statusOf("c:follower")).toMatchObject({ placement: "main", count: 3, limit: 3 })
     editor.add("c:follower")
+    expect(saved[0]?.main).toEqual([{ cardId: "c:follower", count: 4 }])
     editor.remove("c:evolved")
     editor.remove("c:leader")
-    expect(saved).toEqual([])
+    expect(saved).toHaveLength(1)
     editor.remove("c:follower")
-    expect(saved[0]?.main).toEqual([{ cardId: "c:follower", count: 2 }])
+    expect(saved[1]?.main).toEqual([{ cardId: "c:follower", count: 2 }])
   })
 
   it("knows nothing about cards before the facts load", () => {
@@ -77,7 +80,7 @@ describe("deck editor", () => {
       placement: "none",
       count: 0,
       sideCount: 0,
-      max: 0,
+      limit: 0,
       isLeader: true,
     })
     editor.add("c:follower")

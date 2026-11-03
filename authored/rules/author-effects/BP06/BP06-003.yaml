@@ -1,0 +1,49 @@
+cards:
+  BP06-003:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+            - buff:
+                hp: 1
+                on:
+                  kind: follower
+                  trait: 妖精
+                  who: self
+                  zone: ex
+                power: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: fairies
+          targets:
+            - bind: fairies
+              from:
+                kind: follower
+                orig_cost_le: 1
+                trait: 妖精
+                who: self
+                zone: field
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP03-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

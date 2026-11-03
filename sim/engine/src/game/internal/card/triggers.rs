@@ -20,10 +20,13 @@ use alloc::collections::BTreeMap;
 
 mod ability;
 mod change;
+mod discard;
+pub(in crate::game::internal) use discard::hand_header as hand_discard;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
 mod movement;
+pub(in crate::game::internal) use movement::ex_self_entry;
 mod played;
 mod quota;
 mod race;
@@ -92,6 +95,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         return super::fanfare::check_header(ability);
     }
     if ability::check_header(ability)?
+        || discard::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?
         || entry::check_header(ability)?

@@ -4,6 +4,7 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
+use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
@@ -175,6 +176,12 @@ impl Checker {
                 }
             },
             Expr::Compute(operation) => match operation.as_ref() {
+                NatOperation::ReceiptCount {
+                    receipt,
+                    projection,
+                    member,
+                    predicate,
+                } => self.receipt_member_condition(receipt, *projection, *member, predicate),
                 NatOperation::ReceiptActualSum { receipts } => match receipts {
                     MeasuredReceiptList::Cards { receipts } => {
                         self.reference(*receipts, BindingKind::Value)
@@ -667,6 +674,10 @@ impl Checker {
                 self.follow_permission(*permission)?;
                 self.movement_receipts(*receipts)
             }
+            Selector::Relation {
+                object: view @ ObjectView::Current { object },
+                relation: ObjectRelation::Equipment,
+            } if object.as_ref() == &ObjectOperand::SourceHolder {} => self.view(view),
             Selector::Zone { .. } | Selector::Relation { .. } => self.reject(),
         }
     }

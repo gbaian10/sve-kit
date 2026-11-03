@@ -1,0 +1,41 @@
+cards:
+  PR-296:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - act:
+                ref: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 10
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - banish:
+                ref:
+                  kind: follower
+                  who: all
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

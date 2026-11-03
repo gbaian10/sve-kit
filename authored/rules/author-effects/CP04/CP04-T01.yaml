@@ -1,0 +1,34 @@
+cards:
+  CP04-T01:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                abilities:
+                  - activate:
+                      cost:
+                        act_self: true
+                      do:
+                        - buff:
+                            hp: 1
+                            on:
+                              kind: follower
+                              who: self
+                              zone: field
+                            power: 1
+                on: host
+          zone: equipment
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

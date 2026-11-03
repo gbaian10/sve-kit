@@ -18,8 +18,8 @@ export function CountStepper({
   stretch = false,
 }: {
   readonly count: number
-  /** ＋ stops here (what the deck can still take of this card). */
-  readonly max: number
+  /** ＋ stops here; omitted, it never stops (construction rules only warn, they never block). */
+  readonly max?: number
   /** Shown after the count ("n/3"); the rule's limit, not what is left of it. */
   readonly limit?: number
   readonly onChange: (count: number) => void
@@ -61,7 +61,7 @@ export function CountStepper({
       <button
         type="button"
         className={BUTTON}
-        disabled={count >= max}
+        disabled={max !== undefined && count >= max}
         aria-label={t("decks.addOne", { name })}
         onClick={() => {
           onChange(count + 1)

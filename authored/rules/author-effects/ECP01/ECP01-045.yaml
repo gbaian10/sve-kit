@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP01-045:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 4
+                to: cemetery
+                result: milled
+            - damage:
+                to:
+                  who: all
+                  zone: field
+                  kind: follower
+                n:
+                  count_of:
+                    receipt: milled
+                    where:
+                      trait: ウマ娘
+                    view: before
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"

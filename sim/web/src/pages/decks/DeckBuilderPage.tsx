@@ -12,8 +12,7 @@ import { Dialog } from "../../components/ui/Dialog"
 import { Link } from "../../components/ui/Link"
 import { useToast } from "../../components/ui/toast-context"
 import type { CardSummary } from "../../data"
-import { SAME_NAME_LIMIT } from "../../domain/deck/model"
-import { checkDeck } from "../../domain/deck/rules"
+import { deckProblems } from "../../domain/deck/rules"
 import type { Deck } from "../../domain/deck/types"
 import { UI_TEXT_LANG } from "../../domain/nameDisplay"
 import { currentUiLanguage } from "../../i18n"
@@ -74,8 +73,7 @@ function OverlayDeckAction({ summary }: { readonly summary: CardSummary }) {
   return (
     <CountStepper
       count={status.count}
-      max={Math.max(status.max, status.count)}
-      limit={SAME_NAME_LIMIT}
+      limit={status.limit}
       name={name}
       onChange={(count) => {
         if (count > status.count) editor.add(summary.cardId)
@@ -83,6 +81,12 @@ function OverlayDeckAction({ summary }: { readonly summary: CardSummary }) {
       }}
     />
   )
+}
+
+/** Restrictions take effect by the player's own calendar day. */
+function localDay(now: Date): string {
+  const pad = (value: number) => String(value).padStart(2, "0")
+  return `${String(now.getFullYear())}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
 
 function DeckBuilder({ deck }: { readonly deck: Deck }) {
@@ -96,7 +100,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
   const veryWide = useMediaQuery("(min-width: 1440px)")
   const deckSide = useDrawerSide()
   const data = useDeckData(deck.edition)
-  const { facts, restrictions, restrictionStatus } = data
+  const { facts, restrictions, restrictionStatus, construction } = data
   // The deck's own images come from the search worker: reprints have no image rows on the main thread.
   const images = useDeckImages(deck, facts, data.images)
   const [scope, setScope] = useState<PoolScope>("all")
@@ -151,8 +155,15 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
 
   const problems = useMemo(
     () =>
-      facts ? checkDeck(deck, { infoOf: (cardId) => facts.factsOf(cardId), restrictions }) : [],
-    [deck, facts, restrictions],
+      construction.state === "ready"
+        ? deckProblems(
+            deck,
+            construction.index,
+            localDay(new Date()),
+            (cardId) => facts?.factsOf(cardId)?.name,
+          )
+        : [],
+    [deck, facts, construction],
   )
   const editor = useMemo(
     () =>
@@ -164,6 +175,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
           dataFailed: data.failed,
           retryData: data.retry,
           restrictions,
+          construction,
           problems,
           uiLanguage,
           textLang: UI_TEXT_LANG[uiLanguage],
@@ -198,6 +210,7 @@ function DeckBuilder({ deck }: { readonly deck: Deck }) {
       data.retry,
       facts,
       restrictions,
+      construction,
       problems,
       uiLanguage,
       prefs.nameDisplay,

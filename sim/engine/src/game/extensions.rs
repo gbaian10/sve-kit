@@ -239,7 +239,7 @@ impl Game {
             for _ in 0..count {
                 let id = self.new_named_object(string(&node["name"]), &controller)?;
                 self.move_objects(from_ref(&id), "equipment", None, None, frame)?;
-                self.object_mut(&id)?.state["equipped_to"] = json!(subject);
+                self.attach_equipment(&subject, &id, frame)?;
             }
         }
         Ok(())

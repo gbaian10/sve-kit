@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react"
 
 import type { CardRestriction, CardSummary } from "../../data"
+import { SAME_NAME_LIMIT } from "../../domain/deck/construction"
 import {
-  copyLimit,
   countOf,
   editDeck,
   type Placement,
@@ -16,14 +16,15 @@ import type { NameDisplay } from "../../domain/nameDisplay"
 import type { TextLang } from "../../domain/search"
 import type { UiLanguage } from "../../i18n"
 import type { DeckFacts } from "./deck-info"
+import type { ConstructionState } from "./useDeckData"
 
 interface CardStatus {
   readonly placement: Placement
   /** Copies in the card's own deck (main or evolve). */
   readonly count: number
   readonly sideCount: number
-  /** Most copies that deck may hold of it now (0 for cards that go nowhere). */
-  readonly max: number
+  /** The same-name limit its deck shows (3, or what the card text allows); never a cap on adding. */
+  readonly limit: number
   readonly isLeader: boolean
 }
 
@@ -36,6 +37,7 @@ export interface DeckEditor {
   readonly dataFailed: boolean
   readonly retryData: () => void
   readonly restrictions: ReadonlyMap<string, readonly CardRestriction[]>
+  readonly construction: ConstructionState
   readonly problems: readonly DeckProblem[]
   readonly uiLanguage: UiLanguage
   readonly textLang: TextLang
@@ -80,6 +82,7 @@ type EditorView = Pick<
   | "dataFailed"
   | "retryData"
   | "restrictions"
+  | "construction"
   | "problems"
   | "uiLanguage"
   | "textLang"
@@ -96,19 +99,21 @@ export function createDeckEditor(view: EditorView, save: (deck: Deck) => void): 
   const change = (patch: Partial<Omit<Deck, "id" | "createdAt">>) => {
     save(editDeck(deck, patch, new Date()))
   }
-  const nameOf = (cardId: string) => facts?.factsOf(cardId)?.name
   const statusOf = (cardId: string): CardStatus => {
     const isLeader = deck.leader?.cardId === cardId
     const sideCount = countOf(deck.side, cardId)
     const info = facts?.factsOf(cardId)
     const placement = info ? placementOf(info) : "none"
     if (!info || placement === "leader" || placement === "none")
-      return { placement, count: 0, sideCount, max: 0, isLeader }
+      return { placement, count: 0, sideCount, limit: 0, isLeader }
     return {
       placement,
       count: countOf(deck[placement], cardId),
       sideCount,
-      max: copyLimit(deck, placement, info, nameOf),
+      limit:
+        (view.construction.state === "ready"
+          ? view.construction.index.card(cardId)?.copies?.[placement]
+          : undefined) ?? SAME_NAME_LIMIT,
       isLeader,
     }
   }
@@ -124,7 +129,7 @@ export function createDeckEditor(view: EditorView, save: (deck: Deck) => void): 
     add: (cardId, printingId) => {
       const status = statusOf(cardId)
       if (status.placement === "leader") setLeader(cardId, printingId)
-      else if (status.placement !== "none" && status.count < status.max)
+      else if (status.placement !== "none")
         change({
           [status.placement]: withCount(
             deck[status.placement],

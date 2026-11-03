@@ -2,7 +2,8 @@ use super::super::grant::EffectiveAbility;
 use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
-use crate::ir::prevention::{Recipients, projection};
+use crate::ir::ObjectRelation;
+use crate::ir::prevention::{Prevention, Recipients, projection};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
@@ -68,10 +69,39 @@ pub(super) fn is_static(ability: &Ability) -> bool {
             .all(|effect| projection(effect).is_some())
 }
 
+fn check_equipment(shape: &Prevention<'_>) -> Result<()> {
+    let host = |objects: &Selector| {
+        matches!(objects, Selector::Relation {
+        object: ObjectView::Current { object }, relation: ObjectRelation::Equipment
+    } if object.as_ref() == &ObjectOperand::SourceHolder {})
+    };
+    let on_host = match (&shape.recipients, shape.damage_source) {
+        (Some(Recipients::Objects(objects)), None) => host(objects),
+        (None, Some(objects)) => host(objects),
+        _ => false,
+    };
+    if !on_host
+        || shape.condition != &Expr::Literal(Bool(true))
+        || shape.kind != DamageKind::Any
+        || !matches!(
+            shape.rewrite,
+            EventRewrite::AddDamage {
+                amount: Expr::Literal(_)
+            }
+        )
+    {
+        return Err(unsupported("unconditional equipment host damage modifier"));
+    }
+    Ok(())
+}
+
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     let ability = &located.node;
     if !is_static(ability)
-        || ability.active_zones != [ZoneKind::Field]
+        || !matches!(
+            ability.active_zones.as_slice(),
+            [ZoneKind::Field | ZoneKind::Equipment]
+        )
         || ability.qualification != AbilityQualification::Ordinary
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
@@ -92,6 +122,10 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         {
             return Err(unsupported("static damage prevention lifetime"));
         }
+        let equipment = ability.active_zones == [ZoneKind::Equipment];
+        if equipment {
+            check_equipment(&shape)?;
+        }
         let mut sets = Vec::new();
         if let Some(recipients) = shape.recipients {
             sets.push(match recipients {
@@ -107,6 +141,16 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
             sets.push(RecipientSet::Objects {
                 objects: objects.clone(),
             });
+        }
+        if equipment {
+            // Both validated relation ends are public field followers, not the equipment itself.
+            for set in &mut sets {
+                *set = RecipientSet::Objects {
+                    objects: Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                };
+            }
         }
         let body = Program {
             scope: ability.scope,
@@ -351,6 +395,16 @@ impl Game {
         Ok(references)
     }
 
+    fn prevention_providers(&self) -> impl Iterator<Item = String> + '_ {
+        self.field_ids().into_iter().chain(
+            self.state
+                .objects
+                .values()
+                .filter(|object| object.zone == "equipment")
+                .map(|object| object.id.clone()),
+        )
+    }
+
     fn static_prevention_references(&self, hit: &Value, references: &mut Vec<Value>) -> Result<()> {
         let target = hit["target"]
             .as_str()
@@ -358,7 +412,12 @@ impl Game {
         let source = hit["source"]
             .as_str()
             .ok_or_else(|| crate::invalid("damage source"))?;
-        for provider in self.field_ids() {
+        for provider in self.prevention_providers() {
+            let zone = if self.object(&provider)?.zone == "equipment" {
+                ZoneKind::Equipment
+            } else {
+                ZoneKind::Field
+            };
             let (card, _) = self.internal_effective_print(&provider)?;
             if !self.card_runtime.is_loaded(&card)
                 && !self.internal_has_local_definitions(&provider)
@@ -369,7 +428,9 @@ impl Game {
                 .internal_effective_abilities(&provider)?
                 .into_iter()
                 .filter(|ability| {
-                    is_static(&ability.node) || holder_removal::is_mixed_static(&ability.node)
+                    ability.node.active_zones == [zone]
+                        && (is_static(&ability.node)
+                            || holder_removal::is_mixed_static(&ability.node))
                 })
                 .collect::<Vec<_>>();
             if abilities.is_empty() {

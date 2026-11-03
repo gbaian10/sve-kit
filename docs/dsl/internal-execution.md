@@ -274,6 +274,15 @@ Pass 回傳 `CardPlay::Continued(Step)`，才續接原攻擊或 end 棄牌程序
 攻擊者及目標世代。合法選擇後失敗則回本次 play origin，以新 epoch 恢復原窗口，
 先前成功行動保留。終局清除窗口，私有候選不投影給對手。
 
+Quick 法術的 `play.additional_cost` 可要求捨棄一張符合既有篩選的自己手牌。
+預檢在隔離的 Game 副本沿正式法術入口進入 Resolution，再以同一付款與私有材料驗證
+證明固有 PP 及這一張追加費用可支付；來源法術已不在手牌，不得以自身支付。
+預檢不執行本文、不提交事件或公開候選。實際宣告仍先選正式目標，再私下選擇費用材料，
+全部付款成功後才執行本文；不足或失敗沿既有交易邊界回復。此處不開放多張、
+混合公開材料、未印刷 Quick 的法術或其他 Quick 追加費用。同一張 Quick 法術在自己的
+main 階段也沿正式付款程序打出。可選手牌費用沿既有 `spell.optional_cost` 的拒付路徑，
+拒付不捨棄、不執行以付款成功為條件的額外效果。
+
 進化規則入口只承接受驗的固有進化正規形：同名、自方未公開 EvolveDeck 資源、Reveal 後支付固定 PP，
 以及單一普通 Evolve 指示；不開一般本文的 Evolve 或 EachObject。只有已載入整卡的持有者走此入口，
 未載入的原型持有者照舊使用原型進化。來源及資源只收 face 0，
@@ -580,12 +589,12 @@ selector、牌底、非固定張數與其他目的地不因此准入。他人牌
 `to: ex`、`banish: {top: …}` 與 `look` 仍只接受 `self`。作者入口不接受 result、
 placement 或額外進場效果，精確零張亦未開放。
 
-## 自己選定手牌棄牌
+## 選定手牌棄牌
 
-本文 `discard: {who: self, n: N}` 接受固定正整數 N；降低為自己目前 Hand、
+本文 `discard: {who: self, n: N}` 接受固定正整數 N；`who` 可為 `self` 或 `opp`，省略為 `self`。降低為棄牌者目前 Hand、
 無篩選、單組與精確印刷張數的 Discard(Chosen)。結算才列出當前手牌候選，
 不足時降低最低量以盡可能執行；空域與唯一候選仍詢問。`all: true` 則降低為
-Discard(All)，執行時一次棄置當下自己手牌的全部成員，不逐張詢問。
+Discard(All)，執行時一次棄置當下棄牌者手牌的全部成員，不逐張詢問。
 
 沿用 actor 專屬的物件問句與 token-local handle，沒有新增 wire 欄位。
 對手不取得手牌候選，Referee 仍可檢視權威；actor／token／張數／重複／外來 handle／目前
@@ -595,8 +604,7 @@ Discard(All)，執行時一次棄置當下自己手牌的全部成員，不逐�
 提交沿真正 discard 原語記錄棄牌計數、DiscardEvent、DiscardOutcome 與
 MoveMethod::Discard 的移動事實；只有實際離手的卡成為公開資訊，未棄牌仍秘密。
 棄牌前的從者特徵快照沿卡面讀取攻防；手牌數值修正未准入，一般場上數值讀取仍不接受 Hand。
-本片不准入他方選定手牌、帶篩選、任意張數、零張、作者 result 或 after 投影；一般棄牌事件
-consumer 與完成量接續由各自能力另行准入。
+本文不准入帶篩選、任意張數、零張、作者 result 或 after 投影；完成量接續由各自能力另行准入。
 
 ## 隨機棄牌
 
@@ -608,6 +616,21 @@ consumer 與完成量接續由各自能力另行准入。
 整個指示拒絕且局面不變，不在已知卡中抽而略過匿名卡。之後走與選定棄牌相同的 discard 原語，記錄 DiscardEvent、
 DiscardOutcome 與移動事實；只有實際棄掉的卡公開。帶篩選的母體、可變張數與
 「それのプレイヤー」等以目標控制者為對象的隨機棄牌仍拒絕。
+
+## 棄牌印刷誘發
+
+印刷棄牌訂閱降低為既有 `EventPattern::Discard`，以棄牌者及可選的
+`DiscardCardBefore == SourceHolder` 正規形篩選；只收 BeforeExit、PerFact。
+場上觀察者在 Field 訂閱，自身手牌訂閱在 Hand 擷取來源，移區前封存權威來源資訊與
+原世代。每批在移動前共用 before／batch，實際提交的每張 DiscardEvent 才把該卡對應的
+occurrence 交入共同 pending 佇列；未成功移動或外層交易失敗不殘留待機。
+解析及 runtime 均拒絕其他篩選或一般 Hand 觀察者。後續宣告、目標與費用沿用共同能力打出流程；自身橫置費用仍用結算時的 `Control::Pay`，
+不能改成打出時的頭費用。同時棄兩張會待機兩次，但橫置自身只能成功支付一次。
+公開待機描述只有事件種類及已公開來源卡，不帶原手牌位置或可追蹤的私有物件身分。
+費用與本文均沿共用捨棄提交點發生事件；目前 header 的 Effect cause 指向執行權威，
+不額外判斷費用是否視為卡文效果，`by` 篩選仍未准入。
+
+規則 7.4.7 的手牌上限捨棄亦在實際移動前捕捉、成功移動後沿同一棄置事件匹配與待機准入；因果為規則，不攜帶前一個能力來源。仍有棄置待機時不能換回合，結算抽牌再次超限時要重新捨棄。
 
 ## 本文手牌選取
 
@@ -738,8 +761,10 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
 的 NoTemporalExpiry、EndResolution、CurrentTurnEnd、NextTurnEnd，或明示 SourceHolder／Field 的 SourceZoneExit；沒有 usage。
-CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上從者，
-已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
+CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上或 EX 區的從者，
+已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。EX 區從者的修正依
+CR 4.8.3.3，在該卡由 EX 直接出場（含打出時經解決區入場）時沿同一規則移區邊界帶到新世代
+（BP06-003、BP13-009）；其他移區仍讓原世代修正失效。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
 
@@ -755,7 +780,7 @@ Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，
 instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
-除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
+除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代（上述 EX 出場承接除外）。
 NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本文完成後，先清除目標已換世代的數值層，
 再移除綁定此次 execution 的整批 EndResolution 修正，從原始基礎與其餘 Add／Set 完整重算、保留目前受傷量 D，
 最後執行既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
@@ -884,3 +909,10 @@ IR 的 MoveOutcome 型別參照沿用費用指示的產出型別，讀值另驗�
 
 `half_up: N` 沿既有整數運算計算 N 的一半並向正無窮方向進位；不以 N 加一，避免整數上界溢位。
 卡片減費條件的 `count` 另接受自己墓地的職業及原費用篩選，付款材料查詢不因此取得職業篩選。
+
+## 牌庫頂送墓成員的種族計數
+
+`count_of: {receipt: R, where: {trait: T}, view: before}` 僅接受同一能力中已完成、自己牌庫頂直接送墓的移動結果 R。
+只計算這次成功到達墓地的成員，依離開牌庫前未受場上修正的印刷種族篩選，不重查墓地總量，也不包含剩餘牌庫。
+降低為既有移動收據上的具名成員述詞，沿用型別、支配與 private-read 驗證；不另建卡片資訊表或獨立移動路徑。
+本次只准入傷害的單一等量數值位置；其他目的地、對手牌庫、Look 選取、after、未完成結果及其他數值用途保持拒絕。

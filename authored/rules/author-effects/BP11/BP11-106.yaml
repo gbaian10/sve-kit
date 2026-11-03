@@ -1,0 +1,51 @@
+cards:
+  BP11-106:
+    abilities:
+      - lastword:
+          do:
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              n: 1
+                              to: field
+                              token: 従順な駿馬
+                        - - create:
+                              n: 1
+                              to: ex
+                              token: 従順な駿馬
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              n: 1
+                              to: field
+                              token: 機動二輪車
+                        - - create:
+                              n: 1
+                              to: ex
+                              token: 機動二輪車
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              n: 1
+                              to: field
+                              token: 魔導装甲車
+                        - - create:
+                              n: 1
+                              to: ex
+                              token: 魔導装甲車
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

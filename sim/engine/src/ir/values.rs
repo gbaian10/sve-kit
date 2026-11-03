@@ -430,6 +430,7 @@ variants!(IntOperation {
     Conditional { condition: Expr<Bool>, then_value: Expr<Int>, else_value: Expr<Int> } => ["value.conditional"]
 });
 variants!(NatOperation {
+    ReceiptCount { receipt: ObjectReceipt, projection: MemberProjection, member: Binding<RuntimeObjectView>, predicate: Expr<Bool> } => ["read.receipt.member-count"],
     ReceiptActualSum { receipts: MeasuredReceiptList } => ["read.receipt.actual-sum"],
     Conditional { condition: Expr<Bool>, then_value: Expr<Nat>, else_value: Expr<Nat> } => ["value.conditional"],
     CheckedInt { value: Expr<Int> } => ["value.checked-nat"],

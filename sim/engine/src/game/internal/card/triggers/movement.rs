@@ -49,6 +49,18 @@ fn destination_matches(on: &TriggerCondition, destination: &str) -> bool {
     })
 }
 
+/// 「EXエリアにこれが置かれたとき」 is active in EX and observes only its own arrival there.
+pub(in crate::game::internal) fn ex_self_entry(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Ex]
+        && matches!(
+            ability.trigger.as_ref().map(|trigger| &trigger.on),
+            Some(TriggerCondition::Event {
+                pattern: EventPattern::EnterEx { .. }
+            })
+        )
+        && filter(ability).is_some_and(|plan| plan.itself == Some(true))
+}
+
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if filter(ability).is_none() {
         return Ok(false);
@@ -59,7 +71,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         .ok_or_else(|| invalid("missing movement trigger"))?;
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || trigger.active_zones != [ZoneKind::Field]
+        || (trigger.active_zones != [ZoneKind::Field]
+            && !(trigger.active_zones == [ZoneKind::Ex] && ex_self_entry(ability)))
         || trigger.view
             != if matches!(
                 trigger.on,
@@ -159,7 +172,10 @@ impl Game {
                 let abilities = self
                     .internal_printed_abilities(&id)?
                     .into_iter()
-                    .filter(|ability| matches_kind(&ability.node, exit))
+                    .filter(|ability| {
+                        matches_kind(&ability.node, exit)
+                            && ability.node.active_zones == [ZoneKind::Field]
+                    })
                     .collect();
                 Ok((id, abilities))
             })
@@ -301,7 +317,18 @@ impl Game {
         if previous.is_empty() {
             return Ok(());
         }
-        let observers = self.movement_observers(false)?;
+        let mut observers = self.movement_observers(false)?;
+        // An arriving card's own EX-zone ability sees the move that activates it (CR 10.7.4.2).
+        for old in previous {
+            let own = self
+                .internal_printed_abilities(&old.id)?
+                .into_iter()
+                .filter(|ability| ex_self_entry(&ability.node))
+                .collect::<Vec<_>>();
+            if !own.is_empty() {
+                observers.push((old.id.clone(), own));
+            }
+        }
         if observers.iter().all(|(_, abilities)| abilities.is_empty()) {
             return Ok(());
         }

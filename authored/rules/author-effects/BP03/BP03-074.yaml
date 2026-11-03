@@ -1,0 +1,31 @@
+cards:
+  BP03-074:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 1
+          on:
+            enter_field:
+              sel:
+                name: ゴースト
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP03-T05
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
