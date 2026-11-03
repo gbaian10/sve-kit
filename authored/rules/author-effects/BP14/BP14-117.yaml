@@ -1,0 +1,17 @@
+cards:
+  BP14-117:
+    abilities:
+      - evolve_time:
+          do:
+            - draw:
+                n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

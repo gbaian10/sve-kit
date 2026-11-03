@@ -1,0 +1,65 @@
+cards:
+  BP13-021:
+    abilities:
+      - fanfare:
+          do:
+            - banish:
+                top:
+                  n: 10
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 30
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: banish
+                          op: ge
+                          right: 20
+                      else:
+                        - damage:
+                            n: 5
+                            to:
+                              any_of:
+                                - leader: opp
+                                - kind: follower
+                                  who: opp
+                                  zone: field
+                      then:
+                        - damage:
+                            n: 10
+                            to:
+                              any_of:
+                                - leader: opp
+                                - kind: follower
+                                  who: opp
+                                  zone: field
+                then:
+                  - damage:
+                      n: 20
+                      to:
+                        any_of:
+                          - leader: opp
+                          - kind: follower
+                            who: opp
+                            zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
