@@ -316,6 +316,33 @@ def ran(kind: str, folder: Path) -> int:
     return len(junit(folder / "junit.xml", python=True)[0])
 
 
+# Cargo names each binary it runs; only repository paths and crate names reach the summary.
+RUST_BINARY = re.compile(
+    r"^\s*Running (?:unittests )?([A-Za-z0-9_./-]+\.rs) \(.*?/deps/([A-Za-z0-9_-]+?)-[0-9a-f]+\)$"
+)
+
+
+def binary_section(source: str) -> list[str]:
+    """Time each test binary, so per-binary setup costs stay visible across shards."""
+    rows: list[str] = []
+    label = None
+    for line in source.splitlines():
+        if match := RUST_BINARY.match(line):
+            label = f"{match[2]} ({match[1]})"
+        elif label and (result := RUST_RESULT.match(line)):
+            ran = int(result[1]) + int(result[2]) + int(result[3])
+            rows.append(f"| {label} | {ran} | {number(result[4]):.2f} |")
+            label = None
+    return [
+        "",
+        "### Test binaries",
+        "",
+        "| Binary | Tests run | Seconds |",
+        "| --- | ---: | ---: |",
+        *rows,
+    ]
+
+
 def rust_summary(folder: Path) -> str:
     """Aggregate stable libtest result lines without exposing panic output."""
     source, results = rust_results(folder)
@@ -330,7 +357,7 @@ def rust_summary(folder: Path) -> str:
         source,
         re.MULTILINE,
     )
-    failures = "\n".join(failure_section(locations))
+    failures = "\n".join(failure_section(locations) + binary_section(source))
     return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{shard_line}\n{failures}\n"
 
 

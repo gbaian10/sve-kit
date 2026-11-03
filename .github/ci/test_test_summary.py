@@ -307,7 +307,11 @@ test module::r#type::test_error ... FAILED
 test {PRIVATE} ... FAILED
 test [unsafe](https://example.com) ... FAILED
 test boundaries::test_ok ... ok
+     Running unittests src/lib.rs (target/llvm-cov-target/debug/deps/sve_engine-0123abcd)
 test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.20s
+     Running tests/{PRIVATE}.rs (target/llvm-cov-target/debug/deps/x-0123abcd)
+     Running tests/listed_only.rs (target/llvm-cov-target/debug/deps/listed_only-0123abcd)
+     Running tests/current_repository.rs (target/llvm-cov-target/debug/deps/current_repository-89ef)
 test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
 """,
             encoding="utf-8",
@@ -323,6 +327,11 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         assert "**12.00 s**" in summary
         assert "**1.50 s**" in summary
         assert "### Failed tests\n\n- `boundaries::test_failure`" in summary
+        assert "| sve_engine (src/lib.rs) | 4 | 1.20 |" in summary
+        assert (
+            "| current_repository (tests/current_repository.rs) | 3 | 0.30 |" in summary
+        )
+        assert "listed_only" not in summary
         assert "- `module::r#type::test_error`" in summary
         assert "test_ok" not in summary
         assert "unsafe" not in summary
