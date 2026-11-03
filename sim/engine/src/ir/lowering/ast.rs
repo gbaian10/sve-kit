@@ -1614,6 +1614,8 @@ pub(super) struct Auto {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "discarded")]
+    Discarded(DiscardSubscription),
     #[serde(rename = "evolved")]
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
@@ -1730,6 +1732,16 @@ pub(super) enum EvolutionZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct EvolutionCost {
     pub pp: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiscardSubscription {
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    #[serde(rename = "from")]
+    pub _from: Option<HandZone>,
+    pub who: Option<EntryPlayer>,
 }
 
 #[derive(Deserialize)]

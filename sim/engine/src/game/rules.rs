@@ -824,7 +824,9 @@ impl Game {
             cause: json!({"rule":"7.4.7"}),
             ..Frame::default()
         };
+        let pending = self.internal_prepare_rule_discard(&selected, &frame)?;
         self.discard(&selected, &frame)?;
+        self.internal_commit_rule_discard(pending)?;
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
