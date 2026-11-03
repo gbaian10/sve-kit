@@ -213,3 +213,51 @@ fn mode_targets_keep_arbitrary_player_captures_closed() {
         "only the selected target controller capture is admitted inside modes"
     );
 }
+
+#[test]
+fn mode_recipient_targets_keep_selection_captures_closed() {
+    let program = lower_body(&json!({"targets":[{"option":1,"bind":"target","from":{"who":"opp","zone":"field","kind":"follower","leader_or":true},"n":1}],"do":[{"choice":{"n":1,"options":[[{"damage":{"to":"target","n":2}}],[{"draw":{"n":1}}]]}}]})).unwrap();
+    let mut valid = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "mode-recipient-positive",
+    )
+    .unwrap();
+    valid.load_internal_card("unit-follower", &program).unwrap();
+    let mut bad = program.card().clone();
+    let Node::Control {
+        control: Control::Mode { modes, .. },
+    } = &mut bad.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("formal modes")
+    };
+    let scope = modes[0].body.scope;
+    let parameter = &mut modes[0].parameters[0];
+    assert!(matches!(parameter.domain, ChoiceDomain::Recipients { .. }));
+    parameter.captures.push(Capture::Player {
+        at: CaptureTime::AtSelection {
+            decision: parameter.id,
+        },
+        value: Expr::Live(Box::new(PlayerRead::Active {})),
+        into: CaptureRef {
+            binding: Binding::new(999, scope),
+        },
+    });
+    let program = WellFormedCardProgram::check(bad).unwrap();
+    let mut rejected = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "mode-recipient-capture-boundary",
+    )
+    .unwrap();
+    assert!(
+        rejected
+            .load_internal_card("unit-follower", &program)
+            .is_err(),
+        "recipient mode support cannot admit arbitrary selection captures"
+    );
+}

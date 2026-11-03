@@ -1071,8 +1071,15 @@ impl Game {
             .iter()
             .filter(|decision| !super::material::is_parameter(decision))
         {
-            let (wait, _) = self.target_domain(execution, decision)?;
-            if wait.bounds.minimum.0 > wait.capacity()? {
+            let feasible = if matches!(decision.domain, ChoiceDomain::Recipients { .. }) {
+                let (_, domain) = self.recipient_target_domain(execution, decision)?;
+                domain.cardinality.minimum.0
+                    <= u64::try_from(domain.members.len()).map_err(invalid)?
+            } else {
+                let (wait, _) = self.target_domain(execution, decision)?;
+                wait.bounds.minimum.0 <= wait.capacity()?
+            };
+            if !feasible {
                 return Ok(false);
             }
         }
