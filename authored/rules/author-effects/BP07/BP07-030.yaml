@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-030:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - optional:
+                do:
+                  - either:
+                      options:
+                        - - create:
+                              token: ナテラの大樹
+                              to: field
+                              n: 1
+                        - - create:
+                              token: ナテラの大樹
+                              to: ex
+                              n: 1
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - act:
+                  sel:
+                    who: self
+                    zone: field
+                    name: ナテラの大樹
+                  any: true
+                  result: materials
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  x_paid: materials
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP07-T03

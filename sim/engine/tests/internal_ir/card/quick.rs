@@ -500,7 +500,46 @@ fn evolved_quick_departure_cost_is_rejected_before_a_window_can_offer_it() {
         vec![draw(1, 0)],
     ))]);
     let before = exact_authority(&board);
-    assert!(board.load_internal_card("unit-follower", &program).is_err());
+    let error = board
+        .load_internal_card("unit-follower", &program)
+        .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("evolved Quick source departure cost")
+    );
+    assert_eq!(before, exact_authority(&board));
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["activate"] = json!({"quick":true,"cost":{"to_cemetery":{"sel":{"who":"self","zone":"field","kind":"follower"},"n":1_u8}},"do":[{"draw":{"n":1_u8}}]});
+    let meta = tree["cards"]["BP08-038"]["meta"].clone();
+    tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
+    let selected = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    board
+        .clone()
+        .load_internal_card("unit-follower", &selected)
+        .unwrap();
+    let mut formal = selected.card().clone();
+    let parameter = &mut formal.abilities[0].node.play.as_mut().unwrap().parameters[0];
+    let DecisionKind::PlayParameter { slot, .. } = &mut parameter.kind else {
+        panic!("material parameter")
+    };
+    *slot = PlaySlot::Targets;
+    let formal = WellFormedCardProgram::check(formal).unwrap();
+    let error = board
+        .load_internal_card("unit-follower", &formal)
+        .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("evolved Quick source departure cost"),
+        "a formal target binding is not a selected cost material: {error}"
+    );
     assert_eq!(before, exact_authority(&board));
 }
 

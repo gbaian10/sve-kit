@@ -4,13 +4,13 @@ use super::{
     DiscardOutcome, DrawEvent, DriveCheckedEvent, DriveGainedEvent, DriveTriggerEvent,
     EarthRitePaidComponent, EnterExEvent, EnterFieldEvent, EquipEvent, Event, EventSnapshotPolicy,
     EvolutionStateFields, EvolveEvent, FusedEvent, HistoryCount, HistoryQuery, Info,
-    LeaveFieldEvent, LifeChangeEvent, MeasuredReceipt, MeasuredReceiptList, MoveEvent, MoveOutcome,
-    MoveResult, MovementReceipt, MovementReceiptList, NonEmpty, NumericHistoryQuery, ObjectReceipt,
-    ObjectReceiptList, ObjectRef, PaymentEvent, PaymentReceipt, PaymentResult, PhaseEvent,
-    PhaseFields, PlayEvent, PlaySubject, PostureEvent, PostureFields, RaceEvent, ReceiptList,
-    ReceiptReference, ReceiptStatus, ResolveEvent, RuntimeAbilityReference, RuntimeObjectView,
-    SourcePredicate, StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome, TurnIdFields,
-    UbActivatedEvent, ValueEquality, Visitor, Walk,
+    LeaveFieldEvent, LifeChangeEvent, MaterialActOutcome, MeasuredReceipt, MeasuredReceiptList,
+    MoveEvent, MoveOutcome, MoveResult, MovementReceipt, MovementReceiptList, NonEmpty,
+    NumericHistoryQuery, ObjectReceipt, ObjectReceiptList, ObjectRef, PaymentEvent, PaymentReceipt,
+    PaymentResult, PhaseEvent, PhaseFields, PlayEvent, PlaySubject, PostureEvent, PostureFields,
+    RaceEvent, ReceiptList, ReceiptReference, ReceiptStatus, ResolveEvent, RuntimeAbilityReference,
+    RuntimeObjectView, SourcePredicate, StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome,
+    TurnIdFields, UbActivatedEvent, ValueEquality, Visitor, Walk,
 };
 use core::fmt::Debug;
 use core::marker::PhantomData;
@@ -592,6 +592,7 @@ impl Walk for NoRead {
     }
 }
 variants!(IntFrozen {
+    PaidMaterialActs { receipt: ReceiptReference<MaterialActOutcome> } => ["read.receipt.paid-material-acts"],
     PaidMaterialAttack { receipt: ReceiptReference<MoveOutcome> } => ["read.receipt.paid-material-attack"],
     DiscardedCost { receipt: ReceiptReference<DiscardOutcome> } => ["read.receipt.discarded-cost"],
     StatBefore { facet: Binding<StatDelta> } => ["read.event-field"],

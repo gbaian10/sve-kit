@@ -123,6 +123,10 @@ runtime_record!(PaymentResult { complete: Bool, steps: Vec<RuntimeReceiptId> });
 
 runtime_record!(MoveOutcome { moved: Vec<MoveResult> });
 
+/// Typed identity for a completed own-field material Act cost receipt.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MaterialActOutcome;
+
 runtime_record!(SearchOutcome { found: Vec<RuntimeObjectView>, revealed: Vec<RuntimeObjectView>, moved: Vec<MoveResult> });
 
 runtime_record!(

@@ -2,7 +2,7 @@ use super::{Checked, Checker, WellFormedReason};
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, Decision, DecisionKind, Instruction, InstructionContext,
     MoveDestination, MoveOutcome, MoveReason, Nat, ObjectOperand, OwnerZone, PlaySlot, PlayerRef,
-    PlayerRelation, ReceiptLocation, ReceiptReference, Selector, ZoneKind,
+    PlayerRelation, Posture, ReceiptLocation, ReceiptReference, Selector, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -31,6 +31,20 @@ impl Checker {
         let [group] = constraint.groups.as_slice() else {
             return;
         };
+        if decision.actor == (PlayerRef::Controller {})
+            && decision.visibility == (Visibility::Public {})
+            && constraint.cardinality == group.cardinality
+            && (constraint.cardinality
+                == (Cardinality {
+                    minimum: Nat(0),
+                    maximum: None,
+                })
+                || (constraint.cardinality.minimum.0 > 0
+                    && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
+            && own_field(&group.selector)
+        {
+            self.env.field_act_materials.insert(binding.key());
+        }
         let single = Cardinality {
             minimum: Nat(1),
             maximum: Some(Nat(1)),
@@ -41,6 +55,18 @@ impl Checker {
         {
             self.env.field_materials.insert(binding.key());
         }
+    }
+
+    pub(super) fn material_act_cost(
+        &self,
+        instruction: &Instruction,
+        context: InstructionContext,
+    ) -> bool {
+        context == InstructionContext::Cost
+            && instruction.precondition.is_none()
+            && instruction.actor == (PlayerRef::Controller {})
+            && matches!(&instruction.action, Action::Posture { objects: Selector::Bound { reference }, posture: Posture::Acted }
+                if self.env.field_act_materials.contains(&reference.key()))
     }
 
     pub(super) fn record_material_move(

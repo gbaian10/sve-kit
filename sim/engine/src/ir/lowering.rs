@@ -1100,6 +1100,7 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
 #[derive(Clone, Default)]
 struct ReceiptReads {
     paid_materials: BTreeMap<String, ReceiptId>,
+    paid_material_acts: BTreeMap<String, ReceiptId>,
     /// Declared bounds of named discard payments.
     discard_bounds: BTreeMap<ReceiptId, Cardinality>,
     /// Movements of cards leaving the deck, which carry no modifications.

@@ -109,6 +109,11 @@ pub(super) const fn is_parameter(decision: &Decision) -> bool {
     )
 }
 
+pub(super) fn uses_parameter(action: &Action, play: &PlaySpec) -> bool {
+    matches!(cost_objects(action),Some(Selector::Bound {reference}) if play.parameters.iter().any(|decision|
+        is_parameter(decision) && matches!(&decision.domain,ChoiceDomain::Objects {binding,..} if binding==reference)))
+}
+
 fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
     match selector {
         Selector::Zone {

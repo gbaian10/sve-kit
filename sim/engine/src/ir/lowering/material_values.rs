@@ -25,7 +25,10 @@ impl BodyContext<'_> {
             ast::Step::Destroy(ast::ObjectAction::Long { result, .. }) => result.as_deref(),
             _ => None,
         };
-        if name.is_some_and(|name| self.receipt_reads.paid_materials.contains_key(name)) {
+        if name.is_some_and(|name| {
+            self.receipt_reads.paid_materials.contains_key(name)
+                || self.receipt_reads.paid_material_acts.contains_key(name)
+        }) {
             return Err(unsupported(path));
         }
         Ok(())
@@ -49,6 +52,7 @@ impl BodyContext<'_> {
             return Ok(());
         }
         if name.is_empty()
+            || self.receipt_reads.paid_material_acts.contains_key(name)
             || self.receipt_reads.paid_materials.contains_key(name)
             || self.observations.contains_key(name)
             || self.targets.contains_key(name)
@@ -61,6 +65,38 @@ impl BodyContext<'_> {
         }
         self.receipt_reads
             .paid_materials
+            .insert(name.clone(), receipt);
+        Ok(())
+    }
+
+    pub(super) fn record_paid_material_acts(
+        &mut self,
+        material: &ast::Material,
+        receipt: ReceiptId,
+        path: &str,
+    ) -> Result<(), LoweringError> {
+        let Some(name) = &material.result else {
+            return Ok(());
+        };
+        if !matches!(material.sel.who, ast::Side::Controller)
+            || !matches!(material.sel.zone, ast::PublicZone::Field)
+        {
+            return Err(unsupported(path));
+        }
+        if name.is_empty()
+            || self.receipt_reads.paid_material_acts.contains_key(name)
+            || self.receipt_reads.paid_materials.contains_key(name)
+            || self.observations.contains_key(name)
+            || self.targets.contains_key(name)
+            || self.recipient_targets.contains_key(name)
+            || self.definitions.contains_key(name)
+            || self.searches.contains(name)
+            || self.ex_outputs.contains_key(name)
+        {
+            return Err(unsupported(path));
+        }
+        self.receipt_reads
+            .paid_material_acts
             .insert(name.clone(), receipt);
         Ok(())
     }
