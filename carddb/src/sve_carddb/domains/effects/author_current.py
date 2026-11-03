@@ -51,7 +51,7 @@ from sve_carddb.domains.translations.sources import pointer
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-    from sve_carddb.build import Database, Value
+    from sve_carddb.build import Database, Row, Value
     from sve_carddb.contracts.author_leaves import IndexRecord
     from sve_carddb.contracts.source_binding import SourceDescriptor
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -155,6 +155,7 @@ class CurrentAuthorSources:
         self.db = db
         self.sources = sources
         self.jp_batch_id = jp_batch_id
+        self._jp_printings: tuple[int, dict[object, list[Row]]] | None = None
         # Rebuild cached models from the immutable snapshot bytes at this boundary.
         snapshot = Snapshot(snapshot.shards, snapshot.closure)
         try:
@@ -178,13 +179,21 @@ class CurrentAuthorSources:
                 Diagnostic("source", "source_classifier_invalid")
             ) from None
 
+    def _printings(self, number: str) -> list[Row]:
+        # One scan per database revision replaces a full table scan per lookup.
+        revision = self.db.revision()
+        if self._jp_printings is None or self._jp_printings[0] != revision:
+            numbers: dict[object, list[Row]] = {}
+            for row in self.db.select(
+                "printing", self.db.columns("printing"), where={"region": "jp"}
+            ):
+                numbers.setdefault(row.values["card_no"], []).append(row)
+            self._jp_printings = revision, numbers
+        return self._jp_printings[1].get(number, [])
+
     def printing_card(self, number: str, *, prototype: bool = False) -> str:
         """Resolve an official JP printing only when all rows agree on identity."""
-        rows = self.db.select(
-            "printing",
-            self.db.columns("printing"),
-            where={"region": "jp", "card_no": number},
-        )
+        rows = self._printings(number)
         identities = {_text(row.values["card_id"]) for row in rows}
         if len(identities) != 1:
             raise SourceError(

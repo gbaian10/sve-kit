@@ -66,6 +66,8 @@ def load_glossary(root: Path) -> Snapshot:
         if file[0].startswith(("translations/glossary/", "translations/overrides/"))
     )
     snapshot = Snapshot(selected, loaded.files)
+    # The reader already ran the strict closure checks on exactly these files.
+    snapshot.__dict__["four_layer"] = loaded
     validate_snapshot(snapshot)
     return snapshot
 

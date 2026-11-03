@@ -72,6 +72,7 @@ class Database:
         self._rules = rules
         self._version = schema.version
         self._query_checks = schema.query_checks
+        self._transaction_revision = 0
         self._exact_rows: dict[
             str, dict[tuple[SQLValue, ...], tuple[SQLValue, ...]]
         ] = {}
@@ -123,6 +124,8 @@ class Database:
             raise
         finally:
             self._exact_rows.clear()
+            # Rollback restores rows without changing SQLite's total_changes.
+            self._transaction_revision += 1
 
     def save(self, path: Path) -> None:
         """Save the completed transaction without reconstructing domain rows."""
@@ -253,6 +256,10 @@ class Database:
     def has_table(self, name: str) -> bool:
         """Report declared capability availability without probing SQLite internals."""
         return name in self._tables
+
+    def revision(self) -> int:
+        """Change on row mutations and transaction completion, including rollback."""
+        return self._connection.total_changes + self._transaction_revision
 
     def columns(self, name: str) -> tuple[str, ...]:
         """Expose declaration names, never unvalidated SQLite schema metadata."""
