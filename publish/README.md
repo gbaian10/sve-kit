@@ -45,7 +45,8 @@ write nothing and never open bitmaps. Image dry-run checks the description;
 snapshot dry-run checks the pointer, manifest hash/schema, JSON hashes/lengths,
 Brotli decoding, reader join and reference closure, then reports image requirements.
 It also requires each region's construction index at `construction/<manifest hex>/<region>.json`,
-canonical and naming the same manifest and region; an export without one cannot be published.
+in the supported format, canonical and naming the same data version, manifest and region;
+an export without one cannot be published.
 Remote differences and readiness are unknown offline. `--export-dir` takes
 precedence over `SVE_EXPORT_DIR`; a non-empty absolute root is required.
 

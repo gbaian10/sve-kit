@@ -49,10 +49,12 @@ def test_an_export_needs_its_own_construction_index(
         load_export(roots.preview)
 
 
+@pytest.mark.parametrize("mismatch", ["bytes", "headers"])
 def test_rerun_completes_a_missing_index_but_never_replaces_one(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
+    mismatch: str,
 ) -> None:
     store, state, _ = remote
     export(images, roots, step=0)
@@ -64,15 +66,27 @@ def test_rerun_completes_a_missing_index_but_never_replaces_one(
     assert again["index"] == "unchanged"
     assert again["written_files"] == 1
     assert state.objects[member.key].raw == member.raw
-    state.objects[member.key] = Stored(b"{}", '"other"', JSON_HEADERS)
+    state.objects[member.key] = Stored(
+        b"{}" if mismatch == "bytes" else member.raw,
+        '"other"',
+        JSON_HEADERS
+        if mismatch == "bytes"
+        else JSON_HEADERS | {"cache-control": "no-store"},
+    )
+    before = dict(state.objects)
+    state.requests.clear()
     with pytest.raises(ExportError, match="Stored construction index differs"):
         upload(store, loaded)
+    assert state.objects == before
+    assert all(method == "GET" for method, _key, _headers in state.requests)
 
 
+@pytest.mark.parametrize("missing", ["none", "current", "previous", "both"])
 def test_gc_keeps_current_and_previous_indexes_only(
     images: PublicImages,
     roots: Roots,
     remote: tuple[R2Store, ServerState, Loopback],
+    missing: str,
 ) -> None:
     store, state, _ = remote
     keys = []
@@ -83,11 +97,19 @@ def test_gc_keeps_current_and_previous_indexes_only(
         loaded = load_export(roots.preview)
         upload(store, loaded)
         keys.append(loaded.construction[0].key)
-    # The second index is gone already, as for a snapshot published before indexes existed.
-    del state.objects[keys[1]]
+    # Missing retained indexes also represent snapshots published before indexes existed.
+    absent = set()
+    if missing in {"previous", "both"}:
+        absent.add(keys[1])
+    if missing in {"current", "both"}:
+        absent.add(keys[2])
+    for key in absent:
+        del state.objects[key]
     result = gc.collect(store, SNAPSHOT_PREFIXES, execute=True)
     deleted = result["deleted"]
     assert isinstance(deleted, list)
     assert keys[0] in deleted
-    assert keys[2] in state.objects
+    assert not set(keys[1:]) & set(deleted)
+    for key in keys[1:]:
+        assert (key in state.objects) == (key not in absent)
     assert keys[0] not in state.objects
