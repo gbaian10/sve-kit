@@ -388,7 +388,9 @@ impl Game {
             || has_evolution
             || resource_links;
         if special {
-            if execution.ability.is_none() {
+            if execution.ability.is_none()
+                && !self.internal_exchange_token_cost_authorized(execution, &previous.id, zone)?
+            {
                 return Err(unsupported(
                     "special-card movement requires whole-card authority",
                 ));

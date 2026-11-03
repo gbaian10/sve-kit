@@ -3,8 +3,9 @@ use crate::ir::{
     Action, Binding, Bool, Cardinality, ChoiceDomain, CostChange, CostSpec, CostStep, Decision,
     DecisionId, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, InputMode,
     Instruction, InstructionContext, InstructionId, Int, MoveDestination, MoveReason, MoveSpec,
-    Nat, OwnerZone, PlayCostExchange, PlaySlot, PlayerRef, Posture, ReceiptId, SelectionConstraint,
-    SelectionGroup, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    Nat, ObjectOperand, ObjectView, OwnerZone, PlayCostExchange, PlaySlot, PlayerRef, Posture,
+    PostureRead, Predicate, ReceiptId, SelectionConstraint, SelectionGroup, SelectionSnapshot,
+    SelectionView, Selector, Visibility, ZoneKind,
 };
 
 enum MaterialAction {
@@ -35,9 +36,53 @@ pub(super) fn lower(
         _ => return Err(unsupported(&path)),
     };
     let scope = allocator.scope(&path)?;
-    let binding = Binding::new(allocator.id(&path)?, scope);
-    let (materials, action) = lower_material(optional, binding, allocator, &path)?;
-    let id = allocator.id(&path)?;
+    let choices = if let Some(routes) = &optional.one_of {
+        if routes.len() != 2
+            || optional.discard.is_some()
+            || optional.to_cemetery.is_some()
+            || optional.banish.is_some()
+            || optional.act.is_some()
+            || optional.result.is_some()
+            || routes.iter().any(|route| {
+                route.one_of.is_some() || route.discard.is_some() || route.result.is_some()
+            })
+        {
+            return Err(unsupported(&path));
+        }
+        routes.iter().collect::<Vec<_>>()
+    } else {
+        vec![optional]
+    };
+    let multiple = choices.len() == 2;
+    let mut materials = Vec::new();
+    let mut alternatives = Vec::new();
+    for (index, choice) in choices.into_iter().enumerate() {
+        let route_path = format!("{path}/one_of/{index}");
+        let binding = Binding::new(allocator.id(&route_path)?, scope);
+        let (decision, action) = lower_material(choice, binding, allocator, &route_path, multiple)?;
+        materials.push(decision);
+        let id = allocator.id(&route_path)?;
+        alternatives.push(CostSpec::Ordered {
+            steps: vec![CostStep {
+                keyword: None,
+                materials: None,
+                instruction: Box::new(Instruction {
+                    id: InstructionId(id),
+                    receipt: ReceiptId(id),
+                    actor: PlayerRef::Controller {},
+                    source: super::ability_source(source, None),
+                    precondition: None,
+                    context: InstructionContext::Cost,
+                    action,
+                }),
+            }],
+        });
+    }
+    let cost = if multiple {
+        CostSpec::Alternative { alternatives }
+    } else {
+        alternatives.pop().ok_or_else(|| unsupported(&path))?
+    };
     let mut located = source.clone();
     located.author_path.clone_from(&path);
     Ok(Some(Located {
@@ -46,21 +91,12 @@ pub(super) fn lower(
             scope,
             decision: DecisionId(allocator.id(&path)?),
             materials,
-            cost: CostSpec::Ordered {
-                steps: vec![CostStep {
-                    keyword: None,
-                    materials: None,
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(id),
-                        receipt: ReceiptId(id),
-                        actor: PlayerRef::Controller {},
-                        source: super::ability_source(source, None),
-                        precondition: None,
-                        context: InstructionContext::Cost,
-                        action,
-                    }),
-                }],
+            route: if multiple {
+                Some(DecisionId(allocator.id(&path)?))
+            } else {
+                None
             },
+            cost,
             change,
             receipt: ReceiptId(allocator.id(&path)?),
         },
@@ -72,6 +108,7 @@ fn lower_material(
     binding: Binding<Selector>,
     allocator: &mut Allocator,
     path: &str,
+    multiple: bool,
 ) -> Result<(Decision, Action), LoweringError> {
     if let Some(discard) = &optional.discard {
         if optional.to_cemetery.is_some() || optional.banish.is_some() || optional.act.is_some() {
@@ -124,7 +161,10 @@ fn lower_material(
         (Some(material), None, None) if matches!(material.sel.zone, ast::PublicZone::Field) => {
             (material, MaterialAction::Put)
         }
-        (None, Some(material), None) if matches!(material.sel.zone, ast::PublicZone::Cemetery) => {
+        (None, Some(material), None)
+            if matches!(material.sel.zone, ast::PublicZone::Cemetery)
+                || (multiple && matches!(material.sel.zone, ast::PublicZone::Ex)) =>
+        {
             (material, MaterialAction::Banish)
         }
         (None, None, Some(material)) if matches!(material.sel.zone, ast::PublicZone::Field) => {
@@ -139,7 +179,7 @@ fn lower_material(
     {
         return Err(unsupported(path));
     }
-    let materials = materials(material, binding, allocator, path)?;
+    let materials = materials(material, binding, allocator, path, multiple)?;
     let objects = Selector::Bound { reference: binding };
     let action = match operation {
         MaterialAction::Put => Action::Move {
@@ -169,17 +209,51 @@ fn materials(
     binding: Binding<Selector>,
     allocator: &mut Allocator,
     path: &str,
+    multiple: bool,
 ) -> Result<Decision, LoweringError> {
     let cardinality = Cardinality {
         minimum: Nat(material.n.ok_or_else(|| unsupported(path))?),
         maximum: Some(Nat(material.n.ok_or_else(|| unsupported(path))?)),
     };
-    costs::query(&material.sel, allocator, path)?;
-    let selector = costs::public_query(
-        &material.sel,
-        Binding::new(allocator.id(path)?, allocator.scope(path)?),
-        path,
-    )?;
+    let mut query = material.sel.clone();
+    let standing = if multiple {
+        if query.class.as_ref().is_none_or(String::is_empty)
+            || !matches!(
+                (&query.zone, query.acted),
+                (ast::PublicZone::Field, Some(false)) | (ast::PublicZone::Ex, None)
+            )
+        {
+            return Err(unsupported(path));
+        }
+        let standing = query.acted.take() == Some(false);
+        let class = query.class.take();
+        costs::query(&query, allocator, path)?;
+        query.class = class;
+        standing
+    } else {
+        costs::query(&query, allocator, path)?;
+        false
+    };
+    let candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
+    let mut selector = costs::public_query(&query, candidate, path)?;
+    if standing {
+        let Selector::Zone { predicate, .. } = &mut selector else {
+            return Err(unsupported(path));
+        };
+        **predicate = Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![
+                Expr::Compute(Box::new(Predicate::PostureEquals {
+                    left: Expr::Live(Box::new(PostureRead::Posture {
+                        object: ObjectView::Current {
+                            object: Box::new(ObjectOperand::Bound { binding: candidate }),
+                        },
+                    })),
+                    right: Expr::Literal(Posture::Standing),
+                })),
+                *predicate.clone(),
+            ],
+        }));
+    }
     decision(
         binding,
         SelectionConstraint {

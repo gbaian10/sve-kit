@@ -25,6 +25,9 @@ pub(super) fn lower(
     operation: Operation,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
+    if material.sel.acted.is_some() {
+        return Err(unsupported(path));
+    }
     let cardinality = cardinality(material, path)?;
     let named = matches!(operation, Operation::Put)
         && matches!(material.sel.who, ast::Side::Controller)
@@ -82,6 +85,9 @@ pub(super) fn choice(
     cardinality: Cardinality,
     path: &str,
 ) -> Result<(Selector, Decision), LoweringError> {
+    if query.acted.is_some() {
+        return Err(unsupported(path));
+    }
     if !matches!(query.who, ast::Side::Controller | ast::Side::All) {
         return Err(unsupported(path));
     }

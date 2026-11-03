@@ -463,6 +463,9 @@ enum Wait {
         receipt: ReceiptId,
     },
     CostMaterials(card::exchange::MaterialWait),
+    ExchangeRoute {
+        affordable: Vec<usize>,
+    },
     MaterialParameter(card::material::MaterialWait),
     TriggerQuota {
         count: usize,
@@ -824,6 +827,14 @@ impl Game {
                     let members = wait.validate(&handles)?;
                     rollback = execution.origin.take();
                     wait.bind(&mut execution, members);
+                }
+                (Wait::ExchangeRoute { affordable }, Answer::Integer(route)) => {
+                    let index = usize::try_from(route.0).map_err(invalid)?;
+                    if !affordable.contains(&index) {
+                        return Err(invalid("unavailable exchange route"));
+                    }
+                    rollback = execution.origin.take();
+                    card::exchange::choose_route(&mut execution, index)?;
                 }
                 (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;

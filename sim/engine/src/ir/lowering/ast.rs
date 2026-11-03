@@ -1945,6 +1945,7 @@ pub(super) enum PublicNumber {
 #[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
+    pub acted: Option<bool>,
     pub racing: Option<bool>,
     #[serde(default)]
     pub other: bool,
@@ -2100,6 +2101,7 @@ pub(super) enum ModeCondition {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
+    pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
     pub banish: Option<Material>,
