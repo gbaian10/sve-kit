@@ -237,12 +237,13 @@ pub(super) fn lower_at_source(
     source: super::SourceSpan,
 ) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
-    if head.zone.as_ref().is_some_and(|zones| match zones {
-        ast::ActivationZones::One(zone) => zone.kind() != ZoneKind::Field,
-        ast::ActivationZones::Many(zones) => {
-            !matches!(zones.as_slice(),[zone] if zone.kind()==ZoneKind::Field)
-        }
-    }) {
+    let zone = match &head.zone {
+        None => ZoneKind::Field,
+        Some(zones) => zones.single().ok_or_else(|| unsupported(path))?,
+    };
+    if !matches!(zone, ZoneKind::Field | ZoneKind::Equipment)
+        || (zone == ZoneKind::Equipment && head.r#while.is_some())
+    {
         return Err(unsupported(path));
     }
     let origin = ability_source(&source, None);
@@ -375,7 +376,7 @@ pub(super) fn lower_at_source(
             source: origin,
             kind: AbilityKind::Static,
             qualification: AbilityQualification::Ordinary,
-            active_zones: vec![ZoneKind::Field],
+            active_zones: vec![zone],
             event_captures: vec![],
             play: None,
             trigger: None,

@@ -347,7 +347,11 @@ impl Game {
         self.card_runtime.quick_start = true;
         let result = if let Some(action) = action {
             if let Some(ability) = action.ability {
-                self.activate_loaded_card(&action.holder, ability, actor)
+                self.activate_loaded_card(
+                    &action.holder,
+                    super::ActivationKey::Definition(ability),
+                    actor,
+                )
             } else {
                 self.play_internal_spell(&action.holder, actor)
             }

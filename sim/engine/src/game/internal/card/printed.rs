@@ -168,6 +168,15 @@ impl Game {
         self.internal_effective_print(holder)?;
         let source = self.internal_current_reference(holder)?;
         let form = self.internal_current_reference(form)?;
+        self.internal_object_association(source, form)
+            .map(|link| vec![link])
+    }
+
+    pub(in crate::game::internal) fn internal_object_association(
+        &mut self,
+        source: ObjectRef,
+        form: ObjectRef,
+    ) -> Result<AssociationId> {
         let next = AssociationId(
             u64::try_from(self.card_runtime.links.len())
                 .map_err(invalid)?
@@ -184,7 +193,7 @@ impl Game {
                 form.generation.0,
             ))
             .or_insert(next);
-        Ok(vec![link])
+        Ok(link)
     }
 
     pub(in crate::game::internal) fn internal_characteristics(

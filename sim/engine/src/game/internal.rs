@@ -6,7 +6,6 @@
 )]
 
 use super::{Frame, Game, View, int, string};
-use crate::ir::AttackEvent;
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
     CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control, CostSpec,
@@ -26,6 +25,7 @@ use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, DriveGainedEvent, EvolveEvent,
     FaceId, PaymentEvent, PaymentResult, QuickWindow, RaceEvent,
 };
+use crate::ir::{AttackEvent, EquipEvent};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -286,6 +286,8 @@ pub enum InstructionOutcome {
     },
     /// Tokens successfully created and placed, after applying destination capacity.
     Token(TokenOutcome),
+    /// Successful equipment associations, after physical token creation.
+    Equipped(Vec<EquipEvent>),
     /// Actual body resource recovery, independent of cost payment.
     Resource(ResourceOutcome),
     /// Successful discards and their physical movements, independent of destruction.
@@ -371,6 +373,8 @@ pub enum Fact {
     DriveChecked(Box<DriveCheckedEvent>),
     /// Effect-driven evolution; it does not count as playing an evolution ability.
     Evolved(Box<EvolveEvent>),
+    /// One successfully created equipment attached to a field generation.
+    Equipped(EquipEvent),
     /// A card actually discarded from the actor's hand.
     Discard(Box<DiscardEvent>),
     /// A direct nonzero leader life change, independent of damage.
@@ -1390,6 +1394,7 @@ impl Game {
             Action::MealRace { .. } => self.internal_race(execution, &instruction)?,
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
+            Action::Equip { .. } => self.internal_equip(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Counter { .. } => {
                 self.internal_counter(execution, &instruction, false)?;

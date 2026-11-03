@@ -2,10 +2,12 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
+use crate::ir::ObjectRelation;
 use crate::ir::{
     AbilityKind, AbilityQualification, CharacteristicPatch, ContinuousLayer, Effect,
     EffectDefinitionId, EffectTarget, ObjectOperand, ScopeId, TimestampBasis, ZoneKind,
 };
+use crate::ir::{ObjectView, Selector};
 
 pub(super) fn lower(
     allocator: &mut Allocator,
@@ -26,12 +28,14 @@ pub(super) fn lower_at_source(
     source: super::SourceSpan,
 ) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
-    if head.zone.as_ref().is_some_and(|zones| match zones {
-        ast::ActivationZones::One(zone) => zone.kind() != ZoneKind::Field,
-        ast::ActivationZones::Many(zones) => {
-            !matches!(zones.as_slice(), [zone] if zone.kind() == ZoneKind::Field)
-        }
-    }) {
+    let zone = head
+        .zone
+        .as_ref()
+        .map_or(Some(ZoneKind::Field), ast::ActivationZones::single)
+        .ok_or_else(|| unsupported(path))?;
+    if !matches!(zone, ZoneKind::Field | ZoneKind::Equipment)
+        || (zone == ZoneKind::Equipment && head.r#while.is_some())
+    {
         return Err(unsupported(path));
     }
     let origin = ability_source(&source, None);
@@ -52,10 +56,22 @@ pub(super) fn lower_at_source(
         }
         let abilities =
             context.granted_abilities(&grant.keywords, &grant.abilities, &source, path)?;
-        let selector = grant
-            .on
-            .as_ref()
-            .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?;
+        let selector = if zone == ZoneKind::Equipment {
+            if !matches!(&grant.on, Some(ast::Objects::Bound(name)) if name == "host") {
+                return Err(unsupported(path));
+            }
+            Selector::Relation {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::SourceHolder {}),
+                },
+                relation: ObjectRelation::Equipment,
+            }
+        } else {
+            grant
+                .on
+                .as_ref()
+                .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?
+        };
         declarations.push(Effect::Continuous {
             id: EffectDefinitionId(context.card_allocator.id(path)?),
             source: origin.clone(),
@@ -66,7 +82,7 @@ pub(super) fn lower_at_source(
             timestamp: TimestampBasis::ZoneEntry {
                 object: ObjectOperand::SourceHolder {},
             },
-            active_zones: vec![ZoneKind::Field],
+            active_zones: vec![zone],
             duration: numeric::duration(None, path)?,
         });
     }
@@ -78,7 +94,7 @@ pub(super) fn lower_at_source(
             source: origin,
             kind: AbilityKind::Static,
             qualification: AbilityQualification::Ordinary,
-            active_zones: vec![ZoneKind::Field],
+            active_zones: vec![zone],
             event_captures: vec![],
             play: None,
             trigger: None,

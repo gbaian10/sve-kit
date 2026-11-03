@@ -10,6 +10,13 @@ use serde_json::{Value, json};
 use super::{Frame, Game, Prompt, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
+fn token_erasure_zone(kind: &str, destination: &str) -> bool {
+    match kind {
+        "イクイップメント・トークン" => destination != "equipment",
+        _ => kind.contains("トークン") && !matches!(destination, "field" | "ex" | "resolution"),
+    }
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Rule domains share one private state and are split into focused modules."
@@ -746,8 +753,7 @@ impl Game {
             {
                 self.bump(&format!("{}.magic_item_banished", previous.controller), 1);
             }
-            let token = string(&printed["card_type"]).contains("トークン");
-            if token && !matches!(destination, "field" | "ex" | "resolution" | "equipment") {
+            if token_erasure_zone(string(&printed["card_type"]), destination) {
                 erased.push(id.clone());
             }
             if string(&printed["card_type"]).contains("アドバンス")

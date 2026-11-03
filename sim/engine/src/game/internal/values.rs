@@ -7,6 +7,7 @@ use super::{
     invalid, player_id, seat_name, unsupported,
 };
 use crate::ir::AttackEvent;
+use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
@@ -246,6 +247,12 @@ impl Execution {
             {
                 self.public_target_objects(game, selector, false)?
             }
+            Selector::Relation {
+                object: ObjectView::Current { object },
+                relation: ObjectRelation::Equipment,
+            } if object.as_ref() == &ObjectOperand::SourceHolder {} => {
+                game.internal_equipment_host(self)?
+            }
             Selector::Objects { objects } => objects
                 .iter()
                 .map(|object| self.object(game, object))
@@ -288,23 +295,7 @@ impl Execution {
             Selector::MoveAfter {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
-            } => {
-                let moves = self.successful_moves(receipt)?.collect::<Vec<_>>();
-                // A bounced card's new hand generation must not become trackable (second batch §5).
-                if matches!(receipt, MovementReceipt::Move { .. })
-                    && moves.iter().any(|movement| {
-                        movement
-                            .actual_to
-                            .is_some_and(|to| to.kind == ZoneKind::Hand)
-                    })
-                {
-                    return Err(unsupported("hidden hand after follow"));
-                }
-                moves
-                    .into_iter()
-                    .filter_map(|movement| movement.after)
-                    .collect()
-            }
+            } => self.followed_members(receipt)?,
             Selector::Difference { input, except } => {
                 let input = self.objects(game, input)?;
                 let except = self.objects(game, except)?;
@@ -320,6 +311,24 @@ impl Execution {
         Ok(objects
             .into_iter()
             .filter(|object| seen.insert((object.id, object.generation)))
+            .collect())
+    }
+
+    fn followed_members(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
+        let moves = self.successful_moves(receipt)?.collect::<Vec<_>>();
+        // A bounced card's new hand generation must not become trackable (second batch §5).
+        if matches!(receipt, MovementReceipt::Move { .. })
+            && moves.iter().any(|movement| {
+                movement
+                    .actual_to
+                    .is_some_and(|to| to.kind == ZoneKind::Hand)
+            })
+        {
+            return Err(unsupported("hidden hand after follow"));
+        }
+        Ok(moves
+            .into_iter()
+            .filter_map(|movement| movement.after)
             .collect())
     }
 

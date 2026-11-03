@@ -1077,6 +1077,7 @@ struct ReceiptReads {
 }
 
 struct BodyContext<'definitions> {
+    static_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
     source_use: &'definitions ast::SourceUse,
@@ -1120,6 +1121,11 @@ impl<'definitions> BodyContext<'definitions> {
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
+            static_zone: entry
+                .r#static
+                .as_ref()
+                .and_then(|head| head.zone.as_ref())
+                .and_then(ast::ActivationZones::single),
             subject_event: None,
             damage_event: None,
             source_use: &entry.sources[0],
@@ -1449,6 +1455,17 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Search(value) => self.search(value, path),
             ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Create(value) => self.create(value, path),
+            ast::Step::Equip(value) => {
+                let ast::This::This = value.on;
+                if value.token.is_empty() {
+                    return Err(unsupported(path));
+                }
+                Ok(Action::Equip {
+                    holder: ObjectOperand::SourceHolder {},
+                    template: super::TokenTemplateId(value.token.clone()),
+                    count: Nat(1),
+                })
+            }
             ast::Step::Look(value) => {
                 if !matches!(
                     value.top.who,

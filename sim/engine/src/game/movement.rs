@@ -290,6 +290,53 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn attach_equipment(
+        &mut self,
+        holder: &str,
+        equipment: &str,
+        frame: &Frame,
+    ) -> Result<()> {
+        if self.object(holder)?.zone != "field"
+            || !self.object_type(holder)?.contains("フォロワー")
+            || self.object(equipment)?.zone != "equipment"
+            || self.object_type(equipment)? != "イクイップメント・トークン"
+        {
+            return Err(invalid("equipment attachment endpoints"));
+        }
+        self.object_mut(equipment)?.state["equipped_to"] = json!(holder);
+        let group = self.group();
+        self.emit(
+            json!({"kind":"装備","object":holder,"equipment":equipment}),
+            &frame.cause,
+            group,
+        );
+        Ok(())
+    }
+
+    pub(super) fn erase_equipment(&mut self, id: &str) -> Result<()> {
+        let object = self.object(id)?.clone();
+        let generation = object
+            .generation
+            .checked_add(1)
+            .ok_or_else(|| invalid("equipment generation exhausted"))?;
+        self.player_mut(&object.controller)?
+            .zones
+            .entry("equipment".into())
+            .or_default()
+            .retain(|value| value != id);
+        let equipment = self.object_mut(id)?;
+        equipment.zone = "void".into();
+        equipment.generation = generation;
+        equipment.state["equipped_to"] = Value::Null;
+        let group = self.group();
+        self.emit(
+            json!({"kind":"消去","object":id,"by":"rule-11.11.1"}),
+            &json!({"rule":"11.11.1"}),
+            group,
+        );
+        Ok(())
+    }
+
     pub(super) fn release_links(&mut self, leaving: &[Object], frame: &Frame) -> Result<()> {
         let mut resources = BTreeSet::new();
         let mut equipment = BTreeSet::new();
@@ -333,19 +380,7 @@ impl Game {
             self.object_mut(&id)?.state["face_up"] = json!(true);
         }
         for id in equipment {
-            let object = self.object(&id)?.clone();
-            self.player_mut(&object.controller)?
-                .zones
-                .entry("equipment".into())
-                .or_default()
-                .retain(|value| *value != id);
-            self.object_mut(&id)?.zone = "void".into();
-            let group = self.group();
-            self.emit(
-                json!({"kind":"消去","object":id,"by":"rule-11.11.1"}),
-                &json!({"rule":"11.11.1"}),
-                group,
-            );
+            self.erase_equipment(&id)?;
         }
         Ok(())
     }

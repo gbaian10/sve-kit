@@ -381,7 +381,9 @@ impl Game {
         let resource_links = previous.state["links"].as_object().is_some_and(|links| {
             links.len() == 1 && (links.contains_key("出走") || links.contains_key("憑依"))
         }) && self.internal_resource_links_valid(&previous.id)?;
-        let special = card_type.contains("トークン")
+        let equipped = self.internal_equipment_links(&previous.id)?;
+        let special = equipped
+            || card_type.contains("トークン")
             || card_type.contains("アドバンス")
             || has_evolution
             || resource_links;
@@ -400,17 +402,13 @@ impl Game {
                     | "フォロワー・トークン"
                     | "アミュレット・トークン"
                     | "スペル・トークン"
+                    | "イクイップメント・トークン"
             ))
             || (previous
                 .state
                 .get("links")
                 .is_some_and(|value| !value.is_null())
                 && !resource_links)
-            || self
-                .state
-                .objects
-                .values()
-                .any(|item| item.state["equipped_to"] == previous.id)
         {
             return Err(unsupported(
                 "movement requires linked or special-card rules",
@@ -420,10 +418,11 @@ impl Game {
             && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
         {
             Some("evolve_deck")
-        } else if matches!(
-            card_type,
-            "フォロワー・トークン" | "アミュレット・トークン" | "スペル・トークン"
-        ) && !matches!(zone, "field" | "ex" | "resolution")
+        } else if (card_type == "イクイップメント・トークン" && zone != "equipment")
+            || (matches!(
+                card_type,
+                "フォロワー・トークン" | "アミュレット・トークン" | "スペル・トークン"
+            ) && !matches!(zone, "field" | "ex" | "resolution"))
         {
             Some("void")
         } else {

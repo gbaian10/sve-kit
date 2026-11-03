@@ -57,6 +57,12 @@ pub(super) mod selection;
 pub use play::{CardEntry, CardPlay};
 pub use selection::TargetDomain;
 
+#[derive(Clone, Copy)]
+enum ActivationKey {
+    Definition(AbilityId),
+    Instance(AbilityInstanceId),
+}
+
 /// Explicit authority boundary after a complete ability resolution.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ResumeStage {
@@ -410,7 +416,7 @@ impl Game {
         Ok(())
     }
 
-    /// Activate a loaded, printed ability in its effective zone at the active player's main timing.
+    /// Activate one unambiguous effective definition at the active player's main timing.
     /// Holder generation, origin, instance and execution are derived by authority.
     ///
     /// # Errors
@@ -422,11 +428,48 @@ impl Game {
         definition: AbilityId,
         actor: PlayerId,
     ) -> Result<CardPlay> {
+        self.activate_internal_entry(holder, ActivationKey::Definition(definition), actor)
+    }
+
+    /// Allocate cached authority identities for effective activated definitions.
+    ///
+    /// # Errors
+    /// Rejects an unloaded holder or unavailable text-provider definition.
+    pub fn internal_activated_sources(
+        &mut self,
+        holder: &str,
+    ) -> Result<Vec<RuntimeAbilitySource>> {
+        self.internal_effective_abilities(holder)?
+            .into_iter()
+            .filter(|ability| ability.node.kind == AbilityKind::Activated)
+            .map(|ability| self.internal_effective_source(holder, &ability))
+            .collect()
+    }
+
+    /// Activate a specific effective instance, including one of several equipment providers.
+    ///
+    /// # Errors
+    /// Rejects stale instances, controller or timing and restores the whole attempt on failure.
+    pub fn activate_internal_card_instance(
+        &mut self,
+        holder: &str,
+        instance: AbilityInstanceId,
+        actor: PlayerId,
+    ) -> Result<CardPlay> {
+        self.activate_internal_entry(holder, ActivationKey::Instance(instance), actor)
+    }
+
+    fn activate_internal_entry(
+        &mut self,
+        holder: &str,
+        key: ActivationKey,
+        actor: PlayerId,
+    ) -> Result<CardPlay> {
         if self.card_runtime.quick.is_some() {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
-        let result = self.activate_loaded_card(holder, definition, actor);
+        let result = self.activate_loaded_card(holder, key, actor);
         self.finish_card_attempt(before, result)
     }
 
@@ -471,16 +514,33 @@ impl Game {
     fn activate_loaded_card(
         &mut self,
         holder: &str,
-        definition: AbilityId,
+        key: ActivationKey,
         actor: PlayerId,
     ) -> Result<CardPlay> {
-        self.require_internal_abilities(holder, &format!("activate ability {}", definition.0))?;
+        self.require_internal_abilities(holder, "activate effective ability")?;
         let object = self.object(holder)?.clone();
-        let ability = self
-            .internal_printed_abilities(holder)?
+        let mut selected = None;
+        for candidate in self
+            .internal_effective_abilities(holder)?
             .into_iter()
-            .find(|ability| ability.node.id == definition)
-            .ok_or_else(|| invalid("ability is not effective for this holder"))?;
+            .filter(|candidate| candidate.node.kind == AbilityKind::Activated)
+        {
+            if matches!(key, ActivationKey::Definition(definition) if candidate.node.id != definition)
+            {
+                continue;
+            }
+            let source = self.internal_effective_source(holder, &candidate)?;
+            if matches!(key, ActivationKey::Instance(instance) if source.instance != instance) {
+                continue;
+            }
+            if selected.replace((candidate, source)).is_some() {
+                return Err(invalid(
+                    "ambiguous effective definition requires an ability instance",
+                ));
+            }
+        }
+        let (ability, source) =
+            selected.ok_or_else(|| invalid("ability is not effective for this holder"))?;
         let seat = seat_name(actor)?;
         if ability.node.kind != AbilityKind::Activated
             || !matches!(
@@ -500,10 +560,12 @@ impl Game {
         {
             return Err(unsupported("activation holder, controller or timing"));
         }
-        let (face, _) = printed_origin(&ability.node.source.origin)?;
-        let (card, ordinal) = self.internal_effective_print(holder)?;
-        if self.printed_face_ordinal(&card, face)? != ordinal {
-            return Err(invalid("printed ability belongs to another face"));
+        if ability.grant.is_none() {
+            let (face, _) = printed_origin(&ability.node.source.origin)?;
+            let (card, ordinal) = self.internal_effective_print(holder)?;
+            if self.printed_face_ordinal(&card, face)? != ordinal {
+                return Err(invalid("printed ability belongs to another face"));
+            }
         }
         let context = Context {
             source: holder.into(),
@@ -512,7 +574,6 @@ impl Game {
         };
         self.internal_context(&context)?;
         self.check_internal_resources()?;
-        let source = self.internal_card_source(holder, definition, actor)?;
         if resource_entry::intrinsic(&ability.node) {
             self.check_resource_entry_available(holder, &ability.node)?;
         }
@@ -527,7 +588,7 @@ impl Game {
                 "activated ability quota exhausted".into(),
             ));
         }
-        self.start_internal_ability(ability.node, context, source, false)
+        self.start_internal_ability(ability.definition.node, context, source, false)
     }
 
     pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {
@@ -1105,6 +1166,62 @@ fn check_nested_nodes(
     Ok(())
 }
 
+fn check_instruction(
+    game: &Game,
+    instruction: &Instruction,
+    source: &SourceSpan,
+    ability_source: &AbilitySource,
+) -> Result<()> {
+    super::tokens::check_catalog(game, &instruction.action)?;
+    super::tokens::equipment::check_catalog(game, &instruction.action)?;
+    super::transform::check_catalog(game, &instruction.action)?;
+    super::grant::check_action(&instruction.action)?;
+    check_grant_instruction(game, instruction, source, ability_source)?;
+    if instruction.source != *ability_source {
+        return Err(invalid("instruction has a foreign ability source"));
+    }
+    if !matches!(
+        instruction.action,
+        Action::Draw {
+            mode: StepwiseMode::Exact,
+            ..
+        } | Action::Look {
+            mode: StepwiseMode::Exact,
+            ..
+        } | Action::Damage {
+            amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
+            ..
+        } | Action::Resource { .. }
+            | Action::Counter { .. }
+            | Action::Discard { .. }
+            | Action::Reveal { .. }
+            | Action::Move { .. }
+            | Action::Destroy { .. }
+            | Action::Life { .. }
+            | Action::Banish { .. }
+            | Action::Transform { .. }
+            | Action::Posture { .. }
+            | Action::Modify { .. }
+            | Action::Grant { .. }
+            | Action::InstallEffect { .. }
+            | Action::Search { .. }
+            | Action::Token { .. }
+            | Action::Equip { .. }
+            | Action::Order { .. }
+            | Action::RideDrive {
+                operation: RideDriveOperation::GainDrive {},
+                ..
+            }
+            | Action::MealRace {
+                operation: MealRaceOperation::Race,
+                ..
+            }
+    ) {
+        return Err(unsupported("whole-card synchronous action"));
+    }
+    Ok(())
+}
+
 fn check_nodes(
     game: &Game,
     nodes: &[Located<Node>],
@@ -1115,51 +1232,7 @@ fn check_nodes(
         check_node_source(game, &located.source, source)?;
         match &located.node {
             Node::Instruction { instruction } => {
-                super::tokens::check_catalog(game, &instruction.action)?;
-                super::transform::check_catalog(game, &instruction.action)?;
-                super::grant::check_action(&instruction.action)?;
-                check_grant_instruction(game, instruction, source, ability_source)?;
-                if instruction.source != *ability_source {
-                    return Err(invalid("instruction has a foreign ability source"));
-                }
-                if !matches!(
-                    instruction.action,
-                    Action::Draw {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Look {
-                        mode: StepwiseMode::Exact,
-                        ..
-                    } | Action::Damage {
-                        amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
-                        ..
-                    } | Action::Resource { .. }
-                        | Action::Counter { .. }
-                        | Action::Discard { .. }
-                        | Action::Reveal { .. }
-                        | Action::Move { .. }
-                        | Action::Destroy { .. }
-                        | Action::Life { .. }
-                        | Action::Banish { .. }
-                        | Action::Transform { .. }
-                        | Action::Posture { .. }
-                        | Action::Modify { .. }
-                        | Action::Grant { .. }
-                        | Action::InstallEffect { .. }
-                        | Action::Search { .. }
-                        | Action::Token { .. }
-                        | Action::Order { .. }
-                        | Action::RideDrive {
-                            operation: RideDriveOperation::GainDrive {},
-                            ..
-                        }
-                        | Action::MealRace {
-                            operation: MealRaceOperation::Race,
-                            ..
-                        }
-                ) {
-                    return Err(unsupported("whole-card synchronous action"));
-                }
+                check_instruction(game, instruction, source, ability_source)?;
             }
             Node::Control {
                 control: control @ Control::Pay { on_paid, .. },
@@ -1224,6 +1297,9 @@ fn check_grant_instruction(
         ..
     } = &instruction.action
     {
+        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if ability.kind == AbilityKind::Activated)) {
+            return Err(unsupported("activated grants require an equipment provider"));
+        }
         check_granted_definitions(game, abilities, source, ability_source)?;
         if &provider.face != printed_origin(&instruction.source.origin)?.0 {
             return Err(unsupported("grant provider face"));
@@ -1251,7 +1327,9 @@ fn check_static_granted_definitions(game: &Game, located: &Located<Ability>) -> 
             for granted in abilities {
                 if let GrantedAbility::Definition { ability } = granted
                     && (ability.active_zones != [ZoneKind::Field]
-                        || static_keywords::is_static(ability))
+                        || static_keywords::is_static(ability)
+                        || (ability.kind == AbilityKind::Activated
+                            && located.node.active_zones != [ZoneKind::Equipment]))
                 {
                     return Err(unsupported("continuous granted zone or transitive aura"));
                 }
@@ -1303,6 +1381,9 @@ fn check_granted_definitions(
             continue;
         }
         check_header(ability)?;
+        if ability.kind == AbilityKind::Activated {
+            check_costs(ability, source)?;
+        }
         let body = ability
             .body
             .as_ref()
