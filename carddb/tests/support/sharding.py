@@ -1,7 +1,7 @@
 """Run one slice of the collected tests so CI can split the suite across jobs.
 
-Every test belongs to exactly one shard, chosen from a hash of its node ID, so the
-slices never overlap and a new test needs no registration. The report lets the
+Every test belongs to exactly one shard, dealt out from its file's sorted node IDs, so
+the slices never overlap and a new test needs no registration. The report lets the
 coverage job check that the shards together ran every collected test.
 """
 
@@ -47,6 +47,24 @@ def shard_of(nodeid: str, total: int) -> int:
     return int.from_bytes(digest[:8], "big") % total + 1
 
 
+def assign(nodeids: list[str], total: int) -> dict[str, int]:
+    """Deal each file's tests round-robin, starting at a shard chosen by the file name.
+
+    A few real-repository tests take minutes and sit together in a handful of files;
+    dealing a file's tests out in turn spreads them over the shards, where hashing each
+    test alone can stack several in one shard.
+    """
+    files: dict[str, list[str]] = {}
+    for nodeid in nodeids:
+        files.setdefault(nodeid.split("::", 1)[0], []).append(nodeid)
+    shards: dict[str, int] = {}
+    for name, tests in files.items():
+        start = shard_of(name, total) - 1
+        for offset, nodeid in enumerate(sorted(tests)):
+            shards[nodeid] = (start + offset) % total + 1
+    return shards
+
+
 @pytest.hookimpl(trylast=True)
 def pytest_collection_modifyitems(
     config: pytest.Config, items: list[pytest.Item]
@@ -55,10 +73,11 @@ def pytest_collection_modifyitems(
     if value is None:
         return
     index, total = parse_shard(value)
+    shards = assign([item.nodeid for item in items], total)
     selected: list[pytest.Item] = []
     deselected: list[pytest.Item] = []
     for item in items:
-        (selected if shard_of(item.nodeid, total) == index else deselected).append(item)
+        (selected if shards[item.nodeid] == index else deselected).append(item)
     report = config.getoption("shard_report")
     if report is not None:
         path = Path(report)

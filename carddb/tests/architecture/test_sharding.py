@@ -6,7 +6,7 @@ import pytest
 
 from sve_carddb.core.json import integer, object_value, parse
 
-from ..support.sharding import parse_shard
+from ..support.sharding import assign, parse_shard
 
 pytest_plugins = ("pytester",)
 
@@ -74,6 +74,7 @@ def test_shards_are_disjoint_complete_and_stable(
     )
     union: set[str] = set()
     first: set[str] = set()
+    sizes: list[int] = []
     for index in range(1, SHARDS + 1):
         ran, counts = run_shard(
             pytester, index, pytester.path / f"shard-{index}.json", distribution
@@ -82,6 +83,7 @@ def test_shards_are_disjoint_complete_and_stable(
             first = ran
         assert not union & ran
         union |= ran
+        sizes.append(len(ran))
         assert counts == {
             "index": index,
             "total": SHARDS,
@@ -89,6 +91,8 @@ def test_shards_are_disjoint_complete_and_stable(
             "selected": len(ran),
         }
     assert len(union) == CASES + 1
+    # A file's tests are dealt out evenly, so the shards differ by at most one test.
+    assert max(sizes) - min(sizes) <= 1
     monkeypatch.setenv("PYTHONHASHSEED", "2")
     repeated, _ = run_shard(pytester, 1, pytester.path / "repeat.json", distribution)
     assert repeated == first
@@ -99,3 +103,11 @@ def test_shard_arguments_are_validated() -> None:
     for value in ("0/3", "4/3", "1/0", "a/3", "1/3/1"):
         with pytest.raises(pytest.UsageError):
             parse_shard(value)
+
+
+def test_slow_tests_of_one_file_go_to_different_shards() -> None:
+    """Three minute-long tests in one file must not all land in the same shard."""
+    slow = [f"tests/workflows/test_authoring.py::test_{name}" for name in "abc"]
+    shards = assign([*slow, "tests/test_other.py::test_fast"], SHARDS)
+    assert sorted(shards[nodeid] for nodeid in slow) == [1, 2, 3]
+    assert set(shards) == {*slow, "tests/test_other.py::test_fast"}

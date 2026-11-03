@@ -561,6 +561,10 @@ jobs:
           clean: true
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
+      # Dependencies parse the large public inputs; optimising only them ("*" excludes workspace members) keeps
+      # every workspace crate unoptimised and instrumented, and the report already excludes dependency sources.
+      - name: Optimise dependencies only
+        run: printf '[profile.dev.package."*"]\nopt-level = 2\n' >> "${CARGO_HOME:-$HOME/.cargo}/config.toml"
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           shared-key: rust # TEMP: measure with main's existing cache; revert before merge
