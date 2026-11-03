@@ -508,9 +508,16 @@ the explicit JP batch in `tests/engine/card-input.json`. It contains every curre
 printing and face; the engine continues to apply its existing authored effects,
 rule names and token selection. This is a test adapter, not a production snapshot
 or a separate maintained card list. Update the batch pin explicitly when changing
-the test baseline. `.github/ci/rust_tests.py` generates a fresh file, replaces any
-inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the temporary data. Both the
-manual `cargo-test` hook and the CI shards use it. Project and fork PRs run the same complete
+the test baseline. `.github/ci/rust_tests.py` writes the inputs to a private temporary
+folder, replaces any inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the
+temporary data. CI always generates them fresh. Locally it first hashes every file the
+generator reads (`INPUTS` in the script: `card-data/`, `authored/`, `dsl/`, the batch
+pin, `carddb/src/`, the `carddb/tests/` package with `support/`, `carddb/pyproject.toml`
+and `carddb/uv.lock`) and copies a pair generated from byte-identical inputs instead of
+generating again. A pair is kept, under `${XDG_CACHE_HOME:-~/.cache}/sve-kit/engine-inputs`
+(newest 8), only when the inputs hashed the same before and after generation. A missing
+input still fails. Delete that folder to force a fresh generation. Both the manual
+`cargo-test` hook and the CI shards use the script. Project and fork PRs run the same complete
 workspace with the 90% line coverage gate, without private credentials. Direct
 Cargo snapshot tests fail if the generated input is missing; they never skip.
 
