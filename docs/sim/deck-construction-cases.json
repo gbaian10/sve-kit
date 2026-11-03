@@ -1245,6 +1245,44 @@
       }
     },
     {
+      "id": "cutthroat-onion",
+      "rule": "6.1.2",
+      "note": "カットスロート在主牌組：オニオン軍団的 50 張上限被覆蓋為 1 張（Q2610）",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "witch"
+        },
+        "leader": "BP01-LD05",
+        "main": [
+          ["BP19-110", 1],
+          ["BP09-049", 49]
+        ],
+        "evolve": []
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.2",
+            "cards": ["BP09-049"],
+            "values": {
+              "name": "オニオン軍団",
+              "section": "main",
+              "count": 49,
+              "limit": 1
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
       "id": "cutthroat-evolve-only",
       "rule": "6.1.2",
       "note": "只有進化面 BP19-111 在進化牌組：沒有這段本文，不觸發",
@@ -2047,18 +2085,18 @@
     {
       "id": "restrictions-uncovered",
       "rule": "restriction",
-      "note": "判定日超出覆蓋區間：已知禁限照套用並提示",
+      "note": "判定日等於覆蓋區間 until：星の鎧仍禁止，並提示覆蓋未知",
       "deck": {
         "basis": {
           "kind": "class",
-          "class": "elf"
+          "class": "royal"
         },
-        "leader": "BP01-LD01",
-        "main": [["BP01-001", 3]],
+        "leader": "BP01-LD03",
+        "main": [["BP04-037", 1]],
         "evolve": [],
         "fill": {
-          "set": "elf",
-          "count": 37
+          "set": "neutral",
+          "count": 39
         }
       },
       "context": {
@@ -2066,8 +2104,20 @@
         "date": "2026-12-01"
       },
       "expect": {
-        "legal": true,
-        "violations": [],
+        "legal": false,
+        "violations": [
+          {
+            "code": "banned",
+            "clause": "restriction",
+            "cards": ["BP04-037"],
+            "values": {
+              "name": "星の鎧",
+              "count": 1,
+              "max": 0,
+              "from": "2025-10-01"
+            }
+          }
+        ],
         "notes": [
           {
             "code": "restrictionsUnknown",
