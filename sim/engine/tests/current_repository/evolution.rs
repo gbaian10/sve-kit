@@ -464,7 +464,7 @@ fn each_b7_evolution_rejects_a_missing_current_ability() {
             .as_array_mut()
             .unwrap()
             .retain(|author| author["input"]["card_no"] != base);
-        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let selected = repository::select(&snapshot, &keywords, &input).unwrap();
         assert!(
             !selected.current.contains_key(base),
             "{base} is not accepted"
@@ -662,7 +662,7 @@ fn synthetic_game(text: &Value, sections: &Value) -> Game {
     card["faces"][0]["text"] = text.clone();
     card["faces"][0]["sections"] = sections.clone();
     lines.push(card.to_string());
-    let selected = Catalog::from_current_selection(&lines.join("\n"), keywords, input).unwrap();
+    let selected = repository::select(&lines.join("\n"), keywords, input).unwrap();
     Game::from_selected_effects(
         selected,
         &initial("BP01-110", "ZZ00-111", "P1"),
