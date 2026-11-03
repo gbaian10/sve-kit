@@ -210,6 +210,10 @@ ignored:
 
 EP／SEP 卡（種類 `ep`／`sep`）沒有卡片能力：EP、SEP 是玩家持有的數值（CR 3.2），卡文只是開局數值（6.2.1.10、6.2.1.11）、EP 代付 PP 與超進化（12.2.3、12.2.4）的提醒，由引擎原生規則執行，不讀這張卡。寫成 `abilities: []` 加 `admission: light`，每個卡文行標 `ignored: reminder`；卡文空白的卡只寫空能力。
 
+`create: {token: {same_name_as: chosen}, to: field | ex}` 從正式目標 `chosen` 捕捉唯一卡名，沿用同名 token 的代表印刷、整卡准入、容量與進場程序建立一張全新卡。正式目標須為公開區域；不複製目前的數值修正、指示物或附加能力（BP05-083，Q745）。`same_name_as: it` 只接受離場事件主體，名稱取事件離場前的 LKI，即使原 token 已由規則消去仍可建立（BP11-074）。只支援自己場上／EX、單張、無初始數值覆寫；名稱不唯一、查無 token 模板、目的區種類不符或整卡未准入時拒絕。
+
+`auto.on.left_field.sel.orig_cost_eq: N` 接受正整數常量，依離場物件的印刷費用篩選，與 `token: true` 等既有條件取交集；不讀目前費用修正。BP11-074 的 `per_turn: 1` 仍使用各能力持有者的共同回合額度，多個符合物件同時離場時由既有待機選擇決定一次（Q1550–Q1553）；這個入口不開放其他事件的原始費用篩選。
+
 目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX；`to: field` 支援從者與護符 token 至自己場上。省略 `n` 為 1；EX 與場上各最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。場上建立共用進場事件與守護的選擇橫置程序；沒有先前區域的建立以 `EntryOrigin::Other` 表示，成功建立的每個 token 各發生一次進場。
 
 EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；多模板分配與進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。

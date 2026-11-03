@@ -116,7 +116,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | damage | to、n、distribute?、distribute_at?、instead? | distribute 時點獨立 |
 | destroy／banish | Ref 或 {ref}；banish 另 top | top 與 ref 互斥 |
 | move | ref\|top、to、position?、order?、reveal?、by?、acted?、entry_effects?、result? | to 為區域或直接 param；位置選項在 position |
-| create | token、n?\|upto\|any、to、counters?、by?、acted?、entry_effects?、bind?、result? | 可 declare→bound 指定量（§13 GAP-A-039）；token 列表每名各 n；allocate 另有總量 |
+| create | token、n?\|upto\|any、to、counters?、by?、acted?、entry_effects?、bind?、result? | 可 declare→bound 指定量（§13 GAP-A-039）；token 列表每名各 n；allocate 另有總量；same_name_as 讀物件名稱 |
 | act／stand／flip_down／flip_up | Ref 或 {ref} | flip 與 EP 分開 |
 | evolve／transform | ref、into?、result?；transform 另 entry_effects? | evolve 能力頭另型別；transform.into 支援 allocate |
 | life／set_life | who、delta／n | delta 與 n 不互換 |

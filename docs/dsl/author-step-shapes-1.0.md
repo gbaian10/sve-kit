@@ -78,7 +78,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 
 TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time、attack_time、race_time、drive_time。entry_effects 在成功產生的新世代上、入場誘發掃描前安裝；no_trigger 的 entry occurrence 責任仍沿效果矩陣。look 的多玩家 top 須使用 each_player，不能把 PlayerSet 當單一 viewer（BP06-113）。
 
-create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
+create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
 
 delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。pilot、feed、drive_check、play_card.cost 沒有本矩陣的接受形狀。pilot 的舊 `{ref,on}` 無法承載印刷數值與期限，不能拿提醒文冒第二個物件。這個有限 Step union 不宣稱所有登錄構造均可承載。
 
