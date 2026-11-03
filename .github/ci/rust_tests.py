@@ -1,19 +1,27 @@
 """Generate ephemeral public card inputs before every complete Rust test scope.
 
+Outside CI, inputs generated from an identical working tree are reused: the
+generator's whole input (see INPUTS) is hashed before and after generation, and a
+copy is kept under the user cache only when both hashes agree.
+
 `--shard=I/N --shard-report=DIR` runs one CI slice: every test, chosen by a hash of
 its name, belongs to exactly one shard. The slice's coverage inputs go to DIR/coverage
 (see rust_coverage.py) and its counts to DIR/shard.json, so the coverage job can merge
 the slices and check that together they ran every listed test.
 """
 
+import fcntl
 import hashlib
 import json
 import os
 import re
 import shutil
+import stat
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed tool argv; no shell
 import sys
 import tempfile
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 import rust_coverage
@@ -31,6 +39,22 @@ DEFAULT = [
 SHARD_SCOPE = ["--locked", "--workspace"]
 SHARD = re.compile(r"--shard=([1-9][0-9]*)/([1-9][0-9]*)")
 LISTED = re.compile(r"^(.+): test$")
+# Everything tests.support.repository_current reads; renaming the generator or its
+# outputs must bump GENERATOR.
+INPUTS = (
+    "card-data",
+    "authored",
+    "dsl",
+    "tests/engine/card-input.json",
+    "carddb/src",
+    "carddb/tests/__init__.py",
+    "carddb/tests/support",
+    "carddb/pyproject.toml",
+    "carddb/uv.lock",
+)
+GENERATOR = b"repository_current cards.jsonl selection.json v2"
+OUTPUTS = ("cards.jsonl", "selection.json")
+KEPT_INPUTS = 8
 
 
 def executable(name: str) -> str:
@@ -45,6 +69,99 @@ def shard_of(name: str, total: int) -> int:
     """Stable across processes and machines; a name appearing in two binaries stays in one shard."""
     digest = hashlib.sha256(name.encode()).digest()
     return int.from_bytes(digest[:8], "big") % total + 1
+
+
+def input_digest(root: Path) -> str:
+    """Hash directory topology and regular file bytes; missing or unsafe inputs fail."""
+    digest = hashlib.sha256(GENERATOR)
+    for name in INPUTS:
+        path = root / name
+        for parent in path.parents:
+            if parent == root:
+                break
+            if parent.is_symlink():
+                raise ValueError(f"Symlink engine input: {name}")
+        pending = [path]
+        while pending:
+            item = pending.pop()
+            if item.name == "__pycache__":
+                continue
+            mode = item.lstat().st_mode
+            if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
+                raise ValueError(f"Nonregular engine input: {item.relative_to(root)}")
+            relative = item.relative_to(root).as_posix().encode()
+            digest.update(b"d" if stat.S_ISDIR(mode) else b"f")
+            digest.update(len(relative).to_bytes(8, "big") + relative)
+            if stat.S_ISDIR(mode):
+                # iterdir propagates unreadable-directory errors instead of hiding them.
+                pending.extend(sorted(item.iterdir(), reverse=True))
+            else:
+                content = item.read_bytes()
+                digest.update(len(content).to_bytes(8, "big") + content)
+    return digest.hexdigest()
+
+
+def cache_root() -> Path | None:
+    """Local reuse only: CI always generates into a fresh temporary folder."""
+    if os.environ.get("CI"):
+        return None
+    base = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
+    return Path(base) / "sve-kit" / "engine-inputs"
+
+
+@contextmanager
+def _cache_access(cache: Path) -> Generator[None]:
+    cache.mkdir(parents=True, exist_ok=True)
+    with (cache / ".lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
+def reuse(cache: Path, digest: str, folder: Path) -> bool:
+    """Copy a complete cached pair into the private temporary folder."""
+    if not cache.is_dir():
+        return False
+    # A publisher must not prune this pair between its two copies.
+    with _cache_access(cache):
+        entry = cache / digest
+        if not all((entry / name).is_file() for name in OUTPUTS):
+            return False
+        for name in OUTPUTS:
+            shutil.copyfile(entry / name, folder / name)
+        entry.touch()
+    return True
+
+
+def keep(cache: Path, digest: str, folder: Path) -> None:
+    """Publish a generated pair atomically and keep only the newest entries."""
+    cache.mkdir(parents=True, exist_ok=True)
+    entry = cache / digest
+    staging = Path(tempfile.mkdtemp(prefix=f".{digest}-", dir=cache))
+    try:
+        for name in OUTPUTS:
+            shutil.copyfile(folder / name, staging / name)
+        with _cache_access(cache):
+            if entry.exists() and not all((entry / name).is_file() for name in OUTPUTS):
+                shutil.rmtree(entry)
+            if not entry.exists():
+                staging.rename(entry)
+            entry.touch()
+            entries = sorted(
+                (
+                    path
+                    for path in cache.iterdir()
+                    if path.is_dir() and not path.name.startswith(".")
+                ),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+            for old in entries[KEPT_INPUTS:]:
+                shutil.rmtree(old, ignore_errors=True)
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
 
 
 def generate(output: Path, selection: Path) -> subprocess.Popen[bytes]:
@@ -183,23 +300,37 @@ def parse_shard(arguments: list[str]) -> tuple[int, int, Path] | None:
 
 
 def main(arguments: list[str]) -> int:
-    """Never reuse a caller's private snapshot or a stale generated JSONL."""
+    """Never reuse a caller's private snapshot or inputs from another working tree."""
     try:
         shard = parse_shard(arguments)
     except ValueError as error:
         sys.stderr.write(f"{error}\n")
         return 2
     with tempfile.TemporaryDirectory(prefix="sve-engine-input-") as temporary:
-        output = Path(temporary) / "cards.jsonl"
-        selection = Path(temporary) / "selection.json"
-        generation = generate(output, selection)
+        folder = Path(temporary)
+        output = folder / OUTPUTS[0]
+        selection = folder / OUTPUTS[1]
+        cache = cache_root()
+        digest = None if cache is None else input_digest(ROOT)
+        generation = (
+            None
+            if cache is not None and digest is not None and reuse(cache, digest, folder)
+            else generate(output, selection)
+        )
         try:
             names = list_tests() if shard is not None else []
         finally:
             # Never remove the folder while the generator still writes into it.
-            generation.wait()
-        if generation.returncode:
-            raise subprocess.CalledProcessError(generation.returncode, generation.args)
+            if generation is not None:
+                generation.wait()
+        if generation is not None:
+            if generation.returncode:
+                raise subprocess.CalledProcessError(
+                    generation.returncode, generation.args
+                )
+            # Inputs edited during generation would make the pair stale for this digest.
+            if cache is not None and digest == input_digest(ROOT):
+                keep(cache, digest, folder)
         environment = {
             **os.environ,
             "SVE_TEST_SNAPSHOT": str(output),

@@ -5,10 +5,14 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- synthetic process results
 import tempfile
 import unittest
+from collections.abc import Callable
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
+from typing import override
 from unittest.mock import patch
 
 import rust_coverage
@@ -45,6 +49,7 @@ class FakeTools:
         generation_status: int = 0,
         test_status: int = 0,
         listing: str = LISTING,
+        during_generation: Callable[[], object] | None = None,
     ) -> None:
         self.generated: list[Path] = []
         self.packaged: list[Path] = []
@@ -53,6 +58,9 @@ class FakeTools:
         self.generation_status = generation_status
         self.test_status = test_status
         self.listing = listing
+        self.during_generation = during_generation
+        self.inputs: list[str] = []
+        self.generated_folders: set[Path] = set()
 
     def popen(self, argv: list[str], **_: object) -> subprocess.Popen[bytes]:
         """Start a fake generator that writes its two outputs on wait."""
@@ -66,6 +74,8 @@ class FakeTools:
             returncode: int | None = None
 
             def wait(self) -> int:
+                if tools.during_generation is not None:
+                    tools.during_generation()
                 for output in outputs:
                     output.write_text("synthetic", encoding="utf-8")
                 tools.generated.extend(outputs)
@@ -95,24 +105,37 @@ class FakeTools:
         if arguments[:2] == ["llvm-cov", "clean"]:
             return subprocess.CompletedProcess(argv, 0)
         assert isinstance(environment, dict)
-        assert Path(environment["SVE_TEST_SNAPSHOT"]) == self.generated[0]
-        assert Path(environment["SVE_TEST_CURRENT_SELECTION"]) == self.generated[1]
-        assert all(path.exists() for path in self.generated)
+        inputs = [
+            Path(environment["SVE_TEST_SNAPSHOT"]),
+            Path(environment["SVE_TEST_CURRENT_SELECTION"]),
+        ]
+        if self.generated:
+            assert inputs == self.generated[-2:]
+        assert inputs[0].parent == inputs[1].parent
+        self.inputs = [path.read_text(encoding="utf-8") for path in inputs]
+        self.generated_folders.add(inputs[0].parent)
         return subprocess.CompletedProcess(argv, self.test_status)
 
 
-def run(arguments: list[str], tools: FakeTools) -> int:
+def run(
+    arguments: list[str],
+    tools: FakeTools,
+    *,
+    root: Path | None = None,
+    cache: Path | None = None,
+) -> int:
     """Run the wrapper with fake tools and an inherited private snapshot path."""
 
-    def package(log: str, summary: Path, root: Path, output: Path) -> None:
+    def package(log: str, summary: Path, root_path: Path, output: Path) -> None:
         assert log == "Running `llvm-cov export`"
         assert summary.exists()
-        assert root == rust_tests.ROOT
+        assert root_path == rust_tests.ROOT
         output.mkdir()
         tools.packaged.append(output)
 
     with (
         patch.object(rust_tests, "executable", side_effect=lambda name: name),
+        patch.object(rust_tests, "ROOT", root or rust_tests.ROOT),
         patch.object(rust_coverage, "package", side_effect=package),
         patch.object(subprocess, "Popen", side_effect=tools.popen),
         patch.object(subprocess, "run", side_effect=tools.run),
@@ -121,6 +144,12 @@ def run(arguments: list[str], tools: FakeTools) -> int:
             {
                 "SVE_TEST_SNAPSHOT": "/unused/inherited-snapshot",
                 "SVE_TEST_CURRENT_SELECTION": "/unused/inherited-selection",
+                "CI": "true" if cache is None else "",
+                "XDG_CACHE_HOME": (
+                    os.environ.get("XDG_CACHE_HOME", "")
+                    if cache is None
+                    else str(cache)
+                ),
             },
         ),
     ):
@@ -219,3 +248,204 @@ class RustTests(unittest.TestCase):
                 assert run(arguments, tools) == 2
             assert tools.cargo == []
             assert tools.generated == []
+
+
+def synthetic_tree(root: Path) -> None:
+    """Every declared generator input, as tiny synthetic files."""
+    for name in rust_tests.INPUTS:
+        path = root / name
+        if Path(name).suffix:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(name, encoding="utf-8")
+        else:
+            (path / "nested").mkdir(parents=True)
+            (path / "nested" / "data.txt").write_text(name, encoding="utf-8")
+            (path / "__pycache__").mkdir()
+            (path / "__pycache__" / "ignored.pyc").write_bytes(b"\x00")
+
+
+class InputReuse(unittest.TestCase):
+    @override
+    def setUp(self) -> None:
+        """Each case starts from its own synthetic tree and empty cache."""
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name) / "repo"
+        self.cache_home = Path(temporary.name) / "cache"
+        self.cache = self.cache_home / "sve-kit/engine-inputs"
+        synthetic_tree(self.root)
+
+    def run_tests(self, tools: FakeTools, *, cache: Path | None = None) -> int:
+        """Run a plain test scope against the synthetic tree."""
+        return run([], tools, root=self.root, cache=cache or self.cache_home)
+
+    def test_identical_tree_reuses_without_generating(self) -> None:
+        """A second run on unchanged inputs copies the kept pair instead of generating."""
+        first = FakeTools()
+        assert self.run_tests(first) == 0
+        assert len(first.generated) == 2
+        kept = [path for path in self.cache.iterdir() if not path.name.startswith(".")]
+        assert len(kept) == 1
+        second = FakeTools()
+        assert self.run_tests(second) == 0
+        assert second.generated == []
+        assert second.inputs == ["synthetic", "synthetic"]
+        # The private copy is still removed; the kept pair stays.
+        assert not any(folder.exists() for folder in second.generated_folders)
+        assert (kept[0] / "cards.jsonl").is_file()
+
+    def test_changed_input_regenerates(self) -> None:
+        """Any edited input file, including nested ones, misses the kept pair."""
+        assert self.run_tests(FakeTools()) == 0
+        (self.root / "authored" / "nested" / "data.txt").write_text(
+            "edited", encoding="utf-8"
+        )
+        tools = FakeTools()
+        assert self.run_tests(tools) == 0
+        assert len(tools.generated) == 2
+
+    def test_empty_directory_change_regenerates(self) -> None:
+        """Directory topology checked by the generator is part of the input."""
+        assert self.run_tests(FakeTools()) == 0
+        (self.root / "authored/products/unexpected").mkdir(parents=True)
+        tools = FakeTools()
+        assert self.run_tests(tools) == 0
+        assert len(tools.generated) == 2
+
+    def test_symlink_with_identical_content_cannot_reuse(self) -> None:
+        """A cached pair cannot bypass the data readers' symlink rejection."""
+        assert self.run_tests(FakeTools()) == 0
+        target = self.root / "card-data/nested/data.txt"
+        external = self.root.parent / "external.txt"
+        external.write_bytes(target.read_bytes())
+        target.unlink()
+        target.symlink_to(external)
+        tools = FakeTools()
+        with self.assertRaises(ValueError):
+            self.run_tests(tools)
+        assert tools.cargo == []
+        assert tools.generated == []
+
+    def test_bytecode_does_not_change_the_digest(self) -> None:
+        """Interpreter caches are not inputs."""
+        before = rust_tests.input_digest(self.root)
+        (self.root / "carddb/src/__pycache__/ignored.pyc").write_bytes(b"\x01")
+        assert rust_tests.input_digest(self.root) == before
+
+    def test_missing_input_fails_before_cargo(self) -> None:
+        """A missing input never falls back to generation or a kept pair."""
+        (self.root / "tests/engine/card-input.json").unlink()
+        tools = FakeTools()
+        with self.assertRaises(FileNotFoundError):
+            self.run_tests(tools)
+        assert tools.cargo == []
+        assert tools.generated == []
+
+    def test_inputs_edited_during_generation_are_not_kept(self) -> None:
+        """The pair may not match either version of the edited tree."""
+        target = self.root / "card-data" / "nested" / "data.txt"
+        tools = FakeTools(
+            during_generation=lambda: target.write_text("edited", encoding="utf-8")
+        )
+        assert self.run_tests(tools) == 0
+        assert not self.cache.exists() or not any(
+            not path.name.startswith(".") for path in self.cache.iterdir()
+        )
+
+    def test_failed_generation_keeps_nothing(self) -> None:
+        """Only a successful generation is kept."""
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.run_tests(FakeTools(generation_status=3))
+        assert not self.cache.exists()
+
+    def test_incomplete_kept_pair_regenerates(self) -> None:
+        """A kept folder missing either output is ignored."""
+        assert self.run_tests(FakeTools()) == 0
+        kept = next(
+            path for path in self.cache.iterdir() if not path.name.startswith(".")
+        )
+        (kept / "selection.json").unlink()
+        tools = FakeTools()
+        assert self.run_tests(tools) == 0
+        assert len(tools.generated) == 2
+
+    def test_cleanup_during_reuse_does_not_break_tests(self) -> None:
+        """Another publisher may prune old entries while a test copies its pair."""
+        assert self.run_tests(FakeTools()) == 0
+        digest = rust_tests.input_digest(self.root)
+        entry = self.cache / digest
+        source = self.root.parent / "pair"
+        source.mkdir()
+        for name in ("cards.jsonl", "selection.json"):
+            (source / name).write_text("synthetic", encoding="utf-8")
+        os.utime(entry, (1, 1))
+        for index in range(7):
+            rust_tests.keep(self.cache, f"{index:064x}", source)
+        original_copy = shutil.copyfile
+        pruning: Future[None] | None = None
+        with ThreadPoolExecutor(max_workers=1) as executor:
+
+            def copy_and_prune(src: Path, dst: Path) -> str:
+                nonlocal pruning
+                result = original_copy(src, dst)
+                if src == entry / "cards.jsonl":
+                    pruning = executor.submit(
+                        rust_tests.keep, self.cache, "f" * 64, source
+                    )
+                    with contextlib.suppress(TimeoutError):
+                        pruning.result(timeout=1)
+                return str(result)
+
+            tools = FakeTools()
+            with patch.object(shutil, "copyfile", side_effect=copy_and_prune):
+                assert self.run_tests(tools) == 0
+            assert pruning is not None
+            pruning.result(timeout=5)
+        assert tools.generated == []
+        assert tools.inputs == ["synthetic", "synthetic"]
+
+    def test_simultaneous_publishers_keep_one_complete_pair(self) -> None:
+        """Two worktrees with identical inputs can both publish successfully."""
+        source = self.root.parent / "pair"
+        source.mkdir()
+        (source / "cards.jsonl").write_text("cards", encoding="utf-8")
+        (source / "selection.json").write_text("selection", encoding="utf-8")
+        digest = rust_tests.input_digest(self.root)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            first = executor.submit(rust_tests.keep, self.cache, digest, source)
+            second = executor.submit(rust_tests.keep, self.cache, digest, source)
+            first.result(timeout=5)
+            second.result(timeout=5)
+        destination = self.root.parent / "private"
+        destination.mkdir()
+        assert rust_tests.reuse(self.cache, digest, destination)
+        assert (destination / "cards.jsonl").read_text(encoding="utf-8") == "cards"
+        assert (destination / "selection.json").read_text(
+            encoding="utf-8"
+        ) == "selection"
+
+    def test_only_the_newest_pairs_are_kept(self) -> None:
+        """Old working trees do not accumulate kept pairs."""
+        for index in range(rust_tests.KEPT_INPUTS + 2):
+            (self.root / "dsl" / "nested" / "data.txt").write_text(
+                str(index), encoding="utf-8"
+            )
+            assert self.run_tests(FakeTools()) == 0
+        kept = [path for path in self.cache.iterdir() if not path.name.startswith(".")]
+        assert len(kept) == rust_tests.KEPT_INPUTS
+
+    def test_ci_never_reuses(self) -> None:
+        """CI keeps generating into a fresh temporary folder, never the user cache."""
+        with patch.dict(os.environ, {"CI": "true"}):
+            assert rust_tests.cache_root() is None
+        with patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache)}):
+            os.environ.pop("CI", None)
+            assert rust_tests.cache_root() == self.cache / "sve-kit" / "engine-inputs"
+
+    def test_ci_main_generates_despite_an_existing_local_pair(self) -> None:
+        """The real CI policy bypasses even a complete, matching local cache."""
+        assert self.run_tests(FakeTools()) == 0
+        tools = FakeTools()
+        with patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache_home)}):
+            assert run([], tools, root=self.root) == 0
+        assert len(tools.generated) == 2
