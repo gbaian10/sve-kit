@@ -52,6 +52,9 @@ INPUTS = (
     "carddb/pyproject.toml",
     "carddb/uv.lock",
 )
+# hatch-vcs writes this ignored file while uv installs carddb, so it can appear during
+# the first generation and changes with every commit; no carddb code imports it.
+BUILD_OUTPUTS = frozenset({"carddb/src/sve_carddb/_version.py"})
 GENERATOR = b"repository_current cards.jsonl selection.json v2"
 OUTPUTS = ("cards.jsonl", "selection.json")
 KEPT_INPUTS = 8
@@ -84,12 +87,13 @@ def input_digest(root: Path) -> str:
         pending = [path]
         while pending:
             item = pending.pop()
-            if item.name == "__pycache__":
+            relative_path = item.relative_to(root).as_posix()
+            if item.name == "__pycache__" or relative_path in BUILD_OUTPUTS:
                 continue
             mode = item.lstat().st_mode
             if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
                 raise ValueError(f"Nonregular engine input: {item.relative_to(root)}")
-            relative = item.relative_to(root).as_posix().encode()
+            relative = relative_path.encode()
             digest.update(b"d" if stat.S_ISDIR(mode) else b"f")
             digest.update(len(relative).to_bytes(8, "big") + relative)
             if stat.S_ISDIR(mode):
