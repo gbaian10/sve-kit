@@ -318,7 +318,7 @@ def ran(kind: str, folder: Path) -> int:
 
 # Cargo names each binary it runs; only repository paths and crate names reach the summary.
 RUST_BINARY = re.compile(
-    r"^\s*Running (?:unittests )?([A-Za-z0-9_./-]+\.rs) \(.*?/deps/([A-Za-z0-9_-]+?)-[0-9a-f]+\)$"
+    r"^\s*Running (?:unittests )?((?:src|tests|examples|benches)/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.rs) \(.*?/deps/([A-Za-z0-9_-]+?)-[0-9a-f]+\)$"
 )
 
 
@@ -327,8 +327,9 @@ def binary_section(source: str) -> list[str]:
     rows: list[str] = []
     label = None
     for line in source.splitlines():
-        if match := RUST_BINARY.match(line):
-            label = f"{match[2]} ({match[1]})"
+        if line.lstrip().startswith("Running "):
+            match = RUST_BINARY.match(line)
+            label = f"{match[2]} ({match[1]})" if match else None
         elif label and (result := RUST_RESULT.match(line)):
             ran = int(result[1]) + int(result[2]) + int(result[3])
             rows.append(f"| {label} | {ran} | {number(result[4]):.2f} |")

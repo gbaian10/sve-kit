@@ -298,6 +298,44 @@ class SummaryTests(unittest.TestCase):
         assert "::case 36" not in slowest
         assert PRIVATE not in summary
 
+    def test_rust_binary_headers_keep_private_paths_and_listing_labels_out(
+        self,
+    ) -> None:
+        """Rejected headers must neither expose paths nor inherit a listing's label."""
+        private_ascii = "ASCII_PRIVATE_SENTINEL"
+        for header in (
+            f"Running unittests /tmp/{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running ../{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running tests/../../{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running {private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running tests/{PRIVATE}.rs (target/debug/deps/x-1234)",
+            f"Running {private_ascii} is not a Cargo binary header",
+        ):
+            with self.subTest(header=header):
+                (self.folder / "test.log").write_text(
+                    "Running tests/listed_only.rs (target/debug/deps/listed_only-1234)\n"
+                    f"{header}\n"
+                    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s\n"
+                    "Running tests/safe.rs (target/debug/deps/safe-5678)\n"
+                    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s\n",
+                    encoding="utf-8",
+                )
+                (self.folder / "elapsed.txt").write_text("1", encoding="utf-8")
+                self.write_shard("shard.json", 1, 1, collected=2, selected=2)
+                output = io.StringIO()
+                target = self.folder / "summary.md"
+                target.unlink(missing_ok=True)
+                with (
+                    patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": str(target)}),
+                    contextlib.redirect_stdout(output),
+                ):
+                    assert main(["rust", str(self.folder)]) == 0
+                for rendered in (output.getvalue(), target.read_text(encoding="utf-8")):
+                    assert private_ascii not in rendered
+                    assert PRIVATE not in rendered
+                    assert "listed_only" not in rendered
+                    assert "| safe (tests/safe.rs) | 1 | 0.20 |" in rendered
+
     def test_rust_shard_counts_and_wall_time(self) -> None:
         """Aggregate multiple binaries and doctests; never include panics or source."""
         (self.folder / "test.log").write_text(
