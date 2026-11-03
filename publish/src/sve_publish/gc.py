@@ -4,12 +4,14 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError as SchemaError
 from sve_carddb.export.read_api import (
+    CONSTRUCTION_KEY,
     IMAGE_KEY,
     INDEX,
     JSON_KEY,
     ExportError,
     array,
     closure,
+    construction_keys,
     current_image_keys,
     object_value,
     retained_manifest,
@@ -64,6 +66,12 @@ def retained(store: R2Store) -> tuple[Stored, set[str], set[str]]:
         path = string(entry["manifest_path"])
         required |= closure(path, manifest)
         optional.add(path + ".br")
+        # Kept while their snapshot is retained; snapshots published before indexes have none.
+        optional.update(
+            construction_keys(
+                string(entry["manifest_sha256"]), array(manifest["regions"])
+            )
+        )
     return remote, required, optional
 
 
@@ -104,7 +112,10 @@ def collect(
     listed: set[str] = set()
     for prefix in SNAPSHOT_PREFIXES:
         listed.update(store.keys(prefix))
-    if any(not JSON_KEY.fullmatch(key) for key in listed):
+    if any(
+        not (JSON_KEY.fullmatch(key) or CONSTRUCTION_KEY.fullmatch(key))
+        for key in listed
+    ):
         raise ExportError("GC inventory contains an irregular public key")
     if required - listed:
         raise ExportError("GC retained closure is incomplete")

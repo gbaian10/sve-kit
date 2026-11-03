@@ -17,7 +17,12 @@ from botocore.exceptions import (
     ReadTimeoutError,
 )
 from botocore.parsers import ResponseParserError
-from sve_carddb.export.read_api import IMAGE_KEY, JSON_KEY, ExportError
+from sve_carddb.export.read_api import (
+    CONSTRUCTION_KEY,
+    IMAGE_KEY,
+    JSON_KEY,
+    ExportError,
+)
 
 from sve_publish.headers import IMAGE_HEADERS
 from sve_publish.sdk import (
@@ -39,11 +44,13 @@ if TYPE_CHECKING:
         ListObjectsV2RequestTypeDef,
     )
 
-PUBLIC_PREFIXES = frozenset(
-    {"snapshots/blobs/", "snapshots/manifests/"}
-    | {"images/" + s + "/" for s in ("card_s", "card_l", "art_s")}
+# Construction indexes follow their snapshot's manifest, so snapshot GC owns them too.
+SNAPSHOT_PREFIXES = frozenset(
+    {"snapshots/blobs/", "snapshots/manifests/", "construction/"}
 )
-SNAPSHOT_PREFIXES = frozenset(p for p in PUBLIC_PREFIXES if p.startswith("snapshots/"))
+PUBLIC_PREFIXES = SNAPSHOT_PREFIXES | frozenset(
+    "images/" + s + "/" for s in ("card_s", "card_l", "art_s")
+)
 IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
 MAX_OBJECT = 128 * 1024 * 1024
 # R2 processes roughly 60 ms per key, so each batch must finish within the 30-second read timeout.
@@ -223,7 +230,11 @@ class R2Store:
             raise ExportError(f"Deletion batch requires 1 to {MAX_DELETE_BATCH} keys")
         if any(
             not any(key.startswith(p) for p in PUBLIC_PREFIXES)
-            or not (JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key))
+            or not (
+                JSON_KEY.fullmatch(key)
+                or CONSTRUCTION_KEY.fullmatch(key)
+                or IMAGE_KEY.fullmatch(key)
+            )
             for key in keys
         ):
             raise ExportError("Deletion key is outside the public namespaces")

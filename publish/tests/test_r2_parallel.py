@@ -67,7 +67,7 @@ def test_cli_jobs_bounds_concurrency_with_identical_writes_and_summary(
         assert result.exit_code == 0, result.output
         summaries.append(json.loads(result.stdout))
         assert "Upload:" in result.stderr
-        assert f"{len(loaded.members)}/" in result.stderr
+        assert f"{len(loaded.members) + len(loaded.construction)}/" in result.stderr
         objects.append({k: (v.raw, v.headers) for k, v in fake.objects.items()})
         assert fake.peak <= jobs
         if jobs > 1:
@@ -75,17 +75,20 @@ def test_cli_jobs_bounds_concurrency_with_identical_writes_and_summary(
         assert fake.requests[-2:] == [("PUT", INDEX), ("GET", INDEX)]
     assert summaries[0] == summaries[1]
     assert objects[0] == objects[1]
-    assert summaries[0]["written_files"] == len(loaded.members)
+    assert summaries[0]["written_files"] == len(loaded.members) + len(
+        loaded.construction
+    )
     local = report(loaded)
     assert isinstance(local["image_bytes"], int)
     assert isinstance(local["json_bytes"], int)
+    assert isinstance(local["construction_bytes"], int)
     assert (
         sum(
             len(raw)
             for key, (raw, _) in objects[0].items()
             if key not in {INDEX, INVENTORY}
         )
-        == (local["json_bytes"])
+        == local["json_bytes"] + local["construction_bytes"]
     )
     print(  # ruff: ignore[print] -- record acceptance timings without object contents
         f"20 ms/request: jobs=1 {timings[0]:.3f}s; jobs=16 {timings[1]:.3f}s"
@@ -135,7 +138,10 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
         new_writes = {key for method, key in fake.requests[before:] if method == "PUT"}
         assert done <= new_writes
         assert all(
-            fake.objects[key].raw == next(m.raw for m in loaded.members if m.key == key)
+            fake.objects[key].raw
+            == next(
+                m.raw for m in (*loaded.members, *loaded.construction) if m.key == key
+            )
             for key in done
         )
         assert failed.key in new_writes
@@ -143,7 +149,7 @@ def test_failure_stops_waiting_writes_drains_and_rerun_only_fills_missing(
             key
             for method, key in fake.requests[before:]
             if method == "GET" and key not in {INDEX, INVENTORY}
-        } == done
+        } == done | {member.key for member in loaded.construction}
         assert result["unchanged_files"] == len(done)
         assert result["index"] == "updated"
 

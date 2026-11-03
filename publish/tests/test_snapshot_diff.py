@@ -178,19 +178,22 @@ def test_first_publish_and_current_rerun_trust_the_committed_index(
     ready(fake, roots)
     with memory_store(fake) as store:
         first = upload(store, loaded)
-        assert first["written_files"] == len(loaded.members)
+        assert first["written_files"] == len(loaded.members) + len(loaded.construction)
+        # Construction indexes sit outside the manifest, so each run asks for them by key.
         assert {key for method, key in fake.requests if method == "GET"} == {
             INDEX,
             INVENTORY,
-        }
+        } | {member.key for member in loaded.construction}
         assert fake.requests[-2:] == [("PUT", INDEX), ("GET", INDEX)]
         fake.requests.clear()
         again = upload(store, loaded)
     assert again["written_files"] == 0
-    assert again["unchanged_files"] == len(loaded.members)
+    assert again["unchanged_files"] == len(loaded.members) + len(loaded.construction)
     assert again["index"] == "unchanged"
+    construction = {member.key for member in loaded.construction}
     assert all(
-        method == "GET" and key in {INDEX, INVENTORY} for method, key in fake.requests
+        method == "GET" and key in {INDEX, INVENTORY} | construction
+        for method, key in fake.requests
     )
 
 
@@ -231,15 +234,20 @@ def test_text_only_update_reuses_current_and_previous_without_image_io(
         finished = perf_counter()
     writes = {key for method, key in fake.requests if method == "PUT"}
     reads = [key for method, key in fake.requests if method == "GET"]
-    assert writes == expected | {INDEX}
-    assert len(reads) == 7
-    assert set(reads) == {
-        INDEX,
-        INVENTORY,
-        string(first.entry["manifest_path"]),
-        string(second.entry["manifest_path"]),
-    }
-    assert result["written_files"] == len(expected)
+    construction = {member.key for member in third.construction}
+    assert writes == expected | construction | {INDEX}
+    assert len(reads) == 7 + len(construction)
+    assert (
+        set(reads)
+        == {
+            INDEX,
+            INVENTORY,
+            string(first.entry["manifest_path"]),
+            string(second.entry["manifest_path"]),
+        }
+        | construction
+    )
+    assert result["written_files"] == len(expected | construction)
     assert fake.requests[-2:] == [("PUT", INDEX), ("GET", INDEX)]
     assert not any(key.startswith("images/") for _, key in fake.requests)
     print(  # ruff: ignore[print] -- acceptance evidence contains counts and synthetic timings only
@@ -265,9 +273,10 @@ def test_raw_and_brotli_are_independent_representations(
         fake.requests.clear()
         upload(store, second)
     expected = {m.key for m in second.members} - declared(first)
+    construction = {member.key for member in second.construction}
     assert {key for method, key in fake.requests if method == "PUT"} == expected | {
         INDEX
-    }
+    } | construction
     reused_raw = declared(first) & declared(second)
     assert reused_raw
     if not old_br:
@@ -303,7 +312,7 @@ def test_only_a_create_only_collision_is_downloaded(
         key
         for method, key in fake.requests
         if method == "GET" and key not in {INDEX, INVENTORY}
-    ] == [member.key]
+    ] == [*(item.key for item in loaded.construction), member.key]
 
 
 def test_optional_manifest_brotli_is_not_inferred_from_its_raw_manifest(
@@ -475,7 +484,7 @@ def test_changes_ref_retains_its_raw_and_brotli_without_payload_reads(
         INDEX,
         INVENTORY,
         string(old_entry["manifest_path"]),
-    }
+    } | {member.key for member in second.construction}
 
 
 @pytest.mark.parametrize("changed", ["images", "index", "readback"])

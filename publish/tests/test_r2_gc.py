@@ -70,7 +70,9 @@ def three_versions(
 
 
 def keys(loaded: Export) -> set[str]:
-    return {m.key for m in loaded.members} | {i.key for i in loaded.images}
+    return {m.key for m in (*loaded.members, *loaded.construction)} | {
+        i.key for i in loaded.images
+    }
 
 
 def test_collects_only_objects_outside_current_previous_and_current_images(
@@ -129,7 +131,7 @@ def test_previous_images_are_collected_when_current_drops_them(
     result = gc.collect_images(store, IMAGE_PREFIXES, execute=True)
     assert result["deleted"] == sorted(i.key for i in previous.images)
     assert set(state.objects) == {
-        m.key for e in (previous, current) for m in e.members
+        m.key for e in (previous, current) for m in (*e.members, *e.construction)
     } | {INDEX, INVENTORY}
 
 
