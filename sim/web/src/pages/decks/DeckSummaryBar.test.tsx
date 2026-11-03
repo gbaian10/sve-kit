@@ -35,6 +35,7 @@ function renderBar(
       dataFailed,
       retryData: () => undefined,
       restrictions: new Map(),
+      construction: { state: "loading" },
       problems,
       uiLanguage: "zh-TW",
       textLang: "ja",

@@ -15,6 +15,7 @@ import {
   parseJson,
   stringValue,
 } from "./format-v3/json"
+import { appRequests } from "./request-queue"
 
 const FORMAT = 1
 const ZONES: readonly Zone[] = ["none", "leader", "main", "evolve"]
@@ -22,15 +23,15 @@ const SCOPES = ["main", "evolve", "all"] as const
 const KINDS = ["copy_limit", "choice_group"] as const
 
 /** The construction index next to a snapshot: `construction/<manifest hex>/<region>.json`. */
-export function constructionIndexUrl(base: string, manifestHash: string, region: string): string {
+function constructionIndexUrl(base: string, manifestHash: string, region: string): string {
   return `${base}/construction/${manifestHash.replace(/^sha256:/u, "")}/${region}.json`
 }
 
 export async function loadConstructionIndex(
-  fetcher: Fetcher,
   base: string,
   manifestHash: string,
   region: string,
+  fetcher: Fetcher = appRequests.foreground,
 ): Promise<ConstructionIndex> {
   const bytes = await fetchBytes(fetcher, constructionIndexUrl(base, manifestHash, region))
   return decodeConstructionIndex(parseJson(bytes), manifestHash, region)
@@ -46,7 +47,7 @@ const intOrNull = (value: JsonValue | undefined, path: string) =>
   value === null ? null : integerValue(value, [path])
 
 /** Validates the wire shape (docs/schema/export/construction-index.md) and its snapshot binding. */
-export function decodeConstructionIndex(
+function decodeConstructionIndex(
   value: JsonValue,
   manifestHash: string,
   region: string,

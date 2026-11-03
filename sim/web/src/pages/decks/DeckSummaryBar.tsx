@@ -2,7 +2,8 @@ import { ChevronUp, CircleAlert, CircleCheck, CircleDashed } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { BottomBar } from "../../components/nav/BottomBar"
-import { EVOLVE_MAX, MAIN_MAX, MAIN_MIN, totalCount } from "../../domain/deck/model"
+import { EVOLVE_MAX, MAIN_MAX, MAIN_MIN } from "../../domain/deck/construction"
+import { totalCount } from "../../domain/deck/model"
 import { useDeckEditor } from "./deck-editor"
 import { CountPill } from "./DeckPanel"
 

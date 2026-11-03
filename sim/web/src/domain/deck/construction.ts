@@ -50,7 +50,7 @@ export interface ConstructionIndex {
   readonly formats: ReadonlyMap<string, FormatRules>
 }
 
-export type DeckBasis =
+type DeckBasis =
   | { readonly kind: "class"; readonly classCode?: string }
   | { readonly kind: "title"; readonly titleCode: string }
 
@@ -90,7 +90,7 @@ export type ViolationCode =
 
 export type NoteCode = "triggerClassUnchecked" | "restrictionsUnknown"
 
-export interface Violation {
+interface Violation {
   readonly code: ViolationCode
   /** Comprehensive Rules clause, `restriction` for the official lists, `format` for formats. */
   readonly clause: string
@@ -99,7 +99,7 @@ export interface Violation {
   readonly values: Readonly<Record<string, string | number>>
 }
 
-export interface Note {
+interface Note {
   readonly code: NoteCode
   readonly clause: string
 }

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest"
 
 import { checkConstruction } from "../domain/deck/construction"
-import { constructionIndexUrl, decodeConstructionIndex } from "./construction-index"
+import type { Fetcher } from "./cdn"
+import { loadConstructionIndex } from "./construction-index"
 import type { JsonObject } from "./format-v3/json"
 
 const HASH = `sha256:${"ab".repeat(32)}`
@@ -44,9 +45,19 @@ const wire = (): JsonObject => ({
   },
 })
 
-describe("decodeConstructionIndex", () => {
-  it("decodes dictionary codes, bit masks and per-card rules", () => {
-    const index = decodeConstructionIndex(wire(), HASH, "jp")
+/** Serves one JSON body at the index's path and records what was asked for. */
+function serve(body: JsonObject) {
+  const urls: string[] = []
+  const fetcher: Fetcher = (url) => {
+    urls.push(url)
+    return Promise.resolve(new Response(JSON.stringify(body)))
+  }
+  return { urls, load: () => loadConstructionIndex("/cdn", HASH, "jp", fetcher) }
+}
+
+describe("loadConstructionIndex", () => {
+  it("decodes dictionary codes, bit masks and per-card rules", async () => {
+    const index = await serve(wire()).load()
     expect(index.card("c:amulet")).toEqual({
       name: 0,
       classCode: "elf",
@@ -75,8 +86,8 @@ describe("decodeConstructionIndex", () => {
     })
   })
 
-  it("feeds the validator directly", () => {
-    const index = decodeConstructionIndex(wire(), HASH, "jp")
+  it("feeds the validator directly", async () => {
+    const index = await serve(wire()).load()
     const result = checkConstruction(
       { basis: { kind: "class" }, leader: "c:leader", main: [["c:amulet", 1]], evolve: [] },
       index,
@@ -100,13 +111,13 @@ describe("decodeConstructionIndex", () => {
         cards: { ...(value["cards"] as JsonObject), zone: [2] },
       }),
     ],
-  ])("rejects %s", (_name, mutate) => {
-    expect(() => decodeConstructionIndex(mutate(wire()), HASH, "jp")).toThrow()
+  ])("rejects %s", async (_name, mutate) => {
+    await expect(serve(mutate(wire())).load()).rejects.toThrow()
   })
 
-  it("locates the index by the snapshot's manifest hash", () => {
-    expect(constructionIndexUrl("/cdn", HASH, "en")).toBe(
-      `/cdn/construction/${"ab".repeat(32)}/en.json`,
-    )
+  it("locates the index by the snapshot's manifest hash", async () => {
+    const server = serve(wire())
+    await server.load()
+    expect(server.urls).toEqual([`/cdn/construction/${"ab".repeat(32)}/jp.json`])
   })
 })

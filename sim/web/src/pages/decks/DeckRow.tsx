@@ -50,7 +50,6 @@ export function DeckRow({
   const editor = useDeckEditor()
   const facts = editor.facts?.factsOf(entry.cardId)
   const summary = editor.facts?.summaryOf(entry.cardId, entry.printingId)
-  const status = editor.statusOf(entry.cardId)
   const name = summary
     ? displayName(summary.name, editor.uiLanguage, editor.nameDisplay)
     : { primary: { text: facts?.name ?? entry.cardId, lang: "ja" as const } }
@@ -129,7 +128,6 @@ export function DeckRow({
       ) : (
         <CountStepper
           count={entry.count}
-          max={Math.max(status.max, entry.count)}
           name={name.primary.text}
           onChange={(count) => {
             editor.setCount(section, entry.cardId, count)

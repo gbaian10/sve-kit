@@ -90,7 +90,7 @@ function resizableWindow() {
 }
 
 describe("DeckBuilderPage", () => {
-  it("adds copies from the pool until the same-name limit and lists them in the deck", async () => {
+  it("adds copies past the same-name limit, warns about it and lists them in the deck", async () => {
     const deck = await openBuilder()
     const user = userEvent.setup()
     // The steppers appear once the pool's results and the deck's card facts have both loaded.
@@ -100,20 +100,24 @@ describe("DeckBuilderPage", () => {
     await user.click(add())
     // The rule's limit stays the denominator however many copies are in.
     expect(add().parentElement).toHaveTextContent("1/3")
-    for (let copy = 1; copy < 3; copy += 1) await user.click(add())
-    expect(add()).toBeDisabled()
-    expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 3 }])
+    // Construction rules only warn: a fourth copy still goes in (maintainer decision 2026-11-03).
+    for (let copy = 1; copy < 4; copy += 1) await user.click(add())
+    expect(add()).toBeEnabled()
+    expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 4 }])
     // Below 1180 px the deck is a sheet over the pool.
     await user.click(screen.getByRole("button", { name: "打開牌組" }))
     const list = await screen.findByRole("region", { name: "主牌組" })
     expect(within(list).getByRole("button", { name: "試作の見習い兵" })).toBeInTheDocument()
-    expect(screen.getByText("主牌組 3 張，要 40～50 張。")).toBeInTheDocument()
+    expect(
+      await screen.findByText("主牌組有 4 張「試作の見習い兵」，同名最多 3 張。"),
+    ).toBeInTheDocument()
 
     await user.click(within(list).getByRole("button", { name: "減一張 試作の見習い兵" }))
-    expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 2 }])
+    expect(stored(deck.id)?.main).toEqual([{ cardId: "c:bp01-001", count: 3 }])
+    expect(screen.getByText("主牌組 3 張，要 40～50 張。")).toBeInTheDocument()
+    expect(screen.queryByText(/同名最多/u)).not.toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "繼續加卡" }))
     expect(screen.queryByRole("dialog", { name: "牌組" })).not.toBeInTheDocument()
-    expect(add()).toBeEnabled()
   }, 60_000)
 
   it("sets the leader from the pool and keeps other classes out by default", async () => {

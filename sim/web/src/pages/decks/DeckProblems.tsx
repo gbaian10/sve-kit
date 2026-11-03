@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheck, Info, TriangleAlert } from "lucide-react"
+import { CircleAlert, CircleCheck, Info, LoaderCircle } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -10,7 +10,6 @@ import { useDeckLabels } from "./deck-labels"
 
 const TONE = {
   error: { Icon: CircleAlert, className: "text-danger" },
-  warning: { Icon: TriangleAlert, className: "text-warning" },
   info: { Icon: Info, className: "text-info" },
 } as const
 
@@ -46,12 +45,20 @@ export function DeckProblems({
     <div className="flex flex-col gap-1.5 rounded-button border border-border bg-surface-1 p-2">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span className="flex items-center gap-1.5 text-12 font-semibold text-text-2">
-          {errors === 0 ? (
+          {editor.construction.state === "loading" ? (
+            <>
+              <LoaderCircle className="size-4 animate-spin text-text-3" aria-hidden="true" />
+              {t("decks.rulesLoading")}
+            </>
+          ) : editor.construction.state === "failed" ? (
+            <>
+              <Info className="size-4 text-text-3" aria-hidden="true" />
+              {t("decks.rulesFailed")}
+            </>
+          ) : errors === 0 ? (
             <>
               <CircleCheck className="size-4 text-success" aria-hidden="true" />
-              {problems.some((item) => item.severity === "warning")
-                ? t("decks.status.legalWithWarnings")
-                : t("decks.status.legal")}
+              {problems.length > 0 ? t("decks.status.legalWithWarnings") : t("decks.status.legal")}
             </>
           ) : (
             <>
@@ -80,7 +87,9 @@ export function DeckProblems({
                 <span className="shrink-0 rounded-badge bg-surface-3 px-1.5 text-11 text-text-2 tabular-nums">
                   {problem.clause === "restriction"
                     ? t("decks.clauseRestriction")
-                    : t("decks.clause", { clause: problem.clause })}
+                    : problem.clause === "format"
+                      ? t("decks.clauseFormat")
+                      : t("decks.clause", { clause: problem.clause })}
                 </span>
               </>
             )

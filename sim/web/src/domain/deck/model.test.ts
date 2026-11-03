@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest"
 
 import { card } from "../../test-utils/deck-cards"
 import {
-  copyLimit,
   countOf,
   createDeck,
   duplicateDeck,
@@ -113,19 +112,6 @@ describe("deck model", () => {
       printingId: "p:x",
     })
     expect(withPrinting(main, "c:2", undefined)[1]).toEqual({ cardId: "c:2", count: 2 })
-  })
-
-  it("limits copies by card name in the section only", () => {
-    const deck = {
-      ...sample(),
-      main: [{ cardId: "c:1", count: 2 }],
-      evolve: [{ cardId: "c:3", count: 3 }],
-    }
-    const names: Record<string, string> = { "c:1": "Elf", "c:2": "Elf", "c:3": "Elf" }
-    const nameOf = (id: string) => names[id]
-    expect(copyLimit(deck, "main", { cardId: "c:2", name: "Elf" }, nameOf)).toBe(1)
-    expect(copyLimit(deck, "main", { cardId: "c:1", name: "Elf" }, nameOf)).toBe(3)
-    expect(copyLimit(deck, "evolve", { cardId: "c:2", name: "Elf" }, nameOf)).toBe(0)
   })
 
   it("records every edit as a newer revision of the same deck", () => {
