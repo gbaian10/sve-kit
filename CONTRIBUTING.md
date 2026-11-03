@@ -416,11 +416,15 @@ pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI calls the s
 
 CI keeps the existing component jobs and the required `ci-ok` gate. The `python` and `rust`
 jobs run the component's hooks (and the publish tests); the carddb tests and the Rust tests
-run in parallel shards (`python-tests`, `rust-tests`). A shard runs every test whose name
-hashes to it, so each collected test runs in exactly one shard and new tests need no setup:
-pytest selects with `--shard=I/N` (`carddb/tests/support/sharding.py`), and
-`.github/ci/rust_tests.py --shard=I/N` lists the whole workspace and passes this shard's names
-to libtest with `--exact`. Each shard records how many tests it collected and selected; its
+run in parallel shards (`python-tests`, `rust-tests`). Each collected test runs in exactly
+one shard and new tests need no setup: pytest (`--shard=I/N`,
+`carddb/tests/support/sharding.py`) deals each file's tests out in turn, so the few
+minute-long real-repository tests in one file land in different shards, and
+`.github/ci/rust_tests.py --shard=I/N` lists the whole workspace, picks names by hash and
+passes them to libtest with `--exact`. The Rust shards compile dependencies with
+`opt-level = 2` (`profile.dev.package."*"`, which excludes workspace members): the
+dependencies parse the large public inputs, while every workspace crate stays unoptimised
+and instrumented and the report already excludes dependency sources. Each shard records how many tests it collected and selected; its
 summary fails if any selected test did not report a result. `python-coverage` and
 `rust-coverage` then check that the shards together ran every collected test exactly once
 and gate the merged coverage at the same thresholds as a single run: `coverage combine`
