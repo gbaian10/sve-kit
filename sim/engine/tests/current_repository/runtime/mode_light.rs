@@ -7,7 +7,7 @@ use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};
 
 /// Synthetic materials isolate the admitted programs from unrelated card abilities.
-const STAND_INS: [(&str, &str, &str, &[&str], u8); 9] = [
+const STAND_INS: [(&str, &str, &str, &[&str], u8); 10] = [
     (
         "pay-unit",
         "test unit",
@@ -30,6 +30,7 @@ const STAND_INS: [(&str, &str, &str, &[&str], u8); 9] = [
         1,
     ),
     ("pay-pale", "pay-pale", "フォロワー", &["ペイルムーン"], 1),
+    ("pay-kagero", "pay-kagero", "フォロワー", &["かげろう"], 1),
     ("pay-aqua", "pay-aqua", "フォロワー", &["アクアフォース"], 1),
     (
         "pay-oracle",
@@ -197,6 +198,11 @@ fn quick_case(sample: &str, material: &str, check: fn(&Value)) {
             );
             if accept {
                 check(&state);
+            } else {
+                assert_eq!(
+                    state["P2"]["leader"]["life"], 20_i64,
+                    "{number}: refusing applies none of the paid body"
+                );
             }
         }
     }
@@ -226,6 +232,15 @@ fn cp03_055_pays_pale_moon_and_banishes_three() {
             s["P1"]["banish"],
             json!(["top1", "top2", "tail"]),
             "the paid mode banishes the top three"
+        );
+    });
+}
+#[test]
+fn csd03b_007_pays_kagero_and_damages_the_targets_controller_leader() {
+    quick_case("CSD03b-007", "pay-kagero", |s| {
+        assert_eq!(
+            s["P2"]["leader"]["life"], 19_i64,
+            "the chosen follower's controller leader takes one damage"
         );
     });
 }

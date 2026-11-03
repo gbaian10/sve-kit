@@ -1,0 +1,55 @@
+cards:
+  CSD03b-007:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 2
+                        to: victim_free
+                  - - pay:
+                        cost:
+                          discard:
+                            n: 1
+                            sel:
+                              trait: かげろう
+                              who: self
+                              zone: hand
+                        do:
+                          - damage:
+                              n: 3
+                              to: victim_paid
+                          - damage:
+                              n: 1
+                              to:
+                                leader_of: victim_paid
+          targets:
+            - bind: victim_free
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: victim_paid
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
