@@ -112,7 +112,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     mask_entry_origin(&mut inspected)?;
     mask_public_selectors(&mut inspected)?;
-    super::tokens::mask_count(&mut inspected);
+    super::tokens::mask_operands(&mut inspected);
     mask_granted_definitions(&mut inspected);
 
     if let Node::Instruction { instruction } = &mut inspected

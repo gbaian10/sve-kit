@@ -454,6 +454,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     super::counters::check_action(action)?;
     super::discard::check_action(action)?;
     super::numeric::check_action(action)?;
+    super::numeric::pilot::check_action(action)?;
     super::grant::check_action(action)
 }
 
@@ -682,6 +683,9 @@ fn supported(code: &str) -> bool {
             | "player.require-one"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
+            | "shape.Action.BoxPilot"
+            | "action.box-pilot"
+            | "shape.BoxPilotMode.Pilot"
             | "shape.Action.Equip"
             | "action.equip"
             | "shape.Action.Token"

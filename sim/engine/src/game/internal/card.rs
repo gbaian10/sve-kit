@@ -329,7 +329,8 @@ impl Game {
         card: &WellFormedCardProgram,
     ) -> Result<()> {
         let base_print = self.catalog.face(card_no, 0)?;
-        check_base_face(base_print)?;
+        let base_face = self.printed_face_id(card_no, 0)?;
+        check_base_face(base_print, pilot_face(card, &base_face.0))?;
         costs::check(self, card_no, card)?;
         optional::check_card(card)?;
         material::check_card(card)?;
@@ -366,13 +367,14 @@ impl Game {
             let declaration = printed_keywords::card_declaration(ability);
             keywords::check_coordinate(&mut origins, ordinal, &located.source, declaration)?;
             let printed = self.catalog.face(card_no, ordinal)?;
-            check_ability_face(ability, printed)?;
+            let pilot = pilot_face(card, &face.0);
+            check_ability_face(ability, printed, pilot)?;
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
             }
             self.check_card_source(&located.source, card_no, &face.0, line.0)?;
             if let Some(keyword) = declaration {
-                keywords::check(self, card_no, located, printed, keyword)?;
+                keywords::check(self, card_no, located, printed, keyword, pilot)?;
                 continue;
             }
             if card_permission(ability) {
@@ -761,8 +763,20 @@ impl Game {
     }
 }
 
-fn check_base_face(printed: &serde_json::Value) -> Result<()> {
-    check_printed_face(printed)?;
+fn pilot_face(card: &WellFormedCardProgram, face: &str) -> bool {
+    card.card().abilities.iter().any(|located| {
+        let ability = &located.node;
+        matches!(&ability.source.origin, AbilityOrigin::Printed { face: origin, .. } if origin.0 == face)
+            && ability.body.as_ref().is_some_and(|body| body.steps.iter().any(|step| {
+                matches!(&step.node, Node::Instruction { instruction }
+                    if matches!(instruction.action, Action::BoxPilot { .. })
+                        && super::numeric::pilot::check_action(&instruction.action).is_ok())
+            }))
+    })
+}
+
+fn check_base_face(printed: &serde_json::Value, pilot: bool) -> Result<()> {
+    check_printed_face(printed, pilot)?;
     if matches!(
         printed["card_type"].as_str(),
         Some(
@@ -779,8 +793,8 @@ fn check_base_face(printed: &serde_json::Value) -> Result<()> {
     Ok(())
 }
 
-fn check_ability_face(ability: &Ability, printed: &serde_json::Value) -> Result<()> {
-    check_printed_face(printed)?;
+fn check_ability_face(ability: &Ability, printed: &serde_json::Value, pilot: bool) -> Result<()> {
+    check_printed_face(printed, pilot)?;
     if is_printed_quick(ability)
         && ability.kind == AbilityKind::Activated
         && !printed["card_type"]
@@ -812,14 +826,15 @@ fn check_ability_face(ability: &Ability, printed: &serde_json::Value) -> Result<
     Ok(())
 }
 
-fn check_printed_face(printed: &serde_json::Value) -> Result<()> {
+fn check_printed_face(printed: &serde_json::Value, pilot: bool) -> Result<()> {
     if printed["cost"].is_null() {
         return Err(unsupported("missing printed card cost"));
     }
     if matches!(
         printed["card_type"].as_str(),
         Some("アミュレット" | "アミュレット・トークン")
-    ) && (printed["power"] != "-" || printed["hp"] != "-")
+    ) && !pilot
+        && (printed["power"] != "-" || printed["hp"] != "-")
     {
         return Err(unsupported("amulet with printed combat statistics"));
     }
@@ -1205,6 +1220,7 @@ fn check_instruction(
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
     super::transform::check_catalog(game, &instruction.action)?;
     super::grant::check_action(&instruction.action)?;
+    super::numeric::pilot::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
     if instruction.source != *ability_source {
         return Err(invalid("instruction has a foreign ability source"));
@@ -1236,6 +1252,7 @@ fn check_instruction(
             | Action::Search { .. }
             | Action::Token { .. }
             | Action::Equip { .. }
+            | Action::BoxPilot { .. }
             | Action::Order { .. }
             | Action::RideDrive {
                 operation: RideDriveOperation::GainDrive {},

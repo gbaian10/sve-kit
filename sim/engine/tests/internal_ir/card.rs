@@ -3,6 +3,9 @@ use super::*;
 mod event_combat_life;
 use second::lowerer;
 
+#[path = "card/pilot.rs"]
+mod pilot;
+
 #[path = "card/mandatory_reveal.rs"]
 mod mandatory_reveal;
 

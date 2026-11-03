@@ -31,6 +31,9 @@ mod cost;
 mod damage;
 #[path = "internal_ir/life.rs"]
 mod life;
+#[path = "internal_ir/pilot.rs"]
+mod pilot;
+
 #[path = "internal_ir/numeric.rs"]
 mod numeric;
 #[path = "internal_ir/ordering.rs"]

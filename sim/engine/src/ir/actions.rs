@@ -135,7 +135,7 @@ tags!(EvolutionMode {
 record!(TokenSpec { template: TokenTemplate, count: Expr<Nat> });
 variants!(TokenTemplate {
     Fixed { template: TokenTemplateId } => [],
-    Name { name: Expr<CardName> } => ["token.dynamic-name"]
+    Name { name: Expr<CardName>, kind: Option<super::CardKind> } => ["token.dynamic-name"]
 });
 variants!(TokenAllocation {
     Unrestricted { templates: Vec<TokenTemplateId>, total: Expr<Nat>, counts: Binding<Vec<TokenCount>>, actor: PlayerRef, decision: DecisionId } => ["transform.token-allocation"],
@@ -185,7 +185,7 @@ variants!(#[derive(Copy)] TurnOperation { InsertBefore { anchor: ScheduleAnchor 
 tags!(Outcome { Win, Lose });
 variants!(BoxPilotMode {
     Boxed { duration: Duration, cutoff: TimestampBasis } => [],
-    Pilot { duration: Duration, attack: Int, life: Int } => []
+    Pilot { duration: Duration } => []
 });
 
 variants!(InstallationSubjects { Objects { objects: Selector, affected: Binding<Selector> } => [], Players { players: PlayerSet, affected: Binding<PlayerSet> } => [] });

@@ -288,6 +288,8 @@ pub enum InstructionOutcome {
     Token(TokenOutcome),
     /// Successful equipment associations, after physical token creation.
     Equipped(Vec<EquipEvent>),
+    /// Source generations successfully changed from printed amulets into followers.
+    Piloted(Vec<ObjectRef>),
     /// Actual body resource recovery, independent of cost payment.
     Resource(ResourceOutcome),
     /// Successful discards and their physical movements, independent of destruction.
@@ -1396,6 +1398,7 @@ impl Game {
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Equip { .. } => self.internal_equip(execution, &instruction)?,
+            Action::BoxPilot { .. } => self.internal_pilot(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Counter { .. } => {
                 self.internal_counter(execution, &instruction, false)?;

@@ -1085,7 +1085,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Reveal(_)
         | ast::Step::Move(_)
         | ast::Step::Create(_)
-        | ast::Step::Equip(_) => false,
+        | ast::Step::Equip(_)
+        | ast::Step::Pilot(_) => false,
     })
 }
 

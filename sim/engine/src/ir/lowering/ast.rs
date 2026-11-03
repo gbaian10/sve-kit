@@ -323,6 +323,7 @@ pub(super) enum Step {
     Move(Move),
     Create(Create),
     Equip(Equip),
+    Pilot(Pilot),
 }
 
 #[derive(Deserialize)]
@@ -414,6 +415,13 @@ pub(super) struct EffectEvolution {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct Pilot {
+    #[serde(rename = "ref")]
+    pub reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Equip {
     pub on: This,
     pub token: String,
@@ -435,7 +443,10 @@ pub(super) struct Create {
 pub(super) enum CreateToken {
     One(String),
     Many(Vec<String>),
-    SameName { same_name_as: String },
+    SameName {
+        same_name_as: String,
+        kind: Option<String>,
+    },
 }
 
 impl CreateToken {

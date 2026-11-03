@@ -681,6 +681,23 @@ impl Checker {
                 source,
                 batch,
             } => self.damage(recipients, amount, *flags, source, *batch),
+            Action::BoxPilot {
+                subject,
+                mode: super::BoxPilotMode::Pilot { duration },
+            } => {
+                if *subject != (ObjectOperand::SourceHolder {}) {
+                    return self.reject();
+                }
+                self.object(subject)?;
+                if duration.end != (super::DurationEnd::CurrentTurnEnd {})
+                    || duration.anchor != (super::TimeAnchor::Installation {})
+                    || duration.usage.is_some()
+                    || !duration.intervals.is_empty()
+                {
+                    return self.reject();
+                }
+                Ok(())
+            }
             Action::Equip {
                 holder, template, ..
             } => {

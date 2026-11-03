@@ -425,3 +425,13 @@ impl BodyContext<'_> {
         })
     }
 }
+
+pub(super) fn pilot(value: &ast::Pilot, path: &str) -> Result<Action, LoweringError> {
+    let ast::This::This = value.reference;
+    Ok(Action::BoxPilot {
+        subject: ObjectOperand::SourceHolder {},
+        mode: super::super::BoxPilotMode::Pilot {
+            duration: duration(Some(&ast::Until::Turn), path)?,
+        },
+    })
+}
