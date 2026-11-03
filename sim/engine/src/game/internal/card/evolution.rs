@@ -250,13 +250,16 @@ impl Game {
         {
             return Ok(false);
         }
-        if decision.get("face").is_some_and(|face| {
-            face.as_u64()
-                .and_then(|value| usize::try_from(value).ok())
-                .is_none()
-        }) {
-            return Ok(false);
-        }
+        let face = match decision.get("face") {
+            None => 0,
+            Some(value) => {
+                let Some(face) = value.as_u64().and_then(|value| usize::try_from(value).ok())
+                else {
+                    return Ok(false);
+                };
+                face
+            }
+        };
         for component in ["pp", "ep", "sep"] {
             if decision["pay"]
                 .get(component)
@@ -298,11 +301,7 @@ impl Game {
             }
         }
         let resource = self.object(string(&decision["evolve_card"]))?;
-        let face = decision.get("face").and_then(Value::as_u64).unwrap_or(0);
-        if usize::try_from(face)
-            .ok()
-            .is_none_or(|face| self.catalog.face(&resource.card, face).is_err())
-        {
+        if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);
         }
         self.evolve_with_code(decision, &code, Some(&entry.node))
@@ -350,7 +349,9 @@ fn destination(ability: &Ability) -> Result<Destination> {
 pub(super) fn resource_association(game: &Game, base: &str, form: &str) -> Result<bool> {
     let object = game.object(base)?;
     let base_name = string(&game.catalog.face(&object.card, 0)?["name"]);
-    let form_name = string(&game.face(form)?["name"]);
+    let form_face = game.face(form)?;
+    let form_name = string(&form_face["name"]);
+    let is_evolve_follower = string(&form_face["card_type"]) == "フォロワー・エボルヴ";
     if base_name == form_name {
         return Ok(true);
     }
@@ -358,7 +359,9 @@ pub(super) fn resource_association(game: &Game, base: &str, form: &str) -> Resul
         return Ok(false);
     };
     for entry in &program.card().abilities {
-        if intrinsic(&entry.node) && destination(&entry.node)?.matches(base_name, form_name) {
+        if intrinsic(&entry.node)
+            && destination(&entry.node)?.matches(base_name, form_name, is_evolve_follower)
+        {
             return Ok(true);
         }
     }

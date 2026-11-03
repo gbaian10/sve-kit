@@ -1,6 +1,7 @@
 //! Closed printed evolution destinations share the existing face-selection predicate.
 use super::{
-    Binding, Bool, CardName, Expr, NamesRead, ObjectOperand, ObjectRef, ObjectView, Predicate,
+    Binding, Bool, CardKind, CardName, CharacteristicView, Expr, KindRead, NamesRead,
+    ObjectOperand, ObjectRef, ObjectView, Predicate,
 };
 
 pub(crate) enum Destination {
@@ -22,11 +23,11 @@ fn names(object: ObjectOperand) -> Expr<Vec<CardName>> {
 }
 
 impl Destination {
-    pub(crate) fn matches(&self, source: &str, form: &str) -> bool {
+    pub(crate) fn matches(&self, source: &str, form: &str, is_evolve_follower: bool) -> bool {
         match self {
             Self::SameName => source == form,
             Self::Names(names) => names.iter().any(|name| name.0 == form),
-            Self::Contains(name) => form.contains(&name.0),
+            Self::Contains(name) => is_evolve_follower && form.contains(&name.0),
         }
     }
 
@@ -41,9 +42,20 @@ impl Destination {
                 left: names(object),
                 right: Expr::Literal(values.clone()),
             },
-            Self::Contains(name) => Predicate::NameContains {
-                object: view(object),
-                name: Expr::Literal(name.clone()),
+            Self::Contains(name) => Predicate::And {
+                predicates: vec![
+                    Expr::Compute(Box::new(Predicate::KindEquals {
+                        left: Expr::Live(Box::new(KindRead::Kind {
+                            object: view(object.clone()),
+                            view: CharacteristicView::Effective,
+                        })),
+                        right: Expr::Literal(CardKind::EvolveFollower),
+                    })),
+                    Expr::Compute(Box::new(Predicate::NameContains {
+                        object: view(object),
+                        name: Expr::Literal(name.clone()),
+                    })),
+                ],
             },
         }))
     }
@@ -66,11 +78,17 @@ impl Destination {
             Self::Names(values.clone())
         } else if let Predicate::NamesIntersect { .. } = operation.as_ref() {
             Self::SameName
-        } else if let Predicate::NameContains {
-            name: Expr::Literal(name),
-            ..
-        } = operation.as_ref()
-        {
+        } else if let Predicate::And { predicates } = operation.as_ref() {
+            let [_, Expr::Compute(name_predicate)] = predicates.as_slice() else {
+                return None;
+            };
+            let Predicate::NameContains {
+                name: Expr::Literal(name),
+                ..
+            } = name_predicate.as_ref()
+            else {
+                return None;
+            };
             if name.0.is_empty() {
                 return None;
             }

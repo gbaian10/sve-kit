@@ -96,3 +96,66 @@ fn wrong_names_faces_and_cross_head_prices_reject_without_reveal_or_payment() {
         assert_eq!(game.projection(View::Referee).unwrap(), before);
     }
 }
+
+fn boundary_selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+        let (mut snapshot, keywords, mut input) = inputs().clone();
+        let mut face = snapshot
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .find(|card| card["number"] == "BP08-090")
+            .unwrap()["faces"][0]
+            .clone();
+        face["name"] = json!("レーヴァテインドラゴン・synthetic amulet");
+        snapshot.push_str(&json!({"number":"evolve-wrong-kind","faces":[face]}).to_string());
+        snapshot.push('\n');
+        input["documents"].as_array_mut().unwrap().push(json!([
+            "evolve-wrong-kind.yaml",
+            json!({"format":1_u8,"kind":"effect_set","cards":{
+                "evolve-wrong-kind":{"status":"complete","abilities":[]}
+            }})
+            .to_string()
+        ]));
+        selection_without_abilities((snapshot, keywords, input), &["BP09-005", "BP09-019"])
+    })
+}
+
+fn boundary_game(initial: &Value) -> Game {
+    Game::from_selected_effects(
+        boundary_selection().clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "evolution-boundaries",
+    )
+    .unwrap()
+}
+
+#[test]
+fn name_contains_rejects_matching_evolution_amulets_before_reveal_and_payment() {
+    let mut board = boundary_game(&position("BP03-056", "evolve-wrong-kind"));
+    let before = board.projection(View::Referee).unwrap();
+    let step = evolve(&mut board, 0, 0, 1, "BP03-056");
+    assert_eq!(step.outcome, "cannot-evolve");
+    assert_eq!(step.events, Vec::<Value>::new());
+    assert_eq!(board.projection(View::Referee).unwrap(), before);
+}
+
+#[test]
+fn unadmitted_reverse_faces_keep_the_printed_ability_boundary_after_real_evolution() {
+    for (base, form, definition, pp) in [
+        ("BP09-004", "BP09-005", 0, 1),
+        ("BP09-018", "BP09-019", 1, 4),
+    ] {
+        let mut board = boundary_game(&position(base, form));
+        assert_eq!(
+            evolve(&mut board, definition, 1, pp, base).outcome,
+            "resolved"
+        );
+        assert!(
+            matches!(board.internal_pending_choice(), Err(EngineFailure::Unsupported(reason))
+            if reason == "internal D1 does not support evolution resource printed abilities are not admitted")
+        );
+    }
+}
