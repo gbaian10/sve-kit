@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  DSD01a-008:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - option: 1
+              bind: enemy4
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                leader_or: true
+              n: 1
+            - option: 2
+              bind: enemy8
+              from:
+                who: opp
+                zone: field
+                kind: follower
+                leader_or: true
+              n: 1
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        to: enemy4
+                        n: 4
+                    - draw:
+                        n: 1
+                  - - pay:
+                        cost:
+                          pp: 3
+                        do:
+                          - if:
+                              cond:
+                                cmp:
+                                  left:
+                                    count:
+                                      who: self
+                                      zone: cemetery
+                                      trait: 学院
+                                  op: ge
+                                  right: 10
+                              then:
+                                - damage:
+                                    to: enemy8
+                                    n: 8
+                                - draw:
+                                    n: 2
