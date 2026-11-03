@@ -1,0 +1,59 @@
+cards:
+  BP19-062:
+    abilities:
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: it
+            - life:
+                delta: 1
+                who: self
+          on:
+            enter_field:
+              sel:
+                name: オルカ
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: オルカ
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: オルカ
+        line: 2
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -1
+                    next_only: true
+                    when_playing:
+                      trait: 海洋
+                      who: self
+                      zone: ex
+                until: turn
+                who: self
+          per_turn: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

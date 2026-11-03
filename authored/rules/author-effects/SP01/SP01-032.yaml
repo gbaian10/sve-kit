@@ -1,0 +1,51 @@
+cards:
+  SP01-032:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        other: true
+                        trait: 吸血鬼
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - damage:
+                      n: 3
+                      to:
+                        leaders: opponents
+                  - life:
+                      delta: 3
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

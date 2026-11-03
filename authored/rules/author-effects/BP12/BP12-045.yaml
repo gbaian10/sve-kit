@@ -1,0 +1,46 @@
+cards:
+  BP12-045:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: victim
+          on:
+            played:
+              sel:
+                class: ウィッチ
+                kind: spell
+              who: self
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      kind: follower
+                      who: self
+                      zone: cemetery
+                then:
+                  - pp:
+                      delta: 6
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
