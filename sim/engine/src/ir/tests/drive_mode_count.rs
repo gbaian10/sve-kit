@@ -18,12 +18,11 @@ fn query() -> Value {
 }
 
 #[test]
-fn conditional_modes_accept_only_a_public_named_evolve_count() {
+fn conditional_evolve_deck_modes_accept_only_a_public_named_count() {
     lowerer().lower(&tree(&query())).unwrap();
     for (key, value) in [
         ("who", json!("opp")),
         ("zone", json!("hand")),
-        ("zone", json!("field")),
         ("face_up", json!(false)),
         ("face_up", Value::Null),
         ("name", Value::Null),
@@ -40,6 +39,30 @@ fn conditional_modes_accept_only_a_public_named_evolve_count() {
             lowerer().lower(&tree(&invalid)).unwrap_err().code,
             "unsupported_construct",
             "the semantic count restriction rejects {key}"
+        );
+    }
+}
+
+#[test]
+fn conditional_modes_accept_public_zone_counts_of_either_player() {
+    for (who, zone) in [
+        ("self", "cemetery"),
+        ("opp", "cemetery"),
+        ("self", "field"),
+        ("opp", "ex"),
+    ] {
+        lowerer()
+            .lower(&tree(&json!({"who":who,"zone":zone,"trait":"trait"})))
+            .unwrap();
+    }
+    for zone in ["hand", "deck"] {
+        assert_eq!(
+            lowerer()
+                .lower(&tree(&json!({"who":"self","zone":zone,"trait":"trait"})))
+                .unwrap_err()
+                .code,
+            "unsupported_construct",
+            "a hidden {zone} count does not set the mode cap"
         );
     }
 }

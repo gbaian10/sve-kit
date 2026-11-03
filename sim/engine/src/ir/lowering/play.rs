@@ -967,9 +967,8 @@ fn choice_count(
         }))
     };
     let condition = match &replacement.r#if {
-        ast::ModeCondition::Cmp(comparison) => {
-            context.public_evolve_mode_condition(comparison, path)?
-        }
+        ast::ModeCondition::Cmp(comparison) => context.public_mode_condition(comparison, path)?,
+        ast::ModeCondition::History(history) => context.history_condition(history, path)?,
         ast::ModeCondition::EnteredFrom(origin)
             if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
         {

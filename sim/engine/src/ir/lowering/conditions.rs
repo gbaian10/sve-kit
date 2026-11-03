@@ -129,7 +129,7 @@ impl BodyContext<'_> {
         })))
     }
 
-    fn history_condition(
+    pub(super) fn history_condition(
         &mut self,
         history: &ast::HistoryQuery,
         path: &str,
@@ -260,7 +260,8 @@ impl BodyContext<'_> {
         })))
     }
 
-    pub(super) fn public_evolve_mode_condition(
+    /// Mode counts read only public counts fixed when the modes are chosen.
+    pub(super) fn public_mode_condition(
         &mut self,
         comparison: &ast::BodyComparison,
         path: &str,
@@ -268,6 +269,18 @@ impl BodyContext<'_> {
         let ast::Number::Count { count } = &comparison.left else {
             return Err(unsupported(path));
         };
+        if matches!(
+            count.zone,
+            ast::CountZone::Field
+                | ast::CountZone::Cemetery
+                | ast::CountZone::Ex
+                | ast::CountZone::Banish
+        ) {
+            if !matches!(comparison.right, ast::Number::Literal(_)) {
+                return Err(unsupported(path));
+            }
+            return self.comparison_condition(comparison, path);
+        }
         if !matches!(comparison.op, ast::Comparison::Ge)
             || !matches!(comparison.right, ast::Number::Literal(1..))
             || !matches!(count.who, ast::Side::Controller)

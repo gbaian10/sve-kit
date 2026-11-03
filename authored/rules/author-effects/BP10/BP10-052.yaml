@@ -1,0 +1,49 @@
+cards:
+  BP10-052:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            trait: チェス
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    upto: 2
+                n: 1
+                options:
+                  - - choose:
+                        bind: sacrifice
+                        by: opp
+                        from:
+                          kind: follower
+                          who: opp
+                          zone: field
+                        n: 1
+                    - move:
+                        ref: sacrifice
+                        to: cemetery
+                  - - life:
+                        delta: 3
+                        who: self
+                  - - draw:
+                        n: 2
+                        who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
