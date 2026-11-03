@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-103:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            one_of:
+              - to_cemetery:
+                  sel:
+                    who: self
+                    zone: field
+                    class: ナイトメア
+                    acted: false
+                  n: 4
+              - banish:
+                  sel:
+                    who: self
+                    zone: ex
+                    class: ナイトメア
+                  n: 4
+          optional_cost_delta: -9

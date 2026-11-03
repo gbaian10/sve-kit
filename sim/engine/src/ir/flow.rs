@@ -278,11 +278,38 @@ record!(PlayCostPayment {
 record!(PlayCostExchange {
     scope: ScopeId,
     decision: DecisionId,
-    materials: Decision,
+    materials: Vec<Decision>,
+    route: Option<DecisionId>,
     cost: CostSpec,
     change: super::CostChange,
     receipt: ReceiptId
 });
+impl PlayCostExchange {
+    /// Closed route pairing keeps each material decision tied to its own cost.
+    pub(crate) fn routes(&self) -> Option<Vec<(&Decision, &CostStep)>> {
+        fn one(cost: &CostSpec) -> Option<&CostStep> {
+            match cost {
+                CostSpec::Ordered { steps } if steps.len() == 1 => steps.first(),
+                CostSpec::Ordered { .. } | CostSpec::Alternative { .. } => None,
+            }
+        }
+        match (&self.cost, self.materials.as_slice(), self.route) {
+            (CostSpec::Ordered { steps }, [material], None) if steps.len() == 1 => {
+                Some(vec![(material, steps.first()?)])
+            }
+            (CostSpec::Alternative { alternatives }, [first, second], Some(_))
+                if alternatives.len() == 2 =>
+            {
+                Some(vec![
+                    (first, one(alternatives.first()?)?),
+                    (second, one(alternatives.get(1)?)?),
+                ])
+            }
+            _ => None,
+        }
+    }
+}
+
 record!(PlayCostModifier { condition: Option<Expr<Bool>>, change: super::CostChange });
 
 impl Walk for FacePlayCost {

@@ -1,10 +1,11 @@
 use super::{Checked, Checker, WellFormedReason};
+use crate::ir::exchange as exchange_shape;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Action, Bool, ChoiceDomain, CostChange, CostSpec, DecisionKind, DiscardMode, Disjointness,
-    ExecutionRef, Expr, InputMode, InstructionContext, Int, MoveDestination, MoveReason, OwnerZone,
-    PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef, PlayerRelation, Posture,
-    SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, Decision, DecisionKind,
+    DiscardMode, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int,
+    MoveDestination, MoveReason, OwnerZone, PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef,
+    PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -66,13 +67,36 @@ impl Checker {
         if !self.receipts.insert(exchange.receipt) {
             return Err(self.error(WellFormedReason::DuplicateReceipt));
         }
+        if let Some(route) = exchange.route
+            && !self.decisions.insert(route)
+        {
+            return Err(self.error(WellFormedReason::DuplicateDecision));
+        }
         self.isolated(|checker| checker.exchange_materials(exchange))
     }
 
     fn exchange_materials(&mut self, exchange: &PlayCostExchange) -> Checked {
+        let Some(routes) = exchange.routes() else {
+            return self.reject();
+        };
+        if routes.len() == 2 && !exchange_shape::pair(exchange) {
+            return self.reject();
+        }
+        if let [(decision, _)] = routes.as_slice()
+            && matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. } if constraint.groups.iter().any(|group| matches!(group.selector, Selector::Zone { zone: ZoneKind::Ex, .. })))
+        {
+            return self.reject();
+        }
+
+        self.env.scope = exchange.scope;
+        for (decision, step) in routes {
+            self.exchange_route(decision, step)?;
+        }
+        Ok(())
+    }
+
+    fn exchange_route(&mut self, decision: &Decision, step: &CostStep) -> Checked {
         let checker = self;
-        checker.env.scope = exchange.scope;
-        let decision = &exchange.materials;
         let ChoiceDomain::Objects {
             constraint,
             binding,
@@ -95,7 +119,10 @@ impl Checker {
         };
         if players.relative_to != (PlayerRef::Controller {})
             || players.relation != PlayerRelation::SelfPlayer
-            || !matches!(zone, ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Hand)
+            || !matches!(
+                zone,
+                ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Hand | ZoneKind::Ex
+            )
             || constraint.cardinality.minimum.0 == 0
             || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
             || group.cardinality != constraint.cardinality
@@ -126,12 +153,6 @@ impl Checker {
             checker.decision_header(decision)?;
             checker.answer(decision, None)
         })?;
-        let CostSpec::Ordered { steps } = &exchange.cost else {
-            return checker.reject();
-        };
-        let [step] = steps.as_slice() else {
-            return checker.reject();
-        };
         let selected = Selector::Bound {
             reference: *binding,
         };
@@ -142,7 +163,7 @@ impl Checker {
                     && movement.position.is_none() && movement.order.is_none()
                     && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
             || matches!(&step.instruction.action, Action::Banish { objects }
-                if *zone == ZoneKind::Cemetery && *objects == selected)
+                if matches!(zone,ZoneKind::Cemetery|ZoneKind::Ex) && *objects == selected)
             || matches!(&step.instruction.action, Action::Posture { objects, posture: Posture::Acted }
                 if *zone == ZoneKind::Field && *objects == selected)
             || matches!(&step.instruction.action, Action::Discard { player: PlayerRef::Controller {}, mode: DiscardMode::All { eligible } }
@@ -150,6 +171,7 @@ impl Checker {
                     if matches!(sets.as_slice(), [Selector::Zone {players: hand_players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..}, other]
                         if hand_players == players && **predicate == Expr::Literal(Bool(true)) && *other == selected)));
         if !valid
+            || step.keyword.is_some()
             || step.materials.is_some()
             || step.instruction.precondition.is_some()
             || step.instruction.actor != (PlayerRef::Controller {})

@@ -122,6 +122,7 @@ fn lower_operations(
                     any: false,
                     result: None,
                     sel: ast::PublicQuery {
+                        acted: None,
                         other: false,
                         who: ast::Side::Controller,
                         zone: ast::PublicZone::Ex,

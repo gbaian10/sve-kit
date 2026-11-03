@@ -23,6 +23,7 @@ pub(super) fn cost(
 
 pub(super) const fn amulets() -> ast::PublicQuery {
     ast::PublicQuery {
+        acted: None,
         who: ast::Side::Controller,
         zone: ast::PublicZone::Field,
         kind: Some(ast::SearchKind::Amulet),

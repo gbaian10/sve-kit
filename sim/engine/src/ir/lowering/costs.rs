@@ -251,7 +251,7 @@ pub(super) fn public_query(
     binding: Binding<ObjectRef>,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if !value.names.is_empty() {
+    if !value.names.is_empty() || value.acted.is_some() {
         return Err(unsupported(path));
     }
     Ok(match value.zone {

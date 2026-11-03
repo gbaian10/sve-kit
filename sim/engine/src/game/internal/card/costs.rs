@@ -65,23 +65,23 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 u64::from(exchange.source.line),
             )
             .map_err(|error| at_source(error, &exchange.source))?;
-            let CostSpec::Ordered { steps } = &exchange.node.cost else {
-                return Err(unsupported("exchange cost"));
-            };
-            let [step] = steps.as_slice() else {
-                return Err(unsupported("exchange steps"));
-            };
-            if step.instruction.source
-                != (AbilitySource {
-                    holder: ObjectOperand::SourceHolder {},
-                    origin: AbilityOrigin::Printed {
-                        face: face.node.face.clone(),
-                        line: Nat(u64::from(exchange.source.line)),
-                    },
-                    controller: PlayerRef::Controller {},
-                })
+            for (_, step) in exchange
+                .node
+                .routes()
+                .ok_or_else(|| unsupported("exchange routes"))?
             {
-                return Err(unsupported("exchange instruction source"));
+                if step.instruction.source
+                    != (AbilitySource {
+                        holder: ObjectOperand::SourceHolder {},
+                        origin: AbilityOrigin::Printed {
+                            face: face.node.face.clone(),
+                            line: Nat(u64::from(exchange.source.line)),
+                        },
+                        controller: PlayerRef::Controller {},
+                    })
+                {
+                    return Err(unsupported("exchange instruction source"));
+                }
             }
         }
         for modifier in &face.node.modifiers {

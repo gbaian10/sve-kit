@@ -26,11 +26,16 @@
 三類在歷史 `(name, text)` 去重的 31 組付款交換候選中占 16 組（送墓 4、消滅 1、
 橫置 11）。這是片段形狀數，包含本文不同的同名卡；不是整卡可用數或 runtime 覆蓋率。
 
-以下整卡拒絕，包含未選分支：`one_of`／「または」、多組交換、`steps`、材料 groups、
+材料擇一另窄收 `one_of` 的兩個完整付款方案：同一 class、同一固定正整數張數，
+一支為自己場上直立卡送墓，另一支為自己 EX 卡消滅。BP01-103／BP01-SL15 骸の王
+使用此形狀。接受後先選其中一支，再只選該支的足額材料；不能混合兩區，也不能把
+從 EX 打出的來源卡算進材料。兩支共用原有常值費用修正。
+
+以下整卡拒絕，包含未選分支：上述形狀以外的 `one_of`、多組交換、`steps`、材料 groups、
 upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payload.result、動態張數、X、
-其他非公開區域的材料、EX 材料、其他操作、額外／模式內 optional 或 additional、alt、+N、正 delta、
-複數 set、未受驗的 aura／next-play／期限。BP01-SL15 骸の王的兩種材料不能拆成只收其中
-一支；開闢の予言者的十組原費用不能縮成任選十張。付款交換本身依 CR 屬可選追加成本，
+其他非公開區域的材料、上述擇一以外的 EX 材料、其他操作、額外／模式內 optional 或 additional、alt、+N、正 delta、
+複數 set、未受驗的 aura／next-play／期限。骸の王的兩種材料必須整組承載；
+開闢の予言者的十組原費用不能縮成任選十張。付款交換本身依 CR 屬可選追加成本，
 本節拒絕的是**除此單一交換以外**的追加費用，不是把交換改稱另一種遊戲規則。
 
 ## 2. 決定、選材料與付款
@@ -42,7 +47,7 @@ upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payl
 | 步驟 0–1 | 保存整次 origin；公開打出的卡並移入 Resolution；它不再是 Hand／墓地的候選材料 |
 | 步驟 2 | 由 play controller 決定接受／拒絕交換（CR 10.4.7.2、10.6.2.2.2）；只保存 DecisionId 對應的決定，不移材料、不扣 PP、不產生付款 receipt |
 | 步驟 3–4 | 依既有規則選 targets／分配；不把成本材料冒充本文 target。首批不允許交換決定影響模式數、targets、分配或 X |
-| 步驟 5a | 在任何付款之前，以同一 Resolution 狀態求全部成本修正、固定實付 PP（§3）；接受交換時才詢問並驗證足額材料，仍不修改遊戲狀態 |
+| 步驟 5a | 在任何付款之前，以同一 Resolution 狀態求全部成本修正、固定實付 PP（§3）；接受交換時才詢問並驗證足額材料；擇一交換先用既有整數決定選可完整支付的方案，再出該支材料題，仍不修改遊戲狀態 |
 | 步驟 5b | 驗證固有 PP 與整組材料均可完整支付，再依 §3.2 消費一次完整計畫；不在本文再次付款 |
 | 步驟 6–9 | 付款後檢查場容量，成功後才 played／本文／resolved／CheckTiming；付款產生的事件不在步驟 5 插入能力解決 |
 
@@ -123,7 +128,8 @@ FacePlayCost.exchange: Option<Located<PlayCostExchange>>
 PlayCostExchange {
   scope: ScopeId,
   decision: DecisionId,
-  materials: Decision,
+  materials: Vec<Decision>,
+  route: Option<DecisionId>,
   cost: CostSpec,
   change: CostChange,
   receipt: ReceiptId
@@ -134,9 +140,10 @@ PaymentReference.CardPlay { face: FaceId, receipt: ReceiptId }
 `decision` 是此 exchange 專用的二值問題，actor 為 play controller、visibility 為 Public，
 答案恰為接受／拒絕；authority 以當次 card execution 保存
 結果，只用於本組計畫，不偽裝 `Binding<Nat>` 或付款 receipt，也不新增通用決定讀值運算。
-`materials` 恰為 Controller／Public 的 `D.play-param CostMaterials` Objects 決定，
+`materials` 保存各支的 Controller／Public `D.play-param CostMaterials` Objects 決定，
 selection_snapshot 是該材料決定的付款前版本；它的 binding 是材料集合的唯一定義。
-cost 恰為一個 Ordered step，InstructionContext 為 Cost，指示以該 binding 選取足額材料；
+單支 cost 恰為一個 Ordered step；兩支則為 Alternative 裡兩個單步 Ordered，與材料決定依序配對。
+InstructionContext 為 Cost，指示以該支 binding 選取足額材料；
 CostStep.materials 留空，不重複定義 binding。原子依 §1 為 Move（Put 到 owner 墓地）、
 Banish 或 Posture（Acted），不降低成本文 Move／Destroy／May。現行通用成本良構不收
 非來源 Move 與 Banish，materials 也只配 Discard／Posture；本入口另行准入這三種原子，
@@ -164,7 +171,7 @@ optional，整卡拒絕。同次本文除上述 PaymentComplete 外，只增加�
 
 ## 5. lowering、良構與准入
 
-- DSL 入口只接 `play.optional_cost` 的單一 mapping（§1 的 exact Material，wrapper.result
+- DSL 入口接 `play.optional_cost` 的單一 mapping 或 §1 的兩支 `one_of`（每支 exact Material，wrapper.result
   可省略），並且恰有一個 literal `optional_cost_delta` 或 `optional_cost_set`。
   不帶 option、不帶 choice 關聯；缺修正、帶列表或條件式交換修正均拒絕。
   公開材料沿用物件篩選器，包含 `name_contains`；候選 binding 換到材料決定的獨立
@@ -199,3 +206,16 @@ false fallback 讓卡片通過。例子只測承載，不要求次元の超越�
    不增加另一套 snapshot 矩陣。
 4. §5 的提前 receipt 反例，以及一個付款材料會觸發能力的局面，分別驗靜態時點拒絕及
    §3.2 的修改前 Unsupported；其餘明列的拒絕沿現有封閉解碼／准入檢查，不逐格增測。
+
+## 7. 兩支材料的執行邊界
+
+IR 將材料決定與既有 `CostSpec::Alternative` 的單步成本依序配對，使用獨立的方案 DecisionId；
+良構檢查拒絕跨支 binding、聯集選擇器、不同張數、對手材料與巢狀選項。
+未選支不綁材料、不產付款回條。選擇失敗保留同一次問題；整體無法付款回復原 play origin。
+
+場上一般 token 可經既有 Move 送墓後依 token 規則消失（Q271）；授權只限這次已驗證
+整卡交換、Resolution 來源與所選材料 slot 的當前世代，不偽造起動能力。仍保留付款事件
+訂閱、連結物件及進化材料的既有保守拒絕。載入了會消費付款事件的能力時，交換在修改前
+回 Unsupported；這不代表所有局面已可執行。一般單支交換與其他 token 移區不受此授權。
+
+目前職業比對沿既有候選查詢讀印刷面；尚無已准入的職業改寫效果，不能以本片宣稱支援改寫後的職業。
