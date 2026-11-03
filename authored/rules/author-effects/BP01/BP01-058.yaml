@@ -1,0 +1,51 @@
+cards:
+  BP01-058:
+    abilities:
+      - fanfare:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 防御型ゴーレム
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 攻撃型ゴーレム
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 大地の魔片
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 防御型ゴーレム
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 攻撃型ゴーレム
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

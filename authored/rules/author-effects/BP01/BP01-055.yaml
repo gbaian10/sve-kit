@@ -1,0 +1,41 @@
+cards:
+  BP01-055:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  kind: follower
+                  trait: ゴーレム
+                  who: self
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: victim
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                trait: ゴーレム
+              who: self
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

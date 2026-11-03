@@ -1,0 +1,36 @@
+cards:
+  BP01-033:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: it
+                power: 1
+          on:
+            enter_field:
+              sel:
+                class: ロイヤル
+                kind: follower
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: 1
+                on:
+                  class: ロイヤル
+                  kind: follower
+                  who: self
+                  zone: field
+                power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

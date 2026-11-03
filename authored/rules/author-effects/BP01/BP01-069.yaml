@@ -1,0 +1,20 @@
+cards:
+  BP01-069:
+    abilities:
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 大地の魔片
+            - stack_plus: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,24 @@
+cards:
+  BP01-137:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - damage_mod:
+                delta: 4
+                source: this
+          while:
+            not:
+              my_turn: true
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
