@@ -1,0 +1,50 @@
+cards:
+  CSD02a-003:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+          while:
+            cmp:
+              left:
+                count:
+                  kind: follower
+                  trait: キュート
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: キュート
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: to_hand
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
