@@ -5,16 +5,16 @@ use super::{
 };
 use crate::ir::NumericProperty;
 use crate::ir::events::attack::target_plan;
-use crate::ir::history_turn::subject_plan;
+use crate::ir::history_turn::{life_plan, life_sum_plan, subject_plan};
 use crate::ir::prevention;
 use crate::ir::{
     Action, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain,
     Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation,
-    Located, LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat, NatRead, Node,
-    ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
-    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector, SnapshotId,
-    SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    IntRead, Located, LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat,
+    NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone,
+    PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation,
+    RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
+    SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
@@ -390,6 +390,12 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
 }
 
 fn mask_public_number(number: &mut Expr<Int>) {
+    if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if life_sum_plan(query).is_some()))
+    {
+        *number = Expr::Literal(Int(0));
+        return;
+    }
+
     if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, property: NumericProperty::Attack | NumericProperty::Life } if target_plan(objects).is_some()))
     {
         *number = Expr::Literal(Int(0));
@@ -423,7 +429,7 @@ fn mask_public_number(number: &mut Expr<Int>) {
 }
 
 fn mask_public_natural(value: &mut Expr<Nat>) {
-    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some()))
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some()))
     {
         *value = Expr::Literal(Nat(0));
         return;
