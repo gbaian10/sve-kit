@@ -1,0 +1,40 @@
+cards:
+  CP03-114:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - life:
+                delta: 1
+                who: self
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                position:
+                  nth: 3
+                ref: returned
+                to: deck
+          targets:
+            - bind: returned
+              from:
+                who: self
+                zone: cemetery
+              upto: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

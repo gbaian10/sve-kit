@@ -1,0 +1,32 @@
+cards:
+  CP03-090:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_le: 2
+                  trait: シャドウパラディン
+                  who: self
+                  zone: deck
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
