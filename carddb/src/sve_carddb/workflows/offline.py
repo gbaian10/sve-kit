@@ -664,7 +664,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         context,
         identity.snapshot,
         batches=batches,
-        corrections=None if texts.corrections is None else Corrections(texts),
+        corrections=Corrections(texts),
     )
     name_result = None
     mark("flavor + template inputs")

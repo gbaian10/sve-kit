@@ -88,7 +88,6 @@ def test_four_synthetic_english_corrections_have_distinct_evidence_and_rule_resu
     images = FrozenImages(store.root, store.store_id, batch.batch_id)
     case.images = images
     case.plan = plan_text_observations(case.identity, case.provider, images=images)
-    assert case.plan.corrections is not None
     assert len(case.plan.corrections) == 4
     assert all(application.status == "applied" for application in case.plan.corrections)
     with create_database(compile_build(("en", "related", "correction"))) as db:

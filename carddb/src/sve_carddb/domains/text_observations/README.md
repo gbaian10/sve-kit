@@ -20,9 +20,10 @@ when no texts have been published.
 
 An initial current exists only when every observation of a face-region has one
 identical current-bearing variant and there are no missing sources, identity
-gates, null effects, errata links or unresolved source corrections. When an explicit
-image provider is supplied, successful [source corrections](../source_corrections/README.md)
-are applied to separate candidates before comparison; raw observations remain exact.
+gates, null effects, errata links or unresolved source corrections. Successful
+[source corrections](../source_corrections/README.md) are applied to separate
+candidates before comparison, with or without an image provider; raw observations
+remain exact.
 Differences retain their individual observations. `populate_wording_basis` compares
 dated printings, applies exact-content AI/manual decisions, and selects the latest
 known release only after equivalence. Fetch times never rank variants. Current uses the existing

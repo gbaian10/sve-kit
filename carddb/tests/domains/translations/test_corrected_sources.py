@@ -22,7 +22,6 @@ def test_explicit_recipe_replays_only_its_verified_effect_and_keeps_original(
 ) -> None:
     case = default_correction_case.copy(tmp_path).texts
     proof = Corrections(case.plan)
-    assert case.plan.corrections is not None
     application = case.plan.corrections[0]
     observation = application.observation
     source = observation.card.source
@@ -60,8 +59,6 @@ def test_missing_or_altered_plan_is_rejected_before_projection(
     tmp_path: Path, default_correction_case: CorrectionCaseTemplate
 ) -> None:
     case = default_correction_case.copy(tmp_path).texts
-    with pytest.raises(ValueError, match="pinned correction plan"):
-        Corrections(replace(case.plan, corrections=None))
     with pytest.raises(ValueError, match="Correction"):
         Corrections(replace(case.plan, corrections=()))
     proof = Corrections(case.plan)

@@ -40,7 +40,6 @@ def correction(tmp_path_factory: pytest.TempPathFactory) -> CorrectionCase:
 
 
 def application(correction: CorrectionCase) -> Application:
-    assert correction.texts.plan.corrections is not None
     return correction.texts.plan.corrections[0]
 
 

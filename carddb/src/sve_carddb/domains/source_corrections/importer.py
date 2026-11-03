@@ -61,7 +61,9 @@ def correction_values(application: Application) -> dict[str, Value]:
 
 
 def evidence_values(application: Application) -> tuple[dict[str, Value], ...]:
-    """Bind each locator to the independently verified regional image version."""
+    """Bind each locator to its verified image version; registered-only evidence has none."""
+    if application.images is None:
+        return ()
     return tuple(
         {
             "correction_id": application.data.id,
@@ -101,8 +103,6 @@ def application_values(application: Application, plan: TextPlan) -> dict[str, Va
 
 def populate_corrections(db: Database, plan: TextPlan, texts: TextInterner) -> None:
     """Populate inside the observation transaction; proposed records have no application."""
-    if plan.corrections is None:
-        return
     verify_applications(plan.identity, plan.observations, plan.corrections)
     for application in plan.corrections:
         if application.data.field == "effect":
@@ -120,8 +120,6 @@ def verify_corrections(db: Database, plan: TextPlan, vocabulary: Vocabulary) -> 
     """Check domain values and raw/result separation beyond SQLite FK/adoption checks."""
     from sve_carddb.domains.text_observations.importer import revision_id  # ruff: ignore[import-outside-top-level] -- avoids the importer dependency cycle
 
-    if plan.corrections is None:
-        raise ValueError("Correction verification requires an explicitly pinned plan")
     verify_applications(plan.identity, plan.observations, plan.corrections)
     expected = {
         "source_correction": tuple(correction_values(a) for a in plan.corrections),

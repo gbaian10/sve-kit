@@ -29,7 +29,8 @@ if TYPE_CHECKING:
 class Application:
     record: RegistryRecord
     observation: FaceObservation
-    images: tuple[Source, ...]
+    # None trusts the registered image hashes; only an archive-backed build re-reads them.
+    images: tuple[Source, ...] | None
     status: Status | None
 
     @property
@@ -43,7 +44,12 @@ class Application:
         return digest(canonical(self.record.entry().model_dump(mode="json")))
 
     def uses(self) -> tuple[SourceUse, ...]:
-        """Pin both the observation comparison and every exact image locator."""
+        """Pin the observation comparison and every exact image locator when resolved."""
+        images = (
+            ()
+            if self.images is None
+            else zip(self.data.evidence, self.images, strict=True)
+        )
         return (
             SourceUse(
                 source=self.observation.card.source,
@@ -66,9 +72,7 @@ class Application:
                         }
                     ).decode(),
                 )
-                for evidence, source in zip(
-                    self.data.evidence, self.images, strict=True
-                )
+                for evidence, source in images
             ),
         )
 
@@ -101,7 +105,9 @@ class Application:
             ].fingerprint(),
             "projected_face_hash": self.observation.content.fingerprint(),
             "observation_hash": self.observation.card.observation.observation_hash,
-            "image_source_ids": [source.id for source in self.images],
+            "image_source_ids": None
+            if self.images is None
+            else [source.id for source in self.images],
             "warning": "retire_upstream_fixed_correction"
             if self.status == "already_fixed"
             else None,
@@ -145,10 +151,14 @@ def verify_application(registry: RegistrySnapshot, application: Application) -> 
         != data
     ):
         raise ValueError("Correction typed data differs from its exact authored record")
+    if any(evidence.region != item.region for evidence in data.evidence):
+        raise ValueError("Correction image evidence metadata mismatch")
+    if application.images is None:
+        return
     if len(data.evidence) != len(application.images):
         raise ValueError("Correction image evidence inventory mismatch")
     for evidence, source in zip(data.evidence, application.images, strict=True):
-        if evidence.region != item.region or (
+        if (
             source.kind,
             source.url,
             source.sha256,
@@ -194,9 +204,9 @@ def withheld_regions(preview: PreviewPlan) -> frozenset[tuple[str, Region]]:
 def plan_applications(
     preview: PreviewPlan,
     observations: tuple[FaceObservation, ...],
-    images: ImageProvider,
+    images: ImageProvider | None,
 ) -> tuple[Application, ...]:
-    """Require every scoped source/evidence; do not silently skip unavailable inputs."""
+    """Require every scoped source; without an image provider trust registered evidence."""
     by_use = {(item.printing_id, item.face_id): item for item in observations}
     result = []
     for record in selected_records(preview):
@@ -208,7 +218,7 @@ def plan_applications(
         application = Application(
             record,
             item,
-            tuple(images.image(e) for e in data.evidence),
+            None if images is None else tuple(images.image(e) for e in data.evidence),
             _status(data, item),
         )
         _verify_application(preview, application)

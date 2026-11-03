@@ -243,7 +243,7 @@ def _candidate_revisions(
 def _correction_blocks(plan: TextPlan, face: str, region: Region) -> frozenset[str]:
     applied = {
         item.data.id
-        for item in plan.corrections or ()
+        for item in plan.corrections
         if item.status in {"applied", "already_fixed"}
     }
     blocked = set()

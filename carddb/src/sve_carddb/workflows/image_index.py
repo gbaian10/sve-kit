@@ -432,8 +432,8 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
             ),
             source=source,
         )
-        for application in texts.corrections or ()
-        for source in application.images
+        for application in texts.corrections
+        for source in application.images or ()
     }
     index = ImageIndex(
         recipe=DEFAULT_RECIPE.version,

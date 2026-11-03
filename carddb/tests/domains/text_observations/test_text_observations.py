@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import create_database
+from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.review import Correction
@@ -66,6 +66,46 @@ def test_exact_initial_keeps_every_physical_source_and_one_revision_per_face_reg
         assert {
             row.values["source_id"] for row in db.rows("printing_face_observation")
         } == {item.card.source.id for item in case.plan.observations}
+
+
+def test_empty_correction_plan_rejects_stale_correction_rows(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    case = make_case(tmp_path / "authored", inputs)
+    assert case.plan.corrections == ()
+    item = case.plan.observations[0]
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+            db.insert(
+                "source_correction",
+                {
+                    "id": "stale-correction",
+                    "printing_id": item.printing_id,
+                    "face_id": item.face_id,
+                    "field": "card_type",
+                    "expected_source_unit_id": None,
+                    "expected_raw_value": Json("Spell"),
+                    "corrected_value": Json("Follower"),
+                    "expected_raw_sections": None,
+                    "corrected_sections": None,
+                    "expected_source_hash": item.card.observation.observation_hash,
+                    "reason": "Stale synthetic correction",
+                    "reported_to_official": False,
+                    "reported_on": None,
+                    "report_url": None,
+                    "state": "needs_review",
+                },
+            )
+        with pytest.raises(ValueError, match="Correction database inventory"):
+            with db.transaction():
+                case.compose().populate(
+                    db,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+        assert not db.rows("face_revision")
 
 
 @pytest.mark.parametrize("missing", [None, ""])
@@ -325,7 +365,7 @@ def test_reversed_source_indices_use_authored_faces_not_face_ordinals(
 
 
 @pytest.mark.parametrize("state", ["active", "needs_review"])
-def test_source_correction_does_not_implicitly_adopt_or_apply_text(
+def test_only_active_registered_correction_applies_without_image_reads(
     tmp_path: Path, inputs: Inputs, state: str
 ) -> None:
     inputs.jp["PR-001"].faces[0].text = "Rule."
@@ -344,9 +384,21 @@ def test_source_correction_does_not_implicitly_adopt_or_apply_text(
     ]
     case = make_case(tmp_path / "authored", inputs)
     group = next(group for group in case.plan.groups if group.region == "jp")
-    assert group.reasons == ("source_correction_pending",)
     assert group.current() is None
-    assert all(item.content.effect == "Rule." for item in group.observations)
+    assert all(
+        item.content.effect == "Rule."
+        for item in case.plan.observations
+        if item.region == "jp"
+    )
+    effects = {item.card_no: item.content.effect for item in group.observations}
+    if state == "active":
+        (application,) = case.plan.corrections
+        assert (application.status, application.images) == ("applied", None)
+        assert group.reasons == ("observation_difference",)
+        assert effects == {"BP02-071": "Correction candidate", "PR-001": "Rule."}
+    else:
+        assert group.reasons == ("source_correction_pending",)
+        assert set(effects.values()) == {"Rule."}
 
 
 def test_explicit_special_kinds_traits_and_titles_are_all_materialized(
