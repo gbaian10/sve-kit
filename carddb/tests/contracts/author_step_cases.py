@@ -226,6 +226,8 @@ SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
     {"extra_turn": {"who": "self"}},
     {"make_type": {"on": "this", "type": "amulet"}},
     {"create": {"token": "token", "to": "field"}},
+    {"create": {"token": {"same_name_as": "chosen"}, "to": "ex"}},
+    {"create": {"token": {"same_name_as": "it"}, "to": "field"}},
     {
         "create": {
             "token": ["first", {"param": "token"}],
