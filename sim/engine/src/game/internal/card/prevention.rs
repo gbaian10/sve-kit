@@ -3,6 +3,7 @@ use super::super::{Context, Execution, InstructionOutcome, Slot, admission, play
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::ir::prevention::{Recipients, projection};
+use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
@@ -367,7 +368,9 @@ impl Game {
             let abilities = self
                 .internal_effective_abilities(&provider)?
                 .into_iter()
-                .filter(|ability| is_static(&ability.node))
+                .filter(|ability| {
+                    is_static(&ability.node) || holder_removal::is_mixed_static(&ability.node)
+                })
                 .collect::<Vec<_>>();
             if abilities.is_empty() {
                 continue;
@@ -376,8 +379,12 @@ impl Game {
             let execution = self.static_prevention_execution(&provider)?;
             for located in abilities {
                 for effect in &located.node.declarations {
-                    let shape = projection(effect)
-                        .ok_or_else(|| unsupported("static prevention declaration"))?;
+                    let Some(shape) = projection(effect) else {
+                        if holder_removal::projection(effect).is_some() {
+                            continue;
+                        }
+                        return Err(unsupported("static prevention declaration"));
+                    };
                     if !Kind::from(shape.kind).matches(hit)
                         || !execution.boolean(self, shape.condition)?.0
                     {

@@ -1,0 +1,54 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "rush",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "name": "aura",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "action": "ability_destroy",
+            "op": "restrict",
+            "subjects": "self"
+          },
+          {
+            "action": "banish",
+            "op": "restrict",
+            "subjects": "self"
+          }
+        ]
+      },
+      "kind": "static",
+      "line": 3
+    }
+  ],
+  "status": "complete"
+}

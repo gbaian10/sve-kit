@@ -196,7 +196,9 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
-            | ast::InstalledEffect::Cannot(ast::Cannot::Stand(_) | ast::Cannot::Attack(_)) => {
+            | ast::InstalledEffect::Cannot(
+                ast::Cannot::Stand(_) | ast::Cannot::Attack(_) | ast::Cannot::Removal(_),
+            ) => {
                 return Err(unsupported(path));
             }
         };
@@ -255,6 +257,36 @@ pub(super) fn lower_at_source(
     let mut declarations = Vec::new();
     for declaration in &head.effects {
         let (on, damage_source, kind, rewrite) = match declaration {
+            ast::StaticEffect::Cannot(ast::Cannot::Removal(shape)) => {
+                if head.r#while.is_some() {
+                    return Err(unsupported(path));
+                }
+                declarations.push(super::attack_restrictions::removal(shape, path)?);
+                continue;
+            }
+            ast::StaticEffect::If(shape) => {
+                if head.r#while.is_some()
+                    || shape.r#else.is_some()
+                    || !head.effects.iter().any(|effect| {
+                        matches!(effect, ast::StaticEffect::Cannot(ast::Cannot::Removal(_)))
+                    })
+                {
+                    return Err(unsupported(path));
+                }
+                let [ast::StaticEffect::Prevent(prevent)] = shape.then.as_slice() else {
+                    return Err(unsupported(path));
+                };
+                let branch_condition = context.qualification(&shape.cond, path)?;
+                declarations.push(context.prevention_effect(
+                    prevent,
+                    numeric::holder(),
+                    &origin,
+                    branch_condition,
+                    numeric::duration(None, path)?,
+                    path,
+                )?);
+                continue;
+            }
             ast::StaticEffect::Prevent(shape) => {
                 declarations.push(context.prevention_effect(
                     shape,

@@ -238,6 +238,8 @@ apply:
 
 持有者永久不能在自己的開始階段依規則起身時，寫 `static.effects: [{cannot: {what: stand, on: this, during: {phase: start, who: self, cause: rule}}}]`（CP02-025、ECP01-053）。宣告只在持有者仍在場上且保有此能力時有效，沒有回合期限；每次自己的開始階段都重新讀取。它不阻止效果的 `stand`，因此 Main 階段的印刷付費能力仍可使其起身；沿用頭費用的拒付流程，拒付時保持橫置。此入口不接受 `affected`、對手開始階段或 `static.while`；有期限的施加仍使用上方既有 `apply`。
 
+印刷的自身移動免疫使用 `static.effects`：`cannot: {what: destroy, on: this, by: ability}` 阻止能力直接破壞，`cannot: {what: banish, on: this}` 阻止消滅；`on` 省略也指自身。每次處理依持有者當下有效卡面及能力重讀，失去能力後不再保護；不另安裝有期限的狀態。禁止的指示沒有成功移動回條，也不產生離場或破壞事件。能力傷害或交戰傷害造成體力歸零仍會規則破壞，直接送墓不等於破壞（Q802、Q2263、Q2836）。本入口只接受無條件的自身宣告，不接受其他接受者、`static.while`、施加式免疫、未限定原因的 `destroy` 或 `banish:by:ability`。同一段印刷能力同時包含自身能力防傷時，須保留為一個 `static` 宣告；能力防傷可用靜態專用的 `if: {cond, then: [{prevent: {kind: ability}}]}` 控制，無條件的 `cannot` 放在同層。此形式只收自身能力防傷與自身移動免疫，不接受 `else`、巢狀分支或其他持續效果。
+
 ## 寫入與驗證
 
 ```bash

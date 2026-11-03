@@ -463,8 +463,15 @@ impl Allocator {
                     | ast::StaticEffect::DamageMod(_)
                     | ast::StaticEffect::DamageCap(_),
                 ) => prevention::lower,
+                Some(ast::StaticEffect::If(_))
+                    if declaration.effects.iter().any(|effect| {
+                        matches!(effect, ast::StaticEffect::Cannot(ast::Cannot::Removal(_)))
+                    }) =>
+                {
+                    prevention::lower
+                }
                 Some(ast::StaticEffect::Cannot(_)) => attack_restrictions::lower,
-                None => return Err(unsupported(path)),
+                Some(ast::StaticEffect::If(_)) | None => return Err(unsupported(path)),
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
             return Ok(true);

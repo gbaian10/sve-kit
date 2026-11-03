@@ -136,6 +136,7 @@ pub(crate) mod prevention;
 pub(crate) mod printed_keywords;
 mod projections;
 pub(crate) mod quick;
+pub(crate) mod removal_restrictions;
 pub(crate) mod ride;
 mod runtime;
 pub(crate) mod stand_restrictions;

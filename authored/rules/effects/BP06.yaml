@@ -1,38 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP06-022:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: rush
-      - line: 2
-        kind: static
-        body:
-          op: macro
-          name: aura
-      - line: 3
-        kind: static
-        body:
-          op: seq
-          steps:
-            - op: restrict
-              subjects: self
-              action: ability_destroy
-            - op: restrict
-              subjects: self
-              action: banish
   BP06-035:
     status: complete
     abilities:

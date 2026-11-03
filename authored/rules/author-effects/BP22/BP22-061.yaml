@@ -1,0 +1,29 @@
+cards:
+  BP22-061:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - if:
+                cond:
+                  not:
+                    standing: this
+                then:
+                  - prevent:
+                      kind: ability
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
