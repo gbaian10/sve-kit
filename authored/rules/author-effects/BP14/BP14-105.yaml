@@ -1,0 +1,46 @@
+cards:
+  BP14-105:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            cmp:
+              left:
+                plus:
+                  - count:
+                      trait: 宴楽
+                      who: self
+                      zone: field
+                  - count:
+                      trait: 宴楽
+                      who: self
+                      zone: ex
+              op: ge
+              right: 3
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

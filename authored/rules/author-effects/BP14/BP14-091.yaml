@@ -1,0 +1,45 @@
+cards:
+  BP14-091:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - auto:
+          cost:
+            pp: 2
+          do:
+            - if:
+                cond:
+                  in_zone:
+                    ref: this
+                    zone: ex
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+                  - life:
+                      delta: 2
+                      who: self
+          on:
+            phase:
+              which: end
+              whose: opp
+          zone: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
