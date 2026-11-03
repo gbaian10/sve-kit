@@ -274,3 +274,56 @@ fn own_discard_by_an_opponents_effect_triggers_on_the_opponents_turn() {
     assert_eq!(state["P2"]["leader"]["life"], 20_u8);
     assert_eq!(state["turn"]["active"], "P2");
 }
+
+#[test]
+fn opponent_chosen_discard_keeps_the_choice_private_to_the_discarder() {
+    let mut source = tree(&json!({"who":"self"}), false, false);
+    source["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+        json!([{"discard":{"who":"opp","n":1_u8}}]);
+    let mut game = fixture_for_discarder(&source, false, 2, 1);
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("p", AbilityId(1), PlayerId { seat: 2 })
+        .unwrap()
+    else {
+        panic!("the discarding opponent must choose their own card");
+    };
+    assert_eq!(question.actor, PlayerId { seat: 1 });
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("private discard candidates");
+    };
+    assert_eq!(
+        domain.members.len(),
+        2,
+        "only the discarder sees both hand candidates"
+    );
+    assert!(game.internal_decision(View::P1).is_some());
+    assert!(
+        game.internal_decision(View::P2).is_none(),
+        "the ability's controller cannot see the choice"
+    );
+    let before = game.projection(View::Referee).unwrap();
+    game.answer_internal_card(
+        PlayerId { seat: 2 },
+        question.token,
+        Answer::Targets(vec![0]),
+    )
+    .unwrap_err();
+    assert_eq!(
+        game.projection(View::Referee).unwrap(),
+        before,
+        "the wrong actor cannot change the pending choice"
+    );
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    resolve_one(&mut game, 1);
+    finish_check(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["h0"]));
+    assert_eq!(state["P1"]["hand"], json!(["h1"]));
+    assert_eq!(
+        state["P1"]["leader"]["life"], 21_u8,
+        "only the selected discard triggers"
+    );
+}
