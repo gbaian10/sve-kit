@@ -10,10 +10,12 @@ from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.stage_log import mark
+from sve_carddb.export.construction_index import write_construction_indexes
 from sve_carddb.export.image_index import ImageIndex
 from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.publication import require_preview
+from sve_carddb.export.read_api import load_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
 from sve_carddb.workflows.offline import Built, Inputs
@@ -51,6 +53,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         Path | None, typer.Option(exists=True, dir_okay=False)
     ] = None,
     format_version: Annotated[str, typer.Option()] = MEDIA,
+    construction_dir: Annotated[Path | None, typer.Option()] = None,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     preview_dir = required_root(preview_dir, "--preview-dir", "SVE_EXPORT_DIR")
@@ -78,11 +81,36 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         preview_dir.resolve()
     ):
         raise ValueError("Private image index must be outside the public output root")
+    _require_outside(construction_dir, preview_dir)
     codec = python_brotli() if brotli else None
     index = None if image_index is None else ImageIndex.read(image_index)
     mark("load image index")
     built = build_offline(recipe, bundle_dir=bundle_dir, image_index=index)
     _finish(built, roots, recipe.batch(), codec, format_version)
+    if construction_dir is not None:
+        _write_construction(preview_dir, construction_dir)
+
+
+@app.command("construction-index")
+def construction_index_command(
+    export_dir: Annotated[Path, typer.Option(envvar="SVE_EXPORT_DIR")],
+    out_dir: Annotated[Path, typer.Option()],
+) -> None:
+    """Write each region's construction index for the export's current preview snapshot."""
+    _require_outside(out_dir, export_dir)
+    _write_construction(export_dir, out_dir)
+
+
+def _require_outside(out_dir: Path | None, export_dir: Path) -> None:
+    # The public closure is verified file by file; nothing else may land inside it.
+    if out_dir is not None and out_dir.resolve().is_relative_to(export_dir.resolve()):
+        raise ValueError("Construction index must be outside the public output root")
+
+
+def _write_construction(export_dir: Path, out_dir: Path) -> None:
+    report = write_construction_indexes(load_snapshot(export_dir.resolve()), out_dir)
+    mark("write construction indexes")
+    typer.echo(canonical(report).decode())
 
 
 if TYPE_CHECKING:
