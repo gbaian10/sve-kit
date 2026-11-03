@@ -16,9 +16,11 @@ from sve_carddb.core.json import (
     parse,
     string,
 )
+from sve_carddb.export import read_api
 from sve_carddb.export.construction_index import (
     ConstructionIndexError,
     build_construction_index,
+    write_construction_indexes,
 )
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import load_export
@@ -575,6 +577,29 @@ def _command(export_dir: Path) -> Result:
     return CliRunner().invoke(
         cli.app, ["snapshot", "construction-index", "--export-dir", str(export_dir)]
     )
+
+
+def test_refusing_a_later_region_leaves_no_indexes(tmp_path: Path) -> None:
+    jp, en = Pool("jp"), Pool("en")
+    jp.card("c:jp", "合成：確認済み")
+    en.card("c:en", "Synthetic unknown mechanism")
+    en.tables["card_mechanic_coverage"] = []
+    snapshot = read_api.Snapshot(
+        jp.manifest | {"regions": ["jp", "en"]},
+        MANIFEST_SHA,
+        {table: rows + en.tables[table] for table, rows in jp.tables.items()},
+    )
+    assert (
+        build_construction_index(
+            snapshot.manifest, snapshot.tables, "jp", snapshot.manifest_sha256
+        )["region"]
+        == "jp"
+    )
+    with pytest.raises(
+        ConstructionIndexError, match="unknown starting amulet status in en"
+    ):
+        write_construction_indexes(snapshot, tmp_path)
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_command_writes_each_region_beside_the_snapshot(tmp_path: Path) -> None:

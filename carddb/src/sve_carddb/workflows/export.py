@@ -91,8 +91,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     try:
         _write_construction(preview_dir)
     except ConstructionIndexError as error:
-        # A preview built without some facts (no mechanism adapters, say) is still a preview;
-        # publish requires the index, so such a snapshot cannot be released.
+        # Incomplete facts still permit previews; index completeness is a publication requirement.
         typer.echo(
             canonical({"construction_index": "skipped", "reason": str(error)}).decode()
         )
