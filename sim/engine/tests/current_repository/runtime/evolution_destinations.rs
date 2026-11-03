@@ -66,10 +66,14 @@ fn celia_destination_and_price_belong_to_the_selected_evolution_head() {
 #[test]
 fn laevateinn_uses_its_printed_name_contains_selector() {
     for base in ["BP03-056", "BP03-SL11"] {
-        let mut game = game(&position(base, "BP03-057"));
+        let mut game = game(&position(base, "BP03-058"));
         assert_eq!(evolve(&mut game, 0, 0, 1, base).outcome, "resolved");
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["objects"]["source"]["evolved_with"], "form");
+        assert_eq!(
+            state["objects"]["source"]["name"],
+            "レーヴァテインドラゴン・アタックモード"
+        );
         assert_eq!(state["P1"]["pp"]["current"], 9_u8);
     }
 }
