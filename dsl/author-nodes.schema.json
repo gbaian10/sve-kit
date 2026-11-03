@@ -16416,6 +16416,10 @@
         },
         "precondition": {
           "$ref": "#/$defs/A.cond"
+        },
+        "cost": {
+          "type": "integer",
+          "const": 0
         }
       },
       "additionalProperties": false,

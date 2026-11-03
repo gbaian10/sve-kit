@@ -1,0 +1,50 @@
+cards:
+  BP05-018:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - evolve:
+          cost:
+            pp: 0
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: opp
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 2
+                  who: opp
+        line: 3
+      - activate:
+          cost:
+            pp: 8
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                who: opp
+                zone: cemetery
+              n: 1
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

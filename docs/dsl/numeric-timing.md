@@ -154,7 +154,7 @@ T-B 只作合成驗收。
 CR 10.6.2.8、7.3.4／7.4.6、10.5.2.1、11.1.2–11.3 提供這個先後關係；
 EndResolution 是本專案內部期限，該映射為 `generalized`，不是聲稱 CR 有同名步驟。
 來源／目標換區失效仍可更早發生。待答、resume 與 save 不代表結束；rollback 撤回整次
-安裝及其期限，不能留下已耗用的 occurrence。nested play 未有完整 execution 邊界時拒絕。
+安裝及其期限，不能留下已耗用的 occurrence。受驗效果的巢狀打出保留各自 execution 邊界：子卡完成時清除子卡的 EndResolution 層，母層在母本文全部完成時才清除。
 
 真實檢查時點種子是 [BP10-076 《節制》・ルーゼン](https://shadowverse-evolve.com/cardlist/?cardno=BP10-076)
 Q1327：同一能力前段致死不讓後段提早失去其保護；BP20-058 Q2659 則是同一能力中

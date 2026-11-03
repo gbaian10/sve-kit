@@ -807,7 +807,7 @@ NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本�
 閒置 Game 的基礎、固定操作與 ProperPlay 時間可存檔；待答與尚未解算的預備 play 不可存檔。
 數值修正的 EndResolution 時序已定於[數值期限契約](numeric-timing.md#33-endresolution)，
 目前只驗合成 closed Program 的生命週期；沒有真實 Numeric EndResolution 卡例，不由 lowering 自動補入期限。
-待答不是解算完成，resume 的提交失敗連同到期清理一起回復整次 execution；解決區清理另沿上述 Printed Spell 程序；nested play 與其他完整 CardProgram 形狀仍未接入。
+待答不是解算完成，resume 的提交失敗連同到期清理一起回復對應 execution；解決區清理沿上述 Printed Spell 程序，受驗的效果巢狀打出使用本文末節的母子執行邊界。
 CurrentTurnEnd 保存安裝當回合的身分，在 7.4.8 整批結束主區間；沒有未來附加區間的效果才移除，end 觸發、Quick 與棄牌檢查期間仍有效。
 NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩家下一回合時綁定其身分，
 再於該回合 7.4.8 到期。skip 不配置身分，extra 每個實際開始的回合各有身分；
@@ -981,3 +981,19 @@ WF 只對 Cost 語境、無前提且綁定公開自方場上費用材料的 Act 
 
 目前進化面 Quick 的材料移區用於不含來源的材料費用（例如美杜莎支付毒蛇）。
 若未來卡片能把進化來源本身選作材料，須另驗預檢、連結資源離場與本文結算，不能由本入口推定支援。
+
+## 效果授權的巢狀打卡
+
+`Action::PlayCard` 使用相同的卡片打出初始化、模式、正式目標、費用計算、追加成本、打出事實與
+解決清理。`CurrentInstallation` 只在受驗本文中提供此次授權；不放寬一般主階段的打出入口。
+此子集只接受單張正式墓場目標與明示的 `cost: 0`；未明示費用與其他費用覆寫仍拒絕。
+執行器保存母 execution 的續體與內層宣告前狀態，再切到有獨立 ID 的子 execution。
+子問題的 token 固定子 ID；回應完成後，對外仍回報原母能力的正式來源與解決結果。
+
+子執行的收據維持其作用域，母指示結果只保存成功子 execution ID 或未打出；打出／解決事實依序
+帶回母執行的進度。Spell 清理與場上入場沿用原流程，子結束不開啟對外檢查點，也不解決新 pending；
+母本文全部結束後才進既有檢查與 pending 流程。子正式提交前的付款或合法性失敗只回復子嘗試，
+保留母能力付款、先前效果、pending 與隨機狀態；已發出的 token 世代不重用。
+
+子卡移動母能力的來源時，共用移動管線也為暫停中的母 execution 保存離場前來源資訊；
+母續行的 SourceInformation 沿用同一 LKI 規則。只有實際成功換區才封存，取代為留場的移動不封存。

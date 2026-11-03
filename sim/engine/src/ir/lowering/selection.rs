@@ -24,6 +24,7 @@ impl BodyContext<'_> {
         let outputs = self.ex_outputs.clone();
         let ex_targets = self.ex_targets.clone();
         let hand_targets = self.hand_targets.clone();
+        let playable_targets = self.playable_targets.clone();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         let mut body = self.steps(
@@ -53,6 +54,7 @@ impl BodyContext<'_> {
         self.ex_outputs = outputs;
         self.ex_targets = ex_targets;
         self.hand_targets = hand_targets;
+        self.playable_targets = playable_targets;
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
             maximum: Some(super::Nat(1)),

@@ -134,7 +134,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | stack_plus | Expr | 規則選擇與建立 counter 語義 |
 | box／pilot | box:{ref,until}；pilot:{ref} | box 期限必填；pilot 沿 CR5.32 使用印刷攻體、固定本回合 |
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
-| play_card／play_ability | {ref}（cost 尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
+| play_card／play_ability | {ref}（cost?:0；其餘費用覆寫尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until?、precondition? | 無期限僅一次，有期限預設各次；不收 line/result |
 | player_effect／apply | {who,effect,until?}／{on,effect,until?,capture?} | on 與 who 分開；apply.capture=play |
 | win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |

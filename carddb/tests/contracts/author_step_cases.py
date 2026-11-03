@@ -208,6 +208,7 @@ SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
     {"race": {"ref": "this", "n": 2}},
     {"gain_drive": {"ref": "this"}},
     {"play_card": {"ref": "t"}},
+    {"play_card": {"ref": "t", "cost": 0}},
     {
         "play_ability": {
             "of": "t",

@@ -30,7 +30,8 @@ Spell 的 Resolution 對映依 10.1.1、10.3.4、10.6.2.1、10.6.2.8.2；Followe
 owner／controller、區域、禁止與時點。普通起點限 Hand／EX，不新增 `PlaySpec` 起點欄位。
 Spell 的 `[Hand, Ex]` 或 `[Field]` 即使通用良構檢查接受，也不能通過正式整卡准入。
 Resolution 本身不給第二次 play 權限。Quick 的時機另外依規則入口授權；第一版可只支援
-主動玩家 main，未受驗的 Quick、其他區域打出及效果巢狀 play 一律拒絕。
+主動玩家 main；受驗效果另可授權正式選定的自己或對手墓場卡，以基本費用零打出。
+該授權只在本文指示當下有效，不開放一般入口從墓場打出；其他未受驗的區域與授權仍拒絕。
 Quick 的首批時點、許可與交易續接義務見 [Quick 契約](quick-semantics.md)，不因此宣稱執行器已支援。
 
 `ExecutionId` 在這次嘗試開始配發；`AbilityInstanceId` 與 `RuntimeAbilitySource` 由 authority

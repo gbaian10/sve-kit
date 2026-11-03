@@ -9,17 +9,18 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
     CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control,
-    CostSpec, CounterChangeEvent, DamageEvent, DamageQuantityOutcome, DamageRecipient, Decision,
-    DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent, DriveCheckedEvent,
-    DriveTriggerEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId, Expr, Generation,
-    InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead,
-    LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome,
-    Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
-    OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent,
-    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
-    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
-    TransformOutcome, TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
+    CostOverride, CostSpec, CounterChangeEvent, DamageEvent, DamageQuantityOutcome,
+    DamageRecipient, Decision, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent,
+    DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId,
+    Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
+    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind,
+    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
+    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
+    PlayerSet, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
+    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
+    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
+    StepwiseMode, TokenOutcome, TransformOutcome, TriggerIcon, Visibility, WellFormedProgram,
+    ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, DriveGainedEvent, EvolveEvent,
@@ -275,6 +276,8 @@ pub enum InstructionOutcome {
         /// Counters added to the recipient generation.
         to: CounterChangeEvent,
     },
+    /// The formal child execution, absent when the selected play was impossible.
+    NestedPlay(Option<ExecutionId>),
     /// Whether the controller accepted an optional body.
     Optional(bool),
     /// One effect-driven ordinary evolution and its live physical association.
@@ -537,6 +540,9 @@ pub(super) struct Execution {
     play_counts: BTreeMap<u32, (Nat, Nat)>,
     ward_entries: Vec<(ObjectRef, bool)>,
     creating: Option<tokens::Creation>,
+    nested: Option<Box<card::nested::Continuation>>,
+    cost_override: Option<CostOverride>,
+    play_origin_player: Option<PlayerId>,
 }
 
 #[expect(
@@ -714,6 +720,9 @@ impl Game {
                 play_counts: BTreeMap::new(),
                 ward_entries: Vec::new(),
                 creating: None,
+                nested: None,
+                cost_override: None,
+                play_origin_player: None,
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
@@ -1186,47 +1195,36 @@ impl Game {
     }
 
     fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
-        if execution.play.is_some() {
-            self.internal_play_parameters(execution)?;
+        loop {
+            match self.internal_run_current(execution) {
+                Err(EngineFailure::IllegalPlay(_))
+                    if execution
+                        .nested
+                        .as_ref()
+                        .is_some_and(|nested| !nested.committed) =>
+                {
+                    self.cancel_nested_card(execution)?;
+                }
+                result => return result,
+            }
         }
+    }
+
+    fn internal_run_current(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
+            if execution.play.is_some() {
+                self.internal_play_parameters(execution)?;
+                if execution.waiting.is_some() {
+                    break;
+                }
+            }
             self.internal_reveal_expiry(execution, false);
             if self.internal_quota_wait(execution)? {
                 break;
             }
             let Some(node) = execution.todo.pop_front() else {
-                self.internal_reveal_expiry(execution, true);
-                if execution.field_entry {
-                    return self.internal_field_card_finish(execution);
-                }
-                self.internal_spell_cleanup(execution)?;
-                self.internal_numeric_cleanup()?;
-                self.internal_numeric_end_resolution(execution.id)?;
-                self.internal_preventions_end_resolution(execution.id);
-                if execution.spell {
-                    let group = self.group();
-                    self.emit(
-                        json!({"kind":"解決","object":execution.context.source}),
-                        &execution.frame().cause,
-                        group,
-                    );
-                }
-                if let Some(source) = execution.ability {
-                    self.card_runtime.checkpoint = Some(execution.id);
-                    execution.facts.push(if execution.spell {
-                        Fact::CardResolved {
-                            execution: execution.id,
-                            object: source.holder,
-                            controller: source.controller,
-                        }
-                    } else {
-                        Fact::AbilityResolved {
-                            execution: execution.id,
-                            source,
-                        }
-                    });
-                } else {
-                    self.checks()?;
+                if self.finish_internal_execution(execution)? {
+                    continue;
                 }
                 return Ok(());
             };
@@ -1286,6 +1284,51 @@ impl Game {
         }
         self.internal_reveal_expiry(execution, false);
         Ok(())
+    }
+
+    fn finish_internal_execution(&mut self, execution: &mut Execution) -> Result<bool> {
+        self.internal_reveal_expiry(execution, true);
+        if execution.field_entry {
+            self.internal_field_card_finish(execution)?;
+            return Ok(execution.waiting.is_none() && Self::finish_nested_card(execution));
+        }
+        self.internal_spell_cleanup(execution)?;
+        self.internal_numeric_cleanup()?;
+        self.internal_numeric_end_resolution(execution.id)?;
+        self.internal_preventions_end_resolution(execution.id);
+        if execution.spell {
+            let group = self.group();
+            self.emit(
+                json!({"kind":"解決","object":execution.context.source}),
+                &execution.frame().cause,
+                group,
+            );
+        }
+        match execution.ability {
+            Some(source) => {
+                if execution.nested.is_none() {
+                    self.card_runtime.checkpoint = Some(execution.id);
+                }
+                execution.facts.push(if execution.spell {
+                    Fact::CardResolved {
+                        execution: execution.id,
+                        object: source.holder,
+                        controller: source.controller,
+                    }
+                } else {
+                    Fact::AbilityResolved {
+                        execution: execution.id,
+                        source,
+                    }
+                });
+            }
+            None => {
+                if execution.nested.is_none() {
+                    self.checks()?;
+                }
+            }
+        }
+        Ok(Self::finish_nested_card(execution))
     }
 
     fn internal_object_iteration(
@@ -1406,6 +1449,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
             Action::RideDrive { .. } => self.internal_gain_drive(execution, &instruction)?,
             Action::MealRace { .. } => self.internal_race(execution, &instruction)?,
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,

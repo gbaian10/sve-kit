@@ -731,3 +731,6 @@ mod same_name;
 
 #[path = "card/reveal_cost.rs"]
 mod reveal_cost;
+
+#[path = "card/nested_play.rs"]
+mod nested_play;

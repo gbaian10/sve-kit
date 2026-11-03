@@ -1096,6 +1096,51 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
     }
 }
 
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only explicit plays and nested controls introduce cemetery play authority."
+)]
+fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
+    let mut targets = BTreeSet::new();
+    for step in steps {
+        match step {
+            ast::Step::PlayCard(play) => {
+                targets.insert(play.r#ref.clone());
+            }
+            ast::Step::Pay(payment) => targets.extend(nested_targets(&payment.steps)),
+            ast::Step::Optional(optional) => {
+                targets.extend(nested_targets(&optional.steps));
+                if let Some(following_steps) = &optional.then {
+                    targets.extend(nested_targets(following_steps));
+                }
+            }
+            ast::Step::If(branch) => {
+                targets.extend(nested_targets(&branch.then));
+                if let Some(else_steps) = &branch.r#else {
+                    targets.extend(nested_targets(else_steps));
+                }
+            }
+            ast::Step::EachPlayer(each) => {
+                for stage in &each.stages {
+                    targets.extend(nested_targets(stage));
+                }
+            }
+            ast::Step::Choice(choice) => {
+                for option in &choice.options {
+                    targets.extend(nested_targets(option));
+                }
+            }
+            ast::Step::Either(either) => {
+                for option in &either.options {
+                    targets.extend(nested_targets(option));
+                }
+            }
+            _ => {}
+        }
+    }
+    targets
+}
+
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
@@ -1131,6 +1176,8 @@ struct BodyContext<'definitions> {
     ex_outputs: BTreeMap<String, Selector>,
     ex_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,
+    playable_targets: BTreeSet<String>,
+    nested_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     receipt_reads: ReceiptReads,
     observed_targets: BTreeSet<String>,
@@ -1182,6 +1229,8 @@ impl<'definitions> BodyContext<'definitions> {
             ex_outputs: BTreeMap::new(),
             ex_targets: BTreeSet::new(),
             hand_targets: BTreeSet::new(),
+            playable_targets: BTreeSet::new(),
+            nested_targets: nested_targets(&body.steps),
             observations: BTreeMap::new(),
             receipt_reads: ReceiptReads::default(),
             observed_targets: BTreeSet::new(),
@@ -1434,6 +1483,30 @@ impl<'definitions> BodyContext<'definitions> {
         })
     }
 
+    fn nested_card_play(&self, value: &ast::PlayCard, path: &str) -> Result<Action, LoweringError> {
+        if !self.playable_targets.contains(&value.r#ref) || value.cost != Some(0) {
+            return Err(unsupported(path));
+        }
+        let selection = *self
+            .targets
+            .get(&value.r#ref)
+            .ok_or_else(|| unsupported(path))?;
+        Ok(Action::PlayCard {
+            card: ObjectOperand::Selected { selection },
+            controller: PlayerRef::Controller {},
+            cost_override: value
+                .cost
+                .map(|_| super::CostOverride::SetBase { amount: Int(0) }),
+            authorization: super::EffectReference::CurrentInstallation {},
+            parameters: super::PlaySpec {
+                limit: None,
+                captures: vec![],
+                parameters: vec![],
+                costs: super::CostSpec::Ordered { steps: vec![] },
+            },
+        })
+    }
+
     fn action(
         &mut self,
         step: &ast::Step,
@@ -1442,6 +1515,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::PlayCard(value) => self.nested_card_play(value, path),
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
             ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
             ast::Step::Race(value) => Ok(resource_entry::action(

@@ -217,18 +217,16 @@ impl Game {
         if matched.is_empty() {
             return Ok(());
         }
-        let from = match self.object(source)?.state["entered_from"].as_str() {
-            Some("hand") => ZoneKind::Hand,
-            Some("ex") => ZoneKind::Ex,
-            _ => return Err(unsupported("card Play origin")),
-        };
+        let from = execution
+            .play_origin
+            .ok_or_else(|| unsupported("card Play origin"))?;
         let event = PlayEvent {
             subject: PlaySubject::Card {
                 object: self.internal_current_reference(source)?,
             },
             controller: actor,
             origin_zone: RuntimeZoneRef {
-                player: actor,
+                player: execution.play_origin_player.unwrap_or(actor),
                 kind: from,
             },
             cost: RuntimeReceiptId {

@@ -136,6 +136,7 @@ impl BodyContext<'_> {
             | ast::Step::SetStat(_)
             | ast::Step::Apply(_)
             | ast::Step::PlayerEffect(_)
+            | ast::Step::PlayCard(_)
             | ast::Step::Create(_)
             | ast::Step::Equip(_)
             | ast::Step::Pilot(_) => None,

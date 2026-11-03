@@ -1,10 +1,10 @@
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, Slot, Wait};
 use super::{
-    Ability, AbilityKind, Activation, Context, Execution, ExecutionId, Expr, Fact, Game,
-    Generation, Int, Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource,
-    SourceSpan, Step, admission, int, invalid, printed_origin, seat_name, unsupported,
+    Ability, Activation, Context, Execution, ExecutionId, Expr, Fact, Game, Generation, Int,
+    Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
+    admission, int, invalid, seat_name, unsupported,
 };
-use crate::game::internal::{InstructionOutcome, UbHistoryFact};
+use crate::game::internal::{InstructionOutcome, UbHistoryFact, player_id};
 use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
@@ -859,33 +859,12 @@ impl Game {
         holder: &str,
         actor: PlayerId,
     ) -> Result<CardPlay> {
-        self.check_card_play_holder(holder, actor)?;
-        let object = self.object(holder)?.clone();
-        let card = self
-            .card_runtime
-            .definitions
-            .cards
-            .get(&object.card)
-            .ok_or_else(|| invalid("card is not loaded"))?;
-        let abilities = card
-            .card()
-            .abilities
-            .iter()
-            .filter(|a| a.node.kind == AbilityKind::Spell)
-            .collect::<Vec<_>>();
-        let [located] = abilities.as_slice() else {
-            return Err(unsupported("one printed Spell per card"));
-        };
-        let ability = located.node.clone();
-        let (face, _) = printed_origin(&ability.source.origin)?;
-        if self.printed_face_ordinal(&object.card, face)? != 0 {
-            return Err(unsupported("Spell belongs to another face"));
-        }
-        let execution = self.spell_execution(holder, actor, &ability)?;
-        self.run_card_play(execution, ability)
+        let mut execution = self.prepare_card_execution(holder, actor, None)?;
+        self.internal_run(&mut execution)?;
+        self.card_play_result(execution)
     }
 
-    fn spell_execution(
+    pub(super) fn spell_execution(
         &mut self,
         holder: &str,
         actor: PlayerId,
@@ -898,6 +877,7 @@ impl Game {
             controller: actor,
         };
         let mut execution = self.new_card_execution(old_context)?;
+        execution.play_origin_player = Some(player_id(&object.controller)?);
         let play = ability
             .play
             .as_ref()
@@ -978,6 +958,10 @@ impl Game {
 
     pub(super) fn new_card_execution(&mut self, context: Context) -> Result<Execution> {
         self.emitted.clear();
+        self.fresh_card_execution(context)
+    }
+
+    pub(super) fn fresh_card_execution(&mut self, context: Context) -> Result<Execution> {
         self.state.ir_epoch = self
             .state
             .ir_epoch
@@ -1041,6 +1025,9 @@ impl Game {
             play_counts: self.internal_play_counts()?,
             ward_entries: Vec::new(),
             creating: None,
+            nested: None,
+            cost_override: None,
+            play_origin_player: None,
         })
     }
 
@@ -1049,6 +1036,16 @@ impl Game {
         mut execution: Execution,
         ability: Ability,
     ) -> Result<CardPlay> {
+        self.prepare_ability_play(&mut execution, ability)?;
+        self.internal_run(&mut execution)?;
+        self.card_play_result(execution)
+    }
+
+    pub(super) fn prepare_ability_play(
+        &self,
+        execution: &mut Execution,
+        ability: Ability,
+    ) -> Result<()> {
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
@@ -1061,7 +1058,7 @@ impl Game {
             costs: CostSpec::Ordered { steps: Vec::new() },
         });
         let additional = if execution.spell {
-            self.internal_additional(&execution)?
+            self.internal_additional(execution)?
         } else {
             None
         };
@@ -1086,7 +1083,7 @@ impl Game {
             chosen: BTreeMap::new(),
             parameters,
             exchange: if execution.spell {
-                self.internal_exchange(&execution)?
+                self.internal_exchange(execution)?
             } else {
                 None
             },
@@ -1098,8 +1095,7 @@ impl Game {
             restart: None,
             distribution_captures: None,
         });
-        self.internal_run(&mut execution)?;
-        self.card_play_result(execution)
+        Ok(())
     }
 
     pub(super) fn finish_card_attempt(
@@ -1171,7 +1167,7 @@ impl Game {
                     .is_some_and(|payment| payment.required)
             })
             .and_then(|execution| execution.trigger_occurrence.map(|id| (id, execution.id)));
-        let source = self.typed.as_ref().and_then(|execution| execution.ability);
+        let source = self.typed.as_ref().and_then(Execution::root_ability);
         let progress = match self.answer_internal_step(actor, token, answer) {
             Err(crate::EngineFailure::IllegalPlay(_)) if occurrence.is_some() => {
                 let (id, checkpoint) = occurrence.ok_or_else(|| invalid("missing occurrence"))?;
@@ -1430,6 +1426,9 @@ impl Game {
                 }
             }
         }
+        if let Some(nested) = execution.nested.as_mut() {
+            nested.committed = true;
+        }
         execution.facts.push(if execution.spell {
             Fact::CardPlayed {
                 execution: execution.id,
@@ -1681,7 +1680,7 @@ impl Game {
                     .ok_or_else(|| invalid("Spell cleanup generation exhausted"))?;
                 let departing_source = execution.source_before_move(self, from_ref(holder))?;
                 self.move_objects(from_ref(holder), "cemetery", None, None, &execution.frame())?;
-                execution.seal_source_departure(departing_source);
+                execution.seal_source_departure(&departing_source);
             }
         }
         Ok(())
@@ -1808,7 +1807,7 @@ fn independent_selector(selector: &Selector) -> bool {
     reason = "Field plays share the card payment continuation."
 )]
 impl Game {
-    pub(super) fn run_field_play(&mut self, mut execution: Execution) -> Result<CardPlay> {
+    pub(super) fn prepare_field_play(&self, execution: &mut Execution) -> Result<()> {
         execution.field_entry = true;
         execution.play = Some(PlayState {
             qualification: AbilityQualification::Ordinary,
@@ -1820,7 +1819,7 @@ impl Game {
             groups: vec![],
             chosen: BTreeMap::new(),
             parameters: VecDeque::new(),
-            exchange: self.internal_exchange(&execution)?,
+            exchange: self.internal_exchange(execution)?,
             optional: vec![],
             costs: CostSpec::Ordered { steps: vec![] },
             mode_costs: CostSpec::Ordered { steps: vec![] },
@@ -1832,8 +1831,7 @@ impl Game {
             restart: None,
             distribution_captures: None,
         });
-        self.internal_run(&mut execution)?;
-        self.card_play_result(execution)
+        Ok(())
     }
 }
 

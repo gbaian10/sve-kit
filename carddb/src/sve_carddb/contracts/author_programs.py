@@ -5,7 +5,14 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Annotated, Literal, NotRequired, TypedDict
 
-from pydantic import AfterValidator, ConfigDict, Field, RootModel, with_config
+from pydantic import (
+    AfterValidator,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    RootModel,
+    with_config,
+)
 
 from sve_carddb.contracts.author_costs import (
     Cost,
@@ -49,6 +56,7 @@ from sve_carddb.contracts.author_selection_parents import (
     Targets,  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 )
 from sve_carddb.contracts.four_layer import Code  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
+from sve_carddb.core.json import integer
 from sve_carddb.core.models import Text
 
 
@@ -2134,6 +2142,8 @@ type GainDriveAction = GainDriveActionFields
 @with_config(CONFIG)
 class PlayCardActionFields(TypedDict):
     ref: EffectObject
+
+    cost: NotRequired[Annotated[Literal[0], BeforeValidator(integer)]]
 
     result: NotRequired[BindingName]
 

@@ -629,6 +629,12 @@ impl Checker {
     )]
     fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
+            Action::PlayCard { .. } => {
+                let Some(card) = super::nested_play::card_operand(action) else {
+                    return self.reject();
+                };
+                self.object(card)
+            }
             Action::DriveCheck { player, source, .. } => {
                 self.player(player)?;
                 self.ability_source(source)

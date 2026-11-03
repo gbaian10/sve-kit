@@ -1,7 +1,7 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
-use crate::ir::{AbilityKind, FaceId, Located, PlayCostPayment};
+use crate::ir::{AbilityKind, CostOverride, FaceId, Located, PlayCostPayment};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, ObjectOperand, ZoneKind,
 };
@@ -359,7 +359,13 @@ impl Game {
         if object.state.get("cost").is_some() || !self.state.continuous.is_empty() {
             return Err(unsupported("typed payment state or prototype cost layers"));
         }
-        let mut base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;
+        let printed_base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;
+        let mut base =
+            if let Some(CostOverride::SetBase { amount }) = execution.cost_override.as_ref() {
+                amount.0
+            } else {
+                printed_base
+            };
         let mut delta = 0_i64;
         let card = self
             .card_runtime

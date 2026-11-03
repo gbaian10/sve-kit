@@ -250,13 +250,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        if matches!(
-            target.from.zone,
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
-        ) && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
-        {
-            return Err(unsupported(path));
-        }
+        self.check_cemetery_target(target, path)?;
         let cardinality = target_cardinality(target, path)?;
         if target.from.leader.is_some() || target.from.leaders.is_some() || target.from.leader_or {
             if target.from.other {
@@ -276,6 +270,11 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         match &target.from.zone {
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+                if cardinality.maximum == Some(Nat(1)) =>
+            {
+                self.playable_targets.insert(target.bind.clone());
+            }
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex)) => {
                 self.ex_targets.insert(target.bind.clone());
             }
@@ -307,6 +306,29 @@ impl BodyContext<'_> {
             },
             cardinality,
         ))
+    }
+
+    fn check_cemetery_target(&self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+        ) && (target.from.leader_or
+            || !matches!(
+                target.from.who,
+                Some(ast::Side::Controller | ast::Side::Opponent)
+            ))
+        {
+            return Err(unsupported(path));
+        }
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+        ) && matches!(target.from.who, Some(ast::Side::Opponent))
+            && !self.nested_targets.contains(&target.bind)
+        {
+            return Err(unsupported(path));
+        }
+        Ok(())
     }
 
     fn dynamic_target_count(
@@ -781,6 +803,8 @@ impl BodyContext<'_> {
                 ex_outputs: BTreeMap::new(),
                 ex_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
+                playable_targets: BTreeSet::new(),
+                nested_targets: super::nested_targets(steps),
                 observations: BTreeMap::new(),
                 receipt_reads: super::ReceiptReads::default(),
                 observed_targets: BTreeSet::new(),
@@ -800,6 +824,7 @@ impl BodyContext<'_> {
                 context.ex_outputs.clone_from(&self.ex_outputs);
                 context.ex_targets.clone_from(&self.ex_targets);
                 context.hand_targets.clone_from(&self.hand_targets);
+                context.playable_targets.clone_from(&self.playable_targets);
                 context.observations.clone_from(&self.observations);
                 context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);
@@ -1055,7 +1080,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
-        ast::Step::StackPlus(_)
+        ast::Step::PlayCard(_)
+        | ast::Step::StackPlus(_)
         | ast::Step::Counter(_)
         | ast::Step::GainDrive(_)
         | ast::Step::Race(_)
