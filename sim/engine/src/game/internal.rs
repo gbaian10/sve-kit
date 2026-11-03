@@ -6,6 +6,7 @@
 )]
 
 use super::{Frame, Game, View, int, string};
+use crate::ir::evolution_destination::Destination;
 use crate::ir::{
     AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
     CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control,
@@ -512,6 +513,7 @@ pub(super) struct Execution {
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_discards: BTreeMap<ReceiptId, Vec<ObjectRef>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
+    effect_evolution_destinations: BTreeMap<(ScopeId, u64), Destination>,
     facts: Vec<Fact>,
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
@@ -689,6 +691,7 @@ impl Game {
                 receipts: BTreeMap::new(),
                 cost_discards: BTreeMap::new(),
                 material_selections: BTreeMap::new(),
+                effect_evolution_destinations: BTreeMap::new(),
                 facts: Vec::new(),
                 waiting: None,
                 destroy_guards: Vec::new(),

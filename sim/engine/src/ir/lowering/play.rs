@@ -30,11 +30,28 @@ const fn parameter(id: u64, slot: PlaySlot, domain: ChoiceDomain) -> Decision {
     }
 }
 
-fn check_hand_choice(
+fn check_choice_shape(
     target: &ast::Target,
     resolution: bool,
     path: &str,
-) -> Result<(), LoweringError> {
+) -> Result<bool, LoweringError> {
+    let dynamic_count = target
+        .n
+        .as_ref()
+        .or(target.upto.as_ref())
+        .is_some_and(ast::NumericArgument::is_dynamic);
+    if dynamic_count
+        && (resolution
+            || target.from.observation.is_some()
+            || target.from.leader.is_some()
+            || target.from.leaders.is_some()
+            || target.from.leader_or)
+    {
+        return Err(unsupported(path));
+    }
+    if target.from.except.is_some() && target.from.observation.is_none() {
+        return Err(unsupported(path));
+    }
     if matches!(
         target.from.zone,
         Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
@@ -50,7 +67,7 @@ fn check_hand_choice(
     {
         return Err(unsupported(path));
     }
-    Ok(())
+    Ok(dynamic_count)
 }
 
 fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
@@ -207,21 +224,7 @@ impl BodyContext<'_> {
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
-        check_hand_choice(target, resolution, path)?;
-        let dynamic_count = target
-            .n
-            .as_ref()
-            .or(target.upto.as_ref())
-            .is_some_and(ast::NumericArgument::is_dynamic);
-        if dynamic_count
-            && (resolution
-                || target.from.observation.is_some()
-                || target.from.leader.is_some()
-                || target.from.leaders.is_some()
-                || target.from.leader_or)
-        {
-            return Err(unsupported(path));
-        }
+        let dynamic_count = check_choice_shape(target, resolution, path)?;
         if target.from.observation.is_some() {
             if target
                 .from
@@ -349,6 +352,7 @@ impl BodyContext<'_> {
             .as_ref()
             .ok_or_else(|| unsupported(path))?;
         if !resolution
+            || (branches.len() != 1 && branches.iter().any(|branch| branch.except.is_some()))
             || branches.iter().any(|branch| {
                 branch.observation.as_ref() != Some(observation)
                     || branch.alias.is_some()
@@ -1231,13 +1235,35 @@ fn observed_predicate(
                 &super::selection::ObjectFilter::from(branch),
                 candidate,
             );
-            if branch.not_same_name_as_this {
-                super::search::exclude_source_name(predicate, candidate)
+            if let Some(except) = &branch.except {
+                if except.name.is_empty()
+                    || branch.observation.as_deref() != Some(except.observation.as_str())
+                    || branch.not_same_name_as_this
+                {
+                    return None;
+                }
+                let excluded = super::selection::field_filter(
+                    &super::selection::ObjectFilter {
+                        name: Some(&except.name),
+                        ..super::selection::ObjectFilter::default()
+                    },
+                    candidate,
+                );
+                Some(Expr::Compute(Box::new(Predicate::And {
+                    predicates: vec![
+                        predicate,
+                        Expr::Compute(Box::new(Predicate::Not {
+                            predicate: excluded,
+                        })),
+                    ],
+                })))
+            } else if branch.not_same_name_as_this {
+                Some(super::search::exclude_source_name(predicate, candidate))
             } else {
-                predicate
+                Some(predicate)
             }
         })
-        .collect::<Vec<_>>();
+        .collect::<Option<Vec<_>>>()?;
     if predicates.len() == 1 {
         return predicates.pop();
     }

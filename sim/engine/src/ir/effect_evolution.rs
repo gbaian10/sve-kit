@@ -1,12 +1,13 @@
 //! Closed resolution-time selection and ordinary self-evolution projection.
 use super::{
     AbilitySource, Action, Binding, Cardinality, ChoiceDomain, Control, Decision, DecisionId,
-    DecisionKind, Declinable, Disjointness, EvolutionCardRef, EvolutionMode, Expr, FaceId,
-    Instruction, InstructionContext, InstructionId, Located, NamesRead, Nat, Node, ObjectOperand,
-    ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerSet, Predicate, Program, ReceiptId,
-    ScopeId, SelectionConstraint, SelectionGroup, SelectionView, Selector, SourceSpan,
-    TextQuantifier, Visibility, ZoneKind,
+    DecisionKind, Declinable, Disjointness, EvolutionCardRef, EvolutionMode, FaceId, Instruction,
+    InstructionContext, InstructionId, Located, Nat, Node, ObjectOperand, ObjectRef, PlayerRef,
+    PlayerRelation, PlayerSet, Program, ReceiptId, ScopeId, SelectionConstraint, SelectionGroup,
+    SelectionView, Selector, SourceSpan, TextQuantifier, Visibility, ZoneKind,
 };
+
+use super::evolution_destination::Destination;
 
 pub(crate) struct Keys {
     pub scope: ScopeId,
@@ -33,15 +34,7 @@ const fn controller() -> PlayerSet {
     }
 }
 
-fn names(object: ObjectOperand) -> Expr<Vec<super::CardName>> {
-    Expr::Live(Box::new(NamesRead::Names {
-        object: ObjectView::Current {
-            object: Box::new(object),
-        },
-    }))
-}
-
-fn choice(keys: &Keys) -> Decision {
+fn choice(keys: &Keys, destination: &Destination) -> Decision {
     let candidate = Binding::new(1, keys.candidate);
     Decision {
         id: keys.decision,
@@ -66,10 +59,7 @@ fn choice(keys: &Keys) -> Decision {
                         zone: ZoneKind::Evolve,
                         view: SelectionView::Current {},
                         binding: candidate,
-                        predicate: Box::new(Expr::Compute(Box::new(Predicate::NamesIntersect {
-                            left: names(ObjectOperand::Bound { binding: candidate }),
-                            right: names(ObjectOperand::SourceHolder {}),
-                        }))),
+                        predicate: Box::new(destination.predicate(candidate)),
                     },
                 }],
                 cardinality: one(),
@@ -81,7 +71,12 @@ fn choice(keys: &Keys) -> Decision {
     }
 }
 
-pub(crate) fn build(keys: &Keys, source: &SourceSpan, origin: &AbilitySource) -> Control {
+pub(crate) fn build(
+    keys: &Keys,
+    source: &SourceSpan,
+    origin: &AbilitySource,
+    destination: &Destination,
+) -> Control {
     Control::Sequence {
         body: Program {
             scope: keys.scope,
@@ -89,7 +84,7 @@ pub(crate) fn build(keys: &Keys, source: &SourceSpan, origin: &AbilitySource) ->
                 Located {
                     source: source.clone(),
                     node: Node::Decision {
-                        decision: choice(keys),
+                        decision: choice(keys, destination),
                     },
                 },
                 Located {
@@ -137,23 +132,35 @@ pub(crate) fn build(keys: &Keys, source: &SourceSpan, origin: &AbilitySource) ->
 }
 
 pub(crate) fn is_choice(decision: &Decision) -> bool {
+    destination(decision).is_some()
+}
+
+pub(crate) fn destination(decision: &Decision) -> Option<Destination> {
     let ChoiceDomain::Objects {
         constraint,
         binding,
         ..
     } = &decision.domain
     else {
-        return false;
+        return None;
     };
     let [group] = constraint.groups.as_slice() else {
-        return false;
+        return None;
     };
     let Selector::Zone {
-        binding: candidate, ..
+        binding: candidate,
+        predicate,
+        ..
     } = &group.selector
     else {
-        return false;
+        return None;
     };
+    let destination = Destination::from_predicate(predicate, *candidate)?;
+    if !matches!(&destination, Destination::SameName)
+        && !matches!(&destination, Destination::Names(names) if names.len() == 1)
+    {
+        return None;
+    }
     let keys = Keys {
         scope: binding.key().0,
         candidate: candidate.key().0,
@@ -162,7 +169,7 @@ pub(crate) fn is_choice(decision: &Decision) -> bool {
         instruction: InstructionId(0),
         receipt: ReceiptId(0),
     };
-    *decision == choice(&keys)
+    (*decision == choice(&keys, &destination)).then_some(destination)
 }
 
 pub(crate) struct Projection<'projection> {
@@ -182,9 +189,7 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
     let Node::Decision { decision } = &first.node else {
         return None;
     };
-    if !is_choice(decision) {
-        return None;
-    }
+    let destination = destination(decision)?;
     let Node::Control {
         control:
             Control::EachObject {
@@ -219,12 +224,14 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
         instruction: instruction.id,
         receipt: instruction.receipt,
     };
-    (*control == build(&keys, &first.source, &instruction.source)).then_some(Projection {
-        body,
-        decision,
-        form: *binding,
-        instruction,
-    })
+    (*control == build(&keys, &first.source, &instruction.source, &destination)).then_some(
+        Projection {
+            body,
+            decision,
+            form: *binding,
+            instruction,
+        },
+    )
 }
 
 pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {

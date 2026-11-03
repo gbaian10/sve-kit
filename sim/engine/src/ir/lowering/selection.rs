@@ -265,6 +265,7 @@ impl BodyContext<'_> {
             || from.has_evolve.is_some()
             || from.has_state_filter()
             || from.not_same_name_as_this
+            || from.except.is_some()
             || from.other
             || from.has_numeric_filter()
             || from.class.is_some()

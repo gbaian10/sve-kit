@@ -11,6 +11,215 @@ fn tree(step: Value) -> Value {
     tree
 }
 
+fn named_position(base: &WellFormedCardProgram) -> Game {
+    let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
+    for (number, name) in [
+        ("named-form", "named destination"),
+        ("same-form", "unit-follower"),
+    ] {
+        snapshot.push('\n');
+        snapshot.push_str(
+            &json!({"number":number,"faces":[{
+                "name":name,"card_class":"ニュートラル","card_type":"フォロワー・エボルヴ",
+                "cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]
+            }]})
+            .to_string(),
+        );
+    }
+    let forms = json!({"format":1_u8,"kind":"effect_set","cards":{
+        "named-form":{"status":"complete","abilities":[]},
+        "same-form":{"status":"complete","abilities":[]}
+    }})
+    .to_string();
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &registry,
+            &[
+                ("units.yaml".into(), document),
+                ("forms.yaml".into(), forms),
+            ],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
+        {"id":"named","card":"named-form"},{"id":"decoy","card":"same-form"}
+    ]);
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "named-evolution",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", base).unwrap();
+    for number in ["named-form", "same-form", "unit-spell", "unit-amulet"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game
+}
+
+#[test]
+fn named_effect_evolution_selects_the_explicit_form_and_never_falls_back_to_same_name() {
+    for destination in ["named destination", "absent destination"] {
+        let programs = lowerer()
+            .lower(&tree(json!({"evolve":{"ref":"this","into":destination}})))
+            .unwrap();
+        let mut game = named_position(&programs["unit-follower"]);
+        let before = game.projection(View::Referee).unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("private named evolution choice");
+        };
+        assert!(
+            game.internal_decision(View::P2).is_none(),
+            "the other player cannot inspect evolution resources"
+        );
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("named evolution domain");
+        };
+        let available = destination == "named destination";
+        assert_eq!(
+            domain.members.len(),
+            usize::from(available),
+            "a same-name decoy does not satisfy an explicit destination"
+        );
+        if available {
+            assert_eq!(
+                domain.members[0].card.as_deref(),
+                Some("named-form"),
+                "only the differently named printed destination is eligible"
+            );
+        } else {
+            assert_eq!(
+                domain.cardinality.minimum,
+                Nat(0),
+                "a missing form allows an empty resolution answer"
+            );
+        }
+        let unchanged = format!("{game:?}");
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![u64::MAX]),
+        )
+        .unwrap_err();
+        assert_eq!(
+            format!("{game:?}"),
+            unchanged,
+            "an out-of-domain handle cannot change authority or state"
+        );
+        let activation = resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets(domain.members.iter().map(|member| member.handle).collect()),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            activation
+                .progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(fact, Fact::Evolved(_)))
+                .count(),
+            usize::from(available),
+            "only an actual named resource produces an evolution event"
+        );
+        let after = game.projection(View::Referee).unwrap();
+        for resource in ["pp", "ep", "sep"] {
+            assert_eq!(
+                after["P1"][resource], before["P1"][resource],
+                "effect evolution does not spend intrinsic {resource}"
+            );
+        }
+        assert_eq!(
+            after["objects"]["s"]["power"],
+            if available { 4_u8 } else { 2_u8 },
+            "the selected destination supplies the evolved characteristics"
+        );
+    }
+}
+
+#[test]
+fn named_effect_evolution_rejects_forged_destinations_and_foreign_instruction_bindings() {
+    let lowered = lowerer()
+        .lower(&tree(
+            json!({"evolve":{"ref":"this","into":"named destination"}}),
+        ))
+        .unwrap();
+    let valid = lowered["unit-follower"].card();
+    for names in [
+        vec![],
+        vec![
+            CardName("named destination".into()),
+            CardName("another destination".into()),
+        ],
+    ] {
+        let mut forged = valid.clone();
+        let Node::Control {
+            control: Control::Sequence { body: outer },
+        } = &mut forged.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("closed effect evolution projection");
+        };
+        let Node::Decision { decision } = &mut outer.steps[0].node else {
+            panic!("private form decision");
+        };
+        let ChoiceDomain::Objects { constraint, .. } = &mut decision.domain else {
+            panic!("form objects");
+        };
+        let Selector::Zone { predicate, .. } = &mut constraint.groups[0].selector else {
+            panic!("evolve zone");
+        };
+        let Expr::Compute(operation) = predicate.as_mut() else {
+            panic!("named form predicate");
+        };
+        let Predicate::NamesIntersect { right, .. } = operation.as_mut() else {
+            panic!("literal destination names");
+        };
+        *right = Expr::Literal(names);
+        assert!(
+            WellFormedCardProgram::check(forged).is_err(),
+            "empty or multi-name raw IR is outside the closed effect destination"
+        );
+    }
+    let mut forged = valid.clone();
+    let Node::Control {
+        control: Control::Sequence { body: outer },
+    } = &mut forged.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("closed effect evolution projection");
+    };
+    let Node::Control {
+        control: Control::EachObject { body, .. },
+    } = &mut outer.steps[1].node
+    else {
+        panic!("selected form iteration");
+    };
+    let scope = body.scope;
+    let Node::Instruction { instruction } = &mut body.steps[0].node else {
+        panic!("one evolution instruction");
+    };
+    let Action::Evolve { form, .. } = &mut instruction.action else {
+        panic!("ordinary effect evolution");
+    };
+    form.object = ObjectOperand::Bound {
+        binding: Binding::new(99, scope),
+    };
+    assert!(
+        WellFormedCardProgram::check(forged).is_err(),
+        "the instruction cannot consume a form binding different from its decision"
+    );
+}
+
 #[test]
 fn effect_evolution_uses_private_matching_resource_and_no_intrinsic_payment() {
     let lowered = lowerer()
@@ -71,10 +280,15 @@ fn effect_evolution_uses_private_matching_resource_and_no_intrinsic_payment() {
 }
 
 #[test]
-fn effect_evolution_rejects_foreign_subject_named_override_and_forged_private_domain() {
+fn effect_evolution_rejects_unneeded_shapes_and_forged_private_domain() {
     for step in [
         json!({"evolve":{"ref":"enemy"}}),
-        json!({"evolve":{"ref":"this","into":"other"}}),
+        json!({"gain_drive":{"ref":"this","into":"other"}}),
+        json!({"evolve":{"ref":"this","into":["other"]}}),
+        json!({"evolve":{"ref":"this","into":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","name_contains":"other"}}}),
+        json!({"evolve":{"ref":"this","into":"other","result":"changed"}}),
+        json!({"evolve":{"ref":"this","into":"other","precondition":{"awakened":true}}}),
+        json!({"evolve":{"ref":"this","into":""}}),
     ] {
         lowerer().lower(&tree(step)).unwrap_err();
     }

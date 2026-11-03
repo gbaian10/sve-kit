@@ -293,7 +293,7 @@ pub(super) enum Step {
     Optional(Optional),
     Race(Race),
     GainDrive(EffectEvolution),
-    Evolve(EffectEvolution),
+    Evolve(NamedEffectEvolution),
     If(Conditional),
     EachPlayer(EachPlayer),
     Choice(Choice),
@@ -418,6 +418,14 @@ pub(super) struct EffectEvolution {
 pub(super) struct Pilot {
     #[serde(rename = "ref")]
     pub reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct NamedEffectEvolution {
+    #[serde(rename = "ref")]
+    pub _reference: This,
+    pub into: Option<EvolutionDestination>,
 }
 
 #[derive(Deserialize)]
@@ -1241,6 +1249,7 @@ pub(super) struct ChooseGroup {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
+    pub except: Option<ObservedNameExcept>,
     #[serde(rename = "as")]
     pub alias: Option<String>,
     pub r#where: Option<Box<QueryExtremumWhere>>,
@@ -1303,6 +1312,14 @@ impl TryFrom<String> for FilterKeyword {
             _ => Err("unsupported filter keyword"),
         }
     }
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ObservedNameExcept {
+    #[serde(rename = "in")]
+    pub observation: String,
+    pub name: String,
 }
 
 impl TargetQuery {

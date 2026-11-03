@@ -1020,7 +1020,11 @@ impl Game {
             if constraint.groups.len() != 1 {
                 return Err(unsupported("one effect evolution selector group"));
             }
-            return Ok(vec![self.effect_evolution_members(execution)?]);
+            let destination = effect_evolution::destination(decision)
+                .ok_or_else(|| unsupported("effect evolution destination"))?;
+            return Ok(vec![
+                self.effect_evolution_members(execution, &destination)?,
+            ]);
         }
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let observed_deck = allow_resolution_zones && private_look_choice(decision);
