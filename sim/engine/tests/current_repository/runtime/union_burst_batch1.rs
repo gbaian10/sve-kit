@@ -341,6 +341,11 @@ fn rino_evolution_damages_all_enemies_and_is_ub_even_with_an_empty_opposing_fiel
             let mut game = evolve(card, initial);
             let play = pending(&mut game, card);
             ub(&resolved(finish(&mut game, play)));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]["ub_activated"],
+                1_u8,
+                "a proper UB is counted even when its body changes nothing"
+            );
             if enemies {
                 assert_eq!(
                     game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],

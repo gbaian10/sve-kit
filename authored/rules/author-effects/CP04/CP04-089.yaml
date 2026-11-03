@@ -1,0 +1,35 @@
+cards:
+  CP04-089:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      history:
+                        at_least: 2
+                        event: ub_activated
+                        exclude: this_execution
+                        who: self
+                        window: this_turn
+                    n: 3
+                n: 1
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

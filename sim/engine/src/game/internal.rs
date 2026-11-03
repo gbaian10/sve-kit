@@ -52,7 +52,7 @@ mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod grant;
 mod history_turn;
-pub(super) use history_turn::{SubjectHistoryEvent, SubjectHistoryFact};
+pub(super) use history_turn::{SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact};
 mod life;
 mod movement;
 mod numeric;

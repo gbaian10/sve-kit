@@ -1581,3 +1581,23 @@ fn mandatory_play_cost_does_not_relax_ordinary_activation_material_group_limit()
     ]});
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn buff_replacement_rejects_unadmitted_stats_and_multiple_alternatives() {
+    let mut tree = expanded::tree().clone();
+    let replacement = json!({"if":{"history":{"event":"ub_activated","who":"self","window":"this_turn","exclude":"this_execution","at_least":2_u64}},"power":2_u64});
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] =
+        json!([{"buff":{"on":"this","power":1_u64,"instead":[replacement]}}]);
+    lowerer().lower(&tree).unwrap();
+    for step in [
+        json!({"buff":{"on":"this","power":1_u64,"hp":1_u64,"instead":[replacement]}}),
+        json!({"buff":{"on":"this","hp":1_u64,"instead":[replacement]}}),
+        json!({"buff":{"on":"this","power":1_u64,"instead":[]}}),
+        json!({"buff":{"on":"this","power":1_u64,"instead":[replacement,replacement]}}),
+        json!({"buff":{"on":"this","power":1_u64,"instead":[{"if":{"combo":2_u64},"hp":2_u64}]}}),
+        json!({"set_stat":{"on":"this","power":1_u64,"instead":[replacement]}}),
+    ] {
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([step]);
+        lowerer().lower(&tree).unwrap_err();
+    }
+}

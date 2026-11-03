@@ -132,7 +132,9 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 
 `auto.on.stat_changed` 接受 `ref: this`、`stat: power | hp`（或清單）及 `direction: up | down`。省略欄位表示不加該項限制；一個指示對同一物件的攻擊力／體力差額合為一個事實，清單採任一欄位符合，不因兩項都增加而重複觸發。零差額不產生事件；明示數值指示與超進化的 +1/+1 會產生，普通進化換底值、持續條件重算與期限到期不產生。這兩類事件頭目前使用場上來源與既有每回合一次限制，不忽略其他未支援欄位。
 
-`ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。此入口尚未新增 UB 歷史查詢、UB 發動訂閱或免原費用發動其他 UB 的 consumer，不能據此准入那些本文。
+`ub: true` 是觸發／起動能力的獨立標記，沿用該能力原有時機、正式目標、付款與本文。能力控制者必須使用作品構築，且作品規則綁定含 `ub_enabled`；職業構築、交叉構築及其他作品下，UB 能力在所有區域無效。同卡未帶 UB 的能力仍有效。適正打出後在既有 `AbilityPlayed` 事實記錄 `UnionBurst` 資格，目標不足、拒付或付款失敗不記錄；本文沒有成功改變狀態仍算一次適正打出。`history`／`history_count` 可查 `event: ub_activated`、`window: this_turn`，以 `who: self | opp` 篩選能力控制者，省略時計算雙方；`exclude: this_execution` 依執行 ID 排除本次正式發動。計次沿用既有 `ub_activated` 回合計數器，包括明示歷史開局；IR 執行紀錄只識別要排除的本次。只計事實次數，不接受主體篩選或 `distinct: subjects`；每回合重置。記錄在正式打出提交時即對本文與巢狀執行可見，並非解決完成後才計次。UB 發動訂閱與免原費用發動其他 UB 的 consumer 尚未准入。
+
+`buff.instead` 可在只有 `power` 的強化指示上放一筆 `{if, power}`，以既有條件數值一次選定攻擊力增量；不先加基本值再補差額。`hp` 取代、同時攻體強化、複數取代與 `set_stat.instead` 尚未准入。
 
 入場曲、進化時與謝幕可用 `cost` 宣告頭付款（例如 `cost: {pp: 2}` 或 `cost: {leader_life: 2}`），沿用接受／拒絕與不足資源不發動的付款流程；目標在付款前宣告。`optional_cost` 與模式付款尚不接受 `leader_life`。
 

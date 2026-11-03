@@ -488,19 +488,34 @@ impl BodyContext<'_> {
             .who
             .as_ref()
             .map(|side| matches!(side, ast::LeaderSide::Controller));
+        if matches!(
+            history.event,
+            ast::HistoryEvent::LifeChanged
+                | ast::HistoryEvent::UbActivated
+                | ast::HistoryEvent::Played
+        ) && (history.sel.is_some()
+            || history.from.is_some()
+            || history.to.is_some()
+            || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects)))
+        {
+            return Err(unsupported(path));
+        }
+        let player = own.map(|own| {
+            if own {
+                PlayerRef::Controller {}
+            } else {
+                super::super::events::timing::opponent()
+            }
+        });
+        if history.exclude.is_some() && !matches!(history.event, ast::HistoryEvent::UbActivated) {
+            return Err(unsupported(path));
+        }
         if matches!(history.event, ast::HistoryEvent::LifeChanged) {
             if history.who.is_none()
                 || history
                     .r#where
                     .as_ref()
                     .is_none_or(|filter| !matches!(filter.direction, ast::LifeDirection::Down))
-            {
-                return Err(unsupported(path));
-            }
-            if history.sel.is_some()
-                || history.from.is_some()
-                || history.to.is_some()
-                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
             {
                 return Err(unsupported(path));
             }
@@ -517,23 +532,17 @@ impl BodyContext<'_> {
         if history.r#where.is_some() {
             return Err(unsupported(path));
         }
+        if matches!(history.event, ast::HistoryEvent::UbActivated) {
+            return Ok(super::super::history_turn::ub_query(
+                Binding::new(id, self.scope),
+                player,
+                history.exclude.is_some(),
+            ));
+        }
         if matches!(history.event, ast::HistoryEvent::Played) {
-            if history.sel.is_some()
-                || history.from.is_some()
-                || history.to.is_some()
-                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
-            {
-                return Err(unsupported(path));
-            }
             return Ok(super::super::history_turn::played_query(
                 Binding::new(id, self.scope),
-                own.map(|own| {
-                    if own {
-                        PlayerRef::Controller {}
-                    } else {
-                        super::super::events::timing::opponent()
-                    }
-                }),
+                player,
             ));
         }
         let mut filter = super::movement::movement_filter(own, false, history.sel.as_ref(), false);
@@ -560,7 +569,9 @@ impl BodyContext<'_> {
                     None => SubjectHistoryKind::Leave,
                 }
             }
-            ast::HistoryEvent::Played | ast::HistoryEvent::LifeChanged => {
+            ast::HistoryEvent::Played
+            | ast::HistoryEvent::UbActivated
+            | ast::HistoryEvent::LifeChanged => {
                 return Err(unsupported(path));
             }
         };

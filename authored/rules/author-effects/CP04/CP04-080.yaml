@@ -1,0 +1,34 @@
+cards:
+  CP04-080:
+    abilities:
+      - attack_time:
+          do:
+            - buff:
+                instead:
+                  - if:
+                      history:
+                        at_least: 2
+                        event: ub_activated
+                        exclude: this_execution
+                        who: self
+                        window: this_turn
+                    power: 2
+                on: this
+                power: 1
+          ub: true
+        line: 1
+      - keywords:
+          - rush
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

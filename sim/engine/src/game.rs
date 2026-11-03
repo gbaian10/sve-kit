@@ -200,6 +200,8 @@ struct State {
     event_occurrences: BTreeMap<String, EventOccurrence>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_subject_history: Vec<internal::SubjectHistoryFact>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    ir_ub_history: Vec<internal::UbHistoryFact>,
     knowledge: BTreeMap<String, Knowledge>,
     facts: Value,
     game: Value,
@@ -463,6 +465,7 @@ impl Game {
             used: BTreeMap::new(),
             event_occurrences: BTreeMap::new(),
             ir_subject_history: Vec::new(),
+            ir_ub_history: Vec::new(),
             knowledge: BTreeMap::new(),
             facts: facts.clone(),
             game: json!({"ended":false}),
