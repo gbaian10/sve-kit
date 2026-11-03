@@ -1,0 +1,40 @@
+cards:
+  BP10-080:
+    abilities:
+      - keywords:
+          - bane
+          - drain
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to:
+                  leaders: opponents
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+                  - grant:
+                      keywords:
+                        - rush
+                        - assail
+                      on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
