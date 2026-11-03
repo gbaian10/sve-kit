@@ -701,5 +701,8 @@ mod material_power;
 #[path = "card/discard_event.rs"]
 mod discard_event;
 
+#[path = "card/equipment_played.rs"]
+mod equipment_played;
+
 #[path = "card/filtered_mill.rs"]
 mod filtered_mill;

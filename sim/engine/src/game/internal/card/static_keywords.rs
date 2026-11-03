@@ -208,6 +208,9 @@ impl Game {
         );
         for source in providers {
             let zone = if self.object(&source)?.zone == "equipment" {
+                if recipient.state["silenced"] == true {
+                    continue;
+                }
                 ZoneKind::Equipment
             } else {
                 ZoneKind::Field

@@ -1308,8 +1308,8 @@ fn check_grant_instruction(
         ..
     } = &instruction.action
     {
-        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if ability.kind == AbilityKind::Activated)) {
-            return Err(unsupported("activated grants require an equipment provider"));
+        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if equipment_definition(ability))) {
+            return Err(unsupported("granted activation or Play requires an equipment provider"));
         }
         check_granted_definitions(game, abilities, source, ability_source)?;
         if &provider.face != printed_origin(&instruction.source.origin)?.0 {
@@ -1339,7 +1339,7 @@ fn check_static_granted_definitions(game: &Game, located: &Located<Ability>) -> 
                 if let GrantedAbility::Definition { ability } = granted
                     && (ability.active_zones != [ZoneKind::Field]
                         || static_keywords::is_static(ability)
-                        || (ability.kind == AbilityKind::Activated
+                        || (equipment_definition(ability)
                             && located.node.active_zones != [ZoneKind::Equipment]))
                 {
                     return Err(unsupported("continuous granted zone or transitive aura"));
@@ -1349,6 +1349,10 @@ fn check_static_granted_definitions(game: &Game, located: &Located<Ability>) -> 
         }
     }
     Ok(())
+}
+
+fn equipment_definition(ability: &Ability) -> bool {
+    ability.kind == AbilityKind::Activated || filter(ability).is_some()
 }
 
 fn check_granted_static(located: &Located<Ability>) -> Result<()> {

@@ -1377,6 +1377,9 @@ pub(super) enum Number {
     Times {
         times: Box<[Self; 2]>,
     },
+    HalfUp {
+        half_up: Box<Self>,
+    },
     Per {
         per: Box<Per>,
     },

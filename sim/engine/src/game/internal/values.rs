@@ -1077,6 +1077,15 @@ fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
     let (&first, rest) = values
         .split_first()
         .ok_or_else(|| invalid("empty arithmetic"))?;
+    if operation == Arithmetic::HalfUp {
+        if !rest.is_empty() {
+            return Err(invalid("half-up requires one operand"));
+        }
+        return first
+            .div_euclid(2)
+            .checked_add(i64::from(first.rem_euclid(2) != 0))
+            .ok_or_else(|| invalid("signed arithmetic overflow"));
+    }
     rest.iter().try_fold(first, |left, &right| {
         match operation {
             Arithmetic::Add => left.checked_add(right),
