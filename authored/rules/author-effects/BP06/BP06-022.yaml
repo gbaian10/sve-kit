@@ -1,0 +1,30 @@
+cards:
+  BP06-022:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - rush
+          - aura
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+            - cannot:
+                on: this
+                what: banish
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
