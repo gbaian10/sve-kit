@@ -1,0 +1,26 @@
+cards:
+  BP20-099:
+    abilities:
+      - auto:
+          do:
+            - player_effect:
+                effect:
+                  prevent:
+                    kind: any
+                    next_only: true
+                until: turn
+                who: self
+          on:
+            phase:
+              which: main
+              whose: opp
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

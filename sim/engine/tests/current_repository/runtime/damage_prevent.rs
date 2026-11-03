@@ -16,7 +16,7 @@ fn rules_game(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn pass_quick(game: &mut Game) {
+pub(super) fn pass_quick(game: &mut Game) {
     for _ in 0_u8..4 {
         let Some(question) = game.internal_quick_choice().unwrap() else {
             return;
@@ -103,7 +103,7 @@ fn bp01_024_quick_curse_preserves_the_attack_but_prevents_its_damage() {
     }
 }
 
-const fn all_leaders_damage() -> Action {
+pub(super) const fn all_leaders_damage() -> Action {
     Action::Damage {
         recipients: RecipientSet::Leaders {
             players: PlayerSet {
@@ -270,7 +270,7 @@ fn bp06_021_all_printings_buff_and_gain_rush_before_preventing_combat_damage() {
 }
 
 #[test]
-fn damage_prevention_rejects_unresolved_next_only_usage() {
+fn static_damage_prevention_keeps_next_only_usage_closed() {
     let input = &inputs().2;
     let source = input["authors"]
         .as_array()

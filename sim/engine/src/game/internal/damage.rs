@@ -2,7 +2,7 @@ use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, player_id,
     seat_name, unsupported,
 };
-use crate::game::damage::DamageReplacement;
+use crate::game::damage::{DamageReplacement, DamageUse};
 use crate::game::{BTreeMap, int, string};
 use crate::ir::{
     Action, DamageEvent, DamageFlags, DamageQuantityOutcome, DecisionId, Instruction, Int, Nat,
@@ -33,6 +33,7 @@ pub(super) struct DamageRun {
     requested: i64,
     remaining: Vec<(RuntimeDamageRecipient, Value)>,
     hits: Vec<Value>,
+    consumed: BTreeMap<DamageUse, i64>,
     facts: Vec<DamageEvent>,
     choices: Vec<DamageReplacement>,
 }
@@ -60,6 +61,13 @@ impl DamageRun {
 }
 
 fn order_independent(replacements: &[DamageReplacement]) -> bool {
+    if replacements.len() > 1
+        && replacements
+            .iter()
+            .any(|replacement| replacement.consumption.is_some())
+    {
+        return false;
+    }
     replacements.len() <= 1
         || replacements.iter().any(|effect| effect.prevent)
         || replacements
@@ -151,11 +159,43 @@ impl Game {
                 requested,
                 remaining,
                 hits: vec![],
+                consumed: BTreeMap::new(),
                 facts: vec![],
                 choices: vec![],
             },
             None,
         )
+    }
+
+    fn damage_replacement_options(
+        &self,
+        replacements: &[DamageReplacement],
+    ) -> Result<Vec<ReplacementOption>> {
+        replacements
+            .iter()
+            .zip(0_u64..)
+            .map(|(replacement, handle)| {
+                let provider = string(&replacement.reference["source"]);
+                let (card, name) = if let (Some(card), Some(name)) = (
+                    replacement.reference["card"].as_str(),
+                    replacement.reference["name"].as_str(),
+                ) {
+                    (card.to_owned(), name.to_owned())
+                } else {
+                    // Older prototype candidates obtain their label from the public provider.
+                    (
+                        self.object(provider)?.card.clone(),
+                        self.card_name(provider)?,
+                    )
+                };
+                Ok(ReplacementOption {
+                    handle,
+                    card,
+                    name,
+                    line: replacement.reference["line"].as_u64(),
+                })
+            })
+            .collect::<Result<Vec<_>>>()
     }
 
     pub(super) fn continue_damage(
@@ -169,11 +209,11 @@ impl Game {
             let replacements = if let Some(chosen) = selected.take() {
                 chosen
             } else {
-                self.damage_replacements(&hit, &BTreeMap::new())?
+                self.damage_replacements(&hit, &run.consumed)?
             };
             if replacements
                 .iter()
-                .any(|replacement| replacement.consumption.is_some())
+                .any(|replacement| matches!(replacement.consumption, Some(DamageUse::Legacy(_))))
             {
                 return Err(unsupported("typed limited damage replacement"));
             }
@@ -184,31 +224,7 @@ impl Game {
                         player_id(&self.object(execution.object_id(object)?)?.controller)?
                     }
                 };
-                let options = replacements
-                    .iter()
-                    .zip(0_u64..)
-                    .map(|(replacement, handle)| {
-                        let provider = string(&replacement.reference["source"]);
-                        let (card, name) = if let (Some(card), Some(name)) = (
-                            replacement.reference["card"].as_str(),
-                            replacement.reference["name"].as_str(),
-                        ) {
-                            (card.to_owned(), name.to_owned())
-                        } else {
-                            // Installed candidates are pure prevention and never need a public choice.
-                            (
-                                self.object(provider)?.card.clone(),
-                                self.card_name(provider)?,
-                            )
-                        };
-                        Ok(ReplacementOption {
-                            handle,
-                            card,
-                            name,
-                            line: replacement.reference["line"].as_u64(),
-                        })
-                    })
-                    .collect::<Result<Vec<_>>>()?;
+                let options = self.damage_replacement_options(&replacements)?;
                 run.remaining.push((recipient, hit));
                 run.choices = replacements;
                 self.internal_wait(
@@ -221,12 +237,23 @@ impl Game {
                 return Ok(());
             }
             run.choices.clear();
-            let ordered = replacements
+            let ordered = if replacements
                 .iter()
-                .find(|effect| effect.prevent)
-                .cloned()
-                .map_or(replacements, |prevention| vec![prevention]);
-            let (actual, _) = DamageReplacement::fold_order(int(&hit["amount"]), ordered)?;
+                .any(|effect| effect.consumption.is_some())
+            {
+                replacements
+            } else {
+                replacements
+                    .iter()
+                    .find(|effect| effect.prevent)
+                    .cloned()
+                    .map_or(replacements, |prevention| vec![prevention])
+            };
+            let (actual, uses) = DamageReplacement::fold_order(int(&hit["amount"]), ordered)?;
+            for usage in uses {
+                let count = run.consumed.entry(usage).or_default();
+                *count = count.saturating_add(1);
+            }
             if actual == 0 {
                 continue;
             }
@@ -248,6 +275,7 @@ impl Game {
             sum.checked_add(fact.amount.0.get())
                 .ok_or_else(|| invalid("damage outcome overflow"))
         })?;
+        self.commit_damage_uses(&run.consumed)?;
         self.apply_damage(&run.hits, &execution.frame(), Some(&run.facts))?;
         execution
             .facts

@@ -213,8 +213,9 @@ fn mask_player_cost_filter(inspected: &mut Node) -> Result<()> {
             &instruction.action,
             Action::InstallEffect {
                 subjects: InstallationSubjects::Players { .. },
+                effect,
                 ..
-            }
+            } if matches!(effect.as_ref(), Effect::CostModifier { .. })
         )
     {
         super::card::other_costs::check_install(&instruction.action)?;

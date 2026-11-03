@@ -264,7 +264,11 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 `cannot.attack.target` 的「相手を攻撃できない」標準為 `{who: opp, kind: follower, leader_or: true}`，同時涵蓋對手從者與領袖（BP04-SL08、Q581）；CSD03b-014 使用同一述詞。只有卡文明寫「相手のリーダー」才縮成 `{leaders: opponents}`。
 
-`prevent: {on?,kind:any|combat|ability,source?,next_only?}`；`damage_mod: {on?,source?,kind?:any|attack|combat|ability,delta或multiply,next_only?}`；`damage_cap: {on?,threshold,set}` 在 amount>=threshold 時改為 set，不默認 min；`cost_mod: {when_playing,delta或set,next_only?}`；`evolve_cost_mod: {on,delta或set}`；`ignore_ward: {on}`；`reroll: {who,times}`；`choice_any: {who}`。期限與使用額度分開。`cost_mod.when_playing.in` 接 ObjectSet 或 `{follow: ReceiptId|ReceiptList}`；於效果安裝時保存獲授權的新世代集合，不因之後同卡號入場而新增成員。`player_effect` 的 next_only 共用一個 UsageId，整組下一次符合的適正 play 消耗一次；`apply` 對各物件安裝時則各有 UsageId。付款交易失敗須回復額度，普通費用預覽不消耗。BP14-046 使用前者，不能每張各免費一次（依日文語法與 CP04-003 同句型推論，無直接 Q&A；`strength: inferred`）。
+`prevent: {on?,kind:any|combat|ability,source?,next_only?}`；`damage_mod: {on?,source?,kind?:any|attack|combat|ability,delta或multiply,next_only?}`；`damage_cap: {on?,threshold,set}` 在 amount>=threshold 時改為 set，不默認 min；`cost_mod: {when_playing,delta或set,next_only?}`；`evolve_cost_mod: {on,delta或set}`；`ignore_ward: {on}`；`reroll: {who,times}`；`choice_any: {who}`。期限與使用額度分開。`cost_mod.when_playing.in` 接 ObjectSet 或 `{follow: ReceiptId|ReceiptList}`；於效果安裝時保存獲授權的新世代集合，不因之後同卡號入場而新增成員。`player_effect.cost_mod` 的 next_only 共用一個 UsageId，整組下一次符合的適正 play 消耗一次；`apply` 對各物件安裝時則各有 UsageId。付款交易失敗須回復額度，普通費用預覽不消耗。BP14-046 使用前者，不能每張各免費一次（依日文語法與 CP04-003 同句型推論，無直接 Q&A；`strength: inferred`）。
+
+`prevent.next_only` 與 `damage_mod.next_only` 的一次額度在實際套用正值傷害時消耗，
+傷害已為零則保留；與費用修正的適正 play 消耗分開。內部目前只開放本回合、
+單一物件的任意種類防止，或自己領袖的任意種類防止／負常值減傷；來源與多個接受者篩選保持拒絕。
 
 `enters_acted:{on}` 是入場姿態取代。自身 static 在 ProspectiveEntry 以目的區資訊求值（CR 10.9.3），因此預設 active_zones=field 仍能在入場當下生效，毋須擴成手牌／墓地皆有效；不產生額外 act 事件。
 

@@ -14,6 +14,12 @@ enum Arithmetic {
     Saturating,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum DamageUse {
+    Legacy(usize),
+    Installed(u64),
+}
+
 #[derive(Clone, Debug)]
 pub(super) struct DamageReplacement {
     pub(super) reference: Value,
@@ -24,7 +30,7 @@ pub(super) struct DamageReplacement {
     pub(super) cap: Option<(i64, i64)>,
     pub(super) prevent: bool,
     arithmetic: Arithmetic,
-    pub(super) consumption: Option<usize>,
+    pub(super) consumption: Option<DamageUse>,
 }
 
 #[expect(
@@ -35,7 +41,7 @@ impl Game {
     pub(super) fn damage_batch(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let hits = list(&node["hits"]);
         let mut actual = Vec::new();
-        let mut consumed = BTreeMap::<usize, i64>::new();
+        let mut consumed = BTreeMap::<DamageUse, i64>::new();
         for (hit_index, hit) in hits.iter().enumerate() {
             let order_key = hit_index.to_string();
             let id = string(&hit["target"]);
@@ -105,10 +111,7 @@ impl Game {
             }
         }
         // A later hit may still need input; commit charges only after the whole batch is planned.
-        for (index, count) in consumed {
-            let uses = &mut self.state.continuous[index]["effect"]["uses"];
-            *uses = json!(int(uses).saturating_sub(count));
-        }
+        self.commit_damage_uses(&consumed)?;
         Self::damage_receipt(&actual, node["bind"].as_str(), frame);
         self.apply_damage(&actual, frame, None)
     }
@@ -193,12 +196,12 @@ impl Game {
         }
     }
 
-    pub(super) fn damage_replacements(
+    fn installed_damage_replacements(
         &self,
         hit: &Value,
-        consumed: &BTreeMap<usize, i64>,
+        consumed: &BTreeMap<DamageUse, i64>,
     ) -> Result<Vec<DamageReplacement>> {
-        let mut result = self
+        Ok(self
             .internal_prevention_references(hit)?
             .into_iter()
             .map(|reference| DamageReplacement {
@@ -212,9 +215,30 @@ impl Game {
                     .map(|_| (int(&reference["cap"][0]), int(&reference["cap"][1]))),
                 prevent: reference["prevent"] == true,
                 arithmetic: Arithmetic::Checked,
-                consumption: None,
+                consumption: reference["remaining"]
+                    .as_u64()
+                    .filter(|remaining| *remaining > 0)
+                    .and_then(|_| reference["reference"]["effect"].as_u64())
+                    .map(DamageUse::Installed),
             })
-            .collect::<Vec<_>>();
+            .filter(|replacement| match replacement.consumption {
+                Some(DamageUse::Installed(effect)) => self
+                    .internal_prevention_remaining(effect)
+                    .is_ok_and(|remaining| {
+                        u64::try_from(*consumed.get(&DamageUse::Installed(effect)).unwrap_or(&0))
+                            .is_ok_and(|used| remaining > used)
+                    }),
+                _ => true,
+            })
+            .collect::<Vec<_>>())
+    }
+
+    pub(super) fn damage_replacements(
+        &self,
+        hit: &Value,
+        consumed: &BTreeMap<DamageUse, i64>,
+    ) -> Result<Vec<DamageReplacement>> {
+        let mut result = self.installed_damage_replacements(hit, consumed)?;
         for source in self.ability_sources("damage replacement")? {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];
@@ -258,14 +282,17 @@ impl Game {
             }
             let mut effect = entry["effect"].clone();
             if let Some(uses) = effect.get_mut("uses") {
-                *uses = json!(int(uses).saturating_sub(*consumed.get(&index).unwrap_or(&0)));
+                *uses = json!(
+                    int(uses)
+                        .saturating_sub(*consumed.get(&DamageUse::Legacy(index)).unwrap_or(&0))
+                );
             }
             let frame: Frame = serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
             let reference = frame.reference.clone();
             if let Some(mut replacement) =
                 self.prepare_damage_replacement(&effect, hit, frame, &reference)?
             {
-                replacement.consumption = effect.get("uses").map(|_| index);
+                replacement.consumption = effect.get("uses").map(|_| DamageUse::Legacy(index));
                 result.push(replacement);
             }
         }
@@ -287,6 +314,52 @@ impl Game {
             ));
         }
         Ok(result.into_iter().filter(|entry| entry.active).collect())
+    }
+
+    pub(super) fn commit_damage_uses(&mut self, consumed: &BTreeMap<DamageUse, i64>) -> Result<()> {
+        enum Update {
+            Legacy(usize, i64),
+            Installed(u64, u64),
+        }
+        let plans = consumed
+            .iter()
+            .map(|(usage, count)| {
+                Ok(match usage {
+                    DamageUse::Legacy(index) => {
+                        let entry = self
+                            .state
+                            .continuous
+                            .get(*index)
+                            .ok_or_else(|| invalid("missing damage replacement"))?;
+                        Update::Legacy(*index, int(&entry["effect"]["uses"]).saturating_sub(*count))
+                    }
+                    DamageUse::Installed(effect) => {
+                        let count = u64::try_from(*count).map_err(invalid)?;
+                        let remaining = self
+                            .internal_prevention_remaining(*effect)?
+                            .checked_sub(count)
+                            .ok_or_else(|| invalid("damage prevention budget exhausted"))?;
+                        Update::Installed(*effect, remaining)
+                    }
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+        for plan in plans {
+            match plan {
+                Update::Legacy(index, remaining) => {
+                    let entry = self
+                        .state
+                        .continuous
+                        .get_mut(index)
+                        .ok_or_else(|| invalid("missing damage replacement"))?;
+                    entry["effect"]["uses"] = json!(remaining);
+                }
+                Update::Installed(effect, remaining) => {
+                    self.internal_prevention_set_remaining(effect, remaining)?;
+                }
+            }
+        }
+        Ok(())
     }
 
     fn prepare_damage_replacement(
@@ -358,7 +431,10 @@ fn reads_damage_amount(node: &Value) -> bool {
 }
 
 impl DamageReplacement {
-    pub(super) fn fold_order(mut amount: i64, mut ordered: Vec<Self>) -> Result<(i64, Vec<usize>)> {
+    pub(super) fn fold_order(
+        mut amount: i64,
+        mut ordered: Vec<Self>,
+    ) -> Result<(i64, Vec<DamageUse>)> {
         let mut uses = Vec::new();
         while amount > 0 {
             let Some(index) = ordered

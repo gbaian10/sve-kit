@@ -373,7 +373,8 @@ impl BodyContext<'_> {
                 return self.no_stand(installation, path);
             }
             ast::InstalledEffect::Cannot(ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_))
-            | ast::InstalledEffect::Prevent(_) => {
+            | ast::InstalledEffect::Prevent(_)
+            | ast::InstalledEffect::DamageMod(_) => {
                 return self.prevent_apply(installation, source, path);
             }
             ast::InstalledEffect::EvolveCostMod(_) => {

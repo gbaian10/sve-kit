@@ -1,7 +1,8 @@
 use super::{
-    AbilitySource, Bool, DamageKind, DamageRecipient, Duration, Effect, EventRewrite, Expr,
-    ObjectOperand, OncePerEvent, PlayerRef, PlayerSet, Predicate, ProposedEventPattern,
-    RecipientPredicate, ReplacementScope, Selector, SourcePredicate,
+    AbilitySource, Bool, Cardinality, DamageKind, DamageRecipient, Duration, Effect,
+    EffectReference, EventRewrite, Expr, Nat, ObjectOperand, OncePerEvent, PlayerRef,
+    PlayerRelation, PlayerSet, Predicate, ProposedEventPattern, RecipientPredicate,
+    ReplacementScope, Selector, SourcePredicate, TextQuantifier, UsageScope, UseLimit,
 };
 
 pub(crate) enum Recipients<'effect> {
@@ -17,6 +18,7 @@ pub(crate) struct Prevention<'effect> {
     pub condition: &'effect Expr<Bool>,
     pub rewrite: &'effect EventRewrite,
     pub duration: &'effect Duration,
+    pub usage: Option<&'effect UseLimit>,
 }
 
 fn recipient_filter(predicate: &RecipientPredicate) -> Option<Recipients<'_>> {
@@ -70,7 +72,7 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         scope: ReplacementScope::General,
         affected_player: PlayerRef::ProposedDamageRecipient {},
         once_per_event: OncePerEvent::Enforced,
-        usage: None,
+        usage,
         prospective_chars: None,
         duration,
         ..
@@ -78,6 +80,28 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
     else {
         return None;
     };
+    if let Some(usage) = usage
+        && (!matches!(
+            usage,
+            UseLimit {
+                count: Nat(1),
+                scope: UsageScope::SharedPlayer {
+                    player: PlayerRef::Controller {},
+                    effect: EffectReference::CurrentInstallation {}
+                }
+            }
+        ) || *kind != DamageKind::Any
+            || damage_source.is_some()
+            || !matches!(
+                rewrite,
+                EventRewrite::PreventDamage { .. }
+                    | EventRewrite::AddDamage {
+                        amount: Expr::Literal(super::Int(i64::MIN..=-1))
+                    }
+            ))
+    {
+        return None;
+    }
     let supported = matches!(
         rewrite,
         EventRewrite::PreventDamage {
@@ -110,5 +134,18 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         condition,
         rewrite,
         duration,
+        usage: usage.as_ref(),
     })
+}
+
+pub(crate) const fn own_leader() -> PlayerSet {
+    PlayerSet {
+        relation: PlayerRelation::SelfPlayer,
+        relative_to: PlayerRef::Controller {},
+        cardinality: Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(1)),
+        },
+        text_quantifier: TextQuantifier::One,
+    }
 }

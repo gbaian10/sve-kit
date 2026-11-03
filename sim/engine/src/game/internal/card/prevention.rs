@@ -1,9 +1,9 @@
 use super::super::grant::EffectiveAbility;
-use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id};
+use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::ir::ObjectRelation;
-use crate::ir::prevention::{Prevention, Recipients, projection};
+use crate::ir::prevention::{Prevention, Recipients, own_leader, projection};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
@@ -50,13 +50,35 @@ impl Kind {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+enum Targets {
+    Objects(Vec<Member>),
+    Leaders(Vec<String>),
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+enum Rewrite {
+    Prevent,
+    Add(i64),
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct Label {
+    card: String,
+    name: String,
+    line: Option<u64>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct PreventionState {
     effect: u64,
     execution: u64,
-    recipients: Option<Vec<Member>>,
+    recipients: Option<Targets>,
     sources: Option<Vec<Member>>,
     kind: Kind,
     end: EffectEnd,
+    remaining: Option<u64>,
+    rewrite: Rewrite,
+    label: Label,
 }
 
 pub(super) fn is_static(ability: &Ability) -> bool {
@@ -95,6 +117,19 @@ fn check_equipment(shape: &Prevention<'_>) -> Result<()> {
     Ok(())
 }
 
+fn check_static_source(shape: &Prevention<'_>, origin: &AbilitySource) -> Result<()> {
+    if shape.source != origin
+        || shape.duration.end != (DurationEnd::NoTemporalExpiry {})
+        || shape.duration.anchor != (TimeAnchor::Installation {})
+        || shape.duration.usage.is_some()
+        || shape.usage.is_some()
+        || !shape.duration.intervals.is_empty()
+    {
+        return Err(unsupported("static damage prevention lifetime"));
+    }
+    Ok(())
+}
+
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     let ability = &located.node;
     if !is_static(ability)
@@ -114,14 +149,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     }
     for effect in &ability.declarations {
         let shape = projection(effect).ok_or_else(|| unsupported("static damage prevention"))?;
-        if shape.source != &ability.source
-            || shape.duration.end != (DurationEnd::NoTemporalExpiry {})
-            || shape.duration.anchor != (TimeAnchor::Installation {})
-            || shape.duration.usage.is_some()
-            || !shape.duration.intervals.is_empty()
-        {
-            return Err(unsupported("static damage prevention lifetime"));
-        }
+        check_static_source(&shape, &ability.source)?;
         let equipment = ability.active_zones == [ZoneKind::Equipment];
         if equipment {
             check_equipment(&shape)?;
@@ -205,7 +233,7 @@ pub(in crate::game::internal) fn check_install(
     origin: &AbilitySource,
 ) -> Result<()> {
     let Action::InstallEffect {
-        subjects: InstallationSubjects::Objects { affected, .. },
+        subjects,
         capture: InstallationTime::InstructionStart,
         effect,
         duration,
@@ -214,15 +242,35 @@ pub(in crate::game::internal) fn check_install(
         return Err(unsupported("damage prevention installation"));
     };
     let shape = projection(effect).ok_or_else(|| unsupported("damage prevention shape"))?;
-    if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) {
+    if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) && shape.usage.is_none() {
         return Err(unsupported("installed numeric damage replacement"));
     }
-    let targets = Selector::Bound {
-        reference: *affected,
-    };
-    let captured = match (shape.recipients, shape.damage_source) {
-        (Some(Recipients::Objects(objects)), None) | (None, Some(objects)) => *objects == targets,
-        _ => false,
+    let captured = match subjects {
+        InstallationSubjects::Objects { objects, affected } => {
+            if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) {
+                return Err(unsupported("object damage prevention rewrite"));
+            }
+            if shape.usage.is_some()
+                && !matches!(objects, Selector::Objects { objects } if objects.len() == 1)
+            {
+                return Err(unsupported("one next-damage recipient"));
+            }
+            let targets = Selector::Bound {
+                reference: *affected,
+            };
+            match (shape.recipients, shape.damage_source) {
+                (Some(Recipients::Objects(filter)), None) | (None, Some(filter)) => {
+                    *filter == targets
+                }
+                _ => false,
+            }
+        }
+        InstallationSubjects::Players { players, .. } => {
+            shape.usage.is_some()
+                && *players == own_leader()
+                && matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
+                && shape.damage_source.is_none()
+        }
     };
     if !captured
         || shape.source != origin
@@ -238,6 +286,7 @@ pub(in crate::game::internal) fn check_install(
                 | DurationEnd::EndResolution {}
                 | DurationEnd::NoTemporalExpiry {}
         )
+        || (shape.usage.is_some() && duration.end != (DurationEnd::CurrentTurnEnd {}))
     {
         return Err(unsupported(
             "installed damage prevention capture or lifetime",
@@ -295,11 +344,7 @@ impl Game {
     ) -> Result<()> {
         check_install(&instruction.action, &instruction.source)?;
         let Action::InstallEffect {
-            subjects:
-                InstallationSubjects::Objects {
-                    objects: subjects,
-                    affected,
-                },
+            subjects,
             effect: definition,
             duration,
             ..
@@ -307,27 +352,47 @@ impl Game {
         else {
             return Err(unsupported("damage prevention subjects"));
         };
-        let members = execution.objects(self, subjects)?;
-        execution.slots.insert(
-            affected.key(),
-            Slot::Objects {
-                members: members.clone(),
-                on_field_at_capture: true,
-            },
-        );
         let shape =
             projection(definition).ok_or_else(|| unsupported("damage prevention effect"))?;
-        let captured = frozen(execution, self, &members)?;
-        let recipients = match shape.recipients {
-            None => None,
-            Some(Recipients::Objects(_)) => Some(captured.clone()),
-            Some(Recipients::Leaders(_)) => {
-                return Err(unsupported("installed prevention recipient"));
+        let (members, recipients, sources, present) = match subjects {
+            InstallationSubjects::Objects { objects, affected } => {
+                let members = execution.objects(self, objects)?;
+                let captured = frozen(execution, self, &members)?;
+                execution.slots.insert(
+                    affected.key(),
+                    Slot::Objects {
+                        members: members.clone(),
+                        on_field_at_capture: true,
+                    },
+                );
+                let recipients = shape
+                    .recipients
+                    .as_ref()
+                    .map(|_| Targets::Objects(captured.clone()));
+                let sources = shape.damage_source.map(|_| captured);
+                let present = !members.is_empty();
+                (members, recipients, sources, present)
+            }
+            InstallationSubjects::Players { players, .. } => {
+                let players = execution
+                    .players(self, players)?
+                    .into_iter()
+                    .map(|player| Ok(format!("{}.leader", seat_name(player)?)))
+                    .collect::<Result<Vec<_>>>()?;
+                let present = !players.is_empty();
+                (vec![], Some(Targets::Leaders(players)), None, present)
             }
         };
-        let sources = shape.damage_source.map(|_| captured);
-        if !members.is_empty() {
+        if present {
             let end = EffectEnd::at(self, execution, &duration.end)?;
+            let label = self.prevention_label(execution)?;
+            let rewrite = match shape.rewrite {
+                EventRewrite::PreventDamage { .. } => Rewrite::Prevent,
+                EventRewrite::AddDamage {
+                    amount: Expr::Literal(amount),
+                } => Rewrite::Add(amount.0),
+                _ => return Err(unsupported("installed prevention rewrite")),
+            };
             let effect = self.state.next_ir_effect;
             self.state.next_ir_effect = effect
                 .checked_add(1)
@@ -339,11 +404,70 @@ impl Game {
                 sources,
                 kind: shape.kind.into(),
                 end,
+                remaining: shape.usage.map(|usage| usage.count.0),
+                rewrite,
+                label,
             });
         }
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Installed(members));
+        Ok(())
+    }
+
+    fn prevention_label(&self, execution: &Execution) -> Result<Label> {
+        if execution.ability.is_some() {
+            let provider = self.installed_effect_provider(execution)?;
+            let ordinal =
+                self.printed_face_ordinal(&provider.card, &FaceId(provider.span.face.clone()))?;
+            let name = self.catalog.face(&provider.card, ordinal)?["name"]
+                .as_str()
+                .ok_or_else(|| crate::invalid("effect provider name"))?
+                .to_owned();
+            return Ok(Label {
+                card: provider.card,
+                name,
+                line: Some(u64::from(provider.span.line)),
+            });
+        }
+        // Fragment producers have no printed ability proof; only retain an existing public face.
+        let object = self
+            .state
+            .objects
+            .get(&execution.context.source)
+            .ok_or_else(|| unsupported("public prevention provider is unavailable"))?;
+        let name = self.face(&object.id)?["name"]
+            .as_str()
+            .ok_or_else(|| crate::invalid("fragment source name"))?
+            .to_owned();
+        Ok(Label {
+            card: object.card.clone(),
+            name,
+            line: None,
+        })
+    }
+
+    pub(in crate::game) fn internal_prevention_remaining(&self, effect: u64) -> Result<u64> {
+        self.state
+            .ir_preventions
+            .iter()
+            .find(|state| state.effect == effect)
+            .and_then(|state| state.remaining)
+            .ok_or_else(|| crate::invalid("missing limited damage prevention"))
+    }
+
+    pub(in crate::game) fn internal_prevention_set_remaining(
+        &mut self,
+        effect: u64,
+        remaining: u64,
+    ) -> Result<()> {
+        let state = self
+            .state
+            .ir_preventions
+            .iter_mut()
+            .find(|state| state.effect == effect)
+            .ok_or_else(|| crate::invalid("missing limited damage prevention"))?;
+        state.remaining = Some(remaining);
         Ok(())
     }
 
@@ -360,12 +484,16 @@ impl Game {
         let generation = hit["source_generation"].as_u64();
         let mut references = Vec::new();
         for effect in &self.state.ir_preventions {
-            if !effect.kind.matches(hit) || effect.end.source_expired(self) {
+            if effect.remaining == Some(0)
+                || !effect.kind.matches(hit)
+                || effect.end.source_expired(self)
+            {
                 continue;
             }
             let target_matches = match &effect.recipients {
                 None => true,
-                Some(objects) => {
+                Some(Targets::Leaders(players)) => players.iter().any(|player| player == target),
+                Some(Targets::Objects(objects)) => {
                     if target.ends_with(".leader") {
                         false
                     } else {
@@ -388,7 +516,15 @@ impl Game {
                 Some(_) => false,
             };
             if target_matches && source_matches {
-                references.push(json!({"reference":{"kind":"ir-damage-prevention", "effect":effect.effect},"prevent":true}));
+                let mut reference = json!({"reference":{"kind":"ir-damage-prevention", "effect":effect.effect},"remaining":effect.remaining});
+                match effect.rewrite {
+                    Rewrite::Prevent => reference["prevent"] = json!(true),
+                    Rewrite::Add(amount) => reference["delta"] = json!(amount),
+                }
+                reference["reference"]["card"] = json!(effect.label.card);
+                reference["reference"]["name"] = json!(effect.label.name);
+                reference["reference"]["line"] = json!(effect.label.line);
+                references.push(reference);
             }
         }
         self.static_prevention_references(hit, &mut references)?;
@@ -583,6 +719,12 @@ pub(in crate::game::internal) fn requirement(
             | "shape.DamageRecipient.Bound"
             | "shape.EventRewrite.PreventDamage"
             | "replacement.damage.prevent"
+            | "shape.EventRewrite.AddDamage"
+            | "replacement.damage.add"
+            | "shape.UseLimit"
+            | "shape.UsageScope.SharedPlayer"
+            | "usage.shared-player"
+            | "shape.EffectReference.CurrentInstallation"
             | "internal.ReplacementScope.General"
             | "internal.OncePerEvent.Enforced"
             | "internal.DamageKind.Any"

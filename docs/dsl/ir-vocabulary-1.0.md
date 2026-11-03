@@ -582,6 +582,17 @@ CR 10.9.1.1–.4：基礎資訊→能力有效性→非數值→數值；Add／S
 
 `UsageScope = PerObject(ObjectRef) | SharedPlayer(PlayerRef,EffectInstanceId)`；player_effect 的 cost_mod.next_only 使用 SharedPlayer，一個 UsageId 控制整批 when_playing.in 的成功 after refs。apply 各物件安裝則各 PerObject；預覽不消耗、適正 play 提交消耗，付款失敗交易回復。BP14-046 依日文語法與 CP04-003 同句型推論（無直接 Q&A），標 `strength: inferred`；使用共享一次，期間內第一張符合即耗盡；後續卡回正常成本。領域追蹤仍只容許 R.follow-move／RuleCarry 的既定路徑。
 
+安裝的「下一次傷害」取代效果使用 `Replacement.usage`，不使用 `Duration.usage`。
+目前限單一物件或自己的領袖、`CurrentTurnEnd`，額度為
+`SharedPlayer(Controller, CurrentInstallation)` 的一次；每次安裝各有一份額度。
+只有實際套用於正值傷害才消耗：傷害本來為 0，或已被其他取代效果減至 0 時不消耗；
+本效果把正值減至 0 時仍消耗。多個候選由受影響玩家透過既有傷害取代選序決定，
+即使最終傷害相同，仍須保留對剩餘額度的影響。
+預覽與回答驗證不消耗，整批傷害計畫完成後才提交；取消或後續指令失敗時交易回復。
+額度與安裝時接受者、物件世代及期限綁定，來源離場不移除已安裝效果。
+依據為 CR 10.10.2 的取代選序、Q1405／Q2676／Q2290 的零傷害、
+Q2701 的兩次防止與 Q2779 的兩次減傷；非傷害生命設定依 Q1406／Q2675。
+
 ## 內部執行契約的補充
 
 常見觸發的限定事件、pending 選序、限次及來源資訊 producer 依
