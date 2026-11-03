@@ -6,7 +6,7 @@ import pytest
 
 from sve_carddb.core.json import integer, object_value, parse
 
-from ..support.sharding import parse_shard, shard_of
+from ..support.sharding import parse_shard
 
 pytest_plugins = ("pytester",)
 
@@ -15,14 +15,19 @@ CASES = 60
 
 
 def run_shard(
-    pytester: pytest.Pytester, index: int, report: Path
+    pytester: pytest.Pytester, index: int, report: Path, distribution: str
 ) -> tuple[set[str], dict[str, int]]:
-    events = pytester.path / f"events-{index}.txt"
+    events = pytester.path / "events.txt"
+    events.unlink(missing_ok=True)
     pytester.makeconftest(f"""
         from pathlib import Path
 
+        def pytest_configure(config):
+            global is_worker
+            is_worker = hasattr(config, "workerinput")
+
         def pytest_runtest_logreport(report):
-            if report.when == "call":
+            if report.when == "call" and not is_worker:
                 with Path({str(events)!r}).open("a") as stream:
                     stream.write(report.nodeid + "\\n")
     """)
@@ -31,6 +36,9 @@ def run_shard(
         "xdist.plugin",
         "-p",
         "tests.support.sharding",
+        "-p",
+        "tests.support.scheduling",
+        f"--dist={distribution}",
         "-n",
         "2",
         "-q",
@@ -38,17 +46,21 @@ def run_shard(
         f"--shard-report={report}",
     )
     counts = object_value(parse(report.read_bytes()))
-    ran = set(events.read_text().splitlines()) if events.exists() else set()
+    reported = events.read_text().splitlines() if events.exists() else []
+    ran = set(reported)
+    assert len(reported) == len(ran)
     result.assert_outcomes(passed=len(ran))
     return ran, {key: integer(value) for key, value in counts.items()}
 
 
-def test_shards_are_disjoint_and_complete(
-    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch
+@pytest.mark.parametrize("distribution", ["load", "loadgroup"])
+def test_shards_are_disjoint_complete_and_stable(
+    pytester: pytest.Pytester, monkeypatch: pytest.MonkeyPatch, distribution: str
 ) -> None:
     monkeypatch.setenv("PYTHONPATH", str(Path(__file__).resolve().parents[2]))
     monkeypatch.setenv("PYTEST_DISABLE_PLUGIN_AUTOLOAD", "1")
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+    monkeypatch.setenv("PYTHONHASHSEED", "1")
     pytester.makeini("[pytest]\naddopts=\n")
     pytester.makepyfile(
         test_alpha=f"""
@@ -61,8 +73,13 @@ def test_shards_are_disjoint_and_complete(
         test_beta="def test_single():\n    pass\n",
     )
     union: set[str] = set()
+    first: set[str] = set()
     for index in range(1, SHARDS + 1):
-        ran, counts = run_shard(pytester, index, pytester.path / f"shard-{index}.json")
+        ran, counts = run_shard(
+            pytester, index, pytester.path / f"shard-{index}.json", distribution
+        )
+        if index == 1:
+            first = ran
         assert not union & ran
         union |= ran
         assert counts == {
@@ -72,13 +89,12 @@ def test_shards_are_disjoint_and_complete(
             "selected": len(ran),
         }
     assert len(union) == CASES + 1
+    monkeypatch.setenv("PYTHONHASHSEED", "2")
+    repeated, _ = run_shard(pytester, 1, pytester.path / "repeat.json", distribution)
+    assert repeated == first
 
 
-def test_assignment_is_stable_and_validated() -> None:
-    # Fixed values guard against switching to Python's per-process salted hash.
-    assert shard_of("tests/test_alpha.py::test_case[0]", SHARDS) == 2
-    assert shard_of("tests/test_alpha.py::test_case[1]", 7) == 1
-    assert {shard_of(f"t::{n}", SHARDS) for n in range(50)} == {1, 2, 3}
+def test_shard_arguments_are_validated() -> None:
     assert parse_shard("2/3") == (2, 3)
     for value in ("0/3", "4/3", "1/0", "a/3", "1/3/1"):
         with pytest.raises(pytest.UsageError):

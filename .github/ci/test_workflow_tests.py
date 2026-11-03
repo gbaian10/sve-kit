@@ -3,6 +3,7 @@
 
 import contextlib
 import io
+import json
 import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- executes the real workflow with synthetic tools
@@ -15,7 +16,6 @@ from typing import cast
 import yaml
 
 from hooks import ROOT, main, owners
-from test_summary import coverage_scope
 
 # Jobs that run a component's tests, and the jobs that gate the shards' merged coverage.
 TEST_JOBS = ("python-tests", "rust-tests", "web")
@@ -345,7 +345,6 @@ class ShardTests(unittest.TestCase):
     def test_every_shard_job_reaches_its_coverage_gate_and_ci_ok(self) -> None:
         """Shards are 1..N, feed one coverage job, and every job counts for its component."""
         jobs = self.workflow()
-        script = str(cast("list[dict[str, object]]", jobs["ci-ok"]["steps"])[0]["run"])
         for tests, coverage, component in (
             ("python-tests", "python-coverage", "python"),
             ("rust-tests", "rust-coverage", "rust"),
@@ -359,26 +358,92 @@ class ShardTests(unittest.TestCase):
                 assert jobs[job]["if"] == (
                     f"${{{{ needs.changes.outputs.{component} == 'true' }}}}"
                 )
-                assert f'"{job}":"{component}"' in script
 
-    def test_full_gates_are_unchanged(self) -> None:
-        """Shards only skip the per-shard check; the merged data keeps the 90% gates."""
+    def test_ci_ok_rejects_failed_cancelled_or_missing_required_shards(self) -> None:
+        """Run the real gate: every new required job must succeed; unchanged components may skip."""
         jobs = self.workflow()
-        assert coverage_scope("python") == ("full", 90)
-        assert coverage_scope("rust") == ("full", 90)
-        steps = {
-            job: {
-                str(step.get("id")): str(step.get("run", ""))
-                for step in cast("list[dict[str, object]]", jobs[job]["steps"])
+        script = str(cast("list[dict[str, object]]", jobs["ci-ok"]["steps"])[0]["run"])
+        for component in ("python", "rust"):
+            for state in ("success", "failure", "cancelled", "skipped"):
+                for job in (f"{component}-tests", f"{component}-coverage"):
+                    with self.subTest(job=job, state=state):
+                        needs: dict[str, dict[str, object]] = {
+                            name: {"result": state if name == job else "success"}
+                            for name in cast("list[str]", jobs["ci-ok"]["needs"])
+                        }
+                        needs["changes"]["outputs"] = {
+                            "python": "true",
+                            "rust": "true",
+                        }
+                        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- actual gate with synthetic job results
+                            [shutil.which("bash") or "bash", "-eu", "-c", script],
+                            env={**os.environ, "NEEDS": json.dumps(needs)},
+                            capture_output=True,
+                            check=False,
+                        )
+                        assert (result.returncode == 0) == (state == "success")
+            needs = {
+                name: {"result": "skipped" if name.startswith(component) else "success"}
+                for name in cast("list[str]", jobs["ci-ok"]["needs"])
             }
-            for job in (*TEST_JOBS, *COVERAGE_JOBS)
-        }
-        assert "--fail-under=90" in steps["python-coverage"]["coverage"]
-        assert "rust_coverage.py" in steps["rust-coverage"]["coverage"]
-        assert "--cov-fail-under=0 --shard=" in steps["python-tests"]["tests"]
-        # The shards run the same complete workspace as the local cargo-test hook.
-        assert "--shard=" in steps["rust-tests"]["tests"]
-        assert "--test " not in steps["rust-tests"]["tests"]
+            needs["changes"]["outputs"] = {component: "false"}
+            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- actual gate with an unchanged component
+                [shutil.which("bash") or "bash", "-eu", "-c", script],
+                env={**os.environ, "NEEDS": json.dumps(needs)},
+                capture_output=True,
+                check=False,
+            )
+            assert result.returncode == 0
+
+    def test_coverage_steps_apply_gates_and_preserve_failure(self) -> None:
+        """The real shell steps invoke the coverage gates and propagate their failure."""
+        jobs = self.workflow()
+        for job, executable in (
+            ("python-coverage", "uv"),
+            ("rust-coverage", "python3"),
+        ):
+            with self.subTest(job=job), tempfile.TemporaryDirectory() as folder:
+                failure_status = 7
+                root = Path(folder)
+                script = str(
+                    next(
+                        step["run"]
+                        for step in cast("list[dict[str, object]]", jobs[job]["steps"])
+                        if step.get("id") == "coverage"
+                    )
+                )
+                tool = root / "bin" / executable
+                tool.parent.mkdir()
+                tool.write_text(
+                    '#!/bin/bash\nprintf "%s\\n" "$@" >> "$ARGV_FILE"\n'
+                    'for argument in "$@"; do\n'
+                    f'  if [[ "$argument" == report || "$argument" == *.py ]]; then exit {failure_status}; fi\n'
+                    "done\n",
+                    encoding="utf-8",
+                )
+                tool.chmod(0o700)
+                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- actual coverage step with a failing external tool
+                    [shutil.which("bash") or "bash", "-eu", "-c", script],
+                    cwd=root,
+                    env={
+                        **os.environ,
+                        "PATH": f"{tool.parent}{os.pathsep}{os.environ['PATH']}",
+                        "DATA_DIR": str(root / "coverage"),
+                        "ARGV_FILE": str(root / "argv"),
+                    },
+                    capture_output=True,
+                    check=False,
+                )
+                assert result.returncode == failure_status
+                arguments = (root / "argv").read_text().splitlines()
+                if job == "python-coverage":
+                    assert "combine" in arguments
+                    assert "--fail-under=90" in arguments
+                else:
+                    assert arguments == [
+                        ".github/ci/rust_coverage.py",
+                        str(root / "coverage"),
+                    ]
 
     def test_successful_shards_hand_over_coverage_only(self) -> None:
         """Run each real test step with a passing fake tool: only coverage data and counts are kept."""
@@ -407,7 +472,7 @@ class ShardTests(unittest.TestCase):
                 tool = root / "bin" / executable
                 tool.parent.mkdir()
                 tool.write_text(
-                    f'#!/bin/bash\necho "$PRIVATE"\n{outputs}\n'
+                    f'#!/bin/bash\nprintf "%s\\n" "$@" > "$ARGV_FILE"\necho "$PRIVATE"\n{outputs}\n'
                     'echo \'{"selected": 1}\' > "$REPORT_DIR/shard.json"\n',
                     encoding="utf-8",
                 )
@@ -424,12 +489,17 @@ class ShardTests(unittest.TestCase):
                         "SHARD": "2/3",
                         "PYTEST_WORKERS": "4",
                         "PRIVATE": "synthetic_private_diagnostic",
+                        "ARGV_FILE": str(root / "argv"),
                     },
                     capture_output=True,
                     text=True,
                     check=False,
                 )
                 assert result.returncode == 0, result.stderr
+                arguments = (root / "argv").read_text().splitlines()
+                assert "--shard=2/3" in arguments
+                if job == "python-tests":
+                    assert "--cov-fail-under=0" in arguments
                 kept = sorted(
                     path.relative_to(root / "coverage").as_posix()
                     for path in (root / "coverage").rglob("*")

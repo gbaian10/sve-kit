@@ -39,13 +39,20 @@ NAMES = [
 class FakeTools:
     """Record every tool call; the generator writes both inputs when waited for."""
 
-    def __init__(self, *, generation_status: int = 0, test_status: int = 0) -> None:
+    def __init__(
+        self,
+        *,
+        generation_status: int = 0,
+        test_status: int = 0,
+        listing: str = LISTING,
+    ) -> None:
         self.generated: list[Path] = []
         self.packaged: list[Path] = []
         self.cargo: list[list[str]] = []
         self.environments: list[dict[str, str] | None] = []
         self.generation_status = generation_status
         self.test_status = test_status
+        self.listing = listing
 
     def popen(self, argv: list[str], **_: object) -> subprocess.Popen[bytes]:
         """Start a fake generator that writes its two outputs on wait."""
@@ -77,7 +84,7 @@ class FakeTools:
         environment = kwargs.get("env")
         self.environments.append(environment)  # type: ignore[arg-type]
         if "--list" in arguments:
-            return subprocess.CompletedProcess(argv, 0, stdout=LISTING)
+            return subprocess.CompletedProcess(argv, 0, stdout=self.listing)
         if "report" in arguments:
             assert kwargs["stderr"] == subprocess.PIPE
             summary = Path(arguments[arguments.index("--output-path") + 1])
@@ -129,9 +136,14 @@ class RustTests(unittest.TestCase):
         ):
             tools = FakeTools(test_status=7)
             assert run(arguments, tools) == 7
-            assert tools.cargo == [arguments or rust_tests.DEFAULT]
-            assert "--test" not in tools.cargo[0]
-            assert "--workspace" in tools.cargo[0]
+            command = next(call for call in tools.cargo if "--workspace" in call)
+            if arguments:
+                assert command == arguments
+            else:
+                assert command[0] == "llvm-cov"
+                assert "--locked" in command
+                assert command[command.index("--fail-under-lines") + 1] == "90"
+                assert "--test" not in command
             assert not any(path.exists() for path in tools.generated)
 
     def test_failed_generation_never_runs_cargo(self) -> None:
@@ -145,28 +157,26 @@ class RustTests(unittest.TestCase):
         """Shards run disjoint name sets that together cover the whole listing."""
         with tempfile.TemporaryDirectory() as temporary:
             union: list[str] = []
+            previous: set[str] = set()
             for index in (1, 2, 3):
                 report = Path(temporary) / f"shard-{index}"
                 tools = FakeTools()
                 assert (
                     run([f"--shard={index}/3", f"--shard-report={report}"], tools) == 0
                 )
-                clean, listing, tests, export = tools.cargo
-                assert clean == ["llvm-cov", "clean", "--workspace"]
-                assert listing[-3:] == ["--", "--list", "--format=terse"]
-                assert tests[: tests.index("--")] == [
-                    "llvm-cov",
-                    "--no-report",
-                    *rust_tests.SHARD_SCOPE,
-                ]
-                assert "--workspace" in rust_tests.SHARD_SCOPE
-                assert "--test" not in tests
-                assert tests[tests.index("--") + 1] == "--exact"
+                listing = next(call for call in tools.cargo if "--list" in call)
+                tests = next(call for call in tools.cargo if "--exact" in call)
+                for command in (listing, tests):
+                    assert command[0] == "llvm-cov"
+                    assert "--workspace" in command
+                    assert "--locked" in command
+                    assert "--test" not in command
+                assert "--exact" in tests[tests.index("--") + 1 :]
                 selected = tests[tests.index("--exact") + 1 :]
-                assert all(rust_tests.shard_of(name, 3) == index for name in selected)
+                assert selected
+                assert not previous.intersection(selected)
+                previous.update(selected)
                 union.extend(selected)
-                assert export[:4] == ["llvm-cov", "report", "--json", "--summary-only"]
-                assert export[-1] == "-vv"
                 assert tools.packaged == [report / "coverage"]
                 assert json.loads((report / "shard.json").read_text()) == {
                     "index": index,
@@ -189,14 +199,10 @@ class RustTests(unittest.TestCase):
         """Without a filter libtest runs every test, so an empty slice is an error."""
         with tempfile.TemporaryDirectory() as temporary:
             report = Path(temporary) / "report"
-            tools = FakeTools()
-            names = {rust_tests.shard_of(name, 50) for name in NAMES}
-            empty = next(index for index in range(1, 51) if index not in names)
+            tools = FakeTools(listing="0 tests, 0 benchmarks\n")
             with contextlib.redirect_stderr(io.StringIO()):
-                assert (
-                    run([f"--shard={empty}/50", f"--shard-report={report}"], tools) == 1
-                )
-            assert len(tools.cargo) == 2
+                assert run(["--shard=1/3", f"--shard-report={report}"], tools) == 1
+            assert not any("--exact" in call for call in tools.cargo)
             assert not report.exists()
 
     def test_invalid_shard_arguments(self) -> None:
