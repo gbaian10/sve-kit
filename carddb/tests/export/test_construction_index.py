@@ -612,13 +612,21 @@ def test_command_replaces_output_symlinks_without_modifying_targets(
     assert not (out / "jp.json").is_symlink()
 
 
-def test_command_refuses_a_linked_construction_directory(tmp_path: Path) -> None:
+@pytest.mark.parametrize("level", ["construction", "manifest"])
+def test_command_refuses_a_linked_construction_directory(
+    tmp_path: Path, level: str
+) -> None:
     snapshot = construction_snapshot()
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
-    (roots.preview / "construction").symlink_to(elsewhere)
+    destination = roots.preview / "construction"
+    if level == "manifest":
+        destination.mkdir()
+        manifest = string(load_export(roots.preview).entry["manifest_sha256"])
+        destination /= manifest.removeprefix("sha256:")
+    destination.symlink_to(elsewhere)
     assert _command(roots.preview).exit_code != 0
     assert list(elsewhere.iterdir()) == []
 
@@ -670,32 +678,36 @@ def _official_pool(region: str) -> Pool:
     return pool
 
 
-@pytest.mark.parametrize(
-    ("region", "suffix", "onion"),
-    [("jp", "", "BP09-049"), ("en", "EN", "BP09-058EN")],
-)
+@pytest.fixture(scope="session")
+def official_construction_indexes() -> dict[str, JsonValue]:
+    return {region: _official_pool(region).build() for region in ("jp", "en")}
+
+
 def test_official_card_text_yields_the_known_construction_rules(
-    region: str, suffix: str, onion: str
+    official_construction_indexes: dict[str, JsonValue],
 ) -> None:
-    index = _official_pool(region).build()
-    cards = cards_by_id(index)
-    ids = list(cards)
-    copies = {
-        (ids[integer(row[0])], row[1], row[2])
-        for row in map(array, array(get(index, "copies")))
-    }
-    assert {
-        (onion, "main", 50),
-        (f"BP11-045{suffix}", "main", 6),
-        (f"CP01-085{suffix}", "evolve", 10),
-        (f"CP03-127{suffix}", "evolve", 10),
-        (f"ECP01-058{suffix}", "evolve", 10),
-    } <= copies
-    # New card text that changes construction must be reviewed here: today two main-deck names
-    # and seven evolve-deck names carry such a rule in each region.
-    assert len({(cards[card]["name"], section) for card, section, _ in copies}) == 9
-    singletons = [array(row) for row in array(get(index, "singleton_except"))]
-    holders = {ids[integer(row[0])] for row in singletons}
-    assert f"BP19-110{suffix}" in holders
-    cutthroat = cards[f"BP19-110{suffix}"]["name"]
-    assert all(row[1] == [cutthroat] for row in singletons)
+    for region, suffix, onion in (("jp", "", "BP09-049"), ("en", "EN", "BP09-058EN")):
+        index = official_construction_indexes[region]
+        cards = cards_by_id(index)
+        ids = list(cards)
+        copies = {
+            (ids[integer(row[0])], row[1], row[2])
+            for row in map(array, array(get(index, "copies")))
+        }
+        assert {
+            (onion, "main", 50),
+            (f"BP11-045{suffix}", "main", 6),
+            (f"CP01-085{suffix}", "evolve", 10),
+            (f"CP03-127{suffix}", "evolve", 10),
+            (f"ECP01-058{suffix}", "evolve", 10),
+        } <= copies, region
+        # New construction wording needs review: each region has two main-deck names
+        # and seven evolve-deck names with copy rules.
+        assert (
+            len({(cards[card]["name"], section) for card, section, _ in copies}) == 9
+        ), region
+        singletons = [array(row) for row in array(get(index, "singleton_except"))]
+        holders = {ids[integer(row[0])] for row in singletons}
+        assert f"BP19-110{suffix}" in holders, region
+        cutthroat = cards[f"BP19-110{suffix}"]["name"]
+        assert all(row[1] == [cutthroat] for row in singletons), region
