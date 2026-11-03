@@ -2,7 +2,7 @@
 
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed local Git argv records provenance without author pins
 from contextlib import contextmanager
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from shutil import which
 from typing import TYPE_CHECKING, Literal
@@ -94,21 +94,6 @@ class Workspace:
     current: CurrentAuthorSources
     expander: AuthorExpander
     authored: Path
-    # Shared by dataclasses.replace copies, so entries are keyed by their checkout.
-    loaded: dict[Path, AuthorInputSet] = field(
-        default_factory=dict, repr=False, compare=False
-    )
-
-    def author_set(self) -> AuthorInputSet:
-        """Read each stored inventory once per command; callers supply a stable checkout."""
-        key = self.authored.resolve()
-        if key not in self.loaded:
-            self.loaded[key] = load_author_set(self.authored, self.expander.schemas)
-        return self.loaded[key]
-
-    def forget_author_set(self, root: Path) -> None:
-        """A write changed this checkout, so later readers load it again."""
-        self.loaded.pop(root.resolve(), None)
 
 
 def _configuration(inputs: Inputs) -> None:
@@ -137,8 +122,9 @@ def _configuration(inputs: Inputs) -> None:
         )
 
 
-def author_numbers(inputs: AuthorInputSet) -> frozenset[str]:
+def author_numbers(authored: Path, expander: AuthorExpander) -> frozenset[str]:
     """Include all indexed authors when preparing a whole-set check."""
+    inputs = load_author_set(authored, expander.schemas)
     return frozenset(record.record_key for record in inputs.index.records)
 
 
@@ -328,10 +314,9 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
     )
     from sve_carddb.domains.effects.author_handwritten import read as read_handwritten  # ruff: ignore[import-outside-top-level] -- only public profile needs to discover shorthand card identities
 
-    stored = load_author_set(authored, expander.schemas)
     numbers = (
         cards
-        | author_numbers(stored)
+        | author_numbers(authored, expander)
         | (
             frozenset(read_handwritten(main, None).cards)
             if main is not None
@@ -413,7 +398,6 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             ),
             expander,
             authored,
-            {authored.resolve(): stored},
         )
 
 
@@ -433,7 +417,7 @@ def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
         for field in payload.fields
     ]
     candidates = positions(payload, current.classifier)
-    inputs = workspace.author_set()
+    inputs = load_author_set(workspace.authored, workspace.expander.schemas)
     stored_inputs = inputs
     inputs, failures = current.resolve_inputs(inputs, workspace.expander)
     uses: list[JsonValue] = []
@@ -529,7 +513,7 @@ def check(
     compare_public: Inputs | None = None,
 ) -> dict[str, JsonValue]:
     """Check every authored card and full inventory, independently of display filters."""
-    inputs = workspace.author_set()
+    inputs = load_author_set(workspace.authored, workspace.expander.schemas)
     results = workspace.current.validate_inputs(inputs, workspace.expander)
     rejected = [
         result

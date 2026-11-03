@@ -159,3 +159,14 @@ def test_first_partial_write_invalidates_inputs(
     assert (workspace.authored / error.value.failed).stat().st_size == 1
     with pytest.raises(AuthorInputError):
         authoring.check(workspace)
+
+
+def test_check_reads_files_added_after_an_earlier_check(
+    workspace: authoring.Workspace,
+) -> None:
+    assert authoring.check(workspace)["status"] == "ok"
+    stray = workspace.authored / "rules/author-effects/FIX/001.yaml"
+    stray.parent.mkdir(parents=True)
+    stray.write_bytes(b"{}")
+    with pytest.raises(AuthorInputError):
+        authoring.check(workspace)
