@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-079:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          do:
+            - create:
+                token: 毒蛇
+                to: field
+                n: 1
+      - line: 2
+        activate:
+          quick: true
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel:
+                    who: self
+                    zone: field
+                    kind: follower
+                    name: 毒蛇
+                  n: 2
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy: enemy
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP04-T01

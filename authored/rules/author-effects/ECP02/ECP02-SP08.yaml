@@ -1,0 +1,77 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-SP08:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n: 7
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: cemetery
+                            trait: キュート
+                        op: ge
+                        right: 3
+                    - cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: cemetery
+                            trait: クール
+                        op: ge
+                        right: 3
+                    - cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: cemetery
+                            trait: パッション
+                        op: ge
+                        right: 3
+                then:
+                  - grant:
+                      "on": this
+                      keywords:
+                        - storm
+                  - pp:
+                      who: self
+                      delta: 1
+      - line: 2
+        activate:
+          quick: true
+          zone: hand
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+              - discard:
+                  ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 2

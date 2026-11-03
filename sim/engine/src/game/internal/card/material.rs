@@ -3,15 +3,15 @@ use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported}
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
 };
-use crate::ir::quick::card_permission;
+use crate::game::legal::subsets;
+use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    AbilityKind, AbilityOrigin, Action, Binding, Cardinality, Characteristics, ChoiceDomain,
-    CostSpec, Decision, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
-    KeywordId, MoveDestination, MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef,
-    OwnerZone, PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity,
-    QuantityUnit, SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram,
-    ZoneKind, ZoneRef,
+    AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
+    DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
+    MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
+    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
+    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
 };
 use alloc::collections::BTreeSet;
 
@@ -575,21 +575,25 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         .abilities
         .iter()
         .any(|ability| card_permission(&ability.node));
-    if card.card().abilities.iter().any(|ability| {
-        (matches!(
-            ability.node.source.origin,
-            AbilityOrigin::Keyword {
-                keyword: KeywordId::Quick,
-                ..
+    for ability in &card.card().abilities {
+        if let Some(play) = &ability.node.play {
+            let materials = play
+                .parameters
+                .iter()
+                .filter(|decision| is_parameter(decision))
+                .collect::<Vec<_>>();
+            if materials.is_empty() {
+                continue;
             }
-        ) || (quick_spell && ability.node.kind == AbilityKind::Spell))
-            && ability
-                .node
-                .play
-                .as_ref()
-                .is_some_and(|play| play.parameters.iter().any(is_parameter))
-    }) {
-        return Err(unsupported("material fee Quick preflight"));
+            if ability.node.kind == AbilityKind::Activated && is_printed_quick(&ability.node) {
+                for decision in materials {
+                    check_quick_parameter(decision)?;
+                }
+            }
+            if quick_spell && ability.node.kind == AbilityKind::Spell {
+                return Err(unsupported("material fee Quick Spell preflight"));
+            }
+        }
     }
     for ability in &card.card().abilities {
         if ability.node.play.as_ref().is_some_and(|play| {
@@ -631,5 +635,90 @@ fn cost_destination(action: &Action) -> Result<(&'static str, ZoneKind, MoveMeth
         }
         Action::Move { .. } => Ok(("cemetery", ZoneKind::Cemetery, MoveMethod::Put)),
         _ => Err(unsupported("material payment action")),
+    }
+}
+
+pub(super) fn check_quick_parameter(decision: &Decision) -> Result<()> {
+    check_parameter(decision)?;
+    let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
+        return Err(unsupported("Quick public material domain"));
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return Err(unsupported("one Quick public material group"));
+    };
+    let selector = match &group.selector {
+        Selector::Difference { input, .. } => input.as_ref(),
+        selector => selector,
+    };
+    if constraint.cardinality.minimum == Nat(0)
+        || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
+        || !matches!(selector, Selector::Zone { players, zone: ZoneKind::Field | ZoneKind::Ex, .. }
+            if players.relation == PlayerRelation::SelfPlayer)
+    {
+        return Err(unsupported("fixed own field or EX Quick materials"));
+    }
+    Ok(())
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Quick quotations reuse the authoritative material payment transaction."
+)]
+impl Game {
+    pub(super) fn internal_quick_material_costs_available(
+        &self,
+        execution: &Execution,
+        play: &PlaySpec,
+    ) -> Result<bool> {
+        let mut materials = play
+            .parameters
+            .iter()
+            .filter(|decision| is_parameter(decision));
+        let decision = materials
+            .next()
+            .ok_or_else(|| invalid("missing Quick materials"))?;
+        if materials.next().is_some() {
+            return Err(unsupported("one Quick public material group"));
+        }
+        check_quick_parameter(decision)?;
+        let mut selection = execution.clone();
+        match self.internal_material_parameter(
+            &mut selection,
+            decision,
+            posture_parameter(&play.costs, decision),
+        ) {
+            Ok(()) => {}
+            Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
+            Err(error) => return Err(error),
+        }
+        let Some((question, Wait::MaterialParameter(wait))) = selection.waiting.take() else {
+            return Err(invalid("missing Quick material quote"));
+        };
+        let InputDomain::CostMaterials(domain) = question.domain else {
+            return Err(invalid("missing Quick material domain"));
+        };
+        let names = domain
+            .members
+            .iter()
+            .map(|member| member.handle.to_string())
+            .collect::<Vec<_>>();
+        let count = usize::try_from(wait.bounds.minimum.0).map_err(invalid)?;
+        // A single own Field or EX bounds candidates to five; unions stay rejected.
+        for selected in subsets(&names, count, count) {
+            let handles = selected
+                .iter()
+                .map(|handle| handle.parse::<u64>().map_err(invalid))
+                .collect::<Result<Vec<_>>>()?;
+            let mut trial = self.clone();
+            let mut paid = execution.clone();
+            trial.card_runtime.active_source = paid.ability;
+            wait.bind(&mut paid, wait.validate(&handles)?);
+            match trial.internal_card_payment(&mut paid, &play.costs, false) {
+                Ok(()) => return Ok(true),
+                Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        Ok(false)
     }
 }

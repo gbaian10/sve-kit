@@ -6,6 +6,9 @@ use second::lowerer;
 #[path = "card/mandatory_reveal.rs"]
 mod mandatory_reveal;
 
+#[path = "card/quick_public.rs"]
+mod quick_public;
+
 #[path = "card/activation_zones.rs"]
 mod activation_zones;
 
