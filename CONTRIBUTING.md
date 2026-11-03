@@ -520,7 +520,8 @@ layout instead of generating again. A pair is kept under
 hashed the same before and after generation. A missing
 input, unreadable directory, symlink or other nonregular input still fails. Bytecode
 cache directories and the hatch-vcs `carddb/src/sve_carddb/_version.py` (written when
-uv installs carddb, imported by nothing) are ignored. Cache copies, publication and pruning share a local
+uv installs carddb; its version is exposed by the package but not used in the
+generated inputs) are ignored. Cache copies, publication and pruning share a local
 lock so concurrent worktrees cannot delete a pair while it is copied; generation
 and staging copies run outside that lock. Delete that folder to force a fresh
 generation when no wrapper is running. Both the manual `cargo-test` hook and the CI

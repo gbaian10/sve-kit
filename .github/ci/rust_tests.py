@@ -52,8 +52,8 @@ INPUTS = (
     "carddb/pyproject.toml",
     "carddb/uv.lock",
 )
-# hatch-vcs writes this ignored file while uv installs carddb, so it can appear during
-# the first generation and changes with every commit; no carddb code imports it.
+# hatch-vcs writes this during uv installs; the package exposes the version,
+# but repository_current's outputs do not consume it.
 BUILD_OUTPUTS = frozenset({"carddb/src/sve_carddb/_version.py"})
 GENERATOR = b"repository_current cards.jsonl selection.json v2"
 OUTPUTS = ("cards.jsonl", "selection.json")
