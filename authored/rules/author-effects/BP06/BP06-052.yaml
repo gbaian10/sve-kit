@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-052:
+    abilities:
+      - line: 1
+        spell:
+          optional_cost:
+            to_cemetery:
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: ゴーレム
+              n: 1
+            result: materials
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: materials
+                then:
+                  - damage:
+                      to:
+                        any_of:
+                          - leaders: opponents
+                          - who: opp
+                            zone: field
+                            kind: follower
+                      n: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-04"

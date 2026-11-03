@@ -8,6 +8,7 @@ use crate::game::internal::{InstructionOutcome, UbHistoryFact};
 use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
     ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet, SelectionSnapshot,
@@ -1178,6 +1179,23 @@ impl Game {
         }
     }
 
+    fn internal_play_material_parameter(
+        &self,
+        execution: &mut Execution,
+        decision: &Decision,
+        play: &PlayState,
+    ) -> Result<()> {
+        if reveal_payment::parameter(decision).is_some() {
+            let Some((_, additional)) = play.additional.as_deref() else {
+                return Err(unsupported("private materials require an additional cost"));
+            };
+            self.internal_reveal_material_parameter(execution, decision, &additional.play)?;
+        } else {
+            self.internal_material_parameter(execution, decision, play.material_posture(decision))?;
+        }
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn internal_play_parameters(
         &mut self,
         execution: &mut Execution,
@@ -1220,11 +1238,7 @@ impl Game {
                         if play.declined_material(&decision) {
                             continue;
                         }
-                        snapshot.internal_material_parameter(
-                            execution,
-                            &decision,
-                            play.material_posture(&decision),
-                        )?;
+                        snapshot.internal_play_material_parameter(execution, &decision, &play)?;
                     } else {
                         snapshot.internal_target(execution, &decision)?;
                     }

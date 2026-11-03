@@ -1,5 +1,6 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
 use crate::ir::quick::card_permission;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{AbilityKind, FaceId, Located, PlayCostPayment};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, ObjectOperand, ZoneKind,
@@ -141,6 +142,32 @@ fn check_additional(
         && payment.node.play.parameters.is_empty();
     if quick && !hand {
         return Err(unsupported("additional Quick payment preflight"));
+    }
+    if reveal_payment::payment(&payment.node.play) {
+        game.check_card_source(
+            &payment.source,
+            card_no,
+            &face.0,
+            u64::from(payment.source.line),
+        )?;
+        let origin = AbilitySource {
+            holder: ObjectOperand::SourceHolder {},
+            origin: AbilityOrigin::Printed {
+                face: face.clone(),
+                line: Nat(u64::from(payment.source.line)),
+            },
+            controller: PlayerRef::Controller {},
+        };
+        let CostSpec::Ordered { steps } = &payment.node.play.costs else {
+            return Err(unsupported("mandatory revelation ordered costs"));
+        };
+        if steps.iter().any(|step| step.instruction.source != origin) {
+            return Err(unsupported("mandatory revelation source"));
+        }
+        let [decision] = payment.node.play.parameters.as_slice() else {
+            return Err(unsupported("one mandatory revelation parameter"));
+        };
+        return super::material::check_reveal_parameter(decision);
     }
     let CostSpec::Ordered { steps } = &payment.node.play.costs else {
         return Err(unsupported("additional ordered costs"));

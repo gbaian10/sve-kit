@@ -9,6 +9,7 @@ use crate::ir::events::played::filter;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
     AssociationId, CharacteristicPatch, Control, CostSpec, DamageAmount, DiscardMode, Effect,
@@ -47,6 +48,7 @@ pub(super) mod quick;
 mod removal_restrictions;
 pub(in crate::game::internal) mod resource_entry;
 mod resources;
+mod reveal_cost;
 mod static_keywords;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
@@ -637,6 +639,19 @@ impl Game {
         Ok(())
     }
 
+    fn internal_card_pp_amount(
+        &self,
+        execution: &Execution,
+        card_cost: bool,
+        printed: Int,
+    ) -> Result<Int> {
+        if card_cost {
+            self.internal_card_play_cost(execution).map(Int)
+        } else {
+            Ok(printed)
+        }
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
@@ -647,6 +662,7 @@ impl Game {
             return Err(unsupported("whole-card cost alternatives"));
         };
         self.internal_use_prerequisite(execution, costs)?;
+        self.check_reveal_cost_entry(execution, costs)?;
         for step in steps {
             self.check_keyword_cost(execution, step)?;
             if material::source_field_cost(&step.instruction.action)
@@ -667,15 +683,14 @@ impl Game {
                         self.internal_hand_cost_payment(execution, &step.instruction)?;
                     (quantity, subjects, vec![])
                 }
+                action if reveal_payment::objects(action).is_some() => {
+                    self.internal_reveal_cost_payment(execution, &step.instruction)?
+                }
                 Action::Resource {
                     amount: Expr::Literal(amount),
                     ..
                 } => {
-                    let amount = if card_cost {
-                        Int(self.internal_card_play_cost(execution)?)
-                    } else {
-                        *amount
-                    };
+                    let amount = self.internal_card_pp_amount(execution, card_cost, *amount)?;
                     (
                         self.internal_pay_pp(execution.context.controller, amount)?,
                         Vec::new(),

@@ -3,6 +3,7 @@ use crate::ir::NumericProperty;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
 use crate::ir::public_numbers;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
@@ -284,6 +285,14 @@ impl Checker {
         self.answer(decision, None)?;
         self.record_field_material(decision);
         Ok(())
+    }
+
+    pub(super) fn reveal_cost_decision(&mut self, decision: &Decision) -> Checked {
+        if reveal_payment::parameter(decision).is_none() {
+            return self.reject();
+        }
+        self.decision_header(decision)?;
+        self.answer(decision, None)
     }
 
     pub(super) fn play_input(

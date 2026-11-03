@@ -40,6 +40,14 @@ pub(super) fn lower_additional(
         ast::Cost::Short(operation) => from_ref(operation.as_ref()),
         ast::Cost::Ordered { steps } => steps.as_slice(),
     };
+    if operations.iter().any(|operation| {
+        matches!(
+            operation,
+            ast::CostOperation::Reveal(_) | ast::CostOperation::ToDeckBottom(_)
+        )
+    }) {
+        return super::reveal_cost::lower(context, operations, source, path);
+    }
     lower_operations(context, operations, source, path, true)
 }
 
@@ -191,6 +199,8 @@ fn lower_operations(
                 reason: MoveReason::Put,
             },
             ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
+            | ast::CostOperation::Reveal(_)
+            | ast::CostOperation::ToDeckBottom(_)
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false) => {
@@ -254,6 +264,8 @@ fn material_operation(
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::BanishSelf(_)
         | ast::CostOperation::Discard(_)
+        | ast::CostOperation::Reveal(_)
+        | ast::CostOperation::ToDeckBottom(_)
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_) => Err(unsupported(path)),
     }

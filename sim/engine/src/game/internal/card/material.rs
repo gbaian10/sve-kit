@@ -4,6 +4,7 @@ use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
 };
 use crate::ir::quick::card_permission;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     AbilityKind, AbilityOrigin, Action, Binding, Cardinality, Characteristics, ChoiceDomain,
     CostSpec, Decision, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
@@ -128,6 +129,25 @@ fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
         }
         _ => Err(unsupported("public material selector")),
     }
+}
+
+pub(super) fn check_reveal_parameter(decision: &Decision) -> Result<()> {
+    if reveal_payment::parameter(decision).is_some() {
+        let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
+            return Err(unsupported("private hand materials"));
+        };
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported("private hand material group"));
+        };
+        let Selector::Zone {
+            predicate, binding, ..
+        } = &group.selector
+        else {
+            return Err(unsupported("private hand materials"));
+        };
+        return search::check_predicate(predicate, *binding).map(|_checked| ());
+    }
+    Err(unsupported("private hand material parameter"))
 }
 
 pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<()> {
@@ -306,10 +326,18 @@ impl Game {
                     "field"
                 } else if *zone == ZoneKind::Ex {
                     "ex"
+                } else if *zone == ZoneKind::Hand {
+                    "hand"
                 } else {
                     "cemetery"
                 },
             ) {
+                if *zone == ZoneKind::Hand
+                    && (self.object(&id)?.owner != seat_name(player)?
+                        || self.object(&id)?.controller != seat_name(player)?)
+                {
+                    return Err(unsupported("foreign hand material owner"));
+                }
                 if standing && self.object(&id)?.state["acted"] != false {
                     continue;
                 }
@@ -328,6 +356,30 @@ impl Game {
         standing: bool,
     ) -> Result<()> {
         check_parameter(decision)?;
+        self.material_parameter(execution, decision, standing)
+    }
+
+    pub(super) fn internal_reveal_material_parameter(
+        &self,
+        execution: &mut Execution,
+        decision: &Decision,
+        additional: &PlaySpec,
+    ) -> Result<()> {
+        if !reveal_payment::payment(additional) || !additional.parameters.contains(decision) {
+            return Err(unsupported(
+                "private materials require mandatory revelation",
+            ));
+        }
+        check_reveal_parameter(decision)?;
+        self.material_parameter(execution, decision, false)
+    }
+
+    fn material_parameter(
+        &self,
+        execution: &mut Execution,
+        decision: &Decision,
+        standing: bool,
+    ) -> Result<()> {
         let ChoiceDomain::Objects {
             constraint,
             binding,
@@ -379,7 +431,8 @@ impl Game {
                 binding: *binding,
                 members,
                 bounds: constraint.cardinality,
-                field: zones(selector)? == [ZoneKind::Field],
+                field: reveal_payment::parameter(decision).is_none()
+                    && zones(selector)? == [ZoneKind::Field],
             }),
         ));
         Ok(())

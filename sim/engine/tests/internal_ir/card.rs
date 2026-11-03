@@ -3,6 +3,9 @@ use super::*;
 mod event_combat_life;
 use second::lowerer;
 
+#[path = "card/mandatory_reveal.rs"]
+mod mandatory_reveal;
+
 #[path = "card/activation_zones.rs"]
 mod activation_zones;
 
