@@ -116,7 +116,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | damage | to、n、distribute?、distribute_at?、instead? | distribute 時點獨立 |
 | destroy／banish | Ref 或 {ref}；banish 另 top | top 與 ref 互斥 |
 | move | ref\|top、to、position?、order?、reveal?、by?、acted?、entry_effects?、result? | to 為區域或直接 param；位置選項在 position |
-| create | token、n?\|upto\|any、to、counters?、by?、acted?、entry_effects?、bind?、result? | 可 declare→bound 指定量（§13 GAP-A-039）；token 列表每名各 n；allocate 另有總量；same_name_as 讀物件名稱 |
+| create | token、n?\|upto\|any、to、counters?、by?、acted?、entry_effects?、bind?、result? | 可 declare→bound 指定量（§13 GAP-A-039）；token 列表每名各 n；allocate 另有總量；same_name_as 讀物件名稱，可加 kind:follower 限定印刷模板種類 |
 | act／stand／flip_down／flip_up | Ref 或 {ref} | flip 與 EP 分開 |
 | evolve／transform | ref、into?、result?；transform 另 entry_effects? | evolve 能力頭另型別；transform.into 支援 allocate |
 | life／set_life | who、delta／n | delta 與 n 不互換 |
@@ -132,7 +132,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | equip | on、token | 裝備不占普通場格 |
 | steal／give | ref、to?、precondition? | 同世代控制轉移 |
 | stack_plus | Expr | 規則選擇與建立 counter 語義 |
-| box／pilot | box:{ref,until}；pilot 尚不接受 | box 期限必填，pilot 數值／期限未定 |
+| box／pilot | box:{ref,until}；pilot:{ref} | box 期限必填；pilot 沿 CR5.32 使用印刷攻體、固定本回合 |
 | race／feed／gain_drive／drive_check | race:{ref,n?}、gain_drive:{ref}；feed/drive_check 尚不接受 | 按各規則程序，不是任意動作組合 |
 | play_card／play_ability | {ref}（cost 尚不接受）／{of,trigger或ability,cost_policy?} | ability 例 {ub:true,n:1}；cost_policy=normal/waive_original |
 | delayed | on、do；targets?、optional_cost?、x?、define?、aggregation?、next_only?、until?、precondition? | 無期限僅一次，有期限預設各次；不收 line/result |
