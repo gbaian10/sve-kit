@@ -1,0 +1,19 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "kind": "any",
+        "op": "replace_damage",
+        "prevent": true,
+        "subjects": "self.leader",
+        "until": "end-of-turn",
+        "uses": 1
+      },
+      "event": "main_start",
+      "kind": "trigger",
+      "line": 1,
+      "side": "opponent"
+    }
+  ],
+  "status": "complete"
+}
