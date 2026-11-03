@@ -1,6 +1,11 @@
 format: 1
 kind: effects_index
 records:
+  - card_id: c:90d097044a4c5bbab8cadb8d025a4846
+    file: rules/author-effects/CP04/CP04-001.yaml
+    kind: author_effect_set
+    record_key: CP04-001
+    scope: shared
   - card_id: c:b3c2de771a0f502aa4aad2acd766c29e
     file: rules/author-effects/CP04/CP04-002.yaml
     kind: author_effect_set
@@ -390,4 +395,14 @@ records:
     file: rules/author-effects/CP04/CP04-SP12a.yaml
     kind: author_effect_set
     record_key: CP04-SP12a
+    scope: shared
+  - card_id: c:05178f1ab6795b65a16513bb5bd4539d
+    file: rules/author-effects/CP04/CP04-T01.yaml
+    kind: author_effect_set
+    record_key: CP04-T01
+    scope: shared
+  - card_id: c:0c95857693805389b0338c1495d2b616
+    file: rules/author-effects/CP04/CP04-T02.yaml
+    kind: author_effect_set
+    record_key: CP04-T02
     scope: shared

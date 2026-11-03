@@ -1,0 +1,30 @@
+cards:
+  CP04-T02:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - damage_mod:
+                delta: 2
+                source: host
+          zone: equipment
+      - line: 2
+        static:
+          effects:
+            - damage_mod:
+                delta: -2
+                on: host
+          zone: equipment
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
