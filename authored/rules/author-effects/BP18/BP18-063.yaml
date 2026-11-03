@@ -1,0 +1,58 @@
+cards:
+  BP18-063:
+    abilities:
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            attacked:
+              sel:
+                as: striker
+                kind: follower
+                trait: 武闘竜人
+                where:
+                  cmp:
+                    left:
+                      power_of: striker
+                    op: ge
+                    right: 4
+              who: self
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      exists:
+                        kind: follower
+                        trait: 武闘竜人
+                        where:
+                          cmp:
+                            left:
+                              power_of: item
+                            op: ge
+                            right: 4
+                        who: self
+                        zone: field
+                    n: 3
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

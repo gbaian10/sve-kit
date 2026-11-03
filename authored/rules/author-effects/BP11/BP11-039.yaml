@@ -1,0 +1,54 @@
+cards:
+  BP11-039:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+                who: self
+          on:
+            enter_field:
+              during:
+                turn: self
+              sel:
+                trait: 乗物
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 6
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 魔導装甲車
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

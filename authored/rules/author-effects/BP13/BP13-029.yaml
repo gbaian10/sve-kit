@@ -1,0 +1,54 @@
+cards:
+  BP13-029:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          on:
+            enter_field:
+              during:
+                turn: self
+              sel:
+                class: ロイヤル
+                kind: follower
+                token: true
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          cost:
+            pp: 3
+          do:
+            - create:
+                n: 1
+                to: field
+                token: スティールナイト
+            - create:
+                n: 1
+                to: field
+                token: シールドガーディアン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP13-T08
+        line: 1
+        section: 1
+      - card: BP13-T09
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
