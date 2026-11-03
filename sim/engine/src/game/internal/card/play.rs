@@ -591,9 +591,11 @@ impl Game {
             .as_ref()
             .ok_or_else(|| invalid("missing Quick PlaySpec"))?;
         execution.spell = spell;
-        if super::qualification(&play.costs)?.is_some() {
+        let material = play.parameters.iter().any(super::material::is_parameter);
+        if material || super::qualification(&play.costs)?.is_some() {
             let source = probe.internal_card_source(holder, ability.id, actor)?;
             execution.bind_source(&probe, source)?;
+            probe.card_runtime.active_source = Some(source);
             match probe.internal_use_prerequisite(&execution, &play.costs) {
                 Ok(()) => {}
                 Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
@@ -601,7 +603,12 @@ impl Game {
             }
         }
         execution.captures(&probe, &play.captures)?;
-        if !self.quick_costs_available(holder, &execution, &play.costs, actor, spell)? {
+        let available = if material {
+            probe.internal_quick_material_costs_available(&execution, play)?
+        } else {
+            self.quick_costs_available(holder, &execution, &play.costs, actor, spell)?
+        };
+        if !available {
             return Ok(false);
         }
         if spell && !self.quick_additional_costs_available(holder, ability, actor, &execution)? {
@@ -614,7 +621,13 @@ impl Game {
                 .ok_or_else(|| invalid("missing Quick body"))?,
             false,
         )?;
-        self.quick_mode_plan(&execution, &groups, play.parameters.clone().into())
+        let targets = play
+            .parameters
+            .iter()
+            .filter(|decision| !super::material::is_parameter(decision))
+            .cloned()
+            .collect();
+        self.quick_mode_plan(&execution, &groups, targets)
     }
 
     fn quick_costs_available(
