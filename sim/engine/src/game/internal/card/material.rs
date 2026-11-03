@@ -77,7 +77,7 @@ pub(super) const fn is_parameter(decision: &Decision) -> bool {
     )
 }
 
-fn zone(selector: &Selector) -> Result<ZoneKind> {
+fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
     match selector {
         Selector::Zone {
             players,
@@ -101,13 +101,30 @@ fn zone(selector: &Selector) -> Result<ZoneKind> {
                 }) =>
         {
             search::check_predicate(predicate, *binding)?;
-            Ok(*zone)
+            Ok(vec![*zone])
         }
         Selector::Difference { input, except }
             if matches!(except.as_ref(),
             Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) =>
         {
-            zone(input)
+            zones(input)
+        }
+        Selector::Union { sets } if sets.len() == 2 => {
+            let mut result = Vec::new();
+            for set in sets {
+                if !matches!(set, Selector::Zone { players, .. }
+                    if players.relation == PlayerRelation::SelfPlayer)
+                {
+                    return Err(unsupported("own material zone union"));
+                }
+                result.extend(zones(set)?);
+            }
+            if result != [ZoneKind::Field, ZoneKind::Ex]
+                && result != [ZoneKind::Ex, ZoneKind::Field]
+            {
+                return Err(unsupported("field and EX material union"));
+            }
+            Ok(result)
         }
         _ => Err(unsupported("public material selector")),
     }
@@ -149,7 +166,9 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
     {
         return Err(unsupported("strict single material group"));
     }
-    zone(&group.selector)?;
+    if zones(&group.selector)?.len() > 1 && constraint.cardinality.minimum == Nat(0) {
+        return Err(unsupported("fixed material zone union"));
+    }
     Ok(())
 }
 
@@ -204,7 +223,9 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
         check_parameter(decision).is_ok()
             && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
             if binding == reference && constraint.groups.first().is_some_and(|group|
-                zone(&group.selector).is_ok_and(|zone| cost_zone(action, zone))))
+                zones(&group.selector).is_ok_and(|zones|
+                    (zones.len() == 1 || matches!(action, Action::Banish { .. }))
+                    && zones.into_iter().all(|zone| cost_zone(action, zone)))))
     })
 }
 
@@ -249,6 +270,17 @@ impl Game {
         selector: &Selector,
         standing: bool,
     ) -> Result<Vec<ObjectRef>> {
+        if let Selector::Union { sets } = selector {
+            let mut members = Vec::new();
+            for set in sets {
+                for member in self.material_candidates(execution, set, standing)? {
+                    if !members.contains(&member) {
+                        members.push(member);
+                    }
+                }
+            }
+            return Ok(members);
+        }
         if let Selector::Difference { input, .. } = selector {
             let source = execution.object(self, &ObjectOperand::SourceHolder {})?;
             return Ok(self
@@ -347,7 +379,7 @@ impl Game {
                 binding: *binding,
                 members,
                 bounds: constraint.cardinality,
-                field: zone(selector)? == ZoneKind::Field,
+                field: zones(selector)? == [ZoneKind::Field],
             }),
         ));
         Ok(())

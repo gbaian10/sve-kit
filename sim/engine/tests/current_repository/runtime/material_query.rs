@@ -11,7 +11,7 @@ fn prepared(with_attack: bool) -> &'static SelectedEffects {
     let (exchange, triggered) = SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
         input["authors"].as_array_mut().unwrap().retain(|author| {
-            matches!(author["input"]["card_no"].as_str(), Some("CP04-036" | "CP04-106" | "CP04-016" | "BP07-024" | "CP02-T01" | "BP03-T02"))
+            matches!(author["input"]["card_no"].as_str(), Some("CP04-036" | "CP04-106" | "CP04-016" | "BP07-024" | "BP07-T03" | "CP02-T01" | "BP03-T02"))
         });
         // Blank companions isolate the printed payment filter from unrelated subscriptions.
         for (number, name, kind) in [
@@ -223,7 +223,7 @@ fn bp07_024_and_its_corrected_reprint_combine_both_discounts() {
             initial["players"]["P1"]["pp"] = json!({"current":u8::from(!bayleon),"max":1_u8});
             initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":number}]);
             initial["players"]["P1"]["zones"]["field"] = json!([
-                {"id":"tree0","card":"query-tree"}, {"id":"tree1","card":"query-tree"}
+                {"id":"tree0","card":"BP07-T03"}, {"id":"tree1","card":"BP07-T03"}
             ]);
             if bayleon {
                 initial["players"]["P1"]["zones"]["field"]

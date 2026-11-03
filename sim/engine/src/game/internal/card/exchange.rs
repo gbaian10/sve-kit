@@ -133,6 +133,7 @@ impl Game {
             return Err(unsupported("exchange Quick payment"));
         }
         let hand_payment = matches!(step(&exchange.node)?.action, Action::Discard { .. });
+        let posture_payment = matches!(step(&exchange.node)?.action, Action::Posture { .. });
         // A definition that can consume payment facts is unsafe even when its holder is hidden.
         for definition in self.card_runtime.definitions.cards.values() {
             for ability in &definition.card().abilities {
@@ -142,7 +143,7 @@ impl Game {
                         TriggerCondition::Event {
                             pattern: EventPattern::EnterField { .. } | EventPattern::Phase { .. }
                         }
-                    ) || (hand_payment
+                    ) || ((hand_payment || posture_payment)
                         && matches!(
                             trigger.on,
                             TriggerCondition::Event {
@@ -239,7 +240,7 @@ impl Game {
                 continue;
             }
             if object.controller != seat_name(execution.context.controller)?
-                || self.object_type(&id)?.contains("トークン")
+                || (!posture && self.object_type(&id)?.contains("トークン"))
                 || self.object_type(&id)?.contains("アドバンス")
                 || object
                     .state
@@ -253,10 +254,18 @@ impl Game {
                     matches!(other.zone.as_str(), "field" | "cemetery")
                         && other.state["equipped_to"] == id
                 })
-                || self
-                    .internal_printed_abilities(&id)?
-                    .iter()
-                    .any(|ability| ability.node.kind == AbilityKind::Triggered)
+                || self.internal_printed_abilities(&id)?.iter().any(|ability| {
+                    ability.node.kind == AbilityKind::Triggered
+                        && !(posture
+                            && ability.node.trigger.as_ref().is_some_and(|trigger| {
+                                matches!(
+                                    trigger.on,
+                                    TriggerCondition::Event {
+                                        pattern: EventPattern::LeaveField { .. }
+                                    }
+                                )
+                            }))
+                })
                 || self.restricted(
                     &id,
                     if posture {

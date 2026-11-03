@@ -40,7 +40,7 @@ pub(super) fn distinct_count(
         return Err(unsupported(path));
     }
     Ok(aggregate_count(
-        super::costs::public_query(query, binding),
+        super::costs::public_query(query, binding, path)?,
         Some(property),
     ))
 }

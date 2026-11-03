@@ -178,7 +178,8 @@ fn materials(
     let selector = costs::public_query(
         &material.sel,
         Binding::new(allocator.id(path)?, allocator.scope(path)?),
-    );
+        path,
+    )?;
     decision(
         binding,
         SelectionConstraint {

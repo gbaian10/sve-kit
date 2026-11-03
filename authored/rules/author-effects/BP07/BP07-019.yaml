@@ -1,0 +1,64 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-019:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 4
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 自然
+                upto: 2
+            - move:
+                ref: picked
+                to: ex
+                result: moved
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 3
+        activate:
+          cost:
+            banish:
+              sel:
+                who: self
+                zone: field
+                name: ナテラの大樹
+              n: 2
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: 自然
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 2

@@ -33,13 +33,13 @@ pub(super) fn lower(
     {
         return Err(unsupported(path));
     }
-    let zone = match material.sel.zone {
-        ast::PublicZone::Field => ZoneKind::Field,
-        ast::PublicZone::Ex => ZoneKind::Ex,
-        ast::PublicZone::Cemetery if matches!(operation, Operation::Banish) => ZoneKind::Cemetery,
-        ast::PublicZone::Cemetery => return Err(unsupported(path)),
-    };
-    if matches!(operation, Operation::Act | Operation::Ex) && zone != ZoneKind::Field {
+    if (matches!(
+        material.sel.zone,
+        ast::PublicZone::Cemetery | ast::PublicZone::FieldEx
+    ) && !matches!(operation, Operation::Banish))
+        || (matches!(operation, Operation::Act | Operation::Ex)
+            && !matches!(material.sel.zone, ast::PublicZone::Field))
+    {
         return Err(unsupported(path));
     }
     let (objects, decision) = choice(allocator, bindings, scope, &material.sel, cardinality, path)?;
@@ -74,38 +74,52 @@ pub(super) fn choice(
     if !matches!(query.who, ast::Side::Controller | ast::Side::All) {
         return Err(unsupported(path));
     }
-    let zone = match query.zone {
-        ast::PublicZone::Field => ZoneKind::Field,
-        ast::PublicZone::Ex => ZoneKind::Ex,
-        ast::PublicZone::Cemetery => ZoneKind::Cemetery,
+    let zones = match query.zone {
+        ast::PublicZone::Field => vec![ZoneKind::Field],
+        ast::PublicZone::Ex => vec![ZoneKind::Ex],
+        ast::PublicZone::Cemetery => vec![ZoneKind::Cemetery],
+        ast::PublicZone::FieldEx
+            if matches!(query.who, ast::Side::Controller) && cardinality.minimum.0 > 0 =>
+        {
+            vec![ZoneKind::Field, ZoneKind::Ex]
+        }
+        ast::PublicZone::FieldEx => return Err(unsupported(path)),
     };
     let binding = Binding::new(bindings.id(path)?, scope);
-    let candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
-    let mut selector = Selector::Zone {
-        players: PlayerSet {
-            relation: if matches!(query.who, ast::Side::All) {
-                PlayerRelation::All
-            } else {
-                PlayerRelation::SelfPlayer
-            },
-            relative_to: PlayerRef::Controller {},
-            cardinality: Cardinality {
-                minimum: Nat(1),
-                maximum: Some(Nat(if matches!(query.who, ast::Side::All) {
-                    2
+    let mut sets = Vec::new();
+    for zone in zones {
+        let candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
+        sets.push(Selector::Zone {
+            players: PlayerSet {
+                relation: if matches!(query.who, ast::Side::All) {
+                    PlayerRelation::All
                 } else {
-                    1
-                })),
+                    PlayerRelation::SelfPlayer
+                },
+                relative_to: PlayerRef::Controller {},
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(if matches!(query.who, ast::Side::All) {
+                        2
+                    } else {
+                        1
+                    })),
+                },
+                text_quantifier: TextQuantifier::Implicit,
             },
-            text_quantifier: TextQuantifier::Implicit,
-        },
-        zone,
-        view: SelectionView::Current {},
-        binding: candidate,
-        predicate: Box::new(super::selection::field_filter(
-            &super::selection::ObjectFilter::from(query),
-            candidate,
-        )),
+            zone,
+            view: SelectionView::Current {},
+            binding: candidate,
+            predicate: Box::new(super::selection::field_filter(
+                &super::selection::ObjectFilter::from(query),
+                candidate,
+            )),
+        });
+    }
+    let mut selector = if sets.len() == 1 {
+        sets.remove(0)
+    } else {
+        Selector::Union { sets }
     };
     if query.other {
         selector = Selector::Difference {

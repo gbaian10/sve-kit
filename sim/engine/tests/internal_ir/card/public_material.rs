@@ -3,6 +3,86 @@ use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
+#[test]
+fn public_material_union_is_only_own_field_and_ex_banishment() {
+    let body = json!({"cost":{"banish":{"sel":{"who":"self","zone":["field","ex"],"name":"tree"},"n":1}},"do":[{"life":{"who":"self","delta":1}}]});
+    for zones in [json!(["field", "ex"]), json!(["ex", "field"])] {
+        let mut input = body.clone();
+        input["cost"]["banish"]["sel"]["zone"] = zones;
+        let typed = program("unit-follower", "activate", input);
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "material-union-admission",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &typed).unwrap();
+    }
+    for zones in [
+        json!([]),
+        json!(["field"]),
+        json!(["field", "field"]),
+        json!(["field", "cemetery"]),
+        json!(["field", "ex", "cemetery"]),
+    ] {
+        let mut input = body.clone();
+        input["cost"]["banish"]["sel"]["zone"] = zones;
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", input))
+            .unwrap_err();
+    }
+    for who in ["opp", "all"] {
+        let mut input = body.clone();
+        input["cost"]["banish"]["sel"]["who"] = json!(who);
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", input))
+            .unwrap_err();
+    }
+    for operation in ["act", "to_cemetery", "return_to_hand", "to_ex"] {
+        let mut input = body.clone();
+        input["cost"] = json!({operation: body["cost"]["banish"]});
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", input))
+            .unwrap_err();
+    }
+    let mut variable = body;
+    variable["cost"]["banish"]
+        .as_object_mut()
+        .unwrap()
+        .remove("n");
+    variable["cost"]["banish"]["any"] = json!(true);
+    lowerer()
+        .lower(&expanded("unit-follower", "activate", variable))
+        .unwrap_err();
+}
+
+#[test]
+fn material_union_does_not_admit_union_conditions_counts_or_aggregates() {
+    for zone in [json!("field"), json!(["field", "ex"])] {
+        let query = json!({"who":"self","zone":zone,"kind":"follower"});
+        for step in [
+            json!({"if":{"cond":{"exists":query},"then":[{"life":{"who":"self","delta":1}}]}}),
+            json!({"draw":{"n":{"count":query}}}),
+            json!({"draw":{"n":{"distinct_names":query}}}),
+            json!({"draw":{"n":{"agg":{"of":query,"attr":"power","fn":"sum"}}}}),
+        ] {
+            let input = expanded(
+                "unit-follower",
+                "activate",
+                json!({"cost":{"pp":1},"do":[step]}),
+            );
+            let result = lowerer().lower(&input);
+            assert_eq!(
+                result.is_ok(),
+                zone.is_string(),
+                "only the existing single-zone query is admitted"
+            );
+        }
+    }
+}
+
 fn expanded(card: &str, head: &str, body: Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();

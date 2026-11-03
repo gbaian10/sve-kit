@@ -289,7 +289,7 @@ fn exchange_follower_pays_materials_before_capacity_and_keeps_the_pre_payment_co
 fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_change() {
     let tree = candidate(
         "unit-spell",
-        json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field"},"n":2},"result":"exchange"},"optional_cost_delta":-2}),
+        json!({"optional_cost":{"to_cemetery":{"sel":{"who":"self","zone":"field"},"n":2},"result":"exchange"},"optional_cost_delta":-2}),
         true,
     );
     let program = lower(&tree, 4);
@@ -354,6 +354,39 @@ fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_ch
         Err(sve_engine::EngineFailure::Unsupported(_))
     ));
     transactions::assert_restored(&game, &origin);
+}
+
+#[test]
+fn posture_exchange_still_rejects_non_departure_material_triggers() {
+    let program = lower(
+        &candidate(
+            "unit-spell",
+            json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field"},"n":1},"result":"exchange"},"optional_cost_delta":-2}),
+            true,
+        ),
+        4,
+    );
+    let mut observer = candidate("unit-follower", Value::Null, false);
+    let entry = &mut observer["cards"]["unit-follower"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("play");
+    entry["auto"] = json!({"on":{"phase":{"which":"end","whose":"self"}},"do":[{"draw":{"n":1}}]});
+    let observer = lower(&observer, 1);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("4")),
+        &initial("unit-spell", "field", 1, 4),
+        &Value::Null,
+        &Value::Null,
+        "posture-material-trigger",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &program).unwrap();
+    game.load_internal_card("unit-follower", &observer).unwrap();
+    let before = game.clone();
+    assert!(
+        matches!(game.play_internal_card("s", PlayerId { seat: 1 }), Err(sve_engine::EngineFailure::Unsupported(reason)) if reason.contains("exchange material has unsupported")),
+        "a phase trigger passes the global guard but remains unsafe on an act material"
+    );
+    transactions::assert_restored(&game, &before);
 }
 
 #[test]
