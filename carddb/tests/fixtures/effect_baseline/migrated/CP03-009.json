@@ -1,0 +1,81 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "ride",
+      "body": {
+        "op": "gain_drive",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        },
+        {
+          "op": "link_resource",
+          "subjects": "self",
+          "resource_role": "drive_point",
+          "count": 1,
+          "from_zone": "evolve_deck",
+          "to": "drive"
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "modify",
+        "subjects": "self",
+        "power": 1,
+        "hp": 1,
+        "keywords": [
+          "storm"
+        ],
+        "abilities": [
+          {
+            "line": 2,
+            "kind": "trigger",
+            "keyword": "on_attack",
+            "body": {
+              "op": "if",
+              "condition": {
+                "fn": "eq",
+                "args": [
+                  {
+                    "read": "self.turn.trait_attacks.アクアフォース"
+                  },
+                  3
+                ]
+              },
+              "then": {
+                "op": "damage",
+                "subjects": "target.1",
+                "amount": 2
+              }
+            },
+            "event": "attack",
+            "subject": "self",
+            "targets": [
+              {
+                "key": "1",
+                "select": {
+                  "side": "opponent",
+                  "zone": "field",
+                  "type": "follower"
+                },
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ]
+      },
+      "event": "gain_drive",
+      "subject": "self",
+      "keyword": "on_drive_gain"
+    }
+  ]
+}

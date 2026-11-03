@@ -434,11 +434,11 @@ fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
         "../../../carddb/tests/fixtures/effect_baseline/migrated/CSD03a-006.json"
     ))
     .unwrap();
-    for authored in [
-        &cp03["cards"]["CP03-009"],
-        &cp03["cards"]["CP03-112"],
-        &migrated,
-    ] {
+    let valeria: Value = serde_json::from_str(include_str!(
+        "../../../carddb/tests/fixtures/effect_baseline/migrated/CP03-009.json"
+    ))
+    .unwrap();
+    for authored in [&valeria, &cp03["cards"]["CP03-112"], &migrated] {
         let costs = authored["abilities"][0]["costs"].as_array().unwrap();
         let links = costs
             .iter()

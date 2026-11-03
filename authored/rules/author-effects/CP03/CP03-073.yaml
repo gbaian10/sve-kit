@@ -1,0 +1,82 @@
+cards:
+  CP03-073:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - choose:
+                      bind: pickednormal
+                      from:
+                        in: seen
+                        kind: follower
+                        trait: かげろう
+                      may: true
+                      n: 1
+                  - move:
+                      ref: pickednormal
+                      result: movednormal
+                      to: hand
+                  - reveal:
+                      bind: shownnormal
+                      ref: pickednormal
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: movednormal
+                            view: before
+                        in: seen
+                      to: deck
+                then:
+                  - choose:
+                      bind: pickedawake
+                      from:
+                        in: seen
+                        kind: follower
+                        trait: かげろう
+                      upto: 2
+                  - move:
+                      ref: pickedawake
+                      result: movedawake
+                      to: hand
+                  - reveal:
+                      bind: shownawake
+                      ref: pickedawake
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: movedawake
+                            view: before
+                        in: seen
+                      to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
