@@ -1,0 +1,53 @@
+cards:
+  CP03-025:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+          into: ソウルセイバー・ドラゴン
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 2
+                  trait: ロイヤルパラディン
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: placed
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+            - grant:
+                keywords:
+                  - rush
+                on:
+                  follow: placed
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
