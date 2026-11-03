@@ -1,0 +1,40 @@
+cards:
+  BP13-007:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish:
+                  n: 3
+                  sel:
+                    who: self
+                    zone: cemetery
+          do:
+            - create:
+                n: 1
+                to: field
+                token:
+                  - エッジアーティファクト
+                  - ミスティックアーティファクト
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    token_sources:
+      - card: BP13-T05
+        line: 1
+        section: 1
+      - card: BP05-T05
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

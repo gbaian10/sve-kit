@@ -1,0 +1,62 @@
+cards:
+  BP20-113:
+    abilities:
+      - keywords:
+          - drain
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          on:
+            played:
+              sel:
+                name: 干絶の甘露
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - buff:
+                hp: -3
+                on: ally
+                power: 3
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: sep
+                        who: self
+                    op: eq
+                    right: 0
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 干絶の甘露
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: all
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

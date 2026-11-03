@@ -35,28 +35,6 @@ cards:
               zone: field
     review: 先設 1／1；SC 張數固定於結算開始，不能在後續重新計數。
     status: complete
-  BP16-076:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          count: 1
-          op: draw
-        costs:
-          - hp: -2
-            op: modify
-            subjects: self.leader
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP16-SL08:
     abilities:
       - body:

@@ -1,0 +1,96 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "bind": "looked",
+                "count": 2,
+                "op": "look"
+              },
+              {
+                "op": "optional",
+                "selection": {
+                  "bind": "chosen",
+                  "max": 1,
+                  "min": 1,
+                  "select": {
+                    "from": "looked"
+                  }
+                },
+                "then": {
+                  "op": "move",
+                  "subjects": "chosen",
+                  "to": "ex"
+                }
+              },
+              {
+                "op": "move",
+                "subjects": {
+                  "difference": [
+                    "looked",
+                    "chosen"
+                  ]
+                },
+                "to": "cemetery"
+              }
+            ]
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "count": {
+                    "from": "chosen",
+                    "trait": "絶傑"
+                  }
+                },
+                0
+              ],
+              "fn": "gt"
+            },
+            "op": "if",
+            "then": {
+              "amount": -3,
+              "op": "adjust_cost",
+              "subjects": "chosen",
+              "until": "end-of-turn"
+            }
+          }
+        ]
+      },
+      "event": "damage",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "trigger_if": {
+        "args": [
+          {
+            "read": "self.is_active"
+          },
+          {
+            "read": "event.effect_damage"
+          }
+        ],
+        "fn": "and"
+      }
+    },
+    {
+      "body": {
+        "count": 1,
+        "name": "烈絶の滅牙",
+        "op": "create",
+        "to": "ex"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
