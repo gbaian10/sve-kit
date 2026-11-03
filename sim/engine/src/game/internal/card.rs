@@ -1098,6 +1098,9 @@ pub(super) fn check_payment(
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
+            Action::Reveal { .. } => {
+                !quick && reveal_payment::selected(&instruction.action, &play.parameters)
+            }
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             action => material::check_cost(action, play),

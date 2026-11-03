@@ -6,6 +6,7 @@ use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
     Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind,
@@ -354,10 +355,19 @@ impl Checker {
                 checker.play_entry = Some(checker.env.clone());
                 for (index, decision) in play.parameters.iter().enumerate() {
                     checker.at(&format!("parameters/{index}"), |checker| {
-                        checker.play_decision(decision, &ability.source.controller)
+                        if reveal_payment::field_parameter(ability, decision) {
+                            checker.reveal_cost_decision(decision)?;
+                            if let Some((binding, _)) = reveal_payment::parameter(decision) {
+                                checker.env.reveal_materials.insert(binding.key());
+                            }
+                            Ok(())
+                        } else {
+                            checker.play_decision(decision, &ability.source.controller)
+                        }
                     })?;
                 }
                 checker.at("costs", |checker| checker.play_costs(&play.costs))?;
+                checker.retire_reveal_materials(&play.costs);
                 Ok(())
             })?;
         }

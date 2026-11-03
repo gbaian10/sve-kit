@@ -223,6 +223,7 @@ struct Environment {
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
     field_materials: BTreeSet<Key>,
+    reveal_materials: BTreeSet<Key>,
     single_material_moves: BTreeSet<ReceiptId>,
     single_discards: BTreeSet<ReceiptId>,
 }
@@ -232,6 +233,8 @@ impl Environment {
         self.receipts.extend(other.receipts.clone());
         self.field_materials
             .extend(other.field_materials.iter().copied());
+        self.reveal_materials
+            .extend(other.reveal_materials.iter().copied());
         self.single_material_moves
             .extend(other.single_material_moves.iter().copied());
         self.single_discards
@@ -296,6 +299,7 @@ impl Checker {
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
             field_materials: BTreeSet::new(),
+            reveal_materials: BTreeSet::new(),
             single_material_moves: BTreeSet::new(),
             single_discards: BTreeSet::new(),
         };
@@ -472,6 +476,12 @@ impl Checker {
             }
         };
         if play_payment {
+            if let Node::Control {
+                control: Control::Pay { costs, .. },
+            } = node
+            {
+                self.retire_reveal_materials(costs);
+            }
             self.resolution_entry = self.env.clone();
         }
         result

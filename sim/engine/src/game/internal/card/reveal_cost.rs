@@ -22,20 +22,28 @@ impl Game {
             return Ok(());
         }
         let source = self.object(&execution.context.source)?;
+        let (printing, _) = self.internal_effective_print(&execution.context.source)?;
         let card = self
             .card_runtime
             .definitions
             .cards
-            .get(&source.card)
+            .get(&printing)
             .ok_or_else(|| invalid("missing reveal cost card"))?;
-        if !card.card().card_play_costs.iter().any(|face| {
-            face.node.additional.as_ref().is_some_and(|payment| {
-                payment.node.play.costs == *costs && reveal_payment::payment(&payment.node.play)
+        let field = source.zone == "field"
+            && source.generation == execution.context.generation.0
+            && card
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| reveal_payment::field_cost(&ability.node, costs));
+        if !field
+            && !card.card().card_play_costs.iter().any(|face| {
+                face.node.additional.as_ref().is_some_and(|payment| {
+                    payment.node.play.costs == *costs && reveal_payment::payment(&payment.node.play)
+                })
             })
-        }) {
-            return Err(invalid(
-                "revelation requires its closed additional cost entry",
-            ));
+        {
+            return Err(invalid("revelation requires its declared cost entry"));
         }
         Ok(())
     }
@@ -54,6 +62,11 @@ impl Game {
             return Err(invalid("missing revelation material selection"));
         };
         let members = members.clone();
+        execution
+            .material_selections
+            .get(&reference.key())
+            .ok_or_else(|| invalid("missing reveal selection proof"))?
+            .revalidate(self, execution, &members)?;
         if !matches!(members.len(), 1 | 2) {
             return Err(invalid("mandatory revelation cardinality"));
         }

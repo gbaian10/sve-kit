@@ -153,7 +153,7 @@ impl PlayState {
             payment.accepted == Some(false)
                 && matches!(&payment.costs, CostSpec::Ordered { steps } if steps.iter().any(|step| {
                     let action = &step.instruction.action;
-                    matches!(super::material::cost_objects(action), Some(Selector::Bound { reference }) if reference == binding)
+                    matches!(super::material::cost_objects(action).or_else(|| reveal_payment::objects(action)), Some(Selector::Bound { reference }) if reference == binding)
                         || super::super::counters::selected_cost(action) == Some(*binding)
                 }))
         })
@@ -1015,6 +1015,7 @@ impl Game {
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
             cost_discards: BTreeMap::new(),
+            material_selections: BTreeMap::new(),
             facts: Vec::new(),
             waiting: None,
             destroy_guards: Vec::new(),
@@ -1199,10 +1200,11 @@ impl Game {
         play: &PlayState,
     ) -> Result<()> {
         if reveal_payment::parameter(decision).is_some() {
-            let Some((_, additional)) = play.additional.as_deref() else {
-                return Err(unsupported("private materials require an additional cost"));
-            };
-            self.internal_reveal_material_parameter(execution, decision, &additional.play)?;
+            if let Some((_, additional)) = play.additional.as_deref() {
+                self.internal_reveal_material_parameter(execution, decision, &additional.play)?;
+            } else {
+                self.internal_material_parameter(execution, decision, false)?;
+            }
         } else {
             self.internal_material_parameter(execution, decision, play.material_posture(decision))?;
         }

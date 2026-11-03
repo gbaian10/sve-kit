@@ -1,12 +1,12 @@
-//! Only additional costs may reveal a fixed own-hand choice and move that same choice.
+//! Revealing materials share one choice; only additional costs may also move that choice.
 use super::{
     AbilitySource, Action, Binding, BodyContext, Instruction, InstructionContext, InstructionId,
     LoweringError, PlayerRef, ReceiptId, Selector, ast, unsupported,
 };
 use crate::ir::{
-    ChoiceDomain, CostSpec, CostStep, Decision, DecisionId, DecisionKind, DiscardMode,
-    ExecutionRef, InputMode, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, PlaySpec,
-    Position, SelectionSnapshot, Visibility,
+    ChoiceDomain, CostSpec, CostStep, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
+    MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, PlaySpec, Position,
+    SelectionSnapshot, Visibility,
 };
 
 pub(super) fn lower(
@@ -36,38 +36,12 @@ pub(super) fn lower(
         }
         _ => return Err(unsupported(path)),
     };
-    let Action::Discard {
-        mode: DiscardMode::Chosen { constraint },
-        ..
-    } = super::hand_payment::lower(context.card_allocator, material, path)?
-    else {
+    if material.sel.name_contains.is_some() {
         return Err(unsupported(path));
-    };
-    let [group] = constraint.groups.as_slice() else {
+    }
+    let decision = choice(context, material, path)?;
+    let ChoiceDomain::Objects { binding, .. } = decision.domain.clone() else {
         return Err(unsupported(path));
-    };
-    let Selector::Zone { players, .. } = &group.selector else {
-        return Err(unsupported(path));
-    };
-    let binding = Binding::new(context.allocator.id(path)?, context.scope);
-    let decision = Decision {
-        id: DecisionId(context.card_allocator.id(path)?),
-        captures: vec![],
-        actor: PlayerRef::Controller {},
-        visibility: Visibility::Only {
-            players: players.clone(),
-        },
-        kind: DecisionKind::PlayParameter {
-            slot: PlaySlot::CostMaterials,
-            selection_snapshot: SelectionSnapshot::AtDecision,
-            play_scope: ExecutionRef::Current {},
-            input: InputMode::Inline,
-        },
-        domain: ChoiceDomain::Objects {
-            constraint,
-            binding,
-            target_roles: None,
-        },
     };
     let selected = Selector::Bound { reference: binding };
     let mut actions = vec![Action::Reveal {
@@ -111,4 +85,64 @@ pub(super) fn lower(
         parameters: vec![decision],
         costs: CostSpec::Ordered { steps },
     })
+}
+
+fn choice(
+    context: &mut BodyContext<'_>,
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<Decision, LoweringError> {
+    let count = super::hand_payment::cardinality(material, path)?;
+    if !matches!(count.minimum.0, 1 | 2) || count.maximum != Some(count.minimum) {
+        return Err(unsupported(path));
+    }
+    let constraint = super::hand_payment::constraint(context.card_allocator, material, path)?;
+    let [group] = constraint.groups.as_slice() else {
+        return Err(unsupported(path));
+    };
+    let Selector::Zone { players, .. } = &group.selector else {
+        return Err(unsupported(path));
+    };
+    let players = players.clone();
+    let binding = Binding::new(context.allocator.id(path)?, context.scope);
+    Ok(Decision {
+        id: DecisionId(context.card_allocator.id(path)?),
+        captures: vec![],
+        actor: PlayerRef::Controller {},
+        visibility: Visibility::Only { players },
+        kind: DecisionKind::PlayParameter {
+            slot: PlaySlot::CostMaterials,
+            selection_snapshot: SelectionSnapshot::AtDecision,
+            play_scope: ExecutionRef::Current {},
+            input: InputMode::Inline,
+        },
+        domain: ChoiceDomain::Objects {
+            constraint,
+            binding,
+            target_roles: None,
+        },
+    })
+}
+
+pub(super) fn field(
+    context: &mut BodyContext<'_>,
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<(Action, Decision), LoweringError> {
+    if material.n.is_none() || material.upto.is_some() || material.any || material.result.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    let decision = choice(context, material, path)?;
+    let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+        return Err(unsupported(path));
+    };
+    Ok((
+        Action::Reveal {
+            objects: Selector::Bound {
+                reference: *binding,
+            },
+        },
+        decision,
+    ))
 }

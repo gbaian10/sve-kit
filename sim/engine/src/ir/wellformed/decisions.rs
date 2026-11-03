@@ -292,7 +292,23 @@ impl Checker {
             return self.reject();
         }
         self.decision_header(decision)?;
-        self.answer(decision, None)
+        self.answer(decision, None)?;
+        Ok(())
+    }
+
+    pub(super) fn retire_reveal_materials(&mut self, costs: &CostSpec) {
+        if let CostSpec::Ordered { steps } = costs {
+            for step in steps {
+                if let Action::Reveal {
+                    objects: Selector::Bound { reference },
+                } = &step.instruction.action
+                    && self.env.reveal_materials.remove(&reference.key())
+                {
+                    self.env.bindings.remove(&reference.key());
+                    self.env.access.remove(&reference.key());
+                }
+            }
+        }
     }
 
     pub(super) fn play_input(
@@ -666,6 +682,8 @@ impl Checker {
                             | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }
                             | Action::Posture { posture: Posture::Acted, .. })
+                            || matches!(&step.instruction.action, Action::Reveal { objects: Selector::Bound { reference } }
+                                if checker.env.reveal_materials.contains(&reference.key()))
                             || step.instruction.action == ride::attachment(checker.env.scope)
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
                             || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
