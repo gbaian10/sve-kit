@@ -142,10 +142,11 @@ export function checkConstruction(
   }
 
   const unknown = new Set<string>()
+  const selectedLeader = deck.leader === null ? undefined : index.card(deck.leader)
   let leader: IndexCard | undefined
   if (deck.leader === null) add("leaderMissing", "6.1.1.1")
   else {
-    const card = index.card(deck.leader)
+    const card = selectedLeader
     if (!card) unknown.add(deck.leader)
     else if (card.zone !== "leader") add("leaderNotLeader", "6.1.1.1", [deck.leader])
     else leader = card
@@ -202,7 +203,7 @@ export function checkConstruction(
           })
   } else {
     const title = deck.basis.titleCode
-    if (leader && deck.leader !== null && !leader.titles.includes(title))
+    if (selectedLeader && deck.leader !== null && !selectedLeader.titles.includes(title))
       add("leaderTitleMismatch", "6.1.1.5.2", [deck.leader], { title })
     for (const [id, card] of firstById)
       if (!card.titles.includes(title)) add("titleMismatch", "6.1.1.5.2", [id], { title })

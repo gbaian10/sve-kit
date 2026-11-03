@@ -1,4 +1,4 @@
-import { ChevronUp, CircleAlert, CircleCheck, CircleDashed } from "lucide-react"
+import { ChevronUp, CircleAlert, CircleCheck, CircleDashed, Info } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import { BottomBar } from "../../components/nav/BottomBar"
@@ -10,7 +10,7 @@ import { CountPill } from "./DeckPanel"
 /** The deck's check result: nothing is "legal" until the card data has loaded and the rules ran. */
 function DeckStatus() {
   const { t } = useTranslation()
-  const { facts, dataFailed, problems } = useDeckEditor()
+  const { facts, dataFailed, problems, construction } = useDeckEditor()
   if (facts === null)
     return dataFailed ? (
       <CircleAlert
@@ -25,7 +25,23 @@ function DeckStatus() {
         aria-label={t("results.dependenciesPending")}
       />
     )
+  if (construction.state !== "ready")
+    return (
+      <CircleDashed
+        className="size-5 shrink-0 text-text-3"
+        role="img"
+        aria-label={t(construction.state === "failed" ? "decks.rulesFailed" : "decks.rulesLoading")}
+      />
+    )
   const errors = problems.filter((item) => item.severity === "error").length
+  if (errors === 0 && problems.length > 0)
+    return (
+      <Info
+        className="size-5 shrink-0 text-info"
+        role="img"
+        aria-label={t("decks.status.legalWithWarnings")}
+      />
+    )
   if (errors === 0)
     return (
       <CircleCheck

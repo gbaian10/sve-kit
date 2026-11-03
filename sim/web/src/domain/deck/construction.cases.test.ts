@@ -160,6 +160,36 @@ function comparable(items: readonly Expected[], actual: boolean) {
 }
 
 describe("shared deck construction cases", () => {
+  it("also checks the title of a known card in the wrong leader zone", () => {
+    const result = checkConstruction(
+      {
+        basis: { kind: "title", titleCode: "required-title" },
+        leader: "c:wrong",
+        main: [],
+        evolve: [],
+      },
+      {
+        card: () => ({
+          name: 0,
+          classCode: "neutral",
+          titles: [],
+          zone: "main",
+          startAmulet: false,
+        }),
+        titleRules: new Map(),
+        formats: new Map([
+          ["standard", { coverage: [["2026-11-01", "2026-11-05"]], restrictions: [] }],
+        ]),
+      },
+      { format: "standard", date: "2026-11-04" },
+    )
+    expect(result.violations.map(({ code }) => code).sort()).toEqual([
+      "leaderNotLeader",
+      "leaderTitleMismatch",
+      "mainTooFew",
+    ])
+  })
+
   it.each(cases.cases.map((item) => [item.id, item] as const))("%s", (_id, item) => {
     const result = checkConstruction(deckOf(item.deck), index, item.context)
     const expectedViolations = item.expect.violations as readonly Expected[]

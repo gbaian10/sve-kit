@@ -15,6 +15,51 @@ import {
 const ZONES = ["none", "leader", "main", "evolve"]
 const ZONE_OF_ROLE: Readonly<Record<string, number>> = { leader: 1, main: 2, evolve: 3 }
 
+function knownCoverage(
+  windows: readonly JsonObject[],
+  restrictions: readonly JsonObject[],
+  asOf: string,
+): JsonValue[] {
+  const cutoff = new Date(Date.parse(`${asOf}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10)
+  let covered = windows
+    .filter((row) => row["state"] === "complete" && stringValue(row["from_date"]) < cutoff)
+    .map((row): readonly [string, string] => [
+      stringValue(row["from_date"]),
+      row["until_date"] === null || stringValue(row["until_date"]) > cutoff
+        ? cutoff
+        : stringValue(row["until_date"]),
+    ])
+  const unknown = [
+    ...windows
+      .filter((row) => row["state"] !== "complete")
+      .map(
+        (row) =>
+          [
+            stringValue(row["from_date"]),
+            row["until_date"] === null ? cutoff : stringValue(row["until_date"]),
+          ] as const,
+      ),
+    ...restrictions
+      .filter((row) => row["state"] === "announced")
+      .map(
+        (row) =>
+          [
+            stringValue(row["effective_from"]),
+            row["effective_until"] === null ? cutoff : stringValue(row["effective_until"]),
+          ] as const,
+      ),
+  ]
+  for (const [start, until] of unknown)
+    covered = covered.flatMap(([left, right]) => {
+      if (until <= left || right <= start) return [[left, right]]
+      const remaining: (readonly [string, string])[] = []
+      if (left < start) remaining.push([left, start])
+      if (until < right) remaining.push([until, right])
+      return remaining
+    })
+  return covered.map(([from, until]) => [from, until])
+}
+
 export function constructionIndexFiles(
   rowsOf: (table: string) => readonly JsonObject[],
   manifest: JsonObject,
@@ -87,12 +132,19 @@ function projectRegion(
 
   const formats: JsonObject = {}
   for (const profile of rowsOf("rules_profile").filter((row) => row["region"] === region)) {
-    const coverage = arrayValue(manifest["restriction_coverage"])
+    const windows = arrayValue(manifest["restriction_coverage"])
       .map((value) => objectValue(value))
-      .filter((row) => row["profile_id"] === profile["id"] && row["state"] === "complete")
-      .map((row) => [row["from_date"] ?? null, row["until_date"] ?? null])
-    const restrictions = rowsOf("restriction")
-      .filter((row) => row["profile_id"] === profile["id"] && row["state"] === "confirmed")
+      .filter((row) => row["profile_id"] === profile["id"])
+    const profileRestrictions = rowsOf("restriction").filter(
+      (row) => row["profile_id"] === profile["id"],
+    )
+    const coverage = knownCoverage(
+      windows,
+      profileRestrictions,
+      stringValue(manifest["data_as_of"]),
+    )
+    const restrictions = profileRestrictions
+      .filter((row) => row["state"] === "confirmed")
       .sort((a, b) => compareCodePoints(stringValue(a["id"]), stringValue(b["id"])))
       .map((row) => ({
         id: row["id"] ?? null,

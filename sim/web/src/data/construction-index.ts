@@ -6,6 +6,7 @@ import type {
   Zone,
 } from "../domain/deck/construction"
 import { fetchBytes, type Fetcher } from "./cdn"
+import type { LoadedSnapshot } from "./client"
 import { fail } from "./format-v3/errors"
 import {
   arrayValue,
@@ -29,12 +30,12 @@ function constructionIndexUrl(base: string, manifestHash: string, region: string
 
 export async function loadConstructionIndex(
   base: string,
-  manifestHash: string,
+  snapshot: Pick<LoadedSnapshot, "manifestHash" | "dataVersion">,
   region: string,
   fetcher: Fetcher = appRequests.foreground,
 ): Promise<ConstructionIndex> {
-  const bytes = await fetchBytes(fetcher, constructionIndexUrl(base, manifestHash, region))
-  return decodeConstructionIndex(parseJson(bytes), manifestHash, region)
+  const bytes = await fetchBytes(fetcher, constructionIndexUrl(base, snapshot.manifestHash, region))
+  return decodeConstructionIndex(parseJson(bytes), snapshot, region)
 }
 
 const oneOf = <T extends string>(allowed: readonly T[], value: string, path: string): T => {
@@ -49,15 +50,17 @@ const intOrNull = (value: JsonValue | undefined, path: string) =>
 /** Validates the wire shape (docs/schema/export/construction-index.md) and its snapshot binding. */
 function decodeConstructionIndex(
   value: JsonValue,
-  manifestHash: string,
+  expected: Pick<LoadedSnapshot, "manifestHash" | "dataVersion">,
   region: string,
 ): ConstructionIndex {
   const root = objectValue(value)
   if (root["construction_index_format"] !== FORMAT) fail("shape", "unknown index format", [])
   if (root["region"] !== region) fail("shape", "index of another region", ["region"])
   const snapshot = objectValue(root["snapshot"], ["snapshot"])
-  if (snapshot["manifest_sha256"] !== manifestHash)
+  if (snapshot["manifest_sha256"] !== expected.manifestHash)
     fail("shape", "index of another snapshot", ["snapshot"])
+  if (stringValue(snapshot["data_version"], ["snapshot", "data_version"]) !== expected.dataVersion)
+    fail("shape", "index of another data version", ["snapshot", "data_version"])
   const zoneNames = arrayValue(root["zones"]).map((item) => stringValue(item, ["zones"]))
   if (zoneNames.join() !== ZONES.join()) fail("shape", "unexpected zones", ["zones"])
   const classes = arrayValue(root["classes"]).map((item) => stringValue(item, ["classes"]))

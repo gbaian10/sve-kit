@@ -52,7 +52,19 @@ function serve(body: JsonObject) {
     urls.push(url)
     return Promise.resolve(new Response(JSON.stringify(body)))
   }
-  return { urls, load: () => loadConstructionIndex("/cdn", HASH, "jp", fetcher) }
+  return {
+    urls,
+    load: () =>
+      loadConstructionIndex(
+        "/cdn",
+        {
+          manifestHash: HASH,
+          dataVersion: "preview-20261103T000000Z-0001",
+        },
+        "jp",
+        fetcher,
+      ),
+  }
 }
 
 describe("loadConstructionIndex", () => {
@@ -100,6 +112,20 @@ describe("loadConstructionIndex", () => {
   })
 
   it.each([
+    [
+      "another data version",
+      (value: JsonObject) => ({
+        ...value,
+        snapshot: { manifest_sha256: HASH, data_version: "preview-20261001T000000Z-0001" },
+      }),
+    ],
+    [
+      "a missing data version",
+      (value: JsonObject) => ({
+        ...value,
+        snapshot: { manifest_sha256: HASH },
+      }),
+    ],
     ["another snapshot", (value: JsonObject) => ({ ...value, snapshot: { manifest_sha256: "x" } })],
     ["another region", (value: JsonObject) => ({ ...value, region: "en" })],
     ["a newer format", (value: JsonObject) => ({ ...value, construction_index_format: 2 })],

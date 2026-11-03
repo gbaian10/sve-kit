@@ -8,6 +8,7 @@ import { createI18n } from "../../i18n"
 import { createDeckEditor, DeckEditorContext } from "./deck-editor"
 import type { DeckFacts } from "./deck-info"
 import { DeckSummaryBar } from "./DeckSummaryBar"
+import type { ConstructionState } from "./useDeckData"
 
 let i18n: Awaited<ReturnType<typeof createI18n>>
 beforeAll(async () => {
@@ -18,7 +19,6 @@ const deck = createDeck(
   { name: "摘要", edition: "jp", basis: { kind: "class", classCode: "royal" } },
   new Date("2026-11-03T00:00:00.000Z"),
 )
-// The bar only asks whether the facts exist; the rules' result arrives as `problems`.
 const loadedFacts = {} as DeckFacts
 const tooFew = { severity: "error" } as DeckProblem
 
@@ -26,6 +26,10 @@ function renderBar(
   facts: DeckFacts | null,
   dataFailed: boolean,
   problems: readonly DeckProblem[] = [],
+  construction: ConstructionState = {
+    state: "ready",
+    index: { card: () => undefined, titleRules: new Map(), formats: new Map() },
+  },
 ) {
   const editor = createDeckEditor(
     {
@@ -35,7 +39,7 @@ function renderBar(
       dataFailed,
       retryData: () => undefined,
       restrictions: new Map(),
-      construction: { state: "loading" },
+      construction,
       problems,
       uiLanguage: "zh-TW",
       textLang: "ja",
@@ -57,6 +61,29 @@ function renderBar(
 }
 
 describe("DeckSummaryBar", () => {
+  it.each([
+    ["loading", "構築規則資料載入中"],
+    ["failed", "無法載入構築規則資料"],
+  ] as const)("does not call a deck legal when rules are %s", (state, label) => {
+    renderBar(loadedFacts, false, [], { state })
+    expect(screen.getByRole("img", { name: label })).toBeInTheDocument()
+    expect(screen.queryByRole("img", { name: "符合構築規則" })).not.toBeInTheDocument()
+  })
+
+  it("keeps incomplete checks visible in the summary", () => {
+    renderBar(loadedFacts, false, [
+      {
+        kind: "restrictionsUnknown",
+        severity: "info",
+        clause: "restriction",
+        cardIds: [],
+        values: {},
+      },
+    ])
+    expect(screen.getByRole("img", { name: "可用，但有提醒" })).toBeInTheDocument()
+    expect(screen.queryByRole("img", { name: "符合構築規則" })).not.toBeInTheDocument()
+  })
+
   it("does not call a deck legal before its cards have loaded", () => {
     renderBar(null, false)
     expect(

@@ -77,7 +77,7 @@ export function useDeckData(edition: Region): DeckData {
   useEffect(() => {
     if (!snapshot || !current) return
     let active = true
-    loadConstructionIndex(client.base, snapshot.manifestHash, edition).then(
+    loadConstructionIndex(client.base, snapshot, edition).then(
       (index) => {
         if (active) setConstruction({ key, value: { state: "ready", index } })
       },
