@@ -12,7 +12,7 @@ from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.regions import Region
 from sve_carddb.core.wording import Wording, preferred_wordings
 from sve_carddb.domains.products.models import Date, Precision, check_date
-from sve_carddb.domains.registry.records import CorrectionData, PrintingData
+from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.text_observations.equivalence import (
     Classification,
     Method,
@@ -241,24 +241,11 @@ def _candidate_revisions(
 
 
 def _correction_blocks(plan: TextPlan, face: str, region: Region) -> frozenset[str]:
-    applied = {
-        item.data.id
-        for item in plan.corrections
-        if item.status in {"applied", "already_fixed"}
-    }
     blocked = set()
-    for record in plan.identity.snapshot.records.values():
-        data = record.data
-        if (
-            isinstance(data, CorrectionData)
-            and data.face_id == face
-            and data.id not in applied
-        ):
-            printing = plan.identity.snapshot.records[
-                "printing:" + data.printing_id
-            ].data
-            if isinstance(printing, PrintingData) and printing.region == region:
-                blocked.add(data.printing_id)
+    for printing_id in plan.unapplied_corrections.get(face, ()):
+        printing = plan.identity.snapshot.records["printing:" + printing_id].data
+        if isinstance(printing, PrintingData) and printing.region == region:
+            blocked.add(printing_id)
     return frozenset(blocked)
 
 

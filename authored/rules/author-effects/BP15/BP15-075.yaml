@@ -1,0 +1,30 @@
+cards:
+  BP15-075:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - move:
+                ref: mate
+                to: ex
+          targets:
+            - bind: mate
+              from:
+                kind: follower
+                not_same_name_as_this: true
+                trait: 海洋
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

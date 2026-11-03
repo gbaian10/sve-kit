@@ -1,0 +1,48 @@
+cards:
+  BP11-042:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - keywords:
+          - rush
+          - bane
+          - drain
+        line: 2
+      - activate:
+          cost:
+            earth_rite: 1
+          do:
+            - either:
+                options:
+                  - - grant:
+                        keywords:
+                          - rush
+                        on: ally
+                  - - grant:
+                        keywords:
+                          - bane
+                        on: ally
+                  - - grant:
+                        keywords:
+                          - drain
+                        on: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

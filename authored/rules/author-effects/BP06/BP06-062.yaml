@@ -1,0 +1,41 @@
+cards:
+  BP06-062:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              awakened: true
+      - line: 2
+        spell:
+          do:
+            - destroy: enemy
+            - if:
+                cond:
+                  exists:
+                    name: 銀氷のドラゴニュート・フィルレイン
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                acted: true
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
