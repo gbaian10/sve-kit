@@ -1,0 +1,40 @@
+cards:
+  BP05-041:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          name: 破壊の絶傑・リーシェナ
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - pay:
+                        cost:
+                          pp: 2
+                        do:
+                          - damage:
+                              n:
+                                count:
+                                  trait: アイドル
+                                  who: self
+                                  zone: field
+                              to:
+                                kind: follower
+                                who: opp
+                                zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,46 @@
+cards:
+  BP12-007:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pay:
+                        cost:
+                          to_ex:
+                            n: 1
+                            sel:
+                              trait: 自然
+                              who: self
+                              zone: field
+                        do:
+                          - damage:
+                              n: 3
+                              to: victim
+                  - - create:
+                        n: 2
+                        to: field
+                        token: フェアリー
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP03-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,39 @@
+cards:
+  BP12-106:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy: victim2
+                  - - pay:
+                        cost:
+                          pp: 2
+                        do:
+                          - destroy: victim6
+          targets:
+            - bind: victim2
+              from:
+                orig_cost_le: 2
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: victim6
+              from:
+                orig_cost_le: 6
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
