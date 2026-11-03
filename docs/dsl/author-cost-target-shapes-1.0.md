@@ -89,7 +89,7 @@ one_of 至少兩個 CostAlternative，只選一支；禁止直接 one_of 套 one
 | one_of | CostAlternative[]，至少兩支 | BP01-SL15；複合分支／steps 內位置合成 |
 | stack_counter_from | 無接受形狀 | 舊登錄，不作合成正例 |
 
-正式 lowering／runtime 的起動能力費用支援 `leader_life: N`（固定非負整數），
+正式 lowering／runtime 的起動能力費用與自動能力宣告頭 `cost` 支援 `leader_life: N`（固定非負整數），
 依 CR 10.4.5 只扣自己的領袖生命；生命不足時整筆付款失敗，不能降至負數。
 可以剛好付至 0，敗北留到能力結算後的檢查時點。這是生命變動而非傷害，
 付款收據使用 `QuantityUnit::Life`，並保留實際生命變動事實；BP08-084 同時驗證每回合兩次上限。
