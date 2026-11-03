@@ -538,6 +538,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     Fact::DriveGained(_)
                     | Fact::Raced(_)
                     | Fact::Evolved(_)
+                    | Fact::Equipped(_)
                     | Fact::CardPlayed { .. }
                     | Fact::CardResolved { .. }
                     | Fact::AbilityPlayed { .. }
@@ -692,5 +693,7 @@ mod event_ability;
 #[path = "card/removal_immunity.rs"]
 mod removal_immunity;
 
+#[path = "card/equipment.rs"]
+mod equipment;
 #[path = "card/material_power.rs"]
 mod material_power;

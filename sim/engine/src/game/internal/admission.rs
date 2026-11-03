@@ -447,6 +447,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     }
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
+    super::tokens::equipment::check_action(action)?;
     super::transform::check_action(action)?;
     super::movement::check_action(action)?;
     super::resource::check_action(action)?;
@@ -677,6 +678,8 @@ fn supported(code: &str) -> bool {
             | "player.require-one"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
+            | "shape.Action.Equip"
+            | "action.equip"
             | "shape.Action.Token"
             | "action.token"
             | "shape.TokenDestination.Single"

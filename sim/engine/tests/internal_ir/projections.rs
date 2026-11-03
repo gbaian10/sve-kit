@@ -132,6 +132,7 @@ fn success_projections_preserve_old_and_new_generations_without_chasing_later_mo
                 Fact::DriveGained(_)
                 | Fact::Raced(_)
                 | Fact::Evolved(_)
+                | Fact::Equipped(_)
                 | Fact::CardPlayed { .. }
                 | Fact::CardResolved { .. }
                 | Fact::AbilityPlayed { .. }

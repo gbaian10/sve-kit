@@ -104,7 +104,11 @@ impl BodyContext<'_> {
             } else if entry.play.is_some() {
                 super::granted_play::lower(&entry, scope, nested_source, &nested_path)?
             } else {
-                if entry.attack_time.is_none() && entry.auto.is_none() && entry.lastword.is_none() {
+                if entry.attack_time.is_none()
+                    && entry.auto.is_none()
+                    && entry.lastword.is_none()
+                    && entry.activate.is_none()
+                {
                     return Err(unsupported(&nested_path));
                 }
                 self.card_allocator.executable_ability(

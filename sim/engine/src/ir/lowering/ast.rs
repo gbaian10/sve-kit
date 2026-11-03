@@ -152,9 +152,22 @@ pub(super) enum ActivationZones {
     Many(Vec<ActivationZone>),
 }
 
+impl ActivationZones {
+    pub(super) const fn single(&self) -> Option<ZoneKind> {
+        match self {
+            Self::One(zone) => Some(zone.kind()),
+            Self::Many(zones) => match zones.as_slice() {
+                [zone] => Some(zone.kind()),
+                _ => None,
+            },
+        }
+    }
+}
+
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum ActivationZone {
+    Equipment,
     Hand,
     Cemetery,
     Field,
@@ -164,6 +177,7 @@ pub(super) enum ActivationZone {
 impl ActivationZone {
     pub(super) const fn kind(self) -> ZoneKind {
         match self {
+            Self::Equipment => ZoneKind::Equipment,
             Self::Hand => ZoneKind::Hand,
             Self::Cemetery => ZoneKind::Cemetery,
             Self::Field => ZoneKind::Field,
@@ -268,6 +282,7 @@ pub(super) enum Step {
     Reveal(Reveal),
     Move(Move),
     Create(Create),
+    Equip(Equip),
 }
 
 #[derive(Deserialize)]
@@ -355,6 +370,13 @@ pub(super) struct Race {
 pub(super) struct EffectEvolution {
     #[serde(rename = "ref")]
     pub _reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Equip {
+    pub on: This,
+    pub token: String,
 }
 
 #[derive(Deserialize)]

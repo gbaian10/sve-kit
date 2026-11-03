@@ -1,5 +1,6 @@
 mod capacity;
 mod dynamic;
+pub(super) mod equipment;
 
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
 use alloc::sync::Arc;
@@ -375,10 +376,11 @@ impl Game {
             .iter()
             .map(|id| execution.reference(self, id))
             .collect::<Result<Vec<_>>>()?;
-        let zone = if destination == ZoneKind::Field {
-            "field"
-        } else {
-            "ex"
+        let zone = match destination {
+            ZoneKind::Field => "field",
+            ZoneKind::Ex => "ex",
+            ZoneKind::Equipment => "equipment",
+            _ => return Err(unsupported("token destination")),
         };
         let mut frame = execution.frame();
         if let Some(amount) = stack {

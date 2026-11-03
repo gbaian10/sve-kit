@@ -956,7 +956,7 @@ impl Game {
             self.internal_terminal_cleanup();
             return Ok(());
         }
-        if self.clean_field_rules()? {
+        if self.clean_equipment_rules()? || self.clean_field_rules()? {
             return self.checks();
         }
         if self.state.pending.is_empty()

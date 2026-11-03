@@ -12,7 +12,7 @@ use crate::ir::{
 impl Checker {
     pub(super) fn prevention(&mut self, effect: &Effect, zones: &[ZoneKind]) -> Checked {
         let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
-        if zones != [ZoneKind::Field]
+        if !matches!(zones, [ZoneKind::Field | ZoneKind::Equipment])
             || shape.duration.end != (DurationEnd::NoTemporalExpiry {})
             || shape.duration.anchor != (TimeAnchor::Installation {})
             || shape.duration.usage.is_some()

@@ -128,7 +128,8 @@ impl BodyContext<'_> {
             | ast::Step::SetStat(_)
             | ast::Step::Apply(_)
             | ast::Step::PlayerEffect(_)
-            | ast::Step::Create(_) => None,
+            | ast::Step::Create(_)
+            | ast::Step::Equip(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)

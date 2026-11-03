@@ -1,14 +1,15 @@
 use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
     EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
-    NumericChange, ObjectRef, Resource, ResourceOperation, Stat, TimeAnchor, TimestampBasis,
-    TraitId,
+    NumericChange, ObjectRef, ObjectView, Resource, ResourceOperation, Stat, TimeAnchor,
+    TimestampBasis, TraitId,
 };
 use super::{
     AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
     Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView, Selector,
     TextQuantifier, ZoneKind, ast, unsupported,
 };
+use crate::ir::ObjectRelation;
 
 pub(super) fn holder() -> Selector {
     Selector::Objects {
@@ -140,6 +141,14 @@ impl BodyContext<'_> {
         let query = match value {
             ast::Objects::This(_) => return Ok(holder()),
             ast::Objects::Bound(name) => {
+                if name == "host" && self.static_zone == Some(ZoneKind::Equipment) {
+                    return Ok(Selector::Relation {
+                        object: ObjectView::Current {
+                            object: Box::new(ObjectOperand::SourceHolder {}),
+                        },
+                        relation: ObjectRelation::Equipment,
+                    });
+                }
                 if name == "attack_target" {
                     return self.attack_target_objects(path);
                 }

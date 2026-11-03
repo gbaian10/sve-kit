@@ -371,27 +371,6 @@ cards:
           amount: 1
         event: field_to_cemetery
         subject: self
-  CP04-PR16:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: replace_damage
-          sources: linked
-          amount: 2
-          kind: any
-        active_zones:
-          - equipment
-      - line: 2
-        kind: static
-        body:
-          op: replace_damage
-          subjects: linked
-          amount: -2
-          kind: any
-        active_zones:
-          - equipment
   CP04-SL09:
     status: complete
     abilities:
@@ -449,25 +428,3 @@ cards:
           - op: pp
             amount: 2
         section: 0
-  CP04-T02:
-    token_template: true
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: replace_damage
-          sources: linked
-          amount: 2
-          kind: any
-        active_zones:
-          - equipment
-      - line: 2
-        kind: static
-        body:
-          op: replace_damage
-          subjects: linked
-          amount: -2
-          kind: any
-        active_zones:
-          - equipment

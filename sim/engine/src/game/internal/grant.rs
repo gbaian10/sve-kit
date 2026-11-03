@@ -213,6 +213,11 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 pub(super) fn supported_definition(ability: &Ability) -> bool {
+    if ability.kind == AbilityKind::Activated {
+        return ability.active_zones == [ZoneKind::Field]
+            && ability.qualification == AbilityQualification::Ordinary
+            && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
+    }
     if ability.kind == AbilityKind::Static {
         return ability.active_zones == [ZoneKind::Field] || static_cost(ability);
     }

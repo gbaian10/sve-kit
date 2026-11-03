@@ -67,6 +67,7 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
             | Fact::DriveGained(_)
             | Fact::Raced(_)
             | Fact::Evolved(_)
+            | Fact::Equipped(_)
             | Fact::CardPlayed { .. }
             | Fact::CardResolved { .. }
             | Fact::AbilityPlayed { .. }
