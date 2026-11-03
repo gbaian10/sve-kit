@@ -66,6 +66,15 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().map(|card| card.handle).collect())
             }
+            InputDomain::TokenCapacity { choices } => {
+                let chosen = choices
+                    .iter()
+                    .position(|names| {
+                        matches!(names.as_slice(), [name] if name == "魔導装甲車" || name == "リペアモード")
+                    })
+                    .unwrap();
+                Answer::TokenCapacity(u64::try_from(chosen).unwrap())
+            }
             InputDomain::Targets(domain) => Answer::Targets(
                 domain
                     .members
@@ -172,15 +181,20 @@ fn named(state: &Value, zone: &Value, name: &str) -> Vec<String> {
 const HORSE: &str = "BP11-P31";
 
 #[test]
-fn bp11_006_places_two_vehicles_then_hits_everything_for_the_ex_vehicle_count() {
+fn bp11_006_chooses_the_armored_car_for_the_last_ex_slot_then_counts_vehicles() {
     let mut initial = in_hand("BP11-006");
-    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"horse","card":HORSE}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([
+        {"id":"horse1","card":HORSE},{"id":"horse2","card":HORSE},
+        {"id":"horse3","card":HORSE},{"id":"other","card":"BP01-171"}
+    ]);
     let mut game = game(&initial);
     play(&mut game);
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 3);
-    assert_eq!(state["P2"]["leader"]["life"], 17_u8);
-    assert_eq!(state["objects"]["enemy"]["damage"], 3_u8);
+    assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 5);
+    assert_eq!(named(&state, &state["P1"]["ex"], "魔導装甲車").len(), 1);
+    assert_eq!(named(&state, &state["P1"]["ex"], "機動二輪車").len(), 0);
+    assert_eq!(state["P2"]["leader"]["life"], 16_u8);
+    assert_eq!(state["objects"]["enemy"]["damage"], 4_u8);
 }
 
 #[test]
@@ -200,7 +214,11 @@ fn bp11_014_lastword_deals_three_with_three_vehicles_on_field_and_ex() {
     initial["players"]["P1"]["zones"]["ex"] = json!([
         {"id":"horse1","card":HORSE},{"id":"horse2","card":HORSE}
     ]);
-    push(&mut initial, "field", vec![json!({"id":"horse3","card":HORSE})]);
+    push(
+        &mut initial,
+        "field",
+        vec![json!({"id":"horse3","card":HORSE})],
+    );
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"reaper","card":"BP22-084"}]);
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-037","state":{"hp":20_u8,"max_hp":20_u8}}]);
@@ -224,6 +242,49 @@ fn bp11_048_fanfare_horse_triggers_a_draw_and_discard_once() {
     assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 0);
     assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 1);
     assert_eq!(state["P1"]["deck"], json!(["second", "third"]));
+}
+
+#[test]
+fn bp11_048_does_not_draw_when_a_vehicle_enters_during_the_opponents_turn() {
+    let mut initial = on_field("BP11-048");
+    initial["turn"]["active"] = json!("P2");
+    push(
+        &mut initial,
+        "field",
+        vec![json!({"id":"producer","card":"producer"})],
+    );
+    let mut tree = expanded::tree().clone();
+    let mut source = tree["cards"]["BP01-041"].clone();
+    let mut ability = source["abilities"][0].clone();
+    ability.as_object_mut().unwrap().remove("activate");
+    ability["auto"] = json!({
+        "on":{"phase":{"whose":"opp","which":"end"}},
+        "do":[{"create":{"token":"従順な駿馬","n":1_u8,"to":"field"}}]
+    });
+    source["abilities"] = json!([ability]);
+    tree["cards"] = json!({"producer":source});
+    let producer = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
+    let mut game = Game::from_selected_effects(
+        producer_selection().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "opponent-vehicle-entry",
+    )
+    .unwrap();
+    game.load_internal_card("producer", &producer).unwrap();
+    assert_eq!(
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    triggers_with(&mut game, &[1]);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(named(&state, &state["P1"]["field"], "従順な駿馬").len(), 1);
+    assert_eq!(state["P1"]["deck"], json!(["first", "second", "third"]));
+    assert_eq!(state["P1"]["hand"], json!([]));
+    assert_eq!(state["P1"]["cemetery"], json!([]));
 }
 
 #[test]
@@ -256,22 +317,38 @@ fn bp11_072_evolves_for_one_only_while_crimson() {
         "cannot-evolve",
         "the one-cost evolution needs crimson"
     );
-    push(&mut initial, "hand", vec![json!({"id":"payer","card":"BP01-118"})]);
+    push(
+        &mut initial,
+        "hand",
+        vec![json!({"id":"payer","card":"BP01-118"})],
+    );
     let mut game = game(&initial);
     play_with(&mut game, "payer", &[1]);
-    assert_eq!(game.internal_rule_action(&cheap).unwrap().outcome, "resolved");
+    assert_eq!(
+        game.internal_rule_action(&cheap).unwrap().outcome,
+        "resolved"
+    );
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["evolve_deck"], json!([]));
-    assert_eq!(state["P1"]["pp"]["current"], 8_u8, "one for the payer, one to evolve");
+    assert_eq!(
+        state["P1"]["pp"]["current"], 8_u8,
+        "one for the payer, one to evolve"
+    );
 }
 
 #[test]
 fn bp11_095_pays_three_to_banish_when_an_own_vehicle_leaves() {
     let mut initial = on_field("BP11-095");
-    push(&mut initial, "field", vec![json!({"id":"horse","card":HORSE})]);
+    push(
+        &mut initial,
+        "field",
+        vec![json!({"id":"horse","card":HORSE})],
+    );
     let mut game = game(&initial);
     let horse = printed_activation(HORSE, 0);
-    let step = game.activate_internal_card("horse", horse, actor()).unwrap();
+    let step = game
+        .activate_internal_card("horse", horse, actor())
+        .unwrap();
     finish_with(&mut game, step, &[1]);
     triggers_with(&mut game, &[1]);
     let state = game.projection(View::Referee).unwrap();
@@ -336,7 +413,10 @@ fn bp12_038_costs_less_per_distinct_cemetery_cost() {
     play(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["field"], json!(["source"]));
-    assert_eq!(state["P1"]["pp"]["current"], 0_u8, "fourteen minus four kinds");
+    assert_eq!(
+        state["P1"]["pp"]["current"], 0_u8,
+        "fourteen minus four kinds"
+    );
 }
 
 #[test]
@@ -375,15 +455,22 @@ fn bp12_048_second_choice_places_repair_mode() {
 }
 
 #[test]
-fn bp12_049_discards_a_machine_to_draw_and_place_both_tokens() {
+fn bp12_049_chooses_repair_mode_for_the_last_ex_slot_then_recovers_one_pp() {
     let mut initial = in_hand("BP12-049");
-    push(&mut initial, "hand", vec![json!({"id":"fuel","card":"BP07-044"})]);
+    push(
+        &mut initial,
+        "hand",
+        vec![json!({"id":"fuel","card":"BP07-044"})],
+    );
+    initial["players"]["P1"]["zones"]["ex"] = json!(cards("repair", "BP07-T02", 4));
     let mut game = game(&initial);
     play(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["cemetery"], json!(["fuel"]));
     assert_eq!(state["P1"]["hand"], json!(["first"]));
-    assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 2);
+    assert_eq!(named(&state, &state["P1"]["ex"], "リペアモード").len(), 5);
+    assert_eq!(named(&state, &state["P1"]["ex"], "プロダクトマシーン").len(), 0);
+    assert_eq!(state["P1"]["pp"]["current"], 9_u8);
 }
 
 #[test]
@@ -402,7 +489,11 @@ fn bp12_057_awakened_gives_other_ocean_followers_rush_and_assail() {
 #[test]
 fn bp12_059_acts_to_give_a_cheap_dragon_storm_and_one_one() {
     let mut initial = on_field("BP12-059");
-    push(&mut initial, "field", vec![json!({"id":"ally","card":"BP12-067"})]);
+    push(
+        &mut initial,
+        "field",
+        vec![json!({"id":"ally","card":"BP12-067"})],
+    );
     let mut game = game(&initial);
     let mut step = game
         .activate_internal_card("source", printed_activation("BP12-059", 0), actor())
@@ -424,7 +515,12 @@ fn bp12_059_acts_to_give_a_cheap_dragon_storm_and_one_one() {
     triggers_with(&mut game, &[1]);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["objects"]["ally"]["power"], 3_u8);
-    assert!(state["objects"]["ally"]["keywords"].as_array().unwrap().contains(&json!("疾走")));
+    assert!(
+        state["objects"]["ally"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("疾走"))
+    );
     assert_eq!(state["objects"]["source"]["acted"], true);
 }
 

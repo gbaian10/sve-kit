@@ -10,6 +10,8 @@ cards:
                 who: self
           on:
             enter_field:
+              during:
+                turn: self
               sel:
                 trait: 乗物
               who: self
@@ -28,6 +30,10 @@ cards:
         - actor:
             model: claude-opus-5-5
             who: Claude
+          date: "2026-11-03"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
           date: "2026-11-03"
     token_sources:
       - card: BP11-P31
