@@ -1,0 +1,23 @@
+cards:
+  BP13-057:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            awakened: true
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
