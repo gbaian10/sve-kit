@@ -5,6 +5,7 @@ use super::{
     invalid, seat_name, unsupported,
 };
 use crate::ir::printed_keywords;
+use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding, Bool,
     BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead,
@@ -116,9 +117,9 @@ pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>)
             }
             Predicate::CompareInt {
                 left: Expr::Compute(read),
-                right: Expr::Literal(Int(amount)),
+                right,
                 ..
-            } if *amount >= 0 && numeric_filter(read, candidate) => Ok(true),
+            } if public_numbers::check(right) && numeric_filter(read, candidate) => Ok(true),
             Predicate::HasAbility {
                 abilities,
                 predicate,
@@ -217,6 +218,15 @@ pub(in crate::game::internal) fn freeze_source_names(
                 ),
             }
         }
+        Predicate::CompareInt {
+            left,
+            comparison,
+            right,
+        } if public_numbers::check(right) => Predicate::CompareInt {
+            left: left.clone(),
+            comparison: *comparison,
+            right: Expr::Literal(execution.integer(game, right)?),
+        },
         Predicate::Not { predicate } => Predicate::Not {
             predicate: freeze_source_names(game, execution, predicate)?,
         },

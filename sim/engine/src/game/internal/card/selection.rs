@@ -4,6 +4,7 @@ use crate::game::list;
 use crate::ir::effect_evolution;
 use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::private_look_choice;
+use crate::ir::public_numbers;
 use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
     ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
@@ -12,6 +13,7 @@ use crate::ir::{
     PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
     Selector, Stat, TraitsRead,
 };
+use crate::ir::{AggregateBound, NumericProperty};
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -268,12 +270,59 @@ fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
         return Err(unsupported("one selector group per target decision"));
     };
     if !matches!(constraint.distinct_by, None | Some(ObjectProperty::Names))
-        || !constraint.aggregate_bounds.is_empty()
+        || !count_bounds(constraint)
         || constraint.disjoint != Disjointness::Disjoint
     {
         return Err(unsupported("target properties or aggregate constraints"));
     }
     Ok(group)
+}
+
+fn count_bounds(constraint: &SelectionConstraint) -> bool {
+    if constraint.aggregate_bounds.is_empty() {
+        return true;
+    }
+    let [
+        AggregateBound {
+            property: NumericProperty::Count,
+            comparison: Comparison::Equal | Comparison::LessEqual,
+            value,
+        },
+    ] = constraint.aggregate_bounds.as_slice()
+    else {
+        return false;
+    };
+    constraint.groups.len() == 1
+        && constraint.groups[0].cardinality == constraint.cardinality
+        && constraint.cardinality.minimum == Nat(0)
+        && constraint.cardinality.maximum.is_none()
+        && public_numbers::check(value)
+}
+fn evaluated_counts(
+    game: &Game,
+    execution: &Execution,
+    printed: &SelectionConstraint,
+) -> Result<SelectionConstraint> {
+    if !count_bounds(printed) {
+        return Err(unsupported("dynamic target count shape"));
+    }
+    let mut constraint = printed.clone();
+    if let [bound] = constraint.aggregate_bounds.as_slice() {
+        let count =
+            Nat(u64::try_from(execution.integer(game, &bound.value)?.0.max(0)).map_err(invalid)?);
+        let cardinality = Cardinality {
+            minimum: if bound.comparison == Comparison::Equal {
+                count
+            } else {
+                Nat(0)
+            },
+            maximum: Some(count),
+        };
+        constraint.cardinality = cardinality;
+        constraint.groups[0].cardinality = cardinality;
+        constraint.aggregate_bounds.clear();
+    }
+    Ok(constraint)
 }
 
 fn target_bounds(constraint: &SelectionConstraint, group: &SelectionGroup) -> Cardinality {
@@ -611,8 +660,10 @@ fn check_atomic_predicate(
         Predicate::CompareInt {
             left: Expr::Compute(left),
             comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
-            right: Expr::Literal(Int(_)),
-        } if matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) => {
+            right,
+        } if public_numbers::check(right)
+            && matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) =>
+        {
             Ok(())
         }
         _ => Err(unsupported(
@@ -867,8 +918,9 @@ impl Game {
         let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
-        let group_members = self.target_group_members(execution, decision, constraint)?;
-        let (members, group_bounds, bounds) = group_layout(constraint, &group_members);
+        let constraint = evaluated_counts(self, execution, constraint)?;
+        let group_members = self.target_group_members(execution, decision, &constraint)?;
+        let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
         let bounds = look_field_entry_bounds(
             self,
             actor_seat,

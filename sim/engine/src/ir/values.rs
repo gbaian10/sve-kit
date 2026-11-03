@@ -481,6 +481,7 @@ variants!(Predicate {
 variants!(NameOperation { UniqueName { object: ObjectView } => ["value.unique-name"] });
 variants!(ZoneOperation { OfPlayer { player: PlayerRef, kind: ZoneKind } => [] });
 tags!(NumericProperty {
+    Count,
     Cost,
     OriginalCost,
     Attack,

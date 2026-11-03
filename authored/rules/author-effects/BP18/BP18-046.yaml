@@ -1,0 +1,48 @@
+cards:
+  BP18-046:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: banish
+                            op: ge
+                            right: 10
+                        then:
+                          - damage:
+                              n: 2
+                              to:
+                                any_of:
+                                  - enemy
+                                  - leader_of: enemy
+                  - - draw:
+                        n: 1
+                    - banish:
+                        top:
+                          n: 1
+                          who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

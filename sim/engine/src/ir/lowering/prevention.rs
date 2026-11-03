@@ -300,7 +300,8 @@ pub(super) fn lower_at_source(
             }
             ast::StaticEffect::Grant(_)
             | ast::StaticEffect::Cannot(_)
-            | ast::StaticEffect::CostMod(_) => {
+            | ast::StaticEffect::CostMod(_)
+            | ast::StaticEffect::EvolveCostMod(_) => {
                 return Err(unsupported(path));
             }
         };

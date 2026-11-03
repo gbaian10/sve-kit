@@ -117,6 +117,7 @@ impl BodyContext<'_> {
                 name: None,
                 name_contains: None,
                 orig_cost_eq: None,
+                orig_cost_ge: None,
                 token: None,
                 not_token: None,
             },
@@ -813,6 +814,7 @@ impl BodyContext<'_> {
             || count.name.is_some()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
+            || count.orig_cost_ge.is_some()
             || count.token.is_some()
             || count.not_token.is_some();
         if !matches!(
@@ -833,10 +835,12 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let binding = Binding::new(self.allocator.id(path)?, self.scope);
-        if count
-            .orig_cost_eq
-            .is_some_and(|cost| i64::try_from(cost).is_err())
+        // A count can be nested inside another candidate predicate.
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        if [count.orig_cost_eq, count.orig_cost_ge]
+            .into_iter()
+            .flatten()
+            .any(|cost| i64::try_from(cost).is_err())
         {
             return Err(unsupported(path));
         }

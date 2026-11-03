@@ -214,7 +214,10 @@ impl Game {
         id: &str,
         base: i64,
     ) -> Result<i64> {
-        self.installed_cost_with(id, base, CostKind::Evolution, None)
+        let extra = CostChange::Delta {
+            amount: Expr::Literal(Int(self.internal_static_evolution_delta(id)?)),
+        };
+        self.installed_cost_with(id, base, CostKind::Evolution, Some(&extra))
     }
 
     fn installed_cost_with(

@@ -248,22 +248,27 @@ fn bp07_086_banishes_the_created_repair_mode_and_reduces_evolution_by_one() {
     );
 }
 #[test]
-fn bp13_078_puts_an_opponents_other_follower_into_its_owners_cemetery_then_reduces_evolution() {
-    let mut initial = position("BP13-078", "hand", "payment-form-BP13-078");
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"fee","card":"BP01-171"}]);
-    let mut game = game(&initial);
-    play(&mut game, "source", 1, 1);
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["P2"]["cemetery"],
-        json!(["fee"]),
-        "bp13 078 puts an opponents other follower into its owners cemetery then reduces evolution"
-    );
-    evolve(&mut game, 1, &json!({}));
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
-        7_i64,
-        "bp13 078 puts an opponents other follower into its owners cemetery then reduces evolution"
-    );
+fn bp13_078_pays_only_another_follower_controlled_by_its_controller() {
+    for own in [false, true] {
+        let mut initial = position("BP13-078", "hand", "payment-form-BP13-078");
+        initial["players"]["P2"]["zones"]["field"] =
+            json!([{"id":"enemy-fee","card":"BP01-171","owner":"P1"}]);
+        if own {
+            initial["players"]["P1"]["zones"]["field"] =
+                json!([{"id":"own-fee","card":"BP01-171","owner":"P2"}]);
+        }
+        let mut game = game(&initial);
+        play(&mut game, "source", 1, 1);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P2"]["field"], json!(["enemy-fee"]),
+            "a follower controlled by the opponent cannot pay a field material cost even when owned by the payer");
+        assert_eq!(state["P2"]["cemetery"], if own { json!(["own-fee"]) } else { json!([]) },
+            "the payer's controlled follower pays into its owner's cemetery");
+        evolve(&mut game, if own { 1 } else { 2 }, &json!({}));
+        assert_eq!(game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            if own { 7_i64 } else { 6_i64 },
+            "only a successfully paid optional fanfare grants the evolution discount");
+    }
 }
 #[test]
 fn bp04_106_acts_two_amulets_for_fanfare_then_banishes_one_to_evolve() {

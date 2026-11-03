@@ -608,6 +608,7 @@ fn supported(code: &str) -> bool {
             | "selector.extremum"
             | "internal.ExtremumKind.Minimum"
             | "internal.ExtremumKind.Maximum"
+            | "internal.NumericProperty.Count"
             | "internal.NumericProperty.Cost"
             | "internal.NumericProperty.OriginalCost"
             | "internal.NumericProperty.Attack"

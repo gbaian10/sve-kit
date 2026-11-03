@@ -127,6 +127,25 @@ pub(super) fn lower(
         .transpose()?;
     let mut declarations = Vec::new();
     for value in &head.effects {
+        if let ast::StaticEffect::EvolveCostMod(modifier) = value {
+            if !matches!(modifier.on, ast::EvolutionCostSubject::This)
+                || modifier.set.is_some()
+                || head.r#while.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            let argument = modifier.delta.as_ref().ok_or_else(|| unsupported(path))?;
+            let number: ast::Number = super::decode(argument.clone(), path)?;
+            let amount = context.number(&number, path, &mut super::BTreeSet::new())?;
+            declarations.push(Effect::CostModifier {
+                kind: CostKind::Evolution,
+                subjects: super::numeric::holder(),
+                change: CostChange::Delta { amount },
+                duration: super::numeric::duration(None, path)?,
+                usage: None,
+            });
+            continue;
+        }
         let ast::StaticEffect::CostMod(value) = value else {
             return Err(unsupported(path));
         };

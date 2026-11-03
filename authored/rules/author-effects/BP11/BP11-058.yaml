@@ -1,0 +1,50 @@
+cards:
+  BP11-058:
+    abilities:
+      - fanfare:
+          do:
+            - banish:
+                ref: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto:
+                count:
+                  class: ドラゴン
+                  orig_cost_ge: 7
+                  who: self
+                  zone: cemetery
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - discard:
+                  ref: this
+              - discard:
+                  n: 1
+                  sel:
+                    class: ドラゴン
+                    orig_cost_ge: 7
+                    who: self
+                    zone: hand
+          do:
+            - pp_max:
+                delta: 1
+                who: self
+            - draw:
+                n: 1
+          zone: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

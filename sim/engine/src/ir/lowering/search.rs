@@ -32,16 +32,17 @@ fn view(binding: Binding<ObjectRef>) -> ObjectView {
 }
 
 fn filter(
+    context: &mut BodyContext<'_>,
     selector: &ast::SearchSelector,
     candidate: Binding<ObjectRef>,
     path: &str,
 ) -> Result<Expr<Bool>, LoweringError> {
     match selector {
-        ast::SearchSelector::Query(query) => query_filter(query, candidate, path),
+        ast::SearchSelector::Query(query) => query_filter(context, query, candidate, path),
         ast::SearchSelector::Union { any_of } if !any_of.is_empty() => {
             let predicates = any_of
                 .iter()
-                .map(|query| query_filter(query, candidate, path))
+                .map(|query| query_filter(context, query, candidate, path))
                 .collect::<Result<Vec<_>, _>>()?;
             if predicates
                 .iter()
@@ -56,6 +57,7 @@ fn filter(
 }
 
 fn query_filter(
+    context: &mut BodyContext<'_>,
     query: &ast::SearchQuery,
     candidate: Binding<ObjectRef>,
     path: &str,
@@ -79,6 +81,13 @@ fn query_filter(
         _ => return Err(unsupported(path)),
     };
     let predicate = super::selection::field_filter(&filter, candidate);
+    let predicate = context.numeric_limits(
+        predicate,
+        candidate,
+        query.cost_le.as_ref(),
+        query.orig_cost_le.as_ref(),
+        path,
+    )?;
     if !query.not_same_name_as_this {
         return Ok(predicate);
     }
@@ -294,7 +303,7 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let (filter, cardinality, groups) = if let Some(query) = &search.sel {
-            let predicate = filter(query, candidate, path)?;
+            let predicate = filter(self, query, candidate, path)?;
             let cardinality = quantity(search.n, search.upto, path)?;
             if search.distinct_by.is_some() {
                 (
@@ -318,7 +327,7 @@ impl BodyContext<'_> {
                     .checked_add(cardinality.maximum.ok_or_else(|| unsupported(path))?.0)
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(1, self.card_allocator.scope(path)?);
-                let predicate = filter(&group.sel, binding, path)?;
+                let predicate = filter(self, &group.sel, binding, path)?;
                 if matches!(predicate, Expr::Literal(_)) {
                     return Err(unsupported(path));
                 }
@@ -461,8 +470,15 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::EvolveCostMod(modifier) = &installation.effect else {
             return Err(unsupported(path));
         };
-        let ast::Affected::Affected = modifier.on;
-        let change = match (modifier.delta, modifier.set) {
+        if !matches!(modifier.on, ast::EvolutionCostSubject::Affected) {
+            return Err(unsupported(path));
+        }
+        let installed_delta = modifier
+            .delta
+            .as_ref()
+            .map(|value| value.as_i64().ok_or_else(|| unsupported(path)))
+            .transpose()?;
+        let change = match (installed_delta, modifier.set) {
             (Some(delta), None) => CostChange::Delta {
                 amount: Expr::Literal(Int(delta)),
             },

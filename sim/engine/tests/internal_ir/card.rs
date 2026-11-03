@@ -678,3 +678,6 @@ mod counter_lifecycle;
 
 #[path = "card/permanent_stand.rs"]
 mod permanent_stand;
+
+#[path = "card/dynamic_declarations.rs"]
+mod dynamic_declarations;

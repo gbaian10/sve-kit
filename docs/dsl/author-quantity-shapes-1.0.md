@@ -155,4 +155,6 @@ ECP01-038 的 DeckSlice 為 `{who:opponents,n:20}`；
 完整 choose/search 群組、位置、search.to.partition、entry_effects、instead、precondition 及 move/banish/look/reveal 已由[動作矩陣](author-step-shapes-1.0.md)承載。
 本表保留數量角色邊界；完整能力入口、來源／型別／scope／ports／receipt/capability 檢查仍另行實作。
 
-C1 的 `choice.upto` 另接受單一 `count: {who: self, zone: field, trait: <類型>}`：以正式模式宣告時的公開場上集合求上限，再沿用選項數上限、適正目標與不重複規則。零張略過群組；不擴充其他數量算式、精確 `n` 或替換上限。
+C1 的 `choice.upto` 另接受單一 `count: {who: self, zone: field, trait: <類型>}`：以正式模式宣告時的公開場上集合求上限，再沿用選項數上限、適正目標與不重複規則。零張略過群組。另准入 `per: {of: {count: <公開自身計數>}, unit: <正整數>}`，按完整單位向下取整並限制於模式總數；不擴充精確 `n`、替換上限或其他模式算式。
+
+C1 的正式 Target `n`／`upto` 接受[公開數值宣告子集](authoring-tools.md#公開數值宣告與查詢上限)，在宣告問題時固定精確／上限張數；不將這項權限推及私有 Look、任意 `choose`／`search` 張數或材料費用。底層重用單一選擇群組與張數 aggregate bound，不新增一套選擇程序。

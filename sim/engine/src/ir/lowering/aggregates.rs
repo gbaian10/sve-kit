@@ -95,6 +95,14 @@ impl BodyContext<'_> {
             || query.has_state_filter()
             || !query.traits_all.is_empty()
             || !query.names.is_empty()
+            || query
+                .cost_le
+                .as_ref()
+                .is_some_and(ast::NumericArgument::is_dynamic)
+            || query
+                .orig_cost_le
+                .as_ref()
+                .is_some_and(ast::NumericArgument::is_dynamic)
         {
             return Err(unsupported(path));
         }
@@ -112,10 +120,16 @@ impl BodyContext<'_> {
             other: query.other,
             racing: None,
             orig_cost_eq: query.orig_cost_eq,
-            orig_cost_le: query.orig_cost_le,
+            orig_cost_le: query
+                .orig_cost_le
+                .as_ref()
+                .and_then(ast::NumericArgument::literal),
             orig_cost_ge: query.orig_cost_ge,
             cost_eq: query.cost_eq,
-            cost_le: query.cost_le,
+            cost_le: query
+                .cost_le
+                .as_ref()
+                .and_then(ast::NumericArgument::literal),
             cost_ge: query.cost_ge,
             hp_le: query.hp_le,
             r#where: None,

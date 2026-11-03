@@ -1,5 +1,6 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
+use crate::ir::public_numbers;
 use crate::ir::{
     Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, NamesRead, ObjectRef,
 };
@@ -182,6 +183,13 @@ impl Checker {
             Expr::Compute(operation) => {
                 if bounds.minimum != Nat(1) || bounds.maximum.is_some() {
                     return Err(self.error(WellFormedReason::InvalidModes));
+                }
+                if let NatOperation::CheckedInt { value } = operation.as_ref() {
+                    return if public_numbers::per_count(value) {
+                        Ok(())
+                    } else {
+                        self.reject()
+                    };
                 }
                 self.conditional_count(operation)
             }
