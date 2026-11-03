@@ -1,0 +1,38 @@
+cards:
+  BP12-059:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on: ally
+          targets:
+            - bind: ally
+              from:
+                class: ドラゴン
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

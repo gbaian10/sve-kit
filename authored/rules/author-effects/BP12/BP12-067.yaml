@@ -1,0 +1,28 @@
+cards:
+  BP12-067:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        class: ドラゴン
+                        kind: follower
+                        orig_cost_eq: 1
+                        who: self
+                        zone: deck
+                      to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

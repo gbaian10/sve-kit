@@ -1,0 +1,41 @@
+cards:
+  BP11-095:
+    abilities:
+      - auto:
+          cost:
+            pp: 3
+          do:
+            - banish: enemy
+          on:
+            left_field:
+              sel:
+                trait: 乗物
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 従順な駿馬
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP11-P31
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

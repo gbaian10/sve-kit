@@ -1,0 +1,58 @@
+cards:
+  BP12-061:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 2
+              sel:
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 2
+        line: 1
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ナテラの大樹
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 自然
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 5
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP07-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

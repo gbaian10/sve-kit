@@ -1,0 +1,27 @@
+cards:
+  BP12-038:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - distinct_orig_costs:
+                  who: self
+                  zone: cemetery
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - keywords:
+          - ward
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
