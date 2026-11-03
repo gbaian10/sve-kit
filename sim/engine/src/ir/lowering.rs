@@ -705,7 +705,10 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
             && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
                 || (zones == [ZoneKind::Ex]
-                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))))
+                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))
+                    // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
+                    && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
+                        if placed.reference.is_some())))
         {
             return Err(unsupported(path));
         }

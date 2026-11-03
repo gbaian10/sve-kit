@@ -26,6 +26,7 @@ mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
 mod movement;
+pub(in crate::game::internal) use movement::ex_self_entry;
 mod played;
 mod quota;
 mod race;

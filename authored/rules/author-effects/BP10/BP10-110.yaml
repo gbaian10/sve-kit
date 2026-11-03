@@ -1,0 +1,39 @@
+cards:
+  BP10-110:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 4
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+          zone: ex
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 10
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
