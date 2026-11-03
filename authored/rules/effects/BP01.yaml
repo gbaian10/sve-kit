@@ -101,24 +101,6 @@ cards:
                 fn: le
               zone: cemetery
     status: complete
-  BP01-170:
-    abilities:
-      - active_zones:
-          - hand
-        body:
-          count: 1
-          op: draw
-        event: discard
-        kind: trigger
-        line: 1
-        subject: self
-      - body:
-          count: 1
-          op: draw
-        kind: spell
-        line: 1
-        section: 0
-    status: complete
   BP01-172:
     abilities: []
     status: complete
