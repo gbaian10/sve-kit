@@ -332,6 +332,7 @@ fn check_requirements(
                             | "shape.AbilityOrigin.Keyword"
                             | "shape.ObjectFrozen.EnterFieldObject"
                             | "shape.ObjectFrozen.EnterExObject"
+                            | "shape.ObjectFrozen.UbActivatedHolder"
                             | "shape.ObjectFrozen.AttackAttacker"
                             | "shape.ObjectFrozen.EvolveSubject"
                             | "shape.ObjectFrozen.DestroyObjectBefore"

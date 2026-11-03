@@ -836,3 +836,11 @@ BP06-118 的單一入場能力使用對手整副手牌，整卡為 light。
 
 隱藏手牌讀取只存在於已驗證的整副 Reveal 動作內；通用 selector、capture、metadata、
 篩選／牌庫／隨機公開、RevealUntil 及後續新世代追蹤仍不准入。
+
+### UB 發動訂閱
+
+帶 `UnionBurst` 資格的能力在既有 `AbilityPlayed` 提交點，完成目標與付款後、本文前，
+以同一 execution、能力實例、來源世代與控制者產生 `UbActivated`。
+目前僅准場上其他己方從者的 UB 訂閱；一般能力、未成立付款與其他來源不產生符合事件。
+共用 subject filter 在發動快照判斷 holder，並在本文前建立 pending occurrence；
+觀察者後續離場仍使用既有來源資訊與世代保護。次數限制沿用 shared quota，沒有獨立 UB 佇列。

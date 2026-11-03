@@ -1358,6 +1358,9 @@ impl Game {
                 controller: source.controller.seat,
             });
         }
+        if play.qualification == AbilityQualification::UnionBurst {
+            self.internal_ub_activated_events(execution)?;
+        }
         if execution.spell {
             let CostSpec::Ordered { steps } = &play.costs else {
                 return Err(unsupported("card play costs"));
