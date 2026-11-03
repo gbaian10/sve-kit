@@ -78,7 +78,12 @@ export function DeckImportPage() {
     if (preview === null || preview === "bad-code") return
     const deck = {
       ...createDeck(
-        { name: preview.name ?? t("decks.importedName"), edition, basis: preview.basis },
+        {
+          name: preview.name ?? t("decks.importedName"),
+          edition,
+          format: preview.format ?? "standard",
+          basis: preview.basis,
+        },
         new Date(),
       ),
       leader: preview.leader,

@@ -1,13 +1,15 @@
 import type { Region } from "../search"
-import type { DeckBasis } from "./types"
+import { type DeckBasis, type DeckFormat, FORMATS_OF } from "./types"
 
 // A deck as one short line for chats and links: "SVEK-" and base64url of
-// [format version, edition, basis, leader, main, evolve, side, name]. Cards are the snapshot's
+// [code version, edition, deck format, basis, leader, main, evolve, side, name]. Cards are the snapshot's
 // permanent printing integers (`printing.int_id`, never reassigned); each section is sorted
 // ascending and stored as varint deltas, each followed by the copy count.
 
 const PREFIX = "SVEK-"
-const FORMAT_VERSION = 1
+const CODE_VERSION = 2
+// Byte values of the deck formats; a code may carry only its edition's formats.
+const FORMAT_CODES: readonly DeckFormat[] = ["standard", "crossover", "cross_craft", "gloryfinder"]
 // A whole input that is a code, or a link carrying one in `d`.
 const CODE_INPUT = /^(?:\S*[?&]d=)?(SVEK-[A-Za-z0-9_-]+)(?:[&#]\S*)?$/u
 
@@ -18,6 +20,7 @@ export interface DeckCodeCard {
 
 export interface DeckCodePayload {
   readonly edition: Region
+  readonly format: DeckFormat
   readonly basis: DeckBasis
   readonly leader: number | null
   readonly main: readonly DeckCodeCard[]
@@ -65,7 +68,11 @@ function writeSection(out: number[], cards: readonly DeckCodeCard[]): void {
 }
 
 export function encodeDeckCode(payload: DeckCodePayload): string {
-  const out: number[] = [FORMAT_VERSION, payload.edition === "en" ? 1 : 0]
+  const out: number[] = [
+    CODE_VERSION,
+    payload.edition === "en" ? 1 : 0,
+    FORMAT_CODES.indexOf(payload.format),
+  ]
   out.push(payload.basis.kind === "title" ? 1 : 0)
   const basis = new TextEncoder().encode(
     payload.basis.kind === "title" ? payload.basis.titleCode : payload.basis.classCode,
@@ -133,10 +140,14 @@ export function decodeDeckCode(code: string): DeckCodePayload {
     }
     return cards
   }
-  if (byte() !== FORMAT_VERSION) throw new DeckCodeError("unknown format version")
+  if (byte() !== CODE_VERSION) throw new DeckCodeError("unknown code version")
   const editionByte = byte()
+  const format = FORMAT_CODES[byte()]
   const kindByte = byte()
   if (editionByte > 1 || kindByte > 1) throw new DeckCodeError("bad header")
+  const edition = editionByte === 1 ? "en" : "jp"
+  if (format === undefined || !FORMATS_OF[edition].includes(format))
+    throw new DeckCodeError("format of another edition")
   const basisLength = varint()
   const basisCode = text(offset + basisLength)
   const leader = varint()
@@ -144,7 +155,8 @@ export function decodeDeckCode(code: string): DeckCodePayload {
   const evolve = section()
   const side = section()
   return {
-    edition: editionByte === 1 ? "en" : "jp",
+    edition,
+    format,
     basis:
       kindByte === 1
         ? { kind: "title", titleCode: basisCode }

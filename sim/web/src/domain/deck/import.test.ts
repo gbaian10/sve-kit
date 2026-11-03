@@ -47,6 +47,8 @@ describe("readImport", () => {
     expect(imported).toMatchObject({
       name: "精靈快攻",
       edition: undefined,
+      // A pasted list names no format; the importer makes it a Standard deck.
+      format: undefined,
       basis: { kind: "class", classCode: "forest" },
       leader: { cardId: "c:leader" },
       main: [{ cardId: "c:1", count: 4 }],
@@ -68,9 +70,10 @@ describe("readImport", () => {
     expect(imported.main).toEqual([{ cardId: "c:1", count: 2 }])
   })
 
-  it("reads a share code with its edition, basis, leader, side list and unknown ids", () => {
+  it("reads a share code with its edition, format, basis, leader, side list and unknown ids", () => {
     const code = encodeDeckCode({
       edition: "en",
+      format: "gloryfinder",
       basis: { kind: "title", titleCode: "umamusume" },
       leader: 20_100,
       main: [
@@ -85,6 +88,7 @@ describe("readImport", () => {
     expect(readImport(code, lookup)).toMatchObject({
       name: "Uma",
       edition: "en",
+      format: "gloryfinder",
       basis: { kind: "title", titleCode: "umamusume" },
       leader: { cardId: "c:leader" },
       main: [{ cardId: "c:1", count: 3 }],
@@ -97,6 +101,7 @@ describe("readImport", () => {
   it("reads a code without a leader or a name", () => {
     const code = encodeDeckCode({
       edition: "jp",
+      format: "standard",
       basis: { kind: "class", classCode: "royal" },
       leader: null,
       main: [{ intId: 20_020, count: 3 }],

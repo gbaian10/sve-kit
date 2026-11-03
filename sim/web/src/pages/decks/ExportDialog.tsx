@@ -166,6 +166,7 @@ export function ExportDialog({
       missing.push(facts.factsOf(deck.leader.cardId)?.name ?? deck.leader.cardId)
     const code = encodeDeckCode({
       edition: deck.edition,
+      format: deck.format,
       basis: deck.basis,
       leader,
       main: cards(deck.main),

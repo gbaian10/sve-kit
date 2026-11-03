@@ -70,6 +70,7 @@ describe("DeckImportPage", () => {
   it("opens a share link with its preview and lists ids the snapshot does not have", async () => {
     const code = encodeDeckCode({
       edition: "jp",
+      format: "crossover",
       basis: { kind: "class", classCode: "royal" },
       leader: 2001,
       main: [
@@ -87,6 +88,7 @@ describe("DeckImportPage", () => {
     await userEvent.setup().click(screen.getByRole("button", { name: "建立牌組" }))
     expect(storedDecks()[0]).toMatchObject({
       name: "分享的牌組",
+      format: "crossover",
       leader: { cardId: "c:sd01-001" },
       main: [{ cardId: "c:bp01-001", count: 3 }],
     })
