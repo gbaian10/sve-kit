@@ -131,25 +131,29 @@ fn check_additional(
             super::play::check_additional_body(&ability.node)?;
         }
     }
-    if card
+    let quick = card
         .card()
         .abilities
         .iter()
-        .any(|ability| card_permission(&ability.node))
-    {
+        .any(|ability| card_permission(&ability.node));
+    let hand = quick
+        && super::hand_payment::single_additional(&payment.node.play.costs)
+        && payment.node.play.parameters.is_empty();
+    if quick && !hand {
         return Err(unsupported("additional Quick payment preflight"));
     }
     let CostSpec::Ordered { steps } = &payment.node.play.costs else {
         return Err(unsupported("additional ordered costs"));
     };
-    if steps.is_empty()
-        || steps.iter().any(|step| {
-            !super::material::check_cost(&step.instruction.action, &payment.node.play)
-                || !matches!(
-                    super::material::cost_objects(&step.instruction.action),
-                    Some(Selector::Bound { .. })
-                )
-        })
+    if !hand
+        && (steps.is_empty()
+            || steps.iter().any(|step| {
+                !super::material::check_cost(&step.instruction.action, &payment.node.play)
+                    || !matches!(
+                        super::material::cost_objects(&step.instruction.action),
+                        Some(Selector::Bound { .. })
+                    )
+            }))
     {
         return Err(unsupported("additional public material costs"));
     }

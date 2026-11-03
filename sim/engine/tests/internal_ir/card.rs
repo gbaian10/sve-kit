@@ -706,3 +706,6 @@ mod equipment_played;
 
 #[path = "card/filtered_mill.rs"]
 mod filtered_mill;
+
+#[path = "card/quick_hand.rs"]
+mod quick_hand;

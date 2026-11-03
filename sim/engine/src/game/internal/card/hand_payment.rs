@@ -78,6 +78,22 @@ pub(super) fn check_cost(action: &Action) -> bool {
     source_discard(action) || selection(action).is_ok()
 }
 
+pub(super) fn single_additional(costs: &CostSpec) -> bool {
+    let CostSpec::Ordered { steps } = costs else {
+        return false;
+    };
+    let [step] = steps.as_slice() else {
+        return false;
+    };
+    selection(&step.instruction.action).is_ok_and(|constraint| {
+        constraint.cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
+    })
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Hand cost choice and commit share the play transaction."
@@ -88,6 +104,11 @@ impl Game {
         execution: &mut Execution,
         play: &PlayState,
     ) -> Result<bool> {
+        if let Some((_, additional)) = play.additional.as_deref()
+            && self.internal_hand_cost_materials(execution, &additional.play.costs)?
+        {
+            return Ok(true);
+        }
         if self.internal_hand_cost_materials(execution, &play.costs)? {
             return Ok(true);
         }

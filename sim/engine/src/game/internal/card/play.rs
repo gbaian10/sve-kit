@@ -118,7 +118,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(super) exchange: Option<super::exchange::ExchangeState>,
     pub(super) optional: Vec<super::optional::OptionalState>,
     pub(super) costs: CostSpec,
-    additional: Option<Box<(FaceId, PlayCostPayment)>>,
+    pub(super) additional: Option<Box<(FaceId, PlayCostPayment)>>,
     mode_costs: CostSpec,
     limit: Option<LimitSpec>,
     body: Program,
@@ -603,6 +603,9 @@ impl Game {
         if !self.quick_costs_available(holder, &execution, &play.costs, actor, spell)? {
             return Ok(false);
         }
+        if spell && !self.quick_additional_costs_available(holder, ability, actor, &execution)? {
+            return Ok(false);
+        }
         let groups = collect_modes(
             ability
                 .body
@@ -706,6 +709,58 @@ impl Game {
             }
         }
         Ok(true)
+    }
+
+    fn quick_additional_costs_available(
+        &self,
+        holder: &str,
+        ability: &Ability,
+        actor: PlayerId,
+        execution: &Execution,
+    ) -> Result<bool> {
+        let Some((_, payment)) = self.internal_additional(execution)?.as_deref().cloned() else {
+            return Ok(true);
+        };
+        if !super::hand_payment::single_additional(&payment.play.costs) {
+            return Err(unsupported("Quick additional hand cost"));
+        }
+        let mut probe = self.clone();
+        // Enter Resolution through the formal play boundary before looking for hand costs.
+        let mut selection = probe.spell_execution(holder, actor, ability)?;
+        probe.card_runtime.active_source = selection.ability;
+        let play = ability
+            .play
+            .as_ref()
+            .ok_or_else(|| invalid("missing Quick play"))?;
+        match probe.internal_card_payment(&mut selection, &play.costs, true) {
+            Ok(()) => {}
+            Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
+            Err(error) => return Err(error),
+        }
+        match probe.internal_hand_cost_materials(&mut selection, &payment.play.costs) {
+            Ok(true) => {}
+            Ok(false) => return Err(invalid("missing Quick hand cost")),
+            Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
+            Err(error) => return Err(error),
+        }
+        let Some((question, Wait::CostDiscard(wait))) = selection.waiting.take() else {
+            return Err(invalid("missing Quick hand cost question"));
+        };
+        let InputDomain::CostMaterials(domain) = question.domain else {
+            return Err(invalid("Quick hand cost domain"));
+        };
+        for candidate in domain.members {
+            let mut trial = probe.clone();
+            let mut paid = selection.clone();
+            let members = wait.validate(&trial, &paid, &[candidate.handle])?;
+            paid.cost_discards.insert(wait.receipt(), members);
+            match trial.internal_card_payment(&mut paid, &payment.play.costs, false) {
+                Ok(()) => return Ok(true),
+                Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        Ok(false)
     }
 
     fn quick_mode_plan(
@@ -812,6 +867,17 @@ impl Game {
         if self.printed_face_ordinal(&object.card, face)? != 0 {
             return Err(unsupported("Spell belongs to another face"));
         }
+        let execution = self.spell_execution(holder, actor, &ability)?;
+        self.run_card_play(execution, ability)
+    }
+
+    fn spell_execution(
+        &mut self,
+        holder: &str,
+        actor: PlayerId,
+        ability: &Ability,
+    ) -> Result<Execution> {
+        let object = self.object(holder)?.clone();
         let old_context = Context {
             source: holder.into(),
             generation: Generation(object.generation),
@@ -830,7 +896,7 @@ impl Game {
         let source = self.internal_card_source(holder, ability.id, actor)?;
         // The Spell's source is its Resolution generation, never the Hand/EX play-time object.
         execution.bind_source(self, source)?;
-        self.run_card_play(execution, ability)
+        Ok(execution)
     }
 
     pub(super) fn check_card_play_holder(&self, holder: &str, actor: PlayerId) -> Result<()> {
