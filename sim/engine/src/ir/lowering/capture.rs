@@ -141,6 +141,7 @@ impl BodyContext<'_> {
             | ast::Number::Plus { .. }
             | ast::Number::Minus { .. }
             | ast::Number::Times { .. }
+            | ast::Number::HalfUp { .. }
             | ast::Number::Per { .. }
             | ast::Number::Min { .. }
             | ast::Number::Event { .. }

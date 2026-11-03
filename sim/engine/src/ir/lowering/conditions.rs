@@ -8,6 +8,7 @@ use super::{
     IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use core::slice::from_ref;
 
 pub(super) fn qualify_costs(
     costs: &mut CostSpec,
@@ -795,6 +796,9 @@ impl BodyContext<'_> {
             }
             ast::Number::Times { times } => {
                 self.arithmetic(Arithmetic::Multiply, &times[..], path, active)
+            }
+            ast::Number::HalfUp { half_up } => {
+                self.arithmetic(Arithmetic::HalfUp, from_ref(half_up.as_ref()), path, active)
             }
             ast::Number::Min { min } => self.minimum(min, path, active),
             ast::Number::Per { per } => self.per(per, path, active),

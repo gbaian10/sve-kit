@@ -1,0 +1,51 @@
+cards:
+  CP04-037:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                kind: spell
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 3
+                to: t
+            - draw:
+                n: 1
+          targets:
+            - bind: t
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+        section: 1
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - equip:
+                on: this
+                token: ケイオスグリモワール
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

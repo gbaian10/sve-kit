@@ -939,6 +939,7 @@ fn supported(code: &str) -> bool {
             | "internal.Arithmetic.FloorDivide"
             | "internal.Arithmetic.Minimum"
             | "internal.Arithmetic.Maximum"
+            | "internal.Arithmetic.HalfUp"
             | "shape.NatOperation.Count"
             | "value.aggregate.count"
             | "shape.NatOperation.DistinctCount"

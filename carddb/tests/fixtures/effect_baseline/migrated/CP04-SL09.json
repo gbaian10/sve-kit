@@ -1,0 +1,90 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "amount": 3,
+            "op": "damage",
+            "subjects": "target.1"
+          },
+          {
+            "count": 1,
+            "op": "draw"
+          }
+        ]
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "self",
+            "type": "spell",
+            "zone": "hand"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "discard",
+          "subjects": "cost.1"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ],
+      "ub": true
+    },
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1,
+      "section": 0
+    },
+    {
+      "body": {
+        "count": 1,
+        "name": "ケイオスグリモワール",
+        "op": "equip",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "section": 0,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

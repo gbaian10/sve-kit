@@ -229,6 +229,7 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {
                 pattern: EventPattern::Attack { .. }
+                    | EventPattern::Play { .. }
                     | EventPattern::Phase { .. }
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Damage { .. }
