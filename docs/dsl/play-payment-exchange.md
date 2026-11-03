@@ -164,6 +164,9 @@ optional，整卡拒絕。同次本文除上述 PaymentComplete 外，只增加�
 - DSL 入口只接 `play.optional_cost` 的單一 mapping（§1 的 exact Material，wrapper.result
   可省略），並且恰有一個 literal `optional_cost_delta` 或 `optional_cost_set`。
   不帶 option、不帶 choice 關聯；缺修正、帶列表或條件式交換修正均拒絕。
+  公開材料沿用物件篩選器，包含 `name_contains`；候選 binding 換到材料決定的獨立
+  scope 時保留完整篩選條件。名稱包含並不放寬卡種或直立資格，例如 CP04-036 只接受
+  名稱含「ペコリーヌ」的直立從者，仍須恰好一張，不能以錯名、錯卡種或已橫置的卡付款。
 - lowering 把這對欄位構成 face 的唯一 exchange，與一般 modifiers 並列；不讓 exchange
   change 同時進普通 modifiers。Spell 的 `PlaySpec.costs` 保持唯一印刷 PP literal，
   Follower 仍走卡片規則成本。既有來源 reader 若只能看 abilities，須接 card-level play
