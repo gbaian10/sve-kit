@@ -332,6 +332,20 @@ class InputReuse(unittest.TestCase):
         (self.root / "carddb/src/__pycache__/ignored.pyc").write_bytes(b"\x01")
         assert rust_tests.input_digest(self.root) == before
 
+    def test_version_file_written_by_install_is_not_an_input(self) -> None:
+        """The first install writes the version file during generation; the pair is still kept."""
+        version = self.root / "carddb/src/sve_carddb/_version.py"
+        version.parent.mkdir(parents=True, exist_ok=True)
+        first = FakeTools(
+            during_generation=lambda: version.write_text("v1", encoding="utf-8")
+        )
+        assert self.run_tests(first) == 0
+        assert len(first.generated) == 2
+        version.write_text("v2", encoding="utf-8")
+        second = FakeTools()
+        assert self.run_tests(second) == 0
+        assert second.generated == []
+
     def test_missing_input_fails_before_cargo(self) -> None:
         """A missing input never falls back to generation or a kept pair."""
         (self.root / "tests/engine/card-input.json").unlink()

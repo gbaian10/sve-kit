@@ -519,7 +519,9 @@ layout instead of generating again. A pair is kept under
 `${XDG_CACHE_HOME:-~/.cache}/sve-kit/engine-inputs` (newest 8), only when the inputs
 hashed the same before and after generation. A missing
 input, unreadable directory, symlink or other nonregular input still fails. Bytecode
-cache directories are ignored. Cache copies, publication and pruning share a local
+cache directories and the hatch-vcs `carddb/src/sve_carddb/_version.py` (written when
+uv installs carddb; its version is exposed by the package but not used in the
+generated inputs) are ignored. Cache copies, publication and pruning share a local
 lock so concurrent worktrees cannot delete a pair while it is copied; generation
 and staging copies run outside that lock. Delete that folder to force a fresh
 generation when no wrapper is running. Both the manual `cargo-test` hook and the CI
