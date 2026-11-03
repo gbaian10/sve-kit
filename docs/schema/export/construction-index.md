@@ -6,16 +6,16 @@
 
 ## 1. 產出
 
-```bash
-# 從既有匯出根產生（每個地區一個 <region>.json）
-uv --directory carddb run sve-carddb snapshot construction-index --export-dir <匯出根> --out-dir <輸出目錄>
+`export-offline` 寫完快照後一併產生；既有匯出根可用下面的指令補產：
 
-# 或在 export-offline 完成後一併產生
-uv --directory carddb run sve-carddb snapshot export-offline … --construction-dir <輸出目錄>
+```bash
+uv --directory carddb run sve-carddb snapshot construction-index --export-dir <匯出根>
 ```
 
-- 讀匯出根的 `snapshots/preview/current.json`，跟 publish 用同一套閉包驗證；輸出目錄不能在匯出根裡
-- 檔案是 canonical-json-v1 bytes；指令印出每個檔的 bytes 與 SHA-256
+- 讀匯出根的 `snapshots/preview/current.json`，跟 publish 用同一套閉包驗證
+- 寫在同一個匯出根的 `construction/<manifest hex>/<region>.json`（manifest hex 是 `manifest_sha256` 去掉 `sha256:`）；
+  讀端用已載入快照的 manifest hash 組出路徑，快照清單本身不列這些檔，傳輸格式不變（維護者 2026-11-03 決定）
+- 檔案是 canonical-json-v1 bytes；指令印出每個檔的路徑、bytes 與 SHA-256；`construction` 目錄是連結時拒絕寫入
 - 綁定：檔內 `snapshot.data_version`、`snapshot.manifest_sha256` 指向來源快照；同一場對局固定快照與索引，兩邊用這兩個值核對
 - 本契約的範圍是本機產出
 
@@ -27,7 +27,7 @@ uv --directory carddb run sve-carddb snapshot export-offline … --construction-
 | `snapshot` | `{data_version, manifest_sha256}` |
 | `classes`、`titles`、`zones` | 字典：代碼字串的清單，卡片欄位存索引位置 |
 | `title_rules` | 作品名代碼 → 規則代號（目前只有 `cardfight_vanguard` → `vanguard`） |
-| `names` | 構築名稱的個數；構築名稱只以整數代號出現 |
+| `names` | 構築名稱的個數；構築名稱只以整數代號 0～`names`−1 出現，不帶名稱文字 |
 | `cards` | 欄式：`id`、`name`、`class`、`titles`、`zone` 五個等長陣列，依卡片 ID 排序 |
 | `copies` | `[卡片位置, "main" 或 "evolve", 上限]` |
 | `singleton_except` | `[卡片位置, [不受影響的構築名稱代號…]]` |
@@ -38,6 +38,8 @@ uv --directory carddb run sve-carddb snapshot export-offline … --construction-
 - `cards.titles`：位元遮罩，第 i 位是 `titles[i]`
 - `cards.zone`：`zones` 的位置（`none`、`leader`、`main`、`evolve`）
 - 卡片位置是 `cards` 陣列的索引
+- 構築名稱代號是不透明的分組鍵（[規格 §1.2](../../sim/deck-construction.md#12-構築索引邏輯形)）：只比較相同與否，
+  代號在不同快照之間不保證相同；違規的 `values.name` 就是這個代號，介面顯示名稱時用 `cards` 第一張卡在快照裡的卡名
 - `restrictions[]`：`{id, kind, from, until, max, max_groups, members: [[構築名稱代號, scope, option]]}`；
   `kind` 是 `copy_limit` 或 `choice_group`，日期是 `YYYY-MM-DD`，`until` 不含當天
 

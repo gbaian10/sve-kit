@@ -1,9 +1,10 @@
 """The construction index keeps exactly the facts a deck validator needs."""
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-from typer.testing import CliRunner
+from typer.testing import CliRunner, Result
 
 from sve_carddb import cli
 from sve_carddb.core.json import (
@@ -26,8 +27,6 @@ from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 from .test_name_annotations import name_snapshot
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from pydantic import JsonValue
 
     from sve_carddb.export.reader import Row, View
@@ -41,6 +40,7 @@ class Pool:
 
     def __init__(self, region: str = "jp") -> None:
         self.region = region
+        self._names: set[str] = set()
         vocabulary: list[Row] = [
             {"kind": kind, "code": code}
             for kind, codes in (
@@ -75,7 +75,8 @@ class Pool:
 
     def name(self, name: str) -> str:
         rules_name_id = f"rn:{name}"
-        if not any(row["id"] == rules_name_id for row in self.tables["rules_name"]):
+        if rules_name_id not in self._names:
+            self._names.add(rules_name_id)
             self.tables["rules_name"].append(
                 {"id": rules_name_id, "region": self.region, "official_name": name}
             )
@@ -570,51 +571,27 @@ def test_partial_windows_and_announced_rules_leave_coverage_gaps() -> None:
     assert get(standard, "restrictions") == []
 
 
-def test_command_writes_each_region_of_an_export(tmp_path: Path) -> None:
+def _command(export_dir: Path) -> Result:
+    return CliRunner().invoke(
+        cli.app, ["snapshot", "construction-index", "--export-dir", str(export_dir)]
+    )
+
+
+def test_command_writes_each_region_beside_the_snapshot(tmp_path: Path) -> None:
     snapshot = construction_snapshot()
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
-    out = tmp_path / "construction"
-    result = CliRunner().invoke(
-        cli.app,
-        [
-            "snapshot",
-            "construction-index",
-            "--export-dir",
-            str(roots.preview),
-            "--out-dir",
-            str(out),
-        ],
-    )
+    result = _command(roots.preview)
     assert result.exit_code == 0, result.output
+    manifest = string(load_export(roots.preview).entry["manifest_sha256"])
+    key = f"construction/{manifest.removeprefix('sha256:')}/jp.json"
+    raw = (roots.preview / key).read_bytes()
     report = object_value(parse(result.output.strip().splitlines()[-1].encode()))
-    raw = (out / "jp.json").read_bytes()
-    assert report == {"jp": {"bytes": len(raw), "sha256": digest(raw)}}
-    index = parse(raw)
-    assert (
-        get(index, "snapshot", "manifest_sha256")
-        == load_export(roots.preview).entry["manifest_sha256"]
-    )
-    assert array(get(index, "cards", "id"))
-
-
-def test_command_refuses_to_write_inside_the_public_root(tmp_path: Path) -> None:
-    snapshot = construction_snapshot()
-    roots = Roots(tmp_path / "public", tmp_path / "private")
-    write_preview(snapshot, roots, {})
-    result = CliRunner().invoke(
-        cli.app,
-        [
-            "snapshot",
-            "construction-index",
-            "--export-dir",
-            str(roots.preview),
-            "--out-dir",
-            str(roots.preview / "construction"),
-        ],
-    )
-    assert result.exit_code != 0
-    assert not (roots.preview / "construction").exists()
+    assert report == {key: {"bytes": len(raw), "sha256": digest(raw)}}
+    assert get(parse(raw), "snapshot", "manifest_sha256") == manifest
+    assert array(get(parse(raw), "cards", "id"))
+    # The snapshot closure publish reads is unchanged by the extra files.
+    load_export(roots.preview)
 
 
 def test_command_replaces_output_symlinks_without_modifying_targets(
@@ -625,20 +602,100 @@ def test_command_replaces_output_symlinks_without_modifying_targets(
     write_preview(snapshot, roots, {})
     pointer = roots.preview / "snapshots/preview/current.json"
     before = pointer.read_bytes()
-    out = tmp_path / "construction"
-    out.mkdir()
+    manifest = string(load_export(roots.preview).entry["manifest_sha256"])
+    out = roots.preview / "construction" / manifest.removeprefix("sha256:")
+    out.mkdir(parents=True)
     (out / "jp.json").symlink_to(pointer)
-    result = CliRunner().invoke(
-        cli.app,
-        [
-            "snapshot",
-            "construction-index",
-            "--export-dir",
-            str(roots.preview),
-            "--out-dir",
-            str(out),
-        ],
-    )
+    result = _command(roots.preview)
     assert result.exit_code == 0, result.output
     assert pointer.read_bytes() == before
     assert not (out / "jp.json").is_symlink()
+
+
+def test_command_refuses_a_linked_construction_directory(tmp_path: Path) -> None:
+    snapshot = construction_snapshot()
+    roots = Roots(tmp_path / "public", tmp_path / "private")
+    write_preview(snapshot, roots, {})
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (roots.preview / "construction").symlink_to(elsewhere)
+    assert _command(roots.preview).exit_code != 0
+    assert list(elsewhere.iterdir()) == []
+
+
+REPOSITORY = Path(__file__).resolve().parents[3]
+# Kinds that keep a card out of both decks or put it in the evolve deck, in each region's wording.
+_NONE_KINDS = ("トークン", "Token", "EP", "Evolution Point", "-")
+_EVOLVE_KINDS = ("エボルヴ", "アドバンス", "Evolved", "Advanced")
+# The EN page prints Drive Point as a plain Spell; exports take its deck role from the card identity
+# shared with JP, which reading pages alone cannot see.
+_ROLE_FIXES = {"CP03-127EN": "evolve"}
+
+
+def _official_pool(region: str) -> Pool:
+    """Every reviewed official card of the region, with its printed name, kind and text."""
+    pool = Pool(region)
+    for path in sorted((REPOSITORY / "card-data" / region).rglob("*.json")):
+        if path.name.endswith(".evidence.json"):
+            continue
+        for value in array(object_value(parse(path.read_bytes()))["cards"]):
+            card = object_value(value)
+            document = object_value(
+                next(iter(object_value(card["documents"]).values()))
+            )
+            face = object_value(array(object_value(document["record"])["faces"])[0])
+            kind = string(
+                face["card_type"]
+                if region == "jp"
+                else object_value(face["info"]).get("Card Type") or "-"
+            )
+            role = (
+                "leader"
+                if kind in {"リーダー", "Leader"}
+                else None
+                if any(part in kind for part in _NONE_KINDS)
+                else "evolve"
+                if any(part in kind for part in _EVOLVE_KINDS)
+                else "main"
+            )
+            role = _ROLE_FIXES.get(string(card["card_no"]), role)
+            pool.card(
+                string(card["card_no"]),
+                string(face["name"]),
+                role=role,
+                class_code="neutral",
+                text=None if face["text"] is None else string(face["text"]),
+                sections=tuple(map(string, array(face["sections"] or []))),
+            )
+    return pool
+
+
+@pytest.mark.parametrize(
+    ("region", "suffix", "onion"),
+    [("jp", "", "BP09-049"), ("en", "EN", "BP09-058EN")],
+)
+def test_official_card_text_yields_the_known_construction_rules(
+    region: str, suffix: str, onion: str
+) -> None:
+    index = _official_pool(region).build()
+    cards = cards_by_id(index)
+    ids = list(cards)
+    copies = {
+        (ids[integer(row[0])], row[1], row[2])
+        for row in map(array, array(get(index, "copies")))
+    }
+    assert {
+        (onion, "main", 50),
+        (f"BP11-045{suffix}", "main", 6),
+        (f"CP01-085{suffix}", "evolve", 10),
+        (f"CP03-127{suffix}", "evolve", 10),
+        (f"ECP01-058{suffix}", "evolve", 10),
+    } <= copies
+    # New card text that changes construction must be reviewed here: today two main-deck names
+    # and seven evolve-deck names carry such a rule in each region.
+    assert len({(cards[card]["name"], section) for card, section, _ in copies}) == 9
+    singletons = [array(row) for row in array(get(index, "singleton_except"))]
+    holders = {ids[integer(row[0])] for row in singletons}
+    assert f"BP19-110{suffix}" in holders
+    cutthroat = cards[f"BP19-110{suffix}"]["name"]
+    assert all(row[1] == [cutthroat] for row in singletons)

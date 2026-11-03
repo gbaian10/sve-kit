@@ -107,9 +107,16 @@ def build_construction_index(
 
 
 def write_construction_indexes(
-    snapshot: Snapshot, out_dir: Path
+    snapshot: Snapshot, export_root: Path
 ) -> dict[str, JsonValue]:
-    """Write `<region>.json` for every region of the snapshot; report each file's hash."""
+    """Write `construction/<manifest hex>/<region>.json` beside the snapshot; report the files."""
+    out_dir = (
+        export_root / "construction" / snapshot.manifest_sha256.removeprefix("sha256:")
+    )
+    # A linked directory would put the files outside the export root that publish reads.
+    for part in (export_root / "construction", out_dir):
+        if part.is_symlink():
+            raise ConstructionIndexError("Construction index directory is a link")
     out_dir.mkdir(parents=True, exist_ok=True)
     report: dict[str, JsonValue] = {}
     for region in map(string, array(snapshot.manifest["regions"])):
@@ -126,7 +133,10 @@ def write_construction_indexes(
             Path(temporary).replace(out_dir / f"{region}.json")
         finally:
             Path(temporary).unlink(missing_ok=True)
-        report[region] = {"bytes": len(raw), "sha256": digest(raw)}
+        report[f"{out_dir.relative_to(export_root)}/{region}.json"] = {
+            "bytes": len(raw),
+            "sha256": digest(raw),
+        }
     return report
 
 

@@ -53,7 +53,6 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         Path | None, typer.Option(exists=True, dir_okay=False)
     ] = None,
     format_version: Annotated[str, typer.Option()] = MEDIA,
-    construction_dir: Annotated[Path | None, typer.Option()] = None,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     preview_dir = required_root(preview_dir, "--preview-dir", "SVE_EXPORT_DIR")
@@ -81,34 +80,25 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         preview_dir.resolve()
     ):
         raise ValueError("Private image index must be outside the public output root")
-    _require_outside(construction_dir, preview_dir)
     codec = python_brotli() if brotli else None
     index = None if image_index is None else ImageIndex.read(image_index)
     mark("load image index")
     built = build_offline(recipe, bundle_dir=bundle_dir, image_index=index)
     _finish(built, roots, recipe.batch(), codec, format_version)
-    if construction_dir is not None:
-        _write_construction(preview_dir, construction_dir)
+    _write_construction(preview_dir)
 
 
 @app.command("construction-index")
 def construction_index_command(
     export_dir: Annotated[Path, typer.Option(envvar="SVE_EXPORT_DIR")],
-    out_dir: Annotated[Path, typer.Option()],
 ) -> None:
-    """Write each region's construction index for the export's current preview snapshot."""
-    _require_outside(out_dir, export_dir)
-    _write_construction(export_dir, out_dir)
+    """Write each region's construction index beside the export's current preview snapshot."""
+    _write_construction(export_dir)
 
 
-def _require_outside(out_dir: Path | None, export_dir: Path) -> None:
-    # The public closure is verified file by file; nothing else may land inside it.
-    if out_dir is not None and out_dir.resolve().is_relative_to(export_dir.resolve()):
-        raise ValueError("Construction index must be outside the public output root")
-
-
-def _write_construction(export_dir: Path, out_dir: Path) -> None:
-    report = write_construction_indexes(load_snapshot(export_dir.resolve()), out_dir)
+def _write_construction(export_dir: Path) -> None:
+    root = export_dir.resolve()
+    report = write_construction_indexes(load_snapshot(root), root)
     mark("write construction indexes")
     typer.echo(canonical(report).decode())
 
