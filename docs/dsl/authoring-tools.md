@@ -220,9 +220,9 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱目前只接受單一區域的 Main／End 時點，並不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 
-墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作仍只准已有的自身回場，任意目標回場與一般事件欄位讀取維持原邊界。
+墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作只准自身回場或移到持有者的 EX（墓場的打出與進場訂閱共用這個限制），其他操作、其他目的地、任意目標回場與一般事件欄位讀取維持原邊界。
 
-墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 只准移回場上或移到自己的 EX，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。
+墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 沿用上述墓場限制，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。
 
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
 
