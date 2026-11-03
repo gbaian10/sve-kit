@@ -1,10 +1,14 @@
+use super::Node;
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::ir::observation_selection::private_look_choice;
+use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
     Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
     NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate, ReceiptId,
     ReceiptLocation, RuntimeObjectView, TraitId, TraitsRead,
 };
+use alloc::collections::BTreeSet;
 use core::convert::identity;
 
 /// The member information a receipt condition may read.
@@ -46,7 +50,27 @@ fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
         .ok_or_else(|| unsupported("iterated receipt member condition"))
 }
 
+/// The public mask admits only discard receipts; deck movements need their producer.
 pub(super) fn check(
+    receipt: &ObjectReceipt,
+    projection: MemberProjection,
+    member: Binding<RuntimeObjectView>,
+    predicate: &Expr<Bool>,
+) -> Result<()> {
+    if !matches!(
+        receipt,
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Discard { .. }
+        }
+    ) {
+        return Err(unsupported(
+            "receipt member condition without a checked producer",
+        ));
+    }
+    check_shape(receipt, projection, member, predicate)
+}
+
+fn check_shape(
     receipt: &ObjectReceipt,
     projection: MemberProjection,
     member: Binding<RuntimeObjectView>,
@@ -59,6 +83,80 @@ pub(super) fn check(
     matches(predicate, member, None, None).map(|_| ())
 }
 
+/// Movement receipts whose members provably left the deck, in program order.
+#[derive(Default)]
+pub(super) struct DeckReads {
+    looks: Vec<Binding<Selector>>,
+    moves: BTreeSet<ReceiptId>,
+}
+
+impl DeckReads {
+    /// Records a deck-top movement or a movement of a private Look choice.
+    pub(super) fn record(&mut self, node: &Node) {
+        match node {
+            Node::Decision { decision } if private_look_choice(decision) => {
+                if let ChoiceDomain::Objects { binding, .. } = &decision.domain {
+                    self.looks.push(*binding);
+                }
+            }
+            Node::Instruction { instruction } => {
+                let looked = matches!(&instruction.action,
+                    Action::Move { objects: Selector::Bound { reference }, .. }
+                        if self.looks.contains(reference));
+                if looked || super::movement::deck_top(&instruction.action).is_some() {
+                    self.moves.insert(instruction.receipt);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    /// Masks an If guard's deck movement conditions once their producers are proven.
+    pub(super) fn mask(&self, node: &Node) -> Result<Node> {
+        let mut inspected = node.clone();
+        if let Node::Control {
+            control: Control::If { condition, .. },
+        } = &mut inspected
+        {
+            self.mask_condition(condition)?;
+        }
+        Ok(inspected)
+    }
+
+    fn mask_condition(&self, condition: &mut Expr<Bool>) -> Result<()> {
+        let Expr::Compute(predicate) = condition else {
+            return Ok(());
+        };
+        match predicate.as_mut() {
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                for child in predicates {
+                    self.mask_condition(child)?;
+                }
+            }
+            Predicate::Not { predicate } => self.mask_condition(predicate)?,
+            Predicate::ReceiptAny {
+                receipt:
+                    receipt @ ObjectReceipt::Movement {
+                        receipt: MovementReceipt::Move { .. },
+                    },
+                projection,
+                member,
+                predicate,
+            } => {
+                if !self.moves.contains(&local_receipt(receipt)?) {
+                    return Err(unsupported(
+                        "receipt member condition outside a deck movement",
+                    ));
+                }
+                check_shape(receipt, *projection, *member, predicate)?;
+                *condition = Expr::Literal(Bool(false));
+            }
+            _ => {}
+        }
+        Ok(())
+    }
+}
+
 pub(super) fn any(
     game: &Game,
     execution: &Execution,
@@ -67,7 +165,7 @@ pub(super) fn any(
     member: Binding<RuntimeObjectView>,
     predicate: &Expr<Bool>,
 ) -> Result<bool> {
-    check(receipt, projection, member, predicate)?;
+    check_shape(receipt, projection, member, predicate)?;
     let id = local_receipt(receipt)?;
     let members = match execution.receipts.get(&id) {
         Some(InstructionOutcome::Discard(outcome)) => outcome
@@ -95,6 +193,15 @@ pub(super) fn any(
             .iter()
             .filter(|movement| movement.after.is_some())
             .map(|movement| {
+                // Printed information stands in only for a card that left the deck.
+                let from_deck = execution.facts.iter().any(|fact| {
+                    matches!(fact, Fact::Movement(moved)
+                        if moved.movement.before == movement.before
+                            && moved.from.kind == ZoneKind::Deck)
+                });
+                if !from_deck {
+                    return Err(unsupported("receipt member that did not leave the deck"));
+                }
                 Ok((
                     printed_card(game, execution, movement.before)?,
                     movement.before,

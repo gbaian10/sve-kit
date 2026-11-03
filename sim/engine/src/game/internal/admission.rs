@@ -94,7 +94,12 @@ fn check_body(
     }
     check_requirements(&inspected, source, origin.is_some(), &paths)?;
     super::numeric::check_program(program)?;
-    check_program(program, source, origin.is_some())
+    check_program(
+        program,
+        source,
+        origin.is_some(),
+        &mut super::receipt_counts::DeckReads::default(),
+    )
 }
 
 fn keyword_source_paths(
@@ -455,17 +460,23 @@ fn check_player_stage(
     stages: &[PlayerStage],
     source: &SourceSpan,
     card: bool,
+    reads: &mut super::receipt_counts::DeckReads,
 ) -> Result<()> {
     super::tokens::check_each(control)?;
     for stage in stages {
-        check_program(&stage.body, source, card)?;
+        check_program(&stage.body, source, card, reads)?;
     }
     Ok(())
 }
 
-fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<()> {
+fn check_program(
+    program: &Program,
+    source: &SourceSpan,
+    card: bool,
+    reads: &mut super::receipt_counts::DeckReads,
+) -> Result<()> {
     for step in &program.steps {
-        super::ordering::check_node(&step.node, source)?;
+        super::ordering::check_node(&reads.mask(&step.node)?, source)?;
         match &step.node {
             Node::Control { control }
                 if card && effect_evolution::projection(control).is_some() => {}
@@ -473,25 +484,25 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 control: control @ Control::Pay { on_paid, .. },
             } if card => {
                 super::card::optional::check_control(control)?;
-                check_program(on_paid, source, card)?;
+                check_program(on_paid, source, card, reads)?;
             }
             Node::Control {
                 control: control @ Control::EachObject { body, .. },
             } if card && super::counters::iteration(control).is_some() => {
                 super::counters::check_iteration(control)?;
-                check_program(body, source, card)?;
+                check_program(body, source, card, reads)?;
             }
             Node::Control {
                 control: control @ Control::EachPlayer { stages, .. },
-            } => check_player_stage(control, stages, source, card)?,
+            } => check_player_stage(control, stages, source, card, reads)?,
             Node::Control {
                 control: Control::Sequence { body },
-            } => check_program(body, source, card)?,
+            } => check_program(body, source, card, reads)?,
             Node::Control {
                 control: control @ Control::May { body, .. },
             } => {
                 super::alternatives::check_may(control)?;
-                check_program(body, source, card)?;
+                check_program(body, source, card, reads)?;
             }
             Node::Control {
                 control:
@@ -501,9 +512,9 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                         ..
                     },
             } => {
-                check_program(then_body, source, card)?;
+                check_program(then_body, source, card, reads)?;
                 if let Some(body) = else_body {
-                    check_program(body, source, card)?;
+                    check_program(body, source, card, reads)?;
                 }
             }
             Node::Instruction { instruction } => {
@@ -519,12 +530,13 @@ fn check_program(program: &Program, source: &SourceSpan, card: bool) -> Result<(
                 control: Control::Mode { modes, .. },
             } if card => {
                 for mode in modes {
-                    check_program(&mode.body, source, card)?;
+                    check_program(&mode.body, source, card, reads)?;
                 }
             }
             Node::Capture { .. } => {}
             Node::Control { .. } => return Err(unsupported("control")),
         }
+        reads.record(&step.node);
     }
     Ok(())
 }
