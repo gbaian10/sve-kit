@@ -1,0 +1,39 @@
+cards:
+  BP15-029:
+    abilities:
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 黄金の靴
+          on:
+            played:
+              sel:
+                trait: 財宝
+              who: self
+          per_turn: 1
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 黄金の小剣
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP15-P29
+        line: 1
+        section: 1
+      - card: BP15-P31
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
