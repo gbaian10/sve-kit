@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from pydantic import JsonValue
-    from sve_carddb.export.read_api import Export
+    from sve_carddb.export.read_api import Export, Member
 
     from sve_publish.adapter import R2Store, Stored
 
@@ -92,6 +92,8 @@ def upload(
     images = store.get(INVENTORY)
     require_images(images, export.images)
     members = () if index is None else missing_members(store, before, export.members)
+    # Also when the snapshot is already current, so a rerun completes a missing index.
+    members += _missing_construction(store, export)
     pool = UploadPool(store, jobs, len(members), progress)
     pool.sync(
         UploadObject(member.key, partial(bytes, member.raw), member_headers(member))
@@ -107,11 +109,25 @@ def upload(
     return {
         "mode": "execute",
         "written_files": pool.written,
-        "unchanged_files": len(export.members) - pool.written,
+        "unchanged_files": len(export.members)
+        + len(export.construction)
+        - pool.written,
         "index": "unchanged" if index is None else "updated",
         "index_revision": final["revision"],
         "cdn_verification": "not_checked",
     }
+
+
+def _missing_construction(store: R2Store, export: Export) -> tuple[Member, ...]:
+    """Indexes are bound to one manifest, so a stored one with other bytes is never replaced."""
+    missing: list[Member] = []
+    for member in export.construction:
+        remote = store.get(member.key)
+        if remote is None:
+            missing.append(member)
+        elif remote.raw != member.raw or remote.headers != member_headers(member):
+            raise ExportError(f"Stored construction index differs: {member.key}")
+    return tuple(missing)
 
 
 def _commit(store: R2Store, remote: Stored | None, index: dict[str, JsonValue]) -> None:
@@ -134,6 +150,8 @@ def report(export: Export) -> dict[str, object]:
         "manifest_sha256": export.entry["manifest_sha256"],
         "json_files": len(export.members),
         "json_bytes": sum(len(m.raw) for m in export.members),
+        "construction_files": len(export.construction),
+        "construction_bytes": sum(len(m.raw) for m in export.construction),
         "image_files": len(export.images),
         "image_bytes": sum(i.bytes for i in export.images),
         "remote": "not_checked",

@@ -44,6 +44,8 @@ Dry-run is the default. Without an image scope, both commands open no HTTP clien
 write nothing and never open bitmaps. Image dry-run checks the description;
 snapshot dry-run checks the pointer, manifest hash/schema, JSON hashes/lengths,
 Brotli decoding, reader join and reference closure, then reports image requirements.
+It also requires each region's construction index at `construction/<manifest hex>/<region>.json`,
+canonical and naming the same manifest and region; an export without one cannot be published.
 Remote differences and readiness are unknown offline. `--export-dir` takes
 precedence over `SVE_EXPORT_DIR`; a non-empty absolute root is required.
 
@@ -132,6 +134,10 @@ downloads that one key: identical bytes and contractual headers count as complet
 different content stops publication. An already-current export checks image readiness
 and returns without synchronizing JSON objects.
 
+Construction indexes sit outside the manifest closure, so every upload, current or not, reads each
+index key once: a missing one is created, an identical one counts as done, and different bytes stop
+publication. A rerun therefore completes an index that an earlier upload did not write.
+
 Raw and `.br` keys are compared independently; an old raw-only descriptor does
 not imply its compressed sibling exists. Reused descriptors must agree on raw
 length and any declared Brotli length. A conflicting length stops before any PUT.
@@ -186,7 +192,9 @@ uv --directory publish run sve-publish images gc \
 ```
 
 GC dry-run is remote read-only and needs credentials; `--execute` deletes.
-Snapshot GC retains current/previous JSON closures and optional manifest `.br`,
+Snapshot GC retains current/previous JSON closures, optional manifest `.br` and the
+current/previous construction indexes (optional, so snapshots published before indexes still collect);
+indexes of other manifests are candidates,
 without reading images, image inventory or current payload joins. Image GC reads
 current's verified payloads to derive image references, retains current images
 only, and uses paginated LIST to find unretained images including upload orphans.

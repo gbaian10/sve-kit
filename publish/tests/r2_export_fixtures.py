@@ -9,11 +9,17 @@ from typing import TYPE_CHECKING
 import pytest
 from PIL import Image
 from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.export.construction_index import write_construction_indexes
 from sve_carddb.export.image_upload import upload_description
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.preview.media_state import commit, reserve
-from sve_carddb.export.read_api import ImageUpload, digest, load_image_upload
+from sve_carddb.export.read_api import (
+    ImageUpload,
+    digest,
+    load_image_upload,
+    load_snapshot,
+)
 from sve_carddb.export.transport import Batch, export_snapshot
 from sve_carddb.images.variants import build_variants
 from sve_carddb.workflows.image_index import write_images
@@ -67,6 +73,9 @@ def export(
         roots,
         {},
         brotli=brotli,
+    )
+    write_construction_indexes(
+        load_snapshot(roots.preview.resolve()), roots.preview.resolve()
     )
 
 

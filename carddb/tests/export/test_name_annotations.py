@@ -10,6 +10,7 @@ from pydantic import JsonValue
 from sve_carddb.build import create_database
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.domains.translations.names.annotations import annotate_name
+from sve_carddb.export.construction_index import write_construction_indexes
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.name_annotations import (
     assign_name_concepts,
@@ -17,7 +18,7 @@ from sve_carddb.export.name_annotations import (
     whole_name,
 )
 from sve_carddb.export.preview import Roots, write_preview
-from sve_carddb.export.read_api import load_export
+from sve_carddb.export.read_api import load_export, load_snapshot
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.reader_annotations import validate_annotations
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
@@ -107,6 +108,8 @@ def test_native_whole_name_round_trip_and_publish_boundary(tmp_path: Path) -> No
             assert all(len(array(fragment)) == 5 for fragment in array(fragments))
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
+    # Publication also needs the construction index beside the snapshot.
+    write_construction_indexes(load_snapshot(roots.preview), roots.preview)
     load_export(roots.preview)
 
 

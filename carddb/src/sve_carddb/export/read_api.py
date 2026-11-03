@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
 # JSON boundary helpers are part of the public reader contract for remote index consumers.
 __all__ = [
+    "CONSTRUCTION_KEY",
     "IMAGE_KEY",
     "INDEX",
     "JSON_KEY",
@@ -55,6 +56,7 @@ __all__ = [
     "array",
     "canonical",
     "closure",
+    "construction_keys",
     "current_image_keys",
     "digest",
     "directory",
@@ -77,6 +79,7 @@ __all__ = [
 POINTER = "snapshots/preview/current.json"
 INDEX = "snapshots/versions/index.json"
 JSON_KEY = re.compile(r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json(?:\.br)?\Z")
+CONSTRUCTION_KEY = re.compile(r"construction/[0-9a-f]{64}/(?:jp|en)\.json\Z")
 _ENTRY = (
     "data_version",
     "published_at",
@@ -123,12 +126,24 @@ class Export:
     entry: dict[str, JsonValue]
     members: tuple[Member, ...]
     images: tuple[ImageFile, ...]
+    # Outside the manifest closure: found by the manifest hash (docs/schema/export/construction-index.md).
+    construction: tuple[Member, ...]
 
 
 def directory(root: Path) -> None:
     """Keep explicit input paths from following symlink aliases."""
     if not root.is_absolute() or root.resolve() != root or not root.is_dir():
         raise ExportError("Explicit existing non-symlink directory required")
+
+
+def construction_keys(
+    manifest_sha256: str, regions: list[JsonValue]
+) -> tuple[str, ...]:
+    """Where each region's construction index of one snapshot lives."""
+    hexdigest = manifest_sha256.removeprefix("sha256:")
+    return tuple(
+        f"construction/{hexdigest}/{string(region)}.json" for region in regions
+    )
 
 
 def closure(manifest_path: str, manifest: dict[str, JsonValue]) -> set[str]:
@@ -182,13 +197,50 @@ def image_files(tables: dict[str, list[Row]]) -> tuple[ImageFile, ...]:
 def load_export(root: Path) -> Export:
     """Validate the pointer's whole public JSON closure before credentials or HTTP."""
     path, raw, manifest, members, tables = _verified(root)
+    hashed = digest(raw)
     return Export(
         root,
         {k: manifest[k] for k in _ENTRY}
-        | {"manifest_path": path, "manifest_sha256": digest(raw)},
+        | {"manifest_path": path, "manifest_sha256": hashed},
         members,
         image_files(tables),
+        _construction(root, hashed, array(manifest["regions"])),
     )
+
+
+def _construction(
+    root: Path, manifest_sha256: str, regions: list[JsonValue]
+) -> tuple[Member, ...]:
+    try:
+        return _construction_members(root, manifest_sha256, regions)
+    except ExportError:
+        raise
+    except ValueError, OSError, KeyError, TypeError:
+        raise ExportError("Construction index validation failed") from None
+
+
+def _construction_members(
+    root: Path, manifest_sha256: str, regions: list[JsonValue]
+) -> tuple[Member, ...]:
+    """Each region's index must exist, be canonical and name this snapshot and region."""
+    found: list[Member] = []
+    for key, region in zip(
+        construction_keys(manifest_sha256, regions), regions, strict=True
+    ):
+        try:
+            raw = read_member(root, key)
+        except FileNotFoundError:
+            raise ExportError("Export lacks a construction index") from None
+        value = object_value(parse(raw))
+        snapshot = object_value(value["snapshot"])
+        if (
+            canonical(value) != raw
+            or value["region"] != region
+            or snapshot["manifest_sha256"] != manifest_sha256
+        ):
+            raise ExportError("Construction index differs from its snapshot")
+        found.append(Member(key, raw))
+    return tuple(found)
 
 
 @dataclass(frozen=True, repr=False)

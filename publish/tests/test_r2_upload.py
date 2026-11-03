@@ -83,7 +83,7 @@ def test_first_upload_selects_only_the_public_closure_and_writes_index_last(
     assert result["index"] == "updated"
     assert result["cdn_verification"] == "not_checked"
     expected = (
-        {m.key for m in loaded.members}
+        {m.key for m in (*loaded.members, *loaded.construction)}
         | {i.key for i in loaded.images}
         | {INDEX, INVENTORY}
     )
@@ -368,6 +368,8 @@ def test_dry_run_reads_no_credentials_and_opens_no_client(
         "image_files": len(loaded.images),
         "json_bytes": sum(len(m.raw) for m in loaded.members),
         "json_files": len(loaded.members),
+        "construction_bytes": sum(len(m.raw) for m in loaded.construction),
+        "construction_files": len(loaded.construction),
         "manifest_sha256": loaded.entry["manifest_sha256"],
         "mode": "dry_run",
         "remote": "not_checked",

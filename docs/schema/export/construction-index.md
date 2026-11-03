@@ -9,7 +9,8 @@
 `export-offline` 寫完快照後一併產生；既有匯出根可用下面的指令補產。
 快照缺少判斷所需的事實（例如沒跑機制 adapter，見 §3）時，`export-offline` 不寫索引、在輸出報告註明
 `construction_index: skipped` 與原因；`construction-index` 指令則直接失敗。
-發布契約要求每地區的索引皆存在且綁定相同 manifest；publish 的這項檢查由後續獨立變更實作。
+publish 要求每地區的索引都在、是 canonical bytes 且綁定同一 manifest 與地區，否則不發布；
+上傳時跟快照一起送，GC 保留 current／previous 快照的索引（見 publish README）。
 
 ```bash
 uv --directory carddb run sve-carddb snapshot construction-index --export-dir <匯出根>

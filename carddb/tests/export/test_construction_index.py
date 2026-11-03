@@ -23,7 +23,7 @@ from sve_carddb.export.construction_index import (
     write_construction_indexes,
 )
 from sve_carddb.export.preview import Roots, write_preview
-from sve_carddb.export.read_api import load_export
+from sve_carddb.export.read_api import load_export, load_snapshot
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 
 from .test_name_annotations import name_snapshot
@@ -627,7 +627,7 @@ def test_command_replaces_output_symlinks_without_modifying_targets(
     write_preview(snapshot, roots, {})
     pointer = roots.preview / "snapshots/preview/current.json"
     before = pointer.read_bytes()
-    manifest = string(load_export(roots.preview).entry["manifest_sha256"])
+    manifest = load_snapshot(roots.preview).manifest_sha256
     out = roots.preview / "construction" / manifest.removeprefix("sha256:")
     out.mkdir(parents=True)
     (out / "jp.json").symlink_to(pointer)
@@ -649,7 +649,7 @@ def test_command_refuses_a_linked_construction_directory(
     destination = roots.preview / "construction"
     if level == "manifest":
         destination.mkdir()
-        manifest = string(load_export(roots.preview).entry["manifest_sha256"])
+        manifest = load_snapshot(roots.preview).manifest_sha256
         destination /= manifest.removeprefix("sha256:")
     destination.symlink_to(elsewhere)
     assert _command(roots.preview).exit_code != 0
