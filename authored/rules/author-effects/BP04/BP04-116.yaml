@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-116:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  sel:
+                    who: self
+                    zone: hand
+                    kind: follower
+                  n: 1
+                  result: fee
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  cost_of:
+                    objects_of: fee
+                    view: before
+            - damage:
+                to:
+                  leader_of: enemy
+                n:
+                  half_up:
+                    cost_of:
+                      objects_of: fee
+                      view: before

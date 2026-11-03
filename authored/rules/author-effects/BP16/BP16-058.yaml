@@ -1,0 +1,66 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-058:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        class: ドラゴン
+                        orig_cost_ge: 7
+                    op: ge
+                    right: 7
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 7
+      - line: 2
+        evolve_time:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+              n: 1
+              result: fee
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  cost_of:
+                    objects_of: fee
+                    view: before
+            - draw:
+                n: 1
+      - line: 3
+        super_evolve_time:
+          do:
+            - life:
+                who: self
+                delta: 5

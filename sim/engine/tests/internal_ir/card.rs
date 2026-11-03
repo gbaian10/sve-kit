@@ -698,6 +698,9 @@ mod equipment;
 #[path = "card/material_power.rs"]
 mod material_power;
 
+#[path = "card/material_read.rs"]
+mod material_read;
+
 #[path = "card/discard_event.rs"]
 mod discard_event;
 

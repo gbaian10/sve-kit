@@ -616,6 +616,8 @@ fn supported(code: &str) -> bool {
         "shape.IntFrozen.PaidMaterialAttack"
             | "read.receipt.paid-material-attack"
             | "shape.MovementReceipt.Discard"
+            | "shape.IntFrozen.DiscardedCost"
+            | "read.receipt.discarded-cost"
             | "shape.NatOperation.ReceiptCount"
             | "read.receipt.member-count"
             | "shape.Predicate.ReceiptAny"

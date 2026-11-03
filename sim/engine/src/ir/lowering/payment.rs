@@ -3,8 +3,8 @@ use super::super::{
     Posture, Resource, ResourceOperation,
 };
 use super::{
-    AbilitySource, Action, BodyContext, Expr, Instruction, InstructionContext, InstructionId, Int,
-    LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
+    AbilitySource, Action, BodyContext, Cardinality, Expr, Instruction, InstructionContext,
+    InstructionId, Int, LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
 };
 use core::slice::from_ref;
 
@@ -205,9 +205,7 @@ fn lower_operations(
                 context,
                 name,
                 ReceiptId(id),
-                super::hand_payment::cardinality(material, path)?
-                    .maximum
-                    .is_some_and(|maximum| maximum.0 <= 1),
+                super::hand_payment::cardinality(material, path)?,
                 path,
             )?;
         }
@@ -265,7 +263,7 @@ pub(super) fn record_discard(
     context: &mut BodyContext<'_>,
     name: &str,
     receipt: ReceiptId,
-    single: bool,
+    bounds: Cardinality,
     path: &str,
 ) -> Result<(), LoweringError> {
     if name.is_empty()
@@ -279,9 +277,7 @@ pub(super) fn record_discard(
     {
         return Err(unsupported(path));
     }
-    if single {
-        context.receipt_reads.single_discards.insert(receipt);
-    }
+    context.receipt_reads.discard_bounds.insert(receipt, bounds);
     context.observations.insert(
         name.to_owned(),
         super::super::ObjectReceipt::Movement {

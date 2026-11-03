@@ -724,6 +724,10 @@ impl BodyContext<'_> {
         })))
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Numeric variants share the checked body expression environment."
+    )]
     pub(super) fn number(
         &mut self,
         value: &ast::Number,
@@ -744,9 +748,17 @@ impl BodyContext<'_> {
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
-            ast::Number::Cost { cost_of } => {
-                Ok(this_number(cost_of, None, CharacteristicView::Effective))
-            }
+            ast::Number::Cost { cost_of } => match cost_of {
+                ast::Observation::Binding(name) if name == "this" => Ok(this_number(
+                    &ast::This::This,
+                    None,
+                    CharacteristicView::Effective,
+                )),
+                ast::Observation::Before { objects_of, .. } => {
+                    self.discarded_cost(objects_of, path)
+                }
+                ast::Observation::Binding(_) => Err(unsupported(path)),
+            },
             ast::Number::OriginalCost { orig_cost_of } => Ok(this_number(
                 orig_cost_of,
                 None,

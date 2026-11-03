@@ -4,10 +4,10 @@ use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
-    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MoveOutcome,
-    MovementReceipt, NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView, Predicate,
-    QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId,
-    TraitsRead,
+    Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MemberProjection,
+    MoveOutcome, MovementReceipt, NamesRead, NumberRead, ObjectReceipt, ObjectRef, ObjectView,
+    Predicate, QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView,
+    TraitId, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -365,6 +365,36 @@ pub(super) fn paid_material_attack(
     match characters.attack {
         Info::Present(amount) => Ok(amount),
         Info::AbsentByRules => Err(invalid("missing frozen material attack")),
+    }
+}
+
+pub(super) fn discarded_cost(
+    execution: &Execution,
+    receipt: &ReceiptReference<DiscardOutcome>,
+) -> Result<Int> {
+    let ReceiptLocation::Local { id } = receipt.location() else {
+        return Err(unsupported("iteration discarded cost"));
+    };
+    let Some(InstructionOutcome::Discard(outcome)) = execution.receipts.get(id) else {
+        return Err(invalid("missing discarded cost producer"));
+    };
+    let [member] = outcome.successful.as_slice() else {
+        return Err(invalid("discarded cost requires exactly one card"));
+    };
+    let before = member
+        .before
+        .ok_or_else(|| invalid("missing discarded cost before member"))?;
+    let characters = execution
+        .facts
+        .iter()
+        .find_map(|fact| match fact {
+            Fact::Discard(event) if event.card_before == before.object => Some(&event.characters),
+            _ => None,
+        })
+        .ok_or_else(|| invalid("missing discarded cost characteristics"))?;
+    match characters.cost {
+        Info::Present(amount) if amount.0 >= 0 => Ok(amount),
+        _ => Err(invalid("missing discarded numeric cost")),
     }
 }
 

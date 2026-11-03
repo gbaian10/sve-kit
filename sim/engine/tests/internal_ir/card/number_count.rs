@@ -406,6 +406,16 @@ fn arithmetic_lowering_rejects_a_zero_unit_an_empty_min_and_unopened_max() {
 }
 
 #[test]
+fn half_up_rounds_an_odd_constant_in_a_body_expression() {
+    let payload = json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":{"half_up":3}}}]});
+    assert_eq!(
+        life_after(&payload, 0),
+        22,
+        "half of three rounds upward to two"
+    );
+}
+
+#[test]
 fn half_up_rounds_signed_halves_towards_positive_infinity() {
     const MAX_SAFE: i64 = 0x001F_FFFF_FFFF_FFFF;
     for (amount, rounded) in [

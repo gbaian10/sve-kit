@@ -1356,7 +1356,7 @@ pub(super) enum Number {
         hp_of: BodyStatReference,
     },
     Cost {
-        cost_of: This,
+        cost_of: Observation,
     },
     OriginalCost {
         orig_cost_of: This,

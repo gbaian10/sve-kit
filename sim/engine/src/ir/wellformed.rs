@@ -224,6 +224,7 @@ struct Environment {
     receipts: BTreeMap<ReceiptId, TypeId>,
     field_materials: BTreeSet<Key>,
     single_material_moves: BTreeSet<ReceiptId>,
+    single_discards: BTreeSet<ReceiptId>,
 }
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
@@ -233,6 +234,8 @@ impl Environment {
             .extend(other.field_materials.iter().copied());
         self.single_material_moves
             .extend(other.single_material_moves.iter().copied());
+        self.single_discards
+            .extend(other.single_discards.iter().copied());
         self.access.extend(other.access.clone());
         self.receipt_access.extend(other.receipt_access.clone());
         self.movement_before_access
@@ -294,6 +297,7 @@ impl Checker {
             receipts: BTreeMap::new(),
             field_materials: BTreeSet::new(),
             single_material_moves: BTreeSet::new(),
+            single_discards: BTreeSet::new(),
         };
         Self {
             resolution_entry: env.clone(),
@@ -547,6 +551,20 @@ impl Checker {
         }
         self.produce(instruction.receipt, outcome(&instruction.action))?;
         self.record_material_move(instruction, context);
+        if let Action::Discard {
+            mode: super::DiscardMode::Chosen { constraint },
+            ..
+        } = &instruction.action
+            && constraint.cardinality
+                == (Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                })
+            && instruction.precondition.is_none()
+            && context == InstructionContext::Cost
+        {
+            self.env.single_discards.insert(instruction.receipt);
+        }
         if let Some(access) = before_access {
             self.env
                 .movement_before_access

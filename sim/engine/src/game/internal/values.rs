@@ -550,6 +550,9 @@ impl Execution {
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)
                 }
+                IntFrozen::DiscardedCost { receipt } => {
+                    super::receipt_counts::discarded_cost(self, receipt)
+                }
                 _ => Err(unsupported("signed projection")),
             },
             Expr::Compute(operation) => match operation.as_ref() {
