@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-024:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            act:
+              sel: { who: self, zone: field, name: ナテラの大樹 }
+              n: 2
+          optional_cost_delta: -2
+      - line: 2
+        play:
+          cost_delta:
+            if:
+              exists: { who: self, zone: field, name: 王たる光・ベイリオン }
+            delta: -1
+      - line: 3
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 4 }

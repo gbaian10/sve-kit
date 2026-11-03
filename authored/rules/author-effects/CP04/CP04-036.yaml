@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                name_contains: ペコリーヌ
+              n: 1
+          optional_cost_delta: -3
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 5
+            - damage:
+                to:
+                  leader_of: enemy
+                n: 2
