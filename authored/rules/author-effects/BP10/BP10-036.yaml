@@ -1,0 +1,36 @@
+cards:
+  BP10-036:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - draw:
+                        n: 1
+                  - - if:
+                        cond:
+                          exists:
+                            kind: follower
+                            trait: プリンセス
+                            who: self
+                            zone: field
+                        then:
+                          - search:
+                              n: 1
+                              sel:
+                                class: ロイヤル
+                                kind: follower
+                                who: self
+                                zone: deck
+                              to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

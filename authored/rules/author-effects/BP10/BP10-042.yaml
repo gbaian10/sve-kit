@@ -1,0 +1,46 @@
+cards:
+  BP10-042:
+    abilities:
+      - activate:
+          cost:
+            banish_self: true
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: king
+          targets:
+            - bind: king
+              from:
+                kind: follower
+                name: ミスティックキング
+                who: self
+                zone: field
+              n: 1
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  count:
+                    trait: チェス
+                    who: self
+                    zone: cemetery
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

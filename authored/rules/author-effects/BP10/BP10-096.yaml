@@ -1,0 +1,50 @@
+cards:
+  BP10-096:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  keyword: ward
+                  kind: follower
+                upto: 1
+            - move:
+                ref: picked
+                result: placed
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -1
+                    when_playing:
+                      in: affected
+                on:
+                  follow: placed
+                until: turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,57 @@
+cards:
+  BP10-011:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                upto: 1
+            - move:
+                ref: picked
+                result: placed
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n:
+                  distinct_orig_costs:
+                    who: self
+                    zone: ex
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,47 @@
+cards:
+  BP10-084:
+    abilities:
+      - activate:
+          cost:
+            banish_self: true
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            exists:
+              name: 《節制》・ルーゼン
+              who: self
+              zone: field
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leader: self
+            - draw:
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
