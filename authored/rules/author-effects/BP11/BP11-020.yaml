@@ -3,7 +3,8 @@ cards:
     abilities:
       - evolve_time:
           do:
-            - either:
+            - choice:
+                n: 1
                 options:
                   - - create:
                         n: 1
