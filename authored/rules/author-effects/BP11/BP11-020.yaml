@@ -1,0 +1,28 @@
+cards:
+  BP11-020:
+    abilities:
+      - evolve_time:
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 魔導四輪車・V
+                  - - search:
+                        n: 1
+                        sel:
+                          name: デスペラードショット
+                          who: self
+                          zone: deck
+                        to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

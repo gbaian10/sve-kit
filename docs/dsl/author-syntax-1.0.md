@@ -219,7 +219,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | draw / discard | `{who?, n}`；discard 另有 all/down_to/any/sel/random | I.draw / I.discard；逐張抽不是批次搬牌 |
 | damage / destroy / banish | `{to,n,distribute?,distribute_at?,instead?}`；後兩者 Ref 或 `{ref}`，banish 另接 top | I.damage / I.destroy / I.banish；distribute 預設打出時 |
 | move | `{ref或top,to,position?,order?,reveal?,by?,acted?,entry_effects?,result?}` | I.move；位置決定與順序 I.order，洗指定集 I.shuffle |
-| create | `{token,n?,to,counters?,by?,acted?,entry_effects?,bind?,result?}` | I.token；token 列表為每名各 n，不是擇一；不寫 n 時每名 1；`token:{same_name_as:ObjectRef}` 依所選物件或離場 it 的唯一名稱建立 |
+| create | `{token,n?,to,counters?,by?,acted?,entry_effects?,bind?,result?}` | I.token；token 列表為每名各 n，不是擇一；不寫 n 時每名 1；`token:{same_name_as:ObjectRef,kind?:follower}` 依所選物件或離場 it 的唯一名稱建立 |
 | act / stand | Ref 或 `{ref}` | I.posture；已在該姿態不產生變化 |
 | evolve / transform | `{ref,into?,result?}`；transform 另接 `entry_effects?` | I.evolve Effect / I.transform；變身不是改卡名，into 分配見 §14 A-016j |
 | life / set_life | `{who,delta或n}` | I.life Add / Set；生命改變不等於傷害 |
@@ -236,7 +236,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | equip | `{on,token}` | I.equip；裝備物不占普通場格 |
 | steal / give | `{ref,to?,precondition?}` | I.transfer；場間轉移同世代、不生入場事件 |
 | stack_plus | Expr | K.if＋D.rule-choice StackRecipient＋I.counter 或 I.token 初始 N 個 counter（非 N+1） |
-| box / pilot | box:`{ref,until}`；pilot 尚無接受形狀 | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
+| box / pilot | box:`{ref,until}`；pilot:`{ref}`（目前只准入 this） | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
 | race / feed / gain_drive / drive_check | race:`{ref,n?}`、gain_drive:`{ref}`；feed/drive_check 尚無接受形狀 | I.meal-race / I.ride-drive / I.drive-check 的對應規則程序 |
 | play_card / play_ability | `{ref}`（cost 尚不接受） / `{of,trigger或ability,cost_policy?}` | I.play-card / I.play-ability；內層獨立 execution |
 | delayed | `{on,do,targets?,optional_cost?,x?,define?,aggregation?,next_only?,until?,precondition?}` | I.delay；無期限只一次，有期限預設各次；不收 line/result，詳能力矩陣 |

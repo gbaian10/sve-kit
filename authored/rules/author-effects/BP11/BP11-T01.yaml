@@ -1,0 +1,56 @@
+cards:
+  BP11-T01:
+    abilities:
+      - activate:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: follower
+                name: ファントムデュオ・バニー＆バロン
+                who: self
+                zone: field
+          do:
+            - pilot:
+                ref: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act:
+                  n: 2
+                  sel:
+                    kind: follower
+                    who: self
+                    zone: field
+          do:
+            - pilot:
+                ref: this
+        line: 2
+      - keywords:
+          - storm
+        line: 3
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 荒野
+                    who: self
+                    zone: field
+                then:
+                  - draw:
+                      n: 1
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

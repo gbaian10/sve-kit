@@ -3,7 +3,7 @@ use super::{
 };
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::{
-    AbilitySource, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
+    AbilitySource, CardKind, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
     NameOperation, NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView,
     PlayerOrder, PlayerRead, PlayerRelation, PlayerSet, PlayerStage, Posture, Predicate, Role,
     Selector, SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec, TokenTemplate,
@@ -41,7 +41,16 @@ impl BodyContext<'_> {
             self.ex_outputs
                 .insert(name.clone(), Selector::Bound { reference: output });
         }
-        let tokens = if let ast::CreateToken::SameName { same_name_as } = &value.token {
+        let tokens = if let ast::CreateToken::SameName {
+            same_name_as,
+            kind: created_kind,
+        } = &value.token
+        {
+            let created_kind = match created_kind.as_deref() {
+                None => None,
+                Some("follower") => Some(CardKind::Follower),
+                Some(_) => return Err(unsupported(path)),
+            };
             if !matches!(value.n, None | Some(ast::TokenCount::Fixed(1)))
                 || value.by.as_deref().is_some_and(|who| who != "self")
             {
@@ -63,7 +72,10 @@ impl BodyContext<'_> {
                 self.selected_name(same_name_as, path)?
             };
             vec![TokenSpec {
-                template: TokenTemplate::Name { name },
+                template: TokenTemplate::Name {
+                    name,
+                    kind: created_kind,
+                },
                 count: Expr::Literal(Nat(1)),
             }]
         } else {

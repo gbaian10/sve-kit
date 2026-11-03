@@ -17601,6 +17601,9 @@
         },
         "delayed": {
           "$ref": "#/$defs/A.act.delayed"
+        },
+        "pilot": {
+          "$ref": "#/$defs/A.act.pilot"
         }
       },
       "additionalProperties": false,
@@ -17789,6 +17792,9 @@
         },
         "delayed": {
           "$ref": "#/$defs/A.act.delayed"
+        },
+        "pilot": {
+          "$ref": "#/$defs/A.act.pilot"
         }
       },
       "additionalProperties": false,
@@ -21377,11 +21383,27 @@
       "properties": {
         "same_name_as": {
           "$ref": "#/$defs/A.ref"
+        },
+        "kind": {
+          "const": "follower",
+          "type": "string"
         }
       },
       "additionalProperties": false,
       "required": [
         "same_name_as"
+      ]
+    },
+    "A.act.pilot": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
       ]
     }
   },

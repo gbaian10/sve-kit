@@ -191,20 +191,24 @@ pub(super) fn check(
     located: &Located<Ability>,
     printed: &Value,
     keyword: KeywordId,
+    pilot: bool,
 ) -> Result<()> {
     let card_type = printed["card_type"].as_str();
     let supported_kind = if keyword == KeywordId::Stack {
         matches!(card_type, Some("アミュレット" | "アミュレット・トークン"))
     } else {
-        matches!(
-            card_type,
-            Some(
-                "フォロワー"
-                    | "フォロワー・エボルヴ"
-                    | "フォロワー・アドバンス"
-                    | "フォロワー・トークン"
+        (pilot
+            && keyword == KeywordId::Storm
+            && matches!(card_type, Some("アミュレット" | "アミュレット・トークン")))
+            || matches!(
+                card_type,
+                Some(
+                    "フォロワー"
+                        | "フォロワー・エボルヴ"
+                        | "フォロワー・アドバンス"
+                        | "フォロワー・トークン"
+                )
             )
-        )
     };
     if !supported_kind {
         return Err(unsupported(

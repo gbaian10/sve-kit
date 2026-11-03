@@ -5,6 +5,8 @@
     reason = "Numeric cache writes target constructed object maps."
 )]
 
+pub(super) mod pilot;
+
 use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
@@ -35,6 +37,7 @@ pub(in crate::game) struct NumericState {
     attack: i64,
     life: i64,
     effects: Vec<Modifier>,
+    pilot: Option<pilot::State>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -405,6 +408,7 @@ impl Game {
                 attack: super::super::int(&object.state["power"]),
                 life: super::super::int(&object.state["max_hp"]),
                 effects: Vec::new(),
+                pilot: None,
             });
         if state.effects.iter().any(|effect| {
             matches!(effect.attack, Some(Change::Set(_)))
@@ -415,7 +419,7 @@ impl Game {
         state.attack = add(state.attack, attack)?;
         state.life = add(state.life, life)?;
         let after = state.effective(damage)?;
-        if !state.effects.is_empty() {
+        if !state.effects.is_empty() || state.pilot.is_some() {
             self.state.ir_numeric.insert(id.into(), state);
         }
         self.internal_numeric_cache(id, after)
@@ -630,6 +634,7 @@ impl Game {
                     attack: before_attack,
                     life: maximum,
                     effects: Vec::new(),
+                    pilot: None,
                 });
             let adjusted_life = match life {
                 Some(Change::Set(value)) => Some(Change::Set(add(value, damage)?)),
@@ -762,6 +767,7 @@ impl Game {
     pub(in crate::game) fn internal_numeric_end_turn(&mut self, turn: u64) -> Result<()> {
         self.internal_cost_end_turn(turn);
         self.internal_numeric_cleanup()?;
+        self.internal_pilot_end_turn(turn)?;
         self.internal_numeric_expire(|effect| effect.end == EffectEnd::Turn(turn), Some(turn))
     }
 
@@ -824,7 +830,7 @@ impl Game {
         }
         for (id, remaining, after) in plans {
             self.internal_numeric_cache(&id, after)?;
-            if remaining.effects.is_empty() {
+            if remaining.effects.is_empty() && remaining.pilot.is_none() {
                 self.state.ir_numeric.remove(&id);
             } else {
                 self.state.ir_numeric.insert(id, remaining);

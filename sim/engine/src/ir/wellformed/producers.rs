@@ -74,7 +74,10 @@ impl Checker {
         }
         for (index, token) in tokens.iter().enumerate() {
             self.at(&format!("tokens/{index}"), |checker| {
-                if let TokenTemplate::Name { name } = &token.template {
+                if let TokenTemplate::Name { name, kind } = &token.template {
+                    if !matches!(kind, None | Some(super::super::CardKind::Follower)) {
+                        return checker.reject();
+                    }
                     checker.name(name)?;
                 }
                 checker.natural(&token.count)

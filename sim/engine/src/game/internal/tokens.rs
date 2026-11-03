@@ -13,9 +13,10 @@ use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_nam
 use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
 use crate::ir::{
-    Action, CardName, Control, Expr, Instruction, LkiReason, Located, NameOperation, Nat, Node,
-    ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture, Program, ReceiptId, Requirement,
-    TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate, ZoneKind, ZoneRef,
+    Action, CardKind, CardName, Control, Expr, Instruction, LkiReason, Located, NameOperation, Nat,
+    Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture, Program, ReceiptId,
+    Requirement, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate,
+    ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -65,7 +66,10 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
                     || dynamic::projection(&token.count).is_some()
                     || dynamic::zone_count(&token.count).is_some()
             }
-            TokenTemplate::Name { name } => {
+            TokenTemplate::Name { name, kind } => {
+                if !matches!(kind, None | Some(CardKind::Follower)) {
+                    return false;
+                }
                 tokens.len() == 1
                     && token.count == Expr::Literal(Nat(1))
                     && zone.player == (PlayerRef::Controller {})
@@ -301,10 +305,21 @@ impl Game {
             let count = dynamic::count(execution, self, &token.count)?;
             let name = match &token.template {
                 TokenTemplate::Fixed { template } => template.0.clone(),
-                TokenTemplate::Name { name } => execution.name(self, name)?.0,
+                TokenTemplate::Name { name, .. } => execution.name(self, name)?.0,
             };
-            check_template(self, &name, destination)?;
             let card = self.catalog.token_print(&name)?;
+            if matches!(
+                &token.template,
+                TokenTemplate::Name {
+                    kind: Some(CardKind::Follower),
+                    ..
+                }
+            ) && self.catalog.face(&card, 0)?["card_type"] != "フォロワー・トークン"
+            {
+                // CR 9.1.2.3 / 1.3.2: a name cannot create a token of a different printed kind.
+                continue;
+            }
+            check_template(self, &name, destination)?;
             if !self.card_runtime.is_loaded(&card) {
                 return Err(unsupported("created token requires an admitted whole card"));
             }
@@ -446,6 +461,7 @@ pub(super) struct Paths {
     stages: Vec<String>,
     counts: Vec<String>,
     names: Vec<String>,
+    kinds: Vec<String>,
 }
 
 pub(super) fn paths(program: &Program) -> Paths {
@@ -461,7 +477,18 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
             Node::Instruction { instruction } => {
                 if let Some((tokens, _)) = specification(&instruction.action) {
                     for (token_index, token) in tokens.iter().enumerate() {
-                        if matches!(&token.template, TokenTemplate::Name { name } if departure_name(name))
+                        if matches!(
+                            &token.template,
+                            TokenTemplate::Name {
+                                kind: Some(CardKind::Follower),
+                                ..
+                            }
+                        ) {
+                            accepted.kinds.push(format!(
+                                "{path}/instruction/action/tokens/{token_index}/template/kind"
+                            ));
+                        }
+                        if matches!(&token.template, TokenTemplate::Name { name, .. } if departure_name(name))
                         {
                             accepted.names.push(format!(
                                 "{path}/instruction/action/tokens/{token_index}/template/name"
@@ -531,6 +558,7 @@ pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
         "shape.ObjectView.LastKnown" | "reference.lki" | "internal.LkiReason.ZoneExit" => {
             (&paths.counts, &paths.names)
         }
+        "internal.CardKind.Follower" => (&paths.kinds, &[]),
         "selector.filter"
         | "shape.Selector.Filter"
         | "shape.Predicate.PlayerEquals"
@@ -548,11 +576,16 @@ pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
     })
 }
 
-pub(super) fn mask_count(node: &mut Node) {
+pub(super) fn mask_operands(node: &mut Node) {
+    let valid = matches!(node, Node::Instruction { instruction } if specification(&instruction.action).is_some());
     if let Node::Instruction { instruction } = node
         && let Action::Token { tokens, .. } = &mut instruction.action
     {
         for token in tokens {
+            if valid && let TokenTemplate::Name { kind, .. } = &mut token.template {
+                // A validated literal constrains the new template; it observes no private card.
+                *kind = None;
+            }
             if dynamic::projection(&token.count).is_some() {
                 token.count = Expr::Literal(Nat(0));
             }

@@ -49,6 +49,7 @@ pub(in crate::game::internal) fn paths(
                     for (token_index, token) in tokens.iter().enumerate() {
                         if let TokenTemplate::Name {
                             name: Expr::Compute(operation),
+                            ..
                         } = &token.template
                             && let NameOperation::UniqueName {
                                 object:

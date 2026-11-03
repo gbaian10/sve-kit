@@ -61,6 +61,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | dice | bind:B | who:PlayerRef | BP06-110 |
 | declare.number | bind:B、kind:number | min/max:Q、who:PlayerRef；上下界關係 C1 驗 | BP08-103、BP06-111 |
 | declare.name | bind:B、kind:name | who:PlayerRef；拒絕 min/max | BP12-115 |
+| pilot | ref:R | 目前只准入 this；印刷攻體與本回合期限隱含 | BP11-T01、BP11-P29 |
 | equip | on:O、token:CardName | token 不收直接 param | CP04-019、CP04-001 sections/0 |
 | steal/give | ref:O | to:PlayerRef或other_players；不另造玩家 wrapper | give BP13-043；steal 合成 |
 | stack_plus | N 短形 | 不收 M | BP10-050 |
@@ -78,9 +79,9 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 
 TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time、attack_time、race_time、drive_time。entry_effects 在成功產生的新世代上、入場誘發掃描前安裝；no_trigger 的 entry occurrence 責任仍沿效果矩陣。look 的多玩家 top 須使用 each_player，不能把 PlayerSet 當單一 viewer（BP06-113）。
 
-create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
+create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef,kind?:follower}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
 
-delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。pilot、feed、drive_check、play_card.cost 沒有本矩陣的接受形狀。pilot 的舊 `{ref,on}` 無法承載印刷數值與期限，不能拿提醒文冒第二個物件。這個有限 Step union 不宣稱所有登錄構造均可承載。
+delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。feed、drive_check、play_card.cost 沒有本矩陣的接受形狀。pilot 只指名被操縱的物件；提醒文不代表第二個物件，攻體來自印刷資料，期限依 CR5.32 固定為本回合。這個有限 Step union 不宣稱所有登錄構造均可承載。
 
 ## 自我取代
 
@@ -140,6 +141,6 @@ spell:
           - [{search: {sel: {who: self, zone: deck, kind: follower, name_contains: リーシャ}, n: 1, to: field}}]
 ```
 
-C1/D0 還須接上 per_group、compound 位置回答、付款決定、每玩家作用域、Order 成功 before 收據及展開後的合法 payload 檢查；本片不更改公開 IR 或 capability，不宣稱這些卡已可執行。多張 found 的條件量化、BP01-008 同位置多牌的相對順序及 pilot 數值／期限不得靠 C0 猜測。
+C1/D0 還須接上 per_group、compound 位置回答、付款決定、每玩家作用域、Order 成功 before 收據及展開後的合法 payload 檢查；本片不更改公開 IR 或 capability，不宣稱這些卡已可執行。多張 found 的條件量化、BP01-008 同位置多牌的相對順序不得靠 C0 猜測；pilot 的印刷數值及本回合期限由 IR／執行層依 CR5.32 驗證。
 
 驗證範圍含每個定義的 Python/schema 漂移、負向 schema 突變、獨立卡例與合成 variant、未知鍵／錯型別／互斥／錯上下文、遞迴與 canonical roundtrip。卡例核對遞迴涵蓋凍結 JP 302 檔、7369 documents、7383 faces，以及 EN 297 檔、7420 documents、7437 faces 的 text/sections；Q&A 不作卡例。未找到直接卡例的格明列合成，不將 shape 通過宣稱為全卡語義驗收。

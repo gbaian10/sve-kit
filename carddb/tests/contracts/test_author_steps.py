@@ -80,7 +80,23 @@ def test_payment_decision_has_a_separate_preserved_wire_key() -> None:
         {"same_name_as": ""},
         {"same_name_as": "self"},
         {"same_name_as": "it", "extra": True},
+        {"same_name_as": "chosen", "kind": "amulet"},
     ],
 )
 def test_same_name_token_requires_a_closed_object_reference(token: JsonValue) -> None:
     _check({"create": {"token": token, "to": "field"}}, accepted=False, name="A.action")
+
+
+@pytest.mark.parametrize(
+    "pilot",
+    [
+        {},
+        {"ref": "this", "on": "this"},
+        {"ref": "this", "attack": 3},
+        {"ref": "this", "until": "turn"},
+    ],
+)
+def test_pilot_shape_keeps_printed_values_and_duration_implicit(
+    pilot: JsonValue,
+) -> None:
+    _check([{"pilot": pilot}], accepted=False)

@@ -86,6 +86,7 @@ STEP_NAMES = {
     "A.act.declare.number": "DeclareNumber",
     "A.act.declare.name": "DeclareName",
     "A.act.declare": "DeclareAction",
+    "A.act.pilot": "PilotAction",
     "A.act.equip": "EquipAction",
     "A.act.steal": "StealAction",
     "A.act.give": "GiveAction",
