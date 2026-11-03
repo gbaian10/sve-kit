@@ -1,0 +1,78 @@
+cards:
+  BP09-005:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: エルフ
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        face: 1
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        face: 2
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                ref: friends
+                to: ex
+          targets:
+            - bind: friends
+              from:
+                other: true
+                who: self
+                zone: field
+              upto: 2
+        face: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

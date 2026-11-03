@@ -1,211 +1,111 @@
-format: 1
-kind: effect_set
 cards:
-  BP09-005:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: look
-              count: 5
-              bind: seen
-            - op: optional
-              selection:
-                select:
-                  from: seen
-                  type: spell
-                  where:
-                    fn: eq
-                    args:
-                      - read: item.class
-                      - エルフ
-                min: 1
-                max: 1
-                bind: chosen
-              then:
-                op: seq
-                steps:
-                  - op: reveal
-                    subjects: chosen
-                    to: all
-                  - op: move
-                    subjects: chosen
-                    to: hand
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    difference:
-                      - seen
-                      - chosen
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - chosen
-                  max:
-                    count:
-                      difference:
-                        - seen
-                        - chosen
-                  bind: ordered
-                  order: true
-                - op: move
-                  subjects: ordered
-                  to: deck
-                  position: bottom
-        event: evolve
-        subject: self
-        face: 0
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - read: self.combo
-              - 3
-          then:
-            op: damage
-            subjects: target.1
-            amount: 3
-        event: attack
-        subject: self
-        face: 1
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: move
-          subjects: target.1
-          to: ex
-        event: evolve
-        subject: self
-        face: 1
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              other: true
-            min: 0
-            max: 2
   BP09-020:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: guard
-      - line: 2
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: select
-              select:
-                side: self
-                zone: hand
-              min: 0
+            - bind: chosen
               max:
                 count:
                   side: self
                   zone: hand
-              bind: chosen
-            - op: discard
+              min: 0
+              op: select
+              select:
+                side: self
+                zone: hand
+            - bind: discarded
+              op: discard
               subjects: chosen
-              bind: discarded
-            - op: draw
-              count:
-                fn: add
+            - count:
                 args:
                   - count: discarded
                   - 1
-            - op: if
-              condition:
-                fn: le
+                fn: add
+              op: draw
+            - condition:
                 args:
                   - count:
                       side: self
                       zone: deck
                   - 1
+                fn: le
+              op: if
               then:
                 op: win
                 side: self
         event: end
-  BP09-055:
+        kind: trigger
+        line: 2
     status: complete
+  BP09-055:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
+      - body:
           names:
             - 聖竜・リントヴルム
             - 邪竜・リントヴルム
+          op: evolve
+          subjects: self
         costs:
-          - op: pp
-            amount: 5
-      - line: 2
-        kind: trigger
-        body:
-          op: recover_pp
+          - amount: 5
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           amount:
             count:
               side: self
-              zone: cemetery
               type: spell
               where:
-                fn: eq
                 args:
                   - read: item.class
                   - ドラゴン
+                fn: eq
+              zone: cemetery
+          op: recover_pp
         event: enter
-        subject: self
-  BP09-P17:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: guard
-        face: 0
-      - line: 2
         kind: trigger
-        body:
+        line: 2
+        subject: self
+    status: complete
+  BP09-P17:
+    abilities:
+      - body:
+          name: guard
+          op: macro
+        face: 0
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: modify
+            - hp: 6
+              op: modify
               subjects: self.leader
-              hp: 6
-            - op: draw
-              count: 3
+            - count: 3
+              op: draw
         event: end
         face: 0
-      - line: 1
-        kind: static
-        body:
-          op: macro
+        kind: trigger
+        line: 2
+      - body:
           name: storm
+          op: macro
         face: 1
-      - line: 2
         kind: static
-        body:
+        line: 1
+      - body:
+          action: ignore_guard
           op: restrict
           subjects: self
-          action: ignore_guard
         face: 1
+        kind: static
+        line: 2
+    status: complete
+format: 1
+kind: effect_set

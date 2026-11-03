@@ -1,0 +1,31 @@
+cards:
+  BP08-002:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into: 決意の人形・オーキス
+        line: 1
+      - evolve:
+          cost:
+            pp: 4
+          into: 復讐の人形・オーキス
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 人形
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

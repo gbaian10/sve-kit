@@ -1,0 +1,49 @@
+cards:
+  BP09-019:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: シールドガーディアン
+        face: 1
+        line: 1
+      - face: 2
+        keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: スティールナイト
+            - create:
+                n: 1
+                to: field
+                token: ナイト
+        face: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP09-T07
+        face: 1
+        line: 1
+        section: 1
+      - card: BP09-T06
+        face: 2
+        line: 1
+        section: 1
+      - card: BP09-T05
+        face: 2
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

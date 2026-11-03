@@ -1,0 +1,156 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "look",
+            "count": 5,
+            "bind": "seen"
+          },
+          {
+            "op": "optional",
+            "selection": {
+              "select": {
+                "from": "seen",
+                "type": "spell",
+                "where": {
+                  "fn": "eq",
+                  "args": [
+                    {
+                      "read": "item.class"
+                    },
+                    "エルフ"
+                  ]
+                }
+              },
+              "min": 1,
+              "max": 1,
+              "bind": "chosen"
+            },
+            "then": {
+              "op": "seq",
+              "steps": [
+                {
+                  "op": "reveal",
+                  "subjects": "chosen",
+                  "to": "all"
+                },
+                {
+                  "op": "move",
+                  "subjects": "chosen",
+                  "to": "hand"
+                }
+              ]
+            }
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "op": "select",
+                "select": {
+                  "difference": [
+                    "seen",
+                    "chosen"
+                  ]
+                },
+                "min": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "chosen"
+                    ]
+                  }
+                },
+                "max": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "chosen"
+                    ]
+                  }
+                },
+                "bind": "ordered",
+                "order": true
+              },
+              {
+                "op": "move",
+                "subjects": "ordered",
+                "to": "deck",
+                "position": "bottom"
+              }
+            ]
+          }
+        ]
+      },
+      "event": "evolve",
+      "subject": "self",
+      "face": 0
+    },
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "read": "self.combo"
+            },
+            3
+          ]
+        },
+        "then": {
+          "op": "damage",
+          "subjects": "target.1",
+          "amount": 3
+        }
+      },
+      "event": "attack",
+      "subject": "self",
+      "face": 1,
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "opponent",
+            "zone": "field",
+            "type": "follower"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "move",
+        "subjects": "target.1",
+        "to": "ex"
+      },
+      "event": "evolve",
+      "subject": "self",
+      "face": 1,
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "field",
+            "other": true
+          },
+          "min": 0,
+          "max": 2
+        }
+      ]
+    }
+  ]
+}
