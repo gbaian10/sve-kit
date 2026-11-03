@@ -260,7 +260,9 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
         // Only a validated receipt predicate may erase its local snapshot capabilities.
         if matches!(
             code,
-            "shape.Predicate.ReceiptAny"
+            "shape.NatOperation.ReceiptCount"
+                | "read.receipt.member-count"
+                | "shape.Predicate.ReceiptAny"
                 | "read.receipt.member-any"
                 | "shape.ObjectView.Snapshot"
                 | "reference.snapshot"

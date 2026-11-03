@@ -700,3 +700,6 @@ mod material_power;
 
 #[path = "card/discard_event.rs"]
 mod discard_event;
+
+#[path = "card/filtered_mill.rs"]
+mod filtered_mill;
