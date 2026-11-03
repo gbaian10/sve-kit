@@ -456,8 +456,8 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     except OSError:
         raise WriteError(tuple(written), path) from None
     finally:
-        if written:
-            workspace.forget_author_set(output_root)
+        # The first write may truncate a file before it raises and enters written.
+        workspace.forget_author_set(output_root)
     return {
         "status": "ok",
         "cards": list[JsonValue](sorted(selected)),
