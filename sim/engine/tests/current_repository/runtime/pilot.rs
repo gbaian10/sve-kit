@@ -122,6 +122,23 @@ fn insufficient_pilot_materials_preserve_pp_and_board_for_all_printings() {
 #[test]
 fn both_bunny_evolved_printings_resolve_each_printed_mode_and_created_vehicle_attacks_with_storm() {
     for (base, form) in [("BP11-019", "BP11-020"), ("BP11-SL05", "BP11-SL06")] {
+        let ability = &selection().current[form].program.card().abilities[0].node;
+        let Node::Control {
+            control:
+                Control::Mode {
+                    choice_kind,
+                    chosen,
+                    ..
+                },
+        } = &ability.body.as_ref().unwrap().steps[0].node
+        else {
+            panic!("printed Choice mode");
+        };
+        assert_eq!(*choice_kind, ModeChoiceKind::ChoiceKeyword);
+        assert!(matches!(
+            chosen.kind,
+            ModeDecisionKind::PlayParameter { .. }
+        ));
         for mode in [0_usize, 1] {
             let mut initial = draw_position();
             initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"bunny","card":base}]);
