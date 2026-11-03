@@ -118,7 +118,10 @@ count 支援常值 exact／upto 與良構的 SC／NC 條件樹；在 AtPlay 固�
 常值按印刷模式數截斷，upto 正數至少選一個，零則保存空模式結果並繼續成本與其他本文。
 先證明模式的必要公開目標與共同成本可行，再出題；不可選模式不縮減 exact 必選數。
 只接受唯一頂層、controller、Public 的 ChoiceKeyword；模式 targets 限彼此獨立的公開 selector，
-沒有 mode 內 Distribution、capture 或與根 parameters 混用，未選模式仍通過整樹支援閉包。
+包含排除來源自身的 `Difference(SourceHolder)`，以及由領袖、場上物件及兩者聯集組成的 Recipients。
+模式可行性沿用正式目標候選與選取權限；對手場上沒有從者時，對手領袖仍可使必要目標成立。
+Recipients 不接受 capture、Bound 或跨模式選取依賴；物件目標維持既有選中物件 controller capture。
+沒有 mode 內 Distribution 或與根 parameters 混用，未選模式仍通過整樹支援閉包。
 exact 1 可帶 `CurrentTurnAbilityInstance` 排除；Authority 以既有 ModeUse 保存
 (execution, ability_instance, mode, turn)，AbilityPlayed 才原子提交，本文 false 仍保留紀錄。
 DSL lowering 接常值 n／upto、單一 SC／NC instead 及 this_turn 排除；混合 exact>1、

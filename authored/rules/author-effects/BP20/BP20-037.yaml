@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-037:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy: offering
+                    - create:
+                        token: 奏絶の独唱
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: 新約・白の章
+                        to: field
+                        n: 1
+          targets:
+            - option: 1
+              bind: offering
+              from:
+                who: self
+                zone: field
+                other: true
+                trait: アイドル
+              n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP15-PR12

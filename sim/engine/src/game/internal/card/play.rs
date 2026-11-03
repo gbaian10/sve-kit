@@ -1685,6 +1685,12 @@ fn independent_selector(selector: &Selector) -> bool {
     match selector {
         Selector::Zone { .. } | Selector::Objects { .. } => true,
         Selector::Union { sets } => sets.iter().all(independent_selector),
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(), Selector::Objects { objects }
+                if objects == &[ObjectOperand::SourceHolder {}]) =>
+        {
+            independent_selector(input)
+        }
         _ => false,
     }
 }
@@ -1723,8 +1729,20 @@ impl Game {
     }
 }
 
+fn independent_mode_recipients(candidates: &RecipientSet) -> bool {
+    match candidates {
+        RecipientSet::Leaders { players } => players.relative_to == (PlayerRef::Controller {}),
+        RecipientSet::Objects { objects } => independent_selector(objects),
+        RecipientSet::Union { sets } => sets.iter().all(independent_mode_recipients),
+        _ => false,
+    }
+}
+
 fn independent_mode_target(decision: &Decision) -> bool {
     use crate::ir::{Capture, CaptureTime, ObjectView, PlayerRead, Role};
+    if let ChoiceDomain::Recipients { candidates, .. } = &decision.domain {
+        return decision.captures.is_empty() && independent_mode_recipients(candidates);
+    }
     let ChoiceDomain::Objects {
         binding,
         constraint,
