@@ -153,6 +153,36 @@
         "class": "dragon",
         "titles": [],
         "zone": "leader"
+      },
+      "SYN-PAIR-C": {
+        "name": "合成：二擇一 C",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-ALL-M": {
+        "name": "合成：範圍 all",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-ALL-E": {
+        "name": "合成：範圍 all",
+        "class": "elf",
+        "titles": [],
+        "zone": "evolve"
+      },
+      "SYN-SCOPE-EVO-M": {
+        "name": "合成：範圍 evolve",
+        "class": "elf",
+        "titles": [],
+        "zone": "main"
+      },
+      "SYN-SCOPE-EVO-E": {
+        "name": "合成：範圍 evolve",
+        "class": "elf",
+        "titles": [],
+        "zone": "evolve"
       }
     },
     "title_rules": {
@@ -219,6 +249,35 @@
                 "name": "合成：二擇一 B",
                 "scope": "main",
                 "option": 1
+              },
+              {
+                "name": "合成：二擇一 C",
+                "scope": "main",
+                "option": 0
+              }
+            ]
+          },
+          {
+            "id": "r-scope-all",
+            "kind": "copy_limit",
+            "from": "2025-01-01",
+            "max": 1,
+            "members": [
+              {
+                "name": "合成：範圍 all",
+                "scope": "all"
+              }
+            ]
+          },
+          {
+            "id": "r-scope-evolve",
+            "kind": "copy_limit",
+            "from": "2025-01-01",
+            "max": 0,
+            "members": [
+              {
+                "name": "合成：範圍 evolve",
+                "scope": "evolve"
               }
             ]
           }
@@ -825,6 +884,80 @@
       }
     },
     {
+      "id": "same-name-section-only",
+      "rule": "6.1.1.4",
+      "note": "主牌組 BP19-110 3 張、進化牌組同名 BP19-111 4 張：只有進化牌組超限，cards 只列進化牌組的 ID",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "neutral"
+        },
+        "leader": "LCS01-007",
+        "main": [
+          ["BP19-110", 3],
+          ["FILL-NEUTRAL-01", 1],
+          ["FILL-NEUTRAL-02", 1],
+          ["FILL-NEUTRAL-03", 1],
+          ["FILL-NEUTRAL-04", 1],
+          ["FILL-NEUTRAL-05", 1],
+          ["FILL-NEUTRAL-06", 1],
+          ["FILL-NEUTRAL-07", 1],
+          ["FILL-NEUTRAL-08", 1],
+          ["FILL-NEUTRAL-09", 1],
+          ["FILL-NEUTRAL-10", 1],
+          ["FILL-NEUTRAL-11", 1],
+          ["FILL-NEUTRAL-12", 1],
+          ["FILL-NEUTRAL-13", 1],
+          ["FILL-NEUTRAL-14", 1],
+          ["FILL-NEUTRAL-15", 1],
+          ["FILL-NEUTRAL-16", 1],
+          ["FILL-NEUTRAL-17", 1],
+          ["FILL-NEUTRAL-18", 1],
+          ["FILL-NEUTRAL-19", 1],
+          ["FILL-NEUTRAL-20", 1],
+          ["FILL-UMA-01", 1],
+          ["FILL-UMA-02", 1],
+          ["FILL-UMA-03", 1],
+          ["FILL-UMA-04", 1],
+          ["FILL-UMA-05", 1],
+          ["FILL-UMA-06", 1],
+          ["FILL-UMA-07", 1],
+          ["FILL-UMA-08", 1],
+          ["FILL-UMA-09", 1],
+          ["FILL-UMA-10", 1],
+          ["FILL-UMA-11", 1],
+          ["FILL-UMA-12", 1],
+          ["FILL-UMA-13", 1],
+          ["FILL-UMA-14", 1],
+          ["FILL-UMA-15", 1],
+          ["FILL-UMA-16", 1],
+          ["FILL-UMA-17", 1]
+        ],
+        "evolve": [["BP19-111", 4]]
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "sameNameOver",
+            "clause": "6.1.1.4",
+            "cards": ["BP19-111"],
+            "values": {
+              "name": "機鋒の咎人・カットスロート",
+              "section": "evolve",
+              "count": 4,
+              "limit": 3
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
       "id": "onion-50",
       "rule": "6.1.2",
       "note": "オニオン軍団 50 張（Q1184）",
@@ -1366,6 +1499,55 @@
             "cards": ["BP04-037"],
             "values": {
               "cardClass": "royal",
+              "deckClass": "elf"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "class-mismatch-two",
+      "rule": "6.1.1.5.1",
+      "note": "兩張不同職業的卡：每個卡片 ID 各一筆",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["BP04-037", 1],
+          ["BP09-049", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2025-09-30"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP04-037"],
+            "values": {
+              "cardClass": "royal",
+              "deckClass": "elf"
+            }
+          },
+          {
+            "code": "classMismatch",
+            "clause": "6.1.1.5.1",
+            "cards": ["BP09-049"],
+            "values": {
+              "cardClass": "witch",
               "deckClass": "elf"
             }
           }
@@ -2075,6 +2257,141 @@
             "values": {
               "count": 2,
               "max": 1,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "choice-same-option",
+      "rule": "restriction",
+      "note": "二擇一：同一選項的兩個構築名稱一起放算一組",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [
+          ["SYN-PAIR-A", 1],
+          ["SYN-PAIR-C", 1]
+        ],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 38
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-all",
+      "rule": "restriction",
+      "note": "scope=all：主牌組與進化牌組合計",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["SYN-SCOPE-ALL-M", 1]],
+        "evolve": [["SYN-SCOPE-ALL-E", 1]],
+        "fill": {
+          "set": "elf",
+          "count": 39
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "restricted",
+            "clause": "restriction",
+            "cards": ["SYN-SCOPE-ALL-E", "SYN-SCOPE-ALL-M"],
+            "values": {
+              "name": "合成：範圍 all",
+              "count": 2,
+              "max": 1,
+              "from": "2025-01-01"
+            }
+          }
+        ],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-evolve-main",
+      "rule": "restriction",
+      "note": "scope=evolve：主牌組的同名卡不計",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [["SYN-SCOPE-EVO-M", 3]],
+        "evolve": [],
+        "fill": {
+          "set": "elf",
+          "count": 37
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": true,
+        "violations": [],
+        "notes": []
+      }
+    },
+    {
+      "id": "scope-evolve",
+      "rule": "restriction",
+      "note": "scope=evolve：進化牌組 1 張即違規",
+      "deck": {
+        "basis": {
+          "kind": "class",
+          "class": "elf"
+        },
+        "leader": "BP01-LD01",
+        "main": [],
+        "evolve": [["SYN-SCOPE-EVO-E", 1]],
+        "fill": {
+          "set": "elf",
+          "count": 40
+        }
+      },
+      "context": {
+        "format": "standard",
+        "date": "2026-11-01"
+      },
+      "expect": {
+        "legal": false,
+        "violations": [
+          {
+            "code": "banned",
+            "clause": "restriction",
+            "cards": ["SYN-SCOPE-EVO-E"],
+            "values": {
+              "name": "合成：範圍 evolve",
+              "count": 1,
+              "max": 0,
               "from": "2025-01-01"
             }
           }

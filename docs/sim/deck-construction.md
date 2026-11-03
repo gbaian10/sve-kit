@@ -61,9 +61,20 @@
 ```
 
 - `legal` 只看 `violations` 是否為空；`notes` 是無法檢查或資料不足的提示，不影響合法性
-- `cards`：違規相關的卡片 ID；同名、禁限類列出牌組中屬於該組的全部 ID
-- `values`：顯示用的數值（張數、上限等），各代碼的欄位見下表
-- 違規之間不排序；介面自行排序
+- `cards`：違規相關的卡片 ID，不重複、不排序（比對時當集合）；每種代碼幾筆、列哪些 ID 見下表
+- `values`：顯示用的數值（張數、上限等），各代碼的欄位見 §3、§5
+- 違規之間不排序；介面自行排序；同一代碼不會對同一分組重複出現
+
+| 代碼 | 一筆的分組 | `cards` |
+| --- | --- | --- |
+| `leaderMissing`、`mainTooFew`、`mainTooMany`、`evolveTooMany`、`startAmuletMissing`、`formatUnsupported` | 整副牌一筆 | 空 |
+| `leaderNotLeader`、`leaderClassMismatch`、`leaderTitleMismatch` | 整副牌一筆 | 主戰者 ID |
+| `mainWrongCard`、`evolveWrongCard` | 該區每個卡片 ID 一筆 | 該 ID |
+| `classMismatch`、`titleMismatch` | 每個卡片 ID 一筆（同 ID 在兩區也只一筆） | 該 ID |
+| `unknownCard` | 每個卡片 ID 一筆（主戰者與兩區合併） | 該 ID |
+| `sameNameOver` | 每個（區、構築名稱）一筆 | 該區中屬於該構築名稱的 ID；另一區的同名卡不列 |
+| `startAmuletNames` | 整副牌一筆 | 兩區所有有【スタートアミュレット】的 ID |
+| `banned`、`restricted`、`choiceRestricted` | 每筆禁限一筆 | 依成員 `scope` 計入張數的 ID |
 
 ## 3. 構築規則
 
@@ -92,7 +103,8 @@
 主牌組與進化牌組分開計算（6.1.1.4：各 3 張、合計 6 張）。某區某構築名稱的上限依序決定：
 
 1. 主牌組有任何一張帶 `singleton_except` 的卡，且該分組不在它的清單內 → 1（6.1.2）
-2. 該分組任一張卡的 `copies` 有這一區 → 該值（6.1.2）
+2. 該分組任一張卡的 `copies` 有這一區 → 該值（6.1.2）。同一構築名稱、同一區的 `copies` 必須一致；
+   不一致時由匯出端拒絕產出索引，驗證器不另訂合併規則
 3. 其他 → 3（6.1.1.4）
 
 上限來自 1、2 時 `clause` 寫 `6.1.2`，否則寫 `6.1.1.4`。
