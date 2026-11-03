@@ -321,7 +321,7 @@ jobs:
       fail-fast: false
       matrix:
         # Each test runs in exactly one shard; python-coverage checks that and gates the combined coverage.
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4]
     env:
       MISE_TASK_RUN_AUTO_INSTALL: "false"
     steps:
@@ -550,7 +550,7 @@ jobs:
       matrix:
         # Each test runs in exactly one shard; rust-coverage checks that and gates the merged coverage.
         # Every shard builds the same binaries itself: building once would add a sequential job and a large artifact.
-        shard: [1, 2, 3]
+        shard: [1, 2, 3, 4]
     env:
       MISE_EXEC_AUTO_INSTALL: "false" # Cargo goes through `mise exec`; Rust itself comes from rustup
     steps:
