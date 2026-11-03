@@ -510,14 +510,20 @@ rule names and token selection. This is a test adapter, not a production snapsho
 or a separate maintained card list. Update the batch pin explicitly when changing
 the test baseline. `.github/ci/rust_tests.py` writes the inputs to a private temporary
 folder, replaces any inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the
-temporary data. CI always generates them fresh. Locally it first hashes every file the
-generator reads (`INPUTS` in the script: `card-data/`, `authored/`, `dsl/`, the batch
-pin, `carddb/src/`, the `carddb/tests/` package with `support/`, `carddb/pyproject.toml`
-and `carddb/uv.lock`) and copies a pair generated from byte-identical inputs instead of
-generating again. A pair is kept, under `${XDG_CACHE_HOME:-~/.cache}/sve-kit/engine-inputs`
-(newest 8), only when the inputs hashed the same before and after generation. A missing
-input still fails. Delete that folder to force a fresh generation. Both the manual
-`cargo-test` hook and the CI shards use the script. Project and fork PRs run the same complete
+temporary data. CI always generates them fresh. Locally it first hashes the generator
+inputs, including file paths and bytes, directory paths and node kinds (`INPUTS` in
+the script: `card-data/`, `authored/`, `dsl/`, the batch pin, `carddb/src/`, the
+`carddb/tests/` package with `support/`, `carddb/pyproject.toml`
+and `carddb/uv.lock`) and copies a pair generated from identical files and directory
+layout instead of generating again. A pair is kept under
+`${XDG_CACHE_HOME:-~/.cache}/sve-kit/engine-inputs` (newest 8), only when the inputs
+hashed the same before and after generation. A missing
+input, unreadable directory, symlink or other nonregular input still fails. Bytecode
+cache directories are ignored. Cache copies, publication and pruning share a local
+lock so concurrent worktrees cannot delete a pair while it is copied; generation
+and staging copies run outside that lock. Delete that folder to force a fresh
+generation when no wrapper is running. Both the manual `cargo-test` hook and the CI
+shards use the script. Project and fork PRs run the same complete
 workspace with the 90% line coverage gate, without private credentials. Direct
 Cargo snapshot tests fail if the generated input is missing; they never skip.
 
@@ -527,7 +533,8 @@ The 16 public SVE fixtures retain their field-level hashes, and synthetic SV1/SV
 pages exercise the other parser shapes without copying third-party wording.
 Project and fork Python runs execute the same public fixtures and synthetic tests
 with the complete 90% combined line and branch coverage gate. Generated JSONL,
-official test content and raw test logs are not cached or uploaded as artifacts.
+official test content and raw test logs are not stored in Actions caches or uploaded
+as artifacts.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:

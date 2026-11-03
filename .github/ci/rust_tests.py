@@ -10,14 +10,18 @@ its name, belongs to exactly one shard. The slice's coverage inputs go to DIR/co
 the slices and check that together they ran every listed test.
 """
 
+import fcntl
 import hashlib
 import json
 import os
 import re
 import shutil
+import stat
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed tool argv; no shell
 import sys
 import tempfile
+from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 import rust_coverage
@@ -48,7 +52,7 @@ INPUTS = (
     "carddb/pyproject.toml",
     "carddb/uv.lock",
 )
-GENERATOR = b"repository_current cards.jsonl selection.json v1"
+GENERATOR = b"repository_current cards.jsonl selection.json v2"
 OUTPUTS = ("cards.jsonl", "selection.json")
 KEPT_INPUTS = 8
 
@@ -68,26 +72,32 @@ def shard_of(name: str, total: int) -> int:
 
 
 def input_digest(root: Path) -> str:
-    """Hash every generator input file by path and content; a missing input fails."""
+    """Hash directory topology and regular file bytes; missing or unsafe inputs fail."""
     digest = hashlib.sha256(GENERATOR)
     for name in INPUTS:
         path = root / name
-        if not path.exists():
-            raise FileNotFoundError(f"Missing engine input: {name}")
-        files = (
-            [path]
-            if path.is_file()
-            else sorted(
-                item
-                for item in path.rglob("*")
-                if item.is_file() and "__pycache__" not in item.parts
-            )
-        )
-        for item in files:
+        for parent in path.parents:
+            if parent == root:
+                break
+            if parent.is_symlink():
+                raise ValueError(f"Symlink engine input: {name}")
+        pending = [path]
+        while pending:
+            item = pending.pop()
+            if item.name == "__pycache__":
+                continue
+            mode = item.lstat().st_mode
+            if not (stat.S_ISDIR(mode) or stat.S_ISREG(mode)):
+                raise ValueError(f"Nonregular engine input: {item.relative_to(root)}")
             relative = item.relative_to(root).as_posix().encode()
-            content = item.read_bytes()
+            digest.update(b"d" if stat.S_ISDIR(mode) else b"f")
             digest.update(len(relative).to_bytes(8, "big") + relative)
-            digest.update(len(content).to_bytes(8, "big") + content)
+            if stat.S_ISDIR(mode):
+                # iterdir propagates unreadable-directory errors instead of hiding them.
+                pending.extend(sorted(item.iterdir(), reverse=True))
+            else:
+                content = item.read_bytes()
+                digest.update(len(content).to_bytes(8, "big") + content)
     return digest.hexdigest()
 
 
@@ -99,14 +109,29 @@ def cache_root() -> Path | None:
     return Path(base) / "sve-kit" / "engine-inputs"
 
 
+@contextmanager
+def _cache_access(cache: Path) -> Generator[None]:
+    cache.mkdir(parents=True, exist_ok=True)
+    with (cache / ".lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(lock, fcntl.LOCK_UN)
+
+
 def reuse(cache: Path, digest: str, folder: Path) -> bool:
     """Copy a complete cached pair into the private temporary folder."""
-    entry = cache / digest
-    if not all((entry / name).is_file() for name in OUTPUTS):
+    if not cache.is_dir():
         return False
-    for name in OUTPUTS:
-        shutil.copyfile(entry / name, folder / name)
-    entry.touch()
+    # A publisher must not prune this pair between its two copies.
+    with _cache_access(cache):
+        entry = cache / digest
+        if not all((entry / name).is_file() for name in OUTPUTS):
+            return False
+        for name in OUTPUTS:
+            shutil.copyfile(entry / name, folder / name)
+        entry.touch()
     return True
 
 
@@ -114,26 +139,29 @@ def keep(cache: Path, digest: str, folder: Path) -> None:
     """Publish a generated pair atomically and keep only the newest entries."""
     cache.mkdir(parents=True, exist_ok=True)
     entry = cache / digest
-    if not entry.exists():
-        staging = Path(tempfile.mkdtemp(prefix=f".{digest}-", dir=cache))
+    staging = Path(tempfile.mkdtemp(prefix=f".{digest}-", dir=cache))
+    try:
         for name in OUTPUTS:
             shutil.copyfile(folder / name, staging / name)
-        try:
-            staging.rename(entry)
-        except OSError:
-            # Another run published the same inputs first.
-            shutil.rmtree(staging)
-    entries = sorted(
-        (
-            path
-            for path in cache.iterdir()
-            if path.is_dir() and not path.name.startswith(".")
-        ),
-        key=lambda path: path.stat().st_mtime,
-        reverse=True,
-    )
-    for old in entries[KEPT_INPUTS:]:
-        shutil.rmtree(old, ignore_errors=True)
+        with _cache_access(cache):
+            if entry.exists() and not all((entry / name).is_file() for name in OUTPUTS):
+                shutil.rmtree(entry)
+            if not entry.exists():
+                staging.rename(entry)
+            entry.touch()
+            entries = sorted(
+                (
+                    path
+                    for path in cache.iterdir()
+                    if path.is_dir() and not path.name.startswith(".")
+                ),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+            for old in entries[KEPT_INPUTS:]:
+                shutil.rmtree(old, ignore_errors=True)
+    finally:
+        shutil.rmtree(staging, ignore_errors=True)
 
 
 def generate(output: Path, selection: Path) -> subprocess.Popen[bytes]:
