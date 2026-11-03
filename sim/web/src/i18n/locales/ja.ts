@@ -683,6 +683,15 @@ export default {
     problemsLess: "折りたたむ",
     clause: "総合ルール {{clause}}",
     clauseRestriction: "禁止・制限",
+    format: {
+      label: "フォーマット",
+      standard: "スタンダード",
+      crossover: "クロスオーバー",
+      cross_craft: "Cross Craft",
+      gloryfinder: "グローリーファインダー",
+      unsupportedHint:
+        "このフォーマットの構築チェックはまだ対応していません。デッキは通常どおり組めます。",
+    },
     rulesLoading: "構築ルールのデータを読み込み中",
     rulesFailed: "構築ルールのデータを読み込めません",
     clauseFormat: "フォーマット",
@@ -701,13 +710,15 @@ export default {
       classMismatch:
         "「{{name}}」は{{cardClass}}です。{{deckClass}}デッキには{{deckClass}}とニュートラルしか入れられません。",
       titleMismatch: "「{{name}}」にタイトル「{{title}}」がありません。",
-      restricted: "「{{name}}」は殿堂入り（{{max}} 枚まで、現在 {{count}} 枚）。",
-      banned: "「{{name}}」は禁止カードです。",
+      restricted:
+        "「{{name}}」は殿堂入り（{{from}} より適用、{{max}} 枚まで、現在 {{count}} 枚）。",
+      banned: "「{{name}}」は禁止カードです（{{from}} より適用）。",
       unknownCard: "カード {{cardId}} がデータにありません。",
       startAmuletMissing:
         "ヴァンガードのタイトルデッキには【スタートアミュレット】を持つカードが 1 枚以上必要です。",
       startAmuletNames: "【スタートアミュレット】を持つカードはすべて同じカード名にしてください。",
-      choiceRestricted: "この制限のカードは {{max}} 種類までです（現在 {{count}} 種類）。",
+      choiceRestricted:
+        "この制限のカードは {{max}} 種類までです（{{from}} より適用、現在 {{count}} 種類）。",
       formatUnsupported: "このフォーマットはまだチェックできません。",
       triggerClassUnchecked:
         "トリガーを持つカードはリーダーと同じクラスである必要があります。アイコンのデータがないためチェックしていません。",

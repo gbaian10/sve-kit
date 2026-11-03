@@ -1,5 +1,5 @@
 import type { Region } from "../search"
-import type { Deck, DeckBasis, DeckCardInfo, DeckEntry } from "./types"
+import type { Deck, DeckBasis, DeckCardInfo, DeckEntry, DeckFormat } from "./types"
 
 export type Placement = "main" | "evolve" | "leader" | "none"
 
@@ -69,7 +69,12 @@ export function totalCount(entries: readonly DeckEntry[]): number {
 }
 
 export function createDeck(
-  input: { readonly name: string; readonly edition: Region; readonly basis: DeckBasis },
+  input: {
+    readonly name: string
+    readonly edition: Region
+    readonly format?: DeckFormat
+    readonly basis: DeckBasis
+  },
   now: Date,
 ): Deck {
   const stamp = now.toISOString()
@@ -77,6 +82,7 @@ export function createDeck(
     id: crypto.randomUUID(),
     name: input.name,
     edition: input.edition,
+    format: input.format ?? "standard",
     basis: input.basis,
     leader: null,
     main: [],

@@ -700,6 +700,15 @@ export default {
     problemsLess: "Show fewer",
     clause: "CR {{clause}}",
     clauseRestriction: "Restriction",
+    format: {
+      label: "Format",
+      standard: "Standard",
+      crossover: "Crossover",
+      cross_craft: "Cross Craft",
+      gloryfinder: "Gloryfinder",
+      unsupportedHint:
+        "Construction checks do not support this format yet; you can still build the deck.",
+    },
     rulesLoading: "Loading construction rules",
     rulesFailed: "Construction rules could not be loaded",
     clauseFormat: "Format",
@@ -718,14 +727,14 @@ export default {
       classMismatch:
         "“{{name}}” is {{cardClass}}; a {{deckClass}} deck may only hold {{deckClass}} and neutral cards.",
       titleMismatch: "“{{name}}” does not carry the title “{{title}}”.",
-      restricted: "“{{name}}” is restricted to {{max}} (deck has {{count}}).",
-      banned: "“{{name}}” is banned.",
+      restricted: "“{{name}}” is restricted to {{max}} from {{from}} (deck has {{count}}).",
+      banned: "“{{name}}” is banned from {{from}}.",
       unknownCard: "Card {{cardId}} is not in the data.",
       startAmuletMissing:
         "A Cardfight!! Vanguard deck needs at least one card with Starting Amulet.",
       startAmuletNames: "All cards with Starting Amulet must share the same name.",
       choiceRestricted:
-        "Only {{max}} of these restricted choices may be used; the deck has {{count}}.",
+        "From {{from}}, only {{max}} of these restricted choices may be used; the deck has {{count}}.",
       formatUnsupported: "This format cannot be checked yet.",
       triggerClassUnchecked:
         "Cards with a trigger icon must match the leader’s class; icon data is missing, so this is not checked.",

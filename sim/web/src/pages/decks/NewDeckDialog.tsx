@@ -8,7 +8,7 @@ import { cn } from "../../components/ui/cn"
 import { Dialog } from "../../components/ui/Dialog"
 import { Segmented } from "../../components/ui/Segmented"
 import { classStyle } from "../../domain/classes"
-import type { DeckBasis } from "../../domain/deck/types"
+import { type DeckBasis, type DeckFormat, FORMATS_OF } from "../../domain/deck/types"
 import type { Region } from "../../domain/search"
 import type { ClassOption } from "./deck-labels"
 import type { TitleOption } from "./deck-titles"
@@ -16,6 +16,7 @@ import type { TitleOption } from "./deck-titles"
 export interface NewDeckInput {
   readonly name: string
   readonly edition: Region
+  readonly format: DeckFormat
   readonly basis: DeckBasis
 }
 
@@ -56,6 +57,9 @@ export function NewDeckDialog({
   const edition = chosenEdition ?? defaultEdition
   // Until the chosen edition's cards are in, the other edition's titles must not be offered.
   const editionTitles = titlesEdition === edition ? titles : undefined
+  const [chosenFormat, setChosenFormat] = useState<DeckFormat>("standard")
+  // Formats belong to an edition; one the new edition does not play falls back to Standard.
+  const format = FORMATS_OF[edition].includes(chosenFormat) ? chosenFormat : "standard"
   const [kind, setKind] = useState<DeckBasis["kind"]>("class")
   const [classCode, setClassCode] = useState<string | null>(null)
   const [titleCode, setTitleCode] = useState<string | null>(null)
@@ -77,6 +81,7 @@ export function NewDeckDialog({
   const close = useDialogHistory("new-deck", open, () => {
     setName("")
     setChosenEdition(null)
+    setChosenFormat("standard")
     setKind("class")
     setClassCode(null)
     setTitleCode(null)
@@ -95,7 +100,7 @@ export function NewDeckDialog({
             disabled={basis === undefined}
             onClick={() => {
               if (!basis) return
-              onCreate({ name: name.trim() || defaultName, edition, basis })
+              onCreate({ name: name.trim() || defaultName, edition, format, basis })
             }}
           >
             {t("decks.create")}
@@ -134,6 +139,22 @@ export function NewDeckDialog({
             }}
           />
           <span className="text-11 text-text-3">{t("decks.editionHint")}</span>
+        </div>
+        <div className="flex flex-col gap-1 text-13 text-text-2">
+          <span>{t("decks.format.label")}</span>
+          <Segmented
+            className="self-start"
+            label={t("decks.format.label")}
+            value={format}
+            options={FORMATS_OF[edition].map((value) => ({
+              value,
+              label: t(`decks.format.${value}`),
+            }))}
+            onChange={setChosenFormat}
+          />
+          {format !== "standard" && (
+            <span className="text-11 text-text-3">{t("decks.format.unsupportedHint")}</span>
+          )}
         </div>
         <div className="flex flex-col gap-2 text-13 text-text-2">
           <span>{t("decks.basis.label")}</span>

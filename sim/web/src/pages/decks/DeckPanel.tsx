@@ -149,7 +149,7 @@ export function DeckPanel({
           />
           {/* The edition keeps the right end of the name row, so the row below fits one line. */}
           <span className="inline-flex h-7 shrink-0 items-center rounded-pill border border-border bg-surface-1 px-2 text-11 font-semibold text-text-2">
-            {t(`options.edition.${deck.edition}`)}
+            {t(`options.edition.${deck.edition}`)} · {t(`decks.format.${deck.format}`)}
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 px-1">

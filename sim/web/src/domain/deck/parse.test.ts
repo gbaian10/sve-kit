@@ -6,6 +6,7 @@ const valid = {
   id: "d1",
   name: "Deck",
   edition: "jp",
+  format: "standard",
   basis: { kind: "class", classCode: "forest" },
   leader: { cardId: "c:l", printingId: "p:l" },
   main: [{ cardId: "c:1", count: 3, printingId: "p:1" }],
@@ -28,6 +29,12 @@ describe("parseDeck", () => {
     })
   })
 
+  it("reads a deck saved before formats were recorded as Standard", () => {
+    const { format: _format, ...older } = valid
+    expect(parseDeck(older)?.format).toBe("standard")
+    expect(parseDeck({ ...valid, format: "crossover" })?.format).toBe("crossover")
+  })
+
   it("drops fields it does not know", () => {
     const parsed = parseDeck({ ...valid, extra: 1, basis: { ...valid.basis, extra: 2 } })
     expect(parsed).toEqual(valid)
@@ -37,6 +44,8 @@ describe("parseDeck", () => {
     ["not an object", "deck"],
     ["no id", { ...valid, id: undefined }],
     ["unknown edition", { ...valid, edition: "zh" }],
+    ["unknown format", { ...valid, format: "sealed" }],
+    ["format of the other edition", { ...valid, format: "cross_craft" }],
     ["unknown basis", { ...valid, basis: { kind: "set", code: "bp01" } }],
     ["basis without its code", { ...valid, basis: { kind: "class" } }],
     ["leader of the wrong shape", { ...valid, leader: "c:l" }],

@@ -38,8 +38,7 @@ export function deckProblems(
       evolve: deck.evolve.map((entry) => [entry.cardId, entry.count] as const),
     },
     index,
-    // Decks record no format yet; Standard is the only one the index checks.
-    { format: "standard", date },
+    { format: deck.format, date },
   )
   // The panel's messages also show the main deck's range and the first card's printed name.
   const named = (cardIds: readonly string[], values: Readonly<Record<string, string | number>>) => {

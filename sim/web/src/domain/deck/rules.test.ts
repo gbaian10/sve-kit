@@ -53,6 +53,18 @@ describe("deckProblems", () => {
     })
   })
 
+  it("checks the deck's own format", () => {
+    const problems = deckProblems(
+      deck({ format: "crossover", leader: { cardId: "c:leader" } }),
+      index,
+      "2026-10-26",
+      () => undefined,
+    )
+    expect(problems.map((problem) => [problem.kind, problem.clause])).toEqual([
+      ["formatUnsupported", "format"],
+    ])
+  })
+
   it("reports checks it could not make as infos after the errors", () => {
     const problems = deckProblems(
       deck({ leader: { cardId: "c:leader" } }),
