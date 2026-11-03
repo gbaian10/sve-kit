@@ -2408,6 +2408,7 @@ pub(super) struct ReceiptCountQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
+    pub not_class: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub orig_cost_ge: Option<u64>,

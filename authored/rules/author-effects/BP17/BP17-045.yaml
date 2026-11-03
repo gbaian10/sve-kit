@@ -1,0 +1,40 @@
+cards:
+  BP17-045:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                result: milled
+                to: cemetery
+                top:
+                  n: 2
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: milled
+                          view: before
+                        not_class: ウィッチ
+                    op: ge
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
