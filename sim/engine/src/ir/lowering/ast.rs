@@ -2333,6 +2333,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    If(Box<StaticConditional>),
     EvolveCostMod(EvolutionCostModifier),
     CostMod(CostModifier),
     Grant(StaticGrant),
@@ -2340,6 +2341,14 @@ pub(super) enum StaticEffect {
     Prevent(Prevent),
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StaticConditional {
+    pub cond: Condition,
+    pub then: Vec<StaticEffect>,
+    pub r#else: Option<Vec<StaticEffect>>,
 }
 
 #[derive(Deserialize)]
@@ -2355,9 +2364,31 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotRemoval {
+    pub what: RemovalAction,
+    pub on: Option<Objects>,
+    pub by: Option<RemovalBy>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RemovalAction {
+    Destroy,
+    Banish,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RemovalBy {
+    Ability,
 }
 
 #[derive(Deserialize)]

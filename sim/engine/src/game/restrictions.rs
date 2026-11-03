@@ -37,6 +37,9 @@ impl Game {
     }
 
     pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
+        if self.internal_removal_restricted(id, action)? {
+            return Ok(true);
+        }
         for entry in &self.state.continuous {
             if entry["effect"]["op"] != "restrict"
                 || entry["effect"]["action"] != action

@@ -689,3 +689,5 @@ mod hand_selection;
 
 #[path = "card/event_ability.rs"]
 mod event_ability;
+#[path = "card/removal_immunity.rs"]
+mod removal_immunity;
