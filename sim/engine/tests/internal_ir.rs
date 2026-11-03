@@ -34,6 +34,8 @@ mod life;
 #[path = "internal_ir/pilot.rs"]
 mod pilot;
 
+#[path = "internal_ir/next_damage.rs"]
+mod next_damage;
 #[path = "internal_ir/numeric.rs"]
 mod numeric;
 #[path = "internal_ir/ordering.rs"]

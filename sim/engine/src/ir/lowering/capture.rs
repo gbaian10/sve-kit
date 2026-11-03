@@ -12,7 +12,7 @@ use crate::ir::{
     reason = "Selection captures share the target parameter environment."
 )]
 impl BodyContext<'_> {
-    fn selected_parameter(
+    pub(super) fn selected_parameter(
         &self,
         name: &str,
         path: &str,

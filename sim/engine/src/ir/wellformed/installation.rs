@@ -56,6 +56,12 @@ impl Checker {
         if let InstallationSubjects::Players { players, .. } = subjects {
             self.players(players)?;
             self.installed_duration(duration)?;
+            if matches!(effect, Effect::Replacement { duration: inner, .. } if inner == duration) {
+                if duration.usage.is_some() {
+                    return self.reject();
+                }
+                return self.installed_player_prevention(effect, players);
+            }
             let Effect::CostModifier {
                 kind: CostKind::Play,
                 subjects: filter,
@@ -103,7 +109,7 @@ impl Checker {
         affected: Binding<Selector>,
         duration: &Duration,
     ) -> Checked {
-        // IR §14 defines use consumption only for cost modifiers; other effects fail closed.
+        // Duration usage belongs to costs; replacement usage is checked on the replacement itself.
         if duration.usage.is_some() && !matches!(effect, Effect::CostModifier { .. }) {
             return self.reject();
         }

@@ -1,8 +1,8 @@
 use super::{Checked, Checker, WellFormedReason};
-use crate::ir::prevention::{Recipients, projection};
+use crate::ir::prevention::{Recipients, own_leader, projection};
 use crate::ir::{
-    Bool, DurationEnd, Effect, EventRewrite, Expr, ProposedEventPattern, Selector, TimeAnchor,
-    ZoneKind,
+    Bool, DurationEnd, Effect, EventRewrite, Expr, PlayerSet, ProposedEventPattern, Selector,
+    TimeAnchor, ZoneKind,
 };
 
 #[expect(
@@ -16,6 +16,7 @@ impl Checker {
             || shape.duration.end != (DurationEnd::NoTemporalExpiry {})
             || shape.duration.anchor != (TimeAnchor::Installation {})
             || shape.duration.usage.is_some()
+            || shape.usage.is_some()
             || !shape.duration.intervals.is_empty()
         {
             return self.reject();
@@ -75,6 +76,23 @@ impl Checker {
             | EventRewrite::ReplaceInstruction { .. } => return self.reject(),
         }
         self.boolean(shape.condition)
+    }
+
+    pub(super) fn installed_player_prevention(
+        &mut self,
+        effect: &Effect,
+        players: &PlayerSet,
+    ) -> Checked {
+        let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
+        if players != &own_leader()
+            || shape.usage.is_none()
+            || !matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
+            || shape.damage_source.is_some()
+            || *shape.condition != Expr::Literal(Bool(true))
+        {
+            return self.reject();
+        }
+        self.prevention_shape(effect)
     }
 
     pub(super) fn installed_prevention(&mut self, effect: &Effect, targets: &Selector) -> Checked {

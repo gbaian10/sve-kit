@@ -866,6 +866,7 @@ pub(super) struct Apply {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum InstalledEffect {
+    DamageMod(DamageModifier),
     AddTrait(TraitEffect),
     Stat(ConstantStats),
     CostMod(CostModifier),

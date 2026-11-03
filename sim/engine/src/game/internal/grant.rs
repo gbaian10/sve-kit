@@ -548,6 +548,24 @@ impl Game {
         Ok(source)
     }
 
+    pub(super) fn installed_effect_provider(
+        &self,
+        execution: &Execution,
+    ) -> Result<KeywordProvider> {
+        let source = execution
+            .ability
+            .ok_or_else(|| invalid("effect without ability source"))?;
+        if let Some(((_, _, origin, _), _)) = self
+            .card_runtime
+            .keyword_instances
+            .iter()
+            .find(|(_, instance)| **instance == source.instance)
+        {
+            return Ok(origin.provider().clone());
+        }
+        self.installed_keyword_provider(execution)
+    }
+
     fn installed_keyword_provider(&self, execution: &Execution) -> Result<KeywordProvider> {
         let authority = execution
             .ability

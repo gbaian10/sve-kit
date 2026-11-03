@@ -2,12 +2,14 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
+use crate::ir::prevention::{own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
-    DamageKind, DamageRecipient, Duration, Effect, EffectDefinitionId, EventRewrite, Expr,
-    InstallationSubjects, InstallationTime, Int, Nat, ObjectOperand, OncePerEvent, PlayerRef,
-    PlayerRelation, PlayerSet, Predicate, ProposedEventPattern, RecipientPredicate,
-    ReplacementScope, ScopeId, Selector, SourcePredicate, TextQuantifier, ZoneKind,
+    DamageKind, DamageRecipient, Duration, DurationEnd, Effect, EffectDefinitionId,
+    EffectReference, EventRewrite, Expr, InstallationSubjects, InstallationTime, Int, Nat,
+    ObjectOperand, OncePerEvent, PlayerRef, PlayerRelation, PlayerSet, Predicate,
+    ProposedEventPattern, RecipientPredicate, ReplacementScope, ScopeId, Selector, SourcePredicate,
+    TextQuantifier, UsageScope, UseLimit, ZoneKind,
 };
 
 fn recipient(objects: Selector, binding: Binding<DamageRecipient>) -> RecipientPredicate {
@@ -99,9 +101,6 @@ impl BodyContext<'_> {
         duration: Duration,
         path: &str,
     ) -> Result<Effect, LoweringError> {
-        if shape.next_only == Some(true) {
-            return Err(unsupported(path));
-        }
         let recipient = Some(self.prevention_recipients(shape.on.as_ref(), fallback, path)?);
         let damage_source = shape
             .source
@@ -116,7 +115,7 @@ impl BodyContext<'_> {
             ast::PreventionKind::Combat => DamageKind::Combat,
             ast::PreventionKind::Ability => DamageKind::Ability,
         };
-        self.damage_prevention(
+        let effect = self.damage_prevention(
             ProposedEventPattern::Damage {
                 recipient,
                 source: damage_source,
@@ -126,7 +125,8 @@ impl BodyContext<'_> {
             condition,
             duration,
             path,
-        )
+        )?;
+        limit_next(effect, shape.next_only == Some(true), path)
     }
 
     fn damage_prevention(
@@ -156,13 +156,144 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn player_effect(
+        &mut self,
+        value: &ast::PlayerEffect,
+        source: &AbilitySource,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if matches!(
+            value.effect,
+            ast::InstalledEffect::Prevent(_) | ast::InstalledEffect::DamageMod(_)
+        ) {
+            self.player_prevention(value, source, path)
+        } else {
+            self.player_cost(value, path)
+        }
+    }
+
+    pub(super) fn player_prevention(
+        &mut self,
+        value: &ast::PlayerEffect,
+        source: &AbilitySource,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if !matches!(value.who, ast::Side::Controller) {
+            return Err(unsupported(path));
+        }
+        let (rewrite, on, kind, next, damage_source) = match &value.effect {
+            ast::InstalledEffect::Prevent(shape) => (
+                EventRewrite::PreventDamage {
+                    recipient: None,
+                    source: None,
+                    kind: DamageKind::Any,
+                },
+                shape.on.as_ref(),
+                Some(&shape.kind),
+                shape.next_only,
+                shape.source.as_ref(),
+            ),
+            ast::InstalledEffect::DamageMod(shape) if shape.delta < 0 => (
+                EventRewrite::AddDamage {
+                    amount: Expr::Literal(Int(shape.delta)),
+                },
+                shape.on.as_ref(),
+                shape.kind.as_ref(),
+                shape.next_only,
+                shape.source.as_ref(),
+            ),
+            ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::AddTrait(_)
+            | ast::InstalledEffect::Stat(_)
+            | ast::InstalledEffect::CostMod(_)
+            | ast::InstalledEffect::EvolveCostMod(_)
+            | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
+        };
+        if next != Some(true)
+            || damage_source.is_some()
+            || !matches!(kind, None | Some(ast::PreventionKind::Any))
+            || !matches!(
+                on,
+                None | Some(ast::Recipients::Leader {
+                    leader: ast::LeaderSide::Controller
+                })
+            )
+        {
+            return Err(unsupported(path));
+        }
+        let duration = numeric::duration(value.until.as_ref(), path)?;
+        if duration.end != (DurationEnd::CurrentTurnEnd {}) || !duration.intervals.is_empty() {
+            return Err(unsupported(path));
+        }
+        let binding = Binding::new(1, self.card_allocator.scope(path)?);
+        let players = own_leader();
+        let recipient = RecipientPredicate {
+            binding,
+            condition: Expr::Compute(Box::new(Predicate::RecipientIsLeader {
+                recipient: DamageRecipient::Bound { binding },
+                players: players.clone(),
+            })),
+        };
+        let mut effect = self.damage_prevention(
+            ProposedEventPattern::Damage {
+                recipient: Some(recipient),
+                source: None,
+                kind: DamageKind::Any,
+            },
+            source,
+            Expr::Literal(Bool(true)),
+            duration.clone(),
+            path,
+        )?;
+        if let Effect::Replacement {
+            rewrite: current, ..
+        } = &mut effect
+        {
+            *current = rewrite;
+        }
+        let effect = limit_next(effect, true, path)?;
+        Ok(Action::InstallEffect {
+            subjects: InstallationSubjects::Players {
+                players,
+                affected: Binding::new(1, self.card_allocator.scope(path)?),
+            },
+            capture: InstallationTime::InstructionStart,
+            effect: Box::new(effect),
+            duration,
+        })
+    }
+
     pub(super) fn prevent_apply(
         &mut self,
         installation: &ast::Apply,
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let subjects = self.objects(&installation.on, path)?;
+        let limited = match &installation.effect {
+            ast::InstalledEffect::Prevent(shape) => shape.next_only == Some(true),
+            ast::InstalledEffect::DamageMod(shape) => shape.next_only == Some(true),
+            ast::InstalledEffect::AddTrait(_)
+            | ast::InstalledEffect::Stat(_)
+            | ast::InstalledEffect::CostMod(_)
+            | ast::InstalledEffect::EvolveCostMod(_)
+            | ast::InstalledEffect::Cannot(_) => false,
+        };
+        let subjects = if limited {
+            match &installation.on {
+                ast::Objects::This(_) => numeric::holder(),
+                ast::Objects::Bound(name) => {
+                    let (_, selection) = self.selected_parameter(name, path)?;
+                    Selector::Objects {
+                        objects: vec![ObjectOperand::Selected { selection }],
+                    }
+                }
+                ast::Objects::Zone(_) | ast::Objects::Follow { .. } => {
+                    return Err(unsupported(path));
+                }
+            }
+        } else {
+            self.objects(&installation.on, path)?
+        };
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
         let fallback = Selector::Bound {
             reference: affected,
@@ -192,6 +323,7 @@ impl BodyContext<'_> {
                     path,
                 )?
             }
+            ast::InstalledEffect::DamageMod(_) => return Err(unsupported(path)),
             ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
@@ -289,6 +421,9 @@ pub(super) fn lower_at_source(
                 continue;
             }
             ast::StaticEffect::Prevent(shape) => {
+                if shape.next_only == Some(true) {
+                    return Err(unsupported(path));
+                }
                 declarations.push(context.prevention_effect(
                     shape,
                     numeric::holder(),
@@ -384,4 +519,29 @@ pub(super) fn lower_at_source(
             declarations,
         },
     })
+}
+
+fn limit_next(mut effect: Effect, limited: bool, path: &str) -> Result<Effect, LoweringError> {
+    if limited {
+        let Effect::Replacement {
+            usage, duration, ..
+        } = &mut effect
+        else {
+            return Err(unsupported(path));
+        };
+        if duration.end != (DurationEnd::CurrentTurnEnd {}) || !duration.intervals.is_empty() {
+            return Err(unsupported(path));
+        }
+        *usage = Some(UseLimit {
+            count: Nat(1),
+            scope: UsageScope::SharedPlayer {
+                player: PlayerRef::Controller {},
+                effect: EffectReference::CurrentInstallation {},
+            },
+        });
+        if projection(&effect).is_none() {
+            return Err(unsupported(path));
+        }
+    }
+    Ok(effect)
 }

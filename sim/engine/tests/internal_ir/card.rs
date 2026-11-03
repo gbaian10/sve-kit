@@ -5,6 +5,8 @@ mod event_combat_life;
 mod exchange_routes;
 #[path = "card/material_acts.rs"]
 mod material_acts;
+#[path = "card/next_damage.rs"]
+mod next_damage;
 use second::lowerer;
 
 #[path = "card/pilot.rs"]

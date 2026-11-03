@@ -1557,7 +1557,7 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Grant(value) => self.grant(value, span, path),
             ast::Step::SetStat(value) => self.modify(value, true, path),
             ast::Step::Apply(value) => self.continuous(value, source, path),
-            ast::Step::PlayerEffect(value) => self.player_cost(value, path),
+            ast::Step::PlayerEffect(value) => self.player_effect(value, source, path),
             ast::Step::Search(value) => self.search(value, path),
             ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Create(value) => self.create(value, path),
