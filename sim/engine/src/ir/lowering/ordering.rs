@@ -283,6 +283,14 @@ impl BodyContext<'_> {
             return self.top_move(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
+            if matches!(objects, ast::Objects::Bound(name) if self.hand_targets.contains(name))
+                && matches!(
+                    value.to,
+                    ast::Destination::Hand | ast::Destination::Cemetery
+                )
+            {
+                return Err(unsupported(path));
+            }
             if matches!(value.to, ast::Destination::Deck) {
                 return self.selected_deck_move(value, objects, path);
             }

@@ -683,3 +683,6 @@ mod permanent_stand;
 
 #[path = "card/dynamic_declarations.rs"]
 mod dynamic_declarations;
+
+#[path = "card/hand_selection.rs"]
+mod hand_selection;

@@ -56,3 +56,42 @@ fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
         _ => false,
     }
 }
+
+/// A hand choice authorizes only its controller to inspect current own-hand candidates.
+pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
+    let ChoiceDomain::Objects {
+        constraint,
+        target_roles: None,
+        ..
+    } = &decision.domain
+    else {
+        return false;
+    };
+    let DecisionKind::ResolutionChoice {
+        may,
+        cardinality,
+        precondition: None,
+    } = decision.kind
+    else {
+        return false;
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return false;
+    };
+    cardinality == constraint.cardinality
+        && group.cardinality == cardinality
+        && cardinality
+            .maximum
+            .is_none_or(|max| max.0 > 0 && cardinality.minimum.0 <= max.0)
+        && (may == Declinable::Required || cardinality.minimum == Nat(0))
+        && matches!(&group.selector, Selector::Zone {
+            players, zone: super::ZoneKind::Hand, view: super::SelectionView::Current {}, ..
+        } if players.relation == PlayerRelation::SelfPlayer
+            && players.relative_to == (PlayerRef::Controller {}))
+        && decision.actor == (PlayerRef::Controller {})
+        && matches!(&decision.visibility, Visibility::Only { players }
+            if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
+        && constraint.distinct_by.is_none()
+        && constraint.aggregate_bounds.is_empty()
+        && constraint.disjoint == Disjointness::Disjoint
+}

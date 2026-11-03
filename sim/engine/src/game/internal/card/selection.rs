@@ -3,7 +3,7 @@ use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsuppo
 use crate::game::list;
 use crate::ir::effect_evolution;
 use crate::ir::events::timing::opponent;
-use crate::ir::observation_selection::private_look_choice;
+use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::public_numbers;
 use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
@@ -408,6 +408,18 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     else {
         return Err(unsupported("resolution public choice domain"));
     };
+    if private_hand_choice(decision) {
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported("one hand group"));
+        };
+        let Selector::Zone {
+            binding, predicate, ..
+        } = &group.selector
+        else {
+            return Err(unsupported("hand selector"));
+        };
+        return super::super::search::check_predicate(predicate, *binding).map(|_| ());
+    }
     let private_look_groups = !constraint.groups.is_empty()
         && constraint
             .groups
@@ -916,6 +928,7 @@ impl Game {
         let evolution = effect_evolution::is_choice(decision);
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let observed_deck = allow_resolution_zones && private_look_choice(decision);
+        let own_hand = allow_resolution_zones && private_hand_choice(decision);
         let actor = execution.player(self, &decision.actor)?;
         let actor_seat = super::seat_name(actor)?;
         let constraint = evaluated_counts(self, execution, constraint)?;
@@ -937,6 +950,10 @@ impl Game {
                 let private_observation =
                     private_observed_deck(self, id, actor_seat, observed_deck);
                 if !(private_observation
+                    || (own_hand
+                        && object.zone == "hand"
+                        && object.owner == actor_seat
+                        && object.controller == actor_seat)
                     || matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
                     || (evolution && object.zone == "evolve_deck"))
                     || object.generation != reference.generation.0
@@ -1182,6 +1199,21 @@ impl Execution {
         }
     }
 
+    pub(in crate::game::internal) fn is_private_hand_target(
+        &self,
+        selector: &Selector,
+        member: ObjectRef,
+    ) -> bool {
+        match selector {
+            Selector::Bound { reference } => {
+                self.targets.get(&reference.key()).is_some_and(|wait| {
+                    wait.members.contains(&member) && private_hand_choice(&wait.decision)
+                })
+            }
+            _ => false,
+        }
+    }
+
     pub(in crate::game::internal) fn public_field_objects(
         &self,
         game: &Game,
@@ -1220,6 +1252,13 @@ impl Execution {
                             && players.relation == PlayerRelation::SelfPlayer =>
                     {
                         "evolve_deck"
+                    }
+                    ZoneKind::Hand
+                        if allow_resolution_zones
+                            && players.relation == PlayerRelation::SelfPlayer
+                            && players.relative_to == (PlayerRef::Controller {}) =>
+                    {
+                        "hand"
                     }
                     ZoneKind::Cemetery => "cemetery",
                     _ => return Err(unsupported("public target zone")),

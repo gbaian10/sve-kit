@@ -1068,6 +1068,7 @@ struct BodyContext<'definitions> {
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
     ex_targets: BTreeSet<String>,
+    hand_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     single_discards: BTreeSet<ReceiptId>,
     observed_targets: BTreeSet<String>,
@@ -1113,6 +1114,7 @@ impl<'definitions> BodyContext<'definitions> {
             searches: BTreeSet::new(),
             ex_outputs: BTreeMap::new(),
             ex_targets: BTreeSet::new(),
+            hand_targets: BTreeSet::new(),
             observations: BTreeMap::new(),
             single_discards: BTreeSet::new(),
             observed_targets: BTreeSet::new(),
@@ -1391,6 +1393,10 @@ impl<'definitions> BodyContext<'definitions> {
                 objects: match value {
                     ast::ObjectAction::Short(objects)
                     | ast::ObjectAction::Long { r#ref: objects, .. } => {
+                        if matches!(objects, ast::Objects::Bound(name) if self.hand_targets.contains(name))
+                        {
+                            return Err(unsupported(path));
+                        }
                         self.objects(objects, path)?
                     }
                 },

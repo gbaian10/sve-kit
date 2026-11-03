@@ -595,6 +595,19 @@ MoveMethod::Discard 的移動事實；只有實際離手的卡成為公開資訊
 本片不准入他方手牌、隨機、帶篩選、任意張數、零張、作者 result 或 after
 投影；一般棄牌事件 consumer 與完成量接續由各自能力另行准入。
 
+## 本文手牌選取
+
+`choose.from` 的自己 Hand 降為 Only(SelfPlayer) 的 ResolutionChoice，沿用物件 domain、
+TargetWait 與本次 token 的 handle。正式 Targets、對方／全體手牌及對手代選仍拒絕。
+候選依當前自己的手牌及可准入的卡片篩選產生；不足時沿用結算選取的最低量調整，
+不把此規則套到費用或正式目標。無效回答不撤回先前已完成的抽牌或付款。
+
+選定綁定可供 Banish、Reveal、固定位置的 Deck 移動、EX 移動及普通從者／護符入場使用。
+每次移動先驗原世代；已離手的舊選取不能追蹤後來的新世代。移區共用 MoveMethod::Put／
+Banish、來源快照、進場事件及容量規則，不產生 DiscardEvent；EX 成功回條可供既有減費
+安裝使用。公開手牌於本次結算結束後失效，移到牌庫不保留對手的可定位身分。
+這個入口不授予一般公開 selector 讀取手牌，也不新增分組選擇、移動排列或多張入場的容量程序。
+
 ## 私有看牌與同區排列
 
 Look 先准入 Exact、viewer 自己的 Deck，取頂端至多 count 張；不移區、不換世代。
