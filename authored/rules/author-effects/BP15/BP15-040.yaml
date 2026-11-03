@@ -8,26 +8,57 @@ cards:
                 top:
                   n: 4
                   who: self
-            - choose:
-                bind: picked
-                from:
-                  in: seen
-                  trait: アイドル
-                upto: 2
-            - move:
-                ref: picked
-                result: placed
-                to: ex
-            - move:
-                order: chooser
-                position: bottom
-                ref:
-                  except:
-                    in:
-                      objects_of: placed
-                      view: before
-                  in: seen
-                to: deck
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 4
+                then:
+                  - choose:
+                      bind: picked_one
+                      from:
+                        in: seen
+                        trait: アイドル
+                      upto: 1
+                  - move:
+                      ref: picked_one
+                      result: placed_one
+                      to: ex
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: placed_one
+                            view: before
+                        in: seen
+                      to: deck
+                else:
+                  - choose:
+                      bind: picked_many
+                      from:
+                        in: seen
+                        trait: アイドル
+                      upto: 2
+                  - move:
+                      ref: picked_many
+                      result: placed_many
+                      to: ex
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: placed_many
+                            view: before
+                        in: seen
+                      to: deck
         line: 1
     admission: light
     meta:
@@ -36,5 +67,9 @@ cards:
             model: claude-opus-5-5
             who: Claude
           date: "2026-11-03"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
 format: 2
 kind: author_effect_set

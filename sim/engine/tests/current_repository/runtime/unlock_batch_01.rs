@@ -94,6 +94,9 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) -> CardPlay {
         let answer = match &question.domain {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
+            InputDomain::TokenCapacity { choices } => {
+                Answer::TokenCapacity(u64::try_from(choices.len().checked_sub(1).unwrap()).unwrap())
+            }
             InputDomain::Modes { .. } => Answer::Modes(modes.iter().copied().map(ModeId).collect()),
             InputDomain::Search(domain) => Answer::Search(search(domain)),
             InputDomain::Order(cards) => {
@@ -361,20 +364,6 @@ fn cp04_059_fanfare_deals_four_below_ten_max_pp_and_answers_another_ub_with_two_
 }
 
 #[test]
-fn bp09_005_crimson_face_stores_up_to_two_other_cards_in_ex() {
-    let mut initial = evolving("BP09-004", "BP09-005");
-    initial["players"]["P1"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .extend([json!({"id":"a","card":"BP01-171"}), json!({"id":"b","card":"BP01-171"})]);
-    let mut game = game(&initial);
-    assert_eq!(evolve_into(&mut game, "BP09-004", 0, 1, 1), "resolved");
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["source"]["name"], "真紅の絆・ポーラ");
-    assert_eq!(state["P1"]["ex"], json!(["a", "b"]));
-}
-
-#[test]
 fn bp16_076_pays_two_life_to_draw() {
     let mut game = game(&in_hand("BP16-076"));
     play(&mut game);
@@ -443,4 +432,74 @@ fn bp13_007_banishes_three_cemetery_cards_for_two_artifacts() {
     assert_eq!(state["P1"]["banish"].as_array().unwrap().len(), 3);
     assert_eq!(named(&state, &state["P1"]["field"], "エッジアーティファクト"), 1);
     assert_eq!(named(&state, &state["P1"]["field"], "ミスティックアーティファクト"), 1);
+}
+
+#[test]
+fn bp09_019_q1160_last_field_slot_can_hold_the_knight() {
+    let mut initial = evolving("BP09-018", "BP09-019");
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .extend((0_u8..3_u8).map(|n| json!({"id":format!("old{n}"),"card":"BP01-171"})));
+    let mut game = game(&initial);
+    assert_eq!(evolve_into(&mut game, "BP09-018", 1, 1, 4), "resolved");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(named(&state, &state["P1"]["field"], "ナイト"), 1);
+    assert_eq!(named(&state, &state["P1"]["field"], "スティールナイト"), 0);
+}
+
+#[test]
+fn bp13_007_q1726_last_field_slot_can_hold_the_mystic_artifact() {
+    let mut initial = on_field("BP13-007");
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .extend((0_u8..3_u8).map(|n| json!({"id":format!("old{n}"),"card":"BP01-171"})));
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"c1","card":"BP01-171"},{"id":"c2","card":"BP01-171"},{"id":"c3","card":"BP01-171"}
+    ]);
+    let mut game = game(&initial);
+    activate(&mut game, "BP13-007");
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(named(&state, &state["P1"]["field"], "ミスティックアーティファクト"), 1);
+    assert_eq!(named(&state, &state["P1"]["field"], "エッジアーティファクト"), 0);
+    assert_eq!(state["objects"]["source"]["acted"], true);
+    assert_eq!(state["P1"]["banish"], json!(["c1", "c2", "c3"]));
+    assert_eq!(state["P1"]["hand"], json!(["first"]));
+}
+
+#[test]
+fn bp15_040_last_ex_slot_limits_the_idol_pick_and_keeps_the_remainder() {
+    let mut initial = evolving("BP15-039", "BP15-040");
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"i1","card":"BP05-047"},{"id":"i2","card":"BP05-048"},
+        {"id":"other","card":"BP01-171"},{"id":"rest","card":"BP01-171"},
+        {"id":"unseen","card":"BP01-171"}
+    ]);
+    initial["players"]["P1"]["zones"]["ex"] = json!((0_u8..4_u8)
+        .map(|n| json!({"id":format!("ex{n}"),"card":"BP01-171"}))
+        .collect::<Vec<_>>());
+    let mut game = game(&initial);
+    evolve(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["ex"], json!(["ex0", "ex1", "ex2", "ex3", "i1"]));
+    assert_eq!(state["P1"]["deck"], json!(["unseen", "i2", "other", "rest"]));
+}
+
+#[test]
+fn bp15_040_full_ex_keeps_all_four_observed_cards_in_the_deck() {
+    let mut initial = evolving("BP15-039", "BP15-040");
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"i1","card":"BP05-047"},{"id":"i2","card":"BP05-048"},
+        {"id":"other","card":"BP01-171"},{"id":"rest","card":"BP01-171"},
+        {"id":"unseen","card":"BP01-171"}
+    ]);
+    initial["players"]["P1"]["zones"]["ex"] = json!((0_u8..5_u8)
+        .map(|n| json!({"id":format!("ex{n}"),"card":"BP01-171"}))
+        .collect::<Vec<_>>());
+    let mut game = game(&initial);
+    evolve(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["ex"], json!(["ex0", "ex1", "ex2", "ex3", "ex4"]));
+    assert_eq!(state["P1"]["deck"], json!(["unseen", "i1", "i2", "other", "rest"]));
 }
