@@ -1,0 +1,31 @@
+cards:
+  BP20-098:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n:
+                  times:
+                    - count:
+                        kind: crest
+                        who: self
+                        zone: ex
+                    - 2
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
