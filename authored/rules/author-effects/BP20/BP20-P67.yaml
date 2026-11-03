@@ -1,0 +1,61 @@
+cards:
+  BP20-P67:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: crest
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 5
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              kind: crest
+                              who: self
+                              zone: ex
+                          op: ge
+                          right: 3
+                      then:
+                        - buff:
+                            hp: -2
+                            on: enemy
+                            power: -2
+                then:
+                  - buff:
+                      hp: -4
+                      on: enemy
+                      power: -4
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          zone: ex
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token:
+      name: クレスト 安息の継承者・ヒメカ
+      template: true
+format: 2
+kind: author_effect_set

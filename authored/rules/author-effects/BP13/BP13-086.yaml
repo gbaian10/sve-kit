@@ -1,0 +1,33 @@
+cards:
+  BP13-086:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 2
+                result: made
+                to: ex
+                token: ゴースト
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -1
+                    when_playing:
+                      in: affected
+                on:
+                  follow: made
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP01-T14
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

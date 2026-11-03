@@ -1,224 +1,210 @@
-format: 1
-kind: effect_set
 cards:
   BP16-036:
-    status: complete
     abilities:
-      - line: 1
-        kind: spell
-        body:
-          op: choice
-          min: 1
+      - body:
           max:
+            else: 1
             if:
               read: self.turn.evolutions
             then: 2
-            else: 1
+          min: 1
           modes:
             - op: create
-              tokens:
-                - name: スティールナイト
-                  count: 1
-                - name: シールドガーディアン
-                  count: 1
-                - name: ナイト
-                  count: 1
               to: field
-            - op: modify
+              tokens:
+                - count: 1
+                  name: スティールナイト
+                - count: 1
+                  name: シールドガーディアン
+                - count: 1
+                  name: ナイト
+            - hp: 1
+              op: modify
+              power: 1
               subjects:
                 side: self
-                zone: field
-                type: follower
                 trait: 兵士
+                type: follower
                 where:
                   read: item.token
-              power: 1
-              hp: 1
-  BP16-049:
-    status: complete
-    review: 先設 1／1；SC 張數固定於結算開始，不能在後續重新計數。
-    abilities:
-      - line: 1
+                zone: field
+          op: choice
         kind: spell
-        body:
+        line: 1
+    status: complete
+  BP16-049:
+    abilities:
+      - body:
           op: seq
           steps:
             - op: modify
-              subjects: target.1
-              set_power: 1
               set_hp: 1
-            - op: if
-              condition:
-                fn: ge
+              set_power: 1
+              subjects: target.1
+            - condition:
                 args:
                   - at: resolution-start
                     value:
                       count:
                         side: self
-                        zone: cemetery
                         type: spell
+                        zone: cemetery
                   - 10
+                fn: ge
+              op: if
               then:
                 op: modify
-                subjects: target.1
                 remove_abilities: true
+                subjects: target.1
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  BP16-076:
+              zone: field
+    review: 先設 1／1；SC 張數固定於結算開始，不能在後續重新計數。
     status: complete
+  BP16-076:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: draw
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           count: 1
-        event: enter
-        subject: self
+          op: draw
         costs:
-          - op: modify
+          - hp: -2
+            op: modify
             subjects: self.leader
-            hp: -2
-  BP16-082:
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
     status: complete
+  BP16-082:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: bane
-      - line: 2
+          op: macro
         kind: static
-        body:
-          op: aura
-          subjects: self
-          keywords:
-            - storm
+        line: 1
+      - body:
           condition:
-            fn: ge
             args:
               - count:
                   side: self
                   zone: cemetery
               - 5
-      - line: 3
-        kind: trigger
-        body:
+            fn: ge
+          keywords:
+            - storm
+          op: aura
+          subjects: self
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
-            - op: select
+            - bind: discarded
+              by: opponent
+              max: 1
+              min: 1
+              op: select
               select:
                 side: opponent
                 zone: hand
-              by: opponent
-              min: 1
-              max: 1
-              bind: discarded
             - op: discard
               subjects: discarded
         event: deal_damage
+        kind: trigger
+        line: 3
         subject: self
         trigger_if:
-          fn: and
           args:
             - read: self.is_active
             - read: event.to_opposing_leader
-  BP16-SL08:
+          fn: and
     status: complete
-    review: 抽牌後以同一 choice 的 selection 與 position 標籤選手牌及牌庫上下位置。
+  BP16-SL08:
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: choice
-          min: 1
+      - body:
           max:
+            else: 2
             if:
-              fn: gt
               args:
                 - count:
+                    name: 天下の大泥棒・ジエモン
                     side: self
                     zone: field
-                    name: 天下の大泥棒・ジエモン
                 - 0
+              fn: gt
             then: 3
-            else: 2
+          min: 1
           modes:
             - op: seq
               steps:
                 - op: act
                   subjects: target.1
-                - op: restrict
-                  subjects: target.1
-                  action: normal_stand
+                - action: normal_stand
                   during: next-controller-start
+                  op: restrict
+                  subjects: target.1
             - op: seq
               steps:
-                - op: draw
-                  count: 1
-                - op: choice
-                  timing: resolve
-                  min: 1
+                - count: 1
+                  op: draw
+                - labels:
+                    - position: top
+                    - position: bottom
                   max: 1
+                  min: 1
+                  modes:
+                    - op: move
+                      position: top
+                      subjects: chosen
+                      to: deck
+                    - op: move
+                      position: bottom
+                      subjects: chosen
+                      to: deck
+                  op: choice
                   selection:
+                    bind: chosen
+                    max: 1
+                    min: 1
                     select:
                       side: self
                       zone: hand
-                    min: 1
-                    max: 1
-                    bind: chosen
-                  labels:
-                    - position: top
-                    - position: bottom
-                  modes:
-                    - op: move
-                      subjects: chosen
-                      to: deck
-                      position: top
-                    - op: move
-                      subjects: chosen
-                      to: deck
-                      position: bottom
-            - op: create
+                  timing: resolve
+            - count: 2
               name: 輝く金貨
-              count: 2
+              op: create
               to: ex
+          op: choice
         event: enter
+        kind: trigger
+        line: 1
         subject: self
         targets:
           - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
             max: 1
+            min: 1
             modes:
               - 1
-  BP16-T18:
+            select:
+              side: opponent
+              type: follower
+              zone: field
+    review: 抽牌後以同一 choice 的 selection 與 position 標籤選手牌及牌庫上下位置。
     status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: storm
-      - line: 2
-        kind: trigger
-        body:
-          op: banish
-          subjects: self
-        event: end
+format: 1
+kind: effect_set

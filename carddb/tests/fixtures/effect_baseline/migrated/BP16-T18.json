@@ -1,0 +1,22 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "storm"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "banish",
+        "subjects": "self"
+      },
+      "event": "end"
+    }
+  ]
+}
