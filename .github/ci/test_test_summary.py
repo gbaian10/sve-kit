@@ -41,6 +41,23 @@ class SummaryTests(unittest.TestCase):
         (self.folder / "coverage.json").write_text(
             json.dumps({"totals": {"percent_covered": 91.25}}), encoding="utf-8"
         )
+        self.write_shard("shard.json", 1, 3, collected=12, selected=5)
+
+    def write_shard(
+        self, name: str, index: int, total: int, *, collected: int, selected: int
+    ) -> None:
+        """Write one shard's counts as the sharded test runners do."""
+        (self.folder / name).write_text(
+            json.dumps(
+                {
+                    "index": index,
+                    "total": total,
+                    "collected": collected,
+                    "selected": selected,
+                }
+            ),
+            encoding="utf-8",
+        )
 
     def test_python_counts_locations_and_timings(self) -> None:
         """Count testcases once, combine errors with failures and omit private fields."""
@@ -51,7 +68,9 @@ class SummaryTests(unittest.TestCase):
             in summary
         )
         assert "**9.50 s**" in summary
-        assert "**91.25%**" in summary
+        assert "Shard **1/3**: ran **5** of the **5** tests assigned here" in summary
+        # One shard's coverage is partial; only the combined job reports and gates it.
+        assert "91.25" not in summary
         assert "| tests/test_alpha.py | 2 | 3.000 |" in summary
         assert "| tests/test_beta.py | 3 | 3.500 |" in summary
         slowest = summary.split("### Slowest 30 cases", 1)[1]
@@ -88,39 +107,105 @@ class SummaryTests(unittest.TestCase):
             )
             assert main(["publish", str(self.folder)]) == 0
 
-    def test_python_uses_the_same_full_gate_for_every_run(self) -> None:
-        """Python coverage always measures complete acceptance at 90 percent."""
+    def test_python_shard_must_run_every_assigned_test(self) -> None:
+        """A shard fails when its report lacks assigned tests or its counts."""
         self.write_junit()
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["python", str(self.folder)]) == 0
+        self.write_shard("shard.json", 1, 3, collected=12, selected=6)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            assert main(["python", str(self.folder)]) == 1
+        assert "did not report a result" in output.getvalue()
+        (self.folder / "shard.json").unlink()
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            assert main(["python", str(self.folder)]) == 1
+        assert "Shard counts unavailable" in output.getvalue()
+        assert "Failed/errors: **2**" in output.getvalue()
+        assert PRIVATE not in output.getvalue()
+
+    def test_python_combined_coverage_keeps_the_full_gate(self) -> None:
+        """Merged Python coverage is gated at 90 percent once every shard is present."""
+        self.write_shard("shard-1.json", 1, 2, collected=7, selected=3)
+        self.write_shard("shard-2.json", 2, 2, collected=7, selected=4)
         (self.folder / "coverage.json").write_text(
             json.dumps({"totals": {"percent_covered": 89.5}}), encoding="utf-8"
         )
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            assert main(["python", str(self.folder)]) == 1
+            assert main(["python-coverage", str(self.folder)]) == 1
         assert "required **90%**" in output.getvalue()
+        assert "**89.50%**" in output.getvalue()
         assert (
             "Test scope: **full**; public SVE fixtures and synthetic cases"
             in output.getvalue()
         )
-        assert "Failed/errors: **2**" in output.getvalue()
-        assert PRIVATE not in output.getvalue()
-
+        assert "every collected test ran exactly once" in output.getvalue()
         (self.folder / "coverage.json").write_text(
             json.dumps({"totals": {"percent_covered": 90}}), encoding="utf-8"
         )
         with contextlib.redirect_stdout(io.StringIO()):
-            assert main(["python", str(self.folder)]) == 0
-
-    def test_missing_python_coverage_fails_but_preserves_safe_counts(self) -> None:
-        """A test crash cannot make the full-coverage gate pass."""
-        self.write_junit()
+            assert main(["python-coverage", str(self.folder)]) == 0
         (self.folder / "coverage.json").unlink()
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
-            assert main(["python", str(self.folder)]) == 1
-        assert "Failed/errors: **2**" in output.getvalue()
-        assert "coverage unavailable; required **90%**" in output.getvalue()
-        assert PRIVATE not in output.getvalue()
+            assert main(["python-coverage", str(self.folder)]) == 1
+        assert "Statistics unavailable" in output.getvalue()
+
+    def test_incomplete_shards_fail_the_combined_gate(self) -> None:
+        """Missing, duplicated or inconsistent shards cannot pass at any coverage."""
+        (self.folder / "coverage.json").write_text(
+            json.dumps({"totals": {"percent_covered": 100}}), encoding="utf-8"
+        )
+        for shards in (
+            [(1, 3, 9, 3), (2, 3, 9, 3)],
+            [(1, 2, 9, 4), (1, 2, 9, 5)],
+            [(1, 2, 9, 4), (2, 2, 8, 5)],
+            [(1, 2, 9, 4), (2, 2, 9, 4)],
+            [(1, 2, 9, 4), (2, 3, 9, 5)],
+        ):
+            for path in self.folder.glob("shard-*.json"):
+                path.unlink()
+            for number, (index, total, collected, selected) in enumerate(shards):
+                self.write_shard(
+                    f"shard-{number}.json",
+                    index,
+                    total,
+                    collected=collected,
+                    selected=selected,
+                )
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                assert main(["python-coverage", str(self.folder)]) == 1
+            assert "do not add up" in output.getvalue()
+        for path in self.folder.glob("shard-*.json"):
+            path.unlink()
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["python-coverage", str(self.folder)]) == 1
+        # A boolean is an int in Python but never a valid count.
+        self.write_shard("shard-1.json", 1, 1, collected=True, selected=1)
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["python-coverage", str(self.folder)]) == 1
+
+    def test_rust_combined_coverage_keeps_the_full_gate(self) -> None:
+        """The merged llvm-cov line total is gated at 90 percent once every shard is present."""
+        self.write_shard("shard-1.json", 1, 2, collected=3, selected=1)
+        self.write_shard("shard-2.json", 2, 2, collected=3, selected=2)
+        for percent, status in ((89.99, 1), (90, 0)):
+            (self.folder / "coverage.json").write_text(
+                json.dumps({"data": [{"totals": {"lines": {"percent": percent}}}]}),
+                encoding="utf-8",
+            )
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                assert main(["rust-coverage", str(self.folder)]) == status
+            assert "required **90%**" in output.getvalue()
+            assert "generated public card input" in output.getvalue()
+            assert "every collected test ran exactly once" in output.getvalue()
+        (self.folder / "shard-2.json").unlink()
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["rust-coverage", str(self.folder)]) == 1
 
     def test_web_labels_and_malformed_locations_stay_private(self) -> None:
         """Web description strings and unsafe paths are never summary labels."""
@@ -132,14 +217,6 @@ class SummaryTests(unittest.TestCase):
         assert "src/check.test.tsx::case 1" in summary
         assert "unknown test file::case 2" in summary
         assert PRIVATE not in summary
-
-    def test_failure_without_coverage_preserves_counts(self) -> None:
-        """Test failure diagnostics stay available numerically before coverage export."""
-        self.write_junit()
-        (self.folder / "coverage.json").unlink()
-        summary = junit_summary("python", self.folder)
-        assert "Failed/errors: **2**" in summary
-        assert "coverage unavailable; required **90%**" in summary
 
     def test_missing_malformed_and_empty_report_fail_safely(self) -> None:
         """Missing reports cannot turn a test crash into a successful summary."""
@@ -221,7 +298,45 @@ class SummaryTests(unittest.TestCase):
         assert "::case 36" not in slowest
         assert PRIVATE not in summary
 
-    def test_rust_counts_wall_time_and_missing_coverage(self) -> None:
+    def test_rust_binary_headers_keep_private_paths_and_listing_labels_out(
+        self,
+    ) -> None:
+        """Rejected headers must neither expose paths nor inherit a listing's label."""
+        private_ascii = "ASCII_PRIVATE_SENTINEL"
+        for header in (
+            f"Running unittests /tmp/{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running ../{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running tests/../../{private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running {private_ascii}.rs (target/debug/deps/x-1234)",
+            f"Running tests/{PRIVATE}.rs (target/debug/deps/x-1234)",
+            f"Running {private_ascii} is not a Cargo binary header",
+        ):
+            with self.subTest(header=header):
+                (self.folder / "test.log").write_text(
+                    "Running tests/listed_only.rs (target/debug/deps/listed_only-1234)\n"
+                    f"{header}\n"
+                    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s\n"
+                    "Running tests/safe.rs (target/debug/deps/safe-5678)\n"
+                    "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s\n",
+                    encoding="utf-8",
+                )
+                (self.folder / "elapsed.txt").write_text("1", encoding="utf-8")
+                self.write_shard("shard.json", 1, 1, collected=2, selected=2)
+                output = io.StringIO()
+                target = self.folder / "summary.md"
+                target.unlink(missing_ok=True)
+                with (
+                    patch.dict(os.environ, {"GITHUB_STEP_SUMMARY": str(target)}),
+                    contextlib.redirect_stdout(output),
+                ):
+                    assert main(["rust", str(self.folder)]) == 0
+                for rendered in (output.getvalue(), target.read_text(encoding="utf-8")):
+                    assert private_ascii not in rendered
+                    assert PRIVATE not in rendered
+                    assert "listed_only" not in rendered
+                    assert "| safe (tests/safe.rs) | 1 | 0.20 |" in rendered
+
+    def test_rust_shard_counts_and_wall_time(self) -> None:
         """Aggregate multiple binaries and doctests; never include panics or source."""
         (self.folder / "test.log").write_text(
             f"""panic: {PRIVATE}
@@ -230,33 +345,39 @@ test module::r#type::test_error ... FAILED
 test {PRIVATE} ... FAILED
 test [unsafe](https://example.com) ... FAILED
 test boundaries::test_ok ... ok
+     Running unittests src/lib.rs (target/llvm-cov-target/debug/deps/sve_engine-0123abcd)
 test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.20s
+     Running tests/{PRIVATE}.rs (target/llvm-cov-target/debug/deps/x-0123abcd)
+     Running tests/listed_only.rs (target/llvm-cov-target/debug/deps/listed_only-0123abcd)
+     Running tests/current_repository.rs (target/llvm-cov-target/debug/deps/current_repository-89ef)
 test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
 """,
             encoding="utf-8",
         )
         (self.folder / "elapsed.txt").write_text("12", encoding="utf-8")
-        (self.folder / "coverage.json").write_text(
-            json.dumps({"data": [{"totals": {"lines": {"percent": 95.5}}}]}),
-            encoding="utf-8",
-        )
+        self.write_shard("shard.json", 2, 3, collected=20, selected=7)
         summary = rust_summary(self.folder)
-        assert (
-            "generated public card input, identical for project and fork PRs" in summary
-        )
-        assert "private test data required" not in summary
-        assert "required **90%**" in summary
+        assert "Shard **2/3**: ran **7** of the **7** tests assigned here" in summary
         assert (
             "Total: **7** · Passed: **4** · Skipped/ignored: **1** · Failed: **2**"
             in summary
         )
         assert "**12.00 s**" in summary
         assert "**1.50 s**" in summary
-        assert "**95.50%**" in summary
         assert "### Failed tests\n\n- `boundaries::test_failure`" in summary
+        assert "| sve_engine (src/lib.rs) | 4 | 1.20 |" in summary
+        assert (
+            "| current_repository (tests/current_repository.rs) | 3 | 0.30 |" in summary
+        )
+        assert "listed_only" not in summary
         assert "- `module::r#type::test_error`" in summary
         assert "test_ok" not in summary
         assert "unsafe" not in summary
         assert PRIVATE not in summary
-        (self.folder / "coverage.json").unlink()
-        assert "coverage unavailable" in rust_summary(self.folder)
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["rust", str(self.folder)]) == 0
+        self.write_shard("shard.json", 2, 3, collected=20, selected=8)
+        with contextlib.redirect_stdout(io.StringIO()):
+            assert main(["rust", str(self.folder)]) == 1
+        (self.folder / "shard.json").unlink()
+        assert "Shard counts unavailable" in rust_summary(self.folder)
