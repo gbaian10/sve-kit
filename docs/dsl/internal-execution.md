@@ -741,7 +741,7 @@ Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combi
 CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上或 EX 區的從者，
 已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。EX 區從者的修正依
 CR 4.8.3.3，在該卡由 EX 直接出場（含打出時經解決區入場）時沿同一規則移區邊界帶到新世代
-（BP06-003、BP01-011）；其他移區仍讓原世代修正失效。
+（BP06-003、BP13-009）；其他移區仍讓原世代修正失效。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
 

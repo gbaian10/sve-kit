@@ -99,21 +99,18 @@ fn bp06_003_buffs_ex_fairies_and_the_buff_survives_playing_one_onto_the_field() 
 }
 
 #[test]
-fn bp01_011_buffs_other_field_fairies_and_ex_fairies_but_not_itself() {
+fn bp13_009_buffs_only_fairy_tokens_in_its_own_ex() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP01-011"}]);
-    initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"ally","card":"BP03-T01"},
-        {"id":"goblin","card":"BP01-171"}
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP13-009"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([
+        {"id":"token","card":"BP03-T01"},
+        {"id":"printed","card":"BP01-014"}
     ]);
-    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"waiting","card":"BP03-T01"}]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP03-T01"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":"BP03-T01"}]);
     let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(stats(&state, "ally"), (2, 2));
-    assert_eq!(stats(&state, "waiting"), (2, 2));
-    assert_eq!(stats(&state, "source"), (2, 3), "the dancer itself is excluded");
-    assert_eq!(stats(&state, "goblin"), (2, 2), "a non-fairy is unchanged");
-    assert_eq!(stats(&state, "enemy"), (1, 1), "the opponent's fairy is unchanged");
+    assert_eq!(stats(&state, "token"), (2, 2), "an EX fairy token gains +1/+1");
+    assert_eq!(stats(&state, "printed"), (3, 3), "a printed fairy follower is not a token");
+    assert_eq!(stats(&state, "ally"), (1, 1), "field fairies are outside the text");
 }

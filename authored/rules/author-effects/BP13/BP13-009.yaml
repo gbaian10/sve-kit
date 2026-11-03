@@ -1,26 +1,22 @@
 cards:
-  BP01-011:
+  BP13-009:
     abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
       - fanfare:
           do:
             - buff:
                 hp: 1
                 on:
                   kind: follower
-                  other: true
-                  trait: 妖精
-                  who: self
-                  zone: field
-                power: 1
-            - buff:
-                hp: 1
-                on:
-                  kind: follower
+                  token: true
                   trait: 妖精
                   who: self
                   zone: ex
                 power: 1
-        line: 1
+        line: 2
     admission: light
     meta:
       written_by:
