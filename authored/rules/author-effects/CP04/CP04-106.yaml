@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        activate:
+          ub: true
+          cost:
+            steps:
+              - act_self: true
+              - act:
+                  sel:
+                    who: self
+                    zone: field
+                    other: true
+                  n: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - move:
+                ref: enemy
+                to: ex
+      - line: 1
+        section: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  trait: エリザベスパーク
+                  not_same_name_as_this: true
+                n: 1
+                to: ex
+    rule_sections:
+      - section: 1

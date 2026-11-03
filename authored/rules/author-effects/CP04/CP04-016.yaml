@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        attack_time:
+          ub: true
+          do:
+            - apply:
+                "on": this
+                effect:
+                  prevent:
+                    kind: any
+                until: turn
+      - line: 1
+        section: 1
+        keywords:
+          - rush
+      - line: 2
+        section: 1
+        fanfare:
+          cost:
+            to_ex:
+              sel:
+                who: self
+                zone: field
+                other: true
+              n: 1
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - act: enemy
+    rule_sections:
+      - section: 1

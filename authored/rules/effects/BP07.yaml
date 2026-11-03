@@ -52,58 +52,6 @@ cards:
             subjects: self
           - op: act
             subjects: cost.1
-  BP07-P06:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
-          amount: -2
-          condition:
-            read: paid.trees
-      - line: 2
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
-          amount: -1
-          condition:
-            fn: gt
-            args:
-              - count:
-                  side: self
-                  zone: field
-                  name: 王たる光・ベイリオン
-              - 0
-      - line: 3
-        kind: spell
-        body:
-          op: damage
-          subjects: target.1
-          amount: 4
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        additional_costs:
-          - key: trees
-            costs:
-              - op: act
-                subjects: cost.trees
-            cost_selections:
-              - key: trees
-                select:
-                  side: self
-                  zone: field
-                  name: ナテラの大樹
-                min: 2
-                max: 2
   BP07-P16:
     status: complete
     abilities:
