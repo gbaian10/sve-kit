@@ -231,7 +231,32 @@ pub(super) struct RevealedSelection {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
+    Groups(Box<HandMaterialGroups>),
     Reference { r#ref: String },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HandMaterialGroups {
+    pub groups: Vec<HandMaterialGroup>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum HandMaterialGroup {
+    Source {
+        #[serde(rename = "sel")]
+        _sel: HandSourceSelection,
+        n: u64,
+    },
+    Material(Box<HandMaterial>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HandSourceSelection {
+    #[serde(rename = "in")]
+    pub _source: This,
 }
 
 #[derive(Deserialize)]
@@ -1649,10 +1674,17 @@ pub(super) struct Empty {}
 #[serde(deny_unknown_fields)]
 pub(super) struct Auto {
     pub on: PhaseSubscription,
+    pub aggregation: Option<AutoAggregation>,
     pub zone: Option<ActivationZones>,
     #[serde(flatten)]
     pub body: Body,
 }
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AutoAggregation {
+    Batch,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
@@ -1784,6 +1816,7 @@ pub(super) struct DiscardSubscription {
     #[serde(rename = "from")]
     pub _from: Option<HandZone>,
     pub who: Option<EntryPlayer>,
+    pub during: Option<During>,
 }
 
 #[derive(Deserialize)]

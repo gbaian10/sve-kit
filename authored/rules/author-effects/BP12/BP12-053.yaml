@@ -1,0 +1,44 @@
+cards:
+  BP12-053:
+    abilities:
+      - auto:
+          aggregation: batch
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            discarded:
+              during:
+                turn: self
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

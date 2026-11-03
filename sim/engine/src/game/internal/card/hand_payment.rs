@@ -7,11 +7,16 @@ use crate::game::internal::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int, Nat,
-    ObjectOperand, ObjectRef, PlayerRef, PlayerRelation, Quantity, QuantityUnit,
-    SelectionConstraint, SelectionView, Selector, ZoneKind,
+    ObjectOperand, ObjectRef, PlayerRef, PlayerRelation, Quantity, QuantityUnit, SelectionGroup,
+    SelectionView, Selector, ZoneKind,
 };
 
-fn selection(action: &Action) -> Result<&SelectionConstraint> {
+struct HandSelection<'action> {
+    group: &'action SelectionGroup,
+    source: bool,
+}
+
+fn selection(action: &Action) -> Result<HandSelection<'_>> {
     let Action::Discard {
         player: PlayerRef::Controller {},
         mode: DiscardMode::Chosen { constraint },
@@ -19,12 +24,27 @@ fn selection(action: &Action) -> Result<&SelectionConstraint> {
     else {
         return Err(unsupported("chosen own hand cost"));
     };
-    let [group] = constraint.groups.as_slice() else {
-        return Err(unsupported("one hand cost group"));
+    let one = Cardinality {
+        minimum: Nat(1),
+        maximum: Some(Nat(1)),
     };
-    let count = constraint.cardinality;
-    if group.cardinality != count
-        || constraint.disjoint != Disjointness::Disjoint
+    let (group, source) = match constraint.groups.as_slice() {
+        [group] if group.cardinality == constraint.cardinality => (group, false),
+        [own, group]
+            if own.cardinality == one
+                && group.cardinality == one
+                && constraint.cardinality
+                    == (Cardinality {
+                        minimum: Nat(2),
+                        maximum: Some(Nat(2)),
+                    })
+                && source_selector(&own.selector) =>
+        {
+            (group, true)
+        }
+        _ => return Err(unsupported("hand cost groups")),
+    };
+    if constraint.disjoint != Disjointness::Disjoint
         || constraint.distinct_by.is_some()
         || !constraint.aggregate_bounds.is_empty()
     {
@@ -42,26 +62,16 @@ fn selection(action: &Action) -> Result<&SelectionConstraint> {
     };
     if players.relation != PlayerRelation::SelfPlayer
         || players.relative_to != (PlayerRef::Controller {})
-        || players.cardinality
-            != (Cardinality {
-                minimum: Nat(1),
-                maximum: Some(Nat(1)),
-            })
+        || players.cardinality != one
     {
         return Err(unsupported("own hand cost player"));
     }
     search::check_predicate(predicate, *binding)?;
-    Ok(constraint)
+    Ok(HandSelection { group, source })
 }
 
-pub(super) fn source_discard(action: &Action) -> bool {
-    let Action::Discard {
-        player: PlayerRef::Controller {},
-        mode: DiscardMode::All {
-            eligible: Selector::Intersection { sets },
-        },
-    } = action
-    else {
+fn source_selector(selector: &Selector) -> bool {
+    let Selector::Intersection { sets } = selector else {
         return false;
     };
     matches!(sets.as_slice(), [
@@ -72,6 +82,12 @@ pub(super) fn source_discard(action: &Action) -> bool {
         && players.cardinality == (Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) })
         && **predicate == Expr::Literal(Bool(true))
         && objects == &[ObjectOperand::SourceHolder {}])
+}
+
+pub(super) fn source_discard(action: &Action) -> bool {
+    matches!(action, Action::Discard {
+        player: PlayerRef::Controller {}, mode: DiscardMode::All { eligible },
+    } if source_selector(eligible))
 }
 
 pub(super) fn check_cost(action: &Action) -> bool {
@@ -85,12 +101,14 @@ pub(super) fn single_additional(costs: &CostSpec) -> bool {
     let [step] = steps.as_slice() else {
         return false;
     };
-    selection(&step.instruction.action).is_ok_and(|constraint| {
-        constraint.cardinality
-            == (Cardinality {
-                minimum: Nat(1),
-                maximum: Some(Nat(1)),
-            })
+    // The Quick quote covers another hand card; its Spell source is already in Resolution.
+    selection(&step.instruction.action).is_ok_and(|plan| {
+        !plan.source
+            && plan.group.cardinality
+                == (Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                })
     })
 }
 
@@ -140,39 +158,26 @@ impl Game {
             {
                 continue;
             }
-            let constraint = selection(&instruction.action)?;
-            let group = constraint
-                .groups
-                .first()
-                .ok_or_else(|| invalid("hand cost group"))?;
-            let Selector::Zone { predicate, .. } = &group.selector else {
+            let plan = selection(&instruction.action)?;
+            let Selector::Zone { predicate, .. } = &plan.group.selector else {
                 return Err(unsupported("hand cost selector"));
             };
-            let source_reserved = steps
-                .iter()
-                .any(|cost| source_discard(&cost.instruction.action));
-            let seat = seat_name(execution.context.controller)?;
-            let mut members = vec![];
-            let mut candidates = vec![];
-            for id in self.zone_ids(seat, "hand") {
-                if source_reserved && id == execution.context.source {
-                    continue;
-                }
-                let object = self.object(&id)?;
-                if object.owner != seat || object.controller != seat {
-                    return Err(unsupported("foreign hand owner"));
-                }
-                if search::matches_candidate(self, &id, predicate)? {
-                    candidates.push(DistributionMember {
-                        handle: u64::try_from(members.len()).map_err(invalid)?,
-                        player: execution.context.controller,
-                        card: Some(object.card.clone()),
-                        name: Some(self.card_name(&id)?),
-                    });
-                    members.push(execution.reference(self, &id)?);
+            let source_reserved = plan.source
+                || steps
+                    .iter()
+                    .any(|cost| source_discard(&cost.instruction.action));
+            if plan.source {
+                let seat = seat_name(execution.context.controller)?;
+                let source = self.object(&execution.context.source)?;
+                if source.zone != "hand" || source.owner != seat || source.controller != seat {
+                    return Err(crate::EngineFailure::IllegalPlay(
+                        "grouped hand source unavailable".into(),
+                    ));
                 }
             }
-            if u64::try_from(members.len()).map_err(invalid)? < constraint.cardinality.minimum.0 {
+            let (members, candidates) =
+                self.internal_hand_cost_candidates(execution, predicate, source_reserved)?;
+            if u64::try_from(members.len()).map_err(invalid)? < plan.group.cardinality.minimum.0 {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "insufficient hand cost materials".into(),
                 ));
@@ -183,18 +188,48 @@ impl Game {
                 execution.context.controller,
                 InputDomain::CostMaterials(super::TargetDomain {
                     members: candidates,
-                    cardinality: constraint.cardinality,
+                    cardinality: plan.group.cardinality,
                     distinct_names: false,
                 }),
                 Wait::CostDiscard(HandWait::strict(
                     instruction.clone(),
                     members,
-                    constraint.cardinality,
+                    plan.group.cardinality,
                 )),
             )?;
             return Ok(true);
         }
         Ok(false)
+    }
+
+    fn internal_hand_cost_candidates(
+        &self,
+        execution: &Execution,
+        predicate: &Expr<Bool>,
+        source_reserved: bool,
+    ) -> Result<(Vec<ObjectRef>, Vec<DistributionMember>)> {
+        let seat = seat_name(execution.context.controller)?;
+        let mut members = Vec::new();
+        let mut candidates = Vec::new();
+        for id in self.zone_ids(seat, "hand") {
+            if source_reserved && id == execution.context.source {
+                continue;
+            }
+            let object = self.object(&id)?;
+            if object.owner != seat || object.controller != seat {
+                return Err(unsupported("foreign hand owner"));
+            }
+            if search::matches_candidate(self, &id, predicate)? {
+                candidates.push(DistributionMember {
+                    handle: u64::try_from(members.len()).map_err(invalid)?,
+                    player: execution.context.controller,
+                    card: Some(object.card.clone()),
+                    name: Some(self.card_name(&id)?),
+                });
+                members.push(execution.reference(self, &id)?);
+            }
+        }
+        Ok((members, candidates))
     }
 
     pub(super) fn internal_hand_cost_payment(
@@ -205,16 +240,23 @@ impl Game {
         let members = if source_discard(&instruction.action) {
             vec![execution.object(self, &ObjectOperand::SourceHolder {})?]
         } else {
-            let constraint = selection(&instruction.action)?;
-            let members = execution
+            let plan = selection(&instruction.action)?;
+            let mut members = execution
                 .cost_discards
                 .remove(&instruction.receipt)
                 .ok_or_else(|| invalid("missing hand cost selection"))?;
             if !contains(
-                constraint.cardinality,
+                plan.group.cardinality,
                 Nat(u64::try_from(members.len()).map_err(invalid)?),
             ) {
                 return Err(invalid("incomplete hand cost selection"));
+            }
+            if plan.source {
+                let source = execution.object(self, &ObjectOperand::SourceHolder {})?;
+                if members.contains(&source) {
+                    return Err(invalid("grouped hand source selected twice"));
+                }
+                members.insert(0, source);
             }
             members
         };

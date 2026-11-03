@@ -351,3 +351,133 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
         }
     }
 }
+
+fn grouped_tree(reverse: bool, later_failure: bool) -> Value {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut ability = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    ability.as_object_mut().unwrap().remove("fanfare");
+    let mut groups = vec![
+        json!({"sel":{"in":"this"},"n":1_u8}),
+        json!({"sel":{"who":"self","zone":"hand"},"n":1_u8}),
+    ];
+    if reverse {
+        groups.reverse();
+    }
+    let mut costs = vec![json!({"pp":1_u8}), json!({"discard":{"groups":groups}})];
+    if later_failure {
+        costs.push(json!({"pp":99_u8}));
+    }
+    ability["activate"] = json!({"zone":"hand","cost":{"steps":costs},"do":[{"draw":{"n":1_u8}}]});
+    let meta = tree["cards"]["BP08-038"]["meta"].clone();
+    tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[ability]}});
+    tree
+}
+
+#[test]
+fn grouped_hand_cost_reserves_its_source_and_rolls_back_both_materials_atomically() {
+    for reverse in [false, true] {
+        for later_failure in [false, true] {
+            for has_other in [false, true] {
+                let program = lowerer()
+                    .lower(&grouped_tree(reverse, later_failure))
+                    .unwrap()
+                    .remove("unit-follower")
+                    .unwrap();
+                let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
+                initial["players"]["P1"]["zones"]["field"] = json!([]);
+                initial["players"]["P1"]["zones"]["hand"] =
+                    json!([{"id":"source","card":"unit-follower"}]);
+                if has_other {
+                    initial["players"]["P1"]["zones"]["hand"]
+                        .as_array_mut()
+                        .unwrap()
+                        .push(json!({"id":"other","card":"unit-follower"}));
+                }
+                let mut board = Game::new(
+                    catalog(),
+                    &initial,
+                    &Value::Null,
+                    &Value::Null,
+                    "grouped-hand-cost",
+                )
+                .unwrap();
+                board.load_internal_card("unit-follower", &program).unwrap();
+                board
+                    .load_internal_card("unit-spell", &card(vec![]))
+                    .unwrap();
+                let before = board.projection(View::Referee).unwrap();
+                let start =
+                    board.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 });
+                if !has_other {
+                    start.unwrap_err();
+                    assert_eq!(board.projection(View::Referee).unwrap(), before);
+                    continue;
+                }
+                let CardPlay::Awaiting(question) = start.unwrap() else {
+                    panic!("one other material");
+                };
+                let InputDomain::CostMaterials(domain) = &question.domain else {
+                    panic!("private grouped cost");
+                };
+                assert_eq!(
+                    domain.members.len(),
+                    1,
+                    "source itself is reserved, even though both cards match"
+                );
+                assert_eq!(
+                    domain.cardinality,
+                    Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1))
+                    }
+                );
+                assert!(board.internal_decision(View::P2).is_none());
+                let result = board.answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::CostMaterials(vec![domain.members[0].handle]),
+                );
+                if later_failure {
+                    result.unwrap_err();
+                    assert_eq!(
+                        board.projection(View::Referee).unwrap(),
+                        before,
+                        "a later failure restores PP, both cards and pending occurrences"
+                    );
+                } else {
+                    resolved(result.unwrap());
+                    let state = board.projection(View::Referee).unwrap();
+                    assert_eq!(state["P1"]["hand"], json!(["d"]));
+                    assert_eq!(state["P1"]["cemetery"], json!(["source", "other"]));
+                    assert_eq!(state["P1"]["pp"]["current"], 1_u8);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn grouped_hand_cost_keeps_unneeded_material_shapes_closed() {
+    let source = json!({"sel":{"in":"this"},"n":1_u8});
+    let other = json!({"sel":{"who":"self","zone":"hand"},"n":1_u8});
+    for groups in [
+        json!([source.clone(), source.clone()]),
+        json!([other.clone(), other.clone()]),
+        json!([source.clone(), other.clone(), other.clone()]),
+        json!([{"sel":{"in":"this"},"n":2_u8}, other]),
+        json!([source.clone(), {"sel":{"who":"self","zone":"hand"},"n":2_u8}]),
+        json!([source.clone(), {"sel":{"who":"self","zone":"hand"},"upto":1_u8}]),
+        json!([source, {"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"paid"}]),
+    ] {
+        let mut tree = grouped_tree(false, false);
+        tree["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"]["steps"][1]["discard"]
+            ["groups"] = groups;
+        lowerer().lower(&tree).unwrap_err();
+    }
+    let mut tree = grouped_tree(false, false);
+    tree["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"]["steps"]
+        .as_array_mut()
+        .unwrap()
+        .insert(0, json!({"discard":{"ref":"this"}}));
+    lowerer().lower(&tree).unwrap_err();
+}

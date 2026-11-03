@@ -6,7 +6,7 @@ use super::{
     player_id, unsupported,
 };
 use crate::ir::events::discard::DiscardFilter;
-use crate::ir::{Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
+use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
 
 fn filter(ability: &Ability) -> Option<DiscardFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
@@ -38,12 +38,21 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     } else {
         ZoneKind::Field
     };
+    let aggregation_allowed = trigger.aggregation == (TriggerAggregation::PerFact {})
+        || (!plan.itself
+            && plan.own == Some(true)
+            && plan.own_turn
+            && trigger.aggregation
+                == (TriggerAggregation::PerBatch {
+                    key: BatchPolicy::Instruction {},
+                }));
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
         || trigger.active_zones != ability.active_zones
         || trigger.active_zones != [zone]
         || trigger.view != EventSnapshotPolicy::BeforeExit
-        || trigger.aggregation != (TriggerAggregation::PerFact {})
+        || !aggregation_allowed
+        || (plan.itself && plan.own_turn)
         || trigger
             .limit
             .is_some_and(|limit| !LimitSpec::is_triggered(limit))
@@ -143,6 +152,7 @@ impl Game {
         player: PlayerId,
     ) -> Result<Vec<(String, Located<Ability>)>> {
         let mut observers = Vec::new();
+        let active = player_id(self.active())?;
         let mut holders = self.field_ids();
         holders.push(id.to_owned());
         for holder in holders {
@@ -171,8 +181,9 @@ impl Game {
             };
             for ability in self.internal_printed_abilities(&holder)? {
                 if ability.node.active_zones == [zone]
-                    && filter(&ability.node)
-                        .is_some_and(|plan| plan.matches(player, card_before, source, actor))
+                    && filter(&ability.node).is_some_and(|plan| {
+                        plan.matches(player, card_before, source, actor, active)
+                    })
                 {
                     observers.push((holder.clone(), ability));
                 }

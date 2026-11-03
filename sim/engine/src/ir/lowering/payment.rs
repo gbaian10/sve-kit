@@ -67,11 +67,22 @@ fn lower_operations(
         .filter(|op| {
             matches!(
                 op,
-                ast::CostOperation::Discard(ast::DiscardCost::Material(_))
+                ast::CostOperation::Discard(
+                    ast::DiscardCost::Material(_) | ast::DiscardCost::Groups(_)
+                )
             )
         })
         .count()
         > 1
+        || (operations
+            .iter()
+            .any(|op| matches!(op, ast::CostOperation::Discard(ast::DiscardCost::Groups(_))))
+            && operations.iter().any(|op| {
+                matches!(
+                    op,
+                    ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
+                )
+            }))
     {
         return Err(unsupported(path));
     }
@@ -163,6 +174,9 @@ fn lower_operations(
             },
             ast::CostOperation::Discard(ast::DiscardCost::Material(material)) => {
                 super::hand_payment::lower(context.card_allocator, material, path)?
+            }
+            ast::CostOperation::Discard(ast::DiscardCost::Groups(material)) => {
+                super::hand_payment::grouped(context.card_allocator, material, path)?
             }
             ast::CostOperation::Pp(amount) => Action::Resource {
                 player: PlayerRef::Controller {},

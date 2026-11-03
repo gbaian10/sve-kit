@@ -6,6 +6,7 @@ use super::{
     PlayerRelation, PlayerSet, Selector, TextQuantifier, ast, unsupported,
 };
 use crate::ir::events::discard::DiscardFilter;
+use crate::ir::{BatchPolicy, TriggerAggregation};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -101,7 +102,9 @@ pub(super) fn subscription(
     scope: super::ScopeId,
     path: &str,
 ) -> Result<super::EventPattern, LoweringError> {
-    if discard.reference.is_some() && matches!(discard.who, Some(ast::EntryPlayer::Opponent)) {
+    if discard.reference.is_some()
+        && (matches!(discard.who, Some(ast::EntryPlayer::Opponent)) || discard.during.is_some())
+    {
         return Err(unsupported(path));
     }
     let event = Binding::new(event_id, scope);
@@ -113,7 +116,26 @@ pub(super) fn subscription(
                 .as_ref()
                 .map(|who| matches!(who, ast::EntryPlayer::Controller)),
             itself: discard.reference.is_some(),
+            own_turn: discard.during.is_some(),
         }
         .predicate(event),
     })
+}
+
+pub(super) fn aggregation(
+    auto: Option<&ast::Auto>,
+    path: &str,
+) -> Result<TriggerAggregation, LoweringError> {
+    let Some(auto) = auto else {
+        return Ok(TriggerAggregation::PerFact {});
+    };
+    match auto.aggregation.as_ref() {
+        None => Ok(TriggerAggregation::PerFact {}),
+        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_none() && matches!(event.who, Some(ast::EntryPlayer::Controller)) && event.during.is_some()) => {
+            Ok(TriggerAggregation::PerBatch {
+                key: BatchPolicy::Instruction {},
+            })
+        }
+        Some(ast::AutoAggregation::Batch) => Err(unsupported(path)),
+    }
 }

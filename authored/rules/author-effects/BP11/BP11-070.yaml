@@ -1,0 +1,55 @@
+cards:
+  BP11-070:
+    abilities:
+      - auto:
+          do:
+            - discard:
+                n: 1
+                who: opp
+          on:
+            acted:
+              ref: this
+        line: 1
+      - auto:
+          do:
+            - act: enemy
+          on:
+            discarded:
+              during:
+                turn: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - move:
+                ref: returned
+                to: hand
+          targets:
+            - bind: returned
+              from:
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

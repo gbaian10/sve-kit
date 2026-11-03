@@ -620,7 +620,13 @@ DiscardOutcome 與移動事實；只有實際棄掉的卡公開。帶篩選的�
 ## 棄牌印刷誘發
 
 印刷棄牌訂閱降低為既有 `EventPattern::Discard`，以棄牌者及可選的
-`DiscardCardBefore == SourceHolder` 正規形篩選；只收 BeforeExit、PerFact。
+`DiscardCardBefore == SourceHolder` 正規形篩選；只收 BeforeExit，預設 PerFact。
+場上來源可加自己回合條件，捕捉時比較當前回合玩家與來源控制者；自身手牌來源不收此組合。
+僅「自己回合、自己捨棄」的場上來源可用 PerBatch(Instruction)：每個來源 AbilityInstanceId
+與同一 before/batch 的多張事實，在共用 quota admission 之前去重；不同指令或不同規則選取不合併。
+WF 驗過事件 predicate 後不把單張事件的 binding 或 header context 暴露給後續打出與本文，
+且要求 event_captures 為空；事件欄位與事件物件目標因而不能由聚合能力讀取。
+其他聚合頭、Simultaneous key 與一般事件欄位讀取仍拒絕。
 場上觀察者在 Field 訂閱，自身手牌訂閱在 Hand 擷取來源，移區前封存權威來源資訊與
 原世代。每批在移動前共用 before／batch，實際提交的每張 DiscardEvent 才把該卡對應的
 occurrence 交入共同 pending 佇列；未成功移動或外層交易失敗不殘留待機。
@@ -629,6 +635,12 @@ occurrence 交入共同 pending 佇列；未成功移動或外層交易失敗不
 公開待機描述只有事件種類及已公開來源卡，不帶原手牌位置或可追蹤的私有物件身分。
 費用與本文均沿共用捨棄提交點發生事件；目前 header 的 Effect cause 指向執行權威，
 不額外判斷費用是否視為卡文效果，`by` 篩選仍未准入。
+
+手牌費用的「來源自身一張加另一張手牌」沿同一 Discard(Chosen) 與 SelectionConstraint，
+以 Hand 與 SourceHolder 的交集表示必付來源，另一組沿既有手牌篩選，總量精確為二且互斥。
+材料問題只選另一張；付款時補入已保留來源，逐張重驗世代、區域與控制者，並一次交給
+internal_discard_members。單一收據保留兩張付款與兩筆 DiscardEvent，所以 PerFact 仍兩次、
+PerBatch 僅一次；任一步失敗仍回復完整付款交易。
 
 規則 7.4.7 的手牌上限捨棄亦在實際移動前捕捉、成功移動後沿同一棄置事件匹配與待機准入；因果為規則，不攜帶前一個能力來源。仍有棄置待機時不能換回合，結算抽牌再次超限時要重新捨棄。
 

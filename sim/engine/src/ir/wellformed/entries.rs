@@ -1,17 +1,18 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
+use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::{
-    Ability, AbilityKind, AbilityQualification, Action, Capture, CardProgram, Cardinality,
-    CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind, Duration,
-    DurationEnd, Effect, EffectTarget, EventContext, EventPattern, ExecutionRef, GrantedAbility,
-    Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet, Procedure, ScopeId, StandScope,
-    TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec,
-    Visibility, ZoneKind,
+    Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
+    Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind,
+    Duration, DurationEnd, Effect, EffectTarget, EventContext, EventPattern, EventSnapshotPolicy,
+    ExecutionRef, GrantedAbility, Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet,
+    Procedure, ScopeId, StandScope, TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation,
+    TriggerCondition, TriggerSpec, Visibility, ZoneKind,
 };
 use crate::ir::{
     AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
@@ -23,6 +24,23 @@ use crate::ir::{
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
 use alloc::collections::BTreeSet;
+
+fn batch_discard(trigger: &TriggerSpec) -> bool {
+    let TriggerCondition::Event {
+        pattern: EventPattern::Discard { binding, predicate },
+    } = &trigger.on
+    else {
+        return false;
+    };
+    trigger.aggregation
+        == (TriggerAggregation::PerBatch {
+            key: BatchPolicy::Instruction {},
+        })
+        && trigger.active_zones == [ZoneKind::Field]
+        && trigger.view == EventSnapshotPolicy::BeforeExit
+        && DiscardFilter::parse(*binding, predicate)
+            .is_some_and(|plan| plan.own == Some(true) && plan.own_turn && !plan.itself)
+}
 
 /// An immutable card whose entire accepted ability tree passed structural checking.
 /// This does not grant capability support or permission to execute.
@@ -384,6 +402,13 @@ impl Checker {
         let Some(trigger) = &ability.trigger else {
             return Ok(());
         };
+        if batch_discard(trigger)
+            && (!ability.event_captures.is_empty()
+                || ability.active_zones != [ZoneKind::Field]
+                || !matches!(ability.source.origin, AbilityOrigin::Printed { .. }))
+        {
+            return self.reject();
+        }
         self.at("trigger", |checker| checker.trigger(trigger))?;
         self.at("event_captures", |checker| {
             checker.captures(
@@ -493,8 +518,7 @@ impl Checker {
         if trigger.active_zones.is_empty() {
             return Err(self.error(WellFormedReason::InvalidEntry));
         }
-        // Union narrowing and batch event envelopes require their own proof.
-        if trigger.aggregation != (TriggerAggregation::PerFact {})
+        if (trigger.aggregation != (TriggerAggregation::PerFact {}) && !batch_discard(trigger))
             || trigger
                 .limit
                 .is_some_and(|limit| !LimitSpec::is_triggered(limit))
@@ -503,10 +527,18 @@ impl Checker {
         }
         match &trigger.on {
             TriggerCondition::Event { pattern } => {
+                let entry = self.env.clone();
                 self.env.trigger = Some(trigger.view);
                 self.event_pattern(pattern, Some(trigger.view), true)?;
-                self.env.trigger_subject =
-                    SubjectFields::from_pattern(pattern).map(SubjectFields::object);
+                if batch_discard(trigger) {
+                    // A batch has no single card payload or event context for captures or bodies.
+                    self.env = entry;
+                    self.env.trigger = None;
+                    self.env.trigger_subject = None;
+                } else {
+                    self.env.trigger_subject =
+                        SubjectFields::from_pattern(pattern).map(SubjectFields::object);
+                }
                 Ok(())
             }
             TriggerCondition::State { .. } => self.reject(),

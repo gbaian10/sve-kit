@@ -1,0 +1,48 @@
+cards:
+  BP12-052:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          aggregation: batch
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            discarded:
+              during:
+                turn: self
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                name: ナテラの大樹
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
