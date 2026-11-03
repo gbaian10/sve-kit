@@ -274,3 +274,45 @@ fn bp16_054_mode_one_makes_an_earth_essence_and_heals() {
     assert_eq!(names(&state, "P1", "field"), vec!["大地の魔片".to_owned()]);
     assert_eq!(state["P1"]["leader"]["life"], 21_u8);
 }
+
+fn attack(initial: &Value, target: &str) -> Value {
+    let mut game = game(initial);
+    game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":target}))
+        .unwrap();
+    // Neither player responds in the attack's Quick windows.
+    loop {
+        triggers(&mut game, &[]);
+        let Some(window) = game.internal_quick_choice().unwrap() else {
+            break;
+        };
+        let step = game
+            .answer_internal_card(window.actor, window.token, Answer::Quick(None))
+            .unwrap();
+        finish(&mut game, step, &[]);
+    }
+    triggers(&mut game, &[]);
+    game.projection(View::Referee).unwrap()
+}
+
+#[test]
+fn bp16_082_damaging_the_opposing_leader_makes_them_discard_one() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP16-082"}]);
+    initial["players"]["P2"]["zones"]["hand"] = cards("h", &["BP01-171", "BP01-171"]);
+    let state = attack(&initial, "P2.leader");
+    assert_eq!(state["P2"]["leader"]["life"], 19_u8);
+    assert_eq!(state["P2"]["hand"].as_array().unwrap().len(), 1, "the opponent discards one");
+    assert_eq!(state["P2"]["cemetery"].as_array().unwrap().len(), 1);
+}
+
+#[test]
+fn cp01_056_lastword_makes_the_opponent_discard_one() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP01-056"}]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"BP01-126","state":{"acted":true}}]);
+    initial["players"]["P2"]["zones"]["hand"] = cards("h", &["BP01-171", "BP01-171"]);
+    let state = attack(&initial, "enemy");
+    assert_eq!(state["P1"]["cemetery"], json!(["source"]), "the 3/3 dies attacking a 4/5");
+    assert_eq!(state["P2"]["hand"].as_array().unwrap().len(), 1, "its lastword makes them discard");
+}
