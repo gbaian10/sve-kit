@@ -1,0 +1,61 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 3,
+          "min": 3,
+          "select": {
+            "side": "self",
+            "zone": "hand"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "discard",
+          "subjects": "cost.1"
+        }
+      ],
+      "kind": "evolve",
+      "line": 2
+    },
+    {
+      "body": {
+        "name": "aura",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 3
+    },
+    {
+      "body": {
+        "action": "ability_destroy",
+        "op": "restrict",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 4
+    }
+  ],
+  "status": "complete"
+}

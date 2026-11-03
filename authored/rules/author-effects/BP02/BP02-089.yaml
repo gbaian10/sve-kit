@@ -1,0 +1,34 @@
+cards:
+  BP02-089:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - evolve:
+          cost:
+            discard:
+              n: 3
+              sel:
+                who: self
+                zone: hand
+        line: 2
+      - keywords:
+          - aura
+        line: 3
+      - line: 4
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

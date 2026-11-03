@@ -1,0 +1,49 @@
+cards:
+  BP06-023:
+    abilities:
+      - keywords:
+          - aura
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+            - cannot:
+                on: this
+                what: banish
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: selection
+                      selection: enemy
+                      value:
+                        orig_cost_of: enemy
+                    op: ge
+                    right: 6
+                else:
+                  - destroy: enemy
+                then:
+                  - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
