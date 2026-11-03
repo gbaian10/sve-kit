@@ -56,12 +56,15 @@ describe("NewDeckDialog", () => {
     const user = userEvent.setup()
     const dialog = screen.getByRole("dialog", { name: "新牌組" })
     await user.click(within(dialog).getByRole("radio", { name: "英版" }))
+    await user.click(within(dialog).getByRole("radio", { name: "Cross Craft" }))
+    expect(within(dialog).getByText(/尚未支援構築檢查/u)).toBeInTheDocument()
     await user.click(within(dialog).getByRole("radio", { name: "作品名" }))
     await user.click(within(dialog).getByRole("button", { name: /vanguard/u }))
     await user.click(within(dialog).getByRole("button", { name: "建立" }))
     expect(onCreate).toHaveBeenCalledWith({
       name: "新牌組 1",
       edition: "en",
+      format: "cross_craft",
       basis: { kind: "title", titleCode: "vanguard" },
     })
   })

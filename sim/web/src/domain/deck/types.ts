@@ -5,6 +5,15 @@ export type DeckBasis =
   | { readonly kind: "class"; readonly classCode: string }
   | { readonly kind: "title"; readonly titleCode: string }
 
+/** The construction format a deck is built for; only Standard is checked so far (docs/sim §6). */
+export type DeckFormat = "standard" | "crossover" | "cross_craft" | "gloryfinder"
+
+/** The formats each edition plays (official lists and DeckLog, 2026-11-03). */
+export const FORMATS_OF: Readonly<Record<Region, readonly DeckFormat[]>> = {
+  jp: ["standard", "crossover", "gloryfinder"],
+  en: ["standard", "cross_craft", "gloryfinder"],
+}
+
 /** One card of a deck: the permanent card id, how many, and optionally the printing played. */
 export interface DeckEntry {
   readonly cardId: string
@@ -25,6 +34,7 @@ export interface Deck {
   readonly id: string
   readonly name: string
   readonly edition: Region
+  readonly format: DeckFormat
   readonly basis: DeckBasis
   readonly leader: DeckLeader | null
   readonly main: readonly DeckEntry[]

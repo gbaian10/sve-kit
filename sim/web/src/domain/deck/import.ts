@@ -3,7 +3,7 @@ import type { Region } from "../search"
 import { deckCodeOf, decodeDeckCode } from "./code"
 import { placementOf } from "./model"
 import { parseDeckText } from "./text"
-import type { DeckBasis, DeckCardInfo, DeckEntry, DeckLeader } from "./types"
+import type { DeckBasis, DeckCardInfo, DeckEntry, DeckFormat, DeckLeader } from "./types"
 
 export interface ImportLookup {
   /** A card number as printed (any case; the EN suffix optional) to a printing of the edition. */
@@ -24,6 +24,8 @@ export interface ImportedDeck {
   readonly name: string | undefined
   /** Set by a share code; a pasted list leaves the edition to the importer. */
   readonly edition: Region | undefined
+  /** Set by a share code; a pasted list names no format, so the deck becomes Standard. */
+  readonly format: DeckFormat | undefined
   readonly basis: DeckBasis
   readonly leader: DeckLeader | null
   readonly main: readonly DeckEntry[]
@@ -58,6 +60,7 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
   const references: Reference[] = []
   let name: string | undefined
   let edition: Region | undefined
+  let format: DeckFormat | undefined
   let basis: DeckBasis | undefined
   let unrecognized: ImportedDeck["unrecognized"] = []
   if (code === undefined) {
@@ -76,6 +79,7 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
     const payload = decodeDeckCode(code)
     name = payload.name || undefined
     edition = payload.edition
+    format = payload.format
     basis = payload.basis
     const add = (intId: number, count: number, side: boolean, leader: boolean) => {
       references.push({
@@ -128,6 +132,7 @@ export function readImport(text: string, lookup: ImportLookup): ImportedDeck {
   return {
     name,
     edition,
+    format,
     basis: basis ?? inferBasis(leader, [...main, ...evolve], lookup),
     leader,
     main,

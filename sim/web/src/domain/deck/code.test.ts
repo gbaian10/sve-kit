@@ -10,6 +10,7 @@ import {
 
 const full: DeckCodePayload = {
   edition: "jp",
+  format: "crossover",
   basis: { kind: "class", classCode: "elf" },
   leader: 20_001,
   main: [
@@ -22,9 +23,15 @@ const full: DeckCodePayload = {
   name: "精靈 快攻 BP19",
 }
 
-/** A code by hand: header for a JP class deck, then one main card with the given varint bytes. */
+const encoded = (bytes: number[]) =>
+  `SVEK-${btoa(String.fromCharCode(...bytes))
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replace(/=+$/u, "")}`
+
+/** A code by hand: header for a JP Standard class deck, then one main card of these bytes. */
 function codeWithMain(cardBytes: number[]): string {
-  const bytes = [1, 0, 0, 1, 0x61, 0, 1, ...cardBytes, 0, 0]
+  const bytes = [2, 0, 0, 0, 1, 0x61, 0, 1, ...cardBytes, 0, 0]
   return `SVEK-${btoa(String.fromCharCode(...bytes))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
@@ -34,7 +41,7 @@ function codeWithMain(cardBytes: number[]): string {
 const unsafeCode = () => codeWithMain([0x81, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x10, 1])
 function overflowingIds(): string {
   const big = [0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x0f]
-  const bytes = [1, 0, 0, 1, 0x61, 0, 2, ...big, 1, ...big, 1, 0, 0]
+  const bytes = [2, 0, 0, 0, 1, 0x61, 0, 2, ...big, 1, ...big, 1, 0, 0]
   return `SVEK-${btoa(String.fromCharCode(...bytes))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
@@ -58,6 +65,7 @@ describe("deck code", () => {
   it("round-trips an EN title deck without a leader, side cards or a name", () => {
     const payload: DeckCodePayload = {
       edition: "en",
+      format: "cross_craft",
       basis: { kind: "title", titleCode: "umamusume_pretty_derby" },
       leader: null,
       main: [{ intId: 60_001, count: 3 }],
@@ -85,7 +93,10 @@ describe("deck code", () => {
   it.each([
     ["no prefix", "ABC"],
     ["not base64url", "SVEK-***"],
-    ["unknown version", `SVEK-${btoa("\u0002\u0000\u0000").replace(/=+$/u, "")}`],
+    // Version 1 codes carried no deck format; nothing shipped them, so they are not read.
+    ["unknown version", encoded([1, 0, 0, 1, 0x61, 0, 0, 0, 0])],
+    ["a format of the other edition", encoded([2, 0, 2, 0, 1, 0x61, 0, 0, 0, 0])],
+    ["an unknown format", encoded([2, 1, 9, 0, 1, 0x61, 0, 0, 0, 0])],
     ["truncated", encodeDeckCode(full).slice(0, 12)],
     ["an integer beyond the safe range", unsafeCode()],
     ["ids that add up beyond the safe range", overflowingIds()],

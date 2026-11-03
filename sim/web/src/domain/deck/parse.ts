@@ -1,4 +1,11 @@
-import type { Deck, DeckBasis, DeckEntry, DeckLeader } from "./types"
+import {
+  type Deck,
+  type DeckBasis,
+  type DeckEntry,
+  type DeckFormat,
+  type DeckLeader,
+  FORMATS_OF,
+} from "./types"
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
@@ -35,6 +42,12 @@ function parseBasis(value: unknown): DeckBasis | null {
   return null
 }
 
+// Decks saved before formats were recorded are Standard decks.
+function parseFormat(value: unknown, edition: "jp" | "en"): DeckFormat | null {
+  if (value === undefined) return "standard"
+  return FORMATS_OF[edition].find((format) => format === value) ?? null
+}
+
 function parseLeader(value: unknown): DeckLeader | null | undefined {
   if (value === null) return null
   if (!isRecord(value) || !isString(value["cardId"])) return undefined
@@ -55,8 +68,23 @@ export function parseDeck(value: unknown): Deck | null {
   const side = parseEntries(value["side"])
   if (!isString(id) || !isString(name) || !isTime(createdAt) || !isTime(updatedAt)) return null
   if (edition !== "jp" && edition !== "en") return null
+  const format = parseFormat(value["format"], edition)
+  if (format === null) return null
   if (typeof revision !== "number" || !Number.isInteger(revision) || revision < 1) return null
   if (basis === null || leader === undefined) return null
   if (main === null || evolve === null || side === null) return null
-  return { id, name, edition, basis, leader, main, evolve, side, createdAt, updatedAt, revision }
+  return {
+    id,
+    name,
+    edition,
+    format,
+    basis,
+    leader,
+    main,
+    evolve,
+    side,
+    createdAt,
+    updatedAt,
+    revision,
+  }
 }
