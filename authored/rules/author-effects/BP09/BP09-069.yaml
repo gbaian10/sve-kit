@@ -1,0 +1,42 @@
+cards:
+  BP09-069:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into: カインドクイーン・ヴァンピィ
+        line: 1
+      - evolve:
+          cost:
+            pp: 3
+          into: ブラッドクイーン・ヴァンピィ
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 吸血鬼
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 5
+        line: 2
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フォレストバット
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+    token_sources:
+      - card: BP01-T15
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
