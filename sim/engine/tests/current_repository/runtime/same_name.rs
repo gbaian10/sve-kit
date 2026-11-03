@@ -17,14 +17,14 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                 );
                 Answer::Targets(vec![domain.members[0].handle])
             }
-            InputDomain::CostMaterials(domain) => Answer::CostMaterials(vec![
-                domain
-                    .members
-                    .iter()
-                    .find(|member| member.card.as_deref() == Some("BP01-T03"))
-                    .unwrap()
-                    .handle,
-            ]),
+            InputDomain::CostMaterials(domain) => {
+                assert_eq!(
+                    domain.members.len(),
+                    1,
+                    "CR 10.4.3 limits an unspecified payment to the controller's other card"
+                );
+                Answer::CostMaterials(vec![domain.members[0].handle])
+            }
             InputDomain::ResourceEntryPayment { .. }
             | InputDomain::WardEntry { .. }
             | InputDomain::Quick { .. }
