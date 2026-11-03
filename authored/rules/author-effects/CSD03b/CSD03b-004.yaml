@@ -1,0 +1,35 @@
+cards:
+  CSD03b-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into: 勝利の化身 アリフ
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  all:
+                    - exists:
+                        name: 鎧の化身 バー
+                        who: self
+                        zone: cemetery
+                    - exists:
+                        name: 槍の化身 ター
+                        who: self
+                        zone: cemetery
+                then:
+                  - evolve:
+                      into: 勝利の化身 アリフ
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

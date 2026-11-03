@@ -1,0 +1,41 @@
+cards:
+  CP03-001:
+    abilities:
+      - evolve:
+          cost:
+            pp: 4
+          into: 蒼嵐覇竜 グローリー・メイルストローム
+        line: 1
+      - keywords:
+          - storm
+          - twin_drive
+        line: 2
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_count:
+                        event: attacked
+                        sel:
+                          kind: follower
+                          trait: アクアフォース
+                        who: self
+                        window: this_turn
+                    op: eq
+                    right: 4
+                then:
+                  - evolve:
+                      into: 蒼嵐覇竜 グローリー・メイルストローム
+                      ref: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
