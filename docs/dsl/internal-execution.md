@@ -752,8 +752,10 @@ Public Order 依該文件 §7 維持拒絕，Repeat 的跨輪 epoch 依 §8 等�
 
 Modify 准入有號 Numeric Add、非負常值 Set 與非空遞迴 Numeric Combined；期限只接受 Installation anchor
 的 NoTemporalExpiry、EndResolution、CurrentTurnEnd、NextTurnEnd，或明示 SourceHolder／Field 的 SourceZoneExit；沒有 usage。
-CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上從者，
-已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。
+CurrentTurnEnd 另可帶 DuringNextTurn 附加區間，詳下節。對象限目前場上或 EX 區的從者，
+已換世代的 capture 不適用；其他目前區域或卡片種類使整次解算回復。EX 區從者的修正依
+CR 4.8.3.3，在該卡由 EX 直接出場（含打出時經解決區入場）時沿同一規則移區邊界帶到新世代
+（BP06-003、BP13-009）；其他移區仍讓原世代修正失效。
 同指示先固定去重對象，求完所有有號操作數，再規劃與提交。同一 Combined 中重複同 stat 的 Add 合計，相同 Set 合併；同 stat 的 Set／Add 或不同 Set 整棵拒絕，
 不先截零；整數溢位拒絕並回復整份 Game。
 
@@ -769,7 +771,7 @@ Catalog 印刷值不變。Effective Current 的 Stats read 經同一求值器，
 instruction、execution、effect 與 commit 身分。兩個指示保持兩個事實；零差值不造 facet。
 此為 authority 結果，尚未接完整 EventHeader、觸發及歷史查詢管線，不能當玩家 wire payload。
 
-除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代。
+除明示 SourceZoneExit 外，來源離場不移除非 static 修正；目標換區後原世代修正失效，不追蹤新世代（上述 EX 出場承接除外）。
 NoTemporalExpiry 沒有額外時間截止。合成 closed Program 的全部本文完成後，先清除目標已換世代的數值層，
 再移除綁定此次 execution 的整批 EndResolution 修正，從原始基礎與其餘 Add／Set 完整重算、保留目前受傷量 D，
 最後執行既有規則檢查；指示之間不清場，體力降到 0 的從者在同一解算內仍是後續指示的對象。
