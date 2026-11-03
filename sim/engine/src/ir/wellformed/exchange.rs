@@ -1,4 +1,5 @@
 use super::{Checked, Checker, WellFormedReason};
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Action, Bool, ChoiceDomain, CostChange, CostSpec, DecisionKind, DiscardMode, Disjointness,
     ExecutionRef, Expr, InputMode, InstructionContext, Int, MoveDestination, MoveReason, OwnerZone,
@@ -27,6 +28,18 @@ impl Checker {
         self.isolated(|checker| {
             checker.env.scope = payment.scope;
             checker.play_entry = Some(checker.env.clone());
+            if reveal_payment::payment(&payment.play) {
+                for decision in &payment.play.parameters {
+                    checker.reveal_cost_decision(decision)?;
+                }
+                let CostSpec::Ordered { steps } = &payment.play.costs else {
+                    return checker.reject();
+                };
+                for step in steps {
+                    checker.instruction_in(&step.instruction, InstructionContext::Cost, false)?;
+                }
+                return Ok(());
+            }
             for decision in &payment.play.parameters {
                 checker.play_decision(decision, &PlayerRef::Controller {})?;
             }

@@ -207,9 +207,24 @@ pub(super) enum CostOperation {
     Banish(Material),
     Act(Material),
     Discard(DiscardCost),
+    Reveal(Box<HandMaterial>),
+    ToDeckBottom(RevealedMaterial),
     BanishSelf(bool),
     ActSelf(bool),
     SelfToCemetery(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RevealedMaterial {
+    pub sel: RevealedSelection,
+    pub n: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RevealedSelection {
+    pub r#in: String,
 }
 
 #[derive(Deserialize)]

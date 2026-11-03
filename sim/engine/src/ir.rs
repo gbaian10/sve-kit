@@ -137,6 +137,7 @@ pub(crate) mod printed_keywords;
 mod projections;
 pub(crate) mod quick;
 pub(crate) mod removal_restrictions;
+pub(crate) mod reveal_cost;
 pub(crate) mod ride;
 mod runtime;
 pub(crate) mod stand_restrictions;

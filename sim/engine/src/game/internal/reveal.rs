@@ -68,21 +68,37 @@ impl Game {
             Selector::Bound { .. } => (execution.objects(self, objects)?, true),
             _ => return Err(unsupported("whole hand reveal")),
         };
+        self.internal_reveal_members(
+            execution,
+            instruction,
+            &members,
+            selected.then_some(objects),
+        )
+    }
+
+    pub(super) fn internal_reveal_members(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        members: &[ObjectRef],
+        selected: Option<&Selector>,
+    ) -> Result<()> {
         let mut ids = Vec::new();
         let mut current_members = Vec::with_capacity(members.len());
-        for member in &members {
+        for member in members {
             let id = execution.object_id(*member)?.to_owned();
             let object = self.object(&id)?;
             // Look choices deliberately reveal their selected card after moving it to hand.
-            if selected
-                && object.generation != member.generation.0
-                && execution.is_private_hand_target(objects, *member)
-            {
+            if selected.is_some_and(|objects| {
+                object.generation != member.generation.0
+                    && execution.is_private_hand_target(objects, *member)
+            }) {
                 continue;
             }
             if object.zone != "hand"
                 || object.controller != object.owner
-                || (selected && object.controller != seat_name(execution.context.controller)?)
+                || (selected.is_some()
+                    && object.controller != seat_name(execution.context.controller)?)
             {
                 return Err(invalid("foreign hand reveal member"));
             }

@@ -32,6 +32,7 @@ mod play_restrictions;
 mod prevention;
 mod receipt_counts;
 mod resource_entry;
+mod reveal_cost;
 mod stack;
 mod static_keywords;
 

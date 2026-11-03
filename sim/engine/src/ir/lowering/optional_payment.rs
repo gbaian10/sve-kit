@@ -96,6 +96,8 @@ impl BodyContext<'_> {
                         | ast::CostOperation::EarthRite(_)
                         | ast::CostOperation::LeaderLife(_)
                         | ast::CostOperation::Discard(_)
+                        | ast::CostOperation::Reveal(_)
+                        | ast::CostOperation::ToDeckBottom(_)
                         | ast::CostOperation::BanishSelf(_)
                         | ast::CostOperation::ActSelf(_)
                         | ast::CostOperation::SelfToCemetery(_) => None,
