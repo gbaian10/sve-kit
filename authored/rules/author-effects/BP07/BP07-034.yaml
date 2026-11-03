@@ -1,0 +1,45 @@
+cards:
+  BP07-034:
+    abilities:
+      - auto:
+          do:
+            - act: enemy
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          zone: hand
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - act: enemy
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
