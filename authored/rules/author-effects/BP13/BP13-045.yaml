@@ -1,0 +1,36 @@
+cards:
+  BP13-045:
+    abilities:
+      - evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  kind: spell
+                  trait: 魔法使い
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: selected
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

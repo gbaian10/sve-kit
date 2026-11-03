@@ -1,0 +1,51 @@
+cards:
+  CP03-045:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - draw:
+                        n: 1
+                    - choose:
+                        bind: selected
+                        from:
+                          who: self
+                          zone: hand
+                        n: 1
+                    - banish:
+                        ref: selected
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: banish
+                            op: ge
+                            right: 5
+                        then:
+                          - grant:
+                              keywords:
+                                - storm
+                              on: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: ペイルムーン
+                who: self
+                zone: field
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

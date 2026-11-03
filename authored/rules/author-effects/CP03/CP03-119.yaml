@@ -1,0 +1,32 @@
+cards:
+  CP03-119:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - move:
+                position:
+                  nth: 3
+                ref: selected
+                to: deck
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
