@@ -6,7 +6,9 @@
 
 ## 1. 產出
 
-`export-offline` 寫完快照後一併產生；既有匯出根可用下面的指令補產：
+`export-offline` 寫完快照後一併產生；既有匯出根可用下面的指令補產。
+快照缺少判斷所需的事實（例如沒跑機制 adapter，見 §3）時，`export-offline` 不寫索引、在輸出報告註明
+`construction_index: skipped` 與原因；`construction-index` 指令則直接失敗。沒有索引的快照不能發布（publish 要求每地區的索引都在）。
 
 ```bash
 uv --directory carddb run sve-carddb snapshot construction-index --export-dir <匯出根>

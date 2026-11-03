@@ -117,14 +117,18 @@ def write_construction_indexes(
     for part in (export_root / "construction", out_dir):
         if part.is_symlink():
             raise ConstructionIndexError("Construction index directory is a link")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    report: dict[str, JsonValue] = {}
-    for region in map(string, array(snapshot.manifest["regions"])):
-        raw = canonical(
+    # Every region is built before anything is written, so a refusal leaves the root untouched.
+    built = {
+        region: canonical(
             build_construction_index(
                 snapshot.manifest, snapshot.tables, region, snapshot.manifest_sha256
             )
         )
+        for region in map(string, array(snapshot.manifest["regions"]))
+    }
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report: dict[str, JsonValue] = {}
+    for region, raw in built.items():
         descriptor, temporary = tempfile.mkstemp(dir=out_dir, prefix=".construction-")
         try:
             with os.fdopen(descriptor, "wb") as stream:
