@@ -2,8 +2,9 @@
 
 use super::events::subject::{SubjectFields, SubjectFilter};
 use super::{
-    Binding, Bool, EventPattern, Expr, HistoryCutoff, HistoryQuery, HistoryRange, HistoryWindow,
-    InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
+    Binding, Bool, EventPattern, ExecutionRef, Expr, HistoryCutoff, HistoryQuery, HistoryRange,
+    HistoryWindow, InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
+    UbActivatedEvent,
 };
 
 pub(crate) fn played_query(event: Binding<PlayEvent>, player: Option<PlayerRef>) -> HistoryQuery {
@@ -56,6 +57,71 @@ pub(crate) fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {
     };
     (query == &played_query(*binding, player.clone()))
         .then_some(player.map_or(PlayedBy::Any, PlayedBy::Player))
+}
+
+pub(crate) fn ub_query(
+    event: Binding<UbActivatedEvent>,
+    player: Option<PlayerRef>,
+    exclude_current: bool,
+) -> HistoryQuery {
+    HistoryQuery {
+        pattern: EventPattern::UbActivated {
+            binding: event,
+            predicate: player.map_or(Expr::Literal(Bool(true)), |player| {
+                Expr::Compute(Box::new(Predicate::PlayerEquals {
+                    left: Expr::Frozen(Box::new(PlayerFrozen::UbActivatedController { event })),
+                    right: Expr::Literal(player),
+                }))
+            }),
+        },
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: None,
+        },
+        include_execution: if exclude_current {
+            InclusionPolicy::ExcludeCurrentExecution {
+                execution: ExecutionRef::Current {},
+            }
+        } else {
+            InclusionPolicy::IncludeAll {}
+        },
+    }
+}
+
+pub(crate) fn ub_plan(query: &HistoryQuery) -> Option<(Option<PlayerRef>, bool)> {
+    let EventPattern::UbActivated { binding, predicate } = &query.pattern else {
+        return None;
+    };
+    let player = match predicate {
+        Expr::Literal(Bool(true)) => None,
+        Expr::Compute(operation) => {
+            let Predicate::PlayerEquals {
+                left,
+                right: Expr::Literal(player),
+            } = operation.as_ref()
+            else {
+                return None;
+            };
+            if *left
+                != Expr::Frozen(Box::new(PlayerFrozen::UbActivatedController {
+                    event: *binding,
+                }))
+            {
+                return None;
+            }
+            Some(player.clone())
+        }
+        Expr::Literal(_) | Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => {
+            return None;
+        }
+    };
+    let exclude_current = matches!(
+        query.include_execution,
+        InclusionPolicy::ExcludeCurrentExecution { .. }
+    );
+    (query == &ub_query(*binding, player.clone(), exclude_current))
+        .then_some((player, exclude_current))
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

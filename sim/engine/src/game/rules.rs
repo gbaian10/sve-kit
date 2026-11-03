@@ -849,6 +849,7 @@ impl Game {
             *value = 0;
         }
         self.state.ir_subject_history.clear();
+        self.state.ir_ub_history.clear();
         self.state.used.clear();
         for object in self.state.objects.values_mut() {
             object.state["stats_increased_this_turn"] = json!(false);

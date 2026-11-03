@@ -185,3 +185,49 @@ fn turn_history_lowering_accepts_public_play_counts_and_rejects_wider_queries() 
             .unwrap_err();
     }
 }
+
+#[test]
+fn ub_history_lowering_is_closed_to_current_turn_formal_plays() {
+    let mut tree = fanfare::expanded::spell_tree().clone();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let lowerer = ExpandedLowerer::new().unwrap();
+    for who in [None, Some("self"), Some("opp")] {
+        for exclude in [false, true] {
+            let mut query = json!({"window":"this_turn","event":"ub_activated"});
+            if let Some(who) = who {
+                query["who"] = json!(who);
+            }
+            if exclude {
+                query["exclude"] = json!("this_execution");
+            }
+            tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] =
+                json!([{"draw":{"n":{"history_count":query}}}]);
+            lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+        }
+    }
+    for extra in [
+        json!({"distinct":"subjects"}),
+        json!({"sel":{"kind":"follower"}}),
+        json!({"from":"field"}),
+        json!({"to":"hand"}),
+        json!({"exclude":"all_executions"}),
+        json!({"where":{"direction":"down"}}),
+        json!({"window":"game"}),
+    ] {
+        let mut query = json!({"window":"this_turn","event":"ub_activated"});
+        query
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] =
+            json!([{"draw":{"n":{"history_count":query}}}]);
+        lowerer.lower_with_printed_costs(&tree, &costs).unwrap_err();
+    }
+    tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] = json!([{
+        "draw":{"n":{"history_count":{
+            "window":"this_turn", "event":"life_changed", "who":"self",
+            "where":{"direction":"down"}, "exclude":"this_execution"
+        }}}
+    }]);
+    lowerer.lower_with_printed_costs(&tree, &costs).unwrap_err();
+}

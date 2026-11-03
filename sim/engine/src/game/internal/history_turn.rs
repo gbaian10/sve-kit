@@ -5,7 +5,7 @@ use crate::ir::PlayerId;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
-use crate::ir::history_turn::{PlayedBy, life_plan, life_sum_plan, played_by};
+use crate::ir::history_turn::{PlayedBy, life_plan, life_sum_plan, played_by, ub_plan};
 use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
 use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, TraitId};
 use crate::ir::{ExecutionRef, HistoryQuery, PlayerRef, Requirement, Requirements};
@@ -16,7 +16,13 @@ pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requ
     requirement.locations.iter().all(|location| {
         location
             .ir_path
-            .strip_suffix("/query/pattern")
+            .strip_suffix("/query/include_execution")
+            .or_else(|| {
+                location
+                    .ir_path
+                    .strip_suffix("/query/include_execution/execution")
+            })
+            .or_else(|| location.ir_path.strip_suffix("/query/pattern"))
             .or_else(|| {
                 location
                     .ir_path
@@ -41,15 +47,19 @@ pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requ
     })
 }
 
-fn count(execution: &Execution, game: &Game, player: &PlayerRef, pending: bool) -> Result<Nat> {
-    let player = execution.player(game, player)?;
+fn committed_counter(game: &Game, player: PlayerId, name: &str) -> Result<u64> {
     let count = game
         .state
         .counters
-        .get(&format!("{}.cards_played", seat_name(player)?))
+        .get(&format!("{}.{name}", seat_name(player)?))
         .copied()
         .unwrap_or_default();
-    let mut count = u64::try_from(count).map_err(invalid)?;
+    u64::try_from(count).map_err(invalid)
+}
+
+fn count(execution: &Execution, game: &Game, player: &PlayerRef, pending: bool) -> Result<Nat> {
+    let player = execution.player(game, player)?;
+    let mut count = committed_counter(game, player, "cards_played")?;
     // CR 13.2 includes the card whose formal play is being checked, before it commits.
     if pending
         && player == execution.context.controller
@@ -92,6 +102,13 @@ pub(super) fn played(execution: &Execution, game: &Game, query: &HistoryQuery) -
     }
 }
 
+/// Only committed IR executions can exclude their own fact from the shared counter.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(in crate::game) struct UbHistoryFact {
+    pub(in crate::game::internal) execution: u64,
+    pub(in crate::game::internal) controller: u32,
+}
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub(in crate::game) enum SubjectHistoryEvent {
@@ -117,6 +134,37 @@ pub(in crate::game) struct SubjectHistoryFact {
     pub(in crate::game::internal) destroyed: bool,
 }
 
+fn ub_count(
+    execution: &Execution,
+    game: &Game,
+    player: Option<&PlayerRef>,
+    exclude_current: bool,
+) -> Result<Nat> {
+    let player = player
+        .map(|player| execution.player(game, player))
+        .transpose()?;
+    let mut total = if let Some(player) = player {
+        committed_counter(game, player, "ub_activated")?
+    } else {
+        let own = committed_counter(game, execution.context.controller, "ub_activated")?;
+        let other = committed_counter(game, execution.player(game, &opponent())?, "ub_activated")?;
+        own.checked_add(other)
+            .ok_or_else(|| invalid("UB history overflow"))?
+    };
+    // The counter includes prototype plays and explicit starting history as well as IR plays.
+    if exclude_current
+        && game.state.ir_ub_history.iter().any(|fact| {
+            fact.execution == execution.id.0
+                && player.is_none_or(|player| fact.controller == player.seat)
+        })
+    {
+        total = total
+            .checked_sub(1)
+            .ok_or_else(|| invalid("UB counter omits its committed execution"))?;
+    }
+    Ok(Nat(total))
+}
+
 pub(super) fn subjects(
     execution: &Execution,
     game: &Game,
@@ -135,6 +183,12 @@ pub(super) fn subjects(
         )?)
         .map(Nat)
         .map_err(invalid);
+    }
+    if let Some((player, exclude_current)) = ub_plan(query) {
+        if count != HistoryCount::Facts {
+            return Err(unsupported("UB history subject count"));
+        }
+        return ub_count(execution, game, player.as_ref(), exclude_current);
     }
     let Some((event, filter)) = subject_plan(query) else {
         if count != HistoryCount::Facts {

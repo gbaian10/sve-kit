@@ -632,10 +632,18 @@ pub(super) enum ObjectAction {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Modify {
+    pub instead: Option<Vec<PowerInstead>>,
     pub on: Objects,
     pub power: Option<Number>,
     pub hp: Option<Number>,
     pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PowerInstead {
+    pub r#if: Condition,
+    pub power: Number,
 }
 
 #[derive(Deserialize)]
@@ -1421,6 +1429,12 @@ pub(super) struct HistoryQuery {
     pub to: Option<DepartureDestination>,
     pub at_least: Option<u64>,
     pub r#where: Option<LifeHistoryFilter>,
+    pub exclude: Option<HistoryExclusion>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HistoryExclusion {
+    ThisExecution,
 }
 
 #[derive(Deserialize)]
@@ -1454,6 +1468,7 @@ pub(super) enum LifeHistoryField {
 pub(super) enum HistoryEvent {
     LifeChanged,
     Played,
+    UbActivated,
     Attacked,
     Evolved,
     Destroyed,

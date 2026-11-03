@@ -282,13 +282,28 @@ impl BodyContext<'_> {
         set: bool,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if modification.instead.is_some()
+            && (set || modification.power.is_none() || modification.hp.is_some())
+        {
+            return Err(unsupported(path));
+        }
         let mut patches = Vec::new();
         for (stat, value) in [
             (Stat::Attack, &modification.power),
             (Stat::Life, &modification.hp),
         ] {
             if let Some(value) = value {
-                let amount = self.number(value, path, &mut BTreeSet::new())?;
+                let mut amount = self.number(value, path, &mut BTreeSet::new())?;
+                if let Some(replacements) = &modification.instead {
+                    let [replacement] = replacements.as_slice() else {
+                        return Err(unsupported(path));
+                    };
+                    amount = Expr::Compute(Box::new(super::IntOperation::Conditional {
+                        condition: self.condition(&replacement.r#if, path)?,
+                        then_value: self.number(&replacement.power, path, &mut BTreeSet::new())?,
+                        else_value: amount,
+                    }));
+                }
                 if set && !matches!(&amount, Expr::Literal(Int(literal)) if *literal >= 0) {
                     return Err(unsupported(path));
                 }

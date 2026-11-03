@@ -4,7 +4,7 @@ use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::history_turn::{played_by, subject_plan};
+use crate::ir::history_turn::{played_by, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
@@ -729,6 +729,11 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if ub_plan(query).is_some()
+            && let EventPattern::UbActivated { binding, predicate } = &query.pattern
+        {
+            return self.local_value(*binding, predicate);
+        }
         if played_by(query).is_some()
             && let EventPattern::Play { binding, predicate } = &query.pattern
         {

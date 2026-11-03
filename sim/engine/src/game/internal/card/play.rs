@@ -4,7 +4,7 @@ use super::{
     Generation, Int, Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource,
     SourceSpan, Step, admission, int, invalid, printed_origin, seat_name, unsupported,
 };
-use crate::game::internal::InstructionOutcome;
+use crate::game::internal::{InstructionOutcome, UbHistoryFact};
 use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
@@ -1348,6 +1348,16 @@ impl Game {
                 qualification: play.qualification,
             }
         });
+        if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
+            self.bump(
+                &format!("{}.ub_activated", seat_name(source.controller)?),
+                1,
+            );
+            self.state.ir_ub_history.push(UbHistoryFact {
+                execution: execution.id.0,
+                controller: source.controller.seat,
+            });
+        }
         if execution.spell {
             let CostSpec::Ordered { steps } = &play.costs else {
                 return Err(unsupported("card play costs"));
