@@ -501,13 +501,15 @@ fn cemetery_trigger_declares_targets_before_paying_and_combines_return_with_othe
 }
 
 #[test]
-fn cemetery_body_admits_independent_effects_but_rejects_live_holder_operations() {
+fn cemetery_body_admits_independent_effects_and_self_moves_but_rejects_other_holder_operations() {
     for body in [
         json!({"do":[]}),
         json!({"do":[{"life":{"who":"self","delta":1}}]}),
         json!({"optional_cost":{"pp":1,"result":"paid"},"do":[{"if":{"cond":{"paid":{"receipt":"paid"}},"then":[{"life":{"who":"self","delta":1}}]}}]}),
         json!({"do":[{"choice":{"n":1,"options":[[{"life":{"who":"self","delta":1}}],[{"move":{"ref":"this","to":"field"}}]]}}]}),
         json!({"do":[{"if":{"cond":{"awakened":true},"then":[{"move":{"ref":"this","to":"field"}}]}}]}),
+        // 「自分の墓場のこれをEXエリアに置く」 moves only the holder into its owner's EX.
+        json!({"do":[{"move":{"ref":"this","to":"ex"}}]}),
     ] {
         let mut tree = tree();
         let auto = &mut tree["cards"]["unit-follower"]["abilities"][0]["auto"];
@@ -530,7 +532,6 @@ fn cemetery_body_admits_independent_effects_but_rejects_live_holder_operations()
     for action in [
         json!({"buff":{"on":"this","power":1}}),
         json!({"destroy":"this"}),
-        json!({"move":{"ref":"this","to":"ex"}}),
         json!({"if":{"cond":{"awakened":true},"then":[{"move":{"ref":"this","to":"hand"}}]}}),
     ] {
         let mut tree = tree();

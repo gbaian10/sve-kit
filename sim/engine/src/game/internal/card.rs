@@ -930,11 +930,13 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
     let played_trigger = filter(ability).is_some();
     let hand_discard_trigger = triggers::hand_discard(ability);
+    let cemetery_entry_trigger = triggers::cemetery_entry(ability);
     if (ability.active_zones != [zones]
         && !zone_activation
         && !ex_trigger
         && !played_trigger
-        && !hand_discard_trigger)
+        && !hand_discard_trigger
+        && !cemetery_entry_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

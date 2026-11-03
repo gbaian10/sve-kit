@@ -22,9 +22,11 @@ mod ability;
 mod change;
 mod discard;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
+pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
+mod mill;
 mod movement;
 pub(in crate::game::internal) use movement::ex_self_entry;
 mod played;
@@ -97,6 +99,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     }
     if ability::check_header(ability)?
         || discard::check_header(ability)?
+        || mill::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?
         || entry::check_header(ability)?

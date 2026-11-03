@@ -1,193 +1,125 @@
-format: 1
-kind: effect_set
 cards:
   BP07-030:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
+      - body:
           op: optional
           then:
+            max: 1
+            min: 1
+            modes:
+              - count: 1
+                name: ナテラの大樹
+                op: create
+                to: field
+              - count: 1
+                name: ナテラの大樹
+                op: create
+                to: ex
             op: choice
             timing: resolve
-            min: 1
-            max: 1
-            modes:
-              - op: create
-                name: ナテラの大樹
-                count: 1
-                to: field
-              - op: create
-                name: ナテラの大樹
-                count: 1
-                to: ex
         event: enter
+        kind: trigger
+        line: 1
         subject: self
-      - line: 2
-        kind: activated
-        body:
-          op: damage
-          subjects: target.1
+      - body:
           amount:
             count: cost.1
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
+          op: damage
+          subjects: target.1
         cost_selections:
           - key: "1"
+            max: 5
+            min: 0
             select:
+              name: ナテラの大樹
               side: self
               zone: field
-              name: ナテラの大樹
-            min: 0
-            max: 5
         costs:
           - op: act
             subjects: self
           - op: act
             subjects: cost.1
-  BP07-P16:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: eq
-            args:
-              - read: self.zone
-              - ex
-          then:
-            op: damage
-            subjects: opponent.leader
-            amount:
-              fn: div
-              args:
-                - count:
-                    side: self
-                    zone: cemetery
-                    trait: 自然
-                - 5
-        event: end
-        active_zones:
-          - ex
-      - line: 1
-        kind: static
-        body:
-          op: restrict
-          subjects: self
-          action: play
-          condition:
-            fn: eq
-            args:
-              - read: self.zone
-              - ex
-        section: 0
-      - line: 2
-        kind: spell
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 4
-            - op: if
-              condition:
-                fn: gt
-                args:
-                  - count:
-                      side: self
-                      zone: field
-                      name: 呪われし影・ヴァイディ
-                  - 0
-              then:
-                op: move
-                subjects: self
-                to: ex
-        section: 0
+        kind: activated
+        line: 2
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  BP07-SL09:
+              zone: field
     status: complete
+  BP07-SL09:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: rush
-      - line: 2
-        kind: trigger
-        body:
-          op: modify
-          subjects:
-            zone: field
-            side: self
-            type: follower
-            trait: 機械
-            other: true
-          power: 1
+          op: macro
+        kind: static
+        line: 1
+      - body:
           hp: 1
+          op: modify
+          power: 1
+          subjects:
+            other: true
+            side: self
+            trait: 機械
+            type: follower
+            zone: field
         event: end
-      - line: 3
         kind: trigger
-        body:
+        line: 2
+      - body:
           op: seq
           steps:
-            - op: look
+            - bind: looked
               count: 5
-              bind: looked
-            - op: select
+              op: look
+            - bind: chosen
+              constraint:
+                args:
+                  - args:
+                      - field: cost
+                        values: chosen
+                    fn: sum
+                  - 6
+                fn: le
+              max: 5
+              min: 0
+              op: select
               select:
                 from: looked
-                type: follower
                 trait: 機械
-              min: 0
-              max: 5
-              bind: chosen
-              constraint:
-                fn: le
-                args:
-                  - fn: sum
-                    args:
-                      - values: chosen
-                        field: cost
-                  - 6
+                type: follower
             - op: move
               subjects: chosen
               to: field
-            - op: select
-              select:
-                difference:
-                  - looked
-                  - chosen
-              min:
-                count:
-                  difference:
-                    - looked
-                    - chosen
+            - bind: ordered
               max:
                 count:
                   difference:
                     - looked
                     - chosen
-              bind: ordered
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              op: select
               order: true
+              select:
+                difference:
+                  - looked
+                  - chosen
             - op: move
+              position: bottom
               subjects: ordered
               to: deck
-              position: bottom
         event: enter
+        kind: trigger
+        line: 3
         subject: self
+    status: complete
+format: 1
+kind: effect_set

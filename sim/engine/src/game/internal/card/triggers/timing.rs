@@ -151,6 +151,10 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         }
         Event::Play { .. } => Ok(format!("Play while source at slot {position}")),
         Event::Discard { .. } => Ok("Discard".into()),
+        Event::Move { event } => Ok(format!(
+            "Move deck to cemetery of player {} at field slot {position}",
+            event.from.player.seat
+        )),
         Event::Attack { event } => Ok(format!(
             "Attack {} from field slot {position}",
             event.ordinal.0

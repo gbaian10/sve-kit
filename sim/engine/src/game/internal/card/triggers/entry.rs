@@ -8,7 +8,7 @@ use crate::game::{Frame, Object};
 use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::optional_payment;
-use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
+use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, Located};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -25,7 +25,10 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     }
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || trigger.active_zones != [ZoneKind::Field]
+        || trigger.active_zones != ability.active_zones
+        || !(trigger.active_zones == [ZoneKind::Field]
+            || (trigger.active_zones == [ZoneKind::Cemetery]
+                && super::played::cemetery_body(ability)))
         || trigger.view != EventSnapshotPolicy::AfterEntry
         || trigger.aggregation != (TriggerAggregation::PerFact {})
         || trigger
@@ -36,6 +39,11 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         return Err(unsupported("printed per-fact entry header"));
     }
     Ok(true)
+}
+
+/// 「自分の場に…が出たとき」 printed on a card that waits in its owner's cemetery.
+pub(in crate::game::internal) fn cemetery_header(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Cemetery] && filter(ability).is_some()
 }
 
 fn filter(ability: &Ability) -> Option<SubjectFilter> {
@@ -106,6 +114,38 @@ fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
     reason = "The shared movement boundary owns entry event admission."
 )]
 impl Game {
+    /// Cemetery cards observe only through abilities active in the cemetery.
+    fn entry_observers(&self) -> Result<Vec<(String, Vec<Located<Ability>>)>> {
+        let mut holders = self.field_ids();
+        holders.extend(self.zone_ids("P1", "cemetery"));
+        holders.extend(self.zone_ids("P2", "cemetery"));
+        holders
+            .into_iter()
+            .map(|id| {
+                let zone = if self.object(&id)?.zone == "field" {
+                    ZoneKind::Field
+                } else {
+                    ZoneKind::Cemetery
+                };
+                let abilities = if zone == ZoneKind::Field
+                    || self
+                        .card_runtime
+                        .is_loaded(&self.internal_effective_print(&id)?.0)
+                {
+                    self.internal_printed_abilities(&id)?
+                        .into_iter()
+                        .filter(|ability| {
+                            ability.node.active_zones == [zone] && filter(&ability.node).is_some()
+                        })
+                        .collect::<Vec<_>>()
+                } else {
+                    Vec::new()
+                };
+                Ok((id, abilities))
+            })
+            .collect()
+    }
+
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],
@@ -123,18 +163,7 @@ impl Game {
         {
             return Ok(());
         }
-        let observers = self
-            .field_ids()
-            .into_iter()
-            .map(|id| {
-                let abilities = self
-                    .internal_printed_abilities(&id)?
-                    .into_iter()
-                    .filter(|ability| filter(&ability.node).is_some())
-                    .collect::<Vec<_>>();
-                Ok((id, abilities))
-            })
-            .collect::<Result<Vec<_>>>()?;
+        let observers = self.entry_observers()?;
         let active = player_id(self.active())?;
         let effect_source = self.card_runtime.active_source;
         let (cause, actor, method) = entry_cause(frame)?;

@@ -698,7 +698,13 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         return Err(unsupported(path));
     }
     if let Some(auto) = &entry.auto {
-        let cemetery = auto.cemetery_play();
+        let cemetery = auto.cemetery_observer();
+        // A card in the cemetery never observes its own entry.
+        if cemetery
+            && matches!(&auto.on, ast::PhaseSubscription::EnterField(subscription) if subscription.reference.is_some())
+        {
+            return Err(unsupported(path));
+        }
         let hand_discard = zones == [ZoneKind::Hand]
             && matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some());
         if !cemetery
@@ -855,6 +861,7 @@ fn lowered_trigger(
                 EventPattern::LeaveField { .. }
                     | EventPattern::Destroy { .. }
                     | EventPattern::Discard { .. }
+                    | EventPattern::Move { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
             } else {

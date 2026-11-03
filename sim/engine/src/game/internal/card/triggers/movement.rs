@@ -135,7 +135,7 @@ fn origin(previous: &Object) -> Result<EntryOrigin> {
     reason = "Both projections belong to the common movement transaction."
 )]
 impl Game {
-    fn movement_header(
+    pub(super) fn movement_header(
         &mut self,
         id: &str,
         before: SnapshotId,

@@ -803,6 +803,14 @@ impl Game {
             .map(|plan| plan.previous.clone())
             .collect::<Vec<_>>();
         self.internal_ex_events(&ex_previous, typed_entry_before, frame)?;
+        let milled = plans
+            .iter()
+            .filter(|plan| {
+                plan.changed && plan.previous.zone == "deck" && plan.destination == "cemetery"
+            })
+            .map(|plan| plan.previous.clone())
+            .collect::<Vec<_>>();
+        self.internal_mill_events(&milled, typed_entry_before, frame)?;
         self.enqueue(pending);
         for (object, _) in &entered {
             self.initialize_entry_counters(&object.id, frame)?;

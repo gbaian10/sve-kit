@@ -1,0 +1,46 @@
+cards:
+  BP07-041:
+    abilities:
+      - auto:
+          cost:
+            pp: 1
+          do:
+            - move:
+                ref: this
+                to: ex
+          on:
+            enter_field:
+              sel:
+                name: 蒼の反逆者・テトラ
+              who: self
+          zone: cemetery
+        line: 1
+      - keywords:
+          - quick
+        line: 1
+        section: 1
+      - line: 2
+        section: 1
+        spell:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
