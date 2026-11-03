@@ -30,11 +30,9 @@ cards:
             - create:
                 n: 1
                 to: field
-                token: スティールナイト
-            - create:
-                n: 1
-                to: field
-                token: シールドガーディアン
+                token:
+                  - スティールナイト
+                  - シールドガーディアン
         line: 2
     admission: light
     meta:
@@ -43,6 +41,10 @@ cards:
             model: claude-opus-5-5
             who: Claude
           date: "2026-11-03"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
     token_sources:
       - card: BP13-T08
         line: 1
