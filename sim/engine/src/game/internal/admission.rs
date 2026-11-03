@@ -431,6 +431,9 @@ fn play_requirement(code: &str) -> bool {
             | "internal.ModeChoiceKind.ChoiceKeyword"
             | "internal.ModeChoiceKind.ResolutionAlternative"
             | "shape.ModeDecisionKind.ResolutionChoice"
+            | "action.play-card"
+            | "shape.Action.PlayCard"
+            | "shape.CostOverride.SetBase"
             | "internal.ModeExclusion.CurrentTurnAbilityInstance"
     )
 }
@@ -445,6 +448,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     {
         return super::card::attack_restrictions::check_install(action);
     }
+    super::card::nested::check(action)?;
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
     super::tokens::equipment::check_action(action)?;

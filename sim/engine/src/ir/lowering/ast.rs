@@ -187,6 +187,13 @@ impl ActivationZone {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayCard {
+    pub r#ref: String,
+    pub cost: Option<u64>,
+}
+
+#[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Cost {
     Short(Box<CostOperation>),
@@ -287,6 +294,7 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    PlayCard(PlayCard),
     Pay(ModePayment),
     Counter(CounterChange),
     StackPlus(Number),

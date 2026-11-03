@@ -1,7 +1,7 @@
 use super::{
-    Ability, AbilityId, AbilityInstanceId, AbilityOrigin, Context, Expr, Game, Generation,
-    ObjectRef, PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, invalid, json, seat_name,
-    take, unsupported,
+    Ability, AbilityId, AbilityInstanceId, AbilityOrigin, Expr, Game, Generation, ObjectRef,
+    PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, invalid, json, seat_name, take,
+    unsupported,
 };
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
@@ -49,30 +49,9 @@ impl Game {
         holder: &str,
         actor: PlayerId,
     ) -> Result<super::CardPlay> {
-        let object = self.object(holder)?.clone();
-        let seat = seat_name(actor)?;
-        let context = Context {
-            source: holder.into(),
-            generation: Generation(object.generation),
-            controller: actor,
-        };
-        self.check_card_play_holder(holder, actor)?;
-        let kind = self.object_type(holder)?;
-        if !matches!(
-            kind,
-            "フォロワー" | "フォロワー・トークン" | "アミュレット" | "アミュレット・トークン"
-        ) || (matches!(kind, "フォロワー・トークン" | "アミュレット・トークン")
-            && object.zone != "ex")
-        {
-            return Err(unsupported("supported field card play holder"));
-        }
-        let mut execution = self.new_card_execution(context)?;
-        let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
-        let frame = self.start_frame(holder, serde_json::Value::Null, &decision)?;
-        self.internal_play_move(holder, "resolution", &frame)?;
-        self.object_mut(holder)?.state["entered_from"] = json!(object.zone);
-        execution.context.generation = Generation(self.object(holder)?.generation);
-        self.run_field_play(execution)
+        let mut execution = self.prepare_card_execution(holder, actor, None)?;
+        self.internal_run(&mut execution)?;
+        self.card_play_result(execution)
     }
 
     pub(in crate::game::internal) fn internal_field_card_finish(
@@ -82,7 +61,10 @@ impl Game {
         let holder = execution.context.source.clone();
         let actor = execution.context.controller;
         let seat = seat_name(actor)?;
-        let decision = json!({"do":"play","card":holder,"by":seat,"at":"main"});
+        let mut decision = json!({"do":"play","card":holder,"by":seat});
+        if execution.nested.is_none() {
+            decision["at"] = json!("main");
+        }
         let mut frame = self.start_frame(&holder, serde_json::Value::Null, &decision)?;
         if self.zone_count(seat, "field") >= 5 {
             return Err(crate::EngineFailure::IllegalPlay(
@@ -93,6 +75,9 @@ impl Game {
             return Ok(());
         }
         let played = execution.reference(self, &holder)?;
+        if let Some(nested) = execution.nested.as_mut() {
+            nested.committed = true;
+        }
         execution.facts.push(super::Fact::CardPlayed {
             execution: execution.id,
             object: played,
@@ -107,7 +92,11 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":event});
-        self.internal_play_move(&holder, "field", &frame)?;
+        if execution.nested.is_some() {
+            self.move_effect_playing_card(&holder, seat, "field", &frame)?;
+        } else {
+            self.internal_play_move(&holder, "field", &frame)?;
+        }
         self.internal_ward_entry_posture(execution, played)?;
         self.internal_numeric_end_resolution(execution.id)?;
         self.internal_preventions_end_resolution(execution.id);
@@ -122,6 +111,9 @@ impl Game {
             object: played,
             controller: actor,
         });
+        if execution.nested.is_some() {
+            return Ok(());
+        }
         self.checks()?;
         self.card_runtime.entry_result = Some(super::CardEntry {
             execution: execution.id,

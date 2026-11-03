@@ -68,7 +68,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | box | ref:O、until:U | until 必填；之前的 act 另一步 | BP11-018 |
 | race | ref:O | n:Q；省略為一次 | CP01-042 |
 | gain_drive | ref:O | 與檢查程序分開 | CP03-008 |
-| play_card | ref:O | cost 尚不接受 | BP13-036 |
+| play_card | ref:O | cost?:0；其餘費用覆寫尚不接受 | BP13-036 |
 | play_ability | of:O；trigger 或 ability:{ub:true,n:正安全整數} | cost_policy:normal/waive_original；兩支互斥 | BP14-023、A-016e |
 | apply | on:O、effect:E | until:U、capture:play | BP12-109、CP04-060 |
 | player_effect | who:P、effect:E | until:U | BP14-046 |
@@ -81,7 +81,7 @@ TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time
 
 create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef,kind?:follower}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。
 
-delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。feed、drive_check、play_card.cost 沒有本矩陣的接受形狀。pilot 只指名被操縱的物件；提醒文不代表第二個物件，攻體來自印刷資料，期限依 CR5.32 固定為本回合。這個有限 Step union 不宣稱所有登錄構造均可承載。
+delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](author-ability-shapes-1.0.md)。delayed 只帶 precondition 共通 metadata，不收 result。feed、drive_check 沒有本矩陣的接受形狀。pilot 只指名被操縱的物件；提醒文不代表第二個物件，攻體來自印刷資料，期限依 CR5.32 固定為本回合。這個有限 Step union 不宣稱所有登錄構造均可承載。
 
 ## 自我取代
 

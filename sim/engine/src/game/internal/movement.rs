@@ -990,7 +990,6 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after_snapshot = SnapshotId(self.state.ir_epoch);
         let group = self.group();
-        let mut source_departed = false;
         for (index, id, previous, from_kind, followup, evolution, stack_replaced) in plans {
             self.check_evolution_return(evolution.as_ref())?;
             let current = self.object(&id)?;
@@ -1019,7 +1018,6 @@ impl Game {
             let result = moves
                 .get_mut(index)
                 .ok_or_else(|| invalid("missing movement result"))?;
-            source_departed |= id == execution.context.source;
             result.after = Some(after);
             result.actual_to = Some(result.requested_to);
             if kind == ZoneKind::Deck && followup.is_none() {
@@ -1068,7 +1066,15 @@ impl Game {
                 );
             }
         }
-        execution.seal_source_departure(departing_source.filter(|_| source_departed));
+        let departed = departing_source
+            .into_iter()
+            .filter(|(_, source_snapshot)| {
+                moves.iter().any(|movement| {
+                    movement.before == source_snapshot.view().object && movement.after.is_some()
+                })
+            })
+            .collect::<Vec<_>>();
+        execution.seal_source_departure(&departed);
         if kind == ZoneKind::Deck {
             self.invalidate_deck_observations(execution, &moves, &old_deck)?;
         }

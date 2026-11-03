@@ -2,9 +2,9 @@
 
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::ir::{
-    CardName, CharacteristicView, CounterKind, Expr, LkiReason, NameOperation, Nat, NumberRead,
-    ObjectRef, ObjectView, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView,
-    SnapshotId, Stat,
+    CardName, CharacteristicView, CounterKind, ExecutionId, Expr, LkiReason, NameOperation, Nat,
+    NumberRead, ObjectRef, ObjectView, Requirement, Requirements, RuntimeAbilitySource,
+    RuntimeObjectView, SnapshotId, Stat,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -158,19 +158,46 @@ impl Execution {
         &self,
         game: &Game,
         ids: &[String],
-    ) -> Result<Option<SourceSnapshot>> {
-        let Some(information) = &self.source_information else {
-            return Ok(None);
-        };
-        if information.departed.is_some() || !ids.iter().any(|id| id == &self.context.source) {
-            return Ok(None);
+    ) -> Result<Vec<(ExecutionId, SourceSnapshot)>> {
+        let mut snapshots = Vec::new();
+        if self.source_information.as_ref().is_some_and(|information| {
+            information.departed.is_none() && ids.iter().any(|id| id == &self.context.source)
+        }) {
+            snapshots.push((self.id, self.source_snapshot(game)?));
         }
-        self.source_snapshot(game).map(Some)
+        // A child can move a suspended parent's source before that parent resumes.
+        if let Some(nested) = &self.nested {
+            snapshots.extend(nested.parent.source_before_move(game, ids)?);
+        }
+        Ok(snapshots)
     }
 
-    pub(super) fn seal_source_departure(&mut self, snapshot: Option<SourceSnapshot>) {
+    pub(super) fn seal_source_departure(&mut self, snapshots: &[(ExecutionId, SourceSnapshot)]) {
         if let Some(information) = &mut self.source_information {
-            information.seal(snapshot);
+            information.seal(
+                snapshots
+                    .iter()
+                    .find(|(id, _)| *id == self.id)
+                    .map(|(_, snapshot)| snapshot.clone()),
+            );
+        }
+        if let Some(nested) = &mut self.nested {
+            nested.parent.seal_source_departure(snapshots);
+        }
+    }
+
+    pub(super) fn restore_source_liveness(&mut self, game: &Game) {
+        if let Some(information) = &mut self.source_information
+            && game.object(&self.context.source).is_ok_and(|object| {
+                object.generation == information.holder.generation.0
+                    && object.zone == information.zone
+            })
+        {
+            // Child rollback can restore the exact generation that a tentative move sealed.
+            information.departed = None;
+        }
+        if let Some(nested) = &mut self.nested {
+            nested.parent.restore_source_liveness(game);
         }
     }
 

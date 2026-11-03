@@ -1,0 +1,46 @@
+cards:
+  BP05-053:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: victim
+          on:
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                orig_cost_le: 2
+                trait: 絶傑
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

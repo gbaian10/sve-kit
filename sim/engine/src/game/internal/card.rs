@@ -39,6 +39,7 @@ mod fanfare;
 pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
+pub(in crate::game::internal) mod nested;
 pub(super) mod optional;
 pub(super) mod other_costs;
 mod play_restrictions;
@@ -1223,6 +1224,7 @@ fn check_instruction(
     super::tokens::check_catalog(game, &instruction.action)?;
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
     super::transform::check_catalog(game, &instruction.action)?;
+    nested::check(&instruction.action)?;
     super::grant::check_action(&instruction.action)?;
     super::numeric::pilot::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
@@ -1244,6 +1246,7 @@ fn check_instruction(
             | Action::Counter { .. }
             | Action::Discard { .. }
             | Action::Reveal { .. }
+            | Action::PlayCard { .. }
             | Action::Move { .. }
             | Action::Destroy { .. }
             | Action::Life { .. }

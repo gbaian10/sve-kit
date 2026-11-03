@@ -100,3 +100,9 @@ def test_pilot_shape_keeps_printed_values_and_duration_implicit(
     pilot: JsonValue,
 ) -> None:
     _check([{"pilot": pilot}], accepted=False)
+
+
+@pytest.mark.parametrize("cost", [-1, 1, False, True, "0", None])
+def test_play_card_accepts_only_the_zero_cost_override(cost: JsonValue) -> None:
+    _check({"ref": "t", "cost": cost}, name="A.act.play-card", accepted=False)
+    _check([{"play_card": {"ref": "t", "cost": cost}}], accepted=False)

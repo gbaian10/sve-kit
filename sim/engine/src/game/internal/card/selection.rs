@@ -374,7 +374,10 @@ fn target_selector(selector: &Selector) -> Result<()> {
             binding,
             predicate,
         } if players.relative_to == (PlayerRef::Controller {})
-            && players.relation == PlayerRelation::SelfPlayer =>
+            && matches!(
+                players.relation,
+                PlayerRelation::SelfPlayer | PlayerRelation::Opponents
+            ) =>
         {
             check_predicate(predicate, *binding, false)
         }

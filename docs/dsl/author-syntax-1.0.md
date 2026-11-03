@@ -238,7 +238,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | stack_plus | Expr | K.if＋D.rule-choice StackRecipient＋I.counter 或 I.token 初始 N 個 counter（非 N+1） |
 | box / pilot | box:`{ref,until}`；pilot:`{ref}`（目前只准入 this） | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
 | race / feed / gain_drive / drive_check | race:`{ref,n?}`、gain_drive:`{ref}`；feed/drive_check 尚無接受形狀 | I.meal-race / I.ride-drive / I.drive-check 的對應規則程序 |
-| play_card / play_ability | `{ref}`（cost 尚不接受） / `{of,trigger或ability,cost_policy?}` | I.play-card / I.play-ability；內層獨立 execution |
+| play_card / play_ability | `{ref}`（cost?:0；其餘費用覆寫尚不接受） / `{of,trigger或ability,cost_policy?}` | I.play-card / I.play-ability；內層獨立 execution |
 | delayed | `{on,do,targets?,optional_cost?,x?,define?,aggregation?,next_only?,until?,precondition?}` | I.delay；無期限只一次，有期限預設各次；不收 line/result，詳能力矩陣 |
 | player_effect / apply | `{who,effect,until?}` / `{on,effect,until?}` | I.install-effect，分玩家與物件範圍；不是 I.grant |
 | win / skip_turn / extra_turn | `{who}` | I.game-result / I.schedule-turn |
