@@ -37,7 +37,7 @@ impl Game {
             return Ok(false);
         };
         let object = self.object(holder)?;
-        if &object.card != card || object.state["face"] != 0_u8 {
+        if &object.card != card || (object.zone != "evolution" && object.state["face"] != 0_u8) {
             return Err(invalid("evolution resource identity or face changed"));
         }
         match object.zone.as_str() {
@@ -56,8 +56,9 @@ impl Game {
                 };
                 if base.zone != "field"
                     || base.owner != object.owner
-                    || string(&self.catalog.face(&base.card, 0)?["name"])
-                        != string(&self.catalog.face(card, 0)?["name"])
+                    || base.state["face"] != object.state["face"]
+                    || !string(&self.face(holder)?["card_type"]).contains("エボルヴ")
+                    || !super::evolution::resource_association(self, &base.id, holder)?
                 {
                     return Err(invalid("invalid evolution resource association"));
                 }

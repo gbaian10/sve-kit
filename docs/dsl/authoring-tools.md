@@ -317,3 +317,11 @@ cmp:
 自己的持續進化減費可用 `static.effects: [{evolve_cost_mod: {on: this, delta: {minus: [0, {count: {who: self, zone: field, kind: follower, other: true}}]}}}]`（BP06-019）。每次報價讀取當前有效能力與場上集合，與既有進化費用效果合計後才以零為下限；不安裝永久鎖或保存過時數量。既有 `apply.evolve_cost_mod` 仍限 `on: affected` 與常量修正。
 
 模式內的單一公開目標亦可供 `leader_of` 保存選取時的控制者（BP18-046）。捕捉須屬於該目標自己的宣告、exact 1、角色為 controller，且目標選擇器本身保持獨立；其他角色及任意捕捉仍拒絕。
+
+一般進化頭的 `evolve.into` 接受卡名、非空卡名清單，以及
+`{who: self, zone: evolve_deck, kind: evolve_follower, name_contains: レーヴァテインドラゴン}`。
+省略時沿用同名進化。每個頭的目的地、費用與 `usable_if` 分別檢查；雙面進化卡按回答的面序比對該面名稱，再沿共同程序公開、付款並進化。
+不符合名稱、面序或該頭條件時，在公開與付款前拒絕。此入口不擴充效果本文的進化主體或目的地範圍。
+
+目的地選取的名稱包含必須同時符合進化從者卡種；同名片段的進化護符或進化法術不符合。
+本入口比對進化候選所選面的印刷卡名；候選的改名或額外卡名能力仍須另行准入。

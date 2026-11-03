@@ -1624,8 +1624,32 @@ pub(super) enum PhasePlayer {
 #[serde(deny_unknown_fields)]
 pub(super) struct Evolution {
     pub cost: Cost,
+    pub into: Option<EvolutionDestination>,
     pub usable_if: Option<Condition>,
 }
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum EvolutionDestination {
+    Name(String),
+    Names(Vec<String>),
+    Contains(EvolutionNameSelector),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EvolutionNameSelector {
+    pub who: SelfPlayer,
+    pub zone: EvolutionZone,
+    pub kind: SearchKind,
+    pub name_contains: String,
+}
+
+#[derive(Deserialize)]
+pub(super) enum EvolutionZone {
+    #[serde(rename = "evolve_deck")]
+    Evolve,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct EvolutionCost {

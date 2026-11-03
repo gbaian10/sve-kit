@@ -470,11 +470,12 @@ Controller 與 active_zones=[Field]，採下列封閉形狀：
 
 1. 唯一 Face PlayParameter：AtDecision、Current、Inline、Only(Controller)，沒有 capture。
    Objects 域恰選一張自己的 Evolve 卡，唯一群組也為 exact 1；沒有 roles、distinct_by 或 aggregate bounds。
-   述詞為目前候選卡名稱與 SourceHolder 名稱的 NamesIntersect，不接受未過濾的整個進化牌組。
+   述詞為目前候選卡名稱與 SourceHolder 名稱的 NamesIntersect、與非空常值名稱清單的 NamesIntersect，或 `And[KindEquals(EvolveFollower), NameContains]`（非空常值）。名稱包含的卡種條件不得省略。不接受未過濾的整個進化牌組。
 2. 唯一 Ordered 費用：先 Reveal 同一選取 binding，再 Pay 非負常值的 PpCurrent。
    兩步都是 Controller 的 Cost 指示，無 guard、無材料再選；不接受 EP Alternative。
 3. 本文用 EachObject 對該 exact-one 集合取元素，唯一指示為 Evolve：
    subject=SourceHolder、form.object=該元素、固定 FaceId、mode=Normal，產生新的 link binding。
+   此封閉投影由既有規則程序執行；Face 回答包含實體進化牌與面序，依選定面的印刷名稱檢查目的地，不能只檢查正面名稱或任意翻面。
    不接受 Super／Effect 或 Face 回答的其他用途。
 
 EachObject 是既有型別內的暫時單元素投影，會多出該 capability 需求；它不是卡文的逐物件效果。

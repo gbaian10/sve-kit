@@ -1,0 +1,21 @@
+cards:
+  BP03-056:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into:
+            kind: evolve_follower
+            name_contains: レーヴァテインドラゴン
+            who: self
+            zone: evolve_deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

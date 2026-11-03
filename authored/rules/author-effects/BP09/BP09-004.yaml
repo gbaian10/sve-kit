@@ -1,0 +1,19 @@
+cards:
+  BP09-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into:
+            - 深緑の純心・ポーラ
+            - 真紅の絆・ポーラ
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

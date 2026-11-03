@@ -4,7 +4,11 @@ use super::{
     Result, SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
-use crate::ir::{Bool, Control, Int, PlayerRef, Resource, ResourceOperation};
+use crate::ir::evolution_destination::Destination;
+use crate::ir::{
+    Bool, ChoiceDomain, Control, Int, PlayerRef, Resource, ResourceOperation, SelectionGroup,
+    Selector,
+};
 use serde_json::{Value, json};
 
 pub(super) const fn intrinsic(ability: &Ability) -> bool {
@@ -246,12 +250,16 @@ impl Game {
         {
             return Ok(false);
         }
-        if decision
-            .get("face")
-            .is_some_and(|face| face.as_u64() != Some(0))
-        {
-            return Ok(false);
-        }
+        let face = match decision.get("face") {
+            None => 0,
+            Some(value) => {
+                let Some(face) = value.as_u64().and_then(|value| usize::try_from(value).ok())
+                else {
+                    return Ok(false);
+                };
+                face
+            }
+        };
         for component in ["pp", "ep", "sep"] {
             if decision["pay"]
                 .get(component)
@@ -281,8 +289,21 @@ impl Game {
             return Ok(false);
         }
         let amount = cost(&entry.node)?;
-        // The fixed well-formed projection proves exactly this name-bound, ordinary rule entry.
-        let code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});
+        let mut code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});
+        match destination(&entry.node)? {
+            Destination::SameName => {}
+            Destination::Names(names) => {
+                code["body"]["names"] =
+                    json!(names.into_iter().map(|name| name.0).collect::<Vec<_>>());
+            }
+            Destination::Contains(name) => {
+                code["body"]["name_contains"] = json!(name.0);
+            }
+        }
+        let resource = self.object(string(&decision["evolve_card"]))?;
+        if self.catalog.face(&resource.card, face).is_err() {
+            return Ok(false);
+        }
         self.evolve_with_code(decision, &code, Some(&entry.node))
     }
 }
@@ -301,4 +322,48 @@ fn inline_ids(value: &Value) -> Result<Vec<String>> {
                 .ok_or_else(|| invalid("cost material ID"))
         })
         .collect()
+}
+
+fn destination(ability: &Ability) -> Result<Destination> {
+    let parameter = ability
+        .play
+        .as_ref()
+        .and_then(|play| play.parameters.first())
+        .ok_or_else(|| invalid("missing evolution face parameter"))?;
+    let ChoiceDomain::Objects { constraint, .. } = &parameter.domain else {
+        return Err(unsupported("evolution face domain"));
+    };
+    let Some(SelectionGroup {
+        selector: Selector::Zone {
+            predicate, binding, ..
+        },
+        ..
+    }) = constraint.groups.first()
+    else {
+        return Err(unsupported("evolution candidate domain"));
+    };
+    Destination::from_predicate(predicate, *binding)
+        .ok_or_else(|| unsupported("evolution destination predicate"))
+}
+
+pub(super) fn resource_association(game: &Game, base: &str, form: &str) -> Result<bool> {
+    let object = game.object(base)?;
+    let base_name = string(&game.catalog.face(&object.card, 0)?["name"]);
+    let form_face = game.face(form)?;
+    let form_name = string(&form_face["name"]);
+    let is_evolve_follower = string(&form_face["card_type"]) == "フォロワー・エボルヴ";
+    if base_name == form_name {
+        return Ok(true);
+    }
+    let Some(program) = game.card_runtime.definitions.cards.get(&object.card) else {
+        return Ok(false);
+    };
+    for entry in &program.card().abilities {
+        if intrinsic(&entry.node)
+            && destination(&entry.node)?.matches(base_name, form_name, is_evolve_follower)
+        {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
