@@ -1,0 +1,49 @@
+cards:
+  BP07-055:
+    abilities:
+      - auto:
+          cost:
+            pp: 1
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          zone: hand
+        line: 1
+      - activate:
+          cost:
+            banish:
+              n: 1
+              sel:
+                name: ナテラの大樹
+                who: self
+                zone: field
+          do:
+            - damage:
+                n: 3
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
