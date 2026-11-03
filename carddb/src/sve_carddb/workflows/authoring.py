@@ -41,6 +41,7 @@ from sve_carddb.domains.registry.transitions.files import read_transition_files
 from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.domains.text_observations import FrozenTexts, TextObservations
 from sve_carddb.domains.text_observations.closure import close_preview
+from sve_carddb.domains.translations.corrected_sources import Corrections
 from sve_carddb.domains.translations.four_layer_authored import FrameRecord
 from sve_carddb.domains.translations.glossary.records import TermRecord
 from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
@@ -365,7 +366,14 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         observations.configuration(vocabulary, ())
         | {"product_identity": official.identities.configuration()},
     )
-    sources = Sources(stores, inputs.repo, context, identity.snapshot, batches=batches)
+    sources = Sources(
+        stores,
+        inputs.repo,
+        context,
+        identity.snapshot,
+        batches=batches,
+        corrections=Corrections(observations.plan),
+    )
     with create_database(compile_build(capabilities)) as db:
         with db.transaction():
             populate_product_preview(

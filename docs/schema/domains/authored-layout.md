@@ -239,13 +239,13 @@ confirmed_none 與 same_rules_reskin 記錄不可因追加版次自動擴張。�
 
 `source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類。effect 更正可在同筆記錄加入選用的 `sections: {expected_raw_value: [Text], corrected_value: [Text]}`，核對並替換整份補充段落清單；保留段落順序與原始換行，空清單代表沒有段落。本文與段落必須全部符合原值且來源 hash 相符才原子套用；全部已符合改值時才視為 upstream fixed，部分修正或任一原值不符均為 conflict，不套用其餘部分。段落更正沿用同筆記錄的卡圖證據、hash、reason 與採納狀態，不另建衝突記錄；同一 printing／face 不得有重疊的段落更正。公開 field／值型別依 [傳輸契約 §3.3](../export/snapshot-transport.md#33-公開更正值)：本文或種類保留原 field，補充段落以 `other` 的文字原值呈現，多段以空行分隔；不將清單或建置欄位送入公開 CorrectionValue。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
 
-evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
+evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。有封存卡圖的建置匯入時以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。卡圖只在寫入或新增更正時比對；公開 authoring 與 CI 讀不到私有卡圖，直接信任已登錄的 active 更正與其卡圖 hash，仍須原值與 expected_source_hash 相符才套用，不符時同樣為 conflict，只是不寫 correction_evidence。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
 
 本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片並改 `state: active`。先前 needs_review 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
 
 建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時 source_url 仍存在、值為 null，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
 
-CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這個 CLI 輸出仍是欄位投影，不是完整 face_revision 或公開卡表快照。正式建置 staging 由 `source_corrections` 接入文字觀測匯入器：核對封存圖片後匯入三表，保留原始觀測並建立更正後 revision，再提供受影響引用者的公開 Correction 值；完整快照序列化與發布驗證另由匯出器處理。API 與 F1 使用閉包見 [來源更正實作說明](../../../carddb/src/sve_carddb/domains/source_corrections/README.md)。
+CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這個 CLI 輸出仍是欄位投影，不是完整 face_revision 或公開卡表快照。正式建置 staging 由 `source_corrections` 接入文字觀測匯入器：核對封存圖片後匯入三表（無封存卡圖的公開建置只匯入更正與套用兩表），保留原始觀測並建立更正後 revision，再提供受影響引用者的公開 Correction 值；完整快照序列化與發布驗證另由匯出器處理。API 與 F1 使用閉包見 [來源更正實作說明](../../../carddb/src/sve_carddb/domains/source_corrections/README.md)。
 
 ### 3.5 重跑與新卡包
 

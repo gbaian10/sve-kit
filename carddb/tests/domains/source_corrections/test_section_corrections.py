@@ -66,7 +66,6 @@ def test_section_correction_preserves_raw_and_imports_only_the_verified_result(
     corrected: tuple[str, ...],
 ) -> None:
     case = section_case(tmp_path, inputs, corrected=corrected)
-    assert case.plan.corrections is not None
     application = case.plan.corrections[0]
     assert application.status == "applied"
     raw = application.observation
@@ -126,7 +125,6 @@ def test_section_raw_mismatch_blocks_the_entire_correction(
     inputs: Inputs,
 ) -> None:
     case = section_case(tmp_path, inputs, mismatch=True)
-    assert case.plan.corrections is not None
     application = case.plan.corrections[0]
     assert application.status == "conflict"
     candidate = next(
@@ -182,7 +180,6 @@ def test_corrected_translation_projection_clears_sections_and_checks_their_raw_v
     tmp_path: Path, inputs: Inputs
 ) -> None:
     case = section_case(tmp_path, inputs, corrected=())
-    assert case.plan.corrections is not None
     application = case.plan.corrections[0]
     source = application.observation.card.source
     assert source.archive is not None
@@ -233,7 +230,6 @@ def test_correction_marks_only_the_changed_text_field(
     case.identity = replace(case.identity, snapshot=load_registry(case.root))
     case.catalog = load_products(case.root, registry=case.identity.snapshot)
     case.plan = plan_text_observations(case.identity, case.provider, images=case.images)
-    assert case.plan.corrections is not None
     application = case.plan.corrections[0]
     assert application.status == "applied"
     assert (application.marker(None) is None) == (unchanged == "effect")

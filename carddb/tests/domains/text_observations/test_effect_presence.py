@@ -518,7 +518,6 @@ def test_absent_projection_is_preserved_when_source_correction_changes_type(
     fixture = make_correction_case(
         tmp_path / "authored", inputs, region="en", field="card_type"
     )
-    assert fixture.texts.plan.corrections is not None
     case = fixture.texts
     number = "BP02-070EN"
     card = card_from_raw(
@@ -545,7 +544,6 @@ def test_absent_projection_is_preserved_when_source_correction_changes_type(
     plan = planning.plan_text_observations(
         identity, case.provider, images=fixture.images
     )
-    assert plan.corrections is not None
     application = plan.corrections[0]
     assert application.status == "applied"
     raw = application.observation

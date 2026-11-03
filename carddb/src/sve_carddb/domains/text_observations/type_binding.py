@@ -23,7 +23,7 @@ def type_spelling(plan: TextPlan, item: FaceObservation) -> str:
         return item.content.type_raw
     applications = [
         application
-        for application in plan.corrections or ()
+        for application in plan.corrections
         if application.observation == item
         and application.data.field == "card_type"
         and application.status == "applied"

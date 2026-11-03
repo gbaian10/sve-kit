@@ -13,7 +13,6 @@ from sve_carddb.domains.registry.records import CorrectionData, FaceData, Printi
 from sve_carddb.domains.source_corrections.plan import (
     corrected_observations,
     plan_applications,
-    selected_records,
     withheld_regions,
 )
 from sve_carddb.domains.text_observations.archive import verify_card
@@ -49,22 +48,20 @@ class TextPlan:
     groups: tuple[FaceGroup, ...]
     unavailable: tuple[str, ...]
     diagnostic_exclusions: PreviewPlan
-    corrections: tuple[Application, ...] | None = None
+    corrections: tuple[Application, ...] = ()
     wording_decisions: tuple[WordingDecision, ...] = ()
 
     def candidates(self) -> tuple[FaceObservation, ...]:
         """Keep raw source observations immutable while exposing corrected candidates."""
-        return corrected_observations(self.observations, self.corrections or ())
+        return corrected_observations(self.observations, self.corrections)
 
     def publication_identity(self) -> PreviewPlan:
         """Unresolved active corrections block output; pending wording is still visible."""
-        if self.corrections is None and selected_records(self.identity):
-            raise ValueError("Correction output requires pinned image evidence")
         return close_preview(
             self.identity,
             frozenset(
                 (application.observation.card_id, application.observation.region)
-                for application in self.corrections or ()
+                for application in self.corrections
                 if application.status == "conflict"
             )
             | withheld_regions(self.identity),
@@ -104,11 +101,7 @@ class TextPlan:
         return (
             *observation_uses,
             *presence_uses,
-            *(
-                use
-                for application in self.corrections or ()
-                for use in application.uses()
-            ),
+            *(use for application in self.corrections for use in application.uses()),
         )
 
     def configuration(self) -> dict[str, JsonValue]:
@@ -142,15 +135,15 @@ class TextPlan:
                 )
             ),
             "unavailable_printing_ids": list[JsonValue](self.unavailable),
-            "corrections_hash": None
-            if self.corrections is None
-            else digest(
+            "corrections_hash": digest(
                 canonical(
                     [
                         {
                             "correction_hash": application.key(),
                             "status": application.status,
-                            "images": [
+                            "images": None
+                            if application.images is None
+                            else [
                                 source.model_dump(mode="json")
                                 for source in application.images
                             ],
@@ -217,12 +210,8 @@ class TextPlan:
                 for group in self.groups
             ],
             "diagnostic_exclusions": self.diagnostic_exclusions.report(),
-            "corrections": [
-                application.report() for application in self.corrections or ()
-            ],
-            "publication_identity": None
-            if self.corrections is None and selected_records(self.identity)
-            else self.publication_identity().report(),
+            "corrections": [application.report() for application in self.corrections],
+            "publication_identity": self.publication_identity().report(),
             "diagnostic_exclusion_status": {
                 "proposal": "retired-text-exclusion-proposal",
                 "publication_gate": False,
@@ -242,7 +231,7 @@ def _groups(
     preview: PreviewPlan,
     observations: tuple[FaceObservation, ...],
     unavailable: tuple[str, ...],
-    applications: tuple[Application, ...] | None = None,
+    applications: tuple[Application, ...],
 ) -> tuple[FaceGroup, ...]:
     grouped: dict[tuple[str, Region], list[FaceObservation]] = defaultdict(list)
     included = {
@@ -253,13 +242,10 @@ def _groups(
     corrected: set[tuple[str, Region]] = set()
     for record in preview.snapshot.records.values():
         data = record.data
-        if isinstance(data, CorrectionData) and (
-            applications is None
-            or not any(
-                application.data.id == data.id
-                and application.status in {"applied", "already_fixed"}
-                for application in applications
-            )
+        if isinstance(data, CorrectionData) and not any(
+            application.data.id == data.id
+            and application.status in {"applied", "already_fixed"}
+            for application in applications
         ):
             printing = preview.snapshot.records["printing:" + data.printing_id].data
             if isinstance(printing, PrintingData):
@@ -322,7 +308,11 @@ def _diagnostic_exclusions(
 def plan_text_observations(
     preview: PreviewPlan, provider: TextProvider, *, images: ImageProvider | None = None
 ) -> TextPlan:
-    """Read every selected-region physical observation before any current selection."""
+    """Read every selected-region physical observation before any current selection.
+
+    Without ``images`` active registered corrections still apply after their exact
+    source checks; only the archived image re-read is skipped.
+    """
     observations: list[FaceObservation] = []
     unavailable = []
     for _, record in sorted(preview.snapshot.records.items()):
@@ -378,10 +368,10 @@ def plan_text_observations(
             ),
         )
     )
-    applications = None if images is None else plan_applications(preview, exact, images)
+    applications = plan_applications(preview, exact, images)
     groups = _groups(
         preview,
-        corrected_observations(exact, applications or ()),
+        corrected_observations(exact, applications),
         tuple(sorted(unavailable)),
         applications,
     )

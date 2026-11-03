@@ -34,10 +34,6 @@ class Corrections:
     fields: Mapping[tuple[str, str, int], CorrectedField]
 
     def __init__(self, plan: TextPlan) -> None:
-        if plan.corrections is None:
-            raise ValueError(
-                "Corrected translation sources require a pinned correction plan"
-            )
         verify_applications(plan.identity, plan.observations, plan.corrections)
         fields: dict[tuple[str, str, int], CorrectedField] = {}
         for application in plan.corrections:

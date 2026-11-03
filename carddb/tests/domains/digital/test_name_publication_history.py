@@ -20,7 +20,6 @@ def test_raw_history_remains_eligible_after_effect_correction(
     tmp_path: Path, inputs: Inputs
 ) -> None:
     case = make_correction_case(tmp_path, inputs).texts
-    assert case.plan.corrections is not None
     raw = case.plan.corrections[0].observation
     corrected = next(
         item for item in case.plan.candidates() if item.printing_id == raw.printing_id

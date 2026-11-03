@@ -11,7 +11,6 @@ from sve_carddb.domains.source_corrections.importer import (
     populate_corrections,
     verify_corrections,
 )
-from sve_carddb.domains.source_corrections.plan import selected_records
 from sve_carddb.domains.text_observations.configuration import text_configuration
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.models import candidate_revision_id
@@ -297,8 +296,6 @@ def populate_text_observations(
 ) -> InputRecord:
     """Populate in a caller-owned transaction, preserving missing-effect source uses."""
     plan = observations.plan
-    if plan.corrections is None and selected_records(plan.identity):
-        raise ValueError("Scoped source corrections require pinned image evidence")
     if any(
         db.rows(table)
         for table in ("face_revision", "face_current", "printing_face_observation")
@@ -339,8 +336,9 @@ def populate_text_observations(
     _groups_to_database(db, plan, selected, parents, texts, vocabulary)
     for item in materialized:
         _physical(db, item, texts)
-    populate_corrections(db, plan, texts)
-    if plan.corrections is not None:
+    # Builds without scoped corrections may omit the correction tables entirely.
+    if plan.corrections:
+        populate_corrections(db, plan, texts)
         verify_corrections(db, plan, vocabulary)
     populate_wording_basis(db, plan)
     mark_wording_pending(db, plan)

@@ -24,7 +24,6 @@ class TestDefaultCorrectionInputs:
         field: str,
     ) -> None:
         fixture = default_correction_case.copy(tmp_path)
-        assert fixture.texts.plan.corrections is not None
         evidence = fixture.texts.plan.corrections[0].data.evidence[0]
         changed = evidence.model_copy(
             update={
@@ -88,7 +87,6 @@ def test_daily_evidence_lookup_uses_verified_metadata_without_pngs(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fixture = default_correction_case.copy(tmp_path)
-    assert fixture.texts.plan.corrections is not None
     evidence = fixture.texts.plan.corrections[0].data.evidence[0]
     expected = fixture.images.image(evidence)
     daily = FrozenImages(

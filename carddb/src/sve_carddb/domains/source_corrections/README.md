@@ -4,9 +4,15 @@ Pass `images=FrozenImages(store_root, store_id, batch_id)` to
 `plan_text_observations(identity, texts, images=images)`. The image provider resolves
 the preserved regional `img src` and exact authored image hash to a sealed source
 version, including historical versions. Missing or changed evidence fails; the
-provider never visits live/latest or the network. A scoped correction cannot be
-staged without explicit image evidence. The complete authored envelopes remain
-unchanged, including corrections outside the selected output region.
+provider never visits live/latest or the network. The complete authored envelopes
+remain unchanged, including corrections outside the selected output region.
+
+Without `images` (the public authoring profile and CI) the registered evidence is
+trusted: the card image was compared when the correction was written. Active
+corrections still pass the same exact old value and `expected_source_hash` checks
+and apply identically; conflicts still block the regional card. Such applications
+carry `images=None`, declare no image evidence use and write no
+`correction_evidence` rows, because no image source record exists in that build.
 
 The importer reuses `registry.corrections.correction_status`. An active correction
 first checks for an upstream fix, then requires both exact old value and the

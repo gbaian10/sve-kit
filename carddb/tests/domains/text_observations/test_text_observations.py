@@ -325,7 +325,7 @@ def test_reversed_source_indices_use_authored_faces_not_face_ordinals(
 
 
 @pytest.mark.parametrize("state", ["active", "needs_review"])
-def test_source_correction_does_not_implicitly_adopt_or_apply_text(
+def test_only_active_registered_correction_applies_without_image_reads(
     tmp_path: Path, inputs: Inputs, state: str
 ) -> None:
     inputs.jp["PR-001"].faces[0].text = "Rule."
@@ -344,9 +344,21 @@ def test_source_correction_does_not_implicitly_adopt_or_apply_text(
     ]
     case = make_case(tmp_path / "authored", inputs)
     group = next(group for group in case.plan.groups if group.region == "jp")
-    assert group.reasons == ("source_correction_pending",)
     assert group.current() is None
-    assert all(item.content.effect == "Rule." for item in group.observations)
+    assert all(
+        item.content.effect == "Rule."
+        for item in case.plan.observations
+        if item.region == "jp"
+    )
+    effects = {item.card_no: item.content.effect for item in group.observations}
+    if state == "active":
+        (application,) = case.plan.corrections
+        assert (application.status, application.images) == ("applied", None)
+        assert group.reasons == ("observation_difference",)
+        assert effects == {"BP02-071": "Correction candidate", "PR-001": "Rule."}
+    else:
+        assert group.reasons == ("source_correction_pending",)
+        assert set(effects.values()) == {"Rule."}
 
 
 def test_explicit_special_kinds_traits_and_titles_are_all_materialized(
