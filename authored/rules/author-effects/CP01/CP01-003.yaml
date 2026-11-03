@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP01-003:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        feed:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            return_to_hand:
+              sel:
+                who: self
+                zone: field
+                trait: ウマ娘
+                other: true
+              any: true
+              result: materials
+          do:
+            - damage:
+                to:
+                  who: opp
+                  zone: field
+                  kind: follower
+                n:
+                  times:
+                    - x_paid: materials
+                    - 2
