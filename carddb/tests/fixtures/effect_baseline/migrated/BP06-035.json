@@ -1,0 +1,93 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "adjust_cost",
+        "subjects": "self",
+        "amount": {
+          "fn": "sub",
+          "args": [
+            0,
+            {
+              "count": {
+                "union": [
+                  {
+                    "side": "self",
+                    "zone": "cemetery",
+                    "trait": "陰陽師"
+                  },
+                  {
+                    "side": "self",
+                    "zone": "cemetery",
+                    "type": "spell"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "eq",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "field",
+                "name": "天后"
+              }
+            },
+            0
+          ]
+        },
+        "then": {
+          "op": "create",
+          "name": "天后",
+          "count": 1,
+          "to": "field"
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 3,
+      "kind": "activated",
+      "body": {
+        "op": "modify",
+        "subjects": "target.1",
+        "keywords": [
+          "storm"
+        ]
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "field",
+            "type": "follower",
+            "trait": "式神"
+          },
+          "min": 0,
+          "max": 2
+        }
+      ],
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "self"
+        }
+      ]
+    }
+  ]
+}

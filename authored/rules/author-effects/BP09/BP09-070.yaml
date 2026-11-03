@@ -1,0 +1,74 @@
+cards:
+  BP09-070:
+    abilities:
+      - face: 1
+        line: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  name: フォレストバット
+                  who: self
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            enter_field:
+              sel:
+                name: フォレストバット
+              who: self
+        face: 1
+        line: 2
+      - evolve_time:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+                who: self
+        face: 1
+        line: 3
+      - face: 2
+        keywords:
+          - storm
+        line: 1
+      - face: 2
+        line: 2
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  name: フォレストバット
+                  who: self
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                name: フォレストバット
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        face: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
