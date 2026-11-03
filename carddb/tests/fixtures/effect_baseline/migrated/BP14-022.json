@@ -1,0 +1,48 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "static",
+      "body": {
+        "op": "aura",
+        "subjects": {
+          "zone": "field",
+          "side": "self",
+          "type": "follower",
+          "trait": "宴楽",
+          "other": true
+        },
+        "keywords": [
+          "storm"
+        ]
+      }
+    },
+    {
+      "line": 3,
+      "kind": "trigger",
+      "body": {
+        "op": "create",
+        "name": "輝く金貨",
+        "count": 1,
+        "to": "ex"
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

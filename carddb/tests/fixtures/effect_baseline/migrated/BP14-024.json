@@ -1,0 +1,55 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "if",
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "cemetery",
+                "type": "follower",
+                "where": {
+                  "fn": "eq",
+                  "args": [
+                    {
+                      "read": "item.class"
+                    },
+                    "ロイヤル"
+                  ]
+                }
+              }
+            },
+            5
+          ]
+        },
+        "then": {
+          "op": "modify",
+          "subjects": "self",
+          "power": 1,
+          "keywords": [
+            "rush"
+          ]
+        }
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "draw",
+        "count": 1
+      },
+      "event": "field_to_cemetery",
+      "subject": "self",
+      "keyword": "last_words"
+    }
+  ]
+}
