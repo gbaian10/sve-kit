@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-118:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-03"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+      - line: 3
+        super_evolve_time:
+          cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                other: true
+                trait: ウマ娘
+              any: true
+              result: horses
+          do:
+            - buff:
+                "on": this
+                power:
+                  x_paid: horses
+                hp:
+                  x_paid: horses
