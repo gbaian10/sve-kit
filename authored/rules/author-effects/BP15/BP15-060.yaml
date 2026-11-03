@@ -1,0 +1,29 @@
+cards:
+  BP15-060:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - pay:
+                cost:
+                  act_self: true
+                do:
+                  - draw:
+                      n: 1
+          on:
+            discarded:
+              from: hand
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

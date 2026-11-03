@@ -681,6 +681,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     let zones = match requested {
         Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
+        None if entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None => vec![ZoneKind::Field],
     };
@@ -698,7 +699,10 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     }
     if let Some(auto) = &entry.auto {
         let cemetery = auto.cemetery_play();
+        let hand_discard = zones == [ZoneKind::Hand]
+            && matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some());
         if !cemetery
+            && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
                 || (zones == [ZoneKind::Ex]
                     && !matches!(auto.on, ast::PhaseSubscription::Phase(_))))
@@ -845,7 +849,9 @@ fn lowered_trigger(
                 EventSnapshotPolicy::AtReveal
             } else if matches!(
                 pattern,
-                EventPattern::LeaveField { .. } | EventPattern::Destroy { .. }
+                EventPattern::LeaveField { .. }
+                    | EventPattern::Destroy { .. }
+                    | EventPattern::Discard { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
             } else {
@@ -873,6 +879,9 @@ fn lowered_subscription(
                 binding: event,
                 predicate: super::events::ability::subject().predicate(SubjectFields::Ub(event)),
             })
+        }
+        ast::PhaseSubscription::Discarded(event) => {
+            discard::subscription(event, event_id, scope, path)
         }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
@@ -1039,6 +1048,7 @@ fn lowered_change(
         | ast::PhaseSubscription::Damage(_)
         | ast::PhaseSubscription::Attacked(_)
         | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }
 }

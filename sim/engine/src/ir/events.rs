@@ -2,6 +2,7 @@ pub(crate) mod ability;
 pub(crate) mod attack;
 pub(crate) mod change;
 pub(crate) mod damage;
+pub(crate) mod discard;
 pub(crate) mod life;
 pub(crate) mod played;
 pub(crate) mod subject;

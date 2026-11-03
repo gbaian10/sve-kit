@@ -103,6 +103,43 @@ fn bp02_074_discards_the_scripted_random_card_from_the_opponents_hand() {
 }
 
 #[test]
+fn opponent_random_discard_triggers_light_path_for_the_discarding_player() {
+    let mut initial = position(&[]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP02-074"}]);
+    initial["players"]["P2"]["zones"]["hand"] = json!([
+        {"id":"light","card":"BP01-170"},{"id":"hidden","card":"BP01-171"}
+    ]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([
+        {"id":"drawn","card":"BP01-171"},{"id":"spare","card":"BP01-171"}
+    ]);
+    let script = json!({"random_selections":[{"n":1_u8,"from":"P2.hand","result":["light"]}]});
+    let mut board = game(&initial, &script);
+    play(&mut board, "source");
+    let state = board.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["cemetery"], json!(["light"]));
+    assert_eq!(
+        state["P2"]["hand"],
+        json!(["hidden", "drawn"]),
+        "the discarded card's controller draws"
+    );
+    assert_eq!(state["P2"]["deck"], json!(["spare"]));
+    assert_eq!(
+        state["P1"]["hand"],
+        json!([]),
+        "the random discard's initiator does not draw"
+    );
+    let opponent = board.projection(View::P1).unwrap();
+    assert!(
+        !opponent["known_cards"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|card| card["id"] == "hidden" || card["id"] == "drawn"),
+        "the unselected hand card and later draw remain private"
+    );
+}
+
+#[test]
 fn bp15_114_places_the_nectar_whose_play_discards_two_random_cards() {
     let mut initial = position(&["a", "b", "c"]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"base","card":"BP15-113"}]);

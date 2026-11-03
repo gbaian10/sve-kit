@@ -913,7 +913,12 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
             || is_printed_quick(ability));
     let ex_trigger = triggers::ex_phase(ability);
     let played_trigger = filter(ability).is_some();
-    if (ability.active_zones != [zones] && !zone_activation && !ex_trigger && !played_trigger)
+    let hand_discard_trigger = triggers::hand_discard(ability);
+    if (ability.active_zones != [zones]
+        && !zone_activation
+        && !ex_trigger
+        && !played_trigger
+        && !hand_discard_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
         || !ability.event_captures.is_empty()

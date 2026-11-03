@@ -1,0 +1,58 @@
+cards:
+  BP15-061:
+    abilities:
+      - auto:
+          do:
+            - pay:
+                cost:
+                  act_self: true
+                do:
+                  - draw:
+                      n: 1
+          on:
+            discarded:
+              from: hand
+              who: self
+        line: 1
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: ドラゴン
+                  in: seen
+                  orig_cost_ge: 7
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

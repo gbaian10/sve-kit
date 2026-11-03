@@ -697,3 +697,6 @@ mod removal_immunity;
 mod equipment;
 #[path = "card/material_power.rs"]
 mod material_power;
+
+#[path = "card/discard_event.rs"]
+mod discard_event;

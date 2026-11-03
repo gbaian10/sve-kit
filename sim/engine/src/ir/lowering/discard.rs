@@ -5,6 +5,7 @@ use super::{
     Action, Binding, BodyContext, Bool, Cardinality, Expr, Int, LoweringError, Nat, PlayerRef,
     PlayerRelation, PlayerSet, Selector, TextQuantifier, ast, unsupported,
 };
+use crate::ir::events::discard::DiscardFilter;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -92,4 +93,27 @@ impl BodyContext<'_> {
         };
         Ok(Action::Discard { player, mode })
     }
+}
+
+pub(super) fn subscription(
+    discard: &ast::DiscardSubscription,
+    event_id: u64,
+    scope: super::ScopeId,
+    path: &str,
+) -> Result<super::EventPattern, LoweringError> {
+    if discard.reference.is_some() && matches!(discard.who, Some(ast::EntryPlayer::Opponent)) {
+        return Err(unsupported(path));
+    }
+    let event = Binding::new(event_id, scope);
+    Ok(super::EventPattern::Discard {
+        binding: event,
+        predicate: DiscardFilter {
+            own: discard
+                .who
+                .as_ref()
+                .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+            itself: discard.reference.is_some(),
+        }
+        .predicate(event),
+    })
 }
