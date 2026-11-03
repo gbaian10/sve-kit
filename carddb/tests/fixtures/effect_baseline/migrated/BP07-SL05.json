@@ -1,0 +1,123 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "macro",
+        "name": "guard"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "look",
+            "count": 4,
+            "bind": "seen"
+          },
+          {
+            "op": "select",
+            "select": {
+              "from": "seen",
+              "trait": "自然"
+            },
+            "min": 0,
+            "max": 2,
+            "bind": "chosen"
+          },
+          {
+            "op": "move",
+            "subjects": "chosen",
+            "to": "ex",
+            "bind": "placed"
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "op": "select",
+                "select": {
+                  "difference": [
+                    "seen",
+                    "placed"
+                  ]
+                },
+                "min": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "placed"
+                    ]
+                  }
+                },
+                "max": {
+                  "count": {
+                    "difference": [
+                      "seen",
+                      "placed"
+                    ]
+                  }
+                },
+                "bind": "ordered",
+                "order": true
+              },
+              {
+                "op": "move",
+                "subjects": "ordered",
+                "to": "deck",
+                "position": "bottom"
+              }
+            ]
+          }
+        ]
+      },
+      "event": "evolve",
+      "subject": "self"
+    },
+    {
+      "line": 3,
+      "kind": "activated",
+      "body": {
+        "op": "modify",
+        "subjects": "target.1",
+        "power": 2
+      },
+      "targets": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "field",
+            "type": "follower",
+            "trait": "自然"
+          },
+          "min": 1,
+          "max": 1
+        }
+      ],
+      "cost_selections": [
+        {
+          "key": "1",
+          "select": {
+            "side": "self",
+            "zone": "field",
+            "name": "ナテラの大樹"
+          },
+          "min": 2,
+          "max": 2
+        }
+      ],
+      "costs": [
+        {
+          "op": "banish",
+          "subjects": "cost.1"
+        }
+      ]
+    }
+  ]
+}
