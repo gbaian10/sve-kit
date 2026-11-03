@@ -1,37 +1,4 @@
 cards:
-  BP16-036:
-    abilities:
-      - body:
-          max:
-            else: 1
-            if:
-              read: self.turn.evolutions
-            then: 2
-          min: 1
-          modes:
-            - op: create
-              to: field
-              tokens:
-                - count: 1
-                  name: スティールナイト
-                - count: 1
-                  name: シールドガーディアン
-                - count: 1
-                  name: ナイト
-            - hp: 1
-              op: modify
-              power: 1
-              subjects:
-                side: self
-                trait: 兵士
-                type: follower
-                where:
-                  read: item.token
-                zone: field
-          op: choice
-        kind: spell
-        line: 1
-    status: complete
   BP16-049:
     abilities:
       - body:
@@ -89,50 +56,6 @@ cards:
         kind: trigger
         line: 2
         subject: self
-    status: complete
-  BP16-082:
-    abilities:
-      - body:
-          name: bane
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          condition:
-            args:
-              - count:
-                  side: self
-                  zone: cemetery
-              - 5
-            fn: ge
-          keywords:
-            - storm
-          op: aura
-          subjects: self
-        kind: static
-        line: 2
-      - body:
-          op: seq
-          steps:
-            - bind: discarded
-              by: opponent
-              max: 1
-              min: 1
-              op: select
-              select:
-                side: opponent
-                zone: hand
-            - op: discard
-              subjects: discarded
-        event: deal_damage
-        kind: trigger
-        line: 3
-        subject: self
-        trigger_if:
-          args:
-            - read: self.is_active
-            - read: event.to_opposing_leader
-          fn: and
     status: complete
   BP16-SL08:
     abilities:

@@ -1,0 +1,34 @@
+cards:
+  BP16-018:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      history:
+                        event: evolved
+                        who: self
+                        window: this_turn
+                    upto: 2
+                n: 1
+                options:
+                  - - life:
+                        delta: 2
+                        who: self
+                  - - draw:
+                        n: 1
+                        who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,47 @@
+cards:
+  BP14-099:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                result: milled
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: milled
+                          view: before
+                        not_class: ビショップ
+                    op: ge
+                    right: 1
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
