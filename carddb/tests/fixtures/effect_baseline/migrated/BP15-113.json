@@ -1,0 +1,39 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "self.leader.life"
+            },
+            10
+          ],
+          "fn": "le"
+        },
+        "keywords": [
+          "drain"
+        ],
+        "op": "aura",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}

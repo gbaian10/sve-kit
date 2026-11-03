@@ -691,6 +691,8 @@ fn supported(code: &str) -> bool {
             | "discard.chosen"
             | "shape.DiscardMode.All"
             | "discard.all"
+            | "shape.DiscardMode.Random"
+            | "discard.random"
             | "internal.ZoneKind.Hand"
             | "shape.Action.Reveal"
             | "action.reveal"
