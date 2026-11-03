@@ -633,3 +633,54 @@ fn hand_exchange_body_can_destroy_a_follower_and_enqueue_its_lastword_after_paym
         json!(["lastword-draw"])
     );
 }
+
+#[test]
+fn exchange_name_contains_keeps_its_filter_and_rejects_unmatched_materials() {
+    let program = lower(
+        &candidate(
+            "unit-spell",
+            json!({
+                "optional_cost":{"act":{"sel":{"who":"self","zone":"field","name_contains":"follower"},"n":1},"result":"exchange"},
+                "optional_cost_delta":-3
+            }),
+            true,
+        ),
+        4,
+    );
+    let mut initial = initial("unit-spell", "field", 1, 1);
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"wrong","card":"unit-amulet"}));
+    let mut game = position(&program, &initial, 4, "unit-spell");
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    let accepted = start(&mut game);
+    let question = materials(&mut game, &accepted);
+    let InputDomain::CostMaterials(domain) = &question.domain else {
+        panic!("materials")
+    };
+    assert_eq!(domain.members.len(), 1);
+    assert_eq!(domain.members[0].card.as_deref(), Some("unit-follower"));
+    let before = game.projection(View::Referee).unwrap();
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::CostMaterials(vec![1]),
+    )
+    .unwrap_err();
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::CostMaterials(vec![0]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0);
+    assert_eq!(state["objects"]["m0"]["acted"], true);
+    assert_eq!(state["objects"]["wrong"]["acted"], false);
+    assert_eq!(state["P1"]["hand"], json!(["d"]));
+}

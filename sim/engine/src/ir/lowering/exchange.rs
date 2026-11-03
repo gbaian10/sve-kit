@@ -170,21 +170,11 @@ fn materials(
         minimum: Nat(material.n),
         maximum: Some(Nat(material.n)),
     };
-    let mut selector = costs::query(&material.sel, allocator, path)?;
-    if let Selector::Zone {
-        binding: candidate,
-        predicate,
-        ..
-    } = &mut selector
-    {
-        *candidate = Binding::new(allocator.id(path)?, allocator.scope(path)?);
-        **predicate = super::search::object_filter(
-            material.sel.kind.as_ref(),
-            material.sel.r#trait.as_deref(),
-            material.sel.name.as_deref(),
-            *candidate,
-        );
-    }
+    costs::query(&material.sel, allocator, path)?;
+    let selector = costs::public_query(
+        &material.sel,
+        Binding::new(allocator.id(path)?, allocator.scope(path)?),
+    );
     decision(
         binding,
         SelectionConstraint {
