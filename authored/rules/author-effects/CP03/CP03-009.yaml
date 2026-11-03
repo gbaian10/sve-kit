@@ -1,0 +1,54 @@
+cards:
+  CP03-009:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - grant:
+                abilities:
+                  - attack_time:
+                      do:
+                        - if:
+                            cond:
+                              cmp:
+                                left:
+                                  history_count:
+                                    event: attacked
+                                    sel:
+                                      kind: follower
+                                      trait: アクアフォース
+                                    who: self
+                                    window: this_turn
+                                op: eq
+                                right: 3
+                            then:
+                              - damage:
+                                  n: 2
+                                  to: enemy
+                      targets:
+                        - bind: enemy
+                          from:
+                            kind: follower
+                            who: opp
+                            zone: field
+                          n: 1
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
