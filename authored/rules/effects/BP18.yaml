@@ -101,41 +101,6 @@ cards:
               type: follower
               zone: field
     status: complete
-  BP18-P35:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 1
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          hp: 2
-          op: modify
-          subjects: self.leader
-        cost_selections:
-          - key: "1"
-            max: 2
-            min: 2
-            select:
-              side: self
-              where:
-                args:
-                  - read: item.cost
-                  - 2
-                fn: eq
-              zone: hand
-        costs:
-          - op: reveal
-            subjects: cost.1
-            to: all
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
   BP18-SL16:
     abilities:
       - body:
