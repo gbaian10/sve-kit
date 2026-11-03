@@ -317,8 +317,18 @@ impl BodyContext<'_> {
                 });
             }
         }
+        // Only numeric modification reaches EX followers; other actions keep the field boundary.
+        let subjects = match &modification.on {
+            ast::Objects::Zone(query) if matches!(query.zone, ast::Zone::Ex) => {
+                self.zone_objects(query, ZoneKind::Ex, path)?
+            }
+            ast::Objects::This(_)
+            | ast::Objects::Bound(_)
+            | ast::Objects::Zone(_)
+            | ast::Objects::Follow { .. } => self.objects(&modification.on, path)?,
+        };
         Ok(Action::Modify {
-            subjects: self.objects(&modification.on, path)?,
+            subjects,
             patch: combined(patches, path)?,
             expires: duration(modification.until.as_ref(), path)?,
             source: EffectReference::CurrentInstallation {},
