@@ -1,0 +1,54 @@
+cards:
+  BP07-003:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                  - assail
+                on:
+                  token: true
+                  trait: 妖精
+                  who: self
+                  zone: field
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 2
+          on:
+            enter_field:
+              sel:
+                token: true
+                trait: 妖精
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリーウィスプ
+            - buff:
+                on:
+                  token: true
+                  trait: 妖精
+                  who: self
+                  zone: field
+                power: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-03"
+    token_sources:
+      - card: BP07-T04
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
