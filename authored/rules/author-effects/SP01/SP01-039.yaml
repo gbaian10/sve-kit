@@ -1,0 +1,40 @@
+cards:
+  SP01-039:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_sum:
+                        event: life_changed
+                        field: delta
+                        where:
+                          direction: up
+                        who: self
+                        window: this_turn
+                    op: ge
+                    right: 4
+                then:
+                  - destroy:
+                      ref: enemy
+                  - draw:
+                      n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

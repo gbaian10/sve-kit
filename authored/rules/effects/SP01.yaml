@@ -33,32 +33,3 @@ cards:
                   subjects: discarded
         event: enter
         subject: self
-  SP01-U23:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: ge
-            args:
-              - read: self.turn.leader_hp_increased
-              - 4
-          then:
-            op: seq
-            steps:
-              - op: destroy
-                subjects: target.1
-              - op: draw
-                count: 1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1

@@ -1127,9 +1127,9 @@ fn check_nodes(
                 }
             }
             Node::Control {
-                control: Control::Pay { costs, on_paid, .. },
+                control: control @ Control::Pay { on_paid, .. },
             } => {
-                optional::check_costs(costs, ability_source)?;
+                optional::check_costs(control, ability_source)?;
                 check_nodes(game, &on_paid.steps, source, ability_source)?;
             }
             Node::Control {

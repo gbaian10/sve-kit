@@ -80,6 +80,8 @@ mod field_actions;
 
 #[path = "card/history_turn.rs"]
 mod history_turn;
+#[path = "card/life_history.rs"]
+mod life_history;
 
 #[path = "card/conditions.rs"]
 mod conditions;

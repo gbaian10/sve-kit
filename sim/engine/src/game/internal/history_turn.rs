@@ -2,11 +2,12 @@
 
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
 use crate::ir::PlayerId;
+use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
-use crate::ir::history_turn::{PlayedBy, played_by};
+use crate::ir::history_turn::{PlayedBy, life_plan, life_sum_plan, played_by};
 use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
-use crate::ir::{CardKind, CardName, ClassId, HistoryCount, TraitId};
+use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, TraitId};
 use crate::ir::{ExecutionRef, HistoryQuery, PlayerRef, Requirement, Requirements};
 use alloc::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
@@ -22,10 +23,19 @@ pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requ
                     .split_once("/query/pattern/")
                     .map(|(read, _)| read)
             })
+            .or_else(|| location.ir_path.strip_suffix("/query/predicate"))
+            .or_else(|| {
+                location
+                    .ir_path
+                    .split_once("/query/predicate/")
+                    .map(|(read, _)| read)
+            })
             .is_some_and(|read| {
                 requirements.required.iter().any(|other| {
-                    other.capability.code == "read.history.count"
-                        && other.locations.iter().any(|at| at.ir_path == read)
+                    matches!(
+                        other.capability.code,
+                        "read.history.count" | "read.history.sum"
+                    ) && other.locations.iter().any(|at| at.ir_path == read)
                 })
             })
     })
@@ -113,6 +123,19 @@ pub(super) fn subjects(
     query: &HistoryQuery,
     count: HistoryCount,
 ) -> Result<Nat> {
+    if let Some(filter) = life_plan(query) {
+        if count != HistoryCount::Facts {
+            return Err(unsupported("life history subject count"));
+        }
+        return u64::try_from(life_counter(
+            execution,
+            game,
+            filter,
+            "leader_hp_decreased",
+        )?)
+        .map(Nat)
+        .map_err(invalid);
+    }
     let Some((event, filter)) = subject_plan(query) else {
         if count != HistoryCount::Facts {
             return Err(unsupported("played history subject count"));
@@ -188,4 +211,37 @@ pub(super) fn subjects(
         HistoryCount::Facts => facts,
         HistoryCount::Subjects => u64::try_from(identities.len()).map_err(invalid)?,
     }))
+}
+
+fn life_counter(
+    execution: &Execution,
+    game: &Game,
+    filter: LifeFilter,
+    counter: &str,
+) -> Result<i64> {
+    let player = match filter.own {
+        Some(true) => PlayerRef::Controller {},
+        Some(false) => opponent(),
+        None => return Err(unsupported("life history player")),
+    };
+    let seat = seat_name(execution.player(game, &player)?)?;
+    let value = game
+        .state
+        .counters
+        .get(&format!("{seat}.{counter}"))
+        .copied()
+        .unwrap_or_default();
+    if value < 0 {
+        return Err(invalid("negative life history"));
+    }
+    Ok(value)
+}
+
+pub(super) fn life_sum(
+    execution: &Execution,
+    game: &Game,
+    query: &NumericHistoryQuery,
+) -> Result<Int> {
+    let filter = life_sum_plan(query).ok_or_else(|| unsupported("life history sum"))?;
+    life_counter(execution, game, filter, "leader_hp_increased").map(Int)
 }

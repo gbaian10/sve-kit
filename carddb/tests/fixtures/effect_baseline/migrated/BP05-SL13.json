@@ -1,0 +1,69 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "self.is_active"
+            },
+            {
+              "args": [
+                {
+                  "read": "self.turn.leader_hp_decreased"
+                },
+                0
+              ],
+              "fn": "gt"
+            }
+          ],
+          "fn": "and"
+        },
+        "keywords": [
+          "storm"
+        ],
+        "op": "aura",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "amount": {
+              "read": "self.turn.leader_hp_decreased"
+            },
+            "op": "damage",
+            "subjects": "opponent.leader"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "read": "self.leader.life"
+                },
+                7
+              ],
+              "fn": "eq"
+            },
+            "op": "if",
+            "then": {
+              "hp": 2,
+              "op": "modify",
+              "power": 2,
+              "subjects": "self"
+            }
+          }
+        ]
+      },
+      "event": "attack",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

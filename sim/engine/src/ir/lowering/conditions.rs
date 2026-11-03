@@ -488,6 +488,35 @@ impl BodyContext<'_> {
             .who
             .as_ref()
             .map(|side| matches!(side, ast::LeaderSide::Controller));
+        if matches!(history.event, ast::HistoryEvent::LifeChanged) {
+            if history.who.is_none()
+                || history
+                    .r#where
+                    .as_ref()
+                    .is_none_or(|filter| !matches!(filter.direction, ast::LifeDirection::Down))
+            {
+                return Err(unsupported(path));
+            }
+            if history.sel.is_some()
+                || history.from.is_some()
+                || history.to.is_some()
+                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+            {
+                return Err(unsupported(path));
+            }
+            let filter = super::super::events::life::LifeFilter {
+                own,
+                up: Some(false),
+                own_turn: None,
+            };
+            return Ok(super::super::history_turn::life_query(
+                Binding::new(id, self.scope),
+                filter,
+            ));
+        }
+        if history.r#where.is_some() {
+            return Err(unsupported(path));
+        }
         if matches!(history.event, ast::HistoryEvent::Played) {
             if history.sel.is_some()
                 || history.from.is_some()
@@ -531,7 +560,9 @@ impl BodyContext<'_> {
                     None => SubjectHistoryKind::Leave,
                 }
             }
-            ast::HistoryEvent::Played => return Err(unsupported(path)),
+            ast::HistoryEvent::Played | ast::HistoryEvent::LifeChanged => {
+                return Err(unsupported(path));
+            }
         };
         if !matches!(history.event, ast::HistoryEvent::Moved)
             && (history.from.is_some() || history.to.is_some())
@@ -634,6 +665,39 @@ impl BodyContext<'_> {
         })))
     }
 
+    fn history_sum_number(
+        &mut self,
+        history_sum: &ast::LifeHistorySum,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        if !matches!(history_sum.r#where.direction, ast::LifeDirection::Up) {
+            return Err(unsupported(path));
+        }
+        let ast::LifeHistoryEvent::LifeChanged = history_sum.event;
+        let ast::ThisTurn::ThisTurn = history_sum.window;
+        let ast::LifeHistoryField::Delta = history_sum.field;
+        let event = Binding::new(self.allocator.id(path)?, self.scope);
+        let query = super::super::history_turn::life_query(
+            event,
+            super::super::events::life::LifeFilter {
+                own: Some(matches!(history_sum.who, ast::LeaderSide::Controller)),
+                up: Some(true),
+                own_turn: None,
+            },
+        );
+        let super::super::EventPattern::LifeChange { predicate, .. } = query.pattern else {
+            return Err(unsupported(path));
+        };
+        Ok(Expr::Live(Box::new(IntRead::HistorySum {
+            query: super::super::NumericHistoryQuery::LifeDelta {
+                event,
+                predicate,
+                window: query.window,
+                include_execution: query.include_execution,
+            },
+        })))
+    }
+
     pub(super) fn number(
         &mut self,
         value: &ast::Number,
@@ -679,6 +743,7 @@ impl BodyContext<'_> {
                 let ast::SelectionTime::Selection = at;
                 self.selected_stat(selection, value, path)
             }
+            ast::Number::HistorySum { history_sum } => self.history_sum_number(history_sum, path),
             ast::Number::LeaderLife { leader_life } => {
                 Ok(player_resource(*leader_life, PlayerResource::Life))
             }

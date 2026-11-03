@@ -3,7 +3,8 @@
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
 use crate::ir::{
-    Action, Instruction, Int, LifeChangeEvent, NumericChange, Quantity, QuantityUnit, SnapshotId,
+    Action, Expr, Instruction, Int, LifeChangeEvent, NumericChange, PlayerRef, Quantity,
+    QuantityUnit, SnapshotId,
 };
 
 #[expect(
@@ -85,4 +86,8 @@ impl Game {
             .insert(instruction.receipt, InstructionOutcome::Life(outcome));
         Ok(())
     }
+}
+
+pub(super) const fn is_cost(action: &Action) -> bool {
+    matches!(action, Action::Life { player: PlayerRef::Controller {}, change: NumericChange::Add { amount: Expr::Literal(Int(delta)) } } if *delta <= 0)
 }

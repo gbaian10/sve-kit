@@ -1,0 +1,43 @@
+cards:
+  BP05-069:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            crimson: true
+      - attack_time:
+          do:
+            - damage:
+                n:
+                  history_count:
+                    event: life_changed
+                    where:
+                      direction: down
+                    who: self
+                    window: this_turn
+                to:
+                  leaders: opponents
+            - if:
+                cond:
+                  leader_life:
+                    eq: 7
+                    who: self
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

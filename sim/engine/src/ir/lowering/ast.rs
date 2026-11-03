@@ -1331,6 +1331,9 @@ pub(super) enum Number {
     HistoryCount {
         history_count: HistoryQuery,
     },
+    HistorySum {
+        history_sum: LifeHistorySum,
+    },
     LeaderLife {
         leader_life: LeaderSide,
     },
@@ -1416,10 +1419,39 @@ pub(super) struct HistoryQuery {
     pub from: Option<HistoryOrigin>,
     pub to: Option<DepartureDestination>,
     pub at_least: Option<u64>,
+    pub r#where: Option<LifeHistoryFilter>,
 }
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct LifeHistoryFilter {
+    pub direction: LifeDirection,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct LifeHistorySum {
+    pub event: LifeHistoryEvent,
+    pub window: ThisTurn,
+    pub who: LeaderSide,
+    pub r#where: LifeHistoryFilter,
+    pub field: LifeHistoryField,
+}
+#[derive(Deserialize)]
+pub(super) enum LifeHistoryEvent {
+    #[serde(rename = "life_changed")]
+    LifeChanged,
+}
+#[derive(Deserialize)]
+pub(super) enum LifeHistoryField {
+    #[serde(rename = "delta")]
+    Delta,
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum HistoryEvent {
+    LifeChanged,
     Played,
     Attacked,
     Evolved,

@@ -17,7 +17,14 @@ pub(super) struct OptionalState {
     pub(super) accepted: Option<bool>,
 }
 
-pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()> {
+pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<()> {
+    let Control::Pay {
+        costs, optional, ..
+    } = control
+    else {
+        return Err(unsupported("optional payment control"));
+    };
+    let required = *optional == PaymentOptionality::Required;
     let CostSpec::Ordered { steps } = costs else {
         return Err(unsupported("optional cost alternatives"));
     };
@@ -34,6 +41,7 @@ pub(super) fn check_costs(costs: &CostSpec, origin: &AbilitySource) -> Result<()
             || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount: Expr::Literal(Int(amount)) } if *amount >= 0)
+                || (required && super::super::life::is_cost(&instruction.action))
                 || super::hand_payment::check_cost(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
@@ -76,11 +84,13 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     if super::material::source_field_cost(&step.instruction.action) {
                         return Err(unsupported("source costs require a resolution payment"));
                     }
-                    if !matches!(step.instruction.action, Action::Resource { .. })
-                        && !super::hand_payment::check_cost(&step.instruction.action)
-                        && !super::material::check_cost(&step.instruction.action, play)
-                        && !super::super::counters::check_cost(&step.instruction.action, play)
-                    {
+                    let supported = matches!(step.instruction.action, Action::Resource { .. })
+                        || (optional_payment::required(body)
+                            && super::super::life::is_cost(&step.instruction.action))
+                        || super::hand_payment::check_cost(&step.instruction.action)
+                        || super::material::check_cost(&step.instruction.action, play)
+                        || super::super::counters::check_cost(&step.instruction.action, play);
+                    if !supported {
                         return Err(unsupported("payment material parameter"));
                     }
                 }

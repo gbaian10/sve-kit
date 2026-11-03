@@ -522,7 +522,7 @@ impl Execution {
                         PlayerResource::Sep => player.sep,
                     }))
                 }
-                IntRead::HistorySum { .. } => Err(unsupported("signed read")),
+                IntRead::HistorySum { query } => super::history_turn::life_sum(self, game, query),
             },
             Expr::Frozen(frozen) => match frozen.as_ref() {
                 IntFrozen::DamageAmount { event } => {

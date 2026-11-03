@@ -170,3 +170,58 @@ pub(crate) fn subject_plan(query: &HistoryQuery) -> Option<(SubjectHistoryKind, 
     }
     None
 }
+
+pub(crate) fn life_query(
+    event: Binding<super::LifeChangeEvent>,
+    filter: super::events::life::LifeFilter,
+) -> HistoryQuery {
+    HistoryQuery {
+        pattern: EventPattern::LifeChange {
+            binding: event,
+            predicate: filter.predicate(event),
+        },
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: None,
+        },
+        include_execution: InclusionPolicy::IncludeAll {},
+    }
+}
+
+fn life_filter(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> {
+    let EventPattern::LifeChange { binding, predicate } = &query.pattern else {
+        return None;
+    };
+    let filter = super::events::life::LifeFilter::parse(*binding, predicate)?;
+    (life_query(*binding, filter) == *query).then_some(filter)
+}
+
+pub(crate) fn life_plan(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> {
+    life_filter(query).filter(|filter| {
+        filter.own.is_some() && filter.up == Some(false) && filter.own_turn.is_none()
+    })
+}
+
+pub(crate) fn life_sum_plan(
+    query: &super::NumericHistoryQuery,
+) -> Option<super::events::life::LifeFilter> {
+    let super::NumericHistoryQuery::LifeDelta {
+        event,
+        predicate,
+        window,
+        include_execution,
+    } = query
+    else {
+        return None;
+    };
+    let filter = life_filter(&HistoryQuery {
+        pattern: EventPattern::LifeChange {
+            binding: *event,
+            predicate: predicate.clone(),
+        },
+        window: window.clone(),
+        include_execution: *include_execution,
+    })?;
+    (filter.up == Some(true) && filter.own.is_some() && filter.own_turn.is_none()).then_some(filter)
+}
