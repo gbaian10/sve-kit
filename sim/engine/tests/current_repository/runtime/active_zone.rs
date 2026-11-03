@@ -132,7 +132,25 @@ fn cp04_007_triggers_when_it_is_placed_into_ex() {
     let mut game = game(&initial);
     let step = game.play_internal_card("source", actor()).unwrap();
     finish(&mut game, step);
-    triggers(&mut game);
+    let mut labels = Vec::new();
+    loop {
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let Some(question) = game.internal_pending_choice().unwrap() else {
+            break;
+        };
+        let InputDomain::Pending(options) = &question.domain else {
+            panic!("pending ability expected")
+        };
+        labels.push(options[0].event.clone());
+        let answered = game
+            .answer_internal_card(question.actor, question.token, Answer::Pending(options[0].handle))
+            .unwrap();
+        finish(&mut game, answered);
+    }
+    // The waiting source is in EX, so the public label must not point at the field.
+    assert_eq!(labels.last().map(String::as_str), Some("EnterEx while source at slot 1"));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["ex"], json!(["anemone"]));
     assert_eq!(state["P2"]["leader"]["life"], 19_u8, "its EX ability damages the opponent");

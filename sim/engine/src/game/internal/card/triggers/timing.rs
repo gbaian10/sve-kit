@@ -138,7 +138,8 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
                 event.characters.names
             ))
         }
-        Event::EnterEx { .. } => Ok(format!("EnterEx while source at field slot {position}")),
+        // The source may be a field observer or the arriving EX card itself.
+        Event::EnterEx { .. } => Ok(format!("EnterEx while source at slot {position}")),
         Event::StatChange { .. } => Ok(format!("StatChange at field slot {position}")),
         Event::Posture { event } => Ok(format!(
             "Posture {:?} at field slot {position}",
