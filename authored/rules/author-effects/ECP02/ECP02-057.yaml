@@ -1,0 +1,52 @@
+cards:
+  ECP02-057:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - auto:
+          aggregation: batch
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            dealt_damage:
+              during:
+                turn: self
+              recipient:
+                kind: follower
+                who: opp
+                zone: field
+              sel:
+                trait: デレマス
+              who: self
+              zone: field
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                ref: revived
+                result: returned
+                to: field
+          targets:
+            - bind: revived
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: パッション
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
