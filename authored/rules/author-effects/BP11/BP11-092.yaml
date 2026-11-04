@@ -1,0 +1,65 @@
+cards:
+  BP11-092:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                during:
+                  cause: rule
+                  phase: start
+                  who: self
+                on: this
+                what: stand
+      - auto:
+          do:
+            - stand: this
+          on:
+            life_changed:
+              direction: up
+              who: self
+        line: 2
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - choice:
+                exclude_chosen: this_turn
+                n: 1
+                options:
+                  - - damage:
+                        n: 3
+                        to: enemy
+                  - - buff:
+                        hp: 1
+                        on: ally
+                        power: 1
+                  - - create:
+                        n: 1
+                        to: field
+                        token: ホーリータイガー
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
