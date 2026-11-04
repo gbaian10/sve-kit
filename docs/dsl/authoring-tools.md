@@ -305,6 +305,10 @@ apply:
 
 私有看牌後，`choose.from: {in: seen, kind: follower, trait: かげろう, except: {in: seen, name: ドラゴンナイト アリフ}}` 可排除同一批已觀察牌中的單一字面名字，並保留其餘種類、特徵條件。它與排除持有者同名的 `not_same_name_as_this` 不同；此例的持有者是進化後異名卡。`except` 的觀察綁定必須相同、名字非空；不開放公開目標、手牌選卡、搜尋、聯集或分組選卡，也不接受和 `not_same_name_as_this` 合用。未選牌仍沿既有 Look receipt 的成功移動差集與排序流程處理。
 
+移動結果的數值後續可寫 `agg: {of: {in: {follow: placed}}, attr: orig_cost, fn: sum}`（BP13-050）或 `agg: {of: {in: {follow: entered}}, attr: hp, fn: sum}`（BP20-066／PR-548）。生產者限自己的牌庫頂端移動，以及私有 Look 選牌後的移動；`orig_cost` 只讀實際到達 EX 的成員，`hp` 只讀實際入場從者的當前有效體力，包含已生效的數值修正及傷害。數值本身須是這個 `agg`，消費端限 `life.delta` 或同量傷害的 `damage.n`；不開放其他算術包裝、費用／攻擊力、min／max、before、搜尋或建立 token 的結果，也不接受額外集合篩選。
+
+這個讀值沿同次效果明示的移動收據跟隨新世代，逐一檢查要求與實際目的地及目前物件區域；物件換代或離區會拒絕，不改讀新世代或最後已知值。沒有實際成功成員時總和為 0；滿 EX、滿場或放棄入場不把未移動的候選算進去，後續步驟仍正常處理。
+
 ## 寫入與驗證
 
 ```bash

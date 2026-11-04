@@ -1,0 +1,53 @@
+cards:
+  BP20-066:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  trait: 海洋
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: deck
+            - damage:
+                n:
+                  agg:
+                    attr: hp
+                    fn: sum
+                    of:
+                      in:
+                        follow: entered
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

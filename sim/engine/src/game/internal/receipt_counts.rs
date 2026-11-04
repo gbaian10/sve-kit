@@ -5,9 +5,9 @@ use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
     Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MaterialActOutcome,
-    MemberProjection, MoveOutcome, MovementReceipt, NamesRead, NumberRead, ObjectReceipt,
-    ObjectRef, ObjectView, Predicate, QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference,
-    RuntimeObjectView, TraitId, TraitsRead,
+    MemberProjection, MoveOutcome, MovementReceipt, NamesRead, NumberRead, NumericChange,
+    ObjectReceipt, ObjectRef, ObjectView, Predicate, QuantityUnit, ReceiptId, ReceiptLocation,
+    ReceiptReference, RuntimeObjectView, TraitId, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -91,6 +91,8 @@ pub(super) struct DeckReads {
     looks: Vec<Binding<Selector>>,
     moves: BTreeSet<ReceiptId>,
     cemetery: BTreeSet<ReceiptId>,
+    ex: BTreeSet<ReceiptId>,
+    field: BTreeSet<ReceiptId>,
 }
 
 impl DeckReads {
@@ -108,6 +110,20 @@ impl DeckReads {
                         if self.looks.contains(reference));
                 if looked || super::movement::deck_top(&instruction.action).is_some() {
                     self.moves.insert(instruction.receipt);
+                    if let Action::Move { movement, .. } = &instruction.action {
+                        if movement.to
+                            == (MoveDestination::Owners {
+                                zone: OwnerZone::Ex,
+                            })
+                            || matches!(&movement.to, MoveDestination::Shared { zone }
+                            if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
+                        {
+                            self.ex.insert(instruction.receipt);
+                        }
+                        if super::movement::field_move(movement) {
+                            self.field.insert(instruction.receipt);
+                        }
+                    }
                     if matches!(&instruction.action, Action::Move { objects: Selector::Ordered { zone, .. }, movement, .. }
                         if zone.kind == ZoneKind::Deck && zone.player == (PlayerRef::Controller {}) && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
                     {
@@ -119,7 +135,7 @@ impl DeckReads {
         }
     }
 
-    /// Masks an If guard's deck movement conditions once their producers are proven.
+    /// Masks reads only after their deck movement producers are proven.
     pub(super) fn mask(&self, node: &Node) -> Result<Node> {
         let mut inspected = node.clone();
         if let Node::Control {
@@ -127,6 +143,26 @@ impl DeckReads {
         } = &mut inspected
         {
             self.mask_condition(condition)?;
+        }
+        if let Node::Instruction { instruction } = &mut inspected
+            && let Action::Life {
+                change: NumericChange::Add { amount },
+                ..
+            }
+            | Action::Damage {
+                amount: DamageAmount::Uniform { amount },
+                ..
+            } = &mut instruction.action
+            && let Expr::Compute(operation) = amount
+            && let IntOperation::Sum { objects, property } = operation.as_ref()
+            && let Some((id, zone)) = super::aggregates::followed_sum_plan(objects, *property)
+            && match zone {
+                ZoneKind::Ex => self.ex.contains(&id),
+                ZoneKind::Field => self.field.contains(&id),
+                _ => false,
+            }
+        {
+            *amount = Expr::Literal(Int(0));
         }
         if let Node::Instruction { instruction } = &mut inspected
             && let Action::Damage {
