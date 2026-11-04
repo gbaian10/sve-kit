@@ -1,0 +1,49 @@
+cards:
+  CP02-007:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  history:
+                    event: banished
+                    from: ex
+                    sel:
+                      name: 魔法のアイテム
+                    who: self
+                    window: this_turn
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+          on:
+            left_field:
+              ref: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - buff:
+                hp: 1
+                on: friend
+                power: 1
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set
