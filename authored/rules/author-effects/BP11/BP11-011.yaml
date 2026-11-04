@@ -1,0 +1,45 @@
+cards:
+  BP11-011:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - grant:
+                abilities:
+                  - activate:
+                      cost:
+                        act_self: true
+                      do:
+                        - damage:
+                            n: 3
+                            to: enemy
+                        - damage:
+                            n: 1
+                            to:
+                              leader_of: enemy
+                      targets:
+                        - bind: enemy
+                          from:
+                            kind: follower
+                            who: opp
+                            zone: field
+                          n: 1
+                on: fairies
+                until: turn
+          targets:
+            - any: true
+              bind: fairies
+              from:
+                token: true
+                trait: 妖精
+                who: self
+                zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
