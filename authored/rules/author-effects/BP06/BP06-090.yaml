@@ -1,0 +1,63 @@
+cards:
+  BP06-090:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            moved:
+              from:
+                who: self
+                zone: field
+              sel:
+                keyword: ward
+                kind: follower
+              to: cemetery
+        line: 2
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  keyword: ward
+                  kind: follower
+                  not_same_name_as_this: true
+                  orig_cost_le: 5
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: picked_move
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: picked_move
+                      view: before
+                  in: seen
+                to: deck
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
