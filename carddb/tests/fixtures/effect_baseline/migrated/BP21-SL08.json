@@ -1,0 +1,106 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "max": {
+          "else": 1,
+          "if": {
+            "args": [
+              {
+                "count": {
+                  "side": "self",
+                  "trait": "レヴィオン",
+                  "zone": "cemetery"
+                }
+              },
+              5
+            ],
+            "fn": "ge"
+          },
+          "then": 3
+        },
+        "min": 1,
+        "modes": [
+          {
+            "op": "destroy",
+            "subjects": "target.1"
+          },
+          {
+            "amount": 3,
+            "op": "damage",
+            "subjects": "opponent.leader"
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "count": 2,
+                "op": "draw"
+              },
+              {
+                "op": "seq",
+                "steps": [
+                  {
+                    "bind": "discarded",
+                    "by": "self",
+                    "max": 1,
+                    "min": 1,
+                    "op": "select",
+                    "select": {
+                      "side": "self",
+                      "zone": "hand"
+                    }
+                  },
+                  {
+                    "op": "discard",
+                    "subjects": "discarded"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "op": "choice"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "side": "self",
+            "trait": "レヴィオン",
+            "zone": "hand"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "reveal",
+          "subjects": "cost.1",
+          "to": "all"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "modes": [
+            1
+          ],
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

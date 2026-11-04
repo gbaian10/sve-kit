@@ -452,10 +452,14 @@ impl Checker {
             let count = super::modes::play_mode_groups(body);
             if count > 1
                 || (count > 0
-                    && ability
-                        .play
-                        .as_ref()
-                        .is_some_and(|play| !play.parameters.is_empty()))
+                    && ability.play.as_ref().is_some_and(|play| {
+                        !(play.parameters.is_empty()
+                            || (ability.kind == AbilityKind::Triggered
+                                && optional_payment::required(body)
+                                && play.parameters.iter().all(|decision| {
+                                    reveal_payment::field_parameter(ability, decision)
+                                })))
+                    }))
             {
                 return self.reject();
             }

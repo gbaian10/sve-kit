@@ -739,3 +739,6 @@ mod nested_play;
 
 #[path = "card/draw_event.rs"]
 mod draw_event;
+
+#[path = "card/reveal_modes.rs"]
+mod reveal_modes;

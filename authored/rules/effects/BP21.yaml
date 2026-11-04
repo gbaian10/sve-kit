@@ -1,229 +1,224 @@
-format: 1
-kind: effect_set
 cards:
   BP21-016:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
+      - body:
           op: seq
           steps:
-            - op: modify
-              subjects: self
-              keywords:
+            - keywords:
                 - storm
-            - op: draw
-              count: 1
-        event: enter
-        subject: self
+              op: modify
+              subjects: self
+            - count: 1
+              op: draw
         cost_selections:
           - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              trait: 獣
-              not_name: self
-            min: 1
             max: 1
+            min: 1
+            select:
+              not_name: self
+              side: self
+              trait: 獣
+              type: follower
+              zone: field
         costs:
           - op: move
             subjects: cost.1
             to: hand
-  BP21-P38:
-    status: complete
-    abilities:
-      - line: 1
+        event: enter
         kind: trigger
-        body:
+        line: 1
+        subject: self
+    status: complete
+  BP21-P38:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 5
+              op: damage
               subjects: target.1
-              amount: 5
-            - op: modify
+            - hp: 2
+              op: modify
               subjects: self.leader
-              hp: 2
         event: ex_enter
+        kind: trigger
+        limit: 1
+        limit_at: trigger
+        line: 1
         subject:
           side: self
-          zone: ex
           where:
-            fn: ne
             args:
               - read: item.class
               - ドラゴン
-        limit: 1
-        limit_at: trigger
+            fn: ne
+          zone: ex
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: per
-          count: 2
+              zone: field
+      - body:
           body:
             op: move
             subjects:
               side: self
-              zone: deck
               top: 1
+              zone: deck
             to: ex
+          count: 2
+          op: per
         event: enter
-        subject: self
-  BP21-P56:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
-          op: draw
-          count: 1
-        event: hp_increase
+        line: 2
         subject: self
+    status: complete
+  BP21-P56:
+    abilities:
+      - body:
+          count: 1
+          op: draw
+        event: hp_increase
+        kind: trigger
         limit: 1
         limit_at: trigger
-      - line: 2
-        kind: activated
-        body:
+        line: 1
+        subject: self
+      - body:
+          hp: 1
           op: modify
           subjects: self.leader
-          hp: 1
-        play_if:
-          fn: gt
-          args:
-            - count:
-                side: self
-                zone: field
-                type: follower
-                trait: 学院
-                other: true
-            - 0
         costs:
           - op: act
             subjects: self
-  BP21-P60:
-    status: complete
-    abilities:
-      - line: 1
         kind: activated
-        body:
+        line: 2
+        play_if:
+          args:
+            - count:
+                other: true
+                side: self
+                trait: 学院
+                type: follower
+                zone: field
+            - 0
+          fn: gt
+    status: complete
+  BP21-P60:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 1
+              op: damage
               subjects: opponent.leader
-              amount: 1
-            - op: modify
+            - hp: 1
+              op: modify
               subjects: self.leader
-              hp: 1
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: field
               type: amulet
-            min: 1
-            max: 1
+              zone: field
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: cost.1
             to: cemetery
-  BP21-P70:
-    status: complete
-    abilities:
-      - line: 1
         kind: activated
+        line: 1
+    status: complete
+  BP21-P70:
+    abilities:
+      - active_zones:
+          - ex
         body:
-          op: if
           condition:
-            fn: ge
             args:
               - count:
-                  side: self
-                  zone: field
-                  type: follower
                   keyword: guard
+                  side: self
+                  type: follower
+                  zone: field
               - 3
+            fn: ge
+          op: if
           then:
-            op: modify
-            subjects: target.1
-            power:
-              if:
-                fn: eq
-                args:
-                  - count:
-                      side: self
-                      zone: field
-                      type: follower
-                      keyword: guard
-                  - 5
-              then: 2
-              else: 1
             hp:
+              else: 1
               if:
-                fn: eq
                 args:
                   - count:
-                      side: self
-                      zone: field
-                      type: follower
                       keyword: guard
+                      side: self
+                      type: follower
+                      zone: field
                   - 5
+                fn: eq
               then: 2
+            op: modify
+            power:
               else: 1
-        active_zones:
-          - ex
+              if:
+                args:
+                  - count:
+                      keyword: guard
+                      side: self
+                      type: follower
+                      zone: field
+                  - 5
+                fn: eq
+              then: 2
+            subjects: target.1
+        costs:
+          - amount: 0
+            op: pp
+        kind: activated
+        limit: 1
+        line: 1
         targets:
           - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              keyword: guard
-            min: 1
             max: 1
-        costs:
-          - op: pp
-            amount: 0
-        limit: 1
-  BP21-PR04:
+            min: 1
+            select:
+              keyword: guard
+              side: self
+              type: follower
+              zone: field
     status: complete
+  BP21-PR04:
     abilities:
-      - line: 1
-        kind: trigger
-        body:
+      - body:
+          max: 1
+          min: 0
           op: search
           select:
-            zone: deck
             side: self
             where:
-              fn: and
               args:
-                - fn: eq
-                  args:
+                - args:
                     - read: item.cost
                     - 1
-                - fn: eq
-                  args:
+                  fn: eq
+                - args:
                     - read: item.class
                     - ロイヤル
-          min: 0
-          max: 1
+                  fn: eq
+              fn: and
+            zone: deck
           to: ex
         event: enter
+        kind: trigger
+        line: 1
         subject: self
-      - line: 2
-        kind: activated
-        body:
+      - body:
           op: seq
           steps:
             - op: act
@@ -231,80 +226,20 @@ cards:
             - op: box
               subjects: target.1
               until: next-controller-end
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
         costs:
-          - op: pp
-            amount: 0
+          - amount: 0
+            op: pp
+        kind: activated
         limit: 1
-  BP21-SL08:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: choice
-          min: 1
-          max:
-            if:
-              fn: ge
-              args:
-                - count:
-                    side: self
-                    zone: cemetery
-                    trait: レヴィオン
-                - 5
-            then: 3
-            else: 1
-          modes:
-            - op: destroy
-              subjects: target.1
-            - op: damage
-              subjects: opponent.leader
-              amount: 3
-            - op: seq
-              steps:
-                - op: draw
-                  count: 2
-                - op: seq
-                  steps:
-                    - op: select
-                      select:
-                        side: self
-                        zone: hand
-                      by: self
-                      min: 1
-                      max: 1
-                      bind: discarded
-                    - op: discard
-                      subjects: discarded
-        event: enter
-        subject: self
+        line: 2
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-            modes:
-              - 1
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: hand
-              trait: レヴィオン
-            min: 2
-            max: 2
-        costs:
-          - op: reveal
-            subjects: cost.1
-            to: all
+              zone: field
+    status: complete
+format: 1
+kind: effect_set

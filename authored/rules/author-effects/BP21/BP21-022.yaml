@@ -1,0 +1,57 @@
+cards:
+  BP21-022:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        fanfare:
+          cost:
+            reveal:
+              n: 2
+              sel:
+                trait: レヴィオン
+                who: self
+                zone: hand
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            trait: レヴィオン
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    upto: 3
+                n: 1
+                options:
+                  - - destroy: enemy
+                  - - damage:
+                        n: 3
+                        to:
+                          leaders: opponents
+                  - - draw:
+                        n: 2
+                    - discard:
+                        n: 1
+                        who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
