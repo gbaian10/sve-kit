@@ -116,6 +116,7 @@ describe("development Worker", () => {
     `${BLOB}.br`,
     `snapshots/manifests/${HASH}.json`,
     `snapshots/manifests/${HASH}.json.br`,
+    `construction/${HASH}/jp.json`,
   ])("serves immutable %s from the edge after an R2 miss", async (key) => {
     const f = fixture()
     const first = await worker.fetch(
@@ -301,6 +302,8 @@ describe("development Worker", () => {
     `snapshots/manifests/${HASH}.json`,
     `snapshots/manifests/${HASH}.json.br`,
     INDEX,
+    `construction/${HASH}/jp.json`,
+    `construction/${HASH}/en.json`,
     "images/card_s/20001.webp",
     "images/card_l/20001-f1.webp",
     "images/card_l/20001.webp",
@@ -330,6 +333,10 @@ describe("development Worker", () => {
     "/cdn-preview/snapshots/blobs/private.json",
     `/cdn-preview/snapshots/manifests/${HASH}.json/private`,
     `/cdn-preview/snapshots/blobs/${HASH}.json.png`,
+    `/cdn-preview/construction/${HASH}/zh.json`,
+    `/cdn-preview/construction/${HASH}/jp.json.br`,
+    "/cdn-preview/construction/private/jp.json",
+    `/cdn-preview/construction/${HASH}/../${HASH}/jp.json`,
     "/cdn-preview/images/sha256/aa/example.webp",
     "/cdn-preview/images/card_x/20001.webp",
     "/cdn-preview/images/card_m/20001.webp",
