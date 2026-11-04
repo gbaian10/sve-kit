@@ -829,6 +829,13 @@ pub(super) enum Objects {
     Bound(String),
     Zone(ObjectQuery),
     Follow { follow: String },
+    EventHolder { event: HolderEvent },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HolderEvent {
+    Holder,
 }
 
 #[derive(Clone, Deserialize)]
@@ -1765,6 +1772,8 @@ pub(super) enum AutoAggregation {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "equipped")]
+    Equipped(EquippedSubscription),
     #[serde(rename = "drew")]
     Drew(DrawSubscription),
     #[serde(rename = "discarded")]
@@ -1801,6 +1810,13 @@ pub(super) enum PhaseSubscription {
     Stood(PostureSubscription),
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EquippedSubscription {
+    #[serde(rename = "equipment")]
+    pub _equipment: This,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

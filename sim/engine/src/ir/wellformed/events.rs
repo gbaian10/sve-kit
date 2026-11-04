@@ -1,6 +1,7 @@
 use crate::ir::events::attack::AttackFilter;
 use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::events::damage::DamageFilter;
+use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
@@ -467,6 +468,13 @@ impl Checker {
         triggering: bool,
     ) -> Option<Checked> {
         match pattern {
+            EventPattern::Equip { binding, predicate } => self.committed_header(
+                *binding,
+                EventSnapshotPolicy::AfterEntry,
+                *predicate == equipment::predicate(*binding),
+                view,
+                triggering,
+            ),
             EventPattern::Attack { binding, predicate } => self.committed_header(
                 *binding,
                 EventSnapshotPolicy::AfterEntry,
@@ -566,7 +574,6 @@ impl Checker {
             | EventPattern::DriveGained { .. }
             | EventPattern::DriveTrigger { .. }
             | EventPattern::Fused { .. }
-            | EventPattern::Equip { .. }
             | EventPattern::Dice { .. }
             | EventPattern::DriveChecked { .. }
             | EventPattern::AnyOf { .. } => None,

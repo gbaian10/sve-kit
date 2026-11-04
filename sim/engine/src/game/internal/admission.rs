@@ -3,6 +3,7 @@ use super::{
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
 use crate::ir::PlayerStage;
+use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::{
@@ -39,7 +40,9 @@ pub(super) fn check_card(
         let TriggerCondition::Event { pattern } = &trigger.on else {
             return None;
         };
-        SubjectFields::from_pattern(pattern).map(SubjectFields::object)
+        SubjectFields::from_pattern(pattern)
+            .map(SubjectFields::object)
+            .or_else(|| equipment::binding(pattern).map(equipment::holder))
     });
     check_body(
         program,
@@ -333,6 +336,7 @@ fn check_requirements(
                             | "shape.ObjectFrozen.EnterFieldObject"
                             | "shape.ObjectFrozen.EnterExObject"
                             | "shape.ObjectFrozen.UbActivatedHolder"
+                            | "shape.ObjectFrozen.EquipHolder"
                             | "shape.ObjectFrozen.AttackAttacker"
                             | "shape.ObjectFrozen.EvolveSubject"
                             | "shape.ObjectFrozen.DestroyObjectBefore"

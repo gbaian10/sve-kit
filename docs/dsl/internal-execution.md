@@ -191,7 +191,7 @@ before／after、直接 cause；規則移區的 source=None，不冒充造成先
 不沿效果控制者或離場前控制者。每位 owner 的 EX 已滿時該張保留原區且無 after；
 同批只有部分容量、需要另選卡時仍拒絕。牌庫觀察的 `Shared(Ex)` 維持原本的自方目的地。
 普通從者帶有單一受驗進化關聯時可以公開離場；共同移區原語清除基底狀態，
-依 CR 11.6.1 將進化卡正面放回 owner 進化牌組。食事／憑依／裝備等其他連結仍拒絕。
+依 CR 11.6.1 將進化卡正面放回 owner 進化牌組；裝備依 CR 11.11 隨宿主離場消去，其他未准入的連結仍拒絕。
 
 Lastword 的 `move this to ex` 使用當前 LeaveField 單一成員的 `FollowEventMove`，
 保存原成功移動的 after 世代後再把基底從墓地移至 EX；不改綁來源 holder 或封存 LKI。
@@ -1049,3 +1049,15 @@ WF 只對 Cost 語境、無前提且綁定公開自方場上費用材料的 Act 
 `waive_original` 只免原成本，不略過禁止。Triggered UB 與進化時能力不因本限制受阻。
 限制作用於當次場上實體的所有起動能力，另張同名卡不受影響；進化承接到新形態，
 一般離場後重新入場則不承接，本回合結束時失效。這不是每能力使用次數，其他主體或期限仍拒絕。
+
+## 裝備完成誘發
+
+`EventPattern::Equip` 只准入裝備自身的 Printed 一般觸發、有效區 Equipment、AfterEntry、PerFact；
+完整篩選必須是事件 equipment 與來源 holder 相等，其他來源查詢、聚合與事件捕捉仍拒絕。
+既有 EquipEvent／Equipped receipt 在成功建立關聯後供應同一份事件；不從初始盤面推論曾裝備。
+本文唯一事件物件角色為 `EquipHolder`，由既有 EventObject 權限綁定，不開放事件 equipment 或任意事件引用。
+
+裝備消去晚於宿主的移動提交。既有離場計畫因此記錄來源快照與實際移動的依賴物件，
+確認依賴世代已變更後才封存；裝備的依賴是宿主，普通來源仍是自身。
+解算中與暫停中的執行沿既有 source-before-move／seal 路徑帶同一依賴引用，只有成功移動的成員才能使來源進入 LKI。
+待機選序、正式目標與錯誤回復維持共用流程；參見[裝備觸發契約](trigger-second-semantics.md#8-裝備自身的裝備完成事件)。

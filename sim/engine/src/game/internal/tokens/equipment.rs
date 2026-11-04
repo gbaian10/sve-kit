@@ -1,6 +1,7 @@
 use super::super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, EquipEvent, Instruction, Nat, ObjectOperand, ObjectRef, RuntimeReceiptId, ZoneKind,
+    Action, EquipEvent, Instruction, Nat, ObjectOperand, ObjectRef, RuntimeReceiptId, SnapshotId,
+    ZoneKind,
 };
 
 pub(in crate::game::internal) fn check_action(action: &Action) -> Result<()> {
@@ -88,6 +89,7 @@ impl Game {
             return Err(unsupported("equipment instruction"));
         };
         check_catalog(self, &instruction.action)?;
+        let before = SnapshotId(self.state.ir_epoch);
         let source = execution
             .ability
             .ok_or_else(|| unsupported("equipment whole-card authority"))?;
@@ -132,6 +134,6 @@ impl Game {
             instruction.receipt,
             InstructionOutcome::Equipped(vec![event]),
         );
-        Ok(())
+        self.internal_equipped_event(event, execution, before)
     }
 }

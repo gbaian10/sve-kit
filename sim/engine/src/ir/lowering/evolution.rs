@@ -115,7 +115,9 @@ impl super::BodyContext<'_> {
                     }),
                 ))
             }
-            ast::Objects::Bound(_) | ast::Objects::Zone(_) => Err(unsupported(path)),
+            ast::Objects::Bound(_) | ast::Objects::Zone(_) | ast::Objects::EventHolder { .. } => {
+                Err(unsupported(path))
+            }
         }
     }
 }

@@ -1,0 +1,56 @@
+cards:
+  CP04-055:
+    abilities:
+      - fanfare:
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on: enemy
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+        section: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - equip:
+                      on: this
+                      token: 氷竜剣
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

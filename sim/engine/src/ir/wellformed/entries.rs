@@ -2,6 +2,7 @@ use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFor
 use crate::ir::OncePerEvent;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard::DiscardFilter;
+use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::optional_payment;
@@ -430,6 +431,19 @@ impl Checker {
         let Some(trigger) = &ability.trigger else {
             return Ok(());
         };
+        if matches!(
+            &trigger.on,
+            TriggerCondition::Event {
+                pattern: EventPattern::Equip { .. }
+            }
+        ) && (ability.active_zones != [ZoneKind::Equipment]
+            || trigger.active_zones != [ZoneKind::Equipment]
+            || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+            || ability.qualification != AbilityQualification::Ordinary
+            || !ability.event_captures.is_empty())
+        {
+            return self.reject();
+        }
         if batch_discard(trigger)
             && (!ability.event_captures.is_empty()
                 || ability.active_zones != [ZoneKind::Field]
@@ -570,8 +584,9 @@ impl Checker {
                     self.env.trigger = None;
                     self.env.trigger_subject = None;
                 } else {
-                    self.env.trigger_subject =
-                        SubjectFields::from_pattern(pattern).map(SubjectFields::object);
+                    self.env.trigger_subject = SubjectFields::from_pattern(pattern)
+                        .map(SubjectFields::object)
+                        .or_else(|| equipment::binding(pattern).map(equipment::holder));
                 }
                 Ok(())
             }
