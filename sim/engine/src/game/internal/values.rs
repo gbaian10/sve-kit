@@ -33,7 +33,7 @@ impl Execution {
             PlayerRef::Controller {} => Ok(self.context.controller),
             PlayerRef::Owner {} => player_id(&game.object(&self.context.source)?.owner),
             PlayerRef::Active {} => player_id(game.active()),
-            PlayerRef::ProposedDamageRecipient {} => {
+            PlayerRef::ProposedDamageRecipient {} | PlayerRef::ProposedDamageController {} => {
                 Err(unsupported("proposed damage recipient outside replacement"))
             }
             PlayerRef::RequireOne { players } => {

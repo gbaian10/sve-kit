@@ -145,7 +145,7 @@ impl Game {
                 };
                 let hit = (
                     share.recipient,
-                    json!({"source":source_id,"source_generation":source.view().object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false}),
+                    json!({"controller":seat_name(controller)?,"source":source_id,"source_generation":source.view().object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false}),
                 );
                 if affected == active {
                     remaining.push(hit);

@@ -3,18 +3,49 @@ use super::super::{Context, Execution, InstructionOutcome, Slot, admission, play
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::ir::ObjectRelation;
-use crate::ir::prevention::{Prevention, Recipients, own_leader, projection};
+use crate::ir::prevention::{DamageSource, Prevention, Recipients, own_leader, projection};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
     Expr, FaceId, Generation, InstallationSubjects, InstallationTime, Instruction,
     InstructionContext, InstructionId, Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView,
-    PlayerRef, Program, ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements,
-    Selector, TimeAnchor, ZoneKind,
+    PlayerId, PlayerRef, Program, ProposedEventPattern, ReceiptId, RecipientSet, Requirement,
+    Requirements, Selector, TimeAnchor, ZoneKind,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+
+fn opposing_damage_controller(hit: &Value, provider: PlayerId) -> Result<bool> {
+    let controller = hit["controller"]
+        .as_str()
+        .ok_or_else(|| unsupported("proposed ability damage controller"))?;
+    let controller = player_id(controller)
+        .map_err(|_invalid_seat| unsupported("proposed ability damage controller"))?;
+    Ok(controller != provider)
+}
+
+fn damage_source_matches(
+    filter: Option<DamageSource<'_>>,
+    execution: &Execution,
+    game: &Game,
+    source: &str,
+    hit: &Value,
+) -> Result<bool> {
+    match filter {
+        None => Ok(true),
+        Some(DamageSource::Objects(objects)) => source_matches(
+            execution,
+            game,
+            objects,
+            source,
+            hit["source_generation"].as_u64(),
+        ),
+        Some(DamageSource::OpponentController) => {
+            opposing_damage_controller(hit, execution.context.controller)
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Member {
@@ -99,7 +130,7 @@ fn check_equipment(shape: &Prevention<'_>) -> Result<()> {
     };
     let on_host = match (&shape.recipients, shape.damage_source) {
         (Some(Recipients::Objects(objects)), None) => host(objects),
-        (None, Some(objects)) => host(objects),
+        (None, Some(DamageSource::Objects(objects))) => host(objects),
         _ => false,
     };
     if !on_host
@@ -165,7 +196,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                 },
             });
         }
-        if let Some(objects) = shape.damage_source {
+        if let Some(DamageSource::Objects(objects)) = shape.damage_source {
             sets.push(RecipientSet::Objects {
                 objects: objects.clone(),
             });
@@ -259,9 +290,8 @@ pub(in crate::game::internal) fn check_install(
                 reference: *affected,
             };
             match (shape.recipients, shape.damage_source) {
-                (Some(Recipients::Objects(filter)), None) | (None, Some(filter)) => {
-                    *filter == targets
-                }
+                (Some(Recipients::Objects(filter)), None)
+                | (None, Some(DamageSource::Objects(filter))) => *filter == targets,
                 _ => false,
             }
         }
@@ -607,15 +637,7 @@ impl Game {
                     if !target_matches {
                         continue;
                     }
-                    if let Some(objects) = shape.damage_source
-                        && !source_matches(
-                            &execution,
-                            self,
-                            objects,
-                            source,
-                            hit["source_generation"].as_u64(),
-                        )?
-                    {
+                    if !damage_source_matches(shape.damage_source, &execution, self, source, hit)? {
                         continue;
                     }
                     let Effect::Replacement { id, .. } = effect else {
@@ -701,6 +723,9 @@ impl Game {
     }
 }
 
+#[cfg(test)]
+mod tests;
+
 pub(in crate::game::internal) fn requirement(
     requirements: &Requirements,
     requirement: &Requirement,
@@ -731,6 +756,8 @@ pub(in crate::game::internal) fn requirement(
             | "internal.DamageKind.Combat"
             | "internal.DamageKind.Ability"
             | "shape.PlayerRef.ProposedDamageRecipient"
+            | "shape.PlayerRef.ProposedDamageController"
+            | "player.proposed-damage-controller"
             | "player.proposed-damage-recipient"
     ) {
         return false;

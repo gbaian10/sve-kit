@@ -1,0 +1,24 @@
+cards:
+  BP02-004:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - damage_mod:
+                delta: -1
+                kind: ability
+                on:
+                  kind: follower
+                  who: self
+                  zone: field
+                source:
+                  who: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

@@ -2694,11 +2694,24 @@ pub(super) enum DealDamageAction {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum PreventionSource {
+    Objects(Objects),
+    Controller(PreventionController),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PreventionController {
+    pub who: LeaderSide,
+}
+
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Prevent {
     pub on: Option<Recipients>,
     pub kind: PreventionKind,
-    pub source: Option<Objects>,
+    pub source: Option<PreventionSource>,
     pub next_only: Option<bool>,
 }
 
@@ -2788,7 +2801,7 @@ pub(super) struct BeforeObjects {
 #[serde(deny_unknown_fields)]
 pub(super) struct DamageModifier {
     pub on: Option<Recipients>,
-    pub source: Option<Objects>,
+    pub source: Option<PreventionSource>,
     pub kind: Option<PreventionKind>,
     pub delta: i64,
     pub next_only: Option<bool>,

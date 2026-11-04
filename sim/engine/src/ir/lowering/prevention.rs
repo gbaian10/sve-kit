@@ -2,7 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
-use crate::ir::prevention::{own_leader, projection};
+use crate::ir::prevention::{opponent_controller, own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
     DamageKind, DamageRecipient, Duration, DurationEnd, Effect, EffectDefinitionId,
@@ -92,6 +92,28 @@ impl BodyContext<'_> {
         })
     }
 
+    fn prevention_filter(
+        &mut self,
+        source: &ast::PreventionSource,
+        path: &str,
+    ) -> Result<SourcePredicate, LoweringError> {
+        match source {
+            ast::PreventionSource::Objects(objects) => {
+                let objects = self.objects(objects, path)?;
+                self.prevention_source(objects, path)
+            }
+            ast::PreventionSource::Controller(shape)
+                if matches!(shape.who, ast::LeaderSide::Opponent) =>
+            {
+                Ok(opponent_controller(Binding::new(
+                    1,
+                    self.card_allocator.scope(path)?,
+                )))
+            }
+            ast::PreventionSource::Controller(_) => Err(unsupported(path)),
+        }
+    }
+
     fn prevention_effect(
         &mut self,
         shape: &ast::Prevent,
@@ -105,10 +127,7 @@ impl BodyContext<'_> {
         let damage_source = shape
             .source
             .as_ref()
-            .map(|objects| {
-                let objects = self.objects(objects, path)?;
-                self.prevention_source(objects, path)
-            })
+            .map(|filter| self.prevention_filter(filter, path))
             .transpose()?;
         let kind = match shape.kind {
             ast::PreventionKind::Any => DamageKind::Any,
@@ -304,6 +323,9 @@ impl BodyContext<'_> {
         let condition = Expr::Literal(Bool(true));
         let effect = match &installation.effect {
             ast::InstalledEffect::Prevent(shape) => {
+                if matches!(shape.source, Some(ast::PreventionSource::Controller(_))) {
+                    return Err(unsupported(path));
+                }
                 self.prevention_effect(shape, fallback, source, condition, duration.clone(), path)?
             }
             ast::InstalledEffect::Cannot(ast::Cannot::DealDamage(shape)) => {
@@ -479,16 +501,14 @@ pub(super) fn lower_at_source(
                 return Err(unsupported(path));
             }
         };
-        let recipient = if on.is_none() && damage_source.is_some() {
-            None
-        } else {
-            Some(context.prevention_recipients(on, numeric::holder(), path)?)
-        };
+        let recipient =
+            if on.is_none() && matches!(damage_source, Some(ast::PreventionSource::Objects(_))) {
+                None
+            } else {
+                Some(context.prevention_recipients(on, numeric::holder(), path)?)
+            };
         let damage_source = damage_source
-            .map(|objects| {
-                let objects = context.objects(objects, path)?;
-                context.prevention_source(objects, path)
-            })
+            .map(|filter| context.prevention_filter(filter, path))
             .transpose()?;
         let mut effect = context.damage_prevention(
             ProposedEventPattern::Damage {

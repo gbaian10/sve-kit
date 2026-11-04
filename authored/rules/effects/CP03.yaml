@@ -1,333 +1,320 @@
-format: 1
-kind: effect_set
 cards:
   CP03-005:
-    status: complete
-    review: 生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體。
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
+          name: ネイブルゲイザー・ドラゴン
           op: evolve
           subjects: self
-          name: ネイブルゲイザー・ドラゴン
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: if
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           condition:
-            fn: eq
             args:
               - read: self.turn.trait_attacks.アクアフォース
               - 3
+            fn: eq
+          op: if
           then:
             op: seq
             steps:
-              - op: modify
+              - hp: 2
+                op: modify
                 subjects: self.leader
-                hp: 2
-              - op: draw
-                count: 1
+              - count: 1
+                op: draw
         event: attack
+        kind: trigger
+        line: 2
         subject:
           side: self
-          zone: field
-          type: follower
           trait: アクアフォース
-  CP03-006:
+          type: follower
+          zone: field
+    review: 生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體。
     status: complete
+  CP03-006:
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: drive
+      - body:
           count: 2
+          op: drive
         event: attack
-        subject: self
         keyword: twin_drive
-      - line: 2
         kind: trigger
-        body:
-          op: if
+        line: 1
+        subject: self
+      - body:
           condition:
-            fn: eq
             args:
               - read: self.turn.trait_attacks.アクアフォース
               - 3
+            fn: eq
+          op: if
           then:
             op: seq
             steps:
-              - op: modify
+              - hp: 2
+                op: modify
                 subjects: self.leader
-                hp: 2
-              - op: draw
-                count: 1
+              - count: 1
+                op: draw
         event: attack
+        kind: trigger
+        line: 2
         subject:
           side: self
-          zone: field
-          type: follower
           trait: アクアフォース
-      - line: 3
-        kind: trigger
-        body:
+          type: follower
+          zone: field
+      - body:
           op: seq
           steps:
             - op: optional
               selection:
+                bind: chosen
+                max: 1
+                min: 1
                 select:
                   side: self
-                  zone: hand
-                  type: follower
                   trait: アクアフォース
+                  type: follower
                   where:
-                    fn: eq
                     args:
                       - read: item.cost
                       - 1
-                min: 1
-                max: 1
-                bind: chosen
+                    fn: eq
+                  zone: hand
               then:
+                bind: placed
                 op: move
                 subjects: chosen
                 to: field
-                bind: placed
         event: evolve
+        kind: trigger
+        line: 3
         subject: self
-  CP03-010:
     status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: replace_damage
-          subjects: self
-          sources:
-            side: opponent
-            zone: any
-          prevent: true
-          kind: effect
   CP03-021:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: start_amulet
-      - line: 2
-        kind: activated
-        body:
-          op: modify
-          subjects: target.1
+          op: macro
+        kind: static
+        line: 1
+      - body:
           keywords:
             - storm
-        targets:
-          - key: "1"
-            select:
-              side: self
-              zone: field
-              type: follower
-              trait: アクアフォース
-              where:
-                fn: eq
-                args:
-                  - read: item.cost
-                  - 1
-            min: 1
-            max: 1
+          op: modify
+          subjects: target.1
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: self
             to: cemetery
-  CP03-110:
+        kind: activated
+        line: 2
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: self
+              trait: アクアフォース
+              type: follower
+              where:
+                args:
+                  - read: item.cost
+                  - 1
+                fn: eq
+              zone: field
     status: complete
+  CP03-110:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: rush
-      - line: 1
-        kind: static
-        body:
           op: macro
+        kind: static
+        line: 1
+      - body:
           name: twin_drive
-      - line: 2
-        kind: trigger
-        body:
-          op: draw
+          op: macro
+        kind: static
+        line: 1
+      - body:
           count: 1
+          op: draw
         event: drive_trigger
+        kind: trigger
+        limit: 1
+        limit_at: trigger
+        line: 2
         side: self
         trigger_if:
           read: self.is_active
-        limit: 1
-        limit_at: trigger
-  CP03-112:
     status: complete
+  CP03-112:
     abilities:
-      - line: 1
-        kind: ride
-        body:
+      - body:
           op: gain_drive
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-          - op: link_resource
-            subjects: self
-            resource_role: drive_point
-            count: 1
+          - amount: 1
+            op: pp
+          - count: 1
             from_zone: evolve_deck
+            op: link_resource
+            resource_role: drive_point
+            subjects: self
             to: drive
-      - line: 2
-        kind: trigger
-        body:
+        kind: ride
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 4
+              op: damage
               subjects: target.1
-              amount: 4
-            - op: modify
+            - hp: 2
+              op: modify
               subjects: self.leader
-              hp: 2
         event: drive_trigger
+        kind: trigger
+        line: 2
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-      - line: 3
-        kind: trigger
-        body:
+              zone: field
+      - body:
           op: seq
           steps:
-            - op: modify
-              subjects: self
+            - hp: 1
+              op: modify
               power: 1
-              hp: 1
+              subjects: self
             - op: seq
               steps:
-                - op: look
+                - bind: seen
                   count: 5
-                  bind: seen
-                - op: select
-                  select: seen
-                  min: 0
+                  op: look
+                - bind: top
                   max: 5
-                  bind: top
+                  min: 0
+                  op: select
                   order: true
+                  select: seen
                 - op: move
+                  position: top
                   subjects: top
                   to: deck
-                  position: top
                 - op: seq
                   steps:
-                    - op: select
-                      select:
-                        difference:
-                          - seen
-                          - top
-                      min:
-                        count:
-                          difference:
-                            - seen
-                            - top
+                    - bind: ordered
                       max:
                         count:
                           difference:
                             - seen
                             - top
-                      bind: ordered
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - top
+                      op: select
                       order: true
+                      select:
+                        difference:
+                          - seen
+                          - top
                     - op: move
+                      position: bottom
                       subjects: ordered
                       to: deck
-                      position: bottom
         event: gain_drive
+        kind: trigger
+        line: 3
         subject: self
-  CP03-124:
     status: complete
+  CP03-124:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: start_amulet
-      - line: 2
-        kind: activated
-        body:
+          op: macro
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: look
+            - bind: seen
               count: 3
-              bind: seen
-            - op: select
-              select: seen
-              min: 0
+              op: look
+            - bind: top
               max: 3
-              bind: top
+              min: 0
+              op: select
               order: true
+              select: seen
             - op: move
+              position: top
               subjects: top
               to: deck
-              position: top
             - op: seq
               steps:
-                - op: select
-                  select:
-                    difference:
-                      - seen
-                      - top
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - top
+                - bind: ordered
                   max:
                     count:
                       difference:
                         - seen
                         - top
-                  bind: ordered
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - top
+                  op: select
                   order: true
+                  select:
+                    difference:
+                      - seen
+                      - top
                 - op: move
+                  position: bottom
                   subjects: ordered
                   to: deck
-                  position: bottom
         costs:
           - op: act
             subjects: self
           - op: move
             subjects: self
             to: cemetery
+        kind: activated
+        line: 2
         play_if:
-          fn: gt
           args:
             - count:
                 side: self
-                zone: field
-                type: follower
                 trait: オラクルシンクタンク
+                type: follower
+                zone: field
             - 0
-  CP03-127:
+          fn: gt
     status: complete
-    review: 本文的同名上限為 10；sections 括號只提示取得 drive 的共通規則 14.4.7，不重複給予能力。
+  CP03-127:
     abilities:
-      - line: 1
-        kind: construction
-        body:
-          op: deck_limit
-          name: ドライブポイント
+      - body:
           limit: 10
+          name: ドライブポイント
+          op: deck_limit
           zone: evolve_deck
+        kind: construction
+        line: 1
+    review: 本文的同名上限為 10；sections 括號只提示取得 drive 的共通規則 14.4.7，不重複給予能力。
+    status: complete
+format: 1
+kind: effect_set
