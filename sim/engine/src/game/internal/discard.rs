@@ -339,6 +339,7 @@ impl Game {
                 execution: execution.id,
             },
             execution.ability,
+            Some(execution),
         )?;
         let (moves, successful) = self.internal_move_members(
             execution,
@@ -368,7 +369,7 @@ impl Game {
                 events.push(event);
             }
         }
-        self.internal_commit_discard_events(pending, &events)?;
+        self.internal_commit_discard_events(pending, &events, &moves)?;
         Ok(DiscardOutcome { successful, moves })
     }
 }

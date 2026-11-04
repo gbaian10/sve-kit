@@ -1,4 +1,5 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
+use crate::ir::events::discard as discard_header;
 use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
@@ -64,7 +65,7 @@ pub(super) struct PendingOccurrence {
     subject_information: Option<SourceSnapshot>,
     header: EventHeader,
     leave: Option<LeaveFieldEvent>,
-    leave_after: Option<ObjectRef>,
+    movement_after: Option<ObjectRef>,
     card: String,
     timing: Option<EventPayload>,
     source_position: u64,
@@ -228,7 +229,7 @@ impl Game {
             subject_information: None,
             header,
             leave,
-            leave_after: None,
+            movement_after: None,
             card,
             timing: None,
             source_position: u64::try_from(
@@ -489,7 +490,7 @@ impl Game {
             }
             pending.header.after = after;
             if pending.leave.is_some() {
-                pending.leave_after = Some(self.internal_current_reference(&previous.id)?);
+                pending.movement_after = Some(self.internal_current_reference(&previous.id)?);
             }
             admitted.push(pending);
         }
@@ -647,7 +648,7 @@ impl Game {
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
-            pending.bind_leave_move(&mut execution)?;
+            pending.bind_event_move(&mut execution)?;
             pending.bind_event_object(&mut execution)?;
             if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)
@@ -767,16 +768,24 @@ impl PendingOccurrence {
         Ok(())
     }
 
-    fn bind_leave_move(&self, execution: &mut Execution) -> Result<()> {
-        if let Some(trigger) = &self.ability.node.trigger
-            && let TriggerCondition::Event {
-                pattern: EventPattern::LeaveField { binding, .. },
-            } = &trigger.on
-        {
-            let after = self
-                .leave_after
-                .ok_or_else(|| invalid("missing committed departure"))?;
-            execution.leave_move = Some((binding.key(), after));
+    fn bind_event_move(&self, execution: &mut Execution) -> Result<()> {
+        use crate::ir::MovementEvent;
+        if let Some(trigger) = &self.ability.node.trigger {
+            let event = match &trigger.on {
+                TriggerCondition::Event {
+                    pattern: EventPattern::LeaveField { binding, .. },
+                } => {
+                    if self.movement_after.is_none() {
+                        return Err(invalid("missing committed departure"));
+                    }
+                    Some(MovementEvent::LeaveField { event: *binding })
+                }
+                _ => discard_header::self_event(trigger)
+                    .map(|event| MovementEvent::Discard { event }),
+            };
+            if let Some(event) = event {
+                execution.event_move = Some((event, self.movement_after));
+            }
         }
         Ok(())
     }

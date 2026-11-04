@@ -258,6 +258,11 @@ impl BodyContext<'_> {
             Some(event) => ObjectOperand::FollowEventMove {
                 event: MovementEvent::LeaveField { event },
             },
+            None if self.discard_event.is_some() => ObjectOperand::FollowEventMove {
+                event: MovementEvent::Discard {
+                    event: self.discard_event.ok_or_else(|| unsupported(path))?,
+                },
+            },
             None if self.source_can_enter_field => ObjectOperand::SourceHolder {},
             None => return Err(unsupported(path)),
         };
@@ -319,6 +324,9 @@ impl BodyContext<'_> {
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if let Some(action) = self.discarded_self_move(value, path)? {
+            return Ok(action);
+        }
         if matches!(value.to, ast::Destination::Field) {
             if let Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) = &value.r#ref {
                 return self.self_return(objects, path);
@@ -398,6 +406,41 @@ impl BodyContext<'_> {
             | ast::Destination::Ex
             | ast::Destination::Hand
             | ast::Destination::Cemetery => Err(unsupported(path)),
+        }
+    }
+    fn discarded_self_move(
+        &self,
+        value: &ast::Move,
+        path: &str,
+    ) -> Result<Option<Action>, LoweringError> {
+        let Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) = &value.r#ref else {
+            return Ok(None);
+        };
+        if !matches!(self.auto.map(|auto| &auto.on), Some(ast::PhaseSubscription::Discarded(event)) if event.reference.is_some())
+        {
+            return Ok(None);
+        }
+        let event = self.discard_event.ok_or_else(|| unsupported(path))?;
+        if value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_some()
+            || value.top.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        match value.to {
+            ast::Destination::Field => self.self_return(objects, path).map(Some),
+            ast::Destination::Ex => Ok(Some(owner_put(
+                Selector::Objects {
+                    objects: vec![ObjectOperand::FollowEventMove {
+                        event: MovementEvent::Discard { event },
+                    }],
+                },
+                OwnerZone::Ex,
+            ))),
+            ast::Destination::Deck | ast::Destination::Hand | ast::Destination::Cemetery => {
+                Err(unsupported(path))
+            }
         }
     }
     fn selected_deck_move(

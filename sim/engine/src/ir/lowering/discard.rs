@@ -6,7 +6,8 @@ use super::{
     PlayerRelation, PlayerSet, Selector, TextQuantifier, ast, unsupported,
 };
 use crate::ir::events::discard::DiscardFilter;
-use crate::ir::{BatchPolicy, TriggerAggregation};
+use crate::ir::events::discard::DiscardSource;
+use crate::ir::{BatchPolicy, TraitId, TriggerAggregation};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -99,6 +100,7 @@ impl BodyContext<'_> {
 pub(super) fn subscription(
     discard: &ast::DiscardSubscription,
     event_id: u64,
+    source_id: u64,
     scope: super::ScopeId,
     path: &str,
 ) -> Result<super::EventPattern, LoweringError> {
@@ -108,6 +110,24 @@ pub(super) fn subscription(
         return Err(unsupported(path));
     }
     let event = Binding::new(event_id, scope);
+    let by = discard
+        .by
+        .as_ref()
+        .map(|by| {
+            let ast::SelfPlayer::Controller = by.ability_of.who;
+            if discard.reference.is_none()
+                || !matches!(discard.who, Some(ast::EntryPlayer::Controller))
+                || discard.during.is_some()
+                || by.ability_of.r#trait.trim().is_empty()
+            {
+                return Err(unsupported(path));
+            }
+            Ok(DiscardSource {
+                binding: Binding::new(source_id, scope),
+                trait_id: TraitId(by.ability_of.r#trait.clone()),
+            })
+        })
+        .transpose()?;
     Ok(super::EventPattern::Discard {
         binding: event,
         predicate: DiscardFilter {
@@ -117,6 +137,7 @@ pub(super) fn subscription(
                 .map(|who| matches!(who, ast::EntryPlayer::Controller)),
             itself: discard.reference.is_some(),
             own_turn: discard.during.is_some(),
+            by,
         }
         .predicate(event),
     })

@@ -332,6 +332,7 @@ fn discard_history_keeps_both_query_sites_closed_and_does_not_widen_moved() {
         ("where", json!({"ref":"this"})),
         ("to", json!("cemetery")),
         ("event", json!("moved")),
+        ("by", json!({"ability_of":{"who":"self","trait":"ウマ娘"}})),
     ] {
         let mut query = history();
         query[key] = value;

@@ -128,11 +128,11 @@ impl Execution {
                 event: MovementEvent::LeaveField { event },
             } => {
                 let (_, after) = self
-                    .leave_move
+                    .event_move
                     .as_ref()
-                    .filter(|(binding, _)| *binding == event.key())
+                    .filter(|(binding, _)| *binding == MovementEvent::LeaveField { event: *event })
                     .ok_or_else(|| unsupported("missing triggering movement authority"))?;
-                Ok(*after)
+                after.ok_or_else(|| invalid("missing committed departure"))
             }
             ObjectOperand::Bound { binding } => {
                 let Some(Slot::Objects { members, .. }) = self.slots.get(&binding.key()) else {
@@ -224,6 +224,20 @@ impl Execution {
         Ok(objects)
     }
 
+    fn selector_object(&self, game: &Game, object: &ObjectOperand) -> Result<Option<ObjectRef>> {
+        if let ObjectOperand::FollowEventMove {
+            event: event @ MovementEvent::Discard { .. },
+        } = object
+        {
+            self.event_move
+                .as_ref()
+                .filter(|(saved, _)| saved == event)
+                .map(|(_, after)| *after)
+                .ok_or_else(|| unsupported("missing triggering discard movement authority"))
+        } else {
+            self.object(game, object).map(Some)
+        }
+    }
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
         if let Some((binding, _)) = target_plan(selector) {
             return self.attack_target_objects(game, binding);
@@ -255,7 +269,7 @@ impl Execution {
             }
             Selector::Objects { objects } => objects
                 .iter()
-                .map(|object| self.object(game, object))
+                .filter_map(|object| self.selector_object(game, object).transpose())
                 .collect::<Result<Vec<_>>>()?,
             Selector::Zone {
                 players,

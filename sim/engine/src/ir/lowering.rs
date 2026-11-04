@@ -934,7 +934,7 @@ fn lowered_subscription(
             })
         }
         ast::PhaseSubscription::Discarded(event) => {
-            discard::subscription(event, event_id, scope, path)
+            discard::subscription(event, event_id, subject_id, scope, path)
         }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
@@ -1208,6 +1208,8 @@ struct BodyContext<'definitions> {
     source_can_enter_field: bool,
     departure_to_cemetery: bool,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
+    discard_event: Option<Binding<super::DiscardEvent>>,
+    discard_pp_event: Option<Binding<super::DiscardEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
     definition: AbilityId,
@@ -1258,6 +1260,8 @@ impl<'definitions> BodyContext<'definitions> {
             source_use: &entry.sources[0],
             counter_read_view: CounterReadView::Current,
             leave_event: None,
+            discard_event: None,
+            discard_pp_event: None,
             entry_event: None,
             evolution: entry.evolve.as_ref(),
             source_can_enter_field: false,
@@ -1313,6 +1317,7 @@ impl<'definitions> BodyContext<'definitions> {
             return Ok(None);
         }
         let trigger = self.trigger(entry, keyword, body, path)?;
+        self.discard_event = super::events::discard::self_event(&trigger);
         if let TriggerCondition::Event { pattern } = &trigger.on {
             self.subject_event = SubjectFields::from_pattern(pattern);
             self.equip_event = super::events::equipment::binding(pattern);
@@ -1486,12 +1491,19 @@ impl<'definitions> BodyContext<'definitions> {
                 let condition = self.condition(&conditional.cond, &step_path)?;
                 let parent = self.scope;
                 self.scope = self.card_allocator.scope(&step_path)?;
+                let previous_payment = self.discard_pp_event;
+                self.discard_pp_event = self.discard_event.filter(|_| {
+                    super::optional_payment::public_pp_guard(&condition)
+                        && conditional.r#else.is_none()
+                        && matches!(conditional.then.as_slice(), [ast::Step::Pay(_)])
+                });
                 let then_body = self.steps(
                     &conditional.then,
                     &format!("{step_path}/if/then"),
                     source,
                     ability_source,
                 )?;
+                self.discard_pp_event = previous_payment;
                 let else_body = if let Some(otherwise) = &conditional.r#else {
                     self.scope = self.card_allocator.scope(&step_path)?;
                     Some(self.steps(

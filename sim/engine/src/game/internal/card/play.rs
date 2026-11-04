@@ -1027,7 +1027,7 @@ impl Game {
             entry_method: None,
             entry_origin: None,
             damage_event: None,
-            leave_move: None,
+            event_move: None,
             targets: BTreeMap::new(),
             play: None,
             spell: false,

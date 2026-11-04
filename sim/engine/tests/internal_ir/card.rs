@@ -9,6 +9,9 @@ mod material_acts;
 mod next_damage;
 use second::lowerer;
 
+#[path = "card/discard_ability_source.rs"]
+mod discard_ability_source;
+
 #[path = "card/advance_entry.rs"]
 mod advance_entry;
 

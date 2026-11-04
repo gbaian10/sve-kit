@@ -30,6 +30,47 @@ macro_rules! movement_dispatch {
     reason = "Movement checks share the closed environment."
 )]
 impl Checker {
+    pub(super) fn discard_movement(
+        &self,
+        objects: &Selector,
+        movement: &MoveSpec,
+        reason: MoveReason,
+    ) -> Option<Checked> {
+        use crate::ir::{MovementEvent, ObjectOperand};
+        let Selector::Objects { objects } = objects else {
+            return None;
+        };
+        let [
+            ObjectOperand::FollowEventMove {
+                event: MovementEvent::Discard { event },
+            },
+        ] = objects.as_slice()
+        else {
+            return None;
+        };
+        let destination = matches!(&movement.to,
+            MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field && zone.player == (PlayerRef::Controller {}))
+            || movement.to
+                == (MoveDestination::Owners {
+                    zone: OwnerZone::Ex,
+                });
+        Some(
+            if destination
+                && reason == MoveReason::Put
+                && movement.position.is_none()
+                && movement.order.is_none()
+                && movement.initial_posture.is_none()
+                && movement.entry_effects.is_empty()
+                && self.env.chooser.is_none()
+                && self.env.discard_follow.contains(&event.key())
+            {
+                self.reference(*event, BindingKind::Value)
+            } else {
+                self.reject()
+            },
+        )
+    }
+
     pub(super) fn destination(&mut self, destination: &MoveDestination) -> Checked {
         match destination {
             MoveDestination::Owners { .. } => Ok(()),

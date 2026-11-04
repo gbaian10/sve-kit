@@ -404,6 +404,7 @@ fn play_requirement(code: &str) -> bool {
             | "internal.OwnerZone.Ex"
             | "shape.ObjectOperand.FollowEventMove"
             | "shape.MovementEvent.LeaveField"
+            | "shape.MovementEvent.Discard"
             | "reference.trigger-follow"
             | "read.event-header.move-receipt"
             | "read.card-play.payment-complete"

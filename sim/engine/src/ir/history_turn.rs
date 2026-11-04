@@ -41,6 +41,7 @@ pub(crate) fn discarded_query(event: Binding<DiscardEvent>) -> HistoryQuery {
                 own: Some(true),
                 itself: false,
                 own_turn: false,
+                by: None,
             }
             .predicate(event),
         },

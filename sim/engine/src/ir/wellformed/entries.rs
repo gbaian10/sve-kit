@@ -1,6 +1,7 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
 use crate::ir::events::damage::DamageFilter;
+use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
@@ -452,6 +453,20 @@ impl Checker {
             return self.reject();
         }
         self.at("trigger", |checker| checker.trigger(trigger))?;
+        if ability.active_zones == [ZoneKind::Hand]
+            && let TriggerCondition::Event {
+                pattern: EventPattern::Discard { binding, predicate },
+            } = &trigger.on
+        {
+            self.env.discard_source = DiscardFilter::parse(*binding, predicate)
+                .filter(|plan| plan.itself)
+                .map(|_| binding.key());
+        }
+        if ability.active_zones == [ZoneKind::Hand]
+            && let Some(binding) = discard_header::self_event(trigger)
+        {
+            self.env.discard_follow.insert(binding.key());
+        }
         self.at("event_captures", |checker| {
             checker.captures(
                 &ability.event_captures,

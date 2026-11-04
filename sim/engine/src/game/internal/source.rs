@@ -121,6 +121,10 @@ impl Execution {
             )
     }
 
+    pub(super) fn source_traits(&self, game: &Game) -> Result<Vec<TraitId>> {
+        Ok(self.source_snapshot(game)?.subject.traits)
+    }
+
     pub(super) fn source_counter(&self, game: &Game, kind: &CounterKind) -> Result<Nat> {
         let snapshot = self.source_snapshot(game)?;
         let key = game.catalog.keyword_id(&kind.0);

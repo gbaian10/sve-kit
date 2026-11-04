@@ -2,9 +2,10 @@
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
+use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    AbilityKind, AbilityOrigin, Action, Bool, Control, CostSpec, DecisionId, Expr,
+    Ability, AbilityKind, AbilityOrigin, Action, Bool, Control, CostSpec, DecisionId, Expr,
     InstructionContext, Int, Node, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
     PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
     WellFormedCardProgram, ZoneKind, optional_payment,
@@ -72,9 +73,11 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
     for ability in &card.card().abilities {
         if let Some(body) = &ability.node.body {
             if has_resolution_payment(body)
-                && (ability.node.kind != AbilityKind::Triggered
-                    || !matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
-                    || ability.node.active_zones != [ZoneKind::Field])
+                && !(ability.node.kind == AbilityKind::Triggered
+                    && matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
+                    && ((ability.node.active_zones == [ZoneKind::Field]
+                        && field_resolution_costs(body))
+                        || hand_pp_payment(&ability.node)))
             {
                 return Err(unsupported(
                     "resolution source payment needs a field auto ability",
@@ -127,6 +130,91 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn positive_pp(costs: &CostSpec) -> bool {
+    matches!(costs, CostSpec::Ordered { steps }
+        if matches!(steps.as_slice(), [step] if step.materials.is_none()
+            && step.instruction.precondition.is_none()
+            && step.instruction.actor == (PlayerRef::Controller {})
+            && step.instruction.context == InstructionContext::Cost
+            && matches!(&step.instruction.action, Action::Resource {
+                player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay, amount: Expr::Literal(Int(n)),
+            } if *n > 0)))
+}
+
+fn hand_pp_payment(ability: &Ability) -> bool {
+    use crate::ir::{MovementEvent, ObjectOperand};
+    let Some(event) = ability
+        .trigger
+        .as_ref()
+        .and_then(discard_header::self_event)
+    else {
+        return false;
+    };
+    let Some(body) = &ability.body else {
+        return false;
+    };
+    if ability.active_zones != [ZoneKind::Hand] {
+        return false;
+    }
+    let [step] = body.steps.as_slice() else {
+        return false;
+    };
+    let Node::Control {
+        control:
+            Control::If {
+                condition,
+                then_body,
+                else_body: None,
+            },
+    } = &step.node
+    else {
+        return false;
+    };
+    if !optional_payment::public_pp_guard(condition) {
+        return false;
+    }
+    let [payment] = then_body.steps.as_slice() else {
+        return false;
+    };
+    let Node::Control {
+        control:
+            Control::Pay {
+                at: PaymentTime::ResolutionChoice,
+                optional: PaymentOptionality::Optional,
+                costs,
+                on_paid,
+                ..
+            },
+    } = &payment.node
+    else {
+        return false;
+    };
+    let [movement] = on_paid.steps.as_slice() else {
+        return false;
+    };
+    positive_pp(costs)
+        && matches!(&movement.node, Node::Instruction { instruction }
+        if matches!(&instruction.action, Action::Move {
+            objects: Selector::Objects { objects }, ..
+        } if objects == &[ObjectOperand::FollowEventMove { event: MovementEvent::Discard { event } }]))
+}
+
+fn field_resolution_costs(program: &Program) -> bool {
+    program.steps.iter().all(|step| match &step.node {
+        Node::Control { control: Control::Pay { at: PaymentTime::ResolutionChoice, costs, .. } } => {
+            matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
+                && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
+        }
+        Node::Control { control: Control::If { then_body, else_body, .. } } => {
+            field_resolution_costs(then_body) && else_body.as_ref().is_none_or(field_resolution_costs)
+        }
+        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } } => field_resolution_costs(body),
+        Node::Control { control: Control::Mode { modes, .. } } => modes.iter().all(|mode| field_resolution_costs(&mode.body)),
+        _ => true,
+    })
 }
 
 pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
@@ -256,15 +344,16 @@ pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: boo
 pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> {
     if let Control::Pay {
         at: PaymentTime::ResolutionChoice,
-        costs: CostSpec::Ordered { steps },
+        costs: costs @ CostSpec::Ordered { steps },
         optional: PaymentOptionality::Optional,
         ..
     } = control
     {
-        if !steps.is_empty()
-            && steps
-                .iter()
-                .all(|step| super::material::source_field_cost(&step.instruction.action))
+        if positive_pp(costs)
+            || (!steps.is_empty()
+                && steps
+                    .iter()
+                    .all(|step| super::material::source_field_cost(&step.instruction.action)))
         {
             return Ok(());
         }
