@@ -377,7 +377,7 @@ TriggerEvent receipt、MoveAfter 的 TriggerExplicitReference 與 RuleCarry 仍�
 能力來源類型篩選使用 header 內同一 Discard 的 BeforeExit 有效來源快照；整個 predicate
 須與 canonical 形狀相等，其他 actor、view、payload 或本文／歷史查詢不因此獲得權限。
 
-作者的數值修改與能力授予共用場上／EX 的成功移動結果解析；場上結果由 `Move` 入場或單從者 `Search` 入場明示登錄，以 `SameEffectExplicitReference` 取得新世代引用。結果為空時只略過對空集合的指示，之後獨立的自身修改仍須結算；過時世代沿用既有 `Modify` 檢查。這個登錄不額外授權其他物件動作；效果進化的場上結果仍只接受原有單從者搜尋，不接受一般移動結果。這是作者降階邊界，沒有新增 IR 或 WF 例外。
+作者的數值修改與能力授予共用場上／EX 的成功移動結果解析；場上結果由 `Move` 入場、單從者 `Search` 入場，或各組均為從者 query、各取一張（`n: 1`／`upto: 1`）且沒有 `distinct_by` 的群組 `Search` 入場明示登錄，以 `SameEffectExplicitReference` 取得新世代引用。結果為空時只略過對空集合的指示，之後獨立的自身修改仍須結算；過時世代沿用既有 `Modify` 檢查。這個登錄不額外授權其他物件動作；效果進化的場上結果仍只接受原有單從者搜尋，不接受一般移動結果。這是作者降階邊界，沒有新增 IR 或 WF 例外。
 
 SnapshotCounter 只讀 RuntimeObjectView 指定的快照與 counter kind，沒有「找不到就
 改讀 Current」的退回。BP07-088 種子在 AtEvent 捕捉 LeaveFieldLki 的祈禱 counter；

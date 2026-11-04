@@ -75,7 +75,7 @@ records:
 
 授予可施加到場或 EX 區的適正受益者；其既有能力仍須通過一般准入邊界。`grant.on: {follow: moved}` 沿用同一效果的成功移動回條，對新世代施加能力；失敗移動不產生受益者，不把原物件 ID 當成永久追蹤連結。來源與目標的有效區、期限及生命週期分開處理，並沿用既有授予層對失去能力的處理。
 
-數值 `buff.on`／`set_stat.on` 與 `grant.on` 共用同一效果的入場結果解析：`move.to: field` 的具名結果，以及 `search.to: field` 中 `sel.kind: follower` 且數量明示 `n: 1` 或 `upto: 1` 的具名結果，都可寫成 `{follow: entered}`。它只取實際成功入場的新世代；滿場、沒有找到或選擇不找到時，對空結果的指示不做，後續獨立步驟照常結算。若後續還有對自身的加成，將它寫成獨立的 `buff.on: this`；搜尋沒有結果時，仍結算該自身步驟。
+數值 `buff.on`／`set_stat.on` 與 `grant.on` 共用同一效果的入場結果解析：`move.to: field` 的具名結果，以及 `search.to: field` 中 `sel.kind: follower` 且數量明示 `n: 1` 或 `upto: 1` 的具名結果，以及每組均為從者 query、各取 `n: 1` 或 `upto: 1` 且沒有 `distinct_by` 的群組搜尋結果，都可寫成 `{follow: entered}`。它只取實際成功入場的新世代；滿場、沒有找到或選擇不找到時，對空結果的指示不做，後續獨立步驟照常結算。若後續還有對自身的加成，將它寫成獨立的 `buff.on: this`；搜尋沒有結果時，仍結算該自身步驟。
 
 正式目標與本文 `choose.from` 的公開篩選接受 `traits_all: [絶傑, 魔界]`（同時具有全部特徵）、`token: true` 及 `names: [没頭の実験体, 多頭の実験体]`（名稱符合任一項），共用既有物件篩選與目標合法性檢查。
 

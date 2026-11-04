@@ -12,7 +12,7 @@ use crate::ir::{
     ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
-use crate::ir::{CardKind, EventPattern, FollowPermission, MovementReceipt, TraitId};
+use crate::ir::{CardKind, EventPattern, FollowPermission, TraitId};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -103,8 +103,8 @@ impl super::BodyContext<'_> {
                 let receipt = self
                     .field_outputs
                     .get(follow)
-                    .filter(|receipt| matches!(receipt, MovementReceipt::Search { .. }))
-                    .cloned()
+                    .filter(|output| output.single_follower_search)
+                    .map(|output| output.receipt.clone())
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(3, self.card_allocator.scope(path)?);
                 Ok((
