@@ -1,0 +1,35 @@
+cards:
+  BP08-023:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                ref: revive
+                result: entered
+                to: field
+            - buff:
+                on:
+                  follow: entered
+                power: 1
+          targets:
+            - bind: revive
+              from:
+                class: ロイヤル
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

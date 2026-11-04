@@ -1,0 +1,49 @@
+cards:
+  CSD03a-002:
+    abilities:
+      - keywords:
+          - storm
+          - twin_drive
+        line: 1
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                result: entered
+                sel:
+                  kind: follower
+                  orig_cost_le: 3
+                  trait: ロイヤルパラディン
+                  who: self
+                  zone: deck
+                to: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: ロイヤルパラディン
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 15
+                then:
+                  - buff:
+                      hp: 1
+                      on:
+                        follow: entered
+                      power: 1
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
