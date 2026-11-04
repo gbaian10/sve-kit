@@ -47,7 +47,7 @@ PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`�
 這是依卡文字樣的候選盤點，不聲稱窮盡所有改寫句型。沒有命中的事件也不因此准入。
 所有入口只收 Printed（或以 Printed 為 origin 的關鍵字）、`AbilityKind::Triggered`、
 能力與 trigger 的 `active_zones=[Field]`、`PerFact`，以及第一批 §3 的無限次／每回合一次。
-Grant、Delay、非 Field 有效區、AnyOf、PerBatch 與其他限次均拒絕。
+本節第一版入口不包含 Grant、Delay、非 Field 有效區、AnyOf、PerBatch 與其他限次；傷害批次的封閉例外見 §6.1，已准入的授予形狀另依[作者工具](authoring-tools.md)。
 
 ## 2. 共用交易與資訊邊界
 
@@ -177,6 +177,23 @@ source 為傷害來源的 RuntimeObjectView，controller 是該傷害來源的 c
 不得同時從 facts 回放與舊 damage log 再掃一次。載入無 kind 限制的訂閱前，
 必須具備戰鬥與能力兩條 producer；只完成能力路徑時只能准入 kind=ability。
 任何仍未受驗的傷害取代／禁止，沿整棵預檢拒絕，不能從 requested 值捏造 actual。
+
+### 6.1 對敵方場上從者的傷害批次
+
+`dealt_damage` 的來源恰為 `this`、kind 恰為 `ability`，且 recipient 恰為
+`{who: opp, zone: field, kind: follower}` 時，只接受 `aggregation: batch`。
+其他物件查詢、額外條件或以 PerFact 解算此形狀都不准入；既有自身／領袖篩選仍沿 PerFact。
+此子集合由 CP04-T11 授予宿主的能力使用，普通起動、進化與付款仍由 CP04-073 的完整程式處理。
+
+沿用實際正傷害的 DamageEvent、AfterEntry 視圖與每個指示既有的 before／batch。
+同一次傷害指示的多名敵方從者，在共用額度准入前依 `(AbilityInstanceId, batch)` 去重；
+分開的指示或不同裝備實例不合併；其中不同指示分別觸發，是依不同時點的事件分別誘發推得，並非 Q2549 的直接問答。
+不另建事件表，也不從原提案或傷害量為零的結果推測觸發。
+[Q2549](https://shadowverse-evolve.com/cardlist/?cardno=CP04-T11) 的五名從者各受1點傷害，僅待機一次。
+
+良構檢查先驗證整個事件篩選，再移除批次的單一事件 binding 與 payload 權限；
+本文、宣告及捕捉不能任選其中一次命中當作唯一事件，來源資訊與能力實例則照常保存。
+待機後來源離場及錯誤回復沿既有交易處理，不延伸為任意事件的聚合或新的事件欄位求值。
 
 ## 7. lowering、良構與最小驗收
 

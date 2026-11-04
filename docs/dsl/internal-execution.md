@@ -208,7 +208,7 @@ Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、M
 已待機能力不因來源離場或換世代而消失；來源資訊讀取已封存 LKI，controller 仍固定為觸發當下。
 內部錯誤回該次能力嘗試前，保留原 pending、題目及已成功的前次 card play，epoch 高水位不退。
 正常敗北在 CheckTiming 成立時停止其餘待機並使舊題目失效；已完成本文的 resolved 事實仍保留。
-所有已准入觸發型樣都可宣告 play 目標及成本；PerBatch 尚未准入。
+所有已准入觸發型樣都可宣告 play 目標及成本；PerBatch 僅准入已列的捨棄與對敵方從者造成能力傷害子集合，詳見[觸發契約](trigger-second-semantics.md)。
 
 BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 authority 程序驗證相應傷害片段；
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
@@ -631,11 +631,11 @@ DiscardOutcome 與移動事實；只有實際棄掉的卡公開。帶篩選的�
 印刷棄牌訂閱降低為既有 `EventPattern::Discard`，以棄牌者及可選的
 `DiscardCardBefore == SourceHolder` 正規形篩選；只收 BeforeExit，預設 PerFact。
 場上來源可加自己回合條件，捕捉時比較當前回合玩家與來源控制者；自身手牌來源不收此組合。
-僅「自己回合、自己捨棄」的場上來源可用 PerBatch(Instruction)：每個來源 AbilityInstanceId
+捨棄事件僅「自己回合、自己捨棄」的場上來源可用 PerBatch(Instruction)：每個來源 AbilityInstanceId
 與同一 before/batch 的多張事實，在共用 quota admission 之前去重；不同指令或不同規則選取不合併。
 WF 驗過事件 predicate 後不把單張事件的 binding 或 header context 暴露給後續打出與本文，
 且要求 event_captures 為空；事件欄位與事件物件目標因而不能由聚合能力讀取。
-其他聚合頭、Simultaneous key 與一般事件欄位讀取仍拒絕。
+其他捨棄聚合頭、Simultaneous key 與一般事件欄位讀取仍拒絕；傷害批次的封閉例外見[觸發契約 §6.1](trigger-second-semantics.md#61-對敵方場上從者的傷害批次)。
 場上觀察者在 Field 訂閱，自身手牌訂閱在 Hand 擷取來源，移區前封存權威來源資訊與
 原世代。每批在移動前共用 before／batch，實際提交的每張 DiscardEvent 才把該卡對應的
 occurrence 交入共同 pending 佇列；未成功移動或外層交易失敗不殘留待機。

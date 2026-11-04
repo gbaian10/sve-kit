@@ -92,8 +92,8 @@ RulePermission、PlayCommitted 與共享額度先拒絕。
 是新取得的定義，即使文字相同也是新實例，不承接進化前實例的次數。移區後的新世代有新實例。
 
 本片所有訂閱為 PerFact；同時 N 隻入場，監看者可有 N 個 occurrence，
-再受上述限次約束。需要「1 体以上」聚合的 PerBatch 保持拒絕；
-不能把 Damage 的同時 batch 當成已實作觸發聚合，也不新增通用 batch 分組機制。
+再受上述限次約束。首批入口拒絕需要「1 体以上」聚合的 PerBatch；後續傷害批次的封閉例外見[第二批觸發契約 §6.1](trigger-second-semantics.md#61-對敵方場上從者的傷害批次)。
+Damage 的同時 batch 本身不代表任意觸發聚合已准入，也不新增通用 batch 分組機制。
 
 ## 4. 事件 payload、世代與可見性
 
