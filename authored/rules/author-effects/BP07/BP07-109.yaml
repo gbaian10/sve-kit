@@ -1,0 +1,41 @@
+cards:
+  BP07-109:
+    abilities:
+      - attack_time:
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                class: ニュートラル
+                kind: spell
+                orig_cost_le: 3
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+      - evolve_time:
+          cost:
+            pp: 5
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 5
+                  who: self
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

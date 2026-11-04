@@ -1,0 +1,41 @@
+cards:
+  BP03-024:
+    abilities:
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: ヒーロー
+                    who: self
+                    zone: field
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 1
+      - evolve_time:
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                trait: ヒーロー
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

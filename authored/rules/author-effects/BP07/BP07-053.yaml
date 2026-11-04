@@ -1,0 +1,46 @@
+cards:
+  BP07-053:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 4
+                        to: victim
+                    - search:
+                        n: 1
+                        sel:
+                          name: 影の侵食
+                          who: self
+                          zone: deck
+                        to: ex
+                  - - play_card:
+                        cost: 0
+                        ref: selected
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: selected
+              from:
+                name: 影の侵食
+                who: self
+                zone: cemetery
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
