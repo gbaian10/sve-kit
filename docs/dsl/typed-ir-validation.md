@@ -383,6 +383,13 @@ HistoryExists、HistoryCount 與 HistorySum 檢查 window、cutoff、include_exe
 Since 與 Capture cutoff 必須有正確型別及 capture 類別的既有 binding。
 Facts／Subjects、數值加總與 OriginFactId 去重的實際結果仍由歷史執行器驗證。
 
+目前的捨棄歷史只接受 `EventPattern::Discard` 的己方玩家 canonical 謂詞，
+視窗固定 CurrentTurn／CurrentPoint／IncludeAll，計數固定 Facts。
+同一個查詢計畫供 lowering、WF 與 runtime 使用；其他捨棄謂詞、視窗或 Subjects
+計數在良構檢查時拒絕，不能藉一般事件檢查回落而放行。事件 binding 只屬於查詢，
+不公開手牌物件；執行時讀共同捨棄入口的已提交回合計數。這個封閉查詢亦可作為
+打出費用條件，其他歷史事件沒有因此取得費用讀值資格。
+
 CausePattern::Effect 與 AnyRule 是不同變體；EffectSource::Matching 的 binding 只在
 該 Effect cause 的 source predicate 可見，其他 cause 沒有 source candidate。
 Permission declaration 接受 Destroy／Banish 的對象、cause 與 condition 遞迴檢查，
