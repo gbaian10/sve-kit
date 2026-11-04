@@ -1,0 +1,34 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "action": "trigger",
+        "events": [
+          "fanfare",
+          "on_evolve"
+        ],
+        "op": "restrict",
+        "subjects": "opponent.leader"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "amount": 7,
+        "op": "damage",
+        "subjects": {
+          "other": true,
+          "side": "both",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "event": "evolve",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

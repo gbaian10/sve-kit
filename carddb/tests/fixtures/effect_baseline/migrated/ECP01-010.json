@@ -1,0 +1,52 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "count": 1,
+        "op": "race",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "count": 1,
+          "op": "eat",
+          "subjects": "self"
+        },
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "meal",
+      "line": 2
+    },
+    {
+      "body": {
+        "action": "trigger",
+        "events": [
+          "fanfare",
+          "on_evolve"
+        ],
+        "op": "restrict",
+        "subjects": "opponent.leader"
+      },
+      "kind": "static",
+      "line": 3
+    }
+  ],
+  "status": "complete"
+}
