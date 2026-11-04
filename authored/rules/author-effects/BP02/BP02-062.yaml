@@ -1,0 +1,50 @@
+cards:
+  BP02-062:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  history:
+                    event: discarded
+                    from: hand
+                    who: self
+                    window: this_turn
+                then:
+                  - damage:
+                      n: 2
+                      to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - life:
+                delta: 1
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
