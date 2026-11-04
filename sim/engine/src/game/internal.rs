@@ -41,6 +41,7 @@ mod admission;
 mod aggregates;
 mod allocation;
 mod damage;
+pub(in crate::game) use damage::DamageOccurrence;
 pub use damage::ReplacementOption;
 mod alternatives;
 mod card;

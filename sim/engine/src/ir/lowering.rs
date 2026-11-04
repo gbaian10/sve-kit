@@ -893,7 +893,7 @@ fn lowered_trigger(
             },
             on: TriggerCondition::Event { pattern },
             limit: None,
-            aggregation: discard::aggregation(entry.auto.as_ref(), path)?,
+            aggregation: discard::aggregation(entry.auto.as_ref(), subject_id, scope, path)?,
         }
     })
 }

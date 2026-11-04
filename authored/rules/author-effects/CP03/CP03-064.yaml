@@ -1,0 +1,46 @@
+cards:
+  CP03-064:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+          on:
+            played:
+              during:
+                turn: self
+              sel:
+                kind: spell
+              who: opp
+        line: 1
+      - auto:
+          aggregation: batch
+          do:
+            - draw:
+                n: 1
+                who: self
+          on:
+            dealt_damage:
+              during:
+                turn: self
+              kind: ability
+              recipient:
+                kind: follower
+                who: opp
+                zone: field
+              sel:
+                trait: かげろう
+              who: self
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

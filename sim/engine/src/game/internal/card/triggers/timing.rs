@@ -5,8 +5,9 @@ use super::{
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
-use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::grant;
+use crate::game::internal::source::SourceSnapshot;
+use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
 use crate::game::{Step, int, string};
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::optional_payment;
@@ -134,7 +135,7 @@ fn aggregation_allowed(trigger: &TriggerSpec) -> bool {
         && let Some(plan) = DamageFilter::parse(*binding, predicate)
         && plan.requires_instruction_batch()
     {
-        plan.instruction_batch(*binding)
+        plan.instruction_batch()
             && trigger.aggregation
                 == (TriggerAggregation::PerBatch {
                     key: BatchPolicy::Instruction {},
@@ -432,14 +433,8 @@ impl Game {
         })
     }
 
-    pub(in crate::game) fn internal_damage_events(
-        &mut self,
-        hits: &[Value],
-        facts: Option<&[DamageEvent]>,
-        frame: &Frame,
-        before: SnapshotId,
-    ) -> Result<()> {
-        if !self.internal_has_drain_grants()
+    fn no_damage_observers(&self) -> bool {
+        !self.internal_has_drain_grants()
             && !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
                 program.card().abilities.iter().any(|ability| {
@@ -451,23 +446,51 @@ impl Game {
                     )
                 })
             })
-        {
-            return Ok(());
+    }
+
+    pub(in crate::game) fn internal_combat_damage_occurrences(
+        &mut self,
+        hits: &[Value],
+        before: SnapshotId,
+    ) -> Result<Option<Vec<DamageOccurrence>>> {
+        if self.no_damage_observers() {
+            return Ok(None);
         }
-        let active = player_id(self.active())?;
-        let mut pending = Vec::new();
-        for (index, hit) in hits.iter().enumerate() {
-            let recipient_id = string(&hit["target"]);
-            let event = if let Some(facts) = facts {
-                *facts
-                    .get(index)
-                    .ok_or_else(|| invalid("missing actual damage fact"))?
-            } else {
+        hits.iter()
+            .map(|hit| {
                 if hit["battle"] != true {
                     return Err(unsupported("unadmitted damage producer"));
                 }
-                self.combat_damage_event(hit, before)?
-            };
+                let event = self.combat_damage_event(hit, before)?;
+                let source = self.information_snapshot(event.source.object)?.at(before);
+                Ok(DamageOccurrence { event, source })
+            })
+            .collect::<Result<Vec<_>>>()
+            .map(Some)
+    }
+
+    pub(in crate::game) fn internal_damage_events(
+        &mut self,
+        hits: &[Value],
+        facts: Option<&[DamageOccurrence]>,
+        frame: &Frame,
+        before: SnapshotId,
+    ) -> Result<()> {
+        if self.no_damage_observers() {
+            return Ok(());
+        }
+        let facts = facts.ok_or_else(|| invalid("missing actual damage occurrences"))?;
+        if hits.len() != facts.len() {
+            return Err(invalid("damage occurrence count mismatch"));
+        }
+        let active = player_id(self.active())?;
+        let mut pending = Vec::new();
+        for (hit, damage) in hits.iter().zip(facts) {
+            let recipient_id = string(&hit["target"]);
+            let event = damage.event;
+            if damage.source.view() != event.source {
+                return Err(invalid("damage source snapshot mismatch"));
+            }
             let committed_recipient = if let Some(seat) = recipient_id.strip_suffix(".leader") {
                 RuntimeDamageRecipient::Leader {
                     player: player_id(seat)?,
@@ -480,11 +503,11 @@ impl Game {
             if event.recipient != committed_recipient {
                 return Err(invalid("damage recipient proof mismatch"));
             }
-            let observers = self.damage_observers(hit, event, active)?;
+            let observers = self.damage_observers(hit, event, &damage.source, active)?;
             if observers.is_empty() {
                 continue;
             }
-            let (cause, actor, source) = if facts.is_some() {
+            let (cause, actor, source) = if event.flags == DamageFlags::Ability {
                 let execution = frame.cause["effect"]["execution"]
                     .as_u64()
                     .ok_or_else(|| invalid("missing damage execution cause"))?;
@@ -552,11 +575,11 @@ impl Game {
         &mut self,
         hit: &Value,
         event: DamageEvent,
+        information: &SourceSnapshot,
         active: PlayerId,
     ) -> Result<Vec<(String, EffectiveAbility)>> {
         use crate::ir::events::damage::RecipientFilter;
         let mut observers = Vec::new();
-        let mut subject = None;
         for holder in self.field_ids() {
             self.require_internal_abilities(&holder, "field damage observer")?;
             let controller = player_id(&self.object(&holder)?.controller)?;
@@ -576,7 +599,8 @@ impl Game {
                 let Some(plan) = DamageFilter::parse(*binding, predicate) else {
                     continue;
                 };
-                if plan.kind.is_some_and(|kind| !kind.matches(event.flags))
+                if (plan.source_field && information.zone != "field")
+                    || plan.kind.is_some_and(|kind| !kind.matches(event.flags))
                     || plan
                         .own_turn
                         .is_some_and(|own| own != (controller == active))
@@ -620,27 +644,13 @@ impl Game {
                     {
                         return Err(invalid("damage source identity mismatch"));
                     }
-                    if (filter.kind.is_some()
-                        || filter.trait_id.is_some()
-                        || filter.name.is_some()
-                        || filter.class.is_some())
-                        && self.internal_current_reference(source_id)? != event.source.object
-                    {
-                        return Err(unsupported("departed damage subject characteristics"));
-                    }
-                    if subject.is_none() {
-                        subject = Some(self.event_subject_information(source_id)?);
-                    }
-                    let information = subject
-                        .as_ref()
-                        .ok_or_else(|| invalid("missing damage source information"))?;
                     if !filter.matches_information(
-                        &information.borrowed(),
+                        &information.subject.borrowed(),
                         holder_reference == event.source.object,
                         controller,
                         event.controller,
                         active,
-                        information.token,
+                        information.subject.token,
                     ) {
                         continue;
                     }

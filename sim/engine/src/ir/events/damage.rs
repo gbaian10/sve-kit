@@ -5,10 +5,10 @@ use crate::ir::{
     Binding, Bool, CardKind, Cardinality, CharacteristicView, DamageEvent, DamageFlags,
     DamageFlagsFields, DamageRecipient, Expr, KindRead, Nat, ObjectOperand, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, RecipientFields, SelectionView, Selector,
-    TextQuantifier, ValueEquality, ZoneKind,
+    SnapshotFields, TextQuantifier, ValueEquality, ZoneKind, ZoneOperation, ZoneRead,
 };
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum DamageKind {
     Attack,
     Combat,
@@ -120,6 +120,7 @@ impl RecipientFilter {
 #[derive(Clone)]
 pub(crate) struct DamageFilter {
     pub(crate) dealt: Option<SubjectFilter>,
+    pub(crate) source_field: bool,
     pub(crate) recipient: Option<RecipientFilter>,
     pub(crate) kind: Option<DamageKind>,
     pub(crate) own_turn: Option<bool>,
@@ -132,24 +133,58 @@ impl DamageFilter {
         )
     }
 
-    pub(crate) fn instruction_batch(&self, event: Binding<DamageEvent>) -> bool {
-        self.requires_instruction_batch()
-            && self.predicate(event)
-                == Self {
-                    dealt: Some(SubjectFilter {
-                        itself: Some(true),
-                        ..SubjectFilter::default()
-                    }),
-                    recipient: self.recipient,
-                    kind: Some(DamageKind::Ability),
-                    own_turn: None,
-                }
-                .predicate(event)
+    pub(crate) fn instruction_batch(&self) -> bool {
+        if !self.requires_instruction_batch() {
+            return false;
+        }
+        let Some(dealt) = &self.dealt else {
+            return false;
+        };
+        if *dealt
+            == (SubjectFilter {
+                itself: Some(true),
+                ..SubjectFilter::default()
+            })
+        {
+            return !self.source_field
+                && self.kind == Some(DamageKind::Ability)
+                && self.own_turn.is_none();
+        }
+        let own_trait = SubjectFilter {
+            own: Some(true),
+            trait_id: dealt.trait_id.clone(),
+            ..SubjectFilter::default()
+        };
+        *dealt == own_trait
+            && dealt.trait_id.is_some()
+            && self.own_turn == Some(true)
+            && matches!(
+                (self.source_field, self.kind),
+                (true, None) | (false, Some(DamageKind::Ability))
+            )
+    }
+    fn source_field_predicate(event: Binding<DamageEvent>) -> Expr<Bool> {
+        Expr::Compute(Box::new(Predicate::ZoneEquals {
+            left: Expr::Live(Box::new(ZoneRead::Zone {
+                object: ObjectView::Snapshot {
+                    value: Box::new(Expr::Frozen(Box::new(SnapshotFields::DamageSource {
+                        event,
+                    }))),
+                },
+            })),
+            right: Expr::Compute(Box::new(ZoneOperation::OfPlayer {
+                player: PlayerRef::Controller {},
+                kind: ZoneKind::Field,
+            })),
+        }))
     }
     pub(crate) fn predicate(&self, event: Binding<DamageEvent>) -> Expr<Bool> {
         let mut predicates = Vec::new();
         if let Some(subject) = &self.dealt {
             predicates.push(subject.predicate(SubjectFields::DamageSource(event)));
+        }
+        if self.source_field {
+            predicates.push(Self::source_field_predicate(event));
         }
         if let Some(recipient) = self.recipient {
             predicates.push(recipient.predicate(event));
@@ -207,14 +242,20 @@ impl DamageFilter {
                 Some(DamageKind::Combat),
                 Some(DamageKind::Ability),
             ] {
-                for own_turn in [None, Some(false), Some(true)] {
+                for (own_turn, source_field) in [None, Some(false), Some(true)]
+                    .into_iter()
+                    .flat_map(|turn| [false, true].map(|field| (turn, field)))
+                {
                     let filter = Self {
                         dealt: dealt.clone(),
+                        source_field,
                         recipient,
                         kind,
                         own_turn,
                     };
-                    if filter.predicate(event) == *expression {
+                    if (!source_field || filter.instruction_batch())
+                        && filter.predicate(event) == *expression
+                    {
                         return Some(filter);
                     }
                 }

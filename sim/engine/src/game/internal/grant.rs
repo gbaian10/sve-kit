@@ -263,10 +263,17 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
 )]
 impl Game {
     pub(in crate::game) fn card_traits(&self, holder: &str) -> Result<BTreeSet<String>> {
-        let mut traits = self.face(holder)?["traits"]
-            .as_array()
-            .ok_or_else(|| invalid("missing effective traits"))?
-            .iter()
+        // Minimal catalogs can omit printed traits; generation-bound grants still apply.
+        let printed = self.face(holder)?.get("traits");
+        let mut traits = printed
+            .map(|value| {
+                value
+                    .as_array()
+                    .ok_or_else(|| invalid("missing effective traits"))
+            })
+            .transpose()?
+            .into_iter()
+            .flatten()
             .map(|value| {
                 value
                     .as_str()

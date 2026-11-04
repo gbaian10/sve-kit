@@ -2,9 +2,10 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing and constructed write maps."
 )]
+use super::internal::DamageOccurrence;
 use super::legal::permutations;
 use super::{BTreeMap, Frame, Game, int, list, string};
-use crate::ir::{DamageEvent, SnapshotId};
+use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
@@ -120,9 +121,15 @@ impl Game {
         &mut self,
         actual: &[Value],
         frame: &Frame,
-        facts: Option<&[DamageEvent]>,
+        facts: Option<&[DamageOccurrence]>,
     ) -> Result<()> {
         let at = SnapshotId(self.state.ir_epoch);
+        let combat = if facts.is_none() {
+            self.internal_combat_damage_occurrences(actual, at)?
+        } else {
+            None
+        };
+        let facts = facts.or(combat.as_deref());
         let mut pending = self.drain_triggers(actual, &frame.cause)?;
         let group = self.group();
         let mut damaged = Vec::new();

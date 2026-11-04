@@ -137,8 +137,7 @@ CR 10.11.1：效果要讀特定卡資訊或配置，而卡已離開所參照區�
 authority 對每個受驗來源保留最小的不可變資訊視圖：原 ObjectRef、原區域、
 owner／controller、卡表版本與 face、進化／配置狀態、依 10.9 算出的有效特徵及其
 Original 視圖。印刷資料仍引用卡表快照，不複製另一套卡表；只保存本片讀值所需資訊。
-第一版資訊使用端限 source 的 Cost／Attack／Life（Original／Effective）、
-既有來源歸屬與能力傷害 source；其他 LKI 讀值、任意對象、CostMaterial 先拒絕。
+目前資訊使用端包括 source 的 Cost／Attack／Life（Original／Effective）、既有來源歸屬與傷害來源的區域、種類、類型、印刷名、職業及 token 狀態。來源名稱保持原有 `card_name` 的單一印刷名，名稱別名仍由各自既有的事件主體入口查詢。其他 LKI 讀值、任意對象、CostMaterial 仍拒絕。傷害事件主體的種類可以是未知（例如只讀數值的裝備來源）；要求特定種類的篩選不符合，不捏造成其他種類，也不因此拒絕原有數值來源。其他事件主體入口仍保留既有的種類與職業驗證。
 
 保存點是**成功移區前最後一刻**，早於移區清除 continuous／counters／進化關聯與換
 世代；包括成本、本文、規則處理及 Resolution 收尾造成的移區。同時移區的全部成員
@@ -151,6 +150,8 @@ Last Words 的來源 LKI 指向該 LeaveField.before；其他 pending 的事件 
 後來的離區 LKI。例如攻擊時先入待機，其他能力把來源加攻後再使它離場，
 「これの攻撃力」在結算讀的是最後離場值，不是攻擊宣告值。來源仍在原區時則讀當前值。
 事件條件／AtEvent captures 始終讀事件視圖；已捕捉的數值不重新計算。
+
+傷害來源訂閱同樣讀這份權威資訊：已待機入場曲的來源離場，以及 Last Words 的 LeaveField.before，均保留最後的場上區域與有效類型，不把墓場或手牌的新世代當來源。來源仍在原區時，在實際傷害指示擷取當前資訊；兩種情況都在傷害與來源快照配對後供共同 observer 比對。交戰則在同一傷害提交入口扣血前逐 hit 擷取，不以攻擊方快照代替反擊方。對應的訂閱封閉形狀見[傷害批次](trigger-second-semantics.md#61-對敵方場上從者的傷害批次)。
 
 為避免把 Current 偷改成自動 fallback，規定一個**待新增的內部變體**
 `ObjectView::SourceInformation {}`：只指目前 authority execution／pending 的來源。

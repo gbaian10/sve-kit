@@ -269,7 +269,7 @@ impl Game {
                 if !plan.matches_information(
                     &SubjectInformation {
                         original_cost: Some(snapshot.original_cost()),
-                        kind: characters.kind,
+                        kind: Some(characters.kind),
                         traits: &characters.traits,
                         names: &characters.names,
                         class: characters.class.as_ref(),
