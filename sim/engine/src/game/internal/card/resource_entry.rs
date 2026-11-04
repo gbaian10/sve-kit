@@ -1,4 +1,4 @@
-//! Meal and Ride use the same resource payment transaction and evolution-equivalent quota.
+//! Evolution-equivalent abilities share EP substitution and the ordinary evolution quota.
 use super::super::{DistributionMember, Execution, Fact, InputDomain, InstructionOutcome, Wait};
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Int, KeywordId, Located, Nat, Node,
@@ -7,28 +7,51 @@ use super::{
 use crate::game::{int, list};
 use crate::ir::ride;
 use crate::ir::{
-    AbilityKind, AssociationId, Cardinality, DecisionId, Instruction, InstructionContext,
+    AbilityKind, AssociationId, Cardinality, CostStep, DecisionId, Instruction, InstructionContext,
     MealRaceOperation, ObjectOperand, ObjectRef, PlayerRef, Quantity, QuantityUnit, RaceEvent,
-    Resource, ResourceOperation, ScopeId,
+    Resource, ResourceOperation, ScopeId, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 use serde_json::json;
 
 const MAX_RACES: u64 = 10_000;
 
-pub(super) const fn intrinsic(ability: &Ability) -> bool {
-    matches!(
-        ability.source.origin,
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum EntryKind {
+    Meal,
+    Ride,
+    Advance,
+}
+
+const fn kind(ability: &Ability) -> Option<EntryKind> {
+    match ability.source.origin {
         AbilityOrigin::Keyword {
-            keyword: KeywordId::Meal | KeywordId::Ride,
+            keyword: KeywordId::Meal,
             ..
-        }
-    )
+        } => Some(EntryKind::Meal),
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Ride,
+            ..
+        } => Some(EntryKind::Ride),
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::AdvanceActivate,
+            ..
+        } => Some(EntryKind::Advance),
+        _ => None,
+    }
+}
+
+pub(super) const fn intrinsic(ability: &Ability) -> bool {
+    kind(ability).is_some()
+}
+
+pub(super) fn advance(ability: &Ability) -> bool {
+    kind(ability) == Some(EntryKind::Advance)
 }
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct ResourceEntryState {
-    ride: bool,
+    kind: EntryKind,
     scope: ScopeId,
     count: u64,
     pp: i64,
@@ -86,16 +109,14 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<ResourceEntryState>> {
     else {
         return Err(unsupported("entry costs"));
     };
+    let kind = kind(ability).ok_or_else(|| invalid("missing entry kind"))?;
+    if kind == EntryKind::Advance {
+        return advance_payment(ability, steps).map(Some);
+    }
     let [entry, pp] = steps.as_slice() else {
         return Err(unsupported("resource entry payment projection"));
     };
-    let ride = matches!(
-        ability.source.origin,
-        AbilityOrigin::Keyword {
-            keyword: KeywordId::Ride,
-            ..
-        }
-    );
+    let ride = kind == EntryKind::Ride;
     let count = if ride {
         if entry.instruction.action != ride::attachment(ability.scope) {
             return Err(unsupported("ride resource projection"));
@@ -129,7 +150,7 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<ResourceEntryState>> {
         return Err(unsupported("resource entry amount or explicit links"));
     }
     Ok(Some(ResourceEntryState {
-        ride,
+        kind,
         scope: ability.scope,
         count,
         pp,
@@ -137,9 +158,61 @@ pub(super) fn payment(ability: &Ability) -> Result<Option<ResourceEntryState>> {
     }))
 }
 
+fn advance_payment(ability: &Ability, steps: &[CostStep]) -> Result<ResourceEntryState> {
+    let play = ability
+        .play
+        .as_ref()
+        .ok_or_else(|| invalid("Advance play"))?;
+    let [pp, rest @ ..] = steps else {
+        return Err(unsupported("Advance PP cost"));
+    };
+    let Action::Resource {
+        player: PlayerRef::Controller {},
+        resource: Resource::PpCurrent,
+        operation: ResourceOperation::Pay,
+        amount: Expr::Literal(Int(amount)),
+    } = pp.instruction.action
+    else {
+        return Err(unsupported("Advance printed PP cost"));
+    };
+    if amount < 0
+        || !play.parameters.is_empty()
+        || !play.captures.is_empty()
+        || play.limit.is_some()
+        || rest.len() > 1
+        || steps.iter().any(|step| step.materials.is_some())
+        || rest.iter().any(|step| {
+            step.instruction.action
+                != (Action::Banish {
+                    objects: Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                })
+        })
+    {
+        return Err(unsupported("Advance printed remaining cost"));
+    }
+    Ok(ResourceEntryState {
+        kind: EntryKind::Advance,
+        scope: ability.scope,
+        count: 0,
+        pp: amount,
+        selected: None,
+    })
+}
+
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     let ability = &located.node;
     let state = payment(ability)?.ok_or_else(|| invalid("missing resource entry projection"))?;
+    if state.kind == EntryKind::Advance {
+        if ability.kind != AbilityKind::Activated
+            || ability.active_zones != [ZoneKind::Field]
+            || ability.trigger.is_some()
+        {
+            return Err(unsupported("Advance activation header"));
+        }
+        return Ok(());
+    }
     let play = ability
         .play
         .as_ref()
@@ -149,7 +222,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     };
     if ability.kind != AbilityKind::Activated
         || ability.trigger.is_some()
-        || (if state.ride {
+        || (if state.kind == EntryKind::Ride {
             play.parameters != [ride::parameter(ability.scope)]
         } else {
             !play.parameters.is_empty()
@@ -182,7 +255,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         || instruction.context != InstructionContext::Effect
         || step.source != located.source
         || instruction.action
-            != (if state.ride {
+            != (if state.kind == EntryKind::Ride {
                 ride::gain_drive()
             } else {
                 Action::MealRace {
@@ -239,23 +312,19 @@ impl Game {
         holder: &str,
         ability: &Ability,
     ) -> Result<()> {
-        let ride = matches!(
-            ability.source.origin,
-            AbilityOrigin::Keyword {
-                keyword: KeywordId::Ride,
-                ..
-            }
-        );
-        self.check_resource_entry_kind_available(holder, ride)
+        self.check_resource_entry_kind_available(
+            holder,
+            kind(ability).ok_or_else(|| invalid("entry kind"))?,
+        )
     }
 
-    fn check_resource_entry_kind_available(&self, holder: &str, ride: bool) -> Result<()> {
+    fn check_resource_entry_kind_available(&self, holder: &str, kind: EntryKind) -> Result<()> {
         let object = self.object(holder)?;
         if object.zone != "field"
-            || (if ride {
-                object.state["ride_used"] == true
-            } else {
-                !list(&object.state["links"]["出走"]).is_empty()
+            || (match kind {
+                EntryKind::Ride => object.state["ride_used"] == true,
+                EntryKind::Meal => !list(&object.state["links"]["出走"]).is_empty(),
+                EntryKind::Advance => false,
             })
             || self
                 .state
@@ -275,8 +344,12 @@ impl Game {
     fn resource_entry_candidates(
         &self,
         execution: &Execution,
-        ride: bool,
+        kind: EntryKind,
     ) -> Result<Vec<ObjectRef>> {
+        if kind == EntryKind::Advance {
+            return Ok(vec![]);
+        }
+        let ride = kind == EntryKind::Ride;
         let mut members = Vec::new();
         // Missing rule bindings must fail even when the evolve deck is empty.
         self.catalog
@@ -306,8 +379,8 @@ impl Game {
         if entry.selected.is_some() {
             return Ok(false);
         }
-        self.check_resource_entry_kind_available(&execution.context.source, entry.ride)?;
-        let members = self.resource_entry_candidates(execution, entry.ride)?;
+        self.check_resource_entry_kind_available(&execution.context.source, entry.kind)?;
+        let members = self.resource_entry_candidates(execution, entry.kind)?;
         let count = usize::try_from(entry.count).map_err(invalid)?;
         let player = self.player(seat_name(execution.context.controller)?)?;
         let ep_allowed = player.ep > 0 && entry.pp > 0;
@@ -372,8 +445,8 @@ impl Game {
             .selected
             .as_ref()
             .ok_or_else(|| invalid("missing resource entry selection"))?;
-        self.check_resource_entry_kind_available(&execution.context.source, entry.ride)?;
-        if entry.ride {
+        self.check_resource_entry_kind_available(&execution.context.source, entry.kind)?;
+        if entry.kind == EntryKind::Ride {
             execution.slots.insert(
                 (entry.scope, 0),
                 super::super::Slot::Objects {
@@ -382,7 +455,7 @@ impl Game {
                 },
             );
         }
-        let candidates = self.resource_entry_candidates(execution, entry.ride)?;
+        let candidates = self.resource_entry_candidates(execution, entry.kind)?;
         let seat = seat_name(execution.context.controller)?;
         if chosen
             .resources
@@ -394,12 +467,26 @@ impl Game {
                 "resource entry payment changed".into(),
             ));
         }
+        if entry.kind == EntryKind::Advance {
+            let mut costs = play.costs.clone();
+            let CostSpec::Ordered { steps } = &mut costs else {
+                return Err(invalid("Advance costs"));
+            };
+            let pp = steps
+                .first_mut()
+                .ok_or_else(|| invalid("Advance PP cost"))?;
+            let Action::Resource { amount, .. } = &mut pp.instruction.action else {
+                return Err(invalid("Advance PP action"));
+            };
+            *amount = Expr::Literal(Int(entry.pp.saturating_sub(i64::from(chosen.ep))));
+            self.internal_card_payment(execution, &costs, false)?;
+            return self.commit_entry_payment(execution, chosen.ep);
+        }
         let paid = self.internal_pay_pp(
             execution.context.controller,
             Int(entry.pp.saturating_sub(i64::from(chosen.ep))),
         )?;
-        let player = self.player_mut(seat)?;
-        player.ep = player.ep.saturating_sub(i64::from(chosen.ep));
+        self.pay_entry_ep(execution, chosen.ep)?;
         let ids = chosen
             .resources
             .iter()
@@ -407,14 +494,22 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         self.move_objects(
             &ids,
-            if entry.ride { "drive" } else { "race" },
+            if entry.kind == EntryKind::Ride {
+                "drive"
+            } else {
+                "race"
+            },
             None,
             None,
             &execution.frame(),
         )?;
-        self.object_mut(&execution.context.source)?.state["links"]
-            [if entry.ride { "憑依" } else { "出走" }] = json!(ids);
-        if entry.ride {
+        self.object_mut(&execution.context.source)?.state["links"][if entry.kind == EntryKind::Ride
+        {
+            "憑依"
+        } else {
+            "出走"
+        }] = json!(ids);
+        if entry.kind == EntryKind::Ride {
             self.object_mut(&execution.context.source)?.state["ride_used"] = json!(true);
         }
         let source = self.internal_current_reference(&execution.context.source)?;
@@ -436,7 +531,7 @@ impl Game {
                 ))
                 .or_insert(next);
         }
-        self.bump(&format!("{seat}.evolve_played"), 1);
+        self.consume_entry_quota(execution)?;
         let CostSpec::Ordered { steps } = &play.costs else {
             return Err(invalid("missing resource entry steps"));
         };
@@ -465,6 +560,28 @@ impl Game {
                 },
             );
         }
+        Ok(())
+    }
+
+    fn commit_entry_payment(&mut self, execution: &Execution, use_ep: bool) -> Result<()> {
+        self.pay_entry_ep(execution, use_ep)?;
+        self.consume_entry_quota(execution)
+    }
+
+    fn pay_entry_ep(&mut self, execution: &Execution, use_ep: bool) -> Result<()> {
+        let seat = seat_name(execution.context.controller)?;
+        let player = self.player_mut(seat)?;
+        player.ep = player
+            .ep
+            .checked_sub(i64::from(use_ep))
+            .filter(|ep| *ep >= 0)
+            .ok_or_else(|| invalid("entry EP changed"))?;
+        Ok(())
+    }
+
+    fn consume_entry_quota(&mut self, execution: &Execution) -> Result<()> {
+        let seat = seat_name(execution.context.controller)?;
+        self.bump(&format!("{seat}.evolve_played"), 1);
         Ok(())
     }
 

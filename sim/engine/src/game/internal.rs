@@ -918,6 +918,7 @@ impl Game {
                 }
                 (Wait::ResolutionTargets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
+                    wait.check_advance_current(self, &execution, &objects)?;
                     rollback = execution.origin.take();
                     execution.bind_targets(&wait, objects);
                 }

@@ -99,6 +99,7 @@ impl BodyContext<'_> {
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
         let (from, union) = match &choice.from {
+            ast::ChooseFrom::Advance(_) => return Err(unsupported(path)),
             ast::ChooseFrom::Query(query) => (query.as_ref(), None),
             // Only a private Look receipt is admitted as the shared input of every branch.
             ast::ChooseFrom::Union { any_of } => match any_of.as_slice() {

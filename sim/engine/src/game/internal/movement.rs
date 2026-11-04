@@ -638,7 +638,15 @@ impl Game {
                 && execution.is_private_look_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
-                && matches!(object.zone.as_str(), "evolve_deck" | "ex");
+                && (object.zone == "ex"
+                    || (object.zone == "evolve_deck"
+                        && (matches!(
+                            objects,
+                            Selector::Zone {
+                                zone: ZoneKind::Evolve,
+                                ..
+                            }
+                        ) || execution.is_private_advance_target(objects, member))));
             if !(ordinary || advance || private_look || private_hand)
                 || object.owner != seat
                 || object.controller != seat
