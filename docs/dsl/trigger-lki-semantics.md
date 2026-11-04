@@ -216,3 +216,5 @@ TriggerEvent receipt、MovedRef 泛用跟隨及任意 LKI producer 均維持拒�
    該能力本文條件 false 仍不退額度。改成 PerBatch 或用 PlayCommitted 消耗必須
    靜態拒絕。Attack／Evolve／Phase producer 各自接線時只加一個時點代表例，
    不把這個 pending 情境重建三遍。
+
+離場主體的守護篩選在同批移動前讀取有效關鍵字，包含同世代授予與持續效果，不以只含印刷能力的 `Characteristics.abilities` 代替。即使守護提供者與從者同批離場，也在移動清除授予前完成判斷；待機形成後不再讀墓場中的新世代。此讀值只服務已准入的守護離場標頭，不擴張通用 `SourceSnapshot` 或數值來源的資訊。
