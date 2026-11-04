@@ -400,7 +400,9 @@ impl Game {
             }
             if resource_entry::intrinsic(ability) {
                 resource_entry::check(located)?;
-                continue;
+                if !resource_entry::advance(ability) {
+                    continue;
+                }
             }
             if matches!(ability.kind, AbilityKind::Activated | AbilityKind::Spell) {
                 check_costs(ability, &located.source)?;
@@ -1155,6 +1157,7 @@ pub(in crate::game::internal) fn printed_origin(origin: &AbilityOrigin) -> Resul
                 | KeywordId::OnEvolve
                 | KeywordId::OnSuperEvolve
                 | KeywordId::Evolution
+                | KeywordId::AdvanceActivate
                 | KeywordId::Meal
                 | KeywordId::OnRace
                 | KeywordId::Ride

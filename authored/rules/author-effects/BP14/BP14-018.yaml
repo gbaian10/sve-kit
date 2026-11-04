@@ -1,0 +1,64 @@
+cards:
+  BP14-018:
+    abilities:
+      - activate:
+          advance: true
+          cost:
+            steps:
+              - pp: 4
+              - banish_self: true
+          do:
+            - choose:
+                bind: incoming
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name: 楽園の開闢・タケツミ
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: incoming
+                to: field
+          usable_if:
+            any:
+              - cmp:
+                  left:
+                    count:
+                      trait: 宴楽
+                      who: self
+                      zone: cemetery
+                  op: ge
+                  right: 5
+              - cmp:
+                  left:
+                    count:
+                      class: ロイヤル
+                      who: self
+                      zone: cemetery
+                  op: ge
+                  right: 10
+        line: 1
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - discard:
+                n: 1
+                who: self
+            - create:
+                n: 1
+                to: ex
+                token: 輝く金貨
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

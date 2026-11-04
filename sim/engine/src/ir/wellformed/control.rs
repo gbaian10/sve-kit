@@ -3,11 +3,11 @@ use super::{
     IterationCheck, Program, ReceiptExport, ReceiptList, ReceiptLocation, ReceiptReference,
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
-use crate::ir::effect_evolution;
 use crate::ir::{
     Decision, DecisionKind, Declinable, IterationOrder, PlayerRef, PlayerStage, ReceiptId,
     StageMode,
 };
+use crate::ir::{advance_entry, effect_evolution};
 use alloc::collections::BTreeMap;
 
 impl Checker {
@@ -24,6 +24,9 @@ impl Checker {
     }
 
     fn control_inner(&mut self, control: &Control) -> Checked {
+        if let Some(projection) = advance_entry::projection(control) {
+            return self.isolated(|checker| checker.advance_entry(projection));
+        }
         if let Some(projection) = effect_evolution::projection(control)
             && projection.entry.is_none()
         {

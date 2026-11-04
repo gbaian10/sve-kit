@@ -369,12 +369,18 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
 pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
     for step in &mut program.steps {
         if let Node::Control { control } = &mut step.node {
-            if let Some(projection) = projection(control)
-                && projection.instruction.source == *origin
-            {
+            let closed_scope = projection(control)
+                .filter(|projection| projection.instruction.source == *origin)
+                .map(|projection| projection.body.scope)
+                .or_else(|| {
+                    super::advance_entry::projection(control)
+                        .filter(|projection| projection.instruction.source == *origin)
+                        .map(|projection| projection.body.scope)
+                });
+            if let Some(scope) = closed_scope {
                 *control = Control::Sequence {
                     body: Program {
-                        scope: projection.body.scope,
+                        scope,
                         steps: vec![],
                     },
                 };

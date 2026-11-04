@@ -13,7 +13,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
-use crate::ir::{effect_evolution, prevention, printed_keywords};
+use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
@@ -100,7 +100,7 @@ fn check_body(
     check_program(
         program,
         source,
-        origin.is_some(),
+        origin,
         &mut super::receipt_counts::DeckReads::default(),
     )
 }
@@ -122,6 +122,7 @@ fn keyword_source_paths(
                 | KeywordId::OnRace
                 | KeywordId::OnDriveGain
                 | KeywordId::Quick
+                | KeywordId::AdvanceActivate
                 | KeywordId::Stack,
             ..
         }
@@ -353,6 +354,7 @@ fn check_requirements(
                             | "internal.KeywordId.OnRace"
                             | "internal.KeywordId.OnDriveGain"
                             | "internal.KeywordId.Quick"
+                            | "internal.KeywordId.AdvanceActivate"
                             | "internal.KeywordId.Ward"
                             | "internal.KeywordId.Aura"
                             | "internal.KeywordId.Storm"
@@ -486,12 +488,12 @@ fn check_player_stage(
     control: &Control,
     stages: &[PlayerStage],
     source: &SourceSpan,
-    card: bool,
+    origin: Option<&AbilitySource>,
     reads: &mut super::receipt_counts::DeckReads,
 ) -> Result<()> {
     super::tokens::check_each(control)?;
     for stage in stages {
-        check_program(&stage.body, source, card, reads)?;
+        check_program(&stage.body, source, origin, reads)?;
     }
     Ok(())
 }
@@ -499,37 +501,42 @@ fn check_player_stage(
 fn check_program(
     program: &Program,
     source: &SourceSpan,
-    card: bool,
+    origin: Option<&AbilitySource>,
     reads: &mut super::receipt_counts::DeckReads,
 ) -> Result<()> {
+    let card = origin.is_some();
     for step in &program.steps {
         super::ordering::check_node(&reads.mask(&step.node)?, source)?;
         match &step.node {
             Node::Control { control }
                 if card && effect_evolution::projection(control).is_some() => {}
+            Node::Control { control }
+                if advance_entry::projection(control).is_some_and(|projection| {
+                    origin.is_some_and(|expected| projection.instruction.source == *expected)
+                }) => {}
             Node::Control {
                 control: control @ Control::Pay { on_paid, .. },
             } if card => {
                 super::card::optional::check_control(control)?;
-                check_program(on_paid, source, card, reads)?;
+                check_program(on_paid, source, origin, reads)?;
             }
             Node::Control {
                 control: control @ Control::EachObject { body, .. },
             } if card && super::counters::iteration(control).is_some() => {
                 super::counters::check_iteration(control)?;
-                check_program(body, source, card, reads)?;
+                check_program(body, source, origin, reads)?;
             }
             Node::Control {
                 control: control @ Control::EachPlayer { stages, .. },
-            } => check_player_stage(control, stages, source, card, reads)?,
+            } => check_player_stage(control, stages, source, origin, reads)?,
             Node::Control {
                 control: Control::Sequence { body },
-            } => check_program(body, source, card, reads)?,
+            } => check_program(body, source, origin, reads)?,
             Node::Control {
                 control: control @ Control::May { body, .. },
             } => {
                 super::alternatives::check_may(control)?;
-                check_program(body, source, card, reads)?;
+                check_program(body, source, origin, reads)?;
             }
             Node::Control {
                 control:
@@ -539,9 +546,9 @@ fn check_program(
                         ..
                     },
             } => {
-                check_program(then_body, source, card, reads)?;
+                check_program(then_body, source, origin, reads)?;
                 if let Some(body) = else_body {
-                    check_program(body, source, card, reads)?;
+                    check_program(body, source, origin, reads)?;
                 }
             }
             Node::Instruction { instruction } => {
@@ -557,7 +564,7 @@ fn check_program(
                 control: Control::Mode { modes, .. },
             } if card => {
                 for mode in modes {
-                    check_program(&mode.body, source, card, reads)?;
+                    check_program(&mode.body, source, origin, reads)?;
                 }
             }
             Node::Capture { .. } => {}

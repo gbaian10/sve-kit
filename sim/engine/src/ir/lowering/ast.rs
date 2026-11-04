@@ -137,6 +137,7 @@ impl SourceUse {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Activate {
+    pub advance: Option<True>,
     pub quick: Option<bool>,
     pub zone: Option<ActivationZones>,
     pub cost: Cost,
@@ -1291,7 +1292,24 @@ pub(super) struct Choose {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ChooseFrom {
     Union { any_of: Vec<TargetQuery> },
+    Advance(Box<AdvanceEntryQuery>),
     Query(Box<TargetQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AdvanceEntryQuery {
+    pub who: SelfPlayer,
+    pub zone: EvolveDeckZone,
+    pub kind: SearchKind,
+    pub advance_follower: True,
+    pub name: String,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EvolveDeckZone {
+    EvolveDeck,
 }
 
 #[derive(Deserialize)]

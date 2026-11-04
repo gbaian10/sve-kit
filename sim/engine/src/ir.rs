@@ -119,6 +119,7 @@ macro_rules! runtime_variants {
 
 pub(crate) mod ability_play;
 mod actions;
+pub(crate) mod advance_entry;
 mod answers;
 pub(crate) mod attack_restrictions;
 mod capabilities;

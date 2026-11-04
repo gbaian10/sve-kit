@@ -3,6 +3,7 @@ use crate::ir::ride;
 
 mod ability_restrictions;
 mod additional;
+mod advance_entry;
 mod aggregates;
 mod ast;
 mod attack_restrictions;
@@ -756,6 +757,18 @@ fn ability_body<'entry>(
     entry: &'entry ast::Ability,
     path: &str,
 ) -> Result<(&'entry ast::Body, &'static str, Option<KeywordId>), LoweringError> {
+    if let Some(activated) = &entry.activate
+        && activated.advance.is_some()
+    {
+        if activated.quick.is_some() || activated.zone.is_some() {
+            return Err(unsupported(path));
+        }
+        return Ok((
+            &activated.body,
+            "activate",
+            Some(KeywordId::AdvanceActivate),
+        ));
+    }
     if let Some(body) = &entry.drive_time {
         return Ok((body, "drive_time", Some(KeywordId::OnDriveGain)));
     }
@@ -1417,9 +1430,26 @@ impl<'definitions> BodyContext<'definitions> {
         ability_source: &AbilitySource,
     ) -> Result<Program, LoweringError> {
         let mut steps = Vec::new();
-        for (index, step) in author_steps.iter().enumerate() {
+        let mut authored = author_steps.iter().enumerate();
+        while let Some((index, step)) = authored.next() {
             let step_path = format!("{path}/{index}");
             self.check_paid_material_name(step, &step_path)?;
+            if let ast::Step::Choose(choice) = step
+                && matches!(choice.from, ast::ChooseFrom::Advance(_))
+            {
+                let Some((next, ast::Step::Move(movement))) = authored.next() else {
+                    return Err(unsupported(&step_path));
+                };
+                steps.push(self.advance_entry(
+                    choice,
+                    movement,
+                    &step_path,
+                    &format!("{path}/{next}"),
+                    source,
+                    ability_source,
+                )?);
+                continue;
+            }
             self.field_entry.adjacent = choice_before(author_steps, index);
             if let ast::Step::PlayAbility(value) = step {
                 steps.extend(self.ability_play(value, &step_path, source, ability_source)?);

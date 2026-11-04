@@ -620,3 +620,8 @@ matching duration 與 affected binder；安裝空集合不分配效果身分。
 ### 動態正式張數的閉合
 
 `AggregateBound.property = NumericProperty::Count` 衡量所選集合的成員數。其值只接受公開自身數值子集，checker 拒絕隱藏區域與外來讀值。D1 正式目標僅准入單一群組、原群組與總基數相同且為 `0..None`、一個 `Equal` 或 `LessEqual` 張數界限；建立問題時求值並固定為既有群組與總基數。其他 aggregate 形狀維持原有准入規則；`Count` 不授權物件數值總和或極值操作。
+
+具名 Advance 入場以既有 `Control::Sequence` 封裝控制者私有的 0..1 選取及其唯一的 `Action::Move` 消費者。
+WF 比對完整形狀後才在局部作用域登錄私有綁定；一般 decision 仍拒絕 Evolve 區域。
+執行時以印刷名稱、Advance 卡型、擁有者、控制者及物件世代篩選並在回答時重驗，不授予一般隱藏區域選取權。
+Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序，不新增 IR 或獨立執行器。

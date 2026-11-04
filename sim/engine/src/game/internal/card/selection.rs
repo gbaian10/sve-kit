@@ -1,7 +1,6 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::game::list;
-use crate::ir::effect_evolution;
 use crate::ir::events::timing::opponent;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::public_numbers;
@@ -15,6 +14,7 @@ use crate::ir::{
 };
 use crate::ir::{AggregateBound, NumericProperty};
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
+use crate::ir::{advance_entry, effect_evolution};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
@@ -66,6 +66,29 @@ pub(in crate::game::internal) fn characteristics(
 }
 
 impl TargetWait {
+    pub(in crate::game::internal) fn check_advance_current(
+        &self,
+        game: &Game,
+        execution: &Execution,
+        members: &[ObjectRef],
+    ) -> Result<()> {
+        let Some(name) = advance_entry::name(&self.decision) else {
+            return Ok(());
+        };
+        let seat = super::seat_name(execution.context.controller)?;
+        for member in members {
+            let id = execution.object_id(*member)?;
+            if game.object(id)?.generation != member.generation.0
+                || !game.named_advance_candidate(id, seat, &name)?
+            {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "named Advance resource changed".into(),
+                ));
+            }
+        }
+        Ok(())
+    }
+
     fn is_private_look_member(&self, member: ObjectRef) -> bool {
         self.members.contains(&member) && private_look_choice(&self.decision)
     }
@@ -389,7 +412,7 @@ fn target_selector(selector: &Selector) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
-    if effect_evolution::is_choice(decision) {
+    if effect_evolution::is_choice(decision) || advance_entry::name(decision).is_some() {
         return Ok(());
     }
     if let ChoiceDomain::Recipients {
@@ -929,6 +952,7 @@ impl Game {
             return Err(unsupported("target groups"));
         }
         let evolution = effect_evolution::is_choice(decision);
+        let advance = advance_entry::name(decision).is_some();
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
@@ -958,7 +982,7 @@ impl Game {
                         && object.owner == actor_seat
                         && object.controller == actor_seat)
                     || matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
-                    || (evolution && object.zone == "evolve_deck"))
+                    || ((evolution || advance) && object.zone == "evolve_deck"))
                     || object.generation != reference.generation.0
                     || (object.zone == "field"
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
@@ -1019,6 +1043,16 @@ impl Game {
         decision: &Decision,
         constraint: &SelectionConstraint,
     ) -> Result<Vec<Vec<ObjectRef>>> {
+        if let Some(name) = advance_entry::name(decision) {
+            let seat = super::seat_name(execution.context.controller)?;
+            let mut members = Vec::new();
+            for id in self.zone_ids(seat, "evolve_deck") {
+                if self.named_advance_candidate(&id, seat, &name)? {
+                    members.push(execution.reference(self, &id)?);
+                }
+            }
+            return Ok(vec![members]);
+        }
         if effect_evolution::is_choice(decision) {
             if constraint.groups.len() != 1 {
                 return Err(unsupported("one effect evolution selector group"));
@@ -1067,6 +1101,18 @@ impl Game {
             }
         }
         Ok(members)
+    }
+
+    fn named_advance_candidate(&self, id: &str, seat: &str, name: &CardName) -> Result<bool> {
+        let object = self.object(id)?;
+        // Evolve-deck names have no continuous modifiers; the printed face defines this permission.
+        let printed = self.catalog.face(&object.card, 0)?;
+        Ok(object.zone == "evolve_deck"
+            && object.owner == seat
+            && object.controller == seat
+            && object.state["face"] == 0_i64
+            && printed["card_type"] == "フォロワー・アドバンス"
+            && printed["name"].as_str() == Some(name.0.as_str()))
     }
 
     pub(super) fn internal_mode_targets_feasible(
@@ -1222,6 +1268,21 @@ impl Execution {
             Selector::Bound { reference } => {
                 self.targets.get(&reference.key()).is_some_and(|wait| {
                     wait.members.contains(&member) && private_hand_choice(&wait.decision)
+                })
+            }
+            _ => false,
+        }
+    }
+
+    pub(in crate::game::internal) fn is_private_advance_target(
+        &self,
+        selector: &Selector,
+        member: ObjectRef,
+    ) -> bool {
+        match selector {
+            Selector::Bound { reference } => {
+                self.targets.get(&reference.key()).is_some_and(|wait| {
+                    wait.members.contains(&member) && advance_entry::name(&wait.decision).is_some()
                 })
             }
             _ => false,
