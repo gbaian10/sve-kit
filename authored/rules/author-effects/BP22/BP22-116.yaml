@@ -1,0 +1,45 @@
+cards:
+  BP22-116:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+          on:
+            discarded:
+              by:
+                ability_of:
+                  trait: ウマ娘
+                  who: self
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - line: 2
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: ウマ娘
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
