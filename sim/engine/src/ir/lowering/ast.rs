@@ -1593,13 +1593,26 @@ pub(super) struct HistoryQuery {
     pub who: Option<LeaderSide>,
     #[serde(rename = "distinct")]
     pub distinct: Option<HistoryDistinct>,
-    pub sel: Option<MovementSubject>,
+    pub sel: Option<HistorySubject>,
     pub from: Option<HistoryOrigin>,
     pub to: Option<DepartureDestination>,
     pub at_least: Option<u64>,
     pub r#where: Option<LifeHistoryFilter>,
     pub exclude: Option<HistoryExclusion>,
 }
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum HistorySubject {
+    Single(MovementSubject),
+    Union(HistoryTraitUnion),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HistoryTraitUnion {
+    pub traits_any: [String; 2],
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum HistoryExclusion {

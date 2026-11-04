@@ -328,7 +328,7 @@ fn check_requirements(
                     || super::source::count_zone(&requirements, requirement)
                     || super::history_turn::public_requirement(&requirements, requirement)
                     || super::card::prevention::requirement(&requirements, requirement)
-                    || entry_field_requirement(&requirements, requirement)
+                    || event_field_requirement(&requirements, requirement)
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
@@ -629,19 +629,20 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
     Ok(())
 }
 
-fn entry_field_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
+fn event_field_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
     requirement.capability.code == "read.event-field"
         && requirement.locations.iter().all(|location| {
-            requirements.required.iter().any(|other| {
-                matches!(
-                    other.capability.code,
-                    "shape.EntryMethodFields.EnterFieldMethod"
-                        | "shape.EntryOriginFields.EnterFieldFrom"
-                ) && other
-                    .locations
-                    .iter()
-                    .any(|at| at.ir_path == location.ir_path)
-            })
+            super::history_turn::public_location(requirements, location)
+                || requirements.required.iter().any(|other| {
+                    matches!(
+                        other.capability.code,
+                        "shape.EntryMethodFields.EnterFieldMethod"
+                            | "shape.EntryOriginFields.EnterFieldFrom"
+                    ) && other
+                        .locations
+                        .iter()
+                        .any(|at| at.ir_path == location.ir_path)
+                })
         })
 }
 

@@ -6,6 +6,7 @@ use super::{
 };
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
+use crate::ir::history_turn::played_filter;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
@@ -126,7 +127,9 @@ impl Checker {
     }
 
     fn history_count_read(&mut self, query: &HistoryQuery, count: HistoryCount) -> Checked {
-        if matches!(query.pattern, EventPattern::Discard { .. }) && count != HistoryCount::Facts {
+        if (matches!(query.pattern, EventPattern::Discard { .. }) || played_filter(query).is_some())
+            && count != HistoryCount::Facts
+        {
             return self.reject();
         }
         self.history(query)

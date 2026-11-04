@@ -1405,10 +1405,10 @@ impl Game {
             .ability
             .ok_or_else(|| invalid("missing formal source"))?;
         if execution.spell {
-            self.bump(
-                &format!("{}.cards_played", seat_name(source.controller)?),
-                1,
-            );
+            self.internal_commit_card_play(
+                &execution.context.source,
+                seat_name(source.controller)?,
+            )?;
             let group = self.group();
             self.emit(
                 json!({"kind":"プレイ","object":execution.context.source}),

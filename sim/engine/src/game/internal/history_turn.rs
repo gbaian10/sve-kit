@@ -6,47 +6,52 @@ use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::{
-    PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, ub_plan,
+    PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, played_filter, ub_plan,
 };
 use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
 use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, TraitId};
-use crate::ir::{ExecutionRef, HistoryQuery, PlayerRef, Requirement, Requirements};
+use crate::ir::{ExecutionRef, HistoryQuery, Location, PlayerRef, Requirement, Requirements};
 use alloc::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 
 pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
-    requirement.locations.iter().all(|location| {
-        location
-            .ir_path
-            .strip_suffix("/query/include_execution")
-            .or_else(|| {
-                location
-                    .ir_path
-                    .strip_suffix("/query/include_execution/execution")
+    requirement
+        .locations
+        .iter()
+        .all(|location| public_location(requirements, location))
+}
+
+pub(super) fn public_location(requirements: &Requirements, location: &Location) -> bool {
+    location
+        .ir_path
+        .strip_suffix("/query/include_execution")
+        .or_else(|| {
+            location
+                .ir_path
+                .strip_suffix("/query/include_execution/execution")
+        })
+        .or_else(|| location.ir_path.strip_suffix("/query/pattern"))
+        .or_else(|| {
+            location
+                .ir_path
+                .split_once("/query/pattern/")
+                .map(|(read, _)| read)
+        })
+        .or_else(|| location.ir_path.strip_suffix("/query/predicate"))
+        .or_else(|| {
+            location
+                .ir_path
+                .split_once("/query/predicate/")
+                .map(|(read, _)| read)
+        })
+        .is_some_and(|read| {
+            requirements.required.iter().any(|other| {
+                matches!(
+                    other.capability.code,
+                    "read.history.count" | "read.history.sum"
+                ) && other.locations.iter().any(|at| at.ir_path == read)
             })
-            .or_else(|| location.ir_path.strip_suffix("/query/pattern"))
-            .or_else(|| {
-                location
-                    .ir_path
-                    .split_once("/query/pattern/")
-                    .map(|(read, _)| read)
-            })
-            .or_else(|| location.ir_path.strip_suffix("/query/predicate"))
-            .or_else(|| {
-                location
-                    .ir_path
-                    .split_once("/query/predicate/")
-                    .map(|(read, _)| read)
-            })
-            .is_some_and(|read| {
-                requirements.required.iter().any(|other| {
-                    matches!(
-                        other.capability.code,
-                        "read.history.count" | "read.history.sum"
-                    ) && other.locations.iter().any(|at| at.ir_path == read)
-                })
-            })
-    })
+        })
 }
 
 fn committed_counter(game: &Game, player: PlayerId, name: &str) -> Result<u64> {
@@ -91,6 +96,56 @@ pub(super) fn combo(
 }
 
 pub(super) fn played(execution: &Execution, game: &Game, query: &HistoryQuery) -> Result<Nat> {
+    if let Some((plan, _)) = played_filter(query) {
+        let controller = execution.context.controller;
+        let all = game
+            .state
+            .ir_subject_history
+            .iter()
+            .filter(|fact| {
+                fact.event == SubjectHistoryEvent::Play && fact.controller == controller.seat
+            })
+            .collect::<Vec<_>>();
+        if u64::try_from(all.len()).map_err(invalid)?
+            != committed_counter(game, controller, "cards_played")?
+        {
+            return Err(unsupported("incomplete filtered played-card history"));
+        }
+        let filters = plan.subjects();
+        let mut count = 0_u64;
+        for fact in all {
+            let kind = match fact.kind.as_str() {
+                "follower" => CardKind::Follower,
+                "spell" => CardKind::Spell,
+                "amulet" => CardKind::Amulet,
+                _ => return Err(invalid("invalid saved played-card kind")),
+            };
+            let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
+            let information = SubjectInformation {
+                original_cost: None,
+                keywords: &[],
+                kind: Some(kind),
+                traits: &traits,
+                names: &[],
+                class: None,
+            };
+            if filters.iter().any(|filter| {
+                filter.matches_information(
+                    &information,
+                    false,
+                    controller,
+                    controller,
+                    PlayerId { seat: fact.active },
+                    fact.token,
+                )
+            }) {
+                count = count
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("played-card count overflow"))?;
+            }
+        }
+        return Ok(Nat(count));
+    }
     if let PlayedBy::Player(player) = played_by(query)
         .ok_or_else(|| unsupported("unfiltered current-turn played-card history"))?
     {
@@ -114,6 +169,7 @@ pub(in crate::game) struct UbHistoryFact {
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub(in crate::game) enum SubjectHistoryEvent {
+    Play,
     Attack,
     Evolve,
     Leave,
@@ -134,6 +190,51 @@ pub(in crate::game) struct SubjectHistoryFact {
     pub(in crate::game::internal) names: Option<Vec<String>>,
     pub(in crate::game::internal) token: bool,
     pub(in crate::game::internal) destroyed: bool,
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Formal Play commits one shared counter and public fact before observers."
+)]
+impl Game {
+    pub(in crate::game) fn internal_commit_card_play(
+        &mut self,
+        source: &str,
+        controller: &str,
+    ) -> Result<()> {
+        let fact = if self.card_runtime.is_empty() {
+            None
+        } else {
+            // Played queries need neither titles nor class, even in minimal catalogs.
+            let information = self.public_characteristics(source, Vec::new())?;
+            let kind = match information.kind {
+                Some(CardKind::Follower) => "follower",
+                Some(CardKind::Spell) => "spell",
+                Some(CardKind::Amulet) => "amulet",
+                _ => return Err(unsupported("played-card history kind")),
+            };
+            let object = self.internal_current_reference(source)?;
+            Some(SubjectHistoryFact {
+                event: SubjectHistoryEvent::Play,
+                destination: None,
+                object: object.id.0,
+                generation: object.generation.0,
+                controller: super::player_id(controller)?.seat,
+                active: super::player_id(self.active())?.seat,
+                kind: kind.into(),
+                class: String::new(),
+                traits: information.traits.into_iter().map(|id| id.0).collect(),
+                names: None,
+                token: information.token,
+                destroyed: false,
+            })
+        };
+        self.bump(&format!("{controller}.cards_played"), 1);
+        if let Some(fact) = fact {
+            self.state.ir_subject_history.push(fact);
+        }
+        Ok(())
+    }
 }
 
 fn ub_count(

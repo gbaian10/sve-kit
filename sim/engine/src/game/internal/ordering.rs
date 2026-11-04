@@ -5,7 +5,7 @@ use super::{
 };
 use crate::ir::NumericProperty;
 use crate::ir::events::attack::target_plan;
-use crate::ir::history_turn::{life_plan, life_sum_plan, subject_plan};
+use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
 use crate::ir::prevention;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
@@ -452,7 +452,7 @@ fn mask_public_number(number: &mut Expr<Int>) {
 }
 
 fn mask_public_natural(value: &mut Expr<Nat>) {
-    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some()))
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some() || played_filter(query).is_some()))
     {
         *value = Expr::Literal(Nat(0));
         return;

@@ -388,7 +388,7 @@ impl Game {
         }
         self.move_objects(&[source.into()], "resolution", None, None, &frame)?;
         self.object_mut(source)?.state["entered_from"] = json!(object.zone);
-        self.bump(&format!("{controller}.cards_played"), 1);
+        self.internal_commit_card_play(source, controller)?;
         let group = self.group();
         let cause = self.emit(
             json!({"kind":"プレイ","object":source}),

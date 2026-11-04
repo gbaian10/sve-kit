@@ -272,3 +272,49 @@ fn watching_another_entry_does_not_supply_the_holders_entry_method() {
     entry["auto"] = body;
     lowerer().lower(&candidate).unwrap_err();
 }
+
+#[test]
+fn a_valid_entry_reader_does_not_authorize_an_unhandled_event_reader_in_the_same_body() {
+    let mut candidate = lowerer()
+        .lower(&candidate("play"))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+        .card()
+        .clone();
+    let TriggerCondition::Event {
+        pattern: EventPattern::EnterField { binding, .. },
+    } = &candidate.abilities[0].node.trigger.as_ref().unwrap().on
+    else {
+        panic!("Fanfare event");
+    };
+    let event = *binding;
+    let Node::Control {
+        control: Control::If { condition, .. },
+    } = &mut candidate.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("entry condition");
+    };
+    *condition = Expr::Compute(Box::new(Predicate::And {
+        predicates: vec![
+            condition.clone(),
+            Expr::Compute(Box::new(Predicate::PlayerEquals {
+                left: Expr::Frozen(Box::new(PlayerFrozen::EnterFieldController { event })),
+                right: Expr::Literal(PlayerRef::Controller {}),
+            })),
+        ],
+    }));
+    let checked = WellFormedCardProgram::check(candidate).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "closed-entry-reader-union",
+    )
+    .unwrap();
+    let error = game
+        .load_internal_card("unit-follower", &checked)
+        .unwrap_err();
+    assert!(format!("{error:?}").contains("read.event-field"));
+}
