@@ -146,10 +146,10 @@ impl Game {
     fn played_observers(
         &self,
         source: &str,
-        info: &EventSubjectInformation,
+        info: &mut EventSubjectInformation,
         actor: PlayerId,
     ) -> Result<Vec<(String, EffectiveAbility)>> {
-        let subject = info.borrowed();
+        let mut cost_loaded = false;
         let active = player_id(self.active())?;
         let mut observers = self.field_ids();
         observers.extend(self.zone_ids("P1", "cemetery"));
@@ -172,16 +172,24 @@ impl Game {
             for ability in self.internal_effective_abilities(&holder)? {
                 if ability.node.active_zones == [zone]
                     && let Some(plan) = filter(&ability.node)
-                    && plan.subject.matches_information(
-                        &subject,
+                {
+                    if plan.original.is_some() && !cost_loaded {
+                        info.original_cost = self
+                            .internal_cost_print(source)?
+                            .get("cost")
+                            .and_then(known_original_cost);
+                        cost_loaded = true;
+                    }
+                    if plan.matches_information(
+                        &info.borrowed(),
                         holder == source,
                         controller,
                         actor,
                         active,
                         info.token,
-                    )
-                {
-                    matched.push((holder.clone(), ability));
+                    ) {
+                        matched.push((holder.clone(), ability));
+                    }
                 }
             }
         }
@@ -212,8 +220,8 @@ impl Game {
         }
         let actor = execution.context.controller;
         let source = &execution.context.source;
-        let info = self.event_subject_information(source)?;
-        let matched = self.played_observers(source, &info, actor)?;
+        let mut info = self.event_subject_information(source)?;
+        let matched = self.played_observers(source, &mut info, actor)?;
         if matched.is_empty() {
             return Ok(());
         }
@@ -254,3 +262,15 @@ impl Game {
         self.internal_admit_pending(candidates)
     }
 }
+
+fn known_original_cost(value: &serde_json::Value) -> Option<i64> {
+    let number = match value {
+        serde_json::Value::Number(n) => n.as_i64(),
+        serde_json::Value::String(s) => s.parse::<i64>().ok(),
+        _ => None,
+    };
+    number.filter(|n| *n >= 0)
+}
+
+#[cfg(test)]
+mod tests;

@@ -66,6 +66,9 @@ pub(super) fn attack(
     }
     let subject_filter = entry.sel.as_ref().map(|subject| ast::MovementSubject {
         orig_cost_eq: None,
+        orig_cost_le: None,
+        orig_cost_ge: None,
+        traits_any: None,
         keyword: None,
         class: subject.class.clone(),
         kind: subject.kind.clone(),

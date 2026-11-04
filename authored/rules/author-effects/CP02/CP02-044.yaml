@@ -1,0 +1,35 @@
+cards:
+  CP02-044:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: victim
+            - draw:
+                n: 1
+                who: self
+          on:
+            played:
+              sel:
+                orig_cost_ge: 5
+              who: self
+          per_turn: 1
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set
