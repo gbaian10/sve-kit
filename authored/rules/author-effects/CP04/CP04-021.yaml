@@ -1,0 +1,47 @@
+cards:
+  CP04-021:
+    abilities:
+      - attack_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - keywords:
+          - storm
+        line: 1
+        section: 1
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - equip:
+                on: this
+                token: 聖域剣アヴァロン
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

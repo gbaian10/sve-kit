@@ -1,0 +1,44 @@
+cards:
+  CP04-058:
+    abilities:
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - equip:
+                      on: this
+                      token: 絆の証
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: eq
+                    right: 10
+                then:
+                  - buff:
+                      on: this
+                      power: 3
+          ub: true
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    token_sources:
+      - card: CP04-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
