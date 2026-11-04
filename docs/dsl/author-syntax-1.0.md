@@ -1060,6 +1060,8 @@ spell:
 
 進化頭 into 名稱清單／Sel 編為 D.play-param Face；效果進化的規則選面用 D.rule-choice EvolutionCard，兩者不同。
 
+目前執行准入的效果 `evolve` 限自身，或已選出的單一自己場上從者，以及單一從者搜尋入場結果的 `follow`；他者進化依收件者自己的名字選面且可拒絕，`into` 仍只限自身的單一字面名稱。完整語法列出的其他形狀不表示已可執行，範圍見[效果作者工具](authoring-tools.md)。
+
 真實卡例：**BP09-004 愛の妖精・ポーラ**；來源 `BP09-004#0/text/0`，句型 `T3e96f90125`。
 
 **官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP09-004)；不在本專案授權內）。
