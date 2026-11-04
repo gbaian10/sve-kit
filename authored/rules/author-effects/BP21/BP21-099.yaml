@@ -1,0 +1,64 @@
+cards:
+  BP21-099:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: 学院
+                who: self
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                history_sum:
+                  event: life_changed
+                  field: delta
+                  where:
+                    direction: up
+                  who: self
+                  window: this_turn
+              op: ge
+              right: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  n: 1
+                  sel:
+                    kind: amulet
+                    trait: 学院
+                    who: self
+                    zone: hand
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 1
+                  trait: 学院
+                  who: self
+                  zone: deck
+                to: hand
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set
