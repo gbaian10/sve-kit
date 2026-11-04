@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0016
+revision: 1
+question: アメス先以效果免原費用發動某張從者的一回合限次UB起動後，該次發動是否占用通常起動的使用次數？
+decision: 本專案解讀為會占用。每次適正發動照常寫入同一能力的起動使用歷史；效果授權不以次數上限排除候選、回答或正式提交。因此通常已用過後仍可被效果發動，但先被效果發動後，通常起動仍受既有上限限制。全體UB歷史與事件照常記錄；不改變自動能力的誘發次數消耗點。
+evidence:
+  - ref: CP04-114 Q2488
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=CP04-114
+    note: 只明定通常已用過的限次UB仍可被アメス發動；沒有直接回答反向順序的每能力次數記錄。
+  - ref: CP04-114 Q2550
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=CP04-114
+    note: 效果發動算作一次UB發動，不足以單獨證明每能力的限次記錄方式。
+  - ref: CP04-114 Q2479
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=CP04-114
+    note: 效果發動會產生UB事件；不直接裁定反向順序的使用次數。
+  - ref: project
+    kind: project
+    reason: 原文沒有區分通常與效果發動的兩種使用歷史，採每次發動都記錄、只在效果授權略過上限檢查的解讀；實作者與獨立審核者一致，且不改變共同提交或事件順序。
+    date: "2026-11-04"
+strength: inferred
+decided_on: 2026-11-04
+applies_to: [E.play]
+hint:
+  zh-TW: 本專案解讀：アメス讓能力發動時仍計入該能力的每回合使用次數，但效果授權不受已滿次數阻擋；這個反向次數問題尚無直接官方回答。
+  ja: 本プロジェクトの解釈：アメスの効果による発動もその能力の使用回数に数えますが、効果による発動は回数上限に妨げられません。逆順の使用回数について直接の公式回答はありません。
+  en: "Project interpretation: Ameth's effect still counts as a use of that ability, while effect authorization bypasses its usage limit. The reverse-order usage question has no direct official answer."
+note: 僅解讀效果授權與起動限次的關係；IR事件參照保留說明，不作來源分類或整卡准入證明。若日後官方裁定反向仍可通常起動，可局部修正效果路徑是否寫入限次記錄，UB歷史與事件不變。
