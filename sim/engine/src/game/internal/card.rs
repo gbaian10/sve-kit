@@ -31,6 +31,7 @@ use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
 
+pub(in crate::game) mod ability_restrictions;
 pub(in crate::game) mod attack_restrictions;
 mod costs;
 mod effect_evolution;
@@ -552,6 +553,7 @@ impl Game {
         }
         let (ability, source) =
             selected.ok_or_else(|| invalid("ability is not effective for this holder"))?;
+        self.internal_require_ability_permission(holder, &ability.node)?;
         let seat = seat_name(actor)?;
         if ability.node.kind != AbilityKind::Activated
             || !matches!(

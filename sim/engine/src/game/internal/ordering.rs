@@ -8,13 +8,13 @@ use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::{life_plan, life_sum_plan, subject_plan};
 use crate::ir::prevention;
 use crate::ir::{
-    Action, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality, ChoiceDomain,
-    Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int, IntOperation,
-    IntRead, Located, LookOutcome, MemberProjection, MoveDestination, MovementReceipt, Nat,
-    NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone,
-    PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation,
-    RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, Selector,
-    SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
+    ChoiceDomain, Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int,
+    IntOperation, IntRead, Located, LookOutcome, MemberProjection, MoveDestination,
+    MovementReceipt, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
+    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
+    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
+    ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
@@ -53,6 +53,25 @@ pub(super) fn check_condition(condition: &Expr<Bool>, source: &SourceSpan) -> Re
         },
         source,
     )
+}
+
+fn mask_ability_permission(node: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = node
+        && matches!(&instruction.action, Action::InstallEffect { effect, .. }
+            if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::PlayAbility { .. }, .. }))
+    {
+        super::card::ability_restrictions::check_install(&instruction.action)?;
+        if let Action::InstallEffect { effect, .. } = &mut instruction.action
+            && let Effect::Permission {
+                action: ActionPattern::PlayAbility { predicate },
+                ..
+            } = effect.as_mut()
+        {
+            // A checked literal exception grants no observation of an evolution card.
+            predicate.except.clear();
+        }
+    }
+    Ok(())
 }
 
 #[expect(
@@ -97,6 +116,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     }
     let mut inspected = node.clone();
     mask_prevention(&mut inspected)?;
+    mask_ability_permission(&mut inspected)?;
     mask_discard(&mut inspected)?;
     mask_player_cost_filter(&mut inspected)?;
     if let Node::Instruction { instruction } = &mut inspected

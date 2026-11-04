@@ -2550,10 +2550,45 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotPlayAbility {
+    #[serde(rename = "what")]
+    pub _what: PlayAbilityAction,
+    pub ability: ActivatedPredicate,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PlayAbilityAction {
+    PlayAbility,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ActivatedPredicate {
+    #[serde(rename = "kind")]
+    pub _kind: ActivatedKind,
+    pub except: Option<Vec<EvolutionException>>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ActivatedKind {
+    Activated,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EvolutionException {
+    Evolution,
 }
 
 #[derive(Deserialize)]

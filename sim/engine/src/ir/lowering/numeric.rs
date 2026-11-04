@@ -366,6 +366,9 @@ impl BodyContext<'_> {
                     source: EffectReference::CurrentInstallation {},
                 });
             }
+            ast::InstalledEffect::Cannot(ast::Cannot::PlayAbility(_)) => {
+                return self.no_activation(installation, path);
+            }
             ast::InstalledEffect::Cannot(ast::Cannot::Attack(_)) => {
                 return self.no_attack(installation, path);
             }

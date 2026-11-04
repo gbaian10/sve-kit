@@ -376,6 +376,8 @@ fn play_requirement(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.EachObject"
+            | "shape.ActionPattern.PlayAbility"
+            | "internal.AbilityKind.Activated"
             | "control.each-object"
             | "shape.ObjectOperand.Selected"
             | "reference.selected-object"
@@ -459,6 +461,10 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     }
     super::card::nested::check(action)?;
     super::card::nested::ability::check_action(action)?;
+    if matches!(action, Action::InstallEffect { effect, .. } if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::PlayAbility { .. }, .. }))
+    {
+        return super::card::ability_restrictions::check_install(action);
+    }
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
     super::tokens::equipment::check_action(action)?;

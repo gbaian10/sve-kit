@@ -395,6 +395,7 @@ impl Game {
             state.generation = generation;
         }
         self.internal_numeric_rule_carry(holder, before, generation);
+        self.internal_ability_restrictions_rule_carry(holder, before, generation);
         self.internal_grants_rule_carry(holder, before)
     }
 

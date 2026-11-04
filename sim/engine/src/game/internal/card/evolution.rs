@@ -64,6 +64,9 @@ fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
 }
 
 fn usable(game: &Game, holder: &str, ability: &Ability) -> Result<bool> {
+    if game.internal_ability_forbidden(holder, ability)? {
+        return Ok(false);
+    }
     let Some(predicate) = qualification(ability)? else {
         return Ok(true);
     };
@@ -175,6 +178,9 @@ impl Game {
         ability: &Ability,
         decision: &Value,
     ) -> Result<bool> {
+        if self.internal_ability_forbidden(string(&decision["source"]), ability)? {
+            return Ok(false);
+        }
         let mut play = ability
             .play
             .clone()

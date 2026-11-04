@@ -588,6 +588,9 @@ impl Game {
         actor: PlayerId,
         spell: bool,
     ) -> Result<bool> {
+        if !spell && self.internal_ability_forbidden(holder, ability)? {
+            return Ok(false);
+        }
         // Allocate evaluation slots on a disposable authority, without moving cards or running effects.
         let mut probe = self.clone();
         let mut execution = probe.new_card_execution(Context {
@@ -1057,6 +1060,7 @@ impl Game {
         ability: Ability,
         cost_policy: AbilityCostPolicy,
     ) -> Result<()> {
+        self.internal_require_ability_permission(&execution.context.source, &ability)?;
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;

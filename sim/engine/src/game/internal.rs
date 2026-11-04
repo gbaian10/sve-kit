@@ -50,6 +50,7 @@ mod discard;
 mod drive;
 mod duration;
 mod earth;
+pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
@@ -1608,6 +1609,17 @@ impl Game {
                 ) =>
             {
                 self.internal_install_attack_restriction(execution, &instruction)?;
+            }
+            Action::InstallEffect { effect, .. }
+                if matches!(
+                    effect.as_ref(),
+                    Effect::Permission {
+                        action: ActionPattern::PlayAbility { .. },
+                        ..
+                    }
+                ) =>
+            {
+                self.internal_install_ability_restriction(execution, &instruction)?;
             }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {

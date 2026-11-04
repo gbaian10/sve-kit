@@ -115,7 +115,9 @@ impl Game {
         }
         let mut candidates = vec![];
         for ability in self.internal_effective_abilities(physical)? {
-            if !matches(&ability.node, filter) {
+            if !matches(&ability.node, filter)
+                || self.internal_ability_forbidden(physical, &ability.node)?
+            {
                 continue;
             }
             let source = self.internal_effective_source(physical, &ability)?;
