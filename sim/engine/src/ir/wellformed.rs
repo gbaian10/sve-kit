@@ -264,6 +264,7 @@ struct Checker {
     play_entry: Option<Environment>,
     play_controller: Option<PlayerRef>,
     capture_time: Option<CaptureTime>,
+    event_history: Option<super::EventSnapshotPolicy>,
     count_time: Option<super::SpellCountTime>,
     // Lives outside `Environment`, so no scope join can restore evidence a flip may have revoked.
     revoked: bool,
@@ -324,6 +325,7 @@ impl Checker {
             play_entry: None,
             play_controller: None,
             capture_time: None,
+            event_history: None,
             count_time: None,
             revoked: false,
             scopes: BTreeSet::new(),

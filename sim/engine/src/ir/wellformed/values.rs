@@ -8,8 +8,8 @@ use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
-    EventPattern, EvolutionRead, ExecutionRef, HistoryCount, NumberRead, PaymentReference,
-    PlayerRead, PostureRead,
+    EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
+    PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -125,8 +125,18 @@ impl Checker {
         }
     }
 
+    fn history_count_read(&mut self, query: &HistoryQuery, count: HistoryCount) -> Checked {
+        if matches!(query.pattern, EventPattern::Discard { .. }) && count != HistoryCount::Facts {
+            return self.reject();
+        }
+        self.history(query)
+    }
+
     pub(super) fn natural(&mut self, expression: &Expr<Nat>) -> Checked {
-        if self.event_capture() && matches!(expression, Expr::Live(_)) {
+        if self.event_capture()
+            && matches!(expression, Expr::Live(_))
+            && self.event_history.is_none()
+        {
             return self.reject();
         }
         match expression {
@@ -176,14 +186,7 @@ impl Checker {
                 NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {
                     self.player(player)
                 }
-                NatRead::HistoryCount { query, count } => {
-                    if matches!(query.pattern, EventPattern::Discard { .. })
-                        && *count != HistoryCount::Facts
-                    {
-                        return self.reject();
-                    }
-                    self.history(query)
-                }
+                NatRead::HistoryCount { query, count } => self.history_count_read(query, *count),
                 NatRead::Combo { player, execution } => {
                     if *execution != (ExecutionRef::Current {}) {
                         return self.reject();

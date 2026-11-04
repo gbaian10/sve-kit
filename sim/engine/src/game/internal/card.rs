@@ -6,6 +6,7 @@ use super::{
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
+use crate::ir::history_turn::evolution_capture_header;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
@@ -970,7 +971,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         && !equipment_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
-        || !ability.event_captures.is_empty()
+        || (!ability.event_captures.is_empty() && !evolution_capture_header(ability))
         || !ability.declarations.is_empty()
     {
         return Err(unsupported("whole-card ability header"));

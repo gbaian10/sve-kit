@@ -207,12 +207,30 @@ fn subject_count(
     query: &HistoryQuery,
     count: HistoryCount,
 ) -> Result<Nat> {
-    let Some((event, filter)) = subject_plan(query) else {
+    let Some(_) = subject_plan(query) else {
         if count != HistoryCount::Facts {
             return Err(unsupported("played history subject count"));
         }
         return played(execution, game, query);
     };
+    subject_count_at(
+        game,
+        execution.ability,
+        execution.context.controller,
+        query,
+        count,
+    )
+}
+
+pub(super) fn subject_count_at(
+    game: &Game,
+    source: Option<super::RuntimeAbilitySource>,
+    controller: PlayerId,
+    query: &HistoryQuery,
+    count: HistoryCount,
+) -> Result<Nat> {
+    let (event, filter) =
+        subject_plan(query).ok_or_else(|| unsupported("subject history query"))?;
     let mut facts = 0_u64;
     let mut identities = BTreeSet::new();
     for fact in &game.state.ir_subject_history {
@@ -261,13 +279,13 @@ fn subject_count(
             traits: &traits,
             names: &names,
         };
-        let itself = execution.ability.is_some_and(|source| {
+        let itself = source.is_some_and(|source| {
             source.holder.id.0 == fact.object && source.holder.generation.0 == fact.generation
         });
         if filter.matches_information(
             &information,
             itself,
-            execution.context.controller,
+            controller,
             PlayerId {
                 seat: fact.controller,
             },

@@ -1,9 +1,11 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
+use super::super::Slot;
+use super::super::history_turn::subject_count_at;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
-use crate::ir::{LimitSpec, Requirements};
+use crate::ir::{HistoryCount, LimitSpec, Requirements, ScopeId};
 
 use super::super::source::{EventObject, SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
@@ -69,6 +71,7 @@ pub(super) struct PendingOccurrence {
     card: String,
     timing: Option<EventPayload>,
     source_position: u64,
+    captures: Vec<((ScopeId, u64), Slot)>,
 }
 
 pub(in crate::game) struct DeparturePlan {
@@ -232,6 +235,7 @@ impl Game {
             movement_after: None,
             card,
             timing: None,
+            captures: vec![],
             source_position: u64::try_from(
                 self.zone_ids(
                     super::seat_name(source.controller)?,
@@ -650,6 +654,7 @@ impl Game {
             let mut execution = self.new_card_execution(context)?;
             pending.bind_event_move(&mut execution)?;
             pending.bind_event_object(&mut execution)?;
+            execution.slots.extend(pending.captures.clone());
             if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
                 (&pending.timing, &pending.ability.node.trigger)
                 && let TriggerCondition::Event {
@@ -697,6 +702,52 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    fn capture_history(&mut self, game: &Game) -> Result<()> {
+        use crate::ir::history_turn::{evolution_capture_header, evolution_capture_query};
+        use crate::ir::{Capture, CaptureTime, EventContext, Int};
+        if self.ability.node.event_captures.is_empty() {
+            return Ok(());
+        }
+        if !evolution_capture_header(&self.ability.node)
+            || !matches!(self.timing, Some(EventPayload::Evolve { .. }))
+        {
+            return Err(unsupported("event history capture header"));
+        }
+        let trigger = self
+            .ability
+            .node
+            .trigger
+            .as_ref()
+            .ok_or_else(|| invalid("event history trigger"))?;
+        for capture in &self.ability.node.event_captures {
+            let query = evolution_capture_query(
+                capture,
+                CaptureTime::AtEvent {
+                    event: EventContext::Trigger {},
+                    policy: trigger.view,
+                },
+            )
+            .ok_or_else(|| unsupported("event history capture value"))?;
+            let count = subject_count_at(
+                game,
+                Some(self.source),
+                self.source.controller,
+                query,
+                HistoryCount::Facts,
+            )?;
+            let (key, slot) = match capture {
+                Capture::Integer { into, .. } => (
+                    into.binding.key(),
+                    Slot::Integer(Int(i64::try_from(count.0).map_err(invalid)?)),
+                ),
+                Capture::Natural { into, .. } => (into.binding.key(), Slot::Natural(count)),
+                _ => return Err(unsupported("event history capture type")),
+            };
+            self.captures.push((key, slot));
+        }
+        Ok(())
+    }
+
     pub(super) fn capture_subject_information(&mut self, game: &Game) -> Result<()> {
         let Some(body) = &self.ability.node.body else {
             return Ok(());

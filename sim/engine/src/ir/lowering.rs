@@ -650,7 +650,7 @@ impl Allocator {
                 kind,
                 qualification: body.ub.as_ref().map_or(Ordinary, |_| UnionBurst),
                 active_zones,
-                event_captures: vec![],
+                event_captures: context.event_captures,
                 play,
                 trigger,
                 body: Some(program),
@@ -1242,6 +1242,8 @@ struct BodyContext<'definitions> {
     parameters: Vec<super::Decision>,
     resolution_scope: ScopeId,
     resolution_captures: Vec<super::Capture>,
+    event_captures: Vec<super::Capture>,
+    event_trigger: Option<TriggerSpec>,
     formal_play: bool,
     auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
@@ -1301,6 +1303,8 @@ impl<'definitions> BodyContext<'definitions> {
             parameters: vec![],
             resolution_scope: scope,
             resolution_captures: vec![],
+            event_captures: vec![],
+            event_trigger: None,
             mode_targets: BTreeMap::new(),
             auto: entry.auto.as_ref(),
             formal_play: entry.activate.is_some()
@@ -1331,6 +1335,7 @@ impl<'definitions> BodyContext<'definitions> {
                 self.damage_event = Some(*binding);
             }
         }
+        self.event_trigger = Some(trigger.clone());
         Ok(Some(trigger))
     }
 
