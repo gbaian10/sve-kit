@@ -258,15 +258,17 @@ fn multiple_equipment_providers_grant_distinct_activated_instances_to_the_host()
 }
 
 #[test]
-fn activated_definitions_are_not_opened_for_field_auras_or_installed_grants() {
+fn activated_definitions_admit_installed_grants_but_keep_field_auras_closed() {
     let definition =
         json!({"activate":{"cost":{"act_self":true},"do":[{"life":{"who":"self","delta":1}}]}});
-    for (positive, negative) in [
+    for (installed, positive, definition_grant) in [
         (
+            false,
             json!({"static":{"effects":[{"grant":{"on":"this","keywords":["ward"]}}]}}),
             json!({"static":{"effects":[{"grant":{"on":"this","abilities":[definition]}}]}}),
         ),
         (
+            true,
             json!({"activate":{"cost":{"pp":0},"do":[{"grant":{"on":"this","keywords":["ward"]}}]}}),
             json!({"activate":{"cost":{"pp":0},"do":[{"grant":{"on":"this","abilities":[definition]}}]}}),
         ),
@@ -274,18 +276,22 @@ fn activated_definitions_are_not_opened_for_field_auras_or_installed_grants() {
         let mut game = board("イクイップメント・トークン");
         game.load_internal_card("unit-follower", &lowered(&positive, "unit-follower"))
             .unwrap();
-        let mut rejected = board("イクイップメント・トークン");
-        let before = exact_authority(&rejected);
-        assert!(
-            rejected
-                .load_internal_card("unit-follower", &lowered(&negative, "unit-follower"))
-                .is_err()
+        let mut candidate = board("イクイップメント・トークン");
+        let before = exact_authority(&candidate);
+        let result = candidate.load_internal_card(
+            "unit-follower",
+            &lowered(&definition_grant, "unit-follower"),
         );
-        assert_eq!(
-            exact_authority(&rejected),
-            before,
-            "opening equipment does not admit ordinary activated grants"
-        );
+        if installed {
+            result.unwrap();
+        } else {
+            assert!(result.is_err());
+            assert_eq!(
+                exact_authority(&candidate),
+                before,
+                "field activation auras remain closed"
+            );
+        }
     }
 }
 
