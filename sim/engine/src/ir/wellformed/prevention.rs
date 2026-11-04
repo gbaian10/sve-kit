@@ -1,5 +1,5 @@
 use super::{Checked, Checker, WellFormedReason};
-use crate::ir::prevention::{Recipients, own_leader, projection};
+use crate::ir::prevention::{DamageSource, Recipients, own_leader, projection};
 use crate::ir::{
     Bool, DurationEnd, Effect, EventRewrite, Expr, PlayerSet, ProposedEventPattern, Selector,
     TimeAnchor, ZoneKind,
@@ -18,6 +18,8 @@ impl Checker {
             || shape.duration.usage.is_some()
             || shape.usage.is_some()
             || !shape.duration.intervals.is_empty()
+            || (matches!(shape.damage_source, Some(DamageSource::OpponentController))
+                && zones != [ZoneKind::Field])
         {
             return self.reject();
         }
@@ -56,7 +58,7 @@ impl Checker {
             Some(Recipients::Leaders(players)) => self.players(players)?,
             None => {}
         }
-        if let Some(objects) = shape.damage_source {
+        if let Some(DamageSource::Objects(objects)) = shape.damage_source {
             self.selector(objects)?;
         }
         match shape.rewrite {
@@ -98,9 +100,8 @@ impl Checker {
     pub(super) fn installed_prevention(&mut self, effect: &Effect, targets: &Selector) -> Checked {
         let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
         let captured = match (shape.recipients, shape.damage_source) {
-            (Some(Recipients::Objects(objects)), None) | (None, Some(objects)) => {
-                objects == targets
-            }
+            (Some(Recipients::Objects(objects)), None)
+            | (None, Some(DamageSource::Objects(objects))) => objects == targets,
             _ => false,
         };
         if !captured || *shape.condition != Expr::Literal(Bool(true)) {

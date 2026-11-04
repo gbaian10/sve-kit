@@ -266,6 +266,12 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 `prevent: {on?,kind:any|combat|ability,source?,next_only?}`；`damage_mod: {on?,source?,kind?:any|attack|combat|ability,delta或multiply,next_only?}`；`damage_cap: {on?,threshold,set}` 在 amount>=threshold 時改為 set，不默認 min；`cost_mod: {when_playing,delta或set,next_only?}`；`evolve_cost_mod: {on,delta或set}`；`ignore_ward: {on}`；`reroll: {who,times}`；`choice_any: {who}`。期限與使用額度分開。`cost_mod.when_playing.in` 接 ObjectSet 或 `{follow: ReceiptId|ReceiptList}`；於效果安裝時保存獲授權的新世代集合，不因之後同卡號入場而新增成員。`player_effect.cost_mod` 的 next_only 共用一個 UsageId，整組下一次符合的適正 play 消耗一次；`apply` 對各物件安裝時則各有 UsageId。付款交易失敗須回復額度，普通費用預覽不消耗。BP14-046 使用前者，不能每張各免費一次（依日文語法與 CP04-003 同句型推論，無直接 Q&A；`strength: inferred`）。
 
+普通 field 持續能力的 `prevent` 與固定 `damage_mod` 在 `kind: ability` 時，另接受恰為
+`source: {who: opp}` 的來源條件，受傷者限自身或己方場上從者。這裡的 `who` 指造成這次傷害的
+**能力控制者**，與已提交 `DamageSource` 事件的 controller 一致；不讀來源物件目前的控制者或
+owner，也不限制來源必須仍在場上。其餘帶 zone 的來源物件集合沿用既有 selector 規則。
+此控制者條件不開放 `apply`、`player_effect` 或 equipment；`who: self` 與額外的無 zone 篩選鍵會被拒絕。
+
 `prevent.next_only` 與 `damage_mod.next_only` 的一次額度在實際套用正值傷害時消耗，
 傷害已為零則保留；與費用修正的適正 play 消耗分開。內部目前只開放本回合、
 單一物件的任意種類防止，或自己領袖的任意種類防止／負常值減傷；來源與多個接受者篩選保持拒絕。

@@ -36,7 +36,7 @@ fn prevention(head: &Value, line: u64) -> Option<Vec<Value>> {
                 return None;
             }
             let effect = effect.get("prevent")?;
-            if !only_keys(effect, &["on", "kind", "next_only"])
+            if !only_keys(effect, &["on", "kind", "next_only", "source"])
                 || effect.get("next_only").is_some_and(|next| next != false)
             {
                 return None;
@@ -50,9 +50,19 @@ fn prevention(head: &Value, line: u64) -> Option<Vec<Value>> {
                 None => json!("self"),
                 Some(target) => leader(target)?,
             };
-            Some(json!({"kind":"static", "line":line, "body":{
+            let mut result = json!({"kind":"static", "line":line, "body":{
                 "op":"replace_damage", "kind":kind, "prevent":true, "subjects":subjects
-            }}))
+            }});
+            if let Some(source) = effect.get("source") {
+                if kind != "effect" || source != &json!({"who":"opp"}) {
+                    return None;
+                }
+                result
+                    .get_mut("body")?
+                    .as_object_mut()?
+                    .insert("sources".into(), json!({"side":"opponent", "zone":"any"}));
+            }
+            Some(result)
         })
         .collect()
 }
@@ -240,6 +250,28 @@ mod tests {
             {"line":1_u8,"keywords":["rush","ward"]},
             {"line":2_u8,"static":{"effects":[{"damage_cap":{"threshold":4_u8,"set":3_u8}}]}}
         ]}}})
+    }
+
+    #[test]
+    fn opponent_ability_source_retains_the_historical_all_zone_filter() {
+        let head = json!({"effects":[{"prevent":{"kind":"ability","source":{"who":"opp"}}}]});
+        let result = prevention(&head, 1).unwrap();
+        assert_eq!(
+            result[0]["body"]["sources"],
+            json!({"side":"opponent","zone":"any"})
+        );
+        for source in [
+            json!({"who":"self"}),
+            json!({"who":"opp","zone":"field"}),
+            json!({"who":"opp","kind":"follower"}),
+        ] {
+            let mut bad = head.clone();
+            bad["effects"][0]["prevent"]["source"] = source;
+            assert!(prevention(&bad, 1).is_none());
+        }
+        let mut combat = head;
+        combat["effects"][0]["prevent"]["kind"] = json!("combat");
+        assert!(prevention(&combat, 1).is_none());
     }
 
     #[test]

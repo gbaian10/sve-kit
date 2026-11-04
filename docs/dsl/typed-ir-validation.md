@@ -633,7 +633,15 @@ look 缺牌仍按有限次嘗試處理是專案的保守結構解讀（inferred�
 若引入第三種傷害來源，必須先擴充此分類，不能沿用非 `battle` 的判斷。
 
 受傷者 predicate 的 binder 僅包裝 `RecipientIsFollower`／`RecipientIsLeader`；
-來源 predicate 僅包裝同一 binder 的 `MemberOf`。事件 binder 的 scope 必須新鮮，
+來源 predicate 包裝同一 binder 的 `MemberOf`；普通 field 靜態能力的能力傷害防止與固定加減傷，
+另接受精確的 `PlayerEquals(Literal(ProposedDamageController), Literal(opponent()))`。
+新 `PlayerRef::ProposedDamageController` 只在這個 canonical source predicate 合法，
+收件者限自身或己方場上從者；一般 body、selector、capture、precondition、Life、installed／applied effect、
+equipment、領袖收件者及反向等式都不准入。共用 prevention 投影重建並比對完整形狀，
+WF、native admission 與 runtime 使用同一判斷；全域玩家運算仍拒絕這個 contextual 值。
+能力控制者沿用已提交 `DamageSource.controller` 的語義，非來源物件當下的 controller 或 owner。
+只有需要這個來源篩選時才讀 proposed hit 的 controller，缺少或格式錯誤即拒絕，不能推測。
+非能力傷害在讀取 controller 前排除；native 與 legacy 非戰鬥 hit 分別帶入 instruction source controller 與 frame controller。事件 binder 的 scope 必須新鮮，
 不能當一般物件集合或玩家值使用。`affected_player` 使用封閉的
 `PlayerRef::ProposedDamageRecipient`，只指本次 proposed hit 的受傷領袖或從者控制者；
 一般 instruction、條件與玩家集合不得讀取這個 resolver。
@@ -644,14 +652,12 @@ matching duration 與 affected binder；安裝空集合不分配效果身分。
 本回合、下一個指定玩家的回合結束、結算結束與無時限均沿既有 duration 狀態處理。
 來源傷害資訊必須保留世代；無法確定世代時不得以目前的新世代猜測舊來源。
 
-正式能力傷害與既有交戰結算共用防止匹配。純防止可以與數值持續效果並存；
-沒有擴充舊式改變傷害量的算術支援。被防止的傷害不產生 DamageEvent、實際傷害額度、
+正式能力傷害與既有交戰結算共用防止匹配及既有的數值持續效果折疊。
+靜態固定 `AddDamage(literal)` 逐 hit、逐有效 provider 累加；Riza 的 −1 與兩張疊加 −2
+均沿此路徑，傷害降至零時不產生 DamageEvent。被防止的傷害不產生 DamageEvent、實際傷害額度、
 生命下降或受傷觸發，也不提供破壞免疫。交戰路徑的重疊取代效果沿既有受影響玩家選序程序；
-每個靜態效果引用含來源世代與 definition id。正式能力路徑僅准入無使用額度的純防止，
-被防止者的實際傷害為零，不因此開放舊式傷害量改寫。
-
-這個投影不准入 `next_only:true`、有限使用次數、傷害量改寫或任意 rewrite predicate。
-`next_only` 的消耗時點仍依作者效果契約保留待裁定；不從「下一次」自行推定消耗規則。
+每個靜態效果引用含來源世代與 definition id。此處的靜態控制者篩選不開放使用額度或任意 rewrite predicate；
+既有安裝式下一次防傷與減傷依其封閉的安裝／消耗規則處理，不因此取得控制者篩選。
 
 ### 動態正式張數的閉合
 

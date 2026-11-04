@@ -11,6 +11,8 @@ mod material_acts;
 mod next_damage;
 #[path = "card/played_traits.rs"]
 mod played_traits;
+#[path = "card/prevent_controller.rs"]
+mod prevent_controller;
 use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]

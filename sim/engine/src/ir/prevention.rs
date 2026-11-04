@@ -1,8 +1,9 @@
 use super::{
-    AbilitySource, Bool, Cardinality, DamageKind, DamageRecipient, Duration, Effect,
-    EffectReference, EventRewrite, Expr, Nat, ObjectOperand, OncePerEvent, PlayerRef,
-    PlayerRelation, PlayerSet, Predicate, ProposedEventPattern, RecipientPredicate,
-    ReplacementScope, Selector, SourcePredicate, TextQuantifier, UsageScope, UseLimit,
+    AbilitySource, Binding, Bool, CardKind, Cardinality, CharacteristicView, DamageKind,
+    DamageRecipient, Duration, Effect, EffectReference, EventRewrite, Expr, KindRead, Nat,
+    ObjectOperand, ObjectRef, ObjectView, OncePerEvent, PlayerRef, PlayerRelation, PlayerSet,
+    Predicate, ProposedEventPattern, RecipientPredicate, ReplacementScope, SelectionView, Selector,
+    SourcePredicate, TextQuantifier, UsageScope, UseLimit, ZoneKind,
 };
 
 pub(crate) enum Recipients<'effect> {
@@ -10,10 +11,68 @@ pub(crate) enum Recipients<'effect> {
     Leaders(&'effect PlayerSet),
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum DamageSource<'effect> {
+    Objects(&'effect Selector),
+    OpponentController,
+}
+
+pub(crate) fn opponent_controller(binding: Binding<ObjectRef>) -> SourcePredicate {
+    SourcePredicate {
+        binding,
+        condition: Expr::Compute(Box::new(Predicate::PlayerEquals {
+            left: Expr::Literal(PlayerRef::ProposedDamageController {}),
+            right: Expr::Literal(super::events::timing::opponent()),
+        })),
+    }
+}
+
+fn controller_recipients(recipients: Option<&Recipients<'_>>) -> bool {
+    let Some(Recipients::Objects(objects)) = recipients else {
+        return false;
+    };
+    if *objects
+        == &(Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        })
+    {
+        return true;
+    }
+    let Selector::Zone { binding, .. } = objects else {
+        return false;
+    };
+    **objects
+        == Selector::Zone {
+            players: PlayerSet {
+                relation: PlayerRelation::SelfPlayer,
+                relative_to: PlayerRef::Controller {},
+                cardinality: Cardinality {
+                    minimum: Nat(0),
+                    maximum: None,
+                },
+                text_quantifier: TextQuantifier::Implicit,
+            },
+            zone: ZoneKind::Field,
+            view: SelectionView::Current {},
+            binding: *binding,
+            predicate: Box::new(Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![Expr::Compute(Box::new(Predicate::KindEquals {
+                    left: Expr::Live(Box::new(KindRead::Kind {
+                        object: ObjectView::Current {
+                            object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                        },
+                        view: CharacteristicView::Effective,
+                    })),
+                    right: Expr::Literal(CardKind::Follower),
+                }))],
+            }))),
+        }
+}
+
 pub(crate) struct Prevention<'effect> {
     pub source: &'effect AbilitySource,
     pub recipients: Option<Recipients<'effect>>,
-    pub damage_source: Option<&'effect Selector>,
+    pub damage_source: Option<DamageSource<'effect>>,
     pub kind: DamageKind,
     pub condition: &'effect Expr<Bool>,
     pub rewrite: &'effect EventRewrite,
@@ -44,7 +103,10 @@ fn recipient_filter(predicate: &RecipientPredicate) -> Option<Recipients<'_>> {
     None
 }
 
-fn source_filter(predicate: &SourcePredicate) -> Option<&Selector> {
+fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
+    if *predicate == opponent_controller(predicate.binding) {
+        return Some(DamageSource::OpponentController);
+    }
     let Expr::Compute(condition) = &predicate.condition else {
         return None;
     };
@@ -55,7 +117,7 @@ fn source_filter(predicate: &SourcePredicate) -> Option<&Selector> {
     else {
         return None;
     };
-    (*binding == predicate.binding).then_some(set)
+    (*binding == predicate.binding).then_some(DamageSource::Objects(set))
 }
 
 pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
@@ -126,6 +188,16 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         Some(predicate) => Some(source_filter(predicate)?),
         None => None,
     };
+    if matches!(damage_source, Some(DamageSource::OpponentController))
+        && (*kind != DamageKind::Ability
+            || !controller_recipients(recipients.as_ref())
+            || !matches!(
+                rewrite,
+                EventRewrite::PreventDamage { .. } | EventRewrite::AddDamage { .. }
+            ))
+    {
+        return None;
+    }
     Some(Prevention {
         source,
         recipients,
