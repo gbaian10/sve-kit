@@ -9,6 +9,9 @@ mod material_acts;
 mod next_damage;
 use second::lowerer;
 
+#[path = "card/advance_entry.rs"]
+mod advance_entry;
+
 #[path = "card/move_followup.rs"]
 mod move_followup;
 
