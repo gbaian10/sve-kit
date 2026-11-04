@@ -1603,8 +1603,9 @@ pub(super) struct HistoryQuery {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum HistorySubject {
-    Single(MovementSubject),
+    // The shared single-subject AST must not consume the closed history union.
     Union(HistoryTraitUnion),
+    Single(MovementSubject),
 }
 
 #[derive(Deserialize)]
@@ -2527,10 +2528,13 @@ pub(super) struct ExSubscription {
     pub sel: Option<MovementSubject>,
     pub during: Option<During>,
 }
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
     pub orig_cost_eq: Option<u64>,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
+    pub traits_any: Option<Vec<String>>,
     pub keyword: Option<FilterKeyword>,
     pub class: Option<String>,
     pub kind: Option<SearchKind>,

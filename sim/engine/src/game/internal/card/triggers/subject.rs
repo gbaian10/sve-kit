@@ -6,6 +6,7 @@ use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{CardKind, CardName, ClassId, TraitId};
 
 pub(super) struct EventSubjectInformation {
+    pub(super) original_cost: Option<i64>,
     kind: CardKind,
     pub(super) token: bool,
     class: ClassId,
@@ -34,6 +35,7 @@ impl Game {
     ) -> Result<EventSubjectInformation> {
         let subject = self.public_characteristics(source, names)?;
         Ok(EventSubjectInformation {
+            original_cost: None,
             kind: subject
                 .kind
                 .ok_or_else(|| unsupported("event subject kind"))?,
@@ -51,7 +53,7 @@ impl EventSubjectInformation {
     pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
         SubjectInformation {
             keywords: &[],
-            original_cost: None,
+            original_cost: self.original_cost,
             kind: Some(self.kind),
             class: Some(&self.class),
             traits: &self.traits,

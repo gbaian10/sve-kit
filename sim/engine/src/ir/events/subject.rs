@@ -30,7 +30,7 @@ pub(crate) enum SubjectFields {
     Ub(Binding<UbActivatedEvent>),
 }
 
-fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectView {
+pub(super) fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectView {
     ObjectView::EventSnapshot {
         object: Box::new(ObjectOperand::FromExpression {
             value: Box::new(Expr::Bound(card)),

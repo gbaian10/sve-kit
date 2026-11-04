@@ -898,10 +898,6 @@ fn lowered_trigger(
     })
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "The closed event mapping shares one subject binding allocator."
-)]
 fn lowered_subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
@@ -939,31 +935,7 @@ fn lowered_subscription(
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
-            let subject = movement::movement_filter(
-                played
-                    .who
-                    .as_ref()
-                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
-                false,
-                played.sel.as_ref(),
-                played
-                    .during
-                    .as_ref()
-                    .is_some_and(|during| matches!(during.turn, ast::SelfPlayer::Controller)),
-                path,
-                movement::FilterSupport::Basic,
-            )?;
-            if subject
-                .class
-                .as_ref()
-                .is_some_and(|class| class.0.is_empty())
-            {
-                return Err(unsupported(path));
-            }
-            Ok(EventPattern::Play {
-                binding: event,
-                predicate: super::events::played::PlayedFilter { subject, card }.predicate(event),
-            })
+            movement::played(played, event, card, path)
         }
         ast::PhaseSubscription::Phase(phase) => {
             let player = match phase.whose {

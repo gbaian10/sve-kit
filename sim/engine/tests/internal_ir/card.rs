@@ -11,6 +11,8 @@ mod material_acts;
 mod move_result_numbers;
 #[path = "card/next_damage.rs"]
 mod next_damage;
+#[path = "card/played_original_cost.rs"]
+mod played_original_cost;
 #[path = "card/played_traits.rs"]
 mod played_traits;
 #[path = "card/prevent_controller.rs"]

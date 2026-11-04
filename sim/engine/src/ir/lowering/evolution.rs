@@ -359,11 +359,15 @@ pub(super) fn subscription(
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
-    if entry
-        .sel
-        .as_ref()
-        .is_some_and(|sel| sel.token.is_some() || sel.not_token.is_some() || sel.class.is_some())
-    {
+    if entry.sel.as_ref().is_some_and(|sel| {
+        sel.token.is_some()
+            || sel.not_token.is_some()
+            || sel.class.is_some()
+            || sel.orig_cost_eq == Some(0)
+            || sel.orig_cost_le.is_some()
+            || sel.orig_cost_ge.is_some()
+            || sel.traits_any.is_some()
+    }) {
         return Err(unsupported(path));
     }
     let event = Binding::new(event_id, scope);

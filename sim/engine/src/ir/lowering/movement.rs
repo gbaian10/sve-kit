@@ -1,8 +1,11 @@
 //! Printed movement headers share the immutable event filter plan.
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::mill::MillFilter;
+use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::{CardKind, CardName, ClassId, KeywordId, TraitId};
+use crate::ir::{
+    CardKind, CardName, ClassId, Comparison, KeywordId, ObjectRef, PlayEvent, TraitId,
+};
 
 #[derive(Clone, Copy)]
 pub(super) enum FilterSupport {
@@ -180,6 +183,11 @@ pub(super) fn movement_filter(
     path: &str,
     support: FilterSupport,
 ) -> Result<SubjectFilter, LoweringError> {
+    if subject.is_some_and(|sel| {
+        sel.orig_cost_le.is_some() || sel.orig_cost_ge.is_some() || sel.traits_any.is_some()
+    }) {
+        return Err(unsupported(path));
+    }
     let original_cost = subject.and_then(|sel| sel.orig_cost_eq);
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     let allow_original_cost = matches!(
@@ -228,5 +236,67 @@ pub(super) fn movement_filter(
             .map(|class| ClassId(class.clone())),
         token: subject.and_then(|sel| sel.token.or_else(|| sel.not_token.map(|value| !value))),
         own_turn,
+    })
+}
+
+pub(super) fn played(
+    entry: &ast::PlayedSubscription,
+    event: Binding<PlayEvent>,
+    card: Binding<ObjectRef>,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    let mut subject = entry.sel.clone();
+    let mut original = None;
+    let mut traits_any = Vec::new();
+    if let Some(q) = subject.as_mut() {
+        let bounds = [
+            q.orig_cost_eq.take().map(|n| (Comparison::Equal, n)),
+            q.orig_cost_le.take().map(|n| (Comparison::LessEqual, n)),
+            q.orig_cost_ge.take().map(|n| (Comparison::GreaterEqual, n)),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+        original = match bounds.as_slice() {
+            [] => None,
+            [(op, n)] => Some((
+                *op,
+                i64::try_from(*n).map_err(|_overflow| unsupported(path))?,
+            )),
+            _ => return Err(unsupported(path)),
+        };
+        if let Some(traits) = q.traits_any.take() {
+            if traits.len() < 2 || q.other.is_some() {
+                return Err(unsupported(path));
+            }
+            traits_any = traits.into_iter().map(TraitId).collect();
+        }
+    }
+    let common = movement_filter(
+        entry
+            .who
+            .as_ref()
+            .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+        false,
+        subject.as_ref(),
+        entry
+            .during
+            .as_ref()
+            .is_some_and(|during| matches!(during.turn, ast::SelfPlayer::Controller)),
+        path,
+        FilterSupport::Basic,
+    )?;
+    let plan = PlayedFilter {
+        subject: common,
+        card,
+        original,
+        traits_any,
+    };
+    if !plan.valid() {
+        return Err(unsupported(path));
+    }
+    Ok(EventPattern::Play {
+        binding: event,
+        predicate: plan.predicate(event),
     })
 }
