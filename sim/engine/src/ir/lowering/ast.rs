@@ -2543,6 +2543,7 @@ pub(super) enum StaticEffect {
     Prevent(Prevent),
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
+    NoTrigger(NoTrigger),
 }
 
 #[derive(Deserialize)]
@@ -2950,4 +2951,18 @@ pub(super) struct FilteredCountOf {
 #[serde(deny_unknown_fields)]
 pub(super) struct ReceiptTraitFilter {
     pub r#trait: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct NoTrigger {
+    pub who: Option<EntryPlayer>,
+    pub on: Option<This>,
+    pub kinds: Vec<NoTriggerKind>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum NoTriggerKind {
+    Fanfare,
+    EvolveTime,
 }

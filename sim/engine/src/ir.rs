@@ -143,6 +143,7 @@ pub(crate) mod reveal_cost;
 pub(crate) mod ride;
 mod runtime;
 pub(crate) mod stand_restrictions;
+pub(crate) mod trigger_restrictions;
 mod values;
 mod wellformed;
 

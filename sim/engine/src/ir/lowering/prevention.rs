@@ -472,6 +472,7 @@ pub(super) fn lower_at_source(
                 )
             }
             ast::StaticEffect::Grant(_)
+            | ast::StaticEffect::NoTrigger(_)
             | ast::StaticEffect::Cannot(_)
             | ast::StaticEffect::CostMod(_)
             | ast::StaticEffect::EvolveCostMod(_) => {

@@ -157,7 +157,7 @@ impl Game {
                                 }
                             ))
                 };
-                if !eligible {
+                if !eligible || self.internal_trigger_forbidden(&ability.node, controller)? {
                     continue;
                 }
                 pending.push(self.timing_occurrence(

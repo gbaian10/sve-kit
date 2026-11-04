@@ -760,3 +760,6 @@ mod reveal_modes;
 
 #[path = "card/nested_ub.rs"]
 mod nested_ub;
+
+#[path = "card/trigger_restrictions.rs"]
+mod trigger_restrictions;
