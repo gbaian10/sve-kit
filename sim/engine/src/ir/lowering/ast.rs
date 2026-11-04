@@ -1637,6 +1637,7 @@ pub(super) enum LifeHistoryField {
 pub(super) enum HistoryEvent {
     LifeChanged,
     Played,
+    Discarded,
     UbActivated,
     Attacked,
     Evolved,
@@ -1649,6 +1650,7 @@ pub(super) enum HistoryEvent {
 pub(super) enum HistoryOrigin {
     Zone(FieldOrigin),
     Owned { who: LeaderSide, zone: FieldOrigin },
+    Hand(HandZone),
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -2022,6 +2024,7 @@ pub(super) enum CostCondition {
     Not(Box<Self>),
     Cmp(CostComparison),
     Exists(PublicQuery),
+    History(Box<HistoryQuery>),
 }
 
 #[derive(Deserialize)]

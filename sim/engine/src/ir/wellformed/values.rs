@@ -8,7 +8,8 @@ use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
-    EvolutionRead, ExecutionRef, NumberRead, PaymentReference, PlayerRead, PostureRead,
+    EventPattern, EvolutionRead, ExecutionRef, HistoryCount, NumberRead, PaymentReference,
+    PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -175,7 +176,14 @@ impl Checker {
                 NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {
                     self.player(player)
                 }
-                NatRead::HistoryCount { query, .. } => self.history(query),
+                NatRead::HistoryCount { query, count } => {
+                    if matches!(query.pattern, EventPattern::Discard { .. })
+                        && *count != HistoryCount::Facts
+                    {
+                        return self.reject();
+                    }
+                    self.history(query)
+                }
                 NatRead::Combo { player, execution } => {
                     if *execution != (ExecutionRef::Current {}) {
                         return self.reject();

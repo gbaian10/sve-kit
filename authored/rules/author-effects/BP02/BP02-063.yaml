@@ -1,0 +1,22 @@
+cards:
+  BP02-063:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              history:
+                event: discarded
+                from: hand
+                who: self
+                window: this_turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

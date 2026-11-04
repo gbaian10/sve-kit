@@ -1,7 +1,7 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, CounterKind, IntFrozen, IntRead, NatFrozen,
-    NumberRead, ObjectView, PlayerResource, Precondition, PreconditionKind, PreconditionReason,
-    SnapshotFields, Stat,
+    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, IntFrozen, IntRead,
+    LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
+    PreconditionKind, PreconditionReason, SnapshotFields, Stat,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
@@ -9,6 +9,51 @@ use super::{
     SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 use core::slice::from_ref;
+
+pub(super) fn discarded_history(
+    history: &ast::HistoryQuery,
+    event: Binding<DiscardEvent>,
+    path: &str,
+) -> Result<super::super::HistoryQuery, LoweringError> {
+    if !matches!(history.event, ast::HistoryEvent::Discarded)
+        || !matches!(history.who, Some(ast::LeaderSide::Controller))
+        || !matches!(history.from, Some(ast::HistoryOrigin::Hand(_)))
+        || history.sel.is_some()
+        || history.to.is_some()
+        || history.r#where.is_some()
+        || history.exclude.is_some()
+        || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+    {
+        return Err(unsupported(path));
+    }
+    Ok(super::super::history_turn::discarded_query(event))
+}
+
+fn life_history(
+    history: &ast::HistoryQuery,
+    event: Binding<LifeChangeEvent>,
+    path: &str,
+) -> Result<super::super::HistoryQuery, LoweringError> {
+    if history.who.is_none()
+        || history
+            .r#where
+            .as_ref()
+            .is_none_or(|filter| !matches!(filter.direction, ast::LifeDirection::Down))
+    {
+        return Err(unsupported(path));
+    }
+    Ok(super::super::history_turn::life_query(
+        event,
+        super::super::events::life::LifeFilter {
+            own: history
+                .who
+                .as_ref()
+                .map(|who| matches!(who, ast::LeaderSide::Controller)),
+            up: Some(false),
+            own_turn: None,
+        },
+    ))
+}
 
 pub(super) fn qualify_costs(
     costs: &mut CostSpec,
@@ -498,6 +543,9 @@ impl BodyContext<'_> {
     ) -> Result<super::super::HistoryQuery, LoweringError> {
         use super::super::history_turn::{SubjectHistoryKind, subject_query};
         let id = self.allocator.id(path)?;
+        if matches!(history.event, ast::HistoryEvent::Discarded) {
+            return discarded_history(history, Binding::new(id, self.scope), path);
+        }
         let own = history
             .who
             .as_ref()
@@ -525,23 +573,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if matches!(history.event, ast::HistoryEvent::LifeChanged) {
-            if history.who.is_none()
-                || history
-                    .r#where
-                    .as_ref()
-                    .is_none_or(|filter| !matches!(filter.direction, ast::LifeDirection::Down))
-            {
-                return Err(unsupported(path));
-            }
-            let filter = super::super::events::life::LifeFilter {
-                own,
-                up: Some(false),
-                own_turn: None,
-            };
-            return Ok(super::super::history_turn::life_query(
-                Binding::new(id, self.scope),
-                filter,
-            ));
+            return life_history(history, Binding::new(id, self.scope), path);
         }
         if history.r#where.is_some() {
             return Err(unsupported(path));
@@ -577,6 +609,7 @@ impl BodyContext<'_> {
                         who,
                         zone: ast::FieldOrigin::Field,
                     } => Some(matches!(who, ast::LeaderSide::Controller)),
+                    ast::HistoryOrigin::Hand(_) => return Err(unsupported(path)),
                 };
                 match history.to {
                     Some(ast::DepartureDestination::Cemetery) => SubjectHistoryKind::Cemetery,
@@ -585,6 +618,7 @@ impl BodyContext<'_> {
                 }
             }
             ast::HistoryEvent::Played
+            | ast::HistoryEvent::Discarded
             | ast::HistoryEvent::UbActivated
             | ast::HistoryEvent::LifeChanged => {
                 return Err(unsupported(path));
