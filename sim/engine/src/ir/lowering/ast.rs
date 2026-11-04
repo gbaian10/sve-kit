@@ -2503,6 +2503,7 @@ pub(super) struct ExSubscription {
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
     pub orig_cost_eq: Option<u64>,
+    pub keyword: Option<FilterKeyword>,
     pub class: Option<String>,
     pub kind: Option<SearchKind>,
     #[serde(rename = "trait")]

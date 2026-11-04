@@ -1,4 +1,5 @@
 //! Public event subscriptions share one closed plan over the committed event subject.
+use crate::ir::{AbilitiesRead, AbilityPredicate, KeywordId};
 use crate::ir::{
     AttackEvent, Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView,
     Characteristics, CharacteristicsFields, ClassFrozen, ClassId, ClassRead, Comparison,
@@ -101,8 +102,25 @@ impl SubjectFields {
     }
 
     fn original_cost(self) -> Option<Expr<Int>> {
-        let Self::Leave(event) = self else {
-            return None;
+        let (event, policy) = match self {
+            Self::Leave(event) => (
+                EventContext::LeaveField { event },
+                EventSnapshotPolicy::BeforeExit,
+            ),
+            Self::Entry(event) => (
+                EventContext::EnterField { event },
+                EventSnapshotPolicy::AfterEntry,
+            ),
+            Self::Attack(_)
+            | Self::Posture(_)
+            | Self::DamageSource(_)
+            | Self::Played { .. }
+            | Self::Destroy(_)
+            | Self::Evolve(_)
+            | Self::Cemetery(_)
+            | Self::Hand(_)
+            | Self::Ex(_)
+            | Self::Ub(_) => return None,
         };
         Some(Expr::Compute(Box::new(IntOperation::InformationOrZero {
             information: NumberRead::Cost {
@@ -110,12 +128,49 @@ impl SubjectFields {
                     object: Box::new(ObjectOperand::FromExpression {
                         value: Box::new(self.object()),
                     }),
-                    event: EventContext::LeaveField { event },
-                    policy: EventSnapshotPolicy::BeforeExit,
+                    event,
+                    policy,
                 },
                 view: CharacteristicView::Original,
             },
         })))
+    }
+
+    fn keyword(self, keyword: KeywordId) -> Option<Expr<Bool>> {
+        let Self::Cemetery(event) = self else {
+            return None;
+        };
+        Some(Expr::Compute(Box::new(Predicate::HasAbility {
+            abilities: Expr::Live(Box::new(AbilitiesRead::Abilities {
+                object: ObjectView::EventSnapshot {
+                    object: Box::new(ObjectOperand::FromExpression {
+                        value: Box::new(self.object()),
+                    }),
+                    event: EventContext::LeaveField { event },
+                    policy: EventSnapshotPolicy::BeforeExit,
+                },
+                view: CharacteristicView::Effective,
+            })),
+            predicate: Box::new(AbilityPredicate {
+                kind: None,
+                keyword: Some(keyword),
+                except: vec![],
+                holder: None,
+                origin: None,
+            }),
+        })))
+    }
+
+    fn parsed_keyword(self, expression: &Expr<Bool>) -> Option<KeywordId> {
+        let Expr::Compute(operation) = expression else {
+            return None;
+        };
+        let Predicate::HasAbility { predicate, .. } = operation.as_ref() else {
+            return None;
+        };
+        let keyword = predicate.keyword?;
+        (keyword == KeywordId::Ward && self.keyword(keyword).as_ref() == Some(expression))
+            .then_some(keyword)
     }
 
     pub(crate) fn object(self) -> Expr<ObjectRef> {
@@ -477,15 +532,33 @@ impl SubjectFields {
 
 pub(crate) struct SubjectInformation<'subject> {
     pub(crate) original_cost: Option<i64>,
+    pub(crate) keywords: &'subject [KeywordId],
     pub(crate) kind: Option<CardKind>,
     pub(crate) traits: &'subject [TraitId],
     pub(crate) names: &'subject [CardName],
     pub(crate) class: Option<&'subject ClassId>,
 }
 
+impl<'subject> SubjectInformation<'subject> {
+    pub(crate) fn from_characters(
+        characters: &'subject Characteristics,
+        original_cost: Option<i64>,
+    ) -> Self {
+        Self {
+            original_cost,
+            keywords: &[],
+            kind: Some(characters.kind),
+            traits: &characters.traits,
+            names: &characters.names,
+            class: characters.class.as_ref(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct SubjectFilter {
     pub(crate) original_cost: Option<i64>,
+    pub(crate) keyword: Option<KeywordId>,
     pub(crate) own: Option<bool>,
     pub(crate) itself: Option<bool>,
     pub(crate) kind: Option<CardKind>,
@@ -496,9 +569,31 @@ pub(crate) struct SubjectFilter {
     pub(crate) token: Option<bool>,
 }
 
+pub(crate) fn has_keyword_filter(expression: &Expr<Bool>) -> bool {
+    let Expr::Compute(predicate) = expression else {
+        return false;
+    };
+    if matches!(predicate.as_ref(), Predicate::HasAbility { .. }) {
+        return true;
+    }
+    if let Predicate::And { predicates } | Predicate::Or { predicates } = predicate.as_ref() {
+        return predicates.iter().any(has_keyword_filter);
+    }
+    if let Predicate::Not { predicate } = predicate.as_ref() {
+        return has_keyword_filter(predicate);
+    }
+    false
+}
+
 impl SubjectFilter {
     pub(crate) fn predicate(&self, fields: SubjectFields) -> Expr<Bool> {
         let mut predicates = fields.destination().into_iter().collect::<Vec<_>>();
+        if let Some(keyword) = self.keyword {
+            let Some(predicate) = fields.keyword(keyword) else {
+                return Expr::Literal(Bool(false));
+            };
+            predicates.push(predicate);
+        }
         if let Some(positive) = self.itself {
             let predicate = Expr::Compute(Box::new(Predicate::ObjectEquals {
                 left: fields.object(),
@@ -619,53 +714,89 @@ impl SubjectFilter {
             } else if matches!(predicate.as_ref(), Predicate::PlayerEquals { left, right } if *left == Expr::Literal(PlayerRef::Active {}) && *right == Expr::Literal(PlayerRef::Controller {}))
             {
                 plan.own_turn = true;
-            } else if let Predicate::CompareInt {
-                left,
-                comparison: Comparison::Equal,
-                right: Expr::Literal(Int(cost)),
-            } = predicate.as_ref()
-            {
-                if *cost <= 0 || fields.original_cost().as_ref() != Some(left) {
-                    return None;
-                }
-                plan.original_cost = Some(*cost);
-            } else if let Predicate::KindEquals {
-                left,
-                right: Expr::Literal(kind),
-            } = predicate.as_ref()
-            {
-                if *left != fields.kind() {
-                    return None;
-                }
-                plan.kind = Some(*kind);
-            } else if let Predicate::HasTrait { traits, trait_id } = predicate.as_ref() {
-                if *traits != fields.traits() {
-                    return None;
-                }
-                plan.trait_id = Some(trait_id.clone());
-            } else if let Predicate::ClassEquals {
-                left,
-                right: Expr::Literal(Info::Present(class)),
-            } = predicate.as_ref()
-            {
-                if *left != fields.class() {
-                    return None;
-                }
-                plan.class = Some(class.clone());
-            } else if let Predicate::NamesIntersect {
-                left,
-                right: Expr::Literal(names),
-            } = predicate.as_ref()
-            {
-                if *left != fields.names() || names.len() != 1 {
-                    return None;
-                }
-                plan.name = names.first().cloned();
             } else {
-                return None;
+                plan.characteristic(fields, part)?;
             }
         }
-        (plan.predicate(fields) == *expression).then_some(plan)
+        (plan.closed_characteristics(fields) && plan.predicate(fields) == *expression)
+            .then_some(plan)
+    }
+
+    fn characteristic(&mut self, fields: SubjectFields, part: &Expr<Bool>) -> Option<()> {
+        let Expr::Compute(predicate) = part else {
+            return None;
+        };
+        if matches!(predicate.as_ref(), Predicate::HasAbility { .. }) {
+            self.keyword = Some(fields.parsed_keyword(part)?);
+        } else if let Predicate::CompareInt {
+            left,
+            comparison: Comparison::Equal,
+            right: Expr::Literal(Int(cost)),
+        } = predicate.as_ref()
+        {
+            if *cost <= 0 || fields.original_cost().as_ref() != Some(left) {
+                return None;
+            }
+            self.original_cost = Some(*cost);
+        } else if let Predicate::KindEquals {
+            left,
+            right: Expr::Literal(kind),
+        } = predicate.as_ref()
+        {
+            if *left != fields.kind() {
+                return None;
+            }
+            self.kind = Some(*kind);
+        } else if let Predicate::HasTrait { traits, trait_id } = predicate.as_ref() {
+            if *traits != fields.traits() {
+                return None;
+            }
+            self.trait_id = Some(trait_id.clone());
+        } else if let Predicate::ClassEquals {
+            left,
+            right: Expr::Literal(Info::Present(class)),
+        } = predicate.as_ref()
+        {
+            if *left != fields.class() {
+                return None;
+            }
+            self.class = Some(class.clone());
+        } else if let Predicate::NamesIntersect {
+            left,
+            right: Expr::Literal(names),
+        } = predicate.as_ref()
+        {
+            if *left != fields.names() || names.len() != 1 {
+                return None;
+            }
+            self.name = names.first().cloned();
+        } else {
+            return None;
+        }
+        Some(())
+    }
+
+    fn closed_characteristics(&self, fields: SubjectFields) -> bool {
+        if self.keyword.is_some() {
+            return *self
+                == (Self {
+                    own: Some(true),
+                    kind: Some(CardKind::Follower),
+                    keyword: Some(KeywordId::Ward),
+                    ..Self::default()
+                });
+        }
+        if matches!(fields, SubjectFields::Entry(_)) && self.original_cost.is_some() {
+            return *self
+                == (Self {
+                    own: Some(true),
+                    itself: Some(false),
+                    kind: Some(CardKind::Follower),
+                    original_cost: self.original_cost,
+                    ..Self::default()
+                });
+        }
+        true
     }
 
     pub(crate) fn matches(
@@ -678,13 +809,7 @@ impl SubjectFilter {
         token: bool,
     ) -> bool {
         self.matches_information(
-            &SubjectInformation {
-                original_cost: None,
-                kind: Some(characters.kind),
-                traits: &characters.traits,
-                names: &characters.names,
-                class: characters.class.as_ref(),
-            },
+            &SubjectInformation::from_characters(characters, None),
             same,
             observer_controller,
             subject_controller,
@@ -704,6 +829,9 @@ impl SubjectFilter {
     ) -> bool {
         self.original_cost
             .is_none_or(|expected| characters.original_cost == Some(expected))
+            && self
+                .keyword
+                .is_none_or(|keyword| characters.keywords.contains(&keyword))
             && self.token.is_none_or(|expected| expected == token)
             && self.itself.is_none_or(|itself| itself == same)
             && self

@@ -4,7 +4,7 @@ use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
-use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
 use crate::ir::history_turn::{discarded_plan, played_by, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
@@ -644,6 +644,8 @@ impl Checker {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
             EventPattern::LeaveField { binding, predicate } => {
+                // Only the canonical committed subject plan may read departure keywords.
+                self.without_keyword_filter(predicate)?;
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
             EventPattern::EnterEx { binding, predicate } => {
@@ -748,6 +750,9 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if let EventPattern::LeaveField { predicate, .. } = &query.pattern {
+            self.without_keyword_filter(predicate)?;
+        }
         if let EventPattern::Discard { binding, predicate } = &query.pattern {
             return if discarded_plan(query) {
                 self.local_value(*binding, predicate)
@@ -782,6 +787,14 @@ impl Checker {
             });
         }
         self.isolated(|checker| checker.event_pattern(&query.pattern, None, false))
+    }
+
+    fn without_keyword_filter(&self, predicate: &Expr<Bool>) -> Checked {
+        if has_keyword_filter(predicate) {
+            self.reject()
+        } else {
+            Ok(())
+        }
     }
 
     pub(super) fn numeric_history(&mut self, query: &NumericHistoryQuery) -> Checked {

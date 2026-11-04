@@ -2,7 +2,15 @@
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::{CardKind, CardName, ClassId, TraitId};
+use crate::ir::{CardKind, CardName, ClassId, KeywordId, TraitId};
+
+#[derive(Clone, Copy)]
+pub(super) enum FilterSupport {
+    Basic,
+    OriginalCost,
+    EntryCost,
+    CemeteryWard,
+}
 
 pub(super) fn subscription(
     on: &ast::PhaseSubscription,
@@ -32,7 +40,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                     path,
-                    false,
+                    FilterSupport::Basic,
                 )?
                 .predicate(SubjectFields::Ex(event)),
             })
@@ -50,7 +58,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                     path,
-                    true,
+                    FilterSupport::OriginalCost,
                 )?
                 .predicate(SubjectFields::Leave(event)),
             })
@@ -75,7 +83,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                     path,
-                    false,
+                    FilterSupport::Basic,
                 )?
                 .predicate(SubjectFields::Destroy(event)),
             })
@@ -123,7 +131,11 @@ fn moved(
             entry.sel.as_ref(),
             entry.during.is_some(),
             path,
-            false,
+            if own == Some(true) && matches!(entry.to, ast::DepartureDestination::Cemetery) {
+                FilterSupport::CemeteryWard
+            } else {
+                FilterSupport::Basic
+            },
         )?
         .predicate(match entry.to {
             ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
@@ -166,13 +178,24 @@ pub(super) fn movement_filter(
     subject: Option<&ast::MovementSubject>,
     own_turn: bool,
     path: &str,
-    allow_original_cost: bool,
+    support: FilterSupport,
 ) -> Result<SubjectFilter, LoweringError> {
     let original_cost = subject.and_then(|sel| sel.orig_cost_eq);
-    if original_cost == Some(0) || (original_cost.is_some() && !allow_original_cost) {
+    let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
+    let allow_original_cost = matches!(
+        support,
+        FilterSupport::OriginalCost | FilterSupport::EntryCost
+    );
+    if original_cost == Some(0)
+        || (original_cost.is_some() && !allow_original_cost)
+        || keyword.is_some_and(|keyword| {
+            keyword != KeywordId::Ward || !matches!(support, FilterSupport::CemeteryWard)
+        })
+    {
         return Err(unsupported(path));
     }
     Ok(SubjectFilter {
+        keyword,
         original_cost: original_cost
             .map(i64::try_from)
             .transpose()

@@ -40,6 +40,7 @@ pub(super) struct PublicCharacteristics {
 impl PublicCharacteristics {
     pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
         SubjectInformation {
+            keywords: &[],
             original_cost: None,
             kind: self.kind,
             traits: &self.traits,

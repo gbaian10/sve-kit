@@ -214,8 +214,10 @@ fn subject_case(
     key: (super::ScopeId, u64),
 ) -> Option<(SubjectHistoryKind, SubjectFilter)> {
     let filter = SubjectFilter::parse(fields, predicate)?;
-    (!filter.own_turn && *query == subject_query(kind, key.1, key.0, &filter))
-        .then_some((kind, filter))
+    (!filter.own_turn
+        && filter.keyword.is_none()
+        && *query == subject_query(kind, key.1, key.0, &filter))
+    .then_some((kind, filter))
 }
 
 pub(crate) fn subject_plan(query: &HistoryQuery) -> Option<(SubjectHistoryKind, SubjectFilter)> {

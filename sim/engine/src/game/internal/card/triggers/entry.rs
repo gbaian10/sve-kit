@@ -1,4 +1,5 @@
 //! Entry matching runs after the whole successful batch has installed its effective information.
+use super::super::super::cost::printed_cost;
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
     Game, PlayerId, Result, SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition,
@@ -6,7 +7,7 @@ use super::{
 };
 use crate::game::{Frame, Object};
 use crate::ir::LimitSpec;
-use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, Located};
 
@@ -164,6 +165,11 @@ impl Game {
             return Ok(());
         }
         let observers = self.entry_observers()?;
+        let reads_original_cost = observers.iter().any(|(_, abilities)| {
+            abilities.iter().any(|ability| {
+                filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
+            })
+        });
         let active = player_id(self.active())?;
         let effect_source = self.card_runtime.active_source;
         let (cause, actor, method) = entry_cause(frame)?;
@@ -180,6 +186,11 @@ impl Game {
             }
             let entry_controller = player_id(&self.object(&old.id)?.controller)?;
             let characters = self.internal_characteristics(&old.id)?;
+            let original_cost = if reads_original_cost {
+                Some(printed_cost(&self.internal_cost_print(&old.id)?["cost"])?)
+            } else {
+                None
+            };
             let header = self.pending_header(actor, cause, effect_source, before)?;
             let mut matched = Vec::new();
             for (holder, abilities) in &observers {
@@ -187,8 +198,8 @@ impl Game {
                 for ability in abilities {
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if plan.matches(
-                        &characters,
+                    if plan.matches_information(
+                        &SubjectInformation::from_characters(&characters, original_cost),
                         *holder == old.id,
                         controller,
                         entry_controller,

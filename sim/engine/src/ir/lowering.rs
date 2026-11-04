@@ -951,7 +951,7 @@ fn lowered_subscription(
                     .as_ref()
                     .is_some_and(|during| matches!(during.turn, ast::SelfPlayer::Controller)),
                 path,
-                false,
+                movement::FilterSupport::Basic,
             )?;
             if subject
                 .class
@@ -1024,7 +1024,7 @@ fn lowered_subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                     path,
-                    false,
+                    movement::FilterSupport::EntryCost,
                 )?
                 .predicate(SubjectFields::Entry(event)),
             })
@@ -1055,7 +1055,7 @@ fn lowered_change(
                         entry.sel.as_ref(),
                         false,
                         path,
-                        false,
+                        movement::FilterSupport::Basic,
                     )?,
                     after: if matches!(on, ast::PhaseSubscription::Acted(_)) {
                         super::Posture::Acted
