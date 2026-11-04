@@ -101,3 +101,11 @@ pub(crate) fn select_with_rules(
 ) -> sve_engine::Result<SelectedEffects> {
     loader().select_with_rules(snapshot, keywords, input, rules, identity)
 }
+
+pub(crate) fn select_without_rules(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+) -> sve_engine::Result<SelectedEffects> {
+    loader().select(snapshot, keywords, input)
+}

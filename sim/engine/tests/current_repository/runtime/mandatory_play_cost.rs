@@ -57,7 +57,8 @@ fn variant(number: &str, change: impl FnOnce(&mut Value)) -> SelectedEffects {
                 .as_str()
                 .is_some_and(|path| path.starts_with("cost-"))
         });
-    repository::select(&snapshot, &keywords, &input).unwrap()
+    // This sparse variant deliberately omits unrelated executable resource templates.
+    repository::select_without_rules(&snapshot, &keywords, &input).unwrap()
 }
 fn prepared(initial: &Value) -> Game {
     prepared_with(initial, selected().clone())
