@@ -136,6 +136,11 @@ pub(super) fn aggregation(
                 key: BatchPolicy::Instruction {},
             })
         }
+        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Dealt(event) if super::combat::batch_dealt(event)) => {
+            Ok(TriggerAggregation::PerBatch {
+                key: BatchPolicy::Instruction {},
+            })
+        }
         Some(ast::AutoAggregation::Batch) => Err(unsupported(path)),
     }
 }

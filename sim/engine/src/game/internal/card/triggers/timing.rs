@@ -8,12 +8,13 @@ use crate::game::Frame;
 use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::grant;
 use crate::game::{Step, int, string};
-use crate::ir::LimitSpec;
+use crate::ir::events::damage::DamageFilter;
 use crate::ir::optional_payment;
 use crate::ir::{
     AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerId,
     PlayerRef, RuntimeDamageRecipient,
 };
+use crate::ir::{BatchPolicy, LimitSpec, TriggerSpec};
 use crate::ir::{DamageEvent, DamageFlags, PositiveInt, RuntimeObjectView};
 use crate::ir::{EntryOrigin, Expr, ObjectFrozen, Predicate};
 use crate::ir::{ExecutionId, printed_keywords};
@@ -117,11 +118,30 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || trigger
             .limit
             .is_some_and(|limit| !LimitSpec::is_triggered(limit))
-        || trigger.aggregation != (TriggerAggregation::PerFact {})
+        || !aggregation_allowed(trigger)
     {
-        return Err(unsupported("printed per-fact timing or self-event header"));
+        return Err(unsupported(
+            "printed timing aggregation or self-event header",
+        ));
     }
     Ok(true)
+}
+
+fn aggregation_allowed(trigger: &TriggerSpec) -> bool {
+    if let TriggerCondition::Event {
+        pattern: EventPattern::Damage { binding, predicate },
+    } = &trigger.on
+        && let Some(plan) = DamageFilter::parse(*binding, predicate)
+        && plan.requires_instruction_batch()
+    {
+        plan.instruction_batch(*binding)
+            && trigger.aggregation
+                == (TriggerAggregation::PerBatch {
+                    key: BatchPolicy::Instruction {},
+                })
+    } else {
+        trigger.aggregation == (TriggerAggregation::PerFact {})
+    }
 }
 
 pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
@@ -533,7 +553,7 @@ impl Game {
         event: DamageEvent,
         active: PlayerId,
     ) -> Result<Vec<(String, EffectiveAbility)>> {
-        use crate::ir::events::damage::{DamageFilter, RecipientFilter};
+        use crate::ir::events::damage::RecipientFilter;
         let mut observers = Vec::new();
         let mut subject = None;
         for holder in self.field_ids() {
@@ -576,6 +596,15 @@ impl Game {
                             own.is_none_or(|own| own == (controller == player))
                         }
                         RuntimeDamageRecipient::Object { .. } => false,
+                    },
+                    Some(RecipientFilter::OpposingFollowers { .. }) => match event.recipient {
+                        RuntimeDamageRecipient::Object { .. } => {
+                            let recipient = self.object(string(&hit["target"]))?;
+                            recipient.zone == "field"
+                                && player_id(&recipient.controller)? != controller
+                                && self.object_type(&recipient.id)?.contains("フォロワー")
+                        }
+                        RuntimeDamageRecipient::Leader { .. } => false,
                     },
                 };
                 if !recipient_matches {

@@ -2,9 +2,10 @@
 use super::subject::{SubjectFields, SubjectFilter};
 use super::timing::turn_predicate;
 use crate::ir::{
-    Binding, Bool, Cardinality, DamageEvent, DamageFlags, DamageFlagsFields, DamageRecipient, Expr,
-    Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, Predicate, RecipientFields, Selector,
-    TextQuantifier, ValueEquality,
+    Binding, Bool, CardKind, Cardinality, CharacteristicView, DamageEvent, DamageFlags,
+    DamageFlagsFields, DamageRecipient, Expr, KindRead, Nat, ObjectOperand, ObjectRef, ObjectView,
+    PlayerRef, PlayerRelation, PlayerSet, Predicate, RecipientFields, SelectionView, Selector,
+    TextQuantifier, ValueEquality, ZoneKind,
 };
 
 #[derive(Clone, Copy)]
@@ -43,9 +44,14 @@ impl DamageKind {
 }
 
 #[derive(Clone, Copy)]
+#[expect(
+    variant_size_differences,
+    reason = "The field candidate keeps its small binding inline without allocating per subscription."
+)]
 pub(crate) enum RecipientFilter {
     SourceHolder,
     Leader(Option<bool>),
+    OpposingFollowers { candidate: Binding<ObjectRef> },
 }
 impl RecipientFilter {
     fn predicate(self, event: Binding<DamageEvent>) -> Expr<Bool> {
@@ -81,6 +87,32 @@ impl RecipientFilter {
                     },
                 },
             },
+            Self::OpposingFollowers { candidate } => Predicate::RecipientIsFollower {
+                recipient,
+                objects: Selector::Zone {
+                    players: PlayerSet {
+                        relation: PlayerRelation::Opponents,
+                        relative_to: PlayerRef::Controller {},
+                        cardinality: Cardinality {
+                            minimum: Nat(1),
+                            maximum: Some(Nat(1)),
+                        },
+                        text_quantifier: TextQuantifier::Implicit,
+                    },
+                    zone: ZoneKind::Field,
+                    view: SelectionView::Current {},
+                    binding: candidate,
+                    predicate: Box::new(Expr::Compute(Box::new(Predicate::KindEquals {
+                        left: Expr::Live(Box::new(KindRead::Kind {
+                            object: ObjectView::Current {
+                                object: Box::new(ObjectOperand::Bound { binding: candidate }),
+                            },
+                            view: CharacteristicView::Effective,
+                        })),
+                        right: Expr::Literal(CardKind::Follower),
+                    }))),
+                },
+            },
         }))
     }
 }
@@ -93,6 +125,27 @@ pub(crate) struct DamageFilter {
     pub(crate) own_turn: Option<bool>,
 }
 impl DamageFilter {
+    pub(crate) const fn requires_instruction_batch(&self) -> bool {
+        matches!(
+            self.recipient,
+            Some(RecipientFilter::OpposingFollowers { .. })
+        )
+    }
+
+    pub(crate) fn instruction_batch(&self, event: Binding<DamageEvent>) -> bool {
+        self.requires_instruction_batch()
+            && self.predicate(event)
+                == Self {
+                    dealt: Some(SubjectFilter {
+                        itself: Some(true),
+                        ..SubjectFilter::default()
+                    }),
+                    recipient: self.recipient,
+                    kind: Some(DamageKind::Ability),
+                    own_turn: None,
+                }
+                .predicate(event)
+    }
     pub(crate) fn predicate(&self, event: Binding<DamageEvent>) -> Expr<Bool> {
         let mut predicates = Vec::new();
         if let Some(subject) = &self.dealt {
@@ -121,12 +174,32 @@ impl DamageFilter {
         } else {
             None
         };
+        let candidate = if let Expr::Compute(root) = expression
+            && let Predicate::And { predicates } = root.as_ref()
+        {
+            predicates.iter().find_map(|part| {
+                let Expr::Compute(operation) = part else {
+                    return None;
+                };
+                let Predicate::RecipientIsFollower {
+                    objects: Selector::Zone { binding, .. },
+                    ..
+                } = operation.as_ref()
+                else {
+                    return None;
+                };
+                Some(*binding)
+            })
+        } else {
+            None
+        };
         for recipient in [
             None,
             Some(RecipientFilter::SourceHolder),
             Some(RecipientFilter::Leader(None)),
             Some(RecipientFilter::Leader(Some(false))),
             Some(RecipientFilter::Leader(Some(true))),
+            candidate.map(|candidate| RecipientFilter::OpposingFollowers { candidate }),
         ] {
             for kind in [
                 None,

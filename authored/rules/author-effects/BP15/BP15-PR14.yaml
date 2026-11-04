@@ -1,0 +1,43 @@
+cards:
+  BP15-PR14:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - grant:
+                abilities:
+                  - attack_time:
+                      do:
+                        - damage:
+                            n:
+                              history_count:
+                                event: life_changed
+                                where:
+                                  direction: down
+                                who: self
+                                window: this_turn
+                            to:
+                              kind: follower
+                              who: opp
+                              zone: field
+                on: ally
+            - damage:
+                n: 1
+                to:
+                  leader: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

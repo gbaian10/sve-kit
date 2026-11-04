@@ -2748,9 +2748,19 @@ pub(super) struct DealtSubscription {
     pub reference: Option<This>,
     pub who: Option<EntryPlayer>,
     pub sel: Option<MovementSubject>,
-    pub recipient: Option<DamageRecipientSubscription>,
+    pub recipient: Option<DealtRecipientSubscription>,
     pub kind: Option<AbilityDamage>,
     pub during: Option<DamageDuring>,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DealtRecipientSubscription {
+    Basic(DamageRecipientSubscription),
+    Followers {
+        who: EntryPlayer,
+        zone: Zone,
+        kind: FollowerKind,
+    },
 }
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
