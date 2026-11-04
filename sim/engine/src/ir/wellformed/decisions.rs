@@ -1,10 +1,12 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
-use crate::ir::NumericProperty;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
 use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
+use crate::ir::{
+    AbilityChoiceKind, Binding, NumericProperty, RuntimeAbilityReference, ability_play,
+};
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, CostSpec, CounterOperation, Decision,
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
@@ -102,6 +104,11 @@ impl Checker {
     }
 
     pub(super) fn decision_header(&mut self, decision: &Decision) -> Checked {
+        if matches!(decision.domain, ChoiceDomain::Abilities { .. })
+            && ability_play::choice(decision).is_none()
+        {
+            return self.reject();
+        }
         if !self.env.choices {
             return self.reject();
         }
@@ -158,8 +165,36 @@ impl Checker {
         }
     }
 
+    fn ability_domain(
+        &mut self,
+        holder: &ObjectOperand,
+        filter: AbilityChoiceKind,
+        binding: Binding<RuntimeAbilityReference>,
+        cardinality: Option<Cardinality>,
+    ) -> Checked {
+        let single = Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(1)),
+        };
+        if cardinality != Some(single)
+            || !matches!(
+                holder,
+                ObjectOperand::SourceHolder {} | ObjectOperand::Selected { .. }
+            )
+        {
+            return self.reject();
+        }
+        self.object(holder)?;
+        self.define(binding, BindingKind::Ability(filter))
+    }
+
     fn domain(&mut self, domain: &ChoiceDomain, cardinality: Option<Cardinality>) -> Checked {
         match domain {
+            ChoiceDomain::Abilities {
+                holder,
+                filter,
+                binding,
+            } => self.ability_domain(holder, *filter, *binding, cardinality),
             ChoiceDomain::Objects {
                 constraint,
                 binding,
@@ -733,7 +768,8 @@ fn has_roles(domain: &ChoiceDomain) -> bool {
     match domain {
         ChoiceDomain::Objects { target_roles, .. } => target_roles.is_some(),
         ChoiceDomain::Compound { domains } => domains.iter().any(has_roles),
-        ChoiceDomain::Recipients { .. }
+        ChoiceDomain::Abilities { .. }
+        | ChoiceDomain::Recipients { .. }
         | ChoiceDomain::EndPhaseGuardAct { .. }
         | ChoiceDomain::Modes { .. }
         | ChoiceDomain::Order { .. }

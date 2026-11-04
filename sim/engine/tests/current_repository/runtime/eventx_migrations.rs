@@ -131,7 +131,8 @@ fn finish(game: &mut Game, mut play: CardPlay, take: bool) {
                 })
             }
             InputDomain::Order(cards) => Answer::Order(cards.iter().map(|m| m.handle).collect()),
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)

@@ -68,6 +68,7 @@ fn answer(domain: &InputDomain) -> Answer {
         | InputDomain::Distribution(_)
         | InputDomain::SearchReplacement
         | InputDomain::TokenCapacity { .. }
+        | InputDomain::Abilities(_)
         | InputDomain::Modes { .. } => panic!("unexpected printed choice: {domain:?}"),
     }
 }

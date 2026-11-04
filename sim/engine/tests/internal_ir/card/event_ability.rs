@@ -1,5 +1,6 @@
 use super::*;
 use crate::rule_fixtures;
+use std::sync::OnceLock;
 use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InputDomain;
 
@@ -28,37 +29,67 @@ fn tree(ub: bool, depart: bool, cost: u8) -> Value {
 fn build(ub: bool, depart: bool, cost: u8, source_kind: &str, seat: u32) -> (Game, AbilityId) {
     build_from(&tree(ub, depart, cost), source_kind, seat)
 }
+pub(super) fn title_catalog() -> Arc<Catalog> {
+    static CATALOG: OnceLock<Arc<Catalog>> = OnceLock::new();
+    Arc::clone(CATALOG.get_or_init(|| {
+        let (snapshot, keywords, document) = catalog_documents(&json!("1"));
+        let mut rows = snapshot
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .collect::<Vec<_>>();
+        let mut follower = rows[1].clone();
+        follower["number"] = json!("unit-other-follower");
+        rows.push(follower);
+        let mut equipment = rows[1].clone();
+        equipment["number"] = json!("unit-equipment");
+        equipment["faces"][0]["name"] = json!("unit-equipment");
+        equipment["faces"][0]["card_type"] = json!("イクイップメント・トークン");
+        equipment["faces"][0]["power"] = json!("-");
+        equipment["faces"][0]["hp"] = json!("-");
+        rows.push(equipment);
+        let snapshot = rows
+            .iter()
+            .map(Value::to_string)
+            .collect::<Vec<_>>()
+            .join("\n");
+        let mut document: Value = serde_json::from_str(&document).unwrap();
+        document["cards"]["unit-other-follower"] = document["cards"]["unit-follower"].clone();
+        document["cards"]["unit-equipment"] = document["cards"]["unit-follower"].clone();
+        let document = document.to_string();
+        let snapshot = snapshot
+            .lines()
+            .map(|line| {
+                let mut row: Value = serde_json::from_str(line).unwrap();
+                row["faces"][0]["title"] = json!("UB test");
+                row.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let rules = rule_fixtures::rules(
+            &snapshot,
+            json!([rule_fixtures::title(
+                "ub_test",
+                "unit-follower",
+                json!([{"kind":"ub_enabled"}])
+            )]),
+            json!([]),
+        );
+        Arc::new(
+            Catalog::from_documents_with_rules(
+                &snapshot,
+                &keywords,
+                &[("unit.yaml".into(), document)],
+                &rules.to_string(),
+                &EngineIdentityInput::LegacyJp,
+            )
+            .unwrap(),
+        )
+    }))
+}
+
 fn build_from(input: &Value, source_kind: &str, seat: u32) -> (Game, AbilityId) {
     let programs = lowerer().lower(input).unwrap();
-    let (snapshot, keywords, document) = catalog_documents(&json!("1"));
-    let snapshot = snapshot
-        .lines()
-        .map(|line| {
-            let mut row: Value = serde_json::from_str(line).unwrap();
-            row["faces"][0]["title"] = json!("UB test");
-            row.to_string()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-    let rules = rule_fixtures::rules(
-        &snapshot,
-        json!([rule_fixtures::title(
-            "ub_test",
-            "unit-follower",
-            json!([{"kind":"ub_enabled"}])
-        )]),
-        json!([]),
-    );
-    let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
-            &snapshot,
-            &keywords,
-            &[("unit.yaml".into(), document)],
-            &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
-        )
-        .unwrap(),
-    );
+    let catalog = title_catalog();
     let mut initial = setup(seat, json!([]));
     initial["turn"]["active"] = json!(if seat == 1 { "P1" } else { "P2" });
     for side in ["P1", "P2"] {
@@ -89,7 +120,7 @@ fn build_from(input: &Value, source_kind: &str, seat: u32) -> (Game, AbilityId) 
         .id;
     (game, definition)
 }
-fn finish(game: &mut Game) {
+pub(super) fn finish(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }

@@ -60,7 +60,8 @@ fn resolve_trigger(game: &mut Game, accept: bool) {
                 );
                 Answer::Targets(vec![domain.members[0].handle])
             }
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::WardEntry { .. }
             | InputDomain::Quick { .. }
             | InputDomain::CostMaterials(_)

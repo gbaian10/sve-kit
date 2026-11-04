@@ -32,6 +32,14 @@ fn unavailable(
     reason = "Printed abilities and immutable event characteristics share the catalogue boundary."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_ub_enabled(&self, holder: &str) -> Result<bool> {
+        let player = self.player(&self.object(holder)?.controller)?;
+        Ok(player.construction == "title"
+            && self
+                .catalog
+                .rule_bindings
+                .capability(&player.title_code, "ub_enabled"))
+    }
     pub(in crate::game) fn require_internal_abilities(
         &self,
         holder: &str,
@@ -78,12 +86,7 @@ impl Game {
     ) -> Result<Vec<Located<Ability>>> {
         let object = self.object(holder)?;
         let field = object.zone == "field";
-        let player = self.player(&object.controller)?;
-        let ub_enabled = player.construction == "title"
-            && self
-                .catalog
-                .rule_bindings
-                .capability(&player.title_code, "ub_enabled");
+        let ub_enabled = self.internal_ub_enabled(holder)?;
         Ok(self
             .internal_characteristic_abilities(holder)?
             .into_iter()

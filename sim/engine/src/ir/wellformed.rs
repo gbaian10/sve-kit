@@ -1,8 +1,9 @@
 //! Structural validation of a closed program body, independent of execution support.
 
 use super::{
-    AbilityOrigin, AbilitySource, Action, Arithmetic, BatchOutcome, Binding, Bool, BoolRead,
-    Capture, CaptureTime, CardQuantityOutcome, Cardinality, Control, CounterOperation,
+    AbilityChoiceKind, AbilityCostPolicy, AbilityOperand, AbilityOrigin, AbilitySource,
+    AbilityTriggerPolicy, Action, Arithmetic, BatchOutcome, Binding, Bool, BoolRead, Capture,
+    CaptureTime, CardQuantityOutcome, Cardinality, Control, CounterOperation,
     CounterQuantityOutcome, Declaration, DiceOperation, Expr, FlipOutcome, Holder, Instruction,
     InstructionBatch, InstructionContext, InstructionId, Int, IntFrozen, IntOperation, IntRead,
     IterationCheck, Located, LookOutcome, MeasuredReceipt, MeasuredReceiptList, Nat, NatFrozen,
@@ -196,6 +197,7 @@ enum BindingKind {
     Value,
     Capture,
     Iteration,
+    Ability(AbilityChoiceKind),
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct Slot {
@@ -636,6 +638,21 @@ impl Checker {
                     return self.reject();
                 };
                 self.object(card)
+            }
+            Action::PlayAbility {
+                ability: AbilityOperand::Selected { selection },
+                controller: PlayerRef::Controller {},
+                cost_policy,
+                trigger_policy: AbilityTriggerPolicy::IgnoreAsAuthorized,
+            } => {
+                if instruction_actor != &(PlayerRef::Controller {}) {
+                    return self.reject();
+                }
+                let filter = match cost_policy {
+                    AbilityCostPolicy::Normal => AbilityChoiceKind::EvolutionTime,
+                    AbilityCostPolicy::WaiveOriginal => AbilityChoiceKind::UnionBurst,
+                };
+                self.reference(*selection, BindingKind::Ability(filter))
             }
             Action::DriveCheck { player, source, .. } => {
                 self.player(player)?;

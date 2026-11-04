@@ -3,7 +3,9 @@ use super::{
     Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id, unsupported,
 };
 use crate::game::internal::{Execution, InputDomain, Wait};
-use crate::ir::{AbilityInstanceId, BatchPolicy, DecisionId, LimitSpec, TriggerAggregation};
+use crate::ir::{
+    AbilityCostPolicy, AbilityInstanceId, BatchPolicy, DecisionId, LimitSpec, TriggerAggregation,
+};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 
 /// One earlier controller's public choice in the same simultaneous admission.
@@ -143,6 +145,7 @@ impl Game {
                     pending.source.instance,
                     pending.header.time.turn,
                     limit,
+                    AbilityCostPolicy::Normal,
                 )?;
             }
             self.card_runtime.pending.push(pending);

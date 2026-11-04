@@ -106,6 +106,7 @@ impl BodyContext<'_> {
                 return self.search_result(step, receipt, path);
             }
             ast::Step::StackPlus(_)
+            | ast::Step::PlayAbility(_)
             | ast::Step::Counter(_)
             | ast::Step::Reveal(_)
             | ast::Step::Optional(_)

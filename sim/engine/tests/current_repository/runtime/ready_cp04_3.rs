@@ -102,7 +102,8 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
                     .map(|m| m.handle)
                     .collect(),
             ),
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
@@ -480,7 +481,8 @@ fn cp04_099_and_100_require_both_an_amulet_and_another_follower() {
                                 .map(|m| m.handle)
                                 .collect(),
                         ),
-                        InputDomain::ResourceEntryPayment { .. }
+                        InputDomain::Abilities(_)
+                        | InputDomain::ResourceEntryPayment { .. }
                         | InputDomain::WardEntry { .. }
                         | InputDomain::Quick { .. }
                         | InputDomain::OptionalCost

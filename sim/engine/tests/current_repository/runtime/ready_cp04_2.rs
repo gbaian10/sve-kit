@@ -120,7 +120,8 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
                     amount: domain.total,
                 }]
             }),
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

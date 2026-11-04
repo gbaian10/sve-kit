@@ -215,8 +215,13 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 pub(super) fn supported_definition(ability: &Ability) -> bool {
     if ability.kind == AbilityKind::Activated {
         return ability.active_zones == [ZoneKind::Field]
-            && ability.qualification == AbilityQualification::Ordinary
-            && matches!(ability.source.origin, AbilityOrigin::Printed { .. });
+            && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+            && (ability.qualification == AbilityQualification::Ordinary
+                || (ability.qualification == AbilityQualification::UnionBurst
+                    && ability.play.is_some()
+                    && ability.trigger.is_none()
+                    && ability.event_captures.is_empty()
+                    && ability.declarations.is_empty()));
     }
     if ability.kind == AbilityKind::Static {
         return ability.active_zones == [ZoneKind::Field] || static_cost(ability);
@@ -387,6 +392,10 @@ impl Game {
                 });
             }
         }
+        let ub_enabled = self.internal_ub_enabled(holder)?;
+        result.retain(|ability| {
+            ability.node.qualification != AbilityQualification::UnionBurst || ub_enabled
+        });
         Ok(result)
     }
 

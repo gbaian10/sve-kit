@@ -70,6 +70,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
             | InputDomain::CostMaterials(_)
             | InputDomain::Search(_)
             | InputDomain::Order(_)
+            | InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw

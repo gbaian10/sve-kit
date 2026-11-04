@@ -143,7 +143,8 @@ fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
         let answer = match q.domain {
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::CostMaterials(_)
             | InputDomain::BeforeDraw

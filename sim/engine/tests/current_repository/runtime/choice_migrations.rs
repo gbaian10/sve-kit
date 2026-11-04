@@ -287,7 +287,8 @@ mod conditions {
                                 Answer::Targets(vec![domain.members[0].handle])
                             }
                             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-                            unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                            unexpected @ (InputDomain::Abilities(_)
+                            | InputDomain::ResourceEntryPayment { .. }
                             | InputDomain::CostMaterials(_)
                             | InputDomain::Quick { .. }
                             | InputDomain::BeforeDraw
@@ -358,7 +359,8 @@ mod conditions {
                     }
                     Answer::Order(cards.iter().rev().map(|card| card.handle).collect())
                 }
-                unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                unexpected @ (InputDomain::Abilities(_)
+                | InputDomain::ResourceEntryPayment { .. }
                 | InputDomain::CostMaterials(_)
                 | InputDomain::WardEntry { .. }
                 | InputDomain::Quick { .. }
@@ -479,7 +481,8 @@ mod conditions {
                             Answer::Targets(vec![domain.members[0].handle])
                         }
                         InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-                        unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                        unexpected @ (InputDomain::Abilities(_)
+                        | InputDomain::ResourceEntryPayment { .. }
                         | InputDomain::CostMaterials(_)
                         | InputDomain::Quick { .. }
                         | InputDomain::BeforeDraw
@@ -637,7 +640,8 @@ mod conditions {
                         Answer::CostMaterials(vec![domain.members[0].handle])
                     }
                     InputDomain::OptionalCost => Answer::OptionalCost(true),
-                    unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                    unexpected @ (InputDomain::Abilities(_)
+                    | InputDomain::ResourceEntryPayment { .. }
                     | InputDomain::WardEntry { .. }
                     | InputDomain::Quick { .. }
                     | InputDomain::BeforeDraw

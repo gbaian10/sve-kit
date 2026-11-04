@@ -295,6 +295,7 @@ pub(super) struct Body {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
     PlayCard(PlayCard),
+    PlayAbility(PlayAbility),
     Pay(ModePayment),
     Counter(CounterChange),
     StackPlus(Number),
@@ -332,6 +333,45 @@ pub(super) enum Step {
     Create(Create),
     Equip(Equip),
     Pilot(Pilot),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PlayAbility {
+    Trigger {
+        of: Objects,
+        trigger: AbilityPlayTrigger,
+        #[serde(default)]
+        cost_policy: AbilityPlayCost,
+    },
+    Ability {
+        of: Objects,
+        ability: UbInvocation,
+        #[serde(default)]
+        cost_policy: AbilityPlayCost,
+    },
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AbilityPlayTrigger {
+    EvolveTime,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UbInvocation {
+    #[serde(rename = "ub")]
+    pub _ub: True,
+    pub n: u64,
+}
+
+#[derive(Clone, Copy, Default, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AbilityPlayCost {
+    #[default]
+    Normal,
+    WaiveOriginal,
 }
 
 #[derive(Deserialize)]

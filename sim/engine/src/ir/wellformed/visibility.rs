@@ -111,6 +111,9 @@ impl Checker {
 
     pub(super) fn answer_access(&mut self, domain: &ChoiceDomain, visibility: &Visibility) {
         match domain {
+            ChoiceDomain::Abilities { binding, .. } => {
+                self.env.access.insert(binding.key(), visibility.clone());
+            }
             ChoiceDomain::Objects {
                 binding,
                 target_roles,

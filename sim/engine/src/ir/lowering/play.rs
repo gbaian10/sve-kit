@@ -272,20 +272,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        match &target.from.zone {
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
-                if cardinality.maximum == Some(Nat(1)) =>
-            {
-                self.playable_targets.insert(target.bind.clone());
-            }
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex)) => {
-                self.ex_targets.insert(target.bind.clone());
-            }
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand)) => {
-                self.hand_targets.insert(target.bind.clone());
-            }
-            _ => {}
-        }
+        self.record_target_zone(target, cardinality);
         self.remember_evolution_target(target, cardinality, dynamic_count);
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
@@ -310,6 +297,26 @@ impl BodyContext<'_> {
             },
             cardinality,
         ))
+    }
+
+    fn record_target_zone(&mut self, target: &ast::Target, cardinality: Cardinality) {
+        if ability_holder_target(target, cardinality) {
+            self.ability_holders.insert(target.bind.clone());
+        }
+        match &target.from.zone {
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+                if cardinality.maximum == Some(Nat(1)) =>
+            {
+                self.playable_targets.insert(target.bind.clone());
+            }
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex)) => {
+                self.ex_targets.insert(target.bind.clone());
+            }
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand)) => {
+                self.hand_targets.insert(target.bind.clone());
+            }
+            _ => {}
+        }
     }
 
     fn check_cemetery_target(&self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
@@ -817,6 +824,7 @@ impl BodyContext<'_> {
                 observed_targets: BTreeSet::new(),
                 field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
+                ability_holders: BTreeSet::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
                 resolution_scope: self.resolution_scope,
@@ -841,6 +849,7 @@ impl BodyContext<'_> {
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);
+                context.ability_holders.clone_from(&self.ability_holders);
                 context
                     .recipient_targets
                     .clone_from(&self.recipient_targets);
@@ -1092,6 +1101,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
         ast::Step::PlayCard(_)
+        | ast::Step::PlayAbility(_)
         | ast::Step::StackPlus(_)
         | ast::Step::Counter(_)
         | ast::Step::GainDrive(_)
@@ -1308,4 +1318,18 @@ fn observed_predicate(
         return None;
     }
     Some(Expr::Compute(Box::new(Predicate::Or { predicates })))
+}
+
+fn ability_holder_target(target: &ast::Target, cardinality: Cardinality) -> bool {
+    matches!(
+        target.from.zone,
+        Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+    ) && matches!(target.from.who, Some(ast::Side::Controller))
+        && matches!(target.from.kind, Some(ast::SearchKind::Follower))
+        && !target.from.leader_or
+        && cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
 }

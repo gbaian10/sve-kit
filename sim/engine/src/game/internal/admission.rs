@@ -433,6 +433,15 @@ fn play_requirement(code: &str) -> bool {
             | "shape.ModeDecisionKind.ResolutionChoice"
             | "action.play-card"
             | "shape.Action.PlayCard"
+            | "action.play-ability"
+            | "shape.Action.PlayAbility"
+            | "shape.AbilityOperand.Selected"
+            | "shape.ChoiceDomain.Abilities"
+            | "internal.AbilityChoiceKind.EvolutionTime"
+            | "internal.AbilityChoiceKind.UnionBurst"
+            | "internal.AbilityCostPolicy.Normal"
+            | "internal.AbilityCostPolicy.WaiveOriginal"
+            | "internal.AbilityTriggerPolicy.IgnoreAsAuthorized"
             | "shape.CostOverride.SetBase"
             | "internal.ModeExclusion.CurrentTurnAbilityInstance"
     )
@@ -449,6 +458,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
         return super::card::attack_restrictions::check_install(action);
     }
     super::card::nested::check(action)?;
+    super::card::nested::ability::check_action(action)?;
     super::search::check_action(action)?;
     super::tokens::check_action(action)?;
     super::tokens::equipment::check_action(action)?;
@@ -549,6 +559,12 @@ fn check_program(
 }
 
 fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Result<()> {
+    if matches!(decision.domain, ChoiceDomain::Abilities { .. }) {
+        if !card {
+            return Err(unsupported("ability choice outside a whole card"));
+        }
+        super::card::nested::ability::check_choice(decision)?;
+    }
     if matches!(
         decision.domain,
         ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
@@ -584,6 +600,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             },
             ..
         } | ChoiceDomain::Distribution { .. }
+            | ChoiceDomain::Abilities { .. }
             | ChoiceDomain::Objects { .. }
             | ChoiceDomain::Recipients { .. }
     ) || !decision.captures.is_empty()
