@@ -1016,3 +1016,228 @@ fn granted_damage_definitions_reject_predicates_outside_the_closed_damage_header
         }
     }
 }
+
+fn activated_definition_grant(end: DurationEnd) -> Located<Node> {
+    let mut node = definition_grant(end);
+    let Node::Instruction { instruction } = &mut node.node else {
+        panic!("grant");
+    };
+    let Action::Grant { abilities, .. } = &mut instruction.action else {
+        panic!("grant");
+    };
+    let GrantedAbility::Definition { ability: nested } = &mut abilities[0] else {
+        panic!("definition");
+    };
+    nested.kind = AbilityKind::Activated;
+    nested.source.origin = AbilityOrigin::Printed {
+        face: FaceId("0".into()),
+        line: Nat(1),
+    };
+    nested.trigger = None;
+    nested.play = ability(99, vec![]).node.play;
+    let mut span = source("unit-amulet");
+    span.fragment = None;
+    locate_steps(
+        &mut nested.body.as_mut().unwrap().steps,
+        &span,
+        &nested.source,
+    );
+    node
+}
+
+#[test]
+fn installed_activations_keep_distinct_instances_when_the_provider_leaves_and_expire_at_turn_end() {
+    let program = grant_program(vec![
+        ability(
+            1,
+            vec![activated_definition_grant(DurationEnd::CurrentTurnEnd {})],
+        ),
+        ability(
+            2,
+            vec![movement::put(
+                2,
+                Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                OwnerZone::Hand,
+            )],
+        ),
+    ]);
+    let mut game = position(&program);
+    activate_grant(&mut game);
+    activate_grant(&mut game);
+    let first = game.internal_activated_sources("ally").unwrap();
+    let second = game.internal_activated_sources("second").unwrap();
+    assert_eq!(first.len(), 2);
+    assert_eq!(second.len(), 2);
+    assert_ne!(first[0].instance, first[1].instance);
+    assert_ne!(first[0].instance, second[0].instance);
+    let before = exact_authority(&game);
+    let error = game
+        .activate_internal_card("ally", first[0].definition, PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(error.to_string().contains("ambiguous effective definition"));
+    assert_eq!(exact_authority(&game), before);
+    resolved(
+        game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    for source in first.iter().chain(&second) {
+        let holder = if first.contains(source) {
+            "ally"
+        } else {
+            "second"
+        };
+        let activated = resolved(
+            game.activate_internal_card_instance(holder, source.instance, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        assert_eq!(activated.source, *source);
+        game.resume_internal_card().unwrap();
+    }
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        24_u8
+    );
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    quick::pass(&mut game);
+    game.internal_rule_action(&json!({"do":"end-discard","select":[]}))
+        .unwrap();
+    for holder in ["ally", "second"] {
+        assert_eq!(
+            game.internal_activated_sources(holder).unwrap().as_slice(),
+            []
+        );
+    }
+    let before = exact_authority(&game);
+    game.activate_internal_card_instance("ally", first[0].instance, PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
+fn installed_activations_work_after_printed_ability_loss_and_use_the_recipient_controller() {
+    for silenced in [false, true] {
+        let program = grant_program(vec![ability(
+            1,
+            vec![activated_definition_grant(DurationEnd::NoTemporalExpiry {})],
+        )]);
+        let mut game = position_with_silence(&program, false, silenced);
+        assert_eq!(
+            game.internal_activated_sources("ally").unwrap().as_slice(),
+            []
+        );
+        activate_grant(&mut game);
+        let sources = game.internal_activated_sources("ally").unwrap();
+        assert_eq!(sources.len(), 1);
+        let before = exact_authority(&game);
+        game.activate_internal_card_instance("ally", sources[0].instance, PlayerId { seat: 2 })
+            .unwrap_err();
+        assert_eq!(exact_authority(&game), before);
+        let played = resolved(
+            game.activate_internal_card_instance("ally", sources[0].instance, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        assert_eq!(played.source.controller, PlayerId { seat: 1 });
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            21_u8
+        );
+    }
+}
+
+#[test]
+fn installed_activations_do_not_follow_a_returning_recipient_generation() {
+    let program = grant_program(vec![
+        ability(
+            1,
+            vec![activated_definition_grant(DurationEnd::NoTemporalExpiry {})],
+        ),
+        ability(2, vec![movement::put(2, followers(101), OwnerZone::Hand)]),
+    ]);
+    let mut game = position(&program);
+    activate_grant(&mut game);
+    let source = game.internal_activated_sources("ally").unwrap().remove(0);
+    resolved(
+        game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    game.play_internal_card("ally", PlayerId { seat: 1 })
+        .unwrap();
+    game.resume_internal_card().unwrap();
+    assert_eq!(
+        game.internal_activated_sources("ally").unwrap().as_slice(),
+        []
+    );
+    let before = exact_authority(&game);
+    game.activate_internal_card_instance("ally", source.instance, PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
+fn generic_activation_grants_reject_qualified_entries_and_field_auras() {
+    for case in 0_u8..3 {
+        let aura = case == 2;
+        let mut granted = activated_definition_grant(DurationEnd::CurrentTurnEnd {});
+        let Node::Instruction { instruction } = &mut granted.node else {
+            panic!("grant");
+        };
+        let Action::Grant { abilities, .. } = &mut instruction.action else {
+            panic!("grant");
+        };
+        let program = if aura {
+            let definitions = abilities.clone();
+            let mut continuous = self::aura();
+            let Effect::Continuous { patch, .. } = &mut continuous.node.declarations[0] else {
+                panic!("aura");
+            };
+            *patch = CharacteristicPatch::GrantAbility {
+                abilities: definitions,
+            };
+            grant_program(vec![continuous])
+        } else {
+            let GrantedAbility::Definition { ability: nested } = &mut abilities[0] else {
+                panic!("definition");
+            };
+            if case == 0 {
+                nested.qualification = AbilityQualification::UnionBurst;
+            } else {
+                nested.source.origin = AbilityOrigin::Keyword {
+                    keyword: KeywordId::Quick,
+                    origin: Box::new(nested.source.origin.clone()),
+                };
+                let mut span = source("unit-amulet");
+                span.fragment = None;
+                locate_steps(
+                    &mut nested.body.as_mut().unwrap().steps,
+                    &span,
+                    &nested.source,
+                );
+            }
+            grant_program(vec![ability(1, vec![granted])])
+        };
+        let mut game = Game::new(
+            static_keywords::keyword_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "closed-granted-activation",
+        )
+        .unwrap();
+        let error = game
+            .load_internal_card("unit-amulet", &program)
+            .unwrap_err();
+        assert!(
+            error.to_string().contains(if aura {
+                "continuous granted zone or transitive aura"
+            } else {
+                "granted definition"
+            }),
+            "case aura={aura}: {error}"
+        );
+    }
+}

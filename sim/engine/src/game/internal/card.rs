@@ -563,7 +563,8 @@ impl Game {
             )
             || object.controller != seat
             || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
-            || object.state["silenced"] == true
+            // Installed grants follow initial ability loss; equipment grants are filtered upstream.
+            || (object.state["silenced"] == true && ability.grant.is_none())
             || !activation_type(self.object_type(holder)?, &ability.node.active_zones)
             || (is_printed_quick(&ability.node)
                 && !quick_activation_type(self.object_type(holder)?, &ability.node.active_zones))
@@ -1350,8 +1351,8 @@ fn check_grant_instruction(
         ..
     } = &instruction.action
     {
-        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if equipment_definition(ability))) {
-            return Err(unsupported("granted activation or Play requires an equipment provider"));
+        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if filter(ability).is_some())) {
+            return Err(unsupported("granted Play requires an equipment provider"));
         }
         check_granted_definitions(game, abilities, source, ability_source)?;
         if &provider.face != printed_origin(&instruction.source.origin)?.0 {
