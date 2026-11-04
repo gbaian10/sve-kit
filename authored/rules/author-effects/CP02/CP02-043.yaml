@@ -1,0 +1,27 @@
+cards:
+  CP02-043:
+    abilities:
+      - evolve_time:
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                kind: spell
+                orig_cost_le: 2
+                trait: デレマス
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set
