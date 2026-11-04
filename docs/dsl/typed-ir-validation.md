@@ -389,6 +389,23 @@ HistoryExists、HistoryCount 與 HistorySum 檢查 window、cutoff、include_exe
 Since 與 Capture cutoff 必須有正確型別及 capture 類別的既有 binding。
 Facts／Subjects、數值加總與 OriginFactId 去重的實際結果仍由歷史執行器驗證。
 
+帶主體篩選的 Played 歷史共用一個可重建並精確比較的計畫：
+CurrentTurn／CurrentPoint／IncludeAll、Facts、己方打出者，以及單一類型、
+兩個相異類型的聯集或 Spell 種類。外層只有一個 `PlayedCard` 局部 card binding，
+聯集在該 binding 內使用既有主體謂詞的 OR；每筆已提交事實最多計一次。
+WF、native 公開歷史觀測檢查與 runtime 使用同一計畫，非 canonical 的 Play 歷史不回落為一般事件讀取。
+未帶篩選的己方／對手／雙方查詢仍讀原總計數，Combo 的 pending 投影不改變。
+
+正式打出的三個提交入口共用計數與公開事實記錄點，先固定打出者、種類與有效類型，
+再通知 Played 觀察者及處理入場。記錄不依賴是否存在觀察者；不另建類型計數器或歷史帳本。
+只有總計數而沒有等量 Play 事實的篩選查詢拒絕執行，既有無篩選讀值不受影響。
+讀取不要求卡片名稱或職業；缺少 traits 的最小 catalog 視為空類型，存在卻無效的 traits 仍拒絕。
+`SubjectHistoryEvent::Play` 加入既有 state 的歷史事件變體；已載入 internal card 的遊戲目前尚無公開存檔格式。
+
+`read.event-field` 的能力彙總允許入場方式／來源與歷史讀取器按 location 組合，
+每一處都必須由既有的封閉讀取器證明。合法入場讀值不會授權同一能力內其他未接通的事件讀值，
+也不將此 capability 全域設為 supported。進化事件的 `at: event` 序數範圍維持原限制。
+
 目前的捨棄歷史只接受 `EventPattern::Discard` 的己方玩家 canonical 謂詞，
 視窗固定 CurrentTurn／CurrentPoint／IncludeAll，計數固定 Facts。
 同一個查詢計畫供 lowering、WF 與 runtime 使用；其他捨棄謂詞、視窗或 Subjects

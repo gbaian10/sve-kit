@@ -9,6 +9,8 @@ mod exchange_routes;
 mod material_acts;
 #[path = "card/next_damage.rs"]
 mod next_damage;
+#[path = "card/played_traits.rs"]
+mod played_traits;
 use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]

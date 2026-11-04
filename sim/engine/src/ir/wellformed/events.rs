@@ -6,7 +6,7 @@ use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
-use crate::ir::history_turn::{discarded_plan, played_by, subject_plan, ub_plan};
+use crate::ir::history_turn::{discarded_plan, played_by, played_filter, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
@@ -777,6 +777,15 @@ impl Checker {
             && let EventPattern::Play { binding, predicate } = &query.pattern
         {
             return self.local_value(*binding, predicate);
+        }
+        if let EventPattern::Play { binding, .. } = &query.pattern {
+            let Some((_, card)) = played_filter(query) else {
+                return self.reject();
+            };
+            return self.isolated(|checker| {
+                checker.define(*binding, BindingKind::Value)?;
+                checker.local_value(card, &Expr::Literal(Bool(true)))
+            });
         }
         self.history_window(&query.window, query.include_execution)?;
         if subject_plan(query).is_some() {

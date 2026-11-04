@@ -28,6 +28,114 @@ pub(crate) fn played_query(event: Binding<PlayEvent>, player: Option<PlayerRef>)
     }
 }
 
+/// Closed filters share one committed card binding, including the trait union.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum PlayedHistoryFilter {
+    Trait(super::TraitId),
+    TraitsAny([super::TraitId; 2]),
+    Spell,
+}
+
+impl PlayedHistoryFilter {
+    pub(crate) fn subjects(&self) -> Vec<SubjectFilter> {
+        let traits = match self {
+            Self::Trait(id) => vec![id.clone()],
+            Self::TraitsAny(ids) => ids.to_vec(),
+            Self::Spell => {
+                return vec![SubjectFilter {
+                    own: Some(true),
+                    kind: Some(super::CardKind::Spell),
+                    ..SubjectFilter::default()
+                }];
+            }
+        };
+        traits
+            .into_iter()
+            .map(|id| SubjectFilter {
+                own: Some(true),
+                trait_id: Some(id),
+                ..SubjectFilter::default()
+            })
+            .collect()
+    }
+
+    pub(crate) fn query(
+        &self,
+        event: Binding<PlayEvent>,
+        card: Binding<super::ObjectRef>,
+    ) -> HistoryQuery {
+        let fields = SubjectFields::Played { event, card };
+        let mut predicates = self
+            .subjects()
+            .iter()
+            .map(|filter| filter.predicate(fields))
+            .collect::<Vec<_>>();
+        let predicate = if predicates.len() == 1 {
+            predicates.remove(0)
+        } else {
+            Expr::Compute(Box::new(Predicate::Or { predicates }))
+        };
+        let mut query = played_query(event, None);
+        query.pattern = EventPattern::Play {
+            binding: event,
+            predicate: Expr::Compute(Box::new(Predicate::PlayedCard {
+                subject: Expr::Frozen(Box::new(super::PlaySubjectFields::PlaySubject { event })),
+                card,
+                predicate,
+            })),
+        };
+        query
+    }
+}
+
+pub(crate) fn played_filter(
+    query: &HistoryQuery,
+) -> Option<(PlayedHistoryFilter, Binding<super::ObjectRef>)> {
+    let EventPattern::Play {
+        binding: event,
+        predicate: Expr::Compute(outer),
+    } = &query.pattern
+    else {
+        return None;
+    };
+    let Predicate::PlayedCard {
+        card, predicate, ..
+    } = outer.as_ref()
+    else {
+        return None;
+    };
+    let fields = SubjectFields::Played {
+        event: *event,
+        card: *card,
+    };
+    let plan = if let Expr::Compute(operation) = predicate
+        && let Predicate::Or { predicates } = operation.as_ref()
+    {
+        let [left, right] = predicates.as_slice() else {
+            return None;
+        };
+        let left = SubjectFilter::parse(fields, left)?.trait_id?;
+        let right = SubjectFilter::parse(fields, right)?.trait_id?;
+        if left.0.is_empty() || right.0.is_empty() || left == right {
+            return None;
+        }
+        PlayedHistoryFilter::TraitsAny([left, right])
+    } else {
+        let filter = SubjectFilter::parse(fields, predicate)?;
+        if let Some(id) = filter.trait_id {
+            if id.0.is_empty() {
+                return None;
+            }
+            PlayedHistoryFilter::Trait(id)
+        } else if filter.kind == Some(super::CardKind::Spell) {
+            PlayedHistoryFilter::Spell
+        } else {
+            return None;
+        }
+    };
+    (*query == plan.query(*event, *card)).then_some((plan, *card))
+}
+
 pub(crate) enum PlayedBy {
     Any,
     Player(PlayerRef),

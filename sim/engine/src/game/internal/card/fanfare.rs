@@ -83,7 +83,7 @@ impl Game {
             object: played,
             controller: actor,
         });
-        self.bump(&format!("{seat}.cards_played"), 1);
+        self.internal_commit_card_play(&holder, seat)?;
         self.internal_played_card_events(execution, ReceiptId(0))?;
         let group = self.group();
         let event = self.emit(

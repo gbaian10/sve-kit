@@ -1,0 +1,66 @@
+cards:
+  BP14-043:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  entered_by:
+                    by: play
+                    ref: this
+                else:
+                  - if:
+                      cond:
+                        history:
+                          at_least: 1
+                          event: played
+                          sel:
+                            trait: 宴楽
+                          who: self
+                          window: this_turn
+                      then:
+                        - either:
+                            options:
+                              - - grant:
+                                    keywords:
+                                      - storm
+                                    on: this
+                              - - grant:
+                                    keywords:
+                                      - drain
+                                    on: this
+                then:
+                  - if:
+                      cond:
+                        history:
+                          at_least: 2
+                          event: played
+                          sel:
+                            trait: 宴楽
+                          who: self
+                          window: this_turn
+                      then:
+                        - either:
+                            options:
+                              - - grant:
+                                    keywords:
+                                      - storm
+                                    on: this
+                              - - grant:
+                                    keywords:
+                                      - drain
+                                    on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

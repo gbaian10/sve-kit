@@ -536,6 +536,79 @@ impl BodyContext<'_> {
         })))
     }
 
+    fn played_history(
+        &mut self,
+        history: &ast::HistoryQuery,
+        id: u64,
+        path: &str,
+    ) -> Result<super::super::HistoryQuery, LoweringError> {
+        use super::super::history_turn::PlayedHistoryFilter;
+        if history.from.is_some()
+            || history.to.is_some()
+            || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+        {
+            return Err(unsupported(path));
+        }
+        let own = history
+            .who
+            .as_ref()
+            .map(|side| matches!(side, ast::LeaderSide::Controller));
+        let player = own.map(|own| {
+            if own {
+                PlayerRef::Controller {}
+            } else {
+                super::super::events::timing::opponent()
+            }
+        });
+        let Some(subject) = &history.sel else {
+            return Ok(super::super::history_turn::played_query(
+                Binding::new(id, self.scope),
+                player,
+            ));
+        };
+        if own != Some(true) {
+            return Err(unsupported(path));
+        }
+        let plan = match subject {
+            ast::HistorySubject::Union(union) => {
+                let [left, right] = &union.traits_any;
+                if left.is_empty() || right.is_empty() || left == right {
+                    return Err(unsupported(path));
+                }
+                PlayedHistoryFilter::TraitsAny([
+                    super::super::TraitId(left.clone()),
+                    super::super::TraitId(right.clone()),
+                ])
+            }
+            ast::HistorySubject::Single(subject) => {
+                let filter = super::movement::movement_filter(
+                    Some(true),
+                    false,
+                    Some(subject),
+                    false,
+                    path,
+                    super::movement::FilterSupport::Basic,
+                )?;
+                let plan = if let Some(trait_id) = &filter.trait_id {
+                    if trait_id.0.is_empty() {
+                        return Err(unsupported(path));
+                    }
+                    PlayedHistoryFilter::Trait(trait_id.clone())
+                } else if filter.kind == Some(super::super::CardKind::Spell) {
+                    PlayedHistoryFilter::Spell
+                } else {
+                    return Err(unsupported(path));
+                };
+                if plan.subjects() != [filter] {
+                    return Err(unsupported(path));
+                }
+                plan
+            }
+        };
+        let card = Binding::new(self.allocator.id(path)?, self.scope);
+        Ok(plan.query(Binding::new(id, self.scope), card))
+    }
+
     fn history_query(
         &mut self,
         history: &ast::HistoryQuery,
@@ -552,9 +625,7 @@ impl BodyContext<'_> {
             .map(|side| matches!(side, ast::LeaderSide::Controller));
         if matches!(
             history.event,
-            ast::HistoryEvent::LifeChanged
-                | ast::HistoryEvent::UbActivated
-                | ast::HistoryEvent::Played
+            ast::HistoryEvent::LifeChanged | ast::HistoryEvent::UbActivated
         ) && (history.sel.is_some()
             || history.from.is_some()
             || history.to.is_some()
@@ -586,15 +657,17 @@ impl BodyContext<'_> {
             ));
         }
         if matches!(history.event, ast::HistoryEvent::Played) {
-            return Ok(super::super::history_turn::played_query(
-                Binding::new(id, self.scope),
-                player,
-            ));
+            return self.played_history(history, id, path);
         }
+        let subject = match &history.sel {
+            None => None,
+            Some(ast::HistorySubject::Single(subject)) => Some(subject),
+            Some(ast::HistorySubject::Union(_)) => return Err(unsupported(path)),
+        };
         let mut filter = super::movement::movement_filter(
             own,
             false,
-            history.sel.as_ref(),
+            subject,
             false,
             path,
             super::movement::FilterSupport::Basic,
