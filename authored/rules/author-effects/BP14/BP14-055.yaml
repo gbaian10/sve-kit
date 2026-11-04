@@ -1,0 +1,48 @@
+cards:
+  BP14-055:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - attack_time:
+          cost:
+            counter:
+              holders: 1
+              n: 2
+              name: 神湯カウンター
+              on:
+                name: 竜山温泉
+                who: self
+                zone: field
+          do:
+            - draw:
+                n: 1
+                who: self
+            - apply:
+                effect:
+                  prevent:
+                    kind: any
+                    next_only: true
+                on: this
+                until: turn
+        line: 2
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: 竜山温泉
+                  who: self
+                  zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
