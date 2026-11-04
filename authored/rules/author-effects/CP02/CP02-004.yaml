@@ -1,0 +1,45 @@
+cards:
+  CP02-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - move:
+                ref: returned
+                to: hand
+            - apply:
+                effect:
+                  cannot:
+                    ability:
+                      except:
+                        - evolution
+                      kind: activated
+                    what: play_ability
+                on: this
+                until: turn
+          targets:
+            - bind: returned
+              from:
+                orig_cost_le: 1
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

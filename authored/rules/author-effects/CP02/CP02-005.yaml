@@ -1,0 +1,53 @@
+cards:
+  CP02-005:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                ref: enemy
+                to: hand
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                orig_cost_le: 2
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - move:
+                ref: returned
+                to: hand
+            - apply:
+                effect:
+                  cannot:
+                    ability:
+                      kind: activated
+                    what: play_ability
+                on: this
+                until: turn
+          targets:
+            - bind: returned
+              from:
+                orig_cost_le: 1
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
