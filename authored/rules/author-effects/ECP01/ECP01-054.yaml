@@ -1,0 +1,63 @@
+cards:
+  ECP01-054:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                name: メジロマックイーン
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n:
+                  times:
+                    - count:
+                        trait: メジロ家
+                        who: self
+                        zone: field
+                    - 2
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - lastword:
+          do:
+            - evolve:
+                ref: mcqueen
+          targets:
+            - bind: mcqueen
+              from:
+                evolved: false
+                kind: follower
+                name: メジロマックイーン
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

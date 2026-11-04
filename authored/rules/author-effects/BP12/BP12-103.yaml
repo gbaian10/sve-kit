@@ -1,0 +1,78 @@
+cards:
+  BP12-103:
+    abilities:
+      - auto:
+          cost:
+            act:
+              n: 1
+              sel:
+                name: ナテラの大樹
+                who: self
+                zone: field
+          do:
+            - move:
+                ref: recovered
+                to: hand
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          targets:
+            - bind: recovered
+              from:
+                not_same_name_as_this: true
+                trait: 自然
+                who: self
+                zone: cemetery
+              n: 1
+          zone: hand
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 機械
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - create:
+                n: 1
+                to: ex
+                token: リペアモード
+            - pp:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
