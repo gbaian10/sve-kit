@@ -10,6 +10,7 @@ use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
     AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
@@ -42,6 +43,7 @@ pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
 pub(in crate::game::internal) mod nested;
+pub(in crate::game) mod trigger_restrictions;
 pub(super) use nested::ability::AbilityWait;
 pub(super) mod optional;
 pub(super) mod other_costs;
@@ -901,6 +903,10 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
         super::posture::check_static(located)?;
         return Ok(true);
     }
+    if trigger_permission::is_static(ability) {
+        trigger_restrictions::check(located)?;
+        return Ok(true);
+    }
     if attack_restrictions::is_static(ability) {
         attack_restrictions::check(located)?;
         return Ok(true);
@@ -925,6 +931,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || other_costs::is_static(ability)
+        || trigger_permission::is_static(ability)
         || stand_restrictions::is_static(ability)
         || attack_restrictions::is_static(ability)
         || static_keywords::is_static(ability)

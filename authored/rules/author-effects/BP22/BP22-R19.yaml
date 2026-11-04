@@ -1,0 +1,30 @@
+cards:
+  BP22-R19:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - no_trigger:
+                kinds:
+                  - fanfare
+                  - evolve_time
+                who: opp
+      - evolve_time:
+          do:
+            - damage:
+                n: 7
+                to:
+                  kind: follower
+                  other: true
+                  who: all
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

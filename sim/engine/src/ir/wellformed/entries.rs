@@ -9,6 +9,7 @@ use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::trigger_restrictions;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
     Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind,
@@ -677,13 +678,7 @@ impl Checker {
                 })?;
                 self.duration(duration)
             }
-            Effect::Permission {
-                subject,
-                action,
-                condition,
-                duration,
-                ..
-            } => self.permission_effect(subject, action, condition, duration),
+            Effect::Permission { .. } => self.permission_declaration(effect, ability_zones),
             Effect::CostModifier {
                 kind,
                 subjects,
@@ -695,6 +690,23 @@ impl Checker {
                 self.reject()
             }
         }
+    }
+
+    fn permission_declaration(&mut self, effect: &Effect, ability_zones: &[ZoneKind]) -> Checked {
+        if ability_zones == [ZoneKind::Field] && trigger_restrictions::keyword(effect).is_some() {
+            return Ok(());
+        }
+        let Effect::Permission {
+            subject,
+            action,
+            condition,
+            duration,
+            ..
+        } = effect
+        else {
+            return self.reject();
+        };
+        self.permission_effect(subject, action, condition, duration)
     }
 
     fn permission_effect(

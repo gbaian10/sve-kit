@@ -194,7 +194,8 @@ impl Game {
                         entry_controller,
                         active,
                         self.object_type(&old.id)?.contains("トークン"),
-                    ) {
+                    ) && !self.internal_trigger_forbidden(&ability.node, controller)?
+                    {
                         matched.push((holder, ability, controller));
                     }
                 }
