@@ -32,7 +32,7 @@ fn pass_quick(game: &mut Game) {
     panic!("Quick did not finish");
 }
 
-fn end_turn(game: &mut Game) {
+pub(super) fn end_turn(game: &mut Game) {
     let active = game.projection(View::Referee).unwrap()["turn"]["active"].clone();
     assert_eq!(
         game.internal_rule_action(&json!({"do":"end-phase"}))
