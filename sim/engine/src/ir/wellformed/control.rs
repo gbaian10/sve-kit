@@ -24,11 +24,15 @@ impl Checker {
     }
 
     fn control_inner(&mut self, control: &Control) -> Checked {
-        if let Some(projection) = effect_evolution::projection(control) {
+        if let Some(projection) = effect_evolution::projection(control)
+            && projection.entry.is_none()
+        {
             return self.isolated(|checker| {
                 checker.effect_evolution(projection.body, projection.decision, projection.form)
             });
         }
+        let entry_subject = effect_evolution::projection(control)
+            .and_then(|projection| projection.entry.map(|entry| entry.binding));
         match control {
             Control::Sequence { body } => self.isolated(|checker| checker.program(body)),
             Control::If {
@@ -72,6 +76,7 @@ impl Checker {
                 self.revoke_before_loop(body);
                 self.isolated(|checker| {
                     checker.env.scope = body.scope;
+                    checker.env.effect_entry_subject = entry_subject;
                     checker.define(*binding, BindingKind::Value)?;
                     checker.save_access(binding.key(), access);
                     checker.program(body)

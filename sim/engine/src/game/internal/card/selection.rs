@@ -1023,10 +1023,10 @@ impl Game {
             if constraint.groups.len() != 1 {
                 return Err(unsupported("one effect evolution selector group"));
             }
-            let destination = effect_evolution::destination(decision)
+            let specification = effect_evolution::specification(decision)
                 .ok_or_else(|| unsupported("effect evolution destination"))?;
             return Ok(vec![
-                self.effect_evolution_members(execution, &destination)?,
+                self.effect_evolution_members(execution, &specification)?,
             ]);
         }
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });

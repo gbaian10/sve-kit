@@ -1,4 +1,4 @@
-//! Closed resolution-time selection and ordinary self-evolution projection.
+//! Closed resolution-time selection and ordinary effect-evolution projection.
 use super::{
     AbilitySource, Action, Binding, Cardinality, ChoiceDomain, Control, Decision, DecisionId,
     DecisionKind, Declinable, Disjointness, EvolutionCardRef, EvolutionMode, FaceId, Instruction,
@@ -8,6 +8,7 @@ use super::{
 };
 
 use super::evolution_destination::Destination;
+use super::{Expr, FollowPermission, MovementReceipt, NamesRead, ObjectView, Predicate};
 
 pub(crate) struct Keys {
     pub scope: ScopeId,
@@ -34,8 +35,24 @@ const fn controller() -> PlayerSet {
     }
 }
 
-fn choice(keys: &Keys, destination: &Destination) -> Decision {
+#[derive(Clone, Debug)]
+pub(crate) struct Specification {
+    pub subject: ObjectOperand,
+    pub destination: Destination,
+}
+
+impl Specification {
+    pub(crate) fn cardinality(&self) -> Cardinality {
+        Cardinality {
+            minimum: Nat(u64::from(self.subject == (ObjectOperand::SourceHolder {}))),
+            maximum: Some(Nat(1)),
+        }
+    }
+}
+
+fn choice(keys: &Keys, specification: &Specification) -> Decision {
     let candidate = Binding::new(1, keys.candidate);
+    let bounds = specification.cardinality();
     Decision {
         id: keys.decision,
         captures: vec![],
@@ -44,8 +61,12 @@ fn choice(keys: &Keys, destination: &Destination) -> Decision {
             players: controller(),
         },
         kind: DecisionKind::ResolutionChoice {
-            may: Declinable::Required,
-            cardinality: one(),
+            may: if bounds.minimum == Nat(1) {
+                Declinable::Required
+            } else {
+                Declinable::MayDecline
+            },
+            cardinality: bounds,
             precondition: None,
         },
         domain: ChoiceDomain::Objects {
@@ -53,16 +74,20 @@ fn choice(keys: &Keys, destination: &Destination) -> Decision {
             target_roles: None,
             constraint: SelectionConstraint {
                 groups: vec![SelectionGroup {
-                    cardinality: one(),
+                    cardinality: bounds,
                     selector: Selector::Zone {
                         players: controller(),
                         zone: ZoneKind::Evolve,
                         view: SelectionView::Current {},
                         binding: candidate,
-                        predicate: Box::new(destination.predicate(candidate)),
+                        predicate: Box::new(
+                            specification
+                                .destination
+                                .predicate_for(candidate, &specification.subject),
+                        ),
                     },
                 }],
-                cardinality: one(),
+                cardinality: bounds,
                 distinct_by: None,
                 disjoint: Disjointness::Disjoint,
                 aggregate_bounds: vec![],
@@ -75,7 +100,7 @@ pub(crate) fn build(
     keys: &Keys,
     source: &SourceSpan,
     origin: &AbilitySource,
-    destination: &Destination,
+    specification: &Specification,
 ) -> Control {
     Control::Sequence {
         body: Program {
@@ -84,7 +109,7 @@ pub(crate) fn build(
                 Located {
                     source: source.clone(),
                     node: Node::Decision {
-                        decision: choice(keys, destination),
+                        decision: choice(keys, specification),
                     },
                 },
                 Located {
@@ -109,7 +134,7 @@ pub(crate) fn build(
                                             context: InstructionContext::Effect,
                                             precondition: None,
                                             action: Action::Evolve {
-                                                subject: ObjectOperand::SourceHolder {},
+                                                subject: specification.subject.clone(),
                                                 form: EvolutionCardRef {
                                                     object: ObjectOperand::Bound {
                                                         binding: Binding::new(1, keys.body),
@@ -132,10 +157,10 @@ pub(crate) fn build(
 }
 
 pub(crate) fn is_choice(decision: &Decision) -> bool {
-    destination(decision).is_some()
+    specification(decision).is_some()
 }
 
-pub(crate) fn destination(decision: &Decision) -> Option<Destination> {
+pub(crate) fn specification(decision: &Decision) -> Option<Specification> {
     let ChoiceDomain::Objects {
         constraint,
         binding,
@@ -155,7 +180,34 @@ pub(crate) fn destination(decision: &Decision) -> Option<Destination> {
     else {
         return None;
     };
-    let destination = Destination::from_predicate(predicate, *candidate)?;
+    let Expr::Compute(operation) = predicate.as_ref() else {
+        return None;
+    };
+    let Predicate::NamesIntersect { right, .. } = operation.as_ref() else {
+        return None;
+    };
+    let subject = if let Expr::Live(read) = right {
+        let NamesRead::Names {
+            object: ObjectView::Current { object },
+        } = read.as_ref()
+        else {
+            return None;
+        };
+        object.as_ref().clone()
+    } else if matches!(right, Expr::Literal(_)) {
+        ObjectOperand::SourceHolder {}
+    } else {
+        return None;
+    };
+    if !matches!(
+        subject,
+        ObjectOperand::SourceHolder {}
+            | ObjectOperand::Selected { .. }
+            | ObjectOperand::Bound { .. }
+    ) {
+        return None;
+    }
+    let destination = Destination::from_predicate_for(predicate, *candidate, &subject)?;
     if !matches!(&destination, Destination::SameName)
         && !matches!(&destination, Destination::Names(names) if names.len() == 1)
     {
@@ -169,17 +221,28 @@ pub(crate) fn destination(decision: &Decision) -> Option<Destination> {
         instruction: InstructionId(0),
         receipt: ReceiptId(0),
     };
-    (*decision == choice(&keys, &destination)).then_some(destination)
+    let specification = Specification {
+        subject,
+        destination,
+    };
+    (*decision == choice(&keys, &specification)).then_some(specification)
+}
+
+pub(crate) struct Entry<'entry> {
+    pub input: &'entry Selector,
+    pub binding: Binding<ObjectRef>,
+    pub body: &'entry Program,
 }
 
 pub(crate) struct Projection<'projection> {
+    pub entry: Option<Entry<'projection>>,
     pub body: &'projection Program,
     pub decision: &'projection Decision,
     pub form: Binding<ObjectRef>,
     pub instruction: &'projection Instruction,
 }
 
-pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
+fn inner_projection(control: &Control) -> Option<Projection<'_>> {
     let Control::Sequence { body } = control else {
         return None;
     };
@@ -189,7 +252,7 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
     let Node::Decision { decision } = &first.node else {
         return None;
     };
-    let destination = destination(decision)?;
+    let specification = specification(decision)?;
     let Node::Control {
         control:
             Control::EachObject {
@@ -224,14 +287,83 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
         instruction: instruction.id,
         receipt: instruction.receipt,
     };
-    (*control == build(&keys, &first.source, &instruction.source, &destination)).then_some(
+    (*control == build(&keys, &first.source, &instruction.source, &specification)).then_some(
         Projection {
+            entry: None,
             body,
             decision,
             form: *binding,
             instruction,
         },
     )
+}
+
+pub(crate) fn field_entry(
+    input: Selector,
+    binding: Binding<ObjectRef>,
+    control: Control,
+    source: &SourceSpan,
+) -> Control {
+    Control::EachObject {
+        input,
+        binding,
+        order: None,
+        body: Program {
+            scope: binding.key().0,
+            steps: vec![Located {
+                source: source.clone(),
+                node: Node::Control { control },
+            }],
+        },
+    }
+}
+
+pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
+    if let Some(projection) = inner_projection(control) {
+        return Some(projection);
+    }
+    let Control::EachObject {
+        input,
+        binding,
+        body,
+        order: None,
+    } = control
+    else {
+        return None;
+    };
+    if !matches!(
+        input,
+        Selector::MoveAfter {
+            receipt: MovementReceipt::Search { .. },
+            permission: FollowPermission::SameEffectExplicitReference {},
+        }
+    ) {
+        return None;
+    }
+    let [step] = body.steps.as_slice() else {
+        return None;
+    };
+    let Node::Control { control: inner } = &step.node else {
+        return None;
+    };
+    let mut projection = inner_projection(inner)?;
+    if !matches!(&projection.instruction.action, Action::Evolve { subject: ObjectOperand::Bound { binding: subject }, .. } if subject == binding)
+        || *control
+            != field_entry(
+                input.clone(),
+                *binding,
+                inner.clone(),
+                &projection.body.steps.first()?.source,
+            )
+    {
+        return None;
+    }
+    projection.entry = Some(Entry {
+        input,
+        binding: *binding,
+        body,
+    });
+    Some(projection)
 }
 
 pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
@@ -250,6 +382,7 @@ pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
             }
             match control {
                 Control::Sequence { body } | Control::May { body, .. } => mask(body, origin),
+                Control::Pay { on_paid, .. } => mask(on_paid, origin),
                 Control::If {
                     then_body,
                     else_body,
@@ -269,8 +402,7 @@ pub(crate) fn mask(program: &mut Program, origin: &AbilitySource) {
                 | Control::Match { .. }
                 | Control::Repeat { .. }
                 | Control::EachPlayer { .. }
-                | Control::EachObject { .. }
-                | Control::Pay { .. } => {}
+                | Control::EachObject { .. } => {}
             }
         }
     }

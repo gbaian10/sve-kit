@@ -432,7 +432,7 @@ pub(super) struct Pilot {
 #[serde(deny_unknown_fields)]
 pub(super) struct NamedEffectEvolution {
     #[serde(rename = "ref")]
-    pub _reference: This,
+    pub reference: Objects,
     pub into: Option<EvolutionDestination>,
 }
 

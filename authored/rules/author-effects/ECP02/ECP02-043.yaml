@@ -1,0 +1,65 @@
+cards:
+  ECP02-043:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - look:
+                        bind: seen
+                        top:
+                          n: 2
+                          who: self
+                    - choose:
+                        bind: picked
+                        from:
+                          in: seen
+                          trait: パッション
+                        may: true
+                        n: 1
+                    - move:
+                        ref: picked
+                        result: to_hand
+                        to: hand
+                    - reveal:
+                        bind: shown
+                        ref: picked
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: to_hand
+                              view: before
+                          in: seen
+                        to: deck
+                  - - pay:
+                        cost:
+                          steps:
+                            - pp: 3
+                            - self_to_cemetery: true
+                        do:
+                          - search:
+                              n: 1
+                              result: entered
+                              sel:
+                                kind: follower
+                                name_contains: 大槻唯
+                                who: self
+                                zone: deck
+                              to: field
+                          - evolve:
+                              ref:
+                                follow: entered
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

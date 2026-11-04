@@ -243,6 +243,22 @@ impl BodyContext<'_> {
             && let Some(name) = &search.result
             && matches!(
                 search.to,
+                ast::SearchDestination::Single(ast::SearchZone::Field)
+            )
+            && matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKind::Follower)))
+            && matches!((search.n, search.upto), (Some(1), None) | (None, Some(1)))
+        {
+            self.field_outputs.insert(
+                name.clone(),
+                MovementReceipt::Search {
+                    receipt: ReceiptReference::new(receipt),
+                },
+            );
+        }
+        if let ast::Step::Search(search) = step
+            && let Some(name) = &search.result
+            && matches!(
+                search.to,
                 ast::SearchDestination::Single(ast::SearchZone::Ex)
             )
         {

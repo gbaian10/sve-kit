@@ -22,6 +22,8 @@ impl BodyContext<'_> {
         let field_entry_multi = self.field_entry.multi.clone();
         let searches = self.searches.clone();
         let outputs = self.ex_outputs.clone();
+        let field_outputs = self.field_outputs.clone();
+        let evolution_targets = self.evolution_targets.clone();
         let ex_targets = self.ex_targets.clone();
         let hand_targets = self.hand_targets.clone();
         let playable_targets = self.playable_targets.clone();
@@ -52,6 +54,8 @@ impl BodyContext<'_> {
         self.field_entry.multi = field_entry_multi;
         self.searches = searches;
         self.ex_outputs = outputs;
+        self.field_outputs = field_outputs;
+        self.evolution_targets = evolution_targets;
         self.ex_targets = ex_targets;
         self.hand_targets = hand_targets;
         self.playable_targets = playable_targets;
