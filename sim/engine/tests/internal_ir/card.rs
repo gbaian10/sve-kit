@@ -9,6 +9,9 @@ mod material_acts;
 mod next_damage;
 use second::lowerer;
 
+#[path = "card/move_followup.rs"]
+mod move_followup;
+
 #[path = "card/evolution_subject.rs"]
 mod evolution_subject;
 
