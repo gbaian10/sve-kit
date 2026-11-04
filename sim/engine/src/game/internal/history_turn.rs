@@ -254,6 +254,7 @@ fn subject_count(
             .map(CardName)
             .collect::<Vec<_>>();
         let information = SubjectInformation {
+            keywords: &[],
             original_cost: None,
             kind: Some(kind),
             class: Some(&class),

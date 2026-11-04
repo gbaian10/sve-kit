@@ -771,3 +771,6 @@ mod trigger_restrictions;
 
 #[path = "card/event_damage_sources.rs"]
 mod event_damage_sources;
+
+#[path = "card/event_subject_characteristics.rs"]
+mod event_subject_characteristics;

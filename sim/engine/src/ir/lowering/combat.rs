@@ -66,6 +66,7 @@ pub(super) fn attack(
     }
     let subject_filter = entry.sel.as_ref().map(|subject| ast::MovementSubject {
         orig_cost_eq: None,
+        keyword: None,
         class: subject.class.clone(),
         kind: subject.kind.clone(),
         trait_id: subject.trait_id.clone(),
@@ -84,7 +85,7 @@ pub(super) fn attack(
             subject_filter.as_ref(),
             false,
             path,
-            false,
+            movement::FilterSupport::Basic,
         )?,
         own_turn: entry
             .during
@@ -185,7 +186,7 @@ fn dealt_plan(
             entry.sel.as_ref(),
             false,
             path,
-            false,
+            movement::FilterSupport::Basic,
         )?),
         source_field,
         recipient: entry

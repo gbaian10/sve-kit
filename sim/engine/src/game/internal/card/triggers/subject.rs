@@ -50,6 +50,7 @@ impl Game {
 impl EventSubjectInformation {
     pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
         SubjectInformation {
+            keywords: &[],
             original_cost: None,
             kind: Some(self.kind),
             class: Some(&self.class),

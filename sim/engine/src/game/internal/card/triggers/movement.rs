@@ -6,7 +6,7 @@ use super::{
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
-use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, PlayerId};
+use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, KeywordId, PlayerId};
 use alloc::collections::BTreeMap;
 
 fn filter(ability: &Ability) -> Option<SubjectFilter> {
@@ -229,6 +229,17 @@ impl Game {
         if observers.iter().all(|(_, abilities)| abilities.is_empty()) {
             return Ok(Vec::new());
         }
+        let keyword_filter = observers.iter().any(|(_, abilities)| {
+            abilities
+                .iter()
+                .any(|ability| filter(&ability.node).is_some_and(|plan| plan.keyword.is_some()))
+        });
+        // All batch members and their grant providers still exist in this pre-exit state.
+        let keywords: &[KeywordId] = if keyword_filter && self.keywords(id)?.contains("guard") {
+            &[KeywordId::Ward]
+        } else {
+            &[]
+        };
         let object = self.internal_current_reference(id)?;
         let snapshot = self.information_snapshot(object)?.at(before);
         let lki = snapshot.view();
@@ -268,6 +279,7 @@ impl Game {
                     filter(&ability.node).ok_or_else(|| invalid("missing movement filter"))?;
                 if !plan.matches_information(
                     &SubjectInformation {
+                        keywords,
                         original_cost: Some(snapshot.original_cost()),
                         kind: Some(characters.kind),
                         traits: &characters.traits,

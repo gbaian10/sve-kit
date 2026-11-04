@@ -591,8 +591,14 @@ impl BodyContext<'_> {
                 player,
             ));
         }
-        let mut filter =
-            super::movement::movement_filter(own, false, history.sel.as_ref(), false, path, false)?;
+        let mut filter = super::movement::movement_filter(
+            own,
+            false,
+            history.sel.as_ref(),
+            false,
+            path,
+            super::movement::FilterSupport::Basic,
+        )?;
         let kind = match history.event {
             ast::HistoryEvent::Attacked => SubjectHistoryKind::Attack,
             ast::HistoryEvent::Evolved => SubjectHistoryKind::Evolve,
