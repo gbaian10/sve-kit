@@ -894,6 +894,14 @@ fn lowered_subscription(
                 predicate: super::events::ability::subject().predicate(SubjectFields::Ub(event)),
             })
         }
+        ast::PhaseSubscription::Drew(draw) => {
+            let ast::StartPhase::Start = draw.not_phase;
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Draw {
+                binding: event,
+                predicate: super::events::draw::predicate(event),
+            })
+        }
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, scope, path)
         }
@@ -1068,6 +1076,7 @@ fn lowered_change(
         | ast::PhaseSubscription::Damage(_)
         | ast::PhaseSubscription::Attacked(_)
         | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::Drew(_)
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_) => Err(unsupported(path)),
     }

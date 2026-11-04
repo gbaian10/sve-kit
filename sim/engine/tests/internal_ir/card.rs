@@ -736,3 +736,6 @@ mod reveal_cost;
 
 #[path = "card/nested_play.rs"]
 mod nested_play;
+
+#[path = "card/draw_event.rs"]
+mod draw_event;

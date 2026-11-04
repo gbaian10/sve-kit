@@ -21,6 +21,7 @@ use alloc::collections::BTreeMap;
 mod ability;
 mod change;
 mod discard;
+mod draw;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 mod entry;
@@ -99,6 +100,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     }
     if ability::check_header(ability)?
         || discard::check_header(ability)?
+        || draw::check_header(ability)?
         || mill::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?

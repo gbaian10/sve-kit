@@ -2224,3 +2224,9 @@ auto:
 `event.move_receipt` 是離場／移動事件的 header.receipt 型別化投影。lastword 本文依卡文明示引用離場的「これ」時，以 `follow:{event:move_receipt}` 找到該次實際移動 after；這是 R.follow-move 的 TriggerExplicitReference 授權，並非 LKI 可執行。若該世代又移動，follow 失效，不搜尋同卡號。`this` 作能力 source 仍指原持有者，不因效果召回而偷偷改變傷害來源。
 
 `by_kind` 的 leader 分支將 item 窄化為 PlayerRef，所以 life.who:item；follower 分支 item 是 ObjectRef。`entry_payment` 合法不存在時 did 為 false；拼錯 receipt 名或跨 scope 引用仍是載入錯誤。以上兩者不能混作缺值兜底。
+
+### 開始階段以外的抽牌
+
+`auto.on: {drew: {who: self, not_phase: start}}` 表示自己在開始階段以外每實際抽到一張牌時觸發。
+一次抽多張各觸發一次；其他效果把牌加入手牌不算抽牌。此子集只開放場上的印刷能力，
+不開放其他玩家、其他階段篩選、抽牌來源或歷史讀取。

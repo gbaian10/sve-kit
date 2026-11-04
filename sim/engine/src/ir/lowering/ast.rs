@@ -1725,6 +1725,8 @@ pub(super) enum AutoAggregation {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "drew")]
+    Drew(DrawSubscription),
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
     #[serde(rename = "evolved")]
@@ -1760,6 +1762,14 @@ pub(super) enum PhaseSubscription {
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DrawSubscription {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    pub not_phase: StartPhase,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct UbSubscription {

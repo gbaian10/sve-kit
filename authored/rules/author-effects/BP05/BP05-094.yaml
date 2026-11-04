@@ -1,0 +1,27 @@
+cards:
+  BP05-094:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+          on:
+            drew:
+              not_phase: start
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
