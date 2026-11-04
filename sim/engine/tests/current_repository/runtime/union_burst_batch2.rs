@@ -52,7 +52,7 @@ fn kaiser_insight_evolution_damages_every_opposing_follower() {
         }
     }
 }
-fn end(game: &mut Game) {
+pub(super) fn end(game: &mut Game) {
     if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }

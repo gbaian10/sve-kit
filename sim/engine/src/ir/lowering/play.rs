@@ -793,6 +793,7 @@ impl BodyContext<'_> {
                 static_zone: self.static_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,
+                equip_event: self.equip_event,
                 source_use: self.source_use,
                 counter_read_view: self.counter_read_view,
                 players: self.players.clone(),

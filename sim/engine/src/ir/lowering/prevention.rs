@@ -287,7 +287,9 @@ impl BodyContext<'_> {
                         objects: vec![ObjectOperand::Selected { selection }],
                     }
                 }
-                ast::Objects::Zone(_) | ast::Objects::Follow { .. } => {
+                ast::Objects::Zone(_)
+                | ast::Objects::Follow { .. }
+                | ast::Objects::EventHolder { .. } => {
                     return Err(unsupported(path));
                 }
             }

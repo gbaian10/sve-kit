@@ -1,6 +1,7 @@
 //! Source information belongs to the checked ability execution, never to a caller's snapshot.
 
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
+use crate::game::Object;
 use crate::ir::{
     CardName, CharacteristicView, CounterKind, ExecutionId, Expr, LkiReason, NameOperation, Nat,
     NumberRead, ObjectRef, ObjectView, Requirement, Requirements, RuntimeAbilitySource,
@@ -158,12 +159,22 @@ impl Execution {
         &self,
         game: &Game,
         ids: &[String],
-    ) -> Result<Vec<(ExecutionId, SourceSnapshot)>> {
+    ) -> Result<Vec<(ExecutionId, SourceSnapshot, ObjectRef)>> {
         let mut snapshots = Vec::new();
-        if self.source_information.as_ref().is_some_and(|information| {
-            information.departed.is_none() && ids.iter().any(|id| id == &self.context.source)
-        }) {
-            snapshots.push((self.id, self.source_snapshot(game)?));
+        if let Some(information) = &self.source_information
+            && information.departed.is_none()
+        {
+            let departing = if ids.iter().any(|id| id == &self.context.source) {
+                Some(information.holder)
+            } else {
+                information
+                    .departing_equipment_host(game, &self.context.source, ids)
+                    .map(|host| self.reference(game, &host.id))
+                    .transpose()?
+            };
+            if let Some(departing) = departing {
+                snapshots.push((self.id, self.source_snapshot(game)?, departing));
+            }
         }
         // A child can move a suspended parent's source before that parent resumes.
         if let Some(nested) = &self.nested {
@@ -172,13 +183,16 @@ impl Execution {
         Ok(snapshots)
     }
 
-    pub(super) fn seal_source_departure(&mut self, snapshots: &[(ExecutionId, SourceSnapshot)]) {
+    pub(super) fn seal_source_departure(
+        &mut self,
+        snapshots: &[(ExecutionId, SourceSnapshot, ObjectRef)],
+    ) {
         if let Some(information) = &mut self.source_information {
             information.seal(
                 snapshots
                     .iter()
-                    .find(|(id, _)| *id == self.id)
-                    .map(|(_, snapshot)| snapshot.clone()),
+                    .find(|(id, _, _)| *id == self.id)
+                    .map(|(_, snapshot, _)| snapshot.clone()),
             );
         }
         if let Some(nested) = &mut self.nested {
@@ -282,6 +296,26 @@ impl Execution {
 }
 
 impl SourceInformation {
+    pub(super) fn departing_equipment_host<'game>(
+        &self,
+        game: &'game Game,
+        source: &str,
+        ids: &[String],
+    ) -> Option<&'game Object> {
+        if self.departed.is_some() || self.zone != "equipment" {
+            return None;
+        }
+        let equipment = game.object(source).ok()?;
+        if equipment.zone != "equipment" || equipment.generation != self.holder.generation.0 {
+            return None;
+        }
+        let host = equipment.state.get("equipped_to").and_then(Value::as_str)?;
+        if !ids.iter().any(|id| id == host) {
+            return None;
+        }
+        game.object(host).ok().filter(|host| host.zone == "field")
+    }
+
     pub(super) fn current(game: &Game, source: RuntimeAbilitySource) -> Result<Self> {
         let snapshot = game.information_snapshot(source.holder)?;
         let id = game

@@ -1,4 +1,5 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
+use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
 use crate::ir::{LimitSpec, Requirements};
@@ -22,8 +23,10 @@ mod ability;
 mod change;
 mod discard;
 mod draw;
+mod equipment;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
+pub(in crate::game::internal) use equipment::check_header as equipment_header;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
@@ -69,8 +72,16 @@ pub(super) struct PendingOccurrence {
 
 pub(in crate::game) struct DeparturePlan {
     history: Vec<super::super::SubjectHistoryFact>,
-    updates: Vec<(u64, SourceSnapshot)>,
+    updates: Vec<PendingSourceDeparture>,
     departures: Vec<(PendingOccurrence, Object)>,
+}
+
+// Equipment erasure follows its host move after departure sources have been committed.
+struct PendingSourceDeparture {
+    pending: u64,
+    information: SourceSnapshot,
+    departing: String,
+    generation: u64,
 }
 
 pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
@@ -101,6 +112,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if ability::check_header(ability)?
         || discard::check_header(ability)?
         || draw::check_header(ability)?
+        || equipment::check_header(ability)?
         || mill::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?
@@ -318,6 +330,39 @@ impl Game {
             .collect())
     }
 
+    fn pending_source_departures(
+        &self,
+        ids: &[String],
+        destinations: &BTreeMap<String, String>,
+    ) -> Result<Vec<PendingSourceDeparture>> {
+        let mut updates = Vec::new();
+        for pending in &self.card_runtime.pending {
+            let departing = if ids.contains(&pending.holder)
+                && destinations.get(&pending.holder).is_some_and(|to| {
+                    self.object(&pending.holder).is_ok_and(|object| {
+                        object.zone != *to
+                            && object.generation == pending.source.holder.generation.0
+                    })
+                }) {
+                self.object(&pending.holder).ok()
+            } else {
+                pending
+                    .information
+                    .departing_equipment_host(self, &pending.holder, ids)
+                    .filter(|host| destinations.get(&host.id).is_some_and(|to| to != "field"))
+            };
+            if let Some(departing) = departing {
+                updates.push(PendingSourceDeparture {
+                    pending: pending.id,
+                    information: pending.information.snapshot(self, pending.source)?,
+                    departing: departing.id.clone(),
+                    generation: departing.generation,
+                });
+            }
+        }
+        Ok(updates)
+    }
+
     pub(in crate::game) fn internal_before_departures(
         &mut self,
         ids: &[String],
@@ -327,25 +372,10 @@ impl Game {
     ) -> Result<DeparturePlan> {
         let mut plan = DeparturePlan {
             history: Vec::new(),
-            updates: Vec::new(),
+            updates: self.pending_source_departures(ids, destinations)?,
             departures: Vec::new(),
         };
         let before = SnapshotId(self.state.ir_epoch);
-        for pending in &self.card_runtime.pending {
-            if ids.contains(&pending.holder)
-                && destinations.get(&pending.holder).is_some_and(|to| {
-                    self.object(&pending.holder).is_ok_and(|object| {
-                        object.zone != *to
-                            && object.generation == pending.source.holder.generation.0
-                    })
-                })
-            {
-                plan.updates.push((
-                    pending.id,
-                    pending.information.snapshot(self, pending.source)?,
-                ));
-            }
-        }
         for id in ids {
             plan.history.extend(self.internal_departure_history(
                 id,
@@ -437,21 +467,19 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after = SnapshotId(self.state.ir_epoch);
-        for (id, snapshot) in plan.updates {
-            if let Some(pending) = self
-                .card_runtime
-                .pending
-                .iter_mut()
-                .find(|pending| pending.id == id)
-                && self
-                    .state
-                    .objects
-                    .get(&pending.holder)
-                    .is_some_and(|current| {
-                        current.generation != snapshot.view().object.generation.0
-                    })
+        for update in plan.updates {
+            if self
+                .state
+                .objects
+                .get(&update.departing)
+                .is_some_and(|current| current.generation != update.generation)
+                && let Some(pending) = self
+                    .card_runtime
+                    .pending
+                    .iter_mut()
+                    .find(|pending| pending.id == update.pending)
             {
-                pending.information.seal(Some(snapshot));
+                pending.information.seal(Some(update.information));
             }
         }
         let mut admitted = Vec::new();
@@ -703,6 +731,17 @@ impl PendingOccurrence {
         let TriggerCondition::Event { pattern } = &trigger.on else {
             return Ok(());
         };
+        if let Some(binding) = equipment_event::binding(pattern) {
+            let Some(EventPayload::Equip { event }) = &self.timing else {
+                return Err(invalid("missing triggering equipment payload"));
+            };
+            execution.event_object = Some(EventObject {
+                expression: equipment_event::holder(binding),
+                reference: event.holder,
+                information: None,
+            });
+            return Ok(());
+        }
         let Some(fields) = SubjectFields::from_pattern(pattern) else {
             return Ok(());
         };

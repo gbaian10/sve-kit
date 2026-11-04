@@ -1068,10 +1068,10 @@ impl Game {
         }
         let departed = departing_source
             .into_iter()
-            .filter(|(_, source_snapshot)| {
-                moves.iter().any(|movement| {
-                    movement.before == source_snapshot.view().object && movement.after.is_some()
-                })
+            .filter(|(_, _, departing)| {
+                moves
+                    .iter()
+                    .any(|movement| movement.before == *departing && movement.after.is_some())
             })
             .collect::<Vec<_>>();
         execution.seal_source_departure(&departed);

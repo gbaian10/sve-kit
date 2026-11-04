@@ -140,6 +140,18 @@ impl BodyContext<'_> {
     ) -> Result<Selector, LoweringError> {
         let query = match value {
             ast::Objects::This(_) => return Ok(holder()),
+            ast::Objects::EventHolder {
+                event: ast::HolderEvent::Holder,
+            } => {
+                return self
+                    .equip_event
+                    .map(|event| Selector::Objects {
+                        objects: vec![ObjectOperand::FromExpression {
+                            value: Box::new(super::super::events::equipment::holder(event)),
+                        }],
+                    })
+                    .ok_or_else(|| unsupported(path));
+            }
             ast::Objects::Bound(name) => {
                 if name == "host" && self.static_zone == Some(ZoneKind::Equipment) {
                     return Ok(Selector::Relation {
@@ -332,9 +344,10 @@ impl BodyContext<'_> {
                 self.zone_objects(query, ZoneKind::Ex, path)?
             }
             ast::Objects::Follow { follow } => self.followed(follow, path)?,
-            ast::Objects::This(_) | ast::Objects::Bound(_) | ast::Objects::Zone(_) => {
-                self.objects(&modification.on, path)?
-            }
+            ast::Objects::This(_)
+            | ast::Objects::Bound(_)
+            | ast::Objects::Zone(_)
+            | ast::Objects::EventHolder { .. } => self.objects(&modification.on, path)?,
         };
         Ok(Action::Modify {
             subjects,
