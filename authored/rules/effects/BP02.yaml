@@ -1,184 +1,110 @@
-format: 1
-kind: effect_set
 cards:
   BP02-062:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
+      - body:
           condition:
-            fn: gt
             args:
               - read: self.turn.discarded
               - 0
+            fn: gt
+          op: if
           then:
+            amount: 2
             op: damage
             subjects: target.1
-            amount: 2
         event: end
+        kind: trigger
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               union:
                 - side: opponent
-                  zone: field
                   type: follower
+                  zone: field
                 - opponent.leader
-            min: 1
-            max: 1
-      - line: 2
-        kind: trigger
-        body:
+      - body:
+          hp: 1
           op: modify
           subjects: self.leader
-          hp: 1
-        event: enter
-        subject: self
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
               zone: hand
-            min: 1
-            max: 1
         costs:
           - op: discard
             subjects: cost.1
-  BP02-063:
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
     status: complete
+  BP02-063:
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
+      - body:
           amount: -2
           condition:
-            fn: gt
             args:
               - read: self.turn.discarded
               - 0
-  BP02-089:
+            fn: gt
+          op: adjust_cost
+          subjects: self
+        kind: static
+        line: 1
     status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: hand
-            min: 3
-            max: 3
-        costs:
-          - op: discard
-            subjects: cost.1
-      - line: 3
-        kind: static
-        body:
-          op: macro
-          name: aura
-      - line: 4
-        kind: static
-        body:
-          op: restrict
-          subjects: self
-          action: ability_destroy
   BP02-090:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: aura
-      - line: 2
+          op: macro
         kind: static
-        body:
+        line: 1
+      - body:
+          action: ability_destroy
           op: restrict
           subjects: self
-          action: ability_destroy
-      - line: 3
-        kind: trigger
-        body:
-          op: replace_damage
-          subjects: self
-          prevent: true
+        kind: static
+        line: 2
+      - body:
           kind: any
+          op: replace_damage
+          prevent: true
+          subjects: self
           until: next-opponent-turn-end
         event: evolve
+        kind: trigger
+        line: 3
         subject: self
-  BP02-SL16:
     status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 2
-      - line: 2
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        cost_selections:
-          - key: "1"
-            select:
-              side: self
-              zone: hand
-            min: 3
-            max: 3
-        costs:
-          - op: discard
-            subjects: cost.1
-      - line: 3
-        kind: static
-        body:
-          op: macro
-          name: aura
-      - line: 4
-        kind: static
-        body:
-          op: restrict
-          subjects: self
-          action: ability_destroy
   BP02-SL17:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
+      - body:
           name: aura
-      - line: 2
+          op: macro
         kind: static
-        body:
+        line: 1
+      - body:
+          action: ability_destroy
           op: restrict
           subjects: self
-          action: ability_destroy
-      - line: 3
-        kind: trigger
-        body:
-          op: replace_damage
-          subjects: self
-          prevent: true
+        kind: static
+        line: 2
+      - body:
           kind: any
+          op: replace_damage
+          prevent: true
+          subjects: self
           until: next-opponent-turn-end
         event: evolve
+        kind: trigger
+        line: 3
         subject: self
+    status: complete
+format: 1
+kind: effect_set
