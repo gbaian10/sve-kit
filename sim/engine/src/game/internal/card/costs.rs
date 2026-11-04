@@ -1,9 +1,11 @@
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
+use crate::ir::history_turn::discarded_plan;
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{AbilityKind, CostOverride, FaceId, Located, PlayCostPayment};
 use crate::ir::{
-    AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, ObjectOperand, ZoneKind,
+    AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, HistoryCount, ObjectOperand,
+    ZoneKind,
 };
 use crate::ir::{
     Bool, BoolRead, CostChange, Expr, Int, IntOperation, IntRead, Nat, NatOperation, NatRead,
@@ -302,6 +304,10 @@ fn check_count(value: &Expr<Nat>) -> Result<()> {
     match value {
         Expr::Literal(_) => Ok(()),
         Expr::Live(read) => match read.as_ref() {
+            NatRead::HistoryCount {
+                query,
+                count: HistoryCount::Facts,
+            } if discarded_plan(query) => Ok(()),
             NatRead::ZoneCount { selector } => check_objects(selector),
             NatRead::TurnOrdinal { .. } => Ok(()),
             _ => Err(unsupported("play cost public count")),

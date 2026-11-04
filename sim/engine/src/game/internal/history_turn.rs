@@ -5,7 +5,9 @@ use crate::ir::PlayerId;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
-use crate::ir::history_turn::{PlayedBy, life_plan, life_sum_plan, played_by, ub_plan};
+use crate::ir::history_turn::{
+    PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, ub_plan,
+};
 use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
 use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, TraitId};
 use crate::ir::{ExecutionRef, HistoryQuery, PlayerRef, Requirement, Requirements};
@@ -171,6 +173,12 @@ pub(super) fn subjects(
     query: &HistoryQuery,
     count: HistoryCount,
 ) -> Result<Nat> {
+    if discarded_plan(query) {
+        if count != HistoryCount::Facts {
+            return Err(unsupported("discard history subject count"));
+        }
+        return committed_counter(game, execution.context.controller, "discarded").map(Nat);
+    }
     if let Some(filter) = life_plan(query) {
         if count != HistoryCount::Facts {
             return Err(unsupported("life history subject count"));
@@ -190,6 +198,15 @@ pub(super) fn subjects(
         }
         return ub_count(execution, game, player.as_ref(), exclude_current);
     }
+    subject_count(execution, game, query, count)
+}
+
+fn subject_count(
+    execution: &Execution,
+    game: &Game,
+    query: &HistoryQuery,
+    count: HistoryCount,
+) -> Result<Nat> {
     let Some((event, filter)) = subject_plan(query) else {
         if count != HistoryCount::Facts {
             return Err(unsupported("played history subject count"));

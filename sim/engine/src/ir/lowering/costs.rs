@@ -4,7 +4,8 @@ use super::{
     ZoneKind, ast, decode, source_span, unsupported,
 };
 use crate::ir::{
-    BoolRead, Comparison, CostChange, IntRead, ObjectRef, PlayCostModifier, PlayerResource,
+    BoolRead, Comparison, CostChange, HistoryCount, IntRead, NatRead, ObjectRef, PlayCostModifier,
+    PlayerResource,
 };
 
 pub(super) fn lower(
@@ -176,6 +177,7 @@ fn condition(
         ast::CostCondition::Exists(value) => Predicate::Exists {
             objects: query(value, allocator, path)?,
         },
+        ast::CostCondition::History(history) => history_condition(history, allocator, path)?,
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
             left: match &value.left {
                 ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
@@ -211,6 +213,25 @@ fn condition(
             right: Expr::Literal(Int(value.right)),
         },
     })))
+}
+
+fn history_condition(
+    history: &ast::HistoryQuery,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Predicate, LoweringError> {
+    Ok(Predicate::CompareNat {
+        left: Expr::Live(Box::new(NatRead::HistoryCount {
+            query: super::conditions::discarded_history(
+                history,
+                Binding::new(allocator.id(path)?, ScopeId(0)),
+                path,
+            )?,
+            count: HistoryCount::Facts,
+        })),
+        comparison: Comparison::GreaterEqual,
+        right: Expr::Literal(Nat(history.at_least.unwrap_or(1))),
+    })
 }
 
 fn condition_count_query(

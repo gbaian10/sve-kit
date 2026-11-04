@@ -1,9 +1,10 @@
 //! Current-turn queries share the closed public subject filters used by event headers.
 
+use super::events::discard::DiscardFilter;
 use super::events::subject::{SubjectFields, SubjectFilter};
 use super::{
-    Binding, Bool, EventPattern, ExecutionRef, Expr, HistoryCutoff, HistoryQuery, HistoryRange,
-    HistoryWindow, InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
+    Binding, Bool, DiscardEvent, EventPattern, ExecutionRef, Expr, HistoryCutoff, HistoryQuery,
+    HistoryRange, HistoryWindow, InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
     UbActivatedEvent,
 };
 
@@ -30,6 +31,31 @@ pub(crate) fn played_query(event: Binding<PlayEvent>, player: Option<PlayerRef>)
 pub(crate) enum PlayedBy {
     Any,
     Player(PlayerRef),
+}
+
+pub(crate) fn discarded_query(event: Binding<DiscardEvent>) -> HistoryQuery {
+    HistoryQuery {
+        pattern: EventPattern::Discard {
+            binding: event,
+            predicate: DiscardFilter {
+                own: Some(true),
+                itself: false,
+                own_turn: false,
+            }
+            .predicate(event),
+        },
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: None,
+        },
+        include_execution: InclusionPolicy::IncludeAll {},
+    }
+}
+
+pub(crate) fn discarded_plan(query: &HistoryQuery) -> bool {
+    matches!(&query.pattern, EventPattern::Discard { binding, .. }
+        if *query == discarded_query(*binding))
 }
 
 pub(crate) fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {

@@ -5,7 +5,7 @@ use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::history_turn::{played_by, subject_plan, ub_plan};
+use crate::ir::history_turn::{discarded_plan, played_by, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
@@ -748,6 +748,13 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if let EventPattern::Discard { binding, predicate } = &query.pattern {
+            return if discarded_plan(query) {
+                self.local_value(*binding, predicate)
+            } else {
+                self.reject()
+            };
+        }
         if ub_plan(query).is_some()
             && let EventPattern::UbActivated { binding, predicate } = &query.pattern
         {

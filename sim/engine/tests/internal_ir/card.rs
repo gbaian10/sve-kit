@@ -105,6 +105,8 @@ mod fanfare;
 #[path = "card/field_actions.rs"]
 mod field_actions;
 
+#[path = "card/history_discard.rs"]
+mod history_discard;
 #[path = "card/history_turn.rs"]
 mod history_turn;
 #[path = "card/life_history.rs"]
