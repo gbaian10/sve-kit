@@ -198,6 +198,16 @@ Lastword 的 `move this to ex` 使用當前 LeaveField 單一成員的 `FollowEv
 若該世代在能力結算前再次移區，移動依舊世代成為無成功成員，不追蹤最新世代。
 進化卡本身不是此 after，且回手／消滅／移 EX 不觸發 Lastword。
 
+手牌自身、己方、BeforeExit、PerFact 的 Discard 可沿 `MovementEvent::Discard`
+取得該次實際移入 owner 墓地的 after，再 Put 至己方 Field 或 owner EX；其他目的區、場上觀察者與批次頭不授權。
+效果路徑保存共同移動原語回傳的 after；規則手牌上限路徑在提交當下保存。實際未進 owner 墓地、
+沒有 after 或該 after 已再換世代時，沒有成功成員；不退回 SourceHolder，也不追蹤新世代。
+能力來源與其他 `this` 讀值維持原世代 LKI。
+此頭亦可在 `PPmax >= 非負常值` 的唯一 then 步驟中，選付單一正數 PP 再回場；
+條件在結算時求值，並非觸發的 intervening 條件。Q1867 的親能力先加 PP 上限，待機能力再判斷覺醒。
+拒付或不足時原子地不扣 PP、不移動；其他頭、其他條件、混合付款與其他付款成功本文仍拒絕。
+回場沿共同入場程序，依 CR 12.4.3 觸發 Fanfare。
+
 Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、Main／End Begin、
 自身 LeaveField 與 Damage 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
@@ -568,7 +578,7 @@ Move／Search／Destroy 的 local receipt。只取具有 after、actual_to 與�
 不依卡號或卡名。這些集合不代表 Destroy 事件或完整付款。
 MovedRef、RuleCarry、其他 receipt 家族與未准入事件 payload read
 仍在完整 requirement 預檢時拒絕，包含未執行分支。FollowEventMove 僅開放上述當前 LeaveField
-單一成功成員；一般 Move 事件跟隨仍拒絕。receipt 與 after 世代不進玩家 packet。
+或手牌自身 Discard 的單一成功成員；一般 Move 事件跟隨仍拒絕。receipt 與 after 世代不進玩家 packet。
 
 InstallEffect 的有限子集為 InstructionStart 固定物件集合、Permission Forbid Destroy、
 Effect(Any) cause、常值 true condition，以及 Installation anchor 的 EndResolution。
@@ -641,9 +651,15 @@ WF 驗過事件 predicate 後不把單張事件的 binding 或 header context �
 occurrence 交入共同 pending 佇列；未成功移動或外層交易失敗不殘留待機。
 解析及 runtime 均拒絕其他篩選或一般 Hand 觀察者。後續宣告、目標與費用沿用共同能力打出流程；自身橫置費用仍用結算時的 `Control::Pay`，
 不能改成打出時的頭費用。同時棄兩張會待機兩次，但橫置自身只能成功支付一次。
+法術的棄手牌交換成本可與上述手牌自身、逐張棄牌訂閱並存，付款仍走共同 discard 原語；
+其他未證實的交換成本材料觸發仍拒絕，並不開放一般 Payment header。
 公開待機描述只有事件種類及已公開來源卡，不帶原手牌位置或可追蹤的私有物件身分。
 費用與本文均沿共用捨棄提交點發生事件；目前 header 的 Effect cause 指向執行權威，
-不額外判斷費用是否視為卡文效果，`by` 篩選仍未准入。
+不額外判斷費用是否視為卡文效果。手牌自身、己方棄牌、PerFact 頭另可使用
+`by: {ability_of: {who: self, trait: ...}}`：比對直接執行能力的控制者與權威來源快照中的有效類型，
+不依卡片 owner、授予者或祖先原因判定。成本棄牌與本文棄牌使用同一入口；規則棄牌不符合能力來源。
+僅實際需要此篩選的觀察者擷取來源類型，未篩選訂閱不增加類型資料需求；來源已離場仍讀權威 LKI，錯誤不吞掉。
+這是 canonical header 的封閉例外，本文與歷史查詢不開放一般 EventCause。
 
 手牌費用的「來源自身一張加另一張手牌」沿同一 Discard(Chosen) 與 SelectionConstraint，
 以 Hand 與 SourceHolder 的交集表示必付來源，另一組沿既有手牌篩選，總量精確為二且互斥。
