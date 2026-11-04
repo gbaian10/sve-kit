@@ -180,6 +180,48 @@ impl BodyContext<'_> {
         history: &ast::HistoryQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
+        if matches!(history.event, ast::HistoryEvent::Banished) {
+            let subject = match &history.sel {
+                Some(ast::HistorySubject::Single(subject)) => subject,
+                None | Some(ast::HistorySubject::Union(_)) => return Err(unsupported(path)),
+            };
+            let filter = super::movement::movement_filter(
+                None,
+                false,
+                Some(subject),
+                false,
+                path,
+                super::movement::FilterSupport::Basic,
+            )?;
+            let name = filter
+                .name
+                .clone()
+                .filter(|name| !name.0.is_empty())
+                .ok_or_else(|| unsupported(path))?;
+            if !matches!(history.who, Some(ast::LeaderSide::Controller))
+                || !matches!(history.from, Some(ast::HistoryOrigin::Ex(_)))
+                || history.to.is_some()
+                || history.r#where.is_some()
+                || history.exclude.is_some()
+                || history.at_least.is_some_and(|n| n != 1)
+                || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+                || filter
+                    != (super::super::events::subject::SubjectFilter {
+                        name: Some(name.clone()),
+                        ..Default::default()
+                    })
+            {
+                return Err(unsupported(path));
+            }
+            return Ok(Expr::Live(Box::new(
+                super::super::BoolRead::HistoryExists {
+                    query: super::super::history_turn::public::banished_query(
+                        Binding::new(self.allocator.id(path)?, self.scope),
+                        name,
+                    ),
+                },
+            )));
+        }
         let threshold = history.at_least.unwrap_or(1);
         Ok(Expr::Compute(Box::new(Predicate::CompareInt {
             left: self.history_number(history, path)?,
@@ -524,6 +566,9 @@ impl BodyContext<'_> {
         history: &ast::HistoryQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        if matches!(history.event, ast::HistoryEvent::Banished) {
+            return Err(unsupported(path));
+        }
         let query = self.history_query(history, path)?;
         Ok(Expr::Compute(Box::new(IntOperation::FromNat {
             value: Expr::Live(Box::new(NatRead::HistoryCount {
@@ -688,7 +733,9 @@ impl BodyContext<'_> {
                         who,
                         zone: ast::FieldOrigin::Field,
                     } => Some(matches!(who, ast::LeaderSide::Controller)),
-                    ast::HistoryOrigin::Hand(_) => return Err(unsupported(path)),
+                    ast::HistoryOrigin::Hand(_) | ast::HistoryOrigin::Ex(_) => {
+                        return Err(unsupported(path));
+                    }
                 };
                 match history.to {
                     Some(ast::DepartureDestination::Cemetery) => SubjectHistoryKind::Cemetery,
@@ -696,7 +743,8 @@ impl BodyContext<'_> {
                     None => SubjectHistoryKind::Leave,
                 }
             }
-            ast::HistoryEvent::Played
+            ast::HistoryEvent::Banished
+            | ast::HistoryEvent::Played
             | ast::HistoryEvent::Discarded
             | ast::HistoryEvent::UbActivated
             | ast::HistoryEvent::LifeChanged => {

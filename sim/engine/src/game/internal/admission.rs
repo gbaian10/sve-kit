@@ -89,6 +89,7 @@ fn check_body(
         damage_paths(program, "", event, &mut paths);
     }
     let mut inspected = program.clone();
+    super::history_turn::mask_public_history(&mut inspected);
     if let Some(origin) = origin {
         effect_evolution::mask(&mut inspected, origin);
     }

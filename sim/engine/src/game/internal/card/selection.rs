@@ -2,6 +2,7 @@ use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contain
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::game::list;
 use crate::ir::events::timing::opponent;
+use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::public_numbers;
 use crate::ir::{
@@ -1305,12 +1306,31 @@ impl Execution {
         self.public_target_objects(game, selector, true)
     }
 
+    fn damaged_followers(&self, game: &Game) -> Result<Vec<ObjectRef>> {
+        let mut members = Vec::new();
+        let opponent = self.player(game, &opponent())?;
+        for id in game.zone_ids(super::super::seat_name(opponent)?, "field") {
+            let object = game.object(&id)?;
+            let reference = self.reference(game, &id)?;
+            if object.generation == reference.generation.0
+                && object.state["damaged_this_turn"] == true
+                && game.object_type(&id)?.contains("フォロワー")
+            {
+                members.push(reference);
+            }
+        }
+        Ok(members)
+    }
+
     pub(in crate::game::internal) fn public_target_objects(
         &self,
         game: &Game,
         selector: &Selector,
         allow_resolution_zones: bool,
     ) -> Result<Vec<ObjectRef>> {
+        if damaged_plan(selector).is_some() {
+            return self.damaged_followers(game);
+        }
         let members = match selector {
             Selector::Zone {
                 players,

@@ -1608,7 +1608,7 @@ impl<'definitions> BodyContext<'definitions> {
                         {
                             return Err(unsupported(path));
                         }
-                        self.objects(objects, path)?
+                        self.destroy_objects(objects, path)?
                     }
                 },
             }),

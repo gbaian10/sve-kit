@@ -844,7 +844,7 @@ pub(super) enum HolderEvent {
 pub(super) struct ObjectQuery {
     #[serde(rename = "as")]
     pub alias: Option<String>,
-    pub r#where: Option<Box<QueryExtremumWhere>>,
+    pub r#where: Option<ObjectQueryWhere>,
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<FieldKind>,
@@ -860,6 +860,36 @@ pub(super) struct ObjectQuery {
     pub except: Option<Box<BoundExcept>>,
     #[serde(default)]
     pub other: bool,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(untagged)]
+pub(super) enum ObjectQueryWhere {
+    Extremum(Box<QueryExtremumWhere>),
+    Damaged(DamagedThisTurnWhere),
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamagedThisTurnWhere {
+    pub history: DamagedThisTurnHistory,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamagedThisTurnHistory {
+    pub event: DamagedHistoryEvent,
+    pub window: ThisTurn,
+    pub r#where: DamagedThisTurnRecipient,
+}
+#[derive(Clone, Deserialize)]
+pub(super) enum DamagedHistoryEvent {
+    #[serde(rename = "damaged")]
+    Damaged,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamagedThisTurnRecipient {
+    pub recipient: Item,
 }
 
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
@@ -1649,6 +1679,7 @@ pub(super) enum LifeHistoryField {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum HistoryEvent {
+    Banished,
     LifeChanged,
     Played,
     Discarded,
@@ -1665,6 +1696,12 @@ pub(super) enum HistoryOrigin {
     Zone(FieldOrigin),
     Owned { who: LeaderSide, zone: FieldOrigin },
     Hand(HandZone),
+    Ex(HistoryExZone),
+}
+#[derive(Deserialize)]
+pub(super) enum HistoryExZone {
+    #[serde(rename = "ex")]
+    Ex,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -2216,7 +2253,7 @@ pub(super) struct ConditionalChange {
     pub set: Option<Number>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(super) enum ThisTurn {
     #[serde(rename = "this_turn")]
     ThisTurn,

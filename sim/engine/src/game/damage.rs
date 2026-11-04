@@ -146,7 +146,11 @@ impl Game {
                 self.bump(&format!("{seat}.leader_damaged"), 1);
             } else {
                 self.numeric_damage(id, amount)?;
+                let follower = self.object_type(id)?.contains("フォロワー");
                 let object = self.object_mut(id)?;
+                if amount > 0 && follower {
+                    object.state["damaged_this_turn"] = json!(true);
+                }
                 object.state["damage"] = json!(
                     int(&object.state["damage"])
                         .checked_add(amount)
