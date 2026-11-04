@@ -1,0 +1,39 @@
+cards:
+  CP04-T12:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - life:
+                            delta: 3
+                            who: self
+                      on:
+                        phase:
+                          which: end
+                          whose: self
+                on: host
+          zone: equipment
+      - line: 2
+        static:
+          effects:
+            - damage_mod:
+                delta: 1
+                source: host
+          zone: equipment
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

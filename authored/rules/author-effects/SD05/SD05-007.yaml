@@ -1,0 +1,29 @@
+cards:
+  SD05-007:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - fanfare:
+          cost:
+            leader_life: 2
+          do:
+            - grant:
+                keywords:
+                  - rush
+                on: this
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

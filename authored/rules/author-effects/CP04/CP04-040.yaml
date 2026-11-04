@@ -1,0 +1,56 @@
+cards:
+  CP04-040:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      kind: follower
+                      name: ミラーイメージ・ネネカ
+                      who: self
+                      zone: field
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: ミラーイメージ・ネネカ
+          ub: true
+        line: 1
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - equip:
+                on: this
+                token: ワンドオブミラージュ
+        line: 1
+        section: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

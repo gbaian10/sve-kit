@@ -1,0 +1,45 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "count": 1,
+        "name": "プリンセスソード",
+        "op": "equip",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 2,
+          "op": "pp"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
