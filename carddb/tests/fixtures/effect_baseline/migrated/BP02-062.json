@@ -1,0 +1,72 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "read": "self.turn.discarded"
+            },
+            0
+          ],
+          "fn": "gt"
+        },
+        "op": "if",
+        "then": {
+          "amount": 2,
+          "op": "damage",
+          "subjects": "target.1"
+        }
+      },
+      "event": "end",
+      "kind": "trigger",
+      "line": 1,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "union": [
+              {
+                "side": "opponent",
+                "type": "follower",
+                "zone": "field"
+              },
+              "opponent.leader"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "body": {
+        "hp": 1,
+        "op": "modify",
+        "subjects": "self.leader"
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "self",
+            "zone": "hand"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "discard",
+          "subjects": "cost.1"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

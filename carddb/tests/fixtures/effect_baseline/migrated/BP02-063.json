@@ -1,0 +1,23 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": -2,
+        "condition": {
+          "args": [
+            {
+              "read": "self.turn.discarded"
+            },
+            0
+          ],
+          "fn": "gt"
+        },
+        "op": "adjust_cost",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 1
+    }
+  ],
+  "status": "complete"
+}
