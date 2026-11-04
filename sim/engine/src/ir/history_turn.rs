@@ -320,3 +320,104 @@ pub(crate) fn life_sum_plan(
     })?;
     (filter.up == Some(true) && filter.own.is_some() && filter.own_turn.is_none()).then_some(filter)
 }
+
+/// The event-time exception is one public facts query, not a general live snapshot.
+pub(crate) fn evolution_count(read: &super::NatRead) -> Option<&HistoryQuery> {
+    let super::NatRead::HistoryCount {
+        query,
+        count: super::HistoryCount::Facts,
+    } = read
+    else {
+        return None;
+    };
+    let EventPattern::Evolve { binding, .. } = &query.pattern else {
+        return None;
+    };
+    (*query
+        == subject_query(
+            SubjectHistoryKind::Evolve,
+            binding.key().1,
+            binding.key().0,
+            &SubjectFilter {
+                own: Some(true),
+                kind: Some(super::CardKind::Follower),
+                ..SubjectFilter::default()
+            },
+        ))
+    .then_some(query)
+}
+
+pub(crate) fn evolution_trigger(trigger: &super::TriggerSpec) -> bool {
+    let super::TriggerCondition::Event {
+        pattern: EventPattern::Evolve { binding, predicate },
+    } = &trigger.on
+    else {
+        return false;
+    };
+    trigger.limit.is_none()
+        && trigger.active_zones == [super::ZoneKind::Field]
+        && trigger.aggregation == (super::TriggerAggregation::PerFact {})
+        && trigger.view == super::EventSnapshotPolicy::AfterEntry
+        && *predicate
+            == (SubjectFilter {
+                own: Some(true),
+                kind: Some(super::CardKind::Follower),
+                ..SubjectFilter::default()
+            })
+            .predicate(SubjectFields::Evolve(*binding))
+}
+
+pub(crate) fn evolution_capture_query(
+    capture: &super::Capture,
+    expected: super::CaptureTime,
+) -> Option<&HistoryQuery> {
+    if !matches!(
+        expected,
+        super::CaptureTime::AtEvent {
+            event: super::EventContext::Trigger {},
+            ..
+        }
+    ) {
+        return None;
+    }
+    let (at, value) = if let super::Capture::Integer {
+        at,
+        value: Expr::Compute(operation),
+        ..
+    } = capture
+    {
+        let super::IntOperation::FromNat { value } = operation.as_ref() else {
+            return None;
+        };
+        (at, value)
+    } else if let super::Capture::Natural { at, value, .. } = capture {
+        (at, value)
+    } else {
+        return None;
+    };
+    let Expr::Live(read) = value else { return None };
+    (*at == expected).then(|| evolution_count(read)).flatten()
+}
+
+pub(crate) fn evolution_capture_header(ability: &super::Ability) -> bool {
+    ability.qualification == super::AbilityQualification::Ordinary
+        && ability.play.is_none()
+        && ability.kind == super::AbilityKind::Triggered
+        && matches!(ability.source.origin, super::AbilityOrigin::Printed { .. })
+        && ability.active_zones == [super::ZoneKind::Field]
+        && ability.source.holder == (super::ObjectOperand::SourceHolder {})
+        && ability.source.controller == (PlayerRef::Controller {})
+        && ability.trigger.as_ref().is_some_and(|trigger| {
+            evolution_trigger(trigger)
+                && ability.event_captures.iter().all(|capture| {
+                    evolution_capture_query(
+                        capture,
+                        super::CaptureTime::AtEvent {
+                            event: super::EventContext::Trigger {},
+                            policy: trigger.view,
+                        },
+                    )
+                    .is_some()
+                })
+        })
+}

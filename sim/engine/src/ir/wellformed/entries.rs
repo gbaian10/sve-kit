@@ -6,6 +6,7 @@ use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
+use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
 use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
@@ -468,6 +469,7 @@ impl Checker {
             self.env.discard_follow.insert(binding.key());
         }
         self.at("event_captures", |checker| {
+            checker.event_history = evolution_trigger(trigger).then_some(trigger.view);
             checker.captures(
                 &ability.event_captures,
                 CaptureTime::AtEvent {
@@ -564,13 +566,17 @@ impl Checker {
         let entry = self.env.clone();
         let mut after = entry.clone();
         let previous = self.capture_time.replace(at);
+        let event_history = self.event_history;
         for (index, capture) in captures.iter().enumerate() {
             self.env = entry.clone();
+            self.event_history =
+                event_history.filter(|_| evolution_capture_query(capture, at).is_some());
             self.at(&index.to_string(), |checker| checker.capture(capture))?;
             after.bindings.extend(self.env.bindings.clone());
             after.access.extend(self.env.access.clone());
         }
         self.capture_time = previous;
+        self.event_history = None;
         self.env = after;
         Ok(())
     }

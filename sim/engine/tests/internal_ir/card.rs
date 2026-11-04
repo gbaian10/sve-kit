@@ -1,6 +1,8 @@
 use super::*;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
+#[path = "card/evolution_ordinal.rs"]
+mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]
 mod exchange_routes;
 #[path = "card/material_acts.rs"]

@@ -820,10 +820,10 @@ impl BodyContext<'_> {
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::PaidAmount { x_paid } => self.paid_amount(x_paid, path),
             ast::Number::Aggregate { agg } => self.aggregate(agg, path),
-            ast::Number::Resolution { at, value } => {
-                let ast::ResolutionTime::Resolution = at;
-                self.resolution_count(value, path, active)
-            }
+            ast::Number::Resolution { at, value } => match at {
+                ast::NumericCaptureTime::Resolution => self.resolution_count(value, path, active),
+                ast::NumericCaptureTime::Event => self.event_count(value, path, active),
+            },
             ast::Number::Selection {
                 at,
                 selection,

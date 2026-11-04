@@ -1555,7 +1555,7 @@ pub(super) enum Number {
         turn_number: TurnNumberQuery,
     },
     Resolution {
-        at: ResolutionTime,
+        at: NumericCaptureTime,
         value: Box<Self>,
     },
     Selection {
@@ -1661,8 +1661,9 @@ pub(super) enum HistoryDistinct {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum ResolutionTime {
+pub(super) enum NumericCaptureTime {
     Resolution,
+    Event,
 }
 
 #[derive(Deserialize)]

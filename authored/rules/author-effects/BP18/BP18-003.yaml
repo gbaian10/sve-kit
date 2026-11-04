@@ -1,0 +1,79 @@
+cards:
+  BP18-003:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: event
+                      value:
+                        history_count:
+                          event: evolved
+                          sel:
+                            kind: follower
+                          who: self
+                          window: this_turn
+                    op: eq
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: event
+                      value:
+                        history_count:
+                          event: evolved
+                          sel:
+                            kind: follower
+                          who: self
+                          window: this_turn
+                    op: eq
+                    right: 2
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: event
+                      value:
+                        history_count:
+                          event: evolved
+                          sel:
+                            kind: follower
+                          who: self
+                          window: this_turn
+                    op: eq
+                    right: 3
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+          on:
+            evolved:
+              sel:
+                kind: follower
+              who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

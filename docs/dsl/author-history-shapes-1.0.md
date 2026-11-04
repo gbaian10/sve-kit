@@ -26,7 +26,16 @@ Schema 根拒絕 standalone 文件。節點檢查不提供完整 authored／expa
 `from: {who: self|opp, zone: field}` 表達來源，`to` 可省略或指定 `cemetery|hand`。
 `sel` 沿用已接通的主體種類、職業、類型、名稱、token 與 `other` 篩選。
 `history.at_least` 省略為 1；數值 `history_count` 不收該門檻。
-這些查詢不接受 `at: event`、排除執行、其他視窗或未接通的事件欄位。
+除下列進化序數子集外，這些查詢不接受 `at: event`；排除執行、其他視窗或未接通的事件欄位仍拒絕。
+
+印刷的場上 `auto.on.evolved: {who: self, sel: {kind: follower}}` 可在數值位置使用
+`{at: event, value: {history_count: {event: evolved, window: this_turn, who: self, sel: {kind: follower}}}}`。
+只計 `facts`（可省略），不接受其他事件、玩家、篩選、視窗或排除條件；此封閉入口不含每回合限制、正式打出目標或費用。
+序數在共同進化提交入口記錄本次事實之後、收集各待機時擷取；超進化同樣計一次，
+包含來源入場以前的同回合進化，也適用對手回合的己方從者。
+各待機保留自己的數值，稍後的進化與結算順序不重算它；普通 `history_count` 仍讀當前點。
+同一能力中多次讀取各自擷取同一提交狀態；來源離場或換世代不改數值，對來源本體的效果
+仍依既有世代檢查處理。這個入口不開放其他自動事件、非 auto 能力或一般 Live 快照。
 
 歷史在共用攻擊、進化及移區提交入口保存當時的公開特徵，與有無觀測者無關；
 稍後入場的入場曲也能查詢先前事件。移區後不重查新世代，付款送墓不算破壞。

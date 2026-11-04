@@ -267,6 +267,7 @@ impl Game {
         }
         pending.timing = Some(event);
         pending.capture_subject_information(self)?;
+        pending.capture_history(self)?;
         Ok(pending)
     }
 

@@ -832,6 +832,8 @@ impl BodyContext<'_> {
                 parameters: vec![],
                 resolution_scope: self.resolution_scope,
                 resolution_captures: vec![],
+                event_captures: vec![],
+                event_trigger: None,
                 formal_play: false,
                 auto: None,
                 mode_targets: BTreeMap::new(),

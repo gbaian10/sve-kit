@@ -458,6 +458,12 @@ AtPlay、AtSelection、AtEvent 只能出現在上述明確欄位，不能以普�
 時點。capture 目前仍限 Int／Nat／Bool／Selector；其他型別明確拒絕。
 AtEvent 採較窄範圍：拒絕 Live、Current 物件讀值及全部集合讀值，只接受常值、
 已可見值與明確匹配 event／policy 的 ObjectView::EventSnapshot（及其純運算）。
+唯一的 Live 例外是己方從者 Evolve 訂閱的事件時計數：Integer 的 FromNat 或 Natural，
+內容必須恰為 `HistoryCount` 的「本回合、己方、從者、Evolve、Facts、CurrentPoint、IncludeAll」
+封閉查詢，AtEvent 的 Trigger／policy 也必須匹配。其他 Live、運算包裝或集合仍拒絕。
+WF 與原生整卡閘門共用形狀判斷；原生另外要求 Printed／Triggered／Field、SourceHolder
+及 Controller，其他入口不能藉 capture 繞過能力範圍。實際值在共同進化事實提交後即保存於
+各待機，本文只讀 capture slot；不新增另一份歷史或截止點。
 不把一般 State 讀值隱含改解釋為事件快照；BP07-088 改用上節的 Frozen SnapshotCounter，
 不透過普通 Holder Counter 讀目前狀態。
 

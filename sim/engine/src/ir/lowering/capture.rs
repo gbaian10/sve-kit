@@ -3,8 +3,8 @@ use super::{
     PlayerRef, Selector, ast, unsupported,
 };
 use crate::ir::{
-    Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, IntOperation,
-    NameOperation, NumberRead, PlayerRead, Role, Stat,
+    Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, EventContext,
+    IntOperation, NameOperation, NumberRead, PlayerRead, Role, ScopeId, Stat,
 };
 
 #[expect(
@@ -191,6 +191,43 @@ impl BodyContext<'_> {
             value: lowered?,
             into,
         });
+        Ok(Expr::Captured(into))
+    }
+    pub(super) fn event_count(
+        &mut self,
+        value: &ast::Number,
+        path: &str,
+        active: &mut BTreeSet<String>,
+    ) -> Result<Expr<Int>, LoweringError> {
+        use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
+        let trigger = self
+            .event_trigger
+            .as_ref()
+            .filter(|trigger| self.auto.is_some() && evolution_trigger(trigger))
+            .ok_or_else(|| unsupported(path))?;
+        let at = CaptureTime::AtEvent {
+            event: EventContext::Trigger {},
+            policy: trigger.view,
+        };
+        if !matches!(value, ast::Number::HistoryCount { .. }) {
+            return Err(unsupported(path));
+        }
+        let previous = self.scope;
+        self.scope = ScopeId(self.definition.0);
+        let lowered = self.number(value, path, active);
+        self.scope = previous;
+        let into = CaptureRef {
+            binding: Binding::new(self.allocator.id(path)?, ScopeId(self.definition.0)),
+        };
+        let capture = Capture::Integer {
+            at,
+            value: lowered?,
+            into,
+        };
+        if evolution_capture_query(&capture, at).is_none() {
+            return Err(unsupported(path));
+        }
+        self.event_captures.push(capture);
         Ok(Expr::Captured(into))
     }
 }
