@@ -1,0 +1,30 @@
+cards:
+  BP16-121:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                to: field
+                token:
+                  kind: follower
+                  same_name_as: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le: 5
+                token: true
+                trait: 超克
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
