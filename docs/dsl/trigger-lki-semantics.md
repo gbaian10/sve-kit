@@ -120,6 +120,11 @@ Add 跨進化的還原，也不把食事／憑依當作 Evolve。
 權限不擴張。Lastword 自身移至 EX 則只沿當前 LeaveField 的確切成功移動成員，
 由共同物理提交保存 before／after 及目的地，在待機能力的獨立 execution 綁定；
 不得以 physical ID 重新查找最新世代。進化卡回進化牌組不改變此基底 after，來源資訊仍讀離場前 LKI。
+手牌自身、己方、BeforeExit、PerFact 的 Discard 使用同一 follow 機制，保存該成員實際
+進 owner 墓地的 after，僅供回己方場或移 owner EX。沒有該 after 或已再換世代時沒有成功成員，
+不重新查最新世代；來源 holder 與非移動讀值維持原 LKI。
+`discarded.by.ability_of` 在提交前配對直接能力控制者與權威來源快照中的有效類型，
+來源離場仍使用其 LKI，不以授予者或 owner 代替；規則手牌上限沒有能力來源。
 
 以上場上資訊及送公開墓地的事件可公開；source／target 的 server ObjectRef、
 SnapshotId、內部 receipt 不因事件名稱而成為 wire 欄位。給玩家的待機選項只投影已知

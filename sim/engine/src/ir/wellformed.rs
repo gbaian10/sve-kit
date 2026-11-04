@@ -212,6 +212,8 @@ struct Environment {
     trigger: Option<super::EventSnapshotPolicy>,
     trigger_subject: Option<Expr<ObjectRef>>,
     trigger_events: BTreeSet<Key>,
+    discard_follow: BTreeSet<Key>,
+    discard_source: Option<Key>,
     play_modes: bool,
     play_payments: Option<ScopeId>,
     evolution_form: Option<Binding<ObjectRef>>,
@@ -292,6 +294,8 @@ impl Checker {
             trigger: None,
             trigger_subject: None,
             trigger_events: BTreeSet::new(),
+            discard_follow: BTreeSet::new(),
+            discard_source: None,
             play_modes: false,
             play_payments: None,
             evolution_form: None,
@@ -826,8 +830,18 @@ impl Checker {
                 movement,
                 reason,
             } => {
+                if self.env.discard_source.is_some()
+                    && matches!(objects,
+                    Selector::Objects { objects } if objects.contains(&ObjectOperand::SourceHolder {}))
+                {
+                    return self.reject();
+                }
                 if movement.order.is_none() {
-                    self.selector(objects)?;
+                    if let Some(result) = self.discard_movement(objects, movement, *reason) {
+                        result?;
+                    } else {
+                        self.selector(objects)?;
+                    }
                 }
                 self.movement(movement, Some(*reason), objects, instruction_actor)
             }

@@ -106,6 +106,10 @@ pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
     if entry_origin_guard(condition) {
         return true;
     }
+    public_pp_guard(condition)
+}
+
+pub(crate) fn public_pp_guard(condition: &Expr<Bool>) -> bool {
     matches!(condition, Expr::Compute(predicate)
     if matches!(predicate.as_ref(), Predicate::CompareInt {
         left: Expr::Live(read), comparison: Comparison::GreaterEqual,

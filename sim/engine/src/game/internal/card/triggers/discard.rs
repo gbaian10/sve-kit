@@ -5,6 +5,8 @@ use super::{
     SourceInformation, TriggerAggregation, TriggerCondition, ZoneKind, invalid, optional_payment,
     player_id, unsupported,
 };
+use crate::game::internal::Execution;
+use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
 
@@ -118,7 +120,7 @@ impl Game {
                 .ok_or_else(|| invalid("missing discard rule"))?,
         )?;
         let pending =
-            self.internal_prepare_discard_events(ids, actor, Cause::Rule { rule }, None)?;
+            self.internal_prepare_discard_events(ids, actor, Cause::Rule { rule }, None, None)?;
         Ok(RuleDiscard { cards, pending })
     }
 
@@ -132,15 +134,20 @@ impl Game {
             if actual.generation == card.before.generation.0 {
                 continue;
             }
-            events.push(DiscardEvent {
-                card_before: card.before,
-                player: card.player,
-                characters: card.characters,
-                actual_to: RuntimeZoneRef {
-                    player: player_id(&actual.controller)?,
-                    kind: super::departure_destination(&actual.zone)?,
+            let actual_to = RuntimeZoneRef {
+                player: player_id(&actual.controller)?,
+                kind: super::departure_destination(&actual.zone)?,
+            };
+            let after = Some(self.internal_current_reference(&card.id)?);
+            events.push((
+                DiscardEvent {
+                    card_before: card.before,
+                    player: card.player,
+                    characters: card.characters,
+                    actual_to,
                 },
-            });
+                after,
+            ));
         }
         self.internal_commit_discard_events(plan.pending, &events)
     }
@@ -198,11 +205,13 @@ impl Game {
         cause_actor: PlayerId,
         cause: Cause,
         cause_source: Option<RuntimeAbilitySource>,
+        cause_execution: Option<&Execution>,
     ) -> Result<DiscardPlan> {
         if !self.has_discard_headers() {
             return Ok(DiscardPlan(Vec::new()));
         }
         let mut candidates = Vec::new();
+        let mut cause_traits = None;
         let before = SnapshotId(self.state.ir_epoch);
         for id in members {
             let card_before = self.internal_current_reference(id)?;
@@ -214,6 +223,36 @@ impl Game {
             let header = self.pending_header(cause_actor, cause, cause_source, before)?;
             for (holder, ability) in observers {
                 let actor = player_id(&self.object(&holder)?.controller)?;
+                if let Some(by) = filter(&ability.node).and_then(|plan| plan.by) {
+                    let (
+                        Cause::Effect {
+                            execution: execution_id,
+                        },
+                        Some(source),
+                        Some(execution),
+                    ) = (cause, cause_source, cause_execution)
+                    else {
+                        continue;
+                    };
+                    if source.controller != actor {
+                        continue;
+                    }
+                    if execution.id != execution_id
+                        || execution.ability != Some(source)
+                        || cause_actor != source.controller
+                    {
+                        return Err(invalid("discard cause authority disagrees"));
+                    }
+                    if cause_traits.is_none() {
+                        cause_traits = Some(execution.source_traits(self)?);
+                    }
+                    if !cause_traits
+                        .as_ref()
+                        .is_some_and(|traits| traits.contains(&by.trait_id))
+                    {
+                        continue;
+                    }
+                }
                 let source = self.internal_card_source(&holder, ability.node.id, actor)?;
                 let mut information = SourceInformation::current(self, source)?;
                 if self.object(&holder)?.zone == "hand" {
@@ -232,12 +271,30 @@ impl Game {
     pub(in crate::game::internal) fn internal_commit_discard_events(
         &mut self,
         plan: DiscardPlan,
-        events: &[DiscardEvent],
+        events: &[(DiscardEvent, Option<ObjectRef>)],
     ) -> Result<()> {
         let mut pending = Vec::new();
         for (card, mut occurrence) in plan.0 {
-            if let Some(event) = events.iter().find(|event| event.card_before == card) {
+            if let Some((event, after)) = events.iter().find(|(event, _)| event.card_before == card)
+            {
                 occurrence.header.after = SnapshotId(self.state.ir_epoch);
+                if occurrence
+                    .ability
+                    .node
+                    .trigger
+                    .as_ref()
+                    .and_then(discard_header::self_event)
+                    .is_some()
+                {
+                    let owner = player_id(&self.object(&occurrence.holder)?.owner)?;
+                    occurrence.movement_after = after.filter(|_| {
+                        event.actual_to
+                            == RuntimeZoneRef {
+                                player: owner,
+                                kind: ZoneKind::Cemetery,
+                            }
+                    });
+                }
                 occurrence.timing = Some(EventPayload::Discard {
                     event: event.clone(),
                 });

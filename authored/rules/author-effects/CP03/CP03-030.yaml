@@ -1,0 +1,38 @@
+cards:
+  CP03-030:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+          on:
+            discarded:
+              by:
+                ability_of:
+                  trait: ロイヤルパラディン
+                  who: self
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - lastword:
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

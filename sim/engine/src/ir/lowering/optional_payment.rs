@@ -26,13 +26,20 @@ impl BodyContext<'_> {
             ast::Cost::Short(operation) => slice::from_ref(operation.as_ref()),
             ast::Cost::Ordered { steps } => steps.as_slice(),
         };
-        if operations.is_empty()
-            || operations.iter().any(|operation| {
-                !matches!(
-                    operation,
-                    ast::CostOperation::ActSelf(true) | ast::CostOperation::SelfToCemetery(true)
-                )
-            })
+        let conditional_pp = self.discard_pp_event.is_some()
+            && matches!(operations, [ast::CostOperation::Pp(n)] if *n > 0)
+            && matches!(payment.steps.as_slice(), [ast::Step::Move(value)]
+                if matches!(value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::This(_))))
+                    && matches!(value.to, ast::Destination::Field));
+        if !conditional_pp
+            && (operations.is_empty()
+                || operations.iter().any(|operation| {
+                    !matches!(
+                        operation,
+                        ast::CostOperation::ActSelf(true)
+                            | ast::CostOperation::SelfToCemetery(true)
+                    )
+                }))
         {
             return Err(super::unsupported(path));
         }

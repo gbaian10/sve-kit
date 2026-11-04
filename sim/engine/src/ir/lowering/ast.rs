@@ -1940,6 +1940,20 @@ pub(super) struct DiscardSubscription {
     pub _from: Option<HandZone>,
     pub who: Option<EntryPlayer>,
     pub during: Option<During>,
+    pub by: Option<DiscardBy>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiscardBy {
+    pub ability_of: DiscardAbility,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiscardAbility {
+    pub who: SelfPlayer,
+    pub r#trait: String,
 }
 
 #[derive(Deserialize)]

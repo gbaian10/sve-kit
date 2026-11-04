@@ -818,7 +818,8 @@ tags!(AbsentPayment { NotComplete });
 
 variants!(#[derive(Copy)] MovementEvent {
     Move { event: Binding<MoveEvent> } => [],
-    LeaveField { event: Binding<LeaveFieldEvent> } => []
+    LeaveField { event: Binding<LeaveFieldEvent> } => [],
+    Discard { event: Binding<DiscardEvent> } => []
 });
 
 variants!(NamesFrozen {

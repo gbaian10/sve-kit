@@ -1,6 +1,7 @@
 use crate::ir::events::attack::AttackFilter;
 use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::events::damage::DamageFilter;
+use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
@@ -330,6 +331,7 @@ impl Checker {
                 self.reference(event, BindingKind::Value)?;
                 event.key()
             }
+            MovementEvent::Discard { .. } => return self.reject(),
         };
         if self.env.trigger_events.contains(&key) && self.env.chooser.is_none() {
             Ok(())
@@ -475,6 +477,13 @@ impl Checker {
                 view,
                 triggering,
             ),
+            EventPattern::Discard { binding, predicate } => self.committed_header(
+                *binding,
+                EventSnapshotPolicy::BeforeExit,
+                DiscardFilter::parse(*binding, predicate).is_some(),
+                view,
+                triggering,
+            ),
             EventPattern::Attack { binding, predicate } => self.committed_header(
                 *binding,
                 EventSnapshotPolicy::AfterEntry,
@@ -564,7 +573,6 @@ impl Checker {
             | EventPattern::Payment { .. }
             | EventPattern::Move { .. }
             | EventPattern::Draw { .. }
-            | EventPattern::Discard { .. }
             | EventPattern::Banish { .. }
             | EventPattern::StatChange { .. }
             | EventPattern::Posture { .. }

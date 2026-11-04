@@ -790,6 +790,8 @@ impl BodyContext<'_> {
             let mode_id = u64::try_from(mode_id).map_err(|_error| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                discard_event: self.discard_event,
+                discard_pp_event: None,
                 static_zone: self.static_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,

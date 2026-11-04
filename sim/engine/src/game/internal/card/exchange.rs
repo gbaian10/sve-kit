@@ -3,6 +3,7 @@ use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
+use crate::ir::events::discard as discard_header;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
     AbilityKind, Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId,
@@ -175,7 +176,7 @@ impl Game {
         let posture_payment = routes
             .iter()
             .all(|(_, step)| matches!(step.instruction.action, Action::Posture { .. }));
-        // A definition that can consume payment facts is unsafe even when its holder is hidden.
+        // Unproven payment observers remain unsafe even when their holder is hidden.
         for definition in self.card_runtime.definitions.cards.values() {
             for ability in &definition.card().abilities {
                 if ability.node.trigger.as_ref().is_some_and(|trigger| {
@@ -190,7 +191,8 @@ impl Game {
                             TriggerCondition::Event {
                                 pattern: EventPattern::LeaveField { .. }
                             }
-                        )))
+                        ))
+                        || (hand_payment && discard_header::self_event(trigger).is_some()))
                 }) {
                     return Err(unsupported("exchange payment or material triggers"));
                 }

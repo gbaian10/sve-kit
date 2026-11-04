@@ -363,13 +363,19 @@ PlayerRef::FromExpression 只接受常值、既有 binding 與凍結事件欄位
 PlayerIn 的比較運算元仍可讀 Live。ObjectEquals 的 Bound 物件與 ObjectOperand::Bound
 同規則：選擇域內只有本域候選豁免，其餘須有物件可見性，翻面撤銷後不再可比較。
 
-FollowEventMove 僅接受當前 trigger 明示綁定的 Move／LeaveField，型別表達的是沿
+FollowEventMove 僅接受當前 trigger 明示綁定的 Move／LeaveField／受限 Discard，型別表達的是沿
 header receipt 查找 triggering subject 的 before 成員，取得該單一成員成功移動後
 的引用。其他 binding、歷史事件與 union 外的分支 payload 均不授權。整個
 TriggerEvent receipt、MoveAfter 的 TriggerExplicitReference 與 RuleCarry 仍拒絕；
 不能用整份 receipt 的所有 moved 成員冒充觸發主體。本文的 FromExpression 物件動作
 仍拒絕，Frozen MoveAfter 欄位只可作事件資訊比較，不能繞過 follow 權限執行動作。
 實際配對 before／after、失敗或無 member 的結果及卡文明示引用，仍由 executor／lowering 驗收。
+
+`MovementEvent::Discard` 僅在己方手牌自身、BeforeExit、PerFact 的 canonical header
+標記可 follow 的 binder；一般場上觀察者、批次、foreign binder 與非 trigger binding 均拒絕。
+只允許直接單一成員 Put 至己方 Field 或 owner EX，不能改綁 SourceHolder 或沿其他目的區。
+能力來源類型篩選使用 header 內同一 Discard 的 BeforeExit 有效來源快照；整個 predicate
+須與 canonical 形狀相等，其他 actor、view、payload 或本文／歷史查詢不因此獲得權限。
 
 作者的數值修改與能力授予共用場上／EX 的成功移動結果解析；場上結果由 `Move` 入場或單從者 `Search` 入場明示登錄，以 `SameEffectExplicitReference` 取得新世代引用。結果為空時只略過對空集合的指示，之後獨立的自身修改仍須結算；過時世代沿用既有 `Modify` 檢查。這個登錄不額外授權其他物件動作；效果進化的場上結果仍只接受原有單從者搜尋，不接受一般移動結果。這是作者降階邊界，沒有新增 IR 或 WF 例外。
 
