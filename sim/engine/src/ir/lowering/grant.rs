@@ -1,7 +1,6 @@
 use super::{BodyContext, LoweringError, SourceSpan, ast, keywords, numeric, unsupported};
 use crate::ir::{
-    Action, FaceId, FollowPermission, GrantedAbility, ObjectOperand, ObjectReceipt, ObjectView,
-    Selector, TextProvider, ZoneKind,
+    Action, FaceId, GrantedAbility, ObjectOperand, ObjectView, Selector, TextProvider, ZoneKind,
 };
 use serde_json::{Value, json};
 #[expect(
@@ -44,19 +43,11 @@ impl BodyContext<'_> {
         {
             return self.zone_objects(query, ZoneKind::Ex, path);
         }
-        let ast::Objects::Follow { follow } = on else {
-            return self.objects(on, path);
-        };
-        if let Some(objects) = self.ex_outputs.get(follow) {
-            return Ok(objects.clone());
+        if let ast::Objects::Follow { follow } = on {
+            self.followed(follow, path)
+        } else {
+            self.objects(on, path)
         }
-        let Some(ObjectReceipt::Movement { receipt }) = self.observations.get(follow) else {
-            return Err(unsupported(path));
-        };
-        Ok(Selector::MoveAfter {
-            receipt: receipt.clone(),
-            permission: FollowPermission::SameEffectExplicitReference {},
-        })
     }
 
     pub(super) fn granted_abilities(

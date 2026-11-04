@@ -33,6 +33,17 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<(), LoweringError> {
         if let ast::Step::Move(value) = step
+            && matches!(value.to, ast::Destination::Field)
+            && let Some(name) = &value.result
+        {
+            self.field_outputs.insert(
+                name.clone(),
+                MovementReceipt::Move {
+                    receipt: ReceiptReference::new(receipt),
+                },
+            );
+        }
+        if let ast::Step::Move(value) = step
             && matches!(value.to, ast::Destination::Ex)
             && let Some(name) = &value.result
         {
@@ -153,6 +164,21 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         Ok(())
+    }
+
+    pub(super) fn followed(&self, follow: &str, path: &str) -> Result<Selector, LoweringError> {
+        self.ex_outputs
+            .get(follow)
+            .cloned()
+            .or_else(|| {
+                self.field_outputs
+                    .get(follow)
+                    .map(|receipt| Selector::MoveAfter {
+                        receipt: receipt.clone(),
+                        permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                    })
+            })
+            .ok_or_else(|| unsupported(path))
     }
 
     fn observed(
