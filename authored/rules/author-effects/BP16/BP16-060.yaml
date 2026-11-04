@@ -1,0 +1,27 @@
+cards:
+  BP16-060:
+    abilities:
+      - evolve_time:
+          do:
+            - evolve:
+                ref: ally
+          targets:
+            - bind: ally
+              from:
+                has_evolve: true
+                kind: follower
+                not_same_name_as_this: true
+                trait: 荒野
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
