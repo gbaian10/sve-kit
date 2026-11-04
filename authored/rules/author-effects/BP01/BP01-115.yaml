@@ -1,0 +1,32 @@
+cards:
+  BP01-115:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: revive
+                result: entered
+                to: field
+            - grant:
+                keywords:
+                  - ward
+                on:
+                  follow: entered
+          targets:
+            - bind: revive
+              from:
+                cost_le: 8
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set

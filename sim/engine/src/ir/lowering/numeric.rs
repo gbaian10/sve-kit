@@ -331,10 +331,10 @@ impl BodyContext<'_> {
             ast::Objects::Zone(query) if matches!(query.zone, ast::Zone::Ex) => {
                 self.zone_objects(query, ZoneKind::Ex, path)?
             }
-            ast::Objects::This(_)
-            | ast::Objects::Bound(_)
-            | ast::Objects::Zone(_)
-            | ast::Objects::Follow { .. } => self.objects(&modification.on, path)?,
+            ast::Objects::Follow { follow } => self.followed(follow, path)?,
+            ast::Objects::This(_) | ast::Objects::Bound(_) | ast::Objects::Zone(_) => {
+                self.objects(&modification.on, path)?
+            }
         };
         Ok(Action::Modify {
             subjects,
