@@ -1008,7 +1008,7 @@ fn granted_damage_definitions_reject_predicates_outside_the_closed_damage_header
         if malformed {
             let failure = result.unwrap_err().to_string();
             assert!(
-                failure.contains("printed per-fact timing or self-event header"),
+                failure.contains("printed timing aggregation or self-event header"),
                 "{failure}"
             );
         } else {

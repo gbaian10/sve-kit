@@ -149,6 +149,7 @@ pub(super) fn damaged(
 pub(super) fn dealt(
     entry: &ast::DealtSubscription,
     event_id: u64,
+    candidate_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
@@ -170,7 +171,11 @@ pub(super) fn dealt(
                 path,
                 false,
             )?),
-            recipient: entry.recipient.as_ref().map(recipient),
+            recipient: entry
+                .recipient
+                .as_ref()
+                .map(|value| dealt_recipient(value, candidate_id, scope, path))
+                .transpose()?,
             kind: entry.kind.as_ref().map(kind),
             own_turn: entry
                 .during
@@ -179,6 +184,41 @@ pub(super) fn dealt(
         }
         .predicate(event),
     })
+}
+
+fn dealt_recipient(
+    value: &ast::DealtRecipientSubscription,
+    candidate_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<RecipientFilter, LoweringError> {
+    match value {
+        ast::DealtRecipientSubscription::Basic(value) => Ok(recipient(value)),
+        ast::DealtRecipientSubscription::Followers {
+            who: ast::EntryPlayer::Opponent,
+            zone: ast::Zone::Field,
+            kind: ast::FollowerKind::Follower,
+        } => Ok(RecipientFilter::OpposingFollowers {
+            candidate: Binding::new(candidate_id, scope),
+        }),
+        ast::DealtRecipientSubscription::Followers { .. } => Err(unsupported(path)),
+    }
+}
+
+pub(super) const fn batch_dealt(entry: &ast::DealtSubscription) -> bool {
+    entry.reference.is_some()
+        && entry.who.is_none()
+        && entry.sel.is_none()
+        && entry.during.is_none()
+        && matches!(entry.kind, Some(ast::AbilityDamage::Ability))
+        && matches!(
+            entry.recipient,
+            Some(ast::DealtRecipientSubscription::Followers {
+                who: ast::EntryPlayer::Opponent,
+                zone: ast::Zone::Field,
+                kind: ast::FollowerKind::Follower,
+            })
+        )
 }
 pub(super) fn life(entry: &ast::LifeSubscription, event_id: u64, scope: ScopeId) -> EventPattern {
     let event = Binding::new(event_id, scope);

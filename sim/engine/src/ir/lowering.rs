@@ -976,7 +976,9 @@ fn lowered_subscription(
             evolution::subscription(entry, event_id, scope, path)
         }
         ast::PhaseSubscription::Attacked(entry) => combat::attack(entry, event_id, scope, path),
-        ast::PhaseSubscription::Dealt(entry) => combat::dealt(entry, event_id, scope, path),
+        ast::PhaseSubscription::Dealt(entry) => {
+            combat::dealt(entry, event_id, subject_id, scope, path)
+        }
         ast::PhaseSubscription::LifeChanged(entry) => Ok(combat::life(entry, event_id, scope)),
         ast::PhaseSubscription::Damage(entry) => Ok(combat::damaged(entry, event_id, scope)),
         ast::PhaseSubscription::EnterField(entry) => {

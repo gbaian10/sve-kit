@@ -8,7 +8,7 @@ fn equip_action() -> Action {
     }
 }
 
-fn equipment_catalog(kind: &str) -> Arc<Catalog> {
+pub(super) fn equipment_catalog(kind: &str) -> Arc<Catalog> {
     let (snapshot, keywords, document) = catalog_documents(&json!("1"));
     let snapshot = snapshot
         .lines()

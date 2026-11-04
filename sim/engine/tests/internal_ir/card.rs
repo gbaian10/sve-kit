@@ -713,6 +713,8 @@ mod removal_immunity;
 
 #[path = "card/equipment.rs"]
 mod equipment;
+#[path = "card/equipment_dealt.rs"]
+mod equipment_dealt;
 #[path = "card/material_power.rs"]
 mod material_power;
 

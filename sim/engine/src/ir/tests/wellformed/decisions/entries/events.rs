@@ -645,3 +645,65 @@ fn evolution_subject_is_available_only_through_its_exact_trigger_binding() {
         WellFormedReason::UnsupportedShape,
     );
 }
+
+#[test]
+fn a_batched_damage_header_has_no_single_hit_event_for_its_body() {
+    use crate::ir::events::damage::{DamageFilter, DamageKind, RecipientFilter};
+    use crate::ir::events::subject::SubjectFilter;
+    let event = Binding::new(1, ScopeId(1));
+    let plan = DamageFilter {
+        dealt: Some(SubjectFilter {
+            itself: Some(true),
+            ..SubjectFilter::default()
+        }),
+        recipient: Some(RecipientFilter::OpposingFollowers {
+            candidate: Binding::new(2, ScopeId(1)),
+        }),
+        kind: Some(DamageKind::Ability),
+        own_turn: None,
+    };
+    let pattern = EventPattern::Damage {
+        binding: event,
+        predicate: plan.predicate(event),
+    };
+    let mut empty = event_card(pattern.clone(), EventSnapshotPolicy::AfterEntry, vec![]);
+    empty.abilities[0]
+        .node
+        .trigger
+        .as_mut()
+        .unwrap()
+        .aggregation = TriggerAggregation::PerBatch {
+        key: BatchPolicy::Instruction {},
+    };
+    accept_card(empty);
+    let condition = Expr::Compute(Box::new(Predicate::Equal {
+        operands: Box::new(ValueEquality::EventId {
+            left: Expr::Frozen(Box::new(EventIdHeaderFields::HeaderId {
+                event: EventContext::Trigger {},
+            })),
+            right: Expr::Frozen(Box::new(EventIdHeaderFields::HeaderId {
+                event: EventContext::Damage { event },
+            })),
+        }),
+    }));
+    let mut single = event_card(
+        pattern,
+        EventSnapshotPolicy::AfterEntry,
+        vec![branch(condition)],
+    );
+    accept_card(single.clone());
+    single.abilities[0]
+        .node
+        .trigger
+        .as_mut()
+        .unwrap()
+        .aggregation = TriggerAggregation::PerBatch {
+        key: BatchPolicy::Instruction {},
+    };
+    let error = WellFormedCardProgram::check(single)
+        .expect_err("a batch must not expose one hit to its body");
+    assert!(
+        error.ir_path.contains("/body"),
+        "only the body loses the event binding: {error}"
+    );
+}

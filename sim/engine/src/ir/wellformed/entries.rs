@@ -1,5 +1,6 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
+use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
@@ -41,6 +42,23 @@ fn batch_discard(trigger: &TriggerSpec) -> bool {
         && trigger.view == EventSnapshotPolicy::BeforeExit
         && DiscardFilter::parse(*binding, predicate)
             .is_some_and(|plan| plan.own == Some(true) && plan.own_turn && !plan.itself)
+}
+
+fn batch_damage(trigger: &TriggerSpec) -> bool {
+    let TriggerCondition::Event {
+        pattern: EventPattern::Damage { binding, predicate },
+    } = &trigger.on
+    else {
+        return false;
+    };
+    trigger.aggregation
+        == (TriggerAggregation::PerBatch {
+            key: BatchPolicy::Instruction {},
+        })
+        && trigger.active_zones == [ZoneKind::Field]
+        && trigger.view == EventSnapshotPolicy::AfterEntry
+        && DamageFilter::parse(*binding, predicate)
+            .is_some_and(|plan| plan.instruction_batch(*binding))
 }
 
 /// An immutable card whose entire accepted ability tree passed structural checking.
@@ -532,7 +550,9 @@ impl Checker {
         if trigger.active_zones.is_empty() {
             return Err(self.error(WellFormedReason::InvalidEntry));
         }
-        if (trigger.aggregation != (TriggerAggregation::PerFact {}) && !batch_discard(trigger))
+        if (trigger.aggregation != (TriggerAggregation::PerFact {})
+            && !batch_discard(trigger)
+            && !batch_damage(trigger))
             || trigger
                 .limit
                 .is_some_and(|limit| !LimitSpec::is_triggered(limit))
@@ -544,8 +564,8 @@ impl Checker {
                 let entry = self.env.clone();
                 self.env.trigger = Some(trigger.view);
                 self.event_pattern(pattern, Some(trigger.view), true)?;
-                if batch_discard(trigger) {
-                    // A batch has no single card payload or event context for captures or bodies.
+                if batch_discard(trigger) || batch_damage(trigger) {
+                    // A batch has no single fact payload or event context for captures or bodies.
                     self.env = entry;
                     self.env.trigger = None;
                     self.env.trigger_subject = None;
