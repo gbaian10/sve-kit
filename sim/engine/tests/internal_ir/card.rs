@@ -766,3 +766,6 @@ mod nested_ub;
 
 #[path = "card/trigger_restrictions.rs"]
 mod trigger_restrictions;
+
+#[path = "card/event_damage_sources.rs"]
+mod event_damage_sources;

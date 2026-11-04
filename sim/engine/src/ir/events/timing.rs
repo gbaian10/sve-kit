@@ -165,6 +165,7 @@ pub(crate) fn second_header(ability: &Ability) -> Option<bool> {
 
 pub(crate) fn drain_predicate(event: Binding<DamageEvent>) -> Expr<Bool> {
     DamageFilter {
+        source_field: false,
         dealt: Some(super::subject::SubjectFilter {
             itself: Some(true),
             ..super::subject::SubjectFilter::default()

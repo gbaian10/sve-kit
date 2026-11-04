@@ -652,6 +652,7 @@ fn a_batched_damage_header_has_no_single_hit_event_for_its_body() {
     use crate::ir::events::subject::SubjectFilter;
     let event = Binding::new(1, ScopeId(1));
     let plan = DamageFilter {
+        source_field: false,
         dealt: Some(SubjectFilter {
             itself: Some(true),
             ..SubjectFilter::default()
@@ -706,4 +707,102 @@ fn a_batched_damage_header_has_no_single_hit_event_for_its_body() {
         error.ir_path.contains("/body"),
         "only the body loses the event binding: {error}"
     );
+}
+
+#[test]
+fn field_damage_source_zone_is_only_a_canonical_trigger_header_not_a_general_zone_read() {
+    use crate::ir::events::damage::{DamageFilter, RecipientFilter};
+    use crate::ir::events::subject::SubjectFilter;
+    let event = Binding::new(1, ScopeId(1));
+    let plan = DamageFilter {
+        dealt: Some(SubjectFilter {
+            own: Some(true),
+            trait_id: Some(TraitId("妖精".into())),
+            ..SubjectFilter::default()
+        }),
+        source_field: true,
+        recipient: Some(RecipientFilter::OpposingFollowers {
+            candidate: Binding::new(2, ScopeId(1)),
+        }),
+        kind: None,
+        own_turn: Some(true),
+    };
+    let predicate = plan.predicate(event);
+    let pattern = EventPattern::Damage {
+        binding: event,
+        predicate: predicate.clone(),
+    };
+    let mut valid = event_card(pattern, EventSnapshotPolicy::AfterEntry, vec![]);
+    valid.abilities[0]
+        .node
+        .trigger
+        .as_mut()
+        .unwrap()
+        .aggregation = TriggerAggregation::PerBatch {
+        key: BatchPolicy::Instruction {},
+    };
+    accept_card(valid.clone());
+    for expression in [
+        Expr::Compute(Box::new(Predicate::ZoneEquals {
+            left: Expr::Live(Box::new(ZoneRead::Zone {
+                object: ObjectView::Snapshot {
+                    value: Box::new(Expr::Frozen(Box::new(SnapshotFields::DamageSource {
+                        event,
+                    }))),
+                },
+            })),
+            right: Expr::Compute(Box::new(ZoneOperation::OfPlayer {
+                player: PlayerRef::Controller {},
+                kind: ZoneKind::Field,
+            })),
+        })),
+        predicate,
+    ] {
+        let mut body_read = valid.clone();
+        body_read.abilities[0].node.body.as_mut().unwrap().steps = vec![branch(expression)];
+        let error = WellFormedCardProgram::check(body_read).unwrap_err();
+        assert!(error.ir_path.contains("/body"));
+    }
+    let mut wrong_view = valid;
+    wrong_view.abilities[0].node.trigger.as_mut().unwrap().view = EventSnapshotPolicy::BeforeExit;
+    WellFormedCardProgram::check(wrong_view).unwrap_err();
+}
+
+#[test]
+fn source_field_damage_headers_do_not_open_unrequested_self_leader_or_turn_shapes() {
+    use crate::ir::events::damage::{DamageFilter, DamageKind, RecipientFilter};
+    use crate::ir::events::subject::SubjectFilter;
+    let event = Binding::new(1, ScopeId(1));
+    let base = DamageFilter {
+        dealt: Some(SubjectFilter {
+            own: Some(true),
+            trait_id: Some(TraitId("妖精".into())),
+            ..SubjectFilter::default()
+        }),
+        source_field: true,
+        recipient: Some(RecipientFilter::OpposingFollowers {
+            candidate: Binding::new(2, ScopeId(1)),
+        }),
+        kind: None,
+        own_turn: Some(true),
+    };
+    let mut absent_source = base.clone();
+    absent_source.dealt = None;
+    let mut leader = base.clone();
+    leader.recipient = Some(RecipientFilter::Leader(Some(false)));
+    let mut extra_kind = base.clone();
+    extra_kind.kind = Some(DamageKind::Ability);
+    let mut any_turn = base;
+    any_turn.own_turn = None;
+    for unsupported in [absent_source, leader, extra_kind, any_turn] {
+        let card = event_card(
+            EventPattern::Damage {
+                binding: event,
+                predicate: unsupported.predicate(event),
+            },
+            EventSnapshotPolicy::AfterEntry,
+            vec![],
+        );
+        reject_card(card, WellFormedReason::UnsupportedShape);
+    }
 }

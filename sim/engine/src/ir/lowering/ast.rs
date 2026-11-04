@@ -2817,6 +2817,7 @@ pub(super) struct DealtSubscription {
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub who: Option<EntryPlayer>,
+    pub zone: Option<Zone>,
     pub sel: Option<MovementSubject>,
     pub recipient: Option<DealtRecipientSubscription>,
     pub kind: Option<AbilityDamage>,

@@ -136,6 +136,7 @@ pub(super) fn damaged(
         binding: event,
         predicate: DamageFilter {
             dealt: None,
+            source_field: false,
             recipient: entry.recipient.as_ref().map(recipient),
             kind: entry.kind.as_ref().map(kind),
             own_turn: entry
@@ -153,37 +154,55 @@ pub(super) fn dealt(
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
-    if entry.reference.is_some() && entry.sel.is_some() {
-        return Err(unsupported(path));
-    }
     let event = Binding::new(event_id, scope);
     Ok(EventPattern::Damage {
         binding: event,
-        predicate: DamageFilter {
-            dealt: Some(movement::movement_filter(
-                entry
-                    .who
-                    .as_ref()
-                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
-                entry.reference.is_some(),
-                entry.sel.as_ref(),
-                false,
-                path,
-                false,
-            )?),
-            recipient: entry
-                .recipient
-                .as_ref()
-                .map(|value| dealt_recipient(value, candidate_id, scope, path))
-                .transpose()?,
-            kind: entry.kind.as_ref().map(kind),
-            own_turn: entry
-                .during
-                .as_ref()
-                .map(|during| matches!(during.turn, ast::EntryPlayer::Controller)),
-        }
-        .predicate(event),
+        predicate: dealt_plan(entry, candidate_id, scope, path)?.predicate(event),
     })
+}
+
+fn dealt_plan(
+    entry: &ast::DealtSubscription,
+    candidate_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<DamageFilter, LoweringError> {
+    if entry.reference.is_some() && entry.sel.is_some() {
+        return Err(unsupported(path));
+    }
+    let source_field = match entry.zone {
+        None => false,
+        Some(ast::Zone::Field) if matches!(entry.who, Some(ast::EntryPlayer::Controller)) => true,
+        Some(_) => return Err(unsupported(path)),
+    };
+    let plan = DamageFilter {
+        dealt: Some(movement::movement_filter(
+            entry
+                .who
+                .as_ref()
+                .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+            entry.reference.is_some(),
+            entry.sel.as_ref(),
+            false,
+            path,
+            false,
+        )?),
+        source_field,
+        recipient: entry
+            .recipient
+            .as_ref()
+            .map(|value| dealt_recipient(value, candidate_id, scope, path))
+            .transpose()?,
+        kind: entry.kind.as_ref().map(kind),
+        own_turn: entry
+            .during
+            .as_ref()
+            .map(|during| matches!(during.turn, ast::EntryPlayer::Controller)),
+    };
+    if source_field && !plan.instruction_batch() {
+        return Err(unsupported(path));
+    }
+    Ok(plan)
 }
 
 fn dealt_recipient(
@@ -205,20 +224,13 @@ fn dealt_recipient(
     }
 }
 
-pub(super) const fn batch_dealt(entry: &ast::DealtSubscription) -> bool {
-    entry.reference.is_some()
-        && entry.who.is_none()
-        && entry.sel.is_none()
-        && entry.during.is_none()
-        && matches!(entry.kind, Some(ast::AbilityDamage::Ability))
-        && matches!(
-            entry.recipient,
-            Some(ast::DealtRecipientSubscription::Followers {
-                who: ast::EntryPlayer::Opponent,
-                zone: ast::Zone::Field,
-                kind: ast::FollowerKind::Follower,
-            })
-        )
+pub(super) fn batch_dealt(
+    entry: &ast::DealtSubscription,
+    subject_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> bool {
+    dealt_plan(entry, subject_id, scope, path).is_ok_and(|plan| plan.instruction_batch())
 }
 pub(super) fn life(entry: &ast::LifeSubscription, event_id: u64, scope: ScopeId) -> EventPattern {
     let event = Binding::new(event_id, scope);

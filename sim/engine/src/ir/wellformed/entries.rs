@@ -59,8 +59,7 @@ fn batch_damage(trigger: &TriggerSpec) -> bool {
         })
         && trigger.active_zones == [ZoneKind::Field]
         && trigger.view == EventSnapshotPolicy::AfterEntry
-        && DamageFilter::parse(*binding, predicate)
-            .is_some_and(|plan| plan.instruction_batch(*binding))
+        && DamageFilter::parse(*binding, predicate).is_some_and(|plan| plan.instruction_batch())
 }
 
 /// An immutable card whose entire accepted ability tree passed structural checking.

@@ -477,13 +477,13 @@ impl SubjectFields {
 
 pub(crate) struct SubjectInformation<'subject> {
     pub(crate) original_cost: Option<i64>,
-    pub(crate) kind: CardKind,
+    pub(crate) kind: Option<CardKind>,
     pub(crate) traits: &'subject [TraitId],
     pub(crate) names: &'subject [CardName],
     pub(crate) class: Option<&'subject ClassId>,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct SubjectFilter {
     pub(crate) original_cost: Option<i64>,
     pub(crate) own: Option<bool>,
@@ -680,7 +680,7 @@ impl SubjectFilter {
         self.matches_information(
             &SubjectInformation {
                 original_cost: None,
-                kind: characters.kind,
+                kind: Some(characters.kind),
                 traits: &characters.traits,
                 names: &characters.names,
                 class: characters.class.as_ref(),
@@ -709,7 +709,7 @@ impl SubjectFilter {
             && self
                 .own
                 .is_none_or(|own| own == (observer_controller == subject_controller))
-            && self.kind.is_none_or(|kind| kind == characters.kind)
+            && self.kind.is_none_or(|kind| characters.kind == Some(kind))
             && self
                 .trait_id
                 .as_ref()

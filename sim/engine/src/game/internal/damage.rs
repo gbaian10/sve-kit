@@ -1,3 +1,4 @@
+use super::source::SourceSnapshot;
 use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, player_id,
     seat_name, unsupported,
@@ -6,7 +7,7 @@ use crate::game::damage::{DamageReplacement, DamageUse};
 use crate::game::{BTreeMap, int, string};
 use crate::ir::{
     Action, DamageEvent, DamageFlags, DamageQuantityOutcome, DecisionId, Instruction, Int, Nat,
-    PlayerId, PositiveInt, RuntimeDamageRecipient, RuntimeObjectView,
+    PlayerId, PositiveInt, RuntimeDamageRecipient,
 };
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU64;
@@ -26,15 +27,21 @@ pub struct ReplacementOption {
 }
 
 #[derive(Clone, Debug)]
+pub(in crate::game) struct DamageOccurrence {
+    pub(super) event: DamageEvent,
+    pub(super) source: SourceSnapshot,
+}
+
+#[derive(Clone, Debug)]
 pub(super) struct DamageRun {
     instruction: Box<Instruction>,
-    source: RuntimeObjectView,
+    source: SourceSnapshot,
     controller: PlayerId,
     requested: i64,
     remaining: Vec<(RuntimeDamageRecipient, Value)>,
     hits: Vec<Value>,
     consumed: BTreeMap<DamageUse, i64>,
-    facts: Vec<DamageEvent>,
+    facts: Vec<DamageOccurrence>,
     choices: Vec<DamageReplacement>,
 }
 
@@ -103,7 +110,7 @@ impl Game {
         };
         let (shares, requested) = execution.damage_shares(self, recipients, proposed)?;
         let source = execution.damage_source(self, source)?;
-        let source_id = execution.object_id(source.object)?.to_owned();
+        let source_id = execution.object_id(source.view().object)?.to_owned();
         let controller = execution.player(self, &instruction.source.controller)?;
         let mut remaining = Vec::new();
         let mut non_active = Vec::new();
@@ -138,7 +145,7 @@ impl Game {
                 };
                 let hit = (
                     share.recipient,
-                    json!({"source":source_id,"source_generation":source.object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false}),
+                    json!({"source":source_id,"source_generation":source.view().object.generation.0,"target":target,"amount":amount,"battle":false,"attack":false}),
                 );
                 if affected == active {
                     remaining.push(hit);
@@ -260,26 +267,29 @@ impl Game {
             self.internal_damage_arithmetic(string(&hit["target"]), actual)?;
             hit["amount"] = json!(actual);
             run.hits.push(hit);
-            run.facts.push(DamageEvent {
-                source: run.source,
-                recipient,
-                amount: PositiveInt(
-                    NonZeroU64::new(u64::try_from(actual).map_err(invalid)?)
-                        .ok_or_else(|| invalid("positive actual damage"))?,
-                ),
-                flags: DamageFlags::Ability,
-                controller: run.controller,
+            run.facts.push(DamageOccurrence {
+                source: run.source.clone(),
+                event: DamageEvent {
+                    source: run.source.view(),
+                    recipient,
+                    amount: PositiveInt(
+                        NonZeroU64::new(u64::try_from(actual).map_err(invalid)?)
+                            .ok_or_else(|| invalid("positive actual damage"))?,
+                    ),
+                    flags: DamageFlags::Ability,
+                    controller: run.controller,
+                },
             });
         }
         let actual = run.facts.iter().try_fold(0_u64, |sum, fact| {
-            sum.checked_add(fact.amount.0.get())
+            sum.checked_add(fact.event.amount.0.get())
                 .ok_or_else(|| invalid("damage outcome overflow"))
         })?;
         self.commit_damage_uses(&run.consumed)?;
         self.apply_damage(&run.hits, &execution.frame(), Some(&run.facts))?;
         execution
             .facts
-            .extend(run.facts.into_iter().map(Fact::Damage));
+            .extend(run.facts.into_iter().map(|fact| Fact::Damage(fact.event)));
         execution.receipts.insert(
             run.instruction.receipt,
             InstructionOutcome::Damage(DamageQuantityOutcome {

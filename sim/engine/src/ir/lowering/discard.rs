@@ -124,6 +124,8 @@ pub(super) fn subscription(
 
 pub(super) fn aggregation(
     auto: Option<&ast::Auto>,
+    subject_id: u64,
+    scope: super::ScopeId,
     path: &str,
 ) -> Result<TriggerAggregation, LoweringError> {
     let Some(auto) = auto else {
@@ -136,7 +138,7 @@ pub(super) fn aggregation(
                 key: BatchPolicy::Instruction {},
             })
         }
-        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Dealt(event) if super::combat::batch_dealt(event)) => {
+        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Dealt(event) if super::combat::batch_dealt(event, subject_id, scope, path)) => {
             Ok(TriggerAggregation::PerBatch {
                 key: BatchPolicy::Instruction {},
             })

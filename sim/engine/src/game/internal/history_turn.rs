@@ -238,7 +238,7 @@ pub(super) fn subjects(
             .collect::<Vec<_>>();
         let information = SubjectInformation {
             original_cost: None,
-            kind,
+            kind: Some(kind),
             class: Some(&class),
             traits: &traits,
             names: &names,

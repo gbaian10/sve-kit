@@ -2,10 +2,11 @@
 
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::Object;
+use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
-    CardName, CharacteristicView, CounterKind, ExecutionId, Expr, LkiReason, NameOperation, Nat,
-    NumberRead, ObjectRef, ObjectView, Requirement, Requirements, RuntimeAbilitySource,
-    RuntimeObjectView, SnapshotId, Stat,
+    CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr, LkiReason,
+    NameOperation, Nat, NumberRead, ObjectRef, ObjectView, Requirement, Requirements,
+    RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat, TraitId,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -22,8 +23,30 @@ pub(super) struct SourceSnapshot {
     view: RuntimeObjectView,
     original: [i64; 3],
     effective: [i64; 3],
-    names: Vec<CardName>,
+    pub(super) zone: String,
+    pub(super) subject: PublicCharacteristics,
     counters: BTreeMap<String, Nat>,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct PublicCharacteristics {
+    pub(super) kind: Option<CardKind>,
+    pub(super) token: bool,
+    pub(super) class: Option<ClassId>,
+    pub(super) traits: Vec<TraitId>,
+    pub(super) names: Vec<CardName>,
+}
+
+impl PublicCharacteristics {
+    pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
+        SubjectInformation {
+            original_cost: None,
+            kind: self.kind,
+            traits: &self.traits,
+            names: &self.names,
+            class: self.class.as_ref(),
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -138,7 +161,7 @@ impl Execution {
                         if information.view.object != reference {
                             return Err(invalid("foreign triggering subject information"));
                         }
-                        information.names.clone()
+                        information.subject.names.clone()
                     }
                     _ => return Err(unsupported("name information view")),
                 };
@@ -152,7 +175,8 @@ impl Execution {
     }
 
     pub(super) fn source_names(&self, game: &Game) -> Result<Vec<CardName>> {
-        self.source_snapshot(game).map(|snapshot| snapshot.names)
+        self.source_snapshot(game)
+            .map(|snapshot| snapshot.subject.names)
     }
 
     pub(super) fn source_before_move(
@@ -271,24 +295,15 @@ impl Execution {
             .ok_or_else(|| invalid("missing numeric characteristic"))
     }
 
-    pub(super) fn damage_source(
-        &self,
-        game: &Game,
-        view: &ObjectView,
-    ) -> Result<RuntimeObjectView> {
+    pub(super) fn damage_source(&self, game: &Game, view: &ObjectView) -> Result<SourceSnapshot> {
         match view {
-            ObjectView::SourceInformation {} => {
-                self.source_snapshot(game).map(|snapshot| snapshot.view)
-            }
+            ObjectView::SourceInformation {} => self.source_snapshot(game),
             ObjectView::Current { object } => {
                 let reference = self.object(game, object)?;
                 if game.object(self.object_id(reference)?)?.generation != reference.generation.0 {
                     return Err(invalid("damage source generation is no longer current"));
                 }
-                Ok(RuntimeObjectView {
-                    object: reference,
-                    snapshot: SnapshotId(game.state.ir_epoch),
-                })
+                game.information_snapshot(reference)
             }
             _ => Err(unsupported("damage source view")),
         }
@@ -391,6 +406,33 @@ impl SourceSnapshot {
     reason = "Pending and executing abilities share the same numeric information boundary."
 )]
 impl Game {
+    pub(super) fn public_characteristics(
+        &self,
+        source: &str,
+        names: Vec<CardName>,
+    ) -> Result<PublicCharacteristics> {
+        let card_type = self.object_type(source)?;
+        let kind = match card_type {
+            kind if kind.contains("フォロワー") => Some(CardKind::Follower),
+            "スペル" | "スペル・トークン" | "スペル・アドバンス" => {
+                Some(CardKind::Spell)
+            }
+            "アミュレット" | "アミュレット・トークン" | "アミュレット・エボルヴ" => {
+                Some(CardKind::Amulet)
+            }
+            _ => None,
+        };
+        Ok(PublicCharacteristics {
+            kind,
+            token: card_type.contains("トークン"),
+            names,
+            class: self.face(source)?["card_class"]
+                .as_str()
+                .map(|value| ClassId(value.into())),
+            traits: self.card_traits(source)?.into_iter().map(TraitId).collect(),
+        })
+    }
+
     pub(super) fn information_snapshot(&self, reference: ObjectRef) -> Result<SourceSnapshot> {
         let id = self
             .state
@@ -439,7 +481,8 @@ impl Game {
             },
             original,
             effective,
-            names: vec![CardName(self.card_name(id)?)],
+            zone: current.zone.clone(),
+            subject: self.public_characteristics(id, vec![CardName(self.card_name(id)?)])?,
             counters: current
                 .state
                 .get("counters")

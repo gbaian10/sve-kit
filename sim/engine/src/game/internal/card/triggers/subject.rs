@@ -32,31 +32,17 @@ impl Game {
         source: &str,
         names: Vec<CardName>,
     ) -> Result<EventSubjectInformation> {
-        let kind = match self.object_type(source)? {
-            kind if kind.contains("フォロワー") => CardKind::Follower,
-            "スペル" | "スペル・トークン" | "スペル・アドバンス" => {
-                CardKind::Spell
-            }
-            "アミュレット" | "アミュレット・トークン" | "アミュレット・エボルヴ" => {
-                CardKind::Amulet
-            }
-            _ => return Err(unsupported("event subject kind")),
-        };
-        let token = self.object_type(source)?.contains("トークン");
-        let face = self.face(source)?;
-        let class = ClassId(
-            face["card_class"]
-                .as_str()
-                .ok_or_else(|| invalid("missing subject class"))?
-                .into(),
-        );
-        let traits = self.card_traits(source)?.into_iter().map(TraitId).collect();
+        let subject = self.public_characteristics(source, names)?;
         Ok(EventSubjectInformation {
-            kind,
-            token,
-            class,
-            traits,
-            names,
+            kind: subject
+                .kind
+                .ok_or_else(|| unsupported("event subject kind"))?,
+            token: subject.token,
+            class: subject
+                .class
+                .ok_or_else(|| invalid("missing subject class"))?,
+            traits: subject.traits,
+            names: subject.names,
         })
     }
 }
@@ -65,7 +51,7 @@ impl EventSubjectInformation {
     pub(super) fn borrowed(&self) -> SubjectInformation<'_> {
         SubjectInformation {
             original_cost: None,
-            kind: self.kind,
+            kind: Some(self.kind),
             class: Some(&self.class),
             traits: &self.traits,
             names: &self.names,
