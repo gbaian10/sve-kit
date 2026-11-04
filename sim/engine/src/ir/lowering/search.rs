@@ -245,15 +245,26 @@ impl BodyContext<'_> {
                 search.to,
                 ast::SearchDestination::Single(ast::SearchZone::Field)
             )
-            && matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKind::Follower)))
-            && matches!((search.n, search.upto), (Some(1), None) | (None, Some(1)))
         {
-            self.field_outputs.insert(
-                name.clone(),
-                MovementReceipt::Search {
-                    receipt: ReceiptReference::new(receipt),
-                },
-            );
+            let single = matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKind::Follower)))
+                && matches!((search.n, search.upto), (Some(1), None) | (None, Some(1)));
+            let grouped = search.distinct_by.is_none()
+                && search.groups.as_ref().is_some_and(|groups| !groups.is_empty() && groups.iter().all(|group| {
+                    matches!(&group.sel, ast::SearchSelector::Query(query) if matches!(query.kind, Some(ast::SearchKind::Follower)))
+                        && matches!((group.n, group.upto), (Some(1), None) | (None, Some(1)))
+                }));
+            if single || grouped {
+                self.field_outputs.insert(
+                    name.clone(),
+                    super::FieldOutput {
+                        receipt: MovementReceipt::Search {
+                            receipt: ReceiptReference::new(receipt),
+                        },
+                        // Grouped numeric follow must not widen the singleton evolution permission.
+                        single_follower_search: single,
+                    },
+                );
+            }
         }
         if let ast::Step::Search(search) = step
             && let Some(name) = &search.result

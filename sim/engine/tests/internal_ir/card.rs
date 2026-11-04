@@ -9,6 +9,9 @@ mod material_acts;
 mod next_damage;
 use second::lowerer;
 
+#[path = "card/grouped_search_followup.rs"]
+mod grouped_search_followup;
+
 #[path = "card/discard_ability_source.rs"]
 mod discard_ability_source;
 

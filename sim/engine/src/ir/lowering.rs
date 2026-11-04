@@ -1196,6 +1196,12 @@ struct ReceiptReads {
     deck_cemetery: BTreeSet<ReceiptId>,
 }
 
+#[derive(Clone)]
+struct FieldOutput {
+    receipt: super::MovementReceipt,
+    single_follower_search: bool,
+}
+
 struct BodyContext<'definitions> {
     static_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
@@ -1220,7 +1226,7 @@ struct BodyContext<'definitions> {
     players: BTreeMap<String, Binding<PlayerRef>>,
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
-    field_outputs: BTreeMap<String, super::MovementReceipt>,
+    field_outputs: BTreeMap<String, FieldOutput>,
     evolution_targets: BTreeSet<String>,
     ex_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,

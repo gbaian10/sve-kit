@@ -38,8 +38,11 @@ impl BodyContext<'_> {
         {
             self.field_outputs.insert(
                 name.clone(),
-                MovementReceipt::Move {
-                    receipt: ReceiptReference::new(receipt),
+                super::FieldOutput {
+                    receipt: MovementReceipt::Move {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                    single_follower_search: false,
                 },
             );
         }
@@ -174,7 +177,7 @@ impl BodyContext<'_> {
                 self.field_outputs
                     .get(follow)
                     .map(|receipt| Selector::MoveAfter {
-                        receipt: receipt.clone(),
+                        receipt: receipt.receipt.clone(),
                         permission: super::super::FollowPermission::SameEffectExplicitReference {},
                     })
             })
