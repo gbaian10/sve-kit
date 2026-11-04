@@ -8,9 +8,7 @@ use super::{
 use crate::game::internal::Execution;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
-use crate::ir::{
-    BatchPolicy, Characteristics, DiscardEvent, MoveResult, ObjectRef, PlayerId, RuntimeZoneRef,
-};
+use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
 
 fn filter(ability: &Ability) -> Option<DiscardFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
@@ -131,7 +129,6 @@ impl Game {
         plan: RuleDiscard,
     ) -> Result<()> {
         let mut events = Vec::new();
-        let mut moves = Vec::new();
         for card in plan.cards {
             let actual = self.object(&card.id)?;
             if actual.generation == card.before.generation.0 {
@@ -141,27 +138,18 @@ impl Game {
                 player: player_id(&actual.controller)?,
                 kind: super::departure_destination(&actual.zone)?,
             };
-            let owner = player_id(&actual.owner)?;
-            moves.push(MoveResult {
-                before: card.before,
-                after: Some(self.internal_current_reference(&card.id)?),
-                requested_to: RuntimeZoneRef {
-                    player: owner,
-                    kind: ZoneKind::Cemetery,
+            let after = Some(self.internal_current_reference(&card.id)?);
+            events.push((
+                DiscardEvent {
+                    card_before: card.before,
+                    player: card.player,
+                    characters: card.characters,
+                    actual_to,
                 },
-                requested_position: None,
-                actual_to: Some(actual_to),
-                actual_position: None,
-                replacements: vec![],
-            });
-            events.push(DiscardEvent {
-                card_before: card.before,
-                player: card.player,
-                characters: card.characters,
-                actual_to,
-            });
+                after,
+            ));
         }
-        self.internal_commit_discard_events(plan.pending, &events, &moves)
+        self.internal_commit_discard_events(plan.pending, &events)
     }
 
     fn discard_observers(
@@ -283,12 +271,12 @@ impl Game {
     pub(in crate::game::internal) fn internal_commit_discard_events(
         &mut self,
         plan: DiscardPlan,
-        events: &[DiscardEvent],
-        moves: &[MoveResult],
+        events: &[(DiscardEvent, Option<ObjectRef>)],
     ) -> Result<()> {
         let mut pending = Vec::new();
         for (card, mut occurrence) in plan.0 {
-            if let Some(event) = events.iter().find(|event| event.card_before == card) {
+            if let Some((event, after)) = events.iter().find(|(event, _)| event.card_before == card)
+            {
                 occurrence.header.after = SnapshotId(self.state.ir_epoch);
                 if occurrence
                     .ability
@@ -299,17 +287,13 @@ impl Game {
                     .is_some()
                 {
                     let owner = player_id(&self.object(&occurrence.holder)?.owner)?;
-                    occurrence.movement_after = moves
-                        .iter()
-                        .find(|movement| {
-                            movement.before == card
-                                && movement.actual_to
-                                    == Some(RuntimeZoneRef {
-                                        player: owner,
-                                        kind: ZoneKind::Cemetery,
-                                    })
-                        })
-                        .and_then(|movement| movement.after);
+                    occurrence.movement_after = after.filter(|_| {
+                        event.actual_to
+                            == RuntimeZoneRef {
+                                player: owner,
+                                kind: ZoneKind::Cemetery,
+                            }
+                    });
                 }
                 occurrence.timing = Some(EventPayload::Discard {
                     event: event.clone(),

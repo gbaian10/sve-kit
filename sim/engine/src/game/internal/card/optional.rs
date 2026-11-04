@@ -5,10 +5,11 @@ use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutco
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Ability, AbilityKind, AbilityOrigin, Action, Bool, Control, CostSpec, DecisionId, Expr,
-    InstructionContext, Int, Node, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
-    PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
-    WellFormedCardProgram, ZoneKind, optional_payment,
+    Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
+    DiscardEvent, Expr, InstructionContext, Int, MoveDestination, MoveReason, MovementEvent, Node,
+    ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlayerId, PlayerRef, Program,
+    ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector, WellFormedCardProgram,
+    ZoneKind, ZoneRef, optional_payment,
 };
 use core::slice::from_ref;
 
@@ -144,8 +145,43 @@ fn positive_pp(costs: &CostSpec) -> bool {
             } if *n > 0)))
 }
 
+fn discard_return(program: &Program) -> Option<Binding<DiscardEvent>> {
+    let [step] = program.steps.as_slice() else {
+        return None;
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        return None;
+    };
+    let Action::Move {
+        objects: Selector::Objects { objects },
+        movement,
+        reason: MoveReason::Put,
+    } = &instruction.action
+    else {
+        return None;
+    };
+    if movement.to
+        != (MoveDestination::Shared {
+            zone: ZoneRef {
+                player: PlayerRef::Controller {},
+                kind: ZoneKind::Field,
+            },
+        })
+    {
+        return None;
+    }
+    let [
+        ObjectOperand::FollowEventMove {
+            event: MovementEvent::Discard { event },
+        },
+    ] = objects.as_slice()
+    else {
+        return None;
+    };
+    Some(*event)
+}
+
 fn hand_pp_payment(ability: &Ability) -> bool {
-    use crate::ir::{MovementEvent, ObjectOperand};
     let Some(event) = ability
         .trigger
         .as_ref()
@@ -192,14 +228,7 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     else {
         return false;
     };
-    let [movement] = on_paid.steps.as_slice() else {
-        return false;
-    };
-    positive_pp(costs)
-        && matches!(&movement.node, Node::Instruction { instruction }
-        if matches!(&instruction.action, Action::Move {
-            objects: Selector::Objects { objects }, ..
-        } if objects == &[ObjectOperand::FollowEventMove { event: MovementEvent::Discard { event } }]))
+    positive_pp(costs) && discard_return(on_paid) == Some(event)
 }
 
 fn field_resolution_costs(program: &Program) -> bool {
@@ -346,10 +375,11 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
         at: PaymentTime::ResolutionChoice,
         costs: costs @ CostSpec::Ordered { steps },
         optional: PaymentOptionality::Optional,
+        on_paid,
         ..
     } = control
     {
-        if positive_pp(costs)
+        if (positive_pp(costs) && discard_return(on_paid).is_some())
             || (!steps.is_empty()
                 && steps
                     .iter()

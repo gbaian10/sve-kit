@@ -833,3 +833,84 @@ fn invalid_material_answer_does_not_commit_discard_or_pending_authority() {
         "only the successful retry commits one occurrence"
     );
 }
+
+#[test]
+fn nested_field_payment_cannot_hide_a_positive_pp_resolution_payment() {
+    let mut program = lowered_observer(&json!({
+        "on":{"phase":{"which":"end","whose":"self"}},
+        "do":[{"pay":{"cost":{"act_self":true},"do":[
+            {"pay":{"cost":{"act_self":true},"do":[{"life":{"who":"self","delta":1_u8}}]}}
+        ]}}]
+    }));
+    let Node::Control {
+        control: Control::Pay { on_paid, .. },
+    } = &mut program.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("outer source payment");
+    };
+    let Node::Control {
+        control: Control::Pay { costs, .. },
+    } = &mut on_paid.steps[0].node
+    else {
+        panic!("nested payment");
+    };
+    let CostSpec::Ordered { steps } = costs else {
+        panic!("one nested payment");
+    };
+    steps[0].instruction.action = Action::Resource {
+        player: PlayerRef::Controller {},
+        resource: Resource::PpCurrent,
+        operation: ResourceOperation::Pay,
+        amount: Expr::Literal(Int(3)),
+    };
+    let checked = WellFormedCardProgram::check(program).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &initial(),
+        &Value::Null,
+        &Value::Null,
+        "nested-resolution-pp-boundary",
+    )
+    .unwrap();
+    let before = format!("{game:?}");
+    game.load_internal_card("unit-follower", &checked)
+        .unwrap_err();
+    assert_eq!(format!("{game:?}"), before);
+}
+
+#[test]
+fn conditional_pp_payment_cannot_move_to_ex_instead_of_returning_to_field() {
+    let mut program = lowered_observer(&observer(false, guarded_return()));
+    let Node::Control {
+        control: Control::If { then_body, .. },
+    } = &mut program.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("guarded return");
+    };
+    let Node::Control {
+        control: Control::Pay { on_paid, .. },
+    } = &mut then_body.steps[0].node
+    else {
+        panic!("return payment");
+    };
+    let Node::Instruction { instruction } = &mut on_paid.steps[0].node else {
+        panic!("return movement");
+    };
+    let Action::Move { movement, .. } = &mut instruction.action else {
+        panic!("return movement");
+    };
+    movement.to = MoveDestination::Owners {
+        zone: OwnerZone::Ex,
+    };
+    let checked = WellFormedCardProgram::check(program).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &initial(),
+        &Value::Null,
+        &Value::Null,
+        "pp-return-destination-boundary",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &checked)
+        .unwrap_err();
+}

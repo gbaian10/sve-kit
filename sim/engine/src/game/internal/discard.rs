@@ -352,10 +352,10 @@ impl Game {
         )?;
         let mut events = Vec::new();
         for (before, player, characters) in snapshots {
-            if let Some(actual_to) = moves
+            if let Some(movement) = moves
                 .iter()
                 .find(|movement| movement.before == before && movement.after.is_some())
-                .and_then(|movement| movement.actual_to)
+                && let Some(actual_to) = movement.actual_to
             {
                 let event = DiscardEvent {
                     player,
@@ -366,10 +366,10 @@ impl Game {
                 execution
                     .facts
                     .push(super::Fact::Discard(Box::new(event.clone())));
-                events.push(event);
+                events.push((event, movement.after));
             }
         }
-        self.internal_commit_discard_events(pending, &events, &moves)?;
+        self.internal_commit_discard_events(pending, &events)?;
         Ok(DiscardOutcome { successful, moves })
     }
 }

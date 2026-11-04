@@ -49,6 +49,7 @@ impl DiscardSource {
     }
 
     fn parse(expression: &Expr<Bool>) -> Option<Self> {
+        // DiscardFilter::parse checks the extracted candidate against the complete canonical predicate.
         let Expr::Compute(outer) = expression else {
             return None;
         };
