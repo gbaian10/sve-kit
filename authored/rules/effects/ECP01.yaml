@@ -1,301 +1,245 @@
-format: 1
-kind: effect_set
 cards:
-  ECP01-010:
-    status: complete
-    abilities:
-      - line: 1
-        kind: evolve
-        body:
-          op: evolve
-          subjects: self
-        costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: meal
-        body:
-          op: race
-          subjects: self
-          count: 1
-        costs:
-          - op: eat
-            subjects: self
-            count: 1
-          - op: pp
-            amount: 1
-      - line: 3
-        kind: static
-        body:
-          op: restrict
-          subjects: opponent.leader
-          action: trigger
-          events:
-            - fanfare
-            - on_evolve
-  ECP01-011:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: restrict
-          subjects: opponent.leader
-          action: trigger
-          events:
-            - fanfare
-            - on_evolve
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects:
-            side: both
-            zone: field
-            type: follower
-            other: true
-          amount: 7
-        event: evolve
-        subject: self
   ECP01-014:
-    status: complete
     abilities:
-      - line: 1
-        kind: meal
-        body:
+      - body:
+          count: 1
           op: race
           subjects: self
-          count: 1
         costs:
-          - op: eat
+          - count: 1
+            op: eat
             subjects: self
-            count: 1
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: meal
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 4
+              op: damage
               subjects: target.1
-              amount: 4
-            - op: modify
-              subjects: self
+            - hp: 1
+              op: modify
               power: 1
-              hp: 1
-            - op: damage
               subjects: self
-              amount: 2
+            - amount: 2
+              op: damage
+              subjects: self
         event: race
+        kind: trigger
+        line: 2
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 0
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 0
-            max: 1
-  ECP01-019:
+              zone: field
     status: complete
+  ECP01-019:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: meal
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          count: 1
           op: race
           subjects: self
-          count: 1
         costs:
-          - op: eat
+          - count: 1
+            op: eat
             subjects: self
-            count: 1
-          - op: pp
-            amount: 1
-      - line: 3
-        kind: trigger
-        body:
-          op: if
+          - amount: 1
+            op: pp
+        kind: meal
+        line: 2
+      - body:
           condition:
-            fn: ge
             args:
               - count:
-                  zone: cemetery
                   side: self
                   trait: ウマ娘
+                  zone: cemetery
               - 10
+            fn: ge
+          op: if
           then:
+            face: down
             op: flip
             subjects: target.1
-            face: down
         event: enter
+        kind: trigger
+        line: 3
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: evolve_deck
-              side: self
               name: にんじん
+              side: self
               where:
                 read: item.face_up
-            min: 1
-            max: 1
-  ECP01-023:
+              zone: evolve_deck
     status: complete
+  ECP01-023:
     abilities:
-      - line: 1
-        kind: meal
-        body:
+      - body:
+          count: 1
           op: race
           subjects: self
-          count: 1
         costs:
-          - op: eat
+          - count: 1
+            op: eat
             subjects: self
-            count: 1
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
-          op: macro
+          - amount: 1
+            op: pp
+        kind: meal
+        line: 1
+      - body:
           name: guard
-      - line: 3
-        kind: trigger
-        body:
+          op: macro
+        kind: static
+        line: 2
+      - body:
+          amount: 2
           op: damage
           subjects: target.1
-          amount: 2
         event: enter
+        kind: trigger
+        line: 3
         subject:
           union:
-            - side: self
+            - name: シュヴァルグラン
+              side: self
               zone: field
-              name: シュヴァルグラン
-            - side: self
+            - name: ヴィブロス
+              side: self
               zone: field
-              name: ヴィブロス
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-      - line: 4
-        kind: trigger
-        body:
+              zone: field
+      - body:
           op: seq
           steps:
-            - op: damage
+            - amount: 2
+              op: damage
               subjects: opponent.leader
-              amount: 2
-            - op: modify
+            - hp: 2
+              op: modify
               subjects: self.leader
-              hp: 2
-            - op: draw
-              count: 2
-        event: enter
-        subject: self
+            - count: 2
+              op: draw
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: hand
               trait: ウマ娘
-            min: 1
-            max: 1
+              zone: hand
         costs:
           - op: discard
             subjects: cost.1
-  ECP01-049:
+        event: enter
+        kind: trigger
+        line: 4
+        subject: self
     status: complete
+  ECP01-049:
     abilities:
-      - line: 1
-        kind: meal
-        body:
+      - body:
+          count: 1
           op: race
           subjects: self
-          count: 1
         costs:
-          - op: eat
+          - count: 1
+            op: eat
             subjects: self
-            count: 1
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: draw
+          - amount: 1
+            op: pp
+        kind: meal
+        line: 1
+      - body:
           count:
+            else: 1
             if:
-              fn: ge
               args:
                 - read: cost.1.cost
                 - 7
+              fn: ge
             then: 2
-            else: 1
-        event: enter
-        subject: self
+          op: draw
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
-              zone: hand
               side: self
               trait: ウマ娘
-            min: 1
-            max: 1
+              zone: hand
         costs:
           - op: discard
             subjects: cost.1
-      - line: 3
-        kind: activated
-        body:
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
+      - body:
           op: seq
           steps:
-            - op: if
-              condition:
-                fn: ge
+            - condition:
                 args:
                   - count:
-                      zone: field
                       side: self
                       trait: ウマ娘
+                      zone: field
                   - 3
+                fn: ge
+              op: if
               then:
+                amount: 2
                 op: damage
                 subjects: target.1
-                amount: 2
-            - op: if
-              condition:
-                fn: eq
+            - condition:
                 args:
                   - count:
-                      zone: field
                       side: self
                       trait: ウマ娘
+                      zone: field
                   - 5
+                fn: eq
+              op: if
               then:
+                amount: 2
                 op: damage
                 subjects: target.1.leader
-                amount: 2
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
         costs:
           - op: act
             subjects: self
+        kind: activated
+        line: 3
+        targets:
+          - key: "1"
+            max: 1
+            min: 1
+            select:
+              side: opponent
+              type: follower
+              zone: field
+    status: complete
+format: 1
+kind: effect_set
