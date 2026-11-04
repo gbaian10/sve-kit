@@ -180,15 +180,23 @@ source 為傷害來源的 RuntimeObjectView，controller 是該傷害來源的 c
 
 ### 6.1 對敵方場上從者的傷害批次
 
-`dealt_damage` 的來源恰為 `this`、kind 恰為 `ability`，且 recipient 恰為
-`{who: opp, zone: field, kind: follower}` 時，只接受 `aggregation: batch`。
-其他物件查詢、額外條件或以 PerFact 解算此形狀都不准入；既有自身／領袖篩選仍沿 PerFact。
-此子集合由 CP04-T11 授予宿主的能力使用，普通起動、進化與付款仍由 CP04-073 的完整程式處理。
+收件者恰為 `{who: opp, zone: field, kind: follower}` 的 `dealt_damage` 只接受 `aggregation: batch`，封閉來源形狀為：
+
+| 來源 | 傷害種類與回合 | 使用者 |
+| --- | --- | --- |
+| `ref: this`，沒有 `who`／`sel`／`zone` | `kind: ability`，沒有 `during` | CP04-T11 授予宿主 |
+| `who: self`、`sel: {trait: <類型>}`、`zone: field` | 不限傷害種類（省略 `kind`）、`during: {turn: self}` | ECP02-057 |
+| `who: self`、`sel: {trait: <類型>}`，沒有來源 `zone` | `kind: ability`、`during: {turn: self}` | CP03-064 |
+
+來源類型使用同一事件主體篩選，後兩種不接受其他 `sel` 條件、`ref` 混用或額外傷害種類組合。其他物件查詢、額外條件或以 PerFact 解算這些形狀都不准入；既有自身／領袖篩選仍沿 PerFact。普通起動、進化、付款與每回合額度使用共同流程。
 
 沿用實際正傷害的 DamageEvent、AfterEntry 視圖與每個指示既有的 before／batch。
 同一次傷害指示的多名敵方從者，在共用額度准入前依 `(AbilityInstanceId, batch)` 去重；
 分開的指示或不同裝備實例不合併；其中不同指示分別觸發，是依不同時點的事件分別誘發推得，並非 Q2549 的直接問答。
 不另建事件表，也不從原提案或傷害量為零的結果推測觸發。
+[Q2185～Q2188](https://shadowverse-evolve.com/cardlist/?cardno=ECP02-057) 要求一個多目標指示只觸發一次、交戰傷害也算、零攻擊不觸發，且入場曲來源已離場仍用場上最後資訊。
+
+每筆內部傷害與其來源資訊成對傳遞，不依平行陣列補讀來源。能力傷害沿現有 SourceInformation 的成功離區封存；交戰在 `apply_damage` 扣血與狀態檢查前逐 hit 擷取，保留攻擊方與反擊方不同的來源。訂閱比對使用該份封存區域、特徵、種類、名稱、職業與 token 狀態，以及 DamageEvent 的 controller；不符合便略過，不因來源換世代而報錯。來源資訊只保存於既有 pending／execution 的生命週期，不新增全域歷史表。
 [Q2549](https://shadowverse-evolve.com/cardlist/?cardno=CP04-T11) 的五名從者各受1點傷害，僅待機一次。
 
 良構檢查先驗證整個事件篩選，再移除批次的單一事件 binding 與 payload 權限；

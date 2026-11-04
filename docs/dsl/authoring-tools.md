@@ -151,7 +151,15 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 一般長寫 `auto` 的冒號在本文寫 `pay: {cost: {act_self: true}, do: [...]}`（送墓用 `self_to_cemetery`；可用有序組合）。正式目標在打出時先選，到了該指示才決定付不付；可放在已支援的 `if` 內。拒付或付不起只略過該段本文，能力仍算已打出並結算。付款原子提交，失敗保留先前已結算的效果並回復本段付款；來源須仍在場上，不能用另一張同名卡付款。這個結算付款子集只接受場上普通自動能力的自身橫置／送墓，不接受 EX 來源、私有材料或任意成本。
 
-這三種事件頭尚不接受 schema 中的 `by`；`dealt_damage` 也尚不接受 `zone`。未支援的欄位會在載入時拒絕，不會忽略篩選條件。
+這三種事件頭尚不接受 schema 中的 `by`。`dealt_damage.zone` 僅接受下述自己場上類型來源的 `field` 子集合；其他區域或組合在載入時拒絕，不會忽略篩選條件。
+
+敵方從者收件者 `recipient: {who: opp, zone: field, kind: follower}` 僅接受 `aggregation: batch`，來源形狀封閉為：
+
+- `ref: this`、`kind: ability`，沒有 `who`、`sel`、`zone`、`during`（既有裝備授予形狀）。
+- `who: self`、`sel: {trait: <類型>}`、`zone: field`、`during: {turn: self}`，省略傷害 `kind`（ECP02-057）。
+- `who: self`、`sel: {trait: <類型>}`、`kind: ability`、`during: {turn: self}`，沒有來源 `zone`（CP03-064，可觀察己方法術）。
+
+後兩種不混用 `ref: this`，`sel` 不附加種類、名稱、職業等條件，也不開放對手回合、其他來源區域或其他傷害種類組合。每個成功傷害指示的多名收件者只待機一次，兩個指示分別待機；`per_turn` 仍共用通常的能力實例額度。交戰傷害符合第二種，零傷害與完全防止不產生事件。來源區域與公開特徵讀取權威來源快照，待機或執行期間離場仍使用原區域最後資訊，不回讀新世代；受傷者是否敵方場上從者在傷害提交時判斷，致死傷害也計入。
 
 `apply: {on: 目標, effect: {add_trait: {trait: 武装}}}` 對場上從者增加類型，沿用
 `Action::Modify` 的 AddTrait 與既有授予狀態；`until` 可省略或為 `game`。
