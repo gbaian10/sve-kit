@@ -1,0 +1,25 @@
+cards:
+  BP05-017:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - player_effect:
+                effect:
+                  prevent:
+                    kind: any
+                    next_only: true
+                until: turn
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+format: 2
+kind: author_effect_set
