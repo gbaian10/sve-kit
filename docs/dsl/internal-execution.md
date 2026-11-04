@@ -1039,3 +1039,13 @@ WF 只對 Cost 語境、無前提且綁定公開自方場上費用材料的 Act 
 不能繞過 typed 入口；原型能力讀取也要求卡片已准入，已載入卡不再提供原型能力。
 因此事件沿 typed 抽牌的真實 `InstructionId`，不替原型或規則動作捏造指示身分。
 將來放寬混合執行時，須先補齊可誠實表達來源的 Draw 契約。
+
+## 本回合的起動能力禁止
+
+`apply` 以 `on: this`、`until: turn` 安裝 `cannot: {what: play_ability, ability: {kind: activated}}`，
+可加 `except: [evolution]` 保留固有進化能力。沿用 Permission／InstallEffect 與既有期限，
+共同正式起動、Quick 預檢和進化適正性都先檢查禁止，拒絕時不付款、不公開。
+效果授權的 Activated UB 也沿共同打出入口檢查，候選與回答重驗排除被禁止的能力；
+`waive_original` 只免原成本，不略過禁止。Triggered UB 與進化時能力不因本限制受阻。
+限制作用於當次場上實體的所有起動能力，另張同名卡不受影響；進化承接到新形態，
+一般離場後重新入場則不承接，本回合結束時失效。這不是每能力使用次數，其他主體或期限仍拒絕。
