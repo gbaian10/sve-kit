@@ -1,8 +1,76 @@
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::{
-    Binding, Bool, CardKind, CharacteristicView, Expr, ExtremumKind, KindRead, NumericProperty,
-    ObjectOperand, ObjectRef, ObjectView, Predicate, SelectionView, Selector, Stat, ZoneKind,
+    Binding, Bool, CardKind, CharacteristicView, Expr, ExtremumKind, FollowPermission, KindRead,
+    MovementReceipt, NumericProperty, ObjectOperand, ObjectRef, ObjectView, Predicate, ReceiptId,
+    ReceiptLocation, ReceiptReference, SelectionView, Selector, Stat, ZoneKind,
 };
+
+pub(super) const fn followed_sum_plan(
+    objects: &Selector,
+    property: NumericProperty,
+) -> Option<(ReceiptId, ZoneKind)> {
+    let Selector::MoveAfter {
+        receipt: MovementReceipt::Move { receipt },
+        permission: FollowPermission::SameEffectExplicitReference {},
+    } = objects
+    else {
+        return None;
+    };
+    let ReceiptLocation::Local { id } = receipt.location() else {
+        return None;
+    };
+    let zone = match property {
+        NumericProperty::OriginalCost => ZoneKind::Ex,
+        NumericProperty::Life => ZoneKind::Field,
+        _ => return None,
+    };
+    Some((*id, zone))
+}
+
+pub(super) fn followed_sum(
+    execution: &Execution,
+    game: &Game,
+    objects: &Selector,
+    property: NumericProperty,
+) -> Result<i64> {
+    let (receipt_id, zone) = followed_sum_plan(objects, property)
+        .ok_or_else(|| unsupported("followed aggregate input"))?;
+    let receipt = MovementReceipt::Move {
+        receipt: ReceiptReference::new(receipt_id),
+    };
+    execution
+        .successful_moves(&receipt)?
+        .try_fold(0_i64, |sum, movement| {
+            let after = movement
+                .after
+                .ok_or_else(|| invalid("missing aggregate after member"))?;
+            let id = execution.object_id(after)?;
+            let object = game.object(id)?;
+            let current_zone = match zone {
+                ZoneKind::Ex => "ex",
+                ZoneKind::Field => "field",
+                _ => return Err(unsupported("followed aggregate destination")),
+            };
+            if movement.requested_to.kind != zone
+                || movement.actual_to.is_none_or(|actual| actual.kind != zone)
+                || object.generation != after.generation.0
+                || object.zone != current_zone
+            {
+                return Err(unsupported(
+                    "followed aggregate member did not remain at its destination",
+                ));
+            }
+            let value = match property {
+                NumericProperty::OriginalCost => {
+                    super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
+                }
+                NumericProperty::Life => game.internal_numeric_stat(id, Stat::Life)?,
+                _ => return Err(unsupported("followed aggregate property")),
+            };
+            sum.checked_add(value)
+                .ok_or_else(|| invalid("aggregate sum overflow"))
+        })
+}
 
 pub(super) fn check(objects: &Selector, property: NumericProperty) -> Result<()> {
     if property == NumericProperty::Count {
@@ -126,3 +194,6 @@ pub(super) fn extremum(
         .filter_map(|(reference, value)| (Some(value) == limit).then_some(reference))
         .collect())
 }
+
+#[cfg(test)]
+mod tests;

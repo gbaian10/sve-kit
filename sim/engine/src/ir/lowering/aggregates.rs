@@ -1,5 +1,5 @@
 use super::{Binding, BodyContext, Expr, Int, LoweringError, Selector, ast, unsupported};
-use crate::ir::{ExtremumKind, IntOperation, NumericProperty};
+use crate::ir::{ExtremumKind, FollowPermission, IntOperation, MovementReceipt, NumericProperty};
 
 const fn property(attribute: ast::AggregateAttribute) -> NumericProperty {
     match attribute {
@@ -23,14 +23,53 @@ impl BodyContext<'_> {
         if !matches!(aggregate.function, ast::AggregateFunction::Sum) {
             return Err(unsupported(path));
         }
-        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
-        let mut objects = super::costs::public_query(&aggregate.of, binding, path)?;
-        if aggregate.of.other {
-            objects = Selector::Difference {
-                input: Box::new(objects),
-                except: Box::new(super::numeric::holder()),
-            };
-        }
+        let objects = match &aggregate.of {
+            ast::AggregateOf::Public(query) => {
+                let binding =
+                    Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+                let objects = super::costs::public_query(query, binding, path)?;
+                if query.other {
+                    Selector::Difference {
+                        input: Box::new(objects),
+                        except: Box::new(super::numeric::holder()),
+                    }
+                } else {
+                    objects
+                }
+            }
+            ast::AggregateOf::Followed(query) => {
+                let objects = match aggregate.attr {
+                    ast::AggregateAttribute::OrigCost => self
+                        .ex_outputs
+                        .get(&query.r#in.follow)
+                        .cloned()
+                        .ok_or_else(|| unsupported(path))?,
+                    ast::AggregateAttribute::Hp => {
+                        let output = self
+                            .field_outputs
+                            .get(&query.r#in.follow)
+                            .ok_or_else(|| unsupported(path))?;
+                        Selector::MoveAfter {
+                            receipt: output.receipt.clone(),
+                            permission: FollowPermission::SameEffectExplicitReference {},
+                        }
+                    }
+                    ast::AggregateAttribute::Cost | ast::AggregateAttribute::Power => {
+                        return Err(unsupported(path));
+                    }
+                };
+                if !matches!(
+                    &objects,
+                    Selector::MoveAfter {
+                        receipt: MovementReceipt::Move { .. },
+                        permission: FollowPermission::SameEffectExplicitReference {},
+                    }
+                ) {
+                    return Err(unsupported(path));
+                }
+                objects
+            }
+        };
         Ok(Expr::Compute(Box::new(IntOperation::Sum {
             objects,
             property: property(aggregate.attr),
@@ -188,7 +227,8 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         // A minimum from another population is a comparison, not a set extremum.
-        if *population != aggregate.of {
+        if !matches!(&aggregate.of, ast::AggregateOf::Public(query) if query.as_ref() == population)
+        {
             return Err(unsupported(path));
         }
         let kind = match aggregate.function {

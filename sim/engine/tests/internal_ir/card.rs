@@ -7,6 +7,8 @@ mod evolution_ordinal;
 mod exchange_routes;
 #[path = "card/material_acts.rs"]
 mod material_acts;
+#[path = "card/move_result_numbers.rs"]
+mod move_result_numbers;
 #[path = "card/next_damage.rs"]
 mod next_damage;
 #[path = "card/played_traits.rs"]

@@ -583,6 +583,11 @@ impl Execution {
                 IntOperation::Sum { objects, property } if target_plan(objects).is_some() => {
                     self.attack_target_sum(game, objects, *property).map(Int)
                 }
+                IntOperation::Sum { objects, property }
+                    if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
+                {
+                    super::aggregates::followed_sum(self, game, objects, *property).map(Int)
+                }
                 IntOperation::Sum { objects, property } => {
                     super::aggregates::sum(self, game, objects, *property).map(Int)
                 }

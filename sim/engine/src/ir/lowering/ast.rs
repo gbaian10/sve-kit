@@ -2726,10 +2726,26 @@ pub(super) enum PreventionKind {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Aggregate {
-    pub of: PublicQuery,
+    pub of: AggregateOf,
     pub attr: AggregateAttribute,
     #[serde(rename = "fn")]
     pub function: AggregateFunction,
+}
+#[derive(Clone, Deserialize)]
+#[serde(untagged)]
+pub(super) enum AggregateOf {
+    Public(Box<PublicQuery>),
+    Followed(FollowedIn),
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FollowedIn {
+    pub r#in: FollowName,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FollowName {
+    pub follow: String,
 }
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
