@@ -286,6 +286,7 @@ impl BodyContext<'_> {
             }
             _ => {}
         }
+        self.remember_evolution_target(target, cardinality, dynamic_count);
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
         Ok((
@@ -805,6 +806,8 @@ impl BodyContext<'_> {
                 definitions: self.definitions,
                 searches: BTreeSet::new(),
                 ex_outputs: BTreeMap::new(),
+                field_outputs: BTreeMap::new(),
+                evolution_targets: BTreeSet::new(),
                 ex_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
@@ -826,6 +829,10 @@ impl BodyContext<'_> {
                 context.payment_result.clone_from(&self.payment_result);
                 context.searches.clone_from(&self.searches);
                 context.ex_outputs.clone_from(&self.ex_outputs);
+                context.field_outputs.clone_from(&self.field_outputs);
+                context
+                    .evolution_targets
+                    .clone_from(&self.evolution_targets);
                 context.ex_targets.clone_from(&self.ex_targets);
                 context.hand_targets.clone_from(&self.hand_targets);
                 context.playable_targets.clone_from(&self.playable_targets);

@@ -2,7 +2,6 @@ use super::super::Slot;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
 use crate::game::internal::{Fact, InstructionOutcome};
 use crate::ir::effect_evolution;
-use crate::ir::evolution_destination::Destination;
 use crate::ir::{
     Action, Control, EvolutionMode, EvolutionState, EvolveEvent, Instruction, Node, ObjectOperand,
     ObjectRef, Selector,
@@ -17,18 +16,15 @@ impl Game {
     pub(super) fn effect_evolution_members(
         &self,
         execution: &Execution,
-        destination: &Destination,
+        specification: &effect_evolution::Specification,
     ) -> Result<Vec<ObjectRef>> {
-        let source = self.object(&execution.context.source)?;
-        if source.generation != execution.context.generation.0
-            || source.controller != seat_name(execution.context.controller)?
-            || !self.can_receive_evolution(&source.id)?
-            || self.object_type(&source.id)? != "フォロワー"
-        {
+        let Some(reference) = self.effect_evolution_subject(execution, &specification.subject)?
+        else {
             return Ok(vec![]);
-        }
+        };
+        let source = self.object(execution.object_id(reference)?)?;
         let mut members = Vec::new();
-        let specification = super::evolution::destination_spec(destination);
+        let specification = super::evolution::destination_spec(&specification.destination);
         for id in self.zone_ids(&source.controller, "evolve_deck") {
             if self.evolution_resource_matches(&source.id, &id, 0, &specification)?
                 && self.catalog.face(&self.object(&id)?.card, 0)?["card_type"]
@@ -40,11 +36,69 @@ impl Game {
         Ok(members)
     }
 
+    fn effect_evolution_subject(
+        &self,
+        execution: &Execution,
+        subject: &ObjectOperand,
+    ) -> Result<Option<ObjectRef>> {
+        let reference = if let ObjectOperand::Selected { selection } = subject {
+            let objects = execution.objects(
+                self,
+                &Selector::Bound {
+                    reference: *selection,
+                },
+            )?;
+            let [reference] = objects.as_slice() else {
+                if objects.is_empty() {
+                    return Ok(None);
+                }
+                return Err(invalid("one effect evolution subject"));
+            };
+            *reference
+        } else {
+            execution.object(self, subject)?
+        };
+        let source = self.object(execution.object_id(reference)?)?;
+        Ok((source.generation == reference.generation.0
+            && source.zone == "field"
+            && source.controller == seat_name(execution.context.controller)?
+            && self.can_receive_evolution(&source.id)?
+            && self.object_type(&source.id)? == "フォロワー")
+            .then_some(reference))
+    }
+
+    fn effect_evolution_entry(&self, execution: &mut Execution, control: &Control) -> Result<bool> {
+        let Some(projection) = effect_evolution::projection(control) else {
+            return Ok(false);
+        };
+        let Some(entry) = projection.entry else {
+            return Ok(false);
+        };
+        let members = execution.objects(self, entry.input)?;
+        if members.len() > 1 {
+            return Err(invalid("one actual field entry per effect evolution"));
+        }
+        if !members.is_empty() {
+            execution.slots.insert(
+                entry.binding.key(),
+                Slot::Objects {
+                    members,
+                    on_field_at_capture: true,
+                },
+            );
+            execution.prepend(entry.body.clone());
+        }
+        Ok(true)
+    }
+
     pub(in crate::game::internal) fn internal_effect_evolution_iteration(
         &self,
         execution: &mut Execution,
         control: Control,
     ) -> Result<()> {
+        if self.effect_evolution_entry(execution, &control)? {
+            return Ok(());
+        }
         let Control::EachObject {
             input,
             binding,
@@ -58,7 +112,7 @@ impl Game {
             return Err(unsupported("effect evolution instruction count"));
         };
         if !matches!(&step.node, Node::Instruction { instruction } if matches!(&instruction.action,
-            Action::Evolve { subject: ObjectOperand::SourceHolder {}, form, mode: EvolutionMode::Normal, .. }
+            Action::Evolve { form, mode: EvolutionMode::Normal, .. }
                 if form.object == (ObjectOperand::Bound { binding }) && form.face.0 == "base"))
         {
             return Err(unsupported("effect evolution projection"));
@@ -66,21 +120,29 @@ impl Game {
         let Selector::Bound { reference } = &input else {
             return Err(unsupported("effect evolution choice binding"));
         };
-        let destination = execution
+        let specification = execution
             .targets
             .get(&reference.key())
-            .and_then(|wait| effect_evolution::destination(&wait.decision))
+            .and_then(|wait| effect_evolution::specification(&wait.decision))
             .ok_or_else(|| invalid("missing effect evolution choice authority"))?;
         let forms = execution.objects(self, &input)?;
-        let permitted = self.effect_evolution_members(execution, &destination)?;
+        let permitted = self.effect_evolution_members(execution, &specification)?;
         if forms.iter().any(|form| !permitted.contains(form)) {
             return Err(invalid("effect evolution form left its declared domain"));
         }
         if forms.len() > 1 {
             return Err(invalid("one evolution form per instruction"));
         }
+        if !matches!(&step.node, Node::Instruction { instruction } if matches!(&instruction.action,
+            Action::Evolve { subject, .. } if *subject == specification.subject))
+        {
+            return Err(invalid("foreign effect evolution subject"));
+        }
         if !forms.is_empty() {
-            // The instruction receives only the destination authorized by its original choice.
+            let subject = self
+                .effect_evolution_subject(execution, &specification.subject)?
+                .ok_or_else(|| invalid("effect evolution subject left its domain"))?;
+            // Both the subject and form remain tied to their original authority producers.
             if execution
                 .effect_evolution_destinations
                 .contains_key(&binding.key())
@@ -89,7 +151,7 @@ impl Game {
             }
             execution
                 .effect_evolution_destinations
-                .insert(binding.key(), destination);
+                .insert(binding.key(), (specification, subject));
             execution.slots.insert(
                 binding.key(),
                 Slot::Objects {
@@ -108,13 +170,13 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         let Action::Evolve {
-            subject: ObjectOperand::SourceHolder {},
+            subject,
             form,
             mode: EvolutionMode::Normal,
             ..
         } = &instruction.action
         else {
-            return Err(unsupported("ordinary effect self evolution"));
+            return Err(unsupported("ordinary effect evolution"));
         };
         if form.face.0 != "base" || execution.ability.is_none() {
             return Err(unsupported("effect evolution authority or face"));
@@ -129,19 +191,21 @@ impl Game {
             return Err(invalid("one selected evolution form"));
         };
         let selected = *selected;
-        let destination = execution
+        let (specification, original) = execution
             .effect_evolution_destinations
             .remove(&binding.key())
             .ok_or_else(|| invalid("missing effect evolution destination authority"))?;
-        if !self
-            .effect_evolution_members(execution, &destination)?
-            .contains(&selected)
+        if *subject != specification.subject
+            || self.effect_evolution_subject(execution, subject)? != Some(original)
+            || !self
+                .effect_evolution_members(execution, &specification)?
+                .contains(&selected)
         {
             return Err(invalid(
                 "effect evolution form no longer belongs to its domain",
             ));
         }
-        let source = execution.context.source.clone();
+        let source = execution.object_id(original)?.to_owned();
         let resource = execution.object_id(selected)?.to_owned();
         self.numeric_evolution_allowed(&source, false)?;
         let before = self.internal_characteristics(&source)?;

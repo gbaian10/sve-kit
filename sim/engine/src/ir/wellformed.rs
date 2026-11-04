@@ -212,6 +212,7 @@ struct Environment {
     play_modes: bool,
     play_payments: Option<ScopeId>,
     evolution_form: Option<Binding<ObjectRef>>,
+    effect_entry_subject: Option<Binding<ObjectRef>>,
     chooser: Option<PlayerRef>,
     private_choice: bool,
     choice_candidates: BTreeSet<Key>,
@@ -291,6 +292,7 @@ impl Checker {
             play_modes: false,
             play_payments: None,
             evolution_form: None,
+            effect_entry_subject: None,
             chooser: None,
             private_choice: false,
             choice_candidates: BTreeSet::new(),
@@ -793,11 +795,11 @@ impl Checker {
                 form,
                 mode,
                 link,
-            } if *subject == (ObjectOperand::SourceHolder {})
-                && *mode == super::EvolutionMode::Normal
+            } if *mode == super::EvolutionMode::Normal
                 && matches!(&form.object, ObjectOperand::Bound { binding }
                         if self.env.evolution_form == Some(*binding)) =>
             {
+                self.object(subject)?;
                 self.object(&form.object)?;
                 self.define(*link, BindingKind::Value)
             }

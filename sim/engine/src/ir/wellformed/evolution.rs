@@ -126,6 +126,26 @@ impl Checker {
         {
             return Err(self.error(WellFormedReason::UnsupportedShape));
         }
+        let specification = if resolution {
+            Some(
+                effect_evolution::specification(decision)
+                    .ok_or_else(|| self.error(WellFormedReason::UnsupportedShape))?,
+            )
+        } else {
+            None
+        };
+        let subject = specification
+            .as_ref()
+            .map_or(ObjectOperand::SourceHolder {}, |spec| spec.subject.clone());
+        let bounds = specification
+            .as_ref()
+            .map_or_else(one, effect_evolution::Specification::cardinality);
+        if let ObjectOperand::Bound { binding } = &subject
+            && self.env.effect_entry_subject != Some(*binding)
+        {
+            return Err(self.error(WellFormedReason::UnsupportedShape));
+        }
+        self.object(&subject)?;
         let ChoiceDomain::Objects {
             constraint,
             binding,
@@ -137,15 +157,15 @@ impl Checker {
         let [group] = constraint.groups.as_slice() else {
             return Err(self.error(WellFormedReason::UnsupportedShape));
         };
-        if constraint.cardinality != one()
-            || group.cardinality != one()
+        if constraint.cardinality != bounds
+            || group.cardinality != bounds
             || constraint.distinct_by.is_some()
             || constraint.disjoint != Disjointness::Disjoint
             || !constraint.aggregate_bounds.is_empty()
         {
             return Err(self.error(WellFormedReason::UnsupportedShape));
         }
-        self.evolution_candidates(&group.selector)?;
+        self.evolution_candidates(&group.selector, &subject)?;
         self.decision_header(decision)?;
         self.define(*binding, BindingKind::Value)?;
         self.answer_access(&decision.domain, &decision.visibility);
@@ -171,7 +191,7 @@ impl Checker {
         self.located(iteration, Self::node)
     }
 
-    fn evolution_candidates(&mut self, selector: &Selector) -> Checked {
+    fn evolution_candidates(&mut self, selector: &Selector, subject: &ObjectOperand) -> Checked {
         let Selector::Zone {
             players,
             zone: ZoneKind::Evolve,
@@ -182,7 +202,9 @@ impl Checker {
         else {
             return self.reject();
         };
-        if *players != controller() || Destination::from_predicate(predicate, *binding).is_none() {
+        if *players != controller()
+            || Destination::from_predicate_for(predicate, *binding, subject).is_none()
+        {
             return self.reject();
         }
         // The complete predicate shape is checked above; its candidate never escapes the domain.

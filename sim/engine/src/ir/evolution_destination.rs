@@ -33,11 +33,19 @@ impl Destination {
     }
 
     pub(crate) fn predicate(&self, candidate: Binding<ObjectRef>) -> Expr<Bool> {
+        self.predicate_for(candidate, &ObjectOperand::SourceHolder {})
+    }
+
+    pub(crate) fn predicate_for(
+        &self,
+        candidate: Binding<ObjectRef>,
+        subject: &ObjectOperand,
+    ) -> Expr<Bool> {
         let object = ObjectOperand::Bound { binding: candidate };
         Expr::Compute(Box::new(match self {
             Self::SameName => Predicate::NamesIntersect {
                 left: names(object),
-                right: names(ObjectOperand::SourceHolder {}),
+                right: names(subject.clone()),
             },
             Self::Names(values) => Predicate::NamesIntersect {
                 left: names(object),
@@ -64,6 +72,14 @@ impl Destination {
     pub(crate) fn from_predicate(
         predicate: &Expr<Bool>,
         candidate: Binding<ObjectRef>,
+    ) -> Option<Self> {
+        Self::from_predicate_for(predicate, candidate, &ObjectOperand::SourceHolder {})
+    }
+
+    pub(crate) fn from_predicate_for(
+        predicate: &Expr<Bool>,
+        candidate: Binding<ObjectRef>,
+        subject: &ObjectOperand,
     ) -> Option<Self> {
         let Expr::Compute(operation) = predicate else {
             return None;
@@ -97,6 +113,6 @@ impl Destination {
         } else {
             return None;
         };
-        (destination.predicate(candidate) == *predicate).then_some(destination)
+        (destination.predicate_for(candidate, subject) == *predicate).then_some(destination)
     }
 }

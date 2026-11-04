@@ -12,7 +12,7 @@ use crate::ir::{
     ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
-use crate::ir::{CardKind, EventPattern, TraitId};
+use crate::ir::{CardKind, EventPattern, FollowPermission, TraitId};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -33,7 +33,14 @@ impl super::BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let destination = destination(evolution.into.as_ref(), path)?;
+        let (subject, input) = self.effect_evolution_subject(&evolution.reference, path)?;
+        if subject != (ObjectOperand::SourceHolder {}) && evolution.into.is_some() {
+            return Err(unsupported(path));
+        }
+        let specification = effect_evolution::Specification {
+            subject,
+            destination: destination(evolution.into.as_ref(), path)?,
+        };
         let mut source = source.clone();
         source.author_path = path.into();
         let id = self.card_allocator.id(path)?;
@@ -45,12 +52,70 @@ impl super::BodyContext<'_> {
             instruction: InstructionId(id),
             receipt: ReceiptId(id),
         };
+        let mut control = effect_evolution::build(&keys, &source, origin, &specification);
+        if let Some(input) = input {
+            let ObjectOperand::Bound { binding } = specification.subject else {
+                return Err(unsupported(path));
+            };
+            control = effect_evolution::field_entry(input, binding, control, &source);
+        }
         Ok(Located {
-            node: Node::Control {
-                control: effect_evolution::build(&keys, &source, origin, &destination),
-            },
+            node: Node::Control { control },
             source,
         })
+    }
+
+    pub(super) fn remember_evolution_target(
+        &mut self,
+        target: &ast::Target,
+        bounds: Cardinality,
+        dynamic: bool,
+    ) {
+        if !dynamic
+            && bounds.maximum == Some(Nat(1))
+            && matches!(target.from.who, Some(ast::Side::Controller))
+            && matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+            )
+            && matches!(target.from.kind, Some(ast::SearchKind::Follower))
+        {
+            self.evolution_targets.insert(target.bind.clone());
+        }
+    }
+
+    fn effect_evolution_subject(
+        &mut self,
+        reference: &ast::Objects,
+        path: &str,
+    ) -> Result<(ObjectOperand, Option<Selector>), LoweringError> {
+        match reference {
+            ast::Objects::This(_) => Ok((ObjectOperand::SourceHolder {}, None)),
+            ast::Objects::Bound(name) if self.evolution_targets.contains(name) => {
+                let selection = self
+                    .targets
+                    .get(name)
+                    .copied()
+                    .ok_or_else(|| unsupported(path))?;
+                Ok((ObjectOperand::Selected { selection }, None))
+            }
+            ast::Objects::Follow { follow } => {
+                let receipt = self
+                    .field_outputs
+                    .get(follow)
+                    .cloned()
+                    .ok_or_else(|| unsupported(path))?;
+                let binding = Binding::new(3, self.card_allocator.scope(path)?);
+                Ok((
+                    ObjectOperand::Bound { binding },
+                    Some(Selector::MoveAfter {
+                        receipt,
+                        permission: FollowPermission::SameEffectExplicitReference {},
+                    }),
+                ))
+            }
+            ast::Objects::Bound(_) | ast::Objects::Zone(_) => Err(unsupported(path)),
+        }
     }
 }
 
