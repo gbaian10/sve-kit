@@ -75,6 +75,8 @@ records:
 
 授予可施加到場或 EX 區的適正受益者；其既有能力仍須通過一般准入邊界。`grant.on: {follow: moved}` 沿用同一效果的成功移動回條，對新世代施加能力；失敗移動不產生受益者，不把原物件 ID 當成永久追蹤連結。來源與目標的有效區、期限及生命週期分開處理，並沿用既有授予層對失去能力的處理。
 
+數值 `buff.on`／`set_stat.on` 與 `grant.on` 共用同一效果的入場結果解析：`move.to: field` 的具名結果，以及 `search.to: field` 中 `sel.kind: follower` 且數量明示 `n: 1` 或 `upto: 1` 的具名結果，都可寫成 `{follow: entered}`。它只取實際成功入場的新世代；滿場、沒有找到或選擇不找到時，對空結果的指示不做，後續獨立步驟照常結算。若後續還有對自身的加成，將它寫成獨立的 `buff.on: this`；搜尋沒有結果時，仍結算該自身步驟。
+
 正式目標與本文 `choose.from` 的公開篩選接受 `traits_all: [絶傑, 魔界]`（同時具有全部特徵）、`token: true` 及 `names: [没頭の実験体, 多頭の実験体]`（名稱符合任一項），共用既有物件篩選與目標合法性檢查。
 
 場上正式目標另接受 `acted: true | false`（橫置／直立）、`evolved: false | true`（只比對從者；`true` 包含超進化）與 `entered_this_turn: true`（本回合入場，每個回合開始時清除雙方場上的標記）；這些狀態篩選只用於場上候選，不接受領袖、觀察卡或墓場／EX 來源。`not_same_name_as_this: true` 也可用於公開正式目標與本文 `choose`，以能力持有卡本身的卡名比較，因此謝幕在來源離場後仍排除同名卡；與領袖候選並用時拒絕。場上物件來源（傷害、破壞、起身等的 `{who, zone: field, ...}`）接受 `acted`、`kind: amulet`，以及 `except: {in: 已選目標}` 排除同一能力先前選定的目標（例如「それ以外の相手の場のフォロワーすべて」）；與 `as`／`where` 極值並用時拒絕。公開存在與計數查詢可用 `where: {cmp: {left: {power_of: item}, op: ge | le, right: N}}` 依有效攻擊力篩選。場上限定的持續能力可在 `static.while` 以 `standing: this` 讀取能力持有者目前是否直立；起動條件與本文等其他位置讀取持有者姿態仍不支援。
