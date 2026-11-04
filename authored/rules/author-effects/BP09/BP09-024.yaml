@@ -1,0 +1,60 @@
+cards:
+  BP09-024:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - banish_self: true
+          do:
+            - buff:
+                on:
+                  name: ナイト
+                  who: self
+                  zone: field
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on:
+                  name: ナイト
+                  who: self
+                  zone: field
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      kind: follower
+                      name: 白の王・イメラ
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      kind: follower
+                      name: 黒の女王・マグナス
+                      who: self
+                      zone: deck
+                result: entered
+                to: field
+            - buff:
+                hp: 1
+                on:
+                  follow: entered
+                power: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
