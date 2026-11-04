@@ -234,6 +234,8 @@ struct State {
     #[serde(default)]
     ir_attack_restrictions: Vec<internal::AttackLock>,
     #[serde(default)]
+    ir_ability_restrictions: Vec<internal::AbilityLock>,
+    #[serde(default)]
     ir_drive_gained: BTreeMap<String, u64>,
     #[serde(default)]
     ir_no_leader_attack: BTreeMap<String, internal::LeaderAttackLock>,
@@ -487,6 +489,7 @@ impl Game {
             ir_cost: BTreeMap::new(),
             ir_no_stand: Vec::new(),
             ir_attack_restrictions: Vec::new(),
+            ir_ability_restrictions: Vec::new(),
             ir_drive_gained: BTreeMap::new(),
             ir_no_leader_attack: BTreeMap::new(),
             ir_preventions: Vec::new(),

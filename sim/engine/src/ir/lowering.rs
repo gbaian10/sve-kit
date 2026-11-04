@@ -1,6 +1,7 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 use crate::ir::ride;
 
+mod ability_restrictions;
 mod additional;
 mod aggregates;
 mod ast;

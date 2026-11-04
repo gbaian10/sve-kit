@@ -1,0 +1,58 @@
+cards:
+  BP06-039:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 形代
+        line: 2
+      - activate:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                trait: 式神
+                who: all
+                zone: field
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - apply:
+                effect:
+                  cannot:
+                    ability:
+                      except:
+                        - evolution
+                      kind: activated
+                    what: play_ability
+                on: this
+                until: turn
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-04"
+    token_sources:
+      - card: BP06-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

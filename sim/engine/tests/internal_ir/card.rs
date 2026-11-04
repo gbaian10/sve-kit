@@ -18,6 +18,9 @@ mod evolution_subject;
 #[path = "card/pilot.rs"]
 mod pilot;
 
+#[path = "card/ability_restrictions.rs"]
+mod ability_restrictions;
+
 #[path = "card/mandatory_reveal.rs"]
 mod mandatory_reveal;
 

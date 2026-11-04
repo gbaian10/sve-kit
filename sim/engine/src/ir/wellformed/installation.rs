@@ -1,11 +1,37 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::prevention;
 use crate::ir::{
-    ActionPattern, Binding, CharacteristicPatch, ContinuousLayer, CostChange, CostKind, Duration,
-    DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr, InstallationSubjects,
-    InstallationTime, Interval, PermissionSubject, Polarity, Selector, StandScope, TimeAnchor,
-    TimestampBasis, UsageScope,
+    AbilityKind, ActionPattern, Binding, Bool, CharacteristicPatch, ContinuousLayer, CostChange,
+    CostKind, Duration, DurationEnd, Effect, EffectReference, EffectTarget, ExecutionRef, Expr,
+    InstallationSubjects, InstallationTime, Interval, KeywordId, PermissionSubject, Polarity,
+    Selector, StandScope, TimeAnchor, TimestampBasis, UsageScope,
 };
+
+fn is_installed_activation_permission(
+    effect: &Effect,
+    targets: &Selector,
+    duration: &Duration,
+) -> bool {
+    let Effect::Permission {
+        subject: PermissionSubject::Objects { objects },
+        action: ActionPattern::PlayAbility { predicate },
+        polarity: Polarity::Forbid,
+        condition: Expr::Literal(Bool(true)),
+        duration: inner,
+        ..
+    } = effect
+    else {
+        return false;
+    };
+    objects == targets
+        && inner == duration
+        && duration.end == (DurationEnd::CurrentTurnEnd {})
+        && predicate.kind == Some(AbilityKind::Activated)
+        && predicate.keyword.is_none()
+        && predicate.holder.is_none()
+        && predicate.origin.is_none()
+        && matches!(predicate.except.as_slice(), [] | [KeywordId::Evolution])
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -164,6 +190,12 @@ impl Checker {
                     } => checker.reference(*binding, BindingKind::Value),
                     TimestampBasis::ZoneEntry { .. } => checker.reject(),
                 })
+            }
+            Effect::Permission {
+                subject: PermissionSubject::Objects { objects },
+                ..
+            } if is_installed_activation_permission(effect, &targets, duration) => {
+                self.selector(objects)
             }
             Effect::Permission {
                 subject: subject @ PermissionSubject::Objects { objects },
