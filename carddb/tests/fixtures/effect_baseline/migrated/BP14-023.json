@@ -1,0 +1,136 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "keywords": [
+          "storm"
+        ],
+        "op": "aura",
+        "subjects": {
+          "other": true,
+          "side": "self",
+          "trait": "宴楽",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "bind": "looked",
+            "count": 5,
+            "op": "look"
+          },
+          {
+            "op": "optional",
+            "selection": {
+              "bind": "chosen",
+              "max": 1,
+              "min": 1,
+              "select": {
+                "from": "looked",
+                "trait": "宴楽",
+                "where": {
+                  "args": [
+                    {
+                      "read": "item.cost"
+                    },
+                    3
+                  ],
+                  "fn": "le"
+                }
+              }
+            },
+            "then": {
+              "op": "move",
+              "subjects": "chosen",
+              "to": "ex"
+            }
+          },
+          {
+            "bind": "ordered",
+            "max": {
+              "count": {
+                "difference": [
+                  "looked",
+                  "chosen"
+                ]
+              }
+            },
+            "min": {
+              "count": {
+                "difference": [
+                  "looked",
+                  "chosen"
+                ]
+              }
+            },
+            "op": "select",
+            "order": true,
+            "select": {
+              "difference": [
+                "looked",
+                "chosen"
+              ]
+            }
+          },
+          {
+            "op": "move",
+            "position": "bottom",
+            "subjects": "ordered",
+            "to": "deck"
+          },
+          {
+            "amount": -3,
+            "op": "adjust_cost",
+            "subjects": "chosen",
+            "until": "end-of-turn"
+          }
+        ]
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "name": "輝く金貨",
+            "side": "self",
+            "zone": "ex"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "banish",
+          "subjects": "cost.1"
+        }
+      ],
+      "event": "evolve",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    },
+    {
+      "body": {
+        "event": "evolve",
+        "op": "play_ability",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "activated",
+      "line": 3
+    }
+  ],
+  "status": "complete"
+}

@@ -68,6 +68,7 @@ fn finish(board: &mut Game, mut play: CardPlay) {
             | InputDomain::TokenCapacity { .. }
             | InputDomain::Modes { .. }
             | InputDomain::OptionalCost
+            | InputDomain::Abilities(_)
             | InputDomain::CostMaterials(_) => panic!("unexpected printed choice: {:?}", q.domain),
         };
         play = board

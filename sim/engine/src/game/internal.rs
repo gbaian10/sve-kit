@@ -5,23 +5,24 @@
     reason = "Closed requirement admission rejects all other runtime shapes before mutation."
 )]
 
+use self::card::play::PlayState;
 use super::{Frame, Game, View, int, string};
 use crate::ir::effect_evolution::Specification;
 use crate::ir::{
-    AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool, Capture, CaptureRef,
-    CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain, Comparison, Control,
-    CostOverride, CostSpec, CounterChangeEvent, DamageEvent, DamageQuantityOutcome,
-    DamageRecipient, Decision, DecisionId, DecisionKind, Declinable, DestroyOutcome, DrawEvent,
-    DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod, EntryOrigin, ExecutionId,
-    Expr, Generation, InstallationSubjects, Instruction, InstructionContext, Int, IntFrozen,
-    IntOperation, IntRead, LifeChangeEvent, Located, LookOutcome, MeasuredReceipt, ModeChoiceKind,
-    ModeId, MoveOutcome, Nat, NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId,
-    ObjectOperand, ObjectRef, OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource,
-    PlayerSet, PostureEvent, Predicate, Program, Quantity, ReceiptId, ReceiptLocation,
-    RecipientSet, Requirements, ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient,
-    ScopeId, SearchOutcome, SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer,
-    StepwiseMode, TokenOutcome, TransformOutcome, TriggerIcon, Visibility, WellFormedProgram,
-    ZoneKind,
+    AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
+    Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain,
+    Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
+    DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
+    DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
+    EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
+    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
+    NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
+    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
+    Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
+    RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TransformOutcome,
+    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, DriveGainedEvent, EvolveEvent,
@@ -137,9 +138,24 @@ pub struct DecisionView {
     pub domain: InputDomain,
 }
 
+/// Public printed coordinates identify a definition without exposing its runtime identity.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AbilityOption {
+    /// Handle scoped to the current question.
+    pub handle: u64,
+    /// Printed source card, including the provider of a granted definition.
+    pub source_card: String,
+    /// One-based printed source line.
+    pub source_line: u32,
+    /// Printed source section when the definition comes from a related card.
+    pub source_section: Option<String>,
+}
+
 /// First-slice input shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
+    /// Current effective definitions addressed only by this question's handles.
+    Abilities(Vec<AbilityOption>),
     /// Select evolution-equivalent resources and optionally substitute one EP for one PP.
     ResourceEntryPayment {
         /// Private, question-scoped resource choices.
@@ -217,6 +233,8 @@ pub enum InputDomain {
 /// Internal answer, checked against actor and the entire decision token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Answer {
+    /// One handle from the current effective ability question.
+    Ability(u64),
     /// Answer the current resource entry payment without exposing physical resource identities.
     ResourceEntryPayment {
         /// Resource handles valid only for the current question.
@@ -438,6 +456,10 @@ pub enum Fact {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum Slot {
+    Ability {
+        source: Option<RuntimeAbilitySource>,
+        filter: AbilityChoiceKind,
+    },
     Created(Vec<ObjectRef>),
     Recipients {
         members: Vec<RuntimeDamageRecipient>,
@@ -456,6 +478,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Ability(card::AbilityWait),
     ResourceEntryPayment(card::resource_entry::ResourceEntryWait),
     Discard(discard::HandWait),
     CostDiscard(discard::HandWait),
@@ -534,7 +557,7 @@ pub(super) struct Execution {
     damage_event: Option<((ScopeId, u64), DamageEvent)>,
     leave_move: Option<((ScopeId, u64), ObjectRef)>,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
-    play: Option<card::play::PlayState>,
+    play: Option<PlayState>,
     spell: bool,
     field_entry: bool,
     play_origin: Option<ZoneKind>,
@@ -785,6 +808,11 @@ impl Game {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
             match (wait, answer) {
+                (Wait::Ability(wait), Answer::Ability(handle)) => {
+                    let source = wait.validate(self, &execution, handle)?;
+                    rollback = execution.origin.take();
+                    wait.bind(&mut execution, Some(source));
+                }
                 (
                     Wait::ResourceEntryPayment(wait),
                     Answer::ResourceEntryPayment { materials, use_ep },
@@ -814,8 +842,19 @@ impl Game {
                 }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
                     rollback = execution.origin.take();
-                    if !card::optional::accept(&mut execution, accepted)? {
-                        card::exchange::accept(&mut execution, accepted)?;
+                    let declined_child = !accepted
+                        && execution.nested.is_some()
+                        && execution
+                            .play
+                            .as_ref()
+                            .is_some_and(PlayState::required_head_pending);
+                    if declined_child {
+                        self.cancel_nested_card(&mut execution)?;
+                    } else {
+                        let handled = card::optional::accept(&mut execution, accepted)?;
+                        if !handled {
+                            card::exchange::accept(&mut execution, accepted)?;
+                        }
                     }
                 }
                 (
@@ -1060,6 +1099,7 @@ impl Game {
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
         self.internal_decision(view).map_or(Value::Null, |question| {
             let domain = match question.domain {
+                InputDomain::Abilities(options) => json!({"kind":"abilities","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.source_card,"line":option.source_line,"section":option.source_section})).collect::<Vec<_>>()}),
                 InputDomain::WardEntry { card, name, zone, position } => json!({"kind":"ward-entry","card":card,"name":name,"zone":zone,"position":position}),
                 InputDomain::Quick { window, options } => card::quick::packet(window, &options),
                 InputDomain::TriggerQuota(domain) => json!({"kind":"trigger-quota","candidates":domain.candidates.iter().map(|option| json!({"handle":option.handle,"card":option.card,"line":option.line,"event":option.event})).collect::<Vec<_>>(),"earlier":domain.earlier.iter().map(|selection| json!({"actor":selection.actor.seat,"card":selection.occurrence.card,"line":selection.occurrence.line,"event":selection.occurrence.event})).collect::<Vec<_>>()}),
@@ -1352,6 +1392,7 @@ impl Game {
         decision: &Decision,
     ) -> Result<()> {
         match &decision.domain {
+            ChoiceDomain::Abilities { .. } => self.internal_ability_choice(execution, decision),
             ChoiceDomain::Distribution { .. } => self.internal_distribution(execution, decision),
             ChoiceDomain::Objects { .. } => self.internal_resolution_target(execution, decision),
             ChoiceDomain::Recipients { .. } => {
@@ -1453,6 +1494,7 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
+            Action::PlayAbility { .. } => self.internal_nested_ability(execution, &instruction)?,
             Action::RideDrive { .. } => self.internal_gain_drive(execution, &instruction)?,
             Action::MealRace { .. } => self.internal_race(execution, &instruction)?,
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,

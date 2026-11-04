@@ -15,6 +15,8 @@ mod crest_count;
 #[path = "drive_mode_count.rs"]
 mod drive_mode_count;
 
+mod nested_ability;
+
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
     env::temp_dir,

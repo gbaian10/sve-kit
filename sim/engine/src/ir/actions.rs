@@ -1,11 +1,11 @@
 use super::{
-    Ability, AbilityPredicate, AbilityReference, AbilitySource, AssociationId, BatchPolicy,
-    Binding, Bool, Capture, CardName, CardSnapshot, Cardinality, CharacteristicPatch, CostSpec,
-    CounterKind, Decision, DecisionId, Duration, Effect, EffectReference, Expr, FaceId, Holder,
-    Int, KeywordId, MovedRef, Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef,
-    PlayerSet, Position, Posture, Program, RandomnessPolicy, ReceiptId, RollId, RuleId,
-    ScheduleAnchor, ScheduleToken, SelectionConstraint, Selector, TextProvider, TimestampBasis,
-    TokenTemplateId, TriggerSpec, UsageReference, Visibility, Visitor, Walk, ZoneRef,
+    Ability, AbilityOperand, AbilityPredicate, AbilitySource, AssociationId, BatchPolicy, Binding,
+    Bool, Capture, CardName, CardSnapshot, Cardinality, CharacteristicPatch, CostSpec, CounterKind,
+    Decision, DecisionId, Duration, Effect, EffectReference, Expr, FaceId, Holder, Int, KeywordId,
+    MovedRef, Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef, PlayerSet, Position,
+    Posture, Program, RandomnessPolicy, ReceiptId, RollId, RuleId, ScheduleAnchor, ScheduleToken,
+    SelectionConstraint, Selector, TextProvider, TimestampBasis, TokenTemplateId, TriggerSpec,
+    UsageReference, Visibility, Visitor, Walk, ZoneRef,
 };
 
 // I.swap remains rule-only; there is deliberately no constructible variant.
@@ -38,7 +38,7 @@ variants!(Action {
     RemoveAbility { subjects: Selector, scope: RemoveScope, duration: Duration, timestamp: TimestampBasis } => ["action.remove-ability"],
     Delay { trigger: TriggerSpec, body: Program, captures: Vec<Capture>, lifetime: DelayedLifetime, source: AbilitySource } => ["action.delay"],
     PlayCard { card: ObjectOperand, controller: PlayerRef, cost_override: Option<CostOverride>, authorization: EffectReference, parameters: PlaySpec } => ["action.play-card"],
-    PlayAbility { ability: AbilityReference, controller: PlayerRef, cost_policy: AbilityCostPolicy, trigger_policy: AbilityTriggerPolicy } => ["action.play-ability"],
+    PlayAbility { ability: AbilityOperand, controller: PlayerRef, cost_policy: AbilityCostPolicy, trigger_policy: AbilityTriggerPolicy } => ["action.play-ability"],
     MealRace { subject: ObjectOperand, operation: MealRaceOperation, amount: Expr<Nat>, resource_links: Vec<ObjectOperand> } => ["action.meal-race"],
     RideDrive { subject: ObjectOperand, operation: RideDriveOperation, usage: UsageReference } => ["action.ride-drive"],
     DriveCheck { player: PlayerRef, repetitions: Nat, source: AbilitySource } => ["action.drive-check"],

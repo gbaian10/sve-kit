@@ -6,9 +6,10 @@ use super::{
     EvolutionState, ExecutionRef, Expr, FaceId, FlipOutcome, FusionOutcome, Info, InstructionId,
     Int, KeywordId, LimitSpec, LookOutcome, ModeId, MoveOutcome, MoveResult, MovementEvent, Nat,
     ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PaymentReceipt, PaymentResult, Phase,
-    PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RuleId, ScopeId,
-    SearchOutcome, SelectionConstraint, SelectionSnapshot, Selector, TitleId, TokenOutcome,
-    TraitId, TransformOutcome, TriggerSpec, TurnId, Visitor, Walk, ZoneKind, ZoneRef,
+    PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RuleId,
+    RuntimeAbilityReference, ScopeId, SearchOutcome, SelectionConstraint, SelectionSnapshot,
+    Selector, TitleId, TokenOutcome, TraitId, TransformOutcome, TriggerSpec, TurnId, Visitor, Walk,
+    ZoneKind, ZoneRef,
 };
 use core::mem::replace;
 
@@ -81,6 +82,14 @@ record!(AbilityReference {
     instance: AbilityReferenceKind,
     definition: AbilityId
 });
+variants!(AbilityOperand {
+    Reference { reference: AbilityReference } => [],
+    Selected { selection: Binding<RuntimeAbilityReference> } => []
+});
+tags!(AbilityChoiceKind {
+    EvolutionTime,
+    UnionBurst
+});
 record!(Ability { id: AbilityId, scope: ScopeId, source: AbilitySource, kind: AbilityKind, qualification: AbilityQualification, active_zones: Vec<ZoneKind>, event_captures: Vec<Capture>, play: Option<PlaySpec>, trigger: Option<TriggerSpec>, body: Option<Program>, declarations: Vec<Effect> });
 tags!(AbilityKind {
     Spell,
@@ -138,6 +147,7 @@ tags!(RuleProcedure {
 });
 tags!(QuickWindow { Attack, EndPhase });
 variants!(ChoiceDomain {
+    Abilities { holder: ObjectOperand, filter: AbilityChoiceKind, binding: Binding<RuntimeAbilityReference> } => [],
     EndPhaseGuardAct { binding: Binding<Selector> } => [],
     Objects { constraint: SelectionConstraint, binding: Binding<Selector>, target_roles: Option<TargetRoleSpec> } => [],
     Recipients { candidates: RecipientSet, cardinality: Cardinality, binding: Binding<Vec<DamageRecipient>> } => [],

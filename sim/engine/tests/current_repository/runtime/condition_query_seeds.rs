@@ -18,7 +18,8 @@ fn finish(game: &mut Game, mut play: CardPlay) {
                 );
                 Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle]))
             }
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::OptionalCost
             | InputDomain::CostMaterials(_)

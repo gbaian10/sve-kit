@@ -218,6 +218,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
                 Answer::Order(cards.iter().rev().map(|m| m.handle).collect())
             }
             InputDomain::Modes { .. }
+            | InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw

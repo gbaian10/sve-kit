@@ -27,6 +27,7 @@ CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）及設計
 | R-0013 | I.transform TokenAllocation 部分成功：actor 選模板子集，每模板至多一張，零張不詢問                                                                               | inferred    |
 | R-0014 | L.continuous 同 timestamp 以 D.rule-choice ContinuousTieOrder 定序：回合玩家先、同玩家自選並保存                                                                 | inferred    |
 | R-0015 | ChooseModeAny（好きな数チョイス）數域 0..可用模式數；選 0 不執行整段                                                                                             | inferred    |
+| R-0016 | 效果授權的起動在 E.play 照常記入該能力使用歷史，只略過授權路徑的限次檢查；逆向順序為本專案推定                                                                   | inferred    |
 
 T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X 表達式、S 選擇器、V 讀值、E 事件、H 歷史、L 效果；G 只是未決分類，不能執行。`Expr<T>` 純函數；`Info<T>=Present`(T)/AbsentByRules；未知欄位不是 AbsentByRules。每個 registry 定義攜帶 rule/rulings、型別、合法上下文、可見性與 source span，載入 capability 不足即拒絕。
 

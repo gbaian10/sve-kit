@@ -30,6 +30,7 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize) -> CardPlay {
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)
             | InputDomain::SearchReplacement
+            | InputDomain::Abilities(_)
             | InputDomain::TokenCapacity { .. } => panic!("unexpected printed card question"),
         };
         play = game

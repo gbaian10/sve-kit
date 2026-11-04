@@ -365,6 +365,9 @@ impl Game {
         let Some(execution) = self.typed.as_ref() else {
             return Ok(false);
         };
+        if execution.nested.is_some() {
+            return Ok(false);
+        }
         let Some((view, Wait::OptionalCost)) = &execution.waiting else {
             return Ok(false);
         };

@@ -5,9 +5,10 @@ use super::{
 use crate::game::int;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::ir::nested_play;
+pub(in crate::game::internal) mod ability;
 use crate::ir::{
-    Action, CostOverride, Instruction, ObjectOperand, ReceiptId, RuntimeAbilitySource, Selector,
-    ZoneKind,
+    AbilityCostPolicy, Action, CostOverride, Instruction, ObjectOperand, ReceiptId,
+    RuntimeAbilitySource, Selector, ZoneKind,
 };
 
 #[derive(Clone, Debug)]
@@ -63,7 +64,7 @@ impl Game {
             && let Some(ability) = ability
         {
             let mut execution = self.spell_execution(holder, actor, &ability)?;
-            self.prepare_ability_play(&mut execution, ability)?;
+            self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
             return Ok(execution);
         }
         let context = Context {
@@ -116,7 +117,7 @@ impl Game {
         if let Some(ability) = ability {
             let source = self.internal_card_source(holder, ability.id, actor)?;
             execution.bind_source(self, source)?;
-            self.prepare_ability_play(&mut execution, ability)?;
+            self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
         } else {
             self.prepare_field_play(&mut execution)?;
         }
@@ -199,16 +200,31 @@ impl Game {
                 .insert(instruction.receipt, InstructionOutcome::NestedPlay(None));
             return Ok(());
         }
+        let actor = execution.context.controller;
+        self.nested_attempt(
+            execution,
+            instruction.receipt,
+            cost_override.clone(),
+            |game, continuation| game.prepare_card_execution(&holder, actor, Some(continuation)),
+        )
+    }
+
+    fn nested_attempt(
+        &mut self,
+        execution: &mut Execution,
+        receipt: ReceiptId,
+        cost_override: Option<CostOverride>,
+        prepare: impl FnOnce(&mut Self, Box<Continuation>) -> Result<Execution>,
+    ) -> Result<()> {
         let before = self.clone();
         let continuation = Box::new(Continuation {
             parent: execution.clone(),
             before: Box::new(before.clone()),
-            receipt: instruction.receipt,
-            cost_override: cost_override.clone(),
+            receipt,
+            cost_override,
             committed: false,
         });
-        match self.prepare_card_execution(&holder, execution.context.controller, Some(continuation))
-        {
+        match prepare(self, continuation) {
             Ok(child) => *execution = child,
             Err(crate::EngineFailure::IllegalPlay(_)) => {
                 let epoch = self.state.ir_epoch;
@@ -216,7 +232,7 @@ impl Game {
                 self.state.ir_epoch = self.state.ir_epoch.max(epoch);
                 execution
                     .receipts
-                    .insert(instruction.receipt, InstructionOutcome::NestedPlay(None));
+                    .insert(receipt, InstructionOutcome::NestedPlay(None));
             }
             Err(error) => return Err(error),
         }

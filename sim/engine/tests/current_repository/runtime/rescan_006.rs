@@ -35,6 +35,7 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
                 Answer::Targets(vec![domain.members[0].handle])
             }
             InputDomain::TokenCapacity { .. }
+            | InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::DriveTrigger { .. }
             | InputDomain::Quick { .. }

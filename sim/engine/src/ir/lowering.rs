@@ -22,6 +22,7 @@ mod keywords;
 mod material;
 mod material_values;
 mod movement;
+mod nested_ability;
 mod numeric;
 mod optional_payment;
 mod ordering;
@@ -1194,6 +1195,7 @@ struct BodyContext<'definitions> {
     observed_targets: BTreeSet<String>,
     field_entry: FieldEntryGuard,
     targets: BTreeMap<String, Binding<Selector>>,
+    ability_holders: BTreeSet<String>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
     resolution_scope: ScopeId,
@@ -1249,6 +1251,7 @@ impl<'definitions> BodyContext<'definitions> {
             observed_targets: BTreeSet::new(),
             field_entry: FieldEntryGuard::default(),
             targets: BTreeMap::new(),
+            ability_holders: BTreeSet::new(),
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
             resolution_scope: scope,
@@ -1395,6 +1398,10 @@ impl<'definitions> BodyContext<'definitions> {
             let step_path = format!("{path}/{index}");
             self.check_paid_material_name(step, &step_path)?;
             self.field_entry.adjacent = choice_before(author_steps, index);
+            if let ast::Step::PlayAbility(value) = step {
+                steps.extend(self.ability_play(value, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::Counter(value) = step
                 && !matches!(value.on, ast::Objects::This(_))
             {
@@ -1536,6 +1543,7 @@ impl<'definitions> BodyContext<'definitions> {
                 super::MealRaceOperation::Race,
             )),
             ast::Step::StackPlus(_)
+            | ast::Step::PlayAbility(_)
             | ast::Step::Choice(_)
             | ast::Step::Optional(_)
             | ast::Step::Pay(_)

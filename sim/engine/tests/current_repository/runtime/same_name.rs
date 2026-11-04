@@ -40,6 +40,7 @@ fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
             | InputDomain::Distribution(_)
             | InputDomain::SearchReplacement
             | InputDomain::TokenCapacity { .. }
+            | InputDomain::Abilities(_)
             | InputDomain::Modes { .. } => panic!("unexpected question"),
         };
         play = game

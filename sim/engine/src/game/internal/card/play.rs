@@ -9,6 +9,8 @@ use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
+
+use crate::ir::{AbilityCostPolicy, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
 use crate::ir::{
     AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
     ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet, SelectionSnapshot,
@@ -19,7 +21,8 @@ use crate::ir::{
     Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, ModeId, NumericChange, PlaySlot, Program,
     Resource, ResourceOperation, ScopeId, SnapshotId, Visibility, ZoneKind,
 };
-use crate::ir::{FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
+
+pub(super) mod ability_cost;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -108,6 +111,7 @@ impl PlayMode {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PlayState {
+    cost_policy: AbilityCostPolicy,
     qualification: AbilityQualification,
     pub(in crate::game::internal) resource_entry: Option<super::resource_entry::ResourceEntryState>,
     snapshot: Option<Box<Game>>,
@@ -134,6 +138,11 @@ struct SelectionOrigin {
 }
 
 impl PlayState {
+    pub(in crate::game::internal) fn required_head_pending(&self) -> bool {
+        self.optional
+            .iter()
+            .any(|payment| payment.required && payment.accepted.is_none())
+    }
     fn material_posture(&self, decision: &Decision) -> bool {
         super::material::posture_parameter(&self.costs, decision)
             || self
@@ -1037,7 +1046,7 @@ impl Game {
         mut execution: Execution,
         ability: Ability,
     ) -> Result<CardPlay> {
-        self.prepare_ability_play(&mut execution, ability)?;
+        self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
         self.internal_run(&mut execution)?;
         self.card_play_result(execution)
     }
@@ -1046,6 +1055,7 @@ impl Game {
         &self,
         execution: &mut Execution,
         ability: Ability,
+        cost_policy: AbilityCostPolicy,
     ) -> Result<()> {
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;
@@ -1074,6 +1084,7 @@ impl Game {
             })
             .collect();
         execution.play = Some(PlayState {
+            cost_policy,
             qualification: ability.qualification,
             additional,
             resource_entry,
@@ -1215,6 +1226,7 @@ impl Game {
         let Some(mut play) = execution.play.take() else {
             return Ok(());
         };
+        play.waive_original_costs(execution)?;
         if self.internal_optional_decision(execution, &play)?
             || self.internal_resource_entry_question(execution, &play)?
             || self.internal_exchange_decision(execution, &play)?
@@ -1223,6 +1235,7 @@ impl Game {
             execution.play = Some(play);
             return Ok(());
         }
+        play.waive_original_costs(execution)?;
         play.freeze_selection(self, execution)?;
         if self.internal_optional_decision(execution, &play)? {
             execution.play = Some(play);
@@ -1402,7 +1415,7 @@ impl Game {
         let turn = TurnId(self.state.schedule.current()?);
         if let Some(limit) = play.limit {
             self.card_runtime
-                .consume_quota(source.instance, turn, limit)?;
+                .consume_quota(source.instance, turn, limit, play.cost_policy)?;
         }
         for group in &play.groups {
             if let ChoiceDomain::Modes {
@@ -1811,6 +1824,7 @@ impl Game {
     pub(super) fn prepare_field_play(&self, execution: &mut Execution) -> Result<()> {
         execution.field_entry = true;
         execution.play = Some(PlayState {
+            cost_policy: AbilityCostPolicy::Normal,
             qualification: AbilityQualification::Ordinary,
             additional: None,
             resource_entry: None,

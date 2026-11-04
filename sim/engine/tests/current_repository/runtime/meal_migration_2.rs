@@ -69,6 +69,7 @@ fn finish_with_cost(game: &mut Game, mut play: CardPlay, pay_cost: bool) {
             InputDomain::Quick { .. } => Answer::Quick(None),
             InputDomain::DriveTrigger { .. }
             | InputDomain::TokenCapacity { .. }
+            | InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

@@ -97,7 +97,8 @@ fn finish(game: &mut Game, mut play: CardPlay, targets: &[&str]) -> CardPlay {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().rev().map(|c| c.handle).collect())
             }
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

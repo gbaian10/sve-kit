@@ -97,7 +97,8 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
             InputDomain::Order(cards) => {
                 Answer::Order(cards.iter().rev().map(|m| m.handle).collect())
             }
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)

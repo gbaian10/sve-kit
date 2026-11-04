@@ -11,15 +11,16 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilitySource, Action,
-    AssociationId, CharacteristicPatch, Control, CostSpec, DamageAmount, DiscardMode, Effect,
-    ExecutionId, Expr, FaceId, Generation, GrantedAbility, Instruction, InstructionContext, Int,
-    KeywordId, Located, MealRaceOperation, MoveDestination, MoveReason, Nat, Node, NumericChange,
-    ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit,
-    Requirements, Resource, ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource,
-    Selector, SourceSpan, StepwiseMode, WellFormedCardProgram, ZoneKind,
+    Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
+    AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
+    CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
+    GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located, MealRaceOperation,
+    MoveDestination, MoveReason, Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone,
+    PlayerId, PlayerRef, Posture, Quantity, QuantityUnit, Requirements, Resource,
+    ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
-use crate::ir::{Bool, ChoiceDomain, PreconditionKind, PreconditionReason};
+use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::{Result, invalid};
@@ -40,6 +41,7 @@ pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
 pub(in crate::game::internal) mod nested;
+pub(super) use nested::ability::AbilityWait;
 pub(super) mod optional;
 pub(super) mod other_costs;
 mod play_restrictions;
@@ -135,8 +137,9 @@ impl CardRuntime {
         instance: AbilityInstanceId,
         turn: TurnId,
         limit: LimitSpec,
+        policy: AbilityCostPolicy,
     ) -> Result<()> {
-        if !self.quota_available(instance, turn, limit) {
+        if policy == AbilityCostPolicy::Normal && !self.quota_available(instance, turn, limit) {
             return Err(crate::EngineFailure::IllegalPlay(
                 "ability quota exhausted".into(),
             ));
@@ -148,10 +151,7 @@ impl CardRuntime {
         if entry.0 != turn {
             *entry = (turn, 0);
         }
-        entry.1 = entry
-            .1
-            .checked_add(1)
-            .ok_or_else(|| invalid("ability quota overflow"))?;
+        entry.1 = entry.1.saturating_add(1);
         Ok(())
     }
 
@@ -1226,6 +1226,7 @@ fn check_instruction(
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
     super::transform::check_catalog(game, &instruction.action)?;
     nested::check(&instruction.action)?;
+    nested::ability::check_action(&instruction.action)?;
     super::grant::check_action(&instruction.action)?;
     super::numeric::pilot::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
@@ -1248,6 +1249,7 @@ fn check_instruction(
             | Action::Discard { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
+            | Action::PlayAbility { .. }
             | Action::Move { .. }
             | Action::Destroy { .. }
             | Action::Life { .. }
@@ -1323,15 +1325,8 @@ fn check_nodes(
                 }
             }
             Node::Capture { .. } => {}
-            Node::Decision { decision }
-                if matches!(
-                    decision.domain,
-                    ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
-                ) =>
-            {
-                selection::check_resolution(decision)?;
-            }
-            Node::Control { .. } | Node::Decision { .. } => {
+            Node::Decision { decision } => check_resolution_choice(decision)?,
+            Node::Control { .. } => {
                 return Err(unsupported("whole-card synchronous node"));
             }
         }
@@ -1351,6 +1346,12 @@ fn check_grant_instruction(
         ..
     } = &instruction.action
     {
+        if abilities.iter().any(|granted| {
+            matches!(granted, GrantedAbility::Definition { ability }
+                if ability.qualification == AbilityQualification::UnionBurst)
+        }) {
+            return Err(unsupported("installed granted definition cannot be UB"));
+        }
         if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if filter(ability).is_some())) {
             return Err(unsupported("granted Play requires an equipment provider"));
         }
@@ -1462,4 +1463,14 @@ fn check_granted_definitions(
         play::check(ability, source)?;
     }
     Ok(())
+}
+
+fn check_resolution_choice(decision: &Decision) -> Result<()> {
+    match &decision.domain {
+        ChoiceDomain::Abilities { .. } => nested::ability::check_choice(decision),
+        ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. } => {
+            selection::check_resolution(decision)
+        }
+        _ => Err(unsupported("whole-card synchronous node")),
+    }
 }

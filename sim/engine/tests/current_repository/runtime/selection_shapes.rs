@@ -231,7 +231,8 @@ fn bp12_078_distributes_six_among_any_selected_followers_including_zero() {
                             .collect(),
                     )
                 }
-                unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                unexpected @ (InputDomain::Abilities(_)
+                | InputDomain::ResourceEntryPayment { .. }
                 | InputDomain::WardEntry { .. }
                 | InputDomain::Quick { .. }
                 | InputDomain::BeforeDraw
@@ -381,7 +382,8 @@ fn cp04_109_and_all_printings_pay_two_priconne_then_opponent_privately_discards_
                             .collect(),
                     )
                 }
-                unexpected @ (InputDomain::ResourceEntryPayment { .. }
+                unexpected @ (InputDomain::Abilities(_)
+                | InputDomain::ResourceEntryPayment { .. }
                 | InputDomain::WardEntry { .. }
                 | InputDomain::Quick { .. }
                 | InputDomain::BeforeDraw

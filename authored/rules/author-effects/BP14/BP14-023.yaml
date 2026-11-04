@@ -1,0 +1,78 @@
+cards:
+  BP14-023:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                on:
+                  kind: follower
+                  other: true
+                  trait: 宴楽
+                  who: self
+                  zone: field
+      - evolve_time:
+          cost:
+            banish:
+              n: 2
+              sel:
+                name: 輝く金貨
+                who: self
+                zone: ex
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  orig_cost_le: 3
+                  trait: 宴楽
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+        line: 2
+      - activate:
+          cost:
+            pp: 1
+          do:
+            - play_ability:
+                of: this
+                trigger: evolve_time
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

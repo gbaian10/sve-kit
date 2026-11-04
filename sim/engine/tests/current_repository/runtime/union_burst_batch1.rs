@@ -124,6 +124,7 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)
             | InputDomain::SearchReplacement
+            | InputDomain::Abilities(_)
             | InputDomain::Modes { .. } => panic!("unexpected printed question"),
         };
         play = game

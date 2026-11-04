@@ -1,0 +1,56 @@
+cards:
+  CP04-114:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - grant:
+                        keywords:
+                          - ward
+                        on: guarded
+                  - - if:
+                        cond:
+                          history:
+                            at_least: 2
+                            event: ub_activated
+                            exclude: this_execution
+                            who: self
+                            window: this_turn
+                        then:
+                          - play_ability:
+                              ability:
+                                n: 1
+                                ub: true
+                              cost_policy: waive_original
+                              of: friend
+          targets:
+            - bind: guarded
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: friend
+              from:
+                kind: follower
+                not_same_name_as_this: true
+                trait: プリコネ
+                who: self
+                zone: field
+              n: 1
+              option: 2
+          ub: true
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-03"
+format: 2
+kind: author_effect_set

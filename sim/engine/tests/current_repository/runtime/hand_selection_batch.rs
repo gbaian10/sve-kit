@@ -69,7 +69,8 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: u64) {
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::Order(cards) => Answer::Order(cards.iter().map(|c| c.handle).collect()),
-            InputDomain::ResourceEntryPayment { .. }
+            InputDomain::Abilities(_)
+            | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
