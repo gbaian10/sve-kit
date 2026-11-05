@@ -9,6 +9,7 @@ use super::{
 use crate::ir::AttackEvent;
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
+use crate::ir::history_turn::public::{banished_plan, damaged_plan};
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
     ExecutionRef, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
@@ -239,6 +240,9 @@ impl Execution {
         }
     }
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+        if damaged_plan(selector).is_some() {
+            return self.public_target_objects(game, selector, false);
+        }
         if let Some((binding, _)) = target_plan(selector) {
             return self.attack_target_objects(game, binding);
         }
@@ -977,6 +981,9 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
+            BoolRead::HistoryExists { query } if banished_plan(query).is_some() => {
+                super::history_turn::lesson_exists(self, game, &Expr::Live(Box::new(read.clone())))
+            }
             BoolRead::FieldEntryOrigin {
                 object: ObjectOperand::SourceHolder {},
                 zone: ZoneKind::Cemetery,

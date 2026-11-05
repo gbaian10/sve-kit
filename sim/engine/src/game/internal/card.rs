@@ -1217,10 +1217,11 @@ fn check_nested_nodes(
             check_nodes(game, &body.steps, source, origin)?;
         }
         Control::If {
+            condition,
             then_body,
             else_body,
-            ..
         } => {
+            super::history_turn::check_lesson_condition(game, condition)?;
             check_nodes(game, &then_body.steps, source, origin)?;
             if let Some(body) = else_body {
                 check_nodes(game, &body.steps, source, origin)?;

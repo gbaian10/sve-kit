@@ -51,6 +51,10 @@ pub(crate) fn selection_with_rules_from(
     keywords: &str,
     input: &Value,
 ) -> SelectedEffects {
+    select(snapshot, keywords, input).unwrap()
+}
+
+fn bound_rules(snapshot: &str) -> String {
     let rules_source = read_to_string(
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml"),
     )
@@ -60,15 +64,7 @@ pub(crate) fn selection_with_rules_from(
     *rules_document
         .pointer_mut("/input/snapshot_sha256")
         .unwrap() = Value::String(rule_fixtures::hash(snapshot.as_bytes()));
-    let bound_rules = serde_json::to_string(&rules_document).unwrap();
-    select_with_rules(
-        snapshot,
-        keywords,
-        input,
-        &bound_rules,
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap()
+    serde_json::to_string(&rules_document).unwrap()
 }
 
 pub(crate) fn lowerer() -> &'static ExpandedLowerer {
@@ -86,7 +82,14 @@ pub(crate) fn select(
     keywords: &str,
     input: &Value,
 ) -> sve_engine::Result<SelectedEffects> {
-    loader().select(snapshot, keywords, input)
+    // Full repository selections include cards whose admitted text depends on bound rule resources.
+    select_with_rules(
+        snapshot,
+        keywords,
+        input,
+        &bound_rules(snapshot),
+        &EngineIdentityInput::LegacyJp,
+    )
 }
 
 pub(crate) fn select_with_rules(
@@ -97,4 +100,12 @@ pub(crate) fn select_with_rules(
     identity: &EngineIdentityInput,
 ) -> sve_engine::Result<SelectedEffects> {
     loader().select_with_rules(snapshot, keywords, input, rules, identity)
+}
+
+pub(crate) fn select_without_rules(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+) -> sve_engine::Result<SelectedEffects> {
+    loader().select(snapshot, keywords, input)
 }

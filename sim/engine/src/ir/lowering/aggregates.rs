@@ -106,13 +106,12 @@ impl BodyContext<'_> {
             hp_le: None,
             r#where: None,
         };
-        self.checked_extremum(
-            query.alias.as_deref(),
-            query.r#where.as_deref(),
-            &population,
-            input,
-            path,
-        )
+        let condition = match &query.r#where {
+            Some(ast::ObjectQueryWhere::Extremum(condition)) => Some(condition.as_ref()),
+            Some(ast::ObjectQueryWhere::Damaged(_)) => return Err(unsupported(path)),
+            None => None,
+        };
+        self.checked_extremum(query.alias.as_deref(), condition, &population, input, path)
     }
 
     pub(super) fn target_extremum(

@@ -5,13 +5,18 @@ use crate::ir::PlayerId;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
+use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{
     PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, played_filter, ub_plan,
 };
 use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
-use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, TraitId};
+use crate::ir::{Action, Bool, Control, Expr, Node, Program};
+use crate::ir::{
+    CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, Selector, TraitId,
+};
 use crate::ir::{ExecutionRef, HistoryQuery, Location, PlayerRef, Requirement, Requirements};
 use alloc::collections::BTreeSet;
+use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
 
 pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
@@ -52,6 +57,48 @@ pub(super) fn public_location(requirements: &Requirements, location: &Location) 
                 ) && other.locations.iter().any(|at| at.ir_path == read)
             })
         })
+}
+
+pub(super) fn check_lesson_condition(game: &Game, condition: &Expr<Bool>) -> Result<()> {
+    if let Some(name) = banished_condition(condition)
+        && (!game.catalog.rule_bindings.has_resource("lesson_item")
+            || !game
+                .catalog
+                .rule_bindings
+                .matches_resource("lesson_item", from_ref(&name.0))?)
+    {
+        return Err(unsupported("history name is not the bound lesson resource"));
+    }
+    Ok(())
+}
+
+pub(super) fn lesson_exists(
+    execution: &Execution,
+    game: &Game,
+    condition: &Expr<Bool>,
+) -> Result<Bool> {
+    check_lesson_condition(game, condition)?;
+    Ok(Bool(
+        committed_counter(game, execution.context.controller, "magic_item_banished")? > 0,
+    ))
+}
+
+pub(super) fn mask_public_history(program: &mut Program) {
+    for step in &mut program.steps {
+        if let Node::Control {
+            control: Control::If { condition, .. },
+        } = &mut step.node
+            && banished_condition(condition).is_some()
+        {
+            *condition = Expr::Literal(Bool(false));
+        }
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Action::Destroy { objects } = &mut instruction.action
+            && damaged_plan(objects).is_some()
+        {
+            *objects = Selector::Objects { objects: vec![] };
+        }
+    }
 }
 
 fn committed_counter(game: &Game, player: PlayerId, name: &str) -> Result<u64> {

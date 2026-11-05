@@ -7,6 +7,7 @@ use super::{
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::played_filter;
+use crate::ir::history_turn::public::{banished_plan, damaged_plan};
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
@@ -130,6 +131,9 @@ impl Checker {
         if (matches!(query.pattern, EventPattern::Discard { .. }) || played_filter(query).is_some())
             && count != HistoryCount::Facts
         {
+            return self.reject();
+        }
+        if banished_plan(query).is_some() {
             return self.reject();
         }
         self.history(query)
@@ -638,11 +642,24 @@ impl Checker {
             self.reference(event, BindingKind::Value)?;
             return self.candidate(candidate, &Expr::Literal(Bool(true)));
         }
+        if let Some((candidate, event)) = damaged_plan(selector) {
+            if self.event_capture() || self.env.chooser.is_some() {
+                return self.reject();
+            }
+            return self.isolated(|checker| {
+                checker.define(candidate, BindingKind::Value)?;
+                checker.define(event, BindingKind::Value)
+            });
+        }
         // This slice has object snapshots, but no event-scoped collection read.
         if self.event_capture() {
             return self.reject();
         }
         self.selection_visibility(selector)?;
+        self.selector_members(selector)
+    }
+
+    fn selector_members(&mut self, selector: &Selector) -> Checked {
         match selector {
             Selector::SearchFound { found } => self.reference(*found, BindingKind::Value),
             Selector::SearchRevealed { revealed } => self.reference(*revealed, BindingKind::Value),

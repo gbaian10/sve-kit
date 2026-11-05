@@ -102,7 +102,10 @@ canonical JSON 保留 limb 次序、重複及欄位有無；不執行排序、�
 `where` 只在本片接受 C。提供 `as:BindingName` 必須同時有 where，
 該層不再引入 item；省略 as 則綁定 item。禁止巢狀隱式遮蔽、
 候選元素型別及別名有效範圍仍由 D0／lowering 檢查。
-GAP-A-028 的 cost_of/item 與 bound 比較可表達；GAP-A-029 的 history 尚不在 C 片段。
+GAP-A-028 的 cost_of/item 與 bound 比較可表達。GAP-A-029 的 history 目前只有
+BP20-069 的公開對手場上從者 `destroy.ref` 子集接通；完整形狀與生命週期見
+[公開歷史子集](author-history-shapes-1.0.md#ex-規則資源消滅與當前受傷從者)。
+此例外不開放通用候選條件、正式目標、私有查詢或數值聚合。
 
 ## 物件屬性與參數
 

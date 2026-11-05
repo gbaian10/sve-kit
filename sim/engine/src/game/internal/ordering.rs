@@ -5,6 +5,7 @@ use super::{
 };
 use crate::ir::NumericProperty;
 use crate::ir::events::attack::target_plan;
+use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
 use crate::ir::prevention;
 use crate::ir::{
@@ -84,7 +85,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     // Control bodies are checked individually; their guards still need the same restriction.
     if let Node::Control { control } = node {
         if let Control::If { condition, .. } = control {
-            return check_condition(condition, source);
+            return check_control_guard(condition, source);
         }
         return Ok(());
     }
@@ -275,6 +276,14 @@ fn mask_prevention(inspected: &mut Node) -> Result<()> {
     Ok(())
 }
 
+fn check_control_guard(condition: &Expr<Bool>, source: &SourceSpan) -> Result<()> {
+    if banished_condition(condition).is_some() {
+        Ok(())
+    } else {
+        check_condition(condition, source)
+    }
+}
+
 fn check_private_requirements(requirements: &Requirements, private_spine: bool) -> Result<()> {
     for requirement in &requirements.required {
         let code = requirement.capability.code;
@@ -319,6 +328,9 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             capture: Capture::Integer { value, .. },
         } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
+            Action::Destroy { objects } if damaged_plan(objects).is_some() => {
+                *objects = Selector::Objects { objects: vec![] };
+            }
             Action::Draw { count: amount, .. } => mask_public_number(amount),
             Action::Counter {
                 holder: Holder::Object { object },

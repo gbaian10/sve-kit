@@ -196,6 +196,52 @@ impl BodyContext<'_> {
         }
     }
 
+    pub(super) fn destroy_objects(
+        &mut self,
+        objects: &ast::Objects,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        if let ast::Objects::Zone(query) = objects
+            && let Some(ast::ObjectQueryWhere::Damaged(condition)) = &query.r#where
+        {
+            let ast::DamagedThisTurnWhere {
+                history:
+                    ast::DamagedThisTurnHistory {
+                        event: ast::DamagedHistoryEvent::Damaged,
+                        window: ast::ThisTurn::ThisTurn,
+                        r#where:
+                            ast::DamagedThisTurnRecipient {
+                                recipient: ast::Item::Item,
+                            },
+                    },
+            } = condition;
+            if !matches!(query.who, ast::Side::Opponent)
+                || !matches!(query.zone, ast::Zone::Field)
+                || !matches!(query.kind, Some(ast::FieldKind::Follower))
+                || query.alias.is_some()
+                || query.acted.is_some()
+                || query.except.is_some()
+                || query.other
+                || query.r#trait.is_some()
+                || query.class.is_some()
+                || query.not_class.is_some()
+                || query.token.is_some()
+                || query.not_token.is_some()
+                || query.orig_cost_le.is_some()
+                || query.name.is_some()
+                || query.name_contains.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            let candidate = Binding::new(self.allocator.id(path)?, self.scope);
+            let event = Binding::new(self.allocator.id(&format!("{path}/damaged"))?, self.scope);
+            return Ok(super::super::history_turn::public::damaged_selector(
+                candidate, event,
+            ));
+        }
+        self.objects(objects, path)
+    }
+
     pub(super) fn zone_objects(
         &mut self,
         query: &ast::ObjectQuery,

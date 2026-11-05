@@ -758,6 +758,11 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if super::super::history_turn::public::banished_plan(query).is_some()
+            && let EventPattern::Banish { binding, .. } = &query.pattern
+        {
+            return self.isolated(|checker| checker.define(*binding, BindingKind::Value));
+        }
         if let EventPattern::LeaveField { predicate, .. } = &query.pattern {
             self.without_keyword_filter(predicate)?;
         }

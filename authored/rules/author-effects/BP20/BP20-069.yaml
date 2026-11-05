@@ -1,0 +1,26 @@
+cards:
+  BP20-069:
+    abilities:
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  where:
+                    history:
+                      event: damaged
+                      where:
+                        recipient: item
+                      window: this_turn
+                  who: opp
+                  zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set
