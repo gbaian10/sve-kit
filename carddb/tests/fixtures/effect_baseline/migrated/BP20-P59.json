@@ -1,0 +1,68 @@
+{
+  "abilities": [
+    {
+      "active_zones": [
+        "hand"
+      ],
+      "body": {
+        "condition": {
+          "args": [
+            {
+              "count": {
+                "name_contains": "マゼルベイン",
+                "side": "self",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            0
+          ],
+          "fn": "gt"
+        },
+        "op": "if",
+        "then": {
+          "op": "optional",
+          "then": {
+            "op": "move",
+            "subjects": "self",
+            "to": "ex"
+          }
+        }
+      },
+      "event": "discard",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self"
+    },
+    {
+      "body": {
+        "amount": -2,
+        "condition": {
+          "args": [
+            {
+              "read": "self.zone"
+            },
+            "ex"
+          ],
+          "fn": "eq"
+        },
+        "op": "adjust_cost",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 1,
+      "section": 0
+    },
+    {
+      "body": {
+        "count": 2,
+        "op": "draw"
+      },
+      "kind": "spell",
+      "line": 2,
+      "section": 0
+    }
+  ],
+  "review": "依 Q2702／Q2685：捨牌即誘發，場上マゼルベイン的存在於結算時判定。",
+  "status": "complete"
+}
