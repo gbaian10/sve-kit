@@ -1,0 +1,61 @@
+cards:
+  BP02-054:
+    abilities:
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ヘルフレイムドラゴン
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - fanfare:
+          cost:
+            pp: 3
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ヘルフレイムドラゴン
+            - draw:
+                n: 1
+        line: 1
+        section: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: hand
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ヘルフレイムドラゴン
+          usable_if:
+            awakened: true
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+    rule_sections:
+      - section: 1
+    token_sources:
+      - card: BP02-T06
+        line: 1
+        section: 2
+format: 2
+kind: author_effect_set
