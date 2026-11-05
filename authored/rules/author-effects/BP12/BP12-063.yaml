@@ -1,0 +1,40 @@
+cards:
+  BP12-063:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - evolve:
+          cost:
+            pp: 2
+        line: 2
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

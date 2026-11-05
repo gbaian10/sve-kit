@@ -1,0 +1,41 @@
+cards:
+  BP12-021:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - evolve:
+          cost:
+            pp: 3
+        line: 2
+      - keywords:
+          - ward
+        line: 3
+      - fanfare:
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set
