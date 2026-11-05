@@ -1,0 +1,51 @@
+cards:
+  BP20-120:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: マゼルベイン
+                    who: self
+                    zone: field
+                then:
+                  - optional:
+                      do:
+                        - move:
+                            ref: this
+                            to: ex
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              in_zone:
+                ref: this
+                zone: ex
+        section: 1
+      - line: 2
+        section: 1
+        spell:
+          do:
+            - draw:
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
