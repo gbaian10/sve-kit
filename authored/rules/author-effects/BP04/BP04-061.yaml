@@ -1,0 +1,35 @@
+cards:
+  BP04-061:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - also_named:
+                name: レーヴァテインドラゴン
+      - keywords:
+          - ward
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - damage_mod:
+                delta: -1
+      - auto:
+          do:
+            - life:
+                delta: 3
+                who: self
+          "on":
+            phase:
+              which: end
+              whose: self
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

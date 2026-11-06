@@ -1,0 +1,36 @@
+cards:
+  BP04-062:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - also_named:
+                name: レーヴァテインドラゴン
+      - keywords:
+          - intimidate
+        line: 2
+      - evolve_time:
+          do:
+            - damage:
+                n:
+                  times:
+                    - 2
+                    - count:
+                        kind: follower
+                        trait: 武装
+                        who: self
+                        zone: field
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
