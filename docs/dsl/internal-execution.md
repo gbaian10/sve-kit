@@ -194,7 +194,7 @@ before／after、直接 cause；規則移區的 source=None，不冒充造成先
 
 公開 Field／Cemetery 的 Put 至 `Owners(Ex)` 按每張卡的 owner 分派目的地，
 不沿效果控制者或離場前控制者。每位 owner 的 EX 已滿時該張保留原區且無 after；
-同批只有部分容量、需要另選卡時仍拒絕。牌庫觀察的 `Shared(Ex)` 維持原本的自方目的地。
+同批只有正數部分容量時，依下述容量程序另問精確剩餘格數。牌庫觀察的 `Shared(Ex)` 維持原本的自方目的地。
 普通從者帶有單一受驗進化關聯時可以公開離場；共同移區原語清除基底狀態，
 依 CR 11.6.1 將進化卡正面放回 owner 進化牌組；裝備依 CR 11.11 隨宿主離場消去，其他未准入的連結仍拒絕。
 
@@ -329,7 +329,7 @@ Fanfare）拒絕整個動作，不靜默略過。
 場間控制移轉不產生入場；未受驗入場效果、Creation、隱藏來源與一般事件條件拒絕。
 
 新增的正式 Move 只收自方公開 Cemetery／EX 的普通 base face 0 從者送至 Controller Field，
-容量須直接足夠，不接受選位、初始姿勢、entry effects、特殊卡片或連結。這是 Move 的窄子集，
+容量依下述程序處理，不接受選位、初始姿勢、entry effects、特殊卡片或連結。這是 Move 的窄子集，
 沒有開放一般 Shared 目的地或觀察牌以外的隱藏區操作。
 
 限次只收 `maximum=1 / Turn / AbilityInstance / PendingAdmission`。用實際 TurnId 與來源 instance 記錄，
@@ -708,7 +708,7 @@ Look 的私有 selector 只在 Order cards 或下述受限 Move 的 Union／Diff
 entry_effects 的 Move。物件主幹僅由 Look receipt、Union／Difference 構成，逐張重驗
 自己牌庫的目前世代及有效位置證據；不接受任意 Deck selector 或另一玩家的目的區。
 EX 足夠時全批移動；已滿時每個嘗試保留無 after 的 MoveResult；僅剩部分容量而必須
-另問選牌時仍拒絕並回復整次執行。真正 remainder 由 looked 減該 Move 的成功 Before
+另問容量分配時，沿用 `SearchPartition` 題目選精確剩餘格數。真正 remainder 由 looked 減該 Move 的成功 Before
 取得，再接既有私有單 Placement Order；EX 滿沒移動者仍在 remainder，同名副本互不替代。
 此 EX 滿的 remainder 行為採 2026-10-23 維護者的 `inferred` 專案解讀，官方未回答；
 CR 4.8.3.2 僅規定放不進者不移動，依據與邊界見 [runtime §3.2](runtime-semantics.md#32-精確成功-before)。
@@ -753,9 +753,8 @@ Search 准入搜尋者自己的 Deck、Single／Partition 目的地與同一次�
 SearchOutcome 的 found／revealed 保留舊世代，moved 只記真正的 MoveResult；滿 EX 的
 found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續定位。
 
-目的地限 Owners(Hand／Cemetery) 與搜尋者自己的 Shared(Field／Ex)。尚無容量複選
-輸入，因此可找到的最大張數可能超過正數空位時，在讀取隱藏候選前拒絕情境；零空位
-可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
+目的地限 Owners(Hand／Cemetery) 與搜尋者自己的 Shared(Field／Ex)。找到後的正數部分容量
+沿用既有 SearchPartition 分配題，選精確剩餘格數；零空位可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
 條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
 成功投影與減費安裝仍拒絕。整卡本文可承載本節 Search；公開 capability 沒有擴充。
 
@@ -1109,3 +1108,11 @@ WF 只對 Cost 語境、無前提且綁定公開自方場上費用材料的 Act 
 來源後來離場不會重新補發已被抑制的能力，已建立的待機也不因來源後來出現而取消。
 失能來源不提供禁止；己方能力與護符的範圍照能力控制者判斷，不限於從者。
 這個限制不進入能力打出入口，效果直接指定發動進化時能力仍依原來的正式打出流程。
+
+### 多物件移動的容量分配
+
+普通入場、公開卡移至擁有者 EX、已觀察牌庫卡移至自己 EX，共用純移動計畫與原子的移區提交。容量候選直接來自原計畫的有效到達者，排除舊世代、同區不移動與會留場的取代，避免容量判斷與實際移動各自維護一套條件。每個目的玩家分別依現有張數與上限五計算空位；容量不足時只移動精確空位數，其他成員留在原區（CR 4.4.4.2、4.8.3.2）。
+
+容量為結算中的額外分配，不改變正式目標或既有付款。`Wait::MovementCapacity` 以既有 `SearchPartitionDomain`／`Answer::SearchPartition` 暫停：凍結候選世代與容量，完整驗證 token、actor、重複、未知 handle 及精確張數後，保存所選成員並續跑同一指示。守護入場的姿態題沿用這份選取，全部決策完成前不移動任何成員。
+
+公開候選的 `OrderCard.object` 可對照既有公開物件；私有牌庫／手牌不附此欄位，既有搜尋與排列題的投影不變。題目仍只給操作者與 Referee；未觀察的牌庫片段不能藉容量題取得卡面資訊。回條保留所有原嘗試者與其順序，未放入者的 `after`／實際目的區為空，成功投影、進場事件與 `follow` 只涵蓋真正到達者。Look remainder 延續本節既有的成功 Before 差集契約，不因容量分配把未放入者丟棄。
