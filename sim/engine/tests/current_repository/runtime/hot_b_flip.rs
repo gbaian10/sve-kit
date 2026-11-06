@@ -323,3 +323,39 @@ fn real_guide_cannot_choose_the_recovery_mode_without_a_legal_cemetery_target() 
         false
     );
 }
+
+#[test]
+fn real_cheval_without_a_face_up_carrot_cancels_only_its_fanfare_and_play_can_continue() {
+    let mut initial = initial();
+    initial["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"source","card":"BP22-R21"},{"id":"next","card":"BP03-020"}]);
+    for carrot in initial["players"]["P1"]["zones"]["evolve_deck"]
+        .as_array_mut()
+        .unwrap()
+    {
+        carrot["face_up"] = json!(false);
+    }
+    let mut board = board(&initial);
+    assert!(matches!(
+        board
+            .play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    assert!(matches!(
+        pending_source(&mut board, "BP22-R21"),
+        CardPlay::Cancelled
+    ));
+    finish_checks(&mut board);
+    assert!(
+        board.internal_pending_choice().unwrap().is_none(),
+        "the cancelled fanfare does not leave a target question"
+    );
+    let state = board.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 8_u8);
+    assert_eq!(state["P1"]["field"], json!(["source"]));
+    assert_eq!(state["objects"]["carrot-a"]["face_up"], false);
+    board
+        .play_internal_card("next", PlayerId { seat: 1 })
+        .unwrap();
+}
