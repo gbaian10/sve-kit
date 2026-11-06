@@ -183,6 +183,81 @@ fn a_selected_hand_follower_enters_through_common_capacity_rules() {
 }
 
 #[test]
+fn multi_card_hand_entry_limits_the_private_choice_to_free_field_slots() {
+    for occupied in [3_u64, 4, 5] {
+        let mut initial = setup(1, json!([]));
+        let mut field = vec![json!({"id":"s","card":"unit-follower"})];
+        field.extend((1..occupied).map(|n| json!({"id":format!("f{n}"),"card":"unit-follower"})));
+        initial["players"]["P1"]["zones"]["field"] = json!(field);
+        initial["players"]["P1"]["zones"]["hand"] = json!([
+            {"id":"h1","card":"unit-follower"}, {"id":"h2","card":"unit-follower"}
+        ]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "hand-slots",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program(&json!([
+            {"choose":{"bind":"selected","from":{"who":"self","zone":"hand","kind":"follower"},"upto":2}},
+            {"move":{"ref":"selected","to":"field","result":"entered"}}
+        ]))).unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("private hand entry");
+        };
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("hand candidates")
+        };
+        let free = 5 - occupied;
+        assert_eq!(domain.cardinality.maximum, Some(Nat(free)));
+        assert_eq!(domain.members.len(), 2);
+        assert!(game.internal_decision(View::P2).is_none());
+        if free < 2 {
+            let before = exact_authority(&game);
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0, 1]))
+                .unwrap_err();
+            assert_eq!(exact_authority(&game), before);
+        }
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets((0..free).collect()),
+            )
+            .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5);
+        assert_eq!(
+            state["P1"]["hand"].as_array().unwrap().len(),
+            usize::try_from(2 - free).unwrap()
+        );
+    }
+}
+
+#[test]
+fn multi_card_hand_entry_cannot_use_capacity_from_before_an_intervening_step() {
+    let choose = json!({"choose":{"bind":"selected","from":{"who":"self","zone":"hand","kind":"follower"},"upto":2}});
+    let enter = json!({"move":{"ref":"selected","to":"field","result":"entered"}});
+    let mut tree = fanfare::expanded::tree().clone();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"] = json!({"do":[choose, enter]});
+    lowerer().lower(&tree).unwrap();
+    for steps in [
+        json!([choose, {"draw":{"n":1}}, enter]),
+        json!([choose, {"if":{"cond":{"cmp":{"left":1,"op":"eq","right":1}},"then":[enter]}}]),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"] = json!({"do":steps});
+        lowerer().lower(&tree).unwrap_err();
+    }
+}
+
+#[test]
 fn empty_hand_choice_keeps_the_private_question_and_allows_the_available_zero() {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

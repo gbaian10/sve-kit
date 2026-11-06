@@ -1,0 +1,71 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 機械
+                  other: true
+                keywords:
+                  - rush
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 5
+                bind: seen
+            - choose:
+                bind: taken
+                from:
+                  in: seen
+                  kind: follower
+                  trait: 機械
+                  not_same_name_as_this: true
+                upto: 2
+                may: true
+            - move:
+                ref: taken
+                to: hand
+                result: added
+            - reveal:
+                ref: taken
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: added
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: 機械
+                  orig_cost_le: 2
+                upto: 2
+            - move:
+                ref: selected
+                to: field
+                result: entered
