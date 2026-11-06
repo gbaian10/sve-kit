@@ -128,3 +128,39 @@ fn variable_cost_does_not_authorize_filtered_hidden_information() {
         json!({"cost_delta":{"minus":[0,{"count":{"who":"opp","zone":"hand","kind":"spell"}}]}});
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn own_banish_zone_size_discounts_without_reading_the_opponent_zone() {
+    let program =
+        program(&json!({"cost_delta":{"minus":[0,{"count":{"who":"self","zone":"banish"}}]}}));
+    for count in [0_u8, 2, 5] {
+        let mut initial = position("hand");
+        initial["players"]["P1"]["zones"]["banish"] = json!(
+            (0..count)
+                .map(|i| json!({"id":format!("own-{i}"),"card":"unit-spell"}))
+                .collect::<Vec<_>>()
+        );
+        initial["players"]["P2"]["zones"]["banish"] =
+            json!([{"id":"opponent","card":"unit-spell"}]);
+        let mut game = from_position(&initial, &program);
+        play(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            match count {
+                0 => 7_u8,
+                2 => 9,
+                _ => 10,
+            }
+        );
+    }
+}
+
+#[test]
+fn filtered_banish_zone_counts_stay_closed_for_play_costs() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let entry = &mut tree["cards"]["BP08-038"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["play"] =
+        json!({"cost_delta":{"minus":[0,{"count":{"who":"self","zone":"banish","kind":"spell"}}]}});
+    lowerer().lower(&tree).unwrap_err();
+}

@@ -9,7 +9,7 @@ use crate::ir::{
 };
 use crate::ir::{
     Bool, BoolRead, CostChange, Expr, Int, IntOperation, IntRead, Nat, NatOperation, NatRead,
-    ObjectProperty, PlayerRef, PlayerResource, Predicate, Selector, SourceSpan,
+    ObjectProperty, PlayerRef, PlayerResource, Predicate, SelectionView, Selector, SourceSpan,
 };
 use alloc::collections::BTreeSet;
 
@@ -308,6 +308,21 @@ fn check_count(value: &Expr<Nat>) -> Result<()> {
                 query,
                 count: HistoryCount::Facts,
             } if discarded_plan(query) => Ok(()),
+            // The banish zone is public, but only its whole size is read here (BP17-051).
+            NatRead::ZoneCount {
+                selector:
+                    Selector::Zone {
+                        zone: ZoneKind::Banish,
+                        view: SelectionView::Current {},
+                        players,
+                        predicate,
+                        ..
+                    },
+            } if players.relative_to == (PlayerRef::Controller {})
+                && **predicate == Expr::Literal(Bool(true)) =>
+            {
+                Ok(())
+            }
             NatRead::ZoneCount { selector } => check_objects(selector),
             NatRead::TurnOrdinal { .. } => Ok(()),
             _ => Err(unsupported("play cost public count")),

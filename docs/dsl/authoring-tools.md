@@ -89,7 +89,7 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 
 數值算式接受 `plus`、`minus`、`times`（各恰兩項）、`min`（非空列表）與 `per: {of, unit}`。`per` 是「N 枚につき」：`of` 除以正整數 `unit` 後向下取整（負數往負無限大取整），`unit` 為零在載入時拒絕；有號溢位使整個指示失敗、不改變局面。`max` 與 `half_up` 尚未接線。傷害事件頭（`damaged`／`dealt_damage`）的本文可用 `{event: amount}` 讀該次實際傷害值；其他事件頭、起動與入場曲不提供此讀值，`{event: value}` 亦未接線。
 
-`play.cost_delta` 可使用既有公開計數、`minus`／`times`／`per`／`min` 運算與 `play.define` 別名，依付款時的公開數量加減印刷費用；正數為加費，負數為減費，所有修正合計後才以零為下限。場上、EX、墓場與自己表向進化卡的計數沿用一般數值與選擇器檢查，不能藉此篩選隱藏手牌／牌庫。`in_zone: {ref: this, zone: ex}` 在減費條件中讀取本次打出前保存的來源區域，因此卡片移入結算區後仍能正確付款；目前接受手牌與 EX，且可與公開存在／數量條件組合。
+`play.cost_delta` 可使用既有公開計數、`minus`／`times`／`per`／`min` 運算與 `play.define` 別名，依付款時的公開數量加減印刷費用；正數為加費，負數為減費，所有修正合計後才以零為下限。場上、EX、墓場與自己表向進化卡的計數沿用一般數值與選擇器檢查，不能藉此篩選隱藏手牌／牌庫。消滅區只接受不加篩選的整區張數（`{count: {who: self, zone: banish}}`，BP17-051「自分の消滅領域の枚数」），與本文讀消滅區張數相同；加上種類等篩選仍拒絕。`in_zone: {ref: this, zone: ex}` 在減費條件中讀取本次打出前保存的來源區域，因此卡片移入結算區後仍能正確付款；目前接受手牌與 EX，且可與公開存在／數量條件組合。
 
 場上持續打出費用修改可用 `static.effects: [{cost_mod: {when_playing: {who: opp, kind: spell}, delta: 1}}]`；`when_playing` 可依玩家、卡種、類型、職業、卡名、原始費用上限及 token 篩選，或用 `any_of` 組合。省略區域時包含手牌與 EX，明示 `zone: ex` 時讀本次打出前保存的來源區域。持續來源每次付款依目前場上能力重算，來源離場或失去能力後停止套用；`static.while` 使用已准入的公開付款條件，但不接受僅本次打出才有的來源區域讀值（`in_zone`）。
 
