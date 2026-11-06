@@ -174,6 +174,9 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_rule_stand_blocked(&self, id: &str) -> Result<bool> {
+        if self.internal_boxed(id) {
+            return Ok(true);
+        }
         let object = self.object(id)?;
         if object.zone == "field" && object.controller == self.active() {
             let (card, _) = self.internal_effective_print(id)?;

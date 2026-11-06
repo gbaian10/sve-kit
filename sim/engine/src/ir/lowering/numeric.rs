@@ -510,3 +510,56 @@ pub(super) fn pilot(value: &ast::Pilot, path: &str) -> Result<Action, LoweringEr
         },
     })
 }
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Box uses the formal target's checked binding."
+)]
+impl BodyContext<'_> {
+    pub(super) fn boxed(&self, value: &ast::Boxed, path: &str) -> Result<Action, LoweringError> {
+        if !matches!(value.until, ast::Until::NextOppTurn) {
+            return Err(unsupported(path));
+        }
+        let (index, selection) = self.selected_parameter(&value.reference, path)?;
+        let super::super::ChoiceDomain::Objects { constraint, .. } = &self
+            .parameters
+            .get(index)
+            .ok_or_else(|| unsupported(path))?
+            .domain
+        else {
+            return Err(unsupported(path));
+        };
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported(path));
+        };
+        let Selector::Zone {
+            zone: ZoneKind::Field,
+            players,
+            binding,
+            predicate,
+            ..
+        } = &group.selector
+        else {
+            return Err(unsupported(path));
+        };
+        let follower = super::selection::field_filter(
+            &super::selection::ObjectFilter {
+                kind: Some(super::super::CardKind::Follower),
+                ..Default::default()
+            },
+            *binding,
+        );
+        if players.relation != PlayerRelation::Opponents || predicate.as_ref() != &follower {
+            return Err(unsupported(path));
+        }
+        Ok(Action::BoxPilot {
+            subject: ObjectOperand::Selected { selection },
+            mode: super::super::BoxPilotMode::Boxed {
+                duration: duration(Some(&value.until), path)?,
+                cutoff: TimestampBasis::ProperPlay {
+                    execution: ExecutionRef::Current {},
+                },
+            },
+        })
+    }
+}

@@ -343,6 +343,9 @@ impl Game {
             .filter(|state| state.generation == object.generation)
         {
             for grant in &state.grants {
+                if self.internal_box_suppresses(holder, &grant.origin) {
+                    continue;
+                }
                 if zone == ZoneKind::Field && grant.keywords.contains("single_drive") {
                     let provider = grant.origin.provider();
                     let definition = printed_keywords::drive_definition(
@@ -433,6 +436,7 @@ impl Game {
             .filter(|state| object.zone == "field" && state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
+            .filter(|grant| !self.internal_box_suppresses(holder, &grant.origin))
             .flat_map(|grant| grant.keywords.iter().cloned())
             .collect())
     }
@@ -507,10 +511,10 @@ impl Game {
             .get(holder)
             .filter(|state| state.generation == object.generation)
             .and_then(|state| {
-                state
-                    .grants
-                    .iter()
-                    .find(|grant| grant.keywords.contains("drain"))
+                state.grants.iter().find(|grant| {
+                    grant.keywords.contains("drain")
+                        && !self.internal_box_suppresses(holder, &grant.origin)
+                })
             })
         {
             return Ok(Some(grant.origin.clone()));
@@ -908,5 +912,30 @@ impl Game {
                 .retain(|grant| grant.end != EffectEnd::Turn(turn));
             !state.grants.is_empty()
         });
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Box captures existing grant identities at installation."
+)]
+impl Game {
+    pub(super) fn internal_box_origins(&self, holder: &str) -> Result<BTreeSet<GrantOrigin>> {
+        let object = self.object(holder)?;
+        let mut origins = self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+            .into_iter()
+            .flat_map(|state| &state.grants)
+            .map(|grant| grant.origin.clone())
+            .collect::<BTreeSet<_>>();
+        origins.extend(
+            self.internal_unfiltered_static_grants(holder)?
+                .into_iter()
+                .map(|(_, origin)| origin),
+        );
+        Ok(origins)
     }
 }

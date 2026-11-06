@@ -734,6 +734,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.BoxPilot"
             | "action.box-pilot"
             | "shape.BoxPilotMode.Pilot"
+            | "shape.BoxPilotMode.Boxed"
+            | "internal.BooleanState.Boxed"
             | "shape.Action.Equip"
             | "action.equip"
             | "shape.Action.Token"

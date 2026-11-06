@@ -1646,6 +1646,7 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Reveal(value) => self.reveal(value, path),
             ast::Step::Create(value) => self.create(value, path),
             ast::Step::Pilot(value) => numeric::pilot(value, path),
+            ast::Step::Boxed(value) => self.boxed(value, path),
             ast::Step::Equip(value) => {
                 let ast::This::This = value.on;
                 if value.token.is_empty() {

@@ -833,6 +833,7 @@ impl Game {
         let turn = self.state.schedule.close()?;
         self.internal_numeric_end_turn(turn)?;
         self.internal_keywords_end_turn(turn);
+        self.internal_boxes_end_turn(turn);
         self.internal_drive_end_turn(turn);
         self.internal_attack_restrictions_end_turn(turn);
         self.internal_ability_restrictions_end_turn(turn);
@@ -842,6 +843,7 @@ impl Game {
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
         self.internal_numeric_begin_turn()?;
+        self.internal_boxes_begin_turn()?;
         self.internal_preventions_begin_turn()?;
         self.internal_attack_restrictions_begin_turn()?;
         self.state.turn["phase"] = json!("start");

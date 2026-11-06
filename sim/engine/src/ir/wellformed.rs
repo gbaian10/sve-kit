@@ -734,6 +734,24 @@ impl Checker {
             } => self.damage(recipients, amount, *flags, source, *batch),
             Action::BoxPilot {
                 subject,
+                mode: super::BoxPilotMode::Boxed { duration, cutoff },
+            } => {
+                if !matches!(subject, ObjectOperand::Selected { .. })
+                    || duration.anchor != (super::TimeAnchor::Installation {})
+                    || duration.usage.is_some()
+                    || !duration.intervals.is_empty()
+                    || !matches!(&duration.end, super::DurationEnd::NextTurnEnd {player} if *player == super::events::timing::opponent())
+                    || *cutoff
+                        != (super::TimestampBasis::ProperPlay {
+                            execution: super::ExecutionRef::Current {},
+                        })
+                {
+                    return self.reject();
+                }
+                self.object(subject)
+            }
+            Action::BoxPilot {
+                subject,
                 mode: super::BoxPilotMode::Pilot { duration },
             } => {
                 if *subject != (ObjectOperand::SourceHolder {}) {

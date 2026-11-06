@@ -194,6 +194,17 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Vec<(GrantedAbility, grant::GrantOrigin)>> {
+        Ok(self
+            .internal_unfiltered_static_grants(holder)?
+            .into_iter()
+            .filter(|(_, origin)| !self.internal_box_suppresses(holder, origin))
+            .collect())
+    }
+
+    pub(in crate::game::internal) fn internal_unfiltered_static_grants(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<(GrantedAbility, grant::GrantOrigin)>> {
         let recipient = self.object(holder)?;
         let mut keywords = Vec::new();
         if recipient.zone != "field" {

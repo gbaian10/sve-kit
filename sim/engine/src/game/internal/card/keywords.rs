@@ -42,14 +42,7 @@ impl Game {
             return Ok(None);
         }
         let mut keywords = BTreeSet::new();
-        if object.zone == "field"
-            && object.state["racing"] == true
-            && list(&object.state["links"]["出走"]).iter().any(|resource| {
-                resource
-                    .as_str()
-                    .is_some_and(|id| self.object(id).is_ok_and(|linked| linked.zone == "race"))
-            })
-        {
+        if self.internal_racing_rush(holder)? && !self.internal_box_suppresses_racing(holder) {
             keywords.insert("rush".into());
         }
         for ability in self.internal_printed_abilities(holder)? {
@@ -68,6 +61,17 @@ impl Game {
         }
         keywords.extend(self.internal_static_keywords(holder)?);
         Ok(Some(keywords))
+    }
+
+    pub(in crate::game::internal) fn internal_racing_rush(&self, holder: &str) -> Result<bool> {
+        let object = self.information_source(holder)?;
+        Ok(object.zone == "field"
+            && object.state["racing"] == true
+            && list(&object.state["links"]["出走"]).iter().any(|resource| {
+                resource
+                    .as_str()
+                    .is_some_and(|id| self.object(id).is_ok_and(|linked| linked.zone == "race"))
+            }))
     }
 
     pub(in crate::game::internal) fn internal_ward_entry_choice(

@@ -349,6 +349,8 @@ pub(super) enum Step {
     Create(Create),
     Equip(Equip),
     Pilot(Pilot),
+    #[serde(rename = "box")]
+    Boxed(Boxed),
 }
 
 #[derive(Deserialize)]
@@ -475,6 +477,14 @@ pub(super) struct Race {
 pub(super) struct EffectEvolution {
     #[serde(rename = "ref")]
     pub _reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Boxed {
+    #[serde(rename = "ref")]
+    pub reference: String,
+    pub until: Until,
 }
 
 #[derive(Deserialize)]
@@ -1434,6 +1444,7 @@ pub(super) struct TargetQuery {
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
     pub has_evolve: Option<True>,
+    pub boxed: Option<bool>,
     pub acted: Option<bool>,
     pub evolved: Option<bool>,
     pub entered_this_turn: Option<True>,
@@ -1491,7 +1502,10 @@ pub(super) struct ObservedNameExcept {
 impl TargetQuery {
     /// Field-state filters exist only on current field objects, not leaders or looked cards.
     pub(super) const fn has_state_filter(&self) -> bool {
-        self.acted.is_some() || self.evolved.is_some() || self.entered_this_turn.is_some()
+        self.acted.is_some()
+            || self.evolved.is_some()
+            || self.entered_this_turn.is_some()
+            || self.boxed.is_some()
     }
 
     pub(super) fn has_numeric_filter(&self) -> bool {

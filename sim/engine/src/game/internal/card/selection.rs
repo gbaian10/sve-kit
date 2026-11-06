@@ -761,7 +761,7 @@ pub(in crate::game::internal) fn check_predicate(
 ) -> Result<()> {
     match value {
         Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing | BooleanState::EnteredThisTurn } if candidate_view(object, candidate)) => {
+        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing | BooleanState::EnteredThisTurn | BooleanState::Boxed } if candidate_view(object, candidate)) => {
             Ok(())
         }
         Expr::Compute(operation) => match operation.as_ref() {
@@ -855,6 +855,10 @@ fn check_atomic_predicate(
 
 fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
     match read {
+        BoolRead::State {
+            property: BooleanState::Boxed,
+            ..
+        } => Ok(game.internal_boxed(id)),
         BoolRead::State {
             property: BooleanState::Racing,
             ..

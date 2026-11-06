@@ -17,7 +17,7 @@ pub(super) struct State {
 pub(in crate::game::internal) fn check_action(action: &Action) -> Result<()> {
     if let Action::BoxPilot { subject, mode } = action {
         let BoxPilotMode::Pilot { duration } = mode else {
-            return Err(unsupported("boxed instruction"));
+            return super::super::boxed::check(action);
         };
         if *subject != (ObjectOperand::SourceHolder {})
             || duration.end != (DurationEnd::CurrentTurnEnd {})

@@ -199,7 +199,7 @@ fn pilot_does_not_apply_old_expiry_after_the_source_changes_generation() {
 }
 
 #[test]
-fn pilot_keeps_boxed_and_unrequested_duration_shapes_closed() {
+fn pilot_rejects_self_boxing_cutoffs_and_unrequested_duration_shapes() {
     let mut step = pilot(1);
     if let Node::Instruction { instruction } = &mut step.node {
         instruction.action = Action::BoxPilot {

@@ -128,7 +128,9 @@ impl Game {
                 "printed ability set",
             ));
         };
-        if object.state["silenced"] == true {
+        if object.state["silenced"] == true
+            || self.internal_box_suppresses_printed(holder, &card, face)
+        {
             return Ok(Vec::new());
         }
         Ok(program
