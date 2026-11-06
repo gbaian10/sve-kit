@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP06-055:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  other: true
+                  class: ドラゴン
+                keywords:
+                  - ward
+      - line: 2
+        evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  class: ドラゴン
+                  orig_cost_le: 5
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

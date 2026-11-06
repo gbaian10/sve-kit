@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-002:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: パッション
+                  orig_cost_le: 3
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

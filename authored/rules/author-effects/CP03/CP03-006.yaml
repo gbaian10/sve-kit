@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-006:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        keywords:
+          - twin_drive
+      - line: 2
+        auto:
+          "on":
+            attacked:
+              who: self
+              sel:
+                kind: follower
+                trait: アクアフォース
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_count:
+                        event: attacked
+                        who: self
+                        window: this_turn
+                        sel:
+                          kind: follower
+                          trait: アクアフォース
+                    op: eq
+                    right: 3
+                then:
+                  - life:
+                      who: self
+                      delta: 2
+                  - draw:
+                      n: 1
+      - line: 3
+        evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: アクアフォース
+                  orig_cost_eq: 1
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD02c-002:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            act:
+              n: 3
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: パッション
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: パッション
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+            - grant:
+                "on":
+                  follow: entered
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - move:
+                            ref: this
+                            to: hand

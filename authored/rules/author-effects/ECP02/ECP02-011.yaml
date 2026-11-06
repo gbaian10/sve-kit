@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-011:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: パッション
+                  orig_cost_le: 6
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+            - create:
+                token: 魔法のアイテム
+                to: ex
+                n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP02-T07

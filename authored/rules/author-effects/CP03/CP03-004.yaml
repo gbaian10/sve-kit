@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-004:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          cost:
+            return_to_hand:
+              n: 1
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: アクアフォース
+                orig_cost_eq: 1
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  trait: アクアフォース
+                  orig_cost_le: 3
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

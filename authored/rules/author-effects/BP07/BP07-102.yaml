@@ -1,0 +1,65 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-102:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 3
+                bind: seen
+            - choose:
+                bind: taken
+                from:
+                  in: seen
+                  kind: follower
+                  class: ビショップ
+                upto: 1
+                may: true
+            - move:
+                ref: taken
+                to: hand
+                result: added
+            - reveal:
+                ref: taken
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: added
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  name_contains: ムニャール
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
