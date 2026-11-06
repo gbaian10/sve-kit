@@ -36,18 +36,42 @@ const fn controller() -> PlayerSet {
     }
 }
 
-fn predicate(candidate: Binding<ObjectRef>, name: &CardName) -> Expr<Bool> {
+/// The printed name a named Advance pick must match: the whole name, or a fragment of it (BP10-063).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum AdvanceName {
+    Exact(CardName),
+    Contains(CardName),
+}
+
+impl AdvanceName {
+    /// Whether an own printed rules name satisfies this pick.
+    pub(crate) fn matches(&self, own: &str) -> bool {
+        match self {
+            Self::Exact(name) => own == name.0,
+            Self::Contains(fragment) => own.contains(&fragment.0),
+        }
+    }
+}
+
+fn predicate(candidate: Binding<ObjectRef>, name: &AdvanceName) -> Expr<Bool> {
     let object = ObjectView::Current {
         object: Box::new(ObjectOperand::Bound { binding: candidate }),
     };
+    let names = match name {
+        AdvanceName::Exact(name) => Predicate::NamesIntersect {
+            left: Expr::Live(Box::new(NamesRead::Names {
+                object: object.clone(),
+            })),
+            right: Expr::Literal(vec![name.clone()]),
+        },
+        AdvanceName::Contains(fragment) => Predicate::NameContains {
+            object: object.clone(),
+            name: Expr::Literal(fragment.clone()),
+        },
+    };
     Expr::Compute(Box::new(Predicate::And {
         predicates: vec![
-            Expr::Compute(Box::new(Predicate::NamesIntersect {
-                left: Expr::Live(Box::new(NamesRead::Names {
-                    object: object.clone(),
-                })),
-                right: Expr::Literal(vec![name.clone()]),
-            })),
+            Expr::Compute(Box::new(names)),
             Expr::Live(Box::new(BoolRead::State {
                 object,
                 property: BooleanState::AdvanceFollower,
@@ -56,7 +80,7 @@ fn predicate(candidate: Binding<ObjectRef>, name: &CardName) -> Expr<Bool> {
     }))
 }
 
-fn choice(keys: &Keys, name: &CardName) -> Decision {
+fn choice(keys: &Keys, name: &AdvanceName) -> Decision {
     let candidate = Binding::new(1, keys.candidate);
     Decision {
         id: keys.decision,
@@ -98,7 +122,7 @@ pub(crate) fn build(
     source: &SourceSpan,
     movement_source: &SourceSpan,
     origin: &AbilitySource,
-    name: &CardName,
+    name: &AdvanceName,
     to: ZoneKind,
 ) -> Control {
     Control::Sequence {
@@ -154,7 +178,7 @@ pub(crate) fn build(
     }
 }
 
-pub(crate) fn name(decision: &Decision) -> Option<CardName> {
+pub(crate) fn name(decision: &Decision) -> Option<AdvanceName> {
     let ChoiceDomain::Objects {
         binding,
         constraint,
@@ -183,17 +207,26 @@ pub(crate) fn name(decision: &Decision) -> Option<CardName> {
     let [Expr::Compute(names), _] = predicates.as_slice() else {
         return None;
     };
-    let Predicate::NamesIntersect {
+    let name = if let Predicate::NamesIntersect {
         right: Expr::Literal(names),
         ..
     } = names.as_ref()
-    else {
+    {
+        let [name] = names.as_slice() else {
+            return None;
+        };
+        AdvanceName::Exact(name.clone())
+    } else if let Predicate::NameContains {
+        name: Expr::Literal(fragment),
+        ..
+    } = names.as_ref()
+    {
+        AdvanceName::Contains(fragment.clone())
+    } else {
         return None;
     };
-    let [name] = names.as_slice() else {
-        return None;
-    };
-    if name.0.is_empty() {
+    let (AdvanceName::Exact(text) | AdvanceName::Contains(text)) = &name;
+    if text.0.is_empty() {
         return None;
     }
     let keys = Keys {
@@ -203,7 +236,7 @@ pub(crate) fn name(decision: &Decision) -> Option<CardName> {
         instruction: InstructionId(0),
         receipt: ReceiptId(0),
     };
-    (*decision == choice(&keys, name)).then(|| name.clone())
+    (*decision == choice(&keys, &name)).then_some(name)
 }
 
 #[derive(Clone, Copy)]
