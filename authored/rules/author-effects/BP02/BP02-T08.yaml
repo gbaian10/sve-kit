@@ -1,0 +1,35 @@
+cards:
+  BP02-T08:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: any
+                on:
+                  kind: follower
+                  name: カグヤ
+                  who: self
+                  zone: field
+          while:
+            my_turn: true
+      - auto:
+          do:
+            - banish: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token:
+      name: うたかたの月
+      template: true
+format: 2
+kind: author_effect_set

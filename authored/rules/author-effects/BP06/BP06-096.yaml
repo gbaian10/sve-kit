@@ -1,0 +1,45 @@
+cards:
+  BP06-096:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 7
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - kind: amulet
+                    orig_cost_le: 5
+                  - kind: amulet
+                    orig_cost_le: 3
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
