@@ -235,7 +235,7 @@ fn bp14_029_recruits_from_five_cards_and_can_discard_itself_from_hand_for_a_knig
 fn bp12_017_adds_and_reveals_a_fairy_then_pays_itself_to_heal_with_three_ex_fairies() {
     let mut initial = position("BP12-017");
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"f1","card":"BP01-T01"},{"id":"f2","card":"BP01-T01"},{"id":"f3","card":"BP01-T01"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"f1","card":"BP01-T03"},{"id":"f2","card":"BP01-T03"},{"id":"f3","card":"BP01-T03"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"picked","card":"BP01-013"},{"id":"a","card":"BP01-171"},{"id":"b","card":"BP01-171"}]);
     let mut game = game(&initial);
     play(&mut game, "source");
