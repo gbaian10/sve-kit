@@ -8,22 +8,22 @@ requires-python = ">=3.14.10,<3.15"
 dependencies = [
     "rich>=15.0.0",
     "loguru>=0.7.3",
-    "python-dotenv>=1.2.3",
-    "pydantic>=2.13.5",
-    "pydantic-settings>=2.15.0",
-    "orjson>=3.12.0",
+    "python-dotenv>=1.2.4",
+    "pydantic>=2.14.3",
+    "pydantic-settings>=2.16.2",
+    "orjson>=3.13.0",
     "ruamel-yaml>=0.19.1",
     "httpx>=0.28.1",
-    "selectolax>=1.0.0",
+    "selectolax>=1.0.2",
     "stamina>=26.1.0",
-    "typer>=0.27.2",
+    "typer>=0.28.0",
     "pillow==13.0.0",
     "jsonschema>=4.26.0",
     "pyyaml>=6.0.3",
     "brotli==1.2.1",
     "psutil>=7.2.2",
     "yamlrocks==0.7.1",
-    "jsonschema-rs==0.60.1",
+    "jsonschema-rs==0.60.3",
 ]
 
 [project.scripts]
@@ -37,26 +37,28 @@ art-matching = [
 
 [dependency-groups]
 dev = [
-    "pre-commit>=4.6.2",
-    "ruff>=0.16.8",
-    "mypy>=2.3.1",
-    "commitizen>=4.18.1",
+    "pre-commit>=4.7.0",
+    "ruff>=0.17.4",
+    "mypy>=2.4.1",
+    "commitizen>=4.19.3",
     "cz-conventional-gitmoji>=0.7.0",
     "taplo>=0.9.3",
-    "types-jsonschema>=4.26.0.20260518",
-    "types-pyyaml>=6.0.12",
+    "types-jsonschema>=4.26.0.20261006",
+    "types-pyyaml>=6.0.12.20261103",
     "brotli-stubs>=1.2.1",
     "types-psutil>=7.2.2.20260906",
     "vulture>=2.16",
 ]
 
 # Optional local check, run by hand (see CONTRIBUTING); kept out of the default groups because it bundles ~200 MB of Node.js.
-pyright = ["pyright[nodejs]>=1.1.414"]
+pyright = [
+    "pyright[nodejs]>=1.1.414",
+]
 
 test = [
-    "pytest>=9.1.1",
-    "pytest-asyncio>=1.4.0",
-    "pytest-mock>=3.15.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1.post1",
+    "pytest-mock>=3.17.0",
     "pytest-xdist>=3.8.0",
     "pytest-dotenv>=0.5.2",
     "pytest-emoji>=0.2.0",
@@ -66,7 +68,7 @@ test = [
     "pytest-clarity>=1.0.1",
     "pytest-random-order>=1.2.0",
     "opencv-python-headless==5.0.0.93",
-    "numpy>=2.4,<3",
+    "numpy>=2.5.4",
 ]
 
 [tool.uv]
@@ -196,7 +198,7 @@ directory = "htmlcov"
 ## ruff
 # <https://docs.astral.sh/ruff/settings/>
 [tool.ruff]
-required-version = ">=0.16.0"
+required-version = ">=0.17.0"
 target-version = "py314"
 output-format = "concise"
 show-fixes = true
