@@ -998,7 +998,7 @@ impl BodyContext<'_> {
             ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(
                 distinct_names,
                 super::super::ObjectProperty::Names,
-                Binding::new(self.allocator.id(path)?, self.scope),
+                Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
                 path,
             ),
             ast::Number::DistinctOriginalCosts {
@@ -1006,7 +1006,7 @@ impl BodyContext<'_> {
             } => super::numeric::distinct_count(
                 distinct_orig_costs,
                 super::super::ObjectProperty::Cost,
-                Binding::new(self.allocator.id(path)?, self.scope),
+                Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
                 path,
             ),
             ast::Number::TurnOrdinal { turn_number } => Ok(turn_ordinal(turn_number.who)),

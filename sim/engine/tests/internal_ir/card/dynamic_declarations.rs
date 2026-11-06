@@ -18,6 +18,9 @@ fn dynamic_numeric_declarations_reject_hidden_foreign_and_source_dependent_reads
         json!({"count":{"who":"opp","zone":"field"}}),
         json!({"resource":{"who":"opp","kind":"pp_max"}}),
         json!({"hp_of":"this"}),
+        json!({"distinct_names":{"who":"opp","zone":"cemetery"}}),
+        json!({"distinct_names":{"who":"self","zone":"hand"}}),
+        json!({"distinct_orig_costs":{"who":"self","zone":"cemetery"}}),
     ] {
         for field in ["cost_le", "orig_cost_le"] {
             let mut from = json!({"who":"opp","zone":"field","kind":"follower"});
@@ -34,6 +37,15 @@ fn dynamic_numeric_declarations_reject_hidden_foreign_and_source_dependent_reads
             lower_body(&json!({"targets":[target],"do":[{"destroy":{"ref":"target"}}]}))
                 .unwrap_err();
         }
+    }
+}
+#[test]
+fn own_public_distinct_name_counts_bound_target_costs() {
+    for zone in ["field", "ex", "cemetery"] {
+        let mut from = json!({"who":"self","zone":"cemetery","kind":"spell"});
+        from["orig_cost_le"] = json!({"distinct_names":{"who":"self","zone":zone,"kind":"spell"}});
+        lower_body(&json!({"targets":[{"bind":"target","from":from,"n":1}],"do":[{"move":{"ref":"target","to":"ex"}}]}))
+            .unwrap();
     }
 }
 #[test]
