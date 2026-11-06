@@ -1039,6 +1039,9 @@ fn choice_count(
             context.entered_from(origin, path)?
         }
         ast::ModeCondition::EnteredFrom(_) => return Err(unsupported(path)),
+        ast::ModeCondition::LeaderLife(threshold) => Expr::Compute(Box::new(
+            super::conditions::leader_life_condition(threshold, path)?,
+        )),
         ast::ModeCondition::Spellchain(threshold) => at_least(
             NatFrozen::SpellChain {
                 player: PlayerRef::Controller {},
