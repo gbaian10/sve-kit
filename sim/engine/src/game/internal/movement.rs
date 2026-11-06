@@ -629,8 +629,10 @@ impl Game {
             if object.generation != member.generation.0 {
                 continue;
             }
-            let ordinary = matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット")
-                && matches!(object.zone.as_str(), "cemetery" | "ex");
+            let ordinary = (matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット")
+                && matches!(object.zone.as_str(), "cemetery" | "ex"))
+                // A follower token waiting in EX enters like any EX follower (BP01-078's ドラゴン).
+                || (self.object_type(&object.id)? == "フォロワー・トークン" && object.zone == "ex");
             let private_hand = object.zone == "hand"
                 && object.owner == seat
                 && object.controller == seat
