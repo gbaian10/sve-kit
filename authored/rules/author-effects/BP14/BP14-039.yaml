@@ -1,0 +1,68 @@
+cards:
+  BP14-039:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - auto:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  name: オニオン軍団
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - either:
+                options:
+                  - - move:
+                        order: chooser
+                        position: top
+                        ref:
+                          except:
+                            in:
+                              objects_of: entered
+                              view: before
+                          in: seen
+                        to: deck
+                  - - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: entered
+                              view: before
+                          in: seen
+                        to: deck
+          on:
+            phase:
+              which: end
+              whose: self
+          zone: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

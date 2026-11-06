@@ -1,0 +1,33 @@
+cards:
+  BP14-040:
+    abilities:
+      - evolve_time:
+          cost:
+            discard:
+              n: 1
+              sel:
+                name: オニオン軍団
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 2
+                who: self
+        line: 1
+      - lastword:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

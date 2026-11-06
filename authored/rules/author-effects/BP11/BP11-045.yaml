@@ -1,0 +1,61 @@
+cards:
+  BP11-045:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        name: ラピッドファイア
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 3
+                else:
+                  - damage:
+                      n: 2
+                      to: victim
+                then:
+                  - damage:
+                      n: 3
+                      to: victim
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        name: ラピッドファイア
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - damage:
+                      n: 4
+                      to:
+                        leader_of: victim
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    deck_rule:
+      deck: main
+      same_name_max: 6
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

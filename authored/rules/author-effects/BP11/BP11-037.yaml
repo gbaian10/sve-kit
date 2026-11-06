@@ -1,0 +1,58 @@
+cards:
+  BP11-037:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - discard:
+                n: 1
+                who: self
+          on:
+            played:
+              during:
+                turn: self
+              sel:
+                kind: spell
+                orig_cost_le: 1
+              who: self
+          per_turn: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 従順な駿馬
+            - search:
+                n: 1
+                result: searched_fire
+                sel:
+                  name: ラピッドファイア
+                  who: self
+                  zone: deck
+                to: ex
+            - if:
+                cond:
+                  spellchain: 5
+                then:
+                  - apply:
+                      effect:
+                        cost_mod:
+                          delta: -1
+                          when_playing:
+                            in: affected
+                      on:
+                        follow: searched_fire
+                      until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-05"
+format: 2
+kind: author_effect_set

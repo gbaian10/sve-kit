@@ -1,0 +1,46 @@
+cards:
+  BP09-049:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                abilities:
+                  - attack_time:
+                      do:
+                        - damage:
+                            n: 1
+                            to: victim
+                      targets:
+                        - bind: victim
+                          from:
+                            kind: follower
+                            who: opp
+                            zone: field
+                          n: 1
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  name: オニオン軍団
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 5
+    admission: light
+    deck_rule:
+      deck: main
+      same_name_max: 50
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
