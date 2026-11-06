@@ -5,9 +5,9 @@
 )]
 use super::{
     Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Info, Int, IntOperation,
-    IntRead, KindRead, NamesRead, NatRead, NumberRead, ObjectOperand, ObjectRef, ObjectView,
-    PlayerRef, PlayerRelation, PlayerResource, Predicate, SelectionView, Selector, TraitsRead,
-    ZoneKind,
+    IntRead, KindRead, NamesRead, NatOperation, NatRead, NumberRead, ObjectOperand, ObjectProperty,
+    ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate, SelectionView,
+    Selector, TraitsRead, ZoneKind,
 };
 pub(crate) fn check(value: &Expr<Int>) -> bool {
     match value {
@@ -32,6 +32,13 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
             IntOperation::FromNat {
                 value: Expr::Live(read),
             } => matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector)),
+            // The distinct name count of the same public populations is just as candidate-independent.
+            IntOperation::FromNat {
+                value: Expr::Compute(distinct),
+            } => matches!(
+                distinct.as_ref(),
+                NatOperation::DistinctCount { objects, property: ObjectProperty::Names } if count(objects)
+            ),
             _ => false,
         },
         _ => false,
