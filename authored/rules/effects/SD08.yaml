@@ -1,118 +1,44 @@
-format: 1
-kind: effect_set
 cards:
   SD08-002:
-    status: complete
     abilities:
-      - line: 1
-        kind: static
-        body:
-          op: aura
-          subjects:
-            side: self
-            zone: field
-            name: ドラゴン
+      - body:
           keywords:
             - storm
             - drain
-      - line: 2
-        kind: trigger
-        body:
-          op: restrict
+          op: aura
+          subjects:
+            name: ドラゴン
+            side: self
+            zone: field
+        kind: static
+        line: 1
+      - body:
           action: attack
-          subjects: target.1
           during: next-controller-turn
+          op: restrict
+          subjects: target.1
         event: end
+        kind: trigger
+        line: 2
         targets:
           - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 0
             max: 2
-      - line: 3
-        kind: activated
-        body:
-          op: create
-          name: ドラゴン
-          count: 1
-          to: field
-        limit: 1
-        costs:
-          - op: pp
-            amount: 0
-  SD08-006:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: eq
-            args:
-              - count:
-                  side: self
-                  zone: field
-                  type: follower
-                  other: true
-              - 0
-          then:
-            op: seq
-            steps:
-              - op: destroy
-                subjects: target.1
-              - op: draw
-                count: 1
-        event: enter
-        subject: self
-        targets:
-          - key: "1"
+            min: 0
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: if
-          condition:
-            fn: le
-            args:
-              - read: self.leader.life
-              - 10
-          then:
-            op: modify
-            subjects: self.leader
-            hp: 5
-        event: enter
-        subject: self
-      - line: 3
-        kind: activated
-        body:
-          op: optional
-          then:
-            op: seq
-            steps:
-              - op: select
-                select:
-                  side: self
-                  zone: evolve_deck
-                  name: 大いなる《世界》・ゼルガネイア
-                min: 1
-                max: 1
-                bind: chosen
-              - op: move
-                subjects: chosen
-                to: ex
-                bind: placed
-        active_zones:
-          - cemetery
+              zone: field
+      - body:
+          count: 1
+          name: ドラゴン
+          op: create
+          to: field
         costs:
-          - op: pp
-            amount: 10
-          - op: banish
-            subjects: self
+          - amount: 0
+            op: pp
+        kind: activated
+        limit: 1
+        line: 3
+    status: complete
+format: 1
+kind: effect_set

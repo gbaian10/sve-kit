@@ -72,6 +72,17 @@ fn board_at(
     face_up: bool,
     timing: Option<(&str, &str)>,
 ) -> Game {
+    let (catalog, initial) = board_parts(pp, ep, full, face_up, timing);
+    board_game(catalog, &initial, program)
+}
+
+fn board_parts(
+    pp: u8,
+    ep: u8,
+    full: bool,
+    face_up: bool,
+    timing: Option<(&str, &str)>,
+) -> (Arc<Catalog>, Value) {
     let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
     let mut definitions = serde_json::from_str::<Value>(&document).unwrap();
     for (number, name, kind) in [
@@ -124,9 +135,13 @@ fn board_at(
     initial["players"]["P2"]["zones"]["evolve_deck"] = json!([
         {"id":"opposing","card":"incoming"}
     ]);
+    (catalog, initial)
+}
+
+fn board_game(catalog: Arc<Catalog>, initial: &Value, program: &WellFormedCardProgram) -> Game {
     let mut game = Game::new(
         catalog,
-        &initial,
+        initial,
         &Value::Null,
         &Value::Null,
         "advance-entry",
@@ -650,9 +665,14 @@ fn fabricated_and_replayed_private_entry_answers_preserve_authority() {
 }
 
 #[test]
-fn a_private_evolve_deck_binding_cannot_escape_its_adjacent_field_move() {
+fn a_private_evolve_deck_binding_cannot_escape_its_adjacent_field_or_ex_move() {
     program(false, true);
-    for to in ["hand", "cemetery", "ex"] {
+    // BP10-109 puts the named Advance into EX; other destinations stay closed.
+    let mut to_ex = tree(false, true);
+    to_ex["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["move"]["to"] =
+        json!("ex");
+    lowerer().lower(&to_ex).unwrap();
+    for to in ["hand", "cemetery"] {
         let mut input = tree(false, true);
         input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["move"]["to"] =
             json!(to);
@@ -854,4 +874,94 @@ fn activation_prohibition_also_blocks_advance_despite_an_evolution_exception() {
             "the other unlocked copy can still substitute EP for one PP"
         );
     }
+}
+
+fn to_ex_program() -> WellFormedCardProgram {
+    let mut input = tree(false, true);
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["move"]["to"] =
+        json!("ex");
+    checked_tree(&input)
+}
+
+#[test]
+fn the_named_pick_goes_to_ex_only_while_ex_has_room() {
+    let program = to_ex_program();
+    for full in [false, true] {
+        let (catalog, mut initial) = board_parts(3, 0, false, false, None);
+        if full {
+            initial["players"]["P1"]["zones"]["ex"] = json!(
+                (0_u8..5)
+                    .map(|n| json!({"id":format!("ex-{n}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let mut game = board_game(catalog, &initial, &program);
+        let play = game
+            .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap();
+        resolved(choose(&mut game, play, true));
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["pp"]["current"], 0, "the cost stays paid");
+        assert_eq!(
+            view["P1"]["ex"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("incoming")),
+            !full,
+            "a full EX keeps the Advance in the evolve deck"
+        );
+        assert_eq!(
+            view["P1"]["ex"].as_array().unwrap().len(),
+            if full { 5 } else { 1 }
+        );
+        assert_eq!(view["P2"]["evolve_deck"], json!(["opposing"]));
+    }
+}
+
+#[test]
+fn an_evolve_deck_move_to_ex_needs_the_named_private_pick() {
+    let mut raw = to_ex_program().card().clone();
+    let steps = &mut raw.abilities[0].node.body.as_mut().unwrap().steps;
+    let Node::Control {
+        control: Control::Sequence { body },
+    } = &steps[0].node
+    else {
+        panic!("named Advance sequence")
+    };
+    let mut ordinary = body.steps[1].clone();
+    let Node::Instruction { instruction } = &mut ordinary.node else {
+        panic!("adjacent move")
+    };
+    let Action::Move { objects, .. } = &mut instruction.action else {
+        panic!("move action")
+    };
+    // An ordinary move of the own evolve deck, with no named private Decision at all.
+    *objects = Selector::Zone {
+        players: PlayerSet {
+            relation: PlayerRelation::SelfPlayer,
+            relative_to: PlayerRef::Controller {},
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+            text_quantifier: TextQuantifier::Implicit,
+        },
+        zone: ZoneKind::Evolve,
+        view: SelectionView::Current {},
+        binding: Binding::new(1, ScopeId(9)),
+        predicate: Box::new(Expr::Literal(Bool(true))),
+    };
+    steps[0] = ordinary;
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    // Only the own Advance is present, so card-type checks alone would let it move.
+    let (catalog, mut initial) = board_parts(3, 0, false, false, None);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"incoming","card":"incoming"}]);
+    let mut game = board_game(catalog, &initial, &checked);
+    game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap_err();
+    let ex = game.projection(View::Referee).unwrap()["P1"]["ex"].clone();
+    assert!(
+        !ex.as_array().unwrap().contains(&json!("incoming")),
+        "no ordinary move may put an evolve-deck Advance into EX: {ex}"
+    );
 }

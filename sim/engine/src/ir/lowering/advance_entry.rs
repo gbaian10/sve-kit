@@ -1,7 +1,7 @@
 use super::{
     AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, unsupported,
 };
-use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId, advance_entry};
+use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId, ZoneKind, advance_entry};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -42,8 +42,14 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
+        let to = match movement.to {
+            ast::Destination::Field => ZoneKind::Field,
+            ast::Destination::Ex => ZoneKind::Ex,
+            ast::Destination::Hand | ast::Destination::Cemetery | ast::Destination::Deck => {
+                return Err(unsupported(movement_path));
+            }
+        };
         if !matches!(&movement.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if *name == choice.bind)
-            || !matches!(movement.to, ast::Destination::Field)
             || movement.top.is_some()
             || movement.position.is_some()
             || movement.order.is_some()
@@ -72,6 +78,7 @@ impl BodyContext<'_> {
                     &movement_source,
                     origin,
                     &CardName(query.name.clone()),
+                    to,
                 ),
             },
         })
