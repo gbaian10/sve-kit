@@ -24,7 +24,7 @@ dev = [
     "mypy>=2.3.1",
     "types-boto3[s3]>=1.43.108",
     "types-jsonschema>=4.26.0.20260518",
-    "brotli-stubs>=1.2.0",
+    "brotli-stubs>=1.2.1",
 ]
 test = [
     "pytest>=9.1.1",
