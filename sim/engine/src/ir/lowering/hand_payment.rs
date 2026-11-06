@@ -163,6 +163,15 @@ fn filter(
         }
         predicates.push(search::object_filter(None, Some(trait_id), None, binding));
     }
+    if let Some(union) = &query.traits_any {
+        predicates.push(Expr::Compute(Box::new(Predicate::Or {
+            predicates: union
+                .0
+                .iter()
+                .map(|trait_id| search::object_filter(None, Some(trait_id), None, binding))
+                .collect(),
+        })));
+    }
     if let Some(class) = &query.class {
         if class.is_empty() {
             return Err(unsupported(path));

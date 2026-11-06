@@ -85,6 +85,7 @@ impl BodyContext<'_> {
         let population = ast::PublicQuery {
             acted: None,
             not_same_name_as_this: false,
+            traits_any: None,
             who: query.who.clone(),
             zone: ast::PublicZone::Field,
             kind: query.kind.map(ast::FieldKind::search),
@@ -135,6 +136,7 @@ impl BodyContext<'_> {
             || query.has_evolve.is_some()
             || query.has_state_filter()
             || !query.traits_all.is_empty()
+            || query.traits_any.is_some()
             || !query.names.is_empty()
             || query
                 .cost_le
@@ -150,6 +152,7 @@ impl BodyContext<'_> {
         let population = ast::PublicQuery {
             acted: None,
             not_same_name_as_this: false,
+            traits_any: None,
             who: query.who.clone().ok_or_else(|| unsupported(path))?,
             zone: ast::PublicZone::Field,
             kind: query.kind.clone(),

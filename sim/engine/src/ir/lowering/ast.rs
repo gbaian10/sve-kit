@@ -1,5 +1,5 @@
 use crate::ir::{CardKind, ZoneKind};
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::slice::from_ref;
 use serde::Deserialize;
 use serde::de::IgnoredAny;
@@ -1374,6 +1374,7 @@ pub(super) struct TargetQuery {
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,
+    pub traits_any: Option<TraitUnion>,
     pub token: Option<bool>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -1419,6 +1420,23 @@ impl TryFrom<String> for FilterKeyword {
             ) => Ok(Self(keyword)),
             _ => Err("unsupported filter keyword"),
         }
+    }
+}
+
+/// 「A・カードかB・カード」: at least two distinct, non-empty trait names, any of which matches.
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(try_from = "Vec<String>")]
+pub(super) struct TraitUnion(pub Vec<String>);
+
+impl TryFrom<Vec<String>> for TraitUnion {
+    type Error = &'static str;
+
+    fn try_from(value: Vec<String>) -> Result<Self, Self::Error> {
+        let distinct: BTreeSet<_> = value.iter().collect();
+        if value.len() < 2 || distinct.len() != value.len() || value.iter().any(String::is_empty) {
+            return Err("traits_any needs at least two distinct trait names");
+        }
+        Ok(Self(value))
     }
 }
 
@@ -2139,6 +2157,7 @@ pub(super) struct PublicQuery {
     pub kind: Option<SearchKind>,
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
+    pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
     #[serde(default)]
     pub names: Vec<String>,
@@ -2490,6 +2509,7 @@ pub(super) struct HandQuery {
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,
+    pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub class: Option<String>,
