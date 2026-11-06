@@ -60,6 +60,9 @@ extend = "../carddb/pyproject.toml"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = [
+    # Keep ambient developer environment files out of publish tests.
+    "-p",
+    "no:dotenv",
     "--import-mode=importlib",
     "--strict-markers",
     "--maxfail=3",
