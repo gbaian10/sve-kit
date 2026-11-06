@@ -1,0 +1,23 @@
+cards:
+  BP18-014:
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+          usable_if:
+            history:
+              event: evolved
+              sel:
+                kind: follower
+              who: self
+              window: this_turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
