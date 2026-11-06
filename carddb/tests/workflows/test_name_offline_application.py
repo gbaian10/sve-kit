@@ -48,7 +48,7 @@ def recipe(tmp_path_factory: pytest.TempPathFactory) -> offline.Inputs:
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_version.py"),
     )
-    for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
+    for name in ("uv.lock", "carddb/pyproject.toml"):
         (root / name).write_bytes((REPO / name).read_bytes())
     write(root / "authored", {})
     install(

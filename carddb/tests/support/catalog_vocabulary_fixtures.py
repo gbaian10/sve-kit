@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 RUNTIME = (
     CODE,
-    "carddb/uv.lock",
+    "uv.lock",
     "carddb/pyproject.toml",
     "carddb/src/sve_carddb/domains/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/core/json.py",

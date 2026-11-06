@@ -146,6 +146,8 @@ def _basis(
         "--",
         "carddb/src",
         "carddb/uv.lock",
+        "pyproject.toml",
+        "uv.lock",
         "carddb/pyproject.toml",
     )
     if changed:
@@ -160,6 +162,8 @@ def _basis(
         "--",
         "carddb/src",
         "carddb/uv.lock",
+        "pyproject.toml",
+        "uv.lock",
         "carddb/pyproject.toml",
     ):
         raise ValueError("Renewal program worktree must be committed and clean")

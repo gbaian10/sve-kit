@@ -80,7 +80,7 @@ Prepare `purposes.json` as the reviewed `sources` array, then generate the
 selection from a committed checkout at the repository root, for example:
 
 ```bash
-uv run --directory carddb python - <<'PY'
+uv run --package sve-carddb python - <<'PY'
 import json
 import subprocess
 from pathlib import Path

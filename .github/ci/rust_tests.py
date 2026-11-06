@@ -50,7 +50,9 @@ INPUTS = (
     "carddb/tests/__init__.py",
     "carddb/tests/support",
     "carddb/pyproject.toml",
-    "carddb/uv.lock",
+    "publish/pyproject.toml",
+    "pyproject.toml",
+    "uv.lock",
 )
 # hatch-vcs writes this during uv installs; the package exposes the version,
 # but repository_current's outputs do not consume it.

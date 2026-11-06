@@ -27,7 +27,7 @@ jobs:
           enable-cache: true
           save-cache: false # this workflow runs only on PR events
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: carddb/uv.lock
+          cache-dependency-glob: uv.lock
       - name: Commit format (PR title)
         env:
           TITLE: ${{ github.event.pull_request.title }}

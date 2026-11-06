@@ -1,0 +1,10 @@
+[dependency-groups]
+dev = []
+test = []
+
+[tool.uv.workspace]
+members = ["carddb", "publish"]
+exclude = ["scan"]
+
+[tool.uv]
+default-groups = ["dev", "test"]

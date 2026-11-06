@@ -465,7 +465,7 @@ def main() -> None:
     report["program_revision"] = args.program_revision
     report["program_sha256"] = digest(Path(__file__).read_bytes())
     report["dependencies"] = {
-        "carddb/uv.lock": digest((Path(__file__).parents[4] / "uv.lock").read_bytes())
+        "uv.lock": digest((Path(__file__).parents[5] / "uv.lock").read_bytes())
     }
     args.output.write_bytes(canonical(report) + b"\n")
     sys.stdout.write(canonical(report["counts"]).decode() + "\n")

@@ -3,41 +3,41 @@ name = "sve-publish"
 version = "0.1.0"
 description = "Publish verified SVE offline previews to R2"
 license = "Apache-2.0"
-requires-python = ">=3.14.7,<3.15"
+requires-python = ">=3.14.10,<3.15"
 dependencies = [
     "sve-carddb",
-    "boto3>=1.43.108",
+    "boto3>=1.43.125",
     "jsonschema>=4.26.0",
-    "pydantic>=2.13.5",
-    "typer>=0.27.2",
+    # Match carddb's pin for the RootModel regex regression since 2.14.2.
+    "pydantic==2.14.1",
+    "typer>=0.28.0",
 ]
 
 [project.scripts]
 sve-publish = "sve_publish.cli:main"
 
 [tool.uv.sources]
-sve-carddb = { path = "../carddb", editable = true }
+sve-carddb = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "ruff>=0.16.8",
-    "mypy>=2.3.1",
-    "types-boto3[s3]>=1.43.108",
-    "types-jsonschema>=4.26.0.20260518",
-    "brotli-stubs>=1.2.0",
+    "ruff>=0.17.4",
+    "mypy>=2.4.1",
+    "types-boto3[s3]>=1.43.125",
+    "types-jsonschema>=4.26.0.20261006",
+    "brotli-stubs>=1.2.1",
 ]
 test = [
-    "pytest>=9.1.1",
+    # Share carddb's xdist-compatible runner until pytest-dev/pytest#15303 is fixed.
+    "pytest==9.1.1",
     "pytest-xdist>=3.8.0",
     "pytest-cov>=7.1.0",
-    "pytest-asyncio>=1.4.0",
+    "pytest-asyncio>=1.4.1.post1",
     "httpx>=0.28.1",
 ]
 
 [tool.uv]
 default-groups = ["dev", "test"]
-# brotli-stubs only types the API and pins brotli exactly; override it so the decoder fix (GHSA-9v8h-qqgm-4m35) applies.
-override-dependencies = ["brotli==1.2.1"]
 
 [build-system]
 requires = ["hatchling"]
@@ -62,6 +62,9 @@ extend = "../carddb/pyproject.toml"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = [
+    # Keep ambient developer environment files out of publish tests.
+    "-p",
+    "no:dotenv",
     "--import-mode=importlib",
     "--strict-markers",
     "--maxfail=3",

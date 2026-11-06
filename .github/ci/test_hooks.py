@@ -121,7 +121,8 @@ class WorkflowGateTests(unittest.TestCase):
             "carddb/src/sve_carddb/domains/parsed_cards/storage.py",
             "carddb/src/sve_carddb/core/models.py",
             "carddb/pyproject.toml",
-            "carddb/uv.lock",
+            "pyproject.toml",
+            "uv.lock",
             ".github/workflows/ci.yml",
             ".github/ci/hooks.py",
         ):

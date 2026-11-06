@@ -46,7 +46,7 @@ def test_default_parsed_build_without_sve_archive(tmp_path: Path) -> None:  # ru
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_version.py"),
     )
-    for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
+    for name in ("uv.lock", "carddb/pyproject.toml"):
         (root / name).write_bytes((REPO / name).read_bytes())
     for area in ("rules/rulings", "products/identities"):
         (case.root / area).mkdir(parents=True)

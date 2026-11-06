@@ -79,7 +79,7 @@ def prepared(
         "format: 1\nkind: keyword_registry\ndecision: {id: synthetic-keywords, state: confirmed, note: Synthetic mapping.}\nrecords: []\n"
     )
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
-    (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
+    (repo / "uv.lock").write_bytes(b"synthetic lock")
     (repo / "authored/catalog").mkdir()
     (repo / "authored/catalog/leader-name-frames.yaml").write_text(
         "format: 1\nkind: printing_leader_name_frames\nrecords: []\n"

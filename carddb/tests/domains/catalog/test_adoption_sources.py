@@ -66,7 +66,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
     sealed = seal_batch(store)
     version = sealed.inventory.current[0].source_version_id
     case = make_case(root / "repository")
-    paths = (CODE, JSON_CODE, SOURCE_RUNTIME, "carddb/uv.lock", "carddb/pyproject.toml")
+    paths = (CODE, JSON_CODE, SOURCE_RUNTIME, "uv.lock", "carddb/pyproject.toml")
     for name in paths:
         target = case.repository / name
         target.parent.mkdir(parents=True, exist_ok=True)

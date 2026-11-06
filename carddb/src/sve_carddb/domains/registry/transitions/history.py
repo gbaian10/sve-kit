@@ -36,9 +36,15 @@ class History:
 
     def dependency(self, revision: str) -> FilePin:
         """Pin the actual dependency lock bytes at the recorded program revision."""
+        paths = (
+            git(self.repo, "ls-tree", "--name-only", revision, "--", "uv.lock")
+            .decode()
+            .splitlines()
+        )
+        name = "uv.lock" if "uv.lock" in paths else "carddb/uv.lock"
         return FilePin(
-            name="carddb/uv.lock",
-            sha256=digest(git(self.repo, "show", revision + ":carddb/uv.lock")),
+            name=name,
+            sha256=digest(git(self.repo, "show", revision + ":" + name)),
         )
 
     def registry(self, basis: RegistryBasis) -> RegistryFiles:
