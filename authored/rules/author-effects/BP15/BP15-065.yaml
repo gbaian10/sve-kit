@@ -1,0 +1,40 @@
+cards:
+  BP15-065:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              exists:
+                kind: follower
+                name_contains: フィルレイン
+                who: self
+                zone: field
+      - line: 2
+        spell:
+          do:
+            - damage:
+                distribute: true
+                distribute_at: play
+                n:
+                  resource:
+                    kind: pp_max
+                    who: self
+                to: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,38 @@
+cards:
+  BP21-103:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+          on:
+            stat_changed:
+              direction: up
+              ref: this
+              stat: hp
+          per_turn: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - life:
+                delta: 1
+                who: self
+          usable_if:
+            exists:
+              kind: follower
+              other: true
+              trait: 学院
+              who: self
+              zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,62 @@
+cards:
+  BP15-063:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                other: true
+                trait: 海洋
+              who: self
+        line: 1
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 海洋
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - grant:
+                abilities:
+                  - play:
+                      cost_delta: -2
+                on:
+                  follow: taken
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

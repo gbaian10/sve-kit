@@ -1,0 +1,44 @@
+cards:
+  BP11-012:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                may: true
+                upto: 1
+            - move:
+                order: chooser
+                position: bottom
+                ref: picked
+                result: taken
+                to: deck
+            - create:
+                n: 2
+                to: ex
+                token: フェアリー
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
