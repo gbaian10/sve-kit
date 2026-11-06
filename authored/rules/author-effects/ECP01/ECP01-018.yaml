@@ -1,0 +1,83 @@
+cards:
+  ECP01-018:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seenfirst
+                top:
+                  n: 7
+                  who: self
+            - choose:
+                bind: pickedfirst
+                from:
+                  in: seenfirst
+                  kind: follower
+                  orig_cost_le: 5
+                  trait: ウマ娘
+                may: true
+                n: 1
+            - move:
+                ref: pickedfirst
+                result: takenfirst
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: takenfirst
+                      view: before
+                  in: seenfirst
+                to: deck
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: takenfirst
+                          view: before
+                        name: トウカイテイオー
+                    op: ge
+                    right: 1
+                then:
+                  - look:
+                      bind: seensecond
+                      top:
+                        n: 7
+                        who: self
+                  - choose:
+                      bind: pickedsecond
+                      from:
+                        in: seensecond
+                        kind: follower
+                        orig_cost_le: 4
+                        trait: ウマ娘
+                      may: true
+                      n: 1
+                  - move:
+                      ref: pickedsecond
+                      result: takensecond
+                      to: field
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        except:
+                          in:
+                            objects_of: takensecond
+                            view: before
+                        in: seensecond
+                      to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

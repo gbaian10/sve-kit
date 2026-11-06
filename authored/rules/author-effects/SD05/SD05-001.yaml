@@ -1,0 +1,45 @@
+cards:
+  SD05-001:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 1
+            - grant:
+                keywords:
+                  - ward
+                on: it
+          on:
+            enter_field:
+              sel:
+                name: フォレストバット
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: フォレストバット
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - leader_life: 1
+          do:
+            - create:
+                n: 2
+                to: field
+                token: フォレストバット
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
