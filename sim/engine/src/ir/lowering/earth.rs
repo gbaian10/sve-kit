@@ -25,6 +25,7 @@ pub(super) const fn amulets() -> ast::PublicQuery {
     ast::PublicQuery {
         acted: None,
         not_same_name_as_this: false,
+        traits_any: None,
         who: ast::Side::Controller,
         zone: ast::PublicZone::Field,
         kind: Some(ast::SearchKind::Amulet),

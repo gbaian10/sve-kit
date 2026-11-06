@@ -285,7 +285,8 @@ pub(super) fn named_public_query(
     binding: Binding<ObjectRef>,
     path: &str,
 ) -> Result<Selector, LoweringError> {
-    if !value.names.is_empty() || value.acted.is_some() {
+    // A trait union is admitted only for cost materials, which build their own selector.
+    if !value.names.is_empty() || value.acted.is_some() || value.traits_any.is_some() {
         return Err(unsupported(path));
     }
     Ok(match value.zone {

@@ -1,0 +1,47 @@
+cards:
+  BP14-107:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                traits_any:
+                  - 悪魔
+                  - 魔王
+                who: self
+                zone: cemetery
+          do:
+            - destroy: victim
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+              upto: 2
+        line: 1
+      - activate:
+          cost:
+            banish:
+              n: 1
+              sel:
+                traits_any:
+                  - 悪魔
+                  - 魔王
+                who: self
+                zone: cemetery
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

@@ -1738,3 +1738,71 @@ fn holder_name_exclusion_is_rejected_where_public_counts_have_no_card_needing_it
         "only cost materials and existence checks exclude the holder's name"
     );
 }
+
+#[test]
+fn trait_unions_filter_public_targets_and_reject_single_traits_counts_and_leaders() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let spell = |targets: Value, step: Value| {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({"targets": targets, "do": [step]});
+        tree
+    };
+    let cemetery = |traits: Value| {
+        spell(
+            json!([{"bind":"picked","n":1_u64,"from":{"who":"self","zone":"cemetery",
+                "kind":"follower","traits_any":traits}}]),
+            json!({"move":{"ref":"picked","to":"field","result":"returned"}}),
+        )
+    };
+    let cards = lowerer
+        .lower_with_printed_costs(&cemetery(json!(["獣", "魔法生物"])), &costs)
+        .unwrap();
+    let ChoiceDomain::Objects { constraint, .. } = &cards["SD03-005"].card().abilities[0]
+        .node
+        .play
+        .as_ref()
+        .unwrap()
+        .parameters[0]
+        .domain
+    else {
+        panic!("cemetery targets");
+    };
+    let Selector::Zone { predicate, .. } = &constraint.groups[0].selector else {
+        panic!("cemetery zone");
+    };
+    assert!(
+        matches!(predicate.as_ref(), Expr::Compute(and) if matches!(and.as_ref(),
+            Predicate::And { predicates } if predicates.iter().any(|item|
+                matches!(item, Expr::Compute(or) if matches!(or.as_ref(),
+                    Predicate::Or { predicates: branches } if branches.len() == 2))))),
+        "the union is one OR of trait reads"
+    );
+    for traits in [json!(["獣"]), json!(["獣", "獣"]), json!(["獣", ""])] {
+        assert!(
+            lowerer
+                .lower_with_printed_costs(&cemetery(traits.clone()), &costs)
+                .is_err(),
+            "{traits} is not a union of distinct traits"
+        );
+    }
+    let leaders = spell(
+        json!([{"bind":"picked","n":1_u64,"from":{"who":"opp","kind":"follower",
+            "leader_or":true,"traits_any":["獣","魔法生物"]}}]),
+        json!({"damage":{"to":"picked","n":1_u64}}),
+    );
+    lowerer
+        .lower_with_printed_costs(&leaders, &costs)
+        .unwrap_err();
+    let count = spell(
+        json!([]),
+        json!({"damage":{"to":{"leader":"opp"},"n":{"distinct_names":{"who":"self",
+            "zone":"field","traits_any":["獣","魔法生物"]}}}}),
+    );
+    assert!(
+        lowerer.lower_with_printed_costs(&count, &costs).is_err(),
+        "public counts have no card needing a trait union"
+    );
+}

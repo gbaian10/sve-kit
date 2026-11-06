@@ -267,6 +267,7 @@ impl BodyContext<'_> {
             || from.keyword.is_some()
             || from.r#trait.is_some()
             || !from.traits_all.is_empty()
+            || from.traits_any.is_some()
             || from.token.is_some()
             || !from.names.is_empty()
             || from.name.is_some()
@@ -356,6 +357,8 @@ pub(super) struct ObjectFilter<'query> {
     pub kind: Option<super::super::CardKind>,
     pub trait_id: Option<&'query str>,
     pub all_traits: &'query [String],
+    /// 「AかB」: the candidate has at least one of these traits.
+    pub any_traits: &'query [String],
     pub class: Option<&'query str>,
     pub not_class: Option<&'query str>,
     pub token: Option<bool>,
@@ -381,6 +384,10 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
+            any_traits: query
+                .traits_any
+                .as_ref()
+                .map_or(&[], |union| union.0.as_slice()),
             class: query.class.as_deref(),
             not_class: query.not_class.as_deref(),
             token: query.token,
@@ -426,6 +433,10 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
+            any_traits: query
+                .traits_any
+                .as_ref()
+                .map_or(&[], |union| union.0.as_slice()),
             name: query.name.as_deref(),
             names: &query.names,
             contains: query.name_contains.as_deref(),
@@ -544,14 +555,7 @@ pub(super) fn view_filter(
             },
         )));
     }
-    for trait_id in filter.all_traits {
-        predicates.push(super::search::view_filter(
-            None,
-            Some(trait_id),
-            None,
-            object.clone(),
-        ));
-    }
+    predicates.extend(trait_filters(filter, &object));
     if let Some(contains) = filter.contains {
         predicates.push(super::Expr::Compute(Box::new(
             super::Predicate::NameContains {
@@ -620,6 +624,22 @@ pub(super) fn view_filter(
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+/// Every trait of `traits_all`, then 「AかB」 as one OR so a candidate still counts once.
+fn trait_filters(
+    filter: &ObjectFilter<'_>,
+    object: &super::ObjectView,
+) -> Vec<super::Expr<super::Bool>> {
+    let read =
+        |trait_id: &String| super::search::view_filter(None, Some(trait_id), None, object.clone());
+    let mut predicates = filter.all_traits.iter().map(read).collect::<Vec<_>>();
+    if !filter.any_traits.is_empty() {
+        predicates.push(super::Expr::Compute(Box::new(super::Predicate::Or {
+            predicates: filter.any_traits.iter().map(read).collect(),
+        })));
+    }
+    predicates
 }
 
 /// これと同名を除く: same shape as targets, reading the holder's current names.

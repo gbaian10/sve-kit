@@ -1,0 +1,35 @@
+cards:
+  BP10-121:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                traits_any:
+                  - 天使
+                  - 堕天使
+                who: self
+                zone: hand
+          do:
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 1
+            - pp:
+                delta: 2
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

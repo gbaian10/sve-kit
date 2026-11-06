@@ -478,6 +478,7 @@ impl BodyContext<'_> {
             || target.from.keyword.is_some()
             || target.from.r#trait.is_some()
             || !target.from.traits_all.is_empty()
+            || target.from.traits_any.is_some()
             || target.from.token.is_some()
             || !target.from.names.is_empty()
             || target.from.has_evolve.is_some()

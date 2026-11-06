@@ -124,6 +124,7 @@ fn lower_operations(
                     sel: ast::PublicQuery {
                         acted: None,
                         not_same_name_as_this: false,
+                        traits_any: None,
                         other: false,
                         who: ast::Side::Controller,
                         zone: ast::PublicZone::Ex,
