@@ -424,11 +424,16 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
                 ChoiceDomain::Objects {
                     constraint,
                     binding,
-                    target_roles: None,
+                    target_roles,
                 },
             ) if !distribution => {
                 super::selection::check(constraint)?;
-                target = Some(*binding);
+                if target_roles.is_some() {
+                    for group in &constraint.groups {
+                        super::selection::field_selector(&group.selector)?;
+                    }
+                }
+                target = target_roles.is_none().then_some(*binding);
                 target_count = target_count.saturating_add(1);
             }
             (

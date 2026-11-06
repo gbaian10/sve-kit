@@ -80,7 +80,7 @@ pub(super) use card::prevention::PreventionState;
 pub use card::quick::QuickOption;
 pub use card::{
     Activation, CardEntry, CardPlay, PendingOption, QuotaDomain, QuotaSelection, ResumeStage,
-    TargetDomain,
+    TargetDomain, TargetRoleAssignment, TargetRoleDomain,
 };
 pub(super) use card::{CardRuntime, serialize_cards};
 pub(super) use cost::CostState;
@@ -280,6 +280,13 @@ pub enum Answer {
     SearchReplacement(SearchReplacementAnswer),
     /// Token-scoped target handles.
     Targets(Vec<u64>),
+    /// Target selection and its complete role partition, answered atomically.
+    TargetsWithRoles {
+        /// Selected handles from this question.
+        targets: Vec<u64>,
+        /// One assignment for every advertised role.
+        roles: Vec<TargetRoleAssignment>,
+    },
     /// One token-scoped public name combination handle.
     TokenCapacity(u64),
     /// Unique printed mode identifiers; resolution always follows printed order.
@@ -912,6 +919,12 @@ impl Game {
                             characteristics: wait.characteristics,
                         },
                     );
+                }
+                (Wait::Targets(wait), Answer::TargetsWithRoles { targets, roles }) => {
+                    let (objects, answers) = wait.validate_roles(&targets, &roles)?;
+                    rollback = execution.origin.take();
+                    execution.bind_target_roles(&wait, &answers);
+                    Self::internal_target_answer(&mut execution, &wait, objects)?;
                 }
                 (Wait::Targets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;

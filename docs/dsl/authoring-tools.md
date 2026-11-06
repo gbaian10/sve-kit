@@ -350,6 +350,29 @@ apply:
 
 這個讀值沿同次效果明示的移動收據跟隨新世代，逐一檢查要求與實際目的地及目前物件區域；物件換代或離區會拒絕，不改讀新世代或最後已知值。沒有實際成功成員時總和為 0；滿 EX、滿場或放棄入場不把未移動的候選算進去，後續步驟仍正常處理。
 
+## 同一目標集合的傷害角色
+
+`targets[].roles` 支援一個 `{if_nonempty: 1}` 角色與一個 `remaining` 角色；
+對應 BP14-071 及其 JP 再版。角色名稱只在作者 DSL 中使用，mapping 的鍵序不影響選取順序。
+`damage.to: {role: {of: enemies, name: primary}}` 引用該目標的角色綁定；
+兩個角色使用同一次正式目標宣告，不能改成兩個獨立目標或以陣列第一個成員代選主目標。
+目前只准入場上的公開正式目標與傷害引用，不接受私有選卡、收件者聯集角色、固定角色數量或結算時 `choose.roles`。
+
+權威端的 `awaiting.domain` 在既有 `kind: targets` 題目增加 `roles` 陣列，
+每項為 `{role: <題內整數>, cardinality: {if_nonempty: 1}}` 或
+`{role: <題內整數>, cardinality: {remaining: true}}`；沒有角色的題目回傳空陣列。
+角色 ID 與目標 handle 都只在該 decision token 內有效，不公開 IR binding 或永久物件 ID。
+
+角色題目透過 `Answer::TargetsWithRoles {targets, roles}` 一次作答；每個 `TargetRoleAssignment`
+含 `role: Nat` 與 `targets: Vec<u64>`。JSON 消費端保存同形狀的
+`{targets: [handle, ...], roles: [{role: id, targets: [handle, ...]}, ...]}`；
+scenario runner 的 AI 決定比對將選取與各角色成員當集合，仍區分不同角色的分配。
+沒有角色的題目仍使用 `Answer::Targets`，角色題目不可省略分配；未開放角色的題目也不可附上角色答案。
+
+答案必須恰好包含每個已公告角色一次、涵蓋所有已選目標且互不重複，不能使用未選或跨題 handle。
+選零體時兩個角色都空；選一至三體時主角色恰好一體，其餘全部屬於 `remaining`。
+驗證失敗不提交任何選取或傷害，原題仍可重答；結算時沿用正式目標的世代與合法性重查。
+
 ## 寫入與驗證
 
 ```bash

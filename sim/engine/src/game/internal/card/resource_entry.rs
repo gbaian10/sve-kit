@@ -409,6 +409,7 @@ impl Game {
             InputDomain::ResourceEntryPayment {
                 materials: super::TargetDomain {
                     distinct_names: false,
+                    roles: vec![],
                     members: public,
                     cardinality: Cardinality {
                         minimum: Nat(entry.count),

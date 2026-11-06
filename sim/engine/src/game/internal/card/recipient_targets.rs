@@ -159,6 +159,7 @@ impl Game {
                 members: public,
                 cardinality: *cardinality,
                 distinct_names: false,
+                roles: vec![],
             },
         ))
     }

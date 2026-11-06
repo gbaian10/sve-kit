@@ -66,7 +66,7 @@ pub(super) mod recipient_targets;
 pub(super) mod selection;
 
 pub use play::{CardEntry, CardPlay};
-pub use selection::TargetDomain;
+pub use selection::{TargetDomain, TargetRoleAssignment, TargetRoleDomain};
 
 #[derive(Clone, Copy)]
 enum ActivationKey {

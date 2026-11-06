@@ -1,0 +1,58 @@
+cards:
+  BP14-071:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: opp
+            - life:
+                delta: 1
+                who: self
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: opp
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 1
+      - fanfare:
+          do:
+            - damage:
+                n: 5
+                to:
+                  role:
+                    name: primary
+                    of: enemies
+            - damage:
+                n: 2
+                to:
+                  role:
+                    name: rest
+                    of: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              roles:
+                primary:
+                  if_nonempty: 1
+                rest: remaining
+              upto: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

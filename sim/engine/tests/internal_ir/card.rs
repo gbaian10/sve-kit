@@ -796,3 +796,6 @@ mod event_subject_characteristics;
 
 #[path = "card/name_aliases.rs"]
 mod name_aliases;
+
+#[path = "card/target_roles.rs"]
+mod target_damage_role;

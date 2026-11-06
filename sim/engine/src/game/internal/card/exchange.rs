@@ -520,6 +520,7 @@ impl Game {
             execution.context.controller,
             InputDomain::CostMaterials(super::TargetDomain {
                 distinct_names: false,
+                roles: vec![],
                 members: public,
                 cardinality: constraint.cardinality,
             }),

@@ -216,6 +216,7 @@ impl Game {
                     members: candidates,
                     cardinality: plan.group.cardinality,
                     distinct_names: false,
+                    roles: vec![],
                 }),
                 Wait::CostDiscard(HandWait::strict(
                     instruction.clone(),

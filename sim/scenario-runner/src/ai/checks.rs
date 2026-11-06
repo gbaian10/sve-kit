@@ -142,8 +142,20 @@ fn same_decision(a: &Value, b: &Value) -> bool {
 
 fn canonical(decision: &Value) -> Value {
     let mut out = decision.clone();
-    if let Some(Value::Object(targets)) = out.get_mut("targets") {
-        targets.values_mut().for_each(sort_list);
+    if let Some(targets) = out.get_mut("targets") {
+        match targets {
+            Value::Object(targets) => targets.values_mut().for_each(sort_list),
+            Value::Array(_) => sort_list(targets),
+            Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+        }
+    }
+    if let Some(Value::Array(roles)) = out.get_mut("roles") {
+        for role in roles.iter_mut() {
+            if let Some(targets) = role.get_mut("targets") {
+                sort_list(targets);
+            }
+        }
+        roles.sort_by_key(ToString::to_string);
     }
     if let Some(select) = out.get_mut("select") {
         sort_list(select);
