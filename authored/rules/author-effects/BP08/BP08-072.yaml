@@ -1,0 +1,64 @@
+cards:
+  BP08-072:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -5
+            if:
+              cmp:
+                left:
+                  count:
+                    trait: 死者
+                    who: self
+                    zone: cemetery
+                op: ge
+                right: 15
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - self_to_ex: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 死者
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: cemetery
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

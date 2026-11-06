@@ -1963,3 +1963,36 @@ fn query_state_and_trait_filters_stay_on_their_supported_populations() {
         }
     }
 }
+
+#[test]
+fn self_to_ex_cost_is_paid_only_by_a_hand_activation() {
+    let lowerer = lowerer();
+    let activated = |zone: Option<&str>| {
+        let mut tree = expanded::tree().clone();
+        let head = &mut tree["cards"]["BP01-041"]["abilities"][0]["activate"];
+        head["cost"] = json!({"steps":[{"pp":1_u64},{"self_to_ex":true}]});
+        if let Some(zone) = zone {
+            head["zone"] = json!(zone);
+        }
+        tree
+    };
+    let cards = lowerer.lower(&activated(Some("hand"))).unwrap();
+    let ability = &cards["BP01-041"].card().abilities[0].node;
+    let CostSpec::Ordered { steps } = &ability.play.as_ref().unwrap().costs else {
+        panic!("ordered cost")
+    };
+    assert!(steps.iter().any(|step| matches!(
+        &step.instruction.action,
+        Action::Move { movement, .. }
+            if movement.to == (MoveDestination::Owners { zone: OwnerZone::Ex })
+    )));
+    for zone in [None, Some("field"), Some("ex"), Some("cemetery")] {
+        lowerer.lower(&activated(zone)).unwrap_err();
+    }
+    // Quick candidates would not see a full EX before offering the payment.
+    let mut quick = activated(Some("hand"));
+    quick["cards"]["BP01-041"]["abilities"][0]["activate"]["quick"] = json!(true);
+    lowerer.lower(&quick).unwrap_err();
+    quick["cards"]["BP01-041"]["abilities"][0]["activate"]["cost"] = json!({"pp":1_u64});
+    lowerer.lower(&quick).unwrap();
+}

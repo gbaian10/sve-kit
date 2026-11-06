@@ -6,12 +6,12 @@ use super::{
 use crate::game::Object;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
-    Effect, EffectSource, Expr, Generation, Instruction, MemberProjection, MoveDestination,
-    MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec, MovementReceipt, Nat, Node,
-    ObjectOperand, ObjectReceipt, ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation,
-    Polarity, Position, PositiveNat, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId,
-    RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId,
-    TimeAnchor, ZoneKind,
+    Effect, EffectSource, Expr, Generation, Instruction, InstructionContext, MemberProjection,
+    MoveDestination, MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec, MovementReceipt,
+    Nat, Node, ObjectOperand, ObjectReceipt, ObjectRef, OwnerZone, PlayerId, PlayerRef,
+    PlayerRelation, Polarity, Position, PositiveNat, ReceiptId, ReceiptLocation, ResultMember,
+    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection,
+    SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
@@ -198,6 +198,22 @@ pub(super) fn cemetery_ex_move(action: &Action) -> bool {
     matches!(action, Action::Move { objects: Selector::Bound { .. }, movement, .. }
         if matches!(&movement.to, MoveDestination::Shared { zone }
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex))
+}
+
+/// A private hand card moves when it was chosen privately, or when it pays
+/// 「手札のこれをEXエリアに置く」 for its own activation.
+fn private_hand_member(
+    execution: &Execution,
+    instruction: &Instruction,
+    objects: &Selector,
+    object: &Object,
+    member: ObjectRef,
+) -> bool {
+    execution.is_private_hand_target(objects, member)
+        || (object.id == execution.context.source
+            && member.generation == execution.context.generation
+            && instruction.context == InstructionContext::Cost
+            && super::card::hand_payment::source_to_ex(&instruction.action))
 }
 
 pub(super) fn observed_move(action: &Action) -> bool {
@@ -532,7 +548,7 @@ impl Game {
                     && object.zone == "hand"
                     && object.owner == actor
                     && object.controller == actor
-                    && execution.is_private_hand_target(objects, member);
+                    && private_hand_member(execution, instruction, objects, object, member);
                 let private_observed_move = method == MoveMethod::Put
                     && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
                     && object.zone == "deck"

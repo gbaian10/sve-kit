@@ -1,6 +1,6 @@
 use super::super::{
     CostSpec, CostStep, MoveDestination, MoveReason, MoveSpec, NumericChange, OwnerZone, PlaySpec,
-    Posture, Resource, ResourceOperation,
+    Posture, Resource, ResourceOperation, ZoneKind,
 };
 use super::{
     AbilitySource, Action, BodyContext, Cardinality, Expr, Instruction, InstructionContext,
@@ -232,6 +232,23 @@ fn lower_operations(
                 },
                 reason: MoveReason::Put,
             },
+            ast::CostOperation::SelfToEx(true)
+                if context.activation_zone == Some(ZoneKind::Hand) =>
+            {
+                Action::Move {
+                    objects: super::hand_payment::source(context.card_allocator, path)?,
+                    movement: MoveSpec {
+                        to: MoveDestination::Owners {
+                            zone: OwnerZone::Ex,
+                        },
+                        position: None,
+                        order: None,
+                        initial_posture: None,
+                        entry_effects: vec![],
+                    },
+                    reason: MoveReason::Put,
+                }
+            }
             ast::CostOperation::Reveal(material) => {
                 let (action, decision) = super::reveal_cost::field(context, material, path)?;
                 parameters.push(decision);
@@ -241,7 +258,8 @@ fn lower_operations(
             | ast::CostOperation::ToDeckBottom(_)
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
-            | ast::CostOperation::SelfToCemetery(false) => {
+            | ast::CostOperation::SelfToCemetery(false)
+            | ast::CostOperation::SelfToEx(_) => {
                 return Err(unsupported(path));
             }
         };
@@ -308,7 +326,8 @@ fn material_operation(
         | ast::CostOperation::Reveal(_)
         | ast::CostOperation::ToDeckBottom(_)
         | ast::CostOperation::ActSelf(_)
-        | ast::CostOperation::SelfToCemetery(_) => Err(unsupported(path)),
+        | ast::CostOperation::SelfToCemetery(_)
+        | ast::CostOperation::SelfToEx(_) => Err(unsupported(path)),
     }
 }
 
