@@ -255,7 +255,7 @@ fn cleansing_realm_cycles_each_mode_independently_then_keeps_its_rule_stand_bloc
     }
 }
 
-fn ranpha_entry(card: &str, zone: &str) {
+pub(super) fn ranpha_entry(card: &str, zone: &str) {
     let mut initial = position(card);
     princess(&mut initial);
     initial["players"]["P1"]["zones"]["field"] = json!([]);
@@ -289,14 +289,14 @@ fn ranpha_entry(card: &str, zone: &str) {
         "the follower does not observe its own UB"
     );
 }
-fn ranpha_modes(card: &str) {
+pub(super) fn ranpha_modes(card: &str) {
     let mut initial = position(card);
     princess(&mut initial);
     initial["players"]["P1"]["zones"]["field"]
         .as_array_mut()
         .unwrap()
         .extend([
-            json!({"id":"other","card":"CP04-SP10a"}),
+            json!({"id":"other","card":card}),
             json!({"id":"ninon1","card":"CP04-035"}),
             json!({"id":"ninon2","card":"CP04-035"}),
         ]);
