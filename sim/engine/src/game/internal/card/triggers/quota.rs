@@ -153,12 +153,9 @@ impl Game {
         Ok(())
     }
 
-    pub(in crate::game::internal) fn internal_quota_wait(
-        &mut self,
-        execution: &mut Execution,
-    ) -> Result<bool> {
+    pub(super) fn internal_quota_domain(&self) -> Result<Option<(PlayerId, QuotaDomain)>> {
         let Some(plan) = &self.card_runtime.admission else {
-            return Ok(false);
+            return Ok(None);
         };
         let group = plan
             .groups
@@ -183,16 +180,28 @@ impl Game {
                 )
             })
             .collect::<Result<Vec<_>>>()?;
-        let count = candidates.len();
-        let domain = InputDomain::TriggerQuota(QuotaDomain {
-            candidates,
-            earlier: plan.earlier.clone(),
-        });
+        Ok(Some((
+            actor,
+            QuotaDomain {
+                candidates,
+                earlier: plan.earlier.clone(),
+            },
+        )))
+    }
+
+    pub(in crate::game::internal) fn internal_quota_wait(
+        &mut self,
+        execution: &mut Execution,
+    ) -> Result<bool> {
+        let Some((actor, domain)) = self.internal_quota_domain()? else {
+            return Ok(false);
+        };
+        let count = domain.candidates.len();
         self.internal_wait(
             execution,
             DecisionId(0),
             actor,
-            domain,
+            InputDomain::TriggerQuota(domain),
             Wait::TriggerQuota { count },
         )?;
         Ok(true)

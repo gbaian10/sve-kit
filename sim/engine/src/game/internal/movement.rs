@@ -319,14 +319,14 @@ impl Game {
                 .ok_or_else(|| invalid("invalid evolution link"))?,
         )?;
         let base_print = self.catalog.face(&object.card, 0)?;
-        let form_print = self.catalog.face(&form.card, 0)?;
+        let form_print = self.face(&form.id)?;
         if object.zone != "field"
             || form.zone != "evolution"
             || form.owner != object.owner
             || base_print["card_type"] != "フォロワー"
             || form_print["card_type"] != "フォロワー・エボルヴ"
             || !super::card::resource_association(self, &object.id, &form.id)?
-            || form.state["face"] != 0_u8
+            || object.state["face"] != form.state["face"]
             || form
                 .state
                 .get("evolved_with")

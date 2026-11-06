@@ -173,7 +173,7 @@ impl CardRuntime {
     }
 
     pub(in crate::game) fn has_pending(&self) -> bool {
-        !self.pending.is_empty() || !self.unadmitted.is_empty()
+        !self.pending.is_empty() || !self.unadmitted.is_empty() || self.admission.is_some()
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
