@@ -1573,6 +1573,9 @@ impl Game {
                 );
             }
             Action::Damage { .. } => self.internal_damage(execution, &instruction)?,
+            Action::Move { objects, .. } if movement::cemetery_ex_move(&instruction.action) => {
+                self.internal_cemetery_ex_move(execution, &instruction, objects)?;
+            }
             Action::Move {
                 objects,
                 movement,

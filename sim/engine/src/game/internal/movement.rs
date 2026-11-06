@@ -45,8 +45,8 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             objects,
             movement,
             reason,
-        } if observed_move(action) => {
-            if !observation_spine(objects, false)
+        } if observed_move(action) || cemetery_ex_move(action) => {
+            if (!observation_spine(objects, false) && !cemetery_ex_move(action))
                 || *reason != MoveReason::Put
                 || movement.position.is_some()
                 || movement.order.is_some()
@@ -194,8 +194,15 @@ pub(super) fn field_move(movement: &MoveSpec) -> bool {
     matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
 }
 
+pub(super) fn cemetery_ex_move(action: &Action) -> bool {
+    matches!(action, Action::Move { objects: Selector::Bound { .. }, movement, .. }
+        if matches!(&movement.to, MoveDestination::Shared { zone }
+            if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex))
+}
+
 pub(super) fn observed_move(action: &Action) -> bool {
-    matches!(action, Action::Move { objects, movement, .. }
+    !cemetery_ex_move(action)
+        && matches!(action, Action::Move { objects, movement, .. }
         if matches!(&movement.to, MoveDestination::Shared { zone }
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
             || (movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
@@ -786,6 +793,38 @@ impl Game {
                 self.internal_ward_entry_posture(execution, member.before)?;
             }
         }
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Move(MoveOutcome { moved }),
+        );
+        Ok(())
+    }
+
+    pub(super) fn internal_cemetery_ex_move(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<()> {
+        let members = execution.objects(self, objects)?;
+        if members.len() > 1 {
+            return Err(unsupported("single cemetery capture"));
+        }
+        for &member in &members {
+            let current = self.object(execution.object_id(member)?)?;
+            if current.generation == member.generation.0 && current.zone != "cemetery" {
+                return Err(unsupported("cemetery capture origin"));
+            }
+        }
+        let Action::Move { movement, .. } = &instruction.action else {
+            return Err(invalid("cemetery capture action"));
+        };
+        let moved = self.internal_search_move(
+            execution,
+            &members,
+            &movement.to,
+            execution.context.controller,
+        )?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Move(MoveOutcome { moved }),

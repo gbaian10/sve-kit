@@ -1117,7 +1117,7 @@ fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
 
 #[expect(
     clippy::wildcard_enum_match_arm,
-    reason = "Only explicit plays and nested controls introduce cemetery play authority."
+    reason = "Explicit plays and moves to EX introduce opponent cemetery selection authority."
 )]
 fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
     let mut targets = BTreeSet::new();
@@ -1125,6 +1125,13 @@ fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
         match step {
             ast::Step::PlayCard(play) => {
                 targets.insert(play.r#ref.clone());
+            }
+            ast::Step::Move(movement)
+                if matches!(movement.to, ast::Destination::Ex)
+                    && let Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) =
+                        &movement.r#ref =>
+            {
+                targets.insert(name.clone());
             }
             ast::Step::Pay(payment) => targets.extend(nested_targets(&payment.steps)),
             ast::Step::Optional(optional) => {
@@ -1207,6 +1214,7 @@ struct BodyContext<'definitions> {
     ex_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,
     playable_targets: BTreeSet<String>,
+    opponent_cemetery_targets: BTreeSet<String>,
     nested_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     receipt_reads: ReceiptReads,
@@ -1269,6 +1277,7 @@ impl<'definitions> BodyContext<'definitions> {
             ex_targets: BTreeSet::new(),
             hand_targets: BTreeSet::new(),
             playable_targets: BTreeSet::new(),
+            opponent_cemetery_targets: BTreeSet::new(),
             nested_targets: nested_targets(&body.steps),
             observations: BTreeMap::new(),
             receipt_reads: ReceiptReads::default(),

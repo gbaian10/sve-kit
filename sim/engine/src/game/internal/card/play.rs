@@ -918,7 +918,7 @@ impl Game {
             generation: Generation(object.generation),
             controller: actor,
         })?;
-        if object.owner != seat
+        if (object.owner != seat && object.zone != "ex")
             || object.controller != seat
             || !matches!(object.zone.as_str(), "hand" | "ex")
             || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)

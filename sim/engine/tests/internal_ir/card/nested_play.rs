@@ -523,3 +523,256 @@ fn nested_spell_revelation_keeps_private_payment_and_resumes_the_parent() {
         );
     }
 }
+
+#[test]
+fn a_cemetery_capture_places_the_opponents_card_in_the_controllers_ex() {
+    for full in [false, true] {
+        let mut input = tree("opp", "unit-spell", false, false);
+        input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+            json!([{"move":{"ref":"selected","to":"ex"}}]);
+        let programs = lowerer()
+            .lower_with_printed_costs(&input, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
+        initial["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"child","card":"unit-spell"}]);
+        if full {
+            initial["players"]["P1"]["zones"]["ex"] = json!(
+                (0..5)
+                    .map(|index| json!({"id":format!("ex{index}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "capture").unwrap();
+        for (number, program) in &programs {
+            game.load_internal_card(number, program).unwrap();
+        }
+        let definition = programs["unit-amulet"].card().abilities[0].node.id;
+        let target = question(
+            game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        resolved(select(&mut game, &target));
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P2"]["ex"], json!([]));
+        assert_eq!(
+            state["P2"]["cemetery"],
+            if full { json!(["child"]) } else { json!([]) }
+        );
+        if !full {
+            assert_eq!(state["P1"]["ex"], json!(["child"]));
+        }
+    }
+}
+
+#[test]
+fn cemetery_capture_does_not_admit_other_destinations_or_multiple_targets() {
+    let baseline = tree("opp", "unit-spell", false, false);
+    for destination in ["hand", "cemetery", "field"] {
+        let mut input = baseline.clone();
+        input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+            json!([{"move":{"ref":"selected","to":destination}}]);
+        lowerer()
+            .lower_with_printed_costs(&input, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+            .unwrap_err();
+    }
+    let mut input = baseline;
+    input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+        json!([{"move":{"ref":"selected","to":"ex"}}]);
+    input["cards"]["unit-amulet"]["abilities"][0]["activate"]["targets"][0]["n"] = json!(2_u8);
+    lowerer()
+        .lower_with_printed_costs(&input, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+        .unwrap_err();
+}
+
+#[test]
+fn raw_cemetery_capture_rejects_field_origins_and_multi_card_bindings() {
+    for multiple in [false, true] {
+        let mut input = tree("opp", "unit-follower", false, false);
+        input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"] =
+            json!([{"move":{"ref":"selected","to":"ex"}}]);
+        let mut programs = lowerer()
+            .lower_with_printed_costs(&input, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+            .unwrap();
+        let mut parent = programs["unit-amulet"].card().clone();
+        let ChoiceDomain::Objects { constraint, .. } =
+            &mut parent.abilities[0].node.play.as_mut().unwrap().parameters[0].domain
+        else {
+            panic!("capture target domain");
+        };
+        if multiple {
+            let cardinality = Cardinality {
+                minimum: Nat(2),
+                maximum: Some(Nat(2)),
+            };
+            constraint.cardinality = cardinality;
+            constraint.groups[0].cardinality = cardinality;
+        } else {
+            let Selector::Zone { zone, .. } = &mut constraint.groups[0].selector else {
+                panic!("capture cemetery selector");
+            };
+            *zone = ZoneKind::Field;
+        }
+        programs.insert(
+            "unit-amulet".into(),
+            WellFormedCardProgram::check(parent).unwrap(),
+        );
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
+        initial["players"]["P2"]["zones"][if multiple { "cemetery" } else { "field" }] = if multiple
+        {
+            json!([{"id":"child","card":"unit-follower"},{"id":"other","card":"unit-follower"}])
+        } else {
+            json!([{"id":"child","card":"unit-follower"}])
+        };
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "capture-rejection",
+        )
+        .unwrap();
+        for (number, program) in &programs {
+            game.load_internal_card(number, program).unwrap();
+        }
+        let definition = programs["unit-amulet"].card().abilities[0].node.id;
+        let before = game.projection(View::Referee).unwrap();
+        let target = question(
+            game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let error = game
+            .answer_internal_card(
+                target.actor,
+                target.token,
+                Answer::Targets(if multiple { vec![0, 1] } else { vec![0] }),
+            )
+            .unwrap_err();
+        assert!(error.to_string().contains(if multiple {
+            "single cemetery capture"
+        } else {
+            "cemetery capture origin"
+        }));
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+    }
+}
+
+#[test]
+fn a_foreign_owned_card_is_playable_only_from_the_controllers_ex() {
+    let programs = lowerer()
+        .lower_with_printed_costs(
+            &tree("opp", "unit-spell", false, false),
+            &BTreeMap::from([("unit-spell".into(), Nat(1))]),
+        )
+        .unwrap();
+    for zone in ["hand", "ex"] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
+        initial["players"]["P1"]["zones"][zone] =
+            json!([{"id":"child","card":"unit-spell","owner":"P2"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "foreign-ex-play",
+        )
+        .unwrap();
+        for (number, program) in &programs {
+            game.load_internal_card(number, program).unwrap();
+        }
+        let before = game.projection(View::Referee).unwrap();
+        game.play_internal_card("child", PlayerId { seat: 2 })
+            .unwrap_err();
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+        let play = game.play_internal_card("child", PlayerId { seat: 1 });
+        if zone == "hand" {
+            play.unwrap_err();
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
+        } else {
+            let target = question(play.unwrap());
+            resolved(select(&mut game, &target));
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["ex"], json!([]));
+            assert_eq!(state["P2"]["cemetery"], json!(["child"]));
+            assert_eq!(state["P1"]["pp"]["current"], 2_u8);
+            assert_eq!(state["P1"]["leader"]["life"], 22_u8);
+        }
+    }
+}
+
+#[test]
+fn captured_field_cards_enter_our_field_then_leave_for_their_owners_cemetery() {
+    for child in ["unit-follower", "unit-amulet"] {
+        let mut input = tree("opp", "unit-spell", false, false);
+        input["cards"]["unit-amulet"]["abilities"][0]["activate"] = json!({
+            "cost":{"pp":0},
+            "targets":[{"bind":"victim","from":{"who":"self","zone":"field","name":child,"other":true},"n":1}],
+            "do":[{"destroy":"victim"}]
+        });
+        let programs = lowerer()
+            .lower_with_printed_costs(&input, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
+        initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"child","card":child,"owner":"P2"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "foreign-field-play",
+        )
+        .unwrap();
+        for (number, program) in &programs {
+            game.load_internal_card(number, program).unwrap();
+        }
+        let play = game
+            .play_internal_card("child", PlayerId { seat: 1 })
+            .unwrap();
+        assert!(matches!(play, CardPlay::Entered(_)));
+        let entered = game.projection(View::Referee).unwrap();
+        assert_eq!(entered["P1"]["field"], json!(["parent", "child"]));
+        assert_eq!(entered["P2"]["field"], json!([]));
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        if child == "unit-follower" {
+            let pending = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &pending.domain else {
+                panic!("played follower fanfare");
+            };
+            assert_eq!(pending.actor, PlayerId { seat: 1 });
+            resolved(
+                game.answer_internal_card(
+                    pending.actor,
+                    pending.token,
+                    Answer::Pending(options[0].handle),
+                )
+                .unwrap(),
+            );
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["leader"]["life"], 25_u8);
+            assert_eq!(state["P2"]["leader"]["life"], 20_u8);
+        }
+        let definition = programs["unit-amulet"].card().abilities[0].node.id;
+        let target = question(
+            game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        resolved(select(&mut game, &target));
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["field"], json!(["parent"]));
+        assert_eq!(state["P1"]["cemetery"], json!([]));
+        assert_eq!(state["P2"]["cemetery"], json!(["child"]));
+    }
+}

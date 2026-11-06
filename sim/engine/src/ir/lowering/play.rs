@@ -374,6 +374,9 @@ impl BodyContext<'_> {
                 if cardinality.maximum == Some(Nat(1)) =>
             {
                 self.playable_targets.insert(target.bind.clone());
+                if matches!(target.from.who, Some(ast::Side::Opponent)) {
+                    self.opponent_cemetery_targets.insert(target.bind.clone());
+                }
             }
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Ex)) => {
                 self.ex_targets.insert(target.bind.clone());
@@ -401,7 +404,8 @@ impl BodyContext<'_> {
             target.from.zone,
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
         ) && matches!(target.from.who, Some(ast::Side::Opponent))
-            && !self.nested_targets.contains(&target.bind)
+            && (!self.nested_targets.contains(&target.bind)
+                || target_cardinality(target, path)?.maximum != Some(Nat(1)))
         {
             return Err(unsupported(path));
         }
@@ -898,6 +902,7 @@ impl BodyContext<'_> {
                 ex_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
+                opponent_cemetery_targets: BTreeSet::new(),
                 nested_targets: super::nested_targets(steps),
                 observations: BTreeMap::new(),
                 receipt_reads: super::ReceiptReads::default(),
@@ -927,6 +932,9 @@ impl BodyContext<'_> {
                 context.ex_targets.clone_from(&self.ex_targets);
                 context.hand_targets.clone_from(&self.hand_targets);
                 context.playable_targets.clone_from(&self.playable_targets);
+                context
+                    .opponent_cemetery_targets
+                    .clone_from(&self.opponent_cemetery_targets);
                 context.observations.clone_from(&self.observations);
                 context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);

@@ -401,6 +401,11 @@ impl BodyContext<'_> {
                 },
                 _ => self.objects(objects, path)?,
             };
+            if zone == OwnerZone::Ex
+                && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if self.opponent_cemetery_targets.contains(name))
+            {
+                return Ok(shared_put(objects, ZoneKind::Ex));
+            }
             return Ok(owner_put(objects, zone));
         }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
