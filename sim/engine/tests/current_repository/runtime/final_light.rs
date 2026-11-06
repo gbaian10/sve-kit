@@ -6,7 +6,7 @@
 use super::union_burst_batch1::{pending, ub};
 use super::*;
 
-fn aliases(representative: &str) -> Vec<String> {
+pub(super) fn aliases(representative: &str) -> Vec<String> {
     let selected = selection_with_rules();
     let identity = &selected.current[representative].card_id;
     selected
@@ -31,12 +31,12 @@ fn position(card: &str) -> Value {
     }
     initial
 }
-fn princess(initial: &mut Value) {
+pub(super) fn princess(initial: &mut Value) {
     initial["players"]["P1"]["construction"] = json!("title");
     initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
     initial["players"]["P1"]["leader"]["life"] = json!(6_u8);
 }
-fn game(initial: &Value) -> Game {
+pub(super) fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),
         initial,
@@ -46,7 +46,7 @@ fn game(initial: &Value) -> Game {
     )
     .unwrap()
 }
-fn checks(game: &mut Game) {
+pub(super) fn checks(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }
@@ -255,7 +255,7 @@ fn cleansing_realm_cycles_each_mode_independently_then_keeps_its_rule_stand_bloc
     }
 }
 
-fn ranpha_entry(card: &str, zone: &str) {
+pub(super) fn ranpha_entry(card: &str, zone: &str) {
     let mut initial = position(card);
     princess(&mut initial);
     initial["players"]["P1"]["zones"]["field"] = json!([]);
@@ -289,14 +289,14 @@ fn ranpha_entry(card: &str, zone: &str) {
         "the follower does not observe its own UB"
     );
 }
-fn ranpha_modes(card: &str) {
+pub(super) fn ranpha_modes(card: &str) {
     let mut initial = position(card);
     princess(&mut initial);
     initial["players"]["P1"]["zones"]["field"]
         .as_array_mut()
         .unwrap()
         .extend([
-            json!({"id":"other","card":"CP04-SP10a"}),
+            json!({"id":"other","card":card}),
             json!({"id":"ninon1","card":"CP04-035"}),
             json!({"id":"ninon2","card":"CP04-035"}),
         ]);
