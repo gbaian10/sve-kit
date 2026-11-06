@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.contracts.construction_rules import copy_rule, has_copy_rule
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.effects.author_expansion import (
@@ -17,6 +18,8 @@ from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.translations.four_layer_sources import card_field
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.build import Value
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -74,10 +77,13 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
         raise SourceError("record_key_identity_mismatch")
     card_id = selected_id
     db = current.db
-    cards = db.select("card", ("identity_state",), where={"id": card_id})
-    if len(cards) != 1 or cards[0].values["identity_state"] != "confirmed":
+    if [
+        row.values["identity_state"]
+        for row in db.select("card", ("identity_state",), where={"id": card_id})
+    ] != ["confirmed"]:
         raise SourceError("source_identity_unconfirmed")
     faces: list[JsonValue] = []
+    deck_rules: list[JsonValue] = []
     for row in db.select("face", db.columns("face"), where={"card_id": card_id}):
         face = row.values
         selected = db.select(
@@ -129,6 +135,12 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
             }
             if ordinal is not None:
                 entry["section_kind"] = _scalar(sections[ordinal].values["kind"])
+            if face["ordinal"] == 0:
+                deck_rules.extend(
+                    _deck_rules(
+                        current, face, revision_id, field, ordinal, selected_field.text
+                    )
+                )
             fields.append(entry)
         faces.append(
             {
@@ -142,7 +154,57 @@ def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and
         )
     if not faces:
         raise SourceError("source_current_missing")
-    return {"card_id": card_id, "faces": faces}
+    return {"card_id": card_id, "faces": faces, "deck_rules": deck_rules}
+
+
+def _deck_rules(
+    current: CurrentAuthorSources,
+    face: Mapping[str, Value],
+    revision: str,
+    field: str,
+    ordinal: int | None,
+    text: str,
+) -> list[JsonValue]:
+    if not has_copy_rule(text, "jp"):
+        return []
+    names = current.db.select(
+        "face_rules_name",
+        ("rules_name_id",),
+        where={"face_id": face["id"], "region": "jp", "role": "primary"},
+    )
+    if len(names) != 1:
+        raise SourceError("source_rules_name_mismatch")
+    name = current.db.select(
+        "rules_name",
+        ("official_name",),
+        where={"id": names[0].values["rules_name_id"]},
+    )[0].values["official_name"]
+    assert isinstance(name, str)
+    result: list[JsonValue] = []
+    for line_no, line in enumerate(text.splitlines(), 1):
+        try:
+            rule = copy_rule(line, "jp", name)
+        except ValueError:
+            raise SourceError("source_deck_rule_name_mismatch") from None
+        if rule is None:
+            continue
+        deck, maximum = rule
+        result.append(
+            {
+                "rule": {"deck": deck, "same_name_max": maximum},
+                "source": {
+                    "owner": {"kind": "face_revision", "revision_id": revision},
+                    "face_id": _scalar(face["id"]),
+                    "field": field,
+                    "ordinal": ordinal,
+                    "line": line_no,
+                    "scope": "deck_rule",
+                    "covers": [line_no],
+                    "admission": "light",
+                },
+            }
+        )
+    return result
 
 
 def _position(
@@ -245,6 +307,11 @@ def _check_unknown_sections(
         for source in [object_value(token["source"])]
         for line in array(source["covers"])
     }
+    construction = {
+        (source["face_id"], source["ordinal"], source["line"])
+        for raw in array(payload["deck_rules"])
+        for source in [object_value(object_value(raw)["source"])]
+    }
     for raw in array(payload["faces"]):
         face = object_value(raw)
         sections = {
@@ -272,6 +339,7 @@ def _check_unknown_sections(
                 continue
             if kind in {"unknown", "token_definition"} and any(
                 (key := (face["face_id"], field["ordinal"], line)) not in linked
+                and key not in construction
                 and (kind != "unknown" or key not in ignored)
                 for line in array(field["lines"])
             ):
@@ -453,7 +521,18 @@ def check_coverage(
         for field in [object_value(raw_field)]
         for line in array(field["lines"])
     }
-    covered: set[tuple[str, JsonValue, JsonValue]] = set()
+    rules = [object_value(raw) for raw in array(payload["deck_rules"])]
+    declared = object_value(card).get("deck_rule")
+    if (not rules and declared is not None) or any(
+        rule["rule"] != declared for rule in rules
+    ):
+        raise SourceError("source_deck_rule_mismatch")
+    covered: set[tuple[str, JsonValue, JsonValue]] = {
+        (string(source["face_id"]), source["ordinal"], source["line"])
+        for rule in rules
+        for source in [object_value(rule["source"])]
+    }
+    construction_lines = covered.copy()
     identities: set[str] = set()
     for _, ability in ability_nodes({"cards": {"card": card}}):
         source = object_value(array(ability["sources"])[0])
@@ -463,10 +542,13 @@ def check_coverage(
         if key in identities or source["line"] not in array(source["covers"]):
             raise SourceError("duplicate_source_ability")
         identities.add(key)
-        covered.update(
+        keys = {
             (string(source["face_id"]), source["ordinal"], line)
             for line in array(source["covers"])
-        )
+        }
+        if keys & construction_lines:
+            raise SourceError("duplicate_source_ability")
+        covered.update(keys)
     for source in ignored:
         ignored_key = (string(source["face_id"]), source["ordinal"], source["line"])
         if ignored_key in covered:

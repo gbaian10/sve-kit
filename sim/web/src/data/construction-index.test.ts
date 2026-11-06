@@ -111,6 +111,36 @@ describe("loadConstructionIndex", () => {
     ])
   })
 
+  it("applies printed limits per name while preserving each deck's size limit", async () => {
+    const body = wire()
+    body["singleton_except"] = []
+    body["copies"] = [
+      [0, "main", 6],
+      [1, "evolve", 10],
+    ]
+    const index = await serve(body).load()
+    const check = (main: number, evolve: number) =>
+      checkConstruction(
+        {
+          basis: { kind: "class" },
+          leader: "c:leader",
+          main: [["c:amulet", main]],
+          evolve: [["c:carrot", evolve]],
+        },
+        index,
+        { format: "standard", date: "2026-10-26" },
+      ).violations
+    expect(check(6, 10).filter((v) => v.code === "sameNameOver")).toEqual([])
+    const over = check(7, 11)
+    expect(
+      over
+        .filter((v) => v.code === "sameNameOver")
+        .map((v) => v.values["limit"])
+        .sort(),
+    ).toEqual([6, 10].sort())
+    expect(over.some((v) => v.code === "evolveTooMany")).toBe(true)
+  })
+
   it.each([
     [
       "another data version",

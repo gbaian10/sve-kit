@@ -12,6 +12,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from sve_carddb.contracts.construction_rules import PATTERNS, copy_rule
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 
 if TYPE_CHECKING:
@@ -30,32 +31,6 @@ _TITLE_RULES = {"cardfight_vanguard": "vanguard"}
 
 # Card text that changes construction (CR 6.1.2), per region. A sentence that looks like a
 # copy rule but matches no template stops the export rather than being silently ignored.
-_COPIES = {
-    "jp": (
-        (
-            re.compile(
-                r"『(?P<name>[^』]+)』は自分のデッキに(?P<n>\d+)枚まで入れることができる。"
-            ),
-            "main",
-        ),
-        (
-            re.compile(r"これはエボルヴデッキに(?P<n>\d+)枚まで入れることができる。"),
-            "evolve",
-        ),
-    ),
-    "en": (
-        (
-            re.compile(r"You can put up to (?P<n>\d+) of this card into your deck\."),
-            "main",
-        ),
-        (
-            re.compile(
-                r"You can put up to (?P<n>\d+) of this card into your evolve deck\."
-            ),
-            "evolve",
-        ),
-    ),
-}
 _SINGLETON = {
     "jp": re.compile(
         r"カード名に『(?P<part>[^』]+)』を含まないカードは、"
@@ -80,7 +55,7 @@ def build_construction_index(
     manifest: Mapping[str, JsonValue], tables: View, region: str, manifest_sha256: str
 ) -> dict[str, JsonValue]:
     """The region's construction index, bound to the snapshot it was read from."""
-    if region not in _COPIES:
+    if region not in PATTERNS:
         raise ConstructionIndexError(f"Unsupported region {region}")
     names = _Names(tables, region)
     titles = sorted(_vocabulary(tables, "title"))
@@ -318,15 +293,13 @@ def _text_rules(
 
 
 def _copy_rule(line: str, region: str, names: _Names, own: int) -> tuple[str, int]:
-    for pattern, section in _COPIES[region]:
-        match = pattern.fullmatch(line)
-        if match is None:
-            continue
-        named = match.groupdict().get("name")
-        if named is not None and names.official[own] != named:
-            raise ConstructionIndexError("A copy rule names another card")
-        return section, int(match["n"])
-    raise ConstructionIndexError("Unrecognised construction rule in card text")
+    try:
+        rule = copy_rule(line, region, names.official[own])
+    except ValueError as error:
+        raise ConstructionIndexError(str(error)) from None
+    if rule is None:
+        raise ConstructionIndexError("Unrecognised construction rule in card text")
+    return rule
 
 
 def _formats(
