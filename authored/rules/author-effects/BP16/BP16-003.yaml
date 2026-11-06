@@ -1,0 +1,60 @@
+cards:
+  BP16-003:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 2
+              sel:
+                name: 操り人形
+                who: self
+                zone: ex
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ロイド
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 1
+                "on": doll
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                  - bane
+                "on": doll
+          targets:
+            - bind: doll
+              from:
+                name: 操り人形
+                who: self
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 人形
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP08-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

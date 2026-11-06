@@ -854,17 +854,11 @@ pub(in crate::game::internal) fn matches_candidate(
             Predicate::NamesIntersect {
                 right: Expr::Literal(names),
                 ..
-            } => Ok(game
-                .card_names(id)?
-                .iter()
-                .any(|actual| names.iter().any(|name| &name.0 == actual))),
+            } => game.card_name_matches(id, |actual| names.iter().any(|name| name.0 == actual)),
             Predicate::NameContains {
                 name: Expr::Literal(name),
                 ..
-            } => Ok(game
-                .card_names(id)?
-                .iter()
-                .any(|actual| actual.contains(&name.0))),
+            } => game.card_name_matches(id, |actual| actual.contains(&name.0)),
             Predicate::HasTrait { trait_id, .. } => {
                 Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
             }
@@ -1185,14 +1179,13 @@ impl Game {
 
     fn named_advance_candidate(&self, id: &str, seat: &str, name: &CardName) -> Result<bool> {
         let object = self.object(id)?;
-        // Evolve-deck names have no continuous modifiers; the printed face defines this permission.
         let printed = self.catalog.face(&object.card, 0)?;
         Ok(object.zone == "evolve_deck"
             && object.owner == seat
             && object.controller == seat
             && object.state["face"] == 0_i64
             && printed["card_type"] == "フォロワー・アドバンス"
-            && printed["name"].as_str() == Some(name.0.as_str()))
+            && self.card_name_matches(id, |own| own == name.0)?)
     }
 
     pub(super) fn internal_mode_targets_feasible(

@@ -348,7 +348,7 @@ pub(super) fn count(
     Ok(Nat(count))
 }
 
-/// Cards leaving the deck carry no modifications, so their printing is their information.
+/// This trait-only deck read does not require unrelated ability-derived names.
 fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result<MemberCard> {
     let card = &game.object(execution.object_id(before)?)?.card;
     let printed = game.catalog.face(card, 0)?;

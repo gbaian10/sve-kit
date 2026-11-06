@@ -131,6 +131,7 @@ mod flow;
 pub(crate) mod granted_cost;
 pub(crate) mod history_turn;
 pub mod lowering;
+pub(crate) mod names;
 pub(crate) mod nested_play;
 pub(crate) mod observation_selection;
 pub(crate) mod optional_payment;

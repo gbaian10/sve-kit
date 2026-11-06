@@ -1,6 +1,7 @@
 //! Effective printed definitions are resolved once at the catalogue boundary.
 use super::{Ability, Game, Located, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
+use crate::ir::names;
 use crate::ir::{
     AbilityQualification, AssociationId, CardKind, CardName, Characteristics, ClassId,
     EvolutionState, Generation, Info, Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId,
@@ -144,6 +145,37 @@ impl Game {
             .collect())
     }
 
+    pub(in crate::game) fn internal_printed_name_aliases(
+        &self,
+        card: &str,
+        face: usize,
+        field: bool,
+    ) -> Result<Vec<String>> {
+        let Some(program) = self.card_runtime.definitions.cards.get(card) else {
+            let printed = self.catalog.face(card, face)?;
+            if printed["text"].as_str() == Some("")
+                && printed["sections"].as_array().is_some_and(Vec::is_empty)
+            {
+                return Ok(Vec::new());
+            }
+            return Err(super::unsupported(&format!(
+                "unloaded whole card {card}/{face}, query complete card names: current ability definitions unavailable"
+            )));
+        };
+        Ok(program
+            .card()
+            .abilities
+            .iter()
+            .filter(|ability| {
+                printed_origin(&ability.node.source.origin).is_ok_and(|(printed, _)| {
+                    self.printed_face_ordinal(card, printed)
+                        .is_ok_and(|ordinal| ordinal == face)
+                }) && (field || ability.node.active_zones == names::ALL_ZONES)
+            })
+            .filter_map(|ability| names::name(&ability.node).map(|name| name.0.clone()))
+            .collect())
+    }
+
     pub(in crate::game::internal) fn internal_current_reference(
         &mut self,
         holder: &str,
@@ -280,7 +312,7 @@ impl Game {
             (Info::AbsentByRules, Info::AbsentByRules)
         };
         Ok(Characteristics {
-            names: vec![CardName(self.card_name(holder)?)],
+            names: self.card_names(holder)?.into_iter().map(CardName).collect(),
             kind,
             traits,
             class,

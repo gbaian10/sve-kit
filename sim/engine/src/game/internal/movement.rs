@@ -318,7 +318,7 @@ impl Game {
             || form.owner != object.owner
             || base_print["card_type"] != "フォロワー"
             || form_print["card_type"] != "フォロワー・エボルヴ"
-            || base_print["name"] != form_print["name"]
+            || !super::card::resource_association(self, &object.id, &form.id)?
             || form.state["face"] != 0_u8
             || form
                 .state

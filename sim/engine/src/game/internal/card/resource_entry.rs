@@ -357,10 +357,8 @@ impl Game {
             .matches_resource(if ride { "drive_point" } else { "meal_item" }, &[])?;
         for id in self.zone_ids(seat_name(execution.context.controller)?, "evolve_deck") {
             if self.object(&id)?.state["face_up"] != true
-                && self.catalog.rule_bindings.matches_resource(
-                    if ride { "drive_point" } else { "meal_item" },
-                    &self.card_names(&id)?,
-                )?
+                && self
+                    .card_matches_resource(&id, if ride { "drive_point" } else { "meal_item" })?
             {
                 members.push(execution.reference(self, &id)?);
             }

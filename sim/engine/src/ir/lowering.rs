@@ -24,6 +24,7 @@ mod keywords;
 mod material;
 mod material_values;
 mod movement;
+mod name_aliases;
 mod nested_ability;
 mod numeric;
 mod optional_payment;
@@ -461,6 +462,7 @@ impl Allocator {
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
+                Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,
                 Some(ast::StaticEffect::CostMod(_) | ast::StaticEffect::EvolveCostMod(_)) => {
                     other_costs::lower
                 }

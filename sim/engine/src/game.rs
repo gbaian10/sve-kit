@@ -721,12 +721,21 @@ impl Game {
         {
             return Ok(Vec::new());
         }
-        Ok(list(&self.catalog.program(&source.card)?["abilities"])
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.prototype_printed_abilities(&source.card, face)
+    }
+
+    pub(super) fn prototype_printed_abilities(
+        &self,
+        card: &str,
+        ordinal: usize,
+    ) -> Result<Vec<Value>> {
+        Ok(list(&self.catalog.program(card)?["abilities"])
             .into_iter()
             .filter(|ability| {
-                ability
-                    .get("face")
-                    .is_none_or(|face| int(face) == int(&source.state["face"]))
+                ability.get("face").is_none_or(|face| {
+                    face.as_u64().and_then(|face| usize::try_from(face).ok()) == Some(ordinal)
+                })
             })
             .flat_map(|ability| {
                 if ability["kind"] == "static" && ability["body"]["op"] == "seq" {

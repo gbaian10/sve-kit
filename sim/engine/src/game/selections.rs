@@ -106,9 +106,11 @@ impl Game {
             }
             let mut names = BTreeSet::new();
             for id in selected {
-                if !names.insert(self.card_name(id)?) {
+                let own = self.card_names(id)?;
+                if own.iter().any(|name| names.contains(name)) {
                     return Ok(false);
                 }
+                names.extend(own);
             }
         }
         for other_group in list(&spec["different_from"]) {

@@ -81,8 +81,28 @@ fn position_with_zones(
     turn_decks: bool,
     zones: &Value,
 ) -> Game {
+    named_position(seat, base, form, turn_decks, zones, "unit-follower")
+}
+
+pub(super) fn position_with_form_name(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    name: &str,
+) -> Game {
+    named_position(seat, base, form, false, &Value::Null, name)
+}
+
+fn named_position(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    turn_decks: bool,
+    zones: &Value,
+    form_name: &str,
+) -> Game {
     let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","フォロワー・エボルヴ","-","4","5"),("unit-spell","スペル","1","-","-"),("unit-amulet","アミュレット","1","-","-"),("unit-other","スペル","2","-","-")]
-        .iter().map(|(number,kind,cost,power,hp)| json!({"number":number,"faces":[{"name":if *number=="unit-form" {"unit-follower"} else {number},"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
+        .iter().map(|(number,kind,cost,power,hp)| json!({"number":number,"faces":[{"name":if *number=="unit-form" {form_name} else {number},"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
     let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
     let document=json!({"format":1,"kind":"effect_set","cards":{
         "unit-follower":{"status":"complete","abilities":[]},"unit-form":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"unit-other":{"status":"complete","abilities":[]}
