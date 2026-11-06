@@ -1,0 +1,66 @@
+cards:
+  BP10-070:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 武装
+                may: true
+                upto: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 武装
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 3
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: ドラゴウェポン
+            - pp:
+                delta: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP02-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

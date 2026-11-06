@@ -1,0 +1,57 @@
+cards:
+  BP07-006:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 4
+                who: self
+            - if:
+                cond:
+                  history:
+                    at_least: 1
+                    event: moved
+                    from:
+                      who: self
+                      zone: field
+                    sel:
+                      kind: follower
+                    to: cemetery
+                    window: this_turn
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+      - evolve_time:
+          do:
+            - move:
+                ref: friend
+                result: entered
+                to: field
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                orig_cost_le: 3
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

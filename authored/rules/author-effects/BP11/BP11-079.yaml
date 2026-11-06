@@ -1,0 +1,32 @@
+cards:
+  BP11-079:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - move:
+                      ref: friends
+                      result: entered
+                      to: field
+          targets:
+            - bind: friends
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: 荒野
+                who: self
+                zone: cemetery
+              n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

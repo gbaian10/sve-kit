@@ -1,0 +1,89 @@
+cards:
+  CP04-003:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 1
+                on: friend
+                power: 1
+            - if:
+                cond:
+                  history:
+                    at_least: 3
+                    event: ub_activated
+                    exclude: this_execution
+                    who: self
+                    window: this_turn
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: friend
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                other: true
+                trait: プリコネ
+                who: self
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: プリコネ
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: revealed
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    next_only: true
+                    when_playing:
+                      trait: プリコネ
+                      who: self
+                until: turn
+                who: self
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,40 @@
+cards:
+  BP11-052:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            awakened: true
+      - fanfare:
+          do:
+            - move:
+                ref: friend
+                result: entered
+                to: field
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                orig_cost_le: 2
+                trait: 荒野
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
