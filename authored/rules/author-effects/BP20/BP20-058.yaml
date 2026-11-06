@@ -1,0 +1,55 @@
+cards:
+  BP20-058:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          "on":
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+        line: 2
+      - evolve_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+        line: 3
+      - line: 4
+        super_evolve_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+            - damage:
+                n: 4
+                to:
+                  leaders: opponents
+            - set_stat:
+                hp: 7
+                on: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
