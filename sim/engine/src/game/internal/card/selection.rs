@@ -3,7 +3,9 @@ use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsuppo
 use crate::game::list;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
-use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
+use crate::ir::observation_selection::{
+    CardTotals, card_totals, private_hand_choice, private_look_choice,
+};
 use crate::ir::public_numbers;
 use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
@@ -40,7 +42,15 @@ pub(in crate::game::internal) struct TargetWait {
     group_bounds: Vec<Cardinality>,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
+    cost_cap: Option<CostCap>,
     on_field_at_capture: bool,
+}
+
+/// A printed total original cost cap with each candidate's original cost.
+#[derive(Clone, Debug)]
+struct CostCap {
+    limit: i64,
+    costs: Vec<(ObjectRef, i64)>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -145,6 +155,21 @@ impl TargetWait {
     }
 
     fn compatible(&self, members: &[ObjectRef]) -> Result<bool> {
+        if let Some(CostCap { limit, costs }) = &self.cost_cap {
+            let mut total = 0_i64;
+            for member in members {
+                let (_, cost) = costs
+                    .iter()
+                    .find(|(reference, _)| reference == member)
+                    .ok_or_else(|| invalid("missing target original cost"))?;
+                total = total
+                    .checked_add(*cost)
+                    .ok_or_else(|| invalid("target cost sum overflow"))?;
+            }
+            if total > *limit {
+                return Ok(false);
+            }
+        }
         if self.distinct_names {
             let mut names = BTreeSet::new();
             for member in members {
@@ -176,7 +201,24 @@ impl TargetWait {
 
     fn capacity(&self) -> Result<u64> {
         if !self.distinct_names && self.group_members.len() <= 1 {
-            return u64::try_from(self.members.len()).map_err(invalid);
+            let Some(CostCap { limit, costs }) = &self.cost_cap else {
+                return u64::try_from(self.members.len()).map_err(invalid);
+            };
+            // Cheapest cards first maximize how many fit under one total cap.
+            let mut ascending = costs.iter().map(|(_, cost)| *cost).collect::<Vec<_>>();
+            ascending.sort_unstable();
+            let mut total = 0_i64;
+            let mut count = 0_u64;
+            for cost in ascending {
+                total = total
+                    .checked_add(cost)
+                    .ok_or_else(|| invalid("target cost sum overflow"))?;
+                if total > *limit {
+                    break;
+                }
+                count = count.saturating_add(1);
+            }
+            return Ok(count);
         }
         if self.members.len() > 10 {
             return Err(unsupported("name selection exceeds both fields"));
@@ -294,7 +336,11 @@ fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
         return Err(unsupported("one selector group per target decision"));
     };
     if !matches!(constraint.distinct_by, None | Some(ObjectProperty::Names))
-        || !count_bounds(constraint)
+        || !(count_bounds(constraint)
+            || matches!(
+                card_totals(&constraint.aggregate_bounds),
+                CardTotals::OriginalCostAtMost(_)
+            ))
         || constraint.disjoint != Disjointness::Disjoint
     {
         return Err(unsupported("target properties or aggregate constraints"));
@@ -327,6 +373,12 @@ fn evaluated_counts(
     execution: &Execution,
     printed: &SelectionConstraint,
 ) -> Result<SelectionConstraint> {
+    if matches!(
+        card_totals(&printed.aggregate_bounds),
+        CardTotals::OriginalCostAtMost(_)
+    ) {
+        return Ok(printed.clone());
+    }
     if !count_bounds(printed) {
         return Err(unsupported("dynamic target count shape"));
     }
@@ -1018,6 +1070,7 @@ impl Game {
         let on_field_at_capture = characteristics
             .iter()
             .all(|(_, saved)| saved.zone == "field");
+        let cost_cap = self.target_cost_cap(execution, &constraint, &members)?;
         Ok((
             TargetWait {
                 decision: decision.clone(),
@@ -1028,6 +1081,7 @@ impl Game {
                 group_bounds,
                 characteristics,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+                cost_cap,
                 on_field_at_capture,
             },
             TargetDomain {
@@ -1036,6 +1090,31 @@ impl Game {
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
             },
         ))
+    }
+
+    /// Original costs are printed data, so they are read once when the question is asked.
+    fn target_cost_cap(
+        &self,
+        execution: &Execution,
+        constraint: &SelectionConstraint,
+        members: &[ObjectRef],
+    ) -> Result<Option<CostCap>> {
+        let limit = match card_totals(&constraint.aggregate_bounds) {
+            CardTotals::Unbounded => return Ok(None),
+            CardTotals::OriginalCostAtMost(limit) => limit,
+            CardTotals::Unsupported => return Err(unsupported("target aggregate bound")),
+        };
+        let costs = members
+            .iter()
+            .map(|reference| {
+                let id = execution.object_id(*reference)?;
+                Ok((
+                    *reference,
+                    super::super::cost::printed_cost(&self.internal_cost_print(id)?["cost"])?,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(Some(CostCap { limit, costs }))
     }
 
     fn target_group_members(

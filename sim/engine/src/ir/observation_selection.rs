@@ -1,7 +1,31 @@
 use super::{
-    Cardinality, ChoiceDomain, Decision, DecisionKind, Declinable, Disjointness, MemberProjection,
-    Nat, ObjectReceipt, PlayerRef, PlayerRelation, SelectionConstraint, Selector, Visibility,
+    AggregateBound, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Declinable,
+    Disjointness, Expr, Int, MemberProjection, Nat, NumericProperty, ObjectReceipt, PlayerRef,
+    PlayerRelation, SelectionConstraint, Selector, Visibility,
 };
+
+/// Aggregate bounds a choice of concrete cards admits besides dynamic counts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CardTotals {
+    Unbounded,
+    /// 元のコストの合計がN以下: a fixed cap on the chosen cards' printed costs.
+    OriginalCostAtMost(i64),
+    Unsupported,
+}
+
+pub(crate) const fn card_totals(bounds: &[AggregateBound]) -> CardTotals {
+    match bounds {
+        [] => CardTotals::Unbounded,
+        [
+            AggregateBound {
+                property: NumericProperty::OriginalCost,
+                comparison: Comparison::LessEqual,
+                value: Expr::Literal(Int(limit)),
+            },
+        ] if *limit >= 0 => CardTotals::OriginalCostAtMost(*limit),
+        _ => CardTotals::Unsupported,
+    }
+}
 
 pub(crate) fn private_look_choice(decision: &Decision) -> bool {
     let ChoiceDomain::Objects {
@@ -32,7 +56,10 @@ pub(crate) fn private_look_choice(decision: &Decision) -> bool {
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
         && constraint.distinct_by.is_none()
-        && constraint.aggregate_bounds.is_empty()
+        && !matches!(
+            card_totals(&constraint.aggregate_bounds),
+            CardTotals::Unsupported
+        )
         && constraint.disjoint == Disjointness::Disjoint
 }
 

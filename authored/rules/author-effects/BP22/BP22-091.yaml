@@ -1,0 +1,33 @@
+cards:
+  BP22-091:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: picked
+                result: returned
+                to: field
+            - grant:
+                keywords:
+                  - rush
+                on:
+                  follow: returned
+          targets:
+            - bind: picked
+              cost_sum_le: 6
+              from:
+                kind: follower
+                trait: 死者
+                who: self
+                zone: cemetery
+              upto: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
