@@ -65,6 +65,7 @@ pub(super) fn attack(
         return Err(unsupported(path));
     }
     let subject_filter = entry.sel.as_ref().map(|subject| ast::MovementSubject {
+        r#where: None,
         orig_cost_eq: None,
         orig_cost_le: None,
         orig_cost_ge: None,

@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-104:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: chosen
+              from: { who: self, zone: cemetery }
+              n: 3
+              distinct_by: name
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      at: selection
+                      selection: chosen
+                      value: { distinct_orig_costs: { in: chosen } }
+                    op: eq
+                    right: 1
+                then:
+                  - move: { ref: chosen, to: hand }

@@ -1,11 +1,11 @@
 //! Current-turn queries read committed public facts; only Combo projects a pending formal play.
 
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
-use crate::ir::PlayerId;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
+use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::history_turn::{
     PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, played_filter, ub_plan,
 };
@@ -15,6 +15,7 @@ use crate::ir::{
     CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, Selector, TraitId,
 };
 use crate::ir::{ExecutionRef, HistoryQuery, Location, PlayerRef, Requirement, Requirements};
+use crate::ir::{ObjectRef, PlayerId, RuntimeDamageRecipient};
 use alloc::collections::BTreeSet;
 use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
@@ -483,4 +484,65 @@ pub(super) fn life_sum(
 ) -> Result<Int> {
     let filter = life_sum_plan(query).ok_or_else(|| unsupported("life history sum"))?;
     life_counter(execution, game, filter, "leader_hp_increased").map(Int)
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(in crate::game) struct DamageHistoryFact {
+    recipient: (u64, u64),
+    source: (u64, u64),
+    controller: u32,
+    traits: Vec<String>,
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Damage history shares committed game state."
+)]
+impl Game {
+    pub(in crate::game::internal) fn internal_record_damage_history(
+        &mut self,
+        facts: &[super::DamageOccurrence],
+    ) {
+        for fact in facts {
+            if let RuntimeDamageRecipient::Object { object } = fact.event.recipient {
+                self.state.ir_damage_history.push(DamageHistoryFact {
+                    recipient: (object.id.0, object.generation.0),
+                    source: (
+                        fact.event.source.object.id.0,
+                        fact.event.source.object.generation.0,
+                    ),
+                    controller: fact.event.controller.seat,
+                    traits: fact
+                        .source
+                        .subject
+                        .traits
+                        .iter()
+                        .map(|id| id.0.clone())
+                        .collect(),
+                });
+            }
+        }
+    }
+
+    pub(in crate::game::internal) fn internal_damage_source_link(
+        &self,
+        recipient: ObjectRef,
+        holder: ObjectRef,
+        controller: PlayerId,
+        link: &SourceLink,
+    ) -> bool {
+        self.state.ir_damage_history.iter().any(|fact| {
+            fact.recipient == (recipient.id.0, recipient.generation.0)
+                && if link.source.itself == Some(true) {
+                    fact.source == (holder.id.0, holder.generation.0)
+                } else {
+                    fact.controller == controller.seat
+                        && link
+                            .source
+                            .trait_id
+                            .as_ref()
+                            .is_some_and(|id| fact.traits.contains(&id.0))
+                }
+        })
+    }
 }

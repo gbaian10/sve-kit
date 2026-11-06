@@ -1763,6 +1763,8 @@ pub(super) enum SelectionTime {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SelectedStat {
+    #[serde(rename = "distinct_orig_costs")]
+    DistinctOriginalCosts(SelectedCollection),
     #[serde(rename = "hp_of")]
     Hp(String),
     #[serde(rename = "power_of")]
@@ -1771,6 +1773,12 @@ pub(super) enum SelectedStat {
     Cost(String),
     #[serde(rename = "orig_cost_of")]
     OriginalCost(String),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SelectedCollection {
+    pub r#in: String,
 }
 
 #[derive(Clone, Copy, Deserialize)]
@@ -2054,7 +2062,7 @@ pub(super) struct EntrySubscription {
     pub sel: Option<MovementSubject>,
     pub during: Option<During>,
 }
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub(super) enum This {
     #[serde(rename = "this")]
     This,
@@ -2609,6 +2617,7 @@ pub(super) struct ExSubscription {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
+    pub r#where: Option<Box<SourceLinkCondition>>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -2622,6 +2631,38 @@ pub(super) struct MovementSubject {
     pub token: Option<bool>,
     pub not_token: Option<bool>,
     pub other: Option<bool>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SourceLinkCondition {
+    pub history: SourceLinkHistory,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SourceLinkHistory {
+    pub event: DealtDamageHistory,
+    pub window: ThisTurn,
+    pub who: Option<LeaderSide>,
+    pub sel: Option<SourceLinkSubject>,
+    pub r#where: SourceLinkWhere,
+}
+#[derive(Clone, Deserialize)]
+pub(super) enum DealtDamageHistory {
+    #[serde(rename = "dealt_damage")]
+    DealtDamage,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SourceLinkSubject {
+    pub r#trait: String,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SourceLinkWhere {
+    pub recipient: Item,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
 }
 
 #[derive(Deserialize)]

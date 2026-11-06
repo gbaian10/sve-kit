@@ -360,7 +360,8 @@ pub(super) fn subscription(
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
     if entry.sel.as_ref().is_some_and(|sel| {
-        sel.token.is_some()
+        sel.r#where.is_some()
+            || sel.token.is_some()
             || sel.not_token.is_some()
             || sel.class.is_some()
             || sel.orig_cost_eq == Some(0)

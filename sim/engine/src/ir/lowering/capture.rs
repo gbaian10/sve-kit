@@ -2,6 +2,7 @@ use super::{
     BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError, Nat, ObjectView,
     PlayerRef, Selector, ast, unsupported,
 };
+use crate::ir::ObjectProperty;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, EventContext,
     IntOperation, NameOperation, NumberRead, PlayerRead, Role, ScopeId, Stat,
@@ -86,11 +87,15 @@ impl BodyContext<'_> {
         value: &ast::SelectedStat,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        if let ast::SelectedStat::DistinctOriginalCosts(collection) = value {
+            return self.selected_original_cost_count(name, &collection.r#in, path);
+        }
         let reference = match value {
             ast::SelectedStat::Hp(reference)
             | ast::SelectedStat::Power(reference)
             | ast::SelectedStat::Cost(reference)
             | ast::SelectedStat::OriginalCost(reference) => reference,
+            ast::SelectedStat::DistinctOriginalCosts(_) => return Err(unsupported(path)),
         };
         if reference != name {
             return Err(unsupported(path));
@@ -114,6 +119,7 @@ impl BodyContext<'_> {
                     CharacteristicView::Effective
                 },
             },
+            ast::SelectedStat::DistinctOriginalCosts(_) => return Err(unsupported(path)),
         };
         let into = CaptureRef {
             binding: Binding::new(self.allocator.id(path)?, selection.key().0),
@@ -127,6 +133,40 @@ impl BodyContext<'_> {
                 decision: decision.id,
             },
             value: Expr::Compute(Box::new(IntOperation::InformationOrZero { information })),
+            into,
+        });
+        Ok(Expr::Captured(into))
+    }
+
+    fn selected_original_cost_count(
+        &mut self,
+        name: &str,
+        reference: &str,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        if reference != name
+            || self.observed_targets.contains(name)
+            || self.hand_targets.contains(name)
+        {
+            return Err(unsupported(path));
+        }
+        let selection = *self.targets.get(name).ok_or_else(|| unsupported(path))?;
+        let decision = self.parameters.iter_mut().find(|decision| {
+            matches!(&decision.domain, ChoiceDomain::Objects { binding, .. } if *binding == selection)
+        }).ok_or_else(|| unsupported(path))?;
+        let into = CaptureRef {
+            binding: Binding::new(self.allocator.id(path)?, selection.key().0),
+        };
+        decision.captures.push(Capture::Integer {
+            at: CaptureTime::AtSelection {
+                decision: decision.id,
+            },
+            value: super::numeric::aggregate_count(
+                Selector::Bound {
+                    reference: selection,
+                },
+                Some(ObjectProperty::Cost),
+            ),
             into,
         });
         Ok(Expr::Captured(into))

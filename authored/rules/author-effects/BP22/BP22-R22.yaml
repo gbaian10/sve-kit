@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-R22:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            moved:
+              from: { who: opp, zone: field }
+              to: cemetery
+              during: { turn: self }
+              sel:
+                kind: follower
+                where:
+                  history:
+                    event: dealt_damage
+                    window: this_turn
+                    who: self
+                    sel: { trait: ウマ娘 }
+                    where: { recipient: item }
+          per_turn: 2
+          do:
+            - draw: { who: self, n: 1 }
+            - discard: { who: self, n: 1 }
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left: { count: { who: self, zone: cemetery, trait: ウマ娘 } }
+                    op: ge
+                    right: 10
+                then:
+                  - damage: { to: enemy, n: 4 }
+                else:
+                  - damage: { to: enemy, n: 2 }

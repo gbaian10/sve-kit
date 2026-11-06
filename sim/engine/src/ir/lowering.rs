@@ -968,7 +968,9 @@ fn lowered_subscription(
         ast::PhaseSubscription::LeaveField(_)
         | ast::PhaseSubscription::Destroyed(_)
         | ast::PhaseSubscription::Moved(_)
-        | ast::PhaseSubscription::PlacedEx(_) => movement::subscription(on, event_id, scope, path),
+        | ast::PhaseSubscription::PlacedEx(_) => {
+            movement::subscription(on, event_id, subject_id, scope, path)
+        }
         ast::PhaseSubscription::Acted(_)
         | ast::PhaseSubscription::Stood(_)
         | ast::PhaseSubscription::StatChanged(_) => {

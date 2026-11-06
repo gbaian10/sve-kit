@@ -3,6 +3,7 @@ use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{
     CardKind, CardName, ClassId, Comparison, KeywordId, ObjectRef, PlayEvent, TraitId,
 };
@@ -18,11 +19,12 @@ pub(super) enum FilterSupport {
 pub(super) fn subscription(
     on: &ast::PhaseSubscription,
     event_id: u64,
+    subject_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
     match on {
-        ast::PhaseSubscription::Moved(entry) => moved(entry, event_id, scope, path),
+        ast::PhaseSubscription::Moved(entry) => moved(entry, event_id, subject_id, scope, path),
         ast::PhaseSubscription::PlacedEx(entry) => {
             if entry
                 .sel
@@ -113,6 +115,7 @@ pub(super) fn subscription(
 fn moved(
     entry: &ast::MoveSubscription,
     event_id: u64,
+    damage_id: u64,
     scope: ScopeId,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
@@ -126,24 +129,63 @@ fn moved(
         return mill(entry, own, event_id, scope, path);
     }
     let event = Binding::new(event_id, scope);
-    Ok(EventPattern::LeaveField {
-        binding: event,
-        predicate: movement_filter(
-            own,
-            entry.reference.is_some(),
-            entry.sel.as_ref(),
-            entry.during.is_some(),
-            path,
-            if own == Some(true) && matches!(entry.to, ast::DepartureDestination::Cemetery) {
-                FilterSupport::CemeteryWard
-            } else {
-                FilterSupport::Basic
+    let mut subject = entry.sel.clone();
+    let link = subject.as_mut().and_then(|subject| subject.r#where.take());
+    let filter = movement_filter(
+        own,
+        entry.reference.is_some(),
+        subject.as_ref(),
+        entry.during.is_some(),
+        path,
+        if own == Some(true) && matches!(entry.to, ast::DepartureDestination::Cemetery) {
+            FilterSupport::CemeteryWard
+        } else {
+            FilterSupport::Basic
+        },
+    )?;
+    let predicate = if let Some(link) = link {
+        let history = &link.history;
+        let ast::DealtDamageHistory::DealtDamage = history.event;
+        let ast::ThisTurn::ThisTurn = history.window;
+        let ast::Item::Item = history.r#where.recipient;
+        if own != Some(false)
+            || filter.kind != Some(CardKind::Follower)
+            || !matches!(entry.to, ast::DepartureDestination::Cemetery)
+            || entry.during.is_none()
+        {
+            return Err(unsupported(path));
+        }
+        let source = match (&history.who, &history.sel, &history.r#where.reference) {
+            (None, None, Some(ast::This::This)) => SubjectFilter {
+                itself: Some(true),
+                ..SubjectFilter::default()
             },
-        )?
-        .predicate(match entry.to {
+            (Some(ast::LeaderSide::Controller), Some(source_subject), None) => SubjectFilter {
+                own: Some(true),
+                trait_id: Some(TraitId(source_subject.r#trait.clone())),
+                ..SubjectFilter::default()
+            },
+            _ => return Err(unsupported(path)),
+        };
+        let predicate = SourceLink {
+            subject: filter,
+            source,
+            damage: Binding::new(damage_id, scope),
+        }
+        .predicate(event);
+        if SourceLink::parse(event, &predicate).is_none() {
+            return Err(unsupported(path));
+        }
+        predicate
+    } else {
+        filter.predicate(match entry.to {
             ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
             ast::DepartureDestination::Hand => SubjectFields::Hand(event),
-        }),
+        })
+    };
+    Ok(EventPattern::LeaveField {
+        binding: event,
+        predicate,
     })
 }
 
@@ -184,7 +226,10 @@ pub(super) fn movement_filter(
     support: FilterSupport,
 ) -> Result<SubjectFilter, LoweringError> {
     if subject.is_some_and(|sel| {
-        sel.orig_cost_le.is_some() || sel.orig_cost_ge.is_some() || sel.traits_any.is_some()
+        sel.r#where.is_some()
+            || sel.orig_cost_le.is_some()
+            || sel.orig_cost_ge.is_some()
+            || sel.traits_any.is_some()
     }) {
         return Err(unsupported(path));
     }
