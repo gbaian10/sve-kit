@@ -430,3 +430,38 @@ fn a_public_copy_masks_only_its_own_card_number() {
     assert!(!text.contains("hidden c1"), "{text}");
     assert!(text.contains("hidden c2"), "{text}");
 }
+
+#[test]
+fn role_answers_compare_as_partitions_without_erasing_role_identity() {
+    let chosen = json!({"targets":[0,1,2], "roles":[
+        {"role":0,"targets":[2]}, {"role":1,"targets":[0,1]}]});
+    let position = serde_json::from_value(json!({
+        "schema":"sve-ai-position/1", "id":"role-answers", "setup":{},
+        "checks":[{"id":"H1","awaiting":{"by":"P1","at":"main"},"legal_exact":[chosen]}]
+    }))
+    .unwrap();
+    let all = AiPositions(std::collections::BTreeMap::from([(
+        "role-answers".into(),
+        position,
+    )]));
+    let oracle = table(&all);
+    let mut expected = all;
+    expected.0.get_mut("role-answers").unwrap().checks[0].legal_exact = Some(vec![json!({
+        "targets":[2,0,1], "roles":[{"role":1,"targets":[1,0]}, {"role":0,"targets":[2]}]
+    })]);
+    let mut factory = || -> Box<dyn AiEngine> {
+        Box::new(FakeAi::new(Mutation::None, std::rc::Rc::clone(&oracle)))
+    };
+    let file = profiles("roles", GOOD_PROFILES);
+    assert_eq!(
+        failed(&check_ai(&mut factory, &expected, &file)),
+        Vec::<String>::new()
+    );
+    expected.0.get_mut("role-answers").unwrap().checks[0].legal_exact = Some(vec![json!({
+        "targets":[2,0,1], "roles":[{"role":1,"targets":[1,2]}, {"role":0,"targets":[0]}]
+    })]);
+    assert_ne!(
+        failed(&check_ai(&mut factory, &expected, &file)),
+        Vec::<String>::new()
+    );
+}
