@@ -1,0 +1,53 @@
+cards:
+  ECP02-069:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+          while:
+            any:
+              - cmp:
+                  left:
+                    count:
+                      kind: follower
+                      trait: クール
+                      who: self
+                      zone: field
+                  op: ge
+                  right: 3
+              - exists:
+                  kind: follower
+                  name_contains: 的場梨沙
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: 的場梨沙
+                    who: self
+                    zone: field
+                then:
+                  - create:
+                      to: ex
+                      token: 魔法のアイテム
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: ECP02-SL46
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

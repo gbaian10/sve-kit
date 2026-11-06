@@ -1,0 +1,45 @@
+cards:
+  BP13-046:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 2
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 1
+      - lastword:
+          do:
+            - create:
+                to: field
+                token: 大地の魔片
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP22-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

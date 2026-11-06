@@ -1,0 +1,39 @@
+cards:
+  BP12-066:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  any_of:
+                    - who: self
+                      zone: deck
+                      kind: spell
+                      orig_cost_le: 5
+                      class: ドラゴン
+                    - who: self
+                      zone: deck
+                      kind: spell
+                      orig_cost_le: 2
+                n: 1
+                to: ex
+                result: searched
+            - apply:
+                on:
+                  follow: searched
+                effect:
+                  cost_mod:
+                    when_playing:
+                      in: affected
+                    delta: -5
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

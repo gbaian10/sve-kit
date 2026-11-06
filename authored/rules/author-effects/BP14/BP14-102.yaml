@@ -1,0 +1,50 @@
+cards:
+  BP14-102:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - auto:
+          do:
+            - create:
+                to: field
+                token: ホーリーファルコン
+          on:
+            life_changed:
+              direction: up
+              during:
+                turn: self
+              who: self
+          per_turn: 1
+        line: 2
+      - auto:
+          do:
+            - act: enemy
+          on:
+            enter_field:
+              sel:
+                class: ビショップ
+                kind: follower
+                token: true
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP03-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
