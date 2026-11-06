@@ -166,6 +166,7 @@ fn discarded_card(
         kind,
         trait_id: None,
         name: None,
+        name_contains: None,
         token: None,
         not_token: None,
         other: None,

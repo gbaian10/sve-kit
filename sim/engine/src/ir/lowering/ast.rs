@@ -2675,6 +2675,7 @@ pub(super) struct MovementSubject {
     #[serde(rename = "trait")]
     pub trait_id: Option<String>,
     pub name: Option<String>,
+    pub name_contains: Option<String>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
     pub other: Option<bool>,
