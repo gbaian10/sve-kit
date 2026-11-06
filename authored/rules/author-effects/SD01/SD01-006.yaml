@@ -1,0 +1,76 @@
+cards:
+  SD01-006:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                    op: eq
+                    right: 3
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: field
+                          op: eq
+                          right: 4
+                      else:
+                        - if:
+                            cond:
+                              cmp:
+                                left:
+                                  count:
+                                    who: self
+                                    zone: field
+                                op: eq
+                                right: 5
+                            else:
+                              - create:
+                                  n: 3
+                                  to: field
+                                  token: フェアリー
+                            then:
+                              - create:
+                                  n: 3
+                                  to: ex
+                                  token: フェアリー
+                      then:
+                        - create:
+                            n: 1
+                            to: field
+                            token: フェアリー
+                        - create:
+                            n: 2
+                            to: ex
+                            token: フェアリー
+                then:
+                  - create:
+                      n: 2
+                      to: field
+                      token: フェアリー
+                  - create:
+                      n: 1
+                      to: ex
+                      token: フェアリー
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP22-T05
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

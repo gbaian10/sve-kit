@@ -1,0 +1,52 @@
+cards:
+  BP12-082:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - damage_cap:
+                set: 1
+                threshold: 2
+          while:
+            exists:
+              name: 紫紺の抵抗者・エンネア
+              who: self
+              zone: field
+      - activate:
+          cost:
+            pp: 1
+          do:
+            - move:
+                ref: this
+                result: returned
+                to: field
+            - buff:
+                on:
+                  follow: returned
+                power: 1
+            - grant:
+                abilities:
+                  - lastword:
+                      do:
+                        - banish: this
+                on:
+                  follow: returned
+          usable_if:
+            exists:
+              name: 紫紺の抵抗者・エンネア
+              who: self
+              zone: field
+          zone: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

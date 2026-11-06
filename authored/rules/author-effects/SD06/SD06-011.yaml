@@ -1,0 +1,32 @@
+cards:
+  SD06-011:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: amulet
+                    who: self
+                    zone: field
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

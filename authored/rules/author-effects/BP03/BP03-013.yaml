@@ -1,0 +1,30 @@
+cards:
+  BP03-013:
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - apply:
+                on: enemy
+                effect:
+                  cannot:
+                    what: attack
+                until:
+                  during_next_turn:
+                    who: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

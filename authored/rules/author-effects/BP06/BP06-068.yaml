@@ -1,0 +1,30 @@
+cards:
+  BP06-068:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - create:
+                        by: p
+                        to: ex
+                        token: ドラゴン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP13-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
