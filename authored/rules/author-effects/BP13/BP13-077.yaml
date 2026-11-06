@@ -1,0 +1,38 @@
+cards:
+  BP13-077:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - move:
+                      ref: revive
+                      result: revived
+                      to: field
+                  - grant:
+                      keywords:
+                        - ward
+                      on:
+                        follow: revived
+          targets:
+            - bind: revive
+              from:
+                class: ナイトメア
+                kind: follower
+                not_same_name_as_this: true
+                orig_cost_le: 5
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

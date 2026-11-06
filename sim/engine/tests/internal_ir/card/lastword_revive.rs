@@ -353,4 +353,85 @@ fn unrestricted_departures_cannot_return_the_holder_to_field_or_ex() {
             )]))
             .unwrap_err();
     }
+    lowerer()
+        .lower(&tree(&[(
+            "auto",
+            json!({"on":{"left_field":{"ref":"this"}},"do":[{"banish":"this"}]}),
+        )]))
+        .unwrap_err();
+}
+
+#[test]
+fn lastword_banishes_only_the_departed_cemetery_generation() {
+    let programs = lowerer()
+        .lower(&tree(&[
+            (
+                "activate",
+                json!({"cost":{"pp":0},"do":[{"destroy":"this"}]}),
+            ),
+            ("lastword", json!({"do":[{"banish":"this"}]})),
+            (
+                "lastword",
+                json!({"do":[{"move":{"ref":"this","to":"ex"}}]}),
+            ),
+        ]))
+        .unwrap();
+    let program = &programs["unit-follower"];
+    let mut game = loaded(&board(3), program);
+    depart(&mut game, program.card().abilities[0].node.id);
+    resolved(fire(&mut game, 2));
+    game.resume_internal_card().unwrap();
+    let banished = game.projection(View::Referee).unwrap();
+    assert_eq!(banished["P1"]["banish"], json!(["s"]));
+    assert_eq!(banished["P1"]["cemetery"], json!([]));
+    // The banished card is a new generation, so the other Lastword no longer reaches it.
+    let stale = resolved(fire(&mut game, 3));
+    game.resume_internal_card().unwrap();
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"], banished["P1"]);
+    assert_eq!(after["objects"]["s"], banished["objects"]["s"]);
+    assert!(
+        stale
+            .progress
+            .facts
+            .iter()
+            .all(|fact| !matches!(fact, Fact::Movement(_)))
+    );
+}
+
+#[test]
+fn a_lastword_banish_skips_a_card_already_moved_by_another_lastword() {
+    let programs = lowerer()
+        .lower(&tree(&[
+            (
+                "activate",
+                json!({"cost":{"pp":0},"do":[{"destroy":"this"}]}),
+            ),
+            ("lastword", json!({"do":[{"banish":"this"}]})),
+            (
+                "lastword",
+                json!({"do":[{"move":{"ref":"this","to":"ex"}}]}),
+            ),
+        ]))
+        .unwrap();
+    let program = &programs["unit-follower"];
+    let mut game = loaded(&board(3), program);
+    depart(&mut game, program.card().abilities[0].node.id);
+    resolved(fire(&mut game, 3));
+    game.resume_internal_card().unwrap();
+    let moved = game.projection(View::Referee).unwrap();
+    assert_eq!(moved["P1"]["ex"], json!(["s"]));
+    let stale = resolved(fire(&mut game, 2));
+    game.resume_internal_card().unwrap();
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"], moved["P1"]);
+    assert_eq!(after["P1"]["banish"], json!([]));
+    assert_eq!(after["objects"]["s"], moved["objects"]["s"]);
+    assert!(
+        stale
+            .progress
+            .facts
+            .iter()
+            .all(|fact| !matches!(fact, Fact::Movement(_)))
+    );
 }

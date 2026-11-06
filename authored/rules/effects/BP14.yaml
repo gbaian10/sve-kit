@@ -70,45 +70,6 @@ cards:
         kind: evolve
         line: 2
     status: complete
-  BP14-076:
-    abilities:
-      - body:
-          op: banish
-          subjects: self
-        event: field_to_cemetery
-        kind: trigger
-        line: 1
-        subject: self
-      - body:
-          op: seq
-          steps:
-            - bind: entered
-              op: move
-              subjects: target.1
-              to: field
-            - op: modify
-              set_hp: 1
-              set_power: 1
-              subjects: entered
-        costs:
-          - op: act
-            subjects: self
-        kind: activated
-        line: 2
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              type: follower
-              where:
-                args:
-                  - read: item.cost
-                  - 8
-                fn: le
-              zone: cemetery
-    status: complete
   BP14-081:
     abilities:
       - active_zones:
