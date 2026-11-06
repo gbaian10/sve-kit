@@ -578,7 +578,7 @@ BP19-072 的實際付款、捨棄取代及成功判斷並非完整卡片執行�
 
 roles 只接受 PlayParameter Targets。每個 role ID 與 binding 唯一，由同次回答產生；
 目前接受一個 IfNonempty(1) 與至多一個 Remainder。若無 remainder，目標上限不得大於 1；
-Fixed、多個 IfNonempty、空 roles、重複 remainder 明確拒絕。BP21-PR13 是合成種子。
+Fixed、多個 IfNonempty、空 roles、重複 remainder 明確拒絕。BP14-071／BP21-PR13 的作者 lowering 與正式目標執行已接線；作者入口目前要求同時宣告 IfNonempty(1) 與 Remainder。
 `TargetRoleSpec::accepts_answer` 對已驗目標集合檢查角色基數、同世代 membership、互斥與
 完整覆蓋；目標空集合時 first/rest 都是空集合。它不驗選取域或目標在結算時是否仍合法，
 也不會新增另一個 DecisionId。
