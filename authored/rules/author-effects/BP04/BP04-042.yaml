@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-042:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        fanfare:
+          targets:
+            - bind: europa
+              from:
+                who: self
+                zone: evolve_deck
+                face_up: true
+                name: エウロペ
+              n: 1
+          do:
+            - flip_down: europa
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
