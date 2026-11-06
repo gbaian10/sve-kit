@@ -197,8 +197,9 @@ pub(super) fn check(
     let supported_kind = if keyword == KeywordId::Stack {
         matches!(card_type, Some("アミュレット" | "アミュレット・トークン"))
     } else {
+        // A piloted vehicle is a follower this turn; its printed Storm or Rush applies then.
         (pilot
-            && keyword == KeywordId::Storm
+            && matches!(keyword, KeywordId::Storm | KeywordId::Rush)
             && matches!(card_type, Some("アミュレット" | "アミュレット・トークン")))
             || matches!(
                 card_type,

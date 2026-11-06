@@ -1,0 +1,40 @@
+cards:
+  BP11-069:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - discard:
+                n: 1
+                who: opp
+          on:
+            acted:
+              ref: this
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      name: 魔導列車
+                      who: self
+                      zone: field
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 魔導列車
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

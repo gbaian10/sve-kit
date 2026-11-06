@@ -121,6 +121,7 @@ fn lower_operations(
                     n: Some(*amount),
                     any: false,
                     result: None,
+                    cost_sum_ge: None,
                     sel: ast::PublicQuery {
                         acted: None,
                         not_same_name_as_this: false,
