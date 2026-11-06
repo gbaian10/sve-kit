@@ -1,0 +1,44 @@
+cards:
+  BP06-024:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                cost_sum_le: 7
+                from:
+                  class: ロイヤル
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 3
+                may: true
+                upto: 5
+            - move:
+                ref: picked
+                result: taken
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
