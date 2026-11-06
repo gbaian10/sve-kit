@@ -126,6 +126,8 @@ fn lower_operations(
                         acted: None,
                         not_same_name_as_this: false,
                         traits_any: None,
+                        evolved: None,
+                        traits_all: Vec::new(),
                         other: false,
                         who: ast::Side::Controller,
                         zone: ast::PublicZone::Ex,

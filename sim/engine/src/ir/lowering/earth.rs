@@ -26,6 +26,8 @@ pub(super) const fn amulets() -> ast::PublicQuery {
         acted: None,
         not_same_name_as_this: false,
         traits_any: None,
+        evolved: None,
+        traits_all: Vec::new(),
         who: ast::Side::Controller,
         zone: ast::PublicZone::Field,
         kind: Some(ast::SearchKind::Amulet),

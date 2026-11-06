@@ -1,254 +1,213 @@
-format: 1
-kind: effect_set
 cards:
   ECP02-001:
-    status: complete
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: trigger
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
           op: seq
           steps:
             - op: optional
               selection:
+                bind: chosen
+                max: 1
+                min: 1
                 select:
-                  zone: hand
                   side: self
                   trait: デレマス
                   type: follower
                   where:
-                    fn: le
                     args:
                       - read: item.cost
                       - 2
-                min: 1
-                max: 1
-                bind: chosen
+                    fn: le
+                  zone: hand
               then:
                 op: move
                 subjects: chosen
                 to: ex
-            - op: adjust_cost
+            - amount: -2
+              op: adjust_cost
               subjects: chosen
-              amount: -2
               until: end-of-turn
-        event: enter
-        subject: self
         costs:
-          - op: pp
-            amount: 1
-          - op: lesson
-            count: 1
-  ECP02-065:
+          - amount: 1
+            op: pp
+          - count: 1
+            op: lesson
+        event: enter
+        kind: trigger
+        line: 2
+        subject: self
     status: complete
+  ECP02-065:
     abilities:
-      - line: 1
-        kind: evolve
-        body:
+      - body:
           op: evolve
           subjects: self
         costs:
-          - op: pp
-            amount: 1
-      - line: 2
-        kind: static
-        body:
+          - amount: 1
+            op: pp
+        kind: evolve
+        line: 1
+      - body:
+          count: 1
           op: allow_reroll
           side: self
-          count: 1
-  ECP02-066:
+        kind: static
+        line: 2
     status: complete
+  ECP02-066:
     abilities:
-      - line: 1
-        kind: static
-        body:
+      - body:
+          count: 1
           op: allow_reroll
           side: self
-          count: 1
-      - line: 2
-        kind: trigger
-        body:
+        kind: static
+        line: 1
+      - body:
           op: seq
           steps:
-            - op: dice
+            - bind: die
               count: 1
-              bind: die
-            - op: if
-              condition:
-                fn: eq
+              op: dice
+            - condition:
                 args:
                   - read: die
                   - 1
-              then:
-                op: draw
-                count: 2
-            - op: if
-              condition:
                 fn: eq
+              op: if
+              then:
+                count: 2
+                op: draw
+            - condition:
                 args:
                   - read: die
                   - 2
+                fn: eq
+              op: if
               then:
                 op: seq
                 steps:
-                  - op: damage
+                  - amount: 3
+                    op: damage
                     subjects: opponent.leader
-                    amount: 3
-                  - op: modify
+                  - hp: 3
+                    op: modify
                     subjects: self.leader
-                    hp: 3
-            - op: if
-              condition:
-                fn: eq
+            - condition:
                 args:
                   - read: die
                   - 3
+                fn: eq
+              op: if
               then:
                 op: seq
                 steps:
-                  - op: select
+                  - bind: chosen
+                    by: opponent
+                    max: 1
+                    min: 1
+                    op: select
                     select:
                       side: opponent
-                      zone: field
                       type: follower
                       where:
-                        fn: eq
                         args:
                           - read: item.power
-                          - fn: max
-                            args:
-                              - values:
+                          - args:
+                              - field: power
+                                values:
                                   side: opponent
-                                  zone: field
                                   type: follower
-                                field: power
-                    by: opponent
-                    min: 1
-                    max: 1
-                    bind: chosen
+                                  zone: field
+                            fn: max
+                        fn: eq
+                      zone: field
                   - op: move
                     subjects: chosen
                     to: cemetery
         event: evolve
-        subject: self
-  ECP02-SL29:
-    status: complete
-    abilities:
-      - line: 1
         kind: trigger
-        body:
+        line: 2
+        subject: self
+    status: complete
+  ECP02-SL29:
+    abilities:
+      - body:
           op: seq
           steps:
-            - op: modify
+            - hp: 2
+              op: modify
               subjects: self.leader
-              hp: 2
-            - op: draw
-              count: 1
-        event: evolve
-        subject: self
+            - count: 1
+              op: draw
         cost_selections:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: hand
               trait: デレマス
-            min: 1
-            max: 1
+              zone: hand
         costs:
           - op: discard
             subjects: cost.1
-      - line: 2
+        event: evolve
         kind: trigger
-        body:
+        line: 1
+        subject: self
+      - body:
           op: seq
           steps:
             - op: become_type
               subjects: target.1
               type: amulet
-            - op: modify
-              subjects: target.1
-              abilities:
-                - line: 2
-                  kind: trigger
-                  body:
+            - abilities:
+                - body:
+                    amount: 2
                     op: damage
                     subjects: self.leader
-                    amount: 2
                   event: main_start
-                - line: 2
-                  kind: activated
-                  body:
+                  kind: trigger
+                  line: 2
+                - body:
                     op: move
                     subjects: self
                     to: cemetery
                   cost_selections:
                     - key: "1"
+                      max: 2
+                      min: 2
                       select:
                         side: self
                         zone: hand
-                      min: 2
-                      max: 2
                   costs:
-                    - op: pp
-                      amount: 1
+                    - amount: 1
+                      op: pp
                     - op: discard
                       subjects: cost.1
+                  kind: activated
+                  line: 2
+              op: modify
+              subjects: target.1
         event: super_evolve
+        kind: trigger
+        line: 2
         subject: self
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: opponent
-              zone: field
               type: follower
-            min: 1
-            max: 1
-  ECP02-SL33:
+              zone: field
     status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: adjust_cost
-          subjects: self
-          amount: -5
-          condition:
-            fn: ge
-            args:
-              - count:
-                  zone: cemetery
-                  side: self
-                  trait: デレマス
-              - 10
-      - line: 2
-        kind: spell
-        body:
-          op: seq
-          steps:
-            - op: destroy
-              subjects:
-                difference:
-                  - zone: field
-                    side: both
-                    type: follower
-                  - zone: field
-                    side: both
-                    type: follower
-                    trait: デレマス
-            - op: create
-              name: 魔法のアイテム
-              count: 2
-              to: ex
-            - op: modify
-              subjects: self.leader
-              hp: 4
-            - op: draw
-              count: 2
+format: 1
+kind: effect_set

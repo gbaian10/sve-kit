@@ -843,7 +843,7 @@ pub(super) enum StandPlayer {
 pub(super) enum Objects {
     This(This),
     Bound(String),
-    Zone(ObjectQuery),
+    Zone(Box<ObjectQuery>),
     Follow { follow: String },
     EventHolder { event: HolderEvent },
 }
@@ -870,6 +870,8 @@ pub(super) struct ObjectQuery {
     pub not_token: Option<bool>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
+    pub hp_le: Option<u64>,
+    pub not_trait: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub acted: Option<bool>,
@@ -1291,7 +1293,7 @@ pub(super) struct DamageInstead {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Recipients {
     Union { any_of: Vec<Self> },
-    Field(ObjectQuery),
+    Field(Box<ObjectQuery>),
     Leader { leader: LeaderSide },
     LeaderOf { leader_of: String },
     Leaders { leaders: LeaderGroup },
@@ -2172,6 +2174,7 @@ pub(super) enum PublicNumber {
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicQuery {
     pub acted: Option<bool>,
+    pub evolved: Option<bool>,
     pub racing: Option<bool>,
     #[serde(default)]
     pub other: bool,
@@ -2183,6 +2186,8 @@ pub(super) struct PublicQuery {
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub traits_any: Option<TraitUnion>,
+    #[serde(default)]
+    pub traits_all: Vec<String>,
     pub name: Option<String>,
     #[serde(default)]
     pub names: Vec<String>,

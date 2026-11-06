@@ -202,38 +202,44 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         if let ast::Objects::Zone(query) = objects
-            && let Some(ast::ObjectQueryWhere::Damaged(condition)) = &query.r#where
+            && matches!(query.r#where, Some(ast::ObjectQueryWhere::Damaged(_)))
         {
-            let ast::DamagedThisTurnWhere {
-                history:
-                    ast::DamagedThisTurnHistory {
-                        event: ast::DamagedHistoryEvent::Damaged,
-                        window: ast::ThisTurn::ThisTurn,
-                        r#where:
-                            ast::DamagedThisTurnRecipient {
-                                recipient: ast::Item::Item,
+            // Exhaustive so a new query field cannot silently widen this history shortcut.
+            let ast::ObjectQuery {
+                alias: None,
+                r#where:
+                    Some(ast::ObjectQueryWhere::Damaged(ast::DamagedThisTurnWhere {
+                        history:
+                            ast::DamagedThisTurnHistory {
+                                event: ast::DamagedHistoryEvent::Damaged,
+                                window: ast::ThisTurn::ThisTurn,
+                                r#where:
+                                    ast::DamagedThisTurnRecipient {
+                                        recipient: ast::Item::Item,
+                                    },
                             },
-                    },
-            } = condition;
-            if !matches!(query.who, ast::Side::Opponent)
-                || !matches!(query.zone, ast::Zone::Field)
-                || !matches!(query.kind, Some(ast::FieldKind::Follower))
-                || query.alias.is_some()
-                || query.acted.is_some()
-                || query.except.is_some()
-                || query.other
-                || query.r#trait.is_some()
-                || query.class.is_some()
-                || query.not_class.is_some()
-                || query.token.is_some()
-                || query.not_token.is_some()
-                || query.orig_cost_eq.is_some()
-                || query.orig_cost_le.is_some()
-                || query.name.is_some()
-                || query.name_contains.is_some()
-            {
+                    })),
+                who: ast::Side::Opponent,
+                zone: ast::Zone::Field,
+                kind: Some(ast::FieldKind::Follower),
+                r#trait: None,
+                class: None,
+                not_class: None,
+                token: None,
+                not_token: None,
+                orig_cost_eq: None,
+                orig_cost_le: None,
+                hp_le: None,
+                not_trait: None,
+                name: None,
+                name_contains: None,
+                acted: None,
+                except: None,
+                other: false,
+            } = &**query
+            else {
                 return Err(unsupported(path));
-            }
+            };
             let candidate = Binding::new(self.allocator.id(path)?, self.scope);
             let event = Binding::new(self.allocator.id(&format!("{path}/damaged"))?, self.scope);
             return Ok(super::super::history_turn::public::damaged_selector(
@@ -249,8 +255,11 @@ impl BodyContext<'_> {
         zone: ZoneKind,
         path: &str,
     ) -> Result<Selector, LoweringError> {
-        // Extremum populations do not carry posture or exclusions; reject them rather than widen.
-        if (query.acted.is_some() || query.except.is_some())
+        // Extremum populations do not carry these filters; reject them rather than widen.
+        if (query.acted.is_some()
+            || query.except.is_some()
+            || query.hp_le.is_some()
+            || query.not_trait.is_some())
             && (query.alias.is_some() || query.r#where.is_some())
         {
             return Err(unsupported(path));
@@ -288,6 +297,8 @@ impl BodyContext<'_> {
                         .token
                         .or_else(|| query.not_token.map(|excluded| !excluded)),
                     original_cost: [query.orig_cost_eq, query.orig_cost_le, None],
+                    hp_at_most: query.hp_le,
+                    not_trait: query.not_trait.as_deref(),
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
                     acted: query.acted,
