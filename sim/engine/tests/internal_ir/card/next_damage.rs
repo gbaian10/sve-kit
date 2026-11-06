@@ -34,10 +34,6 @@ fn next_damage_keeps_other_players_durations_filters_and_multiple_recipients_clo
         ("/do/0/player_effect/who", json!("opp")),
         ("/do/0/player_effect/until", json!("next_turn")),
         ("/do/0/player_effect/effect/damage_mod/delta", json!(1)),
-        (
-            "/do/0/player_effect/effect/damage_mod/next_only",
-            json!(false),
-        ),
     ] {
         let mut payload = valid.clone();
         *payload.pointer_mut(pointer).unwrap() = value;
@@ -76,4 +72,91 @@ fn raw_object_reduction_cannot_bypass_the_seeded_prevention_boundary() {
             .to_string()
             .contains("object damage prevention rewrite")
     );
+}
+
+#[test]
+fn only_the_own_leader_reduction_may_last_the_whole_turn() {
+    let whole_turn = |effect: Value, who: &str, until: &str| {
+        tree(
+            json!({"cost":{"pp":0},"do":[{"player_effect":{"who":who,"effect":effect,"until":until}}]}),
+        )
+    };
+    let programs = lowerer()
+        .lower(&whole_turn(
+            json!({"damage_mod":{"delta":-1}}),
+            "self",
+            "turn",
+        ))
+        .unwrap();
+    game(1, 0)
+        .load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    for rejected in [
+        whole_turn(json!({"prevent":{"kind":"any"}}), "self", "turn"),
+        whole_turn(json!({"damage_mod":{"delta":-1}}), "opp", "turn"),
+        whole_turn(json!({"damage_mod":{"delta":-1}}), "self", "next_turn"),
+        whole_turn(json!({"damage_mod":{"delta":1}}), "self", "turn"),
+    ] {
+        lowerer().lower(&rejected).unwrap_err();
+    }
+}
+
+#[test]
+fn raw_whole_turn_leader_reduction_keeps_negative_any_and_this_turn() {
+    let programs = lowerer()
+        .lower(&tree(json!({"cost":{"pp":0},"do":[{"player_effect":{"who":"self","effect":{"damage_mod":{"delta":-1}},"until":"turn"}}]})))
+        .unwrap();
+    let valid = programs["unit-follower"].card().clone();
+    let mutate = |change: &dyn Fn(&mut Effect, &mut Duration)| {
+        let mut raw = valid.clone();
+        let Node::Instruction { instruction } =
+            &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("installation instruction")
+        };
+        let Action::InstallEffect {
+            effect, duration, ..
+        } = &mut instruction.action
+        else {
+            panic!("installed reduction")
+        };
+        change(effect.as_mut(), duration);
+        raw
+    };
+    let positive = mutate(&|effect, _| {
+        if let Effect::Replacement { rewrite, .. } = effect {
+            *rewrite = EventRewrite::AddDamage {
+                amount: Expr::Literal(Int(1)),
+            };
+        }
+    });
+    let lasting = mutate(&|effect, duration| {
+        duration.end = DurationEnd::NoTemporalExpiry {};
+        if let Effect::Replacement {
+            duration: inner, ..
+        } = effect
+        {
+            inner.end = DurationEnd::NoTemporalExpiry {};
+        }
+    });
+    let ability_only = mutate(&|effect, _| {
+        if let Effect::Replacement {
+            pattern: ProposedEventPattern::Damage { kind, .. },
+            ..
+        } = effect
+        {
+            *kind = DamageKind::Ability;
+        }
+    });
+    for raw in [positive, lasting, ability_only] {
+        let rejected = WellFormedCardProgram::check(raw).map_or(true, |checked| {
+            game(1, 0)
+                .load_internal_card("unit-follower", &checked)
+                .is_err()
+        });
+        assert!(
+            rejected,
+            "only the reviewed whole-turn reduction is admitted"
+        );
+    }
 }

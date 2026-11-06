@@ -275,6 +275,8 @@ owner，也不限制來源必須仍在場上。其餘帶 zone 的來源物件集
 `prevent.next_only` 與 `damage_mod.next_only` 的一次額度在實際套用正值傷害時消耗，
 傷害已為零則保留；與費用修正的適正 play 消耗分開。內部目前只開放本回合、
 單一物件的任意種類防止，或自己領袖的任意種類防止／負常值減傷；來源與多個接受者篩選保持拒絕。
+自己領袖的負常值減傷另可省略 `next_only`，表示本回合內每次受到的傷害都減少（BP14-T07「このターン、自分のリーダーが受けるダメージを-1する」）；
+不限次數只開放 `player_effect: {who: self}`、`until: turn` 的減傷，整回合的防止仍須 `next_only`。
 
 `enters_acted:{on}` 是入場姿態取代。自身 static 在 ProspectiveEntry 以目的區資訊求值（CR 10.9.3），因此預設 active_zones=field 仍能在入場當下生效，毋須擴成手牌／墓地皆有效；不產生額外 act 事件。
 

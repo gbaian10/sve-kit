@@ -228,7 +228,9 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
-        if next != Some(true)
+        // Only the fixed reduction may last the whole turn (BP14-T07); full prevention stays once-only.
+        let limited = next == Some(true);
+        if (!limited && !matches!(value.effect, ast::InstalledEffect::DamageMod(_)))
             || damage_source.is_some()
             || !matches!(kind, None | Some(ast::PreventionKind::Any))
             || !matches!(
@@ -270,7 +272,7 @@ impl BodyContext<'_> {
         {
             *current = rewrite;
         }
-        let effect = limit_next(effect, true, path)?;
+        let effect = limit_next(effect, limited, path)?;
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Players {
                 players,

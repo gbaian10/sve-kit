@@ -1,0 +1,29 @@
+cards:
+  BP14-T07:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - player_effect:
+                effect:
+                  damage_mod:
+                    delta: -1
+                until: turn
+                who: self
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+    token:
+      name: 水銀の断絶
+      template: true
+format: 2
+kind: author_effect_set

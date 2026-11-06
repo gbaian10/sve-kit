@@ -120,6 +120,21 @@ fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
     (*binding == predicate.binding).then_some(DamageSource::Objects(set))
 }
 
+/// A whole-turn reduction of damage to the own leader without a use count (BP14-T07).
+pub(crate) fn whole_turn_leader_reduction(shape: &Prevention<'_>) -> bool {
+    shape.usage.is_none()
+        && shape.kind == DamageKind::Any
+        && shape.damage_source.is_none()
+        && matches!(
+            shape.rewrite,
+            EventRewrite::AddDamage {
+                amount: Expr::Literal(super::Int(i64::MIN..=-1))
+            }
+        )
+        && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
+        && shape.duration.intervals.is_empty()
+}
+
 pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
     let Effect::Replacement {
         source,
