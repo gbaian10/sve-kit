@@ -95,8 +95,13 @@ impl BodyContext<'_> {
                         ast::CostOperation::ToCemetery(material)
                         | ast::CostOperation::ReturnToHand(material)
                         | ast::CostOperation::Banish(material)
-                        | ast::CostOperation::Act(material)
-                        | ast::CostOperation::ToEx(material) => material.result.as_ref(),
+                        | ast::CostOperation::Act(material) => material.result.as_ref(),
+                        ast::CostOperation::ToEx(ast::ExMaterial::Public(material)) => {
+                            material.result.as_ref()
+                        }
+                        ast::CostOperation::ToEx(ast::ExMaterial::Hand(material)) => {
+                            material.result.as_ref()
+                        }
                         ast::CostOperation::Pp(_)
                         | ast::CostOperation::Lesson(_)
                         | ast::CostOperation::Counter(_)

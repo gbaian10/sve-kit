@@ -43,6 +43,15 @@ pub(super) fn lower_additional(
     if operations.iter().any(|operation| {
         matches!(
             operation,
+            ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
+                | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(_))
+        )
+    }) {
+        return Err(unsupported(path));
+    }
+    if operations.iter().any(|operation| {
+        matches!(
+            operation,
             ast::CostOperation::Reveal(_) | ast::CostOperation::ToDeckBottom(_)
         )
     }) {
@@ -70,6 +79,8 @@ fn lower_operations(
                 ast::CostOperation::Discard(
                     ast::DiscardCost::Material(_) | ast::DiscardCost::Groups(_)
                 ) | ast::CostOperation::Reveal(_)
+                    | ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
+                    | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(_))
             )
         })
         .count()
@@ -165,8 +176,7 @@ fn lower_operations(
             ast::CostOperation::ToCemetery(value)
             | ast::CostOperation::ReturnToHand(value)
             | ast::CostOperation::Banish(value)
-            | ast::CostOperation::Act(value)
-            | ast::CostOperation::ToEx(value) => {
+            | ast::CostOperation::Act(value) => {
                 let operation = material_operation(operation, path)?;
                 let (action, decision) = super::material::lower(
                     context.card_allocator,
@@ -176,6 +186,30 @@ fn lower_operations(
                     operation,
                     path,
                 )?;
+                parameters.push(decision);
+                action
+            }
+            ast::CostOperation::ToEx(ast::ExMaterial::Public(value)) => {
+                let (action, decision) = super::material::lower(
+                    context.card_allocator,
+                    &mut context.allocator,
+                    context.scope,
+                    value,
+                    super::material::Operation::Ex,
+                    path,
+                )?;
+                parameters.push(decision);
+                action
+            }
+            ast::CostOperation::ToEx(ast::ExMaterial::Hand(material)) => {
+                let (action, decision) =
+                    super::reveal_cost::transfer(context, material, true, path)?;
+                parameters.push(decision);
+                action
+            }
+            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(material)) => {
+                let (action, decision) =
+                    super::reveal_cost::transfer(context, material, false, path)?;
                 parameters.push(decision);
                 action
             }
@@ -255,7 +289,7 @@ fn lower_operations(
                 action
             }
             ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
-            | ast::CostOperation::ToDeckBottom(_)
+            | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false)

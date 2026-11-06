@@ -1,4 +1,4 @@
-//! Revealing materials share one choice; only additional costs may also move that choice.
+//! Hand material costs share one private choice and its selected movement.
 use super::{
     AbilitySource, Action, Binding, BodyContext, Instruction, InstructionContext, InstructionId,
     LoweringError, PlayerRef, ReceiptId, Selector, ast, unsupported,
@@ -6,7 +6,7 @@ use super::{
 use crate::ir::{
     ChoiceDomain, CostSpec, CostStep, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
     MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, PlaySpec, Position,
-    SelectionSnapshot, Visibility,
+    SelectionSnapshot, Visibility, ZoneKind, ZoneRef,
 };
 
 pub(super) fn lower(
@@ -24,7 +24,7 @@ pub(super) fn lower(
     }
     let move_bottom = match rest {
         [] if material.result.is_none() => false,
-        [ast::CostOperation::ToDeckBottom(next)]
+        [ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(next))]
             if next.n == 1
                 && count.minimum.0 == 1
                 && material
@@ -142,6 +142,49 @@ pub(super) fn field(
             objects: Selector::Bound {
                 reference: *binding,
             },
+        },
+        decision,
+    ))
+}
+
+pub(super) fn transfer(
+    context: &mut BodyContext<'_>,
+    material: &ast::HandMaterial,
+    to_ex: bool,
+    path: &str,
+) -> Result<(Action, Decision), LoweringError> {
+    if material.n != Some(1) || material.upto.is_some() || material.any || material.result.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    let decision = choice(context, material, path)?;
+    let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+        return Err(unsupported(path));
+    };
+    Ok((
+        Action::Move {
+            objects: Selector::Bound {
+                reference: *binding,
+            },
+            movement: MoveSpec {
+                to: if to_ex {
+                    MoveDestination::Shared {
+                        zone: ZoneRef {
+                            player: PlayerRef::Controller {},
+                            kind: ZoneKind::Ex,
+                        },
+                    }
+                } else {
+                    MoveDestination::Owners {
+                        zone: OwnerZone::Deck,
+                    }
+                },
+                position: (!to_ex).then_some(Position::Bottom {}),
+                order: None,
+                initial_posture: None,
+                entry_effects: vec![],
+            },
+            reason: MoveReason::Put,
         },
         decision,
     ))
