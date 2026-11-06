@@ -1,0 +1,58 @@
+cards:
+  BP09-037:
+    abilities:
+      - auto:
+          cost:
+            earth_rite: 1
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                cost_sum_le: 4
+                result: moved
+                sel:
+                  kind: amulet
+                  trait: 土の印
+                  who: self
+                  zone: deck
+                to: ex
+                upto: 2
+            - apply:
+                effect:
+                  cost_mod:
+                    set: 0
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
