@@ -1,0 +1,70 @@
+cards:
+  CP04-022:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                on: this
+                power: 1
+          ub: true
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      agg:
+                        attr: power
+                        fn: sum
+                        of:
+                          kind: follower
+                          orig_cost_eq: 1
+                          who: self
+                          zone: field
+                    op: ge
+                    right: 10
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+        section: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 4
+                then:
+                  - equip:
+                      on: this
+                      token: クイーンズコンソール
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
