@@ -1,0 +1,56 @@
+cards:
+  CP04-060:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  not_same_name_as_this: true
+                  trait: ドラゴンズネスト
+                  who: self
+                  zone: deck
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing:
+                      in: affected
+                on:
+                  follow: searched
+                until: turn
+          ub: true
+        line: 1
+      - keywords:
+          - storm
+        line: 1
+        section: 1
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+          on:
+            ub_activated:
+              holder:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              who: self
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
