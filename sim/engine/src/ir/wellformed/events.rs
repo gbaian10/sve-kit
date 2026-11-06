@@ -6,6 +6,7 @@ use crate::ir::events::equipment;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
+use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::history_turn::{discarded_plan, played_by, played_filter, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
@@ -540,6 +541,17 @@ impl Checker {
                 view,
                 triggering,
             ),
+            EventPattern::LeaveField { binding, predicate }
+                if SourceLink::parse(*binding, predicate).is_some() =>
+            {
+                self.committed_header(
+                    *binding,
+                    EventSnapshotPolicy::BeforeExit,
+                    true,
+                    view,
+                    triggering,
+                )
+            }
             EventPattern::LeaveField { binding, predicate } => self
                 .subject_header(
                     *binding,

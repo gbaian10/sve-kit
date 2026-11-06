@@ -10,6 +10,7 @@ use crate::game::internal::source::SourceSnapshot;
 use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
 use crate::game::{Step, int, string};
 use crate::ir::events::damage::DamageFilter;
+use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::optional_payment;
 use crate::ir::{
     AttackEvent, Edge, EventPayload as Event, Generation, Nat, ObjectRef, PhaseEvent, PlayerId,
@@ -444,7 +445,9 @@ impl Game {
                         Some(TriggerCondition::Event {
                             pattern: EventPattern::Damage { .. }
                         })
-                    )
+                    ) || matches!(ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                        Some(TriggerCondition::Event { pattern: EventPattern::LeaveField { binding, predicate } })
+                        if SourceLink::parse(*binding, predicate).is_some())
                 })
             })
     }
@@ -484,6 +487,7 @@ impl Game {
         if hits.len() != facts.len() {
             return Err(invalid("damage occurrence count mismatch"));
         }
+        self.internal_record_damage_history(facts);
         let active = player_id(self.active())?;
         let mut pending = Vec::new();
         for (hit, damage) in hits.iter().zip(facts) {

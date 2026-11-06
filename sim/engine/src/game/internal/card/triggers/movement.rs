@@ -6,6 +6,7 @@ use super::{
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
+use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, KeywordId, PlayerId};
 use alloc::collections::BTreeMap;
 
@@ -17,11 +18,11 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
         return None;
     };
     match pattern {
-        EventPattern::LeaveField { binding, predicate } => {
-            SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate)
-                .or_else(|| SubjectFilter::parse(SubjectFields::Hand(*binding), predicate))
-                .or_else(|| SubjectFilter::parse(SubjectFields::Leave(*binding), predicate))
-        }
+        EventPattern::LeaveField { binding, predicate } => SourceLink::parse(*binding, predicate)
+            .map(|link| link.subject)
+            .or_else(|| SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate))
+            .or_else(|| SubjectFilter::parse(SubjectFields::Hand(*binding), predicate))
+            .or_else(|| SubjectFilter::parse(SubjectFields::Leave(*binding), predicate)),
         EventPattern::Destroy { binding, predicate } => {
             SubjectFilter::parse(SubjectFields::Destroy(*binding), predicate)
         }
@@ -39,6 +40,9 @@ fn destination_matches(on: &TriggerCondition, destination: &str) -> bool {
     else {
         return true;
     };
+    if SourceLink::parse(*binding, predicate).is_some() {
+        return destination == "cemetery";
+    }
     [
         (SubjectFields::Cemetery(*binding), "cemetery"),
         (SubjectFields::Hand(*binding), "hand"),
@@ -293,6 +297,16 @@ impl Game {
                     token,
                 ) {
                     continue;
+                }
+                if let TriggerCondition::Event {
+                    pattern: EventPattern::LeaveField { binding, predicate },
+                } = on
+                    && let Some(link) = SourceLink::parse(*binding, predicate)
+                {
+                    let holder_reference = self.internal_current_reference(&holder)?;
+                    if !self.internal_damage_source_link(object, holder_reference, actor, &link) {
+                        continue;
+                    }
                 }
                 let source = self.internal_card_source(&holder, ability.node.id, actor)?;
                 let mut information = SourceInformation::current(self, source)?;

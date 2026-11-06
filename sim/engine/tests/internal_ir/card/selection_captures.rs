@@ -78,3 +78,146 @@ fn selection_captures_reject_unknown_groups_wrong_anchors_and_multiple_targets()
         .lower_with_printed_costs(&multiple, &costs)
         .unwrap_err();
 }
+
+#[test]
+fn selection_captures_count_distinct_original_costs_of_the_whole_public_selection() {
+    for (members, expected) in [(vec![0, 1], 19_u8), (vec![0, 2], 18)] {
+        let mut tree = tree();
+        tree["cards"]["SD03-005"]["abilities"][0]["spell"] = json!({
+            "targets":[{"bind":"chosen","from":{"who":"self","zone":"field","kind":"follower"},"n":2}],
+            "do":[{"damage":{"to":{"leader":"self"},"n":{
+                "at":"selection","selection":"chosen","value":{"distinct_orig_costs":{"in":"chosen"}}
+            }}}]
+        });
+        let cards = lowerer()
+            .lower_with_printed_costs(&tree, &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]))
+            .unwrap();
+        let (catalog, mut initial) = fanfare::fragment_setup(
+            1,
+            "SD03-005",
+            10,
+            json!([{ "id": "catalog-a", "card": "BP01-037" }, { "id": "catalog-b", "card": "BP01-118" }]),
+        );
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"a","card":"BP01-037","state":{"cost":9}},
+            {"id":"b","card":"BP01-037","state":{"cost":0}},
+            {"id":"c","card":"BP01-118"}
+        ]);
+        let mut board = Game::new(
+            catalog,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "selected-costs",
+        )
+        .unwrap();
+        board
+            .load_internal_card("SD03-005", &cards["SD03-005"])
+            .unwrap();
+        for number in ["BP01-037", "BP01-118"] {
+            board.load_internal_card(number, &card(vec![])).unwrap();
+        }
+        let CardPlay::Awaiting(question) =
+            board.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
+        else {
+            panic!("two public objects");
+        };
+        resolved(
+            board
+                .answer_internal_card(question.actor, question.token, Answer::Targets(members))
+                .unwrap(),
+        );
+        assert_eq!(
+            board.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            expected
+        );
+    }
+}
+
+#[test]
+fn source_link_history_rejects_other_recipients_sources_windows_and_movement_events() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut observer = tree["cards"]["BP01-041"].clone();
+    let mut ability = observer["abilities"][0].clone();
+    ability.as_object_mut().unwrap().remove("activate");
+    ability["auto"] = json!({"on":{"moved":{
+        "from":{"who":"opp","zone":"field"},"to":"cemetery","during":{"turn":"self"},
+        "sel":{"kind":"follower","where":{"history":{
+            "event":"dealt_damage","window":"this_turn","who":"self","sel":{"trait":"ウマ娘"},"where":{"recipient":"item"}
+        }}}
+    }},"do":[{"draw":{"n":1}}]});
+    observer["abilities"] = json!([ability]);
+    tree["cards"] = json!({"observer":observer});
+    lowerer().lower(&tree).unwrap();
+    for (path, value) in [
+        (
+            "/cards/observer/abilities/0/auto/on/moved/sel/where/history/where/recipient",
+            json!("this"),
+        ),
+        (
+            "/cards/observer/abilities/0/auto/on/moved/sel/where/history/who",
+            json!("opp"),
+        ),
+        (
+            "/cards/observer/abilities/0/auto/on/moved/sel/where/history/window",
+            json!("game"),
+        ),
+        (
+            "/cards/observer/abilities/0/auto/on/moved/to",
+            json!("hand"),
+        ),
+        (
+            "/cards/observer/abilities/0/auto/on/moved/sel",
+            json!({"kind":"follower","trait":"extra","where":{"history":{
+                "event":"dealt_damage","window":"this_turn","who":"self","sel":{"trait":"ウマ娘"},"where":{"recipient":"item"}
+            }}}),
+        ),
+    ] {
+        let mut invalid = tree.clone();
+        *invalid.pointer_mut(path).unwrap() = value;
+        assert_eq!(
+            lowerer().lower(&invalid).unwrap_err().code,
+            "unsupported_construct"
+        );
+    }
+    tree["cards"]["observer"]["abilities"][0]["auto"]["on"]["moved"]["sel"]["where"]["history"] = json!({
+        "event":"dealt_damage","window":"this_turn","where":{"ref":"this","recipient":"item"}
+    });
+    lowerer().lower(&tree).unwrap();
+}
+
+#[test]
+fn selected_cost_collections_reject_unknown_groups_private_choices_and_wrong_anchors() {
+    let mut candidate = tree();
+    candidate["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] = json!([
+        {"damage":{"to":{"leader":"self"},"n":{"at":"selection","selection":"chosen","value":{"distinct_orig_costs":{"in":"chosen"}}}}}
+    ]);
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    lowerer()
+        .lower_with_printed_costs(&candidate, &costs)
+        .unwrap();
+    for (path, value) in [
+        (
+            "/cards/SD03-005/abilities/0/spell/do/0/damage/n/selection",
+            json!("missing"),
+        ),
+        (
+            "/cards/SD03-005/abilities/0/spell/do/0/damage/n/value/distinct_orig_costs/in",
+            json!("missing"),
+        ),
+        (
+            "/cards/SD03-005/abilities/0/spell/do/0/damage/n/at",
+            json!("resolution"),
+        ),
+        (
+            "/cards/SD03-005/abilities/0/spell/targets/0/from/zone",
+            json!("hand"),
+        ),
+    ] {
+        let mut invalid = candidate.clone();
+        *invalid.pointer_mut(path).unwrap() = value;
+        lowerer()
+            .lower_with_printed_costs(&invalid, &costs)
+            .unwrap_err();
+    }
+}

@@ -1,6 +1,7 @@
 //! Current-turn queries share the closed public subject filters used by event headers.
 
 pub(crate) mod public;
+pub(crate) mod source_link;
 
 use super::events::discard::DiscardFilter;
 use super::events::subject::{SubjectFields, SubjectFilter};
