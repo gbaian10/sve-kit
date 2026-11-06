@@ -1,0 +1,83 @@
+cards:
+  BP13-001:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: エルフ
+                  in: seen
+                  orig_cost_le: 2
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count_of: moved
+                    op: ge
+                    right: 1
+                then:
+                  - discard:
+                      n: 1
+                      who: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - banish_self: true
+              - banish:
+                  n: 2
+                  sel:
+                    other: true
+                    who: self
+                    zone: cemetery
+          do:
+            - choose:
+                bind: incoming
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name: 九火石炎・セッカ
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: incoming
+                to: field
+          zone: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

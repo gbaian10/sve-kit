@@ -1,0 +1,68 @@
+cards:
+  BP13-008:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                options:
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: banish
+                            op: ge
+                            right: 9
+                        then:
+                          - buff:
+                              hp: 2
+                              on: secca
+                              power: 2
+                          - grant:
+                              keywords:
+                                - storm
+                              on: secca
+                  - - buff:
+                        hp: 2
+                        on: ally
+                        power: 2
+                    - damage:
+                        n:
+                          power_of: ally
+                        to: enemy
+                upto: 2
+          targets:
+            - bind: secca
+              from:
+                kind: follower
+                name: 九火石炎・セッカ
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: ally
+              from:
+                kind: follower
+                name_contains: セッカ
+                who: self
+                zone: field
+              n: 1
+              option: 2
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
