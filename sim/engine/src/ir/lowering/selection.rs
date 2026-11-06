@@ -148,6 +148,7 @@ impl BodyContext<'_> {
             from: from.clone(),
             distinct_by: choice.distinct_by.clone(),
             cost_sum_le: choice.cost_sum_le,
+            roles: None,
             n: n.map(ast::NumericArgument::Literal),
             upto: upto.map(ast::NumericArgument::Literal),
             option: None,

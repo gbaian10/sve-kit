@@ -579,6 +579,7 @@ impl Game {
                     members: public,
                     cardinality: constraint.cardinality,
                     distinct_names: false,
+                    roles: vec![],
                 }),
             },
             Wait::MaterialParameter(MaterialWait {

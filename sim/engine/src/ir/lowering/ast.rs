@@ -1292,6 +1292,7 @@ pub(super) struct DamageInstead {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Recipients {
+    Role { role: RoleReference },
     Union { any_of: Vec<Self> },
     Field(Box<ObjectQuery>),
     Leader { leader: LeaderSide },
@@ -1316,8 +1317,29 @@ pub(super) struct Target {
     pub from: TargetQuery,
     pub distinct_by: Option<Names>,
     pub cost_sum_le: Option<u64>,
+    pub roles: Option<BTreeMap<String, TargetRole>>,
     pub n: Option<NumericArgument>,
     pub upto: Option<NumericArgument>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum TargetRole {
+    IfNonempty { if_nonempty: u64 },
+    Remaining(RemainingRole),
+}
+
+#[derive(Clone, Deserialize)]
+pub(super) enum RemainingRole {
+    #[serde(rename = "remaining")]
+    Remaining,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RoleReference {
+    pub of: String,
+    pub name: String,
 }
 
 #[derive(Deserialize)]

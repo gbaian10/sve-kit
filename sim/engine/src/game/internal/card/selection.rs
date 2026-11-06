@@ -15,7 +15,9 @@ use crate::ir::{
     PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
     Selector, Stat, TraitsRead,
 };
-use crate::ir::{AggregateBound, NumericProperty};
+use crate::ir::{
+    AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
+};
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use crate::ir::{advance_entry, effect_evolution};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -30,6 +32,26 @@ pub struct TargetDomain {
     pub cardinality: Cardinality,
     /// Selected objects must not share a rules name.
     pub distinct_names: bool,
+    /// Roles assigned in the same answer as this target set.
+    pub roles: Vec<TargetRoleDomain>,
+}
+
+/// Public role identity and cardinality, without authority-side bindings.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct TargetRoleDomain {
+    /// Question-scoped role identifier.
+    pub role: Nat,
+    /// Printed rule for how many selected objects receive this role.
+    pub cardinality: RoleCardinality,
+}
+
+/// One part of the disjoint target partition in a player's answer.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TargetRoleAssignment {
+    /// Identifier from the question's role list.
+    pub role: Nat,
+    /// Handles from the selected set in the same question.
+    pub targets: Vec<u64>,
 }
 
 #[derive(Clone, Debug)]
@@ -129,6 +151,54 @@ impl TargetWait {
     }
 
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
+        if self.roles().is_some() {
+            return Err(invalid("target roles required"));
+        }
+        self.validate_selection(handles)
+    }
+
+    const fn roles(&self) -> Option<&TargetRoleSpec> {
+        match &self.decision.domain {
+            ChoiceDomain::Objects { target_roles, .. } => target_roles.as_ref(),
+            _ => None,
+        }
+    }
+
+    pub(in crate::game::internal) fn validate_roles(
+        &self,
+        handles: &[u64],
+        assignments: &[TargetRoleAssignment],
+    ) -> Result<(Vec<ObjectRef>, Vec<TargetRoleAnswer>)> {
+        let selected = self.validate_selection(handles)?;
+        let spec = self
+            .roles()
+            .ok_or_else(|| invalid("unexpected target roles"))?;
+        let answers = assignments
+            .iter()
+            .map(|assignment| {
+                let objects = assignment
+                    .targets
+                    .iter()
+                    .map(|handle| {
+                        self.members
+                            .get(usize::try_from(*handle).map_err(invalid)?)
+                            .copied()
+                            .ok_or_else(|| invalid("foreign role target handle"))
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                Ok(TargetRoleAnswer {
+                    role: assignment.role,
+                    objects,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+        if !spec.accepts_answer(&selected, &answers) {
+            return Err(invalid("target role partition"));
+        }
+        Ok((selected, answers))
+    }
+
+    fn validate_selection(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         if !contains(
             self.bounds,
             Nat(u64::try_from(handles.len()).map_err(invalid)?),
@@ -933,8 +1003,33 @@ pub(in crate::game::internal) fn matches_candidate(
     }
 }
 
+fn role_domains(domain: &ChoiceDomain) -> Vec<TargetRoleDomain> {
+    match domain {
+        ChoiceDomain::Objects {
+            target_roles: Some(spec),
+            ..
+        } => spec
+            .roles
+            .iter()
+            .map(|role| TargetRoleDomain {
+                role: role.role,
+                cardinality: role.cardinality,
+            })
+            .collect(),
+        _ => vec![],
+    }
+}
+
 pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
-    json!({"kind":"targets","distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
+    let roles = domain.roles.iter().map(|role| {
+        let cardinality = match role.cardinality {
+            RoleCardinality::IfNonempty { count } => json!({"if_nonempty": count.0}),
+            RoleCardinality::Remainder {} => json!({"remaining": true}),
+            RoleCardinality::Fixed { cardinality } => json!({"minimum": cardinality.minimum.0, "maximum": cardinality.maximum.map(|n| n.0)}),
+        };
+        json!({"role": role.role.0, "cardinality": cardinality})
+    }).collect::<Vec<_>>();
+    json!({"kind":"targets","roles":roles,"distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
 }
 
 fn private_observed_deck(game: &Game, id: &str, actor_seat: &str, enabled: bool) -> bool {
@@ -1104,6 +1199,7 @@ impl Game {
                 members: public,
                 cardinality: bounds,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+                roles: role_domains(&decision.domain),
             },
         ))
     }
@@ -1526,6 +1622,27 @@ impl Execution {
             .into_iter()
             .filter(|member| seen.insert((member.id, member.generation)))
             .collect())
+    }
+
+    pub(in crate::game::internal) fn bind_target_roles(
+        &mut self,
+        wait: &TargetWait,
+        answers: &[TargetRoleAnswer],
+    ) {
+        if let Some(spec) = wait.roles() {
+            for role in &spec.roles {
+                if let Some(answer) = answers.iter().find(|answer| answer.role == role.role) {
+                    self.targets.insert(role.binding.key(), wait.clone());
+                    self.slots.insert(
+                        role.binding.key(),
+                        Slot::Objects {
+                            members: answer.objects.clone(),
+                            on_field_at_capture: wait.on_field_at_capture,
+                        },
+                    );
+                }
+            }
+        }
     }
 
     pub(in crate::game::internal) fn bind_targets(

@@ -35,6 +35,18 @@ fn check_choice_shape(
     resolution: bool,
     path: &str,
 ) -> Result<bool, LoweringError> {
+    if target.roles.is_some()
+        && (resolution
+            || target.from.leader.is_some()
+            || target.from.leaders.is_some()
+            || target.from.leader_or
+            || !matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+            ))
+    {
+        return Err(unsupported(path));
+    }
     let dynamic_count = target
         .n
         .as_ref()
@@ -304,10 +316,53 @@ impl BodyContext<'_> {
                     },
                 },
                 binding,
-                target_roles: None,
+                target_roles: self.lower_target_roles(target, path)?,
             },
             cardinality,
         ))
+    }
+
+    fn lower_target_roles(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+    ) -> Result<Option<super::super::TargetRoleSpec>, LoweringError> {
+        let Some(roles) = &target.roles else {
+            return Ok(None);
+        };
+        if roles.len() != 2
+            || roles
+                .values()
+                .filter(|role| matches!(role, ast::TargetRole::IfNonempty { if_nonempty: 1 }))
+                .count()
+                != 1
+            || roles
+                .values()
+                .filter(|role| matches!(role, ast::TargetRole::Remaining(_)))
+                .count()
+                != 1
+        {
+            return Err(unsupported(path));
+        }
+        let mut lowered = Vec::new();
+        for (index, (name, role)) in roles.iter().enumerate() {
+            let binding = Binding::new(self.allocator.id(path)?, self.scope);
+            self.target_roles
+                .insert((target.bind.clone(), name.clone()), binding);
+            lowered.push(super::super::TargetRole {
+                role: Nat(u64::try_from(index).map_err(|_private| unsupported(path))?),
+                cardinality: match role {
+                    ast::TargetRole::IfNonempty { if_nonempty } => {
+                        super::super::RoleCardinality::IfNonempty {
+                            count: Nat(*if_nonempty),
+                        }
+                    }
+                    ast::TargetRole::Remaining(_) => super::super::RoleCardinality::Remainder {},
+                },
+                binding,
+            });
+        }
+        Ok(Some(super::super::TargetRoleSpec { roles: lowered }))
     }
 
     fn record_target_zone(&mut self, target: &ast::Target, cardinality: Cardinality) {
@@ -549,6 +604,14 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<RecipientSet, LoweringError> {
         Ok(match recipients {
+            ast::Recipients::Role { role } => RecipientSet::Objects {
+                objects: Selector::Bound {
+                    reference: *self
+                        .target_roles
+                        .get(&(role.of.clone(), role.name.clone()))
+                        .ok_or_else(|| unsupported(path))?,
+                },
+            },
             ast::Recipients::Field(query) => RecipientSet::Objects {
                 objects: self.objects(&ast::Objects::Zone(query.clone()), path)?,
             },
@@ -626,6 +689,7 @@ impl BodyContext<'_> {
             if !self.formal_play
                 || self.targets.len() != 1
                 || self.parameters.len() != 1
+                || !self.target_roles.is_empty()
                 || !matches!(&damage.to, ast::Recipients::Target(_))
             {
                 return Err(unsupported(path));
@@ -840,6 +904,7 @@ impl BodyContext<'_> {
                 observed_targets: BTreeSet::new(),
                 field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
+                target_roles: BTreeMap::new(),
                 ability_holders: BTreeSet::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
@@ -867,6 +932,7 @@ impl BodyContext<'_> {
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);
+                context.target_roles.clone_from(&self.target_roles);
                 context.ability_holders.clone_from(&self.ability_holders);
                 context
                     .recipient_targets
