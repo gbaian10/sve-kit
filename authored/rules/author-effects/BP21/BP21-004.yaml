@@ -1,0 +1,66 @@
+cards:
+  BP21-004:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 妖精
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 2
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        not_same_name_as_this: true
+                        orig_cost_le: 3
+                        trait: 妖精
+                        who: self
+                        zone: deck
+                      to: field
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - destroy: chosen
+            - create:
+                by: opp
+                n: 1
+                to: field
+                token: フェアリー
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 妖精
+                  who: self
+                  zone: ex
+              op: eq
+              right: 5
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
