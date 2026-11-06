@@ -1,0 +1,61 @@
+cards:
+  BP14-029:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 6
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - create:
+                to: field
+                token: スティールナイト
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: SD02-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

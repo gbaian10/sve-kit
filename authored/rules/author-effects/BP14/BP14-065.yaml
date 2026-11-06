@@ -1,0 +1,48 @@
+cards:
+  BP14-065:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  class: ドラゴン
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 3
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - buff:
+                hp: 1
+                on:
+                  follow: taken
+                power: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
