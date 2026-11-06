@@ -97,17 +97,28 @@ fn exact_and_substring_filters_preserve_original_name_and_respect_zone_and_silen
 #[test]
 fn search_reads_always_names_and_rejects_two_cards_with_a_shared_alias() {
     let caster = json!({"activate":{"cost":{"pp":0},"do":[{"search":{"sel":{"who":"self","zone":"deck"},"upto":2,"distinct_by":"name","to":"hand"}}]}});
-    let mut game = position("deck", false, &caster, false);
-    let CardPlay::Awaiting(q) = activate(&mut game) else {
-        panic!("search");
-    };
-    let InputDomain::Search(d) = &q.domain else {
-        panic!("search domain");
-    };
-    assert_eq!(d.cards.len(), 2);
-    let answer = SearchAnswer::Grouped(vec![d.cards.iter().map(|c| c.handle).collect()]);
-    game.answer_internal_card(q.actor, q.token, Answer::Search(answer))
-        .unwrap_err();
+    for field_only in [false, true] {
+        let mut game = position("deck", field_only, &caster, false);
+        let CardPlay::Awaiting(q) = activate(&mut game) else {
+            panic!("search");
+        };
+        let InputDomain::Search(d) = &q.domain else {
+            panic!("search domain");
+        };
+        assert_eq!(d.cards.len(), 2);
+        let answer = SearchAnswer::Grouped(vec![d.cards.iter().map(|c| c.handle).collect()]);
+        let result = game.answer_internal_card(q.actor, q.token, Answer::Search(answer));
+        if field_only {
+            resolved(result.unwrap());
+            let view = game.projection(View::Referee).unwrap();
+            assert_eq!(view["P1"]["hand"].as_array().unwrap().len(), 2);
+        } else {
+            assert!(
+                matches!(result, Err(sve_engine::EngineFailure::Invalid(reason))
+                if reason.contains("search names must differ"))
+            );
+        }
+    }
 }
 
 #[test]
@@ -118,9 +129,13 @@ fn alias_declarations_reject_unneeded_targets_conditions_zones_and_mixed_effects
         json!({"static":{"zone":"hand","effects":[{"also_named":{"name":"extra"}}]}}),
         json!({"static":{"effects":[{"also_named":{"name":"extra"}},{"grant":{"keywords":["ward"]}}]}}),
     ] {
-        lowerer()
-            .lower(&same_name::tree(&head, "unit-follower"))
-            .unwrap_err();
+        assert_eq!(
+            lowerer()
+                .lower(&same_name::tree(&head, "unit-follower"))
+                .unwrap_err()
+                .code,
+            "unsupported_construct"
+        );
     }
 }
 
