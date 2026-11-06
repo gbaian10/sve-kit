@@ -1,0 +1,32 @@
+cards:
+  BP10-044:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          cost:
+            steps:
+              - pp: 4
+              - earth_rite: 1
+          do:
+            - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                orig_cost_le: 4
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

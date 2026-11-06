@@ -1,0 +1,31 @@
+cards:
+  BP21-108:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  n: 1
+                  sel:
+                    kind: amulet
+                    who: self
+                    zone: field
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+            - life:
+                delta: 1
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

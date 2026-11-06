@@ -1,0 +1,39 @@
+cards:
+  BP15-100:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: デウスエクスマキナ
+                  who: self
+                  zone: deck
+                to: field
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: エンシェントアーティファクト
+                  - - create:
+                        n: 1
+                        to: field
+                        token: ミスティックアーティファクト
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP05-T04
+        line: 1
+        section: 1
+      - card: BP05-T05
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set
