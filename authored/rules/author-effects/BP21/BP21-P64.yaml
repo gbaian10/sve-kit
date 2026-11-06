@@ -1,0 +1,54 @@
+cards:
+  BP21-P64:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 7
+                  who: self
+            - choose:
+                bind: picked
+                cost_sum_le: 5
+                from:
+                  any_of:
+                    - in: seen
+                      kind: follower
+                      trait: 学院
+                    - in: seen
+                      kind: follower
+                      trait: 獣
+                may: true
+                upto: 3
+            - move:
+                ref: picked
+                result: taken
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - buff:
+                hp: 1
+                on:
+                  kind: follower
+                  who: self
+                  zone: field
+                power: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
