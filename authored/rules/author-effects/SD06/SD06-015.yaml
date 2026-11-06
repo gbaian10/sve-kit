@@ -1,0 +1,27 @@
+cards:
+  SD06-015:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create:
+                to: field
+                token: ホーリーファルコン
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP03-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

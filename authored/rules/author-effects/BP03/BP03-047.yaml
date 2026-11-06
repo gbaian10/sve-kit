@@ -1,0 +1,35 @@
+cards:
+  BP03-047:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 1
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                other: true
+                trait: チェス
+              who: self
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                to: field
+                token: マジカルポーン
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP03-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

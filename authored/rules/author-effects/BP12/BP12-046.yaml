@@ -1,0 +1,45 @@
+cards:
+  BP12-046:
+    abilities:
+      - evolve:
+          cost:
+            pp: 5
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                to: field
+                token: 大地の魔片
+        line: 2
+      - activate:
+          cost:
+            earth_rite: 1
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+          per_turn: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: ゴーレム
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP22-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

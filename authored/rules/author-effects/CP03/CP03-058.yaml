@@ -1,0 +1,39 @@
+cards:
+  CP03-058:
+    abilities:
+      - activate:
+          cost:
+            banish_self: true
+          do:
+            - stand: ally
+            - apply:
+                effect:
+                  cannot:
+                    target:
+                      leaders: opponents
+                    what: attack
+                on: ally
+                until: turn
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                trait: ペイルムーン
+                who: self
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
