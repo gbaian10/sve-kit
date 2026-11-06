@@ -1,0 +1,44 @@
+cards:
+  BP07-020:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - play_card:
+                cost: 0
+                ref: selected
+          targets:
+            - bind: selected
+              from:
+                name: 輝ける剣撃
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            act:
+              n: 2
+              sel:
+                name: ナテラの大樹
+                who: self
+                zone: field
+          do:
+            - buff:
+                on: this
+                power: 3
+            - life:
+                delta: 2
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
