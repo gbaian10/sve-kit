@@ -1,0 +1,43 @@
+cards:
+  BP14-090:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+      - line: 3
+        static:
+          effects:
+            - damage_mod:
+                delta: -1
+                on: this
+            - damage_mod:
+                delta: -1
+                on:
+                  leader: self
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 水銀の断絶
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+    token_sources:
+      - card: BP14-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

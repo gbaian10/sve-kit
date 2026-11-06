@@ -1,0 +1,49 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "name": "guard",
+        "op": "macro"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "action": "ability_destroy",
+        "op": "restrict",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "amount": -1,
+        "kind": "any",
+        "op": "replace_damage",
+        "subjects": {
+          "union": [
+            "self",
+            "self.leader"
+          ]
+        }
+      },
+      "kind": "static",
+      "line": 3
+    },
+    {
+      "body": {
+        "count": 1,
+        "name": "水銀の断絶",
+        "op": "create",
+        "to": "ex"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 4,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

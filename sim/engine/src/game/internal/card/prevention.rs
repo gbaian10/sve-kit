@@ -3,7 +3,9 @@ use super::super::{Context, Execution, InstructionOutcome, Slot, admission, play
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::ir::ObjectRelation;
-use crate::ir::prevention::{DamageSource, Prevention, Recipients, own_leader, projection};
+use crate::ir::prevention::{
+    DamageSource, Prevention, Recipients, own_leader, projection, whole_turn_leader_reduction,
+};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
@@ -273,7 +275,13 @@ pub(in crate::game::internal) fn check_install(
         return Err(unsupported("damage prevention installation"));
     };
     let shape = projection(effect).ok_or_else(|| unsupported("damage prevention shape"))?;
-    if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) && shape.usage.is_none() {
+    // A whole-turn reduction on the own leader (BP14-T07) needs no use count.
+    let leader_reduction = matches!(subjects, InstallationSubjects::Players { .. })
+        && whole_turn_leader_reduction(&shape);
+    if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
+        && shape.usage.is_none()
+        && !leader_reduction
+    {
         return Err(unsupported("installed numeric damage replacement"));
     }
     let captured = match subjects {
@@ -296,7 +304,7 @@ pub(in crate::game::internal) fn check_install(
             }
         }
         InstallationSubjects::Players { players, .. } => {
-            shape.usage.is_some()
+            (shape.usage.is_some() || leader_reduction)
                 && *players == own_leader()
                 && matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
                 && shape.damage_source.is_none()
