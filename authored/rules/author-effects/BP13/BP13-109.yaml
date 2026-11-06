@@ -1,0 +1,47 @@
+cards:
+  BP13-109:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: self
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 1
+      - evolve_time:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+          do:
+            - create:
+                to: field
+                token: エッジアーティファクト
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP13-T05
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

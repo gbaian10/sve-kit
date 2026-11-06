@@ -1,104 +1,26 @@
-format: 1
-kind: effect_set
 cards:
-  BP06-079:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: macro
-          name: bane
-      - line: 2
-        kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: select
-              select:
-                side: opponent
-                zone: field
-                type: follower
-              by: opponent
-              min:
-                if:
-                  fn: ge
-                  args:
-                    - at: resolution-start
-                      value:
-                        count:
-                          side: self
-                          zone: cemetery
-                    - 10
-                then: 2
-                else: 1
-              max:
-                if:
-                  fn: ge
-                  args:
-                    - at: resolution-start
-                      value:
-                        count:
-                          side: self
-                          zone: cemetery
-                    - 10
-                then: 2
-                else: 1
-              bind: offered
-            - op: move
-              subjects: offered
-              to: cemetery
-        event: enter
-        subject: self
-      - line: 3
-        kind: activated
-        body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: target.1
-              amount: 5
-            - op: move
-              subjects:
-                side: self
-                zone: deck
-                top: 1
-              to: cemetery
-        active_zones:
-          - hand
-        targets:
-          - key: "1"
-            select:
-              side: opponent
-              zone: field
-              type: follower
-            min: 1
-            max: 1
-        costs:
-          - op: pp
-            amount: 3
-          - op: discard
-            subjects: self
   BP06-117:
-    status: complete
     abilities:
-      - line: 1
-        kind: spell
-        body:
+      - body:
           op: seq
           steps:
-            - op: flip
+            - face: down
+              op: flip
               subjects: target.1
-              face: down
-            - op: draw
-              count: 1
+            - count: 1
+              op: draw
+        kind: spell
+        line: 1
         targets:
           - key: "1"
+            max: 1
+            min: 1
             select:
               side: self
-              zone: evolve_deck
               type: evolved_follower
               where:
                 read: item.face_up
-            min: 1
-            max: 1
+              zone: evolve_deck
+    status: complete
+format: 1
+kind: effect_set

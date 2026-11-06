@@ -1,0 +1,50 @@
+cards:
+  BP12-060:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: revived
+                result: entered_0
+                to: field
+          targets:
+            - bind: revived
+              from:
+                class: ドラゴン
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on: ally
+          targets:
+            - bind: ally
+              from:
+                class: ドラゴン
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

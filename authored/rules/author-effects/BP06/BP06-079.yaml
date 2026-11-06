@@ -1,0 +1,69 @@
+cards:
+  BP06-079:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                else:
+                  - choose:
+                      bind: victim_one
+                      by: opp
+                      from:
+                        kind: follower
+                        who: opp
+                        zone: field
+                      n: 1
+                  - move:
+                      ref: victim_one
+                      to: cemetery
+                then:
+                  - choose:
+                      bind: victims_two
+                      by: opp
+                      from:
+                        kind: follower
+                        who: opp
+                        zone: field
+                      n: 2
+                  - move:
+                      ref: victims_two
+                      to: cemetery
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - discard:
+                  ref: this
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
