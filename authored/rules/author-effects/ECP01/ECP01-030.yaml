@@ -1,0 +1,65 @@
+cards:
+  ECP01-030:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - stand: this
+            - draw:
+                n: 1
+                who: self
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  result: fuel
+                  sel:
+                    trait: ウマ娘
+                    who: self
+                    zone: hand
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: fuel
+                          view: before
+                        orig_cost_ge: 7
+                    op: ge
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
