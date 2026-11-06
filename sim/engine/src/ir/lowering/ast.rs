@@ -1079,6 +1079,7 @@ pub(super) struct Search {
     pub to: SearchDestination,
     pub result: Option<String>,
     pub distinct_by: Option<Names>,
+    pub cost_sum_le: Option<u64>,
 }
 
 #[derive(Clone, Deserialize)]

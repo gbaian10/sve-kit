@@ -1652,3 +1652,69 @@ fn original_cost_totals_bound_public_targets_and_reject_leader_recipients() {
         .remove("cost_sum_le");
     lowerer.lower_with_printed_costs(&leaders, &costs).unwrap();
 }
+
+#[test]
+fn search_original_cost_totals_join_the_search_constraint_and_reject_split_destinations() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let mut tree = expanded::spell_tree().clone();
+    *tree
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "do":[{"search":{"sel":{"who":"self","zone":"deck","kind":"follower"},
+            "upto":2_u64,"cost_sum_le":3_u64,"to":"field"}}]
+    });
+    let cards = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    let [step] = cards["SD03-005"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps
+        .as_slice()
+    else {
+        panic!("one search instruction");
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        panic!("search instruction");
+    };
+    let Action::Search {
+        groups: Some(constraint),
+        cardinality,
+        ..
+    } = &instruction.action
+    else {
+        panic!("a capped search keeps one selection constraint");
+    };
+    let [group] = constraint.groups.as_slice() else {
+        panic!("one group spans the filtered deck");
+    };
+    assert!(
+        matches!(&group.selector, Selector::Zone { zone: ZoneKind::Deck, predicate, .. }
+            if matches!(predicate.as_ref(), Expr::Literal(Bool(true)))),
+        "the group adds no filter beyond the search's own"
+    );
+    assert_eq!(group.cardinality, *cardinality);
+    assert_eq!(constraint.distinct_by, None);
+    assert_eq!(
+        constraint.aggregate_bounds,
+        [AggregateBound {
+            property: NumericProperty::OriginalCost,
+            comparison: Comparison::LessEqual,
+            value: Expr::Literal(Int(3)),
+        }]
+    );
+    let mut split = tree.clone();
+    split["cards"]["SD03-005"]["abilities"][0]["spell"]["do"][0]["search"]["to"] = json!({
+        "order":"printed","partition":[{"zone":"hand","n":1_u64},{"zone":"cemetery","n":1_u64}]
+    });
+    assert!(
+        lowerer.lower_with_printed_costs(&split, &costs).is_err(),
+        "a hand and cemetery partition keeps its aggregate-free contract"
+    );
+    split["cards"]["SD03-005"]["abilities"][0]["spell"]["do"][0]["search"]
+        .as_object_mut()
+        .unwrap()
+        .remove("cost_sum_le");
+    lowerer.lower_with_printed_costs(&split, &costs).unwrap();
+}

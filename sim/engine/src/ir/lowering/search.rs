@@ -291,9 +291,11 @@ impl BodyContext<'_> {
         }
         Ok(())
     }
-    fn distinct_search_group(
+    /// One group over the whole filtered deck, for constraints across every found card.
+    fn deck_search_group(
         &mut self,
         cardinality: Cardinality,
+        distinct: bool,
         path: &str,
     ) -> Result<SelectionConstraint, LoweringError> {
         let binding = Binding::new(1, self.card_allocator.scope(path)?);
@@ -317,10 +319,34 @@ impl BodyContext<'_> {
                 cardinality,
             }],
             cardinality,
-            distinct_by: Some(ObjectProperty::Names),
+            distinct_by: distinct.then_some(ObjectProperty::Names),
             disjoint: Disjointness::Disjoint,
             aggregate_bounds: vec![],
         })
+    }
+
+    /// 元のコストの合計がN以下 bounds every found card, grouped or not.
+    fn capped_search_groups(
+        &mut self,
+        search: &ast::Search,
+        cardinality: Cardinality,
+        groups: Option<SelectionConstraint>,
+        path: &str,
+    ) -> Result<Option<SelectionConstraint>, LoweringError> {
+        let Some(limit) = search.cost_sum_le else {
+            return Ok(groups);
+        };
+        if !matches!(search.to, ast::SearchDestination::Single(_)) {
+            return Err(unsupported(path));
+        }
+        let mut constraint = match groups {
+            Some(constraint) => constraint,
+            None => self.deck_search_group(cardinality, false, path)?,
+        };
+        constraint
+            .aggregate_bounds
+            .push(super::play::original_cost_bound(limit, path)?);
+        Ok(Some(constraint))
     }
 
     pub(super) fn search(
@@ -336,7 +362,7 @@ impl BodyContext<'_> {
                 (
                     predicate,
                     cardinality,
-                    Some(self.distinct_search_group(cardinality, path)?),
+                    Some(self.deck_search_group(cardinality, true, path)?),
                 )
             } else {
                 (predicate, cardinality, None)
@@ -395,6 +421,7 @@ impl BodyContext<'_> {
         } else {
             return Err(unsupported(path));
         };
+        let groups = self.capped_search_groups(search, cardinality, groups, path)?;
         if matches!(filter, Expr::Literal(_))
             && groups.is_none()
             && matches!(
