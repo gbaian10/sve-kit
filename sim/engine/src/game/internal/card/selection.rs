@@ -307,18 +307,18 @@ fn group_layout(
     }
 }
 
-/// A private multi-card pick that enters the field next may only offer the free field slots;
+/// A multi-card pick that enters the field next may only offer the free field slots;
 /// a single card that cannot enter simply stays with the remainder.
 fn field_entry_bounds(
     game: &Game,
-    actor_seat: &str,
+    destination_seat: &str,
     feeds_field: bool,
     mut bounds: Cardinality,
 ) -> Result<Cardinality> {
     if feeds_field && bounds.maximum.is_none_or(|maximum| maximum.0 > 1) {
         let free_field_slots = u64::try_from(
             5_i64
-                .saturating_sub(game.zone_count(actor_seat, "field"))
+                .saturating_sub(game.zone_count(destination_seat, "field"))
                 .max(0),
         )
         .map_err(invalid)?;
@@ -537,6 +537,26 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         return Err(unsupported("resolution public choice actor or selector"));
     }
     Ok(())
+}
+
+/// An own-EX resolution pick (BP13-010) is public but enters the field like a private one.
+fn own_ex_pick(constraint: &SelectionConstraint) -> bool {
+    matches!(constraint.groups.as_slice(), [group]
+        if selection_zone(&group.selector) == Some(ZoneKind::Ex)
+            && own_zone_selector(&group.selector))
+}
+
+fn own_zone_selector(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone { players, .. } => {
+            players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == (PlayerRef::Controller {})
+        }
+        Selector::Difference { input, .. } | Selector::Extremum { input, .. } => {
+            own_zone_selector(input)
+        }
+        _ => false,
+    }
 }
 
 fn selection_zone(selector: &Selector) -> Option<ZoneKind> {
@@ -1008,10 +1028,12 @@ impl Game {
         let constraint = evaluated_counts(self, execution, constraint)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
+        // The capacity is the destination's: the controller's field, even when the opponent picks.
         let bounds = field_entry_bounds(
             self,
-            actor_seat,
-            (observed_deck || own_hand) && execution.feeds_field_entry(binding.key()),
+            super::seat_name(execution.context.controller)?,
+            (observed_deck || own_hand || (allow_resolution_zones && own_ex_pick(&constraint)))
+                && execution.feeds_field_entry(binding.key()),
             bounds,
         )?;
         let public = members

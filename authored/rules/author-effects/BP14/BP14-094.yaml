@@ -1,0 +1,52 @@
+cards:
+  BP14-094:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: ex
+                token: 招来の狐
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - choose:
+                bind: fox
+                from:
+                  name: 招来の狐
+                  who: self
+                  zone: ex
+                n: 1
+            - move:
+                ref: fox
+                result: entered
+                to: field
+          usable_if:
+            exists:
+              kind: follower
+              orig_cost_ge: 2
+              trait: 狂信
+              who: self
+              zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP14-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -333,3 +333,108 @@ fn cemetery_entry_replaces_the_printed_choice_limit_without_changing_other_entri
         );
     }
 }
+
+fn ex_pick(by_opponent: bool, own_field: usize, opponent_field: usize) -> (Game, AbilityId) {
+    let mut choice =
+        json!({"bind":"incoming","from":{"who":"self","zone":"ex","kind":"follower"},"upto":2_u8});
+    if by_opponent {
+        choice["by"] = json!("opp");
+    }
+    let body = json!({"cost":{"pp":0},"do":[
+        {"choose":choice},
+        {"move":{"ref":"incoming","to":"field","result":"entered"}}
+    ]});
+    let mut tree = tree(&[("activate", body)]);
+    tree["cards"]["unit-amulet"] = tree["cards"]["unit-follower"].clone();
+    let programs = lowerer().lower(&tree).unwrap();
+    let mut initial = setup(1, json!([{"id":"drawn","card":"unit-spell"}]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    let mut field = vec![json!({"id":"source","card":"unit-amulet"})];
+    field.extend((1..own_field).map(|i| json!({"id":format!("ally{i}"),"card":"unit-follower"})));
+    initial["players"]["P1"]["zones"]["field"] = json!(field);
+    initial["players"]["P1"]["zones"]["ex"] = json!([
+        {"id":"incoming1","card":"unit-follower"},
+        {"id":"incoming2","card":"unit-follower"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!(
+        (0..opponent_field)
+            .map(|i| json!({"id":format!("enemy{i}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "ex-capacity",
+    )
+    .unwrap();
+    for number in ["unit-follower", "unit-amulet"] {
+        game.load_internal_card(number, &programs[number]).unwrap();
+    }
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    (game, programs["unit-amulet"].card().abilities[0].node.id)
+}
+
+#[test]
+fn own_ex_picks_that_enter_next_offer_only_the_controllers_free_field_slots() {
+    // (picked by the opponent, own field, opponent field, offered maximum)
+    for (by_opponent, own_field, opponent_field, slots) in
+        [(false, 4, 0, 1_u64), (false, 5, 0, 0), (true, 1, 5, 2)]
+    {
+        let (mut game, ability) = ex_pick(by_opponent, own_field, opponent_field);
+        let CardPlay::Awaiting(q) = game
+            .activate_internal_card("source", ability, PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("EX choice")
+        };
+        assert_eq!(
+            q.actor,
+            PlayerId {
+                seat: if by_opponent { 2 } else { 1 }
+            }
+        );
+        let InputDomain::Targets(domain) = &q.domain else {
+            panic!("EX targets")
+        };
+        assert_eq!(
+            domain.cardinality.maximum,
+            Some(Nat(slots)),
+            "the destination is the controller's field"
+        );
+        let both = domain
+            .members
+            .iter()
+            .map(|member| member.handle)
+            .collect::<Vec<_>>();
+        if slots < 2 {
+            let before = format!("{game:?}");
+            game.answer_internal_card(q.actor, q.token, Answer::Targets(both.clone()))
+                .unwrap_err();
+            assert_eq!(
+                format!("{game:?}"),
+                before,
+                "an answer that cannot fit changes nothing"
+            );
+        }
+        let fitting = both
+            .into_iter()
+            .take(usize::try_from(slots).unwrap())
+            .collect();
+        resolved(
+            game.answer_internal_card(q.actor, q.token, Answer::Targets(fitting))
+                .unwrap(),
+        );
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["field"].as_array().unwrap().len(),
+            own_field + usize::try_from(slots).unwrap()
+        );
+        assert_eq!(
+            view["P2"]["field"].as_array().unwrap().len(),
+            opponent_field
+        );
+    }
+}
