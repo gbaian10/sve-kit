@@ -305,16 +305,5 @@ cards:
             - 0
           fn: gt
     status: complete
-  CP03-127:
-    abilities:
-      - body:
-          limit: 10
-          name: ドライブポイント
-          op: deck_limit
-          zone: evolve_deck
-        kind: construction
-        line: 1
-    review: 本文的同名上限為 10；sections 括號只提示取得 drive 的共通規則 14.4.7，不重複給予能力。
-    status: complete
 format: 1
 kind: effect_set
