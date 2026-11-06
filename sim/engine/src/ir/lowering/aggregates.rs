@@ -97,7 +97,7 @@ impl BodyContext<'_> {
             name_contains: query.name_contains.clone(),
             other: query.other,
             racing: None,
-            orig_cost_eq: None,
+            orig_cost_eq: query.orig_cost_eq,
             orig_cost_le: query.orig_cost_le,
             orig_cost_ge: None,
             cost_eq: None,

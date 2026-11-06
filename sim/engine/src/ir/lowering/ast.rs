@@ -853,6 +853,7 @@ pub(super) struct ObjectQuery {
     pub not_class: Option<String>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
+    pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
@@ -2740,8 +2741,8 @@ pub(super) enum DealDamageAction {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum PreventionSource {
-    Objects(Objects),
-    Controller(PreventionController),
+    Objects(Box<Objects>),
+    Controller(Box<PreventionController>),
 }
 
 #[derive(Deserialize)]

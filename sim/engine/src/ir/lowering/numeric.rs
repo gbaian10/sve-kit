@@ -227,6 +227,7 @@ impl BodyContext<'_> {
                 || query.not_class.is_some()
                 || query.token.is_some()
                 || query.not_token.is_some()
+                || query.orig_cost_eq.is_some()
                 || query.orig_cost_le.is_some()
                 || query.name.is_some()
                 || query.name_contains.is_some()
@@ -286,7 +287,7 @@ impl BodyContext<'_> {
                     token: query
                         .token
                         .or_else(|| query.not_token.map(|excluded| !excluded)),
-                    original_cost: [None, query.orig_cost_le, None],
+                    original_cost: [query.orig_cost_eq, query.orig_cost_le, None],
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
                     acted: query.acted,

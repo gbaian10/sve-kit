@@ -464,6 +464,7 @@ fn damaged_candidate_history_stays_in_its_exact_public_destroy_selector() {
         ("zone", json!("hand")),
         ("kind", json!("amulet")),
         ("name", json!("unit-follower")),
+        ("orig_cost_eq", json!(1)),
         ("as", json!("another")),
         (
             "where",
