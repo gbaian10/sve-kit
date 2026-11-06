@@ -198,3 +198,92 @@ fn move_material(action: Action, zone: ZoneKind, destination: &str) {
         "one material payment receipt"
     );
 }
+
+/// Act this, then act one own standing field follower, then choose one of two draws.
+fn moded_act_material() -> WellFormedCardProgram {
+    let action = Action::Posture {
+        objects: Selector::Bound {
+            reference: Binding::new(51, ScopeId(1)),
+        },
+        posture: Posture::Acted,
+    };
+    let mut ability = program(action, 1, ZoneKind::Field).card().abilities[0].clone();
+    let modes = node(Node::Control {
+        control: Control::Mode {
+            modes: vec![
+                Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
+                    id: ModeId(1),
+                    parameters: vec![],
+                    body: body(6, vec![draw(1, 0)]),
+                },
+                Mode {
+                    costs: CostSpec::Ordered { steps: vec![] },
+                    id: ModeId(2),
+                    parameters: vec![],
+                    body: body(7, vec![draw(2, 0)]),
+                },
+            ],
+            count: Expr::Literal(Nat(1)),
+            chosen: ModeDecision {
+                id: DecisionId(20),
+                actor: PlayerRef::Controller {},
+                domain: ChoiceDomain::Modes {
+                    modes: vec![ModeId(1), ModeId(2)],
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    binding: Binding::new(20, ScopeId(1)),
+                    exclude_used: None,
+                },
+                kind: ModeDecisionKind::PlayParameter {
+                    play_scope: ExecutionRef::Current {},
+                    input: InputMode::Inline,
+                },
+                visibility: Visibility::Public {},
+            },
+            choice_kind: ModeChoiceKind::ChoiceKeyword,
+        },
+    });
+    ability.node.body.as_mut().unwrap().steps = vec![modes];
+    locate_steps(
+        &mut ability.node.body.as_mut().unwrap().steps,
+        &ability.source,
+        &ability.node.source,
+    );
+    card(vec![ability])
+}
+
+#[test]
+fn activated_modes_beside_an_act_material_probe_every_legal_member() {
+    // The source is the first candidate but is already acted by the earlier step; the other
+    // follower can still pay, so the modes are offered whatever the field order.
+    for field in [["s", "u"], ["u", "s"]] {
+        let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = Value::Array(
+            field
+                .iter()
+                .map(|id| json!({"id":id,"card":"unit-follower"}))
+                .collect(),
+        );
+        let mut game =
+            Game::new(catalog(), &initial, &Value::Null, &Value::Null, "card-seed").unwrap();
+        game.load_internal_card("unit-follower", &moded_act_material())
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("{field:?}: modes");
+        };
+        assert!(
+            matches!(&question.domain, InputDomain::Modes { modes, .. } if modes.len() == 2),
+            "{field:?}: {:?}",
+            question.domain
+        );
+    }
+}

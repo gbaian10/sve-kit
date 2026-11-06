@@ -10,8 +10,9 @@ use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
     MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
-    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
-    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
+    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, ScopeId,
+    SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
+    ZoneRef,
 };
 use crate::ir::{
     AggregateBound, Bool, Comparison, Expr, NamesRead, NumericProperty, ObjectView, Predicate,
@@ -482,6 +483,59 @@ impl Game {
     ) -> Result<()> {
         check_parameter(decision)?;
         self.material_parameter(execution, decision, standing)
+    }
+
+    /// Every legal way to fill a public head-cost material, for an affordability probe.
+    /// Empty when too few candidates exist; the real question still comes later.
+    pub(super) fn internal_public_material_choices(
+        &self,
+        execution: &Execution,
+        decision: &Decision,
+        standing: bool,
+    ) -> Result<Vec<((ScopeId, u64), Slot)>> {
+        let ChoiceDomain::Objects {
+            constraint,
+            binding,
+            ..
+        } = &decision.domain
+        else {
+            return Err(unsupported("material domain"));
+        };
+        if !constraint.aggregate_bounds.is_empty() {
+            return Err(unsupported("aggregate material probe"));
+        }
+        let selector = &constraint
+            .groups
+            .first()
+            .ok_or_else(|| invalid("material group"))?
+            .selector;
+        let members = self.material_candidates(execution, selector, standing)?;
+        let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
+        let field = zones(selector)? == [ZoneKind::Field];
+        let names = (0..members.len())
+            .map(|i| i.to_string())
+            .collect::<Vec<_>>();
+        subsets(&names, count, count)
+            .into_iter()
+            .map(|selected| {
+                let chosen = selected
+                    .iter()
+                    .map(|index| {
+                        members
+                            .get(index.parse::<usize>().map_err(invalid)?)
+                            .copied()
+                            .ok_or_else(|| invalid("material subset"))
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                Ok((
+                    binding.key(),
+                    Slot::Objects {
+                        members: chosen,
+                        on_field_at_capture: field,
+                    },
+                ))
+            })
+            .collect()
     }
 
     pub(super) fn internal_reveal_material_parameter(

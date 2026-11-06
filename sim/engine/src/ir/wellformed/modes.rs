@@ -6,9 +6,10 @@ use crate::ir::{
     PlayerResource,
 };
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Control, CostSpec, EntryOrigin, EntryOriginFields, Expr, Mode,
-    ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen, NatOperation, Node, PlayerRef,
-    Predicate, Program, SpellCountTime, ValueEquality, Visibility, ZoneKind,
+    Bool, Cardinality, ChoiceDomain, Control, CostSpec, DecisionKind, EntryOrigin,
+    EntryOriginFields, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen,
+    NatOperation, Node, PlaySlot, PlayerRef, Predicate, Program, SpellCountTime, ValueEquality,
+    Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicView, NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView,
@@ -350,6 +351,38 @@ impl Checker {
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }
+}
+
+/// Whether no printed mode carries its own fee; head-cost materials only sit beside such modes.
+pub(super) fn play_modes_without_fees(program: &Program) -> bool {
+    program.steps.iter().all(|step| match &step.node {
+        Node::Control {
+            control: Control::Sequence { body },
+        } => play_modes_without_fees(body),
+        Node::Control {
+            control:
+                Control::Mode {
+                    modes,
+                    choice_kind: ModeChoiceKind::ChoiceKeyword,
+                    ..
+                },
+        } => modes.iter().all(|mode| {
+            let free = matches!(&mode.costs, CostSpec::Ordered { steps } if steps.is_empty());
+            free && !mode.parameters.iter().any(|decision| {
+                matches!(
+                    decision.kind,
+                    DecisionKind::PlayParameter {
+                        slot: PlaySlot::CostMaterials,
+                        ..
+                    }
+                )
+            })
+        }),
+        Node::Instruction { .. }
+        | Node::Control { .. }
+        | Node::Capture { .. }
+        | Node::Decision { .. } => true,
+    })
 }
 
 pub(super) fn play_mode_groups(program: &Program) -> usize {

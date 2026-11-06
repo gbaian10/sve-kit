@@ -14,11 +14,11 @@ use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::trigger_restrictions;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
-    Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, DecisionKind,
-    Duration, DurationEnd, Effect, EffectTarget, EventContext, EventPattern, EventSnapshotPolicy,
-    ExecutionRef, GrantedAbility, Nat, NumericChange, PlayerRef, PlayerRelation, PlayerSet,
-    Procedure, ScopeId, StandScope, TextQuantifier, TimeAnchor, TimestampBasis, TriggerAggregation,
-    TriggerCondition, TriggerSpec, Visibility, ZoneKind,
+    Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, Decision,
+    DecisionKind, Duration, DurationEnd, Effect, EffectTarget, EventContext, EventPattern,
+    EventSnapshotPolicy, ExecutionRef, GrantedAbility, Nat, NumericChange, PlaySlot, PlayerRef,
+    PlayerRelation, PlayerSet, Procedure, ScopeId, StandScope, TextQuantifier, TimeAnchor,
+    TimestampBasis, TriggerAggregation, TriggerCondition, TriggerSpec, Visibility, ZoneKind,
 };
 use crate::ir::{
     AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
@@ -30,6 +30,21 @@ use crate::ir::{
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
 use alloc::collections::BTreeSet;
+
+/// A fixed-count public head-cost material; activated modes may follow it (BP09-071, BP09-078).
+fn public_cost_material(decision: &Decision) -> bool {
+    matches!(
+        decision.kind,
+        DecisionKind::PlayParameter {
+            slot: PlaySlot::CostMaterials,
+            ..
+        }
+    ) && decision.visibility == (Visibility::Public {})
+        && matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
+            if constraint.aggregate_bounds.is_empty()
+                && constraint.cardinality.minimum.0 > 0
+                && constraint.cardinality.maximum == Some(constraint.cardinality.minimum))
+}
 
 fn batch_discard(trigger: &TriggerSpec) -> bool {
     let TriggerCondition::Event {
@@ -507,7 +522,10 @@ impl Checker {
                                 && optional_payment::required(body)
                                 && play.parameters.iter().all(|decision| {
                                     reveal_payment::field_parameter(ability, decision)
-                                })))
+                                }))
+                            || (ability.kind == AbilityKind::Activated
+                                && super::modes::play_modes_without_fees(body)
+                                && play.parameters.iter().all(public_cost_material)))
                     }))
             {
                 return self.reject();
