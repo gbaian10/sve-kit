@@ -1,0 +1,59 @@
+cards:
+  BP13-020:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - destroy: victim
+            - buff:
+                hp:
+                  history_count:
+                    event: moved
+                    from: field
+                    sel:
+                      kind: follower
+                    to: cemetery
+                    window: this_turn
+                on: this
+                power:
+                  history_count:
+                    event: moved
+                    from: field
+                    sel:
+                      kind: follower
+                    to: cemetery
+                    window: this_turn
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 2
+      - activate:
+          cost:
+            pp: 2
+          do:
+            - stand: this
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: レヴィオン
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

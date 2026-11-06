@@ -1,0 +1,63 @@
+cards:
+  BP13-076:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                  - bane
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        ref: blade
+                        result: moved
+                        to: ex
+                    - if:
+                        cond:
+                          necro: 20
+                        then:
+                          - apply:
+                              effect:
+                                cost_mod:
+                                  delta: -2
+                                  when_playing:
+                                    in: affected
+                              on:
+                                follow: moved
+                              until: turn
+                  - - move:
+                        to: cemetery
+                        top:
+                          n: 2
+                          who: self
+          targets:
+            - bind: blade
+              from:
+                name: 魂の一刀
+                who: self
+                zone: cemetery
+              n: 1
+              option: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
