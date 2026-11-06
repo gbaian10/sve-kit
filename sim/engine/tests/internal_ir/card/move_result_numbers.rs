@@ -481,3 +481,28 @@ fn raw_follow_permission_kind_unknown_receipts_and_non_deck_producers_stay_close
         }
     }
 }
+
+#[test]
+fn ex_result_cost_set_accepts_only_one_non_negative_fixed_value() {
+    let with = |effect: Value| {
+        let mut tree = circle(&json!(1));
+        tree["cards"]["unit-follower"]["abilities"][0]["fanfare"]["do"][1] = json!({"apply":{
+            "on":{"follow":"placed"},
+            "effect":{"cost_mod":effect},
+            "until":"turn"
+        }});
+        tree
+    };
+    load(
+        &with(json!({"when_playing":{"in":"affected"},"set":0})),
+        "unit-follower",
+    );
+    for rejected in [
+        json!({"when_playing":{"in":"affected"},"set":-1}),
+        json!({"when_playing":{"in":"affected"},"delta":1}),
+        json!({"when_playing":{"in":"affected"},"set":0,"delta":-1}),
+        json!({"when_playing":{"in":"affected"},"set":0,"next_only":true}),
+    ] {
+        lowerer().lower(&with(rejected)).unwrap_err();
+    }
+}
