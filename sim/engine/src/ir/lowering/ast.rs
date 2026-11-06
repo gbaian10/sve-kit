@@ -2132,6 +2132,8 @@ pub(super) struct PublicQuery {
     pub racing: Option<bool>,
     #[serde(default)]
     pub other: bool,
+    #[serde(default)]
+    pub not_same_name_as_this: bool,
     pub who: Side,
     pub zone: PublicZone,
     pub kind: Option<SearchKind>,

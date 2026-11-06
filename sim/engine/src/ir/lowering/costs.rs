@@ -272,6 +272,19 @@ pub(super) fn public_query(
     binding: Binding<ObjectRef>,
     path: &str,
 ) -> Result<Selector, LoweringError> {
+    // Counts and numeric reads have no card that needs the holder-name exclusion yet.
+    if value.not_same_name_as_this {
+        return Err(unsupported(path));
+    }
+    named_public_query(value, binding, path)
+}
+
+/// A public query that may exclude the ability holder's names (exists conditions).
+pub(super) fn named_public_query(
+    value: &ast::PublicQuery,
+    binding: Binding<ObjectRef>,
+    path: &str,
+) -> Result<Selector, LoweringError> {
     if !value.names.is_empty() || value.acted.is_some() {
         return Err(unsupported(path));
     }

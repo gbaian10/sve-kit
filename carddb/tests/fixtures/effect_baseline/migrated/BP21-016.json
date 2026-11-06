@@ -1,0 +1,48 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "keywords": [
+              "storm"
+            ],
+            "op": "modify",
+            "subjects": "self"
+          },
+          {
+            "count": 1,
+            "op": "draw"
+          }
+        ]
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "not_name": "self",
+            "side": "self",
+            "trait": "獣",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "op": "move",
+          "subjects": "cost.1",
+          "to": "hand"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

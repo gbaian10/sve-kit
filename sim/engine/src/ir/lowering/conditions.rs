@@ -786,7 +786,7 @@ impl BodyContext<'_> {
                 },
             })));
         };
-        let mut objects = super::costs::public_query(query, binding, path)?;
+        let mut objects = super::costs::named_public_query(query, binding, path)?;
         if query.other {
             objects = Selector::Difference {
                 input: Box::new(objects),

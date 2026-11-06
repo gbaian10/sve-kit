@@ -84,6 +84,7 @@ impl BodyContext<'_> {
     ) -> Result<Selector, LoweringError> {
         let population = ast::PublicQuery {
             acted: None,
+            not_same_name_as_this: false,
             who: query.who.clone(),
             zone: ast::PublicZone::Field,
             kind: query.kind.map(ast::FieldKind::search),
@@ -148,6 +149,7 @@ impl BodyContext<'_> {
         }
         let population = ast::PublicQuery {
             acted: None,
+            not_same_name_as_this: false,
             who: query.who.clone().ok_or_else(|| unsupported(path))?,
             zone: ast::PublicZone::Field,
             kind: query.kind.clone(),

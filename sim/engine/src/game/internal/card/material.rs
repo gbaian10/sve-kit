@@ -13,6 +13,7 @@ use crate::ir::{
     PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
     SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
 };
+use crate::ir::{Bool, Expr, NamesRead, ObjectView, Predicate};
 use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
@@ -114,6 +115,37 @@ pub(super) fn uses_parameter(action: &Action, play: &PlaySpec) -> bool {
         is_parameter(decision) && matches!(&decision.domain,ChoiceDomain::Objects {binding,..} if binding==reference)))
 }
 
+/// これと同名を除く is the one public-material filter beyond the search classification:
+/// the candidate shares no name with the ability holder, read at payment.
+fn without_holder_name(predicate: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Expr<Bool> {
+    let holder_name = |item: &Expr<Bool>| {
+        matches!(item, Expr::Compute(not) if matches!(not.as_ref(), Predicate::Not { predicate: negated }
+            if matches!(negated, Expr::Compute(names) if matches!(names.as_ref(),
+                Predicate::NamesIntersect { left: Expr::Live(left), right: Expr::Live(right) }
+                    if matches!(left.as_ref(), NamesRead::Names { object: ObjectView::Current { object } }
+                        if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
+                    && matches!(right.as_ref(), NamesRead::Names { object: ObjectView::Current { object } }
+                        if matches!(object.as_ref(), ObjectOperand::SourceHolder {}))))))
+    };
+    if holder_name(predicate) {
+        return Expr::Literal(Bool(true));
+    }
+    if let Expr::Compute(and) = predicate
+        && let Predicate::And { predicates } = and.as_ref()
+        && let Some((last, rest)) = predicates.split_last()
+        && holder_name(last)
+    {
+        return match rest {
+            [] => Expr::Literal(Bool(true)),
+            [single] => single.clone(),
+            rest => Expr::Compute(Box::new(Predicate::And {
+                predicates: rest.to_vec(),
+            })),
+        };
+    }
+    predicate.clone()
+}
+
 fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
     match selector {
         Selector::Zone {
@@ -137,7 +169,7 @@ fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
                     })),
                 }) =>
         {
-            search::check_predicate(predicate, *binding)?;
+            search::check_predicate(&without_holder_name(predicate, *binding), *binding)?;
             Ok(vec![*zone])
         }
         Selector::Difference { input, except }
@@ -357,6 +389,8 @@ impl Game {
         else {
             return Err(unsupported("material selector"));
         };
+        // A holder-name exclusion reads the holder once, before any candidate is classified.
+        let predicate = &search::freeze_source_names(self, execution, predicate)?;
         let mut members = vec![];
         for player in execution.players(self, players)? {
             for id in self.zone_ids(
