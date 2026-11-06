@@ -189,6 +189,9 @@ fn bp03_013_stops_the_chosen_enemy_from_attacking_during_its_next_turn() {
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     quick_pass(&mut game);
+    let opposing_turn = game.projection(View::Referee).unwrap();
+    assert_eq!(opposing_turn["turn"]["active"], "P2");
+    assert_eq!(opposing_turn["objects"]["enemy"]["acted"], false);
     for target in ["P1.leader", "source"] {
         assert_eq!(
             game.internal_rule_action(&json!({"do":"attack","attacker":"enemy","target":target}))
