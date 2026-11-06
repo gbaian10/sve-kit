@@ -1,0 +1,63 @@
+cards:
+  BP16-099:
+    abilities:
+      - fanfare:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                on: enemy
+                until:
+                  during_next_turn:
+                    who: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            act:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                on: enemy
+                until:
+                  during_next_turn:
+                    who: opp
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
