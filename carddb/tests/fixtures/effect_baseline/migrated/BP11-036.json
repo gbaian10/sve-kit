@@ -1,0 +1,107 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "condition": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "read": "self.cemetery.cost"
+                    }
+                  ],
+                  "fn": "distinct"
+                },
+                3
+              ],
+              "fn": "ge"
+            },
+            "op": "if",
+            "then": {
+              "hp": 3,
+              "op": "modify",
+              "subjects": "self.leader"
+            }
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "read": "self.cemetery.cost"
+                    }
+                  ],
+                  "fn": "distinct"
+                },
+                6
+              ],
+              "fn": "ge"
+            },
+            "op": "if",
+            "then": {
+              "count": 1,
+              "op": "draw"
+            }
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "read": "self.cemetery.cost"
+                    }
+                  ],
+                  "fn": "distinct"
+                },
+                9
+              ],
+              "fn": "ge"
+            },
+            "op": "if",
+            "then": {
+              "amount": 9,
+              "op": "damage",
+              "subjects": {
+                "side": "opponent",
+                "type": "follower",
+                "zone": "field"
+              }
+            }
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "read": "self.cemetery.cost"
+                    }
+                  ],
+                  "fn": "distinct"
+                },
+                12
+              ],
+              "fn": "ge"
+            },
+            "op": "if",
+            "then": {
+              "amount": 12,
+              "op": "damage",
+              "subjects": "opponent.leader"
+            }
+          }
+        ]
+      },
+      "event": "evolve",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
