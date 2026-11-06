@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-019:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        static:
+          while:
+            cmp:
+              left:
+                count:
+                  who: opp
+                  zone: cemetery
+              op: ge
+              right: 10
+          effects:
+            - cost_mod:
+                when_playing:
+                  who: self
+                  zone: ex
+                delta: -2
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: selected
+              from:
+                who: opp
+                zone: cemetery
+              n: 1
+          do:
+            - move:
+                ref: selected
+                to: ex
+      - line: 3
+        activate:
+          cost:
+            pp: 8
+          targets:
+            - bind: selected
+              from:
+                who: opp
+                zone: cemetery
+              n: 1
+          do:
+            - play_card:
+                ref: selected
+                cost: 0
