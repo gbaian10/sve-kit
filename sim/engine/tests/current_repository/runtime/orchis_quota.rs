@@ -271,10 +271,13 @@ fn bp08_003_revenge_grants_assail_to_lloyd_and_observes_its_field_alias_when_it_
     assert_eq!(drain(&mut game, ""), 1);
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P2"]["leader"]["life"], 16_u8);
-    assert!(
-        after["P1"]["cemetery"]
-            .as_array()
-            .unwrap()
-            .contains(&json!("lloyd"))
-    );
+    // The field alias triggers before the token ceases to exist outside field and EX.
+    for zone in ["field", "cemetery"] {
+        assert!(
+            !after["P1"][zone]
+                .as_array()
+                .unwrap()
+                .contains(&json!("lloyd"))
+        );
+    }
 }
