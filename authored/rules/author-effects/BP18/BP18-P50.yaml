@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-P50:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: forms
+                from:
+                  who: self
+                  zone: evolve_deck
+                  face_up: true
+                  kind: evolve_follower
+                any: true
+            - flip_down: forms
+            - ep:
+                who: self
+                delta: 1
