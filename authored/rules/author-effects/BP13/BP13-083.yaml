@@ -1,0 +1,28 @@
+cards:
+  BP13-083:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+          targets:
+            - bind: revived
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: 死者
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

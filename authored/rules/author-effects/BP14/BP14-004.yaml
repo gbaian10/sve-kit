@@ -1,0 +1,59 @@
+cards:
+  BP14-004:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                what: attack
+          while:
+            cmp:
+              left:
+                counter:
+                  name: 四季カウンター
+                  on: this
+              op: le
+              right: 3
+      - auto:
+          do:
+            - either:
+                options:
+                  - - buff:
+                        hp:
+                          power_of: this
+                        on: chosen
+                        power:
+                          power_of: this
+                  - - damage:
+                        n:
+                          power_of: this
+                        to: chosen
+            - counter:
+                delta: 1
+                name: 四季カウンター
+                on: this
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: all
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

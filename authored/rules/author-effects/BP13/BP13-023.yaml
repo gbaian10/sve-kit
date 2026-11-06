@@ -1,0 +1,47 @@
+cards:
+  BP13-023:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+                on:
+                  kind: follower
+                  token: true
+                  who: self
+                  zone: field
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            enter_field:
+              during:
+                turn: self
+              sel:
+                kind: follower
+                trait: 兵士
+              who: self
+        line: 2
+      - evolve_time:
+          do:
+            - create:
+                n: 3
+                to: field
+                token: シールドガーディアン
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP13-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

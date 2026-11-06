@@ -1,0 +1,40 @@
+cards:
+  BP14-002:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - banish:
+                  n: 1
+                  sel:
+                    other: true
+                    trait: 宴楽
+                    who: self
+                    zone: field
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_le: 7
+                  who: self
+                  zone: deck
+                to: field
+          per_turn: 1
+          usable_if:
+            history:
+              at_least: 3
+              event: played
+              who: self
+              window: this_turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

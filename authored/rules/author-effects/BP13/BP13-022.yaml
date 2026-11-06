@@ -1,0 +1,40 @@
+cards:
+  BP13-022:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - prevent:
+                kind: ability
+                on:
+                  kind: follower
+                  token: true
+                  who: self
+                  zone: field
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            enter_field:
+              during:
+                turn: self
+              sel:
+                kind: follower
+                trait: 兵士
+              who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

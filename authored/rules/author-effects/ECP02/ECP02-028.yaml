@@ -1,0 +1,62 @@
+cards:
+  ECP02-028:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: キュート
+                    who: self
+                    zone: field
+                else:
+                  - buff:
+                      hp: -3
+                      on: enemy
+                      power: -3
+                then:
+                  - buff:
+                      hp: -5
+                      on: enemy
+                      power: -5
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+            - create:
+                to: ex
+                token: 魔法のアイテム
+          per_turn: 1
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: キュート
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
