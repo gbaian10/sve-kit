@@ -1286,8 +1286,8 @@ pub(super) struct ConstantStats {
 #[serde(deny_unknown_fields)]
 pub(super) struct Draw {
     pub n: Number,
-    #[serde(rename = "who")]
-    pub _who: Option<SelfPlayer>,
+    /// `master_of` is 「それのプレイヤー」, the chosen object's controller (BP06-112).
+    pub who: Option<LifeHolder>,
 }
 
 #[derive(Deserialize)]
