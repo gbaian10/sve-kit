@@ -349,11 +349,26 @@ impl Game {
     ///
     /// # Errors
     /// Rejects missing card facts, malformed positions and unsupported historical state.
+    pub fn new(
+        catalog: Arc<Catalog>,
+        setup: &Value,
+        facts: &Value,
+        random: &Value,
+        seed: &str,
+    ) -> Result<Self> {
+        let mut game = Self::unopened(catalog, setup, facts, random, seed)?;
+        if setup["pregame"] == true {
+            game.initialize_opening()?;
+        }
+        Ok(game)
+    }
+
+    /// Builds the position without the pregame procedures, which read card abilities.
     #[expect(
         clippy::too_many_lines,
         reason = "All initial authoritative fields are assembled together for snapshot auditing."
     )]
-    pub fn new(
+    pub(super) fn unopened(
         catalog: Arc<Catalog>,
         setup: &Value,
         facts: &Value,
@@ -554,9 +569,6 @@ impl Game {
                     game.learn(seat, &object.id, true);
                 }
             }
-        }
-        if setup["pregame"] == true {
-            game.initialize_opening()?;
         }
         Ok(game)
     }

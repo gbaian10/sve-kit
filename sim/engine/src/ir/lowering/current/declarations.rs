@@ -132,6 +132,8 @@ pub enum PrintedKeyword {
     SingleDrive,
     /// Printed two sequential Drive checks on attack.
     TwinDrive,
+    /// Printed Start Amulet; only the title opening reads it.
+    StartAmulet,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]

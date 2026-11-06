@@ -1,0 +1,38 @@
+cards:
+  CP03-062:
+    abilities:
+      - keywords:
+          - start_amulet
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - banish:
+                ref: selected
+          usable_if:
+            exists:
+              kind: follower
+              trait: ペイルムーン
+              who: self
+              zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

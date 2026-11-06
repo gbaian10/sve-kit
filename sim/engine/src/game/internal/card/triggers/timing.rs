@@ -215,7 +215,14 @@ impl Game {
     pub fn internal_rule_action(&mut self, decision: &Value) -> Result<Step> {
         if !matches!(
             string(&decision["do"]),
-            "evolve" | "attack" | "end-phase" | "guard-act" | "end-discard" | "mulligan"
+            "evolve"
+                | "attack"
+                | "end-phase"
+                | "guard-act"
+                | "end-discard"
+                | "choose-start-amulet"
+                | "choose-first"
+                | "mulligan"
         ) || self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()

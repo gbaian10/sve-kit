@@ -244,7 +244,8 @@ impl Game {
         seed: &str,
     ) -> Result<Self> {
         selected.check_runtime()?;
-        let mut game = Self::new(Arc::clone(&selected.prototypes), setup, facts, random, seed)?;
+        let mut game =
+            Self::unopened(Arc::clone(&selected.prototypes), setup, facts, random, seed)?;
         if game.state.objects.values().any(|object| {
             game.catalog
                 .rejected
@@ -262,6 +263,10 @@ impl Game {
         game.card_runtime.definitions =
             selected.runtime_cards(|| game.prepare_current_cards(&selected))?;
         game.admit_evolution_resources()?;
+        // Start Amulets are read from the admitted cards, so the opening waits for them.
+        if setup["pregame"] == true {
+            game.initialize_opening()?;
+        }
         Ok(game)
     }
 
@@ -1180,7 +1185,8 @@ pub(in crate::game::internal) fn printed_origin(origin: &AbilityOrigin) -> Resul
                 | KeywordId::Assail
                 | KeywordId::SingleDrive
                 | KeywordId::TwinDrive
-                | KeywordId::Stack,
+                | KeywordId::Stack
+                | KeywordId::StartAmulet,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {
