@@ -47,7 +47,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-/// A cemetery source may only move itself back to the field or into its owner's EX area.
+/// Cemetery holder reads stay closed to admitted movement and the entry trigger's self cost.
 pub(super) fn cemetery_body(ability: &Ability) -> bool {
     let Some(body) = &ability.body else {
         return false;
@@ -56,6 +56,10 @@ pub(super) fn cemetery_body(ability: &Ability) -> bool {
         return true;
     };
     let mut returns = BTreeSet::new();
+    if super::super::optional::cemetery_self_banish(ability) {
+        returns
+            .insert("/steps/0/control/costs/steps/0/instruction/action/objects/objects/0".into());
+    }
     holder_move_paths(body, "", &mut returns);
     Requirements::derive_program(&Located {
         node: body.clone(),
