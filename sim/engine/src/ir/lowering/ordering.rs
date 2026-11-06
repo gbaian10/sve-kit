@@ -317,6 +317,27 @@ impl BodyContext<'_> {
             objects: match value {
                 ast::BanishAction::Top { top } if own_deck(top) => self.deck_slice(top, path)?,
                 ast::BanishAction::Top { .. } => return Err(unsupported(path)),
+                ast::BanishAction::Objects(objects)
+                    if let Some(event) = self.leave_event
+                        && matches!(
+                            **objects,
+                            ast::ObjectAction::Short(ast::Objects::This(_))
+                                | ast::ObjectAction::Long {
+                                    r#ref: ast::Objects::This(_),
+                                    result: None,
+                                }
+                        ) =>
+                {
+                    // A Lastword's "this" has already moved; banish the generation it became.
+                    if !self.departure_to_cemetery {
+                        return Err(unsupported(path));
+                    }
+                    Selector::Objects {
+                        objects: vec![ObjectOperand::FollowEventMove {
+                            event: MovementEvent::LeaveField { event },
+                        }],
+                    }
+                }
                 ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
             },
         })
