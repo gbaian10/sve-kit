@@ -483,6 +483,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     super::tokens::equipment::check_action(action)?;
     super::transform::check_action(action)?;
     super::movement::check_action(action)?;
+    super::flip::check_action(action)?;
     super::resource::check_action(action)?;
     super::counters::check_action(action)?;
     super::discard::check_action(action)?;
@@ -811,6 +812,8 @@ fn supported(code: &str) -> bool {
             | "action.banish"
             | "shape.Action.Posture"
             | "action.posture"
+            | "shape.Action.FlipDown"
+            | "action.flip-down"
             | "internal.Posture.Acted"
             | "internal.Posture.Standing"
             | "shape.Action.Grant"

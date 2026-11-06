@@ -808,3 +808,6 @@ mod boxed;
 
 #[path = "card/cemetery_self_cost.rs"]
 mod cemetery_self_cost;
+
+#[path = "card/flip_down.rs"]
+mod flip_down;

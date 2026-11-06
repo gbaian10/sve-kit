@@ -14,7 +14,7 @@ use crate::ir::{
     ChoiceDomain, Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
-    EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
+    EntryOrigin, ExecutionId, Expr, FlipOutcome, Generation, InstallationSubjects, Instruction,
     InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
     LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, MovementEvent, Nat,
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
@@ -57,6 +57,7 @@ pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
 pub(in crate::game) use drive::LeaderAttackLock;
+mod flip;
 mod grant;
 mod history_turn;
 pub(in crate::game) use history_turn::DamageHistoryFact;
@@ -332,6 +333,8 @@ pub enum InstructionOutcome {
     Discard(DiscardOutcome),
     /// Requested life operation's actual before/after values, including no change.
     Life(LifeChangeEvent),
+    /// Evolve-deck cards successfully turned face down.
+    Flip(FlipOutcome),
     /// Successful body posture changes, empty when every subject already has that posture.
     Posture(Vec<PostureEvent>),
     /// The whole exchange, available only after the complete card payment.
@@ -1536,6 +1539,9 @@ impl Game {
             Action::Grant { .. } => self.internal_grant(execution, &instruction)?,
             Action::Reveal { objects } => {
                 self.internal_reveal(execution, &instruction, objects)?;
+            }
+            Action::FlipDown { objects } => {
+                self.internal_flip_down(execution, &instruction, objects)?;
             }
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,

@@ -337,6 +337,7 @@ pub(super) enum Step {
     Transform(Transform),
     Act(ObjectAction),
     Stand(ObjectAction),
+    FlipDown(ObjectAction),
     Buff(Modify),
     Grant(Grant),
     SetStat(Modify),
@@ -1448,6 +1449,7 @@ pub(super) struct TargetQuery {
     pub acted: Option<bool>,
     pub evolved: Option<bool>,
     pub entered_this_turn: Option<True>,
+    pub face_up: Option<bool>,
 }
 
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
@@ -1535,6 +1537,7 @@ pub(super) enum TargetZone {
 #[derive(Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum TargetSingleZone {
+    EvolveDeck,
     Hand,
     Field,
     Ex,

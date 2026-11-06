@@ -1257,6 +1257,7 @@ fn check_instruction(
     nested::ability::check_action(&instruction.action)?;
     super::grant::check_action(&instruction.action)?;
     super::numeric::pilot::check_action(&instruction.action)?;
+    super::flip::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
     if instruction.source != *ability_source {
         return Err(invalid("instruction has a foreign ability source"));
@@ -1284,6 +1285,7 @@ fn check_instruction(
             | Action::Banish { .. }
             | Action::Transform { .. }
             | Action::Posture { .. }
+            | Action::FlipDown { .. }
             | Action::Modify { .. }
             | Action::Grant { .. }
             | Action::InstallEffect { .. }
