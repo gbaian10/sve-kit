@@ -965,3 +965,33 @@ fn an_evolve_deck_move_to_ex_needs_the_named_private_pick() {
         "no ordinary move may put an evolve-deck Advance into EX: {ex}"
     );
 }
+
+#[test]
+fn the_named_pick_takes_exactly_one_whole_name_or_name_fragment() {
+    let with_from = |change: &dyn Fn(&mut serde_json::Map<String, Value>)| {
+        let mut input = tree(false, true);
+        let from =
+            input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["choose"]["from"]
+                .as_object_mut()
+                .unwrap();
+        change(from);
+        input
+    };
+    lowerer()
+        .lower(&with_from(&|from| {
+            from.remove("name");
+            from.insert("name_contains".into(), json!("named"));
+        }))
+        .unwrap();
+    for rejected in [
+        with_from(&|from| {
+            from.insert("name_contains".into(), json!("named"));
+        }),
+        with_from(&|from| {
+            from.remove("name");
+            from.insert("name_contains".into(), json!(""));
+        }),
+    ] {
+        lowerer().lower(&rejected).unwrap_err();
+    }
+}

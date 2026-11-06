@@ -1177,7 +1177,12 @@ impl Game {
         Ok(members)
     }
 
-    fn named_advance_candidate(&self, id: &str, seat: &str, name: &CardName) -> Result<bool> {
+    fn named_advance_candidate(
+        &self,
+        id: &str,
+        seat: &str,
+        name: &advance_entry::AdvanceName,
+    ) -> Result<bool> {
         let object = self.object(id)?;
         let printed = self.catalog.face(&object.card, 0)?;
         Ok(object.zone == "evolve_deck"
@@ -1185,7 +1190,7 @@ impl Game {
             && object.controller == seat
             && object.state["face"] == 0_i64
             && printed["card_type"] == "フォロワー・アドバンス"
-            && self.card_name_matches(id, |own| own == name.0)?)
+            && self.card_name_matches(id, |own| name.matches(own))?)
     }
 
     pub(super) fn internal_mode_targets_feasible(

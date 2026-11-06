@@ -1,0 +1,72 @@
+cards:
+  BP10-063:
+    abilities:
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  trait: 武装
+                  who: self
+                  zone: deck
+                to: hand
+            - choose:
+                bind: armed
+                from:
+                  kind: follower
+                  trait: 武装
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: armed
+                result: entered
+                to: field
+      - activate:
+          cost:
+            banish_self: true
+          do:
+            - destroy: leva
+            - destroy: weapons
+            - choose:
+                bind: incoming
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name_contains: デュアルモード
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: incoming
+                to: field
+          targets:
+            - bind: leva
+              from:
+                name: レーヴァテインドラゴン
+                who: self
+                zone: field
+              n: 1
+            - bind: weapons
+              from:
+                name: ドラゴウェポン
+                who: self
+                zone: field
+              n: 2
+          zone: cemetery
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

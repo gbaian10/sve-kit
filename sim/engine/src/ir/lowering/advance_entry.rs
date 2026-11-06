@@ -1,7 +1,8 @@
 use super::{
     AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, unsupported,
 };
-use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId, ZoneKind, advance_entry};
+use crate::ir::advance_entry::{self, AdvanceName};
+use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId, ZoneKind};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -23,8 +24,14 @@ impl BodyContext<'_> {
         let ast::SelfPlayer::Controller = query.who;
         let ast::EvolveDeckZone::EvolveDeck = query.zone;
         let ast::True = query.advance_follower;
+        let advance_name = match (&query.name, &query.name_contains) {
+            (Some(name), None) if !name.is_empty() => AdvanceName::Exact(CardName(name.clone())),
+            (None, Some(fragment)) if !fragment.is_empty() => {
+                AdvanceName::Contains(CardName(fragment.clone()))
+            }
+            _ => return Err(unsupported(path)),
+        };
         if !matches!(query.kind, ast::SearchKind::Follower)
-            || query.name.is_empty()
             || choice.any
             || choice.groups.is_some()
             || choice.distinct_by.is_some()
@@ -77,7 +84,7 @@ impl BodyContext<'_> {
                     &choice_source,
                     &movement_source,
                     origin,
-                    &CardName(query.name.clone()),
+                    &advance_name,
                     to,
                 ),
             },

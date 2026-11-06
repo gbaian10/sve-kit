@@ -1352,7 +1352,8 @@ pub(super) struct AdvanceEntryQuery {
     pub zone: EvolveDeckZone,
     pub kind: SearchKind,
     pub advance_follower: True,
-    pub name: String,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
 }
 
 #[derive(Deserialize)]
