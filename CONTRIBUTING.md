@@ -339,8 +339,7 @@ Local paths and R2 credentials must never be injected into browser code.
 Then:
 
 ```bash
-uv --directory carddb sync --all-groups
-uv --directory publish sync
+uv sync --all-packages --all-groups
 cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
 uv tool install pre-commit
 pre-commit install
@@ -576,8 +575,10 @@ carddb and publish share the root `uv.lock` and `.venv` through a uv workspace.
 After changing either member's dependencies (including Dependabot updates), run
 `uv lock` from the repository root. Existing `uv --directory carddb ...` and
 `uv --directory publish ...` commands select that member's project settings and
-working directory; both install its `dev` and `test` groups by default. Use
-`uv sync --all-packages` to install both members together. Python must satisfy
+working directory; both install its `dev` and `test` groups by default. `uv run`
+only adds missing packages, but `uv sync` is exact: syncing one member removes the
+other member's tools from the shared `.venv`. Use `uv sync --all-packages` to install
+both members together. Python must satisfy
 both members' Python 3.14.10 minimum; CI selects that patch explicitly.
 `scan/` remains an independent uv project outside this workspace.
 

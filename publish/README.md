@@ -234,14 +234,14 @@ Offline fake-SDK tests do not establish platform configuration or deployment suc
 ## Development
 
 ```bash
-uv --directory publish sync
+uv sync --all-packages
 uv --directory publish run ruff check
 uv --directory publish run ruff format --check
 uv --directory publish run mypy
 uv --directory publish run pytest -n 4 --cov
 ```
 
-Production imports only `sve_carddb.export.read_api` from the editable `../carddb`
-dependency. Synthetic fixtures use real producers and fake SDK transports. Tests
+Production imports only `sve_carddb.export.read_api` from the editable workspace
+`sve-carddb` dependency. Synthetic fixtures use real producers and fake SDK transports. Tests
 block external networking and writes outside pytest temporary roots, except
 coverage/bytecode artifacts. Combined line/branch coverage must reach 92%.

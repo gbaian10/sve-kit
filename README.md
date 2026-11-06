@@ -49,7 +49,7 @@ sve-kit/
 │   └── dist/              Build output: SQLite, snapshots  (git-ignored, planned)
 │
 ├── publish/               Verified public exports → R2 (Python, uv)
-│   ├── pyproject.toml     Package: sve-publish, path dependency on carddb
+│   ├── pyproject.toml     Package: sve-publish, workspace dependency on carddb
 │   ├── src/sve_publish/   Upload and remote GC
 │   └── tests/             Synthetic exports, SDK fakes and isolation guard
 │
