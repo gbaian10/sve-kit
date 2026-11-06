@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-005:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 0
+          usable_if:
+            history:
+              window: this_turn
+              event: moved
+              from:
+                who: self
+                zone: field
+              to: hand
+      - line: 2
+        auto:
+          "on":
+            moved:
+              ref: this
+              from: field
+              to: hand
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  class: エルフ
+                  cost_le: 2
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
