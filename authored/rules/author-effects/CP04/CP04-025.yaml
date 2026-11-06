@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        scope: 1
+        fanfare:
+          ub: true
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  orig_cost_le: 2
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+      - line: 1
+        scope: 2
+        attack_time:
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  orig_cost_le: 2
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+          ub: true
+      - line: 1
+        section: 1
+        keywords:
+          - rush
+    rule_sections:
+      - section: 1

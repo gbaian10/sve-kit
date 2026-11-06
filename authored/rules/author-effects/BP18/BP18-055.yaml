@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-055:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  not_class: ウィッチ
+                  orig_cost_le: 6
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+            - grant:
+                "on":
+                  follow: entered
+                keywords:
+                  - rush
+                  - assail
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - move:
+                            ref: this
+                            to: hand

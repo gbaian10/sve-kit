@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-094:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            enter_field:
+              who: self
+              sel:
+                kind: amulet
+          per_turn: 1
+          do:
+            - life:
+                who: self
+                delta: 1
+      - line: 2
+        evolve_time:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: amulet
+                  orig_cost_le: 2
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

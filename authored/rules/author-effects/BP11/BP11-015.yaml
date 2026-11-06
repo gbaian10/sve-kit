@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-015:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  keyword: ward
+                n: 1
+                to: hand
+      - line: 3
+        fanfare:
+          cost:
+            pp: 5
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  keyword: ward
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered

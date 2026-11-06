@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-102:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: amulet
+                  orig_cost_le: 2
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+      - line: 2
+        activate:
+          cost:
+            act:
+              n: 3
+              sel:
+                who: self
+                zone: field
+                kind: amulet
+          do:
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
+            - life:
+                who: self
+                delta: 2

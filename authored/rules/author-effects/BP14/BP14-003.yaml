@@ -1,0 +1,53 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-003:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            act_self: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 狩人
+                    op: ge
+                    right: 3
+                then:
+                  - choose:
+                      bind: selected
+                      from:
+                        who: self
+                        zone: hand
+                        kind: follower
+                        trait: 狩人
+                        orig_cost_le: 3
+                      upto: 1
+                  - move:
+                      ref: selected
+                      to: field
+                      result: entered
