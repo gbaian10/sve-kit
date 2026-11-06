@@ -194,7 +194,7 @@ impl ExpandedLowerer {
         for (key, card) in document.cards {
             let path = format!("/cards/{}", pointer_key(&key));
             let card: ast::Card = decode(card, &path)?;
-            if identity.is_none() && !card.faces.is_empty() {
+            if identity.is_none() && (!card.faces.is_empty() || card.deck_rule.is_some()) {
                 return Err(unsupported(&path));
             }
             let coordinates = CardCoordinates {

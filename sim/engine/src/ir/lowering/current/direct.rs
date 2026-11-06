@@ -31,6 +31,15 @@ enum Admission {
 struct Payload {
     card_id: String,
     faces: Vec<PrintedFace>,
+    #[serde(default)]
+    deck_rules: Vec<ConstructionRule>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ConstructionRule {
+    rule: ast::DeckRule,
+    source: ast::DirectSourceUse,
 }
 
 #[derive(Deserialize)]
@@ -228,12 +237,34 @@ pub(super) fn lower(
                 })
         })
         .collect::<BTreeSet<_>>();
+    let deck_rule = card.deck_rule.clone();
     let entries = ability_entries(card, &card_path)?;
     let coordinates = CardCoordinates {
         key: &input.card_no,
         identity: Some(&identity),
     };
     let mut covered = BTreeSet::new();
+    if input.source_payload.deck_rules.is_empty() && deck_rule.is_some() {
+        return Err(invalid(&format!("{card_path}/deck_rule")));
+    }
+    for construction in &input.source_payload.deck_rules {
+        let source = &construction.source;
+        let revision = source.owner.get("revision_id").and_then(Value::as_str);
+        if deck_rule.as_ref() != Some(&construction.rule)
+            || source.scope != "deck_rule"
+            || source.owner.get("kind").and_then(Value::as_str) != Some("face_revision")
+            || revision
+                .and_then(|key| identity.faces.get(key))
+                .is_none_or(|(face, _)| face != &source.face_id || ordinals.get(face) != Some(&0))
+            || source.covers != [source.line]
+            || !matches!(source.admission.as_str(), "light" | "shared")
+            || covered.contains(&(source.face_id.clone(), source.ordinal, source.line))
+        {
+            return Err(invalid(&format!("{card_path}/deck_rule")));
+        }
+        coverage(source, &expected, &mut covered)?;
+    }
+    let construction_lines = covered.clone();
     let mut uses = BTreeSet::new();
     let mut source_sidecar = BTreeMap::new();
     let mut declarations = BTreeMap::new();
@@ -241,6 +272,11 @@ pub(super) fn lower(
         let ast::SourceUse::Direct(source) = &ability.sources[0] else {
             return Err(invalid(path));
         };
+        if source.covers.iter().any(|line| {
+            construction_lines.contains(&(source.face_id.clone(), source.ordinal, *line))
+        }) {
+            return Err(invalid(path));
+        }
         coverage(source, &expected, &mut covered)?;
         if source
             .covers

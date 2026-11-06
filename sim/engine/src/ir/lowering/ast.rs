@@ -33,6 +33,21 @@ pub(super) struct Card {
     pub ignored: Vec<DirectSourceUse>,
     #[serde(default)]
     pub token_sources: Vec<TokenSource>,
+    pub deck_rule: Option<DeckRule>,
+}
+
+#[derive(Clone, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DeckRule {
+    pub deck: DeckSection,
+    pub same_name_max: u64,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DeckSection {
+    Main,
+    Evolve,
 }
 
 #[derive(Clone, Deserialize)]
