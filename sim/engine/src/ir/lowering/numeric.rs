@@ -119,6 +119,22 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn draw(&mut self, draw: &ast::Draw, path: &str) -> Result<Action, LoweringError> {
+        let player = match &draw.who {
+            None | Some(ast::LifeHolder::Controller(ast::SelfPlayer::Controller)) => {
+                PlayerRef::Controller {}
+            }
+            Some(ast::LifeHolder::MasterOf { master_of }) => {
+                self.selected_player(master_of, super::super::Role::Controller, path)?
+            }
+        };
+        Ok(Action::Draw {
+            player,
+            count: self.number(&draw.n, path, &mut BTreeSet::new())?,
+            mode: super::super::StepwiseMode::Exact,
+        })
+    }
+
     pub(super) fn set_life(
         &mut self,
         life: &ast::SetLife,

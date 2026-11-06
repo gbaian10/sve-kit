@@ -1684,11 +1684,7 @@ impl<'definitions> BodyContext<'definitions> {
                 numeric::resource_increase(value, super::Resource::PpMaximum, path)
             }
             ast::Step::Ep(value) => numeric::resource_increase(value, super::Resource::Ep, path),
-            ast::Step::Draw(draw) => Ok(Action::Draw {
-                player: PlayerRef::Controller {},
-                count: self.number(&draw.n, path, &mut BTreeSet::new())?,
-                mode: StepwiseMode::Exact,
-            }),
+            ast::Step::Draw(draw) => self.draw(draw, path),
             ast::Step::Damage(damage) => self.damage(damage, path),
             ast::Step::Life(life) => self.life(life, path),
             ast::Step::SetLife(life) => self.set_life(life, path),
@@ -1753,7 +1749,7 @@ fn source_span(
 }
 
 fn action_actor(action: &Action) -> PlayerRef {
-    if let Action::Discard { player, .. } = action {
+    if let Action::Discard { player, .. } | Action::Draw { player, .. } = action {
         player.clone()
     } else {
         PlayerRef::Controller {}
