@@ -211,6 +211,9 @@ fn materials(
     path: &str,
     multiple: bool,
 ) -> Result<Decision, LoweringError> {
+    if material.cost_sum_ge.is_some() {
+        return Err(unsupported(path));
+    }
     let cardinality = Cardinality {
         minimum: Nat(material.n.ok_or_else(|| unsupported(path))?),
         maximum: Some(Nat(material.n.ok_or_else(|| unsupported(path))?)),

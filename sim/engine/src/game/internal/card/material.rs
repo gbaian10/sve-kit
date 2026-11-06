@@ -13,7 +13,10 @@ use crate::ir::{
     PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, SelectionSnapshot,
     SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
 };
-use crate::ir::{Bool, Expr, NamesRead, ObjectView, Predicate};
+use crate::ir::{
+    AggregateBound, Bool, Comparison, Expr, NamesRead, NumericProperty, ObjectView, Predicate,
+    SelectionConstraint,
+};
 use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
@@ -23,7 +26,48 @@ pub(in crate::game::internal) struct MaterialWait {
     bounds: Cardinality,
     field: bool,
     selector: Selector,
+    floor: Option<CostFloor>,
 }
+
+/// 元のコストの合計がN以上: the chosen materials' printed costs must reach `minimum`.
+#[derive(Clone, Debug)]
+struct CostFloor {
+    minimum: i64,
+    costs: Vec<(ObjectRef, i64)>,
+}
+
+impl CostFloor {
+    fn reached(&self, members: &[ObjectRef]) -> Result<bool> {
+        let mut total = 0_i64;
+        for member in members {
+            let (_, cost) = self
+                .costs
+                .iter()
+                .find(|(reference, _)| reference == member)
+                .ok_or_else(|| invalid("missing material original cost"))?;
+            total = total
+                .checked_add(*cost)
+                .ok_or_else(|| invalid("material cost sum overflow"))?;
+        }
+        Ok(total >= self.minimum)
+    }
+}
+
+/// The one aggregate a material choice admits; any other bound list is unsupported.
+fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
+    match bounds {
+        [] => Ok(None),
+        [
+            AggregateBound {
+                property: NumericProperty::OriginalCost,
+                comparison: Comparison::GreaterEqual,
+                value: Expr::Literal(Int(minimum)),
+            },
+        ] if *minimum > 0 => Ok(Some(*minimum)),
+        _ => Err(unsupported("material aggregate bound")),
+    }
+}
+
 impl MaterialWait {
     pub(super) fn revalidate(
         &self,
@@ -61,7 +105,7 @@ impl MaterialWait {
             return Err(invalid("material cardinality"));
         }
         let mut seen = BTreeSet::new();
-        handles
+        let members = handles
             .iter()
             .map(|handle| {
                 if !seen.insert(*handle) {
@@ -72,7 +116,13 @@ impl MaterialWait {
                     .copied()
                     .ok_or_else(|| invalid("foreign material handle"))
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        if let Some(floor) = &self.floor
+            && !floor.reached(&members)?
+        {
+            return Err(invalid("material original cost total below its floor"));
+        }
+        Ok(members)
     }
     pub(in crate::game::internal) fn bind(
         &self,
@@ -253,7 +303,9 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
         || group.cardinality != constraint.cardinality
         || constraint.distinct_by.is_some()
         || constraint.disjoint != Disjointness::Disjoint
-        || !constraint.aggregate_bounds.is_empty()
+        || (!constraint.aggregate_bounds.is_empty()
+            && (constraint.cardinality.maximum.is_some()
+                || cost_floor_bound(&constraint.aggregate_bounds).is_err()))
     {
         return Err(unsupported("strict single material group"));
     }
@@ -447,6 +499,29 @@ impl Game {
         self.material_parameter(execution, decision, false)
     }
 
+    /// Printed costs are read once, when the payment is asked.
+    fn material_cost_floor(
+        &self,
+        execution: &Execution,
+        constraint: &SelectionConstraint,
+        members: &[ObjectRef],
+    ) -> Result<Option<CostFloor>> {
+        let Some(minimum) = cost_floor_bound(&constraint.aggregate_bounds)? else {
+            return Ok(None);
+        };
+        let costs = members
+            .iter()
+            .map(|member| {
+                let id = execution.object_id(*member)?;
+                Ok((
+                    *member,
+                    super::super::cost::printed_cost(&self.internal_cost_print(id)?["cost"])?,
+                ))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Ok(Some(CostFloor { minimum, costs }))
+    }
+
     fn material_parameter(
         &self,
         execution: &mut Execution,
@@ -468,7 +543,13 @@ impl Game {
             .selector;
         let members = self.material_candidates(execution, selector, standing)?;
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
-        if members.len() < count {
+        let floor = self.material_cost_floor(execution, constraint, &members)?;
+        // Every candidate together is the largest total, so it decides whether paying is possible.
+        let short = match &floor {
+            Some(floor) => !floor.reached(&members)?,
+            None => false,
+        };
+        if members.len() < count || short {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient materials".into(),
             ));
@@ -507,6 +588,7 @@ impl Game {
                 field: reveal_payment::parameter(decision).is_none()
                     && zones(selector)? == [ZoneKind::Field],
                 selector: selector.clone(),
+                floor,
             }),
         ));
         Ok(())

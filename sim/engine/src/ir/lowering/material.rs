@@ -7,6 +7,7 @@ use crate::ir::{
     InputMode, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, Posture, ScopeId,
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Visibility, ZoneRef,
 };
+use crate::ir::{AggregateBound, Comparison, Expr, Int, NumericProperty};
 
 #[derive(Clone, Copy)]
 pub(super) enum Operation {
@@ -56,7 +57,26 @@ pub(super) fn lower(
     {
         return Err(unsupported(path));
     }
-    let (objects, decision) = choice(allocator, bindings, scope, &material.sel, cardinality, path)?;
+    let (objects, mut decision) =
+        choice(allocator, bindings, scope, &material.sel, cardinality, path)?;
+    if let Some(floor) = material.cost_sum_ge {
+        // Only acting any number of own field followers has a card (BP11-P30) needing a floor.
+        let (Operation::Act, ChoiceDomain::Objects { constraint, .. }) =
+            (operation, &mut decision.domain)
+        else {
+            return Err(unsupported(path));
+        };
+        if !material.any || floor == 0 {
+            return Err(unsupported(path));
+        }
+        constraint.aggregate_bounds.push(AggregateBound {
+            property: NumericProperty::OriginalCost,
+            comparison: Comparison::GreaterEqual,
+            value: Expr::Literal(Int(
+                i64::try_from(floor).map_err(|_overflow| unsupported(path))?
+            )),
+        });
+    }
     Ok((material_action(objects, operation), decision))
 }
 

@@ -1875,3 +1875,41 @@ fn live_attack_reads_only_a_single_chosen_own_follower() {
         .lower_with_printed_costs(&chosen, &costs)
         .unwrap_err();
 }
+
+#[test]
+fn material_cost_floors_accept_only_any_number_of_acted_followers() {
+    let lowerer = lowerer();
+    let activated = |cost: Value| {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP01-041"]["abilities"][0]["activate"]["cost"] = cost;
+        tree
+    };
+    let sel = json!({"who":"self","zone":"field","kind":"follower"});
+    let cards = lowerer
+        .lower(&activated(
+            json!({"act":{"any":true,"cost_sum_ge":5_u64,"sel":sel}}),
+        ))
+        .unwrap();
+    let parameters = &cards["BP01-041"].card().abilities[0]
+        .node
+        .play
+        .as_ref()
+        .unwrap()
+        .parameters;
+    assert!(
+        parameters.iter().any(|decision| matches!(&decision.domain,
+        ChoiceDomain::Objects { constraint, .. } if constraint.aggregate_bounds == [AggregateBound {
+            property: NumericProperty::OriginalCost,
+            comparison: Comparison::GreaterEqual,
+            value: Expr::Literal(Int(5)),
+        }])),
+        "the floor joins the act material choice"
+    );
+    for cost in [
+        json!({"act":{"n":2_u64,"cost_sum_ge":5_u64,"sel":sel}}),
+        json!({"to_cemetery":{"any":true,"cost_sum_ge":5_u64,"sel":sel}}),
+        json!({"act":{"any":true,"cost_sum_ge":0_u64,"sel":sel}}),
+    ] {
+        lowerer.lower(&activated(cost)).unwrap_err();
+    }
+}

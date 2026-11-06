@@ -2343,6 +2343,8 @@ pub(super) struct Material {
     #[serde(default)]
     pub any: bool,
     pub result: Option<String>,
+    /// 元のコストの合計がN以上になるように: a floor on the chosen materials' printed costs.
+    pub cost_sum_ge: Option<u64>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
