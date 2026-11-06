@@ -256,8 +256,10 @@ fn bp08_003_revenge_grants_assail_to_lloyd_and_observes_its_field_alias_when_it_
     assert_eq!(feast(&mut game, "feast0", ""), 1);
     let entry = game.play_internal_card("lloyd", actor()).unwrap();
     answer(&mut game, entry, "");
-    assert_eq!(drain(&mut game, ""), 0);
+    assert_eq!(drain(&mut game, ""), 1);
     let before = game.projection(View::Referee).unwrap();
+    assert_eq!(before["P1"]["leader"]["life"], 22_u8);
+    assert_eq!(before["P2"]["leader"]["life"], 18_u8);
     assert!(
         before["objects"]["lloyd"]["keywords"]
             .as_array()
