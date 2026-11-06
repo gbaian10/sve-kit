@@ -1,0 +1,67 @@
+cards:
+  BP10-109:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      kind: follower
+                      other: true
+                      who: self
+                      zone: field
+                then:
+                  - destroy: enemy
+                  - draw:
+                      n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  leader_life:
+                    le: 10
+                    who: self
+                then:
+                  - life:
+                      delta: 5
+                      who: self
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 10
+              - banish_self: true
+          do:
+            - choose:
+                bind: incoming
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name: 大いなる《世界》・ゼルガネイア
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: incoming
+                to: ex
+          zone: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

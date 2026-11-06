@@ -1,11 +1,12 @@
-//! One private named Advance choice can authorize only its adjacent field movement.
+//! One private named Advance choice can authorize only its adjacent move to the field or EX.
 use super::{
     AbilitySource, Action, Binding, Bool, BoolRead, BooleanState, CardName, Cardinality,
     ChoiceDomain, Control, Decision, DecisionId, DecisionKind, Declinable, Disjointness, Expr,
     Instruction, InstructionContext, InstructionId, Located, MoveDestination, MoveReason, MoveSpec,
-    NamesRead, Nat, Node, ObjectOperand, ObjectRef, ObjectView, PlayerRef, PlayerRelation,
-    PlayerSet, Predicate, Program, ReceiptId, ScopeId, SelectionConstraint, SelectionGroup,
-    SelectionView, Selector, SourceSpan, TextQuantifier, Visibility, ZoneKind, ZoneRef,
+    NamesRead, Nat, Node, ObjectOperand, ObjectRef, ObjectView, OwnerZone, PlayerRef,
+    PlayerRelation, PlayerSet, Predicate, Program, ReceiptId, ScopeId, SelectionConstraint,
+    SelectionGroup, SelectionView, Selector, SourceSpan, TextQuantifier, Visibility, ZoneKind,
+    ZoneRef,
 };
 
 pub(crate) struct Keys {
@@ -98,6 +99,7 @@ pub(crate) fn build(
     movement_source: &SourceSpan,
     origin: &AbilitySource,
     name: &CardName,
+    to: ZoneKind,
 ) -> Control {
     Control::Sequence {
         body: Program {
@@ -125,11 +127,18 @@ pub(crate) fn build(
                                 },
                                 reason: MoveReason::Put,
                                 movement: MoveSpec {
-                                    to: MoveDestination::Shared {
-                                        zone: ZoneRef {
-                                            player: PlayerRef::Controller {},
-                                            kind: ZoneKind::Field,
-                                        },
+                                    // EX uses the owner's zone, like other own cards put there.
+                                    to: if to == ZoneKind::Ex {
+                                        MoveDestination::Owners {
+                                            zone: OwnerZone::Ex,
+                                        }
+                                    } else {
+                                        MoveDestination::Shared {
+                                            zone: ZoneRef {
+                                                player: PlayerRef::Controller {},
+                                                kind: to,
+                                            },
+                                        }
                                     },
                                     initial_posture: None,
                                     entry_effects: vec![],
@@ -241,19 +250,25 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
         instruction: instruction.id,
         receipt: instruction.receipt,
     };
-    (*control
-        == build(
-            &keys,
-            &first.source,
-            &second.source,
-            &instruction.source,
-            &name,
-        ))
-    .then_some(Projection {
-        body,
-        decision,
-        candidate: *candidate,
-        selected: *binding,
-        instruction,
-    })
+    // The named Advance pick goes to the field, or to EX for BP10-109.
+    [ZoneKind::Field, ZoneKind::Ex]
+        .into_iter()
+        .any(|to| {
+            *control
+                == build(
+                    &keys,
+                    &first.source,
+                    &second.source,
+                    &instruction.source,
+                    &name,
+                    to,
+                )
+        })
+        .then_some(Projection {
+            body,
+            decision,
+            candidate: *candidate,
+            selected: *binding,
+            instruction,
+        })
 }

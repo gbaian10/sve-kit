@@ -551,20 +551,20 @@ impl Game {
                     && member.generation == execution.context.generation
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
+                let special_origin = private_observed_move
+                    || private_hand_move
+                    || resolving_source
+                    || (kind == ZoneKind::Ex
+                        && execution.is_private_advance_target(objects, member)
+                        && self.own_evolve_advance(&object.id, actor)?);
                 if kind == ZoneKind::Ex
                     && top.is_none()
-                    && !private_observed_move
-                    && !private_hand_move
-                    && !resolving_source
+                    && !special_origin
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top.is_none()
-                    && !resolving_source
-                    && !private_observed_move
-                    && !private_hand_move
-                {
+                if top.is_none() && !special_origin {
                     public_zone(&object.zone)?;
                 }
             }
@@ -585,6 +585,15 @@ impl Game {
         };
         execution.receipts.insert(instruction.receipt, outcome);
         Ok(())
+    }
+
+    /// The named Advance pick may put its own evolve-deck Advance card into EX (BP10-109).
+    fn own_evolve_advance(&self, id: &str, actor: &str) -> Result<bool> {
+        let object = self.object(id)?;
+        Ok(object.zone == "evolve_deck"
+            && object.owner == actor
+            && object.controller == actor
+            && self.object_type(id)?.contains("アドバンス"))
     }
 
     fn deck_top_members(
@@ -1156,7 +1165,7 @@ fn check_stack_replacement(previous: &Object, current: &Object) -> Result<()> {
 
 fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<ZoneKind> {
     match (zone, method, destination) {
-        ("evolve_deck", MoveMethod::Put, "field") => Ok(ZoneKind::Evolve),
+        ("evolve_deck", MoveMethod::Put, "field" | "ex") => Ok(ZoneKind::Evolve),
         ("resolution", MoveMethod::Put, "ex") => Ok(ZoneKind::Resolution),
         ("hand", MoveMethod::Discard, "cemetery")
         | ("hand", MoveMethod::Banish, "banish")
