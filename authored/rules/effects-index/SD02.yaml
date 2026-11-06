@@ -1,18 +1,33 @@
 format: 1
 kind: effects_index
 records:
-  - card_id: c:32b2b38805a454f5b52218f7274458ae
+  - card_id: c:217b8ff5c1ad58faab5ec0770ea33b40
+    file: rules/author-effects/SD02/SD02-001.yaml
+    kind: author_effect_set
+    record_key: SD02-001
     scope: shared
+  - card_id: c:92b9929ab4435cd2a86a995d6502a110
+    file: rules/author-effects/SD02/SD02-005.yaml
+    kind: author_effect_set
+    record_key: SD02-005
+    scope: shared
+  - card_id: c:7fec422b9fdd588f9e6d6f8c25d112f7
+    file: rules/author-effects/SD02/SD02-006.yaml
+    kind: author_effect_set
+    record_key: SD02-006
+    scope: shared
+  - card_id: c:32b2b38805a454f5b52218f7274458ae
     file: rules/author-effects/SD02/SD02-009.yaml
     kind: author_effect_set
     record_key: SD02-009
-  - card_id: c:e24a3cc9237c5c99afabae635c329e67
     scope: shared
+  - card_id: c:e24a3cc9237c5c99afabae635c329e67
     file: rules/author-effects/SD02/SD02-010.yaml
     kind: author_effect_set
     record_key: SD02-010
-  - card_id: c:9074274015c859758b45a24aa8a26bf9
     scope: shared
+  - card_id: c:9074274015c859758b45a24aa8a26bf9
     file: rules/author-effects/SD02/SD02-013.yaml
     kind: author_effect_set
     record_key: SD02-013
+    scope: shared

@@ -1,0 +1,57 @@
+cards:
+  BP22-049:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+            - damage:
+                n: 1
+                to:
+                  leader_of: enemy
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                trait: ゴーレム
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 攻撃型ゴーレム
+        line: 2
+      - activate:
+          cost:
+            pp: 3
+          do:
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      trait: ゴーレム
+                      who: self
+                      zone: ex
+                until: turn
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
