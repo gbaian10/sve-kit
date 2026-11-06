@@ -1,0 +1,88 @@
+cards:
+  BP08-003:
+    abilities:
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ロイド
+          on:
+            left_field:
+              during:
+                turn: self
+              sel:
+                name: 操り人形
+              who: self
+          per_turn: 1
+        face: 1
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: 操り人形
+        face: 1
+        line: 2
+      - face: 2
+        line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+                on:
+                  name: 操り人形
+                  who: self
+                  zone: field
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            left_field:
+              sel:
+                name: 操り人形
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        face: 2
+        line: 2
+      - evolve_time:
+          do:
+            - create:
+                n: 4
+                to: field
+                token: 操り人形
+        face: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token_sources:
+      - card: BP08-T09
+        face: 1
+        line: 1
+        section: 1
+      - card: BP08-T01
+        face: 1
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

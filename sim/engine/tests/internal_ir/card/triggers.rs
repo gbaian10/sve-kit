@@ -251,3 +251,132 @@ fn pending_order_keeps_departed_source_lki_and_checks_defeat_before_the_other_pl
         );
     }
 }
+
+fn lethal_rule_batch(maximum: u64) -> Game {
+    let programs = lowerer()
+        .lower(&evolution_linked_movement::tree(&[(
+            "auto",
+            json!({
+                "per_turn":maximum,
+                "on":{"left_field":{"who":"self","sel":{"kind":"follower"}}},
+                "do":[{"draw":{"who":"self","n":1}}]
+            }),
+        )]))
+        .unwrap();
+    let mut raw = programs["unit-follower"].card().clone();
+    raw.abilities.push(ability(
+        20,
+        vec![damage(
+            20,
+            RecipientSet::Objects {
+                objects: zone(ZoneKind::Field, 50),
+            },
+            99,
+        )],
+    ));
+    let program = WellFormedCardProgram::check(raw).unwrap();
+    let mut initial = setup(
+        1,
+        json!([{"id":"d1","card":"unit-spell"},{"id":"d2","card":"unit-spell"}]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},
+        {"id":"other1","card":"unit-other-follower"},
+        {"id":"other2","card":"unit-other-follower"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        event_ability::title_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "rule-quota",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-other-follower", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    resolved(
+        game.activate_internal_card("s", AbilityId(20), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    game
+}
+
+#[test]
+fn lethal_rule_batch_offers_quota_before_pending_after_the_observer_leaves() {
+    for maximum in [1_u64, 2] {
+        let mut game = lethal_rule_batch(maximum);
+        assert_eq!(game.internal_card_stage(), Some(ResumeStage::Pending));
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap_err();
+        let mut stale = None;
+        for ordinal in 0..maximum {
+            let q = game
+                .internal_pending_choice()
+                .unwrap()
+                .expect("rule-generated quota must remain reachable");
+            assert_eq!(game.internal_pending_choice().unwrap(), Some(q.clone()));
+            let InputDomain::TriggerQuota(domain) = &q.domain else {
+                panic!("quota before pending");
+            };
+            assert_eq!(
+                domain.candidates.len(),
+                usize::try_from(3 - ordinal).unwrap()
+            );
+            assert_eq!(domain.earlier.len(), usize::try_from(ordinal).unwrap());
+            let before = exact_authority(&game);
+            for (actor, token, answer) in [
+                (PlayerId { seat: 2 }, q.token, Answer::TriggerQuota(1)),
+                (q.actor, q.token, Answer::TriggerQuota(0)),
+                (q.actor, q.token, Answer::TriggerQuota(4)),
+                (q.actor, q.token, Answer::Pending(1)),
+                (q.actor, stale.unwrap_or(q.token), Answer::Integer(Nat(1))),
+            ] {
+                game.answer_internal_card(actor, token, answer).unwrap_err();
+                assert_eq!(exact_authority(&game), before);
+            }
+            if let Some(token) = stale {
+                game.answer_internal_card(q.actor, token, Answer::TriggerQuota(1))
+                    .unwrap_err();
+                assert_eq!(exact_authority(&game), before);
+            }
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["hand"],
+                json!([])
+            );
+            let response = game
+                .answer_internal_card(
+                    q.actor,
+                    q.token,
+                    Answer::TriggerQuota(domain.candidates[0].handle),
+                )
+                .unwrap();
+            assert!(matches!(response, CardPlay::Awaiting(_)));
+            stale = Some(q.token);
+        }
+        for _ in 0..maximum {
+            let q = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &q.domain else {
+                panic!("admitted pending");
+            };
+            resolved(
+                game.answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+                    .unwrap(),
+            );
+            game.resume_internal_card().unwrap();
+        }
+        assert!(game.internal_pending_choice().unwrap().is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["hand"]
+                .as_array()
+                .unwrap()
+                .len(),
+            usize::try_from(maximum).unwrap()
+        );
+    }
+}

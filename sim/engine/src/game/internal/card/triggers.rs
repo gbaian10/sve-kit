@@ -520,7 +520,7 @@ impl Game {
         if let Some((question, _)) = &self.card_runtime.question {
             return Ok(Some(question.clone()));
         }
-        if self.card_runtime.pending.is_empty() {
+        if !self.card_runtime.has_pending() {
             return Ok(None);
         }
         let before = self.clone();
@@ -537,6 +537,11 @@ impl Game {
         if self.state.game["ended"] == true {
             self.card_runtime.pending.clear();
             return Ok(None);
+        }
+        if let Some((actor, domain)) = self.internal_quota_domain()? {
+            return self
+                .pending_question(actor, InputDomain::TriggerQuota(domain), Vec::new())
+                .map(Some);
         }
         let active = player_id(self.active())?;
         let actor = if self
@@ -573,6 +578,16 @@ impl Game {
                 )
             })
             .collect::<Result<Vec<_>>>()?;
+        self.pending_question(actor, InputDomain::Pending(options), members)
+            .map(Some)
+    }
+
+    fn pending_question(
+        &mut self,
+        actor: PlayerId,
+        domain: InputDomain,
+        members: Vec<u64>,
+    ) -> Result<DecisionView> {
         self.state.ir_epoch = self
             .state
             .ir_epoch
@@ -585,10 +600,33 @@ impl Game {
                 decision: DecisionId(0),
                 epoch: self.state.ir_epoch,
             },
-            domain: InputDomain::Pending(options),
+            domain,
         };
         self.card_runtime.question = Some((question.clone(), members));
-        Ok(Some(question))
+        Ok(question)
+    }
+
+    fn answer_pending_quota(&mut self, answer: &Answer, count: usize) -> Result<CardPlay> {
+        let Answer::TriggerQuota(handle) = answer else {
+            return Err(invalid("wrong quota answer"));
+        };
+        if !usize::try_from(*handle).is_ok_and(|handle| handle > 0 && handle <= count) {
+            return Err(invalid("unknown quota handle"));
+        }
+        let before = self.clone();
+        let result = (|| {
+            self.internal_quota_answer(*handle)?;
+            self.card_runtime.question = None;
+            self.internal_pending_choice()?
+                .map(CardPlay::Awaiting)
+                .ok_or_else(|| invalid("quota admission produced no pending occurrence"))
+        })();
+        if result.is_err() {
+            let high = self.state.ir_epoch;
+            *self = before;
+            self.state.ir_epoch = self.state.ir_epoch.max(high);
+        }
+        result
     }
 
     pub(super) fn answer_internal_pending(
@@ -604,6 +642,10 @@ impl Game {
             .ok_or_else(|| invalid("no pending-order question"))?;
         if question.actor != actor || question.token != token {
             return Err(invalid("wrong actor or stale pending token"));
+        }
+        if let InputDomain::TriggerQuota(domain) = &question.domain {
+            let count = domain.candidates.len();
+            return self.answer_pending_quota(answer, count);
         }
         let Answer::Pending(handle) = answer else {
             return Err(invalid("wrong pending answer"));
