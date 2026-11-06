@@ -92,7 +92,6 @@ fn life_holders_stay_closed_where_no_card_needs_them() {
         json!({"do":[{"life":{"who":"opp","delta":3}}]}),
         json!({"do":[{"life":{"who":"opponents","delta":3}}]}),
         json!({"targets":target,"do":[{"set_life":{"who":{"master_of":"victim"},"n":6}}]}),
-        json!({"do":[{"set_life":{"who":"opponents","n":6}}]}),
         json!({"do":[{"life":{"who":{"master_of":"unbound"},"delta":3}}]}),
     ] {
         rejected(&body);

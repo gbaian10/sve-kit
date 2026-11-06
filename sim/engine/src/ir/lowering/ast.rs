@@ -673,8 +673,17 @@ pub(super) struct Discard {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SetLife {
-    pub who: SelfPlayer,
+    pub who: SetLifeHolder,
     pub n: Number,
+}
+
+/// 「相手のリーダーすべての体力をNにする」 sets the opponent leader (BP02-075, BP10-075).
+#[derive(Deserialize)]
+pub(super) enum SetLifeHolder {
+    #[serde(rename = "self")]
+    Controller,
+    #[serde(rename = "opponents")]
+    Opponents,
 }
 
 #[derive(Deserialize)]

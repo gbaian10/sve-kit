@@ -140,9 +140,11 @@ impl BodyContext<'_> {
         life: &ast::SetLife,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let ast::SelfPlayer::Controller = life.who;
         Ok(Action::Life {
-            player: PlayerRef::Controller {},
+            player: match life.who {
+                ast::SetLifeHolder::Controller => PlayerRef::Controller {},
+                ast::SetLifeHolder::Opponents => super::super::events::timing::opponent(),
+            },
             change: NumericChange::Set {
                 amount: self.number(&life.n, path, &mut BTreeSet::new())?,
             },

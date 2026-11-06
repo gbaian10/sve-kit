@@ -788,6 +788,9 @@ mod entry_name;
 #[path = "card/draw_master.rs"]
 mod draw_master;
 
+#[path = "card/set_life_holder.rs"]
+mod set_life_holder;
+
 #[path = "card/nested_ub.rs"]
 mod nested_ub;
 
