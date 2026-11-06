@@ -1,0 +1,57 @@
+cards:
+  CP04-066:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 3
+                to: enemy
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    orig_cost_ge: 7
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 3
+                      to:
+                        leader_of: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      kind: follower
+                      other: true
+                      trait: 〈ジオ・テオゴニア〉
+                      who: self
+                      zone: field
+                then:
+                  - act: this
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
