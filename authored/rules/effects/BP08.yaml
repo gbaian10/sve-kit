@@ -120,55 +120,5 @@ cards:
         line: 2
         subject: self
     status: complete
-  BP08-T01:
-    abilities:
-      - body:
-          name: 操り人形
-          op: name_alias
-          subjects: self
-          while_zone: field
-        kind: static
-        line: 1
-      - body:
-          name: guard
-          op: macro
-        kind: static
-        line: 2
-      - body:
-          hp: 2
-          op: modify
-          subjects: self.leader
-        event: enter
-        kind: trigger
-        line: 3
-        subject: self
-    status: complete
-  BP08-T02:
-    abilities:
-      - body:
-          name: 操り人形
-          op: name_alias
-          subjects: self
-          while_zone: field
-        kind: static
-        line: 1
-      - body:
-          name: rush
-          op: macro
-        kind: static
-        line: 2
-      - body:
-          name: assail
-          op: macro
-        kind: static
-        line: 2
-      - body:
-          count: 1
-          op: draw
-        event: enter
-        kind: trigger
-        line: 3
-        subject: self
-    status: complete
 format: 1
 kind: effect_set

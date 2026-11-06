@@ -487,7 +487,10 @@ impl Game {
             original,
             effective,
             zone: current.zone.clone(),
-            subject: self.public_characteristics(id, vec![CardName(self.card_name(id)?)])?,
+            subject: self.public_characteristics(
+                id,
+                self.card_names(id)?.into_iter().map(CardName).collect(),
+            )?,
             counters: current
                 .state
                 .get("counters")

@@ -131,20 +131,32 @@ impl Game {
         if !string(&new["card_type"]).contains("エボルヴ") {
             return Ok(false);
         }
-        if let Some(name) = node.get("name_contains").and_then(Value::as_str) {
-            return Ok(string(&new["card_type"]) == "フォロワー・エボルヴ"
-                && string(&new["name"]).contains(name));
+        let contains = node.get("name_contains").and_then(Value::as_str);
+        if contains.is_some() && string(&new["card_type"]) != "フォロワー・エボルヴ" {
+            return Ok(false);
         }
-        let names = node.get("names").map_or_else(
-            || {
-                node["name"].as_str().map_or_else(
-                    || self.card_name(source).map(|name| vec![json!(name)]),
-                    |name| Ok(vec![json!(name)]),
-                )
-            },
-            |names| Ok(list(names)),
-        )?;
-        Ok(names.contains(&new["name"]))
+        let names = if contains.is_some() {
+            vec![]
+        } else {
+            node.get("names").map_or_else(
+                || {
+                    node["name"].as_str().map_or_else(
+                        || {
+                            self.card_names(source)
+                                .map(|names| names.into_iter().map(Value::String).collect())
+                        },
+                        |name| Ok(vec![json!(name)]),
+                    )
+                },
+                |names| Ok(list(names)),
+            )?
+        };
+        self.card_name_matches_print(evolve, &next.card, face, |name| {
+            contains.map_or_else(
+                || names.iter().any(|wanted| wanted.as_str() == Some(name)),
+                |part| name.contains(part),
+            )
+        })
     }
 
     pub(super) fn evolution_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {

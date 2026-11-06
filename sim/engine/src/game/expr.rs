@@ -265,29 +265,32 @@ impl Game {
     }
 
     fn matches_names(&self, id: &str, selector: &Value, frame: &Frame) -> Result<bool> {
-        let names = self.card_names(id)?;
         if let Some(role) = selector["resource_role"].as_str()
-            && !self.catalog.rule_bindings.matches_resource(role, &names)?
+            && !self.card_matches_resource(id, role)?
         {
             return Ok(false);
         }
         if let Some(name) = selector["name"].as_str()
-            && !names.iter().any(|own| own == name)
+            && !self.card_name_matches(id, |own| own == name)?
         {
             return Ok(false);
         }
         if let Some(part) = selector["name_contains"].as_str()
-            && !names.iter().any(|own| own.contains(part))
+            && !self.card_name_matches(id, |own| own.contains(part))?
         {
             return Ok(false);
         }
         if let Some(name) = selector["not_name"].as_str() {
-            let name = if name == "self" {
-                string(&self.face(&frame.source)?["name"])
+            let excluded = if name == "self" {
+                self.card_names(&frame.source)?
             } else {
-                name
+                vec![name.to_owned()]
             };
-            if names.iter().any(|own| own == name) {
+            if self
+                .card_names(id)?
+                .iter()
+                .any(|own| excluded.contains(own))
+            {
                 return Ok(false);
             }
         }
@@ -300,34 +303,91 @@ impl Game {
             .matches_resource(role, &[self.card_name(id)?])
     }
 
-    /// The rules name plus every alias (Q1145: an alias is an additional card name).
+    pub(super) fn card_matches_resource(&self, id: &str, role: &str) -> Result<bool> {
+        Ok(self.single_rules_name_matches_role(id, role)?
+            || self
+                .catalog
+                .rule_bindings
+                .matches_resource(role, &self.card_names(id)?)?)
+    }
+
     pub(super) fn card_names(&self, id: &str) -> Result<Vec<String>> {
-        let mut names = vec![self.card_name(id)?];
-        names.extend(self.name_aliases(id)?);
+        let source = self.information_source(id)?;
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.card_names_for_print(id, &source.card, face)
+    }
+
+    pub(super) fn card_names_for_print(
+        &self,
+        id: &str,
+        card: &str,
+        face: usize,
+    ) -> Result<Vec<String>> {
+        let object = self.object(id)?;
+        let mut names = self.printed_card_names(card, face, &object.zone)?;
+        if object.state["silenced"] == true {
+            names.truncate(1);
+        }
         Ok(names)
     }
 
-    /// "これは『X』でもある" (static `name_alias`): extra names while in the given zone.
-    fn name_aliases(&self, id: &str) -> Result<Vec<String>> {
-        let zone = self.object(id)?.zone.clone();
-        // Printed lookup avoids aura recursion; whole-card queries must preserve missing definitions.
-        let abilities = match self.printed_abilities(id) {
-            Ok(abilities) => abilities,
-            Err(crate::EngineFailure::Unsupported(_)) if self.card_runtime.is_empty() => {
-                return Ok(Vec::new());
-            }
-            Err(error) => return Err(error),
-        };
-        Ok(abilities
+    pub(super) fn card_name_matches(
+        &self,
+        id: &str,
+        predicate: impl Fn(&str) -> bool,
+    ) -> Result<bool> {
+        let source = self.information_source(id)?;
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.card_name_matches_print(id, &source.card, face, predicate)
+    }
+
+    pub(super) fn card_name_matches_print(
+        &self,
+        id: &str,
+        card: &str,
+        face: usize,
+        predicate: impl Fn(&str) -> bool,
+    ) -> Result<bool> {
+        // An additional name cannot invalidate a match already proven by the printed name.
+        if predicate(&self.catalog.rules_label(card, face)?) {
+            return Ok(true);
+        }
+        Ok(self
+            .card_names_for_print(id, card, face)?
             .iter()
-            .map(|ability| &ability["body"])
-            .filter(|body| {
-                body["op"] == "name_alias"
-                    && body["subjects"] == "self"
-                    && (body["while_zone"] == "any" || body["while_zone"] == zone.as_str())
-            })
-            .filter_map(|body| body["name"].as_str().map(str::to_owned))
-            .collect())
+            .any(|name| predicate(name)))
+    }
+
+    pub(super) fn printed_card_names(
+        &self,
+        card: &str,
+        face: usize,
+        zone: &str,
+    ) -> Result<Vec<String>> {
+        let mut names = vec![self.catalog.rules_label(card, face)?];
+        if self.card_runtime.is_empty() {
+            let abilities = match self.prototype_printed_abilities(card, face) {
+                Ok(abilities) => abilities,
+                Err(crate::EngineFailure::Unsupported(_)) => return Ok(names),
+                Err(error) => return Err(error),
+            };
+            names.extend(
+                abilities
+                    .iter()
+                    .map(|ability| &ability["body"])
+                    .filter(|body| {
+                        body["op"] == "name_alias"
+                            && body["subjects"] == "self"
+                            && (body["while_zone"] == "any" || body["while_zone"] == zone)
+                    })
+                    .filter_map(|body| body["name"].as_str().map(str::to_owned)),
+            );
+        } else {
+            names.extend(self.internal_printed_name_aliases(card, face, zone == "field")?);
+        }
+        let mut seen = BTreeSet::new();
+        names.retain(|name| seen.insert(name.clone()));
+        Ok(names)
     }
 
     pub(super) fn seats(&self, side: &str, frame: &Frame) -> Vec<String> {

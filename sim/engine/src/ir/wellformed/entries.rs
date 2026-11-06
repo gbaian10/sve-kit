@@ -850,6 +850,11 @@ impl Checker {
                     }
                 }
             }
+            CharacteristicPatch::AddName { name }
+                if layer == ContinuousLayer::NonNumeric && !name.0.is_empty() =>
+            {
+                Ok(())
+            }
             CharacteristicPatch::GrantAbility { abilities }
                 if layer == ContinuousLayer::Ability && !abilities.is_empty() =>
             {

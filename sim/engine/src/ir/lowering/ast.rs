@@ -2708,6 +2708,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    AlsoNamed(AlsoNamed),
     If(Box<StaticConditional>),
     EvolveCostMod(EvolutionCostModifier),
     CostMod(CostModifier),
@@ -2725,6 +2726,13 @@ pub(super) struct StaticConditional {
     pub cond: Condition,
     pub then: Vec<StaticEffect>,
     pub r#else: Option<Vec<StaticEffect>>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AlsoNamed {
+    pub on: Option<Objects>,
+    pub name: String,
 }
 
 #[derive(Deserialize)]

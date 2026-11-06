@@ -356,24 +356,46 @@ fn destination(ability: &Ability) -> Result<Destination> {
         .ok_or_else(|| unsupported("evolution destination predicate"))
 }
 
-pub(super) fn resource_association(game: &Game, base: &str, form: &str) -> Result<bool> {
+pub(in crate::game::internal) fn resource_association(
+    game: &Game,
+    base: &str,
+    form: &str,
+) -> Result<bool> {
     let object = game.object(base)?;
-    let base_name = string(&game.catalog.face(&object.card, 0)?["name"]);
-    let form_face = game.face(form)?;
-    let form_name = string(&form_face["name"]);
-    let is_evolve_follower = string(&form_face["card_type"]) == "フォロワー・エボルヴ";
+    let form_object = game.object(form)?;
+    let face = usize::try_from(super::int(&form_object.state["face"])).map_err(invalid)?;
+    let base_name = game.catalog.rules_label(&object.card, 0)?;
+    let form_name = game.catalog.rules_label(&form_object.card, face)?;
+    let is_evolve_follower =
+        game.catalog.face(&form_object.card, face)?["card_type"] == "フォロワー・エボルヴ";
     if base_name == form_name {
         return Ok(true);
     }
     let Some(program) = game.card_runtime.definitions.cards.get(&object.card) else {
         return Ok(false);
     };
-    for entry in &program.card().abilities {
-        if intrinsic(&entry.node)
-            && destination(&entry.node)?.matches(base_name, form_name, is_evolve_follower)
-        {
-            return Ok(true);
-        }
+    let destinations = program
+        .card()
+        .abilities
+        .iter()
+        .filter(|entry| intrinsic(&entry.node))
+        .map(|entry| destination(&entry.node))
+        .collect::<Result<Vec<_>>>()?;
+    if destinations
+        .iter()
+        .any(|dest| dest.matches(&base_name, &form_name, is_evolve_follower))
+    {
+        return Ok(true);
     }
-    Ok(false)
+    // The association survives ability loss after the evolution choice was made.
+    let base_names = game.printed_card_names(&object.card, 0, "field")?;
+    let form_names = game.printed_card_names(&form_object.card, face, "evolve_deck")?;
+    Ok(form_names.iter().any(|candidate_form_name| {
+        base_names.iter().any(|candidate_base_name| {
+            candidate_base_name == candidate_form_name
+                || destinations.iter().any(|dest| {
+                    dest.matches(candidate_base_name, candidate_form_name, is_evolve_follower)
+                })
+        })
+    }))
 }

@@ -7,6 +7,7 @@ use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::played::filter;
 use crate::ir::history_turn::evolution_capture_header;
+use crate::ir::names;
 use crate::ir::play_restrictions::card_restriction;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
@@ -38,6 +39,7 @@ pub(in crate::game) mod attack_restrictions;
 mod costs;
 mod effect_evolution;
 mod evolution;
+pub(super) use evolution::resource_association;
 pub(super) mod exchange;
 mod fanfare;
 pub(super) mod hand_payment;
@@ -881,6 +883,9 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if names::name(ability).is_some() {
+        return Ok(true);
+    }
     if holder_removal::is_mixed_static(ability) {
         for effect in &ability.declarations {
             let mut single = located.clone();
@@ -931,7 +936,8 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
-    if holder_removal::is_static(ability)
+    if names::name(ability).is_some()
+        || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || other_costs::is_static(ability)
         || trigger_permission::is_static(ability)

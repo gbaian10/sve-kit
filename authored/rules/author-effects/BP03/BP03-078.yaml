@@ -1,0 +1,34 @@
+cards:
+  BP03-078:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - also_named:
+                name: ゴースト
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    name: ジャイアントゴースト
+                    who: self
+                    zone: field
+                then:
+                  - draw:
+                      n: 1
+                      who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

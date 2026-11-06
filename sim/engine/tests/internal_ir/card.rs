@@ -793,3 +793,6 @@ mod event_damage_sources;
 
 #[path = "card/event_subject_characteristics.rs"]
 mod event_subject_characteristics;
+
+#[path = "card/name_aliases.rs"]
+mod name_aliases;

@@ -92,6 +92,7 @@ pub(super) struct SearchWait {
     snapshot: SnapshotId,
     conditional: bool,
     distinct_names: bool,
+    names: Vec<Vec<String>>,
     /// 元のコストの合計がN以下 over every found card.
     cost_cap: Option<i64>,
 }
@@ -616,14 +617,11 @@ pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) 
                 Predicate::NameContains {
                     name: Expr::Literal(name),
                     ..
-                } => Ok(game.card_name(id)?.contains(&name.0)),
+                } => game.card_name_matches(id, |own| own.contains(&name.0)),
                 Predicate::NamesIntersect {
                     right: Expr::Literal(names),
                     ..
-                } => {
-                    let own = game.card_name(id)?;
-                    Ok(names.iter().any(|name| own == name.0))
-                }
+                } => game.card_name_matches(id, |own| names.iter().any(|name| own == name.0)),
                 Predicate::HasTrait { trait_id, .. } => Ok(game
                     .face(id)?
                     .get("traits")
@@ -793,6 +791,14 @@ impl Game {
             Some(CardTotals::OriginalCostAtMost(limit)) => Some(limit),
             Some(CardTotals::Unsupported) => return Err(unsupported("search aggregate bound")),
         };
+        let names = if distinct_names {
+            members
+                .iter()
+                .map(|member| self.card_names(execution.object_id(*member)?))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            vec![]
+        };
         let wait = SearchWait {
             instruction,
             player,
@@ -803,6 +809,7 @@ impl Game {
             snapshot: SnapshotId(self.state.ir_epoch),
             conditional,
             distinct_names,
+            names,
             cost_cap,
         };
         self.internal_wait(
@@ -828,13 +835,15 @@ impl Game {
                 .iter()
                 .position(|member| member == object)
                 .ok_or_else(|| invalid("foreign search member"))?;
-            let card = wait
-                .domain
-                .cards
-                .get(index)
-                .ok_or_else(|| invalid("missing frozen search card"))?;
-            if wait.distinct_names && !names.insert(&card.name) {
-                return Err(invalid("search names must differ"));
+            if wait.distinct_names {
+                let own = wait
+                    .names
+                    .get(index)
+                    .ok_or_else(|| invalid("missing frozen search names"))?;
+                if own.iter().any(|name| names.contains(name)) {
+                    return Err(invalid("search names must differ"));
+                }
+                names.extend(own.iter().cloned());
             }
         }
         if let Some(limit) = wait.cost_cap {
