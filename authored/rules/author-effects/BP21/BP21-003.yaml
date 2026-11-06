@@ -1,0 +1,50 @@
+cards:
+  BP21-003:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ライルの人形
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 人形
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      hp: 4
+                      "on": doll
+                      power: 4
+          targets:
+            - bind: doll
+              from:
+                kind: follower
+                token: true
+                trait: 人形
+                who: self
+                zone: ex
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP21-P63
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
