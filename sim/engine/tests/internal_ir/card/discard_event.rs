@@ -157,6 +157,30 @@ fn committed_discard_is_per_card_and_filters_the_discarder_independently_of_turn
 }
 
 #[test]
+fn discard_headers_filter_the_discarded_cards_kind_before_it_leaves() {
+    // Both discarded hand cards are spells, so only the spell filter triggers, once per card.
+    for (kind, eligible) in [("spell", true), ("follower", false)] {
+        let query = json!({"from":"hand","who":"self","sel":{"kind":kind}});
+        let mut game = fixture(&tree(&query, false, false), false, 1);
+        resolved(
+            game.activate_internal_card("p", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        if eligible {
+            resolve_one(&mut game, 2);
+            resolve_one(&mut game, 1);
+        }
+        finish_check(&mut game);
+        assert!(game.internal_pending_choice().unwrap().is_none(), "{kind}");
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            if eligible { 22_u8 } else { 20_u8 },
+            "{kind}"
+        );
+    }
+}
+
+#[test]
 fn own_hand_discard_freezes_the_departed_source_and_does_not_follow_its_new_generation() {
     let source = tree(
         &json!({"ref":"this","from":"hand","who":"self"}),
@@ -226,7 +250,12 @@ fn discard_headers_reject_unimplemented_filters_and_nonself_hand_observers() {
         json!({"from":"cemetery"}),
         json!({"ref":"this","who":"opp"}),
         json!({"ref":"another"}),
-        json!({"sel":{"kind":"follower"}}),
+        json!({"sel":{}}),
+        json!({"sel":{"name":"unit-spell"}}),
+        json!({"sel":{"trait":"学院"}}),
+        json!({"sel":{"class":" "}}),
+        json!({"ref":"this","sel":{"kind":"spell"}}),
+        json!({"who":"self","sel":{"kind":"spell"},"by":{"ability_of":{"who":"self","trait":"学院"}}}),
         json!({"during":{"turn":"opp"}}),
         json!({"ref":"this","during":{"turn":"self"}}),
         json!({"by":{"ability_of":{"who":"self","trait":"学院"}}}),

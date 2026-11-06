@@ -2039,6 +2039,7 @@ pub(super) struct DiscardSubscription {
     pub who: Option<EntryPlayer>,
     pub during: Option<During>,
     pub by: Option<DiscardBy>,
+    pub sel: Option<MovementSubject>,
 }
 
 #[derive(Deserialize)]

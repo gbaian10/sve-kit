@@ -1,0 +1,57 @@
+cards:
+  BP09-006:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+                who: self
+          on:
+            discarded:
+              during:
+                turn: self
+              from: hand
+              sel:
+                class: エルフ
+                kind: spell
+              who: self
+          per_turn: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: hand
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 4
+                        to: enemy
+                  - - damage:
+                        n: 2
+                        to:
+                          leaders: opponents
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

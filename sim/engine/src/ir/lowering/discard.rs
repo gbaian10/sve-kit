@@ -6,8 +6,8 @@ use super::{
     PlayerRelation, PlayerSet, Selector, TextQuantifier, ast, unsupported,
 };
 use crate::ir::events::discard::DiscardFilter;
-use crate::ir::events::discard::DiscardSource;
-use crate::ir::{BatchPolicy, TraitId, TriggerAggregation};
+use crate::ir::events::discard::{DiscardCard, DiscardSource};
+use crate::ir::{BatchPolicy, ClassId, TraitId, TriggerAggregation};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -128,6 +128,11 @@ pub(super) fn subscription(
             })
         })
         .transpose()?;
+    let card = discard
+        .sel
+        .as_ref()
+        .map(|sel| discarded_card(sel, discard, path))
+        .transpose()?;
     Ok(super::EventPattern::Discard {
         binding: event,
         predicate: DiscardFilter {
@@ -138,8 +143,46 @@ pub(super) fn subscription(
             itself: discard.reference.is_some(),
             own_turn: discard.during.is_some(),
             by,
+            card,
         }
         .predicate(event),
+    })
+}
+
+/// Only constant kind and class filters on another discarded card are carried by the closed header.
+fn discarded_card(
+    sel: &ast::MovementSubject,
+    discard: &ast::DiscardSubscription,
+    path: &str,
+) -> Result<DiscardCard, LoweringError> {
+    let ast::MovementSubject {
+        r#where: None,
+        orig_cost_eq: None,
+        orig_cost_le: None,
+        orig_cost_ge: None,
+        traits_any: None,
+        keyword: None,
+        class,
+        kind,
+        trait_id: None,
+        name: None,
+        token: None,
+        not_token: None,
+        other: None,
+    } = sel
+    else {
+        return Err(unsupported(path));
+    };
+    if discard.reference.is_some()
+        || discard.by.is_some()
+        || (kind.is_none() && class.is_none())
+        || class.as_ref().is_some_and(|class| class.trim().is_empty())
+    {
+        return Err(unsupported(path));
+    }
+    Ok(DiscardCard {
+        kind: kind.as_ref().map(super::search::card_kind),
+        class: class.clone().map(ClassId),
     })
 }
 

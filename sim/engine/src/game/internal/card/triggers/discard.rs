@@ -159,6 +159,7 @@ impl Game {
         player: PlayerId,
     ) -> Result<Vec<(String, Located<Ability>)>> {
         let mut observers = Vec::new();
+        let mut characters = None;
         let active = player_id(self.active())?;
         let mut holders = self.field_ids();
         holders.push(id.to_owned());
@@ -187,13 +188,26 @@ impl Game {
                 ZoneKind::Field
             };
             for ability in self.internal_printed_abilities(&holder)? {
-                if ability.node.active_zones == [zone]
-                    && filter(&ability.node).is_some_and(|plan| {
-                        plan.matches(player, card_before, source, actor, active)
-                    })
+                let Some(plan) = filter(&ability.node) else {
+                    continue;
+                };
+                if ability.node.active_zones != [zone]
+                    || !plan.matches(player, card_before, source, actor, active)
                 {
-                    observers.push((holder.clone(), ability));
+                    continue;
                 }
+                if plan.card.is_some() {
+                    if characters.is_none() {
+                        characters = Some(self.internal_hand_characteristics(id)?);
+                    }
+                    if !characters
+                        .as_ref()
+                        .is_some_and(|characters| plan.matches_card(characters))
+                    {
+                        continue;
+                    }
+                }
+                observers.push((holder.clone(), ability));
             }
         }
         Ok(observers)
