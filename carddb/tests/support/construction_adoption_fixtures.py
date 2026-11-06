@@ -299,7 +299,13 @@ def create(  # ruff: ignore[too-many-locals, too-many-statements] -- Keep the co
     for name in tool_dependencies:
         target = inputs.program / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes((REPO / name).read_bytes())
+        # Frozen recipes retain the legacy path after the live lock moves.
+        raw = (
+            b"Synthetic legacy construction dependency lock\n"
+            if name == "carddb/uv.lock"
+            else (REPO / name).read_bytes()
+        )
+        target.write_bytes(raw)
     git(inputs.program, "add", ".")
     git(inputs.program, "commit", "--allow-empty", "-qm", "Synthetic construction tool")
     tool_revision = git(inputs.program, "rev-parse", "HEAD")
