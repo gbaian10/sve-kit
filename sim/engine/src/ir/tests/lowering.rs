@@ -1718,3 +1718,23 @@ fn search_original_cost_totals_join_the_search_constraint_and_reject_split_desti
         .remove("cost_sum_le");
     lowerer.lower_with_printed_costs(&split, &costs).unwrap();
 }
+
+#[test]
+fn holder_name_exclusion_is_rejected_where_public_counts_have_no_card_needing_it() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let mut tree = expanded::spell_tree().clone();
+    *tree
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "do":[{"damage":{"to":{"leader":"opp"},
+            "n":{"distinct_names":{"who":"self","zone":"field","kind":"follower"}}}}]
+    });
+    lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    tree["cards"]["SD03-005"]["abilities"][0]["spell"]["do"][0]["damage"]["n"]["distinct_names"]
+        ["not_same_name_as_this"] = json!(true);
+    assert!(
+        lowerer.lower_with_printed_costs(&tree, &costs).is_err(),
+        "only cost materials and existence checks exclude the holder's name"
+    );
+}

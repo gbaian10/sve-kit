@@ -369,6 +369,8 @@ pub(super) struct ObjectFilter<'query> {
     pub power_at_least: Option<u64>,
     pub keyword: Option<super::super::KeywordId>,
     pub has_evolve: bool,
+    /// これと同名を除く: the candidate shares no name with the ability holder.
+    pub not_same_name_as_this: bool,
 }
 
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
@@ -433,6 +435,7 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
             hp_at_most: query.hp_le,
+            not_same_name_as_this: query.not_same_name_as_this,
             ..Self::default()
         }
     }
@@ -598,6 +601,9 @@ pub(super) fn view_filter(
             },
         )));
     }
+    if filter.not_same_name_as_this {
+        predicates.push(holder_name_exclusion(object.clone()));
+    }
     if let Some(limit) = filter.hp_at_most {
         predicates.push(number_limit(
             NumberRead::Stats {
@@ -614,6 +620,20 @@ pub(super) fn view_filter(
         [_] => predicates.swap_remove(0),
         _ => super::Expr::Compute(Box::new(super::Predicate::And { predicates })),
     }
+}
+
+/// これと同名を除く: same shape as targets, reading the holder's current names.
+fn holder_name_exclusion(object: super::ObjectView) -> super::Expr<super::Bool> {
+    super::Expr::Compute(Box::new(super::Predicate::Not {
+        predicate: super::Expr::Compute(Box::new(super::Predicate::NamesIntersect {
+            left: super::Expr::Live(Box::new(super::super::NamesRead::Names { object })),
+            right: super::Expr::Live(Box::new(super::super::NamesRead::Names {
+                object: super::ObjectView::Current {
+                    object: Box::new(super::ObjectOperand::SourceHolder {}),
+                },
+            })),
+        })),
+    }))
 }
 
 fn state_filters(

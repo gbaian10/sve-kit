@@ -123,6 +123,7 @@ fn lower_operations(
                     result: None,
                     sel: ast::PublicQuery {
                         acted: None,
+                        not_same_name_as_this: false,
                         other: false,
                         who: ast::Side::Controller,
                         zone: ast::PublicZone::Ex,
