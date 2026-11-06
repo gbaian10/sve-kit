@@ -1,0 +1,43 @@
+cards:
+  ECP02-072:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -5
+            if:
+              cmp:
+                left:
+                  count:
+                    trait: デレマス
+                    who: self
+                    zone: cemetery
+                op: ge
+                right: 10
+      - line: 2
+        spell:
+          do:
+            - destroy:
+                ref:
+                  kind: follower
+                  not_trait: デレマス
+                  who: all
+                  zone: field
+            - create:
+                n: 2
+                to: ex
+                token: 魔法のアイテム
+            - life:
+                delta: 4
+                who: self
+            - draw:
+                n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

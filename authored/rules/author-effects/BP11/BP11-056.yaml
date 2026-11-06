@@ -1,0 +1,21 @@
+cards:
+  BP11-056:
+    abilities:
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  hp_le: 3
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

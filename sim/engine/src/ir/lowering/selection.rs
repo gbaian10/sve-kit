@@ -356,6 +356,8 @@ pub(super) struct ObjectFilter<'query> {
     pub entered_this_turn: bool,
     pub kind: Option<super::super::CardKind>,
     pub trait_id: Option<&'query str>,
+    /// 「Aタイプを持たない」: the candidate lacks this trait.
+    pub not_trait: Option<&'query str>,
     pub all_traits: &'query [String],
     /// 「AかB」: the candidate has at least one of these traits.
     pub any_traits: &'query [String],
@@ -437,6 +439,8 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
                 .traits_any
                 .as_ref()
                 .map_or(&[], |union| union.0.as_slice()),
+            all_traits: &query.traits_all,
+            evolved: query.evolved,
             name: query.name.as_deref(),
             names: &query.names,
             contains: query.name_contains.as_deref(),
@@ -634,6 +638,11 @@ fn trait_filters(
     let read =
         |trait_id: &String| super::search::view_filter(None, Some(trait_id), None, object.clone());
     let mut predicates = filter.all_traits.iter().map(read).collect::<Vec<_>>();
+    if let Some(trait_id) = filter.not_trait {
+        predicates.push(super::Expr::Compute(Box::new(super::Predicate::Not {
+            predicate: read(&trait_id.to_owned()),
+        })));
+    }
     if !filter.any_traits.is_empty() {
         predicates.push(super::Expr::Compute(Box::new(super::Predicate::Or {
             predicates: filter.any_traits.iter().map(read).collect(),

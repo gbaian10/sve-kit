@@ -105,7 +105,7 @@ pub(super) fn choice(
     cardinality: Cardinality,
     path: &str,
 ) -> Result<(Selector, Decision), LoweringError> {
-    if query.acted.is_some() {
+    if query.acted.is_some() || query.evolved.is_some() {
         return Err(unsupported(path));
     }
     if !matches!(query.who, ast::Side::Controller | ast::Side::All) {

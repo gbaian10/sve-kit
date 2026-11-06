@@ -1913,3 +1913,53 @@ fn material_cost_floors_accept_only_any_number_of_acted_followers() {
         lowerer.lower(&activated(cost)).unwrap_err();
     }
 }
+
+#[test]
+fn query_state_and_trait_filters_stay_on_their_supported_populations() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let spell = |step: Value| {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({"do":[step]});
+        tree
+    };
+    let exists = |zone: &str| {
+        spell(
+            json!({"if":{"cond":{"exists":{"who":"self","zone":zone,"kind":"follower","evolved":true}},
+            "then":[{"draw":{"n":1_u64}}]}}),
+        )
+    };
+    lowerer
+        .lower_with_printed_costs(&exists("field"), &costs)
+        .unwrap();
+    lowerer
+        .lower_with_printed_costs(&exists("ex"), &costs)
+        .unwrap_err();
+    // Both `where` shortcuts carry none of the new filters, so each must reject them.
+    let shortcuts = [
+        json!({"cmp":{"left":{"cost_of":"item"},"op":"eq","right":{"agg":{"of":{"who":"opp","zone":"field","kind":"follower"},"attr":"cost","fn":"min"}}}}),
+        json!({"history":{"event":"damaged","window":"this_turn","where":{"recipient":"item"}}}),
+    ];
+    for shortcut in shortcuts {
+        let control = json!({"who":"opp","zone":"field","kind":"follower","where":shortcut});
+        lowerer
+            .lower_with_printed_costs(&spell(json!({"destroy":{"ref":control}})), &costs)
+            .unwrap();
+        for filter in [json!({"hp_le":3_u64}), json!({"not_trait":"兵士"})] {
+            let mut group = json!({"who":"opp","zone":"field","kind":"follower"});
+            group
+                .as_object_mut()
+                .unwrap()
+                .extend(filter.as_object().unwrap().clone());
+            lowerer
+                .lower_with_printed_costs(&spell(json!({"destroy":{"ref":group.clone()}})), &costs)
+                .unwrap();
+            group["where"] = shortcut.clone();
+            lowerer
+                .lower_with_printed_costs(&spell(json!({"destroy":{"ref":group}})), &costs)
+                .unwrap_err();
+        }
+    }
+}

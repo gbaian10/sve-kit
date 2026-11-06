@@ -1,0 +1,69 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "adjust_cost",
+        "subjects": "self",
+        "amount": -5,
+        "condition": {
+          "fn": "ge",
+          "args": [
+            {
+              "count": {
+                "zone": "cemetery",
+                "side": "self",
+                "trait": "デレマス"
+              }
+            },
+            10
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "spell",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "destroy",
+            "subjects": {
+              "difference": [
+                {
+                  "zone": "field",
+                  "side": "both",
+                  "type": "follower"
+                },
+                {
+                  "zone": "field",
+                  "side": "both",
+                  "type": "follower",
+                  "trait": "デレマス"
+                }
+              ]
+            }
+          },
+          {
+            "op": "create",
+            "name": "魔法のアイテム",
+            "count": 2,
+            "to": "ex"
+          },
+          {
+            "op": "modify",
+            "subjects": "self.leader",
+            "hp": 4
+          },
+          {
+            "op": "draw",
+            "count": 2
+          }
+        ]
+      }
+    }
+  ]
+}
