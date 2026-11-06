@@ -1,0 +1,42 @@
+cards:
+  CP01-035:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - choose:
+                bind: picked
+                from:
+                  cost_le: 2
+                  kind: spell
+                  who: self
+                  zone: hand
+                n: 1
+            - move:
+                ref: picked
+                result: placed
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    set: 0
+                    when_playing:
+                      in: affected
+                on:
+                  follow: placed
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

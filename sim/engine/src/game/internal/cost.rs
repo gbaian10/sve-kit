@@ -66,7 +66,8 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         let supported = match kind {
             CostKind::Play => {
                 matches!(objects, Selector::MoveAfter { .. } | Selector::Bound { .. })
-                    && matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
+                    && (matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
+                        || matches!(change, CostChange::Set { amount: Expr::Literal(Int(amount)) } if *amount >= 0))
                     && matches!(
                         duration.end,
                         DurationEnd::CurrentTurnEnd {} | DurationEnd::NoTemporalExpiry {}

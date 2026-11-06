@@ -553,12 +553,16 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         let ast::Affected::Affected = filter.subjects;
-        let Some(delta) = modifier.delta else {
-            return Err(unsupported(path));
+        let change = match (modifier.delta, modifier.set) {
+            (Some(delta), None) if delta <= 0 => CostChange::Delta {
+                amount: Expr::Literal(Int(delta)),
+            },
+            (None, Some(set)) if set >= 0 => CostChange::Set {
+                amount: Expr::Literal(Int(set)),
+            },
+            _ => return Err(unsupported(path)),
         };
-        if delta > 0
-            || modifier.set.is_some()
-            || modifier.next_only.is_some()
+        if modifier.next_only.is_some()
             || !matches!(installation.until, None | Some(ast::Until::Turn))
         {
             return Err(unsupported(path));
@@ -573,9 +577,7 @@ impl BodyContext<'_> {
                 subjects: Selector::Bound {
                     reference: affected,
                 },
-                change: CostChange::Delta {
-                    amount: Expr::Literal(Int(delta)),
-                },
+                change,
                 duration: duration.clone(),
                 usage: None,
             }),

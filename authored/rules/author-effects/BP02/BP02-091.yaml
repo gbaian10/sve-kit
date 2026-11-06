@@ -1,0 +1,61 @@
+cards:
+  BP02-091:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 祈りカウンター
+                on: this
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 祈りカウンター
+                        on: this
+                    op: ge
+                    right: 4
+                then:
+                  - move:
+                      ref: this
+                      to: cemetery
+                  - life:
+                      delta: 10
+                      who: self
+                  - search:
+                      result: searched
+                      sel:
+                        who: self
+                        zone: deck
+                      to: ex
+                      upto: 2
+                  - apply:
+                      effect:
+                        cost_mod:
+                          set: 0
+                          when_playing:
+                            in: affected
+                      on:
+                        follow: searched
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
