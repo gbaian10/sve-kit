@@ -481,3 +481,23 @@ fn grouped_hand_cost_keeps_unneeded_material_shapes_closed() {
         .insert(0, json!({"discard":{"ref":"this"}}));
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn hand_cost_keyword_filter_accepts_only_known_basic_keywords() {
+    let lower = |keyword: &str| {
+        let mut tree = fanfare::expanded::tree().clone();
+        let mut ability = tree["cards"]["BP08-038"]["abilities"][0].clone();
+        ability.as_object_mut().unwrap().remove("fanfare");
+        ability["activate"] = json!({"cost":{"steps":[{"pp":1},{"discard":{
+            "sel":{"who":"self","zone":"hand","kind":"follower","keyword":keyword},"n":1
+        }}]},"do":[{"draw":{"n":1}}]});
+        let meta = tree["cards"]["BP08-038"]["meta"].clone();
+        tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[ability]}});
+        ExpandedLowerer::new().unwrap().lower(&tree)
+    };
+    let programs = lower("ward").unwrap();
+    game(1, 0)
+        .load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    lower("not-a-keyword").unwrap_err();
+}
