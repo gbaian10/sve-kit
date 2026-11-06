@@ -156,6 +156,8 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 `at: selection` 的單一正式目標捕捉可讀 `cost_of` 與 `orig_cost_of`，沿用同一選擇回條與數值捕捉；原始費用取印刷資料，有效費用取當時修正。捕捉發生在選定後、第一個效果指示前，之後目標被破壞或返回手牌都不改變該數值；不授予隱藏區域或任意多物件讀取權限。
 
+公開正式目標的集合也可捕捉 `{at: selection, selection: chosen, value: {distinct_orig_costs: {in: chosen}}}`，以所選整組卡片的印刷原費計算種類數。它沿用選擇回條與 `DistinctCount`，不受有效費用修正影響；例如 BP08-104 比較結果是否為 1，只有整組原費相同才回手。集合名稱須與 `selection` 一致；私有手牌、Look、未知選擇與本文選取仍拒絕。
+
 攻擊本文可用 `is: {ref: attack_target, kind: follower}` 檢查本次宣告的目標，以及 `hp_of: attack_target` 讀取仍在場同世代目標的當前體力；`attack_target` 也可作已支援數值指示的對象。攻擊領袖仍產生待機能力，條件在解算時查（R-0003）；目標離場或換世代即不符合，不追隨新物件。這些讀值均由同一待機事件提供，不能在起動能力或其他事件偽造攻擊目標。
 
 `moved: {from: {who: self, zone: field}, to: cemetery, sel: {kind: follower, keyword: ward}}` 依每個從者離場前的有效守護判斷，包含印刷、授予及持續效果提供的守護；直立也會觸發，來源自身及多個副本同時離場仍逐事件形成待機（Q846–Q851）。只讀同批移動前的狀態，結算時不改查墓場中的新世代。此關鍵字入口不開放其他關鍵字、目的區、事件或歷史查詢。
@@ -529,3 +531,24 @@ cmp:
 場上印刷常在的 `no_trigger` 現支援 `who: opp` 與 `kinds` 的 `fanfare`／`evolve_time`：
 依能力控制者禁止在事件發生時進待機，包含護符入場曲；不禁止效果直接打出該能力。
 此入口不含施加式授予、條件式、其他區域或其他誘發關鍵字。
+
+場上送墓事件的 `sel` 可加上 `where.history`，將離場前的從者世代與本回合實際受傷紀錄連結：
+
+```yaml
+on:
+  moved:
+    from: {who: opp, zone: field}
+    to: cemetery
+    during: {turn: self}
+    sel:
+      kind: follower
+      where:
+        history:
+          event: dealt_damage
+          window: this_turn
+          who: self
+          sel: {trait: ウマ娘}
+          where: {recipient: item}
+```
+
+此入口只接受自己回合中，對手場上從者送墓的事件；傷害來源限自己具有指定特徵的卡片（BP22-R22），或以 `where: {ref: this, recipient: item}` 指定能力持有者自身、並省略該歷史查詢的 `who` 與 `sel`（BP20-025）。來源的控制者及特徵取實際傷害成立時的資訊；目標以物件與世代比對，零傷害不留下紀錄。它在離場事件成立時判斷，後續移動不改已待機的結果；回手再入場的新世代不繼承，下一回合清除歷史。沿用既有傷害事實、離場訂閱、待機及每回合上限，不建立第二條事件路徑。其他來源篩選、任意歷史視窗與事件頭仍拒絕。
