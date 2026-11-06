@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-105:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  orig_cost_le: 6
+                upto: 1
+            - move:
+                ref: selected
+                to: field
+                result: entered
+            - grant:
+                "on":
+                  follow: entered
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - move:
+                            ref: this
+                            to: hand
