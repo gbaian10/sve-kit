@@ -28,6 +28,7 @@ impl BodyContext<'_> {
             || choice.any
             || choice.groups.is_some()
             || choice.distinct_by.is_some()
+            || choice.cost_sum_le.is_some()
             || choice.n != Some(1)
             || choice.upto.is_some()
             || choice.may != Some(true)

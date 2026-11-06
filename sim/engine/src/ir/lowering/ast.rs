@@ -1296,6 +1296,7 @@ pub(super) struct Target {
     pub bind: String,
     pub from: TargetQuery,
     pub distinct_by: Option<Names>,
+    pub cost_sum_le: Option<u64>,
     pub n: Option<NumericArgument>,
     pub upto: Option<NumericArgument>,
 }
@@ -1309,6 +1310,7 @@ pub(super) struct Choose {
     pub from: ChooseFrom,
     pub groups: Option<Vec<ChooseGroup>>,
     pub distinct_by: Option<Names>,
+    pub cost_sum_le: Option<u64>,
     pub n: Option<u64>,
     pub upto: Option<u64>,
     pub may: Option<bool>,

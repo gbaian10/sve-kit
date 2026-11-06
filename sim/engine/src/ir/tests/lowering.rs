@@ -1603,3 +1603,52 @@ fn buff_replacement_rejects_unadmitted_stats_and_multiple_alternatives() {
         lowerer().lower(&tree).unwrap_err();
     }
 }
+
+#[test]
+fn original_cost_totals_bound_public_targets_and_reject_leader_recipients() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let mut tree = expanded::spell_tree().clone();
+    *tree
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "targets":[{"bind":"picked","from":{"who":"self","zone":"cemetery","kind":"follower"},
+            "upto":3_u64,"cost_sum_le":6_u64}],
+        "do":[{"move":{"ref":"picked","to":"field","result":"returned"}}]
+    });
+    let cards = lowerer.lower_with_printed_costs(&tree, &costs).unwrap();
+    let ChoiceDomain::Objects { constraint, .. } = &cards["SD03-005"].card().abilities[0]
+        .node
+        .play
+        .as_ref()
+        .unwrap()
+        .parameters[0]
+        .domain
+    else {
+        panic!("cemetery targets");
+    };
+    assert_eq!(
+        constraint.aggregate_bounds,
+        [AggregateBound {
+            property: NumericProperty::OriginalCost,
+            comparison: Comparison::LessEqual,
+            value: Expr::Literal(Int(6)),
+        }]
+    );
+    let mut leaders = tree.clone();
+    leaders["cards"]["SD03-005"]["abilities"][0]["spell"]["targets"][0] = json!({
+        "bind":"picked","from":{"who":"opp","kind":"follower","leader_or":true},
+        "n":1_u64,"cost_sum_le":6_u64
+    });
+    leaders["cards"]["SD03-005"]["abilities"][0]["spell"]["do"] =
+        json!([{"damage":{"to":"picked","n":1_u64}}]);
+    assert!(
+        lowerer.lower_with_printed_costs(&leaders, &costs).is_err(),
+        "leaders have no original cost"
+    );
+    leaders["cards"]["SD03-005"]["abilities"][0]["spell"]["targets"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("cost_sum_le");
+    lowerer.lower_with_printed_costs(&leaders, &costs).unwrap();
+}

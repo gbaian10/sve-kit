@@ -147,6 +147,7 @@ impl BodyContext<'_> {
             bind: choice.bind.clone(),
             from: from.clone(),
             distinct_by: choice.distinct_by.clone(),
+            cost_sum_le: choice.cost_sum_le,
             n: n.map(ast::NumericArgument::Literal),
             upto: upto.map(ast::NumericArgument::Literal),
             option: None,
@@ -253,6 +254,7 @@ impl BodyContext<'_> {
             || choice.reveal == Some(true)
             || choice.order == Some(true)
             || choice.distinct_by.is_some()
+            || choice.cost_sum_le.is_some()
             || from.who.is_some()
             || from.zone.is_some()
             || from.leader.is_some()

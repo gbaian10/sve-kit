@@ -42,6 +42,7 @@ fn check_choice_shape(
         .is_some_and(ast::NumericArgument::is_dynamic);
     if dynamic_count
         && (resolution
+            || target.cost_sum_le.is_some()
             || target.from.observation.is_some()
             || target.from.leader.is_some()
             || target.from.leaders.is_some()
@@ -61,6 +62,7 @@ fn check_choice_shape(
         || target.from.not_same_name_as_this
         || target.from.has_state_filter()
         || target.distinct_by.is_some()
+        || target.cost_sum_le.is_some()
         || target.from.leader.is_some()
         || target.from.leaders.is_some()
         || target.from.leader_or)
@@ -289,7 +291,7 @@ impl BodyContext<'_> {
                     aggregate_bounds: if dynamic_count {
                         vec![self.dynamic_target_count(target, path)?]
                     } else {
-                        vec![]
+                        original_cost_cap(target, path)?.into_iter().collect()
                     },
                 },
                 binding,
@@ -456,7 +458,7 @@ impl BodyContext<'_> {
                     cardinality,
                     distinct_by: None::<ObjectProperty>,
                     disjoint: Disjointness::Disjoint,
-                    aggregate_bounds: vec![],
+                    aggregate_bounds: original_cost_cap(target, path)?.into_iter().collect(),
                 },
                 binding,
                 target_roles: None,
@@ -472,6 +474,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
         if target.distinct_by.is_some()
+            || target.cost_sum_le.is_some()
             || target.from.keyword.is_some()
             || target.from.r#trait.is_some()
             || !target.from.traits_all.is_empty()
@@ -1225,6 +1228,25 @@ fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, 
         target_players(query.who.as_ref().ok_or_else(|| unsupported(path))?)
     };
     Ok(players)
+}
+
+/// The printed total original cost cap of every selected card (元のコストの合計がN以下).
+fn original_cost_cap(
+    target: &ast::Target,
+    path: &str,
+) -> Result<Option<super::super::AggregateBound>, LoweringError> {
+    target
+        .cost_sum_le
+        .map(|limit| {
+            Ok(super::super::AggregateBound {
+                property: super::super::NumericProperty::OriginalCost,
+                comparison: Comparison::LessEqual,
+                value: Expr::Literal(Int(
+                    i64::try_from(limit).map_err(|_overflow| unsupported(path))?
+                )),
+            })
+        })
+        .transpose()
 }
 
 fn target_cardinality(target: &ast::Target, path: &str) -> Result<Cardinality, LoweringError> {
