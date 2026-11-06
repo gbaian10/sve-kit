@@ -683,3 +683,15 @@ Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序
 進化後卡面的能力視為新獲得（CR 5.16.2.2、5.31.2.1）。
 既有授予資料不刪除，期限終了後仍有效的授予會恢復。規則重置與效果重置分別判斷。
 公開場上投影提供 `boxed` 布林值；回條為 `InstructionOutcome::Boxed` 的實際成功物件。
+
+### 墓場入場觀測者的自身消滅費用
+
+墓場 `EnterField` 觀測者接受既有 `Control::Pay` 的第一個根指示：
+`PlayParameter`、`Required`、空 `on_paid`、單一 Ordered cost，且費用為
+`Action::Banish` 的單一 `SourceHolder`。成本指示的 actor、來源、Cost context、
+無材料及無 precondition 仍須完整相符。
+
+這個形狀同時用於費用准入與墓場來源存取檢查；只放行該成本的來源位置，
+不將一般本文的自身消滅或其他 holder 操作視為合法。其他事件、區域、可選成本與
+複合成本均不因此開放。正式目標在原子付款前完成；來源世代與目前區域沿用
+共用材料付款驗證，付款不能追到移區後的新物件。
