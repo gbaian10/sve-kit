@@ -799,3 +799,6 @@ mod name_aliases;
 
 #[path = "card/target_roles.rs"]
 mod target_damage_role;
+
+#[path = "card/boxed.rs"]
+mod boxed;

@@ -1,0 +1,32 @@
+cards:
+  BP11-024:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy: enemy
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  trait: 荒野
+                  who: self
+                  zone: deck
+                to: hand
+          targets:
+            - bind: enemy
+              from:
+                boxed: true
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

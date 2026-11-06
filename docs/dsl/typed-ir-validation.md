@@ -667,3 +667,19 @@ matching duration 與 affected binder；安裝空集合不分配效果身分。
 WF 比對完整形狀後才在局部作用域登錄私有綁定；一般 decision 仍拒絕 Evolve 區域。
 執行時以印刷名稱、Advance 卡型、擁有者、控制者及物件世代篩選並在回答時重驗，不授予一般隱藏區域選取權。
 Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序，不新增 IR 或獨立執行器。
+
+### 箱子狀態
+
+`BoxPilotMode::Boxed` 使用既有 `Action::BoxPilot`，只接受正式目標的
+`ObjectOperand::Selected`、`NextTurnEnd` 對方玩家、`Installation` anchor、
+無 usage／intervals，以及 `ProperPlay(Current)` cutoff。lowering 另核對正式目標
+為單一對方場上從者且不帶其他篩選，非正式引用、其他期限及非場上 boxed 篩選均拒絕。
+`BooleanState::Boxed` 共用公開物件篩選，不代表一般玩家布林讀值已開放。
+
+執行期由正式選取重新驗證適正性，將箱子記錄綁在受益物件世代，沿用既有
+`EffectEnd` 排程並保存當時的授予來源。當時卡面的印刷能力、當時已施加及有效持續授予的能力、
+既有競走突進均受抑制；稍後新來源的授予不受舊截點影響。
+進化不改物件世代，箱子仍延續；印刷能力截點另保存卡片與卡面座標，
+進化後卡面的能力視為新獲得（CR 5.16.2.2、5.31.2.1）。
+既有授予資料不刪除，期限終了後仍有效的授予會恢復。規則重置與效果重置分別判斷。
+公開場上投影提供 `boxed` 布林值；回條為 `InstructionOutcome::Boxed` 的實際成功物件。

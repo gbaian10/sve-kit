@@ -353,6 +353,7 @@ impl BodyContext<'_> {
 #[derive(Default)]
 pub(super) struct ObjectFilter<'query> {
     pub face_up: Option<bool>,
+    pub boxed: Option<bool>,
     pub racing: Option<bool>,
     pub acted: Option<bool>,
     pub evolved: Option<bool>,
@@ -419,6 +420,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             acted: query.acted,
             evolved: query.evolved,
             entered_this_turn: query.entered_this_turn.is_some(),
+            boxed: query.boxed,
             ..Self::default()
         }
     }
@@ -676,6 +678,7 @@ fn state_filters(
     for (expected, property) in [
         (filter.token, super::super::BooleanState::TokenStatus),
         (filter.face_up, super::super::BooleanState::FaceUp),
+        (filter.boxed, super::super::BooleanState::Boxed),
         (filter.racing, super::super::BooleanState::Racing),
         (
             filter.entered_this_turn.then_some(true),

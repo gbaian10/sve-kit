@@ -47,6 +47,15 @@ fn check_choice_shape(
     {
         return Err(unsupported(path));
     }
+    if target.from.boxed.is_some()
+        && (resolution
+            || !matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+            ))
+    {
+        return Err(unsupported(path));
+    }
     let dynamic_count = target
         .n
         .as_ref()
@@ -1228,7 +1237,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Move(_)
         | ast::Step::Create(_)
         | ast::Step::Equip(_)
-        | ast::Step::Pilot(_) => false,
+        | ast::Step::Pilot(_)
+        | ast::Step::Boxed(_) => false,
     })
 }
 

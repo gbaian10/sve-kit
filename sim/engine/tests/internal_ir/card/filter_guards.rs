@@ -23,6 +23,7 @@ fn state_filters_reject_non_field_leader_and_observed_sources() {
     for from in [
         json!({"who":"self","zone":"cemetery","kind":"follower","acted":true}),
         json!({"who":"self","zone":"ex","kind":"follower","evolved":false}),
+        json!({"who":"self","zone":"ex","kind":"follower","entered_this_turn":true}),
         json!({"who":"opp","zone":"field","kind":"follower","leader_or":true,"entered_this_turn":true}),
     ] {
         assert!(

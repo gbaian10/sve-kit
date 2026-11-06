@@ -10,8 +10,8 @@ use super::{Frame, Game, View, int, string};
 use crate::ir::effect_evolution::Specification;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
-    Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics, ChoiceDomain,
-    Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
+    BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
+    ChoiceDomain, Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
     EntryOrigin, ExecutionId, Expr, Generation, InstallationSubjects, Instruction,
@@ -39,6 +39,8 @@ use serde_json::{Value, json};
 
 mod admission;
 mod aggregates;
+mod boxed;
+pub(in crate::game) use boxed::BoxState;
 mod allocation;
 mod damage;
 pub(in crate::game) use damage::DamageOccurrence;
@@ -322,6 +324,8 @@ pub enum InstructionOutcome {
     Equipped(Vec<EquipEvent>),
     /// Source generations successfully changed from printed amulets into followers.
     Piloted(Vec<ObjectRef>),
+    /// Field generations which actually entered the boxed state.
+    Boxed(Vec<ObjectRef>),
     /// Actual body resource recovery, independent of cost payment.
     Resource(ResourceOutcome),
     /// Successful discards and their physical movements, independent of destruction.
@@ -1517,6 +1521,10 @@ impl Game {
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
             Action::Equip { .. } => self.internal_equip(execution, &instruction)?,
+            Action::BoxPilot {
+                mode: BoxPilotMode::Boxed { .. },
+                ..
+            } => self.internal_box(execution, &instruction)?,
             Action::BoxPilot { .. } => self.internal_pilot(execution, &instruction)?,
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Counter { .. } => {

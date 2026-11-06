@@ -154,7 +154,8 @@ impl BodyContext<'_> {
             | ast::Step::PlayCard(_)
             | ast::Step::Create(_)
             | ast::Step::Equip(_)
-            | ast::Step::Pilot(_) => None,
+            | ast::Step::Pilot(_)
+            | ast::Step::Boxed(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)

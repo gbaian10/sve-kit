@@ -230,6 +230,8 @@ struct State {
     #[serde(default)]
     ir_keywords: BTreeMap<String, internal::KeywordState>,
     #[serde(default)]
+    ir_boxed: BTreeMap<String, internal::BoxState>,
+    #[serde(default)]
     ir_cost: BTreeMap<String, internal::CostState>,
     #[serde(default)]
     ir_no_stand: Vec<internal::StandLock>,
@@ -504,6 +506,7 @@ impl Game {
             next_ir_object: 0,
             ir_numeric: BTreeMap::new(),
             ir_keywords: BTreeMap::new(),
+            ir_boxed: BTreeMap::new(),
             ir_cost: BTreeMap::new(),
             ir_no_stand: Vec::new(),
             ir_attack_restrictions: Vec::new(),
