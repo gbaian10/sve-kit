@@ -1094,7 +1094,7 @@ enum CounterReadView {
     SourceInformation,
 }
 
-/// Free field slots are read when a multi-card Look pick is asked, so it may enter the field
+/// Free field slots are read when a private multi-card pick is asked, so it may enter the field
 /// only as the very next step of the same body.
 #[derive(Default)]
 struct FieldEntryGuard {

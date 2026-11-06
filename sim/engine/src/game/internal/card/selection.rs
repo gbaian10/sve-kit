@@ -307,9 +307,9 @@ fn group_layout(
     }
 }
 
-/// A multi-card Look pick that enters the field next may only offer the free field slots;
+/// A private multi-card pick that enters the field next may only offer the free field slots;
 /// a single card that cannot enter simply stays with the remainder.
-fn look_field_entry_bounds(
+fn field_entry_bounds(
     game: &Game,
     actor_seat: &str,
     feeds_field: bool,
@@ -1014,10 +1014,10 @@ impl Game {
         let constraint = evaluated_counts(self, execution, constraint)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
-        let bounds = look_field_entry_bounds(
+        let bounds = field_entry_bounds(
             self,
             actor_seat,
-            observed_deck && execution.feeds_field_entry(binding.key()),
+            (observed_deck || own_hand) && execution.feeds_field_entry(binding.key()),
             bounds,
         )?;
         let public = members
@@ -1315,7 +1315,7 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
-    /// Lowering admits a multi-card Look pick onto the field only as the very next step.
+    /// Lowering admits a private multi-card pick onto the field only as the very next step.
     fn feeds_field_entry(&self, key: (ScopeId, u64)) -> bool {
         self.todo.front().is_some_and(|node| {
             matches!(node, Node::Instruction { instruction }

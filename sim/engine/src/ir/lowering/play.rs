@@ -275,6 +275,15 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         self.record_target_zone(target, cardinality);
+        if resolution
+            && matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+            )
+            && cardinality.maximum.is_none_or(|maximum| maximum.0 > 1)
+        {
+            self.field_entry.multi.insert(target.bind.clone());
+        }
         self.remember_evolution_target(target, cardinality, dynamic_count);
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
