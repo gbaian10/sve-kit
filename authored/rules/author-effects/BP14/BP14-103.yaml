@@ -1,0 +1,75 @@
+cards:
+  BP14-103:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 5
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                to: ex
+                result: taken
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          count:
+                            in:
+                              objects_of: taken
+                              view: before
+                            kind: follower
+                            trait: 獣
+                        op: ge
+                        right: 1
+                    - cmp:
+                        left:
+                          count:
+                            in:
+                              objects_of: taken
+                              view: before
+                            orig_cost_ge: 5
+                        op: eq
+                        right: 0
+                then:
+                  - apply:
+                      on:
+                        follow: taken
+                      effect:
+                        cost_mod:
+                          when_playing:
+                            in: affected
+                          delta: -4
+                      until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

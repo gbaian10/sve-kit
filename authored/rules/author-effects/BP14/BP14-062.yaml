@@ -1,0 +1,63 @@
+cards:
+  BP14-062:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                else:
+                  - damage:
+                      n: 2
+                      to: enemy
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                acted: true
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on: enemy
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

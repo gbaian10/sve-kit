@@ -1,0 +1,54 @@
+cards:
+  BP14-041:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - lastword:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - move:
+                      ref: this
+                      result: returned
+                      to: field
+                  - set_stat:
+                      hp: 2
+                      on:
+                        follow: returned
+                      power: 2
+                  - grant:
+                      keywords:
+                        - storm
+                      on:
+                        follow: returned
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

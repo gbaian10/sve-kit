@@ -1,0 +1,48 @@
+cards:
+  BP13-063:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 5
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  orig_cost_ge: 7
+                  class: ドラゴン
+                may: true
+                upto: 5
+            - move:
+                ref: picked
+                to: hand
+                result: taken
+            - reveal:
+                ref: picked
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

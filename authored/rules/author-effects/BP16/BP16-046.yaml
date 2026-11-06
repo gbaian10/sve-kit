@@ -1,0 +1,26 @@
+cards:
+  BP16-046:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                to: field
+                token: 大地の魔片
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP22-T10
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
