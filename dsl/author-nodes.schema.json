@@ -11031,6 +11031,10 @@
           "type": "boolean",
           "const": true
         },
+        "self_to_ex": {
+          "type": "boolean",
+          "const": true
+        },
         "banish_self": {
           "type": "boolean",
           "const": true
@@ -11143,6 +11147,11 @@
         },
         {
           "required": [
+            "self_to_ex"
+          ]
+        },
+        {
+          "required": [
             "banish_self"
           ]
         },
@@ -11244,6 +11253,10 @@
           "const": true
         },
         "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_ex": {
           "type": "boolean",
           "const": true
         },
@@ -11362,6 +11375,11 @@
         {
           "required": [
             "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "self_to_ex"
           ]
         },
         {
@@ -11475,6 +11493,10 @@
           "type": "boolean",
           "const": true
         },
+        "self_to_ex": {
+          "type": "boolean",
+          "const": true
+        },
         "banish_self": {
           "type": "boolean",
           "const": true
@@ -11587,6 +11609,11 @@
         },
         {
           "required": [
+            "self_to_ex"
+          ]
+        },
+        {
+          "required": [
             "banish_self"
           ]
         },
@@ -11688,6 +11715,10 @@
           "const": true
         },
         "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_ex": {
           "type": "boolean",
           "const": true
         },
@@ -11813,6 +11844,11 @@
         },
         {
           "required": [
+            "self_to_ex"
+          ]
+        },
+        {
+          "required": [
             "banish_self"
           ]
         },
@@ -11919,6 +11955,10 @@
           "const": true
         },
         "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_ex": {
           "type": "boolean",
           "const": true
         },
@@ -12049,6 +12089,11 @@
         },
         {
           "required": [
+            "self_to_ex"
+          ]
+        },
+        {
+          "required": [
             "banish_self"
           ]
         },
@@ -12155,6 +12200,10 @@
           "const": true
         },
         "self_to_cemetery": {
+          "type": "boolean",
+          "const": true
+        },
+        "self_to_ex": {
           "type": "boolean",
           "const": true
         },
@@ -12284,6 +12333,11 @@
         {
           "required": [
             "self_to_cemetery"
+          ]
+        },
+        {
+          "required": [
+            "self_to_ex"
           ]
         },
         {

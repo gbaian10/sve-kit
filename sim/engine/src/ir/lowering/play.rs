@@ -883,6 +883,7 @@ impl BodyContext<'_> {
                 discard_event: self.discard_event,
                 discard_pp_event: None,
                 static_zone: self.static_zone,
+                activation_zone: self.activation_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,
                 equip_event: self.equip_event,

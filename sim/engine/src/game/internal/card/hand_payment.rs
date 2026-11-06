@@ -6,9 +6,9 @@ use crate::game::internal::{
     discard::HandWait, search,
 };
 use crate::ir::{
-    Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int, Nat,
-    ObjectOperand, ObjectRef, PlayerRef, PlayerRelation, Quantity, QuantityUnit, SelectionGroup,
-    SelectionView, Selector, ZoneKind,
+    Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int,
+    MoveDestination, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlayerRef,
+    PlayerRelation, Quantity, QuantityUnit, SelectionGroup, SelectionView, Selector, ZoneKind,
 };
 
 struct HandSelection<'action> {
@@ -88,6 +88,18 @@ pub(super) fn source_discard(action: &Action) -> bool {
     matches!(action, Action::Discard {
         player: PlayerRef::Controller {}, mode: DiscardMode::All { eligible },
     } if source_selector(eligible))
+}
+
+/// 「手札のこれをEXエリアに置く」 moves only the activating hand card to its controller's EX.
+pub(in crate::game::internal) fn source_to_ex(action: &Action) -> bool {
+    matches!(action, Action::Move { objects, movement, reason: MoveReason::Put }
+        if source_selector(objects)
+            && movement.to
+                == (MoveDestination::Owners { zone: OwnerZone::Ex })
+            && movement.position.is_none()
+            && movement.order.is_none()
+            && movement.initial_posture.is_none()
+            && movement.entry_effects.is_empty())
 }
 
 pub(super) fn check_cost(action: &Action) -> bool {
@@ -257,6 +269,18 @@ impl Game {
             }
         }
         Ok((members, candidates))
+    }
+
+    /// A hand-source cost is payable only while the activating card is still in its owner's hand.
+    pub(super) fn internal_hand_source(&self, execution: &Execution) -> Result<()> {
+        let seat = seat_name(execution.context.controller)?;
+        let source = self.object(&execution.context.source)?;
+        if source.zone != "hand" || source.owner != seat || source.controller != seat {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "hand source unavailable".into(),
+            ));
+        }
+        Ok(())
     }
 
     pub(super) fn internal_hand_cost_payment(

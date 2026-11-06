@@ -692,6 +692,14 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None => vec![ZoneKind::Field],
     };
+    // Quick candidates do not pre-check EX room, so a hand card cannot offer itself there.
+    if entry
+        .activate
+        .as_ref()
+        .is_some_and(|head| head.quick == Some(true) && head.cost.moves_self_to_ex())
+    {
+        return Err(unsupported(path));
+    }
     if entry.activate.is_some()
         && (!matches!(
             zones.as_slice(),
@@ -1187,6 +1195,8 @@ struct FieldOutput {
 
 struct BodyContext<'definitions> {
     static_zone: Option<ZoneKind>,
+    /// Only an activation printed in the hand may move its own card to EX as a cost.
+    activation_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
     equip_event: Option<Binding<super::EquipEvent>>,
@@ -1244,6 +1254,11 @@ impl<'definitions> BodyContext<'definitions> {
         Self {
             static_zone: entry
                 .r#static
+                .as_ref()
+                .and_then(|head| head.zone.as_ref())
+                .and_then(ast::ActivationZones::single),
+            activation_zone: entry
+                .activate
                 .as_ref()
                 .and_then(|head| head.zone.as_ref())
                 .and_then(ast::ActivationZones::single),

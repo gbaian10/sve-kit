@@ -214,6 +214,7 @@ _OPERATIONS = (
     "pp_max",
     "act_self",
     "self_to_cemetery",
+    "self_to_ex",
     "banish_self",
     "act",
     "to_cemetery",
@@ -259,6 +260,7 @@ class CostOperationFields(TypedDict, total=False):
     pp_max: Quantity
     act_self: TrueFlag
     self_to_cemetery: TrueFlag
+    self_to_ex: TrueFlag
     banish_self: TrueFlag
     act: Material
     to_cemetery: Material

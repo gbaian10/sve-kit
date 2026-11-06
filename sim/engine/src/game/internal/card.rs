@@ -18,8 +18,8 @@ use crate::ir::{
     AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
     CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
     GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located, MealRaceOperation,
-    MoveDestination, MoveReason, Nat, Node, NumericChange, ObjectOperand, ObjectRef, OwnerZone,
-    PlayerId, PlayerRef, Posture, Quantity, QuantityUnit, Requirements, Resource,
+    MoveDestination, MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef,
+    OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit, Requirements, Resource,
     ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
     StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
@@ -670,6 +670,38 @@ impl Game {
         }
     }
 
+    /// Moves the paying source itself and requires exactly that object to arrive.
+    fn internal_source_move_payment(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+        movement: &MoveSpec,
+        reason: MoveReason,
+    ) -> Result<ObjectRef> {
+        let original = execution.object(self, &ObjectOperand::SourceHolder {})?;
+        let holder = Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        };
+        // The hand selector only names the private source; move that object directly.
+        let objects = if hand_payment::source_to_ex(&instruction.action) {
+            self.internal_hand_source(execution)?;
+            &holder
+        } else {
+            objects
+        };
+        self.internal_move(execution, instruction, objects, Some((movement, reason)))?;
+        if !matches!(execution.receipts.get(&instruction.receipt),
+            Some(InstructionOutcome::Move(outcome)) if matches!(outcome.moved.as_slice(), [member]
+                if member.before == original && member.after.is_some()))
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "incomplete movement cost".into(),
+            ));
+        }
+        Ok(original)
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
@@ -726,21 +758,13 @@ impl Game {
                     movement,
                     reason,
                 } => {
-                    let original = execution.object(self, &ObjectOperand::SourceHolder {})?;
-                    self.internal_move(
+                    let original = self.internal_source_move_payment(
                         execution,
                         &step.instruction,
                         objects,
-                        Some((movement, *reason)),
+                        movement,
+                        *reason,
                     )?;
-                    if !matches!(execution.receipts.get(&step.instruction.receipt),
-                        Some(InstructionOutcome::Move(outcome)) if matches!(outcome.moved.as_slice(), [member]
-                            if member.before == original && member.after.is_some()))
-                    {
-                        return Err(crate::EngineFailure::IllegalPlay(
-                            "incomplete movement cost".into(),
-                        ));
-                    }
                     (
                         Quantity {
                             amount: Int(1),
@@ -1131,6 +1155,7 @@ pub(super) fn check_payment(
             }
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
+            action if hand_payment::source_to_ex(action) => true,
             action => material::check_cost(action, play),
         };
         if !supported {

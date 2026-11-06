@@ -216,6 +216,17 @@ pub(super) enum Cost {
     Ordered { steps: Vec<CostOperation> },
 }
 
+impl Cost {
+    pub(super) fn moves_self_to_ex(&self) -> bool {
+        match self {
+            Self::Short(operation) => matches!(**operation, CostOperation::SelfToEx(_)),
+            Self::Ordered { steps } => steps
+                .iter()
+                .any(|operation| matches!(operation, CostOperation::SelfToEx(_))),
+        }
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostOperation {
@@ -235,6 +246,8 @@ pub(super) enum CostOperation {
     BanishSelf(bool),
     ActSelf(bool),
     SelfToCemetery(bool),
+    /// 「手札のこれをEXエリアに置く」; only a hand activation pays it.
+    SelfToEx(bool),
 }
 
 #[derive(Deserialize)]

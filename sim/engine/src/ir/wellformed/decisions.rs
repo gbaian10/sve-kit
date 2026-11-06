@@ -730,7 +730,8 @@ impl Checker {
                                 && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
                             || matches!(&step.instruction.action,
                                 Action::Banish { objects: Selector::Objects { objects } }
-                                    if objects == &[ObjectOperand::SourceHolder {}]);
+                                    if objects == &[ObjectOperand::SourceHolder {}])
+                            || hand_source_to_ex(&step.instruction.action);
                         let selected_move = matches!(&step.instruction.action,
                             Action::Move { objects: Selector::Bound { .. }, movement, reason: MoveReason::Put }
                                 if (matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })
@@ -762,6 +763,32 @@ impl Checker {
         }
         Ok(())
     }
+}
+
+/// 「手札のこれをEXエリアに置く」: the activating hand card moves to its controller's EX.
+fn hand_source_to_ex(action: &Action) -> bool {
+    let Action::Move {
+        objects: Selector::Intersection { sets },
+        movement,
+        reason: MoveReason::Put,
+    } = action
+    else {
+        return false;
+    };
+    matches!(sets.as_slice(), [
+        Selector::Zone { players, zone: ZoneKind::Hand, view: SelectionView::Current {}, .. },
+        Selector::Objects { objects },
+    ] if players.relation == PlayerRelation::SelfPlayer
+        && players.relative_to == (PlayerRef::Controller {})
+        && objects == &[ObjectOperand::SourceHolder {}])
+        && movement.to
+            == (MoveDestination::Owners {
+                zone: OwnerZone::Ex,
+            })
+        && movement.position.is_none()
+        && movement.order.is_none()
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty()
 }
 
 fn has_roles(domain: &ChoiceDomain) -> bool {
