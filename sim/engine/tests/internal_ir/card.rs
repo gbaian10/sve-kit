@@ -802,3 +802,6 @@ mod target_damage_role;
 
 #[path = "card/boxed.rs"]
 mod boxed;
+
+#[path = "card/cemetery_self_cost.rs"]
+mod cemetery_self_cost;

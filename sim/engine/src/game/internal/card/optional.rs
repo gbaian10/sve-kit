@@ -6,10 +6,10 @@ use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
-    DiscardEvent, Expr, InstructionContext, Int, MoveDestination, MoveReason, MovementEvent, Node,
-    ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlayerId, PlayerRef, Program,
-    ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector, WellFormedCardProgram,
-    ZoneKind, ZoneRef, optional_payment,
+    DiscardEvent, EventPattern, Expr, InstructionContext, Int, MoveDestination, MoveReason,
+    MovementEvent, Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
+    PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
+    TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef, optional_payment,
 };
 use core::slice::from_ref;
 
@@ -53,6 +53,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                             objects: Selector::Bound { .. }
                         }
                     ))
+                || (required && source_banish(&instruction.action))
                 || super::hand_payment::check_cost(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
@@ -94,6 +95,13 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     return Err(unsupported("payment alternatives"));
                 };
                 for step in steps {
+                    if source_banish(&step.instruction.action)
+                        && !cemetery_self_banish(&ability.node)
+                    {
+                        return Err(unsupported(
+                            "self banish head cost needs a cemetery entry trigger",
+                        ));
+                    }
                     if super::material::source_field_cost(&step.instruction.action) {
                         return Err(unsupported("source costs require a resolution payment"));
                     }
@@ -131,6 +139,40 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn source_banish(action: &Action) -> bool {
+    matches!(action, Action::Banish { objects: Selector::Objects { objects } }
+        if objects == &[ObjectOperand::SourceHolder {}])
+}
+
+/// The cemetery entry uses its saved physical source, never another copy with the same name.
+pub(super) fn cemetery_self_banish(ability: &Ability) -> bool {
+    if ability.kind != AbilityKind::Triggered
+        || ability.active_zones != [ZoneKind::Cemetery]
+        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        || !matches!(
+            ability.trigger.as_ref().map(|trigger| &trigger.on),
+            Some(TriggerCondition::Event {
+                pattern: EventPattern::EnterField { .. }
+            })
+        )
+    {
+        return false;
+    }
+    let Some(body) = &ability.body else {
+        return false;
+    };
+    let Some((CostSpec::Ordered { steps }, _)) = optional_payment::declaration(body) else {
+        return false;
+    };
+    optional_payment::required(body)
+        && matches!(steps.as_slice(), [step] if step.materials.is_none()
+            && step.instruction.precondition.is_none()
+            && step.instruction.context == InstructionContext::Cost
+            && step.instruction.actor == (PlayerRef::Controller {})
+            && step.instruction.source == ability.source
+            && source_banish(&step.instruction.action))
 }
 
 fn positive_pp(costs: &CostSpec) -> bool {
