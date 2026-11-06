@@ -1,0 +1,44 @@
+cards:
+  BP07-078:
+    abilities:
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - move:
+                result: placed
+                to: ex
+                top:
+                  n: 1
+                  who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: placed
+                          view: before
+                        kind: follower
+                    op: ge
+                    right: 1
+                then:
+                  - buff:
+                      hp: 1
+                      on:
+                        follow: placed
+                      power: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
