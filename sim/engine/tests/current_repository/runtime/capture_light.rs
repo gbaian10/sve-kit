@@ -27,12 +27,7 @@ fn position(number: &str, actions: Vec<Action>) -> Game {
 fn kill(batch: bool) -> Action {
     Action::Destroy {
         objects: if batch {
-            Selector::Union {
-                sets: vec![
-                    field_name("セージコマンダー"),
-                    named_field("イベイジョンマーセナリー", 51),
-                ],
-            }
+            subjects()
         } else {
             field_name("セージコマンダー")
         },
@@ -102,6 +97,21 @@ fn mercenary_printings_link_only_their_own_damage_and_preserve_sealed_departures
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state["P1"]["ex"], json!(["top"]));
             assert_eq!(state["P1"]["pp"]["current"], 5_u8);
+            assert!(
+                state["P2"]["cemetery"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("victim"))
+            );
+            if batch {
+                assert_eq!(state["P1"]["field"], json!([]));
+                assert!(
+                    state["P1"]["cemetery"]
+                        .as_array()
+                        .unwrap()
+                        .contains(&json!("source"))
+                );
+            }
             assert!(game.internal_pending_choice().unwrap().is_none());
         }
     }
