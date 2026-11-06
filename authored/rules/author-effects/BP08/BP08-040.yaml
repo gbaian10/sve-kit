@@ -1,0 +1,61 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        sel:
+                          who: self
+                          zone: deck
+                          kind: follower
+                          name: マジカルビースト・モーラ
+                        n: 1
+                        to: field
+                  - - choose:
+                        bind: selected
+                        from:
+                          who: self
+                          zone: hand
+                          kind: follower
+                          name: マジカルビースト・モーラ
+                        upto: 1
+                    - move:
+                        ref: selected
+                        to: field
+                        result: entered
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - act:
+                  n: 1
+                  sel:
+                    who: self
+                    zone: field
+                    kind: follower
+                    name: マジカルビースト・モーラ
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3
