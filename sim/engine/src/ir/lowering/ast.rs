@@ -2325,6 +2325,7 @@ pub(super) enum ModeCondition {
     Spellchain(u64),
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
+    LeaderLife(PlayerThreshold),
 }
 
 #[derive(Deserialize)]

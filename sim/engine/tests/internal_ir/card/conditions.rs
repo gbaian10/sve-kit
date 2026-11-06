@@ -667,3 +667,30 @@ fn distinct_counts_never_authorize_hidden_zone_observations() {
         }
     }
 }
+
+#[test]
+fn mode_counts_may_widen_on_one_public_leader_life_threshold() {
+    let steps = |threshold: Value| {
+        json!([{"choice":{
+            "n":1,
+            "instead":[{"if":{"leader_life":threshold},"upto":2}],
+            "options":[[{"draw":{"n":1}}],[{"life":{"who":"self","delta":1}}]]
+        }}])
+    };
+    let lower = |threshold: Value| {
+        lowerer().lower_with_printed_costs(
+            &tree(&steps(threshold)),
+            &BTreeMap::from([("SD03-005".to_owned(), Nat(1))]),
+        )
+    };
+    for threshold in [
+        json!({"who":"self","le":10}),
+        json!({"who":"opp","ge":5}),
+        json!({"who":"self","eq":1}),
+    ] {
+        lower(threshold).unwrap();
+    }
+    for threshold in [json!({"who":"self"}), json!({"who":"self","le":10,"ge":5})] {
+        lower(threshold).unwrap_err();
+    }
+}

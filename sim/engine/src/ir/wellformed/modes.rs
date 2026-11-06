@@ -2,7 +2,8 @@ use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
 use crate::ir::public_numbers;
 use crate::ir::{
-    Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, NamesRead, ObjectRef,
+    Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead, ObjectRef,
+    PlayerResource,
 };
 use crate::ir::{
     Bool, Cardinality, ChoiceDomain, Control, CostSpec, EntryOrigin, EntryOriginFields, Expr, Mode,
@@ -390,6 +391,16 @@ fn exact_play_mode(kind: ModeChoiceKind, count: &Expr<Nat>, cardinality: Cardina
     reason = "Only public zone counts and turn history are admitted here."
 )]
 fn public_mode_count(value: &Expr<Int>) -> bool {
+    // Leader life is public for either player at the moment modes are chosen.
+    if let Expr::Live(read) = value {
+        return matches!(
+            read.as_ref(),
+            IntRead::PlayerResource {
+                property: PlayerResource::Life,
+                ..
+            }
+        );
+    }
     let Expr::Compute(operation) = value else {
         return false;
     };

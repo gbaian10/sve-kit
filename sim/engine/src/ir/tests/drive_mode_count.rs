@@ -70,7 +70,14 @@ fn conditional_modes_accept_public_zone_counts_of_either_player() {
 #[test]
 fn conditional_modes_do_not_accept_unrelated_integer_conditions_in_ir() {
     let valid = lowerer().lower(&tree(&query())).unwrap();
-    for use_life in [false, true] {
+    for (resource, accepted) in [
+        (None, false),
+        (Some(PlayerResource::PpCurrent), false),
+        (Some(PlayerResource::PpMaximum), false),
+        (Some(PlayerResource::Ep), false),
+        // Leader life is the one public player resource a mode cap may read.
+        (Some(PlayerResource::Life), true),
+    ] {
         let mut card = valid["synthetic"].card().clone();
         let Node::Control {
             control:
@@ -95,15 +102,19 @@ fn conditional_modes_do_not_accept_unrelated_integer_conditions_in_ir() {
         else {
             panic!("public count comparison")
         };
-        if use_life {
+        if let Some(property) = resource {
             *left = Expr::Live(Box::new(IntRead::PlayerResource {
                 player: PlayerRef::Controller {},
-                property: PlayerResource::Life,
+                property,
             }));
         } else {
             *comparison = Comparison::LessEqual;
         }
-        WellFormedCardProgram::check(card).unwrap_err();
+        assert_eq!(
+            WellFormedCardProgram::check(card).is_ok(),
+            accepted,
+            "{resource:?}"
+        );
     }
 }
 
