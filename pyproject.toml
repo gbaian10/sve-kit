@@ -1,0 +1,12 @@
+[dependency-groups]
+dev = []
+test = []
+
+[tool.uv.workspace]
+members = ["carddb", "publish"]
+exclude = ["scan"]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+# brotli-stubs pins the runtime exactly; retain the decoder fix (GHSA-9v8h-qqgm-4m35).
+override-dependencies = ["brotli==1.2.1"]

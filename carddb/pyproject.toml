@@ -4,7 +4,7 @@ dynamic = ["version"]
 description = "Unofficial card database for Shadowverse: EVOLVE"
 license = "Apache-2.0"
 
-requires-python = ">=3.14.7,<3.15"
+requires-python = ">=3.14.10,<3.15"
 dependencies = [
     "rich>=15.0.0",
     "loguru>=0.7.3",
@@ -76,8 +76,6 @@ cache-keys = [
     { git = { commit = true, tags = true } },
 ]
 default-groups = ["dev", "test"]
-# brotli-stubs only types the API and pins brotli exactly; override it so the decoder fix (GHSA-9v8h-qqgm-4m35) applies.
-override-dependencies = ["brotli==1.2.1"]
 
 [build-system]
 requires = ["hatchling", "hatch-vcs"]

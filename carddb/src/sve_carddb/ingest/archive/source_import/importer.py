@@ -59,7 +59,8 @@ PROGRAM_FILES = (
     "carddb/src/sve_carddb/ingest/urls.py",
     "carddb/src/sve_carddb/parse/__init__.py",
     "carddb/src/sve_carddb/parse/html.py",
-    "carddb/uv.lock",
+    "pyproject.toml",
+    "uv.lock",
 )
 
 

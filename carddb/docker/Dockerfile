@@ -1,6 +1,6 @@
 # Runtime mounts keep code and data changes from invalidating dependency layers.
-# uv 0.13 is the first release shipping Python 3.15, so this is the last one before it.
-FROM ghcr.io/astral-sh/uv:0.12.24-python3.14-trixie-slim
+FROM python:3.14.10-slim-trixie
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN apt-get update && apt-get install --no-install-recommends -y git \
     && rm -rf /var/lib/apt/lists/*
@@ -16,9 +16,11 @@ ENV UV_PYTHON_DOWNLOADS=0 \
 WORKDIR /opt/build
 # Cached wheels avoid downloads when rebuilding dependencies.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=carddb/pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=carddb/uv.lock,target=uv.lock \
-    uv sync --locked --no-install-project --no-default-groups
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=carddb/pyproject.toml,target=carddb/pyproject.toml \
+    --mount=type=bind,source=publish/pyproject.toml,target=publish/pyproject.toml \
+    uv sync --package sve-carddb --locked --no-install-workspace --no-default-groups
 # Profiling is available without adding a runtime import dependency.
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install --python /opt/venv/bin/python py-spy

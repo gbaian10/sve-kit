@@ -36,7 +36,7 @@ PARSERS = {
     "en": "carddb/src/sve_carddb/parse/pages/extract_en.py",
 }
 RUNTIME = (
-    "carddb/uv.lock",
+    "uv.lock",
     "carddb/pyproject.toml",
     "carddb/src/sve_carddb/domains/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/parse/html.py",

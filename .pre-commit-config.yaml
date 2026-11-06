@@ -94,15 +94,8 @@ repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.13.6
     hooks:
-      # Each Python project maintains its own dependency lock.
       - id: uv-lock
-        alias: uv-lock-carddb
-        args: [--project, carddb]
-        files: ^carddb/(pyproject\.toml|uv\.lock)$
-      - id: uv-lock
-        alias: uv-lock-publish
-        args: [--project, publish]
-        files: ^(publish/(pyproject\.toml|uv\.lock)|carddb/(pyproject\.toml|uv\.lock))$
+        files: ^(pyproject\.toml|uv\.lock|(carddb|publish)/pyproject\.toml)$
 
   # Workflow checks: actionlint for syntax and expressions, zizmor for security.
   - repo: https://github.com/rhysd/actionlint

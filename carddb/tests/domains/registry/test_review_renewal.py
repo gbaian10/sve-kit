@@ -23,6 +23,7 @@ from sve_carddb.domains.registry.records import MappingReviewData
 from sve_carddb.domains.registry.renew_commands import app
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.domains.registry.transitions.history import History
 from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
 from sve_carddb.domains.registry.transitions.review_sources import RegionalSource
 from sve_carddb.domains.registry.transitions.writer import (
@@ -356,3 +357,22 @@ def test_verified_renewal_allows_next_append_but_does_not_approve_new_jp_scope(
     )
     assert projected.uncovered_jp_card_numbers == ("PR-002",)
     assert not projected.included("region_mapping_review")
+
+
+def test_dependency_pin_follows_the_recorded_git_tree(tmp_path: Path) -> None:
+    repo = tmp_path / "repository"
+    (repo / "carddb").mkdir(parents=True)
+    legacy = repo / "carddb/uv.lock"
+    legacy.write_bytes(b"legacy dependencies")
+    git(repo, "init", "-q")
+    previous = commit(repo)
+    legacy.unlink()
+    (repo / "uv.lock").write_bytes(b"workspace dependencies")
+    current = commit(repo)
+    history = History(repo)
+    assert history.dependency(previous).name == "carddb/uv.lock"
+    assert history.dependency(previous).sha256 == digest(b"legacy dependencies")
+    assert history.dependency(current).name == "uv.lock"
+    assert history.dependency(current).sha256 == digest(b"workspace dependencies")
+    (repo / "uv.lock").write_bytes(b"uncommitted dependencies")
+    assert history.dependency(current).sha256 == digest(b"workspace dependencies")

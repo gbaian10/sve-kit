@@ -21,7 +21,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | ------------ | --------------------------------------------------------------------------------- | ----------- |
 | `card-data/` | 已審查的日英解析卡片輸入與來源證據                                                | JSON        |
 | `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
-| `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；獨立 uv 專案                             | Python、uv  |
+| `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；與 carddb 共用 uv workspace              | Python、uv  |
 | `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
 | `dsl/`       | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
 | `sim/`       | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |

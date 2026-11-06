@@ -33,19 +33,7 @@ updates:
       prefix: ⬆️ dep-bump(sim/engine)
 
   - package-ecosystem: uv
-    directory: /carddb
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 7
-    groups:
-      uv:
-        patterns: ["*"]
-    commit-message:
-      prefix: ⬆️ dep-bump(carddb)
-
-  - package-ecosystem: uv
-    directory: /publish
+    directory: /
     schedule:
       interval: weekly
     cooldown:

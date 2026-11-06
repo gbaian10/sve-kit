@@ -513,8 +513,8 @@ folder, replaces any inherited `SVE_TEST_SNAPSHOT`, runs Cargo, and removes the
 temporary data. CI always generates them fresh. Locally it first hashes the generator
 inputs, including file paths and bytes, directory paths and node kinds (`INPUTS` in
 the script: `card-data/`, `authored/`, `dsl/`, the batch pin, `carddb/src/`, the
-`carddb/tests/` package with `support/`, `carddb/pyproject.toml`
-and `carddb/uv.lock`) and copies a pair generated from identical files and directory
+`carddb/tests/` package with `support/`, `carddb/pyproject.toml`,
+`publish/pyproject.toml`, and the workspace `pyproject.toml` and `uv.lock`) and copies a pair generated from identical files and directory
 layout instead of generating again. A pair is kept under
 `${XDG_CACHE_HOME:-~/.cache}/sve-kit/engine-inputs` (newest 8), only when the inputs
 hashed the same before and after generation. A missing
@@ -572,9 +572,14 @@ that identifies the caller.
 | Rust toolchain                                                      | `rust-toolchain.toml`, by hand, together with `rust-version` in `Cargo.toml`                        |
 | cargo tools in CI (`cargo-llvm-cov`, `cargo-deny`, `cargo-machete`) | The `tool:` versions in `.github/workflows/ci.yml`, by hand                                         |
 
-When a carddb dependency update (including Dependabot) changes `carddb/pyproject.toml`,
-also re-lock `publish/uv.lock` with `uv --directory publish lock`, or publish's
-`--locked` checks will fail.
+carddb and publish share the root `uv.lock` and `.venv` through a uv workspace.
+After changing either member's dependencies (including Dependabot updates), run
+`uv lock` from the repository root. Existing `uv --directory carddb ...` and
+`uv --directory publish ...` commands select that member's project settings and
+working directory; both install its `dev` and `test` groups by default. Use
+`uv sync --all-packages` to install both members together. Python must satisfy
+both members' Python 3.14.10 minimum; CI selects that patch explicitly.
+`scan/` remains an independent uv project outside this workspace.
 
 For version updates Dependabot waits 7 days after a release before proposing it; security updates
 are proposed at once, one pull request each. Workflow files are also checked by

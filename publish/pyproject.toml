@@ -3,7 +3,7 @@ name = "sve-publish"
 version = "0.1.0"
 description = "Publish verified SVE offline previews to R2"
 license = "Apache-2.0"
-requires-python = ">=3.14.7,<3.15"
+requires-python = ">=3.14.10,<3.15"
 dependencies = [
     "sve-carddb",
     "boto3>=1.43.108",
@@ -16,7 +16,7 @@ dependencies = [
 sve-publish = "sve_publish.cli:main"
 
 [tool.uv.sources]
-sve-carddb = { path = "../carddb", editable = true }
+sve-carddb = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -36,8 +36,6 @@ test = [
 
 [tool.uv]
 default-groups = ["dev", "test"]
-# brotli-stubs only types the API and pins brotli exactly; override it so the decoder fix (GHSA-9v8h-qqgm-4m35) applies.
-override-dependencies = ["brotli==1.2.1"]
 
 [build-system]
 requires = ["hatchling"]

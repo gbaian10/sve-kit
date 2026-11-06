@@ -55,10 +55,13 @@ jobs:
               - 'card-data/**'
               - 'carddb/src/**' # includes transitive schema and admission dependencies
               - 'carddb/pyproject.toml'
-              - 'carddb/uv.lock'
+              - 'pyproject.toml'
+              - 'uv.lock'
               - '.github/workflows/ci.yml'
               - '.github/ci/**'
             python:
+              - 'pyproject.toml'
+              - 'uv.lock'
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
               - 'dsl/**' # schema changes must run the Python type drift checks
               - 'publish/**'
@@ -69,7 +72,8 @@ jobs:
               - 'card-data/**'
               - 'carddb/src/**' # engine projection and its transitive schema/CLI dependencies
               - 'carddb/pyproject.toml'
-              - 'carddb/uv.lock'
+              - 'pyproject.toml'
+              - 'uv.lock'
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
               - 'Cargo.toml'
@@ -110,9 +114,7 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - name: Validate admitted inputs and preserve base history
         run: |
           uv run --directory carddb --locked --no-default-groups sve-carddb parsed-cards validate \
@@ -135,15 +137,13 @@ jobs:
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -173,7 +173,7 @@ jobs:
             ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
             ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
             bunfig.toml taplo.toml .taplo.toml uv.toml carddb/uv.toml
-            carddb/pyproject.toml carddb/uv.lock publish/pyproject.toml publish/uv.lock
+            pyproject.toml uv.lock carddb/pyproject.toml publish/pyproject.toml
           )
           scope=(--all-files)
           # Deleted inputs never reach pre-commit's filename filters, but can break the ER build or leave
@@ -208,7 +208,7 @@ jobs:
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.14.10"
       - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           install: false
@@ -218,9 +218,7 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -235,9 +233,9 @@ jobs:
           path: |
             carddb/.mypy_cache
             publish/.mypy_cache
-          key: mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml', 'publish/uv.lock', 'publish/pyproject.toml') }}-${{ github.sha }}
+          key: mypy-${{ runner.os }}-py3.14-${{ hashFiles('uv.lock', 'pyproject.toml', 'carddb/pyproject.toml', 'publish/pyproject.toml') }}-${{ github.sha }}
           restore-keys: |
-            mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml', 'publish/uv.lock', 'publish/pyproject.toml') }}-
+            mypy-${{ runner.os }}-py3.14-${{ hashFiles('uv.lock', 'pyproject.toml', 'carddb/pyproject.toml', 'publish/pyproject.toml') }}-
             mypy-${{ runner.os }}-py3.14-
       - name: Runner CPU count
         run: nproc
@@ -254,14 +252,14 @@ jobs:
       - name: Installed carddb wheel smoke
         run: |
           uv build --wheel carddb --out-dir "${RUNNER_TEMP}/carddb-wheel"
-          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/carddb-wheel-env" uv sync --project carddb --locked --no-default-groups --no-install-project
+          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/carddb-wheel-env" uv sync --package sve-carddb --locked --no-default-groups --no-install-workspace
           uv pip install --no-deps --python "${RUNNER_TEMP}/carddb-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl
           "${RUNNER_TEMP}/carddb-wheel-env/bin/python" -I -B .github/ci/carddb_wheel_smoke.py "$GITHUB_WORKSPACE/tests/fixtures/snapshot-contract/v3"
           "${RUNNER_TEMP}/carddb-wheel-env/bin/sve-carddb" --help > /dev/null
       - name: Installed publish wheel smoke
         run: |
           uv build --wheel --project ./publish --out-dir "${RUNNER_TEMP}/publish-wheel"
-          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/publish-wheel-env" uv sync --project ./publish --locked --no-default-groups --no-install-project --no-install-package sve-carddb
+          UV_PROJECT_ENVIRONMENT="${RUNNER_TEMP}/publish-wheel-env" uv sync --package sve-publish --locked --no-default-groups --no-install-workspace
           uv pip install --no-deps --python "${RUNNER_TEMP}/publish-wheel-env/bin/python" "${RUNNER_TEMP}"/carddb-wheel/*.whl "${RUNNER_TEMP}"/publish-wheel/*.whl
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" --help > /dev/null
           "${RUNNER_TEMP}/publish-wheel-env/bin/sve-publish" images upload --help > /dev/null
@@ -332,7 +330,7 @@ jobs:
           clean: true
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.14.10"
       - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
         with:
           install: false
@@ -342,9 +340,7 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - name: pytest (one shard; the 90% gate runs on the combined shards)
         id: tests
         env:
@@ -430,15 +426,13 @@ jobs:
           clean: true
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
-          python-version: "3.14"
+          python-version: "3.14.10"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: python-coverage-*
@@ -511,9 +505,7 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
@@ -580,9 +572,7 @@ jobs:
           enable-cache: true
           save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           cache-suffix: ${{ github.job }}
-          cache-dependency-glob: |
-            carddb/uv.lock
-            publish/uv.lock
+          cache-dependency-glob: uv.lock
       - name: Rust tests (public inputs, one shard; the 90% gate runs on the merged shards)
         id: tests
         env:
