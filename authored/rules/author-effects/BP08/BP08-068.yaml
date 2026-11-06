@@ -1,0 +1,49 @@
+cards:
+  BP08-068:
+    abilities:
+      - auto:
+          cost:
+            banish_self: true
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                name: 侮蔑の絶傑・ガルミーユ
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: all
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
