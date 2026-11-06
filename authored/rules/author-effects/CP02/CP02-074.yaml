@@ -1,0 +1,46 @@
+cards:
+  CP02-074:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - prevent:
+                kind: ability
+                on:
+                  leader: self
+            - prevent:
+                kind: ability
+                on:
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+          while:
+            my_turn: true
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

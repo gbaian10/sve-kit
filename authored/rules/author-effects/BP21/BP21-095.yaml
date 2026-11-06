@@ -1,0 +1,44 @@
+cards:
+  BP21-095:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 聖騎兵
+                    - buff:
+                        on:
+                          kind: follower
+                          name: 聖騎兵
+                          who: self
+                          zone: field
+                        power: 1
+                    - grant:
+                        keywords:
+                          - assail
+                        on:
+                          kind: follower
+                          name: 聖騎兵
+                          who: self
+                          zone: field
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: クレスト 嗚咽の聖騎士・ウィルバート
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

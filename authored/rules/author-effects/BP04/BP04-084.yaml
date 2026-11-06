@@ -1,0 +1,45 @@
+cards:
+  BP04-084:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                name: 毒蛇
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 毒蛇
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP04-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

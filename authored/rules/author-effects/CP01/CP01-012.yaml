@@ -1,0 +1,32 @@
+cards:
+  CP01-012:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            moved:
+              from: field
+              ref: this
+              to: hand
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
