@@ -1,0 +1,56 @@
+cards:
+  BP13-027:
+    abilities:
+      - auto:
+          cost:
+            pp: 1
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          "on":
+            enter_field:
+              during:
+                turn: self
+              sel:
+                class: ロイヤル
+                kind: follower
+                name_contains: アルベール
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - choose:
+                bind: picked
+                from:
+                  class: ロイヤル
+                  kind: follower
+                  name_contains: アルベール
+                  orig_cost_le:
+                    resource:
+                      kind: pp_max
+                      who: self
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

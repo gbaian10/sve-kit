@@ -782,6 +782,9 @@ mod draw_event;
 #[path = "card/reveal_modes.rs"]
 mod reveal_modes;
 
+#[path = "card/entry_name.rs"]
+mod entry_name;
+
 #[path = "card/nested_ub.rs"]
 mod nested_ub;
 

@@ -564,6 +564,8 @@ pub(crate) struct SubjectFilter {
     pub(crate) kind: Option<CardKind>,
     pub(crate) trait_id: Option<TraitId>,
     pub(crate) name: Option<CardName>,
+    /// 「カード名に『…』を含む」 on an entering subject (BP13-027).
+    pub(crate) name_contains: Option<CardName>,
     pub(crate) class: Option<ClassId>,
     pub(crate) own_turn: bool,
     pub(crate) token: Option<bool>,
@@ -631,6 +633,16 @@ impl SubjectFilter {
             predicates.push(Expr::Compute(Box::new(Predicate::NamesIntersect {
                 left: fields.names(),
                 right: Expr::Literal(vec![name.clone()]),
+            })));
+        }
+        if let Some(fragment) = &self.name_contains {
+            predicates.push(Expr::Compute(Box::new(Predicate::NameContains {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::FromExpression {
+                        value: Box::new(fields.object()),
+                    }),
+                },
+                name: Expr::Literal(fragment.clone()),
             })));
         }
         if let Some(class) = &self.class {
@@ -770,6 +782,23 @@ impl SubjectFilter {
                 return None;
             }
             self.name = names.first().cloned();
+        } else if let Predicate::NameContains {
+            object,
+            name: Expr::Literal(fragment),
+        } = predicate.as_ref()
+        {
+            let current = ObjectView::Current {
+                object: Box::new(ObjectOperand::FromExpression {
+                    value: Box::new(fields.object()),
+                }),
+            };
+            if !matches!(fields, SubjectFields::Entry(_))
+                || *object != current
+                || fragment.0.is_empty()
+            {
+                return None;
+            }
+            self.name_contains = Some(fragment.clone());
         } else {
             return None;
         }
@@ -846,6 +875,12 @@ impl SubjectFilter {
                 .name
                 .as_ref()
                 .is_none_or(|name| characters.names.contains(name))
+            && self.name_contains.as_ref().is_none_or(|fragment| {
+                characters
+                    .names
+                    .iter()
+                    .any(|name| name.0.contains(&fragment.0))
+            })
             && self
                 .class
                 .as_ref()

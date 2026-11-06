@@ -75,6 +75,7 @@ pub(super) fn attack(
         kind: subject.kind.clone(),
         trait_id: subject.trait_id.clone(),
         name: subject.name.clone(),
+        name_contains: None,
         token: subject.token,
         not_token: subject.not_token,
         other: subject.other,

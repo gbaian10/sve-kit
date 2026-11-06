@@ -233,6 +233,14 @@ pub(super) fn movement_filter(
     }) {
         return Err(unsupported(path));
     }
+    // Only an entering subject reads a name fragment (BP13-027).
+    if subject.is_some_and(|sel| {
+        sel.name_contains.as_ref().is_some_and(|fragment| {
+            fragment.is_empty() || !matches!(support, FilterSupport::EntryCost)
+        })
+    }) {
+        return Err(unsupported(path));
+    }
     let original_cost = subject.and_then(|sel| sel.orig_cost_eq);
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     let allow_original_cost = matches!(
@@ -276,6 +284,9 @@ pub(super) fn movement_filter(
         name: subject
             .and_then(|sel| sel.name.as_ref())
             .map(|name| CardName(name.clone())),
+        name_contains: subject
+            .and_then(|sel| sel.name_contains.as_ref())
+            .map(|fragment| CardName(fragment.clone())),
         class: subject
             .and_then(|sel| sel.class.as_ref())
             .map(|class| ClassId(class.clone())),
