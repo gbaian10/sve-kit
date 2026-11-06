@@ -1,0 +1,38 @@
+cards:
+  CSD03b-016:
+    abilities:
+      - keywords:
+          - start_amulet
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - buff:
+                hp: 1
+                on: ally
+                power: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                trait: ヴァンガード
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

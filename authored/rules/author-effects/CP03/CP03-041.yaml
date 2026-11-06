@@ -1,0 +1,33 @@
+cards:
+  CP03-041:
+    abilities:
+      - keywords:
+          - start_amulet
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+                who: self
+          usable_if:
+            exists:
+              kind: follower
+              trait: ロイヤルパラディン
+              who: self
+              zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

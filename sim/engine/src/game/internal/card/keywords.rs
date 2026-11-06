@@ -14,6 +14,21 @@ use serde_json::json;
     reason = "Keyword availability and entry choices share the admitted printed definitions."
 )]
 impl Game {
+    /// CR 14.4.3 reads Start Amulet from a deck card, where printed keywords are otherwise idle.
+    pub(in crate::game) fn internal_start_amulet(&self, holder: &str) -> Result<Option<bool>> {
+        if !self.card_runtime.is_loaded(&self.object(holder)?.card) {
+            return Ok(None);
+        }
+        Ok(Some(
+            self.internal_characteristic_abilities(holder)?
+                .iter()
+                .any(|ability| {
+                    printed_keywords::card_declaration(&ability.node)
+                        == Some(KeywordId::StartAmulet)
+                }),
+        ))
+    }
+
     pub(in crate::game) fn internal_keywords(
         &self,
         holder: &str,
@@ -44,6 +59,7 @@ impl Game {
                     KeywordId::TwinDrive => Some("twin_drive"),
                     KeywordId::Drain => Some("drain"),
                     KeywordId::Stack => Some("stack"),
+                    KeywordId::StartAmulet => Some("start_amulet"),
                     _ => grant::keyword(keyword),
                 },
             ) {
@@ -194,7 +210,7 @@ pub(super) fn check(
     pilot: bool,
 ) -> Result<()> {
     let card_type = printed["card_type"].as_str();
-    let supported_kind = if keyword == KeywordId::Stack {
+    let supported_kind = if matches!(keyword, KeywordId::Stack | KeywordId::StartAmulet) {
         matches!(card_type, Some("アミュレット" | "アミュレット・トークン"))
     } else {
         // A piloted vehicle is a follower this turn; its printed Storm or Rush applies then.
@@ -254,6 +270,7 @@ pub(super) fn check(
                     | (PrintedKeyword::Assail, KeywordId::Assail)
                     | (PrintedKeyword::SingleDrive, KeywordId::SingleDrive)
                     | (PrintedKeyword::TwinDrive, KeywordId::TwinDrive)
+                    | (PrintedKeyword::StartAmulet, KeywordId::StartAmulet)
             )
         })
         .ok_or_else(|| invalid("foreign printed keyword"))?;

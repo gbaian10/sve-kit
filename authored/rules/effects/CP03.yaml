@@ -35,41 +35,6 @@ cards:
           zone: field
     review: 生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體。
     status: complete
-  CP03-021:
-    abilities:
-      - body:
-          name: start_amulet
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          keywords:
-            - storm
-          op: modify
-          subjects: target.1
-        costs:
-          - op: act
-            subjects: self
-          - op: move
-            subjects: self
-            to: cemetery
-        kind: activated
-        line: 2
-        targets:
-          - key: "1"
-            max: 1
-            min: 1
-            select:
-              side: self
-              trait: アクアフォース
-              type: follower
-              where:
-                args:
-                  - read: item.cost
-                  - 1
-                fn: eq
-              zone: field
-    status: complete
   CP03-110:
     abilities:
       - body:
@@ -179,70 +144,6 @@ cards:
         kind: trigger
         line: 3
         subject: self
-    status: complete
-  CP03-124:
-    abilities:
-      - body:
-          name: start_amulet
-          op: macro
-        kind: static
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - bind: seen
-              count: 3
-              op: look
-            - bind: top
-              max: 3
-              min: 0
-              op: select
-              order: true
-              select: seen
-            - op: move
-              position: top
-              subjects: top
-              to: deck
-            - op: seq
-              steps:
-                - bind: ordered
-                  max:
-                    count:
-                      difference:
-                        - seen
-                        - top
-                  min:
-                    count:
-                      difference:
-                        - seen
-                        - top
-                  op: select
-                  order: true
-                  select:
-                    difference:
-                      - seen
-                      - top
-                - op: move
-                  position: bottom
-                  subjects: ordered
-                  to: deck
-        costs:
-          - op: act
-            subjects: self
-          - op: move
-            subjects: self
-            to: cemetery
-        kind: activated
-        line: 2
-        play_if:
-          args:
-            - count:
-                side: self
-                trait: オラクルシンクタンク
-                type: follower
-                zone: field
-            - 0
-          fn: gt
     status: complete
 format: 1
 kind: effect_set

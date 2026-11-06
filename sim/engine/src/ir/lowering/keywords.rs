@@ -12,7 +12,11 @@ pub(super) fn lower(
     keywords: &[String],
 ) -> Result<Vec<Located<Ability>>, LoweringError> {
     // Validate the whole ordered list before allocating or producing any definition.
-    if keywords.is_empty() || keywords.iter().any(|keyword| keyword_id(keyword).is_none()) {
+    if keywords.is_empty()
+        || keywords
+            .iter()
+            .any(|keyword| printed_keyword_id(keyword).is_none())
+    {
         return Err(unsupported(&format!("{path}/keywords")));
     }
     keywords
@@ -22,7 +26,7 @@ pub(super) fn lower(
             let mut source = source_span(key, path, entry)?;
             source.author_path = format!("{path}/keywords/{index}");
             let scope = allocator.scope(path)?;
-            let keyword = keyword_id(keyword).ok_or_else(|| unsupported(path))?;
+            let keyword = printed_keyword_id(keyword).ok_or_else(|| unsupported(path))?;
             let node = if keyword == KeywordId::Stack {
                 Some(printed_keywords::stack_definition(
                     AbilityId(scope.0),
@@ -60,6 +64,15 @@ pub(super) fn lower(
             Ok(Located { node, source })
         })
         .collect()
+}
+
+/// Start Amulet is only a printed card declaration; filters and grants never name it.
+fn printed_keyword_id(keyword: &str) -> Option<KeywordId> {
+    if keyword == "start_amulet" {
+        Some(KeywordId::StartAmulet)
+    } else {
+        keyword_id(keyword)
+    }
 }
 
 pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {

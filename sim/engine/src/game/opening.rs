@@ -28,7 +28,7 @@ impl Game {
         position
     }
 
-    pub(super) fn initialize_opening(&mut self) -> Result<()> {
+    pub(in crate::game) fn initialize_opening(&mut self) -> Result<()> {
         let mut queue = Vec::new();
         for seat in ["P1", "P2"] {
             let player = self.player(seat)?;
@@ -70,7 +70,11 @@ impl Game {
     fn start_amulets(&self, seat: &str) -> Result<Vec<String>> {
         let mut ids = Vec::new();
         for id in self.zone_ids(seat, "deck") {
-            if self.keywords(&id)?.contains("start_amulet") {
+            let start = match self.internal_start_amulet(&id)? {
+                Some(start) => start,
+                None => self.keywords(&id)?.contains("start_amulet"),
+            };
+            if start {
                 ids.push(id);
             }
         }
