@@ -1,0 +1,34 @@
+cards:
+  CP01-006:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                may: true
+                upto: 1
+            - move:
+                order: chooser
+                position: bottom
+                ref: picked
+                result: taken
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

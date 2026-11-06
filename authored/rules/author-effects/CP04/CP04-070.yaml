@@ -1,0 +1,42 @@
+cards:
+  CP04-070:
+    abilities:
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  is:
+                    kind: follower
+                    ref: attack_target
+                then:
+                  - move:
+                      ref: attack_target
+                      result: moved
+                      to: ex
+          ub: true
+        line: 1
+      - line: 1
+        section: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+          while:
+            exists:
+              kind: follower
+              other: true
+              trait: サレンディア救護院
+              who: self
+              zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

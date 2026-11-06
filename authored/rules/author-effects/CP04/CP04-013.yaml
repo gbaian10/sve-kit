@@ -1,0 +1,28 @@
+cards:
+  CP04-013:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            cmp:
+              left:
+                turn_number:
+                  who: self
+              op: lt
+              right: 5
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - keywords:
+          - ward
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
