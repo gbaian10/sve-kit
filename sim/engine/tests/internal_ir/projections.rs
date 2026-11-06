@@ -280,33 +280,22 @@ fn observed_remainder_subtracts_only_successful_before_and_keeps_same_name_copie
 }
 
 #[test]
-fn observed_move_rejects_partial_capacity_stale_evidence_and_unobserved_domains_atomically() {
+fn observed_move_rejects_stale_evidence_and_unobserved_domains_atomically() {
     for seat in [1, 2] {
-        let mut partial = position(seat, true);
-        partial["players"][seat_name(seat)]["zones"]["ex"]
-            .as_array_mut()
-            .unwrap()
-            .pop();
-        for (position, steps) in [
-            (partial, vec![look(1, 2), put_ex(2, looked(1))]),
-            (
-                position(seat, false),
-                vec![look(1, 1), draw(2, 1), put_ex(3, looked(1))],
-            ),
-        ] {
-            let mut game = Game::new(
-                catalog(),
-                &position,
-                &Value::Null,
-                &Value::Null,
-                "invalid-observed-move",
-            )
-            .unwrap();
-            let original = exact_authority(&game);
-            game.execute_internal(&checked(steps), &source("synthetic"), context(seat))
-                .unwrap_err();
-            assert_eq!(exact_authority(&game), original);
-        }
+        let initial = position(seat, false);
+        let steps = vec![look(1, 1), draw(2, 1), put_ex(3, looked(1))];
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "invalid-observed-move",
+        )
+        .unwrap();
+        let original = exact_authority(&game);
+        game.execute_internal(&checked(steps), &source("synthetic"), context(seat))
+            .unwrap_err();
+        assert_eq!(exact_authority(&game), original);
         let public = put_ex(
             2,
             Selector::Objects {
@@ -534,5 +523,85 @@ fn printed_bp18_059_and_sl14_remainder_fragments_use_successful_generations() {
                 );
             }
         }
+    }
+}
+
+#[test]
+fn observed_move_allocates_remaining_ex_capacity_without_public_deck_coordinates() {
+    for seat in [1, 2] {
+        let mut initial = position(seat, true);
+        initial["players"][seat_name(seat)]["zones"]["ex"]
+            .as_array_mut()
+            .unwrap()
+            .pop();
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "observed-capacity",
+        )
+        .unwrap();
+        let progress = execute(&mut game, seat, vec![look(1, 2), put_ex(2, looked(1))]);
+        assert!(
+            !progress.complete,
+            "allocation suspends before any physical arrival"
+        );
+        let question = game.internal_decision(view(seat)).unwrap();
+        let InputDomain::SearchPartition(domain) = &question.domain else {
+            panic!("observed capacity allocation")
+        };
+        assert_eq!(
+            domain.cardinality,
+            Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1))
+            }
+        );
+        assert!(
+            domain.cards.iter().all(|card| card.object.is_none()),
+            "private deck coordinates stay authority-only"
+        );
+        let saved = exact_authority(&game);
+        for handles in [vec![], vec![0, 0], vec![0, 1], vec![99]] {
+            game.answer_internal(
+                question.actor,
+                question.token,
+                Answer::SearchPartition(handles),
+            )
+            .unwrap_err();
+            assert_eq!(
+                exact_authority(&game),
+                saved,
+                "invalid allocations leave observations and moves untouched"
+            );
+        }
+        let result = game
+            .answer_internal(
+                question.actor,
+                question.token,
+                Answer::SearchPartition(vec![domain.cards[1].handle]),
+            )
+            .unwrap();
+        assert!(
+            result.complete,
+            "one allocation completes the observed movement"
+        );
+        let Some(InstructionOutcome::Move(outcome)) = result.receipts.get(&ReceiptId(2)) else {
+            panic!("move receipt")
+        };
+        assert_eq!(
+            outcome.moved.len(),
+            2,
+            "both attempted original members remain in the receipt"
+        );
+        assert_eq!(
+            outcome
+                .moved
+                .iter()
+                .filter(|item| item.after.is_some())
+                .count(),
+            1
+        );
     }
 }

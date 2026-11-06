@@ -817,3 +817,6 @@ mod flip_down;
 
 #[path = "card/hand_transfer_cost.rs"]
 mod hand_transfer_cost;
+
+#[path = "card/movement_capacity.rs"]
+mod movement_capacity;

@@ -52,7 +52,7 @@ pub enum SearchAnswer {
     Grouped(Vec<Vec<u64>>),
 }
 
-/// Frozen remaining found set for one printed destination allocation.
+/// Frozen candidates for a searched destination or a movement capacity allocation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct SearchPartitionDomain {
     /// Fresh handles scoped to this allocation question.
@@ -744,6 +744,7 @@ impl Game {
                     handle: u64::try_from(index).map_err(invalid)?,
                     card: self.object(id)?.card.clone(),
                     name: self.card_name(id)?,
+                    object: None,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -1140,6 +1141,7 @@ impl Game {
                     handle,
                     card: self.object(id)?.card.clone(),
                     name: self.card_name(id)?,
+                    object: None,
                 });
             }
             let domain = SearchPartitionDomain {

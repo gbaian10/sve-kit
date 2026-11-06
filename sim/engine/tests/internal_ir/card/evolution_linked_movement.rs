@@ -196,8 +196,25 @@ fn lastword_cannot_move_into_a_full_owner_ex() {
     assert!(game.internal_pending_choice().unwrap().is_none());
 }
 
+fn owner_ex_position(mixed_owners: bool) -> Value {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"first","card":"unit-follower","owner":if mixed_owners {"P1"} else {"P2"}},
+        {"id":"second","card":"unit-follower","owner":"P2"}
+    ]);
+    let (full_owner, occupied) = if mixed_owners { ("P1", 5) } else { ("P2", 4) };
+    initial["players"][full_owner]["zones"]["ex"] = json!(
+        (0..occupied)
+            .map(|n| json!({"id":format!("ex{n}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    initial
+}
+
 #[test]
-fn public_ex_capacity_is_per_owner_and_partial_batches_roll_back() {
+fn public_ex_capacity_is_per_owner_and_partial_batches_choose_the_exact_arrival() {
     let programs = lowerer().lower(&tree(&[("activate", json!({
         "cost":{"pp":0},
         "targets":[{"bind":"victims","from":{"who":"opp","zone":"field","kind":"follower"},"n":2}],
@@ -205,19 +222,7 @@ fn public_ex_capacity_is_per_owner_and_partial_batches_roll_back() {
     }))])).unwrap();
     let program = &programs["unit-follower"];
     for mixed_owners in [true, false] {
-        let mut initial = setup(1, json!([]));
-        initial["players"]["P1"]["zones"]["hand"] = json!([]);
-        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-        initial["players"]["P2"]["zones"]["field"] = json!([
-            {"id":"first","card":"unit-follower","owner":if mixed_owners {"P1"} else {"P2"}},
-            {"id":"second","card":"unit-follower","owner":"P2"}
-        ]);
-        let (full_owner, occupied) = if mixed_owners { ("P1", 5) } else { ("P2", 4) };
-        initial["players"][full_owner]["zones"]["ex"] = json!(
-            (0..occupied)
-                .map(|n| json!({"id":format!("ex{n}"),"card":"unit-follower"}))
-                .collect::<Vec<_>>()
-        );
+        let initial = owner_ex_position(mixed_owners);
         let mut game = loaded(&initial, program);
         let before = game.projection(View::Referee).unwrap();
         let CardPlay::Awaiting(question) = game
@@ -263,9 +268,41 @@ fn public_ex_capacity_is_per_owner_and_partial_batches_roll_back() {
             assert_eq!(state["P2"]["ex"], json!(["second"]));
             assert_eq!(state["P2"]["field"], json!(["first"]));
         } else {
-            let error = answer.unwrap_err();
-            assert!(format!("{error:?}").contains("capacity selection"));
-            assert_eq!(game.projection(View::Referee).unwrap(), before);
+            let CardPlay::Awaiting(choice) = answer.unwrap() else {
+                panic!("partial owner EX capacity");
+            };
+            assert_eq!(
+                choice.actor,
+                PlayerId { seat: 1 },
+                "the effect controller chooses even for the opponent's EX"
+            );
+            let InputDomain::SearchPartition(domain) = &choice.domain else {
+                panic!("capacity allocation");
+            };
+            assert_eq!(
+                domain
+                    .cards
+                    .iter()
+                    .filter_map(|card| card.object.as_deref())
+                    .collect::<Vec<_>>(),
+                vec!["first", "second"]
+            );
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P2"]["field"],
+                before["P2"]["field"],
+                "neither object moves before allocation"
+            );
+            resolved(
+                game.answer_internal_card(
+                    choice.actor,
+                    choice.token,
+                    Answer::SearchPartition(vec![domain.cards[1].handle]),
+                )
+                .unwrap(),
+            );
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P2"]["field"], json!(["first"]));
+            assert_eq!(state["P2"]["ex"].as_array().unwrap().len(), 5);
         }
     }
 }
