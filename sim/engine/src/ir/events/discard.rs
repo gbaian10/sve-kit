@@ -1,9 +1,11 @@
 //! Discard headers use the committed hand action and its original subject identity.
 use super::timing::{opponent, turn_predicate};
 use crate::ir::{
-    Binding, Bool, CausePattern, CharacteristicView, DiscardEvent, EffectSource, EventContext,
-    EventSnapshotPolicy, Expr, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, PlayerFrozen,
-    PlayerId, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsRead, TriggerSpec,
+    Binding, Bool, CardKind, CausePattern, CharacteristicView, Characteristics,
+    CharacteristicsFields, ClassFrozen, ClassId, DiscardEvent, EffectSource, EventContext,
+    EventSnapshotPolicy, Expr, Info, KindFrozen, ObjectFrozen, ObjectOperand, ObjectRef,
+    ObjectView, PlayerFrozen, PlayerId, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsRead,
+    TriggerSpec,
 };
 
 #[derive(Clone)]
@@ -82,12 +84,84 @@ impl DiscardSource {
     }
 }
 
+/// The committed hand characteristics of the discarded card, read before it leaves.
+#[derive(Clone, PartialEq, Eq)]
+pub(crate) struct DiscardCard {
+    pub(crate) kind: Option<CardKind>,
+    pub(crate) class: Option<ClassId>,
+}
+
+impl DiscardCard {
+    fn characters(event: Binding<DiscardEvent>) -> Expr<Characteristics> {
+        Expr::Frozen(Box::new(CharacteristicsFields::DiscardCharacters { event }))
+    }
+
+    fn predicates(&self, event: Binding<DiscardEvent>) -> Vec<Expr<Bool>> {
+        let mut predicates = Vec::new();
+        if let Some(kind) = self.kind {
+            predicates.push(Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Frozen(Box::new(KindFrozen::Characters {
+                    characters: Self::characters(event),
+                })),
+                right: Expr::Literal(kind),
+            })));
+        }
+        if let Some(class) = &self.class {
+            predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
+                left: Expr::Frozen(Box::new(ClassFrozen::Characters {
+                    characters: Self::characters(event),
+                })),
+                right: Expr::Literal(Info::Present(class.clone())),
+            })));
+        }
+        predicates
+    }
+
+    fn parse(predicates: &[Expr<Bool>]) -> Option<Self> {
+        // DiscardFilter::parse checks the extracted candidate against the complete canonical predicate.
+        let mut card = Self {
+            kind: None,
+            class: None,
+        };
+        for predicate in predicates {
+            let Expr::Compute(operation) = predicate else {
+                continue;
+            };
+            if let Predicate::KindEquals {
+                right: Expr::Literal(kind),
+                ..
+            } = operation.as_ref()
+            {
+                card.kind = Some(*kind);
+            }
+            if let Predicate::ClassEquals {
+                right: Expr::Literal(Info::Present(class)),
+                ..
+            } = operation.as_ref()
+            {
+                card.class = Some(class.clone());
+            }
+        }
+        (card.kind.is_some() || card.class.as_ref().is_some_and(|class| !class.0.is_empty()))
+            .then_some(card)
+    }
+
+    fn matches(&self, characters: &Characteristics) -> bool {
+        self.kind.is_none_or(|kind| kind == characters.kind)
+            && self
+                .class
+                .as_ref()
+                .is_none_or(|class| characters.class.as_ref() == Some(class))
+    }
+}
+
 #[derive(Clone)]
 pub(crate) struct DiscardFilter {
     pub(crate) own: Option<bool>,
     pub(crate) itself: bool,
     pub(crate) own_turn: bool,
     pub(crate) by: Option<DiscardSource>,
+    pub(crate) card: Option<DiscardCard>,
 }
 impl DiscardFilter {
     pub(crate) fn predicate(&self, event: Binding<DiscardEvent>) -> Expr<Bool> {
@@ -114,20 +188,28 @@ impl DiscardFilter {
         if let Some(source) = &self.by {
             predicates.push(source.predicate(event));
         }
+        if let Some(card) = &self.card {
+            predicates.extend(card.predicates(event));
+        }
         Expr::Compute(Box::new(Predicate::And { predicates }))
     }
     pub(crate) fn parse(event: Binding<DiscardEvent>, expression: &Expr<Bool>) -> Option<Self> {
-        let by = if let Expr::Compute(outer) = expression
+        let (by, card) = if let Expr::Compute(outer) = expression
             && let Predicate::And { predicates } = outer.as_ref()
         {
-            predicates.iter().find_map(DiscardSource::parse)
+            (
+                predicates.iter().find_map(DiscardSource::parse),
+                DiscardCard::parse(predicates),
+            )
         } else {
-            None
+            (None, None)
         };
         for own in [None, Some(false), Some(true)] {
             for itself in [false, true] {
                 for own_turn in [false, true] {
-                    if by.is_some() && (own != Some(true) || !itself || own_turn) {
+                    if (by.is_some() && (own != Some(true) || !itself || own_turn))
+                        || (card.is_some() && (itself || by.is_some()))
+                    {
                         continue;
                     }
                     let plan = Self {
@@ -135,6 +217,7 @@ impl DiscardFilter {
                         itself,
                         own_turn,
                         by: by.clone(),
+                        card: card.clone(),
                     };
                     if plan.predicate(event) == *expression {
                         return Some(plan);
@@ -155,6 +238,13 @@ impl DiscardFilter {
         self.own.is_none_or(|own| own == (player == controller))
             && (!self.itself || card == source)
             && (!self.own_turn || active == controller)
+    }
+
+    /// Characteristic filters read the card's hand characteristics before it leaves.
+    pub(crate) fn matches_card(&self, characters: &Characteristics) -> bool {
+        self.card
+            .as_ref()
+            .is_none_or(|card| card.matches(characters))
     }
 }
 

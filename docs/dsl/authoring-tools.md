@@ -303,6 +303,8 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定，不把捨棄者或能力因果當成回合玩家；自身手牌訂閱與 `during` 的組合仍拒絕。
 
+被捨的卡可用 `sel: {kind, class}` 篩選（至少一項），以離手前的手牌特徵判定，例如 BP09-006 的 `sel: {class: エルフ, kind: spell}`；不接受其他 `sel` 欄位，也不與 `ref: this` 或 `by` 並用。
+
 「自己回合、自己捨棄一張以上」另用 `auto.aggregation: batch` 搭配 `on.discarded: {who: self, during: {turn: self}}`（BP12-052／053）。單一捨棄指令中的多張成功棄牌，只讓每個來源能力待機一次；分開的兩次捨棄仍各觸發，去重先於每回合額度。
 規則手牌上限的一次完整選取也屬同一批；抽牌後再次超限的另一次捨棄則是新批（[Q1666–1668](https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL14&faq=)）。
 此聚合只收上述場上、自身回合、自身捨棄的頭，不收手牌自身、其他事件、對手或省略 `who` 的組合；聚合後不得捕捉或讀取單張事件欄位，也不能用事件物件作目標來源。

@@ -1599,7 +1599,9 @@ impl Game {
         let mut execution = execution.clone();
         probe.card_runtime.active_source = execution.ability;
         let spell = execution.spell;
-        let paid = probe.internal_card_payment(&mut execution, &play.costs, spell);
+        let paid = probe
+            .internal_probe_hand_costs(&mut execution, &play.costs)
+            .and_then(|()| probe.internal_card_payment(&mut execution, &play.costs, spell));
         let paid = paid.and_then(|()| probe.internal_card_payment(&mut execution, costs, false));
         match paid {
             Ok(()) => Ok(true),
@@ -1614,11 +1616,12 @@ impl Game {
         }
         let mut payment_game = self.clone();
         payment_game.card_runtime.active_source = execution.ability;
-        match payment_game.internal_card_payment(
-            &mut execution.clone(),
-            &play.costs,
-            execution.spell,
-        ) {
+        let mut probe = execution.clone();
+        match payment_game
+            .internal_probe_hand_costs(&mut probe, &play.costs)
+            .and_then(|()| {
+                payment_game.internal_card_payment(&mut probe, &play.costs, execution.spell)
+            }) {
             Ok(()) => Ok(true),
             Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
             Err(error) => Err(error),

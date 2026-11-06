@@ -142,6 +142,32 @@ impl Game {
         Ok(false)
     }
 
+    /// Fills each open hand cost with its least legal selection so a probe can test payability.
+    pub(super) fn internal_probe_hand_costs(
+        &mut self,
+        execution: &mut Execution,
+        costs: &CostSpec,
+    ) -> Result<()> {
+        while self.internal_hand_cost_materials(execution, costs)? {
+            let Some((question, Wait::CostDiscard(wait))) = execution.waiting.take() else {
+                return Err(invalid("probe hand cost question"));
+            };
+            let InputDomain::CostMaterials(domain) = question.domain else {
+                return Err(invalid("probe hand cost domain"));
+            };
+            let least = usize::try_from(domain.cardinality.minimum.0).map_err(invalid)?;
+            let handles: Vec<_> = domain
+                .members
+                .iter()
+                .take(least)
+                .map(|member| member.handle)
+                .collect();
+            let members = wait.validate(self, execution, &handles)?;
+            execution.cost_discards.insert(wait.receipt(), members);
+        }
+        Ok(())
+    }
+
     pub(super) fn internal_hand_cost_materials(
         &mut self,
         execution: &mut Execution,
