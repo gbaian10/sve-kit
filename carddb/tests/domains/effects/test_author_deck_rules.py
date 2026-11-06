@@ -39,6 +39,7 @@ def card(rule: JsonValue) -> Handwritten:
         ("『Synthetic name』は自分のデッキに6枚まで入れることができる。", "main", 6),
         ("これはエボルヴデッキに10枚まで入れることができる。", "evolve", 10),
     ],
+    ids=["main_limit", "evolve_limit"],
 )
 def test_printed_rule_covers_its_line_without_an_in_game_ability(
     tmp_path: Path, text: str, deck: str, maximum: int

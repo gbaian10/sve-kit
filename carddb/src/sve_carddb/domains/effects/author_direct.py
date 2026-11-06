@@ -7,7 +7,6 @@ from pydantic import JsonValue
 
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, string
-from sve_carddb.domains.construction.copy_rules import copy_rule, has_copy_rule
 from sve_carddb.domains.effects.author_expansion import (
     ExpansionCandidate,
     ability_nodes,
@@ -16,6 +15,7 @@ from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, 
 from sve_carddb.domains.effects.author_inputs import parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.translations.four_layer_sources import card_field
+from sve_carddb.parse.construction_rules import copy_rule, has_copy_rule
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

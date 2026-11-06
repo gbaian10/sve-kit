@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
-from sve_carddb.domains.construction.copy_rules import PATTERNS, copy_rule
+from sve_carddb.parse.construction_rules import PATTERNS, copy_rule
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
