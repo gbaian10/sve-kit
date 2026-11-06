@@ -1,0 +1,46 @@
+cards:
+  BP21-100:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          on:
+            stat_changed:
+              direction: up
+              ref: this
+              stat: hp
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 学院
+                    who: self
+                    zone: field
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

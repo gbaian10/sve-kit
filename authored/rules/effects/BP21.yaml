@@ -76,37 +76,6 @@ cards:
         line: 2
         subject: self
     status: complete
-  BP21-P56:
-    abilities:
-      - body:
-          count: 1
-          op: draw
-        event: hp_increase
-        kind: trigger
-        limit: 1
-        limit_at: trigger
-        line: 1
-        subject: self
-      - body:
-          hp: 1
-          op: modify
-          subjects: self.leader
-        costs:
-          - op: act
-            subjects: self
-        kind: activated
-        line: 2
-        play_if:
-          args:
-            - count:
-                other: true
-                side: self
-                trait: 学院
-                type: follower
-                zone: field
-            - 0
-          fn: gt
-    status: complete
   BP21-P60:
     abilities:
       - body:

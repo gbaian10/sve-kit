@@ -1,0 +1,54 @@
+cards:
+  BP21-056:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: 学院
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: リリウムの幼竜
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  not_same_name_as_this: true
+                  trait: 学院
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: リリウムの巨竜
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

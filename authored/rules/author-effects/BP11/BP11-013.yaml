@@ -1,0 +1,19 @@
+cards:
+  BP11-013:
+    abilities:
+      - evolve_time:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: フェアリー
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

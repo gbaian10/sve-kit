@@ -1,0 +1,46 @@
+cards:
+  BP22-059:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: it
+                power: 1
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                other: true
+                trait: 海洋
+              who: self
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                result: whale
+                sel:
+                  kind: follower
+                  name_contains: ホエール
+                  trait: 海洋
+                  who: self
+                  zone: deck
+                to: ex
+            - grant:
+                abilities:
+                  - play:
+                      cost_delta: -5
+                on:
+                  follow: whale
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,70 @@
+cards:
+  BP11-036:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 3
+                then:
+                  - life:
+                      delta: 3
+                      who: self
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 6
+                then:
+                  - draw:
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 9
+                then:
+                  - damage:
+                      n: 9
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 12
+                then:
+                  - damage:
+                      n: 12
+                      to:
+                        leaders: opponents
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

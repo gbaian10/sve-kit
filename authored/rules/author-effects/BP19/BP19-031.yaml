@@ -1,0 +1,32 @@
+cards:
+  BP19-031:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                ref: friend
+                result: moved
+                to: ex
+            - buff:
+                hp: 1
+                on:
+                  follow: moved
+                power: 1
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                trait: 兵士
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

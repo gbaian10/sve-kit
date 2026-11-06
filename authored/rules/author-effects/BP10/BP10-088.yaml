@@ -1,0 +1,59 @@
+cards:
+  BP10-088:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: ゴースト
+                  - - if:
+                        cond:
+                          exists:
+                            kind: follower
+                            name_contains: ゴースト
+                            who: self
+                            zone: ex
+                        then:
+                          - look:
+                              bind: seen
+                              top:
+                                n: 3
+                                who: self
+                          - choose:
+                              bind: picked
+                              from:
+                                class: ナイトメア
+                                in: seen
+                              may: true
+                              upto: 1
+                          - move:
+                              ref: picked
+                              result: taken
+                              to: hand
+                          - reveal:
+                              bind: shown
+                              ref: picked
+                          - move:
+                              order: chooser
+                              position: bottom
+                              ref:
+                                except:
+                                  in:
+                                    objects_of: taken
+                                    view: before
+                                in: seen
+                              to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
