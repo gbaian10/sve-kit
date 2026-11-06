@@ -1,0 +1,32 @@
+cards:
+  BP01-011:
+    abilities:
+      - fanfare:
+          do:
+            - buff:
+                hp: 1
+                on:
+                  kind: follower
+                  other: true
+                  trait: 妖精
+                  who: self
+                  zone: field
+                power: 1
+            - buff:
+                hp: 1
+                on:
+                  kind: follower
+                  trait: 妖精
+                  who: self
+                  zone: ex
+                power: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

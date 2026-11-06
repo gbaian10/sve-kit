@@ -1,0 +1,44 @@
+cards:
+  BP22-054:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                to: ex
+                token: 防御型ゴーレム
+            - create:
+                to: ex
+                token: 攻撃型ゴーレム
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - buff:
+                      hp: 1
+                      on:
+                        kind: follower
+                        trait: ゴーレム
+                        who: self
+                        zone: ex
+                      power: 1
+          optional_cost:
+            earth_rite: 1
+            result: rite
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP22-T09
+        line: 1
+        section: 1
+      - card: BP22-T08
+        line: 2
+        section: 1
+format: 2
+kind: author_effect_set

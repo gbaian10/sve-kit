@@ -1,0 +1,47 @@
+cards:
+  BP09-045:
+    abilities:
+      - keywords:
+          - stack
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                to: field
+                token: 防御型ゴーレム
+        line: 2
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - create:
+                to: ex
+                token: 攻撃型ゴーレム
+            - buff:
+                on:
+                  kind: follower
+                  trait: ゴーレム
+                  who: self
+                  zone: field
+                power: 1
+            - buff:
+                on:
+                  kind: follower
+                  trait: ゴーレム
+                  who: self
+                  zone: ex
+                power: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

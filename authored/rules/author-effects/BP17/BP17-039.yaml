@@ -1,0 +1,63 @@
+cards:
+  BP17-039:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                class: ウィッチ
+                who: self
+                zone: cemetery
+          do:
+            - draw:
+                n: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 10
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: banish
+                          op: ge
+                          right: 5
+                      then:
+                        - damage:
+                            n: 1
+                            to: enemy
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
