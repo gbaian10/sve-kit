@@ -6,7 +6,6 @@ use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation_selection::{
     CardTotals, card_totals, private_hand_choice, private_look_choice,
 };
-use crate::ir::public_numbers;
 use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
     ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
@@ -20,6 +19,7 @@ use crate::ir::{
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use crate::ir::{advance_entry, effect_evolution};
+use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
@@ -511,6 +511,10 @@ fn target_selector(selector: &Selector) -> Result<()> {
             Ok(())
         }
         Selector::Zone {
+            zone: ZoneKind::Evolve,
+            ..
+        } if public_evolve::selector(selector) => public_zone_selector(selector),
+        Selector::Zone {
             zone: ZoneKind::Ex, ..
         } => public_zone_selector(selector),
         Selector::Zone {
@@ -601,7 +605,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     if (decision.actor != (PlayerRef::Controller {}) && decision.actor != opponent())
         || !matches!(
             selection_zone(&group.selector),
-            Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery)
+            Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve)
         )
     {
         return Err(unsupported("resolution public choice actor or selector"));
@@ -1118,12 +1122,11 @@ impl Game {
             return Err(unsupported("target groups"));
         }
         let evolution = effect_evolution::is_choice(decision);
-        let advance = advance_entry::name(decision).is_some();
+        let private_evolve = evolution || advance_entry::name(decision).is_some();
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
-        let actor = execution.player(self, &decision.actor)?;
-        let actor_seat = super::seat_name(actor)?;
+        let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
         let constraint = evaluated_counts(self, execution, constraint)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
@@ -1150,7 +1153,9 @@ impl Game {
                         && object.owner == actor_seat
                         && object.controller == actor_seat)
                     || matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
-                    || ((evolution || advance) && object.zone == "evolve_deck"))
+                    || ((private_evolve
+                        || (object.controller == actor_seat && object.state["face_up"] == true))
+                        && object.zone == "evolve_deck"))
                     || object.generation != reference.generation.0
                     || (object.zone == "field"
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
@@ -1542,7 +1547,7 @@ impl Execution {
                     ZoneKind::Field => "field",
                     ZoneKind::Ex => "ex",
                     ZoneKind::Evolve
-                        if allow_resolution_zones
+                        if (allow_resolution_zones || public_evolve::selector(selector))
                             && players.relation == PlayerRelation::SelfPlayer =>
                     {
                         "evolve_deck"

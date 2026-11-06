@@ -877,3 +877,56 @@ fn guards_in_a_batch_are_exact_and_only_the_protected_member_gets_the_answer() {
         WellFormedReason::UnavailableBinding,
     );
 }
+
+#[test]
+fn public_evolve_choices_require_an_affirmative_face_up_conjunction() {
+    let mut selected = zone(PlayerRef::Controller {}, ZoneKind::Evolve, 10);
+    let Selector::Zone {
+        binding, predicate, ..
+    } = &mut selected
+    else {
+        panic!("zone")
+    };
+    let face_up = Expr::Live(Box::new(BoolRead::State {
+        object: ObjectView::Current {
+            object: Box::new(ObjectOperand::Bound { binding: *binding }),
+        },
+        property: BooleanState::FaceUp,
+    }));
+    **predicate = face_up.clone();
+    accept(body(
+        1,
+        vec![decision(chosen_objects(1, 1, selected.clone()))],
+    ));
+    for forbidden in [
+        Expr::Literal(Bool(true)),
+        Expr::Compute(Box::new(Predicate::Not {
+            predicate: face_up.clone(),
+        })),
+        Expr::Compute(Box::new(Predicate::Or {
+            predicates: vec![face_up, Expr::Literal(Bool(true))],
+        })),
+    ] {
+        let mut hidden = selected.clone();
+        let Selector::Zone {
+            predicate: hidden_predicate,
+            ..
+        } = &mut hidden
+        else {
+            panic!("zone")
+        };
+        **hidden_predicate = forbidden;
+        reject(
+            body(1, vec![decision(chosen_objects(1, 1, hidden))]),
+            WellFormedReason::UnsupportedShape,
+        );
+    }
+    let Selector::Zone { players, .. } = &mut selected else {
+        panic!("zone")
+    };
+    players.relation = PlayerRelation::Opponents;
+    reject(
+        body(1, vec![decision(chosen_objects(1, 1, selected))]),
+        WellFormedReason::UnsupportedShape,
+    );
+}

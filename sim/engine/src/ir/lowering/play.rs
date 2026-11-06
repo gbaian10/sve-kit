@@ -96,6 +96,7 @@ fn check_choice_shape(
 fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
     match zone {
         ast::TargetZone::Single(single) => Some(vec![match single {
+            ast::TargetSingleZone::EvolveDeck => ZoneKind::Evolve,
             ast::TargetSingleZone::Hand => ZoneKind::Hand,
             ast::TargetSingleZone::Field => ZoneKind::Field,
             ast::TargetSingleZone::Ex => ZoneKind::Ex,
@@ -180,6 +181,12 @@ impl BodyContext<'_> {
             .as_ref()
             .and_then(target_zones)
             .ok_or_else(|| unsupported(path))?;
+        if (zones == [ZoneKind::Evolve]
+            && (query.face_up != Some(true) || !matches!(query.who, Some(ast::Side::Controller))))
+            || (zones != [ZoneKind::Evolve] && query.face_up.is_some())
+        {
+            return Err(unsupported(path));
+        }
         if query.has_state_filter() && zones != [ZoneKind::Field] {
             return Err(unsupported(path));
         }
@@ -296,6 +303,12 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         self.record_target_zone(target, cardinality);
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::EvolveDeck))
+        ) {
+            self.flip_targets.insert(target.bind.clone());
+        }
         if resolution
             && matches!(
                 target.from.zone,
@@ -473,6 +486,7 @@ impl BodyContext<'_> {
                     || branch.leader_or
                     || branch.other
                     || branch.has_evolve.is_some()
+                    || branch.face_up.is_some()
                     || branch.has_state_filter()
                     || branch.hp_le.is_some()
             })
@@ -560,6 +574,7 @@ impl BodyContext<'_> {
             || !target.from.names.is_empty()
             || target.from.has_evolve.is_some()
             || target.from.has_state_filter()
+            || target.from.face_up.is_some()
             || target.from.has_numeric_filter()
             || target.from.class.is_some()
             || target.from.not_class.is_some()
@@ -909,6 +924,7 @@ impl BodyContext<'_> {
                 field_outputs: BTreeMap::new(),
                 evolution_targets: BTreeSet::new(),
                 ex_targets: BTreeSet::new(),
+                flip_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
                 opponent_cemetery_targets: BTreeSet::new(),
@@ -939,6 +955,7 @@ impl BodyContext<'_> {
                     .evolution_targets
                     .clone_from(&self.evolution_targets);
                 context.ex_targets.clone_from(&self.ex_targets);
+                context.flip_targets.clone_from(&self.flip_targets);
                 context.hand_targets.clone_from(&self.hand_targets);
                 context.playable_targets.clone_from(&self.playable_targets);
                 context
@@ -1226,6 +1243,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Transform(_)
         | ast::Step::Act(_)
         | ast::Step::Stand(_)
+        | ast::Step::FlipDown(_)
         | ast::Step::Buff(_)
         | ast::Step::Grant(_)
         | ast::Step::SetStat(_)

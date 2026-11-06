@@ -25,6 +25,7 @@ impl BodyContext<'_> {
         let field_outputs = self.field_outputs.clone();
         let evolution_targets = self.evolution_targets.clone();
         let ex_targets = self.ex_targets.clone();
+        let flip_targets = self.flip_targets.clone();
         let hand_targets = self.hand_targets.clone();
         let playable_targets = self.playable_targets.clone();
         let opponent_cemetery_targets = self.opponent_cemetery_targets.clone();
@@ -58,6 +59,7 @@ impl BodyContext<'_> {
         self.field_outputs = field_outputs;
         self.evolution_targets = evolution_targets;
         self.ex_targets = ex_targets;
+        self.flip_targets = flip_targets;
         self.hand_targets = hand_targets;
         self.playable_targets = playable_targets;
         self.opponent_cemetery_targets = opponent_cemetery_targets;
@@ -385,6 +387,7 @@ pub(super) struct ObjectFilter<'query> {
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::TargetQuery) -> Self {
         Self {
+            face_up: query.face_up,
             kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             has_evolve: query.has_evolve.is_some(),

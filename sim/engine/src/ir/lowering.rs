@@ -41,6 +41,7 @@ mod stack;
 mod static_keywords;
 mod trigger_restrictions;
 
+mod flip;
 mod posture;
 mod quick;
 mod search;
@@ -1212,6 +1213,7 @@ struct BodyContext<'definitions> {
     field_outputs: BTreeMap<String, FieldOutput>,
     evolution_targets: BTreeSet<String>,
     ex_targets: BTreeSet<String>,
+    flip_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,
     playable_targets: BTreeSet<String>,
     opponent_cemetery_targets: BTreeSet<String>,
@@ -1275,6 +1277,7 @@ impl<'definitions> BodyContext<'definitions> {
             field_outputs: BTreeMap::new(),
             evolution_targets: BTreeSet::new(),
             ex_targets: BTreeSet::new(),
+            flip_targets: BTreeSet::new(),
             hand_targets: BTreeSet::new(),
             playable_targets: BTreeSet::new(),
             opponent_cemetery_targets: BTreeSet::new(),
@@ -1627,6 +1630,7 @@ impl<'definitions> BodyContext<'definitions> {
                     }
                 },
             }),
+            ast::Step::FlipDown(value) => self.flip_down(value, path),
             ast::Step::Banish(value) => self.banish(value, path),
             ast::Step::Transform(value) => self.transform(value, path),
             ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {

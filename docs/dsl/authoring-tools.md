@@ -61,6 +61,18 @@ records:
 
 `admission` 可放卡、本體或用途，值為 `light | shared`；用途優先於本體，本體優先於卡。只要任一層明示 admission，該卡走直接作者入口，其餘未標用途保留為共用語義責任。未標 admission 的既有卡維持來源重建路徑，亦不需要錨點。共用整理與審查見[常見效果作者流程](common-family-authoring.md)。
 
+## 表面的進化牌組卡片翻回裏面
+
+`targets[].from` 與本文的 `choose.from` 接受 `{who: self, zone: evolve_deck, face_up: true}`，
+可用 `name: にんじん` 或 `kind: evolve_follower` 等既有公開篩選，再以 `flip_down: chosen`
+將選中的卡片翻回裏面。打出時的正式目標須滿足指定數量；結算中的選取沿用能做多少就做多少，
+`upto` 可選零張，後面的獨立指示仍會執行。
+
+翻面沿用 `Action::FlipDown` 與共用翻面流程，保留卡片世代及區域，回條只記錄實際從表面翻回裏面的成員。
+對手仍記得曾公開的卡片，但不再獲得該裏面卡片的所在位置；持有者仍可檢視自己的進化牌組。
+目前只接受自己的表面卡片與已選取的具名綁定，不接受對手或裏面卡片、`flip_up`、翻面付款及 `result` 變體。
+シュヴァルグラン的翻面是入場能力本文的條件式指示，並非進化付款。
+
 ## 同名建牌張數規則
 
 直接作者入口接受卡級 `deck_rule: {deck: main | evolve, same_name_max: N}`。

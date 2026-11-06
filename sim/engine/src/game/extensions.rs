@@ -195,13 +195,7 @@ impl Game {
             "pilot" | "become_type" => self.change_type(node, frame)?,
             "flip" => {
                 for id in self.select(&node["subjects"], frame)? {
-                    self.object_mut(&id)?.state["face_up"] = json!(node["face"] == "up");
-                    let group = self.group();
-                    self.emit(
-                        json!({"kind":"表向き／裏向き","object":id,"face_up":node["face"] == "up"}),
-                        &frame.cause,
-                        group,
-                    );
+                    self.change_face_up(&id, node["face"] == "up", &frame.cause)?;
                 }
             }
             "control" => self.change_controller(node, frame)?,
@@ -213,6 +207,32 @@ impl Game {
             "reveal_until" => self.reveal_until(node, frame)?,
             unknown => return Err(invalid(format!("unknown extension: {unknown}"))),
         }
+        Ok(())
+    }
+
+    pub(super) fn change_face_up(&mut self, id: &str, face_up: bool, cause: &Value) -> Result<()> {
+        self.object_mut(id)?.state["face_up"] = json!(face_up);
+        let object = self.object(id)?;
+        if object.zone == "evolve_deck" {
+            let controller = object.controller.clone();
+            if face_up {
+                for viewer in ["P1", "P2"] {
+                    self.learn(viewer, id, true);
+                }
+            } else {
+                for (viewer, knowledge) in &mut self.state.knowledge {
+                    if *viewer != controller {
+                        knowledge.located.remove(id);
+                    }
+                }
+            }
+        }
+        let group = self.group();
+        self.emit(
+            json!({"kind":"表向き／裏向き","object":id,"face_up":face_up}),
+            cause,
+            group,
+        );
         Ok(())
     }
 

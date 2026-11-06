@@ -567,7 +567,8 @@ impl Game {
             for seat in ["P1", "P2"] {
                 if object.zone != "void"
                     && (!matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
-                        || (object.controller == seat && object.zone != "deck"))
+                        || (object.controller == seat && object.zone != "deck")
+                        || (object.zone == "evolve_deck" && object.state["face_up"] == true))
                 {
                     game.learn(seat, &object.id, true);
                 }

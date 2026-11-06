@@ -131,12 +131,12 @@ fn an_empty_deck_draw_does_not_queue_a_growth_before_deck_out_checks() {
 }
 
 #[test]
-fn prototype_draw_cards_cannot_bypass_the_existing_typed_authority_boundary() {
+fn legacy_draw_input_cannot_bypass_the_existing_typed_authority_boundary() {
     let mut initial = position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"prototype-spell","card":"BP06-117"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"formal-spell","card":"BP06-117"}]);
     let mut board = game(&initial);
     let before = format!("{board:?}");
-    let error = board.decide(&json!({"do":"play","card":"prototype-spell"}), "prototype-draw").unwrap_err();
+    let error = board.decide(&json!({"do":"play","card":"formal-spell"}), "prototype-draw").unwrap_err();
     assert!(error.to_string().contains("typed execution owns the input point"));
     assert!(format!("{board:?}") == before, "the rejected prototype input preserves all authority state");
 }

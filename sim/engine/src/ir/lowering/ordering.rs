@@ -146,6 +146,7 @@ impl BodyContext<'_> {
             | ast::Step::Transform(_)
             | ast::Step::Act(_)
             | ast::Step::Stand(_)
+            | ast::Step::FlipDown(_)
             | ast::Step::Buff(_)
             | ast::Step::Grant(_)
             | ast::Step::SetStat(_)

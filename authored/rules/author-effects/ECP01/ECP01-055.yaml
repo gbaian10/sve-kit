@@ -1,0 +1,67 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP01-055:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: ウマ娘
+          do:
+            - pp:
+                who: self
+                delta: 4
+      - line: 2
+        activate:
+          cost:
+            act_self: true
+          targets:
+            - bind: recovered
+              option: 1
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: ウマ娘
+                orig_cost_le: 5
+              n: 1
+            - bind: carrots
+              option: 2
+              from:
+                who: self
+                zone: evolve_deck
+                face_up: true
+                name: にんじん
+              upto: 2
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        ref: recovered
+                        to: hand
+                  - - flip_down: carrots
+                    - ep:
+                        who: self
+                        delta: 1
+                  - - buff:
+                        "on":
+                          who: self
+                          zone: field
+                          kind: follower
+                          trait: ウマ娘
+                          other: true
+                        power: 1
+                        hp: 1

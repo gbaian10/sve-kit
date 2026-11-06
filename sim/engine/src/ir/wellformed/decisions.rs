@@ -1,7 +1,6 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
-use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
 use crate::ir::{
@@ -17,6 +16,7 @@ use crate::ir::{
 };
 use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
+use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
 use core::iter::once;
 
@@ -507,6 +507,10 @@ impl Checker {
             {
                 self.reject()
             }
+            Selector::Zone {
+                zone: ZoneKind::Evolve,
+                ..
+            } if public_evolve::selector(selector) => Ok(()),
             Selector::Zone {
                 zone: ZoneKind::Deck | ZoneKind::Evolve | ZoneKind::Banish,
                 ..
