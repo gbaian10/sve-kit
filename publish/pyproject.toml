@@ -8,7 +8,8 @@ dependencies = [
     "sve-carddb",
     "boto3>=1.43.125",
     "jsonschema>=4.26.0",
-    "pydantic>=2.14.3",
+    # Match carddb's pin for the RootModel regex regression since 2.14.2.
+    "pydantic==2.14.1",
     "typer>=0.28.0",
 ]
 
@@ -27,7 +28,8 @@ dev = [
     "brotli-stubs>=1.2.1",
 ]
 test = [
-    "pytest>=9.2.0",
+    # Share carddb's xdist-compatible runner until pytest-dev/pytest#15303 is fixed.
+    "pytest==9.1.1",
     "pytest-xdist>=3.8.0",
     "pytest-cov>=7.1.0",
     "pytest-asyncio>=1.4.1.post1",
