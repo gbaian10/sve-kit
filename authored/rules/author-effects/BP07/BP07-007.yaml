@@ -1,0 +1,38 @@
+cards:
+  BP07-007:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - buff:
+                hp: 1
+                on: latika
+                power: 1
+            - if:
+                cond:
+                  combo: 5
+                then:
+                  - damage:
+                      n:
+                        power_of: latika
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+          targets:
+            - bind: latika
+              from:
+                kind: follower
+                name: 回帰する抱擁・ラティカ
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

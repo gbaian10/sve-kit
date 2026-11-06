@@ -587,6 +587,10 @@ impl Execution {
                 IntOperation::Sum { objects, property } if target_plan(objects).is_some() => {
                     self.attack_target_sum(game, objects, *property).map(Int)
                 }
+                IntOperation::Sum {
+                    objects: objects @ Selector::Bound { .. },
+                    property: property @ (NumericProperty::Attack | NumericProperty::Life),
+                } => self.selected_live_sum(game, objects, *property).map(Int),
                 IntOperation::Sum { objects, property }
                     if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
                 {
@@ -639,6 +643,31 @@ impl Execution {
             .try_fold(0_i64, |sum, object| {
                 let value = game.internal_numeric_stat(self.object_id(object)?, stat)?;
                 sum.checked_add(value)
+                    .ok_or_else(|| invalid("numeric aggregate overflow"))
+            })
+    }
+
+    /// A chosen follower's current stat; one that left the field or changed generation adds 0.
+    fn selected_live_sum(
+        &self,
+        game: &Game,
+        objects: &Selector,
+        property: NumericProperty,
+    ) -> Result<i64> {
+        let stat = if property == NumericProperty::Attack {
+            Stat::Attack
+        } else {
+            Stat::Life
+        };
+        self.objects(game, objects)?
+            .into_iter()
+            .try_fold(0_i64, |sum, object| {
+                let id = self.object_id(object)?;
+                let current = game.object(id)?;
+                if current.generation != object.generation.0 || current.zone != "field" {
+                    return Ok(sum);
+                }
+                sum.checked_add(game.internal_numeric_stat(id, stat)?)
                     .ok_or_else(|| invalid("numeric aggregate overflow"))
             })
     }

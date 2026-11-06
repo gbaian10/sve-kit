@@ -431,7 +431,8 @@ fn mask_public_number(number: &mut Expr<Int>) {
         return;
     }
 
-    if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, property: NumericProperty::Attack | NumericProperty::Life } if target_plan(objects).is_some()))
+    // A chosen public field follower's live stat (BP17-090) is as public as the attack target's.
+    if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, property: NumericProperty::Attack | NumericProperty::Life } if target_plan(objects).is_some() || matches!(objects, Selector::Bound { .. })))
     {
         *number = Expr::Literal(Int(0));
         return;

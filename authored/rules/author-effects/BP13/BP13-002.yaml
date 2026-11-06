@@ -1,0 +1,36 @@
+cards:
+  BP13-002:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          name: 九尾の決意
+                          who: self
+                          zone: deck
+                        to: hand
+                  - - move:
+                        ref: returned
+                        to: hand
+          targets:
+            - bind: returned
+              from:
+                name: 九尾の決意
+                who: self
+                zone: cemetery
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set

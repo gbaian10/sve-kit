@@ -1806,3 +1806,72 @@ fn trait_unions_filter_public_targets_and_reject_single_traits_counts_and_leader
         "public counts have no card needing a trait union"
     );
 }
+
+#[test]
+fn live_attack_reads_only_a_single_chosen_own_follower() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let spell = |reader: &str| {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({
+            "targets":[
+                {"bind":"ally","from":{"who":"self","zone":"field","kind":"follower"},"n":1_u64},
+                {"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1_u64}
+            ],
+            "do":[
+                {"buff":{"on":"ally","power":1_u64,"hp":1_u64}},
+                {"damage":{"to":"enemy","n":{"power_of":reader}}}
+            ]
+        });
+        tree
+    };
+    let cards = lowerer
+        .lower_with_printed_costs(&spell("ally"), &costs)
+        .unwrap();
+    let rendered = &cards["SD03-005"].card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap()
+        .steps;
+    let Node::Instruction { instruction } = &rendered[1].node else {
+        panic!("damage instruction");
+    };
+    let Action::Damage {
+        amount: DamageAmount::Uniform { amount },
+        ..
+    } = &instruction.action
+    else {
+        panic!("uniform damage");
+    };
+    assert!(
+        matches!(amount, Expr::Compute(sum) if matches!(sum.as_ref(),
+            IntOperation::Sum { objects: Selector::Bound { .. }, property: NumericProperty::Attack })),
+        "the amount reads the chosen follower when the damage resolves"
+    );
+    lowerer
+        .lower_with_printed_costs(&spell("enemy"), &costs)
+        .unwrap_err();
+    // A body choose of exactly one own field follower is the same public single object.
+    let mut chosen = expanded::spell_tree().clone();
+    *chosen
+        .pointer_mut("/cards/SD03-005/abilities/0/spell")
+        .unwrap() = json!({
+        "do":[
+            {"choose":{"bind":"ally","from":{"who":"self","zone":"field","kind":"follower"},"n":1_u64}},
+            {"buff":{"on":"ally","power":1_u64,"hp":1_u64}},
+            {"damage":{"to":{"leader":"opp"},"n":{"power_of":"ally"}}}
+        ]
+    });
+    lowerer.lower_with_printed_costs(&chosen, &costs).unwrap();
+    chosen["cards"]["SD03-005"]["abilities"][0]["spell"]["do"][0]["choose"]["upto"] = json!(2_u64);
+    chosen["cards"]["SD03-005"]["abilities"][0]["spell"]["do"][0]["choose"]
+        .as_object_mut()
+        .unwrap()
+        .remove("n");
+    lowerer
+        .lower_with_printed_costs(&chosen, &costs)
+        .unwrap_err();
+}

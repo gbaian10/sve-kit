@@ -1,0 +1,204 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "bind": "seen",
+                "count": 3,
+                "op": "look"
+              },
+              {
+                "op": "optional",
+                "selection": {
+                  "bind": "chosen",
+                  "max": 1,
+                  "min": 1,
+                  "select": {
+                    "from": "seen",
+                    "where": {
+                      "args": [
+                        {
+                          "args": [
+                            {
+                              "read": "item.class"
+                            },
+                            "エルフ"
+                          ],
+                          "fn": "eq"
+                        },
+                        {
+                          "args": [
+                            {
+                              "read": "item.cost"
+                            },
+                            2
+                          ],
+                          "fn": "le"
+                        }
+                      ],
+                      "fn": "and"
+                    }
+                  }
+                },
+                "then": {
+                  "op": "seq",
+                  "steps": [
+                    {
+                      "op": "reveal",
+                      "subjects": "chosen",
+                      "to": "all"
+                    },
+                    {
+                      "op": "move",
+                      "subjects": "chosen",
+                      "to": "hand"
+                    }
+                  ]
+                }
+              },
+              {
+                "op": "seq",
+                "steps": [
+                  {
+                    "bind": "ordered",
+                    "max": {
+                      "count": {
+                        "difference": [
+                          "seen",
+                          "chosen"
+                        ]
+                      }
+                    },
+                    "min": {
+                      "count": {
+                        "difference": [
+                          "seen",
+                          "chosen"
+                        ]
+                      }
+                    },
+                    "op": "select",
+                    "order": true,
+                    "select": {
+                      "difference": [
+                        "seen",
+                        "chosen"
+                      ]
+                    }
+                  },
+                  {
+                    "op": "move",
+                    "position": "bottom",
+                    "subjects": "ordered",
+                    "to": "deck"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "count": "chosen"
+                },
+                0
+              ],
+              "fn": "gt"
+            },
+            "op": "if",
+            "then": {
+              "op": "seq",
+              "steps": [
+                {
+                  "bind": "discarded",
+                  "by": "self",
+                  "max": 1,
+                  "min": 1,
+                  "op": "select",
+                  "select": {
+                    "side": "self",
+                    "zone": "hand"
+                  }
+                },
+                {
+                  "op": "discard",
+                  "subjects": "discarded"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self"
+    },
+    {
+      "active_zones": [
+        "cemetery"
+      ],
+      "body": {
+        "op": "optional",
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "bind": "chosen",
+              "max": 1,
+              "min": 1,
+              "op": "select",
+              "select": {
+                "name": "九火石炎・セッカ",
+                "side": "self",
+                "zone": "evolve_deck"
+              }
+            },
+            {
+              "bind": "placed",
+              "op": "move",
+              "subjects": "chosen",
+              "to": "field"
+            }
+          ]
+        }
+      },
+      "cost_selections": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "select": {
+            "other": true,
+            "side": "self",
+            "zone": "cemetery"
+          }
+        }
+      ],
+      "costs": [
+        {
+          "amount": 3,
+          "op": "pp"
+        },
+        {
+          "op": "banish",
+          "subjects": {
+            "union": [
+              "self",
+              "cost.1"
+            ]
+          }
+        }
+      ],
+      "kind": "activated",
+      "line": 2
+    }
+  ],
+  "status": "complete"
+}

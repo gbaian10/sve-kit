@@ -911,6 +911,18 @@ impl BodyContext<'_> {
                 ast::Observation::Before { objects_of, .. } => {
                     self.paid_material_attack(objects_of, path)
                 }
+                // 「前者の攻撃力」: the chosen own follower's attack when read, after earlier buffs.
+                ast::Observation::Binding(name) if self.ability_holders.contains(name) => {
+                    let reference = self
+                        .targets
+                        .get(name)
+                        .copied()
+                        .ok_or_else(|| unsupported(path))?;
+                    Ok(Expr::Compute(Box::new(IntOperation::Sum {
+                        objects: Selector::Bound { reference },
+                        property: super::super::NumericProperty::Attack,
+                    })))
+                }
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
