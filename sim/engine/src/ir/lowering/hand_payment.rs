@@ -172,6 +172,18 @@ fn filter(
                 .collect(),
         })));
     }
+    // A printed keyword such as 【守護】 on the hand card (BP22-095).
+    if let Some(keyword) = &query.keyword {
+        predicates.push(super::selection::field_filter(
+            &super::selection::ObjectFilter {
+                keyword: Some(
+                    super::keywords::basic_keyword_id(keyword).ok_or_else(|| unsupported(path))?,
+                ),
+                ..super::selection::ObjectFilter::default()
+            },
+            binding,
+        ));
+    }
     if let Some(class) = &query.class {
         if class.is_empty() {
             return Err(unsupported(path));
