@@ -1237,16 +1237,21 @@ fn original_cost_cap(
 ) -> Result<Option<super::super::AggregateBound>, LoweringError> {
     target
         .cost_sum_le
-        .map(|limit| {
-            Ok(super::super::AggregateBound {
-                property: super::super::NumericProperty::OriginalCost,
-                comparison: Comparison::LessEqual,
-                value: Expr::Literal(Int(
-                    i64::try_from(limit).map_err(|_overflow| unsupported(path))?
-                )),
-            })
-        })
+        .map(|limit| original_cost_bound(limit, path))
         .transpose()
+}
+
+pub(super) fn original_cost_bound(
+    limit: u64,
+    path: &str,
+) -> Result<super::super::AggregateBound, LoweringError> {
+    Ok(super::super::AggregateBound {
+        property: super::super::NumericProperty::OriginalCost,
+        comparison: Comparison::LessEqual,
+        value: Expr::Literal(Int(
+            i64::try_from(limit).map_err(|_overflow| unsupported(path))?
+        )),
+    })
 }
 
 fn target_cardinality(target: &ast::Target, path: &str) -> Result<Cardinality, LoweringError> {

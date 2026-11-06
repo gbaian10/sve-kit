@@ -4,6 +4,7 @@ use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, contains,
     invalid, seat_name, unsupported,
 };
+use crate::ir::observation_selection::{CardTotals, card_totals};
 use crate::ir::printed_keywords;
 use crate::ir::public_numbers;
 use crate::ir::{
@@ -91,6 +92,8 @@ pub(super) struct SearchWait {
     snapshot: SnapshotId,
     conditional: bool,
     distinct_names: bool,
+    /// 元のコストの合計がN以下 over every found card.
+    cost_cap: Option<i64>,
 }
 
 pub(super) fn packet(domain: &SearchDomain) -> Value {
@@ -295,8 +298,10 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             .as_ref()
             .is_some_and(|g| g.distinct_by == Some(ObjectProperty::Names));
     if let Some(groups) = groups {
-        if !groups.aggregate_bounds.is_empty()
-            || !matches!(groups.distinct_by, None | Some(ObjectProperty::Names))
+        if matches!(
+            card_totals(&groups.aggregate_bounds),
+            CardTotals::Unsupported
+        ) || !matches!(groups.distinct_by, None | Some(ObjectProperty::Names))
         {
             return Err(unsupported("search aggregates or distinct property"));
         }
@@ -780,6 +785,14 @@ impl Game {
         let distinct_names = groups
             .as_ref()
             .is_some_and(|groups| groups.distinct_by == Some(ObjectProperty::Names));
+        let cost_cap = match groups
+            .as_ref()
+            .map(|groups| card_totals(&groups.aggregate_bounds))
+        {
+            None | Some(CardTotals::Unbounded) => None,
+            Some(CardTotals::OriginalCostAtMost(limit)) => Some(limit),
+            Some(CardTotals::Unsupported) => return Err(unsupported("search aggregate bound")),
+        };
         let wait = SearchWait {
             instruction,
             player,
@@ -790,6 +803,7 @@ impl Game {
             snapshot: SnapshotId(self.state.ir_epoch),
             conditional,
             distinct_names,
+            cost_cap,
         };
         self.internal_wait(
             execution,
@@ -798,6 +812,46 @@ impl Game {
             InputDomain::Search(domain),
             Wait::Search(wait),
         )
+    }
+
+    /// Distinct names and the original cost cap span every found card.
+    fn internal_search_check_totals(
+        &self,
+        execution: &Execution,
+        wait: &SearchWait,
+        found: &[ObjectRef],
+    ) -> Result<()> {
+        let mut names = BTreeSet::new();
+        for object in found {
+            let index = wait
+                .members
+                .iter()
+                .position(|member| member == object)
+                .ok_or_else(|| invalid("foreign search member"))?;
+            let card = wait
+                .domain
+                .cards
+                .get(index)
+                .ok_or_else(|| invalid("missing frozen search card"))?;
+            if wait.distinct_names && !names.insert(&card.name) {
+                return Err(invalid("search names must differ"));
+            }
+        }
+        if let Some(limit) = wait.cost_cap {
+            let mut total = 0_i64;
+            for object in found {
+                let id = execution.object_id(*object)?;
+                total = total
+                    .checked_add(super::cost::printed_cost(
+                        &self.internal_cost_print(id)?["cost"],
+                    )?)
+                    .ok_or_else(|| invalid("search cost sum overflow"))?;
+            }
+            if total > limit {
+                return Err(invalid("search original cost total exceeds its cap"));
+            }
+        }
+        Ok(())
     }
 
     pub(super) fn internal_search_validate(
@@ -856,22 +910,7 @@ impl Game {
         ) {
             return Err(invalid("search total cardinality"));
         }
-        let mut names = BTreeSet::new();
-        for object in &found {
-            let index = wait
-                .members
-                .iter()
-                .position(|member| member == object)
-                .ok_or_else(|| invalid("foreign search member"))?;
-            let card = wait
-                .domain
-                .cards
-                .get(index)
-                .ok_or_else(|| invalid("missing frozen search card"))?;
-            if wait.distinct_names && !names.insert(&card.name) {
-                return Err(invalid("search names must differ"));
-            }
-        }
+        self.internal_search_check_totals(execution, wait, &found)?;
         if let Action::Search {
             destination: Some(SearchDestination::Single { movement }),
             ..
