@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-025:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        keywords: [intimidate]
+      - line: 2
+        auto:
+          on:
+            moved:
+              from: { who: opp, zone: field }
+              to: cemetery
+              during: { turn: self }
+              sel:
+                kind: follower
+                where:
+                  history:
+                    event: dealt_damage
+                    window: this_turn
+                    where: { ref: this, recipient: item }
+          do:
+            - move:
+                top: { who: self, n: 1 }
+                to: ex
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemies
+              from: { who: opp, zone: field, kind: follower }
+              upto: 2
+          do:
+            - damage:
+                to: enemies
+                n: 6
+                distribute: true
+                distribute_at: play
