@@ -1600,37 +1600,73 @@ impl Game {
         if play.exchange.is_some() {
             return Err(unsupported("exchange with mode costs"));
         }
-        let mut probe = self.clone();
-        let mut execution = execution.clone();
-        probe.card_runtime.active_source = execution.ability;
         let spell = execution.spell;
-        let paid = probe
-            .internal_probe_hand_costs(&mut execution, &play.costs)
-            .and_then(|()| probe.internal_card_payment(&mut execution, &play.costs, spell));
-        let paid = paid.and_then(|()| probe.internal_card_payment(&mut execution, costs, false));
-        match paid {
-            Ok(()) => Ok(true),
-            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
-            Err(error) => Err(error),
+        for mut trial in self.internal_public_material_probes(execution, play)? {
+            let mut probe = self.clone();
+            probe.card_runtime.active_source = trial.ability;
+            let paid = probe
+                .internal_probe_hand_costs(&mut trial, &play.costs)
+                .and_then(|()| probe.internal_card_payment(&mut trial, &play.costs, spell));
+            let paid = paid.and_then(|()| probe.internal_card_payment(&mut trial, costs, false));
+            match paid {
+                Ok(()) => return Ok(true),
+                Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
         }
+        Ok(false)
+    }
+
+    /// Public head-cost materials are chosen after the modes (BP09-071): one probe per legal
+    /// way to fill them, so a payment counts as affordable when any of them succeeds.
+    fn internal_public_material_probes(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+    ) -> Result<Vec<Execution>> {
+        let mut probes = vec![execution.clone()];
+        for decision in &play.parameters {
+            if !super::material::is_parameter(decision)
+                || decision.visibility != (Visibility::Public {})
+            {
+                continue;
+            }
+            let choices = self.internal_public_material_choices(
+                execution,
+                decision,
+                play.material_posture(decision),
+            )?;
+            let mut next = Vec::new();
+            for probe in &probes {
+                for (key, slot) in &choices {
+                    let mut filled = probe.clone();
+                    filled.slots.insert(*key, slot.clone());
+                    next.push(filled);
+                }
+            }
+            probes = next;
+        }
+        Ok(probes)
     }
 
     fn internal_play_affordable(&self, execution: &Execution, play: &PlayState) -> Result<bool> {
         if play.exchange.is_some() {
             return self.internal_exchange_affordable(execution, play);
         }
-        let mut payment_game = self.clone();
-        payment_game.card_runtime.active_source = execution.ability;
-        let mut probe = execution.clone();
-        match payment_game
-            .internal_probe_hand_costs(&mut probe, &play.costs)
-            .and_then(|()| {
-                payment_game.internal_card_payment(&mut probe, &play.costs, execution.spell)
-            }) {
-            Ok(()) => Ok(true),
-            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
-            Err(error) => Err(error),
+        for mut probe in self.internal_public_material_probes(execution, play)? {
+            let mut payment_game = self.clone();
+            payment_game.card_runtime.active_source = execution.ability;
+            match payment_game
+                .internal_probe_hand_costs(&mut probe, &play.costs)
+                .and_then(|()| {
+                    payment_game.internal_card_payment(&mut probe, &play.costs, execution.spell)
+                }) {
+                Ok(()) => return Ok(true),
+                Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
         }
+        Ok(false)
     }
 
     pub(in crate::game::internal) fn internal_play_distribution_captures(
