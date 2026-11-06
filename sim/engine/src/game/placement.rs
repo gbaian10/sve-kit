@@ -70,7 +70,7 @@ impl Game {
         side: Option<&str>,
         frame: &Frame,
     ) -> Result<String> {
-        if !matches!(destination, "field" | "ex") {
+        if !matches!(destination, "field" | "ex" | "resolution") {
             return Ok(object.owner.clone());
         }
         let controller = if frame.values.get("owner_destination") == Some(&json!(true)) {

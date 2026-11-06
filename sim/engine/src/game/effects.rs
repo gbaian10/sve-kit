@@ -578,7 +578,14 @@ impl Game {
         zone: &str,
         frame: &Frame,
     ) -> Result<()> {
-        self.move_objects_with_play_grants(&[holder.into()], zone, None, None, frame, true)
+        self.move_objects_with_play_grants(
+            &[holder.into()],
+            zone,
+            Some(&frame.controller),
+            None,
+            frame,
+            true,
+        )
     }
 
     pub(in crate::game) fn move_effect_playing_card(
