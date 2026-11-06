@@ -1,0 +1,50 @@
+cards:
+  BP13-073:
+    abilities:
+      - auto:
+          do:
+            - choice:
+                exclude_chosen: this_turn
+                n: 1
+                options:
+                  - - damage:
+                        n:
+                          history_count:
+                            event: life_changed
+                            where:
+                              direction: down
+                            who: self
+                            window: this_turn
+                        to: enemy
+                  - - buff:
+                        hp: 1
+                        on: this
+                        power: 1
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+          on:
+            life_changed:
+              direction: down
+              during:
+                turn: self
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
