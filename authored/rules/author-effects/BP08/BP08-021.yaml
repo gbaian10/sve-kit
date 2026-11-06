@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-021:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - ward
+      - line: 3
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        sel:
+                          who: self
+                          zone: deck
+                          kind: amulet
+                          name: 不滅の聖剣・デュランダル
+                        n: 1
+                        to: hand
+                  - - choose:
+                        bind: selected
+                        from:
+                          who: self
+                          zone: hand
+                          kind: amulet
+                          name: 不滅の聖剣・デュランダル
+                        upto: 1
+                    - move:
+                        ref: selected
+                        to: field
+                        result: entered

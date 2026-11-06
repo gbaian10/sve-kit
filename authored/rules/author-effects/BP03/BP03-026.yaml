@@ -1,0 +1,67 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-026:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-06"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  keyword: storm
+                n: 1
+                to: hand
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                keyword: storm
+              n: 1
+          do:
+            - buff:
+                "on": ally
+                power: 1
+                hp: 0
+      - line: 3
+        activate:
+          cost:
+            steps:
+              - pp: 10
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                  kind: follower
+                  keyword: storm
+                any: true
+            - move:
+                ref: selected
+                to: field
+                result: entered
+            - buff:
+                "on":
+                  follow: entered
+                power: 2
+                hp: 2

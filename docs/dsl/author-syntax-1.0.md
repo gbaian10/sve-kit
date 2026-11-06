@@ -1217,7 +1217,6 @@ evolve_time:
           bind: picked,
           from: { who: self, zone: hand, kind: follower },
           any: true,
-          may: true,
         }
     - move:
         ref: picked
@@ -1239,6 +1238,8 @@ evolve_time:
           until: turn,
         }
 ```
+
+此處 `any: true` 已允許選取 0 張，表示不入場；不另加 `may` 的 Decline 分支。
 
 ### GAP-A-045
 
