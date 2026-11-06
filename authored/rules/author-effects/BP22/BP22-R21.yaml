@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-R21:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        use: meal_entry.v1
+      - line: 3
+        fanfare:
+          targets:
+            - bind: carrot
+              from:
+                who: self
+                zone: evolve_deck
+                face_up: true
+                name: にんじん
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: ウマ娘
+                    op: ge
+                    right: 10
+                then:
+                  - flip_down: carrot
