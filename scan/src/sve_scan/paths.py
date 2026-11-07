@@ -19,7 +19,7 @@ def work() -> Path:
     return path
 
 
-def private() -> Path:
+def data() -> Path:
     """Private photos and the material derived from them; never published (SVE_SCAN_DATA)."""
     return _root("SVE_SCAN_DATA")
 
@@ -35,18 +35,18 @@ def card_images(size: str = "card_l") -> Path:
 
 def real() -> Path:
     """Labelled real photos, one folder per source with a manifest.jsonl."""
-    return private() / "real"
+    return data() / "real"
 
 
 def deck_photos() -> Path:
     """Deck-spread photos from social posts and their SIFT-checked labels."""
-    return private() / "web-x" / "sample-events-orig"
+    return data() / "web-x" / "sample-events-orig"
 
 
 def glare_bank() -> Path:
-    return private() / "web-x" / "glare-bank"
+    return data() / "web-x" / "glare-bank"
 
 
 def det_photos() -> Path:
     """Openly licensed photo sets used as real detector training data."""
-    return private() / "web-det"
+    return data() / "web-det"
