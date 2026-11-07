@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router"
 
 import { routeState } from "../../app/listEntryState"
-import { useRouteEdition } from "../../app/snapshot"
+import { isScanPath, useRouteEdition } from "../../app/snapshot"
 import { useSystemDark } from "../../app/useSystemDark"
 import { locateEdition, snapshotClient, useSnapshotRoot } from "../../data"
 import { CardRouteError, printingPath } from "../../domain/cardRoute"
@@ -104,7 +104,7 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
   const changeEdition = async (cardEdition: Region) => {
     pending.current?.abort()
     setTransition(null)
-    if (!location.pathname.startsWith("/cards/")) {
+    if (!location.pathname.startsWith("/cards/") || isScanPath(location.pathname)) {
       prefsStore.set({ cardEdition })
       if (
         location.pathname === "/cards" ||

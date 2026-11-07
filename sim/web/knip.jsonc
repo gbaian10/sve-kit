@@ -13,8 +13,7 @@
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
-  // onnxruntime-web is imported by the card scanner in the next PR (#1842); drop it from this list then.
-  "ignoreDependencies": ["@fontsource/ibm-plex-sans", "onnxruntime-web"],
+  "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
   "entry": [
     "bench/driver.ts",
     "scripts/ci/public-junit-reporter.ts",
@@ -33,6 +32,8 @@
     "scripts/fixture/construction.ts",
     "scripts/fixture/cards.ts",
     "scripts/fixture/view.ts",
+    // The card scanner's shared engine; the scan screens (#1843, #1844) import it. Remove this line then.
+    "src/pages/scan/engine.ts!",
   ],
   // knip 6.38 does not know Bun's newer `bun check` and `bun fmt` commands and reads them as binaries.
   "ignoreBinaries": ["check", "fmt"],

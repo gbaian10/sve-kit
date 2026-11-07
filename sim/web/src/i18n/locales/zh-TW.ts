@@ -784,6 +784,60 @@ const zhTW = {
     updateApp: "請更新應用程式以讀取最新快照。",
     retry: "檢查更新",
   },
+  scan: {
+    models: {
+      title: "拍卡辨識模型",
+      back: "回查卡",
+      intro:
+        "拍卡用到的檔案都在這裡。單張和整副牌照片兩個模式共用；下載一次就存在這台裝置，照片不會上傳。",
+      needed: "需要下載 {{mb}} MB",
+      allReady: "全部已下載，之後拍卡不用再下載",
+      stored: "這台裝置已存 {{mb}} MB",
+      downloadAll: "全部下載",
+      removeAll: "全部刪除",
+      download: "下載",
+      update: "更新",
+      remove: "刪除",
+      size: "{{mb}} MB",
+      version: "版本 {{version}}",
+      footer: "刪除後，下次用拍卡會再下載。",
+      state: {
+        ready: "已下載",
+        update: "有新版本",
+        missing: "未下載",
+        downloading: "下載中 {{pct}}%",
+      },
+      runtime: {
+        name: "執行引擎",
+        desc: "在瀏覽器裡跑模型的程式（ONNX Runtime），兩個模型都靠它。",
+      },
+      det: {
+        name: "找卡模型",
+        desc: "找出畫面裡每張卡的四個角，把卡拉正。整副牌照片靠它一次找出全部的卡。",
+      },
+      rec: {
+        name: "辨識模型",
+        desc: "判斷拉正後的卡是哪一張。",
+        index:
+          "含{{edition}}卡片索引：{{cards}} 張卡，卡表 {{dataVersion}}。出新卡包時只更新索引。",
+        noIndex: "{{edition}}卡片索引還沒有發佈。",
+      },
+      list: {
+        offline: "目前連不到伺服器，只顯示已存在這台裝置的模型。",
+        unsupported: "辨識模型改用了新格式，請重新整理網頁、更新 sve-kit 後再下載。",
+        invalid: "模型清單有誤，暫時無法下載。",
+        reload: "重新整理",
+      },
+      error: {
+        network: "下載失敗，請檢查網路後重試。",
+        integrity: "下載的檔案驗證不符，已捨棄；請重試。",
+        quota: "裝置空間不足，請清出空間後再試。",
+        unsupported: "需要更新 sve-kit 才能下載這個版本。",
+        missing: "這個卡片版本的索引還沒有發佈。",
+        unknown: "下載失敗。",
+      },
+    },
+  },
 } as const
 
 type Widen<T> = { readonly [K in keyof T]: T[K] extends string ? string : Widen<T[K]> }

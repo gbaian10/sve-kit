@@ -45,6 +45,16 @@ describe("AccountMenuPanel", () => {
     expect(screen.getByRole("switch", { name: label })).toBeInTheDocument()
   })
 
+  it("switches the scanner's edition in place instead of looking up a card named scan", async () => {
+    const { router } = await renderInRouter(<AccountMenuPanel />, {
+      initialEntries: ["/cards/scan/models"],
+    })
+    await userEvent.click(screen.getByRole("radio", { name: "英版" }))
+    expect(readPrefs().cardEdition).toBe("en")
+    expect(router.state.location.pathname).toBe("/cards/scan/models")
+    expect(screen.getByRole("radio", { name: "英版" })).toHaveAttribute("aria-checked", "true")
+  })
+
   it("writes every choice to the preferences", async () => {
     await renderInRouter(<AccountMenuPanel />)
     await userEvent.click(screen.getByRole("radio", { name: "英版" }))
