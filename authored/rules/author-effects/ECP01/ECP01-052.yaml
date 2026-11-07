@@ -1,0 +1,70 @@
+cards:
+  ECP01-052:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 7
+                who: self
+          on:
+            enter_field:
+              sel:
+                name: 運の行方
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - move:
+                ref:
+                  who: self
+                  zone: cemetery
+                to: deck
+            - shuffle:
+                who: self
+            - look:
+                bind: seen
+                top:
+                  n: 7
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  name: 運の行方
+                upto: 7
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: deck
+        line: 3
+      - lastword:
+          do:
+            - move:
+                ref: this
+                to: deck
+            - shuffle:
+                who: self
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

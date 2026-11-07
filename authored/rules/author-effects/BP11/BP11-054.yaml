@@ -1,0 +1,47 @@
+cards:
+  BP11-054:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          cost:
+            pp: 2
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - shuffle:
+                      who: self
+                  - move:
+                      result: entered
+                      to: ex
+                      top:
+                        n: 1
+                        who: self
+                  - apply:
+                      effect:
+                        cost_mod:
+                          set: 0
+                          when_playing:
+                            in: affected
+                      on:
+                        follow: entered
+                      until: turn
+        line: 2
+      - lastword:
+          do:
+            - life:
+                delta: 2
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
