@@ -158,6 +158,7 @@ impl BodyContext<'_> {
                 kind: spells.then_some(ast::CountKind::Spell),
                 keyword: None,
                 r#trait: None,
+                traits_any: None,
                 name: None,
                 name_contains: None,
                 orig_cost_eq: None,
@@ -381,6 +382,7 @@ impl BodyContext<'_> {
             || count.keyword.is_some()
             || count.other
             || count.r#trait.is_some()
+            || count.traits_any.is_some()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
             || count.token.is_some()
@@ -1100,6 +1102,7 @@ impl BodyContext<'_> {
             || count.other
             || count.kind.is_some()
             || count.r#trait.is_some()
+            || count.traits_any.is_some()
             || count.name.is_some()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
@@ -1120,7 +1123,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if matches!(count.zone, ast::CountZone::EvolveDeck)
-            && !matches!(count.who, ast::Side::Controller)
+            && (!matches!(count.who, ast::Side::Controller) || count.traits_any.is_some())
         {
             return Err(unsupported(path));
         }

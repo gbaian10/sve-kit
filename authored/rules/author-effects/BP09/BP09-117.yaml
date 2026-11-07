@@ -1,0 +1,69 @@
+cards:
+  BP09-117:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - in: seen
+                      trait: 天使
+                    - in: seen
+                      trait: 堕天使
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: moved
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - life:
+                delta: 1
+                who: self
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: follower
+                  traits_any:
+                    - 天使
+                    - 堕天使
+                  who: self
+                  zone: field
+              op: ge
+              right: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
