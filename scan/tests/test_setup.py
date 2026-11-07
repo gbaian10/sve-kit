@@ -25,7 +25,7 @@ def test_paths_come_from_the_environment(monkeypatch, tmp_path):
 def test_missing_root_says_which_variable(monkeypatch):
     monkeypatch.delenv("SVE_SCAN_DATA", raising=False)
     with pytest.raises(SystemExit, match="SVE_SCAN_DATA"):
-        paths.private()
+        paths.data()
 
 
 def test_every_command_names_a_module():
