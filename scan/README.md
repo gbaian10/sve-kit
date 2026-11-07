@@ -10,10 +10,55 @@ web client is the reference.
 - **Card index**: vectors of every card image (int8) + hub correction values + the card list, one per card
   edition (jp / en)
 
-The artifact format is specified in [docs/schema/scan/artifacts.md](../docs/schema/scan/artifacts.md).
+The artifact format is specified in [docs/schema/scan/artifacts.md](../docs/schema/scan/artifacts.md). What the
+models are built from, their licenses, evaluation and limitations are in [MODEL_CARD.md](MODEL_CARD.md).
 
 `scan/` is its own uv project, outside the root workspace (PyTorch stays out of carddb's environment). It reads
 exports only through `sve_carddb.export.read_api`, as `publish/` does.
+
+## Common tasks
+
+Commands below are `python -m sve_scan …` run as `uv --directory scan run python -m sve_scan …`, with the three
+variables of "Where data lives" set. `rec-ft` and `det-e` stand for the work-folder file names of the current
+models.
+
+### New cards or a new card data version (models unchanged)
+
+The models need no retraining (about 8% of cards are held out of training to keep checking that). Rebuild the
+index from the new export and publish it:
+
+```bash
+python -m sve_scan gallery                                            # card images of the export
+uv --directory scan run --group train python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft
+python -m sve_scan index rec-ft                                       # index/rec-ft/{jp,en}.* and build.json
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # same versions: only the index changes
+```
+
+- About 7.5 minutes on a 10-core CPU with an RTX 3070: gallery 2.7 min, hub 0.4 min (GPU), index 4.4 min, the
+  whole set every time (one new card takes as long as a new pack)
+- `build.json` records the card data version and `rows_sha256`, which covers only the image rows (printing,
+  face, image version); a fix to a card's name, class or art group leaves it unchanged. Whether users download
+  anything again follows the release manifest: index files are named by their content hash, so only changed
+  files are new
+- The release step refuses an index built with another recogniser
+
+### Check a model
+
+```bash
+python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # recogniser, real photos
+python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # deck photos of the held-out events
+python -m sve_scan eval-deck deck-det-e                             # deck recall from the step above
+```
+
+Give every model its own deck-label output folder: deck-label skips photos already in the folder and
+eval-deck reads whatever is there, so a reused folder reports the earlier model. Compare with the numbers in
+MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
+
+### Train a new model version
+
+Continue the latest stage with the recipe in "Recogniser" or "Corner finder" (`INIT=<previous tag>`), check it,
+then release it with the next version number (`release <out dir> 2 <det tag> 1 rec-ft` for a new corner finder).
+A new recogniser always needs a new index: rerun `rec-hub` and `index` with its tag before `release`.
 
 ## Setup
 
@@ -152,9 +197,9 @@ python -m sve_scan det export det-e det_det-e.w8.onnx
 
 ```bash
 python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # single card: card-level top-1 / top-5
-python -m sve_scan deck-label rec-ft det-d labels.json deck-out     # then eval-deck for deck recall
-python -m sve_scan eval-deck deck-out
-python -m sve_scan eval-det rec-ft det.json det-d:global            # corner finder: useful boxes, corner error
+python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # then eval-deck for deck recall
+python -m sve_scan eval-deck deck-det-e
+python -m sve_scan eval-det rec-ft det.json det-e:global            # corner finder: useful boxes, corner error
 ```
 
 - Results go to `SVE_SCAN_WORK/eval/`; the same inputs and models give the same results
@@ -164,7 +209,7 @@ python -m sve_scan eval-det rec-ft det.json det-d:global            # corner fin
 ### 6. Release files
 
 ```bash
-python -m sve_scan release <out dir> 1 det-d 1 rec-ft
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # det-1 = stage 5, rec-1 = stage 2
 ```
 
 Writes `models/<sha256>.onnx`, `index/<sha256>.*` and `manifest.json` for the publish step, which uploads them under
