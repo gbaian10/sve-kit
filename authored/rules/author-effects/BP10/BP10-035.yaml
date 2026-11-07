@@ -1,0 +1,51 @@
+cards:
+  BP10-035:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    not_same_name_as_this: true
+                    trait: 商人
+                    who: self
+                    zone: field
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leaders: opponents
+          "on":
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                "on": ally
+                power: 1
+            - grant:
+                keywords:
+                  - assail
+                "on": ally
+          targets:
+            - bind: ally
+              from:
+                class: ロイヤル
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
