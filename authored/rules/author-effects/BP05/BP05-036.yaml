@@ -1,0 +1,50 @@
+cards:
+  BP05-036:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 9
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  orig_cost_le: 3
+                may: true
+                upto: 3
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
