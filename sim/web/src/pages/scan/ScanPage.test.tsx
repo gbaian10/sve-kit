@@ -6,23 +6,30 @@ import { MemoryRouter } from "react-router"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
+import { createScanModelStore } from "../../data/scan-models"
 import { toggleClass } from "../../domain/scan/class-pick"
 import type { ScanCard } from "../../domain/scan/search"
 import { createI18n, type UiLanguage } from "../../i18n"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, saveScanBackend } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
 import { stubCanvas2d } from "../../test-utils/canvas-2d"
-import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
+import { fakeScanCdn, RUNTIMES, SCAN_BASE } from "../../test-utils/scan-publication"
 import { closeScanEngine } from "./engine"
 import { useScanResults } from "./scan-hooks"
 import { ScanPage } from "./ScanPage"
 
+// The parts a scan with the CPU engine needs.
+const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
+
 // ONNX Runtime does not run in jsdom: a stand-in answers with the real models' output names. With
 // `sees.card`, the finder sees one card in the middle and the recogniser reads it as BP01-001.
 const sees = vi.hoisted(() => ({ card: false }))
+vi.mock("onnxruntime-web/webgpu", () => ({
+  env: { wasm: {} },
+  InferenceSession: { create: () => Promise.reject(new Error("no adapter")) },
+}))
 vi.mock("onnxruntime-web/wasm", () => {
   class Tensor {
     readonly data: Float32Array
@@ -129,6 +136,7 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 afterEach(() => {
+  saveScanBackend("cpu")
   sees.card = false
   closeScanEngine()
   prefsStore.set(DEFAULT_PREFS)
@@ -143,7 +151,7 @@ function setup(language?: UiLanguage) {
     caches: () => storage,
     fetcher: fakeScanCdn().fetcher,
     scanBase: () => SCAN_BASE,
-    runtime: RUNTIME,
+    runtimes: RUNTIMES,
   })
   return {
     store,
@@ -156,6 +164,19 @@ function setup(language?: UiLanguage) {
 }
 
 describe("ScanPage", () => {
+  it("asks to switch to CPU when WebGPU cannot start", async () => {
+    saveScanBackend("webgpu")
+    const camera = stubCamera()
+    const page = setup()
+    for (const part of ["runtime-webgpu", "det", "rec"] as const)
+      await page.store.download(part, "jp", () => undefined)
+    const user = userEvent.setup()
+    await page.render()
+    await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
+    camera.grant()
+    expect(await screen.findByText(/WebGPU 無法啟動，請到模型頁改用 CPU 引擎/)).toBeInTheDocument()
+  })
+
   it("asks to download the models first, downloads them in place, then offers the camera", async () => {
     const user = userEvent.setup()
     await setup().render()
@@ -280,7 +301,7 @@ describe("ScanPage", () => {
           ? new Promise<never>((_, reject) => {
               refuseEnglish = reject
             })
-          : page.store.load(edition),
+          : page.store.load(edition, "cpu"),
     }
     await renderInRouter(<ScanPage store={held} />, { initialEntries: ["/cards/scan"] })
     await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
@@ -338,7 +359,7 @@ describe("ScanPage", () => {
     })
     const slow = {
       ...page.store,
-      load: (edition: "jp" | "en") => gate.then(() => page.store.load(edition)),
+      load: (edition: "jp" | "en") => gate.then(() => page.store.load(edition, "cpu")),
     }
     const { unmount } = await renderInRouter(<ScanPage store={slow} />, {
       initialEntries: ["/cards/scan"],

@@ -10,14 +10,18 @@ import {
 import { parseScanCards, type ScanCard } from "../domain/scan/search"
 import type { Region } from "../domain/search"
 import { transferDigest } from "./integrity"
+import { SCAN_BACKENDS, type ScanBackend, type ScanRuntimeBinary } from "./scan-runtime"
 
 // The card scanner's files, downloaded only when the user asks and kept in Cache Storage. Model and
 // index files are named by their content hash, so a cached file is valid for as long as it exists;
 // each part also keeps a record of what it installed, which keeps scanning working offline and
-// across a newer publication until the user updates.
+// across a newer publication until the user updates. The ONNX Runtime binaries come from a public
+// CDN and are checked against the hashes pinned in this build.
 
-export type ScanPart = "runtime" | "det" | "rec"
-export const SCAN_PARTS: readonly ScanPart[] = ["runtime", "det", "rec"]
+export type ScanRuntimePart = `runtime-${ScanBackend}`
+export type ScanPart = ScanRuntimePart | "det" | "rec"
+export const SCAN_PARTS: readonly ScanPart[] = ["runtime-webgpu", "runtime-cpu", "det", "rec"]
+export const runtimePart = (backend: ScanBackend): ScanRuntimePart => `runtime-${backend}`
 
 export type ScanModelErrorKind = "network" | "integrity" | "quota" | "unsupported" | "missing"
 
@@ -56,6 +60,7 @@ export interface ScanModelsStatus {
 }
 
 export interface InstalledScanModels {
+  readonly backend: ScanBackend
   readonly runtime: Uint8Array
   readonly det: { readonly model: DetModel; readonly bytes: Uint8Array }
   readonly rec: { readonly model: RecModel; readonly bytes: Uint8Array }
@@ -69,15 +74,15 @@ export interface InstalledScanModels {
 }
 
 interface RuntimeRecord {
-  readonly url: string
+  readonly file: string
   readonly bytes: number
+  readonly sha256: string
 }
 interface RecRecord {
   readonly rec: RecModel
   readonly index: Partial<Record<Region, ScanIndexFiles>>
 }
-interface Records {
-  runtime?: RuntimeRecord
+type Records = Partial<Record<ScanRuntimePart, RuntimeRecord>> & {
   det?: DetModel
   rec?: RecRecord
 }
@@ -88,8 +93,8 @@ export interface ScanModelStoreOptions {
   readonly fetcher: (url: string, init?: RequestInit) => Promise<Response>
   /** Root URL of the published scan files (`…/scan`), read at call time. */
   readonly scanBase: () => string
-  /** The ONNX Runtime binary this build ships as a site asset. */
-  readonly runtime: RuntimeRecord
+  /** The ONNX Runtime binaries this build pins, one per backend. */
+  readonly runtimes: Readonly<Record<ScanBackend, ScanRuntimeBinary>>
 }
 
 export type ScanProgress = (got: number, total: number) => void
@@ -99,7 +104,8 @@ const CACHE = "sve-scan-models-v1"
 const KEY = "/scan-models/"
 const recordKey = (part: ScanPart) => `${KEY}installed/${part}.json`
 const fileKey = (file: string) => `${KEY}${file}`
-const runtimeKey = (url: string) => `${KEY}runtime/${encodeURIComponent(url)}`
+const runtimeKey = (backend: ScanBackend, sha256: string) =>
+  `${KEY}runtime/${backend}/${sha256}.wasm`
 const SIZE_HEADER = "x-scan-bytes"
 
 function isQuotaError(error: unknown): boolean {
@@ -178,12 +184,21 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     const [listed, installed] = await Promise.all([manifest(), records(cache)])
     const published = listed.state === "ok" ? listed.manifest : undefined
 
-    const runtimeReady = await has(cache, runtimeKey(options.runtime.url))
-    const runtime: ScanPartStatus = {
-      state: runtimeReady ? "ready" : "missing",
-      bytes: options.runtime.bytes,
-      missingBytes: runtimeReady ? 0 : options.runtime.bytes,
+    const runtimeStatus = async (backend: ScanBackend): Promise<ScanPartStatus> => {
+      const pin = options.runtimes[backend]
+      const have = installed[runtimePart(backend)]
+      const current =
+        have?.sha256 === pin.sha256 && (await has(cache, runtimeKey(backend, pin.sha256)))
+      const state = current ? "ready" : have ? "update" : "missing"
+      return {
+        state,
+        bytes: pin.bytes,
+        missingBytes: current ? 0 : pin.bytes,
+      }
     }
+    const runtimes = Object.fromEntries(
+      await Promise.all(SCAN_BACKENDS.map(async (b) => [runtimePart(b), await runtimeStatus(b)])),
+    ) as Record<ScanRuntimePart, ScanPartStatus>
 
     interface Copy {
       readonly files: ScanFile[]
@@ -242,7 +257,7 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     )
     return {
       manifest: listed.state,
-      parts: { runtime, det, rec },
+      parts: { ...runtimes, det, rec },
       storedBytes: await storedBytes(cache),
     }
   }
@@ -303,6 +318,25 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     return bytes
   }
 
+  /** Tries each CDN in turn, but only when a download cannot be made at all; a wrong file is refused. */
+  async function fetchRuntime(
+    pin: ScanRuntimeBinary,
+    onBytes: (got: number) => void,
+    signal: AbortSignal | undefined,
+  ): Promise<Uint8Array> {
+    let failure: ScanModelError | undefined
+    for (const url of pin.urls) {
+      try {
+        return await fetchFile(url, pin, onBytes, signal)
+      } catch (error) {
+        if (signal?.aborted) throw error
+        if (!(error instanceof ScanModelError) || error.kind !== "network") throw error
+        failure = error
+      }
+    }
+    throw failure ?? new ScanModelError("network", "no CDN address for the runtime")
+  }
+
   async function put(cache: Cache, key: string, body: Uint8Array | string): Promise<void> {
     const bytes = typeof body === "string" ? new TextEncoder().encode(body) : body
     try {
@@ -323,7 +357,10 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
   /** Cache keys some install record still needs. */
   function referenced(installed: Records): Set<string> {
     const keys = new Set<string>()
-    if (installed.runtime) keys.add(runtimeKey(installed.runtime.url))
+    for (const backend of SCAN_BACKENDS) {
+      const runtime = installed[runtimePart(backend)]
+      if (runtime) keys.add(runtimeKey(backend, runtime.sha256))
+    }
     if (installed.det) keys.add(fileKey(installed.det.file))
     if (installed.rec)
       for (const file of [
@@ -357,19 +394,27 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
       await put(cache, key, body)
     }
     try {
-      if (part === "runtime") {
-        const { url, bytes } = options.runtime
-        onProgress(0, bytes)
-        await fetchInto(runtimeKey(url), url, { bytes }, (got) => {
-          onProgress(got, bytes)
-        })
-        onProgress(bytes, bytes)
-        await put(cache, recordKey("runtime"), JSON.stringify(options.runtime))
-        for (const request of await cache.keys()) {
-          const path = new URL(request.url).pathname
-          if (path.startsWith(`${KEY}runtime/`) && path !== runtimeKey(url))
-            await cache.delete(request)
+      if (part.startsWith("runtime-")) {
+        const backend = part.slice("runtime-".length) as ScanBackend
+        const pin = options.runtimes[backend]
+        const key = runtimeKey(backend, pin.sha256)
+        onProgress(0, pin.bytes)
+        const have = (await records(cache))[runtimePart(backend)]
+        if (have?.sha256 !== pin.sha256 || !(await has(cache, key))) {
+          const body = await fetchRuntime(
+            pin,
+            (got) => {
+              onProgress(got, pin.bytes)
+            },
+            signal,
+          )
+          added.push(key)
+          await put(cache, key, body)
         }
+        onProgress(pin.bytes, pin.bytes)
+        const record: RuntimeRecord = { file: pin.file, bytes: pin.bytes, sha256: pin.sha256 }
+        await put(cache, recordKey(part), JSON.stringify(record))
+        if (have && have.sha256 !== pin.sha256) await cache.delete(runtimeKey(backend, have.sha256))
         return
       }
       const listed = await manifest()
@@ -412,9 +457,10 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
   }
 
   async function removeFiles(cache: Cache, part: ScanPart, installed: Records): Promise<void> {
-    if (part === "runtime") {
-      for (const request of await cache.keys())
-        if (new URL(request.url).pathname.startsWith(`${KEY}runtime/`)) await cache.delete(request)
+    if (part.startsWith("runtime-")) {
+      const backend = part.slice("runtime-".length) as ScanBackend
+      const runtime = installed[runtimePart(backend)]
+      if (runtime) await cache.delete(runtimeKey(backend, runtime.sha256))
     } else if (part === "det") {
       if (installed.det) await cache.delete(fileKey(installed.det.file))
     } else if (installed.rec) {
@@ -442,21 +488,22 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     return new Uint8Array(await hit.arrayBuffer())
   }
 
-  /** The installed models for one card edition, read from the device only. */
-  async function load(edition: Region): Promise<InstalledScanModels> {
+  /** The installed models for one card edition and backend, read from the device only. */
+  async function load(edition: Region, backend: ScanBackend): Promise<InstalledScanModels> {
     const cache = await open()
     const installed = await records(cache)
     const index = installed.rec?.index[edition]
-    // The runtime binary must come from the same ONNX Runtime build as this site's JavaScript.
+    // The runtime must be the pinned build this site's JavaScript was bundled with.
+    const pin = options.runtimes[backend]
     if (
-      installed.runtime?.url !== options.runtime.url ||
+      installed[runtimePart(backend)]?.sha256 !== pin.sha256 ||
       !installed.det ||
       !installed.rec ||
       !index
     )
       throw new ScanModelError("missing", "scan models are not downloaded")
     const [runtime, det, rec, vectors, scale, hub, cards] = await Promise.all([
-      read(cache, runtimeKey(options.runtime.url)),
+      read(cache, runtimeKey(backend, pin.sha256)),
       read(cache, fileKey(installed.det.file)),
       read(cache, fileKey(installed.rec.rec.file)),
       read(cache, fileKey(index.vectors.file)),
@@ -466,6 +513,7 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     ])
     // Copies keep the typed views aligned whatever offset the cache hands back.
     return {
+      backend,
       runtime,
       det: { model: installed.det, bytes: det },
       rec: { model: installed.rec.rec, bytes: rec },

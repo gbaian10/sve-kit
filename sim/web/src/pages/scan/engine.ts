@@ -1,6 +1,11 @@
 import type * as Ort from "onnxruntime-web/wasm"
 
-import { appScanModels, type InstalledScanModels, type ScanModelStore } from "../../data"
+import {
+  appScanModels,
+  type InstalledScanModels,
+  type ScanBackend,
+  type ScanModelStore,
+} from "../../data"
 import { createIndexDots } from "../../domain/scan/dots"
 import type { DetModel } from "../../domain/scan/manifest"
 import {
@@ -12,10 +17,11 @@ import {
 } from "../../domain/scan/search"
 import { decodeDetections, type Detection, writeSample } from "../../domain/scan/tensor"
 import type { Region } from "../../domain/search"
+import { currentBackend } from "./runtime-choice"
 
 // One recogniser per page load, shared by the single-card and deck screens, so the models are read
-// and compiled once. It runs on the CPU build of ONNX Runtime with one thread: the site is not
-// cross-origin isolated, so worker threads are unavailable anyway.
+// and compiled once. It runs on the ONNX Runtime build the user chose (WebGPU or CPU); the CPU build
+// uses one thread, since the site is not cross-origin isolated and worker threads are unavailable.
 
 interface ScanSample {
   /** RGBA pixels of a straightened card, `rec.width` × `rec.height`. */
@@ -40,6 +46,19 @@ export interface ScanEngine {
   confident(matches: readonly CardMatch[]): boolean
   /** Frees both model sessions once running inferences finish; later calls reject. */
   release(): void
+  /** Resolves once both sessions are freed, so the next engine never overlaps with this one. */
+  readonly freed: Promise<void>
+}
+
+/** A WebGPU session that could not be created; the page offers the CPU build instead. */
+export class ScanEngineStartError extends Error {
+  readonly backend: ScanBackend
+
+  constructor(backend: ScanBackend, cause: unknown) {
+    super(cause instanceof Error ? cause.message : "scan engine failed to start", { cause })
+    this.name = "ScanEngineStartError"
+    this.backend = backend
+  }
 }
 
 export type ScanEngineStage = "reading" | "starting"
@@ -48,13 +67,21 @@ async function createScanEngine(
   edition: Region,
   models: InstalledScanModels,
   ort: typeof Ort,
+  backend: ScanBackend,
 ): Promise<ScanEngine> {
   ort.env.wasm.wasmBinary = models.runtime
   ort.env.wasm.numThreads = 1
-  const options = { executionProviders: ["wasm"] }
+  const options = { executionProviders: [backend === "webgpu" ? "webgpu" : "wasm"] }
   // ONNX Runtime keeps each session's native memory until it is released, not until it is dropped.
   const sessions: Ort.InferenceSession[] = []
-  const free = () => Promise.allSettled(sessions.map((session) => session.release()))
+  let resolveFreed: () => void = () => undefined
+  const freed = new Promise<void>((resolve) => {
+    resolveFreed = resolve
+  })
+  const free = async () => {
+    await Promise.allSettled(sessions.map((session) => session.release()))
+    resolveFreed()
+  }
   let recSession: Ort.InferenceSession
   let detSession: Ort.InferenceSession
   try {
@@ -70,6 +97,7 @@ async function createScanEngine(
       if (!session.outputNames.includes(name)) throw new Error(`model output ${name} is missing`)
   } catch (error) {
     await free()
+    if (backend === "webgpu") throw new ScanEngineStartError(backend, error)
     throw error
   }
   const life = { running: 0, released: false }
@@ -156,62 +184,84 @@ async function createScanEngine(
       life.released = true
       if (life.running === 0) void free()
     },
+    freed,
   }
 }
 
-let shared: { readonly edition: Region; readonly engine: Promise<ScanEngine> } | null = null
+let shared: {
+  readonly edition: Region
+  readonly backend: ScanBackend
+  readonly engine: Promise<ScanEngine>
+} | null = null
+// The engine being replaced; its sessions must be freed before a new one is created.
+let retiring: Promise<void> = Promise.resolve()
 
 export interface ScanEngineSources {
-  readonly load: (edition: Region) => Promise<InstalledScanModels>
-  readonly runtime: () => Promise<typeof Ort>
+  readonly load: (edition: Region, backend: ScanBackend) => Promise<InstalledScanModels>
+  readonly runtime: (backend: ScanBackend) => Promise<typeof Ort>
 }
 
-/** Models from `store`, ONNX Runtime from the site's own bundle. */
+/** Models from `store`, ONNX Runtime from the public CDN build this site pins (see data/scan-runtime). */
 export function scanEngineSources(store: ScanModelStore = appScanModels): ScanEngineSources {
   return {
-    load: (edition) => store.load(edition),
-    runtime: () => import("onnxruntime-web/wasm"),
+    load: (edition, backend) => store.load(edition, backend),
+    // Both entries are loaded on demand: the WebGPU build's JavaScript is only fetched when used.
+    runtime: async (backend) =>
+      backend === "webgpu"
+        ? await import("onnxruntime-web/webgpu")
+        : await import("onnxruntime-web/wasm"),
   }
 }
 
 const appSources = scanEngineSources()
 
-function drop(engine: Promise<ScanEngine>): void {
-  void engine.then(
-    (built) => {
-      built.release()
-    },
-    () => undefined,
-  )
+function retire(engine: Promise<ScanEngine>): Promise<void> {
+  // A replacement may fail before older inferences finish; keep their retirement in the barrier.
+  return Promise.all([
+    retiring,
+    engine.then(
+      async (built) => {
+        built.release()
+        await built.freed
+      },
+      () => undefined,
+    ),
+  ]).then(() => undefined)
 }
 
 /**
- * The page's engine for an edition; built once from the models on this device. Opening another
- * edition releases the previous engine.
+ * The page's engine for an edition and the user's chosen backend; built once from the models on
+ * this device. Opening another edition or backend releases the previous engine first.
  */
 export function openScanEngine(
   edition: Region,
   onStage: (stage: ScanEngineStage) => void = () => undefined,
   sources: ScanEngineSources = appSources,
+  backendOf: () => Promise<ScanBackend> = currentBackend,
 ): Promise<ScanEngine> {
-  if (shared?.edition === edition) return shared.engine
-  if (shared) drop(shared.engine)
-  const engine = (async () => {
-    onStage("reading")
-    const models = await sources.load(edition)
-    onStage("starting")
-    return createScanEngine(edition, models, await sources.runtime())
-  })()
-  shared = { edition, engine }
-  // A failed start must not stick: the next open tries again (for example after a download).
-  engine.catch(() => {
-    if (shared?.engine === engine) shared = null
+  return backendOf().then((backend) => {
+    if (shared?.edition === edition && shared.backend === backend) return shared.engine
+    const before = shared
+    if (before) retiring = retire(before.engine)
+    const waitFor = retiring
+    const engine = (async () => {
+      onStage("reading")
+      const models = await sources.load(edition, backend)
+      onStage("starting")
+      await waitFor
+      return createScanEngine(edition, models, await sources.runtime(backend), backend)
+    })()
+    shared = { edition, backend, engine }
+    // A failed start must not stick: the next open tries again (for example after a download).
+    engine.catch(() => {
+      if (shared?.engine === engine) shared = null
+    })
+    return engine
   })
-  return engine
 }
 
 /** Releases the shared engine, e.g. after models are downloaded or removed. */
 export function closeScanEngine(): void {
-  if (shared) drop(shared.engine)
+  if (shared) retiring = retire(shared.engine)
   shared = null
 }

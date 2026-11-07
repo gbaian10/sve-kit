@@ -8,6 +8,7 @@ import {
   type ImageIndex,
   mergeImageIndexes,
   SCAN_PARTS,
+  type ScanBackend,
   scanCardImage,
   type ScanModelsStatus,
 } from "../../data"
@@ -18,6 +19,7 @@ import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { scanDownloadsFor, useScanDownloads } from "./downloads"
+import { currentBackend, neededParts } from "./runtime-choice"
 
 export const megabytes = (bytes: number) => (bytes / 1048576).toFixed(1)
 
@@ -116,7 +118,7 @@ export function useScanResults(
 export interface ScanReadiness {
   /** Null while checking the device. */
   readonly status: ScanModelsStatus | null
-  /** Every part is on this device (an older copy counts). */
+  /** Models may be older, but the runtime must match this site's JavaScript. */
   readonly ready: boolean
   readonly missingBytes: number
   /** Downloaded / total bytes per part while downloading. */
@@ -131,18 +133,29 @@ export function useScanReadiness(edition: Region, store = appScanModels): ScanRe
   const downloads = scanDownloadsFor(store)
   const { runs, finished } = useScanDownloads(downloads)
   const [status, setStatus] = useState<ScanModelsStatus | null>(null)
+  const [backend, setBackend] = useState<ScanBackend | null>(null)
   useEffect(() => {
     let active = true
     void store.status(edition).then((next) => {
       if (active) setStatus(next)
     })
+    void currentBackend().then((next) => {
+      if (active) setBackend(next)
+    })
     return () => {
       active = false
     }
   }, [store, edition, finished])
-  const ready =
-    status !== null && SCAN_PARTS.every((part) => status.parts[part].state !== "missing")
-  const missing = status ? SCAN_PARTS.filter((part) => status.parts[part].state === "missing") : []
+  // Only the chosen engine's runtime counts; the other one is not needed to scan.
+  const needed = backend ? neededParts(backend) : []
+  const missing = status
+    ? needed.filter((part) =>
+        part.startsWith("runtime-")
+          ? status.parts[part].state !== "ready"
+          : status.parts[part].state === "missing",
+      )
+    : []
+  const ready = status !== null && backend !== null && missing.length === 0
   const progress: ScanReadiness["progress"] = {}
   for (const part of SCAN_PARTS) {
     const run = runs[part]

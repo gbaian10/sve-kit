@@ -1,14 +1,40 @@
 import { createHash } from "node:crypto"
 
+import type { ScanBackend, ScanRuntimeBinary } from "../data/scan-runtime"
 import { memoryCache } from "./cache"
 
 // A tiny synthetic scan publication: placeholder model bytes (never a real model), a 4-dimensional
 // card index and a manifest whose sizes and hashes match, served from an in-memory "CDN".
 
 export const SCAN_BASE = "https://cdn.test/scan"
-export const RUNTIME = { url: "https://app.test/assets/ort.wasm", bytes: 64 }
-
 const hex = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex")
+
+// Stand-ins for the two ONNX Runtime binaries: same pinned hashes and CDN addresses as the build.
+const RUNTIME_BYTES: Record<ScanBackend, Uint8Array> = {
+  cpu: new Uint8Array(64).fill(3),
+  webgpu: new Uint8Array(96).fill(5),
+}
+const RUNTIME_FILES: Record<ScanBackend, string> = {
+  cpu: "ort-wasm-simd-threaded.wasm",
+  webgpu: "ort-wasm-simd-threaded.jsep.wasm",
+}
+const VERSION = "1.31.1"
+export const RUNTIMES: Readonly<Record<ScanBackend, ScanRuntimeBinary>> = {
+  cpu: runtimeBinary("cpu"),
+  webgpu: runtimeBinary("webgpu"),
+}
+function runtimeBinary(backend: ScanBackend): ScanRuntimeBinary {
+  const file = RUNTIME_FILES[backend]
+  return {
+    file,
+    bytes: RUNTIME_BYTES[backend].length,
+    sha256: hex(RUNTIME_BYTES[backend]),
+    urls: [
+      `https://cdn.jsdelivr.net/npm/onnxruntime-web@${VERSION}/dist/${file}`,
+      `https://unpkg.com/onnxruntime-web@${VERSION}/dist/${file}`,
+    ],
+  }
+}
 
 export interface FakeCard {
   readonly no: string
@@ -104,10 +130,26 @@ export function fakeScanCdn(initial: ScanPublication | null = scanPublication())
   const requests: string[] = []
   const corrupt = new Set<string>()
   let offline = false
+  // Runtime URLs (by CDN prefix) that cannot be reached, and runtime files served with wrong bytes.
+  const unreachable = new Set<string>()
+  const runtimeCorrupt = new Set<ScanBackend>()
   const fetcher = (url: string): Promise<Response> => {
     requests.push(url)
     if (offline) return Promise.reject(new TypeError("Failed to fetch"))
-    if (url === RUNTIME.url) return Promise.resolve(new Response(new Uint8Array(RUNTIME.bytes)))
+    const runtime = (Object.keys(RUNTIMES) as ScanBackend[]).find((b) =>
+      RUNTIMES[b].urls.includes(url),
+    )
+    if (runtime) {
+      if (unreachable.has(url)) return Promise.reject(new TypeError("Failed to fetch"))
+      const bytes = RUNTIME_BYTES[runtime]
+      return Promise.resolve(
+        new Response(
+          (runtimeCorrupt.has(runtime)
+            ? bytes.map((byte) => byte ^ 1)
+            : bytes) as Uint8Array<ArrayBuffer>,
+        ),
+      )
+    }
     if (!publication || !url.startsWith(`${SCAN_BASE}/`))
       return Promise.resolve(new Response(null, { status: 404 }))
     const path = url.slice(SCAN_BASE.length + 1)
@@ -128,6 +170,13 @@ export function fakeScanCdn(initial: ScanPublication | null = scanPublication())
     },
     setOffline(value: boolean) {
       offline = value
+    },
+    /** Makes one runtime CDN address unreachable, e.g. the first CDN being down. */
+    unreachable(url: string) {
+      unreachable.add(url)
+    },
+    corruptRuntime(backend: ScanBackend) {
+      runtimeCorrupt.add(backend)
     },
   }
 }

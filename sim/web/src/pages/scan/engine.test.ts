@@ -1,10 +1,13 @@
 import type * as Ort from "onnxruntime-web/wasm"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
+import { createScanModelStore } from "../../data/scan-models"
 import { memoryCache } from "../../test-utils/cache"
-import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
-import { closeScanEngine, openScanEngine } from "./engine"
+import { fakeScanCdn, RUNTIMES, SCAN_BASE } from "../../test-utils/scan-publication"
+import { closeScanEngine, openScanEngine, ScanEngineStartError } from "./engine"
+
+// The parts a scan with the CPU engine needs.
+const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
 
 interface Run {
   readonly model: string
@@ -13,7 +16,11 @@ interface Run {
 }
 
 /** Stands in for ONNX Runtime: records each run and answers like the real models' output names. */
-function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
+function fakeOrt(
+  runs: Run[],
+  life = { created: 0, released: 0, failOn: "" },
+  providers: string[][] = [],
+) {
   class Tensor {
     readonly data: Float32Array
     readonly dims: readonly number[]
@@ -28,7 +35,7 @@ function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
       return Promise.resolve()
     },
     outputNames: model.startsWith("det") ? ["heat", "corners"] : ["embedding"],
-    run: (feeds: { image: Tensor }) => {
+    run: (feeds: { image: Tensor }): Promise<Record<string, { data: Float32Array }>> => {
       const { data, dims } = feeds.image
       runs.push({ model, dims, data: data.slice() })
       if (model.startsWith("det")) {
@@ -54,7 +61,8 @@ function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
     env: { wasm: {} as Record<string, unknown> },
     Tensor,
     InferenceSession: {
-      create: (bytes: Uint8Array) => {
+      create: (bytes: Uint8Array, options?: { executionProviders: readonly string[] }) => {
+        if (options) providers.push([...options.executionProviders])
         const model = new TextDecoder().decode(bytes)
         if (life.failOn && model.startsWith(life.failOn))
           return Promise.reject(new Error("bad model"))
@@ -73,10 +81,10 @@ async function installedModels() {
     caches: () => storage,
     fetcher: cdn.fetcher,
     scanBase: () => SCAN_BASE,
-    runtime: RUNTIME,
+    runtimes: RUNTIMES,
   })
   for (const part of SCAN_PARTS) await store.download(part, "jp", () => undefined)
-  return store.load("jp")
+  return store.load("jp", "cpu")
 }
 
 /** The shared engine for JP, built from the stored models with a stand-in runtime. */
@@ -101,7 +109,7 @@ describe("scan engine", () => {
       load: () => Promise.resolve(models),
       runtime: () => Promise.resolve(ort as unknown as typeof Ort),
     })
-    expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIME.bytes)
+    expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIMES.cpu.bytes)
     expect(ort.env.wasm["numThreads"]).toBe(1)
     expect(engine.cardSize).toEqual({ width: 224, height: 312 })
     expect(engine.det.grow).toBe(1)
@@ -183,5 +191,107 @@ describe("scan engine", () => {
     closeScanEngine()
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(life).toMatchObject({ created: 6, released: 6 })
+  })
+  it.each(["webgpu", "cpu"] as const)("runs with the chosen %s backend", async (backend) => {
+    const models = await installedModels()
+    const providers: string[][] = []
+    const runs: Run[] = []
+    const ort = fakeOrt(runs, undefined, providers)
+    const sources = {
+      load: () => Promise.resolve({ ...models, backend }),
+      runtime: () => Promise.resolve(ort as unknown as typeof Ort),
+    }
+    const engine = await openScanEngine("jp", undefined, sources, () => Promise.resolve(backend))
+    expect(providers).toEqual([
+      [backend === "webgpu" ? "webgpu" : "wasm"],
+      [backend === "webgpu" ? "webgpu" : "wasm"],
+    ])
+    expect(ort.env.wasm["wasmBinary"]).toBe(models.runtime)
+    expect(await engine.detect(new Uint8ClampedArray(256 * 256 * 4), 0.5)).toHaveLength(1)
+  })
+
+  it("waits for an inference to finish even when a closed replacement fails to load", async () => {
+    const models = await installedModels()
+    const life = { created: 0, released: 0, failOn: "" }
+    const ort = fakeOrt([], life)
+    const gate = Promise.withResolvers<undefined>()
+    const create = ort.InferenceSession.create
+    ort.InferenceSession.create = async (bytes) => {
+      const session = await create(bytes)
+      return {
+        ...session,
+        run: async (feeds) => {
+          await gate.promise
+          return session.run(feeds)
+        },
+      }
+    }
+    const sources = {
+      load: () => Promise.resolve(models),
+      runtime: () => Promise.resolve(ort as unknown as typeof Ort),
+    }
+    const first = await openScanEngine("jp", undefined, sources)
+    const inference = first.detect(new Uint8ClampedArray(256 * 256 * 4), 0.5)
+    const failedLoad = Promise.withResolvers<typeof models>()
+    const loading = Promise.withResolvers<undefined>()
+    const replacement = openScanEngine("en", undefined, {
+      ...sources,
+      load: () => {
+        loading.resolve(undefined)
+        return failedLoad.promise
+      },
+    })
+    await loading.promise
+    closeScanEngine()
+    failedLoad.reject(new Error("load failed"))
+    await expect(replacement).rejects.toThrow("load failed")
+    let overlapped = false
+    const nextOrt = fakeOrt([])
+    const nextCreate = nextOrt.InferenceSession.create
+    nextOrt.InferenceSession.create = (bytes, options) => {
+      overlapped ||= life.released < 2
+      return nextCreate(bytes, options)
+    }
+    const next = openScanEngine("jp", undefined, {
+      ...sources,
+      runtime: () => Promise.resolve(nextOrt as unknown as typeof Ort),
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    gate.resolve(undefined)
+    await inference
+    await next
+    expect(overlapped).toBe(false)
+  })
+
+  it("reports a WebGPU session that cannot start as a start error, not a silent fallback", async () => {
+    const models = await installedModels()
+    const broken = {
+      env: { wasm: {} as Record<string, unknown> },
+      Tensor: fakeOrt([]).Tensor,
+      InferenceSession: { create: () => Promise.reject(new Error("no WebGPU adapter")) },
+    }
+    const started = openScanEngine(
+      "jp",
+      undefined,
+      {
+        load: () => Promise.resolve(models),
+        runtime: () => Promise.resolve(broken as unknown as typeof Ort),
+      },
+      () => Promise.resolve("webgpu"),
+    )
+    const error = await started.catch((cause: unknown) => cause)
+    expect(error).toBeInstanceOf(ScanEngineStartError)
+    expect((error as ScanEngineStartError).backend).toBe("webgpu")
+    // A failed start is not kept, so the next open tries again.
+    const again = await openScanEngine(
+      "jp",
+      undefined,
+      {
+        load: () => Promise.resolve(models),
+        runtime: () => Promise.resolve(fakeOrt([]) as unknown as typeof Ort),
+      },
+      () => Promise.resolve("cpu"),
+    ).catch(() => undefined)
+    expect(again).toBeDefined()
   })
 })

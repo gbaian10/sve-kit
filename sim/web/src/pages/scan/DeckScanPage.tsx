@@ -52,7 +52,7 @@ import {
   readDeckPhoto,
 } from "./deck-reader"
 import { useScannedDeckShare } from "./deck-share"
-import { openScanEngine, scanEngineSources } from "./engine"
+import { openScanEngine, scanEngineSources, ScanEngineStartError } from "./engine"
 import {
   classSummary,
   megabytes,
@@ -381,7 +381,15 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
       setMessage(
         error instanceof ScanModelError && error.kind === "missing"
           ? null
-          : { key: "failed", message: error instanceof Error ? error.message : String(error) },
+          : {
+              key: "failed",
+              message:
+                error instanceof ScanEngineStartError && error.backend === "webgpu"
+                  ? t("scan.engine.webgpuFailed")
+                  : error instanceof Error
+                    ? error.message
+                    : String(error),
+            },
       )
     } finally {
       if (isMounted()) setBusy((current) => (current?.token === token ? null : current))
@@ -568,7 +576,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
         </div>
       ) : readiness.downloading ? (
         <div className="flex flex-col gap-1.5">
-          {SCAN_PARTS.map((part) => {
+          {SCAN_PARTS.filter((part) => readiness.progress[part] !== undefined).map((part) => {
             const [got, total] = readiness.progress[part] ?? [0, 0]
             const pct = total ? Math.min(100, Math.round((got / total) * 100)) : 0
             return (
