@@ -1,0 +1,62 @@
+cards:
+  BP08-086:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                "on":
+                  class: ビショップ
+                  kind: follower
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+          targets:
+            - bind: revived
+              from:
+                class: ビショップ
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              upto: 2
+        line: 3
+      - activate:
+          cost:
+            banish:
+              n: 3
+              sel:
+                class: ビショップ
+                kind: follower
+                who: self
+                zone: cemetery
+          do:
+            - buff:
+                hp: 1
+                "on":
+                  kind: follower
+                  other: true
+                  who: self
+                  zone: field
+                power: 1
+          per_turn: 1
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
