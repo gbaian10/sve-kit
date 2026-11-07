@@ -7,6 +7,7 @@ import {
   deckGroups,
   deckListText,
   guessFromDeck,
+  withoutMarks,
   withPrinting,
 } from "./deck-read"
 import type { CardMatch, ScanCard } from "./search"
@@ -87,5 +88,32 @@ describe("deck reading", () => {
     expect(shown.pick).toBe(slA)
     expect(shown.alts.map((alt) => alt.card.no)).toEqual(["BP01-SL01", "BP01-002"])
     expect(shown.alts[0]?.raw).toBe(0.9)
+  })
+})
+
+/** A read at (x, y) with a square box of side `side`. */
+const at = (x: number, y: number, side: number, raw: number): DeckCard => ({
+  ...read(raw >= 0.5 ? "ok" : "unsure", [match(A, raw)]),
+  quad: [
+    [x, y],
+    [x + side, y],
+    [x + side, y + side],
+    [x, y + side],
+  ],
+})
+
+describe("printed marks", () => {
+  it("drops unreadable finds far smaller than the cards read around them", () => {
+    const cards = [at(0, 0, 100, 0.7), at(150, 0, 100, 0.6), at(300, 0, 100, 0.65)]
+    const circle = at(120, 150, 20, 0.25)
+    const farCard = at(450, 0, 60, 0.3)
+    expect(withoutMarks([...cards, circle, farCard])).toEqual([...cards, farCard])
+  })
+
+  it("keeps small finds that read well, and everything when nothing was read", () => {
+    const small = at(120, 150, 20, 0.45)
+    expect(withoutMarks([at(0, 0, 100, 0.7), small])).toContainEqual(small)
+    const unread = [at(0, 0, 100, 0.3), at(120, 150, 20, 0.2)]
+    expect(withoutMarks(unread)).toEqual(unread)
   })
 })
