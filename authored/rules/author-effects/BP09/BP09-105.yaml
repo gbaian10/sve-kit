@@ -1,0 +1,51 @@
+cards:
+  BP09-105:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 4
+              - banish_self: true
+          do:
+            - move:
+                ref: pair
+                result: entered
+                to: field
+          targets:
+            - bind: pair
+              distinct_by: name
+              from:
+                names:
+                  - アマテラス
+                  - ツクヨミ
+                who: self
+                zone: cemetery
+              n: 2
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - search:
+                n: 1
+                sel:
+                  any_of:
+                    - name: アマテラス
+                      who: self
+                      zone: deck
+                    - name: ツクヨミ
+                      who: self
+                      zone: deck
+                to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
