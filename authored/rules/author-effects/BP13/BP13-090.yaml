@@ -1,0 +1,67 @@
+cards:
+  BP13-090:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 2
+              sel:
+                kind: amulet
+                who: self
+                zone: cemetery
+          do:
+            - banish: enemy
+            - damage:
+                n: 3
+                to:
+                  leader_of: enemy
+            - life:
+                delta: 3
+                who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - class: ビショップ
+                      kind: follower
+                      orig_cost_le: 3
+                      who: self
+                      zone: hand
+                    - class: ビショップ
+                      kind: amulet
+                      orig_cost_le: 3
+                      who: self
+                      zone: hand
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

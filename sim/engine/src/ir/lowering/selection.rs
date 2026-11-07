@@ -105,16 +105,8 @@ impl BodyContext<'_> {
         let (from, union) = match &choice.from {
             ast::ChooseFrom::Advance(_) => return Err(unsupported(path)),
             ast::ChooseFrom::Query(query) => (query.as_ref(), None),
-            // Only a private Look receipt is admitted as the shared input of every branch.
             ast::ChooseFrom::Union { any_of } => match any_of.as_slice() {
-                [first, _, ..]
-                    if first.observation.is_some()
-                        && any_of
-                            .iter()
-                            .all(|branch| branch.observation == first.observation) =>
-                {
-                    (first, Some(any_of.as_slice()))
-                }
+                [first, _, ..] if private_union(any_of) => (first, Some(any_of.as_slice())),
                 _ => return Err(unsupported(path)),
             },
         };
@@ -159,6 +151,7 @@ impl BodyContext<'_> {
         };
         let (domain, cardinality) = match union {
             None => self.object_choice(&target, path, true)?,
+            Some(branches) if hand => self.hand_union_choice(&target, branches, path)?,
             Some(branches) => self.observed_object_choice(&target, branches, path, true)?,
         };
         let visibility = if target.from.observation.is_some() || hand {
@@ -382,6 +375,27 @@ pub(super) struct ObjectFilter<'query> {
     pub has_evolve: bool,
     /// これと同名を除く: the candidate shares no name with the ability holder.
     pub not_same_name_as_this: bool,
+}
+
+/// Every branch reads one private Look receipt, or the controller's own hand (「手札のAかB」, BP18-098).
+fn private_union(any_of: &[ast::TargetQuery]) -> bool {
+    let first = any_of
+        .first()
+        .and_then(|branch| branch.observation.as_ref());
+    (first.is_some()
+        && any_of
+            .iter()
+            .all(|branch| branch.observation.as_ref() == first))
+        || any_of.iter().all(own_hand_branch)
+}
+
+const fn own_hand_branch(branch: &ast::TargetQuery) -> bool {
+    branch.observation.is_none()
+        && matches!(branch.who, Some(ast::Side::Controller))
+        && matches!(
+            branch.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+        )
 }
 
 impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {

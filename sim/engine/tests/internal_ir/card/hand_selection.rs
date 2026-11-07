@@ -373,3 +373,79 @@ fn hand_bindings_reject_unadmitted_movement_destruction_and_leader_selectors() {
         lowerer().lower(&tree).unwrap_err();
     }
 }
+
+#[test]
+fn own_hand_union_offers_each_matching_card_once() {
+    let program = program(&json!([
+        {"choose":{"bind":"selected","from":{"any_of":[
+            {"who":"self","zone":"hand","kind":"follower"},
+            {"who":"self","zone":"hand"}
+        ]},"upto":1}},
+        {"banish":{"ref":"selected"}}
+    ]));
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":5,"max":5});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"h","card":"unit-follower"}, {"id":"sp","card":"unit-spell"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "hand-union",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("private hand union choice");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("hand union candidates");
+    };
+    // The follower matches both branches but is offered once.
+    let offered: Vec<_> = domain
+        .members
+        .iter()
+        .filter_map(|m| m.card.as_deref())
+        .collect();
+    assert_eq!(offered, ["unit-follower", "unit-spell"]);
+    assert!(
+        game.internal_decision(View::P2).is_none(),
+        "the choice stays private"
+    );
+    let spell = domain.members[1].handle;
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![spell]))
+            .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["banish"], json!(["sp"]));
+    assert_eq!(view["P1"]["hand"], json!(["h"]));
+}
+
+#[test]
+fn hand_union_branches_must_all_read_the_controllers_own_hand() {
+    for other in [
+        json!({"who":"opp","zone":"hand"}),
+        json!({"who":"self","zone":"field"}),
+        json!({"who":"self","zone":"hand","except":"this"}),
+        json!({"who":"self","zone":"hand","power_le":3}),
+    ] {
+        let mut tree = fanfare::expanded::tree().clone();
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"] = json!({"do":[
+            {"choose":{"bind":"selected","from":{"any_of":[
+                {"who":"self","zone":"hand","kind":"follower"},
+                other
+            ]},"upto":1}},
+            {"banish":{"ref":"selected"}}
+        ]});
+        lowerer().lower(&tree).unwrap_err();
+    }
+}

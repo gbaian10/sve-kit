@@ -594,13 +594,21 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("one hand group"));
         };
-        let Selector::Zone {
-            binding, predicate, ..
-        } = &group.selector
-        else {
-            return Err(unsupported("hand selector"));
+        let branches: Vec<&Selector> = if let Selector::Union { sets } = &group.selector {
+            sets.iter().collect()
+        } else {
+            vec![&group.selector]
         };
-        return super::super::search::check_predicate(predicate, *binding).map(|_| ());
+        for branch in branches {
+            let Selector::Zone {
+                binding, predicate, ..
+            } = branch
+            else {
+                return Err(unsupported("hand selector"));
+            };
+            super::super::search::check_predicate(predicate, *binding)?;
+        }
+        return Ok(());
     }
     let private_look_groups = !constraint.groups.is_empty()
         && constraint
@@ -1555,6 +1563,24 @@ impl Execution {
         Ok(members)
     }
 
+    /// A card matching several branches is still one candidate.
+    fn union_target_objects(
+        &self,
+        game: &Game,
+        sets: &[Selector],
+        allow_resolution_zones: bool,
+    ) -> Result<Vec<ObjectRef>> {
+        let mut members = Vec::new();
+        for set in sets {
+            for member in self.public_target_objects(game, set, allow_resolution_zones)? {
+                if !members.contains(&member) {
+                    members.push(member);
+                }
+            }
+        }
+        Ok(members)
+    }
+
     pub(in crate::game::internal) fn public_target_objects(
         &self,
         game: &Game,
@@ -1604,13 +1630,9 @@ impl Execution {
                 }
                 members
             }
-            Selector::Union { sets } => sets
-                .iter()
-                .map(|set| self.public_target_objects(game, set, allow_resolution_zones))
-                .collect::<Result<Vec<_>>>()?
-                .into_iter()
-                .flatten()
-                .collect(),
+            Selector::Union { sets } => {
+                self.union_target_objects(game, sets, allow_resolution_zones)?
+            }
             Selector::Filter {
                 input,
                 binding,
