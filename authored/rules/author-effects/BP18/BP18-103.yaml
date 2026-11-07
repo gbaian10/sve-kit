@@ -1,0 +1,30 @@
+cards:
+  BP18-103:
+    abilities:
+      - keywords:
+          - bane
+        line: 1
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - create:
+                        by: p
+                        n: 1
+                        to: field
+                        token: 狂信の呪具
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token_sources:
+      - card: BP18-T09
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

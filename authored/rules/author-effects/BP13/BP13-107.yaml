@@ -1,0 +1,29 @@
+cards:
+  BP13-107:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - banish:
+                ref:
+                  any_of:
+                    - who: all
+                      zone: field
+                    - who: all
+                      zone: ex
+            - each_player:
+                as: p
+                stages:
+                  - - banish:
+                        top:
+                          n: 10
+                          who: p
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
