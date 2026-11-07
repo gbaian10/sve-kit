@@ -1,0 +1,50 @@
+cards:
+  BP11-071:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  necro: 10
+                then:
+                  - optional:
+                      do:
+                        - move:
+                            ref: ally
+                            result: entered
+                            to: field
+                        - if:
+                            cond:
+                              did: entered
+                            then:
+                              - banish: this
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: 荒野
+                who: self
+                zone: cemetery
+              n: 1
+        line: 1
+      - lastword:
+          do:
+            - move:
+                ref: this
+                to: ex
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

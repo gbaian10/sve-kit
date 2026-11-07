@@ -1,0 +1,38 @@
+cards:
+  BP09-106:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 天使
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - banish: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
