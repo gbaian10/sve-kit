@@ -9,6 +9,7 @@ use self::card::play::PlayState;
 use super::{Frame, Game, View, int, string};
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
+use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
     BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
@@ -72,6 +73,7 @@ mod resource;
 mod reveal;
 mod scheduled_turn;
 mod search;
+mod shuffle;
 mod terminal;
 mod tokens;
 mod transform;
@@ -304,6 +306,8 @@ pub enum Answer {
 pub enum InstructionOutcome {
     /// One distinct occurrence inserted before the previously scheduled next turn.
     ScheduledTurn(ScheduleToken),
+    /// A completed shuffle, with no projectable object or position result.
+    Shuffled,
     /// Actual before/after counter values, including an unchanged result.
     Counter(CounterChangeEvent),
     /// One atomic transfer preserves both holders' before and after values.
@@ -1568,6 +1572,10 @@ impl Game {
             }
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
+            }
+            Action::Shuffle { .. } => self.internal_shuffle(execution, &instruction)?,
+            Action::Move { .. } if shuffle_shape::placement(&instruction.action).is_some() => {
+                self.internal_shuffle_placement(execution, &instruction)?;
             }
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,

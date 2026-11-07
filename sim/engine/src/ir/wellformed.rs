@@ -669,6 +669,22 @@ impl Checker {
             } if *instruction_actor == (PlayerRef::Controller {}) => {
                 self.define(*occurrence, BindingKind::Value)
             }
+            Action::Shuffle { scope, .. }
+                if super::shuffle::action(action)
+                    && instruction_actor == &(PlayerRef::Controller {}) =>
+            {
+                if let super::ShuffleScope::Subset { cards } = scope {
+                    self.selector(cards)?;
+                    let Some(receipt) = super::shuffle::consumed(action) else {
+                        return self.reject();
+                    };
+                    self.env.receipts.remove(&receipt);
+                    self.env.receipt_access.remove(&receipt);
+                    self.env.movement_before_access.remove(&receipt);
+                }
+                Ok(())
+            }
+
             Action::PlayCard { .. } => {
                 let Some(card) = super::nested_play::card_operand(action) else {
                     return self.reject();

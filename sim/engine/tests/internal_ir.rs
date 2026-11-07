@@ -44,6 +44,8 @@ mod ordering;
 mod posture;
 #[path = "internal_ir/projections.rs"]
 mod projections;
+#[path = "internal_ir/shuffle.rs"]
+mod shuffle;
 #[path = "internal_ir/transactions.rs"]
 mod transactions;
 

@@ -5,6 +5,7 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
+use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
@@ -57,6 +58,7 @@ pub struct MovementFact {
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     match action {
+        Action::Move { .. } if shuffle_shape::placement(action).is_some() => Ok(()),
         Action::Move {
             objects: Selector::Ordered { .. },
             ..
@@ -1145,9 +1147,8 @@ impl Game {
     }
 
     #[expect(
-        clippy::too_many_lines,
         clippy::too_many_arguments,
-        reason = "Replacements, generations and receipts commit at one atomic boundary."
+        reason = "Existing movement callers keep the same atomic input boundary."
     )]
     pub(super) fn internal_move_members(
         &mut self,
@@ -1158,6 +1159,54 @@ impl Game {
         method: MoveMethod,
         owner_ex: bool,
         position: Option<Position>,
+    ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
+        self.commit_move_members(
+            execution, members, zone, kind, method, owner_ex, position, false,
+        )
+    }
+
+    pub(super) fn internal_unordered_deck_return(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        members: &[ObjectRef],
+    ) -> Result<Vec<MoveResult>> {
+        self.check_move_members(
+            execution,
+            instruction,
+            members,
+            ZoneKind::Deck,
+            MoveMethod::Put,
+            false,
+        )?;
+        let (moves, _) = self.commit_move_members(
+            execution,
+            members,
+            "deck",
+            ZoneKind::Deck,
+            MoveMethod::Put,
+            false,
+            None,
+            true,
+        )?;
+        Ok(moves)
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        clippy::too_many_arguments,
+        reason = "Replacements, generations and receipts commit at one atomic boundary."
+    )]
+    fn commit_move_members(
+        &mut self,
+        execution: &mut Execution,
+        members: &[ObjectRef],
+        zone: &str,
+        kind: ZoneKind,
+        method: MoveMethod,
+        owner_ex: bool,
+        position: Option<Position>,
+        unordered_deck: bool,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         let old_deck = if kind == ZoneKind::Deck {
             self.state
@@ -1187,7 +1236,7 @@ impl Game {
                 }
             }
         }
-        if kind == ZoneKind::Deck {
+        if kind == ZoneKind::Deck && !unordered_deck {
             let mut owners = BTreeSet::new();
             if plans
                 .iter()

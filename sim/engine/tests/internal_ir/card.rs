@@ -841,3 +841,6 @@ mod exchange_pp_guard;
 
 #[path = "card/fusion.rs"]
 mod fusion;
+
+#[path = "card/shuffle.rs"]
+mod shuffle;

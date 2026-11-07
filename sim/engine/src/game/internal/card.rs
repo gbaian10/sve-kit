@@ -1333,6 +1333,7 @@ fn check_instruction(
             | Action::Equip { .. }
             | Action::BoxPilot { .. }
             | Action::Order { .. }
+            | Action::Shuffle { .. }
             | Action::RideDrive {
                 operation: RideDriveOperation::GainDrive {},
                 ..

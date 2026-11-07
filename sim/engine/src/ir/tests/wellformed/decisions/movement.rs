@@ -29,6 +29,21 @@ fn moving(id: u64, objects: Selector, to: MoveDestination) -> Located<Node> {
         "synthetic",
     )
 }
+fn privately_order_bottom(step: &mut Located<Node>) {
+    if let Action::Move {
+        objects, movement, ..
+    } = action(step)
+    {
+        // The printed remainder is ordered by its player rather than shuffled.
+        movement.position = Some(Position::Bottom {});
+        movement.order = Some(ordering::order_decision(
+            objects.clone(),
+            Visibility::Only {
+                players: controller_set(),
+            },
+        ));
+    }
+}
 fn objects() -> Selector {
     Selector::Objects {
         objects: vec![ObjectOperand::SourceHolder {}],
@@ -344,10 +359,14 @@ fn r4_1_uses_each_objects_owner_instead_of_the_source_controller() {
         OwnerZone::Cemetery,
         OwnerZone::Banish,
     ] {
-        accept(body(
-            1,
-            vec![moving(1, mixed.clone(), MoveDestination::Owners { zone })],
-        ));
+        let mut step = moving(1, mixed.clone(), MoveDestination::Owners { zone });
+        if zone == OwnerZone::Deck
+            && let Action::Move { movement, .. } = action(&mut step)
+        {
+            // A fixed boundary isolates ownership from unordered shuffle pairs.
+            movement.position = Some(Position::Top {});
+        }
+        accept(body(1, vec![step]));
     }
     for zone in [
         ZoneKind::Hand,
@@ -557,9 +576,7 @@ fn bp18_remainder_subtracts_successful_before_members_and_discount_uses_after() 
             zone: OwnerZone::Deck,
         },
     );
-    if let Action::Move { movement, .. } = action(&mut remainder) {
-        movement.position = Some(Position::Bottom {});
-    }
+    privately_order_bottom(&mut remainder);
     let mut discount = install(4, after(moved(2)));
     discount.source = source("BP18-059");
     if let Action::InstallEffect { effect, .. } = action(&mut discount)
@@ -583,9 +600,14 @@ fn bp18_remainder_subtracts_successful_before_members_and_discount_uses_after() 
             discount,
         ],
     ));
-    reject(
+    let error = reject(
         body(1, vec![look, choice, remainder, move_one]),
-        WellFormedReason::UnavailableReceipt,
+        WellFormedReason::UnsupportedShape,
+    );
+    // Private ordering checks missing evidence before testing receipt existence.
+    assert!(
+        error.ir_path.ends_with("/steps/2/instruction/action/order"),
+        "{error}"
     );
 }
 

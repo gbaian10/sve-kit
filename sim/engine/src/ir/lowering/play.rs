@@ -388,6 +388,13 @@ impl BodyContext<'_> {
     }
 
     fn record_target_zone(&mut self, target: &ast::Target, cardinality: Cardinality) {
+        if matches!(
+            &target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+        ) && matches!(target.from.who, None | Some(ast::Side::Controller))
+        {
+            self.cemetery_return_targets.insert(target.bind.clone());
+        }
         if ability_holder_target(target, cardinality) {
             self.ability_holders.insert(target.bind.clone());
         }
@@ -1008,6 +1015,7 @@ impl BodyContext<'_> {
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
                 opponent_cemetery_targets: BTreeSet::new(),
+                cemetery_return_targets: BTreeSet::new(),
                 nested_targets: super::nested_targets(steps),
                 observations: BTreeMap::new(),
                 receipt_reads: super::ReceiptReads::default(),
@@ -1041,6 +1049,9 @@ impl BodyContext<'_> {
                 context
                     .opponent_cemetery_targets
                     .clone_from(&self.opponent_cemetery_targets);
+                context
+                    .cemetery_return_targets
+                    .clone_from(&self.cemetery_return_targets);
                 context.observations.clone_from(&self.observations);
                 context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);
@@ -1301,7 +1312,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
-        ast::Step::PlayCard(_)
+        ast::Step::Shuffle(_)
+        | ast::Step::PlayCard(_)
         | ast::Step::PlayAbility(_)
         | ast::Step::StackPlus(_)
         | ast::Step::Counter(_)

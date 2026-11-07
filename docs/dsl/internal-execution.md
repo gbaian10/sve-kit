@@ -695,6 +695,27 @@ Banish、來源快照、進場事件及容量規則，不產生 DiscardEvent；E
 安裝使用。公開手牌於本次結算結束後失效，移到牌庫不保留對手的可定位身分。
 這個入口不授予一般公開 selector 讀取手牌，也不新增分組選擇、移動排列或多張入場的容量程序。
 
+## 作者洗牌與封閉牌組排位
+
+`Action::Shuffle` 只接受 Controller 與 FreshRequest。FullZone 取整副自己牌組，沿既有
+`Game::shuffle` 使用同一 RNG 與精確排列腳本，撤銷 located 及 Look 排列授權，並記錄
+`Fact::Shuffled`；零張與單張也記 performed。結果為不可投影的 `InstructionOutcome::Shuffled`。
+
+無序回牌組的 Move 與下一個 FullZone Shuffle 是同一 Program、同來源與控制者的相鄰配對。
+來源限自己墓場的目前世代，沿共同移區提交取得正常 MoveOutcome；只有這個配對可放行
+同一 owner 的多張無序牌組入場。既有移動呼叫端保留原排序守門，外國擁有者保守拒絕。
+
+Look 餘牌隨機放底降低為同區 Bottom Move，再緊接 Subset Shuffle；兩指示之間沒有題目、
+CheckTiming 或移區事件。先把該段置底再置換，與先置換再置底的最終排列、腳本順序及
+RNG 分布相同。放底與真正 chooser Order 共用牌組重排及位置知識撤銷原語，不改世代、
+不產生 Movement fact，也不改 LookReceipt。
+
+這個暫存 MoveOutcome 只供下一個 Subset 讀取。一般 MoveAfter 的新世代守門保持不變；
+Subset 的窄讀取驗證每筆同世代 before／after、自己牌組的實際終點與 Bottom 位置，然後
+使用原 `Game::shuffle`。WF 與 runtime 都在洗牌後撤銷這份 receipt；作者不得命名結果，
+後續 follow、Before、計數或捕捉不能再讀取。單獨 Subset、夾雜指示或跨 Program 配對均拒絕。
+Subset 只撤銷該段的位置知識，不記整副洗牌事實。整個流程沿原外層交易回復，包含 RNG 與腳本游標。
+
 ## 私有看牌與同區排列
 
 Look 先准入 Exact、viewer 自己的 Deck，取頂端至多 count 張；不移區、不換世代。
