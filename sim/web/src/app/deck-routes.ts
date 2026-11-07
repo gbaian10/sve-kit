@@ -9,3 +9,13 @@ export function deckPath(deck: { readonly id: string; readonly edition: Region }
 export function isDeckBuilderPath(pathname: string): boolean {
   return /^\/decks\/(?!import$)[^/]+$/u.test(pathname)
 }
+
+/** The import page opened on a share code or a deck list (`d`), as the share links use. */
+export function deckImportPath(deck: string): string {
+  return `/decks/import?d=${encodeURIComponent(deck)}`
+}
+
+/** A link that opens the import page on this share code from anywhere. */
+export function deckShareLink(code: string): string {
+  return `${window.location.origin}${deckImportPath(code)}`
+}

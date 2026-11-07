@@ -6,6 +6,7 @@ import {
   type ImageIndex,
   loadConstructionIndex,
   loadRestrictionSelection,
+  mergeImageIndexes,
   type RestrictionStatus,
 } from "../../data"
 import type { ConstructionIndex } from "../../domain/deck/construction"
@@ -128,26 +129,6 @@ export function useDeckData(edition: Region): DeckData {
 }
 
 const CHUNK = 20
-
-function mergeImageIndexes(indexes: readonly (ImageIndex | undefined)[]): ImageIndex {
-  const present = indexes.flatMap((index) => (index ? [index] : []))
-  const owner = (printingId: string, faceId: string) =>
-    present.find(
-      (index) =>
-        index.known?.(printingId, faceId) === true || index.asset(printingId, faceId) !== undefined,
-    )
-  return {
-    known: (printingId, faceId) => owner(printingId, faceId) !== undefined,
-    asset: (printingId, faceId) => owner(printingId, faceId)?.asset(printingId, faceId),
-    cardImage: (printingId, faceId) => owner(printingId, faceId)?.cardImage(printingId, faceId),
-    artImage: (printingId, faceId) => owner(printingId, faceId)?.artImage?.(printingId, faceId),
-    eager: (printingId, faceId) =>
-      present.some((index) => index.eager?.(printingId, faceId) === true),
-    failedFace: (printingId, faceId) =>
-      owner(printingId, faceId) === undefined &&
-      present.some((index) => index.failedFace?.(printingId, faceId) === true),
-  }
-}
 
 /**
  * Image metadata for the deck's own printings. The main-thread snapshot carries only the base

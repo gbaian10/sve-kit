@@ -1,4 +1,4 @@
-import { act, renderHook, screen, waitFor } from "@testing-library/react"
+import { act, renderHook, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
@@ -14,12 +14,15 @@ import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
+import { stubCanvas2d } from "../../test-utils/canvas-2d"
 import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
 import { closeScanEngine } from "./engine"
 import { useScanResults } from "./scan-hooks"
 import { ScanPage } from "./ScanPage"
 
-// ONNX Runtime does not run in jsdom: a stand-in answers with the real models' output names.
+// ONNX Runtime does not run in jsdom: a stand-in answers with the real models' output names. With
+// `sees.card`, the finder sees one card in the middle and the recogniser reads it as BP01-001.
+const sees = vi.hoisted(() => ({ card: false }))
 vi.mock("onnxruntime-web/wasm", () => {
   class Tensor {
     readonly data: Float32Array
@@ -31,12 +34,24 @@ vi.mock("onnxruntime-web/wasm", () => {
   }
   const session = (model: string) => ({
     outputNames: model.startsWith("det") ? ["heat", "corners"] : ["embedding"],
-    run: () =>
-      Promise.resolve(
-        model.startsWith("det")
-          ? { heat: { data: new Float32Array(1024) }, corners: { data: new Float32Array(8192) } }
-          : { embedding: { data: new Float32Array(8) } },
-      ),
+    run: (feeds: { image: Tensor }) => {
+      if (model.startsWith("det")) {
+        const heat = new Float32Array(1024)
+        const corners = new Float32Array(8192)
+        if (sees.card) {
+          const at = 16 * 32 + 16
+          heat[at] = 0.9
+          ;[-3, -4.2, 3, -4.2, 3, 4.2, -3, 4.2].forEach((offset, channel) => {
+            corners[channel * 1024 + at] = offset
+          })
+        }
+        return Promise.resolve({ heat: { data: heat }, corners: { data: corners } })
+      }
+      const count = feeds.image.dims[0] ?? 0
+      const data = new Float32Array(count * 4)
+      if (sees.card) for (let at = 0; at < count; at += 1) data[at * 4] = 1
+      return Promise.resolve({ embedding: { data } })
+    },
     release: () => Promise.resolve(),
   })
   return {
@@ -58,6 +73,8 @@ function stubCamera() {
     stop: () => {
       stopped.push("video")
     },
+    // An optical zoom up to 2×; the presets beyond it scale the picture.
+    getCapabilities: () => ({ zoom: { min: 1, max: 2 } }),
     applyConstraints: () =>
       holdFocus
         ? new Promise<void>((resolve) => {
@@ -112,10 +129,13 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 afterEach(() => {
+  sees.card = false
   closeScanEngine()
   prefsStore.set(DEFAULT_PREFS)
   vi.restoreAllMocks()
 })
+
+const container = () => document.body
 
 function setup(language?: UiLanguage) {
   const storage = memoryCache()
@@ -210,6 +230,41 @@ describe("ScanPage", () => {
     await act(() => new Promise((resolve) => setTimeout(resolve, 20)))
     expect(camera.stopped).toEqual(["video"])
   })
+
+  it("recognises the card in view, and follows zoom, orientation, class and lock changes", async () => {
+    const user = userEvent.setup()
+    const camera = stubCamera()
+    stubCanvas2d()
+    sees.card = true
+    vi.spyOn(HTMLVideoElement.prototype, "videoWidth", "get").mockReturnValue(640)
+    vi.spyOn(HTMLVideoElement.prototype, "videoHeight", "get").mockReturnValue(480)
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue(
+      DOMRect.fromRect({ x: 0, y: 0, width: 390, height: 520 }),
+    )
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    await page.render()
+    await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
+    camera.grant()
+    expect(await screen.findByText("認出來了", {}, { timeout: 10_000 })).toBeInTheDocument()
+    expect(
+      await screen.findByRole("link", { name: /BP01-001/ }, { timeout: 10_000 }),
+    ).toHaveAttribute("href", "/cards/BP01-001")
+    await user.click(screen.getByRole("button", { name: "2×" }))
+    expect(screen.getByRole("button", { name: "2×" })).toHaveAttribute("aria-pressed", "true")
+    await user.click(screen.getByRole("button", { name: "3×" }))
+    expect(container().querySelector("video")?.style.transform).toBe("scale(1.5)")
+    await user.click(screen.getByRole("button", { name: "直放" }))
+    expect(screen.getByRole("button", { name: "橫放" })).toHaveAttribute("aria-pressed", "true")
+    const classes = await screen.findByRole("group", { name: "職業" }, { timeout: 15_000 })
+    const [first] = within(classes).getAllByRole("button")
+    if (!first) throw new Error("class buttons")
+    await user.click(first)
+    expect(first).toHaveAttribute("aria-pressed", "true")
+    // Tapping the picture locks too.
+    await user.click(container().querySelector("video") as HTMLVideoElement)
+    expect(screen.getByRole("button", { name: "鎖定結果" })).toHaveAttribute("aria-pressed", "true")
+  }, 40_000)
 
   it("ignores a late answer for an edition the user already switched away from", async () => {
     const user = userEvent.setup()

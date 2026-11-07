@@ -235,6 +235,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
     <div className="-mx-4 flex h-[calc(100dvh-3.25rem-5.25rem)] flex-col gap-3 overflow-x-clip pt-3 lg:mx-auto lg:h-[calc(100dvh-3.25rem)] lg:w-full lg:max-w-240 lg:pb-4 phone-landscape:h-[calc(100dvh-3.25rem)]">
       <h1 className="sr-only">{t("scan.single.heading")}</h1>
       <ScanModeTabs
+        mode="single"
         start={
           <button
             type="button"
@@ -242,7 +243,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
               setSideways(!sideways)
             }}
             aria-pressed={sideways}
-            className="flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 hover:bg-surface-3"
+            className="relative flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-surface-3"
           >
             {sideways ? (
               <RectangleHorizontal className="size-4" aria-hidden="true" />

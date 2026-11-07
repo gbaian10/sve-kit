@@ -57,8 +57,42 @@ export function ClassColumn({
   )
 }
 
+function ModeTab({
+  to,
+  on,
+  label,
+}: {
+  readonly to: string
+  readonly on: boolean
+  readonly label: string
+}) {
+  return on ? (
+    <span
+      aria-current="page"
+      className="rounded-pill bg-surface-1 px-3.5 py-1.5 font-semibold text-text-1 shadow-sm"
+    >
+      {label}
+    </span>
+  ) : (
+    // The pill is 30px tall; the invisible band above and below makes a 44px target.
+    <Link
+      to={to}
+      replace
+      className="relative rounded-pill px-3.5 py-1.5 text-text-2 before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] hover:text-text-1"
+    >
+      {label}
+    </Link>
+  )
+}
+
 /** Above the camera or photo on both screens: the mode switch, an optional control, the models link. */
-export function ScanModeTabs({ start }: { readonly start?: ReactNode }) {
+export function ScanModeTabs({
+  mode,
+  start,
+}: {
+  readonly mode: "single" | "deck"
+  readonly start?: ReactNode
+}) {
   const { t } = useTranslation()
   return (
     <div className="relative mx-4 flex h-9 shrink-0 items-center justify-center lg:mx-0">
@@ -66,17 +100,13 @@ export function ScanModeTabs({ start }: { readonly start?: ReactNode }) {
         aria-label={t("scan.modeSwitch")}
         className="flex rounded-pill bg-surface-2 p-0.5 text-13 whitespace-nowrap"
       >
-        <span
-          aria-current="page"
-          className="rounded-pill bg-surface-1 px-3.5 py-1.5 font-semibold text-text-1 shadow-sm"
-        >
-          {t("scan.modeSingle")}
-        </span>
+        <ModeTab to="/cards/scan" on={mode === "single"} label={t("scan.modeSingle")} />
+        <ModeTab to="/cards/scan/deck" on={mode === "deck"} label={t("scan.modeDeck")} />
       </nav>
       {start !== undefined && <div className="absolute left-0">{start}</div>}
       <Link
         to="/cards/scan/models"
-        className="absolute right-0 flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 hover:bg-surface-3"
+        className="absolute right-0 flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-surface-3"
       >
         <Package className="size-4" aria-hidden="true" /> {t("scan.models.link")}
       </Link>
