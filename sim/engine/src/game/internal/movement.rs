@@ -5,13 +5,13 @@ use super::{
 };
 use crate::game::Object;
 use crate::ir::{
-    Action, ActionPattern, BanishOutcome, Bool, Cause, CausePattern, DestroyOutcome, DurationEnd,
-    Effect, EffectSource, Expr, Generation, Instruction, InstructionContext, MemberProjection,
-    MoveDestination, MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec, MovementReceipt,
-    Nat, Node, ObjectOperand, ObjectReceipt, ObjectRef, OwnerZone, PlayerId, PlayerRef,
-    PlayerRelation, Polarity, Position, PositiveNat, ReceiptId, ReceiptLocation, ResultMember,
-    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection,
-    SnapshotId, TimeAnchor, ZoneKind,
+    Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
+    DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
+    InstructionContext, MemberProjection, MoveDestination, MoveMethod, MoveOutcome, MoveReason,
+    MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt, ObjectRef,
+    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat, ReceiptId,
+    ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
+    SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
@@ -154,6 +154,39 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         _ => Ok(()),
     }
+}
+
+/// The enclosing player stage supplies authority for this otherwise private bound deck.
+pub(super) fn player_banish(control: &Control) -> Option<(&Instruction, Binding<PlayerRef>, u64)> {
+    let Control::EachPlayer { player, stages, .. } = control else {
+        return None;
+    };
+    let [stage] = stages.as_slice() else {
+        return None;
+    };
+    let [step] = stage.body.steps.as_slice() else {
+        return None;
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        return None;
+    };
+    let Action::Banish {
+        objects:
+            Selector::Ordered {
+                zone,
+                start: Position::Top {},
+                count: Expr::Literal(Nat(count)),
+                direction: SliceDirection::Forward,
+            },
+    } = &instruction.action
+    else {
+        return None;
+    };
+    (*count > 0
+        && zone.kind == ZoneKind::Deck
+        && zone.player == (PlayerRef::Bound { binding: *player })
+        && instruction.actor == zone.player)
+        .then_some((instruction, *player, *count))
 }
 
 /// A checked fixed top slice: another player's deck may only be put into its owner's cemetery.
@@ -484,6 +517,48 @@ impl Game {
             .checked_add(if followup.is_some() { 2 } else { 1 })
             .ok_or_else(|| invalid("movement generation exhausted"))?;
         Ok(followup)
+    }
+
+    pub(super) fn internal_player_banish(
+        &mut self,
+        execution: &mut Execution,
+        control: &Control,
+    ) -> Result<()> {
+        super::tokens::check_each(control)?;
+        let (instruction, binding, count) =
+            player_banish(control).ok_or_else(|| unsupported("all-player deck banish stage"))?;
+        let Control::EachPlayer { players, .. } = control else {
+            return Err(invalid("player banish stage"));
+        };
+        let mut players = execution.players(self, players)?;
+        let active = player_id(self.active())?;
+        players.sort_by_key(|member| *member != active);
+        let mut members = Vec::new();
+        for player in players {
+            execution
+                .slots
+                .insert(binding.key(), super::Slot::Player(player));
+            members.extend(self.deck_top_members(
+                execution,
+                &PlayerRef::Bound { binding },
+                count,
+            )?);
+        }
+        // Every player's slice is captured before the shared movement batch mutates either deck.
+        let (moves, successful) = self.internal_move_members(
+            execution,
+            &members,
+            "banish",
+            ZoneKind::Banish,
+            MoveMethod::Banish,
+            false,
+            None,
+        )?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Banish(BanishOutcome { successful, moves }),
+        );
+        Ok(())
     }
 
     pub(super) fn internal_banish(

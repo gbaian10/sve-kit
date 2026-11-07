@@ -226,7 +226,7 @@ fn deck_top_lowering_accepts_ex_and_banish_but_rejects_other_top_banish_shapes()
         input["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{"banish":banish}]);
         assert!(
             lowerer().lower(&input).is_err(),
-            "top banishment does not admit foreign decks, zero counts or unimplemented result syntax"
+            "top banishment outside a checked each-player stage does not admit foreign decks, zero counts or unimplemented result syntax"
         );
     }
 }

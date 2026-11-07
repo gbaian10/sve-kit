@@ -723,6 +723,7 @@ pub(super) enum DeckHolder {
     Side(LeaderSide),
     Group(DeckGroup),
     OwnerOf { owner_of: String },
+    Bound(String),
 }
 
 /// 「相手プレイヤーすべて」 keeps its printed set instead of collapsing to `opp`.
@@ -810,7 +811,21 @@ pub(super) enum Chooser {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
     Top { top: DeckTop },
+    Union { r#ref: PublicBanishUnion },
     Objects(Box<ObjectAction>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicBanishUnion {
+    pub any_of: Vec<PublicBanishZone>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicBanishZone {
+    pub who: Side,
+    pub zone: Zone,
 }
 
 #[derive(Deserialize)]

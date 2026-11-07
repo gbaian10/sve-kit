@@ -3,7 +3,7 @@ use crate::ir::{
     Control, DestroyOutcome, Expr, IntOperation, LkiReason, MemberProjection, MoveMethod,
     MovementReceipt, Nat, NatOperation, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectView,
     PlayerOrder, PlayerRead, PlayerRef, PlayerRelation, Predicate, ReceiptLocation,
-    ReceiptReference, Role, Selector, StageMode, ZoneKind,
+    ReceiptReference, Role, Selector, StageMode, TextQuantifier, ZoneKind,
 };
 
 pub(super) fn zone_count(value: &Expr<Nat>) -> Option<&Selector> {
@@ -141,23 +141,29 @@ pub(crate) fn check_each(control: &Control) -> Result<()> {
         choice_order: PlayerOrder::TurnPlayerFirst,
     } = control
     else {
-        return Err(unsupported("token player stage order"));
+        return Err(unsupported("each-player stage order"));
     };
     let [stage] = stages.as_slice() else {
-        return Err(unsupported("one token player stage"));
+        return Err(unsupported("one each-player stage"));
     };
     if players.relation != PlayerRelation::All
         || players.relative_to != (PlayerRef::Controller {})
+        || players.cardinality.minimum != Nat(0)
+        || players.cardinality.maximum.is_some()
+        || players.text_quantifier != TextQuantifier::All
         || stage.mode != (StageMode::NonChoiceSimultaneous {})
     {
-        return Err(unsupported("all-player token stage"));
+        return Err(unsupported("all-player stage"));
     }
     let [step] = stage.body.steps.as_slice() else {
-        return Err(unsupported("single token instruction stage"));
+        return Err(unsupported("single each-player instruction stage"));
     };
     let Node::Instruction { instruction } = &step.node else {
-        return Err(unsupported("token instruction stage"));
+        return Err(unsupported("each-player instruction stage"));
     };
+    if super::super::movement::player_banish(control).is_some() {
+        return Ok(());
+    }
     let Some((tokens, zone)) = super::specification(&instruction.action) else {
         return Err(unsupported("player token shape"));
     };
