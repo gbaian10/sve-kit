@@ -52,6 +52,8 @@ PUBLIC_PREFIXES = SNAPSHOT_PREFIXES | frozenset(
     "images/" + s + "/" for s in ("card_s", "card_l", "art_s")
 )
 IMAGE_PREFIXES = PUBLIC_PREFIXES - SNAPSHOT_PREFIXES
+# Listed only to skip existing scanner files; no collector deletes under them yet.
+SCAN_PREFIXES = frozenset({"scan/models/", "scan/index/"})
 MAX_OBJECT = 128 * 1024 * 1024
 # R2 processes roughly 60 ms per key, so each batch must finish within the 30-second read timeout.
 MAX_DELETE_BATCH = 100
@@ -253,7 +255,7 @@ class R2Store:
 
     def keys(self, prefix: str) -> tuple[str, ...]:
         """Bounded SDK ListObjectsV2 pagination only in public namespaces."""
-        if prefix not in PUBLIC_PREFIXES:
+        if prefix not in PUBLIC_PREFIXES | SCAN_PREFIXES:
             raise ExportError("List prefix is not explicitly public")
         keys: set[str] = set()
         seen: set[str] = set()

@@ -305,7 +305,7 @@ def test_only_a_create_only_collision_is_downloaded(
         if same_headers:
             assert upload(store, loaded)["unchanged_files"] == 1
         else:
-            with pytest.raises(ExportError, match="Immutable JSON"):
+            with pytest.raises(ExportError, match="Immutable object"):
                 upload(store, loaded, jobs=1)
             assert INDEX not in fake.objects
     assert [

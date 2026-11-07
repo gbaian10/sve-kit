@@ -131,5 +131,5 @@ class UploadPool:
             return 1
         stored = self.store.get(item.key)
         if stored is None or stored.raw != raw or stored.headers != item.headers:
-            raise ExportError("Immutable JSON object differs from the export")
+            raise ExportError("Immutable object differs from the local input")
         return 0
