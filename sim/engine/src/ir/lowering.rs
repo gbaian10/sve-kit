@@ -1735,6 +1735,10 @@ impl<'definitions> BodyContext<'definitions> {
         match step {
             ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
+            ast::Step::ExtraTurn(_) => Ok(extra_turn(Binding::new(
+                self.allocator.id(path)?,
+                self.scope,
+            ))),
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
             ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
             ast::Step::Race(value) => Ok(resource_entry::action(
@@ -1898,6 +1902,16 @@ fn effect_victory(source: &AbilitySource) -> Action {
         },
         result: super::Outcome::Win,
         source: source.clone(),
+    }
+}
+
+const fn extra_turn(occurrence: Binding<super::ScheduleToken>) -> Action {
+    Action::ScheduleTurn {
+        player: PlayerRef::Controller {},
+        operation: super::TurnOperation::InsertBefore {
+            anchor: super::ScheduleAnchor::NextTurn {},
+        },
+        occurrence,
     }
 }
 

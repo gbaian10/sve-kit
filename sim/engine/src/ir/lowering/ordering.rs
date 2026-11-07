@@ -153,6 +153,7 @@ impl BodyContext<'_> {
             }
             ast::Step::StackPlus(_)
             | ast::Step::Win(_)
+            | ast::Step::ExtraTurn(_)
             | ast::Step::PlayAbility(_)
             | ast::Step::Counter(_)
             | ast::Step::Reveal(_)

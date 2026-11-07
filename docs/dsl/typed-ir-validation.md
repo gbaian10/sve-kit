@@ -714,3 +714,9 @@ Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序
 作者 `win: {who: self}` 降到既有 `Action::GameResult` 的 `Outcome::Win`。合法子集限能力控制者的單一隱式 PlayerSet，動作來源須與指令來源相同；其他玩家集合、敗北或偽造來源仍拒絕。執行器沿共用規則勝利程序，勝利後立即清除 typed continuation、待機與問題。正式打牌回傳 `CardPlay::GameEnded(Terminal)`：保留已執行前綴，但 `Progress.complete` 為 false，沒有 CardResolved／AbilityResolved 事實，也不再搬動尚未完成處理的法術。
 
 任意張數捨棄使用既有 Chosen／DiscardOutcome；只接受無篩選的自己當前手牌、單一 disjoint 群組、min=0/max=None。發問時上限夾到現有候選數，回答仍驗 actor、token、世代、owner、controller 與唯一 handle。成功回條的 Before 成員數供 `count_of` 讀取；既有精確一張材料的原費讀取限制不變。
+
+## 追加回合的執行子集
+
+作者 `extra_turn: {who: self}` 降到既有 `Action::ScheduleTurn`，固定 `Controller`、`InsertBefore(NextTurn)`，並建立 `ScheduleToken` producer。WF 與 runtime 只收這個形狀；其他玩家、`SkipNext` 與任意 anchor 仍拒絕。正式打牌程序沿既有成本及解決流程，插入時不改 active player，而是交共用回合佇列依建立順序選取。
+
+權限回條 `InstructionOutcome::ScheduledTurn` 用執行器的單調 epoch 區別每次成功插入；這個 token 識別排程動作，不是實際開始時才配置的 `TurnId`，也不對作者開放結果或 anchor 讀取。後續步驟失敗時沿完整交易回滾，不能留下已撤銷的追加回合。共用排程既有的跳過、普通回合保存、匯入驗證與回合起始程序保持原契約。

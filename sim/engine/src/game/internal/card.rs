@@ -1314,6 +1314,7 @@ fn check_instruction(
             | Action::Counter { .. }
             | Action::Discard { .. }
             | Action::GameResult { .. }
+            | Action::ScheduleTurn { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }

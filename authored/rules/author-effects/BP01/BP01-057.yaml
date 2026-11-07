@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-057:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            banish:
+              n: 10
+              sel:
+                who: self
+                zone: cemetery
+                kind: spell
+          optional_cost_set: 7
+      - line: 2
+        spell:
+          do:
+            - extra_turn:
+                who: self

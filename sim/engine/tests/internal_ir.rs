@@ -47,6 +47,8 @@ mod projections;
 #[path = "internal_ir/transactions.rs"]
 mod transactions;
 
+#[path = "internal_ir/scheduled_turn.rs"]
+mod scheduled_turn;
 #[path = "internal_ir/terminal.rs"]
 mod terminal;
 
