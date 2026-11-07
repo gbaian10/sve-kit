@@ -116,6 +116,26 @@ describe("deck card finding", () => {
     expect(kept).not.toContainEqual(merged)
   })
 
+  it("keeps the only sure card when nothing else sets the size", () => {
+    const sure = cardAt(80, 80)
+    // Weak finds whose centres fall inside it, each covering only a corner of it.
+    const weak = [
+      cardAt(49.5, 37, 63, 0.5),
+      cardAt(110.5, 123, 63, 0.5),
+      cardAt(300, 80, 63, 0.5),
+      cardAt(450, 80, 63, 0.5),
+    ]
+    expect(mergeDeckBoxes([sure, ...weak])).toContainEqual(sure)
+  })
+
+  it("keeps the card when a find inside it is just as sure", () => {
+    const row = [0, 80, 160, 240, 320].map((x) => cardAt(x, 0))
+    const art = cardAt(95, 20, 30, 0.9)
+    expect(mergeDeckBoxes([...row, art]).map((box) => box.quad[0][0])).toEqual([
+      0, 80, 160, 240, 320,
+    ])
+  })
+
   it("adds whole-photo finds only for cards too big for the tiles", () => {
     expect(wholeTile(800, 600)).toEqual({ x: 0, y: -100, side: 800 })
     // In the 256-pixel finder input: one card 100 px tall (about 312 photo px), one 40 px.

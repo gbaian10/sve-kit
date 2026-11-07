@@ -194,7 +194,7 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
   }
   if (keep.length >= 5) {
     // A box mostly inside another (art inside a card, a card inside a bigger false box): keep the
-    // surer one.
+    // surer one (the bigger on a tie).
     const areas = keep.map((box) => area(box.quad))
     const drop = new Set<number>()
     for (let i = 0; i < keep.length; i += 1)
@@ -203,7 +203,7 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
         const aj = areas[j] ?? 0
         if (i === j || ai >= aj) continue
         if (overlap((keep[i] as Box).quad, (keep[j] as Box).quad) <= 0.5 * ai) continue
-        drop.add((keep[i] as Box).score >= (keep[j] as Box).score ? j : i)
+        drop.add((keep[i] as Box).score > (keep[j] as Box).score ? j : i)
       }
     keep = keep.filter((_, i) => !drop.has(i))
     // A box straddling two neighbours is not a card.
@@ -216,9 +216,8 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
     })
   }
   if (keep.length >= 5) {
-    // Sizes are judged against the nearest sure finds, so printed marks and dice around a card
-    // cannot make it look too big. Far smaller than them: not a card. Much bigger and holding two
-    // other finds: two neighbours merged into one box. A big card on its own stays.
+    // Weak finds on printed marks and dice must not set the typical card size, or a real card
+    // among them looks like two merged neighbours.
     const sizes = keep.map((box) => area(box.quad))
     const centres = keep.map((box) => centre(box.quad))
     const sure = keep.flatMap((box, j) => (box.score >= STRONG ? [j] : []))
@@ -235,7 +234,8 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
         .slice(0, 6)
         .map(([, j]) => sizes[j] ?? 0)
         .sort((a, b) => a - b)
-      const median = near[near.length >> 1] ?? 0
+      const median = near[near.length >> 1]
+      if (median === undefined) return true
       const size = sizes[i] ?? 0
       if (size <= 0.35 * median) return false
       if (size < 2.2 * median) return true
