@@ -587,8 +587,12 @@ fn printing_aliases_share_a_candidate_without_selecting_unrelated_numbers() {
 }
 
 #[test]
-fn amulet_token_movement_keeps_other_special_card_kinds_closed() {
-    for kind in ["アミュレット・トークン", "クレスト・トークン"] {
+fn amulet_crest_and_spell_tokens_are_erased_after_moving_to_cemetery() {
+    for kind in [
+        "アミュレット・トークン",
+        "クレスト・トークン",
+        "スペル・トークン",
+    ] {
         let (snapshot, keywords, mut input) = selection(1);
         let snapshot = snapshot
             .lines()
@@ -618,24 +622,17 @@ fn amulet_token_movement_keeps_other_special_card_kinds_closed() {
         )
         .unwrap();
         let result = game.play_internal_card("creator", PlayerId { seat: 1 });
-        if kind == "クレスト・トークン" {
-            assert!(
-                result.is_err(),
-                "other special-card movement remains closed"
-            );
-        } else {
-            assert!(matches!(result.unwrap(), CardPlay::Resolved(_)));
-            let view = game.projection(View::Referee).unwrap();
-            assert_eq!(view["P1"]["ex"], json!([]));
-            assert_eq!(view["P1"]["cemetery"], json!(["creator"]));
-            assert!(
-                view["objects"]
-                    .as_object()
-                    .unwrap()
-                    .values()
-                    .all(|v| v["card"] != "token")
-            );
-        }
+        assert!(matches!(result.unwrap(), CardPlay::Resolved(_)));
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["ex"], json!([]));
+        assert_eq!(view["P1"]["cemetery"], json!(["creator"]));
+        assert!(
+            view["objects"]
+                .as_object()
+                .unwrap()
+                .values()
+                .all(|v| v["card"] != "token")
+        );
     }
 }
 
