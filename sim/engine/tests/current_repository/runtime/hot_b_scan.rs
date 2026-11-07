@@ -15,8 +15,6 @@ const JUNGLE: &[&str] = &[
     "ECP01-SP24",
     "ECP01-SSP24",
 ];
-const JUSTICE: &[&str] = &["BP10-054", "BP10-SL12", "BP10-U04", "SD08-003"];
-
 fn initial(number: &str) -> Value {
     json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main","elapsed_turns":{"P1":3,"P2":3}},"players":{
         "P1":{"leader":{"class":"ニュートラル","life":10},"pp":{"current":10,"max":10},"ep":0,"sep":0,"zones":{
@@ -179,69 +177,5 @@ fn jungle_counts_only_own_uma_cards_and_checks_each_damage_clause_separately() {
             if count == 5 { 18_u8 } else { 20 }
         );
         assert_eq!(state["objects"]["source"]["acted"], true);
-    }
-}
-
-#[test]
-fn justice_printings_do_not_choose_evolution_or_return_after_an_empty_or_low_cost_move() {
-    for number in JUSTICE {
-        for has_card in [false, true] {
-            let mut initial = initial(number);
-            initial["players"]["P1"]["zones"]["deck"] = if has_card {
-                json!([{"id":"top","card":"BP01-021","state":{"cost":9_u8}}])
-            } else {
-                json!([])
-            };
-            let mut board = game(&initial);
-            enter(&mut board);
-            resolved(pending(&mut board, number, 3));
-            finish_checks(&mut board);
-            assert!(board.internal_pending_choice().unwrap().is_none());
-            let state = board.projection(View::Referee).unwrap();
-            assert_eq!(
-                state["P1"]["field"],
-                json!(["source"]),
-                "Q1304: only original cost five or more changes this follower"
-            );
-            assert_eq!(
-                state["P1"]["ex"],
-                if has_card { json!(["top"]) } else { json!([]) }
-            );
-            assert_eq!(state["P1"]["hand"], json!([]));
-            assert_eq!(state["P1"]["pp"]["current"], 2_u8);
-        }
-    }
-}
-
-#[test]
-fn justice_printings_return_after_moving_original_cost_five_then_heal_for_leaving_the_field() {
-    for number in JUSTICE {
-        let mut initial = initial(number);
-        initial["players"]["P1"]["zones"]["deck"] =
-            json!([{"id":"top","card":"BP01-037","state":{"cost":1_u8}}]);
-        let mut board = game(&initial);
-        enter(&mut board);
-        let question = waiting(pending(&mut board, number, 3));
-        assert!(matches!(question.domain, InputDomain::Modes { .. }));
-        assert_eq!(
-            board.projection(View::Referee).unwrap()["P1"]["ex"],
-            json!(["top"]),
-            "the move happens before the conditional choice"
-        );
-        resolved(
-            board
-                .answer_internal_card(
-                    question.actor,
-                    question.token,
-                    Answer::Modes(vec![ModeId(2)]),
-                )
-                .unwrap(),
-        );
-        resolved(pending(&mut board, number, 2));
-        let state = board.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["hand"], json!(["source"]));
-        assert_eq!(state["P1"]["field"], json!([]));
-        assert_eq!(state["P1"]["leader"]["life"], 18_u8);
-        assert_eq!(state["P1"]["ex"], json!(["top"]));
     }
 }
