@@ -1,0 +1,49 @@
+cards:
+  BP10-057:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - life:
+                delta: 2
+                who: self
+          on:
+            attacked:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - lastword:
+          do:
+            - move:
+                acted: true
+                ref: returned
+                result: entered
+                to: field
+          targets:
+            - bind: returned
+              from:
+                name: レーヴァテインドラゴン
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
