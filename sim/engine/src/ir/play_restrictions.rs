@@ -1,4 +1,4 @@
-//! Printed restrictions checked before committing a card play.
+//! Printed permissions and restrictions checked before committing a card play.
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource,
     ActionPattern, Bool, Duration, DurationEnd, Effect, Expr, ObjectOperand, PermissionSubject,
@@ -10,6 +10,30 @@ pub(crate) fn ability(
     scope: ScopeId,
     active_zones: Vec<ZoneKind>,
     condition: Expr<Bool>,
+) -> Ability {
+    declaration(source, scope, active_zones, condition, Polarity::Forbid)
+}
+
+pub(crate) fn cemetery_ability(
+    source: AbilitySource,
+    scope: ScopeId,
+    condition: Expr<Bool>,
+) -> Ability {
+    declaration(
+        source,
+        scope,
+        vec![ZoneKind::Cemetery],
+        condition,
+        Polarity::Allow,
+    )
+}
+
+fn declaration(
+    source: AbilitySource,
+    scope: ScopeId,
+    active_zones: Vec<ZoneKind>,
+    condition: Expr<Bool>,
+    polarity: Polarity,
 ) -> Ability {
     let objects = Selector::Objects {
         objects: vec![ObjectOperand::SourceHolder {}],
@@ -30,7 +54,7 @@ pub(crate) fn ability(
                 objects: objects.clone(),
             },
             action: ActionPattern::PlayCard { objects },
-            polarity: Polarity::Forbid,
+            polarity,
             condition,
             duration: Duration {
                 end: DurationEnd::NoTemporalExpiry {},
@@ -43,26 +67,41 @@ pub(crate) fn ability(
     }
 }
 
-pub(crate) fn card_restriction(ability: &Ability) -> Option<&Expr<Bool>> {
+pub(crate) struct CardPlayRule<'condition> {
+    pub(crate) condition: &'condition Expr<Bool>,
+    pub(crate) forbids: bool,
+}
+
+pub(crate) fn card_play_rule(ability: &Ability) -> Option<CardPlayRule<'_>> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
         || ability.source.holder != (ObjectOperand::SourceHolder {})
         || ability.source.controller != (PlayerRef::Controller {})
-        || !matches!(
-            ability.active_zones.as_slice(),
-            [ZoneKind::Ex] | [ZoneKind::Hand, ZoneKind::Ex]
-        )
     {
         return None;
     }
-    let [Effect::Permission { condition, .. }] = ability.declarations.as_slice() else {
+    let [
+        Effect::Permission {
+            condition,
+            polarity,
+            ..
+        },
+    ] = ability.declarations.as_slice()
+    else {
         return None;
     };
-    let mut expected = self::ability(
+    let polarity = match (polarity, ability.active_zones.as_slice()) {
+        (Polarity::Forbid, [ZoneKind::Ex] | [ZoneKind::Hand, ZoneKind::Ex]) => Polarity::Forbid,
+        (Polarity::Allow, [ZoneKind::Cemetery]) => Polarity::Allow,
+        _ => return None,
+    };
+    let forbids = polarity == Polarity::Forbid;
+    let mut expected = declaration(
         ability.source.clone(),
         ability.scope,
         ability.active_zones.clone(),
         condition.clone(),
+        polarity,
     );
     expected.id = ability.id;
-    (*ability == expected).then_some(condition)
+    (*ability == expected).then_some(CardPlayRule { condition, forbids })
 }

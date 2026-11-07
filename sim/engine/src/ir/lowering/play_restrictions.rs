@@ -4,6 +4,30 @@ use super::{
 };
 use crate::ir::play_restrictions;
 
+pub(super) fn cemetery(
+    allocator: &mut Allocator,
+    key: &super::CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+    permission: &ast::ConditionalCemetery,
+    scope: ScopeId,
+) -> Result<Located<Ability>, LoweringError> {
+    if entry.imports.is_some() {
+        return Err(unsupported(path));
+    }
+    let source = source_span(key, path, entry)?;
+    let empty = ast::Body::default();
+    let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
+    let condition = context.qualification(
+        &permission.condition,
+        &format!("{path}/play/playable_from/if"),
+    )?;
+    Ok(Located {
+        node: play_restrictions::cemetery_ability(ability_source(&source, None), scope, condition),
+        source,
+    })
+}
+
 pub(super) fn lower(
     allocator: &mut Allocator,
     key: &super::CardCoordinates<'_>,

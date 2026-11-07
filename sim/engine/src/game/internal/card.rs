@@ -9,7 +9,7 @@ use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
 use crate::ir::history_turn::evolution_capture_header;
 use crate::ir::names;
-use crate::ir::play_restrictions::card_restriction;
+use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
@@ -185,7 +185,7 @@ impl CardRuntime {
                 !card.card().card_play_costs.is_empty()
                     || card.card().abilities.iter().any(|a| {
                         is_printed_quick(&a.node)
-                            || card_restriction(&a.node).is_some()
+                            || card_play_rule(&a.node).is_some()
                             || other_costs::is_static(&a.node)
                     })
                     || card.card().abilities.iter().any(|ability| {
@@ -982,7 +982,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || prevention::is_static(ability)
         || card_permission(ability)
         || printed_keywords::card_declaration(ability).is_some()
-        || card_restriction(ability).is_some()
+        || card_play_rule(ability).is_some()
     {
         return Ok(());
     }

@@ -175,3 +175,182 @@ fn printed_play_restrictions_evaluate_nested_public_conditions_and_reject_unknow
     })
     .unwrap_err();
 }
+
+#[test]
+fn conditional_cemetery_play_permission_lowers_to_a_source_allow_rule() {
+    let mut expanded = tree(&json!({"my_turn":true}));
+    expanded["cards"]["unit-spell"]["abilities"][0]["play"] = json!({
+        "playable_from": {
+            "zone":"cemetery",
+            "if":{"cmp":{
+                "left":{"history_count":{"event":"played","window":"this_turn","who":"self"}},
+                "op":"ge", "right":3_u8
+            }}
+        }
+    });
+    let programs = lowerer().lower(&expanded).unwrap();
+    let ability = &programs["unit-spell"].card().abilities[0].node;
+    assert_eq!(ability.active_zones, vec![ZoneKind::Cemetery]);
+    let [Effect::Permission { polarity, .. }] = ability.declarations.as_slice() else {
+        panic!("one native play permission")
+    };
+    assert_eq!(*polarity, Polarity::Allow);
+}
+
+fn cemetery_game(zone: &str, permitted: bool) -> Game {
+    let mut expanded = tree(&json!({"my_turn":true}));
+    let mut follower = expanded["cards"]["unit-spell"].take();
+    follower["abilities"][0]["play"] = json!({"playable_from":{
+        "zone":"cemetery", "if":{"cmp":{
+            "left":{"history_count":{"event":"played","window":"this_turn","who":"self"}},
+            "op":"ge", "right":3_u8
+        }}
+    }});
+    expanded["cards"] = json!({"unit-follower":follower});
+    let program = if permitted {
+        lowerer().lower(&expanded).unwrap()["unit-follower"].clone()
+    } else {
+        card(vec![])
+    };
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10_u8,"max":10_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"first","card":"unit-spell"},
+        {"id":"second","card":"unit-spell"},
+        {"id":"third","card":"unit-spell"}
+    ]);
+    if zone == "hand" {
+        initial["players"]["P1"]["zones"][zone]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"may","card":"unit-follower"}));
+    } else {
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"may","card":"unit-follower"}]);
+    }
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "cemetery-permission",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![play::spell(vec![])]))
+        .unwrap();
+    game
+}
+
+fn finish_play_timing(game: &mut Game) {
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+}
+
+#[test]
+fn cemetery_permission_requires_three_committed_plays_without_counting_itself() {
+    let mut game = cemetery_game("cemetery", true);
+    let untouched = format!("{game:?}");
+    game.play_internal_card("may", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(format!("{game:?}"), untouched);
+    for holder in ["first", "second", "third"] {
+        resolved(
+            game.play_internal_card(holder, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        finish_play_timing(&mut game);
+        if holder != "third" {
+            let after_partial = format!("{game:?}");
+            game.play_internal_card("may", PlayerId { seat: 1 })
+                .unwrap_err();
+            assert_eq!(format!("{game:?}"), after_partial);
+        }
+    }
+    assert!(matches!(
+        game.play_internal_card("may", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    finish_play_timing(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!(["may"]));
+    assert_eq!(state["P1"]["cemetery"], json!(["first", "second", "third"]));
+}
+
+#[test]
+fn conditional_cemetery_permission_preserves_hand_and_ex_but_does_not_grant_other_cards() {
+    for zone in ["hand", "ex"] {
+        let mut game = cemetery_game(zone, true);
+        assert!(matches!(
+            game.play_internal_card("may", PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Entered(_)
+        ));
+        finish_play_timing(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["field"],
+            json!(["may"])
+        );
+    }
+    let mut unpermitted = cemetery_game("cemetery", false);
+    for holder in ["first", "second", "third"] {
+        resolved(
+            unpermitted
+                .play_internal_card(holder, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        finish_play_timing(&mut unpermitted);
+    }
+    let before = format!("{unpermitted:?}");
+    unpermitted
+        .play_internal_card("may", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(format!("{unpermitted:?}"), before);
+}
+
+#[test]
+fn cemetery_permission_rejects_unneeded_origins_unconditional_and_mixed_play_modifiers() {
+    for permission in [
+        json!("cemetery"),
+        json!({"zone":["cemetery"],"if":{"my_turn":true}}),
+        json!({"zone":"ex","if":{"my_turn":true}}),
+        json!({"zone":"hand","if":{"my_turn":true}}),
+        json!({"zone":"deck","if":{"my_turn":true}}),
+    ] {
+        let mut expanded = tree(&json!({"my_turn":true}));
+        expanded["cards"]["unit-spell"]["abilities"][0]["play"] =
+            json!({"playable_from":permission});
+        lowerer().lower(&expanded).unwrap_err();
+    }
+    for extra in [
+        json!({"cannot_if":{"my_turn":true}}),
+        json!({"cost_delta":-1_i8}),
+        json!({"define":{"x":1_u8}}),
+    ] {
+        let mut expanded = tree(&json!({"my_turn":true}));
+        let mut play = json!({"playable_from":{"zone":"cemetery","if":{"my_turn":true}}});
+        play.as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        expanded["cards"]["unit-spell"]["abilities"][0]["play"] = play;
+        lowerer().lower(&expanded).unwrap_err();
+    }
+}
+
+#[test]
+fn granted_cost_modifiers_cannot_silently_add_a_cemetery_play_permission() {
+    let mut expanded = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({
+            "fusion":{"sel":{"who":"self","zone":["hand","ex"],"trait":"財宝"},"n":1_u8},
+            "do":[{"grant":{"on":"this","abilities":[{"play":{"cost_delta":-1_i8}}]}}]
+        }),
+    )]);
+    lowerer().lower(&expanded).unwrap();
+    expanded["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["grant"]["abilities"]
+        [0]["play"]["playable_from"] = json!({"zone":"cemetery","if":{"my_turn":true}});
+    lowerer().lower(&expanded).unwrap_err();
+}
