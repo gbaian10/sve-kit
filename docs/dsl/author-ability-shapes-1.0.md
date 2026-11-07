@@ -38,7 +38,7 @@ T=既有非空、保序 Targets；O=OptionalCosts；X=XParameter；D=非空 Map<
 
 per_turn 是 ≥1 的安全整數；拒絕舊鍵與 bool/0/負數/字串。自動能力按 PendingAdmission 消耗、起動按 PlayCommitted 消耗，不提供 consume_at 自訂入口。起動 BP08-084 n=2、auto BP07-036 n=4、授予 CP04-PR20 n=2。per_turn 不表示「只在自己回合」；額外的回合限定需要獨立的規則准入。ub:true 為獨立標誌，不是 per_turn。
 
-EvolutionDestination 直接抽出並共用現有動作 evolve.into 型別：CardName／非空 CardName[]／ObjectSel，不新增 {sel} 包裝或新選取程序。C1 驗 selector 指向合法進化候選、名單登錄與選取時點；evolve_follower 字串形狀不等於 registry 准入。fusion 使用三個互斥變體 {sel:ObjectSel,n:Quantity,result?}／{sel,upto:Quantity,result?}／{sel,any:true,result?}；n 真例 BP19-038、upto BP20-020、any 合成。activate.zone:hand 限制能力啟動位置；融合材料選取不寫 zone，以保留規則允許的手牌／EX。材料一次回答，BP20-020 用 upto:2,result:fused,x:{from_payment:fused}；融合 receipt 是否可投影實付數列 C1，不另宣告一次 X。下限與零選擇准入依 CR12.18，不由 C0 推定。
+EvolutionDestination 直接抽出並共用現有動作 evolve.into 型別：CardName／非空 CardName[]／ObjectSel，不新增 {sel} 包裝或新選取程序。C1 驗 selector 指向合法進化候選、名單登錄與選取時點；evolve_follower 字串形狀不等於 registry 准入。fusion 使用三個互斥變體 {sel:ObjectSel,n:Quantity,result?}／{sel,upto:Quantity,result?}／{sel,any:true,result?}；n 真例 BP19-038、upto BP20-020、any 合成。activate.zone:hand 限制能力啟動位置；融合材料的 schema 可省略 zone；目前原生 lowering 必須明寫 `zone: [hand, ex]`，表示規則允許的兩區混選。材料一次回答，BP20-020 用 upto:2,result:fused,x:{from_payment:fused}；融合 receipt 是否可投影實付數列 C1，不另宣告一次 X。下限與零選擇准入依 CR12.18，不由 C0 推定。
 
 ## 打出程序修飾
 
