@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { CameraScanner, CameraStopped } from "./camera"
+import { CameraScanner } from "./camera"
 import type { ScanEngine } from "./engine"
 
 const engine = { index: { dim: 4 } } as unknown as ScanEngine
@@ -59,7 +59,7 @@ describe("camera scanner", () => {
     const starting = scanner.start()
     scanner.stop()
     camera.grant()
-    await expect(starting).rejects.toBeInstanceOf(CameraStopped)
+    await expect(starting).rejects.toThrow("camera was stopped while starting")
     expect(camera.stops).toHaveLength(1)
     // jsdom leaves srcObject undefined until something sets it; the late camera never shows.
     expect(video.srcObject ?? null).toBeNull()

@@ -7,6 +7,7 @@ import {
   type CardSummary,
   type ImageIndex,
   SCAN_PARTS,
+  scanFaceImage,
   type ScanModelsStatus,
 } from "../../data"
 import { type DisplayedName, displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -57,9 +58,11 @@ export function classSummary(
 
 export interface ScanResult {
   readonly card: ScanCard
-  /** The site's summary of the printing, once the search index answered. */
+  /** The site's summary of the printing's front, once the search index answered; none for other faces. */
   readonly summary: CardSummary | undefined
   readonly name: DisplayedName | undefined
+  /** For a non-front face: its own image, since the summary describes the front. */
+  readonly faceImage?: string
 }
 
 /** Resolves recognised cards to the site's summaries, names in the UI language and images. */
@@ -75,6 +78,14 @@ export function useScanResults(
   const results = useMemo(
     () =>
       cards.map((card, at) => {
+        // Summaries describe the front; another face shows its own image and printed name.
+        if (card.face > 0)
+          return {
+            card,
+            summary: undefined,
+            name: undefined,
+            faceImage: scanFaceImage(card.imageId, card.face),
+          }
         const summary = summaries?.[at]?.summary
         return {
           card,

@@ -49,7 +49,7 @@ interface Canvases {
 }
 
 /** Thrown by `start` when `stop` came first: the late camera has already been closed again. */
-export class CameraStopped extends Error {
+class CameraStopped extends Error {
   constructor() {
     super("camera was stopped while starting")
     this.name = "CameraStopped"

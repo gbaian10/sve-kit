@@ -83,11 +83,14 @@ export function classMask(
 
 const PLAIN_NO = /^[A-Za-z0-9]+-\d+(?:EN)?$/u
 
-/** Same-art printings look alike to the recogniser, so a match shows the plain-numbered one. */
+/**
+ * Same-art printings look alike to the recogniser, so a match shows the plain-numbered one. The face
+ * stays part of the key: a card's back is never shown as its front.
+ */
 function representatives(cards: readonly ScanCard[]): Map<string, ScanCard> {
   const map = new Map<string, ScanCard>()
   for (const card of cards) {
-    const key = `${card.cardId}|${card.artGroup}`
+    const key = `${card.cardId}|${card.artGroup}|${String(card.face)}`
     const current = map.get(key)
     if (!current || (!PLAIN_NO.test(current.no) && PLAIN_NO.test(card.no))) map.set(key, card)
   }
@@ -137,7 +140,8 @@ export function matchCards(
     .flatMap((row) => {
       const card = cards[row.at]
       if (!card) return []
-      const shown = representative.get(`${card.cardId}|${card.artGroup}`) ?? card
+      const shown =
+        representative.get(`${card.cardId}|${card.artGroup}|${String(card.face)}`) ?? card
       return [{ card: shown, score: row.score, raw: row.raw }]
     })
 }

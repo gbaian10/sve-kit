@@ -62,6 +62,26 @@ describe("scan card search", () => {
     expect(isConfident(found, SCORING)).toBe(false)
   })
 
+  it("keeps a card's back as the back, even without an art group", () => {
+    const faces = {
+      ...index([]),
+      dim: 1,
+      vectors: Int8Array.from([-127, 127]),
+      scale: Float32Array.from([1 / 127, 1 / 127]),
+      hub: new Float32Array(2),
+      cards: parseScanCards(
+        [
+          { no: "BP01-030", c: "c9", n: 9, f: 0, nm: "front", a: "", k: "" },
+          { no: "BP01-030", c: "c9", n: 9, f: 1, nm: "back", a: "", k: "" },
+        ],
+        2,
+      ),
+    }
+    const [best] = matchCards(faces, [Float32Array.from([1])], null, 1)
+    expect(best?.card).toMatchObject({ face: 1, name: "back" })
+    expect(best?.raw).toBeCloseTo(1)
+  })
+
   it("scores a card by its best view, so a card turned 180° still matches", () => {
     const search = index([
       [127, 0, 0, 0],

@@ -1,17 +1,22 @@
-import { act, screen } from "@testing-library/react"
+import { act, renderHook, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
+import { I18nextProvider } from "react-i18next"
+import { MemoryRouter } from "react-router"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
 import { toggleClass } from "../../domain/scan/class-pick"
-import type { UiLanguage } from "../../i18n"
+import type { ScanCard } from "../../domain/scan/search"
+import { createI18n, type UiLanguage } from "../../i18n"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
 import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
 import { closeScanEngine } from "./engine"
+import { useScanResults } from "./scan-hooks"
 import { ScanPage } from "./ScanPage"
 
 // ONNX Runtime does not run in jsdom: a stand-in answers with the real models' output names.
@@ -193,6 +198,71 @@ describe("ScanPage", () => {
     expect(camera.stopped).toEqual(["video"])
   })
 
+  it("ignores a late answer for an edition the user already switched away from", async () => {
+    const user = userEvent.setup()
+    const camera = stubCamera()
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    await page.store.download("rec", "en", () => undefined)
+    let refuseEnglish: (cause: Error) => void = () => undefined
+    const held = {
+      ...page.store,
+      load: (edition: "jp" | "en") =>
+        edition === "en"
+          ? new Promise<never>((_, reject) => {
+              refuseEnglish = reject
+            })
+          : page.store.load(edition),
+    }
+    await renderInRouter(<ScanPage store={held} />, { initialEntries: ["/cards/scan"] })
+    await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
+    camera.grant()
+    await screen.findByRole("button", { name: "鎖定結果" })
+    act(() => {
+      prefsStore.set({ cardEdition: "en" })
+    })
+    act(() => {
+      prefsStore.set({ cardEdition: "jp" })
+    })
+    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    await act(async () => {
+      refuseEnglish(new Error("late"))
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(camera.stopped).toEqual([])
+    expect(screen.getByRole("button", { name: "鎖定結果" })).toBeInTheDocument()
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+  })
+
+  it("keeps one camera start at a time and closes it when the page is left", async () => {
+    const user = userEvent.setup()
+    const camera = stubCamera()
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    let release: () => void = () => undefined
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const slow = {
+      ...page.store,
+      load: (edition: "jp" | "en") => gate.then(() => page.store.load(edition)),
+    }
+    const { unmount } = await renderInRouter(<ScanPage store={slow} />, {
+      initialEntries: ["/cards/scan"],
+    })
+    const open = await screen.findByRole("button", { name: /開啟相機|讀取模型/ })
+    await user.click(open)
+    expect(screen.getByRole("button", { name: /讀取模型|開啟相機/ })).toBeDisabled()
+    await act(async () => {
+      release()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    camera.grant()
+    await screen.findByRole("button", { name: "鎖定結果" })
+    unmount()
+    expect(camera.stopped).toEqual(["video"])
+  })
+
   it("switches between portrait and sideways cards", async () => {
     const user = userEvent.setup()
     await setup().render()
@@ -219,4 +289,35 @@ describe("class pick", () => {
     expect(toggleClass(["elf"], "elf")).toEqual([])
     expect(toggleClass([], "neutral")).toEqual(["neutral"])
   })
+})
+
+describe("scan results", () => {
+  it("names a front face from the site and shows another face with its own picture", async () => {
+    const i18n = await createI18n("zh-TW")
+    const wrapper = ({ children }: { readonly children: ReactNode }) => (
+      <I18nextProvider i18n={i18n}>
+        <MemoryRouter initialEntries={["/cards/scan"]}>{children}</MemoryRouter>
+      </I18nextProvider>
+    )
+    const face = (f: number): ScanCard => ({
+      no: "BP01-001",
+      cardId: "c:bp01-001",
+      imageId: 1001,
+      face: f,
+      name: f ? "back" : "front",
+      artGroup: "",
+      classCode: "",
+    })
+    const cards = [face(0), face(1)]
+    const { result } = renderHook(() => useScanResults(cards, "jp"), { wrapper })
+    await waitFor(
+      () => {
+        expect(result.current.results[0]?.summary?.cardNo).toBe("BP01-001")
+      },
+      { timeout: 25_000 },
+    )
+    expect(result.current.results[0]?.name).toBeDefined()
+    expect(result.current.results[1]).toMatchObject({ summary: undefined, name: undefined })
+    expect(result.current.results[1]?.faceImage).toMatch(/\/images\/card_s\/1001-f1\.webp$/u)
+  }, 30_000)
 })

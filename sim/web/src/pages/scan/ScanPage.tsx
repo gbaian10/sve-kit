@@ -27,7 +27,8 @@ import {
   type ScanModelStore,
 } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
-import { type CameraFrame, CameraScanner, CameraStopped } from "./camera"
+import type { Region } from "../../domain/search"
+import { type CameraFrame, CameraScanner } from "./camera"
 import { openScanEngine, scanEngineSources, type ScanEngineStage } from "./engine"
 import {
   classSummary,
@@ -98,23 +99,37 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
     setError(cause instanceof Error ? cause.message : String(cause))
     setPhase("error")
   }
-  // The account menu's edition applies at once. The camera lets go of the old engine first, since
-  // opening another edition releases it, then picks up the new one.
+  // Async flows (camera start, edition switch) each hold a token; a newer flow or leaving the page
+  // makes older ones stale, and a stale flow only cleans up after itself.
+  const startFlow = useRef(0)
+  const switchFlow = useRef(0)
+  const latestEdition = useRef(edition)
   const shownEdition = useRef(edition)
-  useEffect(() => {
+  // The camera lets go of the old engine first, since opening another edition releases it, then
+  // picks up the new one.
+  const switchTo = (target: Region) => {
     const current = scanner.current
-    if (!current || shownEdition.current === edition) return
-    shownEdition.current = edition
+    if (!current || shownEdition.current === target) return
+    shownEdition.current = target
+    const token = ++switchFlow.current
+    const stillWanted = () => switchFlow.current === token && scanner.current === current
     current.detach()
-    void openScanEngine(edition, undefined, sources).then(
+    void openScanEngine(target, undefined, sources).then(
       (engine) => {
-        if (scanner.current === current) current.setEngine(engine)
+        if (stillWanted()) current.setEngine(engine)
       },
       (cause: unknown) => {
-        if (scanner.current === current) fail(cause)
+        if (stillWanted()) fail(cause)
       },
     )
-  }, [edition, sources])
+  }
+  // The account menu's edition applies at once.
+  useEffect(() => {
+    latestEdition.current = edition
+    switchTo(edition)
+    // switchTo reads the latest scanner and sources itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edition])
   useEffect(() => scanner.current?.setClasses(picked), [picked])
   useEffect(() => scanner.current?.setSideways(sideways), [sideways])
 
@@ -142,31 +157,45 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   const start = async () => {
     const [videoElement, aimElement, overlayElement] = [video.current, aim.current, overlay.current]
     if (!videoElement || !aimElement || !overlayElement) return
+    const token = ++startFlow.current
+    switchFlow.current += 1
+    // Read through a call: the page may unmount or start again while this awaits.
+    const isCurrent = () => mounted.current && startFlow.current === token
     scanner.current?.stop()
-    // Read through calls: the page may unmount or start again while this awaits.
-    const live = () => mounted.current
-    const currentScanner = () => scanner.current
+    scanner.current = null
+    setPhase("starting")
+    setError("")
+    const wanted = edition
+    let camera: CameraScanner | null = null
     try {
-      const engine = await openScanEngine(edition, setStage, sources)
-      if (!live()) return
-      const camera = new CameraScanner(engine)
+      const engine = await openScanEngine(wanted, setStage, sources)
+      if (!isCurrent()) return
+      camera = new CameraScanner(engine)
       camera.attach(videoElement, aimElement, overlayElement)
       camera.setClasses(picked)
       camera.setSideways(sideways)
       scanner.current = camera
-      shownEdition.current = edition
+      shownEdition.current = wanted
       const zoomLimit = await camera.start()
-      if (!live() || currentScanner() !== camera) return
+      if (!isCurrent()) {
+        camera.stop()
+        return
+      }
       setMaxZoom(zoomLimit)
       cameraWasOn = true
       setPaused(false)
       setPhase("running")
-      camera.run(setFrame).catch((cause: unknown) => {
-        if (currentScanner() === camera) fail(cause)
+      const running = camera
+      running.run(setFrame).catch((cause: unknown) => {
+        if (scanner.current === running) fail(cause)
       })
+      // The edition changed while the camera was starting.
+      switchTo(latestEdition.current)
     } catch (cause) {
-      // Stopped while starting: whoever stopped it already moved on.
-      if (cause instanceof CameraStopped || !live()) return
+      if (!isCurrent()) {
+        camera?.stop()
+        return
+      }
       fail(cause)
     }
   }
@@ -291,11 +320,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
               phase={phase}
               stage={stage}
               error={error}
-              onStart={() => {
-                setPhase("starting")
-                setError("")
-                void start()
-              }}
+              onStart={() => void start()}
             />
           )}
 
@@ -491,6 +516,14 @@ function Thumb({
   readonly images: ImageIndex | undefined
   readonly className: string
 }) {
+  if (result.faceImage)
+    return (
+      <img
+        src={result.faceImage}
+        alt=""
+        className={cn("aspect-[63/88] rounded-sm bg-surface-3 object-cover", className)}
+      />
+    )
   if (!result.summary || !result.name)
     return <span aria-hidden="true" className={cn("rounded-sm bg-surface-3", className)} />
   return (
