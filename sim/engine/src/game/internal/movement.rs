@@ -86,15 +86,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             objects,
             movement,
             reason: MoveReason::Put,
-        } if field_move(movement)
-            && movement.position.is_none()
-            && movement.order.is_none()
-            && matches!(movement.initial_posture, None | Some(Posture::Acted))
-            && movement.entry_effects.is_empty()
-            && admitted_field_source(objects, movement) =>
-        {
-            Ok(())
-        }
+        } if admitted_field_entry(objects, movement) => Ok(()),
         Action::Move {
             movement,
             reason: MoveReason::Put,
@@ -249,10 +241,16 @@ pub(super) fn advance_entry(action: &Action) -> bool {
             && **predicate == Expr::Literal(Bool(true)))
 }
 
-fn admitted_field_source(objects: &Selector, movement: &MoveSpec) -> bool {
-    !matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Owner {}))
+fn admitted_field_entry(objects: &Selector, movement: &MoveSpec) -> bool {
+    let source_allowed = !matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Owner {}))
         || matches!(objects, Selector::Objects { objects } if matches!(objects.as_slice(),
-            [ObjectOperand::FollowEventMove { event: MovementEvent::LeaveField { .. } }]))
+            [ObjectOperand::FollowEventMove { event: MovementEvent::LeaveField { .. } }]));
+    field_move(movement)
+        && movement.position.is_none()
+        && movement.order.is_none()
+        && matches!(movement.initial_posture, None | Some(Posture::Acted))
+        && movement.entry_effects.is_empty()
+        && source_allowed
 }
 
 pub(super) fn field_move(movement: &MoveSpec) -> bool {
@@ -1194,7 +1192,15 @@ impl Game {
         initial_posture: Option<Posture>,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         self.commit_move_members(
-            execution, members, zone, kind, method, owner_ex, position, false,
+            execution,
+            members,
+            zone,
+            kind,
+            method,
+            owner_destination,
+            position,
+            initial_posture,
+            false,
         )
     }
 
@@ -1220,6 +1226,7 @@ impl Game {
             MoveMethod::Put,
             false,
             None,
+            None,
             true,
         )?;
         Ok(moves)
@@ -1237,8 +1244,9 @@ impl Game {
         zone: &str,
         kind: ZoneKind,
         method: MoveMethod,
-        owner_ex: bool,
+        owner_destination: bool,
         position: Option<Position>,
+        initial_posture: Option<Posture>,
         unordered_deck: bool,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         let old_deck = if kind == ZoneKind::Deck {
