@@ -140,4 +140,28 @@ describe("scan card search", () => {
     expect(() => parseScanCards([null], 1)).toThrow()
     expect(() => parseScanCards([{ ...rows[0], f: -1 }], 1)).toThrow()
   })
+
+  it("ranks tied cards by their first row left after the class mask", () => {
+    const tied: ScanIndex = {
+      dim: 4,
+      vectors: Int8Array.from([127, 0, 0, 0, 127, 0, 0, 0, 127, 0, 0, 0]),
+      scale: Float32Array.from([1 / 127, 1 / 127, 1 / 127]),
+      hub: new Float32Array(3),
+      cards: parseScanCards(
+        [
+          { no: "BP01-001", c: "a", n: 1, nm: "a", a: "x", k: "elf", f: 0 },
+          { no: "BP01-002", c: "b", n: 2, nm: "b", a: "y", k: "elf", f: 0 },
+          { no: "BP01-001SL", c: "a", n: 3, nm: "a", a: "z", k: "elf", f: 0 },
+        ],
+        3,
+      ),
+      scoring: SCORING,
+    }
+    const mask = Uint8Array.from([0, 1, 1])
+    const found = matchCards(tied, [unit(1, 0, 0, 0)], mask, 2)
+    expect(found.map((match) => match.card.cardId)).toEqual(["b", "a"])
+    expect(matchCards(tied, [unit(1, 0, 0, 0)], mask, 1).map((match) => match.card.cardId)).toEqual(
+      ["b"],
+    )
+  })
 })

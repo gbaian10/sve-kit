@@ -1,3 +1,4 @@
+import type { IndexDots } from "./dots"
 import type { Scoring } from "./manifest"
 
 /** One row of the index card list, in index row order. */
@@ -24,6 +25,8 @@ export interface ScanIndex {
   readonly hub: Float32Array
   readonly cards: readonly ScanCard[]
   readonly scoring: Scoring
+  /** The rows in a SIMD kernel when the browser has one; otherwise rows are scored in JavaScript. */
+  readonly dots?: IndexDots | null
 }
 
 export interface CardMatch {
@@ -99,6 +102,30 @@ function representatives(cards: readonly ScanCard[]): Map<string, ScanCard> {
 
 const representativeCache = new WeakMap<readonly ScanCard[], Map<string, ScanCard>>()
 
+/** Each row's card as a small integer, so ranking needs no string lookups per row. */
+interface CardSlots {
+  readonly ofRow: Int32Array
+  readonly count: number
+}
+
+const slotCache = new WeakMap<readonly ScanCard[], CardSlots>()
+
+function cardSlots(cards: readonly ScanCard[]): CardSlots {
+  let slots = slotCache.get(cards)
+  if (!slots) {
+    const ids = new Map<string, number>()
+    const ofRow = Int32Array.from(cards, (card) => {
+      const known = ids.get(card.cardId)
+      if (known !== undefined) return known
+      ids.set(card.cardId, ids.size)
+      return ids.size - 1
+    })
+    slots = { ofRow, count: ids.size }
+    slotCache.set(cards, slots)
+  }
+  return slots
+}
+
 /**
  * The best `limit` different cards for one photo crop. Each view is an embedding of the same crop
  * (for example upright and turned 180°); a card scores by its best view.
@@ -109,24 +136,49 @@ export function matchCards(
   mask: Uint8Array | null,
   limit: number,
 ): CardMatch[] {
+  if (limit <= 0) return []
   const { dim, vectors, scale, hub, cards } = index
   const hubWeight = index.scoring.hubWeight
   // Each card scores by its best printing row, so many printings of one card cannot crowd out the next card.
-  const best = new Map<string, { at: number; score: number; raw: number }>()
+  const { ofRow, count } = cardSlots(cards)
+  const bestScore = new Float64Array(count).fill(-Infinity)
+  const bestRaw = new Float64Array(count)
+  const bestRow = new Int32Array(count).fill(-1)
+  // Cards in the order their first unmasked row appears: ties rank in that order.
+  const met: number[] = []
+  const fast = views.length > 0 ? index.dots?.best(views) : undefined
   for (let at = 0; at < cards.length; at += 1) {
     if (mask && mask[at] === 0) continue
-    const base = at * dim
-    let top = -Infinity
-    for (const view of views) {
-      let dot = 0
-      for (let j = 0; j < dim; j += 1) dot += (vectors[base + j] ?? 0) * (view[j] ?? 0)
-      if (dot > top) top = dot
+    let top = fast ? (fast[at] ?? -Infinity) : -Infinity
+    if (!fast) {
+      const base = at * dim
+      for (const view of views) {
+        let dot = 0
+        for (let j = 0; j < dim; j += 1) dot += (vectors[base + j] ?? 0) * (view[j] ?? 0)
+        if (dot > top) top = dot
+      }
     }
     const raw = top * (scale[at] ?? 0)
     const score = raw - hubWeight * (hub[at] ?? 0)
-    const id = cards[at]?.cardId ?? ""
-    const current = best.get(id)
-    if (!current || score > current.score) best.set(id, { at, score, raw })
+    const slot = ofRow[at] ?? 0
+    if (bestRow[slot] === -1) met.push(slot)
+    if (bestRow[slot] === -1 || score > (bestScore[slot] ?? -Infinity)) {
+      bestScore[slot] = score
+      bestRaw[slot] = raw
+      bestRow[slot] = at
+    }
+  }
+  // The best `limit` cards, highest first; ties keep the card met first.
+  const top: number[] = []
+  for (const slot of met) {
+    const score = bestScore[slot] ?? -Infinity
+    if (top.length === limit && score <= (bestScore[top[limit - 1] ?? 0] ?? -Infinity)) continue
+    let k = top.length < limit ? top.length : limit - 1
+    while (k > 0 && (bestScore[top[k - 1] ?? 0] ?? -Infinity) < score) {
+      top[k] = top[k - 1] ?? 0
+      k -= 1
+    }
+    top[k] = slot
   }
   let reps = representativeCache.get(cards)
   if (!reps) {
@@ -134,9 +186,12 @@ export function matchCards(
     representativeCache.set(cards, reps)
   }
   const representative = reps
-  return [...best.values()]
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
+  return top
+    .map((slot) => ({
+      at: bestRow[slot] ?? -1,
+      score: bestScore[slot] ?? -Infinity,
+      raw: bestRaw[slot] ?? 0,
+    }))
     .flatMap((row) => {
       const card = cards[row.at]
       if (!card) return []
