@@ -826,3 +826,6 @@ mod hand_transfer_cost;
 
 #[path = "card/movement_capacity.rs"]
 mod movement_capacity;
+
+#[path = "card/cemetery_pair_capacity.rs"]
+mod cemetery_pair_capacity;
