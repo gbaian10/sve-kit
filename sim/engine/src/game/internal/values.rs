@@ -227,14 +227,14 @@ impl Execution {
 
     fn selector_object(&self, game: &Game, object: &ObjectOperand) -> Result<Option<ObjectRef>> {
         if let ObjectOperand::FollowEventMove {
-            event: event @ MovementEvent::Discard { .. },
+            event: event @ (MovementEvent::Discard { .. } | MovementEvent::Banish { .. }),
         } = object
         {
             self.event_move
                 .as_ref()
                 .filter(|(saved, _)| saved == event)
                 .map(|(_, after)| *after)
-                .ok_or_else(|| unsupported("missing triggering discard movement authority"))
+                .ok_or_else(|| unsupported("missing triggering hand departure authority"))
         } else {
             self.object(game, object).map(Some)
         }

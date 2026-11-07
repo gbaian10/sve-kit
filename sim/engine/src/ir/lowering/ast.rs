@@ -2019,6 +2019,8 @@ pub(super) enum PhaseSubscription {
     Drew(DrawSubscription),
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
+    #[serde(rename = "banished")]
+    Banished(HandBanishSubscription),
     #[serde(rename = "evolved")]
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
@@ -2172,11 +2174,22 @@ pub(super) struct DiscardSubscription {
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     #[serde(rename = "from")]
-    pub _from: Option<HandZone>,
+    pub from: Option<HandZone>,
     pub who: Option<EntryPlayer>,
     pub during: Option<During>,
     pub by: Option<DiscardBy>,
     pub sel: Option<MovementSubject>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct HandBanishSubscription {
+    #[serde(rename = "ref")]
+    pub reference: This,
+    #[serde(rename = "from")]
+    pub _from: HandZone,
+    #[serde(rename = "who")]
+    pub _who: Option<SelfPlayer>,
 }
 
 #[derive(Deserialize)]

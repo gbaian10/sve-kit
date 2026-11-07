@@ -1,6 +1,7 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
 use super::super::Slot;
 use super::super::history_turn::subject_count_at;
+use crate::ir::events::banish as banish_header;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::timing::leave_filter;
@@ -23,11 +24,13 @@ use crate::ir::{
 use alloc::collections::BTreeMap;
 
 mod ability;
+mod banish;
 mod change;
 mod discard;
 mod draw;
 mod equipment;
 mod fusion;
+pub(in crate::game::internal) use banish::hand_header as hand_banish;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 pub(in crate::game::internal) use equipment::check_header as equipment_header;
@@ -116,6 +119,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     }
     if fusion::check_header(ability)?
         || ability::check_header(ability)?
+        || banish::check_header(ability)?
         || discard::check_header(ability)?
         || draw::check_header(ability)?
         || equipment::check_header(ability)?
@@ -876,7 +880,11 @@ impl PendingOccurrence {
                     Some(MovementEvent::LeaveField { event: *binding })
                 }
                 _ => discard_header::self_event(trigger)
-                    .map(|event| MovementEvent::Discard { event }),
+                    .map(|event| MovementEvent::Discard { event })
+                    .or_else(|| {
+                        banish_header::self_event(trigger)
+                            .map(|event| MovementEvent::Banish { event })
+                    }),
             };
             if let Some(event) = event {
                 execution.event_move = Some((event, self.movement_after));

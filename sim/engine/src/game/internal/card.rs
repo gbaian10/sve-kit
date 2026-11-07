@@ -369,7 +369,7 @@ impl Game {
         }
         let mut origins = BTreeSet::new();
         let mut spell_face = None;
-        for located in &card.card().abilities {
+        for (index, located) in card.card().abilities.iter().enumerate() {
             let ability = &located.node;
             check_header(ability)?;
             let (face, line) = printed_origin(&ability.source.origin)?;
@@ -380,7 +380,7 @@ impl Game {
                 return Err(unsupported("one base Printed Spell per card"));
             }
             let declaration = printed_keywords::card_declaration(ability);
-            keywords::check_coordinate(&mut origins, ordinal, &located.source, declaration)?;
+            keywords::check_card_coordinate(&mut origins, ordinal, &card.card().abilities, index)?;
             let printed = self.catalog.face(card_no, ordinal)?;
             let pilot = pilot_face(card, &face.0);
             check_ability_face(ability, printed, pilot)?;
@@ -1000,14 +1000,14 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
             || is_printed_quick(ability));
     let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
     let played_trigger = filter(ability).is_some() || fusion_events::filter(ability).is_some();
-    let hand_discard_trigger = triggers::hand_discard(ability);
+    let hand_trigger = triggers::hand_discard(ability) || triggers::hand_banish(ability);
     let cemetery_entry_trigger = triggers::cemetery_entry(ability);
     let equipment_trigger = triggers::equipment_header(ability)?;
     if (ability.active_zones != [zones]
         && !zone_activation
         && !ex_trigger
         && !played_trigger
-        && !hand_discard_trigger
+        && !hand_trigger
         && !cemetery_entry_trigger
         && !equipment_trigger)
         || ability.source.holder != (ObjectOperand::SourceHolder {})

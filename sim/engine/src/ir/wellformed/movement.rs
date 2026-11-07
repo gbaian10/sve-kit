@@ -40,16 +40,25 @@ impl Checker {
         let Selector::Objects { objects } = objects else {
             return None;
         };
-        let [
-            ObjectOperand::FollowEventMove {
-                event: MovementEvent::Discard { event },
-            },
-        ] = objects.as_slice()
-        else {
+        let [ObjectOperand::FollowEventMove { event }] = objects.as_slice() else {
             return None;
         };
-        let destination = matches!(&movement.to,
-            MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field && zone.player == (PlayerRef::Controller {}))
+        let (key, reference, field) = match event {
+            MovementEvent::Discard { event } => (
+                event.key(),
+                self.reference(*event, BindingKind::Value),
+                true,
+            ),
+            MovementEvent::Banish { event } => (
+                event.key(),
+                self.reference(*event, BindingKind::Value),
+                false,
+            ),
+            MovementEvent::Move { .. } | MovementEvent::LeaveField { .. } => return None,
+        };
+        let destination = (field
+            && matches!(&movement.to,
+            MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field && zone.player == (PlayerRef::Controller {})))
             || movement.to
                 == (MoveDestination::Owners {
                     zone: OwnerZone::Ex,
@@ -62,9 +71,9 @@ impl Checker {
                 && movement.initial_posture.is_none()
                 && movement.entry_effects.is_empty()
                 && self.env.chooser.is_none()
-                && self.env.discard_follow.contains(&event.key())
+                && self.env.hand_exit_follow.contains(&key)
             {
-                self.reference(*event, BindingKind::Value)
+                reference
             } else {
                 self.reject()
             },

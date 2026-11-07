@@ -19,6 +19,7 @@ mod evolution;
 mod exchange;
 mod grant;
 mod granted_play;
+mod hand_exit;
 mod hand_payment;
 mod keywords;
 mod material;
@@ -232,22 +233,40 @@ impl ExpandedLowerer {
                     continue;
                 }
                 optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
-                abilities.push(allocator.ability(
-                    &coordinates,
-                    &entry_path,
-                    &ability,
-                    entry_scope(index, &entry_path)?,
-                    match identity {
-                        Some(identity) => {
-                            identity.printed_cost(&ability.sources[0].json(), &entry_path)?
-                        }
-                        None => printed_costs.get(&key).copied(),
-                    },
-                    payment_result.clone().filter(|_| {
-                        source_span(&coordinates, &entry_path, &ability)
-                            .is_ok_and(|source| play_faces.contains(&source.face))
-                    }),
-                )?);
+                let branches = if hand_exit::check(&ability, &entry_path)? {
+                    vec![
+                        Some(hand_exit::Branch::Discard),
+                        Some(hand_exit::Branch::Banish),
+                    ]
+                } else {
+                    vec![None]
+                };
+                for (alternative, branch) in branches.into_iter().enumerate() {
+                    let scope = if alternative == 0 {
+                        entry_scope(index, &entry_path)?
+                    } else {
+                        allocator.granted_scope(&entry_path)?
+                    };
+                    abilities.push(allocator.ability(
+                        &coordinates,
+                        &entry_path,
+                        hand_exit::AbilityInput {
+                            entry: &ability,
+                            branch,
+                        },
+                        scope,
+                        match identity {
+                            Some(identity) => {
+                                identity.printed_cost(&ability.sources[0].json(), &entry_path)?
+                            }
+                            None => printed_costs.get(&key).copied(),
+                        },
+                        payment_result.clone().filter(|_| {
+                            source_span(&coordinates, &entry_path, &ability)
+                                .is_ok_and(|source| play_faces.contains(&source.face))
+                        }),
+                    )?);
+                }
             }
             let checked = check_card(
                 CardProgram {
@@ -538,11 +557,12 @@ impl Allocator {
         &mut self,
         key: &CardCoordinates<'_>,
         path: &str,
-        entry: &ast::Ability,
+        input: hand_exit::AbilityInput<'_>,
         scope: ScopeId,
         printed_cost: Option<Nat>,
         payment_result: Option<PaymentBindings>,
     ) -> Result<Located<Ability>, LoweringError> {
+        let entry = input.entry;
         if entry.imports.is_some() {
             return Err(unsupported(path));
         }
@@ -557,18 +577,22 @@ impl Allocator {
             return quick::lower(key, path, entry, scope, keywords);
         }
         let source = source_span(key, path, entry)?;
-        self.executable_ability(entry, scope, printed_cost, payment_result, source, path)
+        self.executable_ability(input, scope, printed_cost, payment_result, source, path)
     }
 
     fn executable_ability(
         &mut self,
-        entry: &ast::Ability,
+        input: hand_exit::AbilityInput<'_>,
         scope: ScopeId,
         printed_cost: Option<Nat>,
         payment_result: Option<PaymentBindings>,
         source: SourceSpan,
         path: &str,
     ) -> Result<Located<Ability>, LoweringError> {
+        let entry = input.entry;
+        if hand_exit::is_union(entry) != input.branch.is_some() {
+            return Err(unsupported(path));
+        }
         let active_zones = active_zones(entry, path)?;
         let (body, head, keyword) = ability_body(entry, path)?;
         let ability_source = ability_source(&source, keyword);
@@ -579,6 +603,7 @@ impl Allocator {
             .and_then(|binding| binding.complete.clone())
             .map(|(name, receipt)| (name, PaymentReference::CardPlay { face, receipt }));
         let mut context = BodyContext::new(entry, scope, body, complete, self);
+        context.hand_exit = input.branch;
         if let Some((name, receipt, bounds)) = payment_result.and_then(|binding| binding.discard) {
             payment::record_discard(&mut context, &name, receipt, bounds, path)?;
         }
@@ -704,7 +729,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     let zones = match requested {
         Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
-        None if entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
+        None if hand_exit::is_union(entry) || entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None if entry.activate.as_ref().is_some_and(|head| head.fusion.is_some()) => vec![ZoneKind::Hand],
         None => vec![ZoneKind::Field],
@@ -743,7 +768,8 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
             return Err(unsupported(path));
         }
         let hand_discard = zones == [ZoneKind::Hand]
-            && matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some());
+            && (hand_exit::is_union(entry)
+                || matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some()));
         if !cemetery
             && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
@@ -951,6 +977,9 @@ fn lowered_subscription(
         scope,
     } = ids;
     match on {
+        ast::PhaseSubscription::AnyOf(_) if hand_exit::is_hand_union(on) => {
+            Ok(hand_exit::discard(event_id, scope))
+        }
         ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_) => {
             fusion::subscription(on, ids, path, allocator)
         }
@@ -979,6 +1008,7 @@ fn lowered_subscription(
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, subject_id, scope, path)
         }
+        ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
@@ -1141,7 +1171,8 @@ fn lowered_change(
         | ast::PhaseSubscription::Drew(_)
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_)
-        | ast::PhaseSubscription::Equipped(_) => Err(unsupported(path)),
+        | ast::PhaseSubscription::Equipped(_)
+        | ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
     }
 }
 
@@ -1253,6 +1284,8 @@ struct BodyContext<'definitions> {
     departure_to_cemetery: bool,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     discard_event: Option<Binding<super::DiscardEvent>>,
+    banish_event: Option<Binding<super::BanishEvent>>,
+    hand_exit: Option<hand_exit::Branch>,
     discard_pp_event: Option<Binding<super::DiscardEvent>>,
     scope: ScopeId,
     local_payment: Option<(String, ReceiptId)>,
@@ -1316,6 +1349,8 @@ impl<'definitions> BodyContext<'definitions> {
             counter_read_view: CounterReadView::Current,
             leave_event: None,
             discard_event: None,
+            banish_event: None,
+            hand_exit: None,
             discard_pp_event: None,
             entry_event: None,
             evolution: entry.evolve.as_ref(),
@@ -1378,6 +1413,7 @@ impl<'definitions> BodyContext<'definitions> {
         }
         let trigger = self.trigger(entry, keyword, body, path)?;
         self.discard_event = super::events::discard::self_event(&trigger);
+        self.banish_event = super::events::banish::self_event(&trigger);
         if let TriggerCondition::Event { pattern } = &trigger.on {
             self.subject_event = SubjectFields::from_pattern(pattern);
             self.equip_event = super::events::equipment::binding(pattern);
@@ -1418,6 +1454,11 @@ impl<'definitions> BodyContext<'definitions> {
             path,
             &mut self.allocator,
         )?;
+        if matches!(self.hand_exit, Some(hand_exit::Branch::Banish)) {
+            trigger.on = TriggerCondition::Event {
+                pattern: hand_exit::banish(event_id, self.scope),
+            };
+        }
         if body.per_turn == Some(0) {
             return Err(unsupported(path));
         }
