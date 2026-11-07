@@ -1,7 +1,15 @@
+import {
+  finishKey,
+  finishOf,
+  finishScores,
+  FinishSmoother,
+  pickFinish,
+} from "../../domain/scan/finish"
 import { orderQuad, warpQuad } from "../../domain/scan/geometry"
 import type { Point, Quad } from "../../domain/scan/tensor"
 import { ScanTracker, type TrackFrame } from "../../domain/scan/tracker"
 import type { ScanEngine } from "./engine"
+import { finishReaderFor } from "./finish-reader"
 
 // The live single-card camera: each frame, find the card around the aiming frame, straighten it,
 // read it upright and turned, and fold the result into the tracker. Everything that can be decided
@@ -60,6 +68,7 @@ export class CameraScanner {
   /** Null while another edition's engine loads: the loop waits instead of using a released one. */
   private engine: ScanEngine | null
   private tracker: ScanTracker
+  private readonly finish = new FinishSmoother()
   private video: HTMLVideoElement | null = null
   private frame: HTMLElement | null = null
   private overlay: HTMLCanvasElement | null = null
@@ -95,17 +104,20 @@ export class CameraScanner {
     if (engine === this.engine) return
     this.engine = engine
     this.tracker = new ScanTracker(engine.index.dim)
+    this.finish.reset()
     this.canvases = null
   }
 
   setClasses(classes: readonly string[]): void {
     this.classes = classes
     this.tracker.reset()
+    this.finish.reset()
   }
 
   setSideways(sideways: boolean): void {
     this.sideways = sideways
     this.tracker.reset()
+    this.finish.reset()
   }
 
   setPaused(paused: boolean): void {
@@ -224,13 +236,38 @@ export class CameraScanner {
           engine.confident(picks),
         )
         this.draw(geometry, quad, frame.status === "ok")
-        onFrame({ ...frame, found: quad !== null })
+        const shown = quad ? this.withFinish(engine, frame, pixels) : this.withoutFinish(frame)
+        onFrame({ ...shown, found: quad !== null })
       } catch (error) {
         // Only a frame begun on an engine that was detached since may fail quietly.
         if (engine === this.engine) throw error
       }
       await new Promise((resolve) => setTimeout(resolve, FRAME_GAP_MS))
     }
+  }
+
+  /** Without a straightened card the frame regions mean nothing: keep the plain printing. */
+  private withoutFinish(frame: TrackFrame): TrackFrame {
+    this.finish.follow("")
+    return frame
+  }
+
+  /** Shows the leader as the printing whose frame colours match this card (SL against plain). */
+  private withFinish(engine: ScanEngine, frame: TrackFrame, pixels: Uint8ClampedArray): TrackFrame {
+    const [leader, ...rest] = frame.picks
+    this.finish.follow(leader ? finishKey(leader.card) : "")
+    const reader = finishReaderFor(engine)
+    const group = leader && reader.group(leader.card)
+    const references = group && reader.ready(group)
+    if (!leader || !group || !references) return frame
+    const { width, height } = engine.cardSize
+    const scores = finishScores(references, [
+      finishOf(pixels, width, height),
+      finishOf(pixels, width, height, true),
+    ])
+    if (!scores) return frame
+    const card = pickFinish(group, this.finish.update(finishKey(leader.card), scores), leader.card)
+    return card === leader.card ? frame : { ...frame, picks: [{ ...leader, card }, ...rest] }
   }
 
   // A method, so the loop re-reads the flag that stop() clears while a frame is awaited.

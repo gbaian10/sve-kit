@@ -8,7 +8,7 @@ import {
   type ImageIndex,
   mergeImageIndexes,
   SCAN_PARTS,
-  scanFaceImage,
+  scanCardImage,
   type ScanModelsStatus,
 } from "../../data"
 import { type DisplayedName, displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -96,7 +96,7 @@ export function useScanResults(
           card,
           summary: undefined,
           name: undefined,
-          faceImage: scanFaceImage(card.imageId, card.face),
+          faceImage: scanCardImage(card.imageId, card.face),
         }
       const summary = byNumber.get(card.no)
       return {
