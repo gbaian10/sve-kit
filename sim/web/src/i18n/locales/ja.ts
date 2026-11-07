@@ -863,8 +863,10 @@ export default {
       rec: {
         name: "認識モデル",
         desc: "補正したカードがどのカードかを判定します。",
+        model: "モデル {{version}}",
+        indexName: "{{edition}}のカード索引",
         index:
-          "{{edition}}のカード索引を含む：{{cards}} 枚、カードデータ {{dataVersion}}。新弾の追加時は索引だけを更新します。",
+          "{{cards}} 件の版 · カードデータ {{dataVersion}}。新弾の追加時は索引だけを更新します。",
         noIndex: "{{edition}}のカード索引はまだ公開されていません。",
       },
       list: {

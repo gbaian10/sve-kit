@@ -201,15 +201,6 @@ function PartRow({
             {t(`scan.models.${part}.name`)}
           </p>
           <p className="text-13 text-text-2">{t(`scan.models.${part}.desc`)}</p>
-          {part === "rec" && status?.cards !== undefined && status.dataVersion !== undefined && (
-            <p className="mt-0.5 text-12 text-text-3">
-              {t("scan.models.rec.index", {
-                edition,
-                cards: status.cards.toLocaleString(i18n.language),
-                dataVersion: status.dataVersion,
-              })}
-            </p>
-          )}
           {unpublished && (
             <p className="mt-0.5 text-12 text-text-3">
               {t("scan.models.rec.noIndex", { edition })}
@@ -237,11 +228,33 @@ function PartRow({
         </span>
       </div>
 
-      {prefix !== undefined && status?.version !== undefined && (
-        <p className="text-13 text-text-2">
-          {t("scan.models.version", { version: `${prefix}${String(status.version)}` })}
-        </p>
-      )}
+      {prefix !== undefined &&
+        status?.version !== undefined &&
+        (status.indexBytes !== undefined &&
+        status.cards !== undefined &&
+        status.dataVersion !== undefined ? (
+          // The index updates on its own with new sets, so its size and data version show apart from the model.
+          <dl className="grid grid-cols-[1fr_auto] gap-x-3 text-13 text-text-2">
+            <dt>{t("scan.models.rec.model", { version: `${prefix}${String(status.version)}` })}</dt>
+            <dd className="text-text-3 tabular-nums">
+              {t("scan.models.size", { mb: megabytes(status.bytes - status.indexBytes) })}
+            </dd>
+            <dt>{t("scan.models.rec.indexName", { edition })}</dt>
+            <dd className="text-text-3 tabular-nums">
+              {t("scan.models.size", { mb: megabytes(status.indexBytes) })}
+            </dd>
+            <dd className="col-span-2 text-12 text-text-3">
+              {t("scan.models.rec.index", {
+                cards: status.cards.toLocaleString(i18n.language),
+                dataVersion: status.dataVersion,
+              })}
+            </dd>
+          </dl>
+        ) : (
+          <p className="text-13 text-text-2">
+            {t("scan.models.version", { version: `${prefix}${String(status.version)}` })}
+          </p>
+        ))}
 
       {running && (
         <div

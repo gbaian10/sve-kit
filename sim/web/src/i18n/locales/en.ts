@@ -881,8 +881,9 @@ export default {
       rec: {
         name: "Recogniser",
         desc: "Tells which card a straightened card is.",
-        index:
-          "Includes the {{edition}} card index: {{cards}} cards, card data {{dataVersion}}. New sets only update the index.",
+        model: "Model {{version}}",
+        indexName: "{{edition}} card index",
+        index: "{{cards}} printings · card data {{dataVersion}}. New sets only update the index.",
         noIndex: "The {{edition}} card index is not published yet.",
       },
       list: {
