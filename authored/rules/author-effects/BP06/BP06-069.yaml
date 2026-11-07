@@ -1,0 +1,22 @@
+cards:
+  BP06-069:
+    abilities:
+      - evolve_time:
+          do:
+            - banish: card
+          targets:
+            - bind: card
+              from:
+                who: all
+                zone: ex
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
