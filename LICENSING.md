@@ -13,7 +13,7 @@ project documentation uses Apache-2.0 as shown below.
 
 | Path | License for our contributions | Excluded third-party material |
 | --- | --- | --- |
-| `carddb/`, `sim/`, `dsl/`, `.github/`, and `tests/`, except the more specific rows below | Apache-2.0 | Official names, card wording, rules, Q&A, source-derived text and other third-party material in literals, examples or fixtures |
+| `carddb/`, `scan/`, `sim/`, `dsl/`, `.github/`, and `tests/`, except the more specific rows below | Apache-2.0 | Official names, card wording, rules, Q&A, source-derived text and other third-party material in literals, examples or fixtures |
 | `authored/rules/effects/`, `authored/rules/keywords.yaml`, `authored/rules/engine/` | Apache-2.0 | Official names in `name` and `ja`, copied wording, and other official or third-party material |
 | `card-data/`, except README files | CC0-1.0 for our contributions to structure and provenance | All official card wording, names, flavor text, Q&A, product wording, illustrator credits and other source-derived expression; parsed copies do not acquire a project license |
 | `carddb/tests/fixtures/official_jp/`, `carddb/tests/fixtures/official_en/` | No project license for the copied official material | Official SVE HTML fixture content; see the adjacent `OFFICIAL-SOURCES.md` and `official-pages.json` provenance |
@@ -137,8 +137,8 @@ Lusitana 1.001, Marcellus 1.000 and Philosopher 2.001 under OFL-1.1.
 Their font copyright and licenses are in the `OFL-*.txt` files under
 `sim/web/src/assets/card-labels/`; the directory README identifies each font. Root NOTICE is not a substitute for a release's dependency notices.
 
-Snapshots, images and audio do not acquire the license of the program that
-exports them. They may include official and third-party content; no project
+Snapshots, images, audio, and the card scanner's model weights and card index
+do not acquire the license of the program that exports them. They may include official and third-party content; no project
 license is granted over a mixed snapshot as a whole. Published content must be
 accompanied by the website's legal information and a human-readable CDN notice.
 No blanket `license` field in a snapshot is inferred from this document.

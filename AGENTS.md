@@ -22,6 +22,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | `card-data/` | 已審查的日英解析卡片輸入與來源證據                                                | JSON        |
 | `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
 | `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；與 carddb 共用 uv workspace              | Python、uv  |
+| `scan/`      | 拍卡辨識：卡圖庫、訓練、匯出 ONNX、評估、卡片索引；獨立 uv 專案（不在 workspace） | Python、uv  |
 | `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
 | `dsl/`       | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
 | `sim/`       | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
@@ -38,7 +39,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 `carddb/src/sve_carddb/` 依階段分層：基礎 `core/`、`contracts/`；來源 `ingest/`（`crawl/`、`http/`、`archive/`）、`parse/`；
 建置 `build/`；資料領域 `domains/`；產出 `images/`、`export/`；最上層 `workflows/` 與 CLI。
-`publish/` 只透過 `sve_carddb.export.read_api` 讀匯出。匯入方向由 CONTRIBUTING〈Setup〉列出的邊界測試強制，規則以測試為準。
+`publish/` 與 `scan/` 只透過 `sve_carddb.export.read_api` 讀匯出。匯入方向由 CONTRIBUTING〈Setup〉列出的邊界測試強制，規則以測試為準。
 
 ### 前端與部署邊界
 
