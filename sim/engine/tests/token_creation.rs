@@ -14,6 +14,9 @@ use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutco
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
 
+#[path = "token_creation/banish_observed.rs"]
+mod banish_observed;
+
 fn author(number: &str, id: &str, kind: &str, mut abilities: Vec<Value>) -> (Value, Value) {
     let card = format!("c:{id}");
     let face = format!("f:{id}");

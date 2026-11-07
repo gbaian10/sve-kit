@@ -576,11 +576,21 @@ impl Game {
                 if object.generation != member.generation.0 {
                     continue;
                 }
-                if !(object.zone == "hand"
-                    && object.owner == super::seat_name(execution.context.controller)?
+                let actor = super::seat_name(execution.context.controller)?;
+                let private_look = object.zone == "deck"
+                    && object.owner == actor
+                    && object.controller == actor
+                    && execution.is_private_look_target(objects, *member)
+                    && self
+                        .state
+                        .knowledge
+                        .get(actor)
+                        .is_some_and(|knowledge| knowledge.located.contains(&object.id));
+                let private_hand = object.zone == "hand"
+                    && object.owner == actor
                     && object.controller == object.owner
-                    && execution.is_private_hand_target(objects, *member))
-                {
+                    && execution.is_private_hand_target(objects, *member);
+                if !(private_look || private_hand) {
                     public_zone(&object.zone)?;
                 }
             }

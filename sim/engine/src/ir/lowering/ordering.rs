@@ -87,6 +87,20 @@ impl BodyContext<'_> {
                     },
                 },
             )),
+            ast::Step::Banish(ast::BanishAction::Objects(objects))
+                if let ast::ObjectAction::Long {
+                    result: Some(name), ..
+                } = objects.as_ref() =>
+            {
+                Some((
+                    name,
+                    ObjectReceipt::Movement {
+                        receipt: MovementReceipt::Banish {
+                            receipt: ReceiptReference::new(receipt),
+                        },
+                    },
+                ))
+            }
             ast::Step::Look(value) => Some((
                 &value.bind,
                 ObjectReceipt::Look {
@@ -207,7 +221,7 @@ impl BodyContext<'_> {
         if matches!(
             receipt,
             ObjectReceipt::Movement {
-                receipt: MovementReceipt::Order { .. }
+                receipt: MovementReceipt::Order { .. } | MovementReceipt::Banish { .. }
             }
         ) && !matches!(
             usage,
@@ -360,6 +374,15 @@ impl BodyContext<'_> {
                         })
                         .collect::<Result<Vec<_>, LoweringError>>()?;
                     Selector::Union { sets }
+                }
+                ast::BanishAction::Objects(objects)
+                    if let ast::ObjectAction::Long {
+                        r#ref: ast::Objects::Bound(name),
+                        result: Some(_),
+                    } = objects.as_ref()
+                        && self.observed_targets.contains(name) =>
+                {
+                    self.objects(&ast::Objects::Bound(name.clone()), path)?
                 }
                 ast::BanishAction::Objects(objects)
                     if let Some(event) = self.leave_event
