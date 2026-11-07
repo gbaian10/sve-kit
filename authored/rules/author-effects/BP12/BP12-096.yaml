@@ -1,0 +1,56 @@
+cards:
+  BP12-096:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            discard:
+              n: 1
+              sel:
+                name: ヘヴンリーイージス
+                who: self
+                zone: hand
+          optional_cost_delta: -2
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  exists:
+                    in: revived
+                    name: 欠落の聖女・リモニウム
+                else:
+                  - move:
+                      ref: revived
+                      result: returned_other
+                      to: field
+                then:
+                  - move:
+                      ref: revived
+                      result: returned_named
+                      to: field
+                  - create:
+                      to: ex
+                      token: リペアモード
+          targets:
+            - bind: revived
+              from:
+                kind: follower
+                orig_cost_le: 3
+                trait: 機械
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
+    token_sources:
+      - card: BP07-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

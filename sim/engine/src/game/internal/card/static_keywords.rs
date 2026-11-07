@@ -102,47 +102,13 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
             return Err(unsupported("static keyword lifetime"));
         }
         let subjects = grant_subjects(ability, selector, condition.as_ref())?;
-        let body = Program {
-            scope: ability.scope,
-            steps: vec![Located {
-                source: located.source.clone(),
-                node: Node::Instruction {
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(1),
-                        actor: PlayerRef::Controller {},
-                        source: ability.source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Effect,
-                        receipt: ReceiptId(1),
-                        action: Action::Grant {
-                            subjects,
-                            abilities: abilities.clone(),
-                            duration: duration.clone(),
-                            provider: TextProvider {
-                                provider: ObjectView::Current {
-                                    object: Box::new(ObjectOperand::SourceHolder {}),
-                                },
-                                face: FaceId(located.source.face.clone()),
-                                ability: ability.id,
-                            },
-                        },
-                    }),
-                },
-            }],
-        };
-        let program = Program {
-            scope: ability.scope,
-            steps: vec![Located {
-                source: located.source.clone(),
-                node: Node::Control {
-                    control: Control::If {
-                        condition: scoped_condition(condition.as_ref()),
-                        then_body: body,
-                        else_body: None,
-                    },
-                },
-            }],
-        };
+        let program = declaration_program(
+            located,
+            subjects,
+            condition.as_ref(),
+            abilities.clone(),
+            duration.clone(),
+        );
         let requirements = Requirements::derive_program(&Located {
             node: program.clone(),
             source: located.source.clone(),
@@ -158,6 +124,90 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         admission::check_card(&program, &located.source, &ability.source, None)?;
     }
     Ok(())
+}
+
+fn declaration_program(
+    located: &Located<Ability>,
+    subjects: Selector,
+    condition: Option<&Expr<Bool>>,
+    abilities: Vec<GrantedAbility>,
+    duration: Duration,
+) -> Program {
+    let body = Program {
+        scope: located.node.scope,
+        steps: vec![Located {
+            source: located.source.clone(),
+            node: Node::Instruction {
+                instruction: Box::new(Instruction {
+                    id: InstructionId(1),
+                    actor: PlayerRef::Controller {},
+                    source: located.node.source.clone(),
+                    precondition: None,
+                    context: InstructionContext::Effect,
+                    receipt: ReceiptId(1),
+                    action: Action::Grant {
+                        subjects,
+                        abilities,
+                        duration,
+                        provider: TextProvider {
+                            provider: ObjectView::Current {
+                                object: Box::new(ObjectOperand::SourceHolder {}),
+                            },
+                            face: FaceId(located.source.face.clone()),
+                            ability: located.node.id,
+                        },
+                    },
+                }),
+            },
+        }],
+    };
+    Program {
+        scope: located.node.scope,
+        steps: vec![Located {
+            source: located.source.clone(),
+            node: Node::Control {
+                control: Control::If {
+                    condition: scoped_condition(condition),
+                    then_body: body,
+                    else_body: None,
+                },
+            },
+        }],
+    }
+}
+
+/// Only live declaration inputs can observe the intermediate PP payment.
+pub(in crate::game::internal) fn payment_dependent(located: &Located<Ability>) -> bool {
+    located.node.declarations.iter().any(|effect| {
+        let Effect::Continuous {
+            target,
+            condition,
+            duration,
+            ..
+        } = effect
+        else {
+            return false;
+        };
+        let subjects = match target {
+            EffectTarget::Dynamic { selector } => selector.clone(),
+            EffectTarget::Captured { .. } => Selector::Objects { objects: vec![] },
+        };
+        // Granted bodies run after payment; inspect only the live condition and target.
+        let program = declaration_program(
+            located,
+            subjects,
+            condition.as_ref(),
+            vec![],
+            duration.clone(),
+        );
+        Requirements::derive_program(&Located {
+            source: located.source.clone(),
+            node: program,
+        })
+        .required
+        .iter()
+        .any(|item| item.capability.code == "internal.PlayerResource.PpCurrent")
+    })
 }
 
 #[expect(

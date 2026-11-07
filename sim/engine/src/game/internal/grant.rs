@@ -481,6 +481,29 @@ impl Game {
         })
     }
 
+    pub(in crate::game::internal) fn internal_payment_dependent_grants(&self) -> Result<bool> {
+        for state in self.state.ir_keywords.values() {
+            for grant in &state.grants {
+                for id in &grant.definitions {
+                    let provider = grant.origin.provider();
+                    let definition = self
+                        .card_runtime
+                        .granted_definitions
+                        .get(&(provider.card.clone(), AbilityId(*id)))
+                        .ok_or_else(|| invalid("missing exchange observer definition"))?;
+                    let located = Located {
+                        node: definition.clone(),
+                        source: provider.span.clone(),
+                    };
+                    if super::card::payment_dependent(&located) {
+                        return Ok(true);
+                    }
+                }
+            }
+        }
+        Ok(false)
+    }
+
     pub(super) fn internal_has_drain_grants(&self) -> bool {
         self.state.ir_keywords.values().any(|state| {
             state

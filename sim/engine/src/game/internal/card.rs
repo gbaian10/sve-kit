@@ -59,6 +59,7 @@ pub(in crate::game::internal) mod resource_entry;
 mod resources;
 mod reveal_cost;
 mod static_keywords;
+pub(in crate::game::internal) use static_keywords::payment_dependent;
 pub(in crate::game::internal) mod triggers;
 pub use triggers::{PendingOption, QuotaDomain, QuotaSelection};
 pub(super) mod play;

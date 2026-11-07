@@ -832,3 +832,6 @@ mod cemetery_pair_capacity;
 
 #[path = "card/ward_bypass.rs"]
 mod ward_bypass;
+
+#[path = "card/exchange_pp_guard.rs"]
+mod exchange_pp_guard;

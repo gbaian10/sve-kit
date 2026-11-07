@@ -36,29 +36,8 @@ fn game(initial: &Value) -> Game {
 }
 
 fn spell_game(initial: &Value) -> Game {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    let selected = SELECTED.get_or_init(|| {
-        let (snapshot, keywords, mut input) = inputs().clone();
-        // Retain complete real programs while excluding unrelated unsupported exchange observers.
-        input["authors"].as_array_mut().unwrap().retain(|author| {
-            author["input"]["card_no"].as_str().is_some_and(|number| {
-                [
-                    "BP22-R23",
-                    "ECP01-036",
-                    "BP01-152",
-                    "BP01-171",
-                    "CSD01-032",
-                    "CP02-T01",
-                    "EBD02-T01",
-                    "BP03-T02",
-                ]
-                .contains(&number)
-            })
-        });
-        repository::selection_with_rules_from(&snapshot, &keywords, &input)
-    });
     Game::from_selected_effects(
-        selected.clone(),
+        selection_with_rules().clone(),
         initial,
         &Value::Null,
         &Value::Null,

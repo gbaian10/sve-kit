@@ -2,7 +2,7 @@ use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 
-fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
+pub(super) fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let mut header = tree["cards"]["BP08-038"]["abilities"][0].clone();
     header.as_object_mut().unwrap().remove("fanfare");
@@ -17,7 +17,7 @@ fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
     tree["cards"] = json!({(card_no):{"meta":meta,"abilities":entries}});
     tree
 }
-fn lower(tree: &Value, cost: u64) -> WellFormedCardProgram {
+pub(super) fn lower(tree: &Value, cost: u64) -> WellFormedCardProgram {
     lowerer()
         .lower_with_printed_costs(tree, &BTreeMap::from([("unit-spell".into(), Nat(cost))]))
         .unwrap()
@@ -25,7 +25,7 @@ fn lower(tree: &Value, cost: u64) -> WellFormedCardProgram {
         .next()
         .unwrap()
 }
-fn initial(card_no: &str, zone: &str, materials: usize, pp: u64) -> Value {
+pub(super) fn initial(card_no: &str, zone: &str, materials: usize, pp: u64) -> Value {
     let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":card_no}]);
     initial["players"]["P1"]["zones"][zone] = json!((0..materials).map(|index|
@@ -286,7 +286,7 @@ fn exchange_follower_pays_materials_before_capacity_and_keeps_the_pre_payment_co
 }
 
 #[test]
-fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_change() {
+fn exchange_rejects_early_receipt_reads_before_any_payment() {
     let tree = candidate(
         "unit-spell",
         json!({"optional_cost":{"to_cemetery":{"sel":{"who":"self","zone":"field"},"n":2},"result":"exchange"},"optional_cost_delta":-2}),
@@ -333,7 +333,20 @@ fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_ch
             .iter()
             .any(|requirement| requirement.capability.code == "read.card-play.payment-complete")
     );
-    let initial = initial("unit-spell", "field", 2, 4);
+}
+
+#[test]
+fn exchange_material_lastwords_wait_until_payment_and_the_spell_body_finish() {
+    let program = lower(
+        &candidate(
+            "unit-spell",
+            json!({"optional_cost":{"to_cemetery":{"sel":{"who":"self","zone":"field"},"n":2},"result":"exchange"},"optional_cost_delta":-2}),
+            true,
+        ),
+        4,
+    );
+    let mut initial = initial("unit-spell", "field", 2, 4);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"d0","card":"unit-follower"},{"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-follower"}]);
     let mut game = Game::new(
         catalog_with_cost(&json!("4")),
         &initial,
@@ -348,16 +361,51 @@ fn exchange_rejects_early_receipt_and_material_triggers_before_any_observable_ch
         &card(vec![triggers::lastword(ability(1, vec![draw(1, 1)]))]),
     )
     .unwrap();
-    let origin = game.clone();
-    assert!(matches!(
-        game.play_internal_card("s", PlayerId { seat: 1 }),
-        Err(sve_engine::EngineFailure::Unsupported(_))
-    ));
-    transactions::assert_restored(&game, &origin);
+    let accept = start(&mut game);
+    let material = materials(&mut game, &accept);
+    game.internal_pending_choice().unwrap_err();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4
+    );
+    resolved(
+        game.answer_internal_card(
+            material.actor,
+            material.token,
+            Answer::CostMaterials(vec![0, 1]),
+        )
+        .unwrap(),
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["pp"]["current"], 2);
+    assert_eq!(after["P1"]["hand"], json!(["d0"]));
+    assert_eq!(after["P1"]["cemetery"], json!(["m0", "m1", "s"]));
+    for expected in [2, 1] {
+        game.resume_internal_card().unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &pending.domain else {
+            panic!("material Lastwords")
+        };
+        assert_eq!(options.len(), expected);
+        resolved(
+            game.answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
+        );
+    }
+    game.resume_internal_card().unwrap();
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["d0", "d1", "d2"])
+    );
 }
 
 #[test]
-fn posture_exchange_still_rejects_non_departure_material_triggers() {
+fn posture_exchange_accepts_phase_observers_without_firing_them_during_payment() {
     let program = lower(
         &candidate(
             "unit-spell",
@@ -381,12 +429,22 @@ fn posture_exchange_still_rejects_non_departure_material_triggers() {
     .unwrap();
     game.load_internal_card("unit-spell", &program).unwrap();
     game.load_internal_card("unit-follower", &observer).unwrap();
-    let before = game.clone();
-    assert!(
-        matches!(game.play_internal_card("s", PlayerId { seat: 1 }), Err(sve_engine::EngineFailure::Unsupported(reason)) if reason.contains("exchange material has unsupported")),
-        "a phase trigger passes the global guard but remains unsafe on an act material"
+    let accept = start(&mut game);
+    let material = materials(&mut game, &accept);
+    resolved(
+        game.answer_internal_card(
+            material.actor,
+            material.token,
+            Answer::CostMaterials(vec![0]),
+        )
+        .unwrap(),
     );
-    transactions::assert_restored(&game, &before);
+    game.resume_internal_card().unwrap();
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["objects"]["m0"]["acted"], true);
+    assert_eq!(after["P1"]["pp"]["current"], 2);
+    assert_eq!(after["P1"]["hand"], json!(["d"]));
 }
 
 #[test]
@@ -716,4 +774,202 @@ fn exchange_name_contains_keeps_its_filter_and_rejects_unmatched_materials() {
     assert_eq!(state["objects"]["m0"]["acted"], true);
     assert_eq!(state["objects"]["wrong"]["acted"], false);
     assert_eq!(state["P1"]["hand"], json!(["d"]));
+}
+
+fn observed_act_exchange(pp: u64) -> Game {
+    let program = lower(
+        &candidate(
+            "unit-spell",
+            json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field"},"n":1},"result":"exchange"},"optional_cost_delta":-2}),
+            true,
+        ),
+        4,
+    );
+    let mut observer = candidate("unit-follower", Value::Null, false);
+    let entry = &mut observer["cards"]["unit-follower"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("play");
+    entry["auto"] = json!({"on":{"acted":{"ref":"this"}},"per_turn":1,"do":[{"life":{"who":"self","delta":1}}]});
+    let observer = lower(&observer, 1);
+    let mut input = initial("unit-spell", "field", 1, pp);
+    input["players"]["P1"]["leader"]["life"] = json!(10);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("4")),
+        &input,
+        &Value::Null,
+        &Value::Null,
+        "exchange-posture-observer",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &program).unwrap();
+    game.load_internal_card("unit-follower", &observer).unwrap();
+    game
+}
+
+#[test]
+fn posture_exchange_defers_its_trigger_and_insufficient_pp_restores_play_before_capture() {
+    for pp in [1, 4] {
+        let mut game = observed_act_exchange(pp);
+        let origin = game.clone();
+        let accept = start(&mut game);
+        let material = materials(&mut game, &accept);
+        game.internal_pending_choice().unwrap_err();
+        let paid = game.answer_internal_card(
+            material.actor,
+            material.token,
+            Answer::CostMaterials(vec![0]),
+        );
+        if pp == 1 {
+            paid.unwrap_err();
+            transactions::assert_restored(&game, &origin);
+            assert!(game.internal_pending_choice().unwrap().is_none());
+            continue;
+        }
+        resolved(paid.unwrap());
+        let before_trigger = game.projection(View::Referee).unwrap();
+        assert_eq!(before_trigger["P1"]["pp"]["current"], 2);
+        assert_eq!(before_trigger["P1"]["hand"], json!(["d"]));
+        assert_eq!(before_trigger["objects"]["m0"]["acted"], true);
+        assert_eq!(before_trigger["P1"]["leader"]["life"], 10);
+        game.resume_internal_card().unwrap();
+        let question = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &question.domain else {
+            panic!("committed act trigger")
+        };
+        assert_eq!(options.len(), 1);
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
+        );
+        game.resume_internal_card().unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            11
+        );
+        assert!(game.internal_pending_choice().unwrap().is_none());
+    }
+}
+
+fn follower_with_departing_material() -> Game {
+    let mut source = candidate(
+        "unit-follower",
+        json!({"optional_cost":{"to_cemetery":{"sel":{"who":"self","zone":"field","kind":"amulet"},"n":1}},"optional_cost_delta":-1}),
+        false,
+    );
+    source["cards"]["unit-follower"]["abilities"][0]["line"] = json!(1);
+    let mut fanfare = source["cards"]["unit-follower"]["abilities"][0].clone();
+    fanfare.as_object_mut().unwrap().remove("play");
+    fanfare["line"] = json!(2);
+    fanfare["fanfare"] = json!({"do":[{"life":{"who":"self","delta":2}}]});
+    source["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(fanfare);
+    let source = lowerer()
+        .lower(&source)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let material = lowerer()
+        .lower(&same_name::tree(
+            &json!({"lastword":{"do":[{"draw":{"n":1}}]}}),
+            "unit-amulet",
+        ))
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut input = initial("unit-follower", "field", 0, 0);
+    input["players"]["P1"]["leader"]["life"] = json!(10);
+    input["players"]["P1"]["zones"]["field"] = json!([{"id":"material","card":"unit-amulet"}]);
+    let mut game = Game::new(
+        catalog(),
+        &input,
+        &Value::Null,
+        &Value::Null,
+        "exchange-entry-and-exit",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &source).unwrap();
+    game.load_internal_card("unit-amulet", &material).unwrap();
+    game
+}
+
+#[test]
+fn follower_exchange_material_lastword_and_fanfare_share_the_next_pending_order_in_either_order() {
+    for first in ["unit-follower", "unit-amulet"] {
+        let mut game = follower_with_departing_material();
+        let accept = start(&mut game);
+        let material = materials(&mut game, &accept);
+        game.internal_pending_choice().unwrap_err();
+        assert!(matches!(
+            game.answer_internal_card(
+                material.actor,
+                material.token,
+                Answer::CostMaterials(vec![0])
+            )
+            .unwrap(),
+            CardPlay::Entered(_)
+        ));
+        for (index, card) in [
+            first,
+            if first == "unit-follower" {
+                "unit-amulet"
+            } else {
+                "unit-follower"
+            },
+        ]
+        .iter()
+        .enumerate()
+        {
+            finish_exchange_checks(&mut game);
+            let question = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("entry and departure share a pending order")
+            };
+            assert_eq!(options.len(), 2 - index);
+            let handle = options
+                .iter()
+                .find(|option| option.card == *card)
+                .unwrap()
+                .handle;
+            resolved(
+                game.answer_internal_card(question.actor, question.token, Answer::Pending(handle))
+                    .unwrap(),
+            );
+            if index == 0 {
+                let state = game.projection(View::Referee).unwrap();
+                assert_eq!(
+                    state["P1"]["leader"]["life"],
+                    if first == "unit-follower" { 12 } else { 10 }
+                );
+                assert_eq!(
+                    state["P1"]["hand"],
+                    if first == "unit-amulet" {
+                        json!(["d"])
+                    } else {
+                        json!([])
+                    }
+                );
+            }
+        }
+        finish_exchange_checks(&mut game);
+        assert!(game.internal_pending_choice().unwrap().is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            12
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["hand"],
+            json!(["d"])
+        );
+    }
+}
+
+fn finish_exchange_checks(game: &mut Game) {
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
 }
