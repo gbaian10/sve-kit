@@ -84,6 +84,21 @@ fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
     }
 }
 
+/// Current own-hand candidates, or a union of such branches ("手札のAかB").
+pub(crate) fn own_hand_selector(selector: &Selector) -> bool {
+    if let Selector::Union { sets } = selector {
+        return sets.len() > 1 && sets.iter().all(own_hand_zone);
+    }
+    own_hand_zone(selector)
+}
+
+fn own_hand_zone(selector: &Selector) -> bool {
+    matches!(selector, Selector::Zone {
+        players, zone: super::ZoneKind::Hand, view: super::SelectionView::Current {}, ..
+    } if players.relation == PlayerRelation::SelfPlayer
+        && players.relative_to == (PlayerRef::Controller {}))
+}
+
 /// A hand choice authorizes only its controller to inspect current own-hand candidates.
 pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
     let ChoiceDomain::Objects {
@@ -111,10 +126,7 @@ pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
             .maximum
             .is_none_or(|max| max.0 > 0 && cardinality.minimum.0 <= max.0)
         && (may == Declinable::Required || cardinality.minimum == Nat(0))
-        && matches!(&group.selector, Selector::Zone {
-            players, zone: super::ZoneKind::Hand, view: super::SelectionView::Current {}, ..
-        } if players.relation == PlayerRelation::SelfPlayer
-            && players.relative_to == (PlayerRef::Controller {}))
+        && own_hand_selector(&group.selector)
         && decision.actor == (PlayerRef::Controller {})
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)

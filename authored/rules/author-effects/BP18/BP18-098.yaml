@@ -1,0 +1,58 @@
+cards:
+  BP18-098:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          "on":
+            life_changed:
+              direction: up
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - kind: follower
+                      orig_cost_le: 3
+                      trait: 透京
+                      who: self
+                      zone: hand
+                    - class: ビショップ
+                      kind: amulet
+                      orig_cost_le: 3
+                      who: self
+                      zone: hand
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 善行の確信
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

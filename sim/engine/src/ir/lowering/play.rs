@@ -460,6 +460,80 @@ impl BodyContext<'_> {
         })
     }
 
+    /// Each branch filters the controller's hand; a card matching several branches is one candidate.
+    pub(super) fn hand_union_choice(
+        &mut self,
+        target: &ast::Target,
+        branches: &[ast::TargetQuery],
+        path: &str,
+    ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        if check_choice_shape(target, true, path)?
+            || target.distinct_by.is_some()
+            || target.cost_sum_le.is_some()
+            || branches.iter().any(|branch| {
+                branch.except.is_some()
+                    || branch.alias.is_some()
+                    || branch.r#where.is_some()
+                    || branch.leader.is_some()
+                    || branch.leaders.is_some()
+                    || branch.leader_or
+                    || branch.other
+                    || branch.not_same_name_as_this
+                    || branch.has_evolve.is_some()
+                    || branch.face_up.is_some()
+                    || branch.has_state_filter()
+                    || branch.hp_le.is_some()
+                    || branch.power_le.is_some()
+                    || branch.power_ge.is_some()
+                    || branch
+                        .cost_le
+                        .as_ref()
+                        .is_some_and(ast::NumericArgument::is_dynamic)
+                    || branch
+                        .orig_cost_le
+                        .as_ref()
+                        .is_some_and(ast::NumericArgument::is_dynamic)
+            })
+            || self.recipient_targets.contains_key(&target.bind)
+        {
+            return Err(unsupported(path));
+        }
+        let cardinality = target_cardinality(target, path)?;
+        let binding = Binding::new(self.allocator.id(path)?, self.scope);
+        if self.definitions.contains_key(&target.bind)
+            || self.searches.contains(&target.bind)
+            || self.observations.contains_key(&target.bind)
+            || self.targets.insert(target.bind.clone(), binding).is_some()
+        {
+            return Err(unsupported(path));
+        }
+        self.record_target_zone(target, cardinality);
+        if cardinality.maximum.is_none_or(|maximum| maximum.0 > 1) {
+            self.field_entry.multi.insert(target.bind.clone());
+        }
+        let sets = branches
+            .iter()
+            .map(|branch| self.public_target_selector(branch, path))
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok((
+            ChoiceDomain::Objects {
+                constraint: SelectionConstraint {
+                    groups: vec![SelectionGroup {
+                        selector: Selector::Union { sets },
+                        cardinality,
+                    }],
+                    cardinality,
+                    distinct_by: None::<ObjectProperty>,
+                    disjoint: Disjointness::Disjoint,
+                    aggregate_bounds: vec![],
+                },
+                binding,
+                target_roles: None,
+            },
+            cardinality,
+        ))
+    }
+
     /// Each branch filters the same Look receipt; several branches form one OR candidate set.
     pub(super) fn observed_object_choice(
         &mut self,
