@@ -243,7 +243,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
               setSideways(!sideways)
             }}
             aria-pressed={sideways}
-            className="flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 hover:bg-surface-3"
+            className="relative flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-surface-3"
           >
             {sideways ? (
               <RectangleHorizontal className="size-4" aria-hidden="true" />

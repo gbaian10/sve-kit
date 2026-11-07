@@ -993,6 +993,8 @@ export default {
         textHint: 'One "count card-number name" per line; Import deck reads it too.',
         copy: "Copy",
         copied: "Copied",
+        missing:
+          "Some cards are not in the current card data ({{cards}}), so there is no code; use the text list or open it in the deck builder.",
         preparing: "Preparing…",
       },
       picker: {

@@ -17,12 +17,14 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 
 import { deckImportPath, deckShareLink } from "../../app/deck-routes"
+import { useDialogHistory } from "../../app/dialog-history"
 import { routeState } from "../../app/listEntryState"
 import { useRouteEdition } from "../../app/snapshot"
 import { CardImage } from "../../components/card/CardImage"
 import { ClassQuickBar } from "../../components/search/ClassQuickBar"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
+import { Dialog } from "../../components/ui/Dialog"
 import { Segmented } from "../../components/ui/Segmented"
 import {
   appScanModels,
@@ -153,7 +155,11 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
   const [message, setMessage] = useState<Message | null>(kept.message)
   const [dimmed, setDimmed] = useState<ReadonlySet<DeckCardStatus>>(new Set())
   const [open, setOpen] = useState<number | null>(null)
-  const [busy, setBusy] = useState(false)
+  // The reading in progress and the edition it reads; another edition makes it moot.
+  const [busy, setBusy] = useState<{ readonly token: number; readonly edition: Region } | null>(
+    null,
+  )
+  const reading = busy !== null && busy.edition === edition
   const [gap, setGap] = useState(DECK_GUESS_GAP)
   const [over, setOver] = useState(false)
   const [camera, setCamera] = useState<MediaStream | null>(null)
@@ -173,28 +179,38 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
     kept.message = message
   })
 
-  const stopCamera = () => {
-    setCamera((stream) => {
-      for (const track of stream?.getTracks() ?? []) track.stop()
-      return null
-    })
-  }
-  // A camera or a reading still in progress when the page goes away must not carry on afterwards.
+  // Every async job (camera request, photo decode, reading) holds a token. A newer job, clearing
+  // the photo, another edition or leaving the page makes older ones stale; stale jobs only clean
+  // up after themselves.
   const mounted = useRef(true)
-  const readFlow = useRef(0)
   const isMounted = () => mounted.current
+  const readFlow = useRef(0)
+  const photoFlow = useRef(0)
+  const shootFlow = useRef(0)
+  const cameraStream = useRef<MediaStream | null>(null)
+  const releaseCamera = () => {
+    shootFlow.current += 1
+    for (const track of cameraStream.current?.getTracks() ?? []) track.stop()
+    cameraStream.current = null
+  }
   useEffect(() => {
     mounted.current = true
     return () => {
       mounted.current = false
       readFlow.current += 1
-      stopCamera()
+      photoFlow.current += 1
+      releaseCamera()
     }
   }, [])
   // Another edition makes a reading in progress stale (its engine is released).
   useEffect(() => {
     readFlow.current += 1
   }, [edition])
+  const stopCamera = () => {
+    releaseCamera()
+    setCamera(null)
+  }
+  const closeCamera = useDialogHistory("scan-camera", camera !== null, stopCamera)
   useEffect(() => {
     const video = cameraVideo.current
     if (!video || !camera) return
@@ -202,14 +218,23 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
     void video.play().catch(() => undefined)
   }, [camera])
 
+  const dropReading = () => {
+    readFlow.current += 1
+    setBusy(null)
+  }
   const take = async (blob: Blob | null | undefined) => {
+    const token = ++photoFlow.current
+    const isCurrent = () => isMounted() && photoFlow.current === token
     try {
       const next = await photoFromBlob(blob)
+      if (!isCurrent()) return
+      dropReading()
       setPhoto(next)
       setCards(null)
       setOpen(null)
       setMessage({ key: "loaded", width: next.width, height: next.height })
     } catch (error) {
+      if (!isCurrent()) return
       if (error instanceof PhotoError)
         setMessage(
           error.kind === "not-image"
@@ -230,6 +255,8 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
     return () => {
       window.removeEventListener("paste", onPaste)
     }
+    // take reads its tokens through refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const paste = async () => {
     try {
@@ -250,6 +277,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
       shootFile.current?.click()
       return
     }
+    const token = ++shootFlow.current
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -259,13 +287,17 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
         },
         audio: false,
       })
-      if (!isMounted()) {
+      // A later request, a closed window or a left page took over: this camera is not wanted.
+      if (!isMounted() || shootFlow.current !== token) {
         for (const track of stream.getTracks()) track.stop()
         return
       }
+      for (const track of cameraStream.current?.getTracks() ?? []) track.stop()
+      cameraStream.current = stream
       setCamera(stream)
     } catch (error) {
-      if (isMounted()) setMessage({ key: "camFailed", name: errorName(error) })
+      if (isMounted() && shootFlow.current === token)
+        setMessage({ key: "camFailed", name: errorName(error) })
     }
   }
   const grab = () => {
@@ -275,10 +307,12 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
     frame.width = video.videoWidth
     frame.height = video.videoHeight
     frame.getContext("2d")?.drawImage(video, 0, 0)
-    stopCamera()
+    closeCamera()
     frame.toBlob((blob) => void take(blob), "image/jpeg", 0.92)
   }
   const clearPhoto = () => {
+    photoFlow.current += 1
+    dropReading()
     setPhoto(null)
     setCards(null)
     setOpen(null)
@@ -290,10 +324,10 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
   const read = async () => {
     if (!photo) return
     const token = ++readFlow.current
-    // Read through a call: the page may unmount or switch edition while this awaits.
-    const isCurrent = () => readFlow.current === token
+    // Read through a call: the photo, the edition or the page may change while this awaits.
+    const isCurrent = () => isMounted() && readFlow.current === token
     const wanted = edition
-    setBusy(true)
+    setBusy({ token, edition: wanted })
     setOpen(null)
     const started = performance.now()
     try {
@@ -323,7 +357,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
           : { key: "failed", message: error instanceof Error ? error.message : String(error) },
       )
     } finally {
-      if (isMounted()) setBusy(false)
+      if (isMounted()) setBusy((current) => (current?.token === token ? null : current))
     }
   }
 
@@ -337,6 +371,9 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
 
   // Names and pictures: picked cards, the best guess of unsure ones, and the open picker's candidates.
   const openCard = open === null ? null : (cards?.[open] ?? null)
+  const closePicker = useDialogHistory("scan-picker", openCard !== null, () => {
+    setOpen(null)
+  })
   const shown = useMemo(() => {
     const list = live.flatMap((card) => {
       const first = card.pick ?? card.alts[0]?.card
@@ -537,10 +574,10 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
           variant="primary"
           size="lg"
           className="w-full"
-          disabled={!photo || !readiness.ready || busy}
+          disabled={!photo || !readiness.ready || reading}
           onClick={() => void read()}
         >
-          {busy ? t("scan.deck.reading") : cards ? t("scan.deck.again") : t("scan.deck.start")}
+          {reading ? t("scan.deck.reading") : cards ? t("scan.deck.again") : t("scan.deck.start")}
         </Button>
       )}
       {message && (
@@ -645,52 +682,56 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
           <SharePanel
             text={share.text}
             code={share.code}
+            missing={share.missing}
             edition={readEdition}
             unsure={counts.unsure}
           />
         </>
       )}
 
-      {camera && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-scrim p-4">
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-label={t("scan.deck.cameraHint")}
-            className="flex w-full max-w-240 flex-col gap-3 rounded-button bg-surface-1 p-3"
-          >
-            <p className="text-13 text-text-2">{t("scan.deck.cameraHint")}</p>
-            {}
-            <video
-              ref={cameraVideo}
-              playsInline
-              muted
-              className="max-h-[70dvh] w-full rounded-control bg-camera object-contain"
-            />
-            <div className="flex justify-end gap-2">
-              <Button onClick={stopCamera}>{t("scan.deck.cancelShot")}</Button>
-              <Button variant="primary" onClick={grab}>
-                <Camera className="size-5" aria-hidden="true" /> {t("scan.deck.shutter")}
-              </Button>
-            </div>
+      <Dialog
+        open={camera !== null}
+        onClose={closeCamera}
+        title={t("scan.deck.cameraHint")}
+        variant="center"
+      >
+        <div className="flex flex-col gap-3">
+          <video
+            ref={cameraVideo}
+            playsInline
+            muted
+            className="max-h-[70dvh] w-full rounded-control bg-camera object-contain"
+          />
+          <div className="flex justify-end gap-2">
+            <Button onClick={closeCamera}>{t("scan.deck.cancelShot")}</Button>
+            <Button variant="primary" onClick={grab}>
+              <Camera className="size-5" aria-hidden="true" /> {t("scan.deck.shutter")}
+            </Button>
           </div>
         </div>
-      )}
+      </Dialog>
 
-      {openCard && open !== null && (
-        <Picker
-          at={open}
-          card={openCard}
-          images={images}
-          resultOf={resultOf}
-          onChoose={(choice) => {
-            choose(open, choice)
-          }}
-          onClose={() => {
-            setOpen(null)
-          }}
-        />
-      )}
+      <Dialog
+        open={openCard !== null}
+        onClose={closePicker}
+        title={t("scan.deck.picker.title")}
+        variant="bottom"
+        bare
+      >
+        {openCard && open !== null && (
+          <Picker
+            at={open}
+            card={openCard}
+            images={images}
+            resultOf={resultOf}
+            onChoose={(choice) => {
+              closePicker()
+              choose(open, choice)
+            }}
+            onClose={closePicker}
+          />
+        )}
+      </Dialog>
     </div>
   )
 }
@@ -877,28 +918,9 @@ function Picker({
 }) {
   const { t } = useTranslation()
   const crop = useMemo(() => cropUrl(card, 224, 312), [card])
-  useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose()
-    }
-    window.addEventListener("keydown", onKey)
-    return () => {
-      window.removeEventListener("keydown", onKey)
-    }
-  }, [onClose])
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- the backdrop closes with Escape too
-    <div className="fixed inset-0 z-70 flex items-end justify-center bg-scrim" onClick={onClose}>
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions -- only stops the backdrop click */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="scan-picker-title"
-        className="flex max-h-[85dvh] w-full max-w-240 flex-col gap-3 overflow-y-auto rounded-t-block bg-surface-1 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-        onClick={(event) => {
-          event.stopPropagation()
-        }}
-      >
+    <div className="flex flex-col gap-3 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="contents">
         <div className="flex items-start gap-3">
           <img
             src={crop}
@@ -906,7 +928,7 @@ function Picker({
             className="w-24 shrink-0 rounded-sm"
           />
           <div className="min-w-0 flex-1">
-            <p id="scan-picker-title" className="flex items-center gap-1.5 text-15 font-bold">
+            <p className="flex items-center gap-1.5 text-15 font-bold">
               <Badge at={at} status={card.status} /> {t("scan.deck.picker.title")}
             </p>
             <p className="mt-1 text-13 text-text-2">{t("scan.deck.picker.hint")}</p>
@@ -968,7 +990,7 @@ function Picker({
         <Button
           variant="danger"
           size="sm"
-          className="self-start"
+          className="h-11 self-start md:h-9"
           onClick={() => {
             onChoose("remove")
           }}
@@ -983,11 +1005,13 @@ function Picker({
 function SharePanel({
   text,
   code,
+  missing,
   edition,
   unsure,
 }: {
   readonly text: string
   readonly code: string
+  readonly missing: readonly string[]
   readonly edition: "jp" | "en"
   readonly unsure: number
 }) {
@@ -1043,7 +1067,7 @@ function SharePanel({
           variant={copied === tab ? "primary" : "secondary"}
           disabled={!body}
           onClick={copy}
-          className="absolute top-2 right-2"
+          className="absolute top-2 right-2 h-11 md:h-9"
         >
           {copied === tab ? (
             <Check className="size-4" aria-hidden="true" />
@@ -1060,7 +1084,11 @@ function SharePanel({
             {body}
           </pre>
         ) : (
-          <p className="text-13 text-text-3">{t("scan.deck.share.preparing")}</p>
+          <p className="text-13 text-text-3">
+            {missing.length > 0
+              ? t("scan.deck.share.missing", { cards: missing.join(t("scan.listSeparator")) })
+              : t("scan.deck.share.preparing")}
+          </p>
         )}
       </div>
     </section>

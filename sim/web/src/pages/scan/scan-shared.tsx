@@ -74,7 +74,12 @@ function ModeTab({
       {label}
     </span>
   ) : (
-    <Link to={to} replace className="rounded-pill px-3.5 py-1.5 text-text-2 hover:text-text-1">
+    // The pill is 30px tall; the invisible band above and below makes a 44px target.
+    <Link
+      to={to}
+      replace
+      className="relative rounded-pill px-3.5 py-1.5 text-text-2 before:absolute before:inset-x-0 before:-inset-y-2 before:content-[''] hover:text-text-1"
+    >
       {label}
     </Link>
   )
@@ -101,7 +106,7 @@ export function ScanModeTabs({
       {start !== undefined && <div className="absolute left-0">{start}</div>}
       <Link
         to="/cards/scan/models"
-        className="absolute right-0 flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 hover:bg-surface-3"
+        className="absolute right-0 flex h-9 items-center gap-1 rounded-pill bg-surface-2 px-3 text-13 text-text-1 before:absolute before:inset-x-0 before:-inset-y-1 before:content-[''] hover:bg-surface-3"
       >
         <Package className="size-4" aria-hidden="true" /> {t("scan.models.link")}
       </Link>

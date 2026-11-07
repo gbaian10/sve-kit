@@ -936,6 +936,8 @@ const zhTW = {
         textHint: "每行「張數 卡號 卡名」，也能貼到匯入牌組。",
         copy: "複製",
         copied: "已複製",
+        missing:
+          "有卡片在目前的卡表裡找不到（{{cards}}），沒辦法做成代碼；請用文字清單或在組牌頁開啟。",
         preparing: "準備中…",
       },
       picker: {
