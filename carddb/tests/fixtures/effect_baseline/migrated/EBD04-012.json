@@ -1,0 +1,54 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "optional",
+        "then": {
+          "op": "if_done",
+          "attempt": {
+            "op": "move",
+            "subjects": "self",
+            "to": "ex"
+          },
+          "then": {
+            "op": "modify",
+            "subjects": "self.leader",
+            "hp": 1
+          }
+        }
+      },
+      "event": "enter",
+      "subject": {
+        "zone": "field",
+        "side": "self",
+        "type": "follower",
+        "name_contains": "マーウィン"
+      },
+      "active_zones": [
+        "cemetery"
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "activated",
+      "body": {
+        "op": "draw",
+        "count": 1
+      },
+      "costs": [
+        {
+          "op": "act",
+          "subjects": "self"
+        },
+        {
+          "op": "move",
+          "subjects": "self",
+          "to": "cemetery"
+        }
+      ]
+    }
+  ]
+}

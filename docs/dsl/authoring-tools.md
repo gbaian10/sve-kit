@@ -321,7 +321,7 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作只准自身回場或移到持有者的 EX（墓場的打出與進場訂閱共用這個限制），其他操作、其他目的地、任意目標回場與一般事件欄位讀取維持原邊界。
 
-墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 沿用上述墓場限制，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。
+墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 沿用上述墓場限制，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。本文的自身移動也可放在 `optional` 內表示「…てよい」，例如 BP15-101 寫 `optional: {do: [{move: {ref: this, to: ex, result: moved}}, {if: {cond: {did: moved}, then: [...]}}]}`；只有實際移到 EX 才執行「そうしたなら」的後句。
 
 墓場入場觀測者的自身消滅費用可寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 侮蔑の絶傑・ガルミーユ}}}, cost: {banish_self: true}, targets: [...], do: [...]}`（BP08-068、Q1098）。目前只接受這個能力頭中的單一自身消滅費用；宣告是否支付、正式目標及原子付款沿用既有能力頭流程。拒付取消該次打出，本文不執行；每個墓場副本只支付自己的來源世代，來源已移區後不能改用新世代或另一張同名卡。這個例外不開放本文的 `banish: this`、打出觀測者、其他有效區或與其他費用組合；入場當下不在墓場的卡不補觸發（Q1081）。
 
