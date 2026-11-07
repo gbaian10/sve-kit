@@ -1,9 +1,6 @@
 import type { Point, Quad } from "./tensor"
 
-// The camera finds cards anew every frame. With two cards near the aiming frame the best one can
-// change from frame to frame, and the same card's corners shift a little each time, so the drawn
-// box jumps between cards and shakes. The follower keeps to the card it showed last and averages
-// that card's corners over recent frames.
+// Each frame finds cards anew; without following one, a box near two cards jumps between them.
 
 /** A card found this frame, in the same pixels as every other frame, and how good a pick it is. */
 export interface QuadCandidate {
@@ -11,43 +8,60 @@ export interface QuadCandidate {
   readonly key: number
 }
 
-/** A box overlapping the last one this much is the same card. */
+export interface Followed {
+  /** Where to draw the box: the followed card's corners averaged over recent frames. */
+  readonly shown: Quad | null
+  /** This frame's own corners of the followed card, for reading it; null when none was found. */
+  readonly found: Quad | null
+}
+
+/** A box overlapping the last one this much can be the same card. */
 const SAME_CARD = 0.5
 /** Another card has to beat the followed one by this much to take over. */
 const STAY = 0.25
 /** Weight of this frame's corners against the average so far. */
 const NEWEST = 0.5
-/** Frames with no card at all before the followed one is dropped. */
+/** Frames with no card at all while the last box stays drawn. */
 const GRACE = 2
 
 export class QuadFollower {
-  private last: Quad | null = null
+  /** The followed card as last found, and as last drawn. */
+  private found: Quad | null = null
+  private shown: Quad | null = null
   private missed = 0
 
-  /** The card to show this frame, or null when none has been seen for a while. */
-  follow(candidates: readonly QuadCandidate[]): Quad | null {
-    const last = this.last
-    let best: { readonly quad: Quad; readonly key: number; readonly same: boolean } | null = null
-    for (const candidate of candidates) {
-      const same = last !== null && boxOverlap(candidate.quad, last) >= SAME_CARD
-      const key = candidate.key + (same ? STAY : 0)
-      if (!best || key > best.key) best = { quad: candidate.quad, key, same }
+  follow(candidates: readonly QuadCandidate[]): Followed {
+    const last = this.found
+    if (candidates.length === 0) {
+      this.missed += 1
+      if (this.missed > GRACE) this.reset()
+      return { shown: this.shown, found: null }
     }
-    if (!best) {
-      if (last && this.missed < GRACE) {
-        this.missed += 1
-        return last
-      }
-      this.reset()
-      return null
-    }
+    // Only the one candidate that overlaps the followed card most is that card; stacked cards
+    // that also overlap it are others.
+    let same = -1
+    let most = SAME_CARD
+    if (last)
+      candidates.forEach((candidate, i) => {
+        const overlap = boxOverlap(candidate.quad, last)
+        if (overlap >= most) [same, most] = [i, overlap]
+      })
+    let pick = 0
+    let best = -Infinity
+    candidates.forEach((candidate, i) => {
+      const key = candidate.key + (i === same ? STAY : 0)
+      if (key > best) [pick, best] = [i, key]
+    })
+    const quad = (candidates[pick] as QuadCandidate).quad
+    this.shown = pick === same && this.shown ? blend(this.shown, quad) : quad
+    this.found = quad
     this.missed = 0
-    this.last = best.same && last ? blend(last, best.quad) : best.quad
-    return this.last
+    return { shown: this.shown, found: quad }
   }
 
   reset(): void {
-    this.last = null
+    this.found = null
+    this.shown = null
     this.missed = 0
   }
 }
@@ -70,8 +84,8 @@ function bounds(quad: Quad): readonly [number, number, number, number] {
 }
 
 /**
- * Moves the last corners part way to the new ones. The finder lists corners clockwise but from any
- * corner, so the new corners are first turned to line up with the last ones.
+ * Moves the drawn corners part way to the new ones. The finder lists corners clockwise but from any
+ * corner, so the new corners are first turned to line up with the drawn ones.
  */
 function blend(last: Quad, next: Quad): Quad {
   let shift = 0

@@ -276,7 +276,7 @@ describe("ScanPage", () => {
     await user.click(screen.getByRole("button", { name: "3×" }))
     expect(container().querySelector("video")?.style.transform).toBe("scale(1.5)")
     // The frame shrinks from its corner handle and remembers the size.
-    const handle = screen.getByRole("slider", { name: "拖曳調整框的大小" })
+    const handle = screen.getByRole("slider", { name: "上下拖曳調整框的大小" })
     expect(handle).toHaveAttribute("aria-valuenow", "100")
     handle.focus()
     await user.keyboard("{ArrowDown}{ArrowDown}")

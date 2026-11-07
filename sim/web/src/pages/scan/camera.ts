@@ -5,7 +5,7 @@ import {
   FinishSmoother,
   pickFinish,
 } from "../../domain/scan/finish"
-import { type QuadCandidate, QuadFollower } from "../../domain/scan/follow"
+import { type Followed, type QuadCandidate, QuadFollower } from "../../domain/scan/follow"
 import { orderQuad, warpQuad } from "../../domain/scan/geometry"
 import type { Point, Quad } from "../../domain/scan/tensor"
 import { ScanTracker, type TrackFrame } from "../../domain/scan/tracker"
@@ -233,7 +233,7 @@ export class CameraScanner {
       try {
         const canvases = this.canvasesFor(engine)
         const geometry = this.geometry(video)
-        const quad = await this.find(engine, canvases, video, geometry)
+        const { shown: box, found: quad } = await this.find(engine, canvases, video, geometry)
         const pixels = quad
           ? this.straighten(engine, canvases, video, quad)
           : this.aimed(canvases, video, geometry)
@@ -244,7 +244,7 @@ export class CameraScanner {
         const frame = this.tracker.step(upright, matches, performance.now(), (picks) =>
           engine.confident(picks),
         )
-        this.draw(geometry, quad, frame.status === "ok")
+        this.draw(geometry, box, frame.status === "ok")
         const shown = quad ? this.withFinish(engine, frame, pixels) : this.withoutFinish(frame)
         onFrame({ ...shown, found: quad !== null })
       } catch (error) {
@@ -350,7 +350,7 @@ export class CameraScanner {
     canvases: Canvases,
     video: HTMLVideoElement,
     g: Geometry,
-  ): Promise<Quad | null> {
+  ): Promise<Followed> {
     const side = Math.max(g.width, g.height) * FIND_REGION
     const x0 = g.x + g.width / 2 - side / 2
     const y0 = g.y + g.height / 2 - side / 2
