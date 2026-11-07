@@ -593,7 +593,12 @@ function Thumb({
       />
     )
   if (!result.summary || !result.name)
-    return <span aria-hidden="true" className={cn("rounded-sm bg-surface-3", className)} />
+    return (
+      <span
+        aria-hidden="true"
+        className={cn("aspect-[63/88] rounded-sm bg-surface-3", className)}
+      />
+    )
   return (
     <CardImage
       summary={result.summary}
@@ -625,13 +630,15 @@ function ResultSheet({
   const { t } = useTranslation()
   // Positioned, so the images' screen-reader text stays inside the scrolling row.
   const chip = "relative flex shrink-0 items-center gap-1.5 rounded-pill py-0.5 pr-2.5 pl-0.5"
+  // The sheet keeps one height while scanning: the camera view above takes the rest, and the
+  // aiming frame is sized from it, so a taller or shorter result would resize the frame.
   return (
     <div className="flex shrink-0 flex-col gap-2 bg-surface-1 px-3 py-3 text-text-1">
       {running && top ? (
         <Link
           {...cardLink(top)}
           className={cn(
-            "relative flex items-center gap-3 rounded-button border p-2",
+            "relative flex h-26 items-center gap-3 rounded-button border p-2",
             recognised ? "border-accent bg-accent-soft" : "border-border",
           )}
         >
@@ -650,11 +657,11 @@ function ResultSheet({
           <ChevronRight className="size-5 shrink-0 text-text-3" aria-hidden="true" />
         </Link>
       ) : (
-        <div className="flex h-25 items-center justify-center rounded-button border border-dashed border-border text-13 text-text-3">
+        <div className="flex h-26 items-center justify-center rounded-button border border-dashed border-border text-13 text-text-3">
           {running ? t("scan.single.noCardYet") : t("scan.single.resultHere")}
         </div>
       )}
-      {running && (others.length > 0 || recent.length > 0) && (
+      {running && (
         <div className="relative flex h-8 min-w-0 [scrollbar-width:none] items-center gap-2 overflow-x-auto text-12 [&::-webkit-scrollbar]:hidden">
           {others.map((result) => (
             <Link
