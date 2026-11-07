@@ -1,0 +1,52 @@
+cards:
+  BP09-054:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                name_contains: ジルニトラ
+                who: self
+                zone: field
+          optional_cost_delta: -3
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                on:
+                  token: true
+                  trait: 竜族
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ドラゴン
+            - draw:
+                n:
+                  count:
+                    token: true
+                    trait: 竜族
+                    who: self
+                    zone: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token_sources:
+      - card: BP01-T11
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

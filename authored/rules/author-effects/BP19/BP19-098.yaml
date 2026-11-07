@@ -1,0 +1,54 @@
+cards:
+  BP19-098:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            act:
+              n: 1
+              sel:
+                kind: follower
+                name: 結盟の咎人・エルラーデ
+                who: self
+                zone: field
+          optional_cost_set: 0
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  any_of:
+                    - name: 戒律の諜報員
+                      who: self
+                      zone: deck
+                    - name: 宗規の構成員
+                      who: self
+                      zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
