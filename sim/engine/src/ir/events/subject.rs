@@ -563,6 +563,8 @@ pub(crate) struct SubjectFilter {
     pub(crate) itself: Option<bool>,
     pub(crate) kind: Option<CardKind>,
     pub(crate) trait_id: Option<TraitId>,
+    /// 「A・フォロワーかB・フォロワーが出たとき」 on an entering subject (BP21-008).
+    pub(crate) traits_any: Vec<TraitId>,
     pub(crate) name: Option<CardName>,
     /// 「カード名に『…』を含む」 on an entering subject (BP13-027).
     pub(crate) name_contains: Option<CardName>,
@@ -627,6 +629,20 @@ impl SubjectFilter {
             predicates.push(Expr::Compute(Box::new(Predicate::HasTrait {
                 traits: fields.traits(),
                 trait_id: trait_id.clone(),
+            })));
+        }
+        if !self.traits_any.is_empty() {
+            predicates.push(Expr::Compute(Box::new(Predicate::Or {
+                predicates: self
+                    .traits_any
+                    .iter()
+                    .map(|trait_id| {
+                        Expr::Compute(Box::new(Predicate::HasTrait {
+                            traits: fields.traits(),
+                            trait_id: trait_id.clone(),
+                        }))
+                    })
+                    .collect(),
             })));
         }
         if let Some(name) = &self.name {
@@ -764,6 +780,8 @@ impl SubjectFilter {
                 return None;
             }
             self.trait_id = Some(trait_id.clone());
+        } else if let Predicate::Or { predicates } = predicate.as_ref() {
+            self.trait_union(fields, predicates)?;
         } else if let Predicate::ClassEquals {
             left,
             right: Expr::Literal(Info::Present(class)),
@@ -802,6 +820,35 @@ impl SubjectFilter {
         } else {
             return None;
         }
+        Some(())
+    }
+
+    /// Only an entering subject reads a union of at least two distinct traits.
+    fn trait_union(&mut self, fields: SubjectFields, branches: &[Expr<Bool>]) -> Option<()> {
+        if !matches!(fields, SubjectFields::Entry(_)) || !self.traits_any.is_empty() {
+            return None;
+        }
+        let mut traits = Vec::new();
+        for branch in branches {
+            let Expr::Compute(predicate) = branch else {
+                return None;
+            };
+            let Predicate::HasTrait {
+                traits: read,
+                trait_id,
+            } = predicate.as_ref()
+            else {
+                return None;
+            };
+            if *read != fields.traits() || trait_id.0.is_empty() || traits.contains(trait_id) {
+                return None;
+            }
+            traits.push(trait_id.clone());
+        }
+        if traits.len() < 2 {
+            return None;
+        }
+        self.traits_any = traits;
         Some(())
     }
 
@@ -871,6 +918,11 @@ impl SubjectFilter {
                 .trait_id
                 .as_ref()
                 .is_none_or(|id| characters.traits.contains(id))
+            && (self.traits_any.is_empty()
+                || self
+                    .traits_any
+                    .iter()
+                    .any(|id| characters.traits.contains(id)))
             && self
                 .name
                 .as_ref()

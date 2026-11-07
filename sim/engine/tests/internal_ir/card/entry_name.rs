@@ -26,3 +26,24 @@ fn only_an_entering_subject_reads_a_card_name_fragment() {
         );
     }
 }
+
+#[test]
+fn only_an_entering_subject_reads_a_trait_union() {
+    let sel = json!({"kind":"follower","other":true,"traits_any":["学院","獣"]});
+    lowerer()
+        .lower(&tree(&json!({"enter_field":{"who":"self","sel":sel}})))
+        .unwrap();
+    for on in [
+        json!({"left_field":{"who":"self","sel":sel}}),
+        json!({"destroyed":{"who":"self","sel":sel}}),
+        json!({"enter_field":{"who":"self","sel":{"kind":"follower","traits_any":["学院"]}}}),
+        json!({"enter_field":{"who":"self","sel":{"kind":"follower","traits_any":["学院","学院"]}}}),
+        json!({"enter_field":{"who":"self","sel":{"kind":"follower","traits_any":["学院",""]}}}),
+        json!({"enter_field":{"who":"self","sel":{"trait":"精霊","traits_any":["学院","獣"]}}}),
+    ] {
+        assert!(
+            lowerer().lower(&tree(&on)).is_err(),
+            "{on}: trait unions are only wired for distinct traits on entering subjects"
+        );
+    }
+}
