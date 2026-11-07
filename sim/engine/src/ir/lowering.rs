@@ -48,6 +48,7 @@ mod posture;
 mod quick;
 mod search;
 mod selection;
+mod shuffle;
 mod tokens;
 mod transform;
 
@@ -1326,6 +1327,7 @@ struct BodyContext<'definitions> {
     hand_targets: BTreeSet<String>,
     playable_targets: BTreeSet<String>,
     opponent_cemetery_targets: BTreeSet<String>,
+    cemetery_return_targets: BTreeSet<String>,
     nested_targets: BTreeSet<String>,
     observations: BTreeMap<String, super::ObjectReceipt>,
     receipt_reads: ReceiptReads,
@@ -1398,6 +1400,7 @@ impl<'definitions> BodyContext<'definitions> {
             hand_targets: BTreeSet::new(),
             playable_targets: BTreeSet::new(),
             opponent_cemetery_targets: BTreeSet::new(),
+            cemetery_return_targets: BTreeSet::new(),
             nested_targets: nested_targets(&body.steps),
             observations: BTreeMap::new(),
             receipt_reads: ReceiptReads::default(),
@@ -1675,6 +1678,32 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(self.choose(choose, &step_path, source)?);
                 continue;
             }
+            if let ast::Step::Move(movement) = step
+                && Self::unordered_deck(movement)
+            {
+                if matches!(movement.order, Some(ast::MoveOrder::Shuffle)) {
+                    steps.extend(self.shuffle_pair(
+                        movement,
+                        None,
+                        &step_path,
+                        source,
+                        ability_source,
+                    )?);
+                } else {
+                    let Some((next, following)) = authored.next() else {
+                        return Err(unsupported(&step_path));
+                    };
+                    let next_path = format!("{path}/{next}");
+                    steps.extend(self.shuffle_pair(
+                        movement,
+                        Some((following, &next_path)),
+                        &step_path,
+                        source,
+                        ability_source,
+                    )?);
+                }
+                continue;
+            }
             let instruction_id = self.card_allocator.id(&step_path)?;
             let action = self.action(step, &step_path, ability_source, source)?;
             self.remember(step, ReceiptId(instruction_id), &step_path)?;
@@ -1799,6 +1828,7 @@ impl<'definitions> BodyContext<'definitions> {
                     count: Nat(1),
                 })
             }
+            ast::Step::Shuffle(value) => Ok(shuffle::full(value)),
             ast::Step::Look(value) => {
                 if !matches!(
                     value.top.who,

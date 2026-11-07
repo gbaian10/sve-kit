@@ -151,7 +151,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::StackPlus(_)
+            ast::Step::Shuffle(_)
+            | ast::Step::StackPlus(_)
             | ast::Step::Win(_)
             | ast::Step::ExtraTurn(_)
             | ast::Step::PlayAbility(_)
@@ -285,6 +286,14 @@ impl BodyContext<'_> {
         } else {
             Ok(input)
         }
+    }
+
+    pub(super) fn shuffled_bottom_cards(
+        &self,
+        observed: &ast::Observed,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        self.observed(observed, ObservationUse::Order, path)
     }
 
     fn self_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {

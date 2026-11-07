@@ -8,6 +8,7 @@ use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
 use crate::ir::prevention;
+use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
     ChoiceDomain, Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int,
@@ -92,7 +93,8 @@ fn mask_ability_permission(node: &mut Node) -> Result<()> {
 )]
 pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     let private_spine = matches!(node, Node::Instruction { instruction }
-        if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action));
+        if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action)
+            || shuffle_shape::placement(&instruction.action) == Some(shuffle_shape::Placement::Bottom));
     // Control bodies are checked individually; their guards still need the same restriction.
     if let Node::Control { control } = node {
         if let Control::If { condition, .. } = control {
@@ -734,39 +736,7 @@ impl Game {
         let [placement] = destinations.as_slice() else {
             return Err(unsupported("order continuation placement"));
         };
-        let mut remaining = wait
-            .deck
-            .iter()
-            .filter(|id| !ids.contains(id))
-            .cloned()
-            .collect::<Vec<_>>();
-        let reordered = ids.clone();
-        let deck = match placement.position {
-            Position::Top {} => ids.into_iter().chain(remaining).collect::<Vec<_>>(),
-            Position::Bottom {} => {
-                remaining.extend(ids);
-                remaining
-            }
-            Position::Index { .. } => return Err(unsupported("indexed order")),
-        };
-        self.player_mut(seat)?.zones.insert(
-            "deck".into(),
-            deck.into_iter().map(serde_json::Value::String).collect(),
-        );
-        // Even an unchanged permutation revokes locations; the chooser retains only untouched cards.
-        // Reordered cards need a fresh Look before another private order or move.
-        if !ordered.is_empty() {
-            for (viewer, knowledge) in &mut self.state.knowledge {
-                let revoked = if viewer == seat {
-                    &reordered
-                } else {
-                    &wait.deck
-                };
-                for id in revoked {
-                    knowledge.located.remove(id);
-                }
-            }
-        }
+        self.internal_reorder_deck(seat, &wait.deck, &ids, placement.position)?;
         let snapshot = SnapshotId(self.state.ir_epoch);
         let successful = ordered
             .into_iter()
@@ -786,6 +756,53 @@ impl Game {
                 moves: Vec::new(),
             }),
         );
+        Ok(())
+    }
+
+    pub(super) fn internal_reorder_deck(
+        &mut self,
+        seat: &str,
+        original: &[String],
+        reordered: &[String],
+        position: Position,
+    ) -> Result<()> {
+        let unique = reordered.iter().collect::<BTreeSet<_>>();
+        if unique.len() != reordered.len() || reordered.iter().any(|id| !original.contains(id)) {
+            return Err(invalid("deck placement is not a unique subset"));
+        }
+        if self.internal_known_deck(seat)? != original {
+            return Err(invalid("deck placement snapshot changed"));
+        }
+        let mut remaining = original
+            .iter()
+            .filter(|id| !reordered.contains(id))
+            .cloned()
+            .collect::<Vec<_>>();
+        let deck = match position {
+            Position::Top {} => reordered
+                .iter()
+                .cloned()
+                .chain(remaining)
+                .collect::<Vec<_>>(),
+            Position::Bottom {} => {
+                remaining.extend_from_slice(reordered);
+                remaining
+            }
+            Position::Index { .. } => return Err(unsupported("indexed order")),
+        };
+        self.player_mut(seat)?.zones.insert(
+            "deck".into(),
+            deck.into_iter().map(serde_json::Value::String).collect(),
+        );
+        // Neither an explicit order nor a random bottom segment leaves reusable position knowledge.
+        if !reordered.is_empty() {
+            for (viewer, knowledge) in &mut self.state.knowledge {
+                let revoked = if viewer == seat { reordered } else { original };
+                for id in revoked {
+                    knowledge.located.remove(id);
+                }
+            }
+        }
         Ok(())
     }
 

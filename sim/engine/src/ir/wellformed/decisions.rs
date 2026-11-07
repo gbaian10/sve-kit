@@ -1,5 +1,4 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
-use crate::ir::fusion;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
 use crate::ir::reveal_cost as reveal_payment;
@@ -17,6 +16,7 @@ use crate::ir::{
 };
 use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
+use crate::ir::{fusion, shuffle};
 use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
 use core::iter::once;
@@ -27,6 +27,9 @@ use core::iter::once;
 )]
 impl Checker {
     pub(super) fn program_steps(&mut self, program: &Program) -> Checked {
+        if !shuffle::closed(&program.steps) {
+            return self.reject();
+        }
         let mut steps = program.steps.iter().enumerate();
         while let Some((index, step)) = steps.next() {
             let guard = match &step.node {

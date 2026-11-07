@@ -358,6 +358,8 @@ pub(super) struct Body {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum Step {
+    #[serde(rename = "shuffle")]
+    Shuffle(Shuffle),
     PlayCard(PlayCard),
     PlayAbility(PlayAbility),
     Pay(ModePayment),
@@ -774,12 +776,38 @@ pub(super) enum DeckGroup {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct Shuffle {
+    pub who: SelfPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct WholeCemetery {
+    pub who: SelfPlayer,
+    pub zone: CemeteryZone,
+}
+
+#[derive(Deserialize)]
+pub(super) enum CemeteryZone {
+    #[serde(rename = "cemetery")]
+    Cemetery,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum MoveOrder {
+    Chooser,
+    Shuffle,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Move {
     pub r#ref: Option<MoveObjects>,
     pub top: Option<DeckTop>,
     pub to: Destination,
     pub position: Option<Placement>,
-    pub order: Option<Chooser>,
+    pub order: Option<MoveOrder>,
     pub result: Option<String>,
     #[serde(rename = "by")]
     pub _by: Option<SelfPlayer>,
@@ -788,6 +816,7 @@ pub(super) struct Move {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum MoveObjects {
+    Cemetery(WholeCemetery),
     Observed(Observed),
     Field(Objects),
 }
@@ -838,12 +867,6 @@ pub(super) enum Placement {
 pub(super) enum DeckEdge {
     Top,
     Bottom,
-}
-
-#[derive(Deserialize)]
-pub(super) enum Chooser {
-    #[serde(rename = "chooser")]
-    Chooser,
 }
 
 #[derive(Deserialize)]
