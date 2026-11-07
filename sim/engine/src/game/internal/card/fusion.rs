@@ -228,8 +228,8 @@ impl Game {
             let object = self.object(id)?;
             let seat = seat_name(execution.context.controller)?;
             if object.generation != member.generation.0
-                || object.owner != seat
                 || object.controller != seat
+                || (object.zone == "hand" && object.owner != seat)
             {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "foreign Fusion material".into(),

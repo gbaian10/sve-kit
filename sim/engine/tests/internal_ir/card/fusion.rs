@@ -395,3 +395,65 @@ fn fused_filters_use_actual_materials_and_share_their_quota_with_play() {
         );
     }
 }
+#[test]
+fn fusion_accepts_a_foreign_owned_card_in_its_controllers_ex_and_returns_it_to_its_owner() {
+    let tree = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({
+            "fusion":{"sel":{"who":"self","zone":["hand","ex"],"kind":"spell"},"n":1_u8},
+            "do":[{"counter":{"on":"this","name":"fusion_counter","delta":1_i8}}]
+        }),
+    )]);
+    let programs = lowerer().lower(&tree).unwrap();
+    let program = &programs["unit-follower"];
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["ex"] =
+        json!([{"id":"foreign","card":"unit-spell","owner":"P2"}]);
+    let mut game = evolution_linked_movement::loaded(&initial, program);
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card(
+            "source",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap()
+    else {
+        panic!("Fusion material");
+    };
+    let InputDomain::CostMaterials(domain) = &question.domain else {
+        panic!("Fusion materials domain");
+    };
+    assert_eq!(
+        domain.members.len(),
+        1,
+        "the controller's EX supplies the candidate"
+    );
+    let result = resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    assert!(result.progress.facts.iter().any(|fact| matches!(fact, Fact::Fused(event) if event.controller == (PlayerId { seat: 1 }) && event.materials.len() == 1)));
+    assert!(
+        result
+            .progress
+            .facts
+            .iter()
+            .all(|fact| !matches!(fact, Fact::Discard(_))),
+        "an EX payment is not a hand discard"
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!([]));
+    assert_eq!(state["P2"]["cemetery"], json!(["foreign"]));
+    assert_eq!(state["P1"]["ex"], json!(["source"]));
+    assert_eq!(
+        state["objects"]["source"]["counters"]["fusion_counter"],
+        1_u8
+    );
+}
