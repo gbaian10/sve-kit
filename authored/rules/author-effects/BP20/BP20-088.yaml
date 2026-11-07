@@ -1,0 +1,36 @@
+cards:
+  BP20-088:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: picked
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    set: 0
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+          targets:
+            - bind: picked
+              cost_sum_le: 4
+              from:
+                trait: 妖怪
+                who: self
+                zone: cemetery
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+format: 2
+kind: author_effect_set
