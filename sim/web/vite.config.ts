@@ -141,6 +141,11 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
 }
 
 export const FIXTURE_ROOT = path.join(import.meta.dirname, "fixtures/snapshot")
+// The CPU build of ONNX Runtime: the WebGPU build's binary exceeds the 25 MiB Workers asset limit.
+const SCAN_RUNTIME = path.join(
+  import.meta.dirname,
+  "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
+)
 
 // Local snapshot roots: SVE_EXPORT_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
 export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; preview?: string } {
@@ -268,11 +273,13 @@ if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
 
 export default defineConfig({
   build: { license: { fileName: "third-party-licenses.md" } },
-  // Only these two flags reach browser code: dev starts on the preview root when a preview is
-  // configured and /cdn is still the fixture (src/app/dev-root.ts).
+  // Only these values reach browser code: dev starts on the preview root when a preview is
+  // configured and /cdn is still the fixture (src/app/dev-root.ts); the scanner shows the runtime's
+  // size before it is downloaded.
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
     "import.meta.env.SVE_CDN_IS_FIXTURE": JSON.stringify(cdnDir === FIXTURE_ROOT ? "1" : ""),
+    "import.meta.env.SVE_SCAN_RUNTIME_BYTES": JSON.stringify(String(statSync(SCAN_RUNTIME).size)),
   },
   plugins: [
     buildIdPlugin(BUILD_INPUTS),

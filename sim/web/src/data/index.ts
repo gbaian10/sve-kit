@@ -54,6 +54,17 @@ export {
   useSnapshotRoot,
   useSnapshotStatus,
 } from "./roots"
+export { appScanModels } from "./scan"
+export {
+  type InstalledScanModels,
+  SCAN_PARTS,
+  ScanModelError,
+  type ScanModelErrorKind,
+  type ScanModelsStatus,
+  type ScanModelStore,
+  type ScanPart,
+  type ScanPartStatus,
+} from "./scan-models"
 export type { QueryFailure, SearchOptions, SearchPage, SearchQuery } from "./search/index"
 export {
   type SearchChannel,

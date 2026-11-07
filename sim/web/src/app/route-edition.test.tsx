@@ -22,6 +22,9 @@ it.each<[InitialEntry, string]>([
   ["/cards/_provisional/99999", "jp"],
   [{ pathname: "/cards/BP01-002", state: { route: { region: "en" } } }, "en"],
   [{ pathname: "/cards/BP01-002", search: "?ed=jp", state: { route: { region: "en" } } }, "jp"],
+  // The card scanner is not a card page: it follows the preferred edition.
+  ["/cards/scan", "en"],
+  ["/cards/scan/models", "en"],
 ])("selects the first catalog from the route %j", (entry, edition) => {
   prefsStore.set({ cardEdition: "en" })
   const { result } = renderHook(() => useRouteEdition(), {

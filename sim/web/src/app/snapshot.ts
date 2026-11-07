@@ -164,6 +164,10 @@ function workerOf(root: SnapshotRoot): ActiveWorker {
   return worker
 }
 
+/** The card scanner lives under /cards but is not a card page: "scan" is not a card number. */
+export const isScanPath = (pathname: string) =>
+  pathname === "/cards/scan" || pathname.startsWith("/cards/scan/")
+
 export function useRouteEdition(): Region {
   const location = useLocation()
   const { cardEdition } = usePrefs()
@@ -181,7 +185,7 @@ export function useRouteEdition(): Region {
     const ed = new URLSearchParams(search).get("ed")
     if (ed === "en" || ed === "jp") return ed
   }
-  if (pathname.startsWith("/cards/")) {
+  if (pathname.startsWith("/cards/") && !isScanPath(pathname)) {
     const params = new URLSearchParams(search)
     if (params.has("ed")) return params.get("ed") === "en" ? "en" : "jp"
     const state = location.state as { route?: { region?: string } } | null

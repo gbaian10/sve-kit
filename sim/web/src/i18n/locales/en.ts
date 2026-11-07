@@ -837,4 +837,60 @@ export default {
     updateApp: "Update the app to read the current snapshot.",
     retry: "Check for updates",
   },
+  scan: {
+    models: {
+      title: "Card scan models",
+      back: "Back to cards",
+      intro:
+        "Everything card scanning uses is here, shared by single-card and deck-photo scanning. Download once and it stays on this device; photos are never uploaded.",
+      needed: "{{mb}} MB to download",
+      unavailable: "Some models can't be downloaded right now",
+      allReady: "All downloaded; scanning needs no further downloads",
+      stored: "{{mb}} MB stored on this device",
+      downloadAll: "Download all",
+      removeAll: "Delete all",
+      download: "Download",
+      update: "Update",
+      remove: "Delete",
+      size: "{{mb}} MB",
+      version: "Version {{version}}",
+      footer: "After deleting, scanning downloads it again next time.",
+      state: {
+        ready: "Downloaded",
+        update: "Update available",
+        missing: "Not downloaded",
+        downloading: "Downloading {{pct}}%",
+      },
+      runtime: {
+        name: "Runtime",
+        desc: "Runs the models in your browser (ONNX Runtime); both models need it.",
+      },
+      det: {
+        name: "Card finder",
+        desc: "Finds each card's four corners and straightens it. Deck photos use it to find every card at once.",
+      },
+      rec: {
+        name: "Recogniser",
+        desc: "Tells which card a straightened card is.",
+        index:
+          "Includes the {{edition}} card index: {{cards}} cards, card data {{dataVersion}}. New sets only update the index.",
+        noIndex: "The {{edition}} card index is not published yet.",
+      },
+      list: {
+        offline: "Can't reach the server; showing only the models stored on this device.",
+        unsupported:
+          "The models now use a newer format. Reload the page to update sve-kit, then download.",
+        invalid: "The model list is broken, so downloads are unavailable for now.",
+        reload: "Reload",
+      },
+      error: {
+        network: "Download failed. Check your connection and try again.",
+        integrity: "The downloaded file failed verification and was discarded. Try again.",
+        quota: "Not enough storage on this device. Free up space and try again.",
+        unsupported: "Update sve-kit to download this version.",
+        missing: "The index for this card edition is not published yet.",
+        unknown: "Download failed.",
+      },
+    },
+  },
 } satisfies Messages
