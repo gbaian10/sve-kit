@@ -1,0 +1,30 @@
+cards:
+  BP16-014:
+    abilities:
+      - evolve_time:
+          do:
+            - buff:
+                hp: 1
+                on: allies
+                power: 1
+          targets:
+            - bind: allies
+              from:
+                kind: follower
+                other: true
+                trait: 妖精
+                who: self
+                zone:
+                  - field
+                  - ex
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
