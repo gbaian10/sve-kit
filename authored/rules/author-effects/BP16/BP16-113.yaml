@@ -1,0 +1,27 @@
+cards:
+  BP16-113:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 6
+                to:
+                  leader: self
+            - create:
+                n: 1
+                to: ex
+                token:
+                  - 沈黙の魔将
+                  - サタンズサーヴァント
+                  - 辺獄の悪鬼
+                  - アスタロトの宣告
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
