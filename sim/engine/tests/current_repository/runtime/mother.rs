@@ -218,3 +218,70 @@ fn bp10_057_all_prints_return_the_named_cemetery_follower_acted_after_departure(
         assert_eq!(state["P1"]["pp"]["current"], 5_u8);
     }
 }
+
+#[test]
+fn bp10_057_all_prints_keep_the_printed_attack_time_marker_damage_and_heal() {
+    for number in ["BP10-057", "BP10-SL15"] {
+        assert!(
+            selection().current[number]
+                .program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| {
+                    ability.source.line == 2
+                        && matches!(
+                            ability.node.source.origin,
+                            AbilityOrigin::Keyword {
+                                keyword: KeywordId::OnAttack,
+                                ..
+                            }
+                        )
+                })
+        );
+        let mut initial = draw_position();
+        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{
+            "id":"source","card":number,"state":{"entered_this_turn":true}
+        }]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{
+            "id":"enemy","card":"BP01-171",
+            "state":{"power":0_u8,"hp":20_u8,"max_hp":20_u8,"acted":true}
+        }]);
+        let mut board = game(&initial);
+        board
+            .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"enemy"}))
+            .unwrap();
+        settle(&mut board, false);
+        let state = board.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["leader"]["life"], 12_u8);
+        // Four ability damage and the printed six combat damage both reach the defender.
+        assert_eq!(state["objects"]["enemy"]["hp"], 10_u8);
+        assert_eq!(state["objects"]["source"]["acted"], true);
+        assert_eq!(state["P1"]["pp"]["current"], 10_u8);
+    }
+}
+
+#[test]
+fn bp10_057_all_prints_do_not_heal_without_a_formal_enemy_follower_q1309() {
+    for number in ["BP10-057", "BP10-SL15"] {
+        let mut initial = draw_position();
+        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+        initial["players"]["P2"]["leader"]["life"] = json!(20_u8);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{
+            "id":"source","card":number,"state":{"entered_this_turn":false}
+        }]);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        let mut board = game(&initial);
+        board
+            .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"P2.leader"}))
+            .unwrap();
+        settle(&mut board, false);
+        let state = board.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["leader"]["life"], 10_u8);
+        assert_eq!(state["P2"]["leader"]["life"], 14_u8);
+        assert_eq!(state["objects"]["source"]["acted"], true);
+    }
+}

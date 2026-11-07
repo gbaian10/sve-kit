@@ -4,7 +4,7 @@ cards:
       - keywords:
           - rush
         line: 1
-      - auto:
+      - attack_time:
           do:
             - damage:
                 n: 4
@@ -12,9 +12,6 @@ cards:
             - life:
                 delta: 2
                 who: self
-          on:
-            attacked:
-              ref: this
           targets:
             - bind: enemy
               from:
