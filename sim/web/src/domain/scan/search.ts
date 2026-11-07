@@ -144,6 +144,8 @@ export function matchCards(
   const bestScore = new Float64Array(count).fill(-Infinity)
   const bestRaw = new Float64Array(count)
   const bestRow = new Int32Array(count).fill(-1)
+  // Cards in the order their first unmasked row appears: ties rank in that order.
+  const met: number[] = []
   const fast = views.length > 0 ? index.dots?.best(views) : undefined
   for (let at = 0; at < cards.length; at += 1) {
     if (mask && mask[at] === 0) continue
@@ -159,6 +161,7 @@ export function matchCards(
     const raw = top * (scale[at] ?? 0)
     const score = raw - hubWeight * (hub[at] ?? 0)
     const slot = ofRow[at] ?? 0
+    if (bestRow[slot] === -1) met.push(slot)
     if (bestRow[slot] === -1 || score > (bestScore[slot] ?? -Infinity)) {
       bestScore[slot] = score
       bestRaw[slot] = raw
@@ -167,8 +170,7 @@ export function matchCards(
   }
   // The best `limit` cards, highest first; ties keep the card met first.
   const top: number[] = []
-  for (let slot = 0; slot < count; slot += 1) {
-    if (bestRow[slot] === -1) continue
+  for (const slot of met) {
     const score = bestScore[slot] ?? -Infinity
     if (top.length === limit && score <= (bestScore[top[limit - 1] ?? 0] ?? -Infinity)) continue
     let k = top.length < limit ? top.length : limit - 1
