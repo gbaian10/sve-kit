@@ -1,0 +1,25 @@
+cards:
+  CP03-061:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - banish: allies
+            - draw:
+                n: 1
+          targets:
+            - bind: allies
+              from:
+                trait: ペイルムーン
+                who: self
+                zone: cemetery
+              n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
