@@ -704,3 +704,9 @@ Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序
 不將一般本文的自身消滅或其他 holder 操作視為合法。其他事件、區域、可選成本與
 複合成本均不因此開放。正式目標在原子付款前完成；來源世代與目前區域沿用
 共用材料付款驗證，付款不能追到移區後的新物件。
+
+## 效果勝利與任意手牌捨棄的執行子集
+
+作者 `win: {who: self}` 降到既有 `Action::GameResult` 的 `Outcome::Win`。合法子集限能力控制者的單一隱式 PlayerSet，動作來源須與指令來源相同；其他玩家集合、敗北或偽造來源仍拒絕。執行器沿共用規則勝利程序，勝利後立即清除 typed continuation、待機與問題。正式打牌回傳 `CardPlay::GameEnded(Terminal)`：保留已執行前綴，但 `Progress.complete` 為 false，沒有 CardResolved／AbilityResolved 事實，也不再搬動尚未完成處理的法術。
+
+任意張數捨棄使用既有 Chosen／DiscardOutcome；只接受無篩選的自己當前手牌、單一 disjoint 群組、min=0/max=None。發問時上限夾到現有候選數，回答仍驗 actor、token、世代、owner、controller 與唯一 handle。成功回條的 Before 成員數供 `count_of` 讀取；既有精確一張材料的原費讀取限制不變。
