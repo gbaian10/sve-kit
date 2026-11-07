@@ -465,6 +465,7 @@ fn play_requirement(code: &str) -> bool {
 
 fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     super::victory::check_action(action, source)?;
+    super::scheduled_turn::check_action(action)?;
     if let Action::InstallEffect { effect, .. } = action
         && matches!(effect.as_ref(), Effect::Replacement { .. })
     {
@@ -775,6 +776,10 @@ fn supported(code: &str) -> bool {
             | "shape.Action.GameResult"
             | "action.game-result"
             | "internal.Outcome.Win"
+            | "shape.Action.ScheduleTurn"
+            | "action.schedule-turn"
+            | "shape.TurnOperation.InsertBefore"
+            | "shape.ScheduleAnchor.NextTurn"
             | "action.discard"
             | "shape.DiscardMode.Chosen"
             | "discard.chosen"

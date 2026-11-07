@@ -374,6 +374,7 @@ pub(super) enum Step {
     Choose(Choose),
     Draw(Draw),
     Win(Win),
+    ExtraTurn(ExtraTurn),
     Pp(ResourceIncrease),
     Discard(Discard),
     PpMax(ResourceIncrease),
@@ -711,6 +712,13 @@ pub(super) struct Discard {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Win {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ExtraTurn {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
 }

@@ -121,6 +121,14 @@ impl TurnSchedule {
     reason = "Turn scheduling owns ordering before the common start-of-turn procedure."
 )]
 impl Game {
+    pub(super) fn insert_extra_turns(&mut self, player: String, count: u32) -> Result<()> {
+        self.state
+            .schedule
+            .extra
+            .push(TurnDirective { player, count });
+        self.state.schedule.check_size()
+    }
+
     pub(super) fn schedule_turns(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let count = u32::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
         frame.performed = 0;
@@ -128,12 +136,14 @@ impl Game {
             return Ok(());
         }
         for player in self.seats(string(&node["side"]), frame) {
-            let destination = if node["op"] == "extra_turn" {
-                &mut self.state.schedule.extra
+            if node["op"] == "extra_turn" {
+                self.insert_extra_turns(player, count)?;
             } else {
-                &mut self.state.schedule.skipped
-            };
-            destination.push(TurnDirective { player, count });
+                self.state
+                    .schedule
+                    .skipped
+                    .push(TurnDirective { player, count });
+            }
             frame.performed = frame.performed.saturating_add(i64::from(count));
         }
         self.state.schedule.check_size()

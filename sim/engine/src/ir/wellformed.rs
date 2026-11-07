@@ -659,6 +659,16 @@ impl Checker {
                 self.players(players)?;
                 self.ability_source(source)
             }
+            Action::ScheduleTurn {
+                player: PlayerRef::Controller {},
+                operation:
+                    super::TurnOperation::InsertBefore {
+                        anchor: super::ScheduleAnchor::NextTurn {},
+                    },
+                occurrence,
+            } if *instruction_actor == (PlayerRef::Controller {}) => {
+                self.define(*occurrence, BindingKind::Value)
+            }
             Action::PlayCard { .. } => {
                 let Some(card) = super::nested_play::card_operand(action) else {
                     return self.reject();

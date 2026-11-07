@@ -7,6 +7,7 @@
 
 use self::card::play::PlayState;
 use super::{Frame, Game, View, int, string};
+use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
@@ -69,6 +70,7 @@ mod ordering;
 mod posture;
 mod resource;
 mod reveal;
+mod scheduled_turn;
 mod search;
 mod terminal;
 mod tokens;
@@ -300,6 +302,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// One distinct occurrence inserted before the previously scheduled next turn.
+    ScheduledTurn(ScheduleToken),
     /// Actual before/after counter values, including an unchanged result.
     Counter(CounterChangeEvent),
     /// One atomic transfer preserves both holders' before and after values.
@@ -1538,6 +1542,7 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
             Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
+            Action::ScheduleTurn { .. } => self.internal_extra_turn(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
             Action::PlayAbility { .. } => self.internal_nested_ability(execution, &instruction)?,
             Action::RideDrive { .. } => self.internal_gain_drive(execution, &instruction)?,
