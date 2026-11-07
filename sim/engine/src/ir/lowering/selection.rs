@@ -420,6 +420,8 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
                 query.orig_cost_ge,
             ],
             hp_at_most: query.hp_le,
+            power_at_most: query.power_le,
+            power_at_least: query.power_ge,
             acted: query.acted,
             evolved: query.evolved,
             entered_this_turn: query.entered_this_turn.is_some(),

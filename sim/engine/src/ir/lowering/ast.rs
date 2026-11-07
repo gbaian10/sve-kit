@@ -1480,6 +1480,8 @@ pub(super) struct TargetQuery {
     pub orig_cost_le: Option<NumericArgument>,
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
+    pub power_le: Option<u64>,
+    pub power_ge: Option<u64>,
     pub has_evolve: Option<True>,
     pub boxed: Option<bool>,
     pub acted: Option<bool>,
@@ -1557,6 +1559,8 @@ impl TargetQuery {
                 self.orig_cost_eq,
                 self.orig_cost_ge,
                 self.hp_le,
+                self.power_le,
+                self.power_ge,
             ]
             .into_iter()
             .any(|limit| limit.is_some())

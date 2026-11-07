@@ -1,0 +1,54 @@
+cards:
+  CSD02b-001:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        kind: follower
+                        trait: クール
+                        who: self
+                        zone: field
+                    op: ge
+                    right: 3
+                then:
+                  - choose:
+                      bind: ally
+                      from:
+                        kind: follower
+                        other: true
+                        power_le: 3
+                        who: self
+                        zone: field
+                      n: 1
+                  - grant:
+                      keywords:
+                        - storm
+                      on: ally
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+          do:
+            - buff:
+                on: this
+                power: 1
+          per_turn: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

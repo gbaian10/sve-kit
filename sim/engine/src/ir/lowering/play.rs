@@ -489,6 +489,8 @@ impl BodyContext<'_> {
                     || branch.face_up.is_some()
                     || branch.has_state_filter()
                     || branch.hp_le.is_some()
+                    || branch.power_le.is_some()
+                    || branch.power_ge.is_some()
             })
             || target.distinct_by.is_some()
             || self.recipient_targets.contains_key(&target.bind)
