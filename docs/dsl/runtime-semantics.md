@@ -262,12 +262,16 @@ BP13-043 Q1747（2024-12-13）確認渡出的從者離場時回 owner 的區域�
 
 ### 3.4 event move follow 與觀察
 
-`FollowEventMove` 只能沿當前 trigger context 所綁定的**一個** Move／LeaveField／受限 Discard
+`FollowEventMove` 只能沿當前 trigger context 所綁定的**一個** Move／LeaveField／受限 Discard／Banish
 事實取得該 member 的 after；來源 holder 不改綁。native 另僅對己方手牌自身
 BeforeExit、PerFact 的 Discard 開放單一成員跟隨；必須是該次實際移入 owner 墓地的 after。
 沒有成功進墓地、沒有 after 或已再換世代時，移動沒有成功成員；錯 event 或批次頭不授權。
 不得以相同卡號或 physical ID 搜尋最新世代替代。
 CR 4.1.4.1 與 10.7.4.1 的指涉／資訊時點不等於一般永久追蹤權限。
+
+native 的 Banish 跟隨限己方手牌自身、BeforeExit、PerFact 的 canonical 頭，且只開放 owner EX 目的地。
+保存的 after 必須仍是該次成功消滅的新世代；沒有成功成員或已再次移區時略過，不以來源實體 ID 重查。
+這項因果證據不授權讀取或選取其他消滅區物件。
 
 authority 可以保存因果連結。給玩家的 view／log／決定 domain 則按 audience／epoch
 投影：對手不可取得未公開手牌的固定 ObjectId、generation、receipt member→after

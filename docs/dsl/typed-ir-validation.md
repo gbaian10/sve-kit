@@ -368,13 +368,17 @@ PlayerRef::FromExpression 只接受常值、既有 binding 與凍結事件欄位
 PlayerIn 的比較運算元仍可讀 Live。ObjectEquals 的 Bound 物件與 ObjectOperand::Bound
 同規則：選擇域內只有本域候選豁免，其餘須有物件可見性，翻面撤銷後不再可比較。
 
-FollowEventMove 僅接受當前 trigger 明示綁定的 Move／LeaveField／受限 Discard，型別表達的是沿
+FollowEventMove 僅接受當前 trigger 明示綁定的 Move／LeaveField／受限 Discard／Banish，型別表達的是沿
 header receipt 查找 triggering subject 的 before 成員，取得該單一成員成功移動後
 的引用。其他 binding、歷史事件與 union 外的分支 payload 均不授權。整個
 TriggerEvent receipt、MoveAfter 的 TriggerExplicitReference 與 RuleCarry 仍拒絕；
 不能用整份 receipt 的所有 moved 成員冒充觸發主體。本文的 FromExpression 物件動作
 仍拒絕，Frozen MoveAfter 欄位只可作事件資訊比較，不能繞過 follow 權限執行動作。
 實際配對 before／after、失敗或無 member 的結果及卡文明示引用，仍由 executor／lowering 驗收。
+
+`MovementEvent::Banish` 僅在己方手牌自身、BeforeExit、PerFact 的 canonical header
+引入跟隨權限，並且只能作為 Put 至 `Owners(Ex)` 的單一主體；不開放 Field、其他目的地或一般物件讀取。
+實際成功的 after、owner 與世代仍由 executor 核對。
 
 `MovementEvent::Discard` 僅在己方手牌自身、BeforeExit、PerFact 的 canonical header
 標記可 follow 的 binder；一般場上觀察者、批次、foreign binder 與非 trigger binding 均拒絕。
