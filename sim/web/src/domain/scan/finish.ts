@@ -13,7 +13,7 @@ const REGIONS: readonly (readonly [number, number, number, number])[] = [
   [0.65, 0.82, 0.8, 0.88],
 ]
 /** Degrees: a region counts only where two printings' hues differ more than this. */
-export const FINISH_SPLIT = 25
+const FINISH_SPLIT = 25
 /** Degrees: another printing replaces the plain one only when it matches this much better. */
 export const FINISH_MARGIN = 10
 /** Weight of the newest frame in the running score of the live camera. */
