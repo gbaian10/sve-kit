@@ -59,13 +59,109 @@ fn bp05_007_and_pr_118_heal_once_only_for_actual_ex_moves() {
                 assert_eq!(after["objects"]["first"]["power"],1_u8, "the Fairy token survives in EX");
             }
         }
-        let mut game=game(&position(printing,4));
-        let before=game.projection(View::Referee).unwrap();
-        let question=targets(game.play_internal_card("spell",PlayerId{seat:1}).unwrap());
-        let error=game.answer_internal_card(question.actor,question.token,Answer::Targets(vec![0,1])).unwrap_err();
-        assert!(format!("{error:?}").contains("capacity selection"));
-        assert_eq!(game.projection(View::Referee).unwrap(),before,"a commit failure restores the whole play's public state");
-        assert!(game.internal_decision(View::P1).is_none(),"the failed play has no outstanding target question");
+    }
+}
+
+#[test]
+fn bp05_007_partial_ex_allocation_preserves_wrong_answer_state_and_heals_once() {
+    for printing in ["BP05-007", "PR-118"] {
+        let mut game = game(&position(printing, 4));
+        let question = targets(
+            game.play_internal_card("spell", PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let CardPlay::Awaiting(capacity) = game
+            .answer_internal_card(question.actor, question.token, Answer::Targets(vec![0, 1]))
+            .unwrap()
+        else {
+            panic!("partial EX capacity allocation")
+        };
+        let InputDomain::SearchPartition(domain) = &capacity.domain else {
+            panic!("capacity partition")
+        };
+        assert_eq!(
+            domain.cards.len(),
+            2,
+            "both formal targets compete for the last EX slot"
+        );
+        assert_eq!(
+            domain.cardinality.minimum.0, 1,
+            "exactly one card must enter"
+        );
+        assert_eq!(domain.cardinality.maximum.map(|value| value.0), Some(1), "only one card may enter");
+        assert!(game.internal_decision(View::P2).is_none(), "the opponent cannot see the capacity question");
+        let second = domain
+            .cards
+            .iter()
+            .find(|card| card.object.as_deref() == Some("second"))
+            .unwrap()
+            .handle;
+        let before = [View::P1, View::P2, View::Referee].map(|view| game.projection(view).unwrap());
+        for (actor, answer) in [
+            (PlayerId { seat: 2 }, vec![second]),
+            (capacity.actor, vec![]),
+            (capacity.actor, vec![second, second]),
+            (
+                capacity.actor,
+                domain.cards.iter().map(|card| card.handle).collect(),
+            ),
+        ] {
+            game.answer_internal_card(actor, capacity.token, Answer::SearchPartition(answer))
+                .unwrap_err();
+            assert_eq!(
+                [View::P1, View::P2, View::Referee].map(|view| game.projection(view).unwrap()),
+                before,
+                "invalid allocation restores every view"
+            );
+            assert_eq!(
+                game.internal_decision(View::P1).unwrap().token,
+                capacity.token,
+                "invalid allocation preserves the current question"
+            );
+        }
+        let result = resolved(
+            game.answer_internal_card(
+                capacity.actor,
+                capacity.token,
+                Answer::SearchPartition(vec![second]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            result
+                .progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(fact, Fact::Movement(_)))
+                .count(),
+            1,
+            "only the allocated Fairy moves"
+        );
+        game.resume_internal_card().unwrap();
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            after["P1"]["leader"]["life"], 12_u8,
+            "one successful move heals once"
+        );
+        assert_eq!(
+            after["P1"]["pp"]["current"], 9_u8,
+            "capacity allocation does not refund the spell"
+        );
+        assert_eq!(
+            after["P1"]["ex"],
+            json!(["ex0", "ex1", "ex2", "ex3", "second"]),
+            "the selected Fairy enters EX"
+        );
+        assert_eq!(
+            after["P1"]["field"],
+            json!(["first", "other-trait"]),
+            "the unallocated Fairy remains on the field"
+        );
+        assert_eq!(
+            after["P2"]["field"],
+            json!(["opponent-fairy"]),
+            "opposing cards are unaffected"
+        );
     }
 }
 
