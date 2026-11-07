@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { boxOverlap, QuadFollower } from "./follow"
+import { QuadFollower } from "./follow"
 import type { Quad } from "./tensor"
 
 /** An upright box, corners clockwise from the top left. */
@@ -15,18 +15,6 @@ function box(x: number, y: number, w = 60, h = 84): Quad {
 
 const NEAR = box(100, 100)
 const FAR = box(300, 100)
-
-describe("boxOverlap", () => {
-  it("is 1 for the same box and 0 for boxes apart", () => {
-    expect(boxOverlap(NEAR, NEAR)).toBe(1)
-    expect(boxOverlap(NEAR, FAR)).toBe(0)
-  })
-
-  it("is the shared area over the joined area", () => {
-    // Half of each 60-wide box overlaps: 30 / (60 + 60 - 30).
-    expect(boxOverlap(box(0, 0), box(30, 0))).toBeCloseTo(1 / 3)
-  })
-})
 
 describe("QuadFollower", () => {
   it("takes the best card when it has none yet", () => {

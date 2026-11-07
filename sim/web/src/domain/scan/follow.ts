@@ -67,7 +67,7 @@ export class QuadFollower {
 }
 
 /** Intersection over union of the two quads' bounding boxes. */
-export function boxOverlap(a: Quad, b: Quad): number {
+function boxOverlap(a: Quad, b: Quad): number {
   const [ax0, ay0, ax1, ay1] = bounds(a)
   const [bx0, by0, bx1, by1] = bounds(b)
   const w = Math.min(ax1, bx1) - Math.max(ax0, bx0)

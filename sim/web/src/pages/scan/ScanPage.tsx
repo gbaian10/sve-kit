@@ -11,7 +11,7 @@ import {
   RectangleVertical,
   ScanLine,
 } from "lucide-react"
-import { type PointerEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 
@@ -85,13 +85,9 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   const overlay = useRef<HTMLCanvasElement>(null)
   const [aimSize, setAimSize] = useState({ width: 0, height: 0 })
   const [aimScale, setAimScale] = useState(savedAimScale)
-  // Dragging the handle on the frame's bottom edge: the frame stays centred, so its size follows
-  // the finger's height from the centre, relative to where the drag began.
+  // Dragging the handle on the frame's bottom edge: the frame stays centred, so moving the edge
+  // down by d makes it 2d taller.
   const drag = useRef<{ readonly from: number; readonly scale: number } | null>(null)
-  const reach = (event: PointerEvent<HTMLElement>) => {
-    const box = area.current?.getBoundingClientRect()
-    return box ? Math.abs(event.clientY - (box.top + box.height / 2)) : 0
-  }
   const endDrag = () => {
     if (drag.current) saveAimScale(aimScale)
     drag.current = null
@@ -317,12 +313,13 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
                   title={t("scan.single.aimSize")}
                   onPointerDown={(event) => {
                     event.currentTarget.setPointerCapture(event.pointerId)
-                    drag.current = { from: reach(event), scale: aimScale }
+                    drag.current = { from: event.clientY, scale: aimScale }
                   }}
                   onPointerMove={(event) => {
                     const start = drag.current
-                    if (!start || start.from <= 0) return
-                    setAimScale(clampAimScale((start.scale * reach(event)) / start.from))
+                    if (!start || aimSize.height === 0) return
+                    const grown = (2 * (event.clientY - start.from)) / aimSize.height
+                    setAimScale(clampAimScale(start.scale + grown))
                   }}
                   onPointerUp={endDrag}
                   onPointerCancel={endDrag}
@@ -443,7 +440,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
                     void scanner.current?.setZoom(step)
                   }}
                   // A 44px target around a 40px dial (design §9 touch size).
-                  className="flex size-11 items-center justify-center"
+                  className="flex size-11 shrink-0 items-center justify-center"
                 >
                   <span
                     className={cn(
