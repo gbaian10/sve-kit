@@ -1,0 +1,32 @@
+cards:
+  BP15-106:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                keyword: ward
+                kind: follower
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
