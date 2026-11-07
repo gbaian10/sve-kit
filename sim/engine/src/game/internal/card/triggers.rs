@@ -27,6 +27,7 @@ mod change;
 mod discard;
 mod draw;
 mod equipment;
+mod fusion;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 pub(in crate::game::internal) use equipment::check_header as equipment_header;
@@ -113,7 +114,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     ) {
         return super::fanfare::check_header(ability);
     }
-    if ability::check_header(ability)?
+    if fusion::check_header(ability)?
+        || ability::check_header(ability)?
         || discard::check_header(ability)?
         || draw::check_header(ability)?
         || equipment::check_header(ability)?

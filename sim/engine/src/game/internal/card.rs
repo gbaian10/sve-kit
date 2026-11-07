@@ -5,6 +5,7 @@ use super::{
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::ir::effect_evolution::projection;
+use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
 use crate::ir::history_turn::evolution_capture_header;
 use crate::ir::names;
@@ -42,6 +43,7 @@ mod evolution;
 pub(super) use evolution::resource_association;
 pub(super) mod exchange;
 mod fanfare;
+mod fusion;
 pub(super) mod hand_payment;
 mod keywords;
 pub(super) mod material;
@@ -729,6 +731,9 @@ impl Game {
                     Vec::new(),
                     Vec::new(),
                 ),
+                Action::Fusion { .. } => {
+                    self.internal_fusion_payment(execution, &step.instruction)?
+                }
                 Action::Discard { .. } => {
                     let (quantity, subjects) =
                         self.internal_hand_cost_payment(execution, &step.instruction)?;
@@ -994,7 +999,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
             || is_printed_quick(ability));
     let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
-    let played_trigger = filter(ability).is_some();
+    let played_trigger = filter(ability).is_some() || fusion_events::filter(ability).is_some();
     let hand_discard_trigger = triggers::hand_discard(ability);
     let cemetery_entry_trigger = triggers::cemetery_entry(ability);
     let equipment_trigger = triggers::equipment_header(ability)?;
@@ -1027,6 +1032,13 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     }
     if ability.play.is_none() {
         return Err(unsupported("missing whole-card PlaySpec"));
+    }
+    let fusion_cost = ability.play.as_ref().is_some_and(|play| matches!(&play.costs,
+        CostSpec::Ordered { steps } if steps.iter().any(|step| matches!(step.instruction.action, Action::Fusion { .. }))));
+    if (fusion_cost || ability.qualification == AbilityQualification::Fusion)
+        && !fusion::check_header(ability)
+    {
+        return Err(unsupported("Fusion activation header"));
     }
     Ok(())
 }
@@ -1154,6 +1166,7 @@ pub(super) fn check_payment(
             action if reveal_payment::selected(action, &play.parameters) => !quick,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
+            Action::Fusion { .. } => fusion::check_cost(&instruction.action),
             action if hand_payment::source_to_ex(action) => true,
             action => material::check_cost(action, play),
         };

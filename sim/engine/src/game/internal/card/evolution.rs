@@ -242,7 +242,7 @@ impl Game {
                 };
                 let ids = inline_ids(&decision["costs"]["discard"])?;
                 let members = wait.inline_members(&probe, &execution, &ids)?;
-                execution.cost_discards.insert(wait.receipt(), members);
+                execution.cost_materials.insert(wait.receipt(), members);
             }
             probe.internal_card_payment(&mut execution, &play.costs, false)
         })();

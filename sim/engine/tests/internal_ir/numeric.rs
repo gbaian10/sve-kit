@@ -64,6 +64,7 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
             | Fact::Movement(_)
             | Fact::Posture(_)
             | Fact::Shuffled { .. }
+            | Fact::Fused(_)
             | Fact::DriveGained(_)
             | Fact::Raced(_)
             | Fact::Evolved(_)

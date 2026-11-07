@@ -5,6 +5,7 @@ pub(crate) mod damage;
 pub(crate) mod discard;
 pub(crate) mod draw;
 pub(crate) mod equipment;
+pub(crate) mod fusion;
 pub(crate) mod life;
 pub(crate) mod mill;
 pub(crate) mod played;

@@ -2,10 +2,10 @@ use super::{
     Ability, AbilityOperand, AbilityPredicate, AbilitySource, AssociationId, BatchPolicy, Binding,
     Bool, Capture, CardName, CardSnapshot, Cardinality, CharacteristicPatch, CostSpec, CounterKind,
     Decision, DecisionId, Duration, Effect, EffectReference, Expr, FaceId, Holder, Int, KeywordId,
-    MovedRef, Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef, PlayerSet, Position,
-    Posture, Program, RandomnessPolicy, ReceiptId, RollId, RuleId, ScheduleAnchor, ScheduleToken,
-    SelectionConstraint, Selector, TextProvider, TimestampBasis, TokenTemplateId, TriggerSpec,
-    UsageReference, Visibility, Visitor, Walk, ZoneRef,
+    Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef, PlayerSet, Position, Posture,
+    Program, RandomnessPolicy, RollId, RuleId, ScheduleAnchor, ScheduleToken, SelectionConstraint,
+    Selector, TextProvider, TimestampBasis, TokenTemplateId, TriggerSpec, UsageReference,
+    Visibility, Visitor, Walk, ZoneRef,
 };
 
 // I.swap remains rule-only; there is deliberately no constructible variant.
@@ -43,7 +43,7 @@ variants!(Action {
     RideDrive { subject: ObjectOperand, operation: RideDriveOperation, usage: UsageReference } => ["action.ride-drive"],
     DriveCheck { player: PlayerRef, repetitions: Nat, source: AbilitySource } => ["action.drive-check"],
     Equip { holder: ObjectOperand, template: TokenTemplateId, count: Nat } => ["action.equip", "action.token"],
-    Fusion { subject: ObjectOperand, materials: SelectionConstraint, cost_receipts: Vec<ReceiptId>, follow: MovedRef } => ["action.fusion", "receipt.move-after", "reference.follow-generation"],
+    Fusion { subject: ObjectOperand, materials: SelectionConstraint } => ["action.fusion", "receipt.move-after", "reference.follow-generation"],
     Random { population: Selector, count: Nat, rng: RandomnessPolicy, visibility: Visibility } => ["action.random"],
     Dice { operation: DiceOperation, result: Binding<Nat> } => ["action.dice"],
     Declare { actor: PlayerRef, declaration: Declaration } => ["action.declare"],

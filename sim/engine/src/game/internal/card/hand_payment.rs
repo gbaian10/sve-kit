@@ -139,7 +139,9 @@ impl Game {
         {
             return Ok(true);
         }
-        if self.internal_hand_cost_materials(execution, &play.costs)? {
+        if self.internal_hand_cost_materials(execution, &play.costs)?
+            || self.internal_fusion_materials(execution, &play.costs)?
+        {
             return Ok(true);
         }
         for payment in play
@@ -175,7 +177,7 @@ impl Game {
                 .map(|member| member.handle)
                 .collect();
             let members = wait.validate(self, execution, &handles)?;
-            execution.cost_discards.insert(wait.receipt(), members);
+            execution.cost_materials.insert(wait.receipt(), members);
         }
         Ok(())
     }
@@ -192,7 +194,7 @@ impl Game {
             let instruction = &step.instruction;
             if !matches!(instruction.action, Action::Discard { .. })
                 || source_discard(&instruction.action)
-                || execution.cost_discards.contains_key(&instruction.receipt)
+                || execution.cost_materials.contains_key(&instruction.receipt)
             {
                 continue;
             }
@@ -293,7 +295,7 @@ impl Game {
         } else {
             let plan = selection(&instruction.action)?;
             let mut members = execution
-                .cost_discards
+                .cost_materials
                 .remove(&instruction.receipt)
                 .ok_or_else(|| invalid("missing hand cost selection"))?;
             if !contains(

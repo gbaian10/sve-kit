@@ -4,6 +4,7 @@ use super::{
     Execution, Fact, Game, InstructionOutcome, Result, int, invalid, player_id, unsupported,
 };
 use crate::game::Object;
+use crate::game::effects::token_erasure_zone;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
@@ -487,6 +488,7 @@ impl Game {
                     | "アミュレット・トークン"
                     | "スペル・トークン"
                     | "イクイップメント・トークン"
+                    | "クレスト・トークン"
             ))
             || (previous
                 .state
@@ -502,12 +504,7 @@ impl Game {
             && !matches!(zone, "field" | "ex" | "resolution" | "evolve_deck")
         {
             Some("evolve_deck")
-        } else if (card_type == "イクイップメント・トークン" && zone != "equipment")
-            || (matches!(
-                card_type,
-                "フォロワー・トークン" | "アミュレット・トークン" | "スペル・トークン"
-            ) && !matches!(zone, "field" | "ex" | "resolution"))
-        {
+        } else if token_erasure_zone(card_type, zone) {
             Some("void")
         } else {
             None

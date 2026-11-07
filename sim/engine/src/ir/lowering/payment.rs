@@ -8,6 +8,19 @@ use super::{
 };
 use core::slice::from_ref;
 
+pub(super) fn activated(
+    context: &mut BodyContext<'_>,
+    activation: &ast::Activate,
+    source: &AbilitySource,
+    path: &str,
+) -> Result<PlaySpec, LoweringError> {
+    match (&activation.cost, &activation.fusion) {
+        (Some(cost), None) => lower(context, cost, source, path),
+        (None, Some(_)) => super::fusion::lower(context, activation, source, path),
+        _ => Err(unsupported(path)),
+    }
+}
+
 pub(super) fn lower(
     context: &mut BodyContext<'_>,
     cost: &ast::Cost,

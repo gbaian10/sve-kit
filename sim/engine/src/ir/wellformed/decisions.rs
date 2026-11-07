@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::fusion;
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::printed_keywords;
 use crate::ir::reveal_cost as reveal_payment;
@@ -414,7 +415,7 @@ impl Checker {
         Ok(())
     }
 
-    fn constraint(&mut self, constraint: &SelectionConstraint) -> Checked {
+    pub(super) fn constraint(&mut self, constraint: &SelectionConstraint) -> Checked {
         self.cardinality(constraint.cardinality)?;
         if constraint.groups.is_empty() {
             return self.reject();
@@ -439,6 +440,18 @@ impl Checker {
             })?;
         }
         Ok(())
+    }
+
+    pub(super) fn fusion(&mut self, action: &Action) -> Checked {
+        let Some(materials) = fusion::materials(action) else {
+            return self.reject();
+        };
+        self.env.chooser = Some(PlayerRef::Controller {});
+        self.env.private_choice = true;
+        let result = self.constraint(materials);
+        self.env.chooser = None;
+        self.env.private_choice = false;
+        result
     }
 
     pub(super) fn discard(&mut self, player: &PlayerRef, mode: &DiscardMode) -> Checked {
@@ -719,6 +732,7 @@ impl Checker {
                         }
                         let valid = matches!(&step.instruction.action,
                             Action::Discard { .. }
+                            | Action::Fusion { .. }
                             | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }
                             | Action::Posture { posture: Posture::Acted, .. })

@@ -157,12 +157,16 @@ impl Game {
         let mut cost_loaded = false;
         let active = player_id(self.active())?;
         let mut observers = self.field_ids();
+        observers.extend(self.zone_ids("P1", "ex"));
+        observers.extend(self.zone_ids("P2", "ex"));
         observers.extend(self.zone_ids("P1", "cemetery"));
         observers.extend(self.zone_ids("P2", "cemetery"));
         let mut matched = Vec::new();
         for holder in observers {
             let zone = if self.object(&holder)?.zone == "field" {
                 ZoneKind::Field
+            } else if self.object(&holder)?.zone == "ex" {
+                ZoneKind::Ex
             } else {
                 ZoneKind::Cemetery
             };

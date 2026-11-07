@@ -210,18 +210,23 @@ pub(crate) fn filter(ability: &Ability) -> Option<PlayedFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
         || !matches!(
             ability.active_zones.as_slice(),
-            [ZoneKind::Field | ZoneKind::Cemetery]
+            [ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Ex]
         )
     {
         return None;
     }
     let trigger = ability.trigger.as_ref()?;
-    let TriggerCondition::Event {
-        pattern: EventPattern::Play { binding, predicate },
-    } = &trigger.on
-    else {
+    let TriggerCondition::Event { pattern } = &trigger.on else {
         return None;
     };
+    if ability.active_zones == [ZoneKind::Ex] && !super::fusion::combined(pattern) {
+        return None;
+    }
     (trigger.active_zones == ability.active_zones).then_some(())?;
-    PlayedFilter::parse(*binding, predicate)
+    super::fusion::patterns(pattern).iter().find_map(|branch| {
+        let EventPattern::Play { binding, predicate } = branch else {
+            return None;
+        };
+        PlayedFilter::parse(*binding, predicate)
+    })
 }

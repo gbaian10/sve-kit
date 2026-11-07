@@ -42,6 +42,7 @@ mod static_keywords;
 mod trigger_restrictions;
 
 mod flip;
+mod fusion;
 mod posture;
 mod quick;
 mod search;
@@ -603,7 +604,7 @@ impl Allocator {
         let activated_play = entry
             .activate
             .as_ref()
-            .map(|activated| payment::lower(&mut context, &activated.cost, &ability_source, path))
+            .map(|activated| payment::activated(&mut context, activated, &ability_source, path))
             .transpose()?;
         let prepared_trigger = context.prepare_event(entry, keyword, body, path)?;
         let mut program =
@@ -653,7 +654,7 @@ impl Allocator {
                 scope,
                 source: ability_source,
                 kind,
-                qualification: body.ub.as_ref().map_or(Ordinary, |_| UnionBurst),
+                qualification: entry_qualification(entry, body),
                 active_zones,
                 event_captures: context.event_captures,
                 play,
@@ -662,6 +663,18 @@ impl Allocator {
                 declarations: vec![],
             },
         })
+    }
+}
+
+fn entry_qualification(entry: &ast::Ability, body: &ast::Body) -> AbilityQualification {
+    if entry
+        .activate
+        .as_ref()
+        .is_some_and(|activation| activation.fusion.is_some())
+    {
+        AbilityQualification::Fusion
+    } else {
+        body.ub.as_ref().map_or(Ordinary, |_| UnionBurst)
     }
 }
 
@@ -693,14 +706,13 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
         None if entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
+        None if entry.activate.as_ref().is_some_and(|head| head.fusion.is_some()) => vec![ZoneKind::Hand],
         None => vec![ZoneKind::Field],
     };
     // Quick candidates do not pre-check EX room, so a hand card cannot offer itself there.
-    if entry
-        .activate
-        .as_ref()
-        .is_some_and(|head| head.quick == Some(true) && head.cost.moves_self_to_ex())
-    {
+    if entry.activate.as_ref().is_some_and(|head| {
+        head.quick == Some(true) && head.cost.as_ref().is_some_and(ast::Cost::moves_self_to_ex)
+    }) {
         return Err(unsupported(path));
     }
     if entry.activate.is_some()
@@ -739,7 +751,8 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
                     && !matches!(auto.on, ast::PhaseSubscription::Phase(_))
                     // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
                     && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
-                        if placed.reference.is_some())))
+                        if placed.reference.is_some())
+                    && !matches!(&auto.on, ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::Played(_) | ast::PhaseSubscription::AnyOf(_))))
         {
             return Err(unsupported(path));
         }
@@ -825,15 +838,27 @@ fn ability_body<'entry>(
     )
 }
 
+#[derive(Clone, Copy)]
+struct EventIds {
+    event: u64,
+    subject: u64,
+    facet: u64,
+    scope: ScopeId,
+}
+
 fn lowered_trigger(
     entry: &ast::Ability,
     keyword: Option<KeywordId>,
-    event_id: u64,
-    subject_id: u64,
-    facet_id: u64,
-    scope: ScopeId,
+    ids: EventIds,
     path: &str,
+    allocator: &mut Allocator,
 ) -> Result<TriggerSpec, LoweringError> {
+    let EventIds {
+        event: event_id,
+        subject: subject_id,
+        scope,
+        ..
+    } = ids;
     Ok(if keyword == Some(KeywordId::Lastword) {
         TriggerSpec::lastword(Binding::new(event_id, scope))
     } else {
@@ -875,7 +900,7 @@ fn lowered_trigger(
                 },
             }
         } else if let Some(auto) = &entry.auto {
-            lowered_subscription(&auto.on, event_id, subject_id, facet_id, scope, path)?
+            lowered_subscription(&auto.on, ids, path, allocator)?
         } else {
             let event = Binding::new(event_id, scope);
             EventPattern::EnterField {
@@ -891,11 +916,13 @@ fn lowered_trigger(
             view: if matches!(
                 pattern,
                 EventPattern::Play { .. } | EventPattern::UbActivated { .. }
-            ) {
+            ) || super::events::fusion::combined(&pattern)
+            {
                 EventSnapshotPolicy::AtReveal
             } else if matches!(
                 pattern,
-                EventPattern::LeaveField { .. }
+                EventPattern::Fused { .. }
+                    | EventPattern::LeaveField { .. }
                     | EventPattern::Destroy { .. }
                     | EventPattern::Discard { .. }
                     | EventPattern::Move { .. }
@@ -913,13 +940,20 @@ fn lowered_trigger(
 
 fn lowered_subscription(
     on: &ast::PhaseSubscription,
-    event_id: u64,
-    subject_id: u64,
-    facet_id: u64,
-    scope: ScopeId,
+    ids: EventIds,
     path: &str,
+    allocator: &mut Allocator,
 ) -> Result<EventPattern, LoweringError> {
+    let EventIds {
+        event: event_id,
+        subject: subject_id,
+        facet: facet_id,
+        scope,
+    } = ids;
     match on {
+        ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_) => {
+            fusion::subscription(on, ids, path, allocator)
+        }
         ast::PhaseSubscription::Equipped(_) => {
             let binding = Binding::new(event_id, scope);
             Ok(EventPattern::Equip {
@@ -951,23 +985,7 @@ fn lowered_subscription(
             movement::played(played, event, card, path)
         }
         ast::PhaseSubscription::Phase(phase) => {
-            let player = match phase.whose {
-                ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
-                ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
-                ast::PhasePlayer::Each => None,
-            };
-            let event = Binding::new(event_id, scope);
-            Ok(EventPattern::Phase {
-                binding: event,
-                predicate: super::events::timing::phase_predicate(
-                    event,
-                    match phase.which {
-                        ast::SubscribedPhase::Main => super::Phase::Main,
-                        ast::SubscribedPhase::End => super::Phase::End,
-                    },
-                    player,
-                ),
-            })
+            Ok(phase_subscription(phase, Binding::new(event_id, scope)))
         }
         ast::PhaseSubscription::LeaveField(entry)
             if entry.reference.is_some() && entry.who.is_none() && entry.sel.is_none() =>
@@ -1016,6 +1034,28 @@ fn lowered_subscription(
                 .predicate(SubjectFields::Entry(event)),
             })
         }
+    }
+}
+
+fn phase_subscription(
+    phase: &ast::PhaseSubscriptionPayload,
+    event: Binding<super::PhaseEvent>,
+) -> EventPattern {
+    let player = match phase.whose {
+        ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
+        ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
+        ast::PhasePlayer::Each => None,
+    };
+    EventPattern::Phase {
+        binding: event,
+        predicate: super::events::timing::phase_predicate(
+            event,
+            match phase.which {
+                ast::SubscribedPhase::Main => super::Phase::Main,
+                ast::SubscribedPhase::End => super::Phase::End,
+            },
+            player,
+        ),
     }
 }
 
@@ -1084,7 +1124,9 @@ fn lowered_change(
                 .predicate(event),
             })
         }
-        ast::PhaseSubscription::Evolved(_)
+        ast::PhaseSubscription::Fused(_)
+        | ast::PhaseSubscription::AnyOf(_)
+        | ast::PhaseSubscription::Evolved(_)
         | ast::PhaseSubscription::UbActivated(_)
         | ast::PhaseSubscription::Played(_)
         | ast::PhaseSubscription::Phase(_)
@@ -1261,11 +1303,12 @@ impl<'definitions> BodyContext<'definitions> {
                 .as_ref()
                 .and_then(|head| head.zone.as_ref())
                 .and_then(ast::ActivationZones::single),
-            activation_zone: entry
-                .activate
-                .as_ref()
-                .and_then(|head| head.zone.as_ref())
-                .and_then(ast::ActivationZones::single),
+            activation_zone: entry.activate.as_ref().and_then(|head| {
+                head.zone
+                    .as_ref()
+                    .and_then(ast::ActivationZones::single)
+                    .or_else(|| head.fusion.as_ref().map(|_| ZoneKind::Hand))
+            }),
             subject_event: None,
             damage_event: None,
             equip_event: None,
@@ -1364,7 +1407,16 @@ impl<'definitions> BodyContext<'definitions> {
         let subject_id = self.allocator.id(&format!("{path}/played-card"))?;
         let facet_id = self.allocator.id(path)?;
         let mut trigger = lowered_trigger(
-            entry, keyword, event_id, subject_id, facet_id, self.scope, path,
+            entry,
+            keyword,
+            EventIds {
+                event: event_id,
+                subject: subject_id,
+                facet: facet_id,
+                scope: self.scope,
+            },
+            path,
+            &mut self.allocator,
         )?;
         if body.per_turn == Some(0) {
             return Err(unsupported(path));
