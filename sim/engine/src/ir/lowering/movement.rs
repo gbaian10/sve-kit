@@ -226,13 +226,25 @@ pub(super) fn movement_filter(
     support: FilterSupport,
 ) -> Result<SubjectFilter, LoweringError> {
     if subject.is_some_and(|sel| {
-        sel.r#where.is_some()
-            || sel.orig_cost_le.is_some()
-            || sel.orig_cost_ge.is_some()
-            || sel.traits_any.is_some()
+        sel.r#where.is_some() || sel.orig_cost_le.is_some() || sel.orig_cost_ge.is_some()
     }) {
         return Err(unsupported(path));
     }
+    // Only an entering subject reads a trait union (BP21-008), never beside a single trait.
+    let traits_any = match subject.and_then(|sel| sel.traits_any.as_ref()) {
+        None => Vec::new(),
+        Some(traits)
+            if matches!(support, FilterSupport::EntryCost)
+                && subject.is_some_and(|sel| sel.trait_id.is_none())
+                && traits.len() >= 2
+                && traits.iter().enumerate().all(|(index, id)| {
+                    !id.is_empty() && !traits.iter().take(index).any(|previous| previous == id)
+                }) =>
+        {
+            traits.iter().cloned().map(TraitId).collect()
+        }
+        Some(_) => return Err(unsupported(path)),
+    };
     // Only an entering subject reads a name fragment (BP13-027).
     if subject.is_some_and(|sel| {
         sel.name_contains.as_ref().is_some_and(|fragment| {
@@ -281,6 +293,7 @@ pub(super) fn movement_filter(
         trait_id: subject
             .and_then(|sel| sel.trait_id.as_ref())
             .map(|id| TraitId(id.clone())),
+        traits_any,
         name: subject
             .and_then(|sel| sel.name.as_ref())
             .map(|name| CardName(name.clone())),
