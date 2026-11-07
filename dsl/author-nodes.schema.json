@@ -2780,6 +2780,10 @@
             "$ref": "#/$defs/A.instead.search"
           },
           "minItems": 1
+        },
+        "acted": {
+          "type": "boolean",
+          "const": true
         }
       },
       "additionalProperties": false,
@@ -2787,6 +2791,25 @@
         "sel",
         "n",
         "to"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "acted"
+            ]
+          },
+          "then": {
+            "properties": {
+              "to": {
+                "const": "field"
+              },
+              "n": {
+                "const": 1
+              }
+            }
+          }
+        }
       ]
     },
     "A.act.search.up-to": {

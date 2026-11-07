@@ -1024,6 +1024,7 @@ impl Game {
             &members,
             &movement.to,
             execution.context.controller,
+            None,
         )?;
         execution.receipts.insert(
             instruction.receipt,
@@ -1086,7 +1087,7 @@ impl Game {
         } else {
             members
         };
-        let mut moved = self.internal_search_move(execution, &members, &spec.to, player)?;
+        let mut moved = self.internal_search_move(execution, &members, &spec.to, player, None)?;
         if let Some(plan) = capacity_plan {
             moved = capacity::complete_receipt(plan.moves, moved);
             capacity::finish(execution, instruction);

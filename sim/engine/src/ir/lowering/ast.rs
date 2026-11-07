@@ -1221,6 +1221,7 @@ pub(super) struct Search {
     pub upto: Option<u64>,
     pub groups: Option<Vec<SearchGroup>>,
     pub to: SearchDestination,
+    pub acted: Option<True>,
     pub result: Option<String>,
     pub distinct_by: Option<Names>,
     pub cost_sum_le: Option<u64>,

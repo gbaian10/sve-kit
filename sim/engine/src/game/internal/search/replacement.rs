@@ -112,6 +112,7 @@ impl Game {
                     zone: OwnerZone::Hand,
                 },
                 player,
+                None,
             )?;
             return self.internal_search_finish(execution, instruction, player, outcome);
         }
@@ -128,6 +129,7 @@ impl Game {
                 &found,
                 destination,
                 player,
+                None,
             )?;
             if results.iter().any(|result| result.after.is_none()) {
                 return Err(unsupported(
@@ -218,7 +220,7 @@ impl Game {
             },
             SearchReplacementAnswer::Replacement => &movement.to,
         };
-        let moved = self.internal_search_move(execution, &found, destination, wait.player)?;
+        let moved = self.internal_search_move(execution, &found, destination, wait.player, None)?;
         self.internal_search_finish(
             execution,
             &wait.instruction,

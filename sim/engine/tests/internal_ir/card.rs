@@ -23,6 +23,8 @@ use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]
 mod grouped_search_followup;
+#[path = "card/search_posture.rs"]
+mod search_posture;
 
 #[path = "card/history_public.rs"]
 mod history_public;

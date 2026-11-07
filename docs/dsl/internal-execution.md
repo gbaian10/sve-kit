@@ -522,6 +522,7 @@ BP06-110 未准入。
 ## 互動回答的交易分界
 
 actor、完整 token、回答變體、handle、permutation、groups、基數及不同名限制先以唯讀方式驗答。
+單張、非分組的 Search 可帶既有 `MoveSpec.initial_posture = Acted`，只限固定一張到場上。容量分配的 continuation 保存同一姿態，後續仍呼叫共用實體移區，在進場事實前初始化；不另產生 Posture 事實。其他 Search、分配與可選替代目的地維持原有無固定姿態的形狀。
 Search 的不同名限制依題目凍結的完整名稱集合（含當時有效別名），不能改用付款或移動後的 live 名稱。
 錯答保持同一題與完整 authority；Search 選取 Spell 入場、可選目的地未具備兩個可執行去向、
 以及未能解讀的 found-local 費用，維持既有的驗答拒絕，不先公開、移動或消耗 token。

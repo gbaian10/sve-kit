@@ -1,0 +1,44 @@
+cards:
+  BP09-088:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+            - choose:
+                bind: returned
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - move:
+                position: bottom
+                ref: returned
+                to: deck
+        line: 2
+      - lastword:
+          cost:
+            pp: 1
+          do:
+            - search:
+                acted: true
+                n: 1
+                sel:
+                  kind: follower
+                  name: ツタンカーメン
+                  who: self
+                  zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
