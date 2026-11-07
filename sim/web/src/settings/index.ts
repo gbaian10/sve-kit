@@ -23,4 +23,4 @@ export {
   usePrefs,
 } from "./prefs"
 export { recentStore, useRecent } from "./recent"
-export { saveScanBackend, savedScanBackend } from "./scan-backend"
+export { savedScanBackend, saveScanBackend } from "./scan-backend"

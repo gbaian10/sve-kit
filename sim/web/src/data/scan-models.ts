@@ -104,8 +104,8 @@ const CACHE = "sve-scan-models-v1"
 const KEY = "/scan-models/"
 const recordKey = (part: ScanPart) => `${KEY}installed/${part}.json`
 const fileKey = (file: string) => `${KEY}${file}`
-// Runtime files are keyed by backend: the pinned hash is what identifies them, not the URL.
-const runtimeKey = (backend: ScanBackend) => `${KEY}runtime/${backend}.wasm`
+const runtimeKey = (backend: ScanBackend, sha256: string) =>
+  `${KEY}runtime/${backend}/${sha256}.wasm`
 const SIZE_HEADER = "x-scan-bytes"
 
 function isQuotaError(error: unknown): boolean {
@@ -187,7 +187,8 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     const runtimeStatus = async (backend: ScanBackend): Promise<ScanPartStatus> => {
       const pin = options.runtimes[backend]
       const have = installed[runtimePart(backend)]
-      const current = have?.sha256 === pin.sha256 && (await has(cache, runtimeKey(backend)))
+      const current =
+        have?.sha256 === pin.sha256 && (await has(cache, runtimeKey(backend, pin.sha256)))
       const state = current ? "ready" : have ? "update" : "missing"
       return {
         state,
@@ -357,7 +358,8 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
   function referenced(installed: Records): Set<string> {
     const keys = new Set<string>()
     for (const backend of SCAN_BACKENDS) {
-      if (installed[runtimePart(backend)]) keys.add(runtimeKey(backend))
+      const runtime = installed[runtimePart(backend)]
+      if (runtime) keys.add(runtimeKey(backend, runtime.sha256))
     }
     if (installed.det) keys.add(fileKey(installed.det.file))
     if (installed.rec)
@@ -395,9 +397,10 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
       if (part.startsWith("runtime-")) {
         const backend = part.slice("runtime-".length) as ScanBackend
         const pin = options.runtimes[backend]
+        const key = runtimeKey(backend, pin.sha256)
         onProgress(0, pin.bytes)
         const have = (await records(cache))[runtimePart(backend)]
-        if (have?.sha256 !== pin.sha256 || !(await has(cache, runtimeKey(backend)))) {
+        if (have?.sha256 !== pin.sha256 || !(await has(cache, key))) {
           const body = await fetchRuntime(
             pin,
             (got) => {
@@ -405,12 +408,13 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
             },
             signal,
           )
-          added.push(runtimeKey(backend))
-          await put(cache, runtimeKey(backend), body)
+          added.push(key)
+          await put(cache, key, body)
         }
         onProgress(pin.bytes, pin.bytes)
         const record: RuntimeRecord = { file: pin.file, bytes: pin.bytes, sha256: pin.sha256 }
         await put(cache, recordKey(part), JSON.stringify(record))
+        if (have && have.sha256 !== pin.sha256) await cache.delete(runtimeKey(backend, have.sha256))
         return
       }
       const listed = await manifest()
@@ -454,7 +458,9 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
 
   async function removeFiles(cache: Cache, part: ScanPart, installed: Records): Promise<void> {
     if (part.startsWith("runtime-")) {
-      await cache.delete(runtimeKey(part.slice("runtime-".length) as ScanBackend))
+      const backend = part.slice("runtime-".length) as ScanBackend
+      const runtime = installed[runtimePart(backend)]
+      if (runtime) await cache.delete(runtimeKey(backend, runtime.sha256))
     } else if (part === "det") {
       if (installed.det) await cache.delete(fileKey(installed.det.file))
     } else if (installed.rec) {
@@ -497,7 +503,7 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     )
       throw new ScanModelError("missing", "scan models are not downloaded")
     const [runtime, det, rec, vectors, scale, hub, cards] = await Promise.all([
-      read(cache, runtimeKey(backend)),
+      read(cache, runtimeKey(backend, pin.sha256)),
       read(cache, fileKey(installed.det.file)),
       read(cache, fileKey(installed.rec.rec.file)),
       read(cache, fileKey(index.vectors.file)),

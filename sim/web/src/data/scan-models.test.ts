@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { memoryCache } from "../test-utils/cache"
 import {
@@ -14,6 +14,8 @@ const CPU: ScanPart = "runtime-cpu"
 const WEBGPU: ScanPart = "runtime-webgpu"
 // The parts a scan with the CPU engine needs.
 const CPU_PARTS: readonly ScanPart[] = [CPU, "det", "rec"]
+
+afterEach(() => vi.restoreAllMocks())
 
 function setup(options: { cdn?: ReturnType<typeof fakeScanCdn>; storage?: CacheStorage } = {}) {
   const cdn = options.cdn ?? fakeScanCdn()
@@ -144,6 +146,58 @@ describe("scan model store", () => {
     await store.download(CPU, "jp", () => undefined)
     expect(cdn.requests.filter((url) => RUNTIMES.cpu.urls.includes(url))).toEqual(RUNTIMES.cpu.urls)
     expect((await store.status("jp")).parts[CPU].state).toBe("ready")
+  })
+
+  it("preserves the installed runtime if saving an update's install record fails", async () => {
+    const storage = memoryCache()
+    let failRecord = false
+    const open = storage.open.bind(storage)
+    vi.spyOn(storage, "open").mockImplementation(async (name) => {
+      const cache = await open(name)
+      const put = cache.put.bind(cache)
+      vi.spyOn(cache, "put").mockImplementation(async (...args) => {
+        if (
+          failRecord &&
+          (await args[1].clone().arrayBuffer()).byteLength !== RUNTIMES.webgpu.bytes
+        )
+          throw new DOMException("full", "QuotaExceededError")
+        await put(...args)
+      })
+      return cache
+    })
+    const cdn = fakeScanCdn()
+    const { store: older } = setup({ cdn, storage })
+    await downloadAll(older)
+    const before = await older.load("jp", "cpu")
+    const stored = (await older.status("jp")).storedBytes
+    const newer = createScanModelStore({
+      caches: () => storage,
+      fetcher: cdn.fetcher,
+      scanBase: () => SCAN_BASE,
+      runtimes: { ...RUNTIMES, cpu: RUNTIMES.webgpu },
+    })
+    failRecord = true
+    expect(await failure(newer.download(CPU, "jp", () => undefined))).toBe("quota")
+    expect((await older.load("jp", "cpu")).runtime).toEqual(before.runtime)
+    expect((await newer.status("jp")).storedBytes).toBe(stored)
+    failRecord = false
+    await newer.download(CPU, "jp", () => undefined)
+    expect((await newer.load("jp", "cpu")).runtime.length).toBe(RUNTIMES.webgpu.bytes)
+    expect((await newer.status("jp")).storedBytes).toBe(
+      stored - RUNTIMES.cpu.bytes + RUNTIMES.webgpu.bytes,
+    )
+  })
+
+  it("refuses a runtime with the wrong size without switching CDNs", async () => {
+    const cdn = fakeScanCdn()
+    const store = createScanModelStore({
+      caches: () => memoryCache(),
+      fetcher: cdn.fetcher,
+      scanBase: () => SCAN_BASE,
+      runtimes: { ...RUNTIMES, cpu: { ...RUNTIMES.cpu, bytes: RUNTIMES.cpu.bytes + 1 } },
+    })
+    expect(await failure(store.download(CPU, "jp", () => undefined))).toBe("integrity")
+    expect(cdn.requests.filter((url) => RUNTIMES.cpu.urls.includes(url))).toHaveLength(1)
   })
 
   it("refuses a runtime whose bytes do not match the pinned hash, from any CDN", async () => {

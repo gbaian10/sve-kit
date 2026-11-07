@@ -9,7 +9,7 @@ import { buildSnapshot } from "../../../scripts/fixture/build"
 import { createScanModelStore } from "../../data/scan-models"
 import { decodeDeckCode } from "../../domain/deck/code"
 import { createI18n } from "../../i18n"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, saveScanBackend } from "../../settings"
 import { renderInRouter, renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
@@ -25,6 +25,10 @@ const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
 // ONNX Runtime does not run in jsdom. The stand-in finds no cards, and the test decides when the
 // card finder answers, to catch a reading still running when the photo goes away.
 const finder = vi.hoisted(() => ({ hold: false, card: false, waiting: [] as (() => void)[] }))
+vi.mock("onnxruntime-web/webgpu", () => ({
+  env: { wasm: {} },
+  InferenceSession: { create: () => Promise.reject(new Error("no adapter")) },
+}))
 vi.mock("onnxruntime-web/wasm", () => {
   class Tensor {
     readonly data: Float32Array
@@ -111,6 +115,7 @@ function stubCameras() {
 }
 
 afterEach(() => {
+  saveScanBackend("cpu")
   closeScanEngine()
   finder.hold = false
   finder.card = false
@@ -158,6 +163,21 @@ function setup() {
 }
 
 describe("DeckScanPage", () => {
+  it("asks to switch to CPU when WebGPU cannot start", async () => {
+    saveScanBackend("webgpu")
+    const page = setup()
+    for (const part of ["runtime-webgpu", "det", "rec"] as const)
+      await page.store.download(part, "jp", () => undefined)
+    const user = userEvent.setup()
+    const { container } = await page.render()
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]:not([capture])')
+    if (!input) throw new Error("file input")
+    await user.upload(input, new File(["png"], "deck.png", { type: "image/png" }))
+    await user.click(await screen.findByRole("button", { name: "開始讀取" }))
+    expect(await screen.findByText(/WebGPU 無法啟動，請到模型頁改用 CPU 引擎/)).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "清掉照片" }))
+  })
+
   it("offers a photo three ways, the class filter, and the model download before reading", async () => {
     const user = userEvent.setup()
     await setup().render()

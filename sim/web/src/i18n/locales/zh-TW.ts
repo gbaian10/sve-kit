@@ -830,6 +830,7 @@ const zhTW = {
       },
       useThis: "改用這個引擎",
       inUse: "使用中",
+      unsupported: "此瀏覽器無法使用 WebGPU。請選擇 CPU 引擎。",
       det: {
         name: "找卡模型",
         desc: "找出畫面裡每張卡的四個角，把卡拉正。整副牌照片靠它一次找出全部的卡。",

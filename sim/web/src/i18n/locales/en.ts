@@ -883,6 +883,7 @@ export default {
       },
       useThis: "Use this engine",
       inUse: "In use",
+      unsupported: "WebGPU is unavailable in this browser. Choose the CPU engine.",
       det: {
         name: "Card finder",
         desc: "Finds each card's four corners and straightens it. Deck photos use it to find every card at once.",

@@ -21,7 +21,7 @@ import {
 import { saveScanBackend } from "../../settings"
 import { type ScanDownloadRun, scanDownloadsFor, useScanDownloads } from "./downloads"
 import { closeScanEngine } from "./engine"
-import { currentBackend } from "./runtime-choice"
+import { currentBackend, neededParts, webgpuAvailable } from "./runtime-choice"
 import { megabytes } from "./scan-hooks"
 
 const VERSION_PREFIX: Partial<Record<ScanPart, string>> = { det: "det-", rec: "rec-" }
@@ -40,6 +40,7 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
   const [removing, setRemoving] = useState(false)
   const [changes, setChanges] = useState(0)
   const [backend, setBackend] = useState<ScanBackend | null>(null)
+  const [gpuAvailable, setGpuAvailable] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -56,15 +57,16 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
     void currentBackend().then((next) => {
       if (active) setBackend(next)
     })
+    void webgpuAvailable().then((available) => {
+      if (active) setGpuAvailable(available)
+    })
     return () => {
       active = false
     }
   }, [])
 
   // Only the chosen engine's files are needed; the other one downloads when the user switches to it.
-  const needed: readonly ScanPart[] = backend
-    ? [runtimePart(backend), "det", "rec"]
-    : ["det", "rec"]
+  const needed: readonly ScanPart[] = backend ? neededParts(backend) : []
   const busy = removing || SCAN_PARTS.some((part) => runs[part]?.state === "running")
   const canDownload = status?.manifest === "ok"
   const pending = status
@@ -75,7 +77,10 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
   const neededBytes = status
     ? pending.reduce((total, part) => total + status.parts[part].missingBytes, 0)
     : 0
-  const allReady = status !== null && needed.every((part) => status.parts[part].state === "ready")
+  const allReady =
+    status !== null &&
+    backend !== null &&
+    needed.every((part) => status.parts[part].state === "ready")
 
   const choose = (next: ScanBackend) => {
     if (next === backend) return
@@ -180,6 +185,7 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
               canDownload={engine !== undefined || canDownload}
               edition={t(`options.edition.${edition}`)}
               selected={engine !== undefined ? engine === backend : undefined}
+              supported={engine !== "webgpu" || gpuAvailable}
               onSelect={
                 engine !== undefined
                   ? () => {
@@ -206,6 +212,7 @@ function PartRow({
   canDownload,
   edition,
   selected,
+  supported,
   onSelect,
   onDownload,
   onRemove,
@@ -218,6 +225,7 @@ function PartRow({
   readonly edition: string
   /** Set on the two runtime rows: whether this engine is the one scanning uses. */
   readonly selected?: boolean | undefined
+  readonly supported: boolean
   readonly onSelect?: (() => void) | undefined
   readonly onDownload: () => void
   readonly onRemove: () => void
@@ -243,6 +251,7 @@ function PartRow({
             {t(`scan.models.${part}.name`)}
           </p>
           <p className="text-13 text-text-2">{t(`scan.models.${part}.desc`)}</p>
+          {!supported && <p className="text-13 text-text-2">{t("scan.models.unsupported")}</p>}
           {unpublished && (
             <p className="mt-0.5 text-12 text-text-3">
               {t("scan.models.rec.noIndex", { edition })}
@@ -328,7 +337,7 @@ function PartRow({
                 {t("scan.models.inUse")}
               </span>
             ) : (
-              <Button size="sm" variant="ghost" disabled={busy} onClick={onSelect}>
+              <Button size="sm" variant="ghost" disabled={busy || !supported} onClick={onSelect}>
                 {t("scan.models.useThis")}
               </Button>
             ))}
@@ -344,7 +353,11 @@ function PartRow({
             </Button>
           )}
           {state !== "ready" && !unpublished && (
-            <Button size="sm" disabled={busy || !canDownload} onClick={onDownload}>
+            <Button
+              size="sm"
+              disabled={busy || !canDownload || !supported || selected === false}
+              onClick={onDownload}
+            >
               <Download className="size-4" aria-hidden="true" />{" "}
               {state === "update" ? t("scan.models.update") : t("scan.models.download")}
             </Button>

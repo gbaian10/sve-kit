@@ -141,9 +141,8 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
 }
 
 export const FIXTURE_ROOT = path.join(import.meta.dirname, "fixtures/snapshot")
-// ONNX Runtime binaries for the card scanner. They are not bundled (the WebGPU one exceeds the
-// 25 MiB Workers asset limit): the browser downloads them from a public CDN at the version this
-// build's onnxruntime-web JavaScript came from, and checks them against the hashes pinned here.
+// The WebGPU binary exceeds Workers' 25 MiB asset limit. Pin both CDN binaries to the installed
+// JavaScript package so a dependency update cannot silently pair it with an incompatible binary.
 const ORT_DIST = path.join(import.meta.dirname, "node_modules/onnxruntime-web/dist")
 function scanRuntimePins(): string {
   const version = (

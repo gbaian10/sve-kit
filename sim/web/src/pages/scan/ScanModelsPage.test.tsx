@@ -1,10 +1,10 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { createScanModelStore } from "../../data/scan-models"
 import type { UiLanguage } from "../../i18n"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, saveScanBackend } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
 import {
@@ -45,10 +45,46 @@ function setup(
 const row = (name: string) => screen.getByRole("listitem", { name })
 
 afterEach(() => {
+  saveScanBackend("cpu")
   prefsStore.set(DEFAULT_PREFS)
+  Reflect.deleteProperty(navigator, "gpu")
+  vi.restoreAllMocks()
 })
 
 describe("ScanModelsPage", () => {
+  it("marks WebGPU unavailable and prevents selecting or downloading it without an adapter", async () => {
+    await setup().render()
+    const gpu = row("執行引擎：WebGPU")
+    expect(await within(gpu).findByText(/此瀏覽器無法使用 WebGPU/)).toBeInTheDocument()
+    expect(within(gpu).getByRole("button", { name: "改用這個引擎" })).toBeDisabled()
+    expect(within(gpu).getByRole("button", { name: "下載" })).toBeDisabled()
+  })
+
+  it("downloads only the selected engine and retains it when switching backends", async () => {
+    saveScanBackend("webgpu")
+    Object.defineProperty(navigator, "gpu", {
+      configurable: true,
+      value: { requestAdapter: () => Promise.resolve({}) },
+    })
+    const user = userEvent.setup()
+    const page = setup()
+    await page.render()
+    const gpu = row("執行引擎：WebGPU")
+    const cpu = row("執行引擎：CPU")
+    expect(await within(gpu).findByText("使用中")).toBeInTheDocument()
+    expect(within(cpu).getByRole("button", { name: "下載" })).toBeDisabled()
+    await user.click(screen.getByRole("button", { name: "全部下載" }))
+    expect(await screen.findByText("全部已下載，之後拍卡不用再下載")).toBeInTheDocument()
+    expect((await page.store.status("jp")).parts["runtime-cpu"].state).toBe("missing")
+    await user.click(within(cpu).getByRole("button", { name: "改用這個引擎" }))
+    await user.click(screen.getByRole("button", { name: "全部下載" }))
+    expect(await within(cpu).findByText("已下載")).toBeInTheDocument()
+    expect(within(gpu).getByText("已下載")).toBeInTheDocument()
+    await user.click(within(gpu).getByRole("button", { name: "刪除" }))
+    await waitFor(() => expect(within(gpu).getByText("未下載")).toBeInTheDocument())
+    expect(within(cpu).getByText("已下載")).toBeInTheDocument()
+  })
+
   it("lists the three parts with their versions and downloads them all on request", async () => {
     const user = userEvent.setup()
     await setup().render()

@@ -50,7 +50,7 @@
 - `scoring`：辨識分數的校準值，跟著辨識模型走
   - 分數 = `dot(q_i, e) × scale[i] − hubWeight × hub[i]`
   - 第一名的原始相似度 ≥ `accept`，而且分數比第二張卡多 ≥ `margin`，才算認出
-- 執行引擎（ONNX Runtime 的 wasm）不屬於這裡：不發佈到 R2。前端建置時從 node_modules 算出 WebGPU／CPU 兩個 wasm 的大小與 SHA-256，下載時從公開 CDN（jsDelivr，失敗改 unpkg）取得，並與建置時的雜湊比對，不符就拒用
+- 執行引擎（ONNX Runtime 的 wasm）不屬於這裡：不發佈到 R2。前端建置時從 node_modules 讀取實際安裝的套件版本，算出 WebGPU／CPU 兩個 wasm 的大小與 SHA-256；下載時使用該版本的公開 CDN（jsDelivr，僅網路失敗時改用 unpkg），大小或雜湊不符就拒用，不換來源。只下載選中的引擎；切換後保留另一個引擎，使用者可個別刪除。同一引擎升版時，成功保存新版本後移除舊檔；舊版不得搭配新版 JavaScript 使用
 - 索引依卡面版本分開，只下載使用者正在用的那一份
 
 ## 檔案內容

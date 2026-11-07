@@ -16,7 +16,11 @@ interface Run {
 }
 
 /** Stands in for ONNX Runtime: records each run and answers like the real models' output names. */
-function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
+function fakeOrt(
+  runs: Run[],
+  life = { created: 0, released: 0, failOn: "" },
+  providers: string[][] = [],
+) {
   class Tensor {
     readonly data: Float32Array
     readonly dims: readonly number[]
@@ -31,7 +35,7 @@ function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
       return Promise.resolve()
     },
     outputNames: model.startsWith("det") ? ["heat", "corners"] : ["embedding"],
-    run: (feeds: { image: Tensor }) => {
+    run: (feeds: { image: Tensor }): Promise<Record<string, { data: Float32Array }>> => {
       const { data, dims } = feeds.image
       runs.push({ model, dims, data: data.slice() })
       if (model.startsWith("det")) {
@@ -57,7 +61,8 @@ function fakeOrt(runs: Run[], life = { created: 0, released: 0, failOn: "" }) {
     env: { wasm: {} as Record<string, unknown> },
     Tensor,
     InferenceSession: {
-      create: (bytes: Uint8Array) => {
+      create: (bytes: Uint8Array, options?: { executionProviders: readonly string[] }) => {
+        if (options) providers.push([...options.executionProviders])
         const model = new TextDecoder().decode(bytes)
         if (life.failOn && model.startsWith(life.failOn))
           return Promise.reject(new Error("bad model"))
@@ -187,23 +192,75 @@ describe("scan engine", () => {
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(life).toMatchObject({ created: 6, released: 6 })
   })
-  it("asks the chosen backend's ONNX Runtime build, WebGPU or CPU", async () => {
+  it.each(["webgpu", "cpu"] as const)("runs with the chosen %s backend", async (backend) => {
     const models = await installedModels()
-    const asked: string[] = []
+    const providers: string[][] = []
+    const runs: Run[] = []
+    const ort = fakeOrt(runs, undefined, providers)
     const sources = {
-      load: (_edition: "jp" | "en", backend: "webgpu" | "cpu") => {
-        asked.push(`load:${backend}`)
-        return Promise.resolve({ ...models, backend })
-      },
-      runtime: (backend: "webgpu" | "cpu") => {
-        asked.push(`runtime:${backend}`)
-        return Promise.resolve(fakeOrt([]) as unknown as typeof Ort)
-      },
+      load: () => Promise.resolve({ ...models, backend }),
+      runtime: () => Promise.resolve(ort as unknown as typeof Ort),
     }
-    await openScanEngine("jp", undefined, sources, () => Promise.resolve("webgpu"))
+    const engine = await openScanEngine("jp", undefined, sources, () => Promise.resolve(backend))
+    expect(providers).toEqual([
+      [backend === "webgpu" ? "webgpu" : "wasm"],
+      [backend === "webgpu" ? "webgpu" : "wasm"],
+    ])
+    expect(ort.env.wasm["wasmBinary"]).toBe(models.runtime)
+    expect(await engine.detect(new Uint8ClampedArray(256 * 256 * 4), 0.5)).toHaveLength(1)
+  })
+
+  it("waits for an inference to finish even when a closed replacement fails to load", async () => {
+    const models = await installedModels()
+    const life = { created: 0, released: 0, failOn: "" }
+    const ort = fakeOrt([], life)
+    const gate = Promise.withResolvers<undefined>()
+    const create = ort.InferenceSession.create
+    ort.InferenceSession.create = async (bytes) => {
+      const session = await create(bytes)
+      return {
+        ...session,
+        run: async (feeds) => {
+          await gate.promise
+          return session.run(feeds)
+        },
+      }
+    }
+    const sources = {
+      load: () => Promise.resolve(models),
+      runtime: () => Promise.resolve(ort as unknown as typeof Ort),
+    }
+    const first = await openScanEngine("jp", undefined, sources)
+    const inference = first.detect(new Uint8ClampedArray(256 * 256 * 4), 0.5)
+    const failedLoad = Promise.withResolvers<typeof models>()
+    const loading = Promise.withResolvers<undefined>()
+    const replacement = openScanEngine("en", undefined, {
+      ...sources,
+      load: () => {
+        loading.resolve(undefined)
+        return failedLoad.promise
+      },
+    })
+    await loading.promise
     closeScanEngine()
-    await openScanEngine("jp", undefined, sources, () => Promise.resolve("cpu"))
-    expect(asked).toEqual(["load:webgpu", "runtime:webgpu", "load:cpu", "runtime:cpu"])
+    failedLoad.reject(new Error("load failed"))
+    await expect(replacement).rejects.toThrow("load failed")
+    let overlapped = false
+    const nextOrt = fakeOrt([])
+    const nextCreate = nextOrt.InferenceSession.create
+    nextOrt.InferenceSession.create = (bytes, options) => {
+      overlapped ||= life.released < 2
+      return nextCreate(bytes, options)
+    }
+    const next = openScanEngine("jp", undefined, {
+      ...sources,
+      runtime: () => Promise.resolve(nextOrt as unknown as typeof Ort),
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    gate.resolve(undefined)
+    await inference
+    await next
+    expect(overlapped).toBe(false)
   })
 
   it("reports a WebGPU session that cannot start as a start error, not a silent fallback", async () => {

@@ -1,6 +1,4 @@
-// The card scanner's ONNX Runtime binaries come from a public npm CDN, at the exact onnxruntime-web
-// version this build's JavaScript was bundled from. The version and each binary's size and SHA-256
-// are read from node_modules at build time (vite.config.ts), so the site never trusts the CDN's copy.
+// Build-time pins tie CDN binaries to the installed JavaScript package; see vite.config.ts.
 
 export type ScanBackend = "webgpu" | "cpu"
 export const SCAN_BACKENDS: readonly ScanBackend[] = ["webgpu", "cpu"]

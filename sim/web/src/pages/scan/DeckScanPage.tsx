@@ -52,7 +52,7 @@ import {
   readDeckPhoto,
 } from "./deck-reader"
 import { useScannedDeckShare } from "./deck-share"
-import { openScanEngine, scanEngineSources } from "./engine"
+import { openScanEngine, scanEngineSources, ScanEngineStartError } from "./engine"
 import {
   classSummary,
   megabytes,
@@ -381,7 +381,15 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
       setMessage(
         error instanceof ScanModelError && error.kind === "missing"
           ? null
-          : { key: "failed", message: error instanceof Error ? error.message : String(error) },
+          : {
+              key: "failed",
+              message:
+                error instanceof ScanEngineStartError && error.backend === "webgpu"
+                  ? t("scan.engine.webgpuFailed")
+                  : error instanceof Error
+                    ? error.message
+                    : String(error),
+            },
       )
     } finally {
       if (isMounted()) setBusy((current) => (current?.token === token ? null : current))

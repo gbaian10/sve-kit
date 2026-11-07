@@ -216,13 +216,17 @@ export function scanEngineSources(store: ScanModelStore = appScanModels): ScanEn
 const appSources = scanEngineSources()
 
 function retire(engine: Promise<ScanEngine>): Promise<void> {
-  return engine.then(
-    async (built) => {
-      built.release()
-      await built.freed
-    },
-    () => undefined,
-  )
+  // A replacement may fail before older inferences finish; keep their retirement in the barrier.
+  return Promise.all([
+    retiring,
+    engine.then(
+      async (built) => {
+        built.release()
+        await built.freed
+      },
+      () => undefined,
+    ),
+  ]).then(() => undefined)
 }
 
 /**

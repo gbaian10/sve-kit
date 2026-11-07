@@ -118,7 +118,7 @@ export function useScanResults(
 export interface ScanReadiness {
   /** Null while checking the device. */
   readonly status: ScanModelsStatus | null
-  /** Every part is on this device (an older copy counts). */
+  /** Models may be older, but the runtime must match this site's JavaScript. */
   readonly ready: boolean
   readonly missingBytes: number
   /** Downloaded / total bytes per part while downloading. */
@@ -148,8 +148,14 @@ export function useScanReadiness(edition: Region, store = appScanModels): ScanRe
   }, [store, edition, finished])
   // Only the chosen engine's runtime counts; the other one is not needed to scan.
   const needed = backend ? neededParts(backend) : []
-  const ready = status !== null && needed.every((part) => status.parts[part].state !== "missing")
-  const missing = status ? needed.filter((part) => status.parts[part].state === "missing") : []
+  const missing = status
+    ? needed.filter((part) =>
+        part.startsWith("runtime-")
+          ? status.parts[part].state !== "ready"
+          : status.parts[part].state === "missing",
+      )
+    : []
+  const ready = status !== null && backend !== null && missing.length === 0
   const progress: ScanReadiness["progress"] = {}
   for (const part of SCAN_PARTS) {
     const run = runs[part]

@@ -10,7 +10,7 @@ import { createScanModelStore } from "../../data/scan-models"
 import { toggleClass } from "../../domain/scan/class-pick"
 import type { ScanCard } from "../../domain/scan/search"
 import { createI18n, type UiLanguage } from "../../i18n"
-import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, saveScanBackend } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
@@ -26,6 +26,10 @@ const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
 // ONNX Runtime does not run in jsdom: a stand-in answers with the real models' output names. With
 // `sees.card`, the finder sees one card in the middle and the recogniser reads it as BP01-001.
 const sees = vi.hoisted(() => ({ card: false }))
+vi.mock("onnxruntime-web/webgpu", () => ({
+  env: { wasm: {} },
+  InferenceSession: { create: () => Promise.reject(new Error("no adapter")) },
+}))
 vi.mock("onnxruntime-web/wasm", () => {
   class Tensor {
     readonly data: Float32Array
@@ -132,6 +136,7 @@ afterAll(() => {
   vi.unstubAllGlobals()
 })
 afterEach(() => {
+  saveScanBackend("cpu")
   sees.card = false
   closeScanEngine()
   prefsStore.set(DEFAULT_PREFS)
@@ -159,6 +164,19 @@ function setup(language?: UiLanguage) {
 }
 
 describe("ScanPage", () => {
+  it("asks to switch to CPU when WebGPU cannot start", async () => {
+    saveScanBackend("webgpu")
+    const camera = stubCamera()
+    const page = setup()
+    for (const part of ["runtime-webgpu", "det", "rec"] as const)
+      await page.store.download(part, "jp", () => undefined)
+    const user = userEvent.setup()
+    await page.render()
+    await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
+    camera.grant()
+    expect(await screen.findByText(/WebGPU 無法啟動，請到模型頁改用 CPU 引擎/)).toBeInTheDocument()
+  })
+
   it("asks to download the models first, downloads them in place, then offers the camera", async () => {
     const user = userEvent.setup()
     await setup().render()
