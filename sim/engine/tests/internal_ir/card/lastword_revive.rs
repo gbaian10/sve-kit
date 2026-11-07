@@ -435,3 +435,93 @@ fn a_lastword_banish_skips_a_card_already_moved_by_another_lastword() {
             .all(|fact| !matches!(fact, Fact::Movement(_)))
     );
 }
+
+#[test]
+fn acted_lastword_entry_initializes_the_arrival_without_an_act_event() {
+    let programs = lowerer()
+        .lower(&tree(&[
+            (
+                "activate",
+                json!({"cost":{"pp":0},"do":[{"destroy":"this"}]}),
+            ),
+            (
+                "lastword",
+                json!({"do":[{"move":{
+                    "ref":"this", "to":"field", "acted":true, "result":"returned"
+                }}]}),
+            ),
+        ]))
+        .unwrap();
+    let program = &programs["unit-follower"];
+    let mut game = loaded(&board(3), program);
+    depart(&mut game, program.card().abilities[0].node.id);
+    let returned = resolved(fire(&mut game, 2));
+    game.resume_internal_card().unwrap();
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!(["s"]));
+    assert_eq!(state["objects"]["s"]["acted"], true);
+    assert_eq!(state["objects"]["s"]["generation"], 2_u8);
+    assert!(
+        returned
+            .progress
+            .facts
+            .iter()
+            .all(|fact| !matches!(fact, Fact::Posture(_)))
+    );
+}
+
+#[test]
+fn raw_entry_posture_and_owner_destination_cannot_bypass_the_closed_source_shape() {
+    let programs = lowerer()
+        .lower(&tree(&[(
+            "lastword",
+            json!({"do":[{
+                "move":{"ref":"this","to":"field","acted":true}
+            }]}),
+        )]))
+        .unwrap();
+    let program = &programs["unit-follower"];
+    for source_holder in [false, true] {
+        let mut raw = program.card().clone();
+        let Node::Instruction { instruction } =
+            &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("return instruction");
+        };
+        let Action::Move {
+            objects, movement, ..
+        } = &mut instruction.action
+        else {
+            panic!("return movement");
+        };
+        if source_holder {
+            *objects = Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            };
+        } else {
+            movement.initial_posture = Some(Posture::Standing);
+        }
+        let mut game = loaded(&board(3), program);
+        let before = format!("{game:?}");
+        if let Ok(checked) = WellFormedCardProgram::check(raw) {
+            game.load_internal_card("unit-follower", &checked)
+                .unwrap_err();
+        }
+        assert_eq!(format!("{game:?}"), before);
+    }
+}
+
+#[test]
+fn entry_posture_cannot_be_silently_ignored_on_other_moves_or_set_to_false() {
+    let mut input = tree(&[(
+        "lastword",
+        json!({"do":[{"move":{"ref":"this","to":"ex"}}]}),
+    )]);
+    lowerer().lower(&input).unwrap();
+    input["cards"]["unit-follower"]["abilities"][0]["lastword"]["do"][0]["move"]["acted"] =
+        json!(true);
+    lowerer().lower(&input).unwrap_err();
+    input["cards"]["unit-follower"]["abilities"][0]["lastword"]["do"][0]["move"] =
+        json!({"ref":"this","to":"field","acted":false});
+    lowerer().lower(&input).unwrap_err();
+}

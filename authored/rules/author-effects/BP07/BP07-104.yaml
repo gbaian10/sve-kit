@@ -1,0 +1,51 @@
+cards:
+  BP07-104:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+          - bane
+        line: 1
+      - lastword:
+          cost:
+            banish:
+              n: 1
+              sel:
+                name: ナテラの大樹
+                who: self
+                zone:
+                  - field
+                  - ex
+          do:
+            - move:
+                acted: true
+                ref: this
+                result: returned
+                to: field
+            - if:
+                cond:
+                  did: returned
+                else:
+                  - banish: this
+                then:
+                  - evolve:
+                      ref:
+                        follow: returned
+                      result: changed
+                  - if:
+                      cond:
+                        not:
+                          did: changed
+                      then:
+                        - banish:
+                            follow: returned
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

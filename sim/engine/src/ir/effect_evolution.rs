@@ -41,18 +41,12 @@ pub(crate) struct Specification {
     pub destination: Destination,
 }
 
-impl Specification {
-    pub(crate) fn cardinality(&self) -> Cardinality {
-        Cardinality {
-            minimum: Nat(u64::from(self.subject == (ObjectOperand::SourceHolder {}))),
-            maximum: Some(Nat(1)),
-        }
-    }
-}
-
 fn choice(keys: &Keys, specification: &Specification) -> Decision {
     let candidate = Binding::new(1, keys.candidate);
-    let bounds = specification.cardinality();
+    let bounds = Cardinality {
+        minimum: Nat(0),
+        maximum: Some(Nat(1)),
+    };
     Decision {
         id: keys.decision,
         captures: vec![],
@@ -61,11 +55,7 @@ fn choice(keys: &Keys, specification: &Specification) -> Decision {
             players: controller(),
         },
         kind: DecisionKind::ResolutionChoice {
-            may: if bounds.minimum == Nat(1) {
-                Declinable::Required
-            } else {
-                Declinable::MayDecline
-            },
+            may: Declinable::MayDecline,
             cardinality: bounds,
             precondition: None,
         },
@@ -334,7 +324,7 @@ pub(crate) fn projection(control: &Control) -> Option<Projection<'_>> {
     if !matches!(
         input,
         Selector::MoveAfter {
-            receipt: MovementReceipt::Search { .. },
+            receipt: MovementReceipt::Search { .. } | MovementReceipt::Move { .. },
             permission: FollowPermission::SameEffectExplicitReference {},
         }
     ) {

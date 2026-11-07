@@ -261,6 +261,7 @@ impl Checker {
                 BoolRead::CardPlayOrigin { .. } | BoolRead::LegalAttack { .. } => self.reject(),
             },
             Expr::Frozen(read) => match read.as_ref() {
+                BoolFrozen::EvolutionSucceeded { receipt } => self.receipt(receipt),
                 BoolFrozen::PaymentComplete {
                     receipt: PaymentReference::Local { receipt },
                 } => self.receipt(receipt),

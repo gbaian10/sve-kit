@@ -74,6 +74,7 @@ impl Game {
             MoveMethod::Banish,
             false,
             None,
+            None,
         )?;
         let banished = successful
             .into_iter()

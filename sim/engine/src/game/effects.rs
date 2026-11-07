@@ -722,6 +722,9 @@ impl Game {
             }
             let from = format!("{}.{}", previous.controller, previous.zone);
             if destination == "field" {
+                if frame.values.get("field_entry_acted") == Some(&json!(true)) {
+                    object.state["acted"] = json!(true);
+                }
                 object.state["entered_this_turn"] = json!(true);
                 object.state["entered_from"] = if previous.zone == "resolution" {
                     previous.state["entered_from"].clone()

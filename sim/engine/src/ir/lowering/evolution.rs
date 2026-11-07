@@ -52,6 +52,18 @@ impl super::BodyContext<'_> {
             instruction: InstructionId(id),
             receipt: ReceiptId(id),
         };
+        if let Some(name) = &evolution.result
+            && (self.targets.contains_key(name)
+                || self.searches.contains(name)
+                || self.observations.contains_key(name)
+                || self
+                    .receipt_reads
+                    .evolutions
+                    .insert(name.clone(), keys.receipt)
+                    .is_some())
+        {
+            return Err(unsupported(path));
+        }
         let mut control = effect_evolution::build(&keys, &source, origin, &specification);
         if let Some(input) = input {
             let ObjectOperand::Bound { binding } = specification.subject else {
@@ -103,7 +115,7 @@ impl super::BodyContext<'_> {
                 let receipt = self
                     .field_outputs
                     .get(follow)
-                    .filter(|output| output.single_follower_search)
+                    .filter(|output| output.single_evolution_subject)
                     .map(|output| output.receipt.clone())
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(3, self.card_allocator.scope(path)?);

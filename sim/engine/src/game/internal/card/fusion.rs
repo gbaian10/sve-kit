@@ -185,6 +185,7 @@ impl Game {
                 MoveMethod::Put,
                 false,
                 None,
+                None,
             )?;
             if moved.len() != ex.len() || moved.iter().any(|m| m.after.is_none()) {
                 return Err(crate::EngineFailure::IllegalPlay(
@@ -272,6 +273,7 @@ impl Game {
             ZoneKind::Ex,
             MoveMethod::Put,
             false,
+            None,
             None,
         )?;
         let [movement] = moved.as_slice() else {

@@ -356,6 +356,7 @@ impl Game {
             MoveMethod::Discard,
             false,
             None,
+            None,
         )?;
         let mut events = Vec::new();
         for (before, player, characters) in snapshots {

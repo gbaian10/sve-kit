@@ -61,6 +61,7 @@ impl BodyContext<'_> {
             || movement.position.is_some()
             || movement.order.is_some()
             || movement.result.is_some()
+            || movement.acted.is_some()
         {
             return Err(unsupported(movement_path));
         }
