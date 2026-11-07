@@ -10,3 +10,8 @@ export const appScanModels = createScanModelStore({
   scanBase: () => `${snapshotBase()}/scan`,
   runtime: { url: runtimeUrl, bytes: Number(import.meta.env.SVE_SCAN_RUNTIME_BYTES) },
 })
+
+/** A non-front face's small card image, named as the scan index says (`<n>-f<face>`). */
+export function scanFaceImage(imageId: number, face: number): string {
+  return `${snapshotBase()}/images/card_s/${String(imageId)}-f${String(face)}.webp`
+}

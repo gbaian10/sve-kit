@@ -7,6 +7,8 @@ export interface ScanCard {
   readonly cardId: string
   /** Integer image id (`images/<size>/<n>.webp`). */
   readonly imageId: number
+  /** Face ordinal: 0 is the front; other faces' images are `<n>-f<face>.webp`. */
+  readonly face: number
   /** Original card name. */
   readonly name: string
   /** Printings that share this art share the group. */
@@ -47,12 +49,16 @@ export function parseScanCards(value: unknown, count: number): ScanCard[] {
       throw new Error(`cards[${String(at)}] is not an object`)
     const row = item as Record<string, unknown>
     const imageId = row["n"]
+    const face = row["f"]
     if (typeof imageId !== "number" || !Number.isInteger(imageId))
       throw new Error(`cards[${String(at)}].n must be an integer`)
+    if (typeof face !== "number" || !Number.isInteger(face) || face < 0)
+      throw new Error(`cards[${String(at)}].f must be a face ordinal`)
     return {
       no: text(row, "no", at),
       cardId: text(row, "c", at),
       imageId,
+      face,
       name: text(row, "nm", at),
       artGroup: text(row, "a", at),
       classCode: text(row, "k", at),
@@ -77,11 +83,14 @@ export function classMask(
 
 const PLAIN_NO = /^[A-Za-z0-9]+-\d+(?:EN)?$/u
 
-/** Same-art printings look alike to the recogniser, so a match shows the plain-numbered one. */
+/**
+ * Same-art printings look alike to the recogniser, so a match shows the plain-numbered one. The face
+ * stays part of the key: a card's back is never shown as its front.
+ */
 function representatives(cards: readonly ScanCard[]): Map<string, ScanCard> {
   const map = new Map<string, ScanCard>()
   for (const card of cards) {
-    const key = `${card.cardId}|${card.artGroup}`
+    const key = `${card.cardId}|${card.artGroup}|${String(card.face)}`
     const current = map.get(key)
     if (!current || (!PLAIN_NO.test(current.no) && PLAIN_NO.test(card.no))) map.set(key, card)
   }
@@ -131,7 +140,8 @@ export function matchCards(
     .flatMap((row) => {
       const card = cards[row.at]
       if (!card) return []
-      const shown = representative.get(`${card.cardId}|${card.artGroup}`) ?? card
+      const shown =
+        representative.get(`${card.cardId}|${card.artGroup}|${String(card.face)}`) ?? card
       return [{ card: shown, score: row.score, raw: row.raw }]
     })
 }

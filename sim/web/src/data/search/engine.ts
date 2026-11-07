@@ -323,7 +323,10 @@ export class SearchEngine {
                     kind: "suggest-result" as const,
                     ...index.suggest(request.text, request.limit, eligible),
                   }
-                : { kind: "recent-result" as const, items: index.recent(request.printingIds) }
+                : {
+                    kind: "recent-result" as const,
+                    items: index.recent(request.printingIds, request.by),
+                  }
             event = { ...result, ...identity }
           } else if (request.kind === "preview" && index) {
             active.previews ??= (async () => {

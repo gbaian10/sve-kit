@@ -1463,6 +1463,21 @@ it("suggestions preserve exact printing and alias ranking, and recent summaries 
     state: "not-in-edition",
   })
   expect(recent.phase === "complete" && recent.recent?.[1]?.state).toBe("available")
+  // The card scanner knows card numbers, not printing ids.
+  h.channel.recent(["BP01-051", "BP99-999"], "jp", "card-no")
+  await expect.poll(() => h.channel.getStatus().result.phase, POLL).toBe("complete")
+  const numbered = h.channel.getStatus().result
+  expect(numbered.phase === "complete" && numbered.recent?.[0]).toMatchObject({
+    state: "available",
+    summary: { cardNo: "BP01-051", region: "jp" },
+  })
+  expect(numbered.phase === "complete" && numbered.recent?.[0]?.printingId).toBe(
+    exact.phase === "complete" ? exact.suggestions?.[0]?.summary.printingId : undefined,
+  )
+  expect(numbered.phase === "complete" && numbered.recent?.[1]).toEqual({
+    printingId: "BP99-999",
+    state: "not-in-edition",
+  })
 })
 
 it("a complete cached view and index are usable while the entry is blocked, without reading metadata", async () => {

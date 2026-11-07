@@ -5,7 +5,6 @@ import {
   useCallback,
   useId,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react"
@@ -21,11 +20,7 @@ import { PaginationTail } from "../../components/results/PaginationTail"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { AbilityTypeFilter } from "../../components/search/AbilityTypeFilter"
 import { ArtistFilter } from "../../components/search/ArtistFilter"
-import {
-  ClassQuickBar,
-  ClassQuickBarSkeleton,
-  type QuickBarClass,
-} from "../../components/search/ClassQuickBar"
+import { ClassQuickBar, ClassQuickBarSkeleton } from "../../components/search/ClassQuickBar"
 import { ConditionChips } from "../../components/search/ConditionChips"
 import { vocabularyOptionLabel } from "../../components/search/facet-labels"
 import { FilterPanel } from "../../components/search/FilterPanel"
@@ -37,20 +32,19 @@ import { SearchBar } from "../../components/search/SearchBar"
 import { SetFilter } from "../../components/search/SetFilter"
 import { TraitFilter } from "../../components/search/TraitFilter"
 import { TypeFilter } from "../../components/search/TypeFilter"
+import { useQuickBarClasses } from "../../components/search/useQuickBarClasses"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
 import { Notice } from "../../components/ui/Notice"
 import { Segmented } from "../../components/ui/Segmented"
 import type { ImageIndex, ImageSource, QueryFailure, SearchPage } from "../../data"
 import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
-import { quickBarClasses } from "../../domain/classes"
 import { leaderFrameTokens, tokenKindTokens } from "../../domain/deckLocation"
 import { formatQuery } from "../../domain/query/codec"
 import {
   activeFilterCount,
   DEFAULT_QUERY,
   defaultSecondarySort,
-  NEUTRAL_CLASS,
   type QueryState,
   toggleClass,
   VIEW_MODES,
@@ -110,6 +104,8 @@ export interface CardBrowserProps {
   /** "Clear all" buttons; the page decides what else resets (typed text, scope). */
   readonly onClearAll: () => void
   readonly search: CardBrowserSearch
+  /** The cards page offers the card scanner beside the search box; the deck pool does not. */
+  readonly scanEntry?: boolean
   readonly results: CardBrowserResults
   /** The result count stays through a new query of the same dataset and unit. */
   readonly countScope: string
@@ -160,6 +156,7 @@ export function CardBrowser({
   onEditionChange,
   onClearAll,
   search,
+  scanEntry = false,
   results,
   countScope,
   view,
@@ -179,26 +176,14 @@ export function CardBrowser({
 }: CardBrowserProps) {
   const { t } = useTranslation()
   const prefs = usePrefs()
-  const { sets, quickSets, setCounts, rarities, classes } = useSetOptions()
+  const { sets, quickSets, setCounts, rarities } = useSetOptions()
   const printingOptions = usePrintingOptions()
   const panelId = useId()
   const sidebarId = useId()
   const { page, cells, images, error: queryError, progress, loading: pageLoading, pages } = results
 
-  const quickBar: QuickBarClass[] = useMemo(
-    () =>
-      quickBarClasses(classes?.map((item) => item.code) ?? []).map((code) => {
-        const option = classes?.find((item) => item.code === code)
-        return {
-          code,
-          label:
-            code === NEUTRAL_CLASS
-              ? t("search.neutral")
-              : (option?.name.translations[textLang] ?? option?.name.original.text ?? code),
-        }
-      }),
-    [classes, textLang, t],
-  )
+  const classOptions = useQuickBarClasses(textLang)
+  const quickBar = classOptions ?? []
   const classLabel = (code: string | null) =>
     code === null
       ? t("search.neutral")
@@ -303,8 +288,8 @@ export function CardBrowser({
 
   const classBar = (
     <>
-      {classes === undefined && <ClassQuickBarSkeleton />}
-      {classes !== undefined && quickBar.length > 0 && (
+      {classOptions === undefined && <ClassQuickBarSkeleton />}
+      {classOptions !== undefined && quickBar.length > 0 && (
         <ClassQuickBar
           label={t("search.classes")}
           classes={quickBar}
@@ -580,6 +565,7 @@ export function CardBrowser({
                   ? {}
                   : { activeOptionId: search.activeOptionId })}
                 filterCount={filterCount}
+                scanEntry={scanEntry}
                 filtersOpen={sidebar.layout ? !sidebar.collapsed : sheetOpen}
                 filtersId={sidebar.layout ? sidebarId : panelId}
                 onToggleFilters={() => {

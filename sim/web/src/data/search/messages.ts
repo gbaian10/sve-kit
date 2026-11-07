@@ -36,7 +36,12 @@ export type PurposeRequest =
   | { readonly kind: "search"; readonly query: SearchQuery }
   | { readonly kind: "view"; readonly query: SearchQuery; readonly remember?: boolean }
   | { readonly kind: "suggest"; readonly text: string; readonly limit: number }
-  | { readonly kind: "recent"; readonly printingIds: readonly string[] }
+  | {
+      readonly kind: "recent"
+      readonly printingIds: readonly string[]
+      /** `card-no`: the ids are card numbers of this edition (the card scanner's results). */
+      readonly by?: "card-no"
+    }
   | { readonly kind: "releases" }
   | { readonly kind: "count"; readonly query: SearchQuery }
 export type QueryRequest = PurposeRequest & {

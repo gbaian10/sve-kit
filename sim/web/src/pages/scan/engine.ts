@@ -1,6 +1,6 @@
 import type * as Ort from "onnxruntime-web/wasm"
 
-import { appScanModels, type InstalledScanModels } from "../../data"
+import { appScanModels, type InstalledScanModels, type ScanModelStore } from "../../data"
 import type { DetModel } from "../../domain/scan/manifest"
 import {
   type CardMatch,
@@ -16,7 +16,7 @@ import type { Region } from "../../domain/search"
 // and compiled once. It runs on the CPU build of ONNX Runtime with one thread: the site is not
 // cross-origin isolated, so worker threads are unavailable anyway.
 
-export interface ScanSample {
+interface ScanSample {
   /** RGBA pixels of a straightened card, `rec.width` × `rec.height`. */
   readonly pixels: Uint8ClampedArray
   /** Also read it turned 180°, for cards facing the other way. */
@@ -43,7 +43,7 @@ export interface ScanEngine {
 
 export type ScanEngineStage = "reading" | "starting"
 
-export async function createScanEngine(
+async function createScanEngine(
   edition: Region,
   models: InstalledScanModels,
   ort: typeof Ort,
@@ -117,6 +117,7 @@ export async function createScanEngine(
           det.input / det.stride,
           det.stride,
           threshold,
+          det.grow,
         )
       }),
     embed: (samples) =>
@@ -163,10 +164,15 @@ export interface ScanEngineSources {
   readonly runtime: () => Promise<typeof Ort>
 }
 
-const appSources: ScanEngineSources = {
-  load: (edition) => appScanModels.load(edition),
-  runtime: () => import("onnxruntime-web/wasm"),
+/** Models from `store`, ONNX Runtime from the site's own bundle. */
+export function scanEngineSources(store: ScanModelStore = appScanModels): ScanEngineSources {
+  return {
+    load: (edition) => store.load(edition),
+    runtime: () => import("onnxruntime-web/wasm"),
+  }
 }
+
+const appSources = scanEngineSources()
 
 function drop(engine: Promise<ScanEngine>): void {
   void engine.then(
@@ -180,7 +186,6 @@ function drop(engine: Promise<ScanEngine>): void {
 /**
  * The page's engine for an edition; built once from the models on this device. Opening another
  * edition releases the previous engine.
- * @public 待接：the scan screens (#1843 single card, #1844 deck photo) open it.
  */
 export function openScanEngine(
   edition: Region,

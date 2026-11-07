@@ -598,12 +598,13 @@ export function useWorkerSuggestions(
   const images = useSummaryImages(shown, edition)
   return { ...state, images }
 }
-export function useRecentSummaries(ids: readonly string[], edition: Region) {
-  const { channel } = useWorkerChannel(JSON.stringify([ids, edition]))
+/** Summaries of printings by id, or by card number of this edition (`by: "card-no"`). */
+export function useRecentSummaries(ids: readonly string[], edition: Region, by?: "card-no") {
+  const { channel } = useWorkerChannel(JSON.stringify([ids, edition, by]))
   const key = JSON.stringify(ids)
   useEffect(() => {
-    channel.recent(JSON.parse(key) as string[], edition)
-  }, [channel, key, edition])
+    channel.recent(JSON.parse(key) as string[], edition, by)
+  }, [channel, key, edition, by])
   const result = useSyncExternalStore(
     channel.subscribe,
     channel.getStatus,

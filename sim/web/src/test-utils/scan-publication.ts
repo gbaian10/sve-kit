@@ -56,6 +56,7 @@ export function scanPublication(options: PublicationOptions = {}) {
       no: card.no,
       c: card.c,
       n: 100 + at,
+      f: 0,
       nm: `${region} ${card.no}`,
       a: card.a ?? "a0",
       k: card.k ?? "",
@@ -78,7 +79,7 @@ export function scanPublication(options: PublicationOptions = {}) {
       ...add("models", "onnx", new TextEncoder().encode(`det model ${String(det)}`)),
       input: 256,
       stride: 8,
-      grow: 1.6,
+      grow: 1.0,
     },
     rec: {
       version: rec,

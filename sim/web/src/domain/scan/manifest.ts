@@ -20,7 +20,7 @@ export interface DetModel extends ScanFile {
   readonly input: number
   /** Pixels per output grid cell. */
   readonly stride: number
-  /** How much larger than the aiming frame the single-card finder looks. */
+  /** Scale of each found quad about its mean point (the finder's calibration). */
   readonly grow: number
 }
 
