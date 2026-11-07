@@ -210,6 +210,12 @@ Sel.top/bottom 不接受，頂部來源使用動作同層 top:DeckSlice；
 
 共通欄位 `result? / precondition?`；`by` 為執行者（預設 self），`who` 為接受資源／抽捨牌的玩家，`to` 的區域持有者是目的地角色。不可互相取代。具體新增欄位見 §13；下表保留 v0 全部動作族。
 
+native 的洗牌僅接受 `shuffle: {who: self}`。自己的墓場正式選取或 `ref: {who: self, zone: cemetery}`
+可用不指定位置／順序的 `move ... to: deck`，但下一步必須是上述整副洗牌；自身 Lastword 的 `this`
+只沿該次實際進墓的終點跟隨。其餘無序回牌組形狀拒絕，不能回別人的牌組卻洗自己的牌組。
+`move.order: shuffle` 只准自己的 Look 餘牌放 `bottom`，不收 `result`；順序題仍用 `chooser`。
+此子集不是一般 Subset 洗牌 API，也不更改 Search 的內建末尾洗牌。
+
 move／banish／look／reveal 的 top 一律在動作同層使用
 [DeckSlice](author-quantity-shapes-1.0.md#牌庫切片的消費位置)，不另收 ref:{top:…} 別名。
 四個父動作、choose/search 群組、遞迴 Steps 的接受形狀及限制見[動作矩陣](author-step-shapes-1.0.md)；費用 banish.top 也共用 DeckSlice。下表未接入的規則程序不代表可接受任意欄位。
@@ -230,7 +236,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | reveal / look | `{ref或top,bind,result?,by?,random?}` | I.reveal / I.look；random 先以 I.random 抽樣，不讓玩家挑 |
 | reveal_until | `{sel,n,bind,matched}` | I.reveal-until；頂端逐張、達標或耗盡停止 |
 | search | `{sel＋n或upto 或 groups,to,cost_sum_le?,distinct_by?,entry_effects?,instead?,result?}` | I.search；找牌／證明條件／搬牌／洗牌，分量結果保存 |
-| shuffle | `{who}`；order 由 choose.order／move.order 承載 | I.shuffle FullZone / I.order |
+| shuffle | `{who}`；native 僅 `who: self`，無序回牌組須緊接洗牌 | I.shuffle FullZone；Look 餘牌的 move.order:shuffle 使用封閉 Subset |
 | dice / declare | `{bind,who?}` / §4 | I.dice / I.declare；骰值非玩家宣告 |
 | flip_down / flip_up | Ref 或 `{ref}` | I.flip-down / I.flip-up；進化牌庫表裏，不是 EP 資源 |
 | equip | `{on,token}` | I.equip；裝備物不占普通場格 |

@@ -262,6 +262,13 @@ Disjoint；各群組是指定 deck 的 Current Zone selector，predicate、基�
 暫不接受。禁止決定的區段內 search 仍拒絕。HasTrait 與 NamesIntersect 的 Current 物件
 讀值支援 CP04-060 的 filter；未驗快照形狀仍拒絕。
 
+Shuffle 只接受 Controller、FreshRequest 與 FullZone，或緊接同區 Bottom Move 的封閉 Subset。
+無序自己牌組 Move 必須緊接涵蓋全部到達者的洗牌：沒有 position 時配 FullZone；Look 觀察脊的
+Bottom 配 Subset，後者恰引用前一 Move 的本地 receipt。兩指示同來源、Effect context、Controller，
+均不得另有 precondition。單獨、夾雜或跨 Program 的配對拒絕。
+Subset 驗完輸入即從環境撤銷暫存 Move receipt，唯一性紀錄仍保留；後續任何型別的讀取均失敗。
+同區位置不換世代的專用 outcome 不放寬其他 MoveAfter 的跨世代跟隨契約。
+
 Move／Search／Destroy／Banish 各自產生對應 outcome，不能互換 receipt 型別。
 MoveAfter／MoveAfterAll 需要支配它的同型 producer／repeat collect，並明示
 SameEffectExplicitReference；TriggerExplicitReference 與 RuleCarry 尚未接受。
