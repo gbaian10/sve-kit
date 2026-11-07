@@ -1,0 +1,46 @@
+cards:
+  BP20-019:
+    abilities:
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            any_of:
+              - fused:
+                  material:
+                    trait: 財宝
+                  who: self
+              - played:
+                  sel:
+                    trait: 財宝
+                  who: self
+        line: 1
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: クレスト 空絶の顕現・オクトリス
+                  - - search:
+                        n: 1
+                        sel:
+                          name: 返還の剣閃
+                          who: self
+                          zone: deck
+                        to: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

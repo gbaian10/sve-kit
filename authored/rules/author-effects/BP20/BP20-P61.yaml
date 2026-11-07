@@ -1,0 +1,55 @@
+cards:
+  BP20-P61:
+    abilities:
+      - auto:
+          do:
+            - counter:
+                delta: 1
+                name: 返戻カウンター
+                on: this
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 返戻カウンター
+                        on: this
+                    op: ge
+                    right: 8
+                then:
+                  - banish:
+                      ref: this
+                  - search:
+                      n: 1
+                      sel:
+                        trait: 盗賊
+                        who: self
+                        zone: deck
+                      to: hand
+          on:
+            any_of:
+              - phase:
+                  which: main
+                  whose: self
+              - fused:
+                  material:
+                    trait: 財宝
+                  who: self
+              - played:
+                  sel:
+                    trait: 財宝
+                  who: self
+          zone: ex
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token:
+      name: クレスト 空絶の顕現・オクトリス
+      template: true
+format: 2
+kind: author_effect_set
