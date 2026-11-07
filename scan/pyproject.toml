@@ -15,7 +15,7 @@ dependencies = [
 
 [dependency-groups]
 train = [
-    "torch==2.11.0",
+    "torch==2.13.0",
     "torchvision",
     "timm>=1.0.20",
     "kornia>=0.8.1",
