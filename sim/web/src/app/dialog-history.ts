@@ -15,6 +15,11 @@ function dialogsOf(state: unknown): readonly string[] {
   return typeof dialog === "string" ? [dialog] : []
 }
 
+/** Whether this history entry belongs to dialog `id` (e.g. on coming back from a page opened in it). */
+export function dialogInHistory(state: unknown, id: string): boolean {
+  return dialogsOf(state).includes(id)
+}
+
 type Stage = "idle" | "pushing" | "pushed"
 
 /**

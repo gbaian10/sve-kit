@@ -1,4 +1,4 @@
-import { act, renderHook, screen, waitFor } from "@testing-library/react"
+import { act, renderHook, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
@@ -9,7 +9,8 @@ import { buildSnapshot } from "../../../scripts/fixture/build"
 import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
 import { decodeDeckCode } from "../../domain/deck/code"
 import { createI18n } from "../../i18n"
-import { renderInRouter } from "../../test-utils"
+import { DEFAULT_PREFS, prefsStore } from "../../settings"
+import { renderInRouter, renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
 import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
@@ -19,7 +20,7 @@ import { closeScanEngine } from "./engine"
 
 // ONNX Runtime does not run in jsdom. The stand-in finds no cards, and the test decides when the
 // card finder answers, to catch a reading still running when the photo goes away.
-const finder = vi.hoisted(() => ({ hold: false, waiting: [] as (() => void)[] }))
+const finder = vi.hoisted(() => ({ hold: false, card: false, waiting: [] as (() => void)[] }))
 vi.mock("onnxruntime-web/wasm", () => {
   class Tensor {
     readonly data: Float32Array
@@ -29,22 +30,36 @@ vi.mock("onnxruntime-web/wasm", () => {
       this.dims = dims
     }
   }
-  const output = {
-    heat: { data: new Float32Array(1024) },
-    corners: { data: new Float32Array(8192) },
+  // With `card`, every tile shows one card-shaped box in its middle (cell 16, 16).
+  const output = () => {
+    const heat = new Float32Array(1024)
+    const corners = new Float32Array(8192)
+    if (finder.card) {
+      const at = 16 * 32 + 16
+      heat[at] = 0.9
+      ;[-3, -4.2, 3, -4.2, 3, 4.2, -3, 4.2].forEach((offset, channel) => {
+        corners[channel * 1024 + at] = offset
+      })
+    }
+    return { heat: { data: heat }, corners: { data: corners } }
   }
   const session = (model: string) => ({
     outputNames: model.startsWith("det") ? ["heat", "corners"] : ["embedding"],
-    run: () =>
-      model.startsWith("det") && finder.hold
-        ? new Promise((resolve) => {
-            finder.waiting.push(() => {
-              resolve(output)
-            })
-          })
-        : Promise.resolve(
-            model.startsWith("det") ? output : { embedding: { data: new Float32Array(16) } },
-          ),
+    run: (feeds: { image: Tensor }) => {
+      if (!model.startsWith("det")) {
+        // Every sample reads as the first card of the synthetic index.
+        const count = feeds.image.dims[0] ?? 0
+        const data = new Float32Array(count * 4)
+        for (let at = 0; at < count; at += 1) data[at * 4] = 1
+        return Promise.resolve({ embedding: { data } })
+      }
+      if (!finder.hold) return Promise.resolve(output())
+      return new Promise((resolve) => {
+        finder.waiting.push(() => {
+          resolve(output())
+        })
+      })
+    },
     release: () => Promise.resolve(),
   })
   return {
@@ -74,6 +89,19 @@ function stubCanvas() {
     context as unknown as CanvasRenderingContext2D,
   )
   vi.stubGlobal("createImageBitmap", () => Promise.resolve({ width: 800, height: 600 }))
+  vi.stubGlobal(
+    "ImageData",
+    class {
+      readonly data: Uint8ClampedArray
+      readonly width: number
+      readonly height: number
+      constructor(data: Uint8ClampedArray, width: number, height: number) {
+        this.data = data
+        this.width = width
+        this.height = height
+      }
+    },
+  )
 }
 
 /** A computer camera whose permission prompts answer when the test says so. */
@@ -107,7 +135,9 @@ function stubCameras() {
 afterEach(() => {
   closeScanEngine()
   finder.hold = false
+  finder.card = false
   finder.waiting.length = 0
+  prefsStore.set(DEFAULT_PREFS)
   vi.restoreAllMocks()
 })
 
@@ -213,6 +243,67 @@ describe("DeckScanPage", () => {
     expect(screen.queryByRole("heading", { name: "存成牌組或分享" })).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "選擇照片" })).toBeInTheDocument()
   })
+
+  it("lets a new reading start after switching edition away and back during one", async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    stubCanvas()
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    const { container } = await page.render()
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]:not([capture])')
+    if (!input) throw new Error("file input")
+    await user.upload(input, new File(["png"], "deck.png", { type: "image/png" }))
+    finder.hold = true
+    await user.click(await screen.findByRole("button", { name: "開始讀取" }))
+    await waitFor(() => {
+      expect(finder.waiting.length).toBeGreaterThan(0)
+    })
+    act(() => {
+      prefsStore.set({ cardEdition: "en" })
+    })
+    act(() => {
+      prefsStore.set({ cardEdition: "jp" })
+    })
+    expect(await screen.findByRole("button", { name: "開始讀取" })).toBeEnabled()
+    // The page keeps its photo for the page load; leave none for the next test.
+    await user.click(screen.getByRole("button", { name: "清掉照片" }))
+  })
+
+  it("reopens the candidates on coming back from a card page, and Back then closes them", async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    stubCanvas()
+    finder.card = true
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    const { container, router } = await renderRoutes(
+      [
+        { path: "/cards", element: <p>cards</p> },
+        { path: "/cards/scan/deck", element: <DeckScanPage store={page.store} /> },
+        { path: "/cards/:cardNo", element: <p>card page</p> },
+      ],
+      { initialEntries: ["/cards", "/cards/scan/deck"] },
+    )
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]:not([capture])')
+    if (!input) throw new Error("file input")
+    await user.upload(input, new File(["png"], "deck.png", { type: "image/png" }))
+    await user.click(await screen.findByRole("button", { name: "開始讀取" }))
+    await user.click(await screen.findByRole("button", { name: /#1\b/u }, { timeout: 15_000 }))
+    const picker = await screen.findByRole("dialog", { name: "照片裡的這張是？" })
+    await user.click(within(picker).getAllByRole("link", { name: /卡片頁/ })[0] as HTMLElement)
+    expect(await screen.findByText("card page")).toBeInTheDocument()
+    await act(() => router.navigate(-1))
+    expect(await screen.findByRole("dialog", { name: "照片裡的這張是？" })).toBeInTheDocument()
+    await act(() => router.navigate(-1))
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "照片裡的這張是？" })).not.toBeInTheDocument()
+    })
+    expect(router.state.location.pathname).toBe("/cards/scan/deck")
+    await act(() => router.navigate(-1))
+    expect(router.state.location.pathname).toBe("/cards")
+    // The page keeps its photo for the page load; leave none for the next test.
+    await act(() => router.navigate("/cards/scan/deck"))
+    await user.click(await screen.findByRole("button", { name: "清掉照片" }))
+  }, 40_000)
 
   it("shows the computer camera in a modal and closes it on leaving the page", async () => {
     const user = userEvent.setup()

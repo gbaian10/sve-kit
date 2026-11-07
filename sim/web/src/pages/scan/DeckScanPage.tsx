@@ -14,10 +14,10 @@ import {
 } from "lucide-react"
 import { type ReactNode, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router"
+import { Link, useLocation } from "react-router"
 
 import { deckImportPath, deckShareLink } from "../../app/deck-routes"
-import { useDialogHistory } from "../../app/dialog-history"
+import { dialogInHistory, useDialogHistory } from "../../app/dialog-history"
 import { routeState } from "../../app/listEntryState"
 import { useRouteEdition } from "../../app/snapshot"
 import { CardImage } from "../../components/card/CardImage"
@@ -121,6 +121,7 @@ function messageText(t: TFunction, message: Message): string {
 }
 
 type View = "number" | "card"
+const PICKER = "scan-picker"
 type ShareTab = "code" | "link" | "text"
 
 // A trip to a card page and back unmounts the page; the photo and its list stay for the page load.
@@ -129,9 +130,18 @@ const kept: {
   cards: (DeckCard | null)[] | null
   /** The card edition the list was read in; sharing and names follow it, not a later switch. */
   readEdition: Region
+  /** The card whose candidates are open, so coming back from a card page reopens them. */
+  open: number | null
   view: View
   message: Message | null
-} = { photo: null, cards: null, readEdition: "jp", view: "number", message: null }
+} = {
+  photo: null,
+  cards: null,
+  readEdition: "jp",
+  open: null,
+  view: "number",
+  message: null,
+}
 
 function errorName(error: unknown): string {
   return error instanceof Error ? error.name : String(error)
@@ -154,12 +164,23 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
   const [view, setView] = useState<View>(kept.view)
   const [message, setMessage] = useState<Message | null>(kept.message)
   const [dimmed, setDimmed] = useState<ReadonlySet<DeckCardStatus>>(new Set())
-  const [open, setOpen] = useState<number | null>(null)
+  // The picker's history entry survives a visit to a card page; coming back reopens the picker.
+  const location = useLocation()
+  const [open, setOpen] = useState<number | null>(() =>
+    dialogInHistory(location.state, PICKER) ? kept.open : null,
+  )
   // The reading in progress and the edition it reads; another edition makes it moot.
   const [busy, setBusy] = useState<{ readonly token: number; readonly edition: Region } | null>(
     null,
   )
-  const reading = busy !== null && busy.edition === edition
+  // Another edition drops the reading in progress (its engine is released); adjusted while
+  // rendering, so switching back does not revive it.
+  const [busyEdition, setBusyEdition] = useState(edition)
+  if (busyEdition !== edition) {
+    setBusyEdition(edition)
+    setBusy(null)
+  }
+  const reading = busy !== null
   const [gap, setGap] = useState(DECK_GUESS_GAP)
   const [over, setOver] = useState(false)
   const [camera, setCamera] = useState<MediaStream | null>(null)
@@ -177,11 +198,11 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
     kept.readEdition = readEdition
     kept.view = view
     kept.message = message
+    kept.open = open
   })
 
-  // Every async job (camera request, photo decode, reading) holds a token. A newer job, clearing
-  // the photo, another edition or leaving the page makes older ones stale; stale jobs only clean
-  // up after themselves.
+  // Each async job (camera request, photo decode, reading) holds a token; anything that supersedes
+  // it makes it stale, and a stale job only cleans up after itself.
   const mounted = useRef(true)
   const isMounted = () => mounted.current
   const readFlow = useRef(0)
@@ -371,7 +392,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
 
   // Names and pictures: picked cards, the best guess of unsure ones, and the open picker's candidates.
   const openCard = open === null ? null : (cards?.[open] ?? null)
-  const closePicker = useDialogHistory("scan-picker", openCard !== null, () => {
+  const closePicker = useDialogHistory(PICKER, openCard !== null, () => {
     setOpen(null)
   })
   const shown = useMemo(() => {
