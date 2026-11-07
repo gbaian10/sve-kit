@@ -820,17 +820,14 @@ const zhTW = {
         missing: "未下載",
         downloading: "下載中 {{pct}}%",
       },
-      "runtime-webgpu": {
-        name: "執行引擎：WebGPU",
-        desc: "用顯示卡加速，速度較快；需要瀏覽器支援 WebGPU。",
+      runtime: {
+        name: "執行引擎",
+        desc: "辨識在這台裝置上執行。選一個就好，只下載選中的。",
+        unsupported: "此瀏覽器不支援",
+        other: "另一個引擎（{{engine}}）也存在這台裝置，{{mb}} MB",
       },
-      "runtime-cpu": {
-        name: "執行引擎：CPU",
-        desc: "用處理器執行，所有瀏覽器都能用，速度較慢。",
-      },
-      useThis: "改用這個引擎",
-      inUse: "使用中",
-      unsupported: "此瀏覽器無法使用 WebGPU。請選擇 CPU 引擎。",
+      "runtime-webgpu": { name: "WebGPU", desc: "用顯示卡加速，速度較快" },
+      "runtime-cpu": { name: "CPU", desc: "所有瀏覽器都能用，速度較慢" },
       det: {
         name: "找卡模型",
         desc: "找出畫面裡每張卡的四個角，把卡拉正。整副牌照片靠它一次找出全部的卡。",
@@ -930,9 +927,8 @@ const zhTW = {
       guessRow: "{{cards}} 張依同牌組推測，確認差距 ≤",
       gapLabel: "推測差距上限",
       confirmAll: "全部確認",
-      unsureMark: "???",
-      maybe: "可能是 {{name}}",
       guessSub: "・推測 {{gap}}",
+      unsureHidden: "（不確定）",
       copies: "×{{count}}",
       share: {
         title: "存成牌組或分享",

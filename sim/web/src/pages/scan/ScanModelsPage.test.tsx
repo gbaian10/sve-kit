@@ -43,6 +43,8 @@ function setup(
 }
 
 const row = (name: string) => screen.getByRole("listitem", { name })
+// The engine card appears once the chosen engine is read from settings.
+const engineRow = () => screen.findByRole("listitem", { name: "執行引擎" })
 
 afterEach(() => {
   saveScanBackend("cpu")
@@ -54,10 +56,11 @@ afterEach(() => {
 describe("ScanModelsPage", () => {
   it("marks WebGPU unavailable and prevents selecting or downloading it without an adapter", async () => {
     await setup().render()
-    const gpu = row("執行引擎：WebGPU")
-    expect(await within(gpu).findByText(/此瀏覽器無法使用 WebGPU/)).toBeInTheDocument()
-    expect(within(gpu).getByRole("button", { name: "改用這個引擎" })).toBeDisabled()
-    expect(within(gpu).getByRole("button", { name: "下載" })).toBeDisabled()
+    const engine = await engineRow()
+    const gpu = await within(engine).findByRole("radio", { name: /WebGPU/ })
+    expect(gpu).toHaveTextContent("此瀏覽器不支援")
+    expect(gpu).toBeDisabled()
+    expect(within(engine).getByRole("radio", { name: /CPU/ })).toBeChecked()
   })
 
   it("downloads only the selected engine and retains it when switching backends", async () => {
@@ -69,20 +72,23 @@ describe("ScanModelsPage", () => {
     const user = userEvent.setup()
     const page = setup()
     await page.render()
-    const gpu = row("執行引擎：WebGPU")
-    const cpu = row("執行引擎：CPU")
-    expect(await within(gpu).findByText("使用中")).toBeInTheDocument()
-    expect(within(cpu).getByRole("button", { name: "下載" })).toBeDisabled()
+    const engine = await engineRow()
+    expect(await within(engine).findByRole("radio", { name: /WebGPU/ })).toBeChecked()
     await user.click(screen.getByRole("button", { name: "全部下載" }))
     expect(await screen.findByText("全部已下載，之後拍卡不用再下載")).toBeInTheDocument()
     expect((await page.store.status("jp")).parts["runtime-cpu"].state).toBe("missing")
-    await user.click(within(cpu).getByRole("button", { name: "改用這個引擎" }))
+    await user.click(within(engine).getByRole("radio", { name: /CPU/ }))
+    expect(within(engine).getByRole("radio", { name: /CPU/ })).toBeChecked()
+    expect(within(engine).getByText("未下載")).toBeInTheDocument()
     await user.click(screen.getByRole("button", { name: "全部下載" }))
-    expect(await within(cpu).findByText("已下載")).toBeInTheDocument()
-    expect(within(gpu).getByText("已下載")).toBeInTheDocument()
-    await user.click(within(gpu).getByRole("button", { name: "刪除" }))
-    await waitFor(() => expect(within(gpu).getByText("未下載")).toBeInTheDocument())
-    expect(within(cpu).getByText("已下載")).toBeInTheDocument()
+    expect(await within(engine).findByText("已下載")).toBeInTheDocument()
+    // The engine left behind stays on the device until removed from the same card.
+    expect(within(engine).getByText(/另一個引擎（WebGPU）也存在這台裝置/)).toBeInTheDocument()
+    await user.click(within(engine).getAllByRole("button", { name: "刪除" })[0] as HTMLElement)
+    await waitFor(() => {
+      expect(within(engine).queryByText(/另一個引擎/)).not.toBeInTheDocument()
+    })
+    expect(within(engine).getByText("已下載")).toBeInTheDocument()
   })
 
   it("lists the three parts with their versions and downloads them all on request", async () => {
@@ -97,7 +103,7 @@ describe("ScanModelsPage", () => {
 
     await user.click(screen.getByRole("button", { name: "全部下載" }))
     expect(await screen.findByText("全部已下載，之後拍卡不用再下載")).toBeInTheDocument()
-    for (const name of ["執行引擎：CPU", "找卡模型", "辨識模型"])
+    for (const name of ["執行引擎", "找卡模型", "辨識模型"])
       expect(within(row(name)).getByText("已下載")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "全部下載" })).toBeDisabled()
   })
@@ -127,7 +133,7 @@ describe("ScanModelsPage", () => {
   it("says when the device is out of space", async () => {
     const user = userEvent.setup()
     await setup({ storage: fullCache() }).render()
-    const runtime = row("執行引擎：CPU")
+    const runtime = await engineRow()
     await user.click(await within(runtime).findByRole("button", { name: "下載" }))
     expect(await within(runtime).findByRole("alert")).toHaveTextContent("裝置空間不足")
   })
@@ -149,7 +155,7 @@ describe("ScanModelsPage", () => {
     await waitFor(() => {
       expect(within(row("找卡模型")).getByRole("button", { name: "下載" })).toBeDisabled()
     })
-    expect(within(row("執行引擎：CPU")).getByRole("button", { name: "下載" })).toBeEnabled()
+    expect(within(row("執行引擎")).getByRole("button", { name: "下載" })).toBeEnabled()
   })
 
   it("does not claim everything is downloaded while an edition's index is unpublished", async () => {

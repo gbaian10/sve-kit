@@ -1,5 +1,5 @@
 import { Check, ChevronLeft, Download, RefreshCw, Trash2 } from "lucide-react"
-import { useEffect, useState } from "react"
+import { type ReactNode, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 
@@ -175,26 +175,68 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
       <ul className="flex flex-col gap-3">
         {SCAN_PARTS.map((part) => {
           const engine = SCAN_BACKENDS.find((b) => runtimePart(b) === part)
+          if (engine === undefined)
+            return (
+              <PartRow
+                key={part}
+                part={part}
+                status={status?.parts[part]}
+                run={runs[part]}
+                busy={busy}
+                canDownload={canDownload}
+                edition={t(`options.edition.${edition}`)}
+                onDownload={() => void downloads.start([part], edition)}
+                onRemove={() => void remove(part)}
+              />
+            )
+          // Both engines share one card, in the place of the first; it acts on the chosen one.
+          if (engine !== SCAN_BACKENDS[0] || !backend) return null
+          const chosen = runtimePart(backend)
+          const other = SCAN_BACKENDS.find((b) => b !== backend) ?? backend
+          const otherStatus = status?.parts[runtimePart(other)]
           return (
             <PartRow
-              key={part}
-              part={part}
-              status={status?.parts[part]}
-              run={runs[part]}
+              key="runtime"
+              part={chosen}
+              status={status?.parts[chosen]}
+              run={runs[chosen]}
               busy={busy}
-              canDownload={engine !== undefined || canDownload}
+              canDownload
               edition={t(`options.edition.${edition}`)}
-              selected={engine !== undefined ? engine === backend : undefined}
-              supported={engine !== "webgpu" || gpuAvailable}
-              onSelect={
-                engine !== undefined
-                  ? () => {
-                      choose(engine)
-                    }
-                  : undefined
+              heading={{
+                name: t("scan.models.runtime.name"),
+                desc: t("scan.models.runtime.desc"),
+              }}
+              chooser={
+                <RuntimeChooser
+                  backend={backend}
+                  gpuAvailable={gpuAvailable}
+                  parts={status?.parts}
+                  busy={busy}
+                  onChoose={choose}
+                />
               }
-              onDownload={() => void downloads.start([part], edition)}
-              onRemove={() => void remove(part)}
+              extra={
+                otherStatus?.state === "ready" ? (
+                  <p className="flex flex-wrap items-center gap-x-2 text-12 text-text-3">
+                    {t("scan.models.runtime.other", {
+                      engine: t(`scan.models.${runtimePart(other)}.name`),
+                      mb: megabytes(otherStatus.bytes),
+                    })}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-danger"
+                      disabled={busy}
+                      onClick={() => void remove(runtimePart(other))}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" /> {t("scan.models.remove")}
+                    </Button>
+                  </p>
+                ) : null
+              }
+              onDownload={() => void downloads.start([chosen], edition)}
+              onRemove={() => void remove(chosen)}
             />
           )
         })}
@@ -211,9 +253,9 @@ function PartRow({
   busy,
   canDownload,
   edition,
-  selected,
-  supported,
-  onSelect,
+  heading,
+  chooser,
+  extra,
   onDownload,
   onRemove,
 }: {
@@ -223,10 +265,10 @@ function PartRow({
   readonly busy: boolean
   readonly canDownload: boolean
   readonly edition: string
-  /** Set on the two runtime rows: whether this engine is the one scanning uses. */
-  readonly selected?: boolean | undefined
-  readonly supported: boolean
-  readonly onSelect?: (() => void) | undefined
+  /** The engine card names the engine in general rather than the chosen part. */
+  readonly heading?: { readonly name: string; readonly desc: string }
+  readonly chooser?: ReactNode
+  readonly extra?: ReactNode
   readonly onDownload: () => void
   readonly onRemove: () => void
 }) {
@@ -248,10 +290,9 @@ function PartRow({
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <p id={titleId} className="text-16 font-bold">
-            {t(`scan.models.${part}.name`)}
+            {heading?.name ?? t(`scan.models.${part}.name`)}
           </p>
-          <p className="text-13 text-text-2">{t(`scan.models.${part}.desc`)}</p>
-          {!supported && <p className="text-13 text-text-2">{t("scan.models.unsupported")}</p>}
+          <p className="text-13 text-text-2">{heading?.desc ?? t(`scan.models.${part}.desc`)}</p>
           {unpublished && (
             <p className="mt-0.5 text-12 text-text-3">
               {t("scan.models.rec.noIndex", { edition })}
@@ -279,6 +320,8 @@ function PartRow({
         </span>
       </div>
 
+      {chooser}
+      {extra}
       {prefix !== undefined &&
         status?.version !== undefined &&
         (status.indexBytes !== undefined &&
@@ -331,16 +374,6 @@ function PartRow({
           {status && status.bytes > 0 ? t("scan.models.size", { mb: megabytes(status.bytes) }) : ""}
         </span>
         <div className="flex gap-2">
-          {selected !== undefined &&
-            (selected ? (
-              <span className="self-center text-12 font-semibold text-success">
-                {t("scan.models.inUse")}
-              </span>
-            ) : (
-              <Button size="sm" variant="ghost" disabled={busy || !supported} onClick={onSelect}>
-                {t("scan.models.useThis")}
-              </Button>
-            ))}
           {(state === "ready" || state === "update") && (
             <Button
               size="sm"
@@ -353,11 +386,7 @@ function PartRow({
             </Button>
           )}
           {state !== "ready" && !unpublished && (
-            <Button
-              size="sm"
-              disabled={busy || !canDownload || !supported || selected === false}
-              onClick={onDownload}
-            >
+            <Button size="sm" disabled={busy || !canDownload} onClick={onDownload}>
               <Download className="size-4" aria-hidden="true" />{" "}
               {state === "update" ? t("scan.models.update") : t("scan.models.download")}
             </Button>
@@ -365,5 +394,69 @@ function PartRow({
         </div>
       </div>
     </li>
+  )
+}
+
+/** The engine choice: one tile per engine, the chosen one marked; only the chosen one downloads. */
+function RuntimeChooser({
+  backend,
+  gpuAvailable,
+  parts,
+  busy,
+  onChoose,
+}: {
+  readonly backend: ScanBackend
+  readonly gpuAvailable: boolean
+  readonly parts: Readonly<Record<ScanPart, ScanPartStatus>> | undefined
+  readonly busy: boolean
+  readonly onChoose: (backend: ScanBackend) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("scan.models.runtime.name")}
+      className="grid grid-cols-2 gap-2"
+    >
+      {SCAN_BACKENDS.map((engine) => {
+        const part = runtimePart(engine)
+        const on = engine === backend
+        const unsupported = engine === "webgpu" && !gpuAvailable
+        const bytes = parts?.[part].bytes ?? 0
+        return (
+          <button
+            key={engine}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            disabled={busy || unsupported}
+            onClick={() => {
+              onChoose(engine)
+            }}
+            className={cn(
+              "flex min-w-0 flex-col items-start gap-0.5 rounded-button border p-2.5 text-left",
+              on
+                ? "border-accent bg-accent-soft ring-1 ring-accent ring-inset"
+                : "border-border bg-surface-2 hover:bg-surface-3",
+              unsupported && "opacity-50",
+            )}
+          >
+            <span className="flex items-center gap-1.5 text-14 font-bold">
+              {on && <Check className="size-4 text-accent" aria-hidden="true" />}
+              {t(`scan.models.${part}.name`)}
+            </span>
+            <span className="text-12 text-text-2">
+              {unsupported ? t("scan.models.runtime.unsupported") : t(`scan.models.${part}.desc`)}
+            </span>
+            {bytes > 0 && (
+              <span className="text-12 text-text-3 tabular-nums">
+                {t("scan.models.size", { mb: megabytes(bytes) })}
+                {parts?.[part].state === "ready" && ` · ${t("scan.models.state.ready")}`}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </div>
   )
 }

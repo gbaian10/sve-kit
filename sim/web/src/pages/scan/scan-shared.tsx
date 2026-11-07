@@ -41,7 +41,7 @@ export function ClassColumn({
               className={cn(
                 "flex size-9 items-center justify-center rounded-full backdrop-blur transition",
                 on ? "bg-camera-chip-on ring-2 ring-camera-text" : "bg-camera-chip",
-                picked.length > 0 && !on && "opacity-60",
+                picked.length > 0 && !on && "opacity-60 grayscale",
               )}
             >
               <img

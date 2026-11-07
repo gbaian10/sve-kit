@@ -856,17 +856,14 @@ export default {
         missing: "未ダウンロード",
         downloading: "ダウンロード中 {{pct}}%",
       },
-      "runtime-webgpu": {
-        name: "実行エンジン：WebGPU",
-        desc: "GPU で動かすため速いです。ブラウザが WebGPU に対応している必要があります。",
+      runtime: {
+        name: "実行エンジン",
+        desc: "認識はこの端末で動きます。どちらか 1 つを選ぶと、選んだものだけダウンロードします。",
+        unsupported: "このブラウザは非対応",
+        other: "もう一方のエンジン（{{engine}}）もこの端末にあります：{{mb}} MB",
       },
-      "runtime-cpu": {
-        name: "実行エンジン：CPU",
-        desc: "CPU で動かします。どのブラウザでも使えますが、遅くなります。",
-      },
-      useThis: "このエンジンを使う",
-      inUse: "使用中",
-      unsupported: "このブラウザでは WebGPU を使用できません。CPU エンジンを選択してください。",
+      "runtime-webgpu": { name: "WebGPU", desc: "GPU で動かすので速い" },
+      "runtime-cpu": { name: "CPU", desc: "どのブラウザでも使えるが遅い" },
       det: {
         name: "カード検出モデル",
         desc: "画面内の各カードの四隅を見つけ、まっすぐに補正します。デッキ写真では全カードを一度に見つけます。",
@@ -974,9 +971,8 @@ export default {
       guessRow: "{{cards}} 枚を同じデッキから推定。差がこれ以下なら確定：",
       gapLabel: "推定の差の上限",
       confirmAll: "すべて確定",
-      unsureMark: "???",
-      maybe: "{{name}}かも",
       guessSub: "・推定 {{gap}}",
+      unsureHidden: "（未確定）",
       copies: "×{{count}}",
       share: {
         title: "デッキとして保存・共有",
