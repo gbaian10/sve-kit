@@ -7,8 +7,10 @@ import {
   turnedQuarter,
 } from "../../domain/scan/deck-detect"
 import { chooseReading, type DeckCard, guessFromDeck } from "../../domain/scan/deck-read"
+import { finishOf, finishScores, pickFinish } from "../../domain/scan/finish"
 import { warpQuad } from "../../domain/scan/geometry"
 import type { ScanEngine } from "./engine"
+import { finishReaderFor } from "./finish-reader"
 
 // Reads every card of one deck photo with the shared engine. The rules (tiling, merging, which
 // reading wins, same-deck guesses) live in domain/scan; this file moves pixels.
@@ -152,7 +154,27 @@ export async function readDeckPhoto(
     })
     await new Promise((resolve) => setTimeout(resolve, 0))
   }
-  return guessFromDeck(cards)
+  return withFinishes(engine, guessFromDeck(cards))
+}
+
+/** Each pick as the printing whose frame colours match its crop (SL against plain). */
+async function withFinishes(engine: ScanEngine, cards: DeckCard[]): Promise<DeckCard[]> {
+  const reader = finishReaderFor(engine)
+  const { width, height } = engine.cardSize
+  return Promise.all(
+    cards.map(async (card) => {
+      const group = card.pick && reader.group(card.pick)
+      if (!card.pick || !group) return card
+      const references = await reader.loaded(group)
+      if (!references) return card
+      const scores = finishScores(references, [
+        finishOf(card.crop, width, height),
+        finishOf(card.crop, width, height, true),
+      ])
+      const pick = scores ? pickFinish(group, scores, card.pick) : card.pick
+      return pick === card.pick ? card : { ...card, pick }
+    }),
+  )
 }
 
 /** The photo with each card's box and number; `colourOf` picks the box colour. */

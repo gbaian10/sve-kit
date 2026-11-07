@@ -55,7 +55,7 @@ export {
   useSnapshotRoot,
   useSnapshotStatus,
 } from "./roots"
-export { appScanModels, scanFaceImage } from "./scan"
+export { appScanModels, loadScanCardImage, scanCardImage } from "./scan"
 export {
   type InstalledScanModels,
   SCAN_PARTS,
