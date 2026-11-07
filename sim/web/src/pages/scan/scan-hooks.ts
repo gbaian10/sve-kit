@@ -8,8 +8,8 @@ import {
   type ImageIndex,
   mergeImageIndexes,
   SCAN_PARTS,
-  scanCardImage,
   type ScanBackend,
+  scanCardImage,
   type ScanModelsStatus,
 } from "../../data"
 import { type DisplayedName, displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
