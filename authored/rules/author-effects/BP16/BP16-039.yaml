@@ -1,0 +1,43 @@
+cards:
+  BP16-039:
+    abilities:
+      - line: 1
+        super_evolve_time:
+          do:
+            - destroy: victims
+            - stack_plus: 2
+          targets:
+            - bind: victims
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+      - lastword:
+          cost:
+            earth_rite: 1
+          do:
+            - move:
+                acted: true
+                ref: this
+                result: returned
+                to: field
+        line: 2
+      - activate:
+          cost:
+            earth_rite: 1
+          do:
+            - grant:
+                keywords:
+                  - assail
+                on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
