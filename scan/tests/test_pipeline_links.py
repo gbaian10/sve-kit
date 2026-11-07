@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from sve_scan import artifacts, deck_label, fetch, release
+from sve_scan import artifacts, deck_label, fetch, rec_index, release
 from sve_scan import gallery as GL
 
 
@@ -73,7 +73,7 @@ def make_work(tmp_path: Path, data_version: str) -> Path:
     vec, scale = artifacts.quantize(rng.standard_normal((2, artifacts.DIM)).astype(np.float32))
     cards = [{"no": f"T-{i}", "c": f"c:{i}", "n": i, "f": 0, "nm": "", "a": "", "k": "", "y": ""} for i in range(2)]
     artifacts.write_index(work / "index" / "rec", "jp", artifacts.Index(vec, scale, np.zeros(2, np.float32), cards))
-    build = {"data_version": data_version, "rec_sha256": artifacts.sha256(work / "rec.w8.onnx")}
+    build = {"data_version": data_version, "rec_sha256": artifacts.sha256(work / "rec.w8.onnx"), "editions": ["jp"]}
     (work / "index" / "rec" / "build.json").write_text(json.dumps(build))
     return work
 
@@ -144,3 +144,85 @@ def test_a_file_from_before_records_gets_its_hash_and_an_honest_unknown_time(tmp
     rec = polite.download("https://x/old.jpg", "old.jpg")
     assert web.requests == [] and rec["fetched_at"] is None and rec["etag"] is None
     assert rec["sha256"] == artifacts.sha256(tmp_path / "old.jpg")
+
+
+def test_a_failed_run_keeps_the_records_of_files_it_already_downloaded(tmp_path: Path):
+    web = FakeWeb()
+    real_open = web.open
+
+    def flaky(url: str) -> tuple[bytes, Message]:
+        if "second" in url:
+            raise OSError("network down")
+        return real_open(url)
+
+    first = fetch.Polite(tmp_path, clock=web.clock, sleep=web.sleep, opener=flaky)
+    rec = first.download("https://files.example/first.jpg", "first.jpg")
+    with pytest.raises(OSError):
+        first.download("https://files.example/second.jpg", "second.jpg")
+    # no save() call: the run died; a new run must still know where first.jpg came from and when
+    again = fetch.Polite(tmp_path, clock=web.clock, sleep=web.sleep, opener=web.open)
+    assert again.complete("first.jpg") and again.records["first.jpg"] == rec and rec["etag"] == '"abc"'
+    assert not (tmp_path / "second.jpg").exists() and not again.complete("second.jpg")
+
+
+def test_a_record_without_its_url_is_not_complete_and_gets_the_url_back(tmp_path: Path):
+    (tmp_path / "room.hdr").write_bytes(b"hdr")
+    (tmp_path / "manifest.json").write_text(json.dumps([{"file": "room.hdr", "id": "room", "license": "CC0"}]))
+    web = FakeWeb()
+    polite = fetch.Polite(tmp_path, clock=web.clock, sleep=web.sleep, opener=web.open)
+    assert not polite.complete("room.hdr")
+    rec = polite.download("https://files.example/room.hdr", "room.hdr", id="room")
+    assert rec["url"] == "https://files.example/room.hdr" and rec["fetched_at"] is None
+    assert rec["sha256"] == artifacts.sha256(tmp_path / "room.hdr") and web.requests == []
+
+
+# ---------- index rebuild: nothing from an earlier build survives it ----------
+class FakeRecogniser:
+    def embed(self, arr: np.ndarray, bs: int = 64) -> np.ndarray:
+        return np.random.default_rng(len(arr)).standard_normal((len(arr), artifacts.DIM)).astype(np.float32)
+
+
+def write_gallery(work: Path, regions: list[str], data_version: str) -> None:
+    meta = [
+        {
+            "n": 20000 + i,
+            "f": 0,
+            "card_version": "1",
+            "card_no": f"T-{i}",
+            "card_id": f"c:{i}",
+            "name": "",
+            "art_id": None,
+            "class": "",
+            "type": "",
+            "region": r,
+        }
+        for i, r in enumerate(regions)
+    ]
+    (work / "gallery.json").write_text(json.dumps(meta))
+    np.save(work / "gallery.npy", np.zeros((len(meta), 4, 4, 3), np.uint8))
+    rows = GL.rows_sha256(meta)
+    (work / "gallery-meta.json").write_text(
+        json.dumps({"data_version": data_version, "manifest_sha256": "m", "rows_sha256": rows})
+    )
+    np.save(work / "hub_r_rec.npy", np.zeros(len(meta), np.float32))
+    (work / "hub_r_rec.json").write_text(json.dumps({"rows_sha256": rows}))
+
+
+def test_rebuilding_with_fewer_editions_releases_only_what_was_rebuilt(tmp_path: Path):
+    work = tmp_path / "work"
+    work.mkdir()
+    (work / "rec.w8.onnx").write_bytes(b"rec")
+    (work / "det_det.w8.onnx").write_bytes(b"det")
+    write_gallery(work, ["jp", "en", "jp"], "A")
+    assert rec_index.build(work, "rec", FakeRecogniser())["editions"] == ["jp", "en"]
+    write_gallery(work, ["jp", "jp"], "B")  # a jp-only export
+    assert rec_index.build(work, "rec", FakeRecogniser())["editions"] == ["jp"]
+    assert sorted(p.name for p in (work / "index" / "rec").iterdir()) == [
+        "build.json",
+        "jp.hub",
+        "jp.i8",
+        "jp.json",
+        "jp.scale",
+    ]
+    manifest = release.run(tmp_path / "out", 1, "det", 1, "rec", work)
+    assert list(manifest["index"]) == ["jp"] and manifest["index"]["jp"]["data_version"] == "B"

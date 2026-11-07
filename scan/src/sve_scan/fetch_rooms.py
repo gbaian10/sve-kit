@@ -48,7 +48,7 @@ pick = list(rng.choice(pick, min(32, len(pick)), replace=False))
 for aid in pick:
     name = f"{aid}.hdr"
     meta = {"id": str(aid), "source": f"https://polyhaven.com/a/{aid}", "license": "CC0"}
-    if web.have(name) and name in web.records:
+    if web.complete(name):
         web.download(web.records[name]["url"], name, **meta)
     else:
         web.download(web.json(f"{API}/files/{aid}")["hdri"]["2k"]["hdr"]["url"], name, **meta)

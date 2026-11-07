@@ -29,7 +29,7 @@ for cat, aid in picks:
     seen.add(aid)
     name = f"{aid}.jpg"
     meta = {"id": aid, "category": cat, "source": f"https://polyhaven.com/a/{aid}", "license": "CC0"}
-    if web.have(name) and name in web.records:
+    if web.complete(name):
         web.download(web.records[name]["url"], name, **meta)
         continue
     files = web.json(f"{API}/files/{aid}")

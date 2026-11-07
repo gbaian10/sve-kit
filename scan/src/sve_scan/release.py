@@ -20,7 +20,8 @@ def run(out: Path, det_v: int, det_tag: str, rec_v: int, rec_tag: str, work: Pat
     rec_path = work / f"{rec_tag}.w8.onnx"
     if build["rec_sha256"] != artifacts.sha256(rec_path):
         raise SystemExit(f"the index in {folder} was built with another {rec_path.name}: rerun the index step")
-    indexes = {ed: (folder, ed, build["data_version"]) for ed in artifacts.EDITIONS if (folder / f"{ed}.i8").exists()}
+    # only the editions this build made: files lying in the folder are not evidence of anything
+    indexes = {ed: (folder, ed, build["data_version"]) for ed in build["editions"]}
     return artifacts.release(out, (det_v, work / f"det_{det_tag}.w8.onnx"), (rec_v, rec_path), indexes)
 
 

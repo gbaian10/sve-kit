@@ -55,21 +55,29 @@ class Polite:
     def json(self, url: str) -> Any:
         return json.loads(self._get(url)[0])
 
-    def have(self, name: str) -> bool:
-        return (self.folder / name).exists()
+    def complete(self, name: str) -> bool:
+        """The file is here and its record names where it came from; only then is it never fetched again."""
+        r = self.records.get(name, {})
+        return (self.folder / name).exists() and bool(r.get("url")) and "sha256" in r and "bytes" in r
 
     def download(self, url: str, name: str, **meta: Any) -> Record:
-        """Fetch url into folder/name unless it is there already; return the file's record."""
+        """Fetch url into folder/name unless it is complete already; return the file's record.
+
+        The record reaches manifest.json before the file takes its name, so a run that dies later never
+        leaves a file whose fetch time and ETag are forgotten.
+        """
         dst = self.folder / name
-        if dst.exists() and name in self.records:
+        if self.complete(name):
             self.records[name].update(meta)
+            self.save()
             return self.records[name]
-        if dst.exists():  # downloaded before records were kept: describe the file, admit what is unknown
+        if dst.exists():  # here but never (fully) recorded: describe the file, admit what is unknown
             body, etag, fetched_at = dst.read_bytes(), None, None
         else:
             body, headers = self._get(url)
-            dst.write_bytes(body)
             etag, fetched_at = headers.get("ETag"), datetime.now(UTC).isoformat(timespec="seconds")
+            tmp = dst.with_name(dst.name + ".part")
+            tmp.write_bytes(body)
         record = {
             "file": name,
             **meta,
@@ -80,8 +88,13 @@ class Polite:
             "bytes": len(body),
         }
         self.records[name] = record
+        self.save()
+        if not dst.exists():
+            tmp.replace(dst)
         return record
 
     def save(self) -> None:
         rows = [self.records[k] for k in sorted(self.records)]
-        (self.folder / "manifest.json").write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+        tmp = self.folder / "manifest.json.part"
+        tmp.write_text(json.dumps(rows, ensure_ascii=False, indent=1) + "\n")
+        tmp.replace(self.folder / "manifest.json")
