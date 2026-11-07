@@ -1,0 +1,43 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP09-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          on:
+            phase:
+              which: end
+              whose: self
+          do:
+            - discard:
+                any: true
+                who: self
+                result: discarded
+            - draw:
+                n:
+                  plus:
+                    - count_of: discarded
+                    - 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: deck
+                    op: le
+                    right: 1
+                then:
+                  - win:
+                      who: self

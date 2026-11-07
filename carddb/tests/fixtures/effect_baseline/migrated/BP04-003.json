@@ -1,0 +1,40 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "evolve",
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "op": "pp",
+          "amount": 1
+        }
+      ]
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "win",
+        "side": "self"
+      },
+      "event": "deal_damage",
+      "subject": "self",
+      "trigger_if": {
+        "fn": "and",
+        "args": [
+          {
+            "read": "event.battle"
+          },
+          {
+            "read": "event.to_opposing_leader"
+          }
+        ]
+      }
+    }
+  ]
+}
