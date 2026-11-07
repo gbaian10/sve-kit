@@ -197,7 +197,8 @@ def camera(target: tuple[float, float], rng: np.random.Generator) -> dict:
     az = rng.uniform(0, 2 * math.pi)
     roll = math.radians(rng.normal(0, 12))
     # target card's long side in px, before foreshortening
-    size = (rng.uniform(0.7, 1.6) if rng.random() < ZOOM_P else rng.uniform(0.08, 0.7)) * S
+    # ZOOM_P is tested before drawing so that 0 leaves the earlier random sequence unchanged
+    size = (rng.uniform(0.7, 1.6) if ZOOM_P > 0 and rng.random() < ZOOM_P else rng.uniform(0.08, 0.7)) * S
     d = f * CARD_MM[1] / size
     v = np.array([math.sin(tilt) * math.cos(az), math.sin(tilt) * math.sin(az), math.cos(tilt)])
     cam = np.array([target[0], target[1], 0.0]) + d * v
@@ -931,8 +932,9 @@ def cmd_train(tag: str, iters: int, bs: int) -> None:
                 f"it {it}/{iters} heat {h[:, 0].mean():.3f} corner {h[:, 1].mean():.4f} "
                 f"({(time.time() - t0) / it:.2f} s/it)"
             )
-        if it % 2000 == 0 or it == iters:
+        if it % 2000 == 0:
             torch.save(model.state_dict(), OUT / f"det_{tag}.pt")
+    torch.save(model.state_dict(), OUT / f"det_{tag}.pt")  # also when the last batch was skipped
     rec = recogniser()
     if rec is None:
         log("REC_TAG not set: skipping the phone and burst checks")

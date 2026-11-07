@@ -92,7 +92,8 @@ class RealDet:
         if negative:
             # Negative crops are background-sized, with rejection AFTER rotation.
             # The positive 8–70% object-size constraint has no meaning here.
-            inside = len(self.quads[i]) > 0 and rng.random() < self.inside_p
+            # each share is tested before drawing so that 0 leaves the earlier random sequence unchanged
+            inside = self.inside_p > 0 and len(self.quads[i]) > 0 and rng.random() < self.inside_p
             for _ in range(128):
                 if inside:
                     q = self.quads[i][int(rng.integers(len(self.quads[i])))]
@@ -124,7 +125,8 @@ class RealDet:
             return crop, rotation
         target = self.quads[i][int(rng.integers(len(self.quads[i])))]
         longest = float(np.linalg.norm(np.roll(target, -1, axis=0) - target, axis=1).max())
-        side = longest / float(rng.uniform(0.7, 1.6) if rng.random() < self.zoom_p else rng.uniform(0.08, 0.70))
+        zoom = self.zoom_p > 0 and rng.random() < self.zoom_p
+        side = longest / float(rng.uniform(0.7, 1.6) if zoom else rng.uniform(0.08, 0.70))
         center = target.mean(axis=0) + rng.uniform(-0.12, 0.12, 2) * side
         return np.array(
             [[s / side, 0, s / 2 - center[0] * s / side], [0, s / side, s / 2 - center[1] * s / side]]
