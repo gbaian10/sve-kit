@@ -15,7 +15,7 @@ const REGIONS: readonly (readonly [number, number, number, number])[] = [
 /** Degrees: a region counts only where two printings' hues differ more than this. */
 const FINISH_SPLIT = 25
 /** Degrees: another printing replaces the plain one only when it matches this much better. */
-export const FINISH_MARGIN = 10
+const FINISH_MARGIN = 10
 /** Weight of the newest frame in the running score of the live camera. */
 const FINISH_EMA = 0.3
 
@@ -76,7 +76,7 @@ export function finishOf(
 }
 
 /** Angle between two chroma vectors in degrees: the hue difference. */
-export function hueGap(p: readonly [number, number], q: readonly [number, number]): number {
+function hueGap(p: readonly [number, number], q: readonly [number, number]): number {
   const cos = (p[0] * q[0] + p[1] * q[1]) / Math.max(Math.hypot(...p) * Math.hypot(...q), 1e-6)
   return (Math.acos(Math.max(-1, Math.min(1, cos))) * 180) / Math.PI
 }

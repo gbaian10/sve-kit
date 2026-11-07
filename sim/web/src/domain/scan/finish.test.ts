@@ -1,13 +1,11 @@
 import { describe, expect, it } from "vitest"
 
 import {
-  FINISH_MARGIN,
   finishGroups,
   finishKey,
   finishOf,
   finishScores,
   FinishSmoother,
-  hueGap,
   pickFinish,
 } from "./finish"
 import { parseScanCards } from "./search"
@@ -74,11 +72,6 @@ if (!plain || !sl || !other) throw new Error("fixture cards")
 const group = [plain, sl]
 
 describe("printing frame check", () => {
-  it("measures hue as the angle between chroma vectors", () => {
-    expect(hueGap([1, 0], [0, 1])).toBeCloseTo(90)
-    expect(hueGap([2, 2], [1, 1])).toBeCloseTo(0)
-  })
-
   it("picks the SL printing for an SL card, even under a warm light", () => {
     const scores = finishScores(references, photo(card(PINK, GEMS, [1.2, 1, 0.8])))
     expect(scores).not.toBeNull()
@@ -100,9 +93,9 @@ describe("printing frame check", () => {
     expect(finishScores(same, photo(slImage))).toBeNull()
   })
 
-  it("keeps the plain printing unless another one leads by the margin", () => {
-    expect(pickFinish(group, [20, 20 - FINISH_MARGIN + 0.1], plain)).toBe(plain)
-    expect(pickFinish(group, [20, 20 - FINISH_MARGIN], plain)).toBe(sl)
+  it("keeps the plain printing unless another one leads by 10 degrees", () => {
+    expect(pickFinish(group, [20, 20 - 10 + 0.1], plain)).toBe(plain)
+    expect(pickFinish(group, [20, 20 - 10], plain)).toBe(sl)
     expect(pickFinish(group, [20, 5], other)).toBe(other)
   })
 
