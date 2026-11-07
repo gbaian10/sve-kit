@@ -126,7 +126,10 @@ export function withoutMarks(cards: readonly DeckCard[]): DeckCard[] {
       .slice(0, 4)
       .map(([, size]) => size)
       .sort((a, b) => a - b)
-    const median = near[near.length >> 1]
-    return median === undefined || quadArea(card.quad) >= MARK_AREA * median
+    if (near.length === 0) return true
+    const mid = near.length >> 1
+    const median =
+      near.length % 2 ? (near[mid] ?? 0) : ((near[mid - 1] ?? 0) + (near[mid] ?? 0)) / 2
+    return quadArea(card.quad) >= MARK_AREA * median
   })
 }

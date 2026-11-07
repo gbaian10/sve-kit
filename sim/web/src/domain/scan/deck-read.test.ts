@@ -110,6 +110,18 @@ describe("printed marks", () => {
     expect(withoutMarks([...cards, circle, farCard])).toEqual([...cards, farCard])
   })
 
+  it("takes the middle of an even number of nearby cards", () => {
+    // Areas 10000, 10000, 40000, 40000: the median is 25000, so a 4000 find (16%) stays.
+    const cards = [
+      at(0, 0, 100, 0.7),
+      at(0, 300, 100, 0.7),
+      at(300, 0, 200, 0.7),
+      at(300, 300, 200, 0.7),
+    ]
+    const small = at(200, 200, 63.25, 0.3)
+    expect(withoutMarks([...cards, small])).toContainEqual(small)
+  })
+
   it("keeps small finds that read well, and everything when nothing was read", () => {
     const small = at(120, 150, 20, 0.45)
     expect(withoutMarks([at(0, 0, 100, 0.7), small])).toContainEqual(small)
