@@ -198,7 +198,7 @@ python -m sve_scan det export det-e det_det-e.w8.onnx
 ```bash
 python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # single card: card-level top-1 / top-5
 python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # then eval-deck for deck recall
-python -m sve_scan eval-deck deck-out
+python -m sve_scan eval-deck deck-det-e
 python -m sve_scan eval-det rec-ft det.json det-e:global            # corner finder: useful boxes, corner error
 ```
 

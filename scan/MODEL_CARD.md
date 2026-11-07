@@ -48,6 +48,23 @@ Deck photos from the held-out events in `sve_scan/splits.py` never feed training
 Out of scope: other card games, card grading or condition, telling printings apart that share the same official
 image.
 
+## In the web client
+
+The models run in `sim/web` (`src/domain/scan/`, `src/pages/scan/`); the Python code here only evaluates them.
+
+1. **Corner finder**: around the aiming frame, or on overlapping tiles of a deck photo; each card is straightened
+   to 224×312
+2. **Recogniser**: one vector for the card upright and one turned 180°
+3. **Card index search**: an int8 dot product with every row, computed with WebAssembly SIMD (`dots.wat`; plain
+   JavaScript where the browser lacks SIMD). Score = similarity − `hubWeight` × hub; a card counts as recognised
+   when its similarity reaches `accept` and it leads the next card by `margin` (artifact format)
+4. **Printing check**: the recogniser treats every printing of one art as one card, so the client then compares
+   the frame colours of the straightened card with each printing's official small image (`finish.ts`). It uses
+   hue after a gray-world white balance, in six frame regions, only where the printings differ by more than 25°.
+   Another printing must lead the plain one by 10°; the live camera smooths this over frames. On official images
+   (each printing's large image as the photo, 2,684 same-art groups), SL printings picked themselves 788 of 804
+   times and plain printings 906 of 910; groups whose frames match the plain one stay plain
+
 ## Evaluation
 
 Held-out data only (never used in training). Card level: different printings of the same card count as the
@@ -68,8 +85,9 @@ are not in the denominator, so they are optimistic. The web client's deck reader
 
 ## Limitations
 
-- **Same image, different printing**: printings whose official images are pixel-identical (for example P cards)
-  cannot be told apart; the answer is the plain printing of the same art
+- **Same image, different printing**: SL printings are told apart by their frame colours (see "In the web
+  client"); printings whose official images are pixel-identical (for example P cards) cannot be, and the answer
+  is the plain printing of the same art. Heavy glare or a strong colour cast keeps the plain printing
 - **Small, far cards**: from a side seat, cards far away in the frame are found less often than with the
   previous corner finder (.918 against .973), in exchange for no false boxes on large cards
 - **One row or a single card filling a deck photo**: the deck reader's largest tile is the photo's short side, so
