@@ -6,14 +6,11 @@
 use super::*;
 use sve_engine::game::internal::DecisionView;
 
-fn prepared(with_attack: bool) -> &'static SelectedEffects {
-    static SELECTED: OnceLock<(SelectedEffects, SelectedEffects)> = OnceLock::new();
-    let (exchange, triggered) = SELECTED.get_or_init(|| {
+fn prepared() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
-        input["authors"].as_array_mut().unwrap().retain(|author| {
-            matches!(author["input"]["card_no"].as_str(), Some("CP04-036" | "CP04-106" | "CP04-016" | "BP07-024" | "BP07-T03" | "CP02-T01" | "BP03-T02"))
-        });
-        // Blank companions isolate the printed payment filter from unrelated subscriptions.
+        // Synthetic companions exercise only the printed material predicates.
         for (number, name, kind) in [
             ("query-pecorine", "プリンセス・ペコリーヌ", "フォロワー"),
             ("query-wrong-kind", "ペコリーヌ", "アミュレット"),
@@ -25,17 +22,13 @@ fn prepared(with_attack: bool) -> &'static SelectedEffects {
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
         }
-        let triggered = repository::selection_with_rules_from(&snapshot, &keywords, &input);
-        // The exchange boundary rejects unsupported attack subscriptions even without a holder.
-        input["authors"].as_array_mut().unwrap().retain(|author| author["input"]["card_no"] != "CP04-016");
-        let exchange = repository::selection_with_rules_from(&snapshot, &keywords, &input);
-        (exchange, triggered)
-    });
-    if with_attack { triggered } else { exchange }
+        repository::selection_with_rules_from(&snapshot, &keywords, &input)
+    })
 }
-fn game(initial: &Value, with_attack: bool) -> Game {
+
+fn game(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
-        prepared(with_attack).clone(),
+        prepared().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -91,7 +84,7 @@ fn cp04_036_only_acts_a_matching_follower_and_deals_distinct_damage_to_its_leade
         {"id":"wrong-name","card":"query-enemy"}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"query-enemy"}]);
-    let mut game = game(&initial, false);
+    let mut game = game(&initial);
     let play = game
         .play_internal_card("source", PlayerId { seat: 1 })
         .unwrap();
@@ -122,8 +115,8 @@ fn cp04_106_acts_itself_and_one_other_card_before_moving_the_target_to_its_owner
         {"id":"acted","card":"query-tree","state":{"acted":true}}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"query-enemy"}]);
-    let mut game = game(&initial, false);
-    let ability = prepared(false).current["CP04-106"]
+    let mut game = game(&initial);
+    let ability = prepared().current["CP04-106"]
         .program
         .card()
         .abilities
@@ -165,7 +158,7 @@ fn cp04_016_fanfare_cannot_use_itself_as_the_other_material() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"CP04-016"}]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"fee","card":"query-tree"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"query-enemy"}]);
-    let mut game = game(&initial, true);
+    let mut game = game(&initial);
     let play = game
         .play_internal_card("source", PlayerId { seat: 1 })
         .unwrap();
@@ -233,7 +226,7 @@ fn bp07_024_and_its_corrected_reprint_combine_both_discounts() {
             }
             initial["players"]["P2"]["zones"]["field"] =
                 json!([{"id":"enemy","card":"query-enemy"}]);
-            let mut game = game(&initial, false);
+            let mut game = game(&initial);
             let play = game
                 .play_internal_card("source", PlayerId { seat: 1 })
                 .unwrap();

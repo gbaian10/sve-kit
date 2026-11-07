@@ -5,14 +5,11 @@
 )]
 use super::*;
 
-// Blank companions isolate exchange payment from unrelated event subscriptions.
+// Synthetic material values isolate the printed filters within the complete selection.
 fn selected() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
-        input["authors"].as_array_mut().unwrap().retain(|author| {
-            author["input"]["card_no"].as_str().is_some_and(|number| ["ECP01-036", "BP14-119", "CP02-038", "CP02-T01", "BP03-T02", "BP18-090", "CP02-050", "CP02-SP06a", "BP20-018"].contains(&number))
-        });
         for (number, cost, traits) in [
             ("exchange-high", "7", vec!["ウマ娘"]),
             ("exchange-low", "1", vec!["ウマ娘"]),

@@ -5,22 +5,19 @@
 use super::*;
 use sve_engine::game::internal::DecisionView;
 
-fn prepared(with_tree: bool) -> &'static SelectedEffects {
-    static BASE: OnceLock<SelectedEffects> = OnceLock::new();
-    static TREE: OnceLock<SelectedEffects> = OnceLock::new();
-    let cache = if with_tree { &TREE } else { &BASE };
-    cache.get_or_init(|| {
-        let (mut snapshot,keywords,mut input)=inputs().clone();
-        input["authors"].as_array_mut().unwrap().retain(|author| matches!(author["input"]["card_no"].as_str(),Some("BP01-103"|"BP01-125"|"BP04-T01"|"CP02-T01"|"BP03-T02")) || (with_tree&&author["input"]["card_no"]=="BP07-T03"));
+fn prepared() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+        let (mut snapshot, keywords, mut input) = inputs().clone();
         snapshot.push_str(&json!({"number":"route-neutral","faces":[{"name":"route-neutral","card_class":"ニュートラル","card_type":"フォロワー","traits":[],"cost":"1","power":"1","hp":"20","text":null,"sections":[]}]}).to_string());snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["route-neutral.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"route-neutral":{"status":"complete","abilities":[]}}}).to_string()]));
         repository::selection_with_rules_from(&snapshot,&keywords,&input)
     })
 }
 
-fn board(initial: &Value, with_tree: bool) -> Game {
+fn board(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
-        prepared(with_tree).clone(),
+        prepared().clone(),
         initial,
         &Value::Null,
         &Value::Null,
@@ -164,7 +161,7 @@ fn skeleton_king_both_printings_pay_four_standing_tokens_before_entering_a_full_
             .as_array_mut()
             .unwrap()
             .push(json!({"id":"neutral","card":"route-neutral"}));
-        let mut game = board(&initial, false);
+        let mut game = board(&initial);
         let q = start(&mut game);
         let materials = choose(&mut game, &q, 0);
         pay(&mut game, &materials, "BP04-T01");
@@ -200,7 +197,7 @@ fn skeleton_king_both_printings_pay_four_standing_tokens_before_entering_a_full_
 fn skeleton_king_both_printings_banish_only_the_other_four_ex_materials() {
     for printing in ["BP01-103", "BP01-SL15"] {
         let initial = position(printing, "ex", 0, 4, 0);
-        let mut game = board(&initial, false);
+        let mut game = board(&initial);
         let q = start(&mut game);
         let materials = choose(&mut game, &q, 1);
         pay(&mut game, &materials, "BP01-125");
@@ -238,7 +235,7 @@ fn skeleton_king_rejects_mixed_partial_routes_acted_materials_and_counting_the_e
                     .unwrap()
                     .push(json!({"id":"neutral","card":"route-neutral"}));
             }
-            let mut game = board(&initial, false);
+            let mut game = board(&initial);
             let before = game.projection(View::Referee).unwrap();
             let q = start(&mut game);
             game.answer_internal_card(q.actor, q.token, Answer::OptionalCost(true))
@@ -253,14 +250,14 @@ fn skeleton_king_rejects_mixed_partial_routes_acted_materials_and_counting_the_e
 }
 
 #[test]
-fn skeleton_king_can_decline_at_nine_pp_and_keeps_the_existing_trigger_guard() {
+fn skeleton_king_can_decline_at_nine_pp_with_the_complete_repository_observer_set() {
     let field_only = position("BP01-103", "hand", 4, 0, 0);
-    let mut field_game = board(&field_only, false);
+    let mut field_game = board(&field_only);
     let field_question = start(&mut field_game);
     let materials = choose(&mut field_game, &field_question, 0);
     pay(&mut field_game, &materials, "BP04-T01");
     let initial = position("BP01-103", "hand", 4, 0, 9);
-    let mut game = board(&initial, false);
+    let mut game = board(&initial);
     let q = start(&mut game);
     assert!(
         matches!(
@@ -279,22 +276,5 @@ fn skeleton_king_can_decline_at_nine_pp_and_keeps_the_existing_trigger_guard() {
         after["P1"]["field"].as_array().unwrap().len(),
         5,
         "all four unspent Vipers remain"
-    );
-    let guarded = position("BP01-103", "hand", 4, 0, 0);
-    let mut guarded_game = board(&guarded, true);
-    let before = guarded_game.projection(View::Referee).unwrap();
-    let error = guarded_game
-        .play_internal_card("source", PlayerId { seat: 1 })
-        .unwrap_err();
-    assert!(
-        error
-            .to_string()
-            .contains("exchange payment or material triggers"),
-        "unsupported payment observers keep the existing contract: {error}"
-    );
-    assert_eq!(
-        guarded_game.projection(View::Referee).unwrap(),
-        before,
-        "the existing unsupported trigger scope fails before mutation"
     );
 }

@@ -1,19 +1,16 @@
 use super::play::PlayState;
+use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
-use crate::ir::events::discard as discard_header;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
-    AbilityKind, Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId,
-    Int, MoveMethod, MoveOutcome, Nat, ObjectRef, PlayCostExchange, Posture, PostureEvent,
-    Quantity, QuantityUnit, Selector, ZoneKind,
+    Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId, Int, MoveMethod,
+    MoveOutcome, Nat, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity, QuantityUnit,
+    Selector, ZoneKind,
 };
-use crate::ir::{
-    BanishOutcome, Bool, EventPattern, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId,
-    TriggerCondition,
-};
+use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
 use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
@@ -166,38 +163,7 @@ impl Game {
         if self.card_runtime.quick_start {
             return Err(unsupported("exchange Quick payment"));
         }
-        let routes = exchange
-            .node
-            .routes()
-            .ok_or_else(|| unsupported("exchange routes"))?;
-        let hand_payment = routes
-            .iter()
-            .all(|(_, step)| matches!(step.instruction.action, Action::Discard { .. }));
-        let posture_payment = routes
-            .iter()
-            .all(|(_, step)| matches!(step.instruction.action, Action::Posture { .. }));
-        // Unproven payment observers remain unsafe even when their holder is hidden.
-        for definition in self.card_runtime.definitions.cards.values() {
-            for ability in &definition.card().abilities {
-                if ability.node.trigger.as_ref().is_some_and(|trigger| {
-                    !(matches!(
-                        trigger.on,
-                        TriggerCondition::Event {
-                            pattern: EventPattern::EnterField { .. } | EventPattern::Phase { .. }
-                        }
-                    ) || ((hand_payment || posture_payment)
-                        && matches!(
-                            trigger.on,
-                            TriggerCondition::Event {
-                                pattern: EventPattern::LeaveField { .. }
-                            }
-                        ))
-                        || (hand_payment && discard_header::self_event(trigger).is_some()))
-                }) {
-                    return Err(unsupported("exchange payment or material triggers"));
-                }
-            }
-        }
+        self.check_exchange_observers()?;
         let state = ExchangeState {
             face: face.clone(),
             definition: exchange.node.clone(),
@@ -210,6 +176,26 @@ impl Game {
             self.exchange_candidates(execution, &state.definition, index)?;
         }
         Ok(Some(state))
+    }
+
+    fn check_exchange_observers(&self) -> Result<()> {
+        let dependent = self.card_runtime.definitions.cards.values().any(|card| {
+            card.card()
+                .abilities
+                .iter()
+                .any(static_keywords::payment_dependent)
+        });
+        if dependent {
+            return Err(unsupported(
+                "exchange with PP-dependent continuous declarations",
+            ));
+        }
+        if self.internal_payment_dependent_grants()? {
+            return Err(unsupported(
+                "exchange with PP-dependent granted declarations",
+            ));
+        }
+        Ok(())
     }
 
     pub(super) fn internal_exchange_decision(
@@ -309,18 +295,6 @@ impl Game {
                     matches!(other.zone.as_str(), "field" | "cemetery")
                         && other.state["equipped_to"] == id
                 })
-                || self.internal_printed_abilities(&id)?.iter().any(|ability| {
-                    ability.node.kind == AbilityKind::Triggered
-                        && !(posture
-                            && ability.node.trigger.as_ref().is_some_and(|trigger| {
-                                matches!(
-                                    trigger.on,
-                                    TriggerCondition::Event {
-                                        pattern: EventPattern::LeaveField { .. }
-                                    }
-                                )
-                            }))
-                })
                 || self.restricted(
                     &id,
                     if posture {
@@ -333,7 +307,7 @@ impl Game {
                 )?
             {
                 return Err(unsupported(
-                    "exchange material has unsupported movement, permission or triggers",
+                    "exchange material has unsupported movement or permission",
                 ));
             }
             members.push(execution.reference(self, &id)?);
