@@ -130,6 +130,8 @@ BP11-018 與 BP11-024 為整卡種子；後者選零個目標仍會執行後續�
 
 Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示「A 與 B 各至多 1 張」，每組須寫 `kind`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與エルフ法術）；`groups` 不與 `any_of` 並用。可多選的 Look 選取若要進場，`move: {ref: <選取>, to: field}` 必須緊接在 `choose` 之後、位於同一層本文；選項上限在出題時依空位計算，中間或條件分支內的進場會在載入時拒絕。分組或聯集拿回手牌不受場位限制。
 
+已從自己的 Look 選出的牌可用 `banish: {ref: picked, result: banished}` 消滅（CP03-053）。`result` 只接受這種已選的觀察綁定；其成功 Before 成員可用於 `move: {ref: {in: seen, except: {in: {objects_of: banished, view: before}}}, to: deck, position: bottom, order: chooser}`，扣除實際消滅的牌後，將其餘牌依選擇順序放到牌庫底。不以選取張數或預先計數代替成功回條，也不授權結果的新世代引用。執行時仍須是本次私有 Look 選取的成員、留在自己的牌庫且位置仍已知；未觀察的牌庫、對手的牌庫與直接對整份 Look 的消滅均不接受。墓場或 EX 的公開正式目標可沿用一般 `banish: selected`，不需要先看牌。
+
 「元のコストの合計がN以下になるように」寫成同層的 `cost_sum_le: N`（非負整數常量），限制所選全部卡片的印刷原費合計；費用修正不影響。目前接受 Look 的私有 `choose`（單一篩選或 `any_of` 聯集，CSD02b-002、BP21-025），以及墓場等公開區的正式目標與本文 `choose`（BP22-091）。出題的張數範圍沿用印刷數量；可行性與結算時的最低張數依最便宜的候選能放進合計的張數計算，超過合計的組合在作答時拒絕、題目不變；必要目標放不下時與其他目標不足相同。不與動態張數、領袖候選、手牌私有選取、`groups`、Advance 選擇並用。
 
 `search` 也接受 `cost_sum_le`（BP18-025、ECP01-051），限搬到單一區域的搜尋；可與 `any_of` 篩選、`distinct_by: name` 或 `groups` 並用，合計涵蓋所有找到的卡。單一篩選的搜尋改以一組涵蓋整個篩選後牌庫的分組題目作答，與名稱互異搜尋相同；找不到或少找仍依搜尋規則，超過合計的組合在作答時拒絕。分配到手牌與墓場的搜尋、找到後改放場上的替代搜尋不接受此欄。

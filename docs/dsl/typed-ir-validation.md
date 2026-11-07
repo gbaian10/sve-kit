@@ -278,6 +278,11 @@ Move／Destroy／Banish 的成功 Before 成員可保留原輸入已知的 audie
 成功移動，不授權其目的地、新世代或隱藏身分。MoveAfter／MoveAfterAll 不自動成為
 Public 選擇證據：取代可能把牌移到非公開區域。FlipDown 仍單調撤銷物件證據。
 
+卡片執行器消滅 Look 選取時，沿用同一決定的私有選取成員證據；另外重驗該世代仍在
+控制者自己的牌庫、持有者與控制者均相同，且權威端仍知道其位置。這個檢查不把
+一般 Bound 或已看過但未選取的牌視為授權，也不從 Banish 推定任意牌庫物件公開。
+准入後沿用一般消滅的同批移動與成功回條，Before 差集供原 Look 的剩餘牌排序。
+
 InstallEffect 接受 InstructionStart、Objects 的獨立 affected binding，以及：
 
 - CostModifier 對同一 binding 的 Delta／Set；負常值 Set 尚未接受，動態數值的合法範圍
