@@ -177,7 +177,8 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
       scanner.current = camera
       shownEdition.current = wanted
       const zoomLimit = await camera.start()
-      if (!isCurrent()) {
+      // Whoever stopped the camera meanwhile (a newer start, a failed edition switch) took it away.
+      if (!isCurrent() || scanner.current !== camera) {
         camera.stop()
         return
       }
@@ -192,7 +193,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
       // The edition changed while the camera was starting.
       switchTo(latestEdition.current)
     } catch (cause) {
-      if (!isCurrent()) {
+      if (!isCurrent() || (camera !== null && scanner.current !== camera)) {
         camera?.stop()
         return
       }

@@ -165,6 +165,10 @@ export class CameraScanner {
     } catch {
       // Not every camera can focus continuously; the default focus still works.
     }
+    if (generation !== this.generation) {
+      close()
+      throw new CameraStopped()
+    }
     this.hardwareZoom = capabilities.zoom && capabilities.zoom.max > 1 ? capabilities.zoom : null
     return this.hardwareZoom ? Math.max(this.hardwareZoom.max, 4) : 4
   }

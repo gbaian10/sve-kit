@@ -52,11 +52,18 @@ vi.mock("onnxruntime-web/wasm", () => {
 function stubCamera() {
   const stopped: string[] = []
   let grant: () => void = () => undefined
+  let focused: () => void = () => undefined
+  let holdFocus = false
   const track = {
     stop: () => {
       stopped.push("video")
     },
-    applyConstraints: () => Promise.resolve(),
+    applyConstraints: () =>
+      holdFocus
+        ? new Promise<void>((resolve) => {
+            focused = resolve
+          })
+        : Promise.resolve(),
   }
   const stream = { getTracks: () => [track], getVideoTracks: () => [track] }
   // jsdom has no camera API; give this navigator one for the test.
@@ -77,6 +84,12 @@ function stubCamera() {
     stopped,
     grant: () => {
       grant()
+    },
+    holdFocus: () => {
+      holdFocus = true
+    },
+    focus: () => {
+      focused()
     },
   }
 }
@@ -232,6 +245,31 @@ describe("ScanPage", () => {
     expect(camera.stopped).toEqual([])
     expect(screen.getByRole("button", { name: "鎖定結果" })).toBeInTheDocument()
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+  })
+
+  it("does not come back on after an edition switch stopped a camera still starting", async () => {
+    const user = userEvent.setup()
+    const camera = stubCamera()
+    camera.holdFocus()
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    await page.render()
+    await user.click(await screen.findByRole("button", { name: /開啟相機/ }))
+    camera.grant()
+    await act(() => new Promise((resolve) => setTimeout(resolve, 20)))
+    // The English index is not on this device: the switch stops the camera and offers the download.
+    act(() => {
+      prefsStore.set({ cardEdition: "en" })
+    })
+    expect(await screen.findByRole("button", { name: /下載模型/ })).toBeInTheDocument()
+    await act(async () => {
+      camera.focus()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(screen.queryByRole("button", { name: "鎖定結果" })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /下載模型/ })).toBeInTheDocument()
+    // Stopping a track twice is harmless; what matters is that it stopped.
+    expect(camera.stopped).toContain("video")
   })
 
   it("keeps one camera start at a time and closes it when the page is left", async () => {
