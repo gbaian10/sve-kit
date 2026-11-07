@@ -17,6 +17,28 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
 use serde_json::json;
 
+mod capacity;
+pub(super) use capacity::CapacityWait;
+
+// Planning and committing must agree on each destination's limit.
+const FIELD_CAPACITY: i64 = 5;
+const EX_CAPACITY: i64 = 5;
+
+struct PlannedMove {
+    result_index: usize,
+    id: String,
+    previous: Object,
+    from_kind: ZoneKind,
+    followup: Option<&'static str>,
+    evolution: Option<(String, u64)>,
+    stack_replaced: bool,
+}
+
+struct MovementPlan {
+    moves: Vec<MoveResult>,
+    plans: Vec<PlannedMove>,
+}
+
 /// One authority-only fact. No hidden destination reference is delivered to a player.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MovementFact {
@@ -385,8 +407,12 @@ impl Game {
     }
 
     fn owner_ex_has_room(&self, owner: &str, count: usize) -> Result<bool> {
-        let available = usize::try_from(5_i64.saturating_sub(self.zone_count(owner, "ex")).max(0))
-            .map_err(invalid)?;
+        let available = usize::try_from(
+            EX_CAPACITY
+                .saturating_sub(self.zone_count(owner, "ex"))
+                .max(0),
+        )
+        .map_err(invalid)?;
         if available != 0 && count > available {
             return Err(unsupported("public EX movement needs capacity selection"));
         }
@@ -501,45 +527,22 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn internal_move(
-        &mut self,
-        execution: &mut Execution,
+    fn check_move_members(
+        &self,
+        execution: &Execution,
         instruction: &Instruction,
-        objects: &Selector,
-        movement: Option<(&MoveSpec, MoveReason)>,
+        members: &[ObjectRef],
+        kind: ZoneKind,
+        method: MoveMethod,
+        from_deck_top: bool,
     ) -> Result<()> {
-        if observed_move(&instruction.action) {
-            return self.internal_observed_move(execution, instruction, objects);
-        }
-        let (zone, kind, method) = match movement {
-            None => ("cemetery", ZoneKind::Cemetery, MoveMethod::Destroy),
-            Some((spec, reason)) => {
-                if field_move(spec) && reason == MoveReason::Put {
-                    return self.internal_field_entry(execution, instruction, objects);
-                }
-                let MoveDestination::Owners { zone } = spec.to else {
-                    return Err(unsupported("shared movement destination"));
-                };
-                let (zone, kind) = match zone {
-                    OwnerZone::Cemetery => ("cemetery", ZoneKind::Cemetery),
-                    OwnerZone::Banish => ("banish", ZoneKind::Banish),
-                    OwnerZone::Hand => ("hand", ZoneKind::Hand),
-                    OwnerZone::Ex => ("ex", ZoneKind::Ex),
-                    OwnerZone::Deck => ("deck", ZoneKind::Deck),
-                };
-                if reason != MoveReason::Put {
-                    return Err(unsupported("movement reason"));
-                }
-                (zone, kind, MoveMethod::Put)
-            }
+        let (Action::Move { objects, .. } | Action::Destroy { objects }) = &instruction.action
+        else {
+            return Err(invalid(
+                "movement member validation needs a movement instruction",
+            ));
         };
-        let top = deck_top(&instruction.action);
-        let members = if let Some((player, count)) = top {
-            self.deck_top_members(execution, player, count)?
-        } else {
-            execution.objects(self, objects)?
-        };
-        for &member in &members {
+        for &member in members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation == member.generation.0 {
                 let actor = super::seat_name(execution.context.controller)?;
@@ -581,18 +584,81 @@ impl Game {
                         && execution.is_private_advance_target(objects, member)
                         && self.own_evolve_advance(&object.id, actor)?);
                 if kind == ZoneKind::Ex
-                    && top.is_none()
+                    && !from_deck_top
                     && !special_origin
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "ex")
                 {
                     return Err(unsupported("public field or cemetery movement to EX"));
                 }
-                if top.is_none() && !special_origin {
+                if !from_deck_top && !special_origin {
                     public_zone(&object.zone)?;
                 }
             }
         }
-        let (moves, successful) = self.internal_move_members(
+        Ok(())
+    }
+
+    pub(super) fn internal_move(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+        movement: Option<(&MoveSpec, MoveReason)>,
+    ) -> Result<()> {
+        if observed_move(&instruction.action) {
+            return self.internal_observed_move(execution, instruction, objects);
+        }
+        let (zone, kind, method) = match movement {
+            None => ("cemetery", ZoneKind::Cemetery, MoveMethod::Destroy),
+            Some((spec, reason)) => {
+                if field_move(spec) && reason == MoveReason::Put {
+                    return self.internal_field_entry(execution, instruction, objects);
+                }
+                let MoveDestination::Owners { zone } = spec.to else {
+                    return Err(unsupported("shared movement destination"));
+                };
+                let (zone, kind) = match zone {
+                    OwnerZone::Cemetery => ("cemetery", ZoneKind::Cemetery),
+                    OwnerZone::Banish => ("banish", ZoneKind::Banish),
+                    OwnerZone::Hand => ("hand", ZoneKind::Hand),
+                    OwnerZone::Ex => ("ex", ZoneKind::Ex),
+                    OwnerZone::Deck => ("deck", ZoneKind::Deck),
+                };
+                if reason != MoveReason::Put {
+                    return Err(unsupported("movement reason"));
+                }
+                (zone, kind, MoveMethod::Put)
+            }
+        };
+        let top = deck_top(&instruction.action);
+        let members = if let Some((player, count)) = top {
+            self.deck_top_members(execution, player, count)?
+        } else {
+            execution.objects(self, objects)?
+        };
+        self.check_move_members(
+            execution,
+            instruction,
+            &members,
+            kind,
+            method,
+            top.is_some(),
+        )?;
+        let capacity_plan = if kind == ZoneKind::Ex {
+            Some(self.plan_movements(execution, &members, zone, kind, method, true, None)?)
+        } else {
+            None
+        };
+        let members = if let Some(plan) = &capacity_plan {
+            let Some(chosen) = self.internal_movement_capacity(execution, instruction, plan)?
+            else {
+                return Ok(());
+            };
+            chosen
+        } else {
+            members
+        };
+        let (mut moves, successful) = self.internal_move_members(
             execution,
             &members,
             zone,
@@ -601,6 +667,10 @@ impl Game {
             kind == ZoneKind::Ex,
             movement.and_then(|(spec, _)| spec.position),
         )?;
+        if let Some(plan) = capacity_plan {
+            moves = capacity::complete_receipt(plan.moves, moves);
+            capacity::finish(execution, instruction);
+        }
         let outcome = if method == MoveMethod::Destroy {
             InstructionOutcome::Destroy(DestroyOutcome { successful, moves })
         } else {
@@ -639,14 +709,13 @@ impl Game {
             .collect()
     }
 
-    fn field_entry_has_room(
+    fn check_field_entry(
         &self,
         execution: &Execution,
         members: &[ObjectRef],
         objects: &Selector,
         seat: &str,
-    ) -> Result<bool> {
-        let mut incoming = 0_i64;
+    ) -> Result<()> {
         for &member in members {
             let object = self.object(execution.object_id(member)?)?;
             if object.generation != member.generation.0 {
@@ -688,30 +757,8 @@ impl Game {
             {
                 return Err(unsupported("admitted controller field entry"));
             }
-            incoming = incoming
-                .checked_add(1)
-                .ok_or_else(|| invalid("entry count overflow"))?;
         }
-        if self
-            .zone_count(seat, "field")
-            .checked_add(incoming)
-            .is_none_or(|count| count > 5)
-        {
-            if members.len() == 1
-                && incoming == 1
-                && (matches!(objects, Selector::Bound { .. })
-                    || matches!(objects,
-                Selector::Objects { objects } if matches!(objects.as_slice(),
-                    [ObjectOperand::FollowEventMove { .. } | ObjectOperand::SourceHolder {}]))
-                    || members
-                        .first()
-                        .is_some_and(|member| execution.is_private_look_target(objects, *member)))
-            {
-                return Ok(false);
-            }
-            return Err(unsupported("field entry needs capacity selection"));
-        }
-        Ok(true)
+        Ok(())
     }
 
     fn internal_field_entry(
@@ -761,30 +808,30 @@ impl Game {
                 }
             }
         }
-        if !self.field_entry_has_room(execution, &members, objects, seat)? {
-            let before = *members
-                .first()
-                .ok_or_else(|| invalid("missing returning object"))?;
+        self.check_field_entry(execution, &members, objects, seat)?;
+        if self.zone_count(seat, "field") >= FIELD_CAPACITY {
             execution.receipts.insert(
                 instruction.receipt,
                 InstructionOutcome::Move(MoveOutcome {
-                    moved: vec![MoveResult {
-                        before,
-                        after: None,
-                        requested_to: RuntimeZoneRef {
-                            player: execution.context.controller,
-                            kind: ZoneKind::Field,
-                        },
-                        requested_position: None,
-                        actual_to: None,
-                        actual_position: None,
-                        replacements: vec![],
-                    }],
+                    moved: capacity::failed_field_entry(&members, execution.context.controller),
                 }),
             );
+            capacity::finish(execution, instruction);
             return Ok(());
         }
-        for &member in &members {
+        let plan = self.plan_movements(
+            execution,
+            &members,
+            "field",
+            ZoneKind::Field,
+            MoveMethod::Put,
+            false,
+            None,
+        )?;
+        let Some(selected) = self.internal_movement_capacity(execution, instruction, &plan)? else {
+            return Ok(());
+        };
+        for &member in &selected {
             let id = execution.object_id(member)?.to_owned();
             if self.object(&id)?.generation == member.generation.0
                 && self.internal_ward_entry_choice(execution, &id)?
@@ -797,7 +844,7 @@ impl Game {
         }
         let (moved, _) = self.internal_move_members(
             execution,
-            &members,
+            &selected,
             "field",
             ZoneKind::Field,
             MoveMethod::Put,
@@ -809,6 +856,8 @@ impl Game {
                 self.internal_ward_entry_posture(execution, member.before)?;
             }
         }
+        let moved = capacity::complete_receipt(plan.moves, moved);
+        capacity::finish(execution, instruction);
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Move(MoveOutcome { moved }),
@@ -878,15 +927,35 @@ impl Game {
         let Action::Move { movement: spec, .. } = &instruction.action else {
             return Err(unsupported("observed move action"));
         };
-        if matches!(&spec.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Ex) {
-            let available =
-                usize::try_from(5_i64.saturating_sub(self.zone_count(seat, "ex")).max(0))
-                    .map_err(invalid)?;
-            if available > 0 && members.len() > available {
-                return Err(unsupported("observed move needs a capacity selection"));
-            }
+        let capacity_plan = if matches!(&spec.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Ex)
+            && self.zone_count(seat, "ex") < EX_CAPACITY
+        {
+            Some(self.plan_movements(
+                execution,
+                &members,
+                "ex",
+                ZoneKind::Ex,
+                MoveMethod::Put,
+                false,
+                None,
+            )?)
+        } else {
+            None
+        };
+        let members = if let Some(plan) = &capacity_plan {
+            let Some(chosen) = self.internal_movement_capacity(execution, instruction, plan)?
+            else {
+                return Ok(());
+            };
+            chosen
+        } else {
+            members
+        };
+        let mut moved = self.internal_search_move(execution, &members, &spec.to, player)?;
+        if let Some(plan) = capacity_plan {
+            moved = capacity::complete_receipt(plan.moves, moved);
+            capacity::finish(execution, instruction);
         }
-        let moved = self.internal_search_move(execution, &members, &spec.to, player)?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Move(MoveOutcome { moved }),
@@ -895,34 +964,20 @@ impl Game {
     }
 
     #[expect(
-        clippy::too_many_lines,
         clippy::too_many_arguments,
-        clippy::cognitive_complexity,
-        reason = "Planning, replacements, generations and receipts commit at one atomic boundary."
+        reason = "The pure proposal uses exactly the atomic movement commit's inputs."
     )]
-    pub(super) fn internal_move_members(
-        &mut self,
-        execution: &mut Execution,
+    fn plan_movements(
+        &self,
+        execution: &Execution,
         members: &[ObjectRef],
         zone: &str,
         kind: ZoneKind,
         method: MoveMethod,
         owner_ex: bool,
         position: Option<Position>,
-    ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
-        let old_deck = if kind == ZoneKind::Deck {
-            self.state
-                .objects
-                .values()
-                .filter(|object| object.zone == "deck")
-                .map(|object| (object.id.clone(), object.owner.clone()))
-                .collect::<Vec<_>>()
-        } else {
-            Vec::new()
-        };
-        let snapshot = SnapshotId(self.state.ir_epoch);
+    ) -> Result<MovementPlan> {
         let mut moves = Vec::new();
-        let mut successful = Vec::new();
         let mut plans = Vec::new();
         for &before in members {
             let id = execution.object_id(before)?.to_owned();
@@ -973,27 +1028,59 @@ impl Game {
                 self.departure_followup(execution, &previous, zone, evolution.is_some())?;
 
             let stack_replaced = self.stack_replaces_departure(&id, zone)?;
-            plans.push((
-                moves.len().saturating_sub(1),
+            plans.push(PlannedMove {
+                result_index: moves.len().saturating_sub(1),
                 id,
                 previous,
                 from_kind,
                 followup,
                 evolution,
                 stack_replaced,
-            ));
+            });
         }
+        Ok(MovementPlan { moves, plans })
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        clippy::too_many_arguments,
+        reason = "Replacements, generations and receipts commit at one atomic boundary."
+    )]
+    pub(super) fn internal_move_members(
+        &mut self,
+        execution: &mut Execution,
+        members: &[ObjectRef],
+        zone: &str,
+        kind: ZoneKind,
+        method: MoveMethod,
+        owner_ex: bool,
+        position: Option<Position>,
+    ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
+        let old_deck = if kind == ZoneKind::Deck {
+            self.state
+                .objects
+                .values()
+                .filter(|object| object.zone == "deck")
+                .map(|object| (object.id.clone(), object.owner.clone()))
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
+        let snapshot = SnapshotId(self.state.ir_epoch);
+        let MovementPlan {
+            mut moves,
+            mut plans,
+        } = self.plan_movements(execution, members, zone, kind, method, owner_ex, position)?;
+        let mut successful = Vec::new();
         if owner_ex {
             let mut arrivals = BTreeMap::<String, usize>::new();
-            for (_, _, previous, ..) in plans.iter().filter(|plan| !plan.6) {
+            for PlannedMove { previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced) {
                 let count = arrivals.entry(previous.owner.clone()).or_default();
                 *count = count.saturating_add(1);
             }
             for (owner, count) in arrivals {
                 if !self.owner_ex_has_room(&owner, count)? {
-                    plans.retain(|(_, _, previous, _, _, _, stack_replaced)| {
-                        *stack_replaced || previous.owner != owner
-                    });
+                    plans.retain(|plan| plan.stack_replaced || plan.previous.owner != owner);
                 }
             }
         }
@@ -1001,18 +1088,15 @@ impl Game {
             let mut owners = BTreeSet::new();
             if plans
                 .iter()
-                .filter(|plan| !plan.6)
-                .any(|(_, _, previous, ..)| !owners.insert(&previous.owner))
+                .filter(|plan| !plan.stack_replaced)
+                .any(|plan| !owners.insert(&plan.previous.owner))
             {
                 return Err(unsupported(
                     "simultaneous deck placement needs an order choice",
                 ));
             }
         }
-        let ids = plans
-            .iter()
-            .map(|(_, id, _, _, _, _, _)| id.clone())
-            .collect::<Vec<_>>();
+        let ids = plans.iter().map(|plan| plan.id.clone()).collect::<Vec<_>>();
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
         if method == MoveMethod::Destroy {
@@ -1049,7 +1133,8 @@ impl Game {
         }
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
-            for (_, id, previous, ..) in plans.iter().filter(|plan| !plan.6) {
+            for PlannedMove { id, previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced)
+            {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != previous.owner {
                         knowledge.located.remove(id);
@@ -1064,7 +1149,16 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after_snapshot = SnapshotId(self.state.ir_epoch);
         let group = self.group();
-        for (index, id, previous, from_kind, followup, evolution, stack_replaced) in plans {
+        for PlannedMove {
+            result_index: index,
+            id,
+            previous,
+            from_kind,
+            followup,
+            evolution,
+            stack_replaced,
+        } in plans
+        {
             self.check_evolution_return(evolution.as_ref())?;
             let current = self.object(&id)?;
             if stack_replaced {

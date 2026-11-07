@@ -162,6 +162,7 @@ impl Game {
                                 handle,
                                 card: self.object(&candidate)?.card.clone(),
                                 name: self.card_name(&candidate)?,
+                                object: None,
                             });
                         }
                     }

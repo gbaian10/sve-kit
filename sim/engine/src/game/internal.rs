@@ -525,6 +525,7 @@ enum Wait {
         receipt: ReceiptId,
     },
     TokenCapacity(Box<tokens::CapacityWait>),
+    MovementCapacity(Box<movement::CapacityWait>),
     Distribution(allocation::DistributionWait),
     Order(ordering::OrderWait),
     DamageReplacements(Box<damage::DamageRun>),
@@ -555,6 +556,7 @@ pub(super) struct Execution {
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_discards: BTreeMap<ReceiptId, Vec<ObjectRef>>,
+    movement_capacity: BTreeMap<(ReceiptId, u32), Vec<ObjectRef>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: Vec<Fact>,
@@ -736,6 +738,7 @@ impl Game {
                 slots: BTreeMap::new(),
                 receipts: BTreeMap::new(),
                 cost_discards: BTreeMap::new(),
+                movement_capacity: BTreeMap::new(),
                 material_selections: BTreeMap::new(),
                 effect_evolution_destinations: BTreeMap::new(),
                 facts: Vec::new(),
@@ -971,6 +974,11 @@ impl Game {
                     rollback = execution.origin.take();
                     self.internal_token_capacity_answer(&mut execution, &wait, &prints)?;
                 }
+                (Wait::MovementCapacity(wait), Answer::SearchPartition(handles)) => {
+                    let chosen = wait.validate(&handles)?;
+                    rollback = execution.origin.take();
+                    self.internal_movement_capacity_answer(&mut execution, &wait, chosen)?;
+                }
                 (Wait::Modes(wait), Answer::Modes(modes)) => {
                     if !wait.chosen.accepts_answer(wait.count, &modes) {
                         return Err(invalid("invalid mode selection"));
@@ -1140,7 +1148,7 @@ impl Game {
                 InputDomain::DamageReplacements(options) => json!({"kind":"damage-replacements","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"name":option.name,"line":option.line})).collect::<Vec<_>>()}),
                 InputDomain::Order(cards) => json!({"kind":"order","cards":cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::Search(domain) => search::packet(&domain),
-                InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
+                InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(ordering::card_packet).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
                 InputDomain::Distribution(domain) => allocation::packet(&domain),
                 InputDomain::SearchReplacement => json!({"kind":"search-replacement","options":["original","replacement"]}),
             };

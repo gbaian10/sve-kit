@@ -423,14 +423,6 @@ fn invalid_advance_entry_and_ordinary_play_are_atomic() {
             (initial(seat, "evolve_deck", other), ZoneKind::Evolve),
             (initial(seat, "cemetery", seat), ZoneKind::Cemetery),
         ];
-        let mut full = initial(seat, "evolve_deck", seat);
-        for n in 0_u8..4_u8 {
-            full["players"][seat]["zones"]["field"]
-                .as_array_mut()
-                .unwrap()
-                .push(json!({"id":format!("filler{n}"),"card":"producer"}));
-        }
-        cases.push((full, ZoneKind::Evolve));
         let mut wrong_time = initial(seat, "evolve_deck", seat);
         wrong_time["turn"]["phase"] = json!("end");
         cases.push((wrong_time, ZoneKind::Evolve));
@@ -465,6 +457,60 @@ fn invalid_advance_entry_and_ordinary_play_are_atomic() {
             views(&game),
             before,
             "neither direct play nor an invented AdvanceActivate bypasses the effect"
+        );
+    }
+}
+
+#[test]
+fn full_field_advance_entry_resolves_without_moving_or_triggering() {
+    for seat in ["P1", "P2"] {
+        let mut full = initial(seat, "evolve_deck", seat);
+        for n in 0_u8..4_u8 {
+            full["players"][seat]["zones"]["field"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":format!("filler{n}"),"card":"producer"}));
+        }
+        let mut game = game(&full, entry(ZoneKind::Evolve), "フォロワー・アドバンス");
+        let before = game.projection(View::Referee).unwrap();
+        let result = resolved(
+            game.activate_internal_card("producer", AbilityId(1), actor(seat))
+                .unwrap(),
+        );
+        assert!(
+            result
+                .progress
+                .facts
+                .iter()
+                .all(|fact| !matches!(fact, Fact::Movement(_))),
+            "CR 4.4.4.2 leaves the incoming Advance unmoved when no field slot remains"
+        );
+        assert!(
+            matches!(result.progress.receipts.get(&ReceiptId(1)),
+            Some(InstructionOutcome::Move(outcome)) if outcome.moved.len() == 1 && outcome.moved[0].after.is_none()),
+            "the legal no-op records an unsuccessful arrival"
+        );
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            after[seat]["field"], before[seat]["field"],
+            "the full field is unchanged"
+        );
+        assert_eq!(
+            after[seat]["evolve_deck"], before[seat]["evolve_deck"],
+            "the incoming card stays in the evolve deck"
+        );
+        assert_eq!(
+            after["objects"]["incoming"]["generation"], 0_u8,
+            "no new generation is created"
+        );
+        assert_eq!(
+            after[seat]["pp"]["current"], 10_u8,
+            "the effect pays no card play cost"
+        );
+        game.resume_internal_card().unwrap();
+        assert!(
+            game.internal_pending_choice().unwrap().is_none(),
+            "an unsuccessful arrival creates no fanfare"
         );
     }
 }

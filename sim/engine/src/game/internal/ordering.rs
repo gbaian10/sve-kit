@@ -21,6 +21,7 @@ use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
 };
 use alloc::collections::BTreeSet;
+use serde_json::json;
 
 /// Printed information attached to a handle valid only with its decision token.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -31,6 +32,16 @@ pub struct OrderCard {
     pub card: String,
     /// Adopted rules name from the same catalogue.
     pub name: String,
+    /// Public capacity choices must distinguish copies with different current states.
+    pub object: Option<String>,
+}
+
+pub(super) fn card_packet(card: &OrderCard) -> serde_json::Value {
+    let mut packet = json!({"handle":card.handle,"card":card.card,"name":card.name});
+    if let Some(object) = &card.object {
+        packet["object"] = json!(object);
+    }
+    packet
 }
 
 #[derive(Clone, Debug)]
@@ -675,6 +686,7 @@ impl Game {
                 handle: u64::try_from(index).map_err(invalid)?,
                 card: current.card.clone(),
                 name: self.card_name(id)?,
+                object: None,
             });
         }
         let decision = *decision;
