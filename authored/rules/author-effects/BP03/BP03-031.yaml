@@ -1,0 +1,60 @@
+cards:
+  BP03-031:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              exists:
+                kind: follower
+                trait: プリンセス
+                who: self
+                zone: field
+      - line: 2
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        on: ally
+                        power: 1
+                    - optional:
+                        do:
+                          - counter:
+                              delta: 1
+                              name: 童話カウンター
+                              on: ally
+                  - - move:
+                        ref: returned
+                        to: deck
+                    - shuffle:
+                        who: self
+                    - draw:
+                        n: 1
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: returned
+              from:
+                class: ロイヤル
+                kind: follower
+                who: self
+                zone: cemetery
+              option: 2
+              upto: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
