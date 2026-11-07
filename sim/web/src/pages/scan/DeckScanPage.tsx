@@ -143,8 +143,14 @@ const kept: {
   message: null,
 }
 
+/** A browser error's name ("NotAllowedError"); DOMException is not an Error everywhere. */
 function errorName(error: unknown): string {
-  return error instanceof Error ? error.name : String(error)
+  return typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    typeof error.name === "string"
+    ? error.name
+    : String(error)
 }
 
 export interface DeckScanPageProps {

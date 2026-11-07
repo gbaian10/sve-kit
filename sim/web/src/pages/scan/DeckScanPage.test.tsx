@@ -1,4 +1,4 @@
-import { act, renderHook, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, renderHook, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { I18nextProvider } from "react-i18next"
@@ -13,6 +13,7 @@ import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter, renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
+import { stubCanvas2d } from "../../test-utils/canvas-2d"
 import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
 import { useScannedDeckShare } from "./deck-share"
 import { DeckScanPage } from "./DeckScanPage"
@@ -47,10 +48,17 @@ vi.mock("onnxruntime-web/wasm", () => {
     outputNames: model.startsWith("det") ? ["heat", "corners"] : ["embedding"],
     run: (feeds: { image: Tensor }) => {
       if (!model.startsWith("det")) {
-        // Every sample reads as the first card of the synthetic index.
+        // Cards (four samples each) take turns: a sure BP01-001; a tie of BP01-001 and BP01-002,
+        // guessed from the sure one; a tie of BP01-002 and BP01-003, left unsure.
         const count = feeds.image.dims[0] ?? 0
         const data = new Float32Array(count * 4)
-        for (let at = 0; at < count; at += 1) data[at * 4] = 1
+        const half = Math.SQRT1_2
+        const kinds = [
+          [1, 0, 0, 0],
+          [half, half, 0, 0],
+          [0, half, half, 0],
+        ]
+        for (let at = 0; at < count; at += 1) data.set(kinds[Math.floor(at / 4) % 3] ?? [], at * 4)
         return Promise.resolve({ embedding: { data } })
       }
       if (!finder.hold) return Promise.resolve(output())
@@ -70,39 +78,6 @@ vi.mock("onnxruntime-web/wasm", () => {
     },
   }
 })
-
-/** jsdom has no 2D canvas: a stand-in that draws nothing and reads back blank pixels. */
-function stubCanvas() {
-  const methods: Record<string, unknown> = {
-    getImageData: (_x: number, _y: number, width: number, height: number) => ({
-      width,
-      height,
-      data: new Uint8ClampedArray(width * height * 4),
-    }),
-    measureText: () => ({ width: 10 }),
-  }
-  const context = new Proxy(methods, {
-    get: (target, key: string): unknown => target[key] ?? (() => undefined),
-    set: () => true,
-  })
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
-    context as unknown as CanvasRenderingContext2D,
-  )
-  vi.stubGlobal("createImageBitmap", () => Promise.resolve({ width: 800, height: 600 }))
-  vi.stubGlobal(
-    "ImageData",
-    class {
-      readonly data: Uint8ClampedArray
-      readonly width: number
-      readonly height: number
-      constructor(data: Uint8ClampedArray, width: number, height: number) {
-        this.data = data
-        this.width = width
-        this.height = height
-      }
-    },
-  )
-}
 
 /** A computer camera whose permission prompts answer when the test says so. */
 function stubCameras() {
@@ -222,7 +197,7 @@ describe("DeckScanPage", () => {
 
   it("drops a reading still running when the photo is cleared", async () => {
     const user = userEvent.setup({ applyAccept: false })
-    stubCanvas()
+    stubCanvas2d()
     const page = setup()
     for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
     const { container } = await page.render()
@@ -246,7 +221,7 @@ describe("DeckScanPage", () => {
 
   it("lets a new reading start after switching edition away and back during one", async () => {
     const user = userEvent.setup({ applyAccept: false })
-    stubCanvas()
+    stubCanvas2d()
     const page = setup()
     for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
     const { container } = await page.render()
@@ -271,7 +246,7 @@ describe("DeckScanPage", () => {
 
   it("reopens the candidates on coming back from a card page, and Back then closes them", async () => {
     const user = userEvent.setup({ applyAccept: false })
-    stubCanvas()
+    stubCanvas2d()
     finder.card = true
     const page = setup()
     for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
@@ -319,6 +294,133 @@ describe("DeckScanPage", () => {
     expect(dialog).toContainElement(document.activeElement as HTMLElement)
     unmount()
     expect(cameras.stopped).toEqual([0])
+  })
+
+  it("lists the photo's cards and lets them be sorted, dimmed, confirmed, corrected and shared", async () => {
+    const user = userEvent.setup({ applyAccept: false })
+    stubCanvas2d()
+    finder.card = true
+    const written: string[] = []
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: {
+        writeText: (text: string) => {
+          written.push(text)
+          return Promise.resolve()
+        },
+        read: () => Promise.resolve([{ types: ["text/plain"] }]),
+      },
+    })
+    const page = setup()
+    for (const part of SCAN_PARTS) await page.store.download(part, "jp", () => undefined)
+    const { container } = await page.render()
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]:not([capture])')
+    if (!input) throw new Error("file input")
+    await user.upload(input, new File(["png"], "deck.png", { type: "image/png" }))
+    await user.click(await screen.findByRole("button", { name: "開始讀取" }))
+    expect(await screen.findByText(/^讀出 \d+ 張/u, {}, { timeout: 20_000 })).toBeInTheDocument()
+
+    const counts = screen.getByRole("group", { name: "顏色（按一下變灰）" })
+    const [ok, guess, unsure] = within(counts).getAllByRole("button")
+    expect(ok).toHaveTextContent(/認出 [1-9]/u)
+    expect(guess).toHaveTextContent(/推測 [1-9]/u)
+    expect(unsure).toHaveTextContent(/\?\?\? [1-9]/u)
+    await user.click(unsure as HTMLElement)
+    expect(unsure).toHaveAttribute("aria-pressed", "false")
+
+    await user.click(screen.getByRole("radio", { name: "依卡名" }))
+    expect(screen.getAllByText(/×\d+/u).length).toBeGreaterThan(0)
+    await user.click(screen.getByRole("radio", { name: "依編號" }))
+
+    const gap = screen.getByRole("spinbutton", { name: "推測差距上限" })
+    await user.clear(gap)
+    await user.type(gap, "0.1")
+    await user.click(screen.getByRole("button", { name: /全部確認/ }))
+    expect(await screen.findByText(/張推測（差距 ≤ 0.10）確認為認出/u)).toBeInTheDocument()
+    expect(within(counts).getAllByRole("button")[1]).toHaveTextContent("推測 0")
+
+    // An unsure card: pick its second candidate, then remove another one.
+    await user.click(screen.getAllByRole("button", { name: /\?\?\? 可能是/u })[0] as HTMLElement)
+    const picker = await screen.findByRole("dialog", { name: "照片裡的這張是？" })
+    const choices = within(picker)
+      .getAllByRole("button")
+      .filter((button) => /\d\.\d\d/u.test(button.textContent))
+    await user.click(choices[1] as HTMLElement)
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "照片裡的這張是？" })).not.toBeInTheDocument()
+    })
+    const before = screen.getAllByRole("button", { name: /#\d+/u }).length
+    await user.click(screen.getAllByRole("button", { name: /#\d+/u })[0] as HTMLElement)
+    await user.click(await screen.findByRole("button", { name: /不是卡/ }))
+    await waitFor(() => {
+      expect(screen.getAllByRole("button", { name: /#\d+/u })).toHaveLength(before - 1)
+    })
+
+    // Sharing: a code, a link and the text list, each copied as shown.
+    const share = screen.getByRole("region", { name: "存成牌組或分享" })
+    expect(
+      within(share)
+        .getByRole("link", { name: /在組牌頁開啟/ })
+        .getAttribute("href"),
+    ).toMatch(/^\/decks\/import\?d=/u)
+    for (const tab of ["牌組代碼", "分享連結", "文字清單"]) {
+      await user.click(within(share).getByRole("radio", { name: tab }))
+      const copy = await within(share).findByRole("button", { name: "複製" })
+      await waitFor(() => {
+        expect(copy).toBeEnabled()
+      })
+      await user.click(copy)
+    }
+    expect(written[0]).toMatch(/^SVEK-/u)
+    expect(written[1]).toMatch(/\/decks\/import\?d=SVEK-/u)
+    expect(written[2]).toMatch(/^# 拍照讀取的牌組\n\d+ BP01-00\d /u)
+
+    // Pasting finds no picture on the clipboard.
+    await user.click(screen.getByRole("button", { name: "清掉照片" }))
+    await user.click(screen.getByRole("button", { name: "從剪貼簿貼上" }))
+    expect(await screen.findByRole("status")).toHaveTextContent("剪貼簿裡沒有圖片")
+  }, 60_000)
+
+  it("takes a dropped photo, and explains clipboard and format problems", async () => {
+    stubCanvas2d()
+    const { container } = await setup().render()
+    const zone = screen.getByRole("button", { name: "選擇照片" }).closest("div.border-dashed")
+    if (!zone) throw new Error("drop zone")
+    const file = new File(["png"], "deck.png", { type: "image/png" })
+    fireEvent.dragOver(zone)
+    fireEvent.drop(zone, { dataTransfer: { files: [file] } })
+    expect(await screen.findByRole("status")).toHaveTextContent("已載入照片 800×600")
+    await userEvent.click(screen.getByRole("button", { name: "清掉照片" }))
+
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { read: () => Promise.reject(new DOMException("denied", "NotAllowedError")) },
+    })
+    await userEvent.click(screen.getByRole("button", { name: "從剪貼簿貼上" }))
+    expect(await screen.findByRole("status")).toHaveTextContent("讀不到剪貼簿（NotAllowedError）")
+
+    // Neither decoder reads it (as with HEIC on a desktop browser).
+    vi.stubGlobal("createImageBitmap", () => Promise.reject(new Error("unsupported")))
+    vi.stubGlobal(
+      "Image",
+      class {
+        onerror: (() => void) | null = null
+        onload: (() => void) | null = null
+        set src(_value: string) {
+          setTimeout(() => this.onerror?.(), 0)
+        }
+      },
+    )
+    const RealImage = globalThis.Image
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: () => "blob:x" })
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: () => undefined })
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]:not([capture])')
+    if (!input) throw new Error("file input")
+    await userEvent
+      .setup({ applyAccept: false })
+      .upload(input, new File(["heic"], "deck.heic", { type: "image/heic" }))
+    expect(await screen.findByRole("status")).toHaveTextContent("（image/heic）")
+    vi.stubGlobal("Image", RealImage)
   })
 
   it("closes every camera a repeated request opened", async () => {

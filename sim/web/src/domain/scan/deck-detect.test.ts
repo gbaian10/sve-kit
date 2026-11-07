@@ -76,6 +76,15 @@ describe("deck card finding", () => {
     expect(merged.every((box) => box.quad[1][0] - box.quad[0][0] === 63)).toBe(true)
   })
 
+  it("keeps the typical-sized box when a small find sits inside a card", () => {
+    const row = [0, 80, 160, 240, 320].map((x) => cardAt(x, 0))
+    // The art of the second card found as a card of its own.
+    const art = cardAt(95, 20, 30, 0.95)
+    const merged = mergeDeckBoxes([...row, art])
+    expect(merged).toHaveLength(5)
+    expect(merged.map((box) => box.quad[0][0])).toEqual([0, 80, 160, 240, 320])
+  })
+
   it("tells a card lying on its side and turns its corners a quarter", () => {
     const upright = cardAt(0, 0).quad
     expect(lyingSideways(upright)).toBe(false)
