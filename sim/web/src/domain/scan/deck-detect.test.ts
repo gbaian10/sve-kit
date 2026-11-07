@@ -6,7 +6,9 @@ import {
   lyingSideways,
   mergeDeckBoxes,
   placeTileFinds,
+  placeWholeFinds,
   turnedQuarter,
+  wholeTile,
 } from "./deck-detect"
 import type { Quad } from "./tensor"
 
@@ -69,20 +71,79 @@ describe("deck card finding", () => {
     ])
   })
 
-  it("drops a box that swallows two neighbouring cards", () => {
+  it("drops a weaker box that swallows two neighbouring cards", () => {
     const row = [0, 80, 160, 240, 320].map((x) => cardAt(x, 0))
-    const merged = mergeDeckBoxes([...row, cardAt(0, 0, 140, 0.95)])
+    const merged = mergeDeckBoxes([...row, cardAt(0, 0, 140, 0.5)])
     expect(merged).toHaveLength(5)
     expect(merged.every((box) => box.quad[1][0] - box.quad[0][0] === 63)).toBe(true)
   })
 
-  it("keeps the typical-sized box when a small find sits inside a card", () => {
+  it("keeps the surer box when a small find sits inside a card", () => {
     const row = [0, 80, 160, 240, 320].map((x) => cardAt(x, 0))
     // The art of the second card found as a card of its own.
-    const art = cardAt(95, 20, 30, 0.95)
+    const art = cardAt(95, 20, 30, 0.5)
     const merged = mergeDeckBoxes([...row, art])
     expect(merged).toHaveLength(5)
     expect(merged.map((box) => box.quad[0][0])).toEqual([0, 80, 160, 240, 320])
+  })
+
+  it("keeps a big card among small printed marks, judging sizes by the sure finds", () => {
+    // A near card on a mat: number circles and print around it are found weakly and small.
+    const marks = [0, 40, 80, 120, 160, 200].map((x) => cardAt(x, 400, 20, 0.45))
+    const far = [0, 80, 160].map((x) => cardAt(x, 0))
+    const near = cardAt(300, 300, 200)
+    const merged = mergeDeckBoxes([...far, ...marks, near])
+    expect(merged).toContainEqual(near)
+    // Far smaller than the sure cards near them: not cards.
+    expect(merged.filter((box) => box.score < 0.5)).toEqual([])
+  })
+
+  it("keeps a big card on its own but drops a big box holding two cards", () => {
+    const row = [0, 80, 160, 240].map((x) => cardAt(x, 0))
+    const alone = cardAt(500, 0, 200)
+    // Holds the centres of two cards without covering half of either.
+    const merged: Box = {
+      score: 0.9,
+      quad: [
+        [25, 30],
+        [120, 30],
+        [120, 200],
+        [25, 200],
+      ],
+    }
+    const kept = mergeDeckBoxes([...row, alone, merged])
+    expect(kept).toContainEqual(alone)
+    expect(kept).not.toContainEqual(merged)
+  })
+
+  it("keeps the only sure card when nothing else sets the size", () => {
+    const sure = cardAt(80, 80)
+    // Weak finds whose centres fall inside it, each covering only a corner of it.
+    const weak = [
+      cardAt(49.5, 37, 63, 0.5),
+      cardAt(110.5, 123, 63, 0.5),
+      cardAt(300, 80, 63, 0.5),
+      cardAt(450, 80, 63, 0.5),
+    ]
+    expect(mergeDeckBoxes([sure, ...weak])).toContainEqual(sure)
+  })
+
+  it("keeps the card when a find inside it is just as sure", () => {
+    const row = [0, 80, 160, 240, 320].map((x) => cardAt(x, 0))
+    const art = cardAt(95, 20, 30, 0.9)
+    expect(mergeDeckBoxes([...row, art]).map((box) => box.quad[0][0])).toEqual([
+      0, 80, 160, 240, 320,
+    ])
+  })
+
+  it("adds whole-photo finds only for cards too big for the tiles", () => {
+    expect(wholeTile(800, 600)).toEqual({ x: 0, y: -100, side: 800 })
+    // In the 256-pixel finder input: one card 100 px tall (about 312 photo px), one 40 px.
+    const big = cardAt(20, 20, 72)
+    const small = cardAt(150, 150, 29)
+    const placed = placeWholeFinds([big, small], 800, 600, 256)
+    expect(placed).toHaveLength(1)
+    expect(placed[0]?.quad[0]).toEqual([62.5, -37.5])
   })
 
   it("tells a card lying on its side and turns its corners a quarter", () => {

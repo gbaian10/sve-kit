@@ -4,7 +4,9 @@ import {
   lyingSideways,
   mergeDeckBoxes,
   placeTileFinds,
+  placeWholeFinds,
   turnedQuarter,
+  wholeTile,
 } from "../../domain/scan/deck-detect"
 import {
   chooseReading,
@@ -107,6 +109,16 @@ async function findCards(
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
   }
+  // The whole photo once more, on its average colour, for cards too big for the tiles.
+  const whole = wholeTile(photo.width, photo.height)
+  ctx.drawImage(photo, 0, 0, photo.width, photo.height, 0, 0, 1, 1)
+  const [r = 0, g = 0, b = 0] = ctx.getImageData(0, 0, 1, 1).data
+  ctx.fillStyle = `rgb(${String(r)} ${String(g)} ${String(b)})`
+  ctx.fillRect(0, 0, size, size)
+  const k = size / whole.side
+  ctx.drawImage(photo, -whole.x * k, -whole.y * k, photo.width * k, photo.height * k)
+  const finds = await engine.detect(ctx.getImageData(0, 0, size, size).data, FIND_THRESHOLD)
+  boxes.push(...placeWholeFinds(finds, photo.width, photo.height, size))
   return mergeDeckBoxes(boxes)
 }
 
