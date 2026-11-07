@@ -1,0 +1,52 @@
+cards:
+  CP04-116:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          cost:
+            to_ex:
+              n: 1
+              sel:
+                trait: プリコネ
+                who: self
+                zone: hand
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 2
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
