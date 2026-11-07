@@ -16,6 +16,7 @@ pub(super) fn lower(
     let ast::PlayCosts {
         define,
         cannot_if,
+        playable_from,
         cost_delta,
         cost_set,
         additional_cost,
@@ -30,6 +31,7 @@ pub(super) fn lower(
         .ok_or_else(|| unsupported(path))?;
     if !define.is_empty()
         || cannot_if.is_some()
+        || playable_from.is_some()
         || cost_set.is_some()
         || additional_cost.is_some()
         || optional_cost.is_some()

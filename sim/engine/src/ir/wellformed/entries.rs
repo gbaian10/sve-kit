@@ -425,9 +425,9 @@ impl Checker {
 
     fn ability_declarations(&mut self, ability: &Ability) -> Checked {
         for (index, effect) in ability.declarations.iter().enumerate() {
-            if let Some(predicate) = super::super::play_restrictions::card_restriction(ability) {
+            if let Some(rule) = super::super::play_restrictions::card_play_rule(ability) {
                 self.at(&format!("declarations/{index}/condition"), |checker| {
-                    checker.boolean(predicate)
+                    checker.boolean(rule.condition)
                 })?;
                 continue;
             }

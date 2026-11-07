@@ -489,6 +489,28 @@ impl Allocator {
             return Ok(true);
         }
         if let Some(play) = &entry.play {
+            if let Some(permission) = &play.playable_from {
+                if play.cannot_if.is_some()
+                    || !play.define.is_empty()
+                    || play.cost_delta.is_some()
+                    || play.cost_set.is_some()
+                    || play.additional_cost.is_some()
+                    || play.optional_cost.is_some()
+                    || play.optional_cost_delta.is_some()
+                    || play.optional_cost_set.is_some()
+                {
+                    return Err(unsupported(path));
+                }
+                abilities.push(play_restrictions::cemetery(
+                    self,
+                    key,
+                    path,
+                    entry,
+                    permission,
+                    entry_scope(index, path)?,
+                )?);
+                return Ok(true);
+            }
             if let Some(condition) = &play.cannot_if {
                 abilities.push(play_restrictions::lower(
                     self,

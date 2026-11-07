@@ -920,13 +920,18 @@ impl Game {
         })?;
         if (object.owner != seat && object.zone != "ex")
             || object.controller != seat
-            || !matches!(object.zone.as_str(), "hand" | "ex")
+            || !matches!(object.zone.as_str(), "hand" | "ex" | "cemetery")
             || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)
             || int(&object.state["face"]) != 0
             || !self.prepared.is_empty()
             || object.state["evolved_with"].is_string()
             || self.restricted(holder, "play")?
-            || self.internal_card_play_forbidden(holder, actor)?
+        {
+            return Err(unsupported("card play holder, permission or timing"));
+        }
+        if self.internal_card_play_forbidden(holder, actor)?
+            || (object.zone == "cemetery"
+                && !self.internal_card_cemetery_play_allowed(holder, actor)?)
         {
             return Err(unsupported("card play holder, permission or timing"));
         }

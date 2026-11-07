@@ -2224,12 +2224,28 @@ pub(super) struct PlayCosts {
     #[serde(default)]
     pub define: BTreeMap<String, Number>,
     pub cannot_if: Option<PlayRestriction>,
+    pub playable_from: Option<Box<ConditionalCemetery>>,
     pub cost_delta: Option<Value>,
     pub cost_set: Option<Value>,
     pub additional_cost: Option<AdditionalCost>,
     pub optional_cost: Option<OptionalCost>,
     pub optional_cost_delta: Option<i64>,
     pub optional_cost_set: Option<i64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ConditionalCemetery {
+    #[serde(rename = "zone")]
+    pub _zone: CemeteryOnly,
+    #[serde(rename = "if")]
+    pub condition: Condition,
+}
+
+#[derive(Deserialize)]
+pub(super) enum CemeteryOnly {
+    #[serde(rename = "cemetery")]
+    Cemetery,
 }
 
 #[derive(Deserialize)]

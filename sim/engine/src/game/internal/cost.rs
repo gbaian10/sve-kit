@@ -357,7 +357,7 @@ impl Game {
         let object = self.object(holder)?;
         if !matches!(
             (object.zone.as_str(), destination),
-            ("hand" | "ex", "resolution") | ("resolution", "field")
+            ("hand" | "ex" | "cemetery", "resolution") | ("resolution", "field")
         ) {
             return Err(unsupported("card play rule movement"));
         }
