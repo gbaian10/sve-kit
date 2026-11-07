@@ -83,3 +83,53 @@ fn bp16_014_may_choose_no_fairy() {
     assert_eq!(view["objects"]["beast"]["power"], 5_u8);
     assert_eq!(view["objects"]["lila"]["power"], 1_u8);
 }
+
+#[test]
+fn bp16_014_takes_at_most_two_and_both_may_share_a_zone() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"] = json!({"current":4_u8,"max":4_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"BP16-013"},
+        {"id":"beast","card":"BP01-013"},
+        {"id":"noble","card":"BP01-014"}
+    ]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"lila","card":"BP03-004"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP16-014"}]);
+    let mut game = game(&initial);
+    let outcome = game
+        .internal_rule_action(&json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}))
+        .unwrap();
+    assert_eq!(outcome.outcome, "resolved", "the printed evolution");
+    finish_checks(&mut game);
+    let q = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &q.domain else {
+        panic!("evolve trigger");
+    };
+    let CardPlay::Awaiting(pick) = game
+        .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+        .unwrap()
+    else {
+        panic!("fairy choice");
+    };
+    let InputDomain::Targets(d) = &pick.domain else {
+        panic!("fairy choice: {:?}", pick.domain);
+    };
+    assert_eq!(d.members.len(), 3, "three fairies qualify");
+    let all: Vec<_> = d.members.iter().map(|m| m.handle).collect();
+    game.answer_internal_card(pick.actor, pick.token, Answer::Targets(all))
+        .unwrap_err();
+    // The rejected answer leaves the question open; both field fairies are taken.
+    let field: Vec<_> = d
+        .members
+        .iter()
+        .filter(|m| m.card.as_deref() != Some("BP03-004"))
+        .map(|m| m.handle)
+        .collect();
+    game.answer_internal_card(pick.actor, pick.token, Answer::Targets(field))
+        .unwrap();
+    finish_checks(&mut game);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["objects"]["beast"]["power"], 6_u8);
+    assert_eq!(view["objects"]["noble"]["power"], 4_u8);
+    assert_eq!(view["objects"]["lila"]["power"], 1_u8);
+}
