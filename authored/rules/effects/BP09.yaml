@@ -73,39 +73,5 @@ cards:
         line: 2
         subject: self
     status: complete
-  BP09-P17:
-    abilities:
-      - body:
-          name: guard
-          op: macro
-        face: 0
-        kind: static
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - hp: 6
-              op: modify
-              subjects: self.leader
-            - count: 3
-              op: draw
-        event: end
-        face: 0
-        kind: trigger
-        line: 2
-      - body:
-          name: storm
-          op: macro
-        face: 1
-        kind: static
-        line: 1
-      - body:
-          action: ignore_guard
-          op: restrict
-          subjects: self
-        face: 1
-        kind: static
-        line: 2
-    status: complete
 format: 1
 kind: effect_set

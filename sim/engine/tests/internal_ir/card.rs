@@ -829,3 +829,6 @@ mod movement_capacity;
 
 #[path = "card/cemetery_pair_capacity.rs"]
 mod cemetery_pair_capacity;
+
+#[path = "card/ward_bypass.rs"]
+mod ward_bypass;

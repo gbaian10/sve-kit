@@ -7,16 +7,16 @@ use serde::{Deserialize, Serialize};
 
 use super::super::{Context, admission, player_id};
 use super::{Ability, Game, Located, Result, unsupported};
-use crate::ir::attack_restrictions::{self, projection};
+use crate::ir::attack_restrictions::{self, AttackPermission, projection, ward_projection};
 use crate::ir::{
     AbilityQualification, Action, BatchPolicy, Control, DamageAmount, DamageFlags, DamageRecipient,
-    Expr, Generation, Instruction, InstructionContext, InstructionId, Int, Node, ObjectId,
+    Effect, Expr, Generation, Instruction, InstructionContext, InstructionId, Int, Node, ObjectId,
     ObjectOperand, ObjectView, PlayerRef, Program, ReceiptId, RecipientSet, RuntimeDamageRecipient,
     ZoneKind,
 };
 
 pub(super) fn is_static(ability: &Ability) -> bool {
-    attack_restrictions::is_static(ability)
+    attack_restrictions::is_static(ability) || attack_restrictions::is_ward_static(ability)
 }
 
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
@@ -34,7 +34,9 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         return Err(unsupported("static attack permission header"));
     }
     for effect in &ability.declarations {
-        let shape = projection(effect).ok_or_else(|| unsupported("attack permission shape"))?;
+        let shape = projection(effect)
+            .or_else(|| ward_projection(effect))
+            .ok_or_else(|| unsupported("attack permission shape"))?;
         let mut sets = vec![RecipientSet::Objects {
             objects: shape.attacker.clone(),
         }];
@@ -100,6 +102,19 @@ impl Game {
         if self.installed_attack_restricted(attacker, target)? {
             return Ok(true);
         }
+        self.printed_attack_permission(attacker, Some(target), projection)
+    }
+
+    pub(in crate::game) fn internal_ignores_ward(&self, attacker: &str) -> Result<bool> {
+        self.printed_attack_permission(attacker, None, ward_projection)
+    }
+
+    fn printed_attack_permission(
+        &self,
+        attacker: &str,
+        target: Option<&str>,
+        project: fn(&Effect) -> Option<AttackPermission<'_>>,
+    ) -> Result<bool> {
         for provider in self.field_ids() {
             let (card, _) = self.internal_effective_print(&provider)?;
             if !self.card_runtime.is_loaded(&card) {
@@ -131,31 +146,40 @@ impl Game {
                 ids,
             )?;
             let attacker = execution.reference(self, attacker)?;
-            let recipient = if let Some(seat) = target.strip_suffix(".leader") {
-                RuntimeDamageRecipient::Leader {
-                    player: player_id(seat)?,
-                }
+            let recipient = if let Some(target) = target {
+                Some(if let Some(seat) = target.strip_suffix(".leader") {
+                    RuntimeDamageRecipient::Leader {
+                        player: player_id(seat)?,
+                    }
+                } else {
+                    RuntimeDamageRecipient::Object {
+                        object: execution.reference(self, target)?,
+                    }
+                })
             } else {
-                RuntimeDamageRecipient::Object {
-                    object: execution.reference(self, target)?,
-                }
+                None
             };
             for ability in abilities {
                 for effect in &ability.node.declarations {
-                    let shape =
-                        projection(effect).ok_or_else(|| unsupported("attack permission shape"))?;
+                    let Some(shape) = project(effect) else {
+                        continue;
+                    };
                     if !execution.boolean(self, shape.condition)?.0
                         || !execution.objects(self, shape.attacker)?.contains(&attacker)
                     {
                         continue;
                     }
-                    if let Some(allowed_targets) = shape.target
-                        && !execution
+                    if let Some(allowed_targets) = shape.target {
+                        let Some(recipient) = recipient.as_ref() else {
+                            continue;
+                        };
+                        if !execution
                             .recipients(self, allowed_targets)?
                             .members()
-                            .contains(&recipient)
-                    {
-                        continue;
+                            .contains(recipient)
+                        {
+                            continue;
+                        }
                     }
                     return Ok(true);
                 }

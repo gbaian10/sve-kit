@@ -1143,3 +1143,6 @@ fn resolution_alternative_can_use_an_earlier_created_set_without_leaking_branch_
         "the unselected branch creates nothing"
     );
 }
+
+#[path = "token_creation/ward_bypass.rs"]
+mod ward_bypass;

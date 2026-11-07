@@ -500,7 +500,8 @@ pub(super) fn lower_at_source(
             | ast::StaticEffect::NoTrigger(_)
             | ast::StaticEffect::Cannot(_)
             | ast::StaticEffect::CostMod(_)
-            | ast::StaticEffect::EvolveCostMod(_) => {
+            | ast::StaticEffect::EvolveCostMod(_)
+            | ast::StaticEffect::IgnoreWard(_) => {
                 return Err(unsupported(path));
             }
         };

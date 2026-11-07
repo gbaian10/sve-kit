@@ -479,7 +479,9 @@ impl Allocator {
                 {
                     prevention::lower
                 }
-                Some(ast::StaticEffect::Cannot(_)) => attack_restrictions::lower,
+                Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
+                    attack_restrictions::lower
+                }
                 Some(ast::StaticEffect::If(_)) | None => return Err(unsupported(path)),
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
