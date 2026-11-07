@@ -29,7 +29,12 @@ import {
 import { printingPath } from "../../domain/cardRoute"
 import type { Region } from "../../domain/search"
 import { type CameraFrame, CameraScanner } from "./camera"
-import { openScanEngine, scanEngineSources, type ScanEngineStage } from "./engine"
+import {
+  openScanEngine,
+  scanEngineSources,
+  type ScanEngineStage,
+  ScanEngineStartError,
+} from "./engine"
 import {
   classSummary,
   megabytes,
@@ -96,7 +101,10 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
       setPhase("idle")
       return
     }
-    setError(cause instanceof Error ? cause.message : String(cause))
+    // WebGPU could not start here: say so, and point at the CPU build, which always works.
+    if (cause instanceof ScanEngineStartError && cause.backend === "webgpu") {
+      setError(t("scan.engine.webgpuFailed"))
+    } else setError(cause instanceof Error ? cause.message : String(cause))
     setPhase("error")
   }
   // Async flows (camera start, edition switch) each hold a token; a newer flow or leaving the page
@@ -450,7 +458,7 @@ function StartPanel({
       )}
       {readiness.downloading && (
         <div className="flex w-full max-w-64 flex-col gap-1.5">
-          {SCAN_PARTS.map((part) => {
+          {SCAN_PARTS.filter((part) => readiness.progress[part] !== undefined).map((part) => {
             const [got, total] = readiness.progress[part] ?? [0, 0]
             const pct = total ? Math.min(100, Math.round((got / total) * 100)) : 0
             return (

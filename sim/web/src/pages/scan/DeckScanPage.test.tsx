@@ -6,7 +6,7 @@ import { MemoryRouter } from "react-router"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
+import { createScanModelStore } from "../../data/scan-models"
 import { decodeDeckCode } from "../../domain/deck/code"
 import { createI18n } from "../../i18n"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
@@ -14,10 +14,13 @@ import { renderInRouter, renderRoutes } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
 import { stubCanvas2d } from "../../test-utils/canvas-2d"
-import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
+import { fakeScanCdn, RUNTIMES, SCAN_BASE } from "../../test-utils/scan-publication"
 import { useScannedDeckShare } from "./deck-share"
 import { DeckScanPage } from "./DeckScanPage"
 import { closeScanEngine } from "./engine"
+
+// The parts a scan with the CPU engine needs.
+const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
 
 // ONNX Runtime does not run in jsdom. The stand-in finds no cards, and the test decides when the
 // card finder answers, to catch a reading still running when the photo goes away.
@@ -111,7 +114,8 @@ afterEach(() => {
   closeScanEngine()
   finder.hold = false
   finder.card = false
-  finder.waiting.length = 0
+  // Answer what is still held: an inference that never settles would keep its engine from freeing.
+  for (const answer of finder.waiting.splice(0)) answer()
   prefsStore.set(DEFAULT_PREFS)
   vi.restoreAllMocks()
 })
@@ -120,7 +124,10 @@ afterEach(() => {
 const built = await buildSnapshot({
   encodeImage: () => Promise.resolve(new TextEncoder().encode("stub")),
 })
-beforeEach(() => vi.stubGlobal("Worker", TestAppWorker))
+beforeEach(() => {
+  vi.stubGlobal("Worker", TestAppWorker)
+  stubCanvas2d()
+})
 beforeAll(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL) => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url
@@ -141,7 +148,7 @@ function setup() {
     caches: () => storage,
     fetcher: fakeScanCdn().fetcher,
     scanBase: () => SCAN_BASE,
-    runtime: RUNTIME,
+    runtimes: RUNTIMES,
   })
   return {
     store,

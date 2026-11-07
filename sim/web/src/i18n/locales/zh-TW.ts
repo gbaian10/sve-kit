@@ -793,6 +793,9 @@ const zhTW = {
     landscape: "橫放",
     allClasses: "全部職業",
     listSeparator: "、",
+    engine: {
+      webgpuFailed: "WebGPU 無法啟動，請到模型頁改用 CPU 引擎。",
+    },
     models: {
       link: "模型",
       title: "拍卡辨識模型",
@@ -817,10 +820,16 @@ const zhTW = {
         missing: "未下載",
         downloading: "下載中 {{pct}}%",
       },
-      runtime: {
-        name: "執行引擎",
-        desc: "在瀏覽器裡跑模型的程式（ONNX Runtime），兩個模型都靠它。",
+      "runtime-webgpu": {
+        name: "執行引擎：WebGPU",
+        desc: "用顯示卡加速，速度較快；需要瀏覽器支援 WebGPU。",
       },
+      "runtime-cpu": {
+        name: "執行引擎：CPU",
+        desc: "用處理器執行，所有瀏覽器都能用，速度較慢。",
+      },
+      useThis: "改用這個引擎",
+      inUse: "使用中",
       det: {
         name: "找卡模型",
         desc: "找出畫面裡每張卡的四個角，把卡拉正。整副牌照片靠它一次找出全部的卡。",

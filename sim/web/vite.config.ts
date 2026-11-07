@@ -141,11 +141,29 @@ export function serveSnapshotRoot(prefix: string, dir: string | undefined): Plug
 }
 
 export const FIXTURE_ROOT = path.join(import.meta.dirname, "fixtures/snapshot")
-// The CPU build of ONNX Runtime: the WebGPU build's binary exceeds the 25 MiB Workers asset limit.
-const SCAN_RUNTIME = path.join(
-  import.meta.dirname,
-  "node_modules/onnxruntime-web/dist/ort-wasm-simd-threaded.wasm",
-)
+// ONNX Runtime binaries for the card scanner. They are not bundled (the WebGPU one exceeds the
+// 25 MiB Workers asset limit): the browser downloads them from a public CDN at the version this
+// build's onnxruntime-web JavaScript came from, and checks them against the hashes pinned here.
+const ORT_DIST = path.join(import.meta.dirname, "node_modules/onnxruntime-web/dist")
+function scanRuntimePins(): string {
+  const version = (
+    JSON.parse(
+      readFileSync(
+        path.join(import.meta.dirname, "node_modules/onnxruntime-web/package.json"),
+        "utf8",
+      ),
+    ) as { version: string }
+  ).version
+  const pin = (file: string) => {
+    const bytes = readFileSync(path.join(ORT_DIST, file))
+    return { file, bytes: bytes.length, sha256: createHash("sha256").update(bytes).digest("hex") }
+  }
+  return JSON.stringify({
+    version,
+    cpu: pin("ort-wasm-simd-threaded.wasm"),
+    webgpu: pin("ort-wasm-simd-threaded.jsep.wasm"),
+  })
+}
 
 // Local snapshot roots: SVE_EXPORT_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
 export function snapshotRoots(environment: NodeJS.ProcessEnv): { cdn: string; preview?: string } {
@@ -271,19 +289,37 @@ if (devHttps && (tlsCertPath !== undefined || tlsKeyPath !== undefined)) {
   }
 }
 
+// onnxruntime-web addresses its binaries with `new URL(…, import.meta.url)`, which Vite would bundle
+// as assets. The scanner always passes the binary it downloaded, so those URLs are never fetched.
+function ortBinariesNotBundled(): Plugin {
+  return {
+    name: "sve-ort-binaries-not-bundled",
+    enforce: "pre",
+    transform(code, id) {
+      if (!id.includes("onnxruntime-web")) return null
+      const out = code.replace(
+        /new URL\(("ort-wasm-[^"]+\.wasm"),\s*import\.meta\.url\)/g,
+        'new URL($1, "https://invalid.invalid/")',
+      )
+      return out === code ? null : { code: out, map: null }
+    },
+  }
+}
+
 export default defineConfig({
   build: { license: { fileName: "third-party-licenses.md" } },
   // Only these values reach browser code: dev starts on the preview root when a preview is
-  // configured and /cdn is still the fixture (src/app/dev-root.ts); the scanner shows the runtime's
-  // size before it is downloaded.
+  // configured and /cdn is still the fixture (src/app/dev-root.ts); the scanner pins the ONNX
+  // Runtime binaries it downloads (src/data/scan-runtime.ts).
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
     "import.meta.env.SVE_CDN_IS_FIXTURE": JSON.stringify(cdnDir === FIXTURE_ROOT ? "1" : ""),
-    "import.meta.env.SVE_SCAN_RUNTIME_BYTES": JSON.stringify(String(statSync(SCAN_RUNTIME).size)),
+    "import.meta.env.SVE_SCAN_RUNTIME_PINS": JSON.stringify(scanRuntimePins()),
   },
   plugins: [
     buildIdPlugin(BUILD_INPUTS),
     inlineThemeBoot(),
+    ortBinariesNotBundled(),
     // LAN requests need a secure context for snapshot verification and offline caching.
     ...(devHttps && tlsCertificate === undefined ? [basicSsl()] : []),
     react(),

@@ -58,6 +58,7 @@ export {
 export { appScanModels, loadScanCardImage, scanCardImage } from "./scan"
 export {
   type InstalledScanModels,
+  runtimePart,
   SCAN_PARTS,
   ScanModelError,
   type ScanModelErrorKind,
@@ -66,6 +67,7 @@ export {
   type ScanPart,
   type ScanPartStatus,
 } from "./scan-models"
+export { SCAN_BACKENDS, type ScanBackend } from "./scan-runtime"
 export type { QueryFailure, SearchOptions, SearchPage, SearchQuery } from "./search/index"
 export {
   type SearchChannel,

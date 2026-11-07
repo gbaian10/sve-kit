@@ -10,7 +10,7 @@ import { memoryCache } from "../../test-utils/cache"
 import {
   fakeScanCdn,
   fullCache,
-  RUNTIME,
+  RUNTIMES,
   SCAN_BASE,
   scanPublication,
 } from "../../test-utils/scan-publication"
@@ -29,7 +29,7 @@ function setup(
     caches: () => storage,
     fetcher: cdn.fetcher,
     scanBase: () => SCAN_BASE,
-    runtime: RUNTIME,
+    runtimes: RUNTIMES,
   })
   return {
     cdn,
@@ -61,7 +61,7 @@ describe("ScanModelsPage", () => {
 
     await user.click(screen.getByRole("button", { name: "全部下載" }))
     expect(await screen.findByText("全部已下載，之後拍卡不用再下載")).toBeInTheDocument()
-    for (const name of ["執行引擎", "找卡模型", "辨識模型"])
+    for (const name of ["執行引擎：CPU", "找卡模型", "辨識模型"])
       expect(within(row(name)).getByText("已下載")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "全部下載" })).toBeDisabled()
   })
@@ -91,7 +91,7 @@ describe("ScanModelsPage", () => {
   it("says when the device is out of space", async () => {
     const user = userEvent.setup()
     await setup({ storage: fullCache() }).render()
-    const runtime = row("執行引擎")
+    const runtime = row("執行引擎：CPU")
     await user.click(await within(runtime).findByRole("button", { name: "下載" }))
     expect(await within(runtime).findByRole("alert")).toHaveTextContent("裝置空間不足")
   })
@@ -113,13 +113,13 @@ describe("ScanModelsPage", () => {
     await waitFor(() => {
       expect(within(row("找卡模型")).getByRole("button", { name: "下載" })).toBeDisabled()
     })
-    expect(within(row("執行引擎")).getByRole("button", { name: "下載" })).toBeEnabled()
+    expect(within(row("執行引擎：CPU")).getByRole("button", { name: "下載" })).toBeEnabled()
   })
 
   it("does not claim everything is downloaded while an edition's index is unpublished", async () => {
     prefsStore.set({ cardEdition: "en" })
     const page = setup({ cdn: fakeScanCdn(scanPublication({ en: null })) })
-    await page.store.download("runtime", "en", () => undefined)
+    await page.store.download("runtime-cpu", "en", () => undefined)
     await page.store.download("det", "en", () => undefined)
     await page.render()
     expect(await screen.findByText("部分模型目前無法下載")).toBeInTheDocument()

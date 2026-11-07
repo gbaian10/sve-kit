@@ -568,7 +568,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
         </div>
       ) : readiness.downloading ? (
         <div className="flex flex-col gap-1.5">
-          {SCAN_PARTS.map((part) => {
+          {SCAN_PARTS.filter((part) => readiness.progress[part] !== undefined).map((part) => {
             const [got, total] = readiness.progress[part] ?? [0, 0]
             const pct = total ? Math.min(100, Math.round((got / total) * 100)) : 0
             return (

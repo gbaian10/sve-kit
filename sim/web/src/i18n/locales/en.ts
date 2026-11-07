@@ -846,6 +846,9 @@ export default {
     landscape: "Landscape",
     allClasses: "all classes",
     listSeparator: ", ",
+    engine: {
+      webgpuFailed: "WebGPU couldn't start. Switch to the CPU engine on the models page.",
+    },
     models: {
       link: "Models",
       title: "Card scan models",
@@ -870,10 +873,16 @@ export default {
         missing: "Not downloaded",
         downloading: "Downloading {{pct}}%",
       },
-      runtime: {
-        name: "Runtime",
-        desc: "Runs the models in your browser (ONNX Runtime); both models need it.",
+      "runtime-webgpu": {
+        name: "Engine: WebGPU",
+        desc: "Runs on the graphics card, so it is faster; needs browser WebGPU support.",
       },
+      "runtime-cpu": {
+        name: "Engine: CPU",
+        desc: "Runs on the processor; works in every browser, but is slower.",
+      },
+      useThis: "Use this engine",
+      inUse: "In use",
       det: {
         name: "Card finder",
         desc: "Finds each card's four corners and straightens it. Deck photos use it to find every card at once.",

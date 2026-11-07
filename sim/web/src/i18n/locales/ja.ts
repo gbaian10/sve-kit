@@ -828,6 +828,10 @@ export default {
     landscape: "横向き",
     allClasses: "すべてのクラス",
     listSeparator: "・",
+    engine: {
+      webgpuFailed:
+        "WebGPU を開始できませんでした。モデルのページで CPU エンジンに切り替えてください。",
+    },
     models: {
       link: "モデル",
       title: "カード認識モデル",
@@ -852,10 +856,16 @@ export default {
         missing: "未ダウンロード",
         downloading: "ダウンロード中 {{pct}}%",
       },
-      runtime: {
-        name: "実行エンジン",
-        desc: "ブラウザでモデルを動かすプログラム（ONNX Runtime）。両方のモデルが使います。",
+      "runtime-webgpu": {
+        name: "実行エンジン：WebGPU",
+        desc: "GPU で動かすため速いです。ブラウザが WebGPU に対応している必要があります。",
       },
+      "runtime-cpu": {
+        name: "実行エンジン：CPU",
+        desc: "CPU で動かします。どのブラウザでも使えますが、遅くなります。",
+      },
+      useThis: "このエンジンを使う",
+      inUse: "使用中",
       det: {
         name: "カード検出モデル",
         desc: "画面内の各カードの四隅を見つけ、まっすぐに補正します。デッキ写真では全カードを一度に見つけます。",

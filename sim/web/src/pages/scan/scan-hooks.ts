@@ -9,6 +9,7 @@ import {
   mergeImageIndexes,
   SCAN_PARTS,
   scanCardImage,
+  type ScanBackend,
   type ScanModelsStatus,
 } from "../../data"
 import { type DisplayedName, displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -18,6 +19,7 @@ import type { Region } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { scanDownloadsFor, useScanDownloads } from "./downloads"
+import { currentBackend, neededParts } from "./runtime-choice"
 
 export const megabytes = (bytes: number) => (bytes / 1048576).toFixed(1)
 
@@ -131,18 +133,23 @@ export function useScanReadiness(edition: Region, store = appScanModels): ScanRe
   const downloads = scanDownloadsFor(store)
   const { runs, finished } = useScanDownloads(downloads)
   const [status, setStatus] = useState<ScanModelsStatus | null>(null)
+  const [backend, setBackend] = useState<ScanBackend | null>(null)
   useEffect(() => {
     let active = true
     void store.status(edition).then((next) => {
       if (active) setStatus(next)
     })
+    void currentBackend().then((next) => {
+      if (active) setBackend(next)
+    })
     return () => {
       active = false
     }
   }, [store, edition, finished])
-  const ready =
-    status !== null && SCAN_PARTS.every((part) => status.parts[part].state !== "missing")
-  const missing = status ? SCAN_PARTS.filter((part) => status.parts[part].state === "missing") : []
+  // Only the chosen engine's runtime counts; the other one is not needed to scan.
+  const needed = backend ? neededParts(backend) : []
+  const ready = status !== null && needed.every((part) => status.parts[part].state !== "missing")
+  const missing = status ? needed.filter((part) => status.parts[part].state === "missing") : []
   const progress: ScanReadiness["progress"] = {}
   for (const part of SCAN_PARTS) {
     const run = runs[part]

@@ -1,10 +1,13 @@
 import type * as Ort from "onnxruntime-web/wasm"
 import { afterEach, describe, expect, it } from "vitest"
 
-import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
+import { createScanModelStore } from "../../data/scan-models"
 import { memoryCache } from "../../test-utils/cache"
-import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
-import { closeScanEngine, openScanEngine } from "./engine"
+import { fakeScanCdn, RUNTIMES, SCAN_BASE } from "../../test-utils/scan-publication"
+import { closeScanEngine, openScanEngine, ScanEngineStartError } from "./engine"
+
+// The parts a scan with the CPU engine needs.
+const SCAN_PARTS = ["runtime-cpu", "det", "rec"] as const
 
 interface Run {
   readonly model: string
@@ -73,10 +76,10 @@ async function installedModels() {
     caches: () => storage,
     fetcher: cdn.fetcher,
     scanBase: () => SCAN_BASE,
-    runtime: RUNTIME,
+    runtimes: RUNTIMES,
   })
   for (const part of SCAN_PARTS) await store.download(part, "jp", () => undefined)
-  return store.load("jp")
+  return store.load("jp", "cpu")
 }
 
 /** The shared engine for JP, built from the stored models with a stand-in runtime. */
@@ -101,7 +104,7 @@ describe("scan engine", () => {
       load: () => Promise.resolve(models),
       runtime: () => Promise.resolve(ort as unknown as typeof Ort),
     })
-    expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIME.bytes)
+    expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIMES.cpu.bytes)
     expect(ort.env.wasm["numThreads"]).toBe(1)
     expect(engine.cardSize).toEqual({ width: 224, height: 312 })
     expect(engine.det.grow).toBe(1)
@@ -183,5 +186,55 @@ describe("scan engine", () => {
     closeScanEngine()
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(life).toMatchObject({ created: 6, released: 6 })
+  })
+  it("asks the chosen backend's ONNX Runtime build, WebGPU or CPU", async () => {
+    const models = await installedModels()
+    const asked: string[] = []
+    const sources = {
+      load: (_edition: "jp" | "en", backend: "webgpu" | "cpu") => {
+        asked.push(`load:${backend}`)
+        return Promise.resolve({ ...models, backend })
+      },
+      runtime: (backend: "webgpu" | "cpu") => {
+        asked.push(`runtime:${backend}`)
+        return Promise.resolve(fakeOrt([]) as unknown as typeof Ort)
+      },
+    }
+    await openScanEngine("jp", undefined, sources, () => Promise.resolve("webgpu"))
+    closeScanEngine()
+    await openScanEngine("jp", undefined, sources, () => Promise.resolve("cpu"))
+    expect(asked).toEqual(["load:webgpu", "runtime:webgpu", "load:cpu", "runtime:cpu"])
+  })
+
+  it("reports a WebGPU session that cannot start as a start error, not a silent fallback", async () => {
+    const models = await installedModels()
+    const broken = {
+      env: { wasm: {} as Record<string, unknown> },
+      Tensor: fakeOrt([]).Tensor,
+      InferenceSession: { create: () => Promise.reject(new Error("no WebGPU adapter")) },
+    }
+    const started = openScanEngine(
+      "jp",
+      undefined,
+      {
+        load: () => Promise.resolve(models),
+        runtime: () => Promise.resolve(broken as unknown as typeof Ort),
+      },
+      () => Promise.resolve("webgpu"),
+    )
+    const error = await started.catch((cause: unknown) => cause)
+    expect(error).toBeInstanceOf(ScanEngineStartError)
+    expect((error as ScanEngineStartError).backend).toBe("webgpu")
+    // A failed start is not kept, so the next open tries again.
+    const again = await openScanEngine(
+      "jp",
+      undefined,
+      {
+        load: () => Promise.resolve(models),
+        runtime: () => Promise.resolve(fakeOrt([]) as unknown as typeof Ort),
+      },
+      () => Promise.resolve("cpu"),
+    ).catch(() => undefined)
+    expect(again).toBeDefined()
   })
 })
