@@ -562,6 +562,8 @@ that identifies the caller.
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | GitHub Actions (pinned by commit SHA)                               | Dependabot, weekly (`.github/dependabot.yml`)                                                       |
 | Rust and Python (`carddb`, `publish`) dependencies                  | Dependabot, weekly, one grouped pull request per ecosystem (version updates)                        |
+| Python dependencies of `scan/` except PyTorch                       | Dependabot, weekly, one grouped pull request                                                        |
+| PyTorch and torchvision in `scan/`                                  | By hand, with a training run that checks the new version                                            |
 | Bun dependencies (`sim/web`)                                        | `bun update` and `bun audit` by hand, monthly (Dependabot cannot read `bun.lock` version 2 yet)     |
 | pre-commit hook versions (`rev:`)                                   | Dependabot, weekly, one grouped pull request                                                        |
 | `cz-conventional-gitmoji` in the commitizen hook                    | Pinned in `.pre-commit-config.yaml`; bump it with its hook's `rev:` and the `carddb` dev dependency |
