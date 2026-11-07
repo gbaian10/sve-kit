@@ -2,8 +2,9 @@
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::game::list;
+use crate::ir::events::{banish as banish_header, discard as discard_header};
 use crate::ir::lowering::PrintedKeyword;
-use crate::ir::{Posture, PostureEvent, SourceSpan, printed_keywords};
+use crate::ir::{Posture, PostureEvent, SourceSpan, ZoneKind, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::slice::from_ref;
 use serde_json::Value;
@@ -171,6 +172,73 @@ pub(super) type PrintedCoordinate<'source> = (
     &'source str,
     Option<KeywordId>,
 );
+
+pub(super) fn check_card_coordinate<'source>(
+    origins: &mut BTreeSet<PrintedCoordinate<'source>>,
+    ordinal: usize,
+    abilities: &'source [Located<Ability>],
+    index: usize,
+) -> Result<()> {
+    let located = abilities
+        .get(index)
+        .ok_or_else(|| invalid("missing card ability"))?;
+    let alternative = abilities
+        .iter()
+        .take(index)
+        .any(|previous| hand_alternatives(previous, located))
+        && abilities
+            .iter()
+            .filter(|other| other.source == located.source)
+            .count()
+            == 2;
+    if alternative {
+        return Ok(());
+    }
+    check_coordinate(
+        origins,
+        ordinal,
+        &located.source,
+        printed_keywords::card_declaration(&located.node),
+    )
+}
+
+/// Two mutually exclusive typed headers may retain the one original printed coordinate.
+fn hand_alternatives(left: &Located<Ability>, right: &Located<Ability>) -> bool {
+    use crate::ir::{AbilityKind, AbilityOrigin, AbilityQualification};
+    if left.source != right.source || left.node.source != right.node.source {
+        return false;
+    }
+    let closed = |ability: &Ability| {
+        ability.kind == AbilityKind::Triggered
+            && ability.qualification == AbilityQualification::Ordinary
+            && ability.active_zones == [ZoneKind::Hand]
+            && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+            && ability.event_captures.is_empty()
+            && ability.declarations.is_empty()
+            && ability
+                .trigger
+                .as_ref()
+                .is_some_and(|trigger| trigger.limit.is_none())
+    };
+    if !closed(&left.node) || !closed(&right.node) {
+        return false;
+    }
+    let discard = |ability: &Ability| {
+        ability
+            .trigger
+            .as_ref()
+            .and_then(discard_header::self_event)
+            .is_some()
+    };
+    let banish = |ability: &Ability| {
+        ability
+            .trigger
+            .as_ref()
+            .and_then(banish_header::self_event)
+            .is_some()
+    };
+    (discard(&left.node) && banish(&right.node)) || (banish(&left.node) && discard(&right.node))
+}
 
 pub(super) fn check_coordinate<'source>(
     origins: &mut BTreeSet<PrintedCoordinate<'source>>,

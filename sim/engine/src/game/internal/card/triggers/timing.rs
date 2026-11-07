@@ -178,6 +178,7 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         Event::Fused { .. } => Ok(format!("Fused while source at slot {position}")),
         Event::Play { .. } => Ok(format!("Play while source at slot {position}")),
         Event::Discard { .. } => Ok("Discard".into()),
+        Event::Banish { .. } => Ok("Banish".into()),
         Event::Draw { .. } => Ok("Draw".into()),
         Event::Equip { .. } => Ok(format!("Equip while source at equipment slot {position}")),
         Event::Move { event } => Ok(format!(

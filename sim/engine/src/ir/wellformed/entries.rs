@@ -1,5 +1,6 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
 use crate::ir::OncePerEvent;
+use crate::ir::events::banish as banish_header;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
@@ -481,7 +482,12 @@ impl Checker {
         if ability.active_zones == [ZoneKind::Hand]
             && let Some(binding) = discard_header::self_event(trigger)
         {
-            self.env.discard_follow.insert(binding.key());
+            self.env.hand_exit_follow.insert(binding.key());
+        }
+        if ability.active_zones == [ZoneKind::Hand]
+            && let Some(binding) = banish_header::self_event(trigger)
+        {
+            self.env.hand_exit_follow.insert(binding.key());
         }
         self.at("event_captures", |checker| {
             checker.event_history = evolution_trigger(trigger).then_some(trigger.view);

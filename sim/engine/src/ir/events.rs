@@ -1,5 +1,6 @@
 pub(crate) mod ability;
 pub(crate) mod attack;
+pub(crate) mod banish;
 pub(crate) mod change;
 pub(crate) mod damage;
 pub(crate) mod discard;

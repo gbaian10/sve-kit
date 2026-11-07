@@ -1,0 +1,77 @@
+cards:
+  BP14-081:
+    abilities:
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - bane
+                on: ally
+          on:
+            any_of:
+              - discarded:
+                  from: hand
+                  ref: this
+                  who: self
+              - banished:
+                  from: hand
+                  ref: this
+                  who: self
+          targets:
+            - bind: ally
+              from:
+                class: ナイトメア
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          zone: hand
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - if:
+                cond:
+                  exists:
+                    in: revived
+                    name: 因果の迷い子・アンサージュ
+                else:
+                  - move:
+                      ref: revived
+                      result: returned_other
+                      to: field
+                then:
+                  - move:
+                      ref: revived
+                      result: returned_ansage
+                      to: field
+                  - buff:
+                      on:
+                        follow: returned_ansage
+                      power: 1
+                  - grant:
+                      keywords:
+                        - storm
+                      on:
+                        follow: returned_ansage
+          targets:
+            - bind: revived
+              from:
+                kind: follower
+                orig_cost_le: 2
+                trait: 宴楽
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

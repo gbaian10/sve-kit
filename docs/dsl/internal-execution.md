@@ -213,6 +213,15 @@ Lastword 的 `move this to ex` 使用當前 LeaveField 單一成員的 `FollowEv
 拒付或不足時原子地不扣 PP、不移動；其他頭、其他條件、混合付款與其他付款成功本文仍拒絕。
 回場沿共同入場程序，依 CR 12.4.3 觸發 Fanfare。
 
+己方手牌自身的 Banish 也在 `BeforeExit` 封存來源，僅由共同移區原語的真實
+`MoveMethod::Banish` 成功提交後入列；Put 至消滅區與其他來源區不產生此誘發。
+`BanishEvent.from.player` 取離開手牌的控制者，與造成消滅的 actor 分開保存。
+作者的互斥 Discard／Banish `any_of` 降低為兩個 typed 頭，來源座標保持一致；載入器只容許
+同一完整來源的恰好一對 canonical、無限次的手牌自身頭共用座標，其他重複仍拒絕。
+兩者沿用共同待機、付款與回復程序，完整外層能力結束後才開放待機選序。
+`MovementEvent::Banish` 僅授權把該次消滅的單一、仍有效 owner 消滅區 after 放到 owner EX；
+EX 已滿、沒有 after 或世代已變時沒有成功成員，不以 physical ID 找回另一個世代，也不開放一般消滅區選卡。
+
 Fanfare、長寫 EnterField、Lastword、OnEvolve、OnSuperEvolve、OnAttack、Main／End Begin、
 自身 LeaveField 與 Damage 共用一個私有待機集合。`internal_pending_choice()` 在穩定檢查時點建立題目，
 回合玩家有待機就由該玩家選一個，否則由對手選。`answer_internal_card` 接 `Answer::Pending(handle)`；
@@ -583,7 +592,7 @@ Move／Search／Destroy 的 local receipt。只取具有 after、actual_to 與�
 不依卡號或卡名。這些集合不代表 Destroy 事件或完整付款。
 MovedRef、RuleCarry、其他 receipt 家族與未准入事件 payload read
 仍在完整 requirement 預檢時拒絕，包含未執行分支。FollowEventMove 僅開放上述當前 LeaveField
-或手牌自身 Discard 的單一成功成員；一般 Move 事件跟隨仍拒絕。receipt 與 after 世代不進玩家 packet。
+或手牌自身 Discard／Banish 的單一成功成員；一般 Move 事件跟隨仍拒絕。receipt 與 after 世代不進玩家 packet。
 
 InstallEffect 的有限子集為 InstructionStart 固定物件集合、Permission Forbid Destroy、
 Effect(Any) cause、常值 true condition，以及 Installation anchor 的 EndResolution。

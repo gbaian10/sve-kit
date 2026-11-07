@@ -103,7 +103,7 @@ impl BodyContext<'_> {
                     return Err(unsupported(&nested_path));
                 }
                 self.card_allocator.executable_ability(
-                    &entry,
+                    super::hand_exit::AbilityInput::ordinary(&entry),
                     scope,
                     None,
                     None,

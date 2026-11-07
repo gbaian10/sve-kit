@@ -9,9 +9,9 @@ use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
     InstructionContext, MemberProjection, MoveDestination, MoveMethod, MoveOutcome, MoveReason,
-    MoveResult, MoveSpec, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt, ObjectRef,
-    OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat, ReceiptId,
-    ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
+    MoveResult, MoveSpec, MovementEvent, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
+    ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat,
+    ReceiptId, ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
     SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -270,6 +270,21 @@ fn private_hand_member(
             && member.generation == execution.context.generation
             && instruction.context == InstructionContext::Cost
             && super::card::hand_payment::source_to_ex(&instruction.action))
+}
+
+fn banished_hand_return(execution: &Execution, objects: &Selector, member: ObjectRef) -> bool {
+    let Selector::Objects { objects } = objects else {
+        return false;
+    };
+    let [
+        ObjectOperand::FollowEventMove {
+            event: event @ MovementEvent::Banish { .. },
+        },
+    ] = objects.as_slice()
+    else {
+        return false;
+    };
+    execution.event_move == Some((*event, Some(member)))
 }
 
 pub(super) fn observed_move(action: &Action) -> bool {
@@ -662,6 +677,12 @@ impl Game {
                 let special_origin = private_observed_move
                     || private_hand_move
                     || resolving_source
+                    || (method == MoveMethod::Put
+                        && kind == ZoneKind::Ex
+                        && object.zone == "banish"
+                        && object.owner == actor
+                        && object.controller == actor
+                        && banished_hand_return(execution, objects, member))
                     || (kind == ZoneKind::Ex
                         && execution.is_private_advance_target(objects, member)
                         && self.own_evolve_advance(&object.id, actor)?);
@@ -1179,6 +1200,7 @@ impl Game {
             }
         }
         let ids = plans.iter().map(|plan| plan.id.clone()).collect::<Vec<_>>();
+        let banished = self.internal_prepare_banish_events(&ids, execution, method)?;
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
         if method == MoveMethod::Destroy {
@@ -1325,6 +1347,9 @@ impl Game {
             })
             .collect::<Vec<_>>();
         execution.seal_source_departure(&departed);
+        if let Some(plan) = banished {
+            self.internal_commit_banish_events(plan, &moves)?;
+        }
         if kind == ZoneKind::Deck {
             self.invalidate_deck_observations(execution, &moves, &old_deck)?;
         }

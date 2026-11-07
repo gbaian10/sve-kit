@@ -973,6 +973,8 @@ impl BodyContext<'_> {
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
                 discard_event: self.discard_event,
+                banish_event: self.banish_event,
+                hand_exit: self.hand_exit,
                 discard_pp_event: None,
                 static_zone: self.static_zone,
                 activation_zone: self.activation_zone,

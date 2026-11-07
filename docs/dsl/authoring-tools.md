@@ -345,6 +345,25 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定，不把捨棄者或能力因果當成回合玩家；自身手牌訂閱與 `during` 的組合仍拒絕。
 
+「從自己的手牌捨棄或消滅這張卡」使用既有的 `any_of`，例如 BP14-074：
+
+```yaml
+auto:
+  zone: hand
+  on:
+    any_of:
+      - discarded: { ref: this, from: hand, who: self }
+      - banished: { ref: this, from: hand, who: self }
+  do:
+    - optional:
+        do: [{ move: { ref: this, to: ex } }]
+```
+
+這個子集只有上述兩種互斥事件，仍是一條作者能力；限次、批次彙整、其他事件組合與巢狀授予均拒絕。
+捨棄包含規則手牌上限（Q1922、Q1930）；消滅必須是成功的消滅指令，普通移區不算。
+`move this to ex` 只跟隨該次成功移動的新世代；EX 已滿或卡片已再次移區時略過。
+BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效果仍完整寫在原有 section 座標。
+
 被捨的卡可用 `sel: {kind, class}` 篩選（至少一項），以離手前的手牌特徵判定，例如 BP09-006 的 `sel: {class: エルフ, kind: spell}`；不接受其他 `sel` 欄位，也不與 `ref: this` 或 `by` 並用。
 
 「自己回合、自己捨棄一張以上」另用 `auto.aggregation: batch` 搭配 `on.discarded: {who: self, during: {turn: self}}`（BP12-052／053）。單一捨棄指令中的多張成功棄牌，只讓每個來源能力待機一次；分開的兩次捨棄仍各觸發，去重先於每回合額度。

@@ -1,0 +1,140 @@
+{
+  "abilities": [
+    {
+      "active_zones": [
+        "hand"
+      ],
+      "body": {
+        "keywords": [
+          "bane"
+        ],
+        "op": "modify",
+        "subjects": "target.1"
+      },
+      "event": "discard",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "self",
+            "type": "follower",
+            "where": {
+              "args": [
+                {
+                  "read": "item.class"
+                },
+                "ナイトメア"
+              ],
+              "fn": "eq"
+            },
+            "zone": "field"
+          }
+        }
+      ]
+    },
+    {
+      "active_zones": [
+        "hand"
+      ],
+      "body": {
+        "keywords": [
+          "bane"
+        ],
+        "op": "modify",
+        "subjects": "target.1"
+      },
+      "event": "banish",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "self",
+            "type": "follower",
+            "where": {
+              "args": [
+                {
+                  "read": "item.class"
+                },
+                "ナイトメア"
+              ],
+              "fn": "eq"
+            },
+            "zone": "field"
+          }
+        }
+      ]
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "bind": "entered",
+            "op": "move",
+            "subjects": "target.1",
+            "to": "field"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "count": {
+                    "from": "entered",
+                    "name": "因果の迷い子・アンサージュ"
+                  }
+                },
+                0
+              ],
+              "fn": "gt"
+            },
+            "op": "if",
+            "then": {
+              "keywords": [
+                "storm"
+              ],
+              "op": "modify",
+              "power": 1,
+              "subjects": "entered"
+            }
+          }
+        ]
+      },
+      "kind": "spell",
+      "line": 1,
+      "section": 0,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "self",
+            "trait": "宴楽",
+            "type": "follower",
+            "where": {
+              "args": [
+                {
+                  "read": "item.cost"
+                },
+                2
+              ],
+              "fn": "le"
+            },
+            "zone": "cemetery"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}
