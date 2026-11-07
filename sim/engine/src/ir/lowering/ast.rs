@@ -1893,6 +1893,8 @@ pub(super) struct CountQuery {
     pub kind: Option<CountKind>,
     pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
+    /// 「AやBの…」: a public count of cards having either trait (BP09-117).
+    pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,

@@ -489,6 +489,10 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
             kind: query.kind.map(ast::CountKind::kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             trait_id: query.r#trait.as_deref(),
+            any_traits: query
+                .traits_any
+                .as_ref()
+                .map_or(&[], |union| union.0.as_slice()),
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),

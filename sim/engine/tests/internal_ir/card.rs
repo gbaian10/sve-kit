@@ -782,6 +782,9 @@ mod draw_event;
 #[path = "card/reveal_modes.rs"]
 mod reveal_modes;
 
+#[path = "card/count_traits.rs"]
+mod count_traits;
+
 #[path = "card/entry_name.rs"]
 mod entry_name;
 
