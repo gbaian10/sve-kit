@@ -1,0 +1,35 @@
+cards:
+  BP14-074:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+          on:
+            any_of:
+              - discarded:
+                  from: hand
+                  ref: this
+                  who: self
+              - banished:
+                  from: hand
+                  ref: this
+                  who: self
+          zone: hand
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
