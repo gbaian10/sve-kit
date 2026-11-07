@@ -245,6 +245,18 @@ fn equality_accepts_known_zero_and_two_but_rejects_neighboring_costs() {
 
 #[test]
 fn only_played_headers_accept_original_cost_ranges_and_trait_unions() {
+    // enter_field also reads a trait union (BP21-008); its cost ranges stay Played-only.
+    let mut entry = equipment_played::tree(
+        &json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"traits_any":["宴楽","魔法使い"]}}},"do":[{"life":{"who":"self","delta":1}}]}}),
+        "unit-follower",
+    );
+    lowerer().lower(&entry).unwrap();
+    entry["cards"]["unit-follower"]["abilities"][0]["auto"]["on"]["enter_field"]["sel"]["orig_cost_le"] =
+        json!(3);
+    assert!(matches!(
+        lowerer().lower(&entry).unwrap_err().code,
+        "unsupported_construct" | "invalid_expanded"
+    ));
     for header in ["enter_field", "left_field", "evolved"] {
         let baseline = equipment_played::tree(
             &json!({"auto":{"on":{header:{"who":"self","sel":{"kind":"follower"}}},"do":[{"life":{"who":"self","delta":1}}]}}),
@@ -257,6 +269,9 @@ fn only_played_headers_accept_original_cost_ranges_and_trait_unions() {
             json!({"orig_cost_eq":0}),
             json!({"traits_any":["宴楽","魔法使い"]}),
         ] {
+            if header == "enter_field" && filter.get("traits_any").is_some() {
+                continue;
+            }
             let mut tree = baseline.clone();
             tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"][header]["sel"] = filter;
             assert!(matches!(
