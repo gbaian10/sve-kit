@@ -153,14 +153,22 @@ function scanRuntimePins(): string {
       ),
     ) as { version: string }
   ).version
-  const pin = (file: string) => {
+  // Each entry names the one binary its own glue code was built for (the WebGPU entry has moved
+  // between builds), so the pin is read from the entry the scanner imports, not written by hand.
+  const pin = (entry: string) => {
+    const files = new Set(
+      readFileSync(path.join(ORT_DIST, entry), "utf8").match(/ort-wasm-simd-threaded[\w.]*\.wasm/g),
+    )
+    const [file] = files
+    if (files.size !== 1 || file === undefined)
+      throw new Error(`${entry} must name exactly one binary, found ${[...files].join(", ")}`)
     const bytes = readFileSync(path.join(ORT_DIST, file))
     return { file, bytes: bytes.length, sha256: createHash("sha256").update(bytes).digest("hex") }
   }
   return JSON.stringify({
     version,
-    cpu: pin("ort-wasm-simd-threaded.wasm"),
-    webgpu: pin("ort-wasm-simd-threaded.jsep.wasm"),
+    cpu: pin("ort.wasm.bundle.min.mjs"),
+    webgpu: pin("ort.webgpu.bundle.min.mjs"),
   })
 }
 
