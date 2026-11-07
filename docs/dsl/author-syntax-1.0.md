@@ -248,11 +248,12 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 `A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
-native 的 `any_of` 目前僅准入己方手牌自身的兩個互斥事件：
+自身手牌棄牌／消滅的 `any_of` 子集為：
 `{any_of: [{discarded: {ref: this, from: hand, who: self}}, {banished: {ref: this, from: hand, who: self}}]}`。
 作者仍寫一條能力，lowering 保留同一印刷來源並配置兩個獨立的 typed 事件節點；不產生泛用 union payload。
 此子集不接受限次、批次彙整、其他事件組合或巢狀授予，避免把一條能力的額度拆成兩份。
 單獨的消滅事件頭、其他來源區與消滅主體篩選仍未准入。
+另有既有的財宝打出／融合事件子集，見 [GAP-A-043](#gap-a-043)。
 
 共同事件 filter `by: {ability_of: EventObjectSel}` 判直接來源；入場加 entered_by，UB 加 holder，傷害加 recipient，融合加 material，drew 加 not_phase，counter_reached 為 counter_changed 的 after 比較。`stat_changed: {ref,stat: power|hp或清單,direction:up|down}` 對應 Attack/Life，同一指示對同一主體的攻體增減保存為一個事實的多個 facet，不重複計（`strength: inferred`；Q2075 只證明超進化會誘發，未證明次數）。stat_changed 的 history.where 同樣只用 ref／stat／direction：ref 降為 IR subject，stat 的 power／hp 降為 StatDelta.property 的 Attack／Life；DSL 層不接受 subject／property 別名。從者事件只由明示數值指示或超進化 CR 12.2.4.1 的 +1 步驟產生；進化基礎替換不產生（Q2758），超進化產生（Q2759）。持續效果條件變化、期限到期、種類還原與快取重算不產生，標 `strength: inferred`；領袖的傷害／回復／生命支付仍保留獨立來源。
 
