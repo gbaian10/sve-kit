@@ -419,6 +419,10 @@ Permission declaration 接受 Destroy／Banish 的對象、cause 與 condition �
 保留 polarity、rule 與 duration。BP02-089 的禁止保留 Effect cause，不泛化成所有
 規則破壞。checker 不依卡號檢查卡文等價性；AnyRule 是其他規則可能需要的合法輸入，
 lowering 必須另外驗證 BP02-089 使用 Effect。
+`IgnoreWard` 的 attacker 與 Permission 的物件 subject 都按 selector 遞迴檢查，
+保留 polarity、condition 與 duration；runtime 另限定為場上印刷常駐、Allow、
+SourceHolder 單一物件且 subject 與 attacker 一致。對他者、其他有效區、其他 polarity、
+期限或本文安裝不因良構通過而准入；公開條件在每次攻擊判斷時重新計算。
 
 Replacement declaration 的子集是 General、LeavesZone 的 SourceHolder，離開區須
 在來源能力有效區內，rewrite 為 RedirectMove。目的地共用 MoveDestination 檢查，
@@ -563,7 +567,7 @@ actor 固定為相對 Active 的 RequireOne(Opponents)，基數 1..1（CR7.4.5�
 domain 必須為該 actor 的 QuickActionOrPass，
 可見性只給該玩家；不依手牌內容刪除窗口。這些入口不是規則執行器，也不能嵌入卡片本文。
 Quick 的許可正規形、合法動作及續體依 [Quick 契約 §4–5](quick-semantics.md#4-合法動作可見性與答題)；
-通用 Permission 的動作只收 Destroy／Banish；卡片 Quick 的 `PlayCard` 許可僅接受
+通用 Permission 的良構檢查與執行准入範圍依前文；卡片 Quick 的 `PlayCard` 許可僅接受
 該節完整 header／唯一 declaration 的精確例外，良構通過也不等於已驗執行。
 
 ## May 與目標角色
