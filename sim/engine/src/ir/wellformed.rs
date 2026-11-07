@@ -641,6 +641,24 @@ impl Checker {
     )]
     fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
+            Action::GameResult {
+                players,
+                result: super::Outcome::Win,
+                source,
+            } if *instruction_actor == (PlayerRef::Controller {})
+                && players.relative_to == (PlayerRef::Controller {})
+                && players.relation == PlayerRelation::SelfPlayer
+                && players.cardinality
+                    == (Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    })
+                && players.text_quantifier == super::TextQuantifier::Implicit
+                && self.ability_source.as_ref() == Some(source) =>
+            {
+                self.players(players)?;
+                self.ability_source(source)
+            }
             Action::PlayCard { .. } => {
                 let Some(card) = super::nested_play::card_operand(action) else {
                     return self.reject();

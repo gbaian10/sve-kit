@@ -16,6 +16,8 @@ use sve_engine::ir::PlayerId;
 
 #[path = "token_creation/banish_observed.rs"]
 mod banish_observed;
+#[path = "token_creation/victory.rs"]
+mod victory;
 
 fn author(number: &str, id: &str, kind: &str, mut abilities: Vec<Value>) -> (Value, Value) {
     let card = format!("c:{id}");

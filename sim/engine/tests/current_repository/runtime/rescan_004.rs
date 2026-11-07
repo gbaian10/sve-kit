@@ -19,6 +19,7 @@ fn play_entry(game: &mut Game, object: &str, card: &str) -> Option<Activation> {
         other @ (CardPlay::Resolved(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
+        | CardPlay::GameEnded(_)
         | CardPlay::Continued(_)) => other,
     };
     if !matches!(played, CardPlay::Entered(_)) {

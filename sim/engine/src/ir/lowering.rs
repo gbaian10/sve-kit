@@ -1711,6 +1711,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
             ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
             ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
@@ -1860,6 +1861,22 @@ fn source_span(
         fragment: Some(text("/binding_id")?),
         author_path: path.to_owned(),
     })
+}
+
+fn effect_victory(source: &AbilitySource) -> Action {
+    Action::GameResult {
+        players: PlayerSet {
+            relation: PlayerRelation::SelfPlayer,
+            relative_to: PlayerRef::Controller {},
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+            text_quantifier: TextQuantifier::Implicit,
+        },
+        result: super::Outcome::Win,
+        source: source.clone(),
+    }
 }
 
 fn action_actor(action: &Action) -> PlayerRef {

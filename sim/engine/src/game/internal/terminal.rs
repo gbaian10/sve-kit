@@ -1,4 +1,4 @@
-//! Surrender commits the executed prefix and releases every continuation without rollback.
+//! Termination commits the executed prefix and releases every continuation without rollback.
 
 use super::{ExecutionId, Game, PlayerId, Progress, Result, invalid, seat_name};
 use crate::game::{Step, other};
@@ -21,6 +21,22 @@ pub struct Terminal {
     reason = "Termination owns the same authority as prepared continuations."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_effect_terminal(
+        &mut self,
+        execution: ExecutionId,
+        mut progress: Progress,
+    ) -> Terminal {
+        progress.complete = false;
+        Terminal {
+            execution: Some(execution),
+            progress: Some(progress),
+            step: Step {
+                outcome: "game-end".into(),
+                events: take(&mut self.emitted),
+            },
+        }
+    }
+
     pub(in crate::game) fn internal_terminal_cleanup(&mut self) {
         self.typed = None;
         self.prepared.clear();

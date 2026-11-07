@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-003:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-07"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          on:
+            dealt_damage:
+              ref: this
+              recipient:
+                leader: opp
+              kind: attack
+          do:
+            - win:
+                who: self

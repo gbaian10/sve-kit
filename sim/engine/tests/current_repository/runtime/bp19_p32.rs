@@ -80,6 +80,7 @@ fn advance_and_resolve_fanfare(game: &mut Game, seat: &str) {
         CardPlay::Continued(step) => {
             panic!("expected Ward entry decision before continuing a rule step, got {step:?}")
         }
+        CardPlay::GameEnded(_) => panic!("expected Ward entry before termination"),
     };
     assert_eq!(
         ward_question.actor.seat,

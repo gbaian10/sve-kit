@@ -109,14 +109,17 @@ fn bounds(action: &Action) -> Result<Cardinality> {
         return Err(unsupported("single hand discard group"));
     };
     let count = constraint.cardinality;
-    if count.minimum.0 == 0
-        || count.maximum != Some(count.minimum)
+    let fixed = count.minimum.0 > 0 && count.maximum == Some(count.minimum);
+    let any = count.minimum == Nat(0) && count.maximum.is_none();
+    if !(fixed || any)
         || group.cardinality != count
         || constraint.disjoint != Disjointness::Disjoint
         || constraint.distinct_by.is_some()
         || !constraint.aggregate_bounds.is_empty()
     {
-        return Err(unsupported("fixed positive discard cardinality"));
+        return Err(unsupported(
+            "fixed positive or any-number discard cardinality",
+        ));
     }
     let Selector::Zone {
         players,
@@ -285,6 +288,9 @@ impl Game {
             .minimum
             .0
             .min(u64::try_from(members.len()).map_err(invalid)?);
+        if count.maximum.is_none() {
+            count.maximum = Some(Nat(u64::try_from(members.len()).map_err(invalid)?));
+        }
         self.internal_wait(
             execution,
             DecisionId(instruction.id.0),

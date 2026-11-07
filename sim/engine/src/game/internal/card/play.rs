@@ -30,6 +30,8 @@ use serde_json::{Value, json};
 /// A formal play exposes a question or a fully committed result, never partial receipts.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum CardPlay {
+    /// Effect victory ended the game; the executed prefix has no resolved fact.
+    GameEnded(super::super::Terminal),
     /// Answer through `answer_internal_card` using only this token and a payload.
     Awaiting(DecisionView),
     /// Complete printed Spell or ability, followed by explicit check timing.
@@ -1008,6 +1010,7 @@ impl Game {
                     _ => None,
                 });
         Ok(Execution {
+            terminated: false,
             context,
             id: ExecutionId(self.state.ir_epoch),
             timestamp: self.state.ir_play_clock,
@@ -1141,6 +1144,11 @@ impl Game {
     }
 
     pub(super) fn card_play_result(&mut self, execution: Execution) -> Result<CardPlay> {
+        if execution.terminated {
+            return Ok(CardPlay::GameEnded(
+                self.internal_effect_terminal(execution.id, execution.progress()),
+            ));
+        }
         if let Some((view, _)) = &execution.waiting {
             let view = view.clone();
             self.typed = Some(execution);
@@ -1198,6 +1206,11 @@ impl Game {
             }
             result => result?,
         };
+        if self.state.game["ended"] == true && !progress.complete {
+            return Ok(CardPlay::GameEnded(
+                self.internal_effect_terminal(token.execution, progress),
+            ));
+        }
         if let Some((view, _)) = self
             .typed
             .as_ref()

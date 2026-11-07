@@ -1313,6 +1313,7 @@ fn check_instruction(
         } | Action::Resource { .. }
             | Action::Counter { .. }
             | Action::Discard { .. }
+            | Action::GameResult { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }

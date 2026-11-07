@@ -19,15 +19,26 @@ impl BodyContext<'_> {
         value: &ast::Discard,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if value.any.is_some()
+            && (value.n.is_some()
+                || value.all.is_some()
+                || value.random.is_some()
+                || matches!(value.who, Some(ast::LeaderSide::Opponent)))
+        {
+            return Err(unsupported(path));
+        }
         let player = match value.who {
             Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
             Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
         };
         let mode = match (value.n, value.all) {
-            (Some(n), None) if n > 0 && value.random != Some(true) => {
+            (n, None)
+                if (n.is_some_and(|n| n > 0) || value.any.is_some())
+                    && value.random != Some(true) =>
+            {
                 let cardinality = Cardinality {
-                    minimum: Nat(n),
-                    maximum: Some(Nat(n)),
+                    minimum: Nat(n.unwrap_or(0)),
+                    maximum: n.map(Nat),
                 };
                 DiscardMode::Chosen {
                     constraint: SelectionConstraint {
