@@ -23,7 +23,18 @@ def signed_area(q):
 
 
 class RealDet:
-    def __init__(self, index: str, split: str = "train", size: int = 256, seed: int = 0):
+    def __init__(
+        self,
+        index: str,
+        split: str = "train",
+        size: int = 256,
+        seed: int = 0,
+        zoom_p: float = 0.0,
+        inside_p: float = 0.0,
+    ):
+        # zoom_p: share of positive crops where the target card is 70-160% of the view (close-ups)
+        # inside_p: share of negative crops cut from inside one card, away from its centre (card art)
+        self.zoom_p, self.inside_p = zoom_p, inside_p
         if not isinstance(size, int) or size < 1:
             raise ValueError("size must be a positive integer")
         self.size = size
@@ -81,9 +92,20 @@ class RealDet:
         if negative:
             # Negative crops are background-sized, with rejection AFTER rotation.
             # The positive 8–70% object-size constraint has no meaning here.
+            # each share is tested before drawing so that 0 leaves the earlier random sequence unchanged
+            inside = self.inside_p > 0 and len(self.quads[i]) > 0 and rng.random() < self.inside_p
             for _ in range(128):
-                side = float(rng.uniform(0.08, 0.4) * min(w, h))
-                center = rng.uniform([0, 0], [w, h])
+                if inside:
+                    q = self.quads[i][int(rng.integers(len(self.quads[i])))]
+                    short = float(np.linalg.norm(np.roll(q, -1, axis=0) - q, axis=1).min())
+                    side = float(rng.uniform(0.25, 0.6) * short)
+                    a, b = rng.uniform(0.15, 0.85, 2)
+                    top = q[0] + a * (q[1] - q[0])
+                    bottom = q[3] + a * (q[2] - q[3])
+                    center = top + b * (bottom - top)
+                else:
+                    side = float(rng.uniform(0.08, 0.4) * min(w, h))
+                    center = rng.uniform([0, 0], [w, h])
                 crop = np.array(
                     [[s / side, 0, s / 2 - center[0] * s / side], [0, s / side, s / 2 - center[1] * s / side]]
                 )
@@ -103,7 +125,8 @@ class RealDet:
             return crop, rotation
         target = self.quads[i][int(rng.integers(len(self.quads[i])))]
         longest = float(np.linalg.norm(np.roll(target, -1, axis=0) - target, axis=1).max())
-        side = longest / float(rng.uniform(0.08, 0.70))
+        zoom = self.zoom_p > 0 and rng.random() < self.zoom_p
+        side = longest / float(rng.uniform(0.7, 1.6) if zoom else rng.uniform(0.08, 0.70))
         center = target.mean(axis=0) + rng.uniform(-0.12, 0.12, 2) * side
         return np.array(
             [[s / side, 0, s / 2 - center[0] * s / side], [0, s / side, s / 2 - center[1] * s / side]]

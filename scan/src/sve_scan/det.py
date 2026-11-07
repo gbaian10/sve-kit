@@ -50,6 +50,9 @@ DENSE_P = float(
     _os.environ.get("DENSE_P", "0")
 )  # tournament-board grids (rows of tightly packed cards); tried, not adopted
 TILT_HI = float(_os.environ.get("TILT_HI", "0.35"))  # share of steep 60-78° views
+# Close-ups: the target card is 70-160% of the view. Deck photos with a few large cards hand the reader tiles
+# that sit inside one card, where the earlier stages (8-70% only) boxed frames in the art as small cards.
+ZOOM_P = float(_os.environ.get("ZOOM_P", "0"))
 MM_PER_PX = CARD_MM[0] / TW
 PHONE = paths.real() / "phone-2026-10-18"  # the maintainer's aim-frame saves (validation only)
 DECOYS = ("back", "ring", "paper", "phone", "keyboard", "box")
@@ -193,7 +196,9 @@ def camera(target: tuple[float, float], rng: np.random.Generator) -> dict:
     )
     az = rng.uniform(0, 2 * math.pi)
     roll = math.radians(rng.normal(0, 12))
-    size = rng.uniform(0.08, 0.7) * S  # target card's long side in px, before foreshortening
+    # target card's long side in px, before foreshortening
+    # ZOOM_P is tested before drawing so that 0 leaves the earlier random sequence unchanged
+    size = (rng.uniform(0.7, 1.6) if ZOOM_P > 0 and rng.random() < ZOOM_P else rng.uniform(0.08, 0.7)) * S
     d = f * CARD_MM[1] / size
     v = np.array([math.sin(tilt) * math.cos(az), math.sin(tilt) * math.sin(az), math.cos(tilt)])
     cam = np.array([target[0], target[1], 0.0]) + d * v
@@ -343,6 +348,8 @@ def background(assets: Assets, scenes: list[dict], rng: np.random.Generator) -> 
     )
     pb = torch.from_numpy(np.stack([sc["bg"] for sc in scenes])).float().to(DEV)
     table = kornia.geometry.transform.warp_perspective(src, pb, (S, S), padding_mode="zeros")
+    # close-ups: a few pixels next to the horizon can warp to NaN; they show the room instead
+    table = torch.nan_to_num(table, nan=0.0, posinf=0.0, neginf=0.0)
     yy, xx = torch.meshgrid(
         torch.arange(S, device=DEV).float() + 0.5, torch.arange(S, device=DEV).float() + 0.5, indexing="ij"
     )
@@ -533,6 +540,9 @@ def render(assets: Assets, scenes: list[dict], rng: np.random.Generator) -> tupl
         w = kornia.geometry.transform.warp_perspective(
             layer[c0 : c0 + 96], pm[c0 : c0 + 96], (S, S), padding_mode="zeros"
         )
+        # A close camera can put part of a large decoy (playmat ring, deck box) behind the lens; its nearly
+        # singular homography warps to NaN there. Those pixels are simply not drawn.
+        w = torch.nan_to_num(w, nan=0.0, posinf=0.0, neginf=0.0)
         grid[owner[c0 : c0 + 96], posn[c0 : c0 + 96]] = w.half()
     del layer
     occludes = torch.zeros(b, nmax, device=DEV)
@@ -635,7 +645,8 @@ def targets(labels: list[list[dict]]) -> tuple[torch.Tensor, torch.Tensor, list[
                 heat[i] = np.maximum(heat[i], g)
                 heat[i, iy, ix] = 1.0
                 pos.append((i, iy, ix, q - np.array([ix + 0.5, iy + 0.5])))
-            elif lab["vis"] >= 0.12:  # half hidden: neither asked for nor punished
+            elif lab["vis"] >= 0.12 and side < G:  # half hidden: neither asked for nor punished
+                # (a card bigger than the view is cut by the frame, not hidden: its art stays a negative)
                 weight[i][g > 0.3] = 0
     return torch.from_numpy(heat).to(DEV), torch.from_numpy(weight).to(DEV), pos
 
@@ -861,7 +872,14 @@ def cmd_train(tag: str, iters: int, bs: int) -> None:
     if os.environ.get("REAL"):
         from sve_scan.det_real import RealDet  # noqa: E402
 
-        real = RealDet(os.environ["REAL"], "train", size=S, seed=int(time.time()))
+        real = RealDet(
+            os.environ["REAL"],
+            "train",
+            size=S,
+            seed=int(time.time()),
+            zoom_p=ZOOM_P,
+            inside_p=float(os.environ.get("INSIDE_P", "0")),
+        )
         n_real = int(round(bs * float(os.environ.get("REAL_FRAC", "0.4"))))
     lr = float(os.environ.get("LR", "2e-3"))
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
@@ -888,12 +906,20 @@ def cmd_train(tag: str, iters: int, bs: int) -> None:
                 ]
                 for ls in rlab
             ]
+        if not torch.isfinite(img).all():  # checked before the forward pass: BatchNorm statistics would keep a NaN
+            log(f"it {it}: non-finite input, batch skipped")
+            sched.step()
+            continue
         heat, w, pos = targets(labels)
         with torch.autocast("cuda", dtype=torch.bfloat16):
             hl, co = model(img)
         lh = focal(hl[:, 0], heat, w)
         lc = corner_loss(co, pos)
         loss = lh + 4.0 * lc
+        if not torch.isfinite(loss):  # one bad batch would turn every weight into NaN
+            log(f"it {it}: non-finite loss, batch skipped")
+            sched.step()
+            continue
         opt.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
@@ -906,8 +932,9 @@ def cmd_train(tag: str, iters: int, bs: int) -> None:
                 f"it {it}/{iters} heat {h[:, 0].mean():.3f} corner {h[:, 1].mean():.4f} "
                 f"({(time.time() - t0) / it:.2f} s/it)"
             )
-        if it % 2000 == 0 or it == iters:
+        if it % 2000 == 0:
             torch.save(model.state_dict(), OUT / f"det_{tag}.pt")
+    torch.save(model.state_dict(), OUT / f"det_{tag}.pt")  # also when the last batch was skipped
     rec = recogniser()
     if rec is None:
         log("REC_TAG not set: skipping the phone and burst checks")
