@@ -44,9 +44,8 @@ updates:
     commit-message:
       prefix: ⬆️ dep-bump
 
-  # scan/ is its own uv project, outside the root workspace. PyTorch and torchvision come from the PyTorch
-  # CUDA index and are upgraded by hand together with a training run: Dependabot offered an older build
-  # than the index had and left the new lock entries without hashes (#1862).
+  # scan/ (own uv project). PyTorch and torchvision are upgraded by hand with a training run: Dependabot
+  # offered an older build than the CUDA index had and left the lock entries without hashes (#1862).
   - package-ecosystem: uv
     directory: /scan
     schedule:
