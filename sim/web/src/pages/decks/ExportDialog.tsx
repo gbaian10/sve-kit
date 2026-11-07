@@ -2,6 +2,7 @@ import { Check, Copy, Download, Share2 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { deckShareLink } from "../../app/deck-routes"
 import { useDialogHistory } from "../../app/dialog-history"
 import { Button } from "../../components/ui/Button"
 import { Dialog } from "../../components/ui/Dialog"
@@ -60,10 +61,6 @@ function sizeLabel(bytes: number): string {
 type Copied = "text" | "link" | "code" | null
 
 /** The share link a deck code travels in; opening it shows the import preview. */
-function shareLink(code: string): string {
-  return `${window.location.origin}/decks/import?d=${code}`
-}
-
 /** The deck as text, as a share code or link, and as a picture; all made in the browser. */
 export function ExportDialog({
   open,
@@ -176,7 +173,7 @@ export function ExportDialog({
     })
     return { code, missing }
   }, [deck, facts])
-  const link = share.code === "" ? "" : shareLink(share.code)
+  const link = share.code === "" ? "" : deckShareLink(share.code)
   const draw = async (chosen: DeckImageSize) => {
     if (!facts) return
     const mine = ++job.current

@@ -6,6 +6,7 @@ import {
   appScanModels,
   type CardSummary,
   type ImageIndex,
+  mergeImageIndexes,
   SCAN_PARTS,
   scanFaceImage,
   type ScanModelsStatus,
@@ -65,6 +66,9 @@ export interface ScanResult {
   readonly faceImage?: string
 }
 
+// The worker answers up to 20 cards per request; a deck photo can hold up to 60 different cards.
+const CHUNK = 20
+
 /** Resolves recognised cards to the site's summaries, names in the UI language and images. */
 export function useScanResults(
   cards: readonly ScanCard[],
@@ -72,30 +76,41 @@ export function useScanResults(
 ): { readonly results: readonly ScanResult[]; readonly images: ImageIndex | undefined } {
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
-  const numbers = useMemo(() => cards.map((card) => card.no), [cards])
-  const found = useRecentSummaries(numbers, edition, "card-no")
-  const summaries = found.phase === "complete" ? found.recent : undefined
-  const results = useMemo(
-    () =>
-      cards.map((card, at) => {
-        // Summaries describe the front; another face shows its own image and printed name.
-        if (card.face > 0)
-          return {
-            card,
-            summary: undefined,
-            name: undefined,
-            faceImage: scanFaceImage(card.imageId, card.face),
-          }
-        const summary = summaries?.[at]?.summary
+  const numbers = useMemo(() => [...new Set(cards.map((card) => card.no))], [cards])
+  const first = useRecentSummaries(numbers.slice(0, CHUNK), edition, "card-no")
+  const second = useRecentSummaries(numbers.slice(CHUNK, 2 * CHUNK), edition, "card-no")
+  const third = useRecentSummaries(numbers.slice(2 * CHUNK, 3 * CHUNK), edition, "card-no")
+  const results = useMemo(() => {
+    const byNumber = new Map<string, CardSummary>()
+    for (const [offset, found] of [first, second, third].entries()) {
+      if (found.phase !== "complete") continue
+      found.recent?.forEach((item, at) => {
+        const no = numbers[offset * CHUNK + at]
+        if (item.summary && no !== undefined) byNumber.set(no, item.summary)
+      })
+    }
+    return cards.map((card) => {
+      // Summaries describe the front; another face shows its own image and printed name.
+      if (card.face > 0)
         return {
           card,
-          summary,
-          name: summary ? displayName(summary.name, uiLanguage, prefs.nameDisplay) : undefined,
+          summary: undefined,
+          name: undefined,
+          faceImage: scanFaceImage(card.imageId, card.face),
         }
-      }),
-    [cards, summaries, uiLanguage, prefs.nameDisplay],
+      const summary = byNumber.get(card.no)
+      return {
+        card,
+        summary,
+        name: summary ? displayName(summary.name, uiLanguage, prefs.nameDisplay) : undefined,
+      }
+    })
+  }, [cards, numbers, first, second, third, uiLanguage, prefs.nameDisplay])
+  const images = useMemo(
+    () => mergeImageIndexes([first.images, second.images, third.images]),
+    [first.images, second.images, third.images],
   )
-  return { results, images: found.images }
+  return { results, images }
 }
 
 export interface ScanReadiness {

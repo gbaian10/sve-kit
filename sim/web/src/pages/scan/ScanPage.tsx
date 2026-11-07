@@ -235,6 +235,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
     <div className="-mx-4 flex h-[calc(100dvh-3.25rem-5.25rem)] flex-col gap-3 overflow-x-clip pt-3 lg:mx-auto lg:h-[calc(100dvh-3.25rem)] lg:w-full lg:max-w-240 lg:pb-4 phone-landscape:h-[calc(100dvh-3.25rem)]">
       <h1 className="sr-only">{t("scan.single.heading")}</h1>
       <ScanModeTabs
+        mode="single"
         start={
           <button
             type="button"

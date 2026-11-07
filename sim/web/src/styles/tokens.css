@@ -56,6 +56,12 @@
   --camera-ok-pill: rgb(22 163 74 / 90%);
   --camera-lock-pill: rgb(2 132 199 / 90%);
   --camera-error: #fca5a5;
+
+  /* Deck-photo results: recognised, guessed from the rest of the deck, unsure, and dimmed. */
+  --scan-ok: #15803d;
+  --scan-guess: #0369a1;
+  --scan-unsure: #a16207;
+  --scan-off: #6b7280;
   --accent: #0f766e;
   --accent-ink: #fff;
   --accent-text: #0b5f59;
@@ -142,6 +148,12 @@
     --camera-ok-pill: rgb(22 163 74 / 90%);
     --camera-lock-pill: rgb(2 132 199 / 90%);
     --camera-error: #fca5a5;
+
+    /* Deck-photo results: recognised, guessed from the rest of the deck, unsure, and dimmed. */
+    --scan-ok: #4ade80;
+    --scan-guess: #38bdf8;
+    --scan-unsure: #facc15;
+    --scan-off: #6b7280;
     --accent: #e8b64a;
     --accent-ink: #1e1f22;
     --accent-text: #f2c65e;
@@ -228,6 +240,12 @@
   --camera-ok-pill: rgb(22 163 74 / 90%);
   --camera-lock-pill: rgb(2 132 199 / 90%);
   --camera-error: #fca5a5;
+
+  /* Deck-photo results: recognised, guessed from the rest of the deck, unsure, and dimmed. */
+  --scan-ok: #4ade80;
+  --scan-guess: #38bdf8;
+  --scan-unsure: #facc15;
+  --scan-off: #6b7280;
   --accent: #e8b64a;
   --accent-ink: #1e1f22;
   --accent-text: #f2c65e;

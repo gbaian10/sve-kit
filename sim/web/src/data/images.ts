@@ -196,3 +196,24 @@ export async function loadImagePage(
   check()
   return indexOf(selected)
 }
+
+/** Several partial image indexes as one: each face is answered by the index that knows it. */
+export function mergeImageIndexes(indexes: readonly (ImageIndex | undefined)[]): ImageIndex {
+  const present = indexes.flatMap((index) => (index ? [index] : []))
+  const owner = (printingId: string, faceId: string) =>
+    present.find(
+      (index) =>
+        index.known?.(printingId, faceId) === true || index.asset(printingId, faceId) !== undefined,
+    )
+  return {
+    known: (printingId, faceId) => owner(printingId, faceId) !== undefined,
+    asset: (printingId, faceId) => owner(printingId, faceId)?.asset(printingId, faceId),
+    cardImage: (printingId, faceId) => owner(printingId, faceId)?.cardImage(printingId, faceId),
+    artImage: (printingId, faceId) => owner(printingId, faceId)?.artImage?.(printingId, faceId),
+    eager: (printingId, faceId) =>
+      present.some((index) => index.eager?.(printingId, faceId) === true),
+    failedFace: (printingId, faceId) =>
+      owner(printingId, faceId) === undefined &&
+      present.some((index) => index.failedFace?.(printingId, faceId) === true),
+  }
+}

@@ -35,6 +35,7 @@ export {
   type ImageSource,
   isSnapshotImageFace,
   loadImagePage,
+  mergeImageIndexes,
   retainedImageIndex,
 } from "./images"
 export { createLocator, GLOBAL_OWNER } from "./locator"
