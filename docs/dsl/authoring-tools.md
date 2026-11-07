@@ -325,6 +325,27 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱接受單一區域的 Main／End 時點，以及下述融合事件與融合／打出共用事件；有效區本身不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 
+條件式墓場打出許可可寫成：
+
+```yaml
+play:
+  playable_from:
+    zone: cemetery
+    if:
+      cmp:
+        left:
+          history_count:
+            event: played
+            window: this_turn
+            who: self
+        op: ge
+        right: 3
+```
+
+這是 BP18-007 的基礎面印刷許可，只在來源位於自己的墓場時讀取條件；條件不成立不會禁止原本合法的手牌或 EX 打出。許可沿用一般打出的時點、印刷費用與入場程序。`history_count` 讀取打出前已提交的自己本回合卡片數，不包含正在嘗試打出的這張；能力直接入場與能力起動不計，換回合後重新計數，詳見[事件與歷史形狀](author-history-shapes-1.0.md)。目前接受單一 `cemetery` 加條件的印刷 `play` 頭；無條件、多區列表、其他區域、授予能力，以及同一頭混用費用修改、`define` 或 `cannot_if` 都拒絕。
+
+BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷非手牌入場，先宣告敵方從者正式目標，才結算傷害與自身置底。沒有合法正式目標時，該次 Fanfare 不能打出，其後句也不執行；卡片本身仍可完成入場。
+
 墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作只准自身回場或移到持有者的 EX（墓場的打出與進場訂閱共用這個限制），其他操作、其他目的地、任意目標回場與一般事件欄位讀取維持原邊界。
 
 墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 沿用上述墓場限制，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。本文的自身移動也可放在 `optional` 內表示「…てよい」，例如 BP15-101 寫 `optional: {do: [{move: {ref: this, to: ex, result: moved}}, {if: {cond: {did: moved}, then: [...]}}]}`；只有實際移到 EX 才執行「そうしたなら」的後句。
