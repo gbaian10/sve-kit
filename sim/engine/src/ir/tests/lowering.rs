@@ -1996,3 +1996,30 @@ fn self_to_ex_cost_is_paid_only_by_a_hand_activation() {
     quick["cards"]["BP01-041"]["abilities"][0]["activate"]["cost"] = json!({"pp":1_u64});
     lowerer.lower(&quick).unwrap();
 }
+
+#[test]
+fn target_power_bounds_lower_to_distinct_candidate_filters() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let spell = |bound: &str| {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({
+            "targets":[{"bind":"t","from":{"who":"opp","zone":"field","kind":"follower",bound:3_u64},"n":1_u64}],
+            "do":[{"damage":{"to":"t","n":1_u64}}]
+        });
+        tree
+    };
+    let at_most = lowerer
+        .lower_with_printed_costs(&spell("power_le"), &costs)
+        .unwrap();
+    let at_least = lowerer
+        .lower_with_printed_costs(&spell("power_ge"), &costs)
+        .unwrap();
+    assert_ne!(
+        at_most["SD03-005"].card().abilities[0].node,
+        at_least["SD03-005"].card().abilities[0].node,
+        "the two bounds keep different candidate predicates"
+    );
+}

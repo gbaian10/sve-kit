@@ -272,6 +272,8 @@ class _SharedFilterFields(TypedDict, total=False):
 @with_config(FILTER_CONFIG)
 class ObjectFilterFields(_SharedFilterFields, _ClassFilter, total=False):
     power_max: TrueFlag
+    power_le: Quantity
+    power_ge: Quantity
     kind: Code | ParamRef | SameAs
     trait: Text | ParamRef
     traits_all: Annotated[tuple[Text | ParamRef, ...], Field(min_length=1)]

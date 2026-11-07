@@ -1871,6 +1871,12 @@
         "power_max": {
           "const": true,
           "type": "boolean"
+        },
+        "power_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "power_ge": {
+          "$ref": "#/$defs/A.quantity"
         }
       },
       "required": [
@@ -2091,6 +2097,12 @@
         "power_max": {
           "const": true,
           "type": "boolean"
+        },
+        "power_le": {
+          "$ref": "#/$defs/A.quantity"
+        },
+        "power_ge": {
+          "$ref": "#/$defs/A.quantity"
         }
       },
       "required": [

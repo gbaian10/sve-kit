@@ -137,6 +137,8 @@ impl BodyContext<'_> {
             || query.not_same_name_as_this
             || query.has_evolve.is_some()
             || query.has_state_filter()
+            || query.power_le.is_some()
+            || query.power_ge.is_some()
             || !query.traits_all.is_empty()
             || query.traits_any.is_some()
             || !query.names.is_empty()
