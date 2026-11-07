@@ -6,6 +6,7 @@ import {
   History,
   Lock,
   LockOpen,
+  MoveVertical,
   RectangleHorizontal,
   RectangleVertical,
   ScanLine,
@@ -28,6 +29,7 @@ import {
 } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import type { Region } from "../../domain/search"
+import { clampAimScale, MIN_AIM_SCALE, saveAimScale, savedAimScale } from "../../settings"
 import { type CameraFrame, CameraScanner } from "./camera"
 import {
   openScanEngine,
@@ -48,7 +50,9 @@ import { ClassColumn, ScanModeTabs } from "./scan-shared"
 
 // Card proportions (63 × 88 mm) for the aiming frame.
 const CARD_RATIO = 88 / 63
-const ZOOMS = [1, 1.5, 2, 3]
+const ZOOMS = [1, 2, 3, 5, 8]
+/** One arrow key press on the frame-size handle. */
+const AIM_STEP = 0.05
 
 // Coming back from a card page should not ask for the camera again: remember it was on.
 let cameraWasOn = false
@@ -80,6 +84,14 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   const area = useRef<HTMLDivElement>(null)
   const overlay = useRef<HTMLCanvasElement>(null)
   const [aimSize, setAimSize] = useState({ width: 0, height: 0 })
+  const [aimScale, setAimScale] = useState(savedAimScale)
+  // Dragging the handle on the frame's bottom edge: the frame stays centred, so moving the edge
+  // down by d makes it 2d taller.
+  const drag = useRef<{ readonly from: number; readonly scale: number } | null>(null)
+  const endDrag = () => {
+    if (drag.current) saveAimScale(aimScale)
+    drag.current = null
+  }
 
   const sources = useMemo(() => scanEngineSources(store), [store])
   // Cleared on unmount: a camera start still waiting for permission must not go on afterwards.
@@ -279,16 +291,61 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
             <div
               ref={aim}
               style={{
-                width: aimSize.width,
-                height: aimSize.height,
+                width: aimSize.width * aimScale,
+                height: aimSize.height * aimScale,
                 boxShadow: "0 0 0 9999px var(--camera-dim)",
               }}
               className={cn(
-                "rounded-block border-2 transition-colors",
+                "relative rounded-block border-2 transition-colors",
                 phase !== "running" && "opacity-0",
                 status === "ok" ? "border-camera-ok" : "border-camera-frame",
               )}
-            />
+            >
+              {phase === "running" && (
+                <span
+                  role="slider"
+                  tabIndex={0}
+                  aria-label={t("scan.single.aimSize")}
+                  aria-valuemin={Math.round(MIN_AIM_SCALE * 100)}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(aimScale * 100)}
+                  aria-valuetext={`${String(Math.round(aimScale * 100))}%`}
+                  title={t("scan.single.aimSize")}
+                  onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId)
+                    drag.current = { from: event.clientY, scale: aimScale }
+                  }}
+                  onPointerMove={(event) => {
+                    const start = drag.current
+                    if (!start || aimSize.height === 0) return
+                    const grown = (2 * (event.clientY - start.from)) / aimSize.height
+                    setAimScale(clampAimScale(start.scale + grown))
+                  }}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                  onKeyDown={(event) => {
+                    const step =
+                      event.key === "ArrowUp" || event.key === "ArrowRight"
+                        ? AIM_STEP
+                        : event.key === "ArrowDown" || event.key === "ArrowLeft"
+                          ? -AIM_STEP
+                          : 0
+                    if (!step) return
+                    event.preventDefault()
+                    const next = clampAimScale(aimScale + step)
+                    setAimScale(next)
+                    saveAimScale(next)
+                  }}
+                  // A 44px target on the middle of the bottom edge (design §9 touch size), clear of
+                  // the class and zoom columns at either side.
+                  className="pointer-events-auto absolute -bottom-5.5 left-1/2 flex size-11 -translate-x-1/2 touch-none items-center justify-center"
+                >
+                  <span className="flex size-7 items-center justify-center rounded-full bg-camera-chip text-camera-text backdrop-blur">
+                    <MoveVertical className="size-4" aria-hidden="true" />
+                  </span>
+                </span>
+              )}
+            </div>
           </div>
           <canvas ref={overlay} className="pointer-events-none absolute inset-0 size-full" />
 
@@ -370,7 +427,8 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
             <div
               role="group"
               aria-label={t("scan.single.zoom")}
-              className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1"
+              // Below the lock button; on a short camera view the steps scroll instead of covering it.
+              className="absolute top-14 right-2 bottom-2 flex [scrollbar-width:none] flex-col justify-center-safe overflow-y-auto"
             >
               {ZOOMS.filter((step) => step <= maxZoom).map((step) => (
                 <button
@@ -382,7 +440,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
                     void scanner.current?.setZoom(step)
                   }}
                   // A 44px target around a 40px dial (design §9 touch size).
-                  className="flex size-11 items-center justify-center"
+                  className="flex size-11 shrink-0 items-center justify-center"
                 >
                   <span
                     className={cn(

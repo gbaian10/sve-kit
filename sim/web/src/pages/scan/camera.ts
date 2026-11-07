@@ -5,6 +5,7 @@ import {
   FinishSmoother,
   pickFinish,
 } from "../../domain/scan/finish"
+import { type Followed, type QuadCandidate, QuadFollower } from "../../domain/scan/follow"
 import { orderQuad, warpQuad } from "../../domain/scan/geometry"
 import type { Point, Quad } from "../../domain/scan/tensor"
 import { ScanTracker, type TrackFrame } from "../../domain/scan/tracker"
@@ -23,6 +24,8 @@ const CENTRE_PULL = 0.6
 const FRAME_GAP_MS = 30
 const IDLE_MS = 200
 const CANDIDATES = 10
+/** Zoom offered without an optical one: the picture is scaled up. */
+const DIGITAL_ZOOM = 8
 
 export interface CameraFrame extends TrackFrame {
   /** The card finder saw a card this frame. */
@@ -69,6 +72,7 @@ export class CameraScanner {
   private engine: ScanEngine | null
   private tracker: ScanTracker
   private readonly finish = new FinishSmoother()
+  private readonly follower = new QuadFollower()
   private video: HTMLVideoElement | null = null
   private frame: HTMLElement | null = null
   private overlay: HTMLCanvasElement | null = null
@@ -105,6 +109,7 @@ export class CameraScanner {
     this.engine = engine
     this.tracker = new ScanTracker(engine.index.dim)
     this.finish.reset()
+    this.follower.reset()
     this.canvases = null
   }
 
@@ -118,6 +123,7 @@ export class CameraScanner {
     this.sideways = sideways
     this.tracker.reset()
     this.finish.reset()
+    this.follower.reset()
   }
 
   setPaused(paused: boolean): void {
@@ -182,13 +188,15 @@ export class CameraScanner {
       throw new CameraStopped()
     }
     this.hardwareZoom = capabilities.zoom && capabilities.zoom.max > 1 ? capabilities.zoom : null
-    return this.hardwareZoom ? Math.max(this.hardwareZoom.max, 4) : 4
+    return this.hardwareZoom ? Math.max(this.hardwareZoom.max, DIGITAL_ZOOM) : DIGITAL_ZOOM
   }
 
   /** Optical zoom where the camera has it, the rest by scaling the picture. */
   async setZoom(zoom: number): Promise<void> {
     const video = this.video
     if (!video) return
+    // The picture moves under the box: start following afresh.
+    this.follower.reset()
     const hardware = this.hardwareZoom
     if (hardware && this.track) {
       const optical = Math.max(hardware.min, Math.min(zoom, hardware.max))
@@ -210,6 +218,7 @@ export class CameraScanner {
     if (this.video && this.video.srcObject === this.stream) this.video.srcObject = null
     this.stream = null
     this.track = null
+    this.follower.reset()
   }
 
   async run(onFrame: (frame: CameraFrame) => void): Promise<void> {
@@ -224,7 +233,7 @@ export class CameraScanner {
       try {
         const canvases = this.canvasesFor(engine)
         const geometry = this.geometry(video)
-        const quad = await this.find(engine, canvases, video, geometry)
+        const { shown: box, found: quad } = await this.find(engine, canvases, video, geometry)
         const pixels = quad
           ? this.straighten(engine, canvases, video, quad)
           : this.aimed(canvases, video, geometry)
@@ -235,7 +244,7 @@ export class CameraScanner {
         const frame = this.tracker.step(upright, matches, performance.now(), (picks) =>
           engine.confident(picks),
         )
-        this.draw(geometry, quad, frame.status === "ok")
+        this.draw(geometry, box, frame.status === "ok")
         const shown = quad ? this.withFinish(engine, frame, pixels) : this.withoutFinish(frame)
         onFrame({ ...shown, found: quad !== null })
       } catch (error) {
@@ -335,13 +344,13 @@ export class CameraScanner {
       )
   }
 
-  /** The card nearest the aiming frame's centre, in video pixels. */
+  /** The card nearest the aiming frame's centre, in video pixels; the one shown last is preferred. */
   private async find(
     engine: ScanEngine,
     canvases: Canvases,
     video: HTMLVideoElement,
     g: Geometry,
-  ): Promise<Quad | null> {
+  ): Promise<Followed> {
     const side = Math.max(g.width, g.height) * FIND_REGION
     const x0 = g.x + g.width / 2 - side / 2
     const y0 = g.y + g.height / 2 - side / 2
@@ -351,16 +360,17 @@ export class CameraScanner {
       canvases.finder.context.getImageData(0, 0, size, size).data,
       FIND_THRESHOLD,
     )
-    let best: { readonly quad: Quad; readonly key: number } | null = null
-    for (const detection of found) {
+    const k = side / size
+    const candidates = found.map((detection): QuadCandidate => {
       const cx = detection.quad.reduce((sum, p) => sum + p[0], 0) / 4 / size - 0.5
       const cy = detection.quad.reduce((sum, p) => sum + p[1], 0) / 4 / size - 0.5
-      const key = detection.score - CENTRE_PULL * Math.hypot(cx, cy)
-      if (!best || key > best.key) best = { quad: detection.quad, key }
-    }
-    if (!best) return null
-    const k = side / size
-    return best.quad.map(([x, y]): Point => [x0 + x * k, y0 + y * k]) as unknown as Quad
+      return {
+        // Video pixels: the finder's square moves with the aiming frame, the video does not.
+        quad: detection.quad.map(([x, y]): Point => [x0 + x * k, y0 + y * k]) as unknown as Quad,
+        key: detection.score - CENTRE_PULL * Math.hypot(cx, cy),
+      }
+    })
+    return this.follower.follow(candidates)
   }
 
   /** Straightens the found card; the source is cut and shrunk to about the card's output size first. */

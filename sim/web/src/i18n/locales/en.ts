@@ -935,6 +935,7 @@ export default {
       locked: "Locked; tap the picture to continue",
       zoom: "Zoom",
       zoomStep: "{{zoom}}×",
+      aimSize: "Drag up or down to resize the frame",
       resultLine: "{{no}} · {{hint}}",
       tapForEffect: "Tap to see its effect",
       notSure: "Not sure yet",
