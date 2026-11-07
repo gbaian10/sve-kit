@@ -317,8 +317,50 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         Ok(Action::Banish {
             objects: match value {
-                ast::BanishAction::Top { top } if own_deck(top) => self.deck_slice(top, path)?,
+                ast::BanishAction::Top { top }
+                    if own_deck(top)
+                        || matches!(&top.who, ast::DeckHolder::Bound(name) if self.players.contains_key(name)) =>
+                {
+                    self.deck_slice(top, path)?
+                }
                 ast::BanishAction::Top { .. } => return Err(unsupported(path)),
+                ast::BanishAction::Union { r#ref: union } => {
+                    let [first, second] = union.any_of.as_slice() else {
+                        return Err(unsupported(path));
+                    };
+                    if !matches!((&first.who, &second.who), (ast::Side::All, ast::Side::All))
+                        || !matches!(
+                            (&first.zone, &second.zone),
+                            (ast::Zone::Field, ast::Zone::Ex) | (ast::Zone::Ex, ast::Zone::Field)
+                        )
+                    {
+                        return Err(unsupported(path));
+                    }
+                    let sets = [ZoneKind::Field, ZoneKind::Ex]
+                        .into_iter()
+                        .map(|zone| {
+                            Ok(Selector::Zone {
+                                players: PlayerSet {
+                                    relation: PlayerRelation::All,
+                                    relative_to: PlayerRef::Controller {},
+                                    cardinality: Cardinality {
+                                        minimum: Nat(0),
+                                        maximum: None,
+                                    },
+                                    text_quantifier: TextQuantifier::All,
+                                },
+                                zone,
+                                view: super::super::SelectionView::Current {},
+                                binding: super::super::Binding::new(
+                                    self.allocator.id(path)?,
+                                    self.scope,
+                                ),
+                                predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
+                            })
+                        })
+                        .collect::<Result<Vec<_>, LoweringError>>()?;
+                    Selector::Union { sets }
+                }
                 ast::BanishAction::Objects(objects)
                     if let Some(event) = self.leave_event
                         && matches!(
@@ -650,6 +692,9 @@ impl BodyContext<'_> {
             ast::DeckHolder::OwnerOf { owner_of } => {
                 self.selected_player(owner_of, super::super::Role::Owner, path)?
             }
+            ast::DeckHolder::Bound(name) => PlayerRef::Bound {
+                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+            },
         };
         Ok(Selector::Ordered {
             zone: super::super::ZoneRef {

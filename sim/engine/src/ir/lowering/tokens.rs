@@ -192,8 +192,16 @@ impl BodyContext<'_> {
         let [stage] = each.stages.as_slice() else {
             return Err(unsupported(path));
         };
-        let [ast::Step::Create(create)] = stage.as_slice() else {
-            return Err(unsupported(path));
+        let allowed = match stage.as_slice() {
+            [ast::Step::Create(create)] => {
+                create.by.as_ref() == Some(&each.binding)
+                    && create.result.is_none()
+                    && create.bind.is_none()
+            }
+            [ast::Step::Banish(ast::BanishAction::Top { top })] => {
+                matches!(&top.who, ast::DeckHolder::Bound(name) if name == &each.binding)
+            }
+            _ => false,
         };
         if matches!(
             each.binding.as_str(),
@@ -202,9 +210,7 @@ impl BodyContext<'_> {
             || self.targets.contains_key(&each.binding)
             || self.observations.contains_key(&each.binding)
             || self.searches.contains(&each.binding)
-            || create.by.as_ref() != Some(&each.binding)
-            || create.result.is_some()
-            || create.bind.is_some()
+            || !allowed
         {
             return Err(unsupported(path));
         }

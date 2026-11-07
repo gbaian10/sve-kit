@@ -2,7 +2,6 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::PlayerStage;
 use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
@@ -13,6 +12,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
+use crate::ir::{PlayerRef, PlayerStage, Selector};
 use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
@@ -501,7 +501,21 @@ fn check_player_stage(
 ) -> Result<()> {
     super::tokens::check_each(control)?;
     for stage in stages {
-        check_program(&stage.body, source, origin, reads)?;
+        let mut body = stage.body.clone();
+        if super::movement::player_banish(control).is_some() {
+            // Validate the private operand as an own-deck read only inside this checked stage.
+            for step in &mut body.steps {
+                if let Node::Instruction { instruction } = &mut step.node
+                    && let Action::Banish {
+                        objects: Selector::Ordered { zone, .. },
+                    } = &mut instruction.action
+                {
+                    zone.player = PlayerRef::Controller {};
+                    instruction.actor = PlayerRef::Controller {};
+                }
+            }
+        }
+        check_program(&body, source, origin, reads)?;
     }
     Ok(())
 }

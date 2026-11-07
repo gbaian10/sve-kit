@@ -1321,7 +1321,7 @@ impl Game {
                 } => self.internal_alternative(execution, control)?,
                 Node::Control {
                     control: control @ Control::EachPlayer { .. },
-                } => self.internal_player_tokens(execution, &control)?,
+                } => self.internal_player_stage(execution, &control)?,
                 Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),

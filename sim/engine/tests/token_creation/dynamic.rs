@@ -4,6 +4,7 @@
 )]
 
 use super::*;
+use alloc::collections::BTreeSet;
 use sve_engine::ir::lowering::ExpandedLowerer;
 use sve_engine::ir::{
     AbilityOrigin, AbilitySource, Action, ActionPattern, Binding, Bool, CardProgram, Cardinality,
@@ -564,4 +565,189 @@ fn both_players_new_observers_see_the_same_simultaneous_entry_batch() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["leader"]["life"], 12_u8);
     assert_eq!(state["P2"]["leader"]["life"], 12_u8);
+}
+
+fn banish_steps() -> Value {
+    json!([
+        {"banish":{"ref":{"any_of":[{"who":"all","zone":"field"},{"who":"all","zone":"ex"}]}}},
+        {"each_player":{"as":"p","stages":[[{"banish":{"top":{"who":"p","n":2_u8}}}]]}}
+    ])
+}
+
+#[test]
+fn each_player_banish_keeps_one_simultaneous_receipt_for_both_decks() {
+    let (snapshot, keywords, input) = selected(banish_steps(), false);
+    let snapshot = token_kind(&snapshot, "フォロワー");
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut initial = initial(0);
+    for (seat, count) in [("P1", 3_usize), ("P2", 1)] {
+        initial["players"][seat]["zones"]["deck"] = json!(
+            (0..count)
+                .map(|index| json!({"id":format!("{seat}-{index}"),"card":"token"}))
+                .collect::<Vec<_>>()
+        );
+    }
+    for seat in ["P1", "P2"] {
+        initial["players"][seat]["zones"]["field"] =
+            json!([{"id":format!("{seat}-field"),"card":"token"}]);
+        initial["players"][seat]["zones"]["ex"] =
+            json!([{"id":format!("{seat}-ex"),"card":"token"}]);
+    }
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "each-banish",
+    )
+    .unwrap();
+    let CardPlay::Resolved(result) = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("no-choice stage");
+    };
+    let outcomes = result
+        .progress
+        .receipts
+        .values()
+        .filter_map(|outcome| {
+            if let InstructionOutcome::Banish(outcome) = outcome {
+                Some(outcome)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(outcomes.len(), 2);
+    let public = outcomes
+        .iter()
+        .find(|outcome| outcome.successful.len() == 4)
+        .unwrap();
+    let public_snapshots = public
+        .successful
+        .iter()
+        .map(|member| member.before.unwrap().snapshot)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        public_snapshots.len(),
+        1,
+        "field and EX leave in the same batch"
+    );
+    let outcome = outcomes
+        .iter()
+        .find(|outcome| outcome.successful.len() == 3)
+        .unwrap();
+    let snapshots = outcome
+        .successful
+        .iter()
+        .map(|member| member.before.unwrap().snapshot)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        snapshots.len(),
+        1,
+        "both slices use the same movement snapshot"
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["deck"], json!(["P1-2"]));
+    assert_eq!(view["P2"]["deck"], json!([]));
+}
+
+#[test]
+fn each_player_banish_rejects_foreign_decks_extra_stages_and_private_unions() {
+    let base = banish_steps();
+    let mut variants = Vec::new();
+    for who in ["opp", "self", "missing"] {
+        let mut steps = base.clone();
+        steps[1]["each_player"]["stages"][0][0]["banish"]["top"]["who"] = json!(who);
+        variants.push(steps);
+    }
+    let mut extra = base.clone();
+    extra[1]["each_player"]["stages"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!([{ "draw":{"n":1_u8}}]));
+    variants.push(extra);
+    let mut private = base.clone();
+    private[0]["banish"]["ref"]["any_of"][1]["zone"] = json!("hand");
+    variants.push(private);
+    let mut escape = base.clone();
+    escape
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"banish":{"top":{"who":"p","n":1_u8}}}));
+    variants.push(escape);
+    let mut zero = base;
+    zero[1]["each_player"]["stages"][0][0]["banish"]["top"]["n"] = json!(0_u8);
+    variants.push(zero);
+    for steps in variants {
+        let (snapshot, keywords, input) = selected(steps, false);
+        Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
+    }
+}
+
+#[test]
+fn raw_player_banish_rejects_unproved_private_authority_without_mutation() {
+    use sve_engine::game::internal::Context;
+    let (_, _, input) = selected(banish_steps(), false);
+    let lowered = ExpandedLowerer::new()
+        .unwrap()
+        .lower_current(&input["authors"][0]["input"])
+        .unwrap();
+    let base = lowered.program.card().abilities[0]
+        .node
+        .body
+        .as_ref()
+        .unwrap();
+    for variant in 0_u8..5 {
+        let mut body = base.clone();
+        let Node::Control {
+            control:
+                Control::EachPlayer {
+                    players,
+                    stages,
+                    choice_order,
+                    ..
+                },
+        } = &mut body.steps[1].node
+        else {
+            panic!("player stage");
+        };
+        let Node::Instruction { instruction } = &mut stages[0].body.steps[0].node else {
+            panic!("banish instruction");
+        };
+        match variant {
+            0 => *choice_order = PlayerOrder::FirstPlayerFirst,
+            1 => players.relation = PlayerRelation::Opponents,
+            2 => players.cardinality.maximum = Some(Nat(1)),
+            3 => instruction.actor = PlayerRef::Controller {},
+            _ => {
+                let Action::Banish {
+                    objects: Selector::Ordered { zone, .. },
+                } = &mut instruction.action
+                else {
+                    panic!("deck slice");
+                };
+                zone.player = PlayerRef::Controller {};
+            }
+        }
+        let span = body.steps[0].source.clone();
+        let checked = WellFormedProgram::check(body).unwrap();
+        let mut game = raw_game();
+        let before = format!("{game:?}");
+        game.execute_internal(
+            &checked,
+            &span,
+            Context {
+                source: "creator".into(),
+                generation: Generation(0),
+                controller: PlayerId { seat: 1 },
+            },
+        )
+        .unwrap_err();
+        assert!(
+            format!("{game:?}") == before,
+            "unsupported raw stage must reject before mutation"
+        );
+    }
 }

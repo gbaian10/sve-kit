@@ -196,12 +196,19 @@ impl Game {
         )
     }
 
-    pub(super) fn internal_player_tokens(
+    pub(super) fn internal_player_stage(
         &mut self,
         execution: &mut Execution,
         control: &Control,
     ) -> Result<()> {
         check_each(control)?;
+        if super::movement::player_banish(control).is_some() {
+            let previous = self.card_runtime.active_source;
+            self.card_runtime.active_source = execution.ability;
+            let result = self.internal_player_banish(execution, control);
+            self.card_runtime.active_source = previous;
+            return result;
+        }
         let Control::EachPlayer {
             players,
             player,

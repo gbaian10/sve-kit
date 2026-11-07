@@ -1,0 +1,36 @@
+cards:
+  CP01-004:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  who: all
+                  zone: field
+              op: ge
+              right: 8
+      - fanfare:
+          do:
+            - pp:
+                delta: 3
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

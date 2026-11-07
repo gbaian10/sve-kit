@@ -350,7 +350,9 @@ Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: ch
 
 動態數量另接受本次 `destroy: {ref: ..., result: broken}` 的成功回條：`n: {count: {in: {objects_of: broken, view: before}, as: victim, where: {cmp: {left: {player: {master_of: victim}}, op: eq, right: {player: p}}}}}`。只計本次實際從場上被破壞者，按離場前控制者區分，包含隨後消去的 token；破壞失敗不計數，不按目前區域或擁有者重新計算。
 
-`each_player: {as: p, stages: [[{create: {token: ..., n: ..., to: field, by: p}}]]}` 支援單一、無選擇的 token 建立階段，雙方在同一批次建立並進場；守護進場選擇按回合玩家優先處理，在所有選擇完成後一次提交。建立與計數須指向同一玩家；各目的區沿用容量上限與守護進場流程，守護由該 token 的控制者選擇。此入口不接受其他回條、after 計數、owner 比較、其它階段動作或結果匯出。整個能力完成後才進入衍生觸發能力的處理。
+`each_player: {as: p, stages: [[{create: {token: ..., n: ..., to: field, by: p}}]]}` 支援單一、無選擇的 token 建立階段，雙方在同一批次建立並進場；守護進場選擇按回合玩家優先處理，在所有選擇完成後一次提交。建立與計數須指向同一玩家；各目的區沿用容量上限與守護進場流程，守護由該 token 的控制者選擇。建立階段不接受其他回條、after 計數、owner 比較或結果匯出。另接受單一非選擇階段 `each_player: {as: p, stages: [[{banish: {top: {who: p, n: 10}}}]]}`：先取得所有玩家各自牌庫頂的實有張數，再以同一批移動消滅；牌庫不足不視為抽牌失敗。只接受正整數張數與該階段的玩家綁定，不開放任意對手牌庫、其他動作、多階段或結果匯出。整個能力完成後才進入衍生觸發能力的處理。
+
+`banish: {ref: {any_of: [{who: all, zone: field}, {who: all, zone: ex}]}}` 將所有玩家的場與 EX 作為同一集合、一批消滅（BP13-107、[Q1794](https://shadowverse-evolve.com/cardlist/?cardno=BP13-107&faq=)）；不以先場後 EX 兩次動作替代。這個入口只接受上述兩種公開區的完整聯集，不接受私有區或額外篩選。
 
 效果本文可用 `choose: {bind: selected, from: {who: self, zone: hand}, n: 1}` 在結算中選取自己的手牌；可加既有種類、職業、特徵及費用篩選，或以 `upto: 1` 表示可選零張。候選只提供給操作者，以本次問題的 handle 回答，不公開其他手牌，也不能放進正式 `targets`。選取綁定可接 `banish`、`reveal`、移到 EX／牌庫指定位置或一般從者／護符入場；這些移動不產生棄牌事件。公開只持續至本次結算結束；移到公開區域者依共用移動規則顯示。移到 EX 的成功回條可沿用 `follow` 安裝該物件的打出費用修正。一般多張移動、入場容量與同批順序仍依共用准入邊界，不因手牌入口額外放寬。
 
