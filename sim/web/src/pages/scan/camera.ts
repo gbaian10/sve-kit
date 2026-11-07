@@ -236,7 +236,8 @@ export class CameraScanner {
           engine.confident(picks),
         )
         this.draw(geometry, quad, frame.status === "ok")
-        onFrame({ ...this.withFinish(engine, frame, pixels), found: quad !== null })
+        const shown = quad ? this.withFinish(engine, frame, pixels) : this.withoutFinish(frame)
+        onFrame({ ...shown, found: quad !== null })
       } catch (error) {
         // Only a frame begun on an engine that was detached since may fail quietly.
         if (engine === this.engine) throw error
@@ -245,9 +246,16 @@ export class CameraScanner {
     }
   }
 
+  /** Without a straightened card the frame regions mean nothing: keep the plain printing. */
+  private withoutFinish(frame: TrackFrame): TrackFrame {
+    this.finish.follow("")
+    return frame
+  }
+
   /** Shows the leader as the printing whose frame colours match this card (SL against plain). */
   private withFinish(engine: ScanEngine, frame: TrackFrame, pixels: Uint8ClampedArray): TrackFrame {
     const [leader, ...rest] = frame.picks
+    this.finish.follow(leader ? finishKey(leader.card) : "")
     const reader = finishReaderFor(engine)
     const group = leader && reader.group(leader.card)
     const references = group && reader.ready(group)

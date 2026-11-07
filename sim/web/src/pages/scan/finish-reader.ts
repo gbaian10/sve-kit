@@ -3,9 +3,8 @@ import { type Finish, finishGroups, finishKey, finishOf } from "../../domain/sca
 import type { ScanCard } from "../../domain/scan/search"
 import type { ScanEngine } from "./engine"
 
-// Loads each printing's official small image once and keeps its frame colours, for the printing
-// check in domain/scan/finish. The images are downloaded, not loaded through <img>, so their pixels
-// can be read back from a canvas.
+// Reads each printing's official small image once (downloaded, so a canvas can read its pixels) and
+// keeps its frame colours for the printing check in domain/scan/finish.
 
 /** Size the official images are read at; only colours in large frame regions matter. */
 const READ_WIDTH = 120

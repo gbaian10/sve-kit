@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
 
 import { parseDeckText } from "../deck/text"
-import { chooseReading, type DeckCard, deckGroups, deckListText, guessFromDeck } from "./deck-read"
+import {
+  chooseReading,
+  type DeckCard,
+  deckGroups,
+  deckListText,
+  guessFromDeck,
+  withPrinting,
+} from "./deck-read"
 import type { CardMatch, ScanCard } from "./search"
 
 const card = (id: string, no: string): ScanCard => ({
@@ -72,5 +79,13 @@ describe("deck reading", () => {
       [1, "BP01-002"],
     ])
     expect(deckListText([], "Deck")).toBe("")
+  })
+
+  it("shows another printing in the pick and in that card's candidate, so confirming keeps it", () => {
+    const slA = { ...A, no: "BP01-SL01", imageId: 2 }
+    const shown = withPrinting(read("ok", [match(A, 0.9), match(B, 0.5)]), slA)
+    expect(shown.pick).toBe(slA)
+    expect(shown.alts.map((alt) => alt.card.no)).toEqual(["BP01-SL01", "BP01-002"])
+    expect(shown.alts[0]?.raw).toBe(0.9)
   })
 })

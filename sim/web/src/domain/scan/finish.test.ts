@@ -121,4 +121,11 @@ describe("printing frame check", () => {
     expect(pickFinish(group, smoother.update("k", [40, 5]), plain)).toBe(sl)
     expect(pickFinish(group, smoother.update("other", [5, 40]), plain)).toBe(plain)
   })
+
+  it("starts over after another card led, even one that could not be scored", () => {
+    const smoother = new FinishSmoother()
+    for (let i = 0; i < 6; i += 1) smoother.update("a", [40, 5])
+    smoother.follow("b") // a card with a single printing: nothing to score
+    expect(pickFinish(group, smoother.update("a", [5, 40]), plain)).toBe(plain)
+  })
 })

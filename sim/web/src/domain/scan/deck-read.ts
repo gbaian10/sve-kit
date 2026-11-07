@@ -20,6 +20,17 @@ export interface DeckCard {
   readonly gap: number
 }
 
+/**
+ * The card shown as another printing of the same card (an SL picked by its frame colours). Its
+ * candidate shows that printing too, so confirming the current candidate keeps it.
+ */
+export function withPrinting(card: DeckCard, printing: ScanCard): DeckCard {
+  const alts = card.alts.map((alt) =>
+    alt.card.cardId === printing.cardId ? { ...alt, card: printing } : alt,
+  )
+  return { ...card, pick: printing, alts }
+}
+
 /** Upright and (for a card lying on its side) quarter-turned readings: the better one wins. */
 export function chooseReading(
   upright: readonly CardMatch[],

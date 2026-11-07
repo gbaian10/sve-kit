@@ -6,7 +6,12 @@ import {
   placeTileFinds,
   turnedQuarter,
 } from "../../domain/scan/deck-detect"
-import { chooseReading, type DeckCard, guessFromDeck } from "../../domain/scan/deck-read"
+import {
+  chooseReading,
+  type DeckCard,
+  guessFromDeck,
+  withPrinting,
+} from "../../domain/scan/deck-read"
 import { finishOf, finishScores, pickFinish } from "../../domain/scan/finish"
 import { warpQuad } from "../../domain/scan/geometry"
 import type { ScanEngine } from "./engine"
@@ -157,7 +162,10 @@ export async function readDeckPhoto(
   return withFinishes(engine, guessFromDeck(cards))
 }
 
-/** Each pick as the printing whose frame colours match its crop (SL against plain). */
+/**
+ * Each pick as the printing whose frame colours match its crop (SL against plain). The candidate of
+ * that card shows the same printing, so confirming it in the picker keeps it.
+ */
 async function withFinishes(engine: ScanEngine, cards: DeckCard[]): Promise<DeckCard[]> {
   const reader = finishReaderFor(engine)
   const { width, height } = engine.cardSize
@@ -172,7 +180,7 @@ async function withFinishes(engine: ScanEngine, cards: DeckCard[]): Promise<Deck
         finishOf(card.crop, width, height, true),
       ])
       const pick = scores ? pickFinish(group, scores, card.pick) : card.pick
-      return pick === card.pick ? card : { ...card, pick }
+      return pick === card.pick ? card : withPrinting(card, pick)
     }),
   )
 }

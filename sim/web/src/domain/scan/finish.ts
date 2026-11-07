@@ -1,10 +1,7 @@
 import type { ScanCard } from "./search"
 
-// The recogniser treats every printing of one art as the same card, so it cannot tell an SL
-// printing (rainbow gems, pink-purple name bar) from the plain one. This compares the frame
-// colours of the straightened card with each printing's official image: hue only, after a
-// gray-world white balance, and only in the frame regions where the printings actually differ.
-// Premium (P) printings share the plain image pixel for pixel, so they stay on the plain number.
+// The recogniser cannot tell same-art printings apart; this tells SL from plain by frame hue against
+// each printing's official image. Premium (P) images equal the plain ones, so those stay plain.
 
 /** Frame regions as fractions of the card (x0, y0, x1, y1): cost and gem corners, then the name bar. */
 const REGIONS: readonly (readonly [number, number, number, number])[] = [
@@ -165,12 +162,18 @@ export class FinishSmoother {
   private key = ""
   private scores: number[] = []
 
+  /** Starts over when the leading card changes, also on frames that cannot be scored. */
+  follow(key: string): void {
+    if (key === this.key) return
+    this.key = key
+    this.scores = []
+  }
+
   /** Folds this frame's scores in; a different group starts over. */
   update(key: string, scores: readonly number[]): number[] {
-    if (key !== this.key || scores.length !== this.scores.length) {
-      this.key = key
-      this.scores = [...scores]
-    } else
+    this.follow(key)
+    if (scores.length !== this.scores.length) this.scores = [...scores]
+    else
       this.scores = this.scores.map(
         (old, at) => (1 - FINISH_EMA) * old + FINISH_EMA * (scores[at] ?? old),
       )
