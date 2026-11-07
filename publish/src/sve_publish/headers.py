@@ -13,6 +13,11 @@ IMAGE_HEADERS = {
     "content-type": "image/webp",
     "cache-control": "public,max-age=86400,must-revalidate",
 }
+# Scanner models and index parts: content-hash names, so cached forever like snapshot JSON.
+SCAN_BINARY_HEADERS = {
+    "content-type": "application/octet-stream",
+    "cache-control": "public,max-age=31536000,immutable",
+}
 INDEX_HEADERS = {"content-type": "application/json", "cache-control": "no-store"}
 
 

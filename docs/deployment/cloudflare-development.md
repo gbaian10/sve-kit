@@ -246,6 +246,26 @@ producer 的私有 `media-state.json` 與備份必須跨次保存，不由遠端
 少量合成圖覆寫／GC 中斷後的同輸入恢復、清單條件寫、登入後控制 key 404、
 未登入 Access 拒絕，以及 query 分離與 browser／SW。離線測試不代替實際部署驗收。
 
+### 拍卡模型與索引
+
+拍卡產物與卡表、卡圖無先後關係，可單獨發佈。`python -m sve_scan release` 產出的資料夾（`manifest.json`、`models/`、`index/`）
+整份上傳到 `scan/`，不做增量；格式見[拍卡產物格式](../schema/scan/artifacts.md)。`SCAN_RELEASE` 由維護者填入：
+
+```bash
+uv --directory publish run sve-publish scan upload "$SCAN_RELEASE"
+uv --directory publish run sve-publish scan upload "$SCAN_RELEASE" \
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --jobs 16 --execute
+```
+
+1. 先跑 dry-run：完全離線，驗 `format: 1`、前端讀得懂的欄位、每個引用檔存在、bytes 與 SHA-256 相符、檔名＝內容雜湊、
+   索引的 `rec` 等於辨識模型版本；有任何不符就停，不讀憑證
+2. 核對 stdout 的 `det-N`、`rec-N`、各版次 `data_version` 與張數，再由維護者當次同意後加 `--execute`
+3. execute 只上傳桶內還沒有的雜湊檔（長快取 immutable），全部成功才條件寫入 `scan/manifest.json`（`no-store`）並讀回；
+   中途失敗時舊清單仍有效，用同一資料夾重跑
+
+舊版的雜湊檔留在桶內，目前沒有 `scan/` 的回收，清理日後另議並經維護者同意。
+Dev Worker 白名單目前不含 `scan/`，`/cdn-preview/scan/…` 仍是 404；前端要從 dev 讀取需另改 Worker。
+
 ## 9. 每個入口的未登入驗法與預期結果
 
 由維護者在不帶登入 cookie 的本機終端驗證。`curl -q` 不讀 curlrc，不加 `-L`、Cookie、

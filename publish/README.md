@@ -6,6 +6,7 @@ update needs only snapshot upload. One maintainer runs these operations serially
 image builds, uploads and either collector must not overlap. No credentials,
 account, bucket or CDN hostname are stored in the repository or passed through CI.
 Preview entries remain development data; formal releases still need #34's gates.
+Scanner releases (`scan upload`) are independent of card data and can run at any time.
 
 ## Image handoff and inventory
 
@@ -221,6 +222,41 @@ Tool-external edits/deletions can invalidate claims and are outside this trust
 model. To repair, delete `_publish/images.json` while no writers run; the next
 images upload then treats the bucket as a first baseline and reuploads every
 described image. ETag conditions detect conflicts, not a distributed lock.
+
+## Scanner release
+
+`python -m sve_scan release` writes one folder holding `manifest.json`, `models/` and `index/`, laid
+out as the [scanner artifact contract](../docs/schema/scan/artifacts.md) (`format: 1`). Pass that
+folder; its files are published under `scan/`. Every run publishes the whole release, with no deltas.
+
+```bash
+uv --directory publish run sve-publish scan upload /explicit/scan-release
+uv --directory publish run sve-publish scan upload /explicit/scan-release \
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" --jobs 16 --execute
+```
+
+Dry-run is the default and fully offline. Both modes first check that the manifest is format 1 and
+readable by the site (positive versions and sizes, `det.input` a multiple of `det.stride`, finite
+scoring values, only `jp`/`en` indexes, each index built for `rec.version`, index sizes matching
+`count`), and that every referenced file exists as a regular file, is named
+`models/<sha256>.onnx` or `index/<sha256>.{i8,scale,hub,json}` by its own SHA-256, and has the
+declared bytes. Any mismatch stops before a credential is read. Stdout reports `det-N`, `rec-N`,
+each edition's `data_version` and card count, file count, bytes and the manifest SHA-256.
+
+Execute lists `scan/models/` and `scan/index/` once and uploads only the absent files, each reread
+and rehashed just before its create-only PUT. Their names are content hashes, so a listed key counts
+as complete. After every file succeeds, `scan/manifest.json` is written last with an ETag condition
+and read back; an identical manifest is left alone. A failure leaves the previous manifest current;
+rerun the same folder. A manifest changed by another writer stops the run.
+
+| Object | Content-Type | Cache-Control |
+| --- | --- | --- |
+| `scan/models/*.onnx`, `scan/index/*.{i8,scale,hub}` | `application/octet-stream` | `public,max-age=31536000,immutable` |
+| `scan/index/*.json` | `application/json` | `public,max-age=31536000,immutable` |
+| `scan/manifest.json` | `application/json` | `no-store` |
+
+Files of earlier releases stay in the bucket: no collector covers `scan/` yet, and cleaning them up
+needs a separate, maintainer-approved change.
 
 ## Maintainer development rehearsal
 

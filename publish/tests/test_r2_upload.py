@@ -205,7 +205,7 @@ def test_conflicting_immutable_json_is_never_overwritten(
     member = loaded.members[0]
     state.objects[member.key] = Stored(b"other", '"other"', member_headers(member))
     with pytest.raises(
-        ExportError, match=r"^Immutable JSON object differs from the export: "
+        ExportError, match=r"^Immutable object differs from the local input: "
     ):
         upload(store, loaded)
     assert state.objects[member.key].raw == b"other"
