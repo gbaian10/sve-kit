@@ -290,6 +290,11 @@ impl TargetWait {
             }
             return Ok(count);
         }
+        if self.group_members.len() == 1
+            && let Some(maximum) = self.bounds.maximum.filter(|maximum| maximum.0 <= 2)
+        {
+            return self.pair_capacity(maximum.0);
+        }
         if self.members.len() > 10 {
             return Err(unsupported("name selection exceeds both fields"));
         }
@@ -310,6 +315,30 @@ impl TargetWait {
             }
         }
         Ok(maximum)
+    }
+
+    fn pair_capacity(&self, maximum: u64) -> Result<u64> {
+        if maximum == 0 {
+            return Ok(0);
+        }
+        // Availability above the requested ceiling is irrelevant; cemetery pools exceed fields.
+        let mut available = 0;
+        for (index, left) in self.members.iter().enumerate() {
+            if self.compatible(&[*left])? {
+                available = 1;
+                if maximum == 1 {
+                    return Ok(available);
+                }
+            }
+            if maximum == 2 {
+                for right in self.members.iter().skip(index.saturating_add(1)) {
+                    if self.compatible(&[*left, *right])? {
+                        return Ok(2);
+                    }
+                }
+            }
+        }
+        Ok(available)
     }
 }
 
