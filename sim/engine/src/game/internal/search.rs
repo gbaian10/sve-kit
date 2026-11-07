@@ -13,9 +13,10 @@ use crate::ir::{
     Comparison, DecisionId, Expr, Info, Instruction, Int, IntOperation, KeywordId, KindRead,
     MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NatRead, NumberRead,
     ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation,
-    Predicate, Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination,
-    SearchOutcome, SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView,
-    Selector, SnapshotId, Stat, TraitsRead, ZoneKind, ZoneRef,
+    Posture, Predicate, Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef,
+    SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
+    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat, TraitsRead, ZoneKind,
+    ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -70,6 +71,7 @@ struct PartitionContinuation {
     destinations: VecDeque<SearchPartition>,
     next_handle: u64,
     capacity_remainder: Option<MoveDestination>,
+    entry_posture: Option<Posture>,
 }
 
 #[derive(Clone, Debug)]
@@ -360,6 +362,13 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         _ => return Err(unsupported("search destination or incomplete allocation")),
     };
     check_movement(movement)?;
+    if movement.initial_posture.is_some()
+        && (!matches!(destination, Some(SearchDestination::Single { .. }))
+            || groups.is_some()
+            || cardinality.maximum != Some(Nat(1)))
+    {
+        return Err(unsupported("single ungrouped acted search"));
+    }
     // Whether a found spell stays in the deck is unadmitted; a count-only search could be forced to pick one.
     if !conditional
         && groups.is_none()
@@ -379,9 +388,22 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 fn check_movement(movement: &MoveSpec) -> Result<()> {
+    let posture_allowed = movement.initial_posture.is_none()
+        || matches!(
+            (movement.initial_posture, &movement.to),
+            (
+                Some(Posture::Acted),
+                MoveDestination::Shared {
+                    zone: ZoneRef {
+                        kind: ZoneKind::Field,
+                        ..
+                    }
+                }
+            )
+        );
     if movement.position.is_some()
         || movement.order.is_some()
-        || movement.initial_posture.is_some()
+        || !posture_allowed
         || !movement.entry_effects.is_empty()
         || !matches!(
             &movement.to,
@@ -1012,11 +1034,17 @@ impl Game {
                             destinations: VecDeque::from([partition]),
                             next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                             capacity_remainder: Some(movement.to.clone()),
+                            entry_posture: movement.initial_posture,
                         },
                     );
                 }
-                let moved =
-                    self.internal_search_move(execution, &found, &movement.to, wait.player)?;
+                let moved = self.internal_search_move(
+                    execution,
+                    &found,
+                    &movement.to,
+                    wait.player,
+                    movement.initial_posture,
+                )?;
                 self.internal_search_finish(
                     execution,
                     &wait.instruction,
@@ -1037,6 +1065,7 @@ impl Game {
                     destinations: destinations.clone().into(),
                     next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                     capacity_remainder: None,
+                    entry_posture: None,
                 },
             ),
             Action::Search {
@@ -1250,6 +1279,7 @@ impl Game {
             cards,
             &wait.partition.zone,
             continuation.player,
+            continuation.entry_posture,
         )?);
         self.internal_search_partition(execution, continuation)
     }
@@ -1304,6 +1334,7 @@ impl Game {
         found: &[ObjectRef],
         to: &MoveDestination,
         player: PlayerId,
+        initial_posture: Option<Posture>,
     ) -> Result<Vec<MoveResult>> {
         let (zone, kind) = self.internal_search_destination(execution, to, player)?;
         let seat = seat_name(player)?;
@@ -1328,7 +1359,7 @@ impl Game {
             MoveMethod::Put,
             false,
             None,
-            None,
+            initial_posture,
         )?;
         if kind == ZoneKind::Hand {
             for movement in &moved {

@@ -2,7 +2,7 @@ use super::super::{
     CardKind, CardName, CharacteristicView, Comparison, CostChange, CostKind, DecisionId,
     Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead,
     MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead, ObjectProperty, ObjectRef,
-    OwnerZone, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
+    OwnerZone, Posture, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
     SearchPartition, SelectionConstraint, SelectionGroup, TraitId, TraitsRead, ZoneRef,
 };
 use super::{
@@ -23,6 +23,25 @@ fn quantity(n: Option<u64>, upto: Option<u64>, path: &str) -> Result<Cardinality
         }),
         _ => Err(unsupported(path)),
     }
+}
+
+fn entry_posture(search: &ast::Search, path: &str) -> Result<Option<Posture>, LoweringError> {
+    if search.acted.is_none() {
+        return Ok(None);
+    }
+    if search.n != Some(1)
+        || search.upto.is_some()
+        || search.groups.is_some()
+        || search.distinct_by.is_some()
+        || search.cost_sum_le.is_some()
+        || !matches!(
+            search.to,
+            ast::SearchDestination::Single(ast::SearchZone::Field)
+        )
+    {
+        return Err(unsupported(path));
+    }
+    Ok(Some(Posture::Acted))
 }
 
 fn view(binding: Binding<ObjectRef>) -> ObjectView {
@@ -218,10 +237,10 @@ const fn destination(zone: &ast::SearchZone) -> MoveDestination {
     }
 }
 
-const fn movement(zone: &ast::SearchZone) -> MoveSpec {
+const fn movement(zone: &ast::SearchZone, initial_posture: Option<Posture>) -> MoveSpec {
     MoveSpec {
         to: destination(zone),
-        initial_posture: None,
+        initial_posture,
         entry_effects: vec![],
         position: None,
         order: None,
@@ -437,8 +456,7 @@ impl BodyContext<'_> {
             found: Binding::new(1, scope),
             revealed: Binding::new(2, scope),
         };
-        let destination =
-            self.search_destination(&search.to, cardinality, continuation.found, path)?;
+        let destination = self.search_destination(search, cardinality, continuation.found, path)?;
         Ok(Action::Search {
             decision: DecisionId(self.card_allocator.id(path)?),
             player: PlayerRef::Controller {},
@@ -454,14 +472,15 @@ impl BodyContext<'_> {
 
     fn search_destination(
         &mut self,
-        value: &ast::SearchDestination,
+        value: &ast::Search,
         cardinality: Cardinality,
         found: Binding<SearchFound>,
         path: &str,
     ) -> Result<SearchDestination, LoweringError> {
-        match value {
+        let initial_posture = entry_posture(value, path)?;
+        match &value.to {
             ast::SearchDestination::Single(zone) => Ok(SearchDestination::Single {
-                movement: movement(zone),
+                movement: movement(zone, initial_posture),
             }),
             ast::SearchDestination::Partition {
                 order: ast::Printed::Printed,
@@ -510,7 +529,7 @@ impl BodyContext<'_> {
                             right: Expr::Literal(Int(instead.r#if.cmp.right)),
                         })),
                     })),
-                    movement: movement(&instead.zone),
+                    movement: movement(&instead.zone, None),
                 })
             }
         }
