@@ -27,7 +27,9 @@ class WorkflowGateTests(unittest.TestCase):
         self.jobs = cast("dict[str, dict[str, object]]", self.workflow["jobs"])
         steps = cast("list[dict[str, object]]", self.jobs["ci-ok"]["steps"])
         self.gate = str(steps[0]["run"])
-        self.outputs = dict.fromkeys(("python", "rust", "web", "card_data"), "false")
+        self.outputs = dict.fromkeys(
+            ("python", "rust", "web", "card_data", "scan"), "false"
+        )
         self.needs: dict[str, object] = {
             job: {"result": "success" if job in {"changes", "repo"} else "skipped"}
             for job in self.jobs
@@ -56,6 +58,7 @@ class WorkflowGateTests(unittest.TestCase):
             "python": ("python",),
             "rust": ("rust",),
             "web": ("web",),
+            "scan": ("scan",),
         }.items():
             for job in jobs:
                 for result in ("failure", "cancelled", "skipped"):

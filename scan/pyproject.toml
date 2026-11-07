@@ -1,0 +1,64 @@
+[project]
+name = "sve-scan"
+version = "0.1.0"
+description = "Card scanner models: gallery, training, ONNX export, evaluation and the card index"
+license = "Apache-2.0"
+requires-python = ">=3.14.10,<3.15"
+# Light by default (index, release, evaluation of shipped models, CI tests); torch only in the train group.
+dependencies = [
+    "sve-carddb",
+    "numpy>=2.3",
+    "opencv-python-headless>=4.12",
+    "onnxruntime>=1.23",
+    "pillow>=11.3",
+]
+
+[dependency-groups]
+train = [
+    "torch==2.11.0",
+    "torchvision",
+    "timm>=1.0.20",
+    "kornia>=0.8.1",
+    "onnx>=1.19",
+]
+dev = [
+    "ruff>=0.17.4",
+    "pytest==9.1.1",
+]
+
+[tool.uv]
+# CI and the index/release steps need no GPU stack: `uv sync` stays light, training runs with `--group train`.
+default-groups = ["dev"]
+
+[tool.uv.sources]
+sve-carddb = { path = "../carddb", editable = true }
+torch = { index = "pytorch-cu130" }
+torchvision = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sve_scan"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+# v0 keeps the experiment code close to what produced the current models; the published-format modules
+# (artifacts, paths, splits, release) and the tests follow the stricter rules.
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E701", "E702", "E731", "E741", "B023", "B905"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sve_scan"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -41,12 +41,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.4
     hooks:
-      # tools/schema-er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
+      # tools/schema-er/ and .github/ci/ have ruff.toml files that extend the carddb settings; scan/ keeps its own.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|publish|tools/schema-er|\.github/ci)/
+        files: ^(carddb|publish|scan|tools/schema-er|\.github/ci)/
       - id: ruff-check
-        files: ^(carddb|publish|tools/schema-er|\.github/ci)/
+        files: ^(carddb|publish|scan|tools/schema-er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.24.0
