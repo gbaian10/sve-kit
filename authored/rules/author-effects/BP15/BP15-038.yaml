@@ -1,0 +1,76 @@
+cards:
+  BP15-038:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            to_cemetery:
+              n: 3
+              sel:
+                kind: follower
+                orig_cost_ge: 2
+                trait: 魔法使い
+                who: self
+                zone: field
+          optional_cost_delta: -9
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+      - activate:
+          cost:
+            discard:
+              n: 1
+              sel:
+                name: 真実の絶傑・ライオ
+                who: self
+                zone: hand
+          do:
+            - damage:
+                n: 9
+                to: enemy
+            - create:
+                n: 1
+                to: ex
+                token: 絶尽の偽証
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
