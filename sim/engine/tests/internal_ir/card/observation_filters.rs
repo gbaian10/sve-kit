@@ -435,7 +435,8 @@ fn awaiting_order(play: CardPlay) -> Option<DecisionView> {
         | CardPlay::Resolved(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
-        | CardPlay::Continued(_) => None,
+        | CardPlay::Continued(_)
+        | CardPlay::GameEnded(_) => None,
     }
 }
 
@@ -807,7 +808,8 @@ fn crowded_look(choose: &Value, destination: &str, deck: Value) -> (Game, Option
         CardPlay::Resolved(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
-        | CardPlay::Continued(_) => None,
+        | CardPlay::Continued(_)
+        | CardPlay::GameEnded(_) => None,
     };
     (game, question)
 }
@@ -908,7 +910,8 @@ fn awaiting_any(play: CardPlay) -> Option<DecisionView> {
         CardPlay::Resolved(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
-        | CardPlay::Continued(_) => None,
+        | CardPlay::Continued(_)
+        | CardPlay::GameEnded(_) => None,
     }
 }
 

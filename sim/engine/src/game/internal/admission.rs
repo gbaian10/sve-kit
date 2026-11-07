@@ -463,6 +463,7 @@ fn play_requirement(code: &str) -> bool {
 }
 
 fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
+    super::victory::check_action(action, source)?;
     if let Action::InstallEffect { effect, .. } = action
         && matches!(effect.as_ref(), Effect::Replacement { .. })
     {
@@ -770,6 +771,9 @@ fn supported(code: &str) -> bool {
             | "internal.Resource.Ep"
             | "internal.ResourceOperation.Add"
             | "shape.Action.Discard"
+            | "shape.Action.GameResult"
+            | "action.game-result"
+            | "internal.Outcome.Win"
             | "action.discard"
             | "shape.DiscardMode.Chosen"
             | "discard.chosen"

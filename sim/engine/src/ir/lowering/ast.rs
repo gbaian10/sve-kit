@@ -373,6 +373,7 @@ pub(super) enum Step {
     Either(Either),
     Choose(Choose),
     Draw(Draw),
+    Win(Win),
     Pp(ResourceIncrease),
     Discard(Discard),
     PpMax(ResourceIncrease),
@@ -703,6 +704,15 @@ pub(super) struct Discard {
     pub all: Option<bool>,
     pub who: Option<LeaderSide>,
     pub random: Option<bool>,
+    pub any: Option<True>,
+    pub result: Option<String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Win {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
 }
 
 #[derive(Deserialize)]

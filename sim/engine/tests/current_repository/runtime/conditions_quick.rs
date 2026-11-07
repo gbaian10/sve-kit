@@ -162,7 +162,10 @@ fn bp08_028_accepts_zero_targets_without_requiring_a_damage_allocation() {
                 .unwrap(),
             );
         }
-        CardPlay::Entered(_) | CardPlay::Cancelled | CardPlay::Continued(_) => {
+        CardPlay::Entered(_)
+        | CardPlay::Cancelled
+        | CardPlay::Continued(_)
+        | CardPlay::GameEnded(_) => {
             panic!("unexpected spell continuation")
         }
     }

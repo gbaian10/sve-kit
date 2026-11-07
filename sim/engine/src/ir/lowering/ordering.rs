@@ -32,6 +32,24 @@ impl BodyContext<'_> {
         receipt: ReceiptId,
         path: &str,
     ) -> Result<(), LoweringError> {
+        if let ast::Step::Discard(value) = step
+            && let Some(name) = &value.result
+        {
+            if value.any.is_none() || !matches!(value.who, None | Some(ast::LeaderSide::Controller))
+            {
+                return Err(unsupported(path));
+            }
+            return super::payment::record_discard(
+                self,
+                name,
+                receipt,
+                Cardinality {
+                    minimum: Nat(0),
+                    maximum: None,
+                },
+                path,
+            );
+        }
         if let ast::Step::Move(value) = step
             && matches!(value.to, ast::Destination::Field)
             && let Some(name) = &value.result
@@ -134,6 +152,7 @@ impl BodyContext<'_> {
                 return self.search_result(step, receipt, path);
             }
             ast::Step::StackPlus(_)
+            | ast::Step::Win(_)
             | ast::Step::PlayAbility(_)
             | ast::Step::Counter(_)
             | ast::Step::Reveal(_)

@@ -905,8 +905,12 @@ impl Game {
     }
 
     pub(super) fn win_by_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        self.win_for_players(self.seats(string(&node["side"]), frame), frame)
+    }
+
+    pub(super) fn win_for_players(&mut self, players: Vec<String>, frame: &Frame) -> Result<()> {
         let mut winners = Vec::new();
-        for seat in self.seats(string(&node["side"]), frame) {
+        for seat in players {
             if !self.restricted(&format!("{seat}.leader"), "win")? {
                 winners.push(seat);
             }

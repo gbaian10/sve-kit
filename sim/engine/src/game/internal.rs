@@ -73,6 +73,7 @@ mod search;
 mod terminal;
 mod tokens;
 mod transform;
+mod victory;
 pub use terminal::Terminal;
 
 mod source;
@@ -550,6 +551,7 @@ enum Wait {
 
 #[derive(Clone, Debug)]
 pub(super) struct Execution {
+    terminated: bool,
     context: Context,
     id: ExecutionId,
     timestamp: u64,
@@ -726,6 +728,7 @@ impl Game {
         let result = (|| {
             self.prepared.remove(&play.execution);
             let mut execution = Execution {
+                terminated: false,
                 context: prepared.context,
                 id: ExecutionId(play.execution),
                 timestamp: prepared.timestamp,
@@ -774,7 +777,7 @@ impl Game {
             };
             self.internal_run(&mut execution)?;
             let progress = execution.progress();
-            if !progress.complete {
+            if !progress.complete && !execution.terminated {
                 self.typed = Some(execution);
             }
             Ok(progress)
@@ -1087,7 +1090,7 @@ impl Game {
             self.internal_run(&mut execution)?;
             execution.origin = rollback.take();
             let progress = execution.progress();
-            if !progress.complete {
+            if !progress.complete && !execution.terminated {
                 self.typed = Some(execution);
             }
             Ok(progress)
@@ -1289,6 +1292,12 @@ impl Game {
 
     fn internal_run_current(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
+            if self.state.game["ended"] == true {
+                execution.terminated = true;
+                execution.todo.clear();
+                self.internal_terminal_cleanup();
+                return Ok(());
+            }
             if execution.play.is_some() {
                 self.internal_play_parameters(execution)?;
                 if execution.waiting.is_some() {
@@ -1528,6 +1537,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
+            Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
             Action::PlayAbility { .. } => self.internal_nested_ability(execution, &instruction)?,
             Action::RideDrive { .. } => self.internal_gain_drive(execution, &instruction)?,
@@ -1739,7 +1749,7 @@ impl Game {
 impl Execution {
     fn progress(&self) -> Progress {
         Progress {
-            complete: self.waiting.is_none() && self.todo.is_empty(),
+            complete: !self.terminated && self.waiting.is_none() && self.todo.is_empty(),
             receipts: self.receipts.clone(),
             facts: self.facts.clone(),
         }

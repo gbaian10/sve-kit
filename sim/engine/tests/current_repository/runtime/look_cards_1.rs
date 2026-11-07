@@ -51,7 +51,7 @@ fn settle(game: &mut Game, mut play: CardPlay, picked: &[&str], offered: &mut Ve
                     .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
                     .unwrap();
             }
-            CardPlay::Continued(_) => panic!("unexpected play outcome"),
+            CardPlay::Continued(_) | CardPlay::GameEnded(_) => panic!("unexpected play outcome"),
         }
     }
 }

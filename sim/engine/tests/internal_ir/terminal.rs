@@ -1,6 +1,66 @@
 use super::*;
 
 #[test]
+fn effect_victory_preserves_the_prefix_without_retaining_a_resumable_execution() {
+    for seat in [1, 2] {
+        let mut game = game(seat, 4);
+        let win = instruction(
+            2,
+            Action::GameResult {
+                players: PlayerSet {
+                    relation: PlayerRelation::SelfPlayer,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::Implicit,
+                },
+                result: Outcome::Win,
+                source: AbilitySource {
+                    holder: ObjectOperand::SourceHolder {},
+                    origin: AbilityOrigin::Printed {
+                        face: FaceId("0".into()),
+                        line: Nat(1),
+                    },
+                    controller: PlayerRef::Controller {},
+                },
+            },
+        );
+        let program = checked(vec![draw(1, 1), win, draw(3, 1)]);
+        let later = game
+            .prepare_internal_play(
+                &checked(vec![up_to(4, 1)]),
+                &source("synthetic"),
+                context(seat),
+            )
+            .unwrap();
+        let prepared = game
+            .prepare_internal_play(&program, &source("synthetic"), context(seat))
+            .unwrap();
+        let progress = game.execute_internal_play(&prepared).unwrap();
+        assert!(!progress.complete);
+        assert_eq!(
+            progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(fact, Fact::Draw(_)))
+                .count(),
+            1
+        );
+        assert!(game.internal_decision(View::Referee).is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["game"]["winner"],
+            if seat == 1 { "P1" } else { "P2" }
+        );
+        let before = exact_authority(&game);
+        game.execute_internal_play(&later).unwrap_err();
+        game.execute_internal_play(&prepared).unwrap_err();
+        assert_eq!(exact_authority(&game), before);
+    }
+}
+
+#[test]
 fn surrender_during_prepared_body_keeps_draw_prefix_and_invalidates_every_handle() {
     for seat in [1, 2] {
         let mut game = game(seat, 4);
