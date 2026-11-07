@@ -10,10 +10,51 @@ web client is the reference.
 - **Card index**: vectors of every card image (int8) + hub correction values + the card list, one per card
   edition (jp / en)
 
-The artifact format is specified in [docs/schema/scan/artifacts.md](../docs/schema/scan/artifacts.md).
+The artifact format is specified in [docs/schema/scan/artifacts.md](../docs/schema/scan/artifacts.md). What the
+models are built from, their licenses, evaluation and limitations are in [MODEL_CARD.md](MODEL_CARD.md).
 
 `scan/` is its own uv project, outside the root workspace (PyTorch stays out of carddb's environment). It reads
 exports only through `sve_carddb.export.read_api`, as `publish/` does.
+
+## Common tasks
+
+Commands below are `python -m sve_scan …` run as `uv --directory scan run python -m sve_scan …`, with the three
+variables of "Where data lives" set. `rec-ft` and `det-e` stand for the work-folder file names of the current
+models.
+
+### New cards or a new card data version (models unchanged)
+
+The models need no retraining (about 8% of cards are held out of training to keep checking that). Rebuild the
+index from the new export and publish it:
+
+```bash
+python -m sve_scan gallery                                            # card images of the export
+uv --directory scan run --group train python -m sve_scan rec-hub mobilenetv3_large_100.ra_in1k rec-ft
+python -m sve_scan index rec-ft                                       # index/rec-ft/{jp,en}.* and build.json
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # same versions: only the index changes
+```
+
+- About 7.5 minutes on a 10-core CPU with an RTX 3070: gallery 2.7 min, hub 0.4 min (GPU), index 4.4 min, the
+  whole set every time (one new card takes as long as a new pack)
+- `build.json` records the card data version and `rows_sha256`, the identity of the card image set. If
+  `rows_sha256` equals the published index's, no card or image changed and users need not download it again
+- The release step refuses an index built with another recogniser
+
+### Check a model
+
+```bash
+python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # recogniser, real photos
+python -m sve_scan deck-label rec-ft det-e labels.json deck-out     # deck photos of the held-out events
+python -m sve_scan eval-deck deck-out                               # deck recall from the step above
+```
+
+Compare with the numbers in MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
+
+### Train a new model version
+
+Continue the latest stage with the recipe in "Recogniser" or "Corner finder" (`INIT=<previous tag>`), check it,
+then release it with the next version number (`release <out dir> 2 <det tag> 1 rec-ft` for a new corner finder).
+A new recogniser always needs a new index: rerun `rec-hub` and `index` with its tag before `release`.
 
 ## Setup
 
