@@ -1,0 +1,51 @@
+cards:
+  BP10-046:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n: 1
+                result: made
+                to: field
+                token: マジカルポーン
+            - buff:
+                on: made
+                power: 1
+            - grant:
+                keywords:
+                  - rush
+                on: made
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: チェス
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        orig_cost_le: 4
+                        trait: チェス
+                        who: self
+                        zone: deck
+                      to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+    token_sources:
+      - card: BP02-T04
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
