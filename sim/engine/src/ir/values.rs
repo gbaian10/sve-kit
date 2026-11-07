@@ -784,6 +784,7 @@ variants!(#[derive(Copy)] PlayerFrozen {
     RaceController { event: Binding<RaceEvent> } => ["read.event-field"],
     DriveGainedController { event: Binding<DriveGainedEvent> } => ["read.event-field"],
     DriveTriggerPlayer { event: Binding<DriveTriggerEvent> } => ["read.event-field"],
+    FusedController { event: Binding<FusedEvent> } => ["read.event-field"],
     UbActivatedController { event: Binding<UbActivatedEvent> } => ["read.event-field"],
     DriveCheckedPlayer { event: Binding<DriveCheckedEvent> } => ["read.event-field"],
     DamageController { event: Binding<DamageEvent> } => ["read.event-field"]
@@ -834,6 +835,7 @@ variants!(KindFrozen {
 });
 
 variants!(TraitsFrozen {
+    FusedMaterialTraits { event: Binding<FusedEvent> } => ["read.event-field"],
     Snapshot { object: Expr<RuntimeObjectView> } => ["read.snapshot-characteristics"],
     Characters { characters: Expr<Characteristics> } => ["read.event-characteristics"]
 });

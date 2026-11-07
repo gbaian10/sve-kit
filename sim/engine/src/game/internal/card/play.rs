@@ -784,7 +784,7 @@ impl Game {
             let mut trial = probe.clone();
             let mut paid = selection.clone();
             let members = wait.validate(&trial, &paid, &[candidate.handle])?;
-            paid.cost_discards.insert(wait.receipt(), members);
+            paid.cost_materials.insert(wait.receipt(), members);
             match trial.internal_card_payment(&mut paid, &payment.play.costs, false) {
                 Ok(()) => return Ok(true),
                 Err(crate::EngineFailure::IllegalPlay(_)) => {}
@@ -1015,7 +1015,7 @@ impl Game {
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
-            cost_discards: BTreeMap::new(),
+            cost_materials: BTreeMap::new(),
             movement_capacity: BTreeMap::new(),
             material_selections: BTreeMap::new(),
             effect_evolution_destinations: BTreeMap::new(),
@@ -1496,7 +1496,14 @@ impl Game {
             .filter(|payment| payment.accepted == Some(true))
             .map(|payment| payment.receipt)
             .collect();
-        execution.prepend(selected_body(play.body, &play.chosen, &paid)?);
+        let empty_fusion = play.qualification == AbilityQualification::Fusion
+            && execution
+                .facts
+                .iter()
+                .any(|fact| matches!(fact, Fact::Fused(event) if event.materials.is_empty()));
+        if !empty_fusion {
+            execution.prepend(selected_body(play.body, &play.chosen, &paid)?);
+        }
         Ok(())
     }
 

@@ -10,7 +10,7 @@ use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
     MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
-    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, ScopeId,
+    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, ReceiptId, ScopeId,
     SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
     ZoneRef,
 };
@@ -22,12 +22,18 @@ use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
-    binding: Binding<Selector>,
+    destination: MaterialDestination,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
     field: bool,
     selector: Selector,
     floor: Option<CostFloor>,
+}
+
+#[derive(Clone, Debug)]
+enum MaterialDestination {
+    Binding(Binding<Selector>),
+    Cost(ReceiptId),
 }
 
 /// 元のコストの合計がN以上: the chosen materials' printed costs must reach `minimum`.
@@ -70,6 +76,22 @@ fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
 }
 
 impl MaterialWait {
+    pub(super) const fn cost(
+        receipt: ReceiptId,
+        members: Vec<ObjectRef>,
+        bounds: Cardinality,
+        selector: Selector,
+    ) -> Self {
+        Self {
+            destination: MaterialDestination::Cost(receipt),
+            members,
+            bounds,
+            field: false,
+            selector,
+            floor: None,
+        }
+    }
+
     pub(super) fn revalidate(
         &self,
         game: &Game,
@@ -130,6 +152,13 @@ impl MaterialWait {
         execution: &mut Execution,
         members: Vec<ObjectRef>,
     ) {
+        let binding = match self.destination {
+            MaterialDestination::Binding(binding) => binding,
+            MaterialDestination::Cost(receipt) => {
+                execution.cost_materials.insert(receipt, members);
+                return;
+            }
+        };
         if matches!(
             self.selector,
             Selector::Zone {
@@ -139,10 +168,10 @@ impl MaterialWait {
         ) {
             execution
                 .material_selections
-                .insert(self.binding.key(), self.clone());
+                .insert(binding.key(), self.clone());
         }
         execution.slots.insert(
-            self.binding.key(),
+            binding.key(),
             Slot::Objects {
                 members,
                 on_field_at_capture: self.field,
@@ -408,7 +437,7 @@ fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
     reason = "Material choice and payment share the play transaction."
 )]
 impl Game {
-    fn material_candidates(
+    pub(super) fn material_candidates(
         &self,
         execution: &Execution,
         selector: &Selector,
@@ -637,7 +666,7 @@ impl Game {
                 }),
             },
             Wait::MaterialParameter(MaterialWait {
-                binding: *binding,
+                destination: MaterialDestination::Binding(*binding),
                 members,
                 bounds: constraint.cardinality,
                 field: reveal_payment::parameter(decision).is_none()

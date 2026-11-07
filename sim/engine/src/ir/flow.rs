@@ -407,6 +407,7 @@ variants!(MeasuredReceipt {
 
 tags!(AbilityQualification {
     Ordinary,
+    Fusion,
     UnionBurst
 });
 

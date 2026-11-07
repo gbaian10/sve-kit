@@ -14,9 +14,9 @@ use crate::ir::{
     ChoiceDomain, Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
-    EntryOrigin, ExecutionId, Expr, FlipOutcome, Generation, InstallationSubjects, Instruction,
-    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
-    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, MovementEvent, Nat,
+    EntryOrigin, ExecutionId, Expr, FlipOutcome, FusedEvent, Generation, InstallationSubjects,
+    Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent,
+    Located, LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, MovementEvent, Nat,
     NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
     OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent,
     Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
@@ -397,6 +397,8 @@ pub struct Progress {
 /// First-slice physical facts, sharing the prototype mutation and causal pipeline.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
+    /// One Fusion execution with its frozen material traits and explicit source follow.
+    Fused(FusedEvent),
     /// One race fact, independent of the number of meal resources paid.
     Raced(RaceEvent),
     /// First acquisition of Drive by this field generation.
@@ -555,7 +557,7 @@ pub(super) struct Execution {
     todo: VecDeque<Node>,
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
-    cost_discards: BTreeMap<ReceiptId, Vec<ObjectRef>>,
+    cost_materials: BTreeMap<ReceiptId, Vec<ObjectRef>>,
     movement_capacity: BTreeMap<(ReceiptId, u32), Vec<ObjectRef>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
@@ -737,7 +739,7 @@ impl Game {
                     .collect(),
                 slots: BTreeMap::new(),
                 receipts: BTreeMap::new(),
-                cost_discards: BTreeMap::new(),
+                cost_materials: BTreeMap::new(),
                 movement_capacity: BTreeMap::new(),
                 material_selections: BTreeMap::new(),
                 effect_evolution_destinations: BTreeMap::new(),
@@ -849,7 +851,7 @@ impl Game {
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
                     rollback = execution.origin.take();
-                    execution.cost_discards.insert(wait.receipt(), members);
+                    execution.cost_materials.insert(wait.receipt(), members);
                 }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
@@ -1379,6 +1381,7 @@ impl Game {
                 group,
             );
         }
+        self.internal_fused_events(execution)?;
         match execution.ability {
             Some(source) => {
                 if execution.nested.is_none() {

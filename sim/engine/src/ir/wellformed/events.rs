@@ -3,6 +3,7 @@ use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::equipment;
+use crate::ir::events::fusion;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
@@ -92,7 +93,15 @@ macro_rules! snapshot_fields {
 }
 snapshot_fields!(NamesFrozen);
 snapshot_fields!(KindFrozen);
-snapshot_fields!(TraitsFrozen);
+impl Projected for TraitsFrozen {
+    fn check(&self, checker: &Checker) -> Checked {
+        match self {
+            Self::Snapshot { object } => checker.projection(object),
+            Self::Characters { characters } => checker.projection(characters),
+            Self::FusedMaterialTraits { event } => checker.reference(*event, BindingKind::Value),
+        }
+    }
+}
 
 payload_fields!(PositionFields; MovePosition);
 payload_fields!(MoveMethodFields; MoveMethod);
@@ -237,6 +246,7 @@ impl Projected for PlayerFrozen {
             Self::RaceController { event } => checker.reference(*event, BindingKind::Value),
             Self::DriveGainedController { event } => checker.reference(*event, BindingKind::Value),
             Self::DriveTriggerPlayer { event } => checker.reference(*event, BindingKind::Value),
+            Self::FusedController { event } => checker.reference(*event, BindingKind::Value),
             Self::UbActivatedController { event } => checker.reference(*event, BindingKind::Value),
             Self::DriveCheckedPlayer { event } => checker.reference(*event, BindingKind::Value),
             Self::DamageController { event } => checker.reference(*event, BindingKind::Value),
@@ -602,16 +612,42 @@ impl Checker {
 
     fn event_alternatives(
         &mut self,
-        patterns: &[EventPattern],
+        pattern: &EventPattern,
         view: Option<EventSnapshotPolicy>,
         triggering: bool,
     ) -> Checked {
+        let EventPattern::AnyOf { patterns } = pattern else {
+            return self.reject();
+        };
+        if fusion::combined(pattern) {
+            return self.fusion_alternatives(patterns, view, triggering);
+        }
         if patterns.is_empty() {
             return self.reject();
         }
         for (index, alternative) in patterns.iter().enumerate() {
             self.at(&format!("patterns/{index}"), |checker| {
                 checker.isolated(|checker| checker.event_pattern(alternative, view, triggering))
+            })?;
+        }
+        Ok(())
+    }
+
+    fn fusion_alternatives(
+        &mut self,
+        patterns: &[EventPattern],
+        view: Option<EventSnapshotPolicy>,
+        triggering: bool,
+    ) -> Checked {
+        if view.is_some_and(|view| view != EventSnapshotPolicy::AtReveal) {
+            return Err(self.error(WellFormedReason::InvalidEntry));
+        }
+        for (index, branch) in patterns.iter().enumerate() {
+            let Some(policy) = fusion::branch_view(branch) else {
+                return self.reject();
+            };
+            self.at(&format!("patterns/{index}"), |checker| {
+                checker.isolated(|checker| checker.event_pattern(branch, Some(policy), triggering))
             })?;
         }
         Ok(())
@@ -642,7 +678,7 @@ impl Checker {
             return checked;
         }
         match pattern {
-            EventPattern::AnyOf { patterns } => self.event_alternatives(patterns, view, triggering),
+            EventPattern::AnyOf { .. } => self.event_alternatives(pattern, view, triggering),
             EventPattern::EarthRitePayment {
                 event,
                 component,

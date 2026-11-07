@@ -547,10 +547,11 @@ impl Checker {
         if context == InstructionContext::Effect
             && matches!(
                 instruction.action,
-                Action::Resource {
-                    operation: ResourceOperation::Pay,
-                    ..
-                }
+                Action::Fusion { .. }
+                    | Action::Resource {
+                        operation: ResourceOperation::Pay,
+                        ..
+                    }
             )
         {
             return self.reject();
@@ -719,6 +720,7 @@ impl Checker {
                 self.declaration(declaration)
             }
             Action::Discard { player, mode } => self.discard(player, mode),
+            Action::Fusion { .. } => self.fusion(action),
             Action::Grant {
                 subjects,
                 abilities,

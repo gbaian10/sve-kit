@@ -370,7 +370,7 @@ runtime_record!(
         play_fact: OriginFactId
     }
 );
-runtime_record!(FusedEvent { execution: ExecutionId, subject_before: ObjectRef, subject_after: ObjectRef, materials: Vec<RuntimeObjectView>, payment: RuntimeReceiptId });
+runtime_record!(FusedEvent { execution: ExecutionId, controller: PlayerId, subject_before: ObjectRef, subject_after: ObjectRef, materials: Vec<RuntimeObjectView>, material_traits: Vec<TraitId>, payment: RuntimeReceiptId });
 runtime_record!(
     #[derive(Copy)]
     EquipEvent {

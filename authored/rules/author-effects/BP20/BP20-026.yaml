@@ -1,0 +1,54 @@
+cards:
+  BP20-026:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    name_contains: オクトリス
+                    who: self
+                    zone: field
+                then:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 黄金の小剣
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+      - activate:
+          do:
+            - grant:
+                abilities:
+                  - play:
+                      cost_delta: -1
+                on: this
+          fusion:
+            n: 1
+            sel:
+              orig_cost_ge: 1
+              trait: 財宝
+              who: self
+              zone:
+                - hand
+                - ex
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

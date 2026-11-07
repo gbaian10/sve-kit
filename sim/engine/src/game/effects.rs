@@ -10,9 +10,11 @@ use serde_json::{Value, json};
 use super::{Frame, Game, Prompt, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
-fn token_erasure_zone(kind: &str, destination: &str) -> bool {
+pub(super) fn token_erasure_zone(kind: &str, destination: &str) -> bool {
     match kind {
         "イクイップメント・トークン" => destination != "equipment",
+        "クレスト・トークン" => destination != "ex",
+        "スペル・トークン" => !matches!(destination, "ex" | "resolution"),
         _ => kind.contains("トークン") && !matches!(destination, "field" | "ex" | "resolution"),
     }
 }

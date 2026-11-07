@@ -155,10 +155,31 @@ pub(super) struct Activate {
     pub advance: Option<True>,
     pub quick: Option<bool>,
     pub zone: Option<ActivationZones>,
-    pub cost: Cost,
+    pub cost: Option<Cost>,
+    pub fusion: Option<Fusion>,
     pub usable_if: Option<Condition>,
     #[serde(flatten)]
     pub body: Body,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Fusion {
+    pub sel: FusionQuery,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusionQuery {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    pub zone: Vec<ActivationZone>,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
+    pub token: Option<bool>,
+    pub orig_cost_ge: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -1988,6 +2009,10 @@ pub(super) enum AutoAggregation {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) enum PhaseSubscription {
+    #[serde(rename = "fused")]
+    Fused(FusedSubscription),
+    #[serde(rename = "any_of")]
+    AnyOf(Vec<Self>),
     #[serde(rename = "equipped")]
     Equipped(EquippedSubscription),
     #[serde(rename = "drew")]
@@ -2026,6 +2051,20 @@ pub(super) enum PhaseSubscription {
     Stood(PostureSubscription),
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusedSubscription {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    pub material: FusedMaterial,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusedMaterial {
+    pub r#trait: String,
 }
 
 #[derive(Deserialize)]

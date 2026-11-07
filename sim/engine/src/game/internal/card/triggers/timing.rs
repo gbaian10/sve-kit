@@ -10,6 +10,7 @@ use crate::game::internal::source::SourceSnapshot;
 use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
 use crate::game::{Step, int, string};
 use crate::ir::events::damage::DamageFilter;
+use crate::ir::events::fusion;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -33,6 +34,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
         return Ok(false);
     };
+    if fusion::has_phase(ability) {
+        return super::fusion::check_header(ability);
+    }
     let admitted = if super::evolution::observer_filter(ability).is_some() {
         true
     } else if let Some(valid) = second_header(ability) {
@@ -171,6 +175,7 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         Event::UbActivated { .. } => {
             Ok(format!("UbActivated while source at field slot {position}"))
         }
+        Event::Fused { .. } => Ok(format!("Fused while source at slot {position}")),
         Event::Play { .. } => Ok(format!("Play while source at slot {position}")),
         Event::Discard { .. } => Ok("Discard".into()),
         Event::Draw { .. } => Ok("Draw".into()),
@@ -816,10 +821,17 @@ impl Game {
                     if !trigger.active_zones.contains(&zone) {
                         continue;
                     }
-                    if let TriggerCondition::Event {
-                        pattern: EventPattern::Phase { binding, predicate },
-                    } = &trigger.on
-                    {
+                    if let TriggerCondition::Event { pattern } = &trigger.on {
+                        let phase_branch = fusion::patterns(pattern).iter().find_map(|branch| {
+                            if let EventPattern::Phase { binding, predicate } = branch {
+                                Some((binding, predicate))
+                            } else {
+                                None
+                            }
+                        });
+                        let Some((binding, predicate)) = phase_branch else {
+                            continue;
+                        };
                         let controller = player_id(&self.object(&holder)?.controller)?;
                         let player = if controller == actor {
                             PlayerRef::Controller {}
@@ -864,14 +876,15 @@ impl Game {
 }
 
 pub(super) fn is_timing(ability: &Ability) -> bool {
-    matches!(
-        ability.trigger.as_ref().map(|t| &t.on),
-        Some(TriggerCondition::Event {
-            pattern: EventPattern::Attack { .. }
-                | EventPattern::Phase { .. }
-                | EventPattern::Evolve { .. }
-                | EventPattern::Damage { .. }
-                | EventPattern::LifeChange { .. }
-        })
-    )
+    fusion::has_phase(ability)
+        || matches!(
+            ability.trigger.as_ref().map(|t| &t.on),
+            Some(TriggerCondition::Event {
+                pattern: EventPattern::Attack { .. }
+                    | EventPattern::Phase { .. }
+                    | EventPattern::Evolve { .. }
+                    | EventPattern::Damage { .. }
+                    | EventPattern::LifeChange { .. }
+            })
+        )
 }

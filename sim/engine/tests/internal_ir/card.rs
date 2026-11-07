@@ -583,7 +583,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                         assert_eq!(fact.execution, activation.execution);
                         Some(fact.effect)
                     }
-                    Fact::DriveGained(_)
+                    Fact::Fused(_)
+                    | Fact::DriveGained(_)
                     | Fact::Raced(_)
                     | Fact::Evolved(_)
                     | Fact::Equipped(_)
@@ -835,3 +836,6 @@ mod ward_bypass;
 
 #[path = "card/exchange_pp_guard.rs"]
 mod exchange_pp_guard;
+
+#[path = "card/fusion.rs"]
+mod fusion;
