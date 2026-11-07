@@ -17,7 +17,7 @@ export type ScanDownloadRun =
 
 export interface ScanDownloadState {
   readonly runs: Partial<Readonly<Record<ScanPart, ScanDownloadRun>>>
-  /** Counts finished downloads, so screens know to read the device status again. */
+  /** Counts ended downloads (done or failed), so screens know to read the device status again. */
   readonly finished: number
 }
 
@@ -48,10 +48,12 @@ function createScanDownloads(store: ScanModelStore) {
       closeScanEngine()
       set(part, undefined, state.finished + 1)
     } catch (error) {
-      set(part, {
-        state: "failed",
-        error: error instanceof ScanModelError ? error.kind : "unknown",
-      })
+      // A failed attempt may still have changed what is stored, so screens read the status again.
+      set(
+        part,
+        { state: "failed", error: error instanceof ScanModelError ? error.kind : "unknown" },
+        state.finished + 1,
+      )
     }
   }
 

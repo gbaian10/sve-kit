@@ -312,6 +312,20 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     }
   }
 
+  /** Cache keys some install record still needs. */
+  function referenced(installed: Records): Set<string> {
+    const keys = new Set<string>()
+    if (installed.runtime) keys.add(runtimeKey(installed.runtime.url))
+    if (installed.det) keys.add(fileKey(installed.det.file))
+    if (installed.rec)
+      for (const file of [
+        installed.rec.rec,
+        ...Object.values(installed.rec.index).flatMap((entry) => indexList(entry)),
+      ])
+        keys.add(fileKey(file.file))
+    return keys
+  }
+
   /** Downloads whatever the part lacks, verifies it, then switches the part over and drops its old files. */
   async function download(
     part: ScanPart,
@@ -320,79 +334,73 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     signal?: AbortSignal,
   ): Promise<void> {
     const cache = await open()
-    if (part === "runtime") {
-      const { url, bytes } = options.runtime
-      onProgress(0, bytes)
-      if (!(await has(cache, runtimeKey(url)))) {
-        const body = await fetchFile(
-          url,
-          { bytes },
-          (got) => {
-            onProgress(got, bytes)
-          },
-          signal,
-        )
-        await put(cache, runtimeKey(url), body)
+    // Files this attempt stored; a failure removes the ones no install record uses, so nothing is
+    // left behind that the delete buttons cannot reach.
+    const added: string[] = []
+    const fetchInto = async (
+      key: string,
+      url: string,
+      file: { bytes: number; sha256?: string },
+      onBytes: (got: number) => void,
+    ) => {
+      if (await has(cache, key)) return
+      const body = await fetchFile(url, file, onBytes, signal)
+      added.push(key)
+      await put(cache, key, body)
+    }
+    try {
+      if (part === "runtime") {
+        const { url, bytes } = options.runtime
+        onProgress(0, bytes)
+        await fetchInto(runtimeKey(url), url, { bytes }, (got) => {
+          onProgress(got, bytes)
+        })
+        onProgress(bytes, bytes)
+        await put(cache, recordKey("runtime"), JSON.stringify(options.runtime))
+        for (const request of await cache.keys()) {
+          const path = new URL(request.url).pathname
+          if (path.startsWith(`${KEY}runtime/`) && path !== runtimeKey(url))
+            await cache.delete(request)
+        }
+        return
       }
-      onProgress(bytes, bytes)
-      await put(cache, recordKey("runtime"), JSON.stringify(options.runtime))
-      for (const request of await cache.keys())
-        if (
-          new URL(request.url).pathname.startsWith(`${KEY}runtime/`) &&
-          new URL(request.url).pathname !== runtimeKey(url)
-        )
-          await cache.delete(request)
-      return
-    }
-    const listed = await manifest()
-    if (listed.state === "unsupported")
-      throw new ScanModelError("unsupported", "the scan list needs a newer site")
-    if (listed.state !== "ok") throw new ScanModelError("network", "the scan list is unavailable")
-    const published = listed.manifest
-    const index = published.index[edition]
-    if (part === "rec" && !index)
-      throw new ScanModelError("missing", `no ${edition} card index is published`)
-    const files =
-      part === "det" ? [published.det] : [published.rec, ...indexList(index as ScanIndexFiles)]
-    const total = sum(files)
-    let done = 0
-    onProgress(0, total)
-    for (const file of files) {
-      if (!(await has(cache, fileKey(file.file)))) {
-        const body = await fetchFile(
-          `${options.scanBase()}/${file.file}`,
-          file,
-          (got) => {
-            onProgress(done + got, total)
-          },
-          signal,
-        )
-        await put(cache, fileKey(file.file), body)
+      const listed = await manifest()
+      if (listed.state === "unsupported")
+        throw new ScanModelError("unsupported", "the scan list needs a newer site")
+      if (listed.state !== "ok") throw new ScanModelError("network", "the scan list is unavailable")
+      const published = listed.manifest
+      const index = published.index[edition]
+      if (part === "rec" && !index)
+        throw new ScanModelError("missing", `no ${edition} card index is published`)
+      const files =
+        part === "det" ? [published.det] : [published.rec, ...indexList(index as ScanIndexFiles)]
+      const total = sum(files)
+      let done = 0
+      onProgress(0, total)
+      for (const file of files) {
+        await fetchInto(fileKey(file.file), `${options.scanBase()}/${file.file}`, file, (got) => {
+          onProgress(done + got, total)
+        })
+        done += file.bytes
+        onProgress(done, total)
       }
-      done += file.bytes
-      onProgress(done, total)
+      const installed = await records(cache)
+      const before = referenced(installed)
+      if (part === "det") await put(cache, recordKey("det"), JSON.stringify(published.det))
+      else {
+        // Another edition's index stays only while it was built for the same recogniser.
+        const previous =
+          installed.rec?.rec.sha256 === published.rec.sha256 ? installed.rec.index : {}
+        const record: RecRecord = { rec: published.rec, index: { ...previous, [edition]: index } }
+        await put(cache, recordKey("rec"), JSON.stringify(record))
+      }
+      const after = referenced(await records(cache))
+      for (const key of before) if (!after.has(key)) await cache.delete(key)
+    } catch (error) {
+      const keep = referenced(await records(cache))
+      for (const key of added) if (!keep.has(key)) await cache.delete(key)
+      throw error
     }
-    const installed = await records(cache)
-    let keep: ScanFile[]
-    if (part === "det") {
-      await put(cache, recordKey("det"), JSON.stringify(published.det))
-      keep = [published.det]
-    } else {
-      // Another edition's index stays only while it was built for the same recogniser.
-      const previous = installed.rec?.rec.sha256 === published.rec.sha256 ? installed.rec.index : {}
-      const record: RecRecord = { rec: published.rec, index: { ...previous, [edition]: index } }
-      await put(cache, recordKey("rec"), JSON.stringify(record))
-      keep = [record.rec, ...Object.values(record.index).flatMap((entry) => indexList(entry))]
-    }
-    const old =
-      part === "det"
-        ? installed.det && [installed.det]
-        : installed.rec && [
-            installed.rec.rec,
-            ...Object.values(installed.rec.index).flatMap((entry) => indexList(entry)),
-          ]
-    const kept = new Set(keep.map((file) => file.file))
-    for (const file of old ?? []) if (!kept.has(file.file)) await cache.delete(fileKey(file.file))
   }
 
   async function removeFiles(cache: Cache, part: ScanPart, installed: Records): Promise<void> {
@@ -431,10 +439,16 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     const cache = await open()
     const installed = await records(cache)
     const index = installed.rec?.index[edition]
-    if (!installed.runtime || !installed.det || !installed.rec || !index)
+    // The runtime binary must come from the same ONNX Runtime build as this site's JavaScript.
+    if (
+      installed.runtime?.url !== options.runtime.url ||
+      !installed.det ||
+      !installed.rec ||
+      !index
+    )
       throw new ScanModelError("missing", "scan models are not downloaded")
     const [runtime, det, rec, vectors, scale, hub, cards] = await Promise.all([
-      read(cache, runtimeKey(installed.runtime.url)),
+      read(cache, runtimeKey(options.runtime.url)),
       read(cache, fileKey(installed.det.file)),
       read(cache, fileKey(installed.rec.rec.file)),
       read(cache, fileKey(index.vectors.file)),

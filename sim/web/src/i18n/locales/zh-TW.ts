@@ -791,6 +791,7 @@ const zhTW = {
       intro:
         "拍卡用到的檔案都在這裡。單張和整副牌照片兩個模式共用；下載一次就存在這台裝置，照片不會上傳。",
       needed: "需要下載 {{mb}} MB",
+      unavailable: "部分模型目前無法下載",
       allReady: "全部已下載，之後拍卡不用再下載",
       stored: "這台裝置已存 {{mb}} MB",
       downloadAll: "全部下載",

@@ -110,9 +110,11 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
           <p className="font-semibold text-text-1">
             {status === null
               ? "…"
-              : allReady || neededBytes === 0
+              : allReady
                 ? t("scan.models.allReady")
-                : t("scan.models.needed", { mb: megabytes(neededBytes) })}
+                : neededBytes > 0
+                  ? t("scan.models.needed", { mb: megabytes(neededBytes) })
+                  : t("scan.models.unavailable")}
           </p>
           {status && (
             <p className="text-text-3">

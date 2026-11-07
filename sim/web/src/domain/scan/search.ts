@@ -102,45 +102,38 @@ export function matchCards(
 ): CardMatch[] {
   const { dim, vectors, scale, hub, cards } = index
   const hubWeight = index.scoring.hubWeight
-  // Same-card printings crowd the top rows, so keep more rows than distinct cards wanted.
-  const keep = limit * 4
-  const rows: { at: number; score: number; raw: number }[] = []
+  // Each card scores by its best printing row, so many printings of one card cannot crowd out the next card.
+  const best = new Map<string, { at: number; score: number; raw: number }>()
   for (let at = 0; at < cards.length; at += 1) {
     if (mask && mask[at] === 0) continue
     const base = at * dim
-    let best = -Infinity
+    let top = -Infinity
     for (const view of views) {
       let dot = 0
       for (let j = 0; j < dim; j += 1) dot += (vectors[base + j] ?? 0) * (view[j] ?? 0)
-      if (dot > best) best = dot
+      if (dot > top) top = dot
     }
-    const raw = best * (scale[at] ?? 0)
+    const raw = top * (scale[at] ?? 0)
     const score = raw - hubWeight * (hub[at] ?? 0)
-    if (rows.length === keep && score <= (rows[keep - 1]?.score ?? -Infinity)) continue
-    let k = rows.length
-    while (k > 0 && (rows[k - 1]?.score ?? Infinity) < score) k -= 1
-    rows.splice(k, 0, { at, score, raw })
-    if (rows.length > keep) rows.pop()
+    const id = cards[at]?.cardId ?? ""
+    const current = best.get(id)
+    if (!current || score > current.score) best.set(id, { at, score, raw })
   }
   let reps = representativeCache.get(cards)
   if (!reps) {
     reps = representatives(cards)
     representativeCache.set(cards, reps)
   }
-  const seen = new Set<string>()
-  const out: CardMatch[] = []
-  for (const row of rows) {
-    const card = cards[row.at]
-    if (!card || seen.has(card.cardId)) continue
-    seen.add(card.cardId)
-    out.push({
-      card: reps.get(`${card.cardId}|${card.artGroup}`) ?? card,
-      score: row.score,
-      raw: row.raw,
+  const representative = reps
+  return [...best.values()]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .flatMap((row) => {
+      const card = cards[row.at]
+      if (!card) return []
+      const shown = representative.get(`${card.cardId}|${card.artGroup}`) ?? card
+      return [{ card: shown, score: row.score, raw: row.raw }]
     })
-    if (out.length === limit) break
-  }
-  return out
 }
 
 /** Whether the best match is good enough and far enough ahead of the next card. */

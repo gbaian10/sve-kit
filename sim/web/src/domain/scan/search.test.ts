@@ -42,6 +42,26 @@ describe("scan card search", () => {
     expect(found[1]?.raw).toBeCloseTo(0.6)
   })
 
+  it("keeps the runner-up card however many printings the best card has", () => {
+    const many = {
+      ...index([]),
+      dim: 1,
+      vectors: Int8Array.from([127, 127, 127, 127, 127, 127, 127, 127, 126]),
+      scale: Float32Array.from(Array.from({ length: 9 }, () => 1 / 127)),
+      hub: new Float32Array(9),
+      cards: parseScanCards(
+        [
+          ...Array.from({ length: 8 }, (_, at) => ({ ...rows[0], no: `BP01-001P${String(at)}` })),
+          rows[2],
+        ],
+        9,
+      ),
+    }
+    const found = matchCards(many, [Float32Array.from([1])], null, 2)
+    expect(found.map((match) => match.card.cardId)).toEqual(["c1", "c2"])
+    expect(isConfident(found, SCORING)).toBe(false)
+  })
+
   it("scores a card by its best view, so a card turned 180° still matches", () => {
     const search = index([
       [127, 0, 0, 0],

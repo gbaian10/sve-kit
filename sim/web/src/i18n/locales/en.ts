@@ -844,6 +844,7 @@ export default {
       intro:
         "Everything card scanning uses is here, shared by single-card and deck-photo scanning. Download once and it stays on this device; photos are never uploaded.",
       needed: "{{mb}} MB to download",
+      unavailable: "Some models can't be downloaded right now",
       allReady: "All downloaded; scanning needs no further downloads",
       stored: "{{mb}} MB stored on this device",
       downloadAll: "Download all",

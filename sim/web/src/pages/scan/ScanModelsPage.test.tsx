@@ -1,9 +1,10 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 
 import { createScanModelStore } from "../../data/scan-models"
 import type { UiLanguage } from "../../i18n"
+import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
 import {
@@ -42,6 +43,10 @@ function setup(
 }
 
 const row = (name: string) => screen.getByRole("listitem", { name })
+
+afterEach(() => {
+  prefsStore.set(DEFAULT_PREFS)
+})
 
 describe("ScanModelsPage", () => {
   it("lists the three parts with their versions and downloads them all on request", async () => {
@@ -110,6 +115,16 @@ describe("ScanModelsPage", () => {
       expect(within(row("找卡模型")).getByRole("button", { name: "下載" })).toBeDisabled()
     })
     expect(within(row("執行引擎")).getByRole("button", { name: "下載" })).toBeEnabled()
+  })
+
+  it("does not claim everything is downloaded while an edition's index is unpublished", async () => {
+    prefsStore.set({ cardEdition: "en" })
+    const page = setup({ cdn: fakeScanCdn(scanPublication({ en: null })) })
+    await page.store.download("runtime", "en", () => undefined)
+    await page.store.download("det", "en", () => undefined)
+    await page.render()
+    expect(await screen.findByText("部分模型目前無法下載")).toBeInTheDocument()
+    expect(within(row("辨識模型")).getByText("英版卡片索引還沒有發佈。")).toBeInTheDocument()
   })
 
   it.each([

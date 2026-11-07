@@ -91,6 +91,33 @@ describe("scan model store", () => {
     expect(status.storedBytes).toBe(0)
   })
 
+  it("cleans up a recogniser download that fails part way, so nothing is stranded", async () => {
+    const cdn = fakeScanCdn()
+    const { store } = setup({ cdn })
+    await store.download("det", "jp", () => undefined)
+    const before = (await store.status("jp")).storedBytes
+    cdn.corrupt(scanPublication().manifest.index.jp.vectors.file)
+    expect(await failure(store.download("rec", "jp", () => undefined))).toBe("integrity")
+    const status = await store.status("jp")
+    expect(status.storedBytes).toBe(before)
+    expect(status.parts.det.state).toBe("ready")
+  })
+
+  it("does not hand an older site's runtime to this site's ONNX Runtime", async () => {
+    const cdn = fakeScanCdn()
+    const storage = memoryCache()
+    const { store: older } = setup({ cdn, storage })
+    for (const part of SCAN_PARTS) await older.download(part, "jp", () => undefined)
+    const newer = createScanModelStore({
+      caches: () => storage,
+      fetcher: cdn.fetcher,
+      scanBase: () => SCAN_BASE,
+      runtime: { url: "https://app.test/assets/ort-next.wasm", bytes: RUNTIME.bytes },
+    })
+    expect((await newer.status("jp")).parts.runtime.state).toBe("missing")
+    await expect(newer.load("jp")).rejects.toThrow(ScanModelError)
+  })
+
   it("reports a full device as a quota failure", async () => {
     const { store } = setup({ storage: fullCache() })
     expect(await failure(store.download("det", "jp", () => undefined))).toBe("quota")
