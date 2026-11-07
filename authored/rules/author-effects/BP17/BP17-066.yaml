@@ -1,0 +1,40 @@
+cards:
+  BP17-066:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - shuffle:
+                who: self
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                upto: 2
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
