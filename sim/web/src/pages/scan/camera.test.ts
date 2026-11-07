@@ -80,7 +80,7 @@ describe("camera scanner", () => {
     const { video, scanner } = attached()
     const starting = scanner.start()
     camera.grant()
-    expect(await starting).toBe(4)
+    expect(await starting).toBe(8)
     expect(video.srcObject).toBe(camera.stream)
     scanner.stop()
     expect(camera.stops).toHaveLength(1)

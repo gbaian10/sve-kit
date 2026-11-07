@@ -921,6 +921,7 @@ export default {
       locked: "固定中。画面をタップで再開",
       zoom: "ズーム",
       zoomStep: "{{zoom}}×",
+      aimSize: "ドラッグして枠の大きさを変える",
       resultLine: "{{no}} · {{hint}}",
       tapForEffect: "タップで効果を表示",
       notSure: "まだ確定していません",

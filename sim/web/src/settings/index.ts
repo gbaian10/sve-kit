@@ -23,4 +23,5 @@ export {
   usePrefs,
 } from "./prefs"
 export { recentStore, useRecent } from "./recent"
+export { clampAimScale, MIN_AIM_SCALE, saveAimScale, savedAimScale } from "./scan-aim"
 export { savedScanBackend, saveScanBackend } from "./scan-backend"

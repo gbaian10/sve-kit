@@ -880,6 +880,7 @@ const zhTW = {
       locked: "已鎖定，點畫面繼續",
       zoom: "放大",
       zoomStep: "{{zoom}}×",
+      aimSize: "拖曳調整框的大小",
       resultLine: "{{no}} · {{hint}}",
       tapForEffect: "點這裡看效果",
       notSure: "還不確定",

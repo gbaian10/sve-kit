@@ -6,11 +6,12 @@ import {
   History,
   Lock,
   LockOpen,
+  MoveDiagonal2,
   RectangleHorizontal,
   RectangleVertical,
   ScanLine,
 } from "lucide-react"
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import { type PointerEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 
@@ -28,6 +29,7 @@ import {
 } from "../../data"
 import { printingPath } from "../../domain/cardRoute"
 import type { Region } from "../../domain/search"
+import { clampAimScale, MIN_AIM_SCALE, saveAimScale, savedAimScale } from "../../settings"
 import { type CameraFrame, CameraScanner } from "./camera"
 import {
   openScanEngine,
@@ -48,7 +50,9 @@ import { ClassColumn, ScanModeTabs } from "./scan-shared"
 
 // Card proportions (63 × 88 mm) for the aiming frame.
 const CARD_RATIO = 88 / 63
-const ZOOMS = [1, 1.5, 2, 3]
+const ZOOMS = [1, 2, 3, 5, 8]
+/** One arrow key press on the frame-size handle. */
+const AIM_STEP = 0.05
 
 // Coming back from a card page should not ask for the camera again: remember it was on.
 let cameraWasOn = false
@@ -80,6 +84,22 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   const area = useRef<HTMLDivElement>(null)
   const overlay = useRef<HTMLCanvasElement>(null)
   const [aimSize, setAimSize] = useState({ width: 0, height: 0 })
+  const [aimScale, setAimScale] = useState(savedAimScale)
+  const resizeAim = (scale: number) => {
+    const next = clampAimScale(scale)
+    setAimScale(next)
+    saveAimScale(next)
+  }
+  // Dragging the corner handle: the frame stays centred, so its size follows the finger's distance
+  // from the centre.
+  const dragAim = (event: PointerEvent<HTMLElement>) => {
+    if (!event.currentTarget.hasPointerCapture(event.pointerId)) return
+    const box = area.current?.getBoundingClientRect()
+    if (!box || aimSize.width === 0) return
+    const dx = Math.abs(event.clientX - (box.left + box.width / 2))
+    const dy = Math.abs(event.clientY - (box.top + box.height / 2))
+    resizeAim(Math.max(dx / (aimSize.width / 2), dy / (aimSize.height / 2)))
+  }
 
   const sources = useMemo(() => scanEngineSources(store), [store])
   // Cleared on unmount: a camera start still waiting for permission must not go on afterwards.
@@ -279,16 +299,50 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
             <div
               ref={aim}
               style={{
-                width: aimSize.width,
-                height: aimSize.height,
+                width: aimSize.width * aimScale,
+                height: aimSize.height * aimScale,
                 boxShadow: "0 0 0 9999px var(--camera-dim)",
               }}
               className={cn(
-                "rounded-block border-2 transition-colors",
+                "relative rounded-block border-2 transition-colors",
                 phase !== "running" && "opacity-0",
                 status === "ok" ? "border-camera-ok" : "border-camera-frame",
               )}
-            />
+            >
+              {phase === "running" && (
+                <span
+                  role="slider"
+                  tabIndex={0}
+                  aria-label={t("scan.single.aimSize")}
+                  aria-valuemin={Math.round(MIN_AIM_SCALE * 100)}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(aimScale * 100)}
+                  aria-valuetext={`${String(Math.round(aimScale * 100))}%`}
+                  title={t("scan.single.aimSize")}
+                  onPointerDown={(event) => {
+                    event.currentTarget.setPointerCapture(event.pointerId)
+                  }}
+                  onPointerMove={dragAim}
+                  onKeyDown={(event) => {
+                    const step =
+                      event.key === "ArrowUp" || event.key === "ArrowRight"
+                        ? AIM_STEP
+                        : event.key === "ArrowDown" || event.key === "ArrowLeft"
+                          ? -AIM_STEP
+                          : 0
+                    if (!step) return
+                    event.preventDefault()
+                    resizeAim(aimScale + step)
+                  }}
+                  // A 44px target centred on the frame's corner (design §9 touch size).
+                  className="pointer-events-auto absolute -right-5.5 -bottom-5.5 flex size-11 touch-none items-center justify-center"
+                >
+                  <span className="flex size-7 items-center justify-center rounded-full bg-camera-chip text-camera-text backdrop-blur">
+                    <MoveDiagonal2 className="size-4" aria-hidden="true" />
+                  </span>
+                </span>
+              )}
+            </div>
           </div>
           <canvas ref={overlay} className="pointer-events-none absolute inset-0 size-full" />
 
@@ -370,7 +424,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
             <div
               role="group"
               aria-label={t("scan.single.zoom")}
-              className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1"
+              className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col"
             >
               {ZOOMS.filter((step) => step <= maxZoom).map((step) => (
                 <button

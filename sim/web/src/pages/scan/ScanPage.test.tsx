@@ -10,7 +10,7 @@ import { createScanModelStore } from "../../data/scan-models"
 import { toggleClass } from "../../domain/scan/class-pick"
 import type { ScanCard } from "../../domain/scan/search"
 import { createI18n, type UiLanguage } from "../../i18n"
-import { DEFAULT_PREFS, prefsStore, saveScanBackend } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, savedAimScale, saveScanBackend } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { TestAppWorker } from "../../test-utils/app-workers"
 import { memoryCache } from "../../test-utils/cache"
@@ -275,6 +275,13 @@ describe("ScanPage", () => {
     expect(screen.getByRole("button", { name: "2×" })).toHaveAttribute("aria-pressed", "true")
     await user.click(screen.getByRole("button", { name: "3×" }))
     expect(container().querySelector("video")?.style.transform).toBe("scale(1.5)")
+    // The frame shrinks from its corner handle and remembers the size.
+    const handle = screen.getByRole("slider", { name: "拖曳調整框的大小" })
+    expect(handle).toHaveAttribute("aria-valuenow", "100")
+    handle.focus()
+    await user.keyboard("{ArrowDown}{ArrowDown}")
+    expect(handle).toHaveAttribute("aria-valuenow", "90")
+    expect(savedAimScale()).toBe(0.9)
     await user.click(screen.getByRole("button", { name: "直放" }))
     expect(screen.getByRole("button", { name: "橫放" })).toHaveAttribute("aria-pressed", "true")
     const classes = await screen.findByRole("group", { name: "職業" }, { timeout: 15_000 })
