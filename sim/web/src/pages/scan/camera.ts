@@ -75,6 +75,8 @@ export class CameraScanner {
   private tracker: ScanTracker
   private readonly finish = new FinishSmoother()
   private readonly follower = new QuadFollower()
+  /** Which reading of a card lying across won last frame: the other one must lead to take over. */
+  private across = false
   private video: HTMLVideoElement | null = null
   private frame: HTMLElement | null = null
   private overlay: HTMLCanvasElement | null = null
@@ -250,14 +252,17 @@ export class CameraScanner {
           readings.map((reading) => ({ pixels: reading, turned: true })),
         )
         if (!this.isRunning() || engine !== this.engine) continue
-        const pick =
-          views.length === 4 &&
-          chooseReading(
-            engine.match(views.slice(0, 2), this.classes, CANDIDATES),
-            engine.match(views.slice(2, 4), this.classes, CANDIDATES),
-          ) === "sideways"
-            ? 1
-            : 0
+        let pick = 0
+        if (views.length === 4) {
+          const upright = engine.match(views.slice(0, 2), this.classes, CANDIDATES)
+          const turned = engine.match(views.slice(2, 4), this.classes, CANDIDATES)
+          // Switching readings looks like a new card to the tracker, so the reading that won last
+          // frame stays unless the other one leads it.
+          const [kept, other] = this.across ? [turned, upright] : [upright, turned]
+          const switches = chooseReading(kept, other) === "sideways"
+          pick = this.across !== switches ? 1 : 0
+        }
+        this.across = pick === 1
         const [upright, turned] = views.slice(2 * pick, 2 * pick + 2)
         const pixels = readings[pick]
         if (!upright || !turned || !pixels) continue
