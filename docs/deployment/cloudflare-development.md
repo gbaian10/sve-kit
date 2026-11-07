@@ -266,7 +266,6 @@ uv --directory publish run sve-publish scan upload "$SCAN_RELEASE" \
    中途失敗時舊清單仍有效，用同一資料夾重跑
 
 舊版的雜湊檔留在桶內，目前沒有 `scan/` 的回收，清理日後另議並經維護者同意。
-Dev Worker 白名單目前不含 `scan/`，`/cdn-preview/scan/…` 仍是 404；前端要從 dev 讀取需另改 Worker。
 
 ## 9. 每個入口的未登入驗法與預期結果
 
