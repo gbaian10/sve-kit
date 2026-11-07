@@ -19,7 +19,7 @@ exports only through `sve_carddb.export.read_api`, as `publish/` does.
 
 ```bash
 uv --directory scan sync                  # light: index, release, evaluation of exported models, tests
-uv --directory scan sync --group train    # adds PyTorch (CUDA 13.0 wheels) for training and export
+uv --directory scan sync --group train    # adds PyTorch (CUDA 13.2 wheels) for training and export
 uv --directory scan run pytest            # what CI runs; needs no GPU and no private data
 ```
 
