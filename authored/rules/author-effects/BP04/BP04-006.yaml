@@ -1,0 +1,30 @@
+cards:
+  BP04-006:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - ignore_ward:
+                "on": this
+      - evolve_time:
+          do:
+            - buff:
+                hp: &id001
+                  count:
+                    who: self
+                    zone: hand
+                "on": this
+                power: *id001
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

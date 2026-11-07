@@ -1,0 +1,39 @@
+cards:
+  BP09-056:
+    abilities:
+      - face: 1
+        keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 6
+                who: self
+            - draw:
+                n: 3
+          "on":
+            phase:
+              which: end
+              whose: self
+        face: 1
+        line: 2
+      - face: 2
+        keywords:
+          - storm
+        line: 1
+      - face: 2
+        line: 2
+        static:
+          effects:
+            - ignore_ward:
+                "on": this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
