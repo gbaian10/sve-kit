@@ -1521,19 +1521,21 @@ export class SearchIndex {
     )
   }
 
-  recent(ids: readonly string[]): readonly RecentSummary[] {
-    return ids.slice(0, 20).map((printingId) => {
+  recent(ids: readonly string[], by?: "card-no"): readonly RecentSummary[] {
+    return ids.slice(0, 20).map((id) => {
+      const wanted = by === "card-no" ? normalizeText(id) : id
+      const column = by === "card-no" ? this.printings.flat : this.printings.id
       for (let p = 0; p < this.printings.id.length; p += 1) {
-        if (this.pool.get(this.printings.id[p] ?? 0) !== printingId) continue
+        if (this.pool.get(column[p] ?? 0) !== wanted) continue
         const summary = this.printings.summary[p] ?? 0
         if (summary)
           return {
-            printingId,
+            printingId: this.pool.get(this.printings.id[p] ?? 0),
             state: "available",
             summary: this.summaries.row(summary - 1) as unknown as CardSummary,
           } as const
       }
-      return { printingId, state: "not-in-edition" } as const
+      return { printingId: id, state: "not-in-edition" } as const
     })
   }
 

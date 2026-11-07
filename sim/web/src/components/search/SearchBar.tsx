@@ -1,5 +1,7 @@
+import { Camera } from "lucide-react"
 import { type ChangeEvent, type KeyboardEvent, type ReactNode, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router"
 
 import { cn } from "../ui/cn"
 
@@ -22,6 +24,8 @@ export interface SearchBarProps {
   readonly onToggleFilters?: () => void
   /** Rendered after the filter button: the current result count. */
   readonly summary?: ReactNode
+  /** Offer the card scanner where the clear button sits while the box is empty. */
+  readonly scanEntry?: boolean
 }
 
 // Design 04: 44px input, radius 12, surface-1 with a 1px border; the filter button beside it.
@@ -40,6 +44,7 @@ export function SearchBar({
   filtersId,
   onToggleFilters,
   summary,
+  scanEntry = false,
 }: SearchBarProps) {
   const { t } = useTranslation()
   const filtersActive = filtersOpen || (filterCount ?? 0) > 0
@@ -85,6 +90,16 @@ export function SearchBar({
             "[&::-webkit-search-cancel-button]:hidden",
           )}
         />
+        {scanEntry && value === "" && (
+          <Link
+            to="/cards/scan"
+            aria-label={t("search.scan")}
+            title={t("search.scan")}
+            className="absolute right-1 flex size-9 items-center justify-center rounded-control text-text-2 hover:bg-surface-2"
+          >
+            <Camera className="size-5" aria-hidden="true" />
+          </Link>
+        )}
         {value !== "" && (
           <button
             type="button"

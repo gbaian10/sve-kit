@@ -66,3 +66,37 @@ it.each([
   await renderInRouter(<Harness />, { language })
   expect(screen.getByRole("button", { name: label })).toHaveTextContent(label)
 })
+
+function TypingHarness({ scanEntry }: { readonly scanEntry: boolean }) {
+  const [value, setValue] = useState("")
+  const inputRef = useRef<HTMLInputElement | null>(null)
+  return (
+    <SearchBar
+      value={value}
+      onChange={setValue}
+      onKeyDown={() => {}}
+      onFocus={() => {}}
+      onBlur={() => {}}
+      inputRef={inputRef}
+      listId="suggestions"
+      expanded={false}
+      scanEntry={scanEntry}
+    />
+  )
+}
+
+it("offers the card scanner where the clear button sits while the box is empty", async () => {
+  const { router } = await renderInRouter(<TypingHarness scanEntry />)
+  const scan = screen.getByRole("link", { name: "拍卡辨識" })
+  expect(scan).toHaveAttribute("href", "/cards/scan")
+  await userEvent.type(screen.getByRole("combobox"), "ローズ")
+  expect(screen.queryByRole("link", { name: "拍卡辨識" })).not.toBeInTheDocument()
+  await userEvent.click(screen.getByRole("button", { name: "清除" }))
+  await userEvent.click(screen.getByRole("link", { name: "拍卡辨識" }))
+  expect(router.state.location.pathname).toBe("/cards/scan")
+})
+
+it("leaves the scanner out where the page does not ask for it", async () => {
+  await renderInRouter(<TypingHarness scanEntry={false} />)
+  expect(screen.queryByRole("link", { name: "拍卡辨識" })).not.toBeInTheDocument()
+})

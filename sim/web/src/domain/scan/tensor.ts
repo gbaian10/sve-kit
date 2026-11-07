@@ -1,6 +1,6 @@
-type Point = readonly [number, number]
+export type Point = readonly [number, number]
 /** Card corners in image pixels: top left, top right, bottom right, bottom left as seen. */
-type Quad = readonly [Point, Point, Point, Point]
+export type Quad = readonly [Point, Point, Point, Point]
 
 export interface Detection {
   /** Card-centre confidence, 0–1. */

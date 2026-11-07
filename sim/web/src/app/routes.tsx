@@ -10,6 +10,7 @@ import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
 import { NotFoundPage } from "../pages/not-found/NotFoundPage"
 import { ScanModelsPage } from "../pages/scan/ScanModelsPage"
+import { ScanPage } from "../pages/scan/ScanPage"
 import { SetsPage } from "../pages/sets/SetsPage"
 import { AppShell } from "./AppShell"
 
@@ -24,6 +25,7 @@ export const routes: RouteObject[] = [
       { path: "cards", Component: CardsPage },
       { path: "cards/_provisional/:intId", Component: CardPage },
       { path: "cards/unimplemented", Component: NotFoundPage },
+      { path: "cards/scan", Component: ScanPage },
       { path: "cards/scan/models", Component: ScanModelsPage },
       { path: "cards/:cardNo/:slug?", Component: CardPage },
       { path: "sets", Component: SetsPage },

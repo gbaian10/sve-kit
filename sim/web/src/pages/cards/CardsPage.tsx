@@ -571,6 +571,7 @@ export function CardsPage() {
         onClearAll={() => {
           commit(DEFAULT_QUERY)
         }}
+        scanEntry
         search={{
           value: input,
           onChange: (value) => {

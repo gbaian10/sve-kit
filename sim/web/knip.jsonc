@@ -32,8 +32,6 @@
     "scripts/fixture/construction.ts",
     "scripts/fixture/cards.ts",
     "scripts/fixture/view.ts",
-    // The card scanner's shared engine; the scan screens (#1843, #1844) import it. Remove this line then.
-    "src/pages/scan/engine.ts!",
   ],
   // knip 6.38 does not know Bun's newer `bun check` and `bun fmt` commands and reads them as binaries.
   "ignoreBinaries": ["check", "fmt"],

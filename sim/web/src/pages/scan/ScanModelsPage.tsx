@@ -17,8 +17,7 @@ import {
 } from "../../data"
 import { type ScanDownloadRun, scanDownloadsFor, useScanDownloads } from "./downloads"
 import { closeScanEngine } from "./engine"
-
-const megabytes = (bytes: number) => (bytes / 1048576).toFixed(1)
+import { megabytes } from "./scan-hooks"
 
 const VERSION_PREFIX: Partial<Record<ScanPart, string>> = { det: "det-", rec: "rec-" }
 
@@ -74,7 +73,7 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 pt-4 pb-6">
       <Link
-        to="/cards"
+        to="/cards/scan"
         className="flex items-center gap-1 self-start text-14 text-text-2 hover:text-text-1"
       >
         <ChevronLeft className="size-4" aria-hidden="true" /> {t("scan.models.back")}

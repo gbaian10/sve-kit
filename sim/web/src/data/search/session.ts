@@ -113,7 +113,7 @@ export interface SearchChannel {
   search(query: SearchQuery): void
   view(query: SearchQuery, remember?: boolean): void
   suggest(text: string, edition: Region, limit?: number): void
-  recent(printingIds: readonly string[], edition: Region): void
+  recent(printingIds: readonly string[], edition: Region, by?: "card-no"): void
   releases(edition: Region): void
   count(query: SearchQuery): void
   dispose(): void
@@ -160,9 +160,9 @@ class Channel implements SearchChannel {
   suggest(text: string, edition: Region, limit = 8): void {
     this.submit({ kind: "suggest", text, limit }, { state: { ...DEFAULT_QUERY, text }, edition })
   }
-  recent(printingIds: readonly string[], edition: Region): void {
+  recent(printingIds: readonly string[], edition: Region, by?: "card-no"): void {
     this.submit(
-      { kind: "recent", printingIds: printingIds.slice(0, 20) },
+      { kind: "recent", printingIds: printingIds.slice(0, 20), ...(by ? { by } : {}) },
       { state: DEFAULT_QUERY, edition },
     )
   }

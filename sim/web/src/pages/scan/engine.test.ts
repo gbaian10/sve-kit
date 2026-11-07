@@ -1,10 +1,10 @@
 import type * as Ort from "onnxruntime-web/wasm"
-import { describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it } from "vitest"
 
 import { createScanModelStore, SCAN_PARTS } from "../../data/scan-models"
 import { memoryCache } from "../../test-utils/cache"
 import { fakeScanCdn, RUNTIME, SCAN_BASE } from "../../test-utils/scan-publication"
-import { closeScanEngine, createScanEngine, openScanEngine } from "./engine"
+import { closeScanEngine, openScanEngine } from "./engine"
 
 interface Run {
   readonly model: string
@@ -79,15 +79,28 @@ async function installedModels() {
   return store.load("jp")
 }
 
+/** The shared engine for JP, built from the stored models with a stand-in runtime. */
+async function engineWith(runs: Run[] = [], life = { created: 0, released: 0, failOn: "" }) {
+  const models = await installedModels()
+  return openScanEngine("jp", undefined, {
+    load: () => Promise.resolve(models),
+    runtime: () => Promise.resolve(fakeOrt(runs, life) as unknown as typeof Ort),
+  })
+}
+
+afterEach(() => {
+  closeScanEngine()
+})
+
 describe("scan engine", () => {
   it("hands the stored runtime to ONNX Runtime and reads the models' conventions from the manifest", async () => {
     const runs: Run[] = []
     const ort = fakeOrt(runs)
-    const engine = await createScanEngine(
-      "jp",
-      await installedModels(),
-      ort as unknown as typeof Ort,
-    )
+    const models = await installedModels()
+    const engine = await openScanEngine("jp", undefined, {
+      load: () => Promise.resolve(models),
+      runtime: () => Promise.resolve(ort as unknown as typeof Ort),
+    })
     expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIME.bytes)
     expect(ort.env.wasm["numThreads"]).toBe(1)
     expect(engine.cardSize).toEqual({ width: 224, height: 312 })
@@ -98,11 +111,7 @@ describe("scan engine", () => {
 
   it("finds cards on the finder's square input", async () => {
     const runs: Run[] = []
-    const engine = await createScanEngine(
-      "jp",
-      await installedModels(),
-      fakeOrt(runs) as unknown as typeof Ort,
-    )
+    const engine = await engineWith(runs)
     const found = await engine.detect(new Uint8ClampedArray(256 * 256 * 4), 0.5)
     expect(runs[0]?.dims).toEqual([1, 3, 256, 256])
     expect(found).toHaveLength(1)
@@ -111,11 +120,7 @@ describe("scan engine", () => {
 
   it("embeds every sample, and its 180° turn when asked, in one batch and in order", async () => {
     const runs: Run[] = []
-    const engine = await createScanEngine(
-      "jp",
-      await installedModels(),
-      fakeOrt(runs) as unknown as typeof Ort,
-    )
+    const engine = await engineWith(runs)
     const card = (first: number, last: number) => {
       const pixels = new Uint8ClampedArray(224 * 312 * 4)
       pixels[0] = first
@@ -135,11 +140,7 @@ describe("scan engine", () => {
   })
 
   it("matches within the picked classes and judges the best card by the recogniser's calibration", async () => {
-    const engine = await createScanEngine(
-      "jp",
-      await installedModels(),
-      fakeOrt([]) as unknown as typeof Ort,
-    )
+    const engine = await engineWith()
     const elfLike = Float32Array.from([0.9, 0.3, 0, 0])
     const all = engine.match([elfLike], [], 3)
     expect(all.map((match) => match.card.no)).toEqual(["BP01-001", "BP01-002", "BP01-003"])
@@ -151,11 +152,7 @@ describe("scan engine", () => {
 
   it("releases its model sessions once running work finishes, and refuses work afterwards", async () => {
     const life = { created: 0, released: 0, failOn: "" }
-    const engine = await createScanEngine(
-      "jp",
-      await installedModels(),
-      fakeOrt([], life) as unknown as typeof Ort,
-    )
+    const engine = await engineWith([], life)
     const running = engine.embed([{ pixels: new Uint8ClampedArray(224 * 312 * 4) }])
     engine.release()
     expect(life.released).toBe(0)
@@ -167,9 +164,7 @@ describe("scan engine", () => {
 
   it("frees the first session when the second model fails to load", async () => {
     const life = { created: 0, released: 0, failOn: "det" }
-    await expect(
-      createScanEngine("jp", await installedModels(), fakeOrt([], life) as unknown as typeof Ort),
-    ).rejects.toThrow("bad model")
+    await expect(engineWith([], life)).rejects.toThrow("bad model")
     expect(life).toMatchObject({ created: 1, released: 1 })
   })
 

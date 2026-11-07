@@ -16,7 +16,7 @@ import type { Region } from "../../domain/search"
 // and compiled once. It runs on the CPU build of ONNX Runtime with one thread: the site is not
 // cross-origin isolated, so worker threads are unavailable anyway.
 
-export interface ScanSample {
+interface ScanSample {
   /** RGBA pixels of a straightened card, `rec.width` × `rec.height`. */
   readonly pixels: Uint8ClampedArray
   /** Also read it turned 180°, for cards facing the other way. */
@@ -43,7 +43,7 @@ export interface ScanEngine {
 
 export type ScanEngineStage = "reading" | "starting"
 
-export async function createScanEngine(
+async function createScanEngine(
   edition: Region,
   models: InstalledScanModels,
   ort: typeof Ort,
@@ -180,7 +180,6 @@ function drop(engine: Promise<ScanEngine>): void {
 /**
  * The page's engine for an edition; built once from the models on this device. Opening another
  * edition releases the previous engine.
- * @public 待接：the scan screens (#1843 single card, #1844 deck photo) open it.
  */
 export function openScanEngine(
   edition: Region,
