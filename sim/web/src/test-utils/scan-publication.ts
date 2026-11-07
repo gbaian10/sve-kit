@@ -16,7 +16,7 @@ const RUNTIME_BYTES: Record<ScanBackend, Uint8Array> = {
 }
 const RUNTIME_FILES: Record<ScanBackend, string> = {
   cpu: "ort-wasm-simd-threaded.wasm",
-  webgpu: "ort-wasm-simd-threaded.jsep.wasm",
+  webgpu: "ort-wasm-simd-threaded.asyncify.wasm",
 }
 const VERSION = "1.31.1"
 export const RUNTIMES: Readonly<Record<ScanBackend, ScanRuntimeBinary>> = {
