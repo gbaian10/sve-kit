@@ -10,19 +10,11 @@ cards:
             - create:
                 n: 1
                 to: ex
-                token: 沈黙の魔将
-            - create:
-                n: 1
-                to: ex
-                token: サタンズサーヴァント
-            - create:
-                n: 1
-                to: ex
-                token: 辺獄の悪鬼
-            - create:
-                n: 1
-                to: ex
-                token: アスタロトの宣告
+                token:
+                  - 沈黙の魔将
+                  - サタンズサーヴァント
+                  - 辺獄の悪鬼
+                  - アスタロトの宣告
         line: 1
     admission: light
     meta:
