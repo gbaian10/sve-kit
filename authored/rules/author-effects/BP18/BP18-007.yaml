@@ -1,0 +1,67 @@
+cards:
+  BP18-007:
+    abilities:
+      - line: 1
+        play:
+          playable_from:
+            if:
+              cmp:
+                left:
+                  history_count:
+                    event: played
+                    who: self
+                    window: this_turn
+                op: ge
+                right: 3
+            zone: cemetery
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to: victim
+          on:
+            left_field:
+              during:
+                turn: self
+              ref: this
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 1
+                to: victim
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      ref: this
+                      from: hand
+                then:
+                  - move:
+                      position: bottom
+                      ref: this
+                      to: deck
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set
