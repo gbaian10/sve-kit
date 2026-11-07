@@ -16,6 +16,8 @@ export interface ClassQuickBarProps {
   readonly onToggle: (code: string) => void
   /** Test hook: decides whether the labelled row fits; defaults to measuring an off-screen copy. */
   readonly fits?: (labelledWidth: number, available: number) => boolean
+  /** Grey out the classes left out once any is picked (the scanner's filter); the search keeps colour. */
+  readonly dimOthers?: boolean
 }
 
 const defaultFits = (labelled: number, available: number) => labelled <= available
@@ -28,6 +30,7 @@ export function ClassQuickBar({
   selected,
   onToggle,
   fits = defaultFits,
+  dimOthers = false,
 }: ClassQuickBarProps) {
   const container = useRef<HTMLDivElement>(null)
   const probe = useRef<HTMLDivElement>(null)
@@ -50,6 +53,7 @@ export function ClassQuickBar({
     const style = classStyle(item.code === "neutral" ? null : item.code)
     const known = item.code === "neutral" || style !== "neutral"
     const pressed = selected.includes(item.code)
+    const grey = dimOthers && selected.length > 0 && !pressed
     return (
       <button
         key={item.code}
@@ -71,6 +75,7 @@ export function ClassQuickBar({
           pressed
             ? "border-text-1 bg-surface-3 text-text-1 ring-1 ring-text-1 ring-inset"
             : "border-border bg-surface-1 text-text-2 hover:bg-surface-2",
+          grey && "text-text-3 grayscale",
         )}
       >
         {known ? (

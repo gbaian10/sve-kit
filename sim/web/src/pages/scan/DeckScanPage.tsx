@@ -545,6 +545,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
             classes={classes}
             selected={picked}
             onToggle={toggleClass}
+            dimOthers
           />
         )}
         <p className="text-12 text-text-3">
@@ -876,14 +877,14 @@ function ResultGrid({
       </span>
     </button>
   )
+  // The yellow border already says it is unsure; the grey name is only the best guess.
   const maybe = (card: ScanCard | undefined) => (
     <>
-      {t("scan.deck.unsureMark")}{" "}
-      <span className="font-normal text-text-3">
-        {t("scan.deck.maybe", { name: nameOf(resultOf(card), card) })}
-      </span>
+      <span className="text-text-3">{nameOf(resultOf(card), card)}</span>
+      <span className="sr-only">{t("scan.deck.unsureHidden")}</span>
     </>
   )
+
   let items: ReactNode[]
   if (view === "number")
     items = cards.map((card, at) => {
@@ -895,7 +896,7 @@ function ResultGrid({
         shown,
         card.status === "unsure" ? maybe(shown) : nameOf(resultOf(shown), shown),
         <>
-          <Badge at={at} status={colour(card.status)} /> {card.status !== "unsure" && shown?.no}
+          <Badge at={at} status={colour(card.status)} /> {shown?.no}
           {card.status === "guess" && t("scan.deck.guessSub", { gap: card.gap.toFixed(2) })}
         </>,
         card.status,
@@ -927,7 +928,9 @@ function ResultGrid({
           at,
           card.alts[0]?.card,
           maybe(card.alts[0]?.card),
-          <Badge at={at} status={colour("unsure")} />,
+          <>
+            <Badge at={at} status={colour("unsure")} /> {card.alts[0]?.card.no}
+          </>,
           "unsure",
         ),
       )

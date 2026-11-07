@@ -55,6 +55,26 @@ describe("ClassQuickBar", () => {
     expect(onToggle).toHaveBeenCalledWith("neutral")
   })
 
+  it("greys out the classes left out only when asked and something is picked", () => {
+    const bar = (selected: string[], dimOthers?: boolean) => (
+      <ClassQuickBar
+        label="職業"
+        classes={classes}
+        selected={selected}
+        onToggle={() => undefined}
+        fits={() => true}
+        {...(dimOthers ? { dimOthers } : {})}
+      />
+    )
+    const { rerender } = render(bar([], true))
+    expect(screen.getByRole("button", { name: "精靈" })).not.toHaveClass("grayscale")
+    rerender(bar(["royal"], true))
+    expect(screen.getByRole("button", { name: "精靈" })).toHaveClass("grayscale")
+    expect(screen.getByRole("button", { name: "皇家" })).not.toHaveClass("grayscale")
+    rerender(bar(["royal"]))
+    expect(screen.getByRole("button", { name: "精靈" })).not.toHaveClass("grayscale")
+  })
+
   it("draws an initial for a class the design has no icon for", () => {
     render(
       <ClassQuickBar

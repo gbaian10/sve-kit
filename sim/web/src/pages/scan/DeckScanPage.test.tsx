@@ -367,7 +367,7 @@ describe("DeckScanPage", () => {
     expect(within(counts).getAllByRole("button")[1]).toHaveTextContent("推測 0")
 
     // An unsure card: pick its second candidate, then remove another one.
-    await user.click(screen.getAllByRole("button", { name: /\?\?\? 可能是/u })[0] as HTMLElement)
+    await user.click(screen.getAllByRole("button", { name: /（不確定）/u })[0] as HTMLElement)
     const picker = await screen.findByRole("dialog", { name: "照片裡的這張是？" })
     const choices = within(picker)
       .getAllByRole("button")

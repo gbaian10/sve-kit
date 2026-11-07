@@ -873,17 +873,14 @@ export default {
         missing: "Not downloaded",
         downloading: "Downloading {{pct}}%",
       },
-      "runtime-webgpu": {
-        name: "Engine: WebGPU",
-        desc: "Runs on the graphics card, so it is faster; needs browser WebGPU support.",
+      runtime: {
+        name: "Engine",
+        desc: "Recognition runs on this device. Pick one; only the chosen engine downloads.",
+        unsupported: "Not supported in this browser",
+        other: "The other engine ({{engine}}) is also on this device: {{mb}} MB",
       },
-      "runtime-cpu": {
-        name: "Engine: CPU",
-        desc: "Runs on the processor; works in every browser, but is slower.",
-      },
-      useThis: "Use this engine",
-      inUse: "In use",
-      unsupported: "WebGPU is unavailable in this browser. Choose the CPU engine.",
+      "runtime-webgpu": { name: "WebGPU", desc: "Runs on the graphics card; faster" },
+      "runtime-cpu": { name: "CPU", desc: "Works in every browser; slower" },
       det: {
         name: "Card finder",
         desc: "Finds each card's four corners and straightens it. Deck photos use it to find every card at once.",
@@ -987,9 +984,8 @@ export default {
       guessRow: "{{cards}} guessed from the rest of the deck; confirm those with a gap ≤",
       gapLabel: "Largest gap to confirm",
       confirmAll: "Confirm all",
-      unsureMark: "???",
-      maybe: "maybe {{name}}",
       guessSub: " · guessed {{gap}}",
+      unsureHidden: " (unsure)",
       copies: "×{{count}}",
       share: {
         title: "Save as a deck or share",
