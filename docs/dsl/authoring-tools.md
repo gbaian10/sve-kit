@@ -321,7 +321,7 @@ EP／SEP 卡（種類 `ep`／`sep`）沒有卡片能力：EP、SEP 是玩家持�
 
 EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；多模板分配與進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
 
-回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱目前只接受單一區域的 Main／End 時點，並不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
+回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱接受單一區域的 Main／End 時點，以及下述融合事件與融合／打出共用事件；有效區本身不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 
 墓場的自身回場訂閱可寫 `auto: {zone: cemetery, on: {played: {who: self, sel: {kind: spell, class: ドラゴン}, during: {turn: self}}}, cost: {pp: 1}, do: [{move: {ref: this, to: field}}]}`。這個例子在自己回合、自己適正打出指定職業法術時擷取當時已在墓場的來源；該法術本文才送墓的來源不補觸發。多張來源各自待機、各自宣告及支付 PP；拒付或不足費用不回場，滿場時付款後沒有成功移動。墓場來源與場上來源共用打出篩選；本文對 `this` 的操作只准自身回場或移到持有者的 EX（墓場的打出與進場訂閱共用這個限制），其他操作、其他目的地、任意目標回場與一般事件欄位讀取維持原邊界。
 
@@ -330,6 +330,14 @@ EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用
 墓場入場觀測者的自身消滅費用可寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 侮蔑の絶傑・ガルミーユ}}}, cost: {banish_self: true}, targets: [...], do: [...]}`（BP08-068、Q1098）。目前只接受這個能力頭中的單一自身消滅費用；宣告是否支付、正式目標及原子付款沿用既有能力頭流程。拒付取消該次打出，本文不執行；每個墓場副本只支付自己的來源世代，來源已移區後不能改用新世代或另一張同名卡。這個例外不開放本文的 `banish: this`、打出觀測者、其他有效區或與其他費用組合；入場當下不在墓場的卡不補觸發（Q1081）。
 
 手牌的起動能力可用 `activate: {zone: hand, cost: {steps: [{pp: 1}, {self_to_ex: true}]}}` 表示「{コスト1}手札のこれをEXエリアに置く：…」（BP10-017、BP08-072）。本卡依一般移動規則從手牌放到持有者的 EX 並公開；`self_to_ex` 只接受 `zone: hand` 的非 Quick 起動費用；Quick、其他區域、自動能力的 `pay`、進化與打出費用都拒絕（Quick 候選尚未預檢 EX 空位）。
+
+融合用 `activate: {fusion: {sel: {who: self, zone: [hand, ex], trait: 財宝, orig_cost_ge: 1}, n: 1}, do: [...]}`，省略有效區時固定為手牌，也可明寫 `zone: hand`。沿用私有成本選材問題及原子付款：材料排除來源本身，手牌材料捨棄，EX 材料送墓，再把來源放到自己的 EX。EX 滿格時可先用 EX 材料騰出空位；整份付款失敗一併回復。本文的 `this` 精確跟隨該來源移入 EX 後的世代，原有的發動來源仍保留在能力紀錄。
+
+目前融合入口接受固定 `n: 1` 或 `upto: 2`，材料可依卡型、單一特徵、Token 與原始費用下限篩選；不接受 `any`、`result`、其他張數、Quick、額外成本、可選成本或模式宣告。`upto: 2` 的可選材料非空時至少選一張；沒有材料時可選零張，來源仍移入 EX，整個本文略過。這是融合的最低材料規則與零材料例外，依 [CR 1.28.0 §12.18](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，不能套用普通 `upto` 可任意選零的規則。
+
+融合事件用 `auto: {on: {fused: {who: self, material: {trait: 財宝}}}, do: [...]}`，可在場上或 EX 訂閱。一次融合不論材料張數只產生一次事實，使用實際材料付款前凍結的特徵；來源本身的特徵不代替材料。融合與打出共用一條能力時寫 `on: {any_of: [{fused: {who: self, material: {trait: 財宝}}}, {played: {who: self, sel: {trait: 財宝}}}]}`，也可再加自己的 Main 時點。分支保留各自的事件快照時點，所有分支共用同一個能力實例與 `per_turn` 額度；只准這個所需組合，不能任意拼接其他事件或不同材料特徵。
+
+紋章達門檻後消滅與後續找牌仍走共用移動流程。Token 的存活區域採同一份 CR9.1.4 判斷：紋章只可留在 EX，法術 Token 只可留在 EX 或結算領域；移到其他區域後立即消去，再繼續本文，不把 Token 留在除外區。
 
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
 
