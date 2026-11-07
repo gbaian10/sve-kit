@@ -1,3 +1,5 @@
+import { lyingSideways, turnedQuarter } from "../../domain/scan/deck-detect"
+import { chooseReading } from "../../domain/scan/deck-read"
 import {
   finishKey,
   finishOf,
@@ -73,6 +75,8 @@ export class CameraScanner {
   private tracker: ScanTracker
   private readonly finish = new FinishSmoother()
   private readonly follower = new QuadFollower()
+  /** Which reading of a card lying across won last frame: the other one must lead to take over. */
+  private across = false
   private video: HTMLVideoElement | null = null
   private frame: HTMLElement | null = null
   private overlay: HTMLCanvasElement | null = null
@@ -234,11 +238,34 @@ export class CameraScanner {
         const canvases = this.canvasesFor(engine)
         const geometry = this.geometry(video)
         const { shown: box, found: quad } = await this.find(engine, canvases, video, geometry)
-        const pixels = quad
-          ? this.straighten(engine, canvases, video, quad)
-          : this.aimed(canvases, video, geometry)
-        const [upright, turned] = await engine.embed([{ pixels, turned: true }])
-        if (!this.isRunning() || engine !== this.engine || !upright || !turned) continue
+        const ordered = quad ? orderQuad(quad, this.sideways) : null
+        // A card lying across the chosen orientation (an opponent's card turned a quarter) is read
+        // both ways, like in a deck photo.
+        const across = ordered && lyingSideways(ordered) ? turnedQuarter(ordered) : null
+        const readings = [
+          ordered
+            ? this.straighten(engine, canvases, video, ordered)
+            : this.aimed(canvases, video, geometry),
+          ...(across ? [this.straighten(engine, canvases, video, across)] : []),
+        ]
+        const views = await engine.embed(
+          readings.map((reading) => ({ pixels: reading, turned: true })),
+        )
+        if (!this.isRunning() || engine !== this.engine) continue
+        let pick = 0
+        if (views.length === 4) {
+          const upright = engine.match(views.slice(0, 2), this.classes, CANDIDATES)
+          const turned = engine.match(views.slice(2, 4), this.classes, CANDIDATES)
+          // Switching readings looks like a new card to the tracker, so the reading that won last
+          // frame stays unless the other one leads it.
+          const [kept, other] = this.across ? [turned, upright] : [upright, turned]
+          const switches = chooseReading(kept, other) === "sideways"
+          pick = this.across !== switches ? 1 : 0
+        }
+        this.across = pick === 1
+        const [upright, turned] = views.slice(2 * pick, 2 * pick + 2)
+        const pixels = readings[pick]
+        if (!upright || !turned || !pixels) continue
         const smoothed = this.tracker.smooth([upright, turned])
         const matches = engine.match(smoothed, this.classes, CANDIDATES)
         const frame = this.tracker.step(upright, matches, performance.now(), (picks) =>
@@ -373,14 +400,16 @@ export class CameraScanner {
     return this.follower.follow(candidates)
   }
 
-  /** Straightens the found card; the source is cut and shrunk to about the card's output size first. */
+  /**
+   * Straightens the card at `ordered` (its top left, top right, bottom right, bottom left); the
+   * source is cut and shrunk to about the card's output size first.
+   */
   private straighten(
     engine: ScanEngine,
     canvases: Canvases,
     video: HTMLVideoElement,
-    quad: Quad,
+    ordered: Quad,
   ): Uint8ClampedArray {
-    const ordered = orderQuad(quad, this.sideways)
     const { width, height } = engine.cardSize
     const xs = ordered.map((p) => p[0])
     const ys = ordered.map((p) => p[1])
