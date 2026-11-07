@@ -1,6 +1,7 @@
 import type * as Ort from "onnxruntime-web/wasm"
 
 import { appScanModels, type InstalledScanModels, type ScanModelStore } from "../../data"
+import { createIndexDots } from "../../domain/scan/dots"
 import type { DetModel } from "../../domain/scan/manifest"
 import {
   type CardMatch,
@@ -95,6 +96,7 @@ async function createScanEngine(
     hub: models.index.hub,
     cards: models.index.cards,
     scoring: rec.scoring,
+    dots: createIndexDots(models.index.vectors, rec.dim),
   }
   let mask: { readonly key: string; readonly rows: Uint8Array | null } = { key: "", rows: null }
   return {
