@@ -114,7 +114,7 @@ python -m sve_scan index rec-ft                                       # index/re
 
 ### 4. Corner finder
 
-The current model was trained in four stages, each continuing the previous one:
+The current model was trained in five stages, each continuing the previous one:
 
 ```bash
 python -m sve_scan det train det-a 15000 48                                    # synthetic scenes only
@@ -128,7 +128,10 @@ python -m sve_scan det-real-index realdet_deck.jsonl realdet_pokemon.jsonl det-l
 INIT=det-c REAL=realdet_deck.jsonl REAL_FRAC=0.4 LR=5e-4 REAL_P=0.3 TEXBANK=texbank.npz \
   REAL2_P=0.5 REALBANK=realbank.npz PROCBANK=procbank.npz WR_P=0.25 HS_P=0.35 MISC_P=0.15 \
   python -m sve_scan det train det-d 4000 48
-python -m sve_scan det export det-d det_det-d.w8.onnx
+INIT=det-d REAL=realdet_deck.jsonl REAL_FRAC=0.4 LR=5e-4 REAL_P=0.3 TEXBANK=texbank.npz \
+  REAL2_P=0.5 REALBANK=realbank.npz PROCBANK=procbank.npz WR_P=0.25 HS_P=0.35 MISC_P=0.15 \
+  ZOOM_P=0.12 INSIDE_P=0.3 python -m sve_scan det train det-e 4000 48
+python -m sve_scan det export det-e det_det-e.w8.onnx
 ```
 
 - Stage 3 boxes run about 4% inside the card edge, so labelling grows them by 1.04 (the `:1.04` in `DETS`); stage
@@ -137,6 +140,12 @@ python -m sve_scan det export det-d det_det-d.w8.onnx
   and not adopted; any detector set can make labels
 - With `REC_TAG=<rec tag>` training ends with end-to-end checks on the maintainer's phone saves and bursts
 - The best offline corner error is not the best model on the web page; judge a new model by the web deck reader
+- Stage 5 adds close-ups (`ZOOM_P`: the card fills 70-160% of the view) and negatives cut from inside a card
+  (`INSIDE_P`). Without them, deck photos with a few large cards got small boxes on frames in the card art.
+  Twice those shares (0.25 / 0.6) fixed large cards slightly better but lost far small cards in the side-seat
+  bursts (found .973 → .753 at threshold 0.35; stage 5 as above: .918)
+- Training skips a batch whose input or loss is not finite: close cameras can warp a few pixels to NaN, and
+  one NaN batch through the forward pass leaves NaN in the BatchNorm statistics
 - The model's four corners are clockwise from an arbitrary start; every client orders them (artifact format)
 
 ### 5. Evaluation
