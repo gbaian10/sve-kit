@@ -8,6 +8,8 @@ import type { ScanEngine } from "./engine"
 // without a camera lives in domain/scan; this file only moves pixels between video and canvas.
 
 const FIND_THRESHOLD = 0.5
+/** The finder looks at a square this much larger than the aiming frame, so a loosely aimed card still fits. */
+const FIND_REGION = 1.6
 /** How strongly a detection off the frame centre loses to one in the middle. */
 const CENTRE_PULL = 0.6
 const FRAME_GAP_MS = 30
@@ -40,8 +42,23 @@ function canvas(width: number, height: number) {
   return { element, context }
 }
 
+interface Canvases {
+  readonly finder: ReturnType<typeof canvas>
+  readonly work: ReturnType<typeof canvas>
+  readonly card: ReturnType<typeof canvas>
+}
+
+/** Thrown by `start` when `stop` came first: the late camera has already been closed again. */
+export class CameraStopped extends Error {
+  constructor() {
+    super("camera was stopped while starting")
+    this.name = "CameraStopped"
+  }
+}
+
 export class CameraScanner {
-  private engine: ScanEngine
+  /** Null while another edition's engine loads: the loop waits instead of using a released one. */
+  private engine: ScanEngine | null
   private tracker: ScanTracker
   private video: HTMLVideoElement | null = null
   private frame: HTMLElement | null = null
@@ -53,15 +70,13 @@ export class CameraScanner {
   private paused = false
   private sideways = false
   private classes: readonly string[] = []
-  private readonly finder: ReturnType<typeof canvas>
-  private readonly work = canvas(1, 1)
-  private readonly card: ReturnType<typeof canvas>
+  private canvases: Canvases | null = null
+  /** Bumped by every start and stop, so a start that finishes after a stop knows it is stale. */
+  private generation = 0
 
   constructor(engine: ScanEngine) {
     this.engine = engine
     this.tracker = new ScanTracker(engine.index.dim)
-    this.finder = canvas(engine.det.input, engine.det.input)
-    this.card = canvas(engine.cardSize.width, engine.cardSize.height)
   }
 
   attach(video: HTMLVideoElement, frame: HTMLElement, overlay: HTMLCanvasElement): void {
@@ -70,11 +85,17 @@ export class CameraScanner {
     this.overlay = overlay
   }
 
+  /** Stops using the current engine before it is released (another edition is loading). */
+  detach(): void {
+    this.engine = null
+  }
+
   /** Swaps in another edition's engine without stopping the camera. */
   setEngine(engine: ScanEngine): void {
     if (engine === this.engine) return
     this.engine = engine
     this.tracker = new ScanTracker(engine.index.dim)
+    this.canvases = null
   }
 
   setClasses(classes: readonly string[]): void {
@@ -97,6 +118,8 @@ export class CameraScanner {
   async start(): Promise<number> {
     const video = this.video
     if (!video) throw new Error("camera is not attached")
+    this.generation += 1
+    const generation = this.generation
     const stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: { ideal: "environment" },
@@ -105,9 +128,28 @@ export class CameraScanner {
       },
       audio: false,
     })
+    const close = () => {
+      for (const track of stream.getTracks()) track.stop()
+      if (video.srcObject === stream) video.srcObject = null
+    }
+    // Permission can take long; the page may have been left meanwhile.
+    if (generation !== this.generation) {
+      close()
+      throw new CameraStopped()
+    }
     this.stream = stream
     video.srcObject = stream
-    await video.play()
+    try {
+      await video.play()
+    } catch (error) {
+      close()
+      this.stream = null
+      throw error
+    }
+    if (generation !== this.generation) {
+      close()
+      throw new CameraStopped()
+    }
     const track = stream.getVideoTracks()[0] ?? null
     this.track = track
     // Some browsers (older Firefox) have no getCapabilities; they just get no optical zoom.
@@ -146,8 +188,10 @@ export class CameraScanner {
   }
 
   stop(): void {
+    this.generation += 1
     this.running = false
     for (const track of this.stream?.getTracks() ?? []) track.stop()
+    if (this.video && this.video.srcObject === this.stream) this.video.srcObject = null
     this.stream = null
     this.track = null
   }
@@ -156,15 +200,18 @@ export class CameraScanner {
     this.running = true
     while (this.isRunning()) {
       const video = this.video
-      if (this.paused || !video || video.videoWidth === 0) {
+      const engine = this.engine
+      if (this.paused || !video || video.videoWidth === 0 || !engine) {
         await new Promise((resolve) => setTimeout(resolve, IDLE_MS))
         continue
       }
-      const engine = this.engine
       try {
+        const canvases = this.canvasesFor(engine)
         const geometry = this.geometry(video)
-        const quad = await this.find(video, geometry)
-        const pixels = quad ? this.straighten(video, quad) : this.aimed(video, geometry)
+        const quad = await this.find(engine, canvases, video, geometry)
+        const pixels = quad
+          ? this.straighten(engine, canvases, video, quad)
+          : this.aimed(canvases, video, geometry)
         const [upright, turned] = await engine.embed([{ pixels, turned: true }])
         if (!this.isRunning() || engine !== this.engine || !upright || !turned) continue
         const smoothed = this.tracker.smooth([upright, turned])
@@ -175,7 +222,7 @@ export class CameraScanner {
         this.draw(geometry, quad, frame.status === "ok")
         onFrame({ ...frame, found: quad !== null })
       } catch (error) {
-        // An engine replaced mid-frame (another edition) refuses work; the next frame uses the new one.
+        // Only a frame begun on an engine that was detached since may fail quietly.
         if (engine === this.engine) throw error
       }
       await new Promise((resolve) => setTimeout(resolve, FRAME_GAP_MS))
@@ -185,6 +232,15 @@ export class CameraScanner {
   // A method, so the loop re-reads the flag that stop() clears while a frame is awaited.
   private isRunning(): boolean {
     return this.running
+  }
+
+  private canvasesFor(engine: ScanEngine): Canvases {
+    this.canvases ??= {
+      finder: canvas(engine.det.input, engine.det.input),
+      work: canvas(1, 1),
+      card: canvas(engine.cardSize.width, engine.cardSize.height),
+    }
+    return this.canvases
   }
 
   private geometry(video: HTMLVideoElement): Geometry {
@@ -239,15 +295,19 @@ export class CameraScanner {
   }
 
   /** The card nearest the aiming frame's centre, in video pixels. */
-  private async find(video: HTMLVideoElement, g: Geometry): Promise<Quad | null> {
-    const engine = this.engine
-    const side = Math.max(g.width, g.height) * engine.det.grow
+  private async find(
+    engine: ScanEngine,
+    canvases: Canvases,
+    video: HTMLVideoElement,
+    g: Geometry,
+  ): Promise<Quad | null> {
+    const side = Math.max(g.width, g.height) * FIND_REGION
     const x0 = g.x + g.width / 2 - side / 2
     const y0 = g.y + g.height / 2 - side / 2
     const size = engine.det.input
-    this.copy(this.finder, video, x0, y0, side, side)
+    this.copy(canvases.finder, video, x0, y0, side, side)
     const found = await engine.detect(
-      this.finder.context.getImageData(0, 0, size, size).data,
+      canvases.finder.context.getImageData(0, 0, size, size).data,
       FIND_THRESHOLD,
     )
     let best: { readonly quad: Quad; readonly key: number } | null = null
@@ -263,9 +323,14 @@ export class CameraScanner {
   }
 
   /** Straightens the found card; the source is cut and shrunk to about the card's output size first. */
-  private straighten(video: HTMLVideoElement, quad: Quad): Uint8ClampedArray {
+  private straighten(
+    engine: ScanEngine,
+    canvases: Canvases,
+    video: HTMLVideoElement,
+    quad: Quad,
+  ): Uint8ClampedArray {
     const ordered = orderQuad(quad, this.sideways)
-    const { width, height } = this.engine.cardSize
+    const { width, height } = engine.cardSize
     const xs = ordered.map((p) => p[0])
     const ys = ordered.map((p) => p[1])
     const bx = Math.floor(Math.min(...xs)) - 2
@@ -279,22 +344,22 @@ export class CameraScanner {
       }),
     )
     const k = Math.min(1, (Math.max(width, height) * 1.15) / longest)
-    this.work.element.width = Math.max(1, Math.ceil(bw * k))
-    this.work.element.height = Math.max(1, Math.ceil(bh * k))
-    this.copy(this.work, video, bx, by, bw, bh)
-    const source = this.work.context.getImageData(
+    canvases.work.element.width = Math.max(1, Math.ceil(bw * k))
+    canvases.work.element.height = Math.max(1, Math.ceil(bh * k))
+    this.copy(canvases.work, video, bx, by, bw, bh)
+    const source = canvases.work.context.getImageData(
       0,
       0,
-      this.work.element.width,
-      this.work.element.height,
+      canvases.work.element.width,
+      canvases.work.element.height,
     )
     const local = ordered.map(([x, y]): Point => [(x - bx) * k, (y - by) * k]) as unknown as Quad
     return warpQuad(source, local, width, height)
   }
 
   /** No card found: read whatever is inside the aiming frame. */
-  private aimed(video: HTMLVideoElement, g: Geometry): Uint8ClampedArray {
-    const { element, context } = this.card
+  private aimed(canvases: Canvases, video: HTMLVideoElement, g: Geometry): Uint8ClampedArray {
+    const { element, context } = canvases.card
     context.save()
     if (this.sideways) {
       context.translate(element.width, 0)

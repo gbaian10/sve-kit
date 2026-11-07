@@ -1,4 +1,4 @@
-import type { Point, Quad } from "./tensor"
+import { orderCorners, type Point, type Quad } from "./tensor"
 
 export interface Pixels {
   readonly width: number
@@ -40,18 +40,7 @@ function homography(src: Quad, dst: Quad): number[] {
  * its side, so its own top edge is the left edge on screen.
  */
 export function orderQuad(quad: readonly Point[], sideways = false): Quad {
-  const cx = quad.reduce((sum, p) => sum + p[0], 0) / 4
-  const cy = quad.reduce((sum, p) => sum + p[1], 0) / 4
-  const byAngle = [...quad].sort(
-    (a, b) => Math.atan2(a[1] - cy, a[0] - cx) - Math.atan2(b[1] - cy, b[0] - cx),
-  )
-  let first = 0
-  for (let i = 1; i < 4; i += 1) {
-    const p = byAngle[i] as Point
-    const q = byAngle[first] as Point
-    if (p[0] + p[1] < q[0] + q[1]) first = i
-  }
-  const o = [...byAngle.slice(first), ...byAngle.slice(0, first)] as [Point, Point, Point, Point]
+  const o = orderCorners(quad)
   return sideways ? [o[3], o[0], o[1], o[2]] : o
 }
 

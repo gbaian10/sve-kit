@@ -7,6 +7,7 @@ const card = (id: string): ScanCard => ({
   no: `BP01-${id}`,
   cardId: id,
   imageId: 1,
+  face: 0,
   name: id,
   artGroup: "a",
   classCode: "",

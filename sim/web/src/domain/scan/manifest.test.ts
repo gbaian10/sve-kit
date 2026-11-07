@@ -27,7 +27,7 @@ const jp = (manifest: Mutable) => part(part(manifest, "index"), "jp")
 describe("scan manifest", () => {
   it("reads both models, their scoring and each edition's index", () => {
     const manifest = parseScanManifest(scanPublication().manifest)
-    expect(manifest.det).toMatchObject({ version: 1, input: 256, stride: 8, grow: 1.6 })
+    expect(manifest.det).toMatchObject({ version: 1, input: 256, stride: 8, grow: 1 })
     expect(manifest.rec).toMatchObject({
       version: 1,
       height: 312,

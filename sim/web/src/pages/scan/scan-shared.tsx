@@ -21,7 +21,7 @@ export function ClassColumn({
   const classes = useScanClasses()
   if (!classes) return null
   return (
-    <div role="group" aria-label={t("search.classes")} className="flex flex-col gap-1.5">
+    <div role="group" aria-label={t("search.classes")} className="flex flex-col">
       {classes.map((item) => {
         const on = picked.includes(item.code)
         return (
@@ -34,17 +34,22 @@ export function ClassColumn({
             onClick={() => {
               onToggle(item.code)
             }}
-            className={cn(
-              "flex size-9 items-center justify-center rounded-full backdrop-blur transition",
-              on ? "bg-camera-chip-on ring-2 ring-camera-text" : "bg-camera-chip",
-              picked.length > 0 && !on && "opacity-60",
-            )}
+            // A 44px target around the 36px icon (design §9 touch size).
+            className="flex size-11 items-center justify-center"
           >
-            <img
-              src={CLASS_ICON[classStyle(item.code === NEUTRAL_CLASS ? null : item.code)]}
-              alt=""
-              className="size-5.5 object-contain"
-            />
+            <span
+              className={cn(
+                "flex size-9 items-center justify-center rounded-full backdrop-blur transition",
+                on ? "bg-camera-chip-on ring-2 ring-camera-text" : "bg-camera-chip",
+                picked.length > 0 && !on && "opacity-60",
+              )}
+            >
+              <img
+                src={CLASS_ICON[classStyle(item.code === NEUTRAL_CLASS ? null : item.code)]}
+                alt=""
+                className="size-5.5 object-contain"
+              />
+            </span>
           </button>
         )
       })}

@@ -5,11 +5,12 @@ import {
   Download,
   History,
   Lock,
+  LockOpen,
   RectangleHorizontal,
   RectangleVertical,
   ScanLine,
 } from "lucide-react"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router"
 
@@ -18,10 +19,16 @@ import { useRouteEdition } from "../../app/snapshot"
 import { CardImage } from "../../components/card/CardImage"
 import { Button } from "../../components/ui/Button"
 import { cn } from "../../components/ui/cn"
-import { appScanModels, type ImageIndex, SCAN_PARTS, type ScanModelStore } from "../../data"
+import {
+  appScanModels,
+  type ImageIndex,
+  SCAN_PARTS,
+  ScanModelError,
+  type ScanModelStore,
+} from "../../data"
 import { printingPath } from "../../domain/cardRoute"
-import { type CameraFrame, CameraScanner } from "./camera"
-import { openScanEngine, type ScanEngineStage } from "./engine"
+import { type CameraFrame, CameraScanner, CameraStopped } from "./camera"
+import { openScanEngine, scanEngineSources, type ScanEngineStage } from "./engine"
 import {
   classSummary,
   megabytes,
@@ -68,24 +75,46 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   const overlay = useRef<HTMLCanvasElement>(null)
   const [aimSize, setAimSize] = useState({ width: 0, height: 0 })
 
-  useEffect(
-    () => () => {
+  const sources = useMemo(() => scanEngineSources(store), [store])
+  // Cleared on unmount: a camera start still waiting for permission must not go on afterwards.
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
       scanner.current?.stop()
       scanner.current = null
-    },
-    [],
-  )
-  // The account menu's edition applies at once: swap in that edition's index.
+    }
+  }, [])
+  const fail = (cause: unknown) => {
+    scanner.current?.stop()
+    scanner.current = null
+    // Models missing for this edition (e.g. just switched to one not downloaded): offer the download.
+    if (cause instanceof ScanModelError && cause.kind === "missing") {
+      setError("")
+      setPhase("idle")
+      return
+    }
+    setError(cause instanceof Error ? cause.message : String(cause))
+    setPhase("error")
+  }
+  // The account menu's edition applies at once. The camera lets go of the old engine first, since
+  // opening another edition releases it, then picks up the new one.
+  const shownEdition = useRef(edition)
   useEffect(() => {
     const current = scanner.current
-    if (!current) return
-    void openScanEngine(edition).then(
+    if (!current || shownEdition.current === edition) return
+    shownEdition.current = edition
+    current.detach()
+    void openScanEngine(edition, undefined, sources).then(
       (engine) => {
-        current.setEngine(engine)
+        if (scanner.current === current) current.setEngine(engine)
       },
-      () => undefined,
+      (cause: unknown) => {
+        if (scanner.current === current) fail(cause)
+      },
     )
-  }, [edition])
+  }, [edition, sources])
   useEffect(() => scanner.current?.setClasses(picked), [picked])
   useEffect(() => scanner.current?.setSideways(sideways), [sideways])
 
@@ -111,25 +140,34 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
   }, [sideways])
 
   const start = async () => {
-    if (!video.current || !aim.current || !overlay.current) return
+    const [videoElement, aimElement, overlayElement] = [video.current, aim.current, overlay.current]
+    if (!videoElement || !aimElement || !overlayElement) return
+    scanner.current?.stop()
+    // Read through calls: the page may unmount or start again while this awaits.
+    const live = () => mounted.current
+    const currentScanner = () => scanner.current
     try {
-      const engine = await openScanEngine(edition, setStage)
+      const engine = await openScanEngine(edition, setStage, sources)
+      if (!live()) return
       const camera = new CameraScanner(engine)
-      camera.attach(video.current, aim.current, overlay.current)
+      camera.attach(videoElement, aimElement, overlayElement)
       camera.setClasses(picked)
       camera.setSideways(sideways)
       scanner.current = camera
-      setMaxZoom(await camera.start())
+      shownEdition.current = edition
+      const zoomLimit = await camera.start()
+      if (!live() || currentScanner() !== camera) return
+      setMaxZoom(zoomLimit)
       cameraWasOn = true
+      setPaused(false)
       setPhase("running")
       camera.run(setFrame).catch((cause: unknown) => {
-        camera.stop()
-        setError(cause instanceof Error ? cause.message : String(cause))
-        setPhase("error")
+        if (currentScanner() === camera) fail(cause)
       })
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-      setPhase("error")
+      // Stopped while starting: whoever stopped it already moved on.
+      if (cause instanceof CameraStopped || !live()) return
+      fail(cause)
     }
   }
   const startOnReturn = useRef(true)
@@ -262,7 +300,33 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
           )}
 
           {phase === "running" && (
-            <div className="absolute top-1/2 left-3 -translate-y-1/2">
+            <button
+              type="button"
+              aria-pressed={paused}
+              aria-label={t("scan.single.lock")}
+              title={t("scan.single.lock")}
+              onClick={togglePause}
+              className="absolute top-2 right-2 flex size-11 items-center justify-center"
+            >
+              <span
+                className={cn(
+                  "flex size-10 items-center justify-center rounded-full backdrop-blur",
+                  paused
+                    ? "bg-camera-lock-pill text-camera-text"
+                    : "bg-camera-chip text-camera-text",
+                )}
+              >
+                {paused ? (
+                  <Lock className="size-5" aria-hidden="true" />
+                ) : (
+                  <LockOpen className="size-5" aria-hidden="true" />
+                )}
+              </span>
+            </button>
+          )}
+
+          {phase === "running" && (
+            <div className="absolute top-1/2 left-2 -translate-y-1/2">
               <ClassColumn picked={picked} onToggle={toggleClass} />
             </div>
           )}
@@ -271,7 +335,7 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
             <div
               role="group"
               aria-label={t("scan.single.zoom")}
-              className="absolute top-1/2 right-3 flex -translate-y-1/2 flex-col gap-2"
+              className="absolute top-1/2 right-2 flex -translate-y-1/2 flex-col gap-1"
             >
               {ZOOMS.filter((step) => step <= maxZoom).map((step) => (
                 <button
@@ -282,14 +346,19 @@ export function ScanPage({ store = appScanModels }: ScanPageProps) {
                     setZoom(step)
                     void scanner.current?.setZoom(step)
                   }}
-                  className={cn(
-                    "size-10 rounded-full text-12 font-semibold tabular-nums backdrop-blur",
-                    zoom === step
-                      ? "bg-camera-text text-camera"
-                      : "bg-camera-chip text-camera-text",
-                  )}
+                  // A 44px target around a 40px dial (design §9 touch size).
+                  className="flex size-11 items-center justify-center"
                 >
-                  {t("scan.single.zoomStep", { zoom: step })}
+                  <span
+                    className={cn(
+                      "flex size-10 items-center justify-center rounded-full text-12 font-semibold tabular-nums backdrop-blur",
+                      zoom === step
+                        ? "bg-camera-text text-camera"
+                        : "bg-camera-chip text-camera-text",
+                    )}
+                  >
+                    {t("scan.single.zoomStep", { zoom: step })}
+                  </span>
                 </button>
               ))}
             </div>

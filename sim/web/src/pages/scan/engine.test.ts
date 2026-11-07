@@ -104,7 +104,7 @@ describe("scan engine", () => {
     expect((ort.env.wasm["wasmBinary"] as Uint8Array).length).toBe(RUNTIME.bytes)
     expect(ort.env.wasm["numThreads"]).toBe(1)
     expect(engine.cardSize).toEqual({ width: 224, height: 312 })
-    expect(engine.det.grow).toBe(1.6)
+    expect(engine.det.grow).toBe(1)
     expect(engine.index.scoring.accept).toBe(0.5)
     expect(engine.index.cards).toHaveLength(5)
   })

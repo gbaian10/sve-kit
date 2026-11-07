@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { decodeDetections, writeSample } from "./tensor"
+import { decodeDetections, orderCorners, writeSample } from "./tensor"
 
 describe("scan tensors", () => {
   it("turns card-centre peaks and corner offsets into quads in input pixels", () => {
@@ -25,6 +25,48 @@ describe("scan tensors", () => {
       [4, 24],
     ])
     expect(found[1]?.quad[0]).toEqual([28, 28])
+  })
+
+  it("orders corners clockwise from the top left whichever corner the finder starts at", () => {
+    const grid = 4
+    const cells = grid * grid
+    const heat = new Float32Array(cells)
+    const corners = new Float32Array(8 * cells)
+    heat[1 * grid + 1] = 0.9
+    // Clockwise, starting at the bottom right corner.
+    const offsets = [1, 1.5, -1, 1.5, -1, -1.5, 1, -1.5]
+    offsets.forEach((offset, channel) => {
+      corners[channel * cells + 1 * grid + 1] = offset
+    })
+    expect(decodeDetections(heat, corners, grid, 8, 0.5)[0]?.quad).toEqual([
+      [4, 0],
+      [20, 0],
+      [20, 24],
+      [4, 24],
+    ])
+    // `grow` scales the quad about its mean point.
+    expect(decodeDetections(heat, corners, grid, 8, 0.5, 1.5)[0]?.quad).toEqual([
+      [0, -6],
+      [24, -6],
+      [24, 30],
+      [0, 30],
+    ])
+  })
+
+  it("starts a tilted card at its top left corner", () => {
+    expect(
+      orderCorners([
+        [90, 110],
+        [10, 12],
+        [8, 100],
+        [95, 5],
+      ]),
+    ).toEqual([
+      [10, 12],
+      [95, 5],
+      [90, 110],
+      [8, 100],
+    ])
   })
 
   it("writes RGBA pixels as RGB planes of a batch slot, optionally turned 180°", () => {

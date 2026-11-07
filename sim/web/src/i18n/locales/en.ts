@@ -901,6 +901,7 @@ export default {
       },
     },
     single: {
+      lock: "Lock the result",
       heading: "Card scan",
       title: "Point at one card to recognise it",
       hint: "Fit the card in the frame; your opponent's cards can be upside down.",

@@ -7,6 +7,8 @@ export interface ScanCard {
   readonly cardId: string
   /** Integer image id (`images/<size>/<n>.webp`). */
   readonly imageId: number
+  /** Face ordinal: 0 is the front; other faces' images are `<n>-f<face>.webp`. */
+  readonly face: number
   /** Original card name. */
   readonly name: string
   /** Printings that share this art share the group. */
@@ -47,12 +49,16 @@ export function parseScanCards(value: unknown, count: number): ScanCard[] {
       throw new Error(`cards[${String(at)}] is not an object`)
     const row = item as Record<string, unknown>
     const imageId = row["n"]
+    const face = row["f"]
     if (typeof imageId !== "number" || !Number.isInteger(imageId))
       throw new Error(`cards[${String(at)}].n must be an integer`)
+    if (typeof face !== "number" || !Number.isInteger(face) || face < 0)
+      throw new Error(`cards[${String(at)}].f must be a face ordinal`)
     return {
       no: text(row, "no", at),
       cardId: text(row, "c", at),
       imageId,
+      face,
       name: text(row, "nm", at),
       artGroup: text(row, "a", at),
       classCode: text(row, "k", at),

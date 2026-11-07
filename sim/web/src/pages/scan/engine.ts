@@ -1,6 +1,6 @@
 import type * as Ort from "onnxruntime-web/wasm"
 
-import { appScanModels, type InstalledScanModels } from "../../data"
+import { appScanModels, type InstalledScanModels, type ScanModelStore } from "../../data"
 import type { DetModel } from "../../domain/scan/manifest"
 import {
   type CardMatch,
@@ -117,6 +117,7 @@ async function createScanEngine(
           det.input / det.stride,
           det.stride,
           threshold,
+          det.grow,
         )
       }),
     embed: (samples) =>
@@ -163,10 +164,15 @@ export interface ScanEngineSources {
   readonly runtime: () => Promise<typeof Ort>
 }
 
-const appSources: ScanEngineSources = {
-  load: (edition) => appScanModels.load(edition),
-  runtime: () => import("onnxruntime-web/wasm"),
+/** Models from `store`, ONNX Runtime from the site's own bundle. */
+export function scanEngineSources(store: ScanModelStore = appScanModels): ScanEngineSources {
+  return {
+    load: (edition) => store.load(edition),
+    runtime: () => import("onnxruntime-web/wasm"),
+  }
 }
+
+const appSources = scanEngineSources()
 
 function drop(engine: Promise<ScanEngine>): void {
   void engine.then(

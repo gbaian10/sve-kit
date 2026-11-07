@@ -5,11 +5,11 @@ import { classMask, isConfident, matchCards, parseScanCards, type ScanIndex } fr
 const SCORING = { hubWeight: 0.75, accept: 0.5, margin: 0.03 }
 
 const rows = [
-  { no: "BP01-001SL", c: "c1", n: 1, nm: "a", a: "x", k: "elf" },
-  { no: "BP01-001", c: "c1", n: 2, nm: "a", a: "x", k: "elf" },
-  { no: "BP01-002", c: "c2", n: 3, nm: "b", a: "x", k: "dragon" },
-  { no: "BP01-003", c: "c3", n: 4, nm: "c", a: "x", k: "neutral" },
-  { no: "BP01-T01", c: "c4", n: 5, nm: "d", a: "x", k: "" },
+  { no: "BP01-001SL", c: "c1", n: 1, nm: "a", a: "x", k: "elf", f: 0 },
+  { no: "BP01-001", c: "c1", n: 2, nm: "a", a: "x", k: "elf", f: 0 },
+  { no: "BP01-002", c: "c2", n: 3, nm: "b", a: "x", k: "dragon", f: 0 },
+  { no: "BP01-003", c: "c3", n: 4, nm: "c", a: "x", k: "neutral", f: 0 },
+  { no: "BP01-T01", c: "c4", n: 5, nm: "d", a: "x", k: "", f: 0 },
 ]
 
 function index(vectors: number[][], hub: number[] = vectors.map(() => 0)): ScanIndex {
@@ -118,5 +118,6 @@ describe("scan card search", () => {
     expect(() => parseScanCards([{ ...rows[0], n: "1" }], 1)).toThrow()
     expect(() => parseScanCards([{ ...rows[0], k: null }], 1)).toThrow()
     expect(() => parseScanCards([null], 1)).toThrow()
+    expect(() => parseScanCards([{ ...rows[0], f: -1 }], 1)).toThrow()
   })
 })
