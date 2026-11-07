@@ -36,19 +36,23 @@ python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # same vers
 
 - About 7.5 minutes on a 10-core CPU with an RTX 3070: gallery 2.7 min, hub 0.4 min (GPU), index 4.4 min, the
   whole set every time (one new card takes as long as a new pack)
-- `build.json` records the card data version and `rows_sha256`, the identity of the card image set. If
-  `rows_sha256` equals the published index's, no card or image changed and users need not download it again
+- `build.json` records the card data version and `rows_sha256`, which covers only the image rows (printing,
+  face, image version); a fix to a card's name, class or art group leaves it unchanged. Whether users download
+  anything again follows the release manifest: index files are named by their content hash, so only changed
+  files are new
 - The release step refuses an index built with another recogniser
 
 ### Check a model
 
 ```bash
 python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # recogniser, real photos
-python -m sve_scan deck-label rec-ft det-e labels.json deck-out     # deck photos of the held-out events
-python -m sve_scan eval-deck deck-out                               # deck recall from the step above
+python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # deck photos of the held-out events
+python -m sve_scan eval-deck deck-det-e                             # deck recall from the step above
 ```
 
-Compare with the numbers in MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
+Give every model its own deck-label output folder: deck-label skips photos already in the folder and
+eval-deck reads whatever is there, so a reused folder reports the earlier model. Compare with the numbers in
+MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
 
 ### Train a new model version
 
@@ -193,9 +197,9 @@ python -m sve_scan det export det-e det_det-e.w8.onnx
 
 ```bash
 python -m sve_scan eval-rec rec-ft <evaluation folder> ...          # single card: card-level top-1 / top-5
-python -m sve_scan deck-label rec-ft det-d labels.json deck-out     # then eval-deck for deck recall
+python -m sve_scan deck-label rec-ft det-e labels.json deck-det-e   # then eval-deck for deck recall
 python -m sve_scan eval-deck deck-out
-python -m sve_scan eval-det rec-ft det.json det-d:global            # corner finder: useful boxes, corner error
+python -m sve_scan eval-det rec-ft det.json det-e:global            # corner finder: useful boxes, corner error
 ```
 
 - Results go to `SVE_SCAN_WORK/eval/`; the same inputs and models give the same results
@@ -205,7 +209,7 @@ python -m sve_scan eval-det rec-ft det.json det-d:global            # corner fin
 ### 6. Release files
 
 ```bash
-python -m sve_scan release <out dir> 1 det-d 1 rec-ft
+python -m sve_scan release <out dir> 1 det-e 1 rec-ft                # det-1 = stage 5, rec-1 = stage 2
 ```
 
 Writes `models/<sha256>.onnx`, `index/<sha256>.*` and `manifest.json` for the publish step, which uploads them under

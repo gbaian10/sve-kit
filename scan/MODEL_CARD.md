@@ -12,12 +12,14 @@ How to rebuild them is in [README.md](README.md); the published file format is i
 
 ## Licensing and provenance
 
-- **Code**: everything under `scan/` is Apache-2.0 ([LICENSING.md](../LICENSING.md))
+- **Code**: the project's own code and documentation under `scan/` are Apache-2.0; official and other
+  third-party material stays excluded as described in [LICENSING.md](../LICENSING.md)
 - **Weights and card index**: not licensed by the project. They are computed from official card images and, like
   snapshots and card images, do not acquire the license of the program that made them (see LICENSING.md). They
   are published for the web app only, the same way as the card images
 - **Base weights**: both models start from timm ImageNet-1k weights released under Apache-2.0. The published
-  weights are derived from them; this notice keeps that attribution
+  weights are derived from them. The upstream Apache-2.0 terms and notices still apply to those components;
+  this provenance note records the source and does not replace the notices a release must carry
 
 | Model | Base weights | License | Pretraining data |
 | --- | --- | --- | --- |
@@ -56,13 +58,13 @@ same answer.
 | Marketplace listing photos, two sets | Recogniser top-1 (centre crop) | .951, 1.0 |
 | Video frames | Recogniser top-1 (centre crop) | .846 |
 | Foil cards | Recogniser top-1 (centre crop) | .910 |
-| Deck photos of 6 held-out events (35 photos, 889 SIFT-confirmed cards) | Cards named right after both models | 854 (.961) |
+| Deck photos of 6 held-out events (35 photos, 889 SIFT-confirmed cards) | Named right among detected, SIFT-confirmed cards | 854 (.961) |
 | Synthetic deck photo, 12 large cards in 2 rows | Cards found | 12/12, no false boxes |
 | Maintainer's single-card phone saves (63) | Card named right | .857 |
 | Side-seat bursts, cards in view (86 frames, 146 cards) | Cards found at threshold 0.35 | .918 |
 
-The deck numbers count SIFT-confirmed cards, which lean towards easy cards, so they are optimistic. The web
-client's deck reader is the end-to-end reference.
+The deck numbers count SIFT-confirmed cards, which lean towards easy cards, and cards the corner finder missed
+are not in the denominator, so they are optimistic. The web client's deck reader is the end-to-end reference.
 
 ## Limitations
 
