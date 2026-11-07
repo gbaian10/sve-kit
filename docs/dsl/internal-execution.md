@@ -982,7 +982,7 @@ IR 的 MoveOutcome 型別參照沿用費用指示的產出型別，讀值另驗�
 
 場上 Activated 的固有費用與 Triggered 的必要頭付款，可公開精確一或兩張自己目前的手牌，
 並與固定 PP、自身橫置組合。沿用 `ir::reveal_cost`、`CostMaterials`、`MaterialWait`、
-`internal_reveal_cost_payment` 與共用 Reveal；沒有另一個 picker、renderer 或付款帳本。
+`internal_hand_material_cost_payment` 與共用 Reveal；沒有另一個 picker、renderer 或付款帳本。
 只有控制者能回答材料題目，付款前依原選取篩選及張數重驗，並檢查 owner、controller、所在區域與世代。
 
 Field 能力的私有參數必須被同一能力已登錄費用中的 Reveal 消耗；WF 只在這個入口記錄可公開的材料 binding，
@@ -994,6 +994,18 @@ Field 能力的私有參數必須被同一能力已登錄費用中的 Reveal 消
 移區或解決完成後撤回隱藏位置資訊，對手不能追蹤隱藏卡片的固定 ID。
 
 已進待機的頭付款依能力實例保存的原始印刷定義檢查；來源離場或改變型態不取消待機，不能以目前所在區或目前印刷取代該定義。
+
+### 單張手牌移區成本
+
+場上起動能力與誘發能力的必要頭付款另接受一張自己手牌的 `to_ex` 或 `to_deck_bottom`。
+沿用同一個私有 CostMaterials 參數、選材證明及付款交易，Move 直接消耗已選材料；
+不插入 Reveal 或 Discard。EX 付款先檢查剩餘容量，付款後的公開計數才讀取到達 EX 的卡。
+置底保留原牌庫順序，卡片進入隱藏牌庫後不公開身分或可追蹤的物件 ID。
+
+WF 將這兩種精確 Move 視為原費用對私有材料的消耗，付款結束即撤銷材料綁定；
+本文不得以材料綁定追蹤移區後的卡。付款前重驗篩選、owner、controller、所在區域與世代，
+與固定 PP、自身橫置一起原子提交。拒付或付款失敗不執行本文，不留下部分費用或移區事實。
+只准入固定一張，不開放分組、變動張數、具名結果、對手手牌、法術追加費用或模式組合。
 
 ### 與抉擇模式組合
 

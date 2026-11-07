@@ -712,7 +712,7 @@ impl Game {
             return Err(unsupported("whole-card cost alternatives"));
         };
         self.internal_use_prerequisite(execution, costs)?;
-        self.check_reveal_cost_entry(execution, costs)?;
+        self.check_hand_material_cost_entry(execution, costs)?;
         for step in steps {
             self.check_keyword_cost(execution, step)?;
             if material::source_field_cost(&step.instruction.action)
@@ -733,8 +733,8 @@ impl Game {
                         self.internal_hand_cost_payment(execution, &step.instruction)?;
                     (quantity, subjects, vec![])
                 }
-                action if reveal_payment::objects(action).is_some() => {
-                    self.internal_reveal_cost_payment(execution, &step.instruction)?
+                action if reveal_cost::selected(execution, action) => {
+                    self.internal_hand_material_cost_payment(execution, &step.instruction)?
                 }
                 Action::Resource {
                     amount: Expr::Literal(amount),
@@ -1150,9 +1150,7 @@ pub(super) fn check_payment(
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
-            Action::Reveal { .. } => {
-                !quick && reveal_payment::selected(&instruction.action, &play.parameters)
-            }
+            action if reveal_payment::selected(action, &play.parameters) => !quick,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             action if hand_payment::source_to_ex(action) => true,

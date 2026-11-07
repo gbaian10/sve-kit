@@ -1,0 +1,39 @@
+cards:
+  BP14-118:
+    abilities:
+      - fanfare:
+          cost:
+            to_ex:
+              n: 1
+              sel:
+                trait: 宴楽
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        trait: 宴楽
+                        who: self
+                        zone: ex
+                    op: ge
+                    right: 3
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

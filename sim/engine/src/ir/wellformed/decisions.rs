@@ -334,9 +334,8 @@ impl Checker {
     pub(super) fn retire_reveal_materials(&mut self, costs: &CostSpec) {
         if let CostSpec::Ordered { steps } = costs {
             for step in steps {
-                if let Action::Reveal {
-                    objects: Selector::Bound { reference },
-                } = &step.instruction.action
+                if let Some(Selector::Bound { reference }) =
+                    reveal_payment::objects(&step.instruction.action)
                     && self.env.reveal_materials.remove(&reference.key())
                 {
                     self.env.bindings.remove(&reference.key());
@@ -639,6 +638,7 @@ impl Checker {
             checker.env.scope = on_paid.scope;
             checker.env.play_payments = None;
             checker.at("costs", |checker| checker.costs(costs))?;
+            checker.retire_reveal_materials(costs);
             checker.produce(receipt, TypeId::of::<PaymentResult>())?;
             checker.at("on_paid", |checker| checker.program(on_paid))?;
             if at == PaymentTime::PlayParameter && optional == PaymentOptionality::Required {
@@ -646,6 +646,7 @@ impl Checker {
             }
             Ok(())
         })?;
+        self.retire_reveal_materials(costs);
         if let Some(paid) = paid {
             self.env.receipts.extend(paid.receipts);
             self.env
@@ -743,7 +744,9 @@ impl Checker {
                                     && movement.position.is_none() && movement.order.is_none()
                                     && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
                             || matches!(&step.instruction.action, Action::Banish { objects: Selector::Bound { .. } });
-                        if !valid && !source_move && !selected_move {
+                        let private_bottom = matches!(reveal_payment::bottom(&step.instruction.action),
+                            Some(Selector::Bound { reference }) if checker.env.reveal_materials.contains(&reference.key()));
+                        if !valid && !source_move && !selected_move && !private_bottom {
                             return checker.reject();
                         }
                         checker.instruction_in(

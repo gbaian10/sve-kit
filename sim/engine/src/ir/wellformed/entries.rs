@@ -522,6 +522,9 @@ impl Checker {
                                 && optional_payment::required(body)
                                 && play.parameters.iter().all(|decision| {
                                     reveal_payment::field_parameter(ability, decision)
+                                        && optional_payment::declaration(body).is_some_and(|(costs, _)| {
+                                            matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| matches!(step.instruction.action, Action::Reveal { .. })))
+                                        })
                                 }))
                             || (ability.kind == AbilityKind::Activated
                                 && super::modes::play_modes_without_fees(body)

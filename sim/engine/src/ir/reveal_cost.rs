@@ -1,11 +1,11 @@
-//! Hand revelation has closed additional and field-ability cost entries.
+//! Private hand materials have closed revelation and field-transfer cost entries.
 use super::optional_payment;
 use super::{
     Ability, AbilityKind, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int,
     MoveDestination, MoveReason, Nat, ObjectOperand, OwnerZone, PlaySlot, PlaySpec, PlayerRef,
     PlayerRelation, Position, Posture, Resource, ResourceOperation, SelectionSnapshot,
-    SelectionView, Selector, Visibility, ZoneKind,
+    SelectionView, Selector, Visibility, ZoneKind, ZoneRef,
 };
 
 pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardinality)> {
@@ -60,27 +60,29 @@ pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardi
 }
 
 pub(crate) fn selected(action: &Action, parameters: &[Decision]) -> bool {
-    let Action::Reveal {
-        objects: Selector::Bound { reference },
-    } = action
-    else {
+    let Some(Selector::Bound { reference }) = objects(action) else {
         return false;
     };
-    parameters
-        .iter()
-        .any(|decision| parameter(decision).is_some_and(|(binding, _)| binding == *reference))
+    parameters.iter().any(|decision| {
+        parameter(decision).is_some_and(|(binding, count)| {
+            binding == *reference
+                && (matches!(action, Action::Reveal { .. }) || count.minimum == Nat(1))
+        })
+    })
 }
 
-fn field_steps(costs: &CostSpec, binding: Binding<Selector>) -> bool {
+fn field_steps(costs: &CostSpec, binding: Binding<Selector>, count: Nat) -> bool {
     let CostSpec::Ordered { steps } = costs else {
         return false;
     };
-    let mut reveals = 0_u8;
+    let mut selections = 0_u8;
     for step in steps {
         let action = &step.instruction.action;
         if matches!(action, Action::Reveal { objects: Selector::Bound { reference } } if *reference == binding)
+            || (count == Nat(1)
+                && matches!(transfer(action), Some(Selector::Bound { reference }) if *reference == binding))
         {
-            reveals = reveals.saturating_add(1);
+            selections = selections.saturating_add(1);
             continue;
         }
         let pp = matches!(action, Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
@@ -91,11 +93,11 @@ fn field_steps(costs: &CostSpec, binding: Binding<Selector>) -> bool {
             return false;
         }
     }
-    reveals == 1
+    selections == 1
 }
 
 pub(crate) fn field_parameter(ability: &Ability, decision: &Decision) -> bool {
-    let Some((binding, _)) = parameter(decision) else {
+    let Some((binding, count)) = parameter(decision) else {
         return false;
     };
     let Some(play) = &ability.play else {
@@ -107,11 +109,11 @@ pub(crate) fn field_parameter(ability: &Ability, decision: &Decision) -> bool {
             AbilityKind::Activated | AbilityKind::Triggered
         )
         && play.parameters.contains(decision)
-        && (field_steps(&play.costs, binding)
+        && (field_steps(&play.costs, binding, count.minimum)
             || ability.body.as_ref().is_some_and(|body| {
                 optional_payment::required(body)
                     && optional_payment::declaration(body)
-                        .is_some_and(|(costs, _)| field_steps(costs, binding))
+                        .is_some_and(|(costs, _)| field_steps(costs, binding, count.minimum))
             }))
 }
 
@@ -121,7 +123,8 @@ pub(crate) fn field_cost(ability: &Ability, costs: &CostSpec) -> bool {
     };
     play.parameters.iter().any(|decision| {
         field_parameter(ability, decision)
-            && parameter(decision).is_some_and(|(binding, _)| field_steps(costs, binding))
+            && parameter(decision)
+                .is_some_and(|(binding, count)| field_steps(costs, binding, count.minimum))
             && (*costs == play.costs
                 || ability.body.as_ref().is_some_and(|body| {
                     optional_payment::declaration(body).is_some_and(|(head, _)| head == costs)
@@ -197,6 +200,32 @@ pub(crate) fn objects(action: &Action) -> Option<&Selector> {
     if let Action::Reveal { objects } = action {
         Some(objects)
     } else {
-        bottom(action)
+        transfer(action)
     }
+}
+
+pub(crate) fn transfer(action: &Action) -> Option<&Selector> {
+    if let Some(objects) = bottom(action) {
+        return Some(objects);
+    }
+    let Action::Move {
+        objects: objects @ Selector::Bound { .. },
+        movement,
+        reason: MoveReason::Put,
+    } = action
+    else {
+        return None;
+    };
+    (movement.to
+        == (MoveDestination::Shared {
+            zone: ZoneRef {
+                player: PlayerRef::Controller {},
+                kind: ZoneKind::Ex,
+            },
+        })
+        && movement.position.is_none()
+        && movement.order.is_none()
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty())
+    .then_some(objects)
 }

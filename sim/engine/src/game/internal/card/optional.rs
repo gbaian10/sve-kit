@@ -48,10 +48,8 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                 || (required && super::super::life::is_cost(&instruction.action))
                 || (required
                     && matches!(
-                        instruction.action,
-                        Action::Reveal {
-                            objects: Selector::Bound { .. }
-                        }
+                        reveal_payment::objects(&instruction.action),
+                        Some(Selector::Bound { .. })
                     ))
                 || (required && source_banish(&instruction.action))
                 || super::hand_payment::check_cost(&instruction.action)

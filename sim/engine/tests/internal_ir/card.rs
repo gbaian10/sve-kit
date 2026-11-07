@@ -814,3 +814,6 @@ mod cemetery_self_cost;
 
 #[path = "card/flip_down.rs"]
 mod flip_down;
+
+#[path = "card/hand_transfer_cost.rs"]
+mod hand_transfer_cost;

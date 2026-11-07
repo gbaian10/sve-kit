@@ -4,20 +4,25 @@ use crate::game::internal::Slot;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Action, Characteristics, CostSpec, Instruction, Int, MoveMethod, MoveOutcome, ObjectRef,
-    Quantity, QuantityUnit, Selector, ZoneKind,
+    Position, Quantity, QuantityUnit, Selector, ZoneKind,
 };
+
+pub(super) fn selected(execution: &Execution, action: &Action) -> bool {
+    matches!(reveal_payment::objects(action), Some(Selector::Bound { reference })
+        if execution.material_selections.contains_key(&reference.key()))
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Revelation uses the existing play payment transaction."
 )]
 impl Game {
-    pub(super) fn check_reveal_cost_entry(
+    pub(super) fn check_hand_material_cost_entry(
         &self,
         execution: &Execution,
         costs: &CostSpec,
     ) -> Result<()> {
-        if !matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| reveal_payment::objects(&step.instruction.action).is_some()))
+        if !matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| selected(execution, &step.instruction.action)))
         {
             return Ok(());
         }
@@ -50,12 +55,12 @@ impl Game {
                 })
             })
         {
-            return Err(invalid("revelation requires its declared cost entry"));
+            return Err(invalid("hand materials require their declared cost entry"));
         }
         Ok(())
     }
 
-    pub(super) fn internal_reveal_cost_payment(
+    pub(super) fn internal_hand_material_cost_payment(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
@@ -102,35 +107,14 @@ impl Game {
                 }
             }
             Action::Move { movement, .. }
-                if reveal_payment::bottom(&instruction.action).is_some() =>
+                if reveal_payment::transfer(&instruction.action).is_some() =>
             {
-                let (moved, _) = self.internal_move_members(
+                self.internal_hand_transfer_payment(
                     execution,
+                    instruction,
                     &members,
-                    "deck",
-                    ZoneKind::Deck,
-                    MoveMethod::Put,
-                    false,
                     movement.position,
                 )?;
-                if moved.len() != members.len()
-                    || !moved.iter().zip(&members).all(|(arrival, selected)| {
-                        arrival.before == *selected
-                            && arrival.after.is_some()
-                            && arrival.actual_to.is_some_and(|to| {
-                                to.kind == ZoneKind::Deck
-                                    && to.player == execution.context.controller
-                            })
-                    })
-                {
-                    return Err(crate::EngineFailure::IllegalPlay(
-                        "incomplete revealed deck-bottom cost".into(),
-                    ));
-                }
-                execution.receipts.insert(
-                    instruction.receipt,
-                    InstructionOutcome::Move(MoveOutcome { moved }),
-                );
             }
             _ => return Err(invalid("mandatory revelation cost")),
         }
@@ -142,5 +126,55 @@ impl Game {
             members,
             vec![],
         ))
+    }
+    fn internal_hand_transfer_payment(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        members: &[ObjectRef],
+        position: Option<Position>,
+    ) -> Result<()> {
+        if members.len() != 1 {
+            return Err(invalid("single-card hand transfer cost"));
+        }
+        let (destination, kind) = if reveal_payment::bottom(&instruction.action).is_some() {
+            ("deck", ZoneKind::Deck)
+        } else {
+            ("ex", ZoneKind::Ex)
+        };
+        if kind == ZoneKind::Ex
+            && self.zone_count(seat_name(execution.context.controller)?, "ex") >= 5
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "insufficient EX capacity for cost".into(),
+            ));
+        }
+        let (moved, _) = self.internal_move_members(
+            execution,
+            members,
+            destination,
+            kind,
+            MoveMethod::Put,
+            false,
+            position,
+        )?;
+        if moved.len() != members.len()
+            || !moved.iter().zip(members).all(|(arrival, selected)| {
+                arrival.before == *selected
+                    && arrival.after.is_some()
+                    && arrival.actual_to.is_some_and(|to| {
+                        to.kind == kind && to.player == execution.context.controller
+                    })
+            })
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "incomplete hand transfer cost".into(),
+            ));
+        }
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Move(MoveOutcome { moved }),
+        );
+        Ok(())
     }
 }
