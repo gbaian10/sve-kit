@@ -120,7 +120,7 @@ fn bp18_098_all_printings_put_a_cheap_tokyo_follower_or_bishop_amulet_from_hand(
     for form in ["BP18-098", "BP18-SL23", "BP18-U06"] {
         let mut game = shirou(form, 0);
         let (step, offered) = offered_choice(&mut game);
-        // 原費 4 的透京 follower and the non-matching follower are not offered.
+        // The original-cost-4 Tokyo follower and the non-Tokyo follower are not offered.
         assert_eq!(offered, ["BP04-115", "BP18-003"], "{form}");
         answer(&mut game, step, "BP04-115");
         drain(&mut game, "");
@@ -166,7 +166,10 @@ fn bp13_090_all_printings_banish_a_follower_and_put_a_cheap_bishop_from_hand_onc
             {"id":"guard","card":"BP01-134"},
             {"id":"commander","card":"BP01-037"}
         ]);
-        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"sun","card":"BP01-149"}]);
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"sun","card":"BP01-149"},
+            {"id":"spare","card":"BP01-149"}
+        ]);
         initial["players"]["P1"]["zones"]["cemetery"] = json!([
             {"id":"old0","card":"BP04-115"},
             {"id":"old1","card":"BP04-115"}
@@ -185,11 +188,11 @@ fn bp13_090_all_printings_banish_a_follower_and_put_a_cheap_bishop_from_hand_onc
         let mut act = game
             .activate_internal_card("source", activated("BP13-090"), actor())
             .unwrap();
-        // The amulet on the field pays first.
+        // One of the two field amulets pays first.
         while let CardPlay::Awaiting(q) = &act
             && let InputDomain::CostMaterials(d) = &q.domain
         {
-            assert_eq!(d.members.len(), 1, "{printing}: only the amulet");
+            assert_eq!(d.members.len(), 2, "{printing}: both amulets");
             act = game
                 .answer_internal_card(q.actor, q.token, Answer::CostMaterials(vec![d.members[0].handle]))
                 .unwrap();
@@ -202,14 +205,21 @@ fn bp13_090_all_printings_banish_a_follower_and_put_a_cheap_bishop_from_hand_onc
         };
         let mut offered: Vec<_> = d.members.iter().filter_map(|m| m.card.clone()).collect();
         offered.sort();
-        // 原費 3 以下のビショップ follower or amulet; the cost-5 neutral one is not offered.
+        // Bishop followers or amulets of original cost 3 or less; the cost-5 Royal follower is not.
         assert_eq!(offered, ["BP01-134", "BP01-146", "BP04-115"], "{printing}");
         answer(&mut game, act, "BP01-146");
         drain(&mut game, "");
         let view = game.projection(View::Referee).unwrap();
-        assert!(view["P1"]["cemetery"].as_array().unwrap().contains(&json!("sun")), "{printing}");
+        let paid = ["sun", "spare"]
+            .iter()
+            .filter(|id| view["P1"]["cemetery"].as_array().unwrap().contains(&json!(id)))
+            .count();
+        assert_eq!(paid, 1, "{printing}: one amulet paid");
         assert!(view["P1"]["field"].as_array().unwrap().contains(&json!("snake")), "{printing}");
+        // The other amulet could still pay, so only the once-per-turn limit rejects a second use.
         game.activate_internal_card("source", activated("BP13-090"), actor())
             .unwrap_err();
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(after["P1"]["field"], view["P1"]["field"], "{printing}: nothing paid");
     }
 }
