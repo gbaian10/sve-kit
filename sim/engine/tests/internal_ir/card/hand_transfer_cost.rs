@@ -135,7 +135,9 @@ fn private_transfer_lowering_rejects_unused_cardinalities_and_result_bindings() 
                 "activate",
                 json!({"cost":{operation:material},"do":[]}),
             )]);
-            lowerer().lower(&tree).unwrap_err();
+            let error = lowerer().lower(&tree).unwrap_err();
+            assert_eq!(error.code, "unsupported_construct");
+            assert!(error.path.starts_with("/cards/unit-follower/abilities/0"));
         }
     }
 }
@@ -193,15 +195,19 @@ fn private_hand_transfers_do_not_extend_mode_or_additional_cost_entries() {
                 "cost":cost,"do":[{"choice":{"n":1,"options":[[{"draw":{"n":1}}],[{"life":{"who":"self","delta":1}}]]}}]
             }),
         )]);
-        lowerer().lower(&tree).unwrap_err();
+        let error = lowerer().lower(&tree).unwrap_err();
+        assert_eq!(error.code, "ill_formed");
+        assert!(error.path.starts_with("/cards/unit-follower/abilities/0"));
         let mut tree = evolution_linked_movement::tree(&[
             ("play", json!({"additional_cost":cost})),
             ("spell", json!({"do":[{"draw":{"n":1}}]})),
         ]);
         let seed = tree["cards"]["unit-follower"].take();
         tree["cards"] = json!({"unit-spell":seed});
-        lowerer()
+        let error = lowerer()
             .lower_with_printed_costs(&tree, &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]))
             .unwrap_err();
+        assert_eq!(error.code, "unsupported_construct");
+        assert!(error.path.starts_with("/cards/unit-spell/abilities/0"));
     }
 }

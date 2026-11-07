@@ -100,21 +100,53 @@ fn bp14_118_all_prints_count_the_paid_ex_material_before_the_buff() {
     }
 }
 
+// Both printings and pay/decline evolution paths share the costly repository fixture.
 #[test]
 fn bp14_008_all_prints_put_the_paid_hand_card_at_the_hidden_deck_bottom() {
     for number in ["BP14-008", "BP14-P02"] {
-        let mut initial = draw_position();
-        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-        initial["players"]["P1"]["zones"]["hand"] = json!([
-            {"id":"source","card":number},{"id":"material","card":"BP01-037"}
-        ]);
-        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-037"}]);
-        let mut game = game(&initial);
-        fanfare(&mut game, true);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["leader"]["life"], 12_u8);
-        assert_eq!(state["P1"]["deck"], json!(["top", "material"]));
-        assert!(game.projection(View::P2).unwrap()["objects"]["material"].is_null());
+        for accept in [true, false] {
+            let mut initial = draw_position();
+            initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+            initial["players"]["P1"]["zones"]["hand"] = json!([
+                {"id":"source","card":number},{"id":"material","card":"BP01-037"}
+            ]);
+            initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-037"}]);
+            initial["players"]["P1"]["zones"]["evolve_deck"] =
+                json!([{"id":"form","card":"BP14-009"}]);
+            let mut game = game(&initial);
+            fanfare(&mut game, accept);
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(
+                state["P1"]["leader"]["life"],
+                if accept { 12_u8 } else { 10_u8 }
+            );
+            assert_eq!(
+                state["P1"]["deck"],
+                if accept {
+                    json!(["top", "material"])
+                } else {
+                    json!(["top"])
+                }
+            );
+            assert_eq!(
+                state["P1"]["hand"],
+                if accept {
+                    json!([])
+                } else {
+                    json!(["material"])
+                }
+            );
+            assert!(game.projection(View::P2).unwrap()["objects"]["material"].is_null());
+            game.internal_rule_action(
+                &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}),
+            )
+            .unwrap();
+            let evolved = game.projection(View::Referee).unwrap();
+            assert_eq!(evolved["objects"]["source"]["evolved_with"], "form");
+            assert_eq!(evolved["objects"]["source"]["power"], 3_u8);
+            assert_eq!(evolved["objects"]["source"]["hp"], 3_u8);
+            assert_eq!(evolved["P1"]["pp"]["current"], 7_u8);
+        }
     }
 }
 
