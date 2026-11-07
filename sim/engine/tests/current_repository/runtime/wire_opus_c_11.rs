@@ -146,3 +146,15 @@ fn bp21_008_ignores_followers_without_either_trait() {
     assert_eq!(view["P2"]["cemetery"], json!(["enemy"]));
     assert_eq!(view["P2"]["leader"]["life"], 19_u8);
 }
+
+#[test]
+fn bp21_008_own_entry_does_not_trigger_line_1() {
+    let mut game = board(&json!([{"id":"source","card":"BP21-008"}]), &json!([]));
+    let entered = game.play_internal_card("source", actor()).unwrap();
+    assert!(matches!(entered, CardPlay::Entered(_)), "the dwarf enters");
+    // Only its Fanfare waits; with no eligible hand card it puts nothing.
+    assert_eq!(drain(&mut game, ""), 1);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["objects"]["enemy"]["damage"], 0_u8);
+    assert_eq!(view["P2"]["leader"]["life"], 20_u8);
+}
