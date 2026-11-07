@@ -2826,6 +2826,13 @@ pub(super) enum StaticEffect {
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
+    IgnoreWard(IgnoreWard),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct IgnoreWard {
+    pub on: Objects,
 }
 
 #[derive(Deserialize)]

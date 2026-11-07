@@ -57,29 +57,7 @@ pub(super) fn lower(
             declarations.push(super::posture::static_no_stand(restriction, path)?);
             continue;
         }
-        let ast::StaticEffect::Cannot(ast::Cannot::Attack(shape)) = effect else {
-            return Err(unsupported(path));
-        };
-        let ast::AttackAction::Attack = shape.what;
-        let attacker = shape
-            .on
-            .as_ref()
-            .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?;
-        let target = shape
-            .target
-            .as_ref()
-            .map(|target| context.recipients(target, path))
-            .transpose()?;
-        declarations.push(Effect::Permission {
-            subject: PermissionSubject::Objects {
-                objects: attacker.clone(),
-            },
-            action: ActionPattern::Attack { attacker, target },
-            polarity: Polarity::Forbid,
-            condition: condition.clone(),
-            duration: numeric::duration(None, path)?,
-            rule: RuleId(133),
-        });
+        declarations.push(permission(&mut context, effect, &condition, path)?);
     }
     Ok(Located {
         source,
@@ -96,6 +74,64 @@ pub(super) fn lower(
             body: None,
             declarations,
         },
+    })
+}
+
+fn permission(
+    context: &mut BodyContext<'_>,
+    effect: &ast::StaticEffect,
+    condition: &Expr<Bool>,
+    path: &str,
+) -> Result<Effect, LoweringError> {
+    let (attacker, action, polarity, rule) = match effect {
+        ast::StaticEffect::IgnoreWard(shape) => {
+            if !matches!(shape.on, ast::Objects::This(_)) {
+                return Err(unsupported(path));
+            }
+            let attacker = numeric::holder();
+            (
+                attacker.clone(),
+                ActionPattern::IgnoreWard { attacker },
+                Polarity::Allow,
+                RuleId(128),
+            )
+        }
+        ast::StaticEffect::Cannot(ast::Cannot::Attack(shape)) => {
+            let ast::AttackAction::Attack = shape.what;
+            let attacker = shape
+                .on
+                .as_ref()
+                .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?;
+            let target = shape
+                .target
+                .as_ref()
+                .map(|target| context.recipients(target, path))
+                .transpose()?;
+            (
+                attacker.clone(),
+                ActionPattern::Attack { attacker, target },
+                Polarity::Forbid,
+                RuleId(133),
+            )
+        }
+        ast::StaticEffect::AlsoNamed(_)
+        | ast::StaticEffect::If(_)
+        | ast::StaticEffect::EvolveCostMod(_)
+        | ast::StaticEffect::CostMod(_)
+        | ast::StaticEffect::Grant(_)
+        | ast::StaticEffect::Cannot(_)
+        | ast::StaticEffect::Prevent(_)
+        | ast::StaticEffect::DamageMod(_)
+        | ast::StaticEffect::DamageCap(_)
+        | ast::StaticEffect::NoTrigger(_) => return Err(unsupported(path)),
+    };
+    Ok(Effect::Permission {
+        subject: PermissionSubject::Objects { objects: attacker },
+        action,
+        polarity,
+        condition: condition.clone(),
+        duration: numeric::duration(None, path)?,
+        rule,
     })
 }
 
