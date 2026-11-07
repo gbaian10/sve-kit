@@ -54,11 +54,14 @@ The models run in `sim/web` (`src/domain/scan/`, `src/pages/scan/`); the Python 
 
 1. **Corner finder**: around the aiming frame, or on overlapping tiles of a deck photo; each card is straightened
    to 224×312
-2. **Recogniser**: one vector for the card upright and one turned 180°
+2. **Recogniser**: one vector for the card upright and one turned 180°. The deck reader also reads a card that
+   looks like it lies on its side turned a quarter, and takes that reading only when its similarity is at
+   least 0.02 higher
 3. **Card index search**: an int8 dot product with every row, computed with WebAssembly SIMD (`dots.wat`; plain
    JavaScript where the browser lacks SIMD). Score = similarity − `hubWeight` × hub; a card counts as recognised
    when its similarity reaches `accept` and it leads the next card by `margin` (artifact format)
-4. **Printing check**: the recogniser treats every printing of one art as one card, so the client then compares
+4. **Printing check**: the recogniser treats every printing of one art as one card, and the client shows the
+   plain printing, the one with a plain numeric card number such as `BP01-001`. It then compares
    the frame colours of the straightened card with each printing's official small image (`finish.ts`). It uses
    hue after a gray-world white balance, in six frame regions, only where the printings differ by more than 25°.
    Another printing must lead the plain one by 10°; the live camera smooths this over frames. On official images
@@ -87,12 +90,14 @@ are not in the denominator, so they are optimistic. The web client's deck reader
 
 - **Same image, different printing**: SL printings are told apart by their frame colours (see "In the web
   client"); printings whose official images are pixel-identical (for example P cards) cannot be, and the answer
-  is the plain printing of the same art. Heavy glare or a strong colour cast keeps the plain printing
+  is the plain printing of the same art. Glare or a colour cast makes the check less reliable; when no other
+  printing leads the plain one by at least 10°, the plain printing is shown
 - **Small, far cards**: from a side seat, cards far away in the frame are found less often than with the
   previous corner finder (.918 against .973), in exchange for no false boxes on large cards
 - **One row or a single card filling a deck photo**: the deck reader's largest tile is the photo's short side, so
-  a card taller than that is cut at every scale and missed. An extra whole-photo pass in the reader fixes most of
-  it; that is a reader change, not a model change
+  a card taller than that is cut at every scale and missed. A reader change, not yet in the web reader: in an
+  offline test of the Python twin, an extra pass over the whole photo (padded to a square) found 48 of 53 cards
+  of synthetic one-row layouts instead of 25
 - **Layouts**: shingled or stacked cards, upright magnetic card displays and large logos on playmats are boxed
   wrongly or missed
 - **Glare and blur**: heavy sleeve glare, strong blur and very oblique shots lower the recogniser's confidence;
