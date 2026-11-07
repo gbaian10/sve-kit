@@ -12,6 +12,7 @@ import {
   chooseReading,
   type DeckCard,
   guessFromDeck,
+  withoutMarks,
   withPrinting,
 } from "../../domain/scan/deck-read"
 import { finishOf, finishScores, pickFinish } from "../../domain/scan/finish"
@@ -171,7 +172,7 @@ export async function readDeckPhoto(
     })
     await new Promise((resolve) => setTimeout(resolve, 0))
   }
-  return withFinishes(engine, guessFromDeck(cards))
+  return withFinishes(engine, guessFromDeck(withoutMarks(cards)))
 }
 
 /**
