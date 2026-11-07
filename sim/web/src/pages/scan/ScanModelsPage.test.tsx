@@ -54,10 +54,9 @@ describe("ScanModelsPage", () => {
     await setup().render()
     expect(await within(row("辨識模型")).findByText("未下載")).toBeInTheDocument()
     expect(within(row("找卡模型")).getByText("版本 det-1")).toBeInTheDocument()
-    expect(within(row("辨識模型")).getByText("版本 rec-1")).toBeInTheDocument()
-    expect(
-      within(row("辨識模型")).getByText(/含日版卡片索引：5 張卡，卡表 2026-09-29/),
-    ).toBeInTheDocument()
+    expect(within(row("辨識模型")).getByText("模型 rec-1")).toBeInTheDocument()
+    expect(within(row("辨識模型")).getByText("日版卡片索引")).toBeInTheDocument()
+    expect(within(row("辨識模型")).getByText(/5 個版次 · 卡表 2026-09-29/)).toBeInTheDocument()
     expect(screen.getByText(/^需要下載/)).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "全部下載" }))
@@ -104,7 +103,7 @@ describe("ScanModelsPage", () => {
     await page.render()
     const rec = row("辨識模型")
     expect(await within(rec).findByText("有新版本")).toBeInTheDocument()
-    expect(within(rec).getByText("版本 rec-2")).toBeInTheDocument()
+    expect(within(rec).getByText("模型 rec-2")).toBeInTheDocument()
     expect(within(rec).getByRole("button", { name: "更新" })).toBeEnabled()
   })
 

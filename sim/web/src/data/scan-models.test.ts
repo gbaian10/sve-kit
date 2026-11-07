@@ -51,6 +51,9 @@ describe("scan model store", () => {
       dataVersion: "2026-09-29",
     })
     expect(status.parts.rec.missingBytes).toBe(status.parts.rec.bytes)
+    // The index is part of the recogniser's size; the model takes the rest.
+    expect(status.parts.rec.indexBytes).toBeGreaterThan(0)
+    expect(status.parts.rec.indexBytes).toBeLessThan(status.parts.rec.bytes)
   })
 
   it("downloads each part with progress up to its fixed total, then reads it back from the device", async () => {

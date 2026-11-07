@@ -828,8 +828,9 @@ const zhTW = {
       rec: {
         name: "辨識模型",
         desc: "判斷拉正後的卡是哪一張。",
-        index:
-          "含{{edition}}卡片索引：{{cards}} 張卡，卡表 {{dataVersion}}。出新卡包時只更新索引。",
+        model: "模型 {{version}}",
+        indexName: "{{edition}}卡片索引",
+        index: "{{cards}} 個版次 · 卡表 {{dataVersion}}。出新卡包時只更新索引。",
         noIndex: "{{edition}}卡片索引還沒有發佈。",
       },
       list: {

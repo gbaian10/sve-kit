@@ -44,6 +44,8 @@ export interface ScanPartStatus {
   readonly dataVersion?: string
   /** Cards in that index. */
   readonly cards?: number
+  /** Bytes of that index, included in `bytes`; the rest is the model. */
+  readonly indexBytes?: number
 }
 
 export interface ScanModelsStatus {
@@ -191,7 +193,13 @@ export function createScanModelStore(options: ScanModelStoreOptions) {
     const describe = (copy: Copy) => ({
       bytes: sum(copy.files),
       version: copy.version,
-      ...(copy.index ? { dataVersion: copy.index.dataVersion, cards: copy.index.count } : {}),
+      ...(copy.index
+        ? {
+            dataVersion: copy.index.dataVersion,
+            cards: copy.index.count,
+            indexBytes: sum(indexList(copy.index)),
+          }
+        : {}),
     })
     const part = async (
       want: Copy | undefined,
