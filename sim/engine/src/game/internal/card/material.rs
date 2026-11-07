@@ -778,6 +778,7 @@ impl Game {
                 method,
                 false,
                 None,
+                None,
             )?;
             if moved.len() != members.len() || moved.iter().any(|result| result.after.is_none()) {
                 return Err(crate::EngineFailure::IllegalPlay(

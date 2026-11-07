@@ -127,6 +127,10 @@ runtime_record!(MoveOutcome { moved: Vec<MoveResult> });
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct MaterialActOutcome;
 
+/// Typed identity for one completed effect-evolution attempt, including failure.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct EvolutionOutcome;
+
 runtime_record!(SearchOutcome { found: Vec<RuntimeObjectView>, revealed: Vec<RuntimeObjectView>, moved: Vec<MoveResult> });
 
 runtime_record!(

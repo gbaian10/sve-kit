@@ -551,6 +551,7 @@ pub(super) struct NamedEffectEvolution {
     #[serde(rename = "ref")]
     pub reference: Objects,
     pub into: Option<EvolutionDestination>,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -778,6 +779,7 @@ pub(super) struct Move {
     pub r#ref: Option<MoveObjects>,
     pub top: Option<DeckTop>,
     pub to: Destination,
+    pub acted: Option<True>,
     pub position: Option<Placement>,
     pub order: Option<Chooser>,
     pub result: Option<String>,

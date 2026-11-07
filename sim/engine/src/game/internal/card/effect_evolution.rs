@@ -74,6 +74,10 @@ impl Game {
         let Some(entry) = projection.entry else {
             return Ok(false);
         };
+        execution.receipts.insert(
+            projection.instruction.receipt,
+            InstructionOutcome::EvolutionFailed,
+        );
         let members = execution.objects(self, entry.input)?;
         if members.len() > 1 {
             return Err(invalid("one actual field entry per effect evolution"));
@@ -138,6 +142,12 @@ impl Game {
         {
             return Err(invalid("foreign effect evolution subject"));
         }
+        let Node::Instruction { instruction } = &step.node else {
+            return Err(invalid("effect evolution attempt instruction"));
+        };
+        execution
+            .receipts
+            .insert(instruction.receipt, InstructionOutcome::EvolutionFailed);
         if !forms.is_empty() {
             let subject = self
                 .effect_evolution_subject(execution, &specification.subject)?

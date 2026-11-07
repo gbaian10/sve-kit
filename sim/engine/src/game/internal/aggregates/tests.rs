@@ -237,6 +237,7 @@ fn followed_life_reads_current_continuous_changes_from_either_players_context() 
                     MoveMethod::Put,
                     false,
                     None,
+                    None,
                 )
                 .unwrap();
             execution.receipts.insert(

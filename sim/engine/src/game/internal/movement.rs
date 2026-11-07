@@ -11,8 +11,8 @@ use crate::ir::{
     InstructionContext, MemberProjection, MoveDestination, MoveMethod, MoveOutcome, MoveReason,
     MoveResult, MoveSpec, MovementEvent, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
     ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat,
-    ReceiptId, ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef,
-    SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
+    Posture, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView,
+    RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
@@ -81,14 +81,15 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             Ok(())
         }
         Action::Move {
+            objects,
             movement,
             reason: MoveReason::Put,
-            ..
         } if field_move(movement)
             && movement.position.is_none()
             && movement.order.is_none()
-            && movement.initial_posture.is_none()
-            && movement.entry_effects.is_empty() =>
+            && matches!(movement.initial_posture, None | Some(Posture::Acted))
+            && movement.entry_effects.is_empty()
+            && admitted_field_source(objects, movement) =>
         {
             Ok(())
         }
@@ -246,8 +247,14 @@ pub(super) fn advance_entry(action: &Action) -> bool {
             && **predicate == Expr::Literal(Bool(true)))
 }
 
+fn admitted_field_source(objects: &Selector, movement: &MoveSpec) -> bool {
+    !matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Owner {}))
+        || matches!(objects, Selector::Objects { objects } if matches!(objects.as_slice(),
+            [ObjectOperand::FollowEventMove { event: MovementEvent::LeaveField { .. } }]))
+}
+
 pub(super) fn field_move(movement: &MoveSpec) -> bool {
-    matches!(&movement.to, MoveDestination::Shared { zone } if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Field)
+    matches!(&movement.to, MoveDestination::Shared { zone } if matches!(zone.player, PlayerRef::Controller {} | PlayerRef::Owner {}) && zone.kind == ZoneKind::Field)
 }
 
 pub(super) fn cemetery_ex_move(action: &Action) -> bool {
@@ -565,6 +572,7 @@ impl Game {
             MoveMethod::Banish,
             false,
             None,
+            None,
         )?;
         execution.receipts.insert(
             instruction.receipt,
@@ -615,6 +623,7 @@ impl Game {
             ZoneKind::Banish,
             MoveMethod::Banish,
             false,
+            None,
             None,
         )?;
         execution.receipts.insert(
@@ -769,6 +778,7 @@ impl Game {
             method,
             kind == ZoneKind::Ex,
             movement.and_then(|(spec, _)| spec.position),
+            None,
         )?;
         if let Some(plan) = capacity_plan {
             moves = capacity::complete_receipt(plan.moves, moves);
@@ -864,13 +874,19 @@ impl Game {
         Ok(())
     }
 
-    fn internal_field_entry(
-        &mut self,
-        execution: &mut Execution,
-        instruction: &Instruction,
+    fn field_entry_player(&self, execution: &Execution, movement: &MoveSpec) -> Result<PlayerId> {
+        let MoveDestination::Shared { zone } = &movement.to else {
+            return Err(invalid("field entry destination"));
+        };
+        execution.player(self, &zone.player)
+    }
+
+    fn field_entry_members(
+        &self,
+        execution: &Execution,
         objects: &Selector,
-    ) -> Result<()> {
-        let members = if let Selector::Zone {
+    ) -> Result<Vec<ObjectRef>> {
+        if let Selector::Zone {
             zone: ZoneKind::Evolve,
             players,
             predicate,
@@ -890,11 +906,25 @@ impl Game {
             )
             .iter()
             .map(|id| execution.reference(self, id))
-            .collect::<Result<Vec<_>>>()?
+            .collect::<Result<Vec<_>>>()
         } else {
-            execution.objects(self, objects)?
+            execution.objects(self, objects)
+        }
+    }
+
+    fn internal_field_entry(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<()> {
+        let members = self.field_entry_members(execution, objects)?;
+        let Action::Move { movement, .. } = &instruction.action else {
+            return Err(invalid("field entry movement"));
         };
-        let seat = super::seat_name(execution.context.controller)?;
+        let destination = self.field_entry_player(execution, movement)?;
+        let owner_destination = destination != execution.context.controller;
+        let seat = super::seat_name(destination)?;
         if matches!(objects, Selector::Objects { objects }
             if objects == &[ObjectOperand::SourceHolder {}])
         {
@@ -916,7 +946,7 @@ impl Game {
             execution.receipts.insert(
                 instruction.receipt,
                 InstructionOutcome::Move(MoveOutcome {
-                    moved: capacity::failed_field_entry(&members, execution.context.controller),
+                    moved: capacity::failed_field_entry(&members, destination),
                 }),
             );
             capacity::finish(execution, instruction);
@@ -928,7 +958,7 @@ impl Game {
             "field",
             ZoneKind::Field,
             MoveMethod::Put,
-            false,
+            owner_destination,
             None,
         )?;
         let Some(selected) = self.internal_movement_capacity(execution, instruction, &plan)? else {
@@ -936,7 +966,8 @@ impl Game {
         };
         for &member in &selected {
             let id = execution.object_id(member)?.to_owned();
-            if self.object(&id)?.generation == member.generation.0
+            if movement.initial_posture.is_none()
+                && self.object(&id)?.generation == member.generation.0
                 && self.internal_ward_entry_choice(execution, &id)?
             {
                 execution.todo.push_front(Node::Instruction {
@@ -951,11 +982,12 @@ impl Game {
             "field",
             ZoneKind::Field,
             MoveMethod::Put,
-            false,
+            owner_destination,
             None,
+            movement.initial_posture,
         )?;
         for member in &moved {
-            if member.after.is_some() {
+            if member.after.is_some() && movement.initial_posture.is_none() {
                 self.internal_ward_entry_posture(execution, member.before)?;
             }
         }
@@ -1077,7 +1109,7 @@ impl Game {
         zone: &str,
         kind: ZoneKind,
         method: MoveMethod,
-        owner_ex: bool,
+        owner_destination: bool,
         position: Option<Position>,
     ) -> Result<MovementPlan> {
         let mut moves = Vec::new();
@@ -1086,7 +1118,7 @@ impl Game {
             let id = execution.object_id(before)?.to_owned();
             let previous = self.object(&id)?.clone();
             let requested_to = RuntimeZoneRef {
-                player: if shared_destination(zone) && !owner_ex {
+                player: if shared_destination(zone) && !owner_destination {
                     execution.context.controller
                 } else {
                     player_id(&previous.owner)?
@@ -1156,8 +1188,9 @@ impl Game {
         zone: &str,
         kind: ZoneKind,
         method: MoveMethod,
-        owner_ex: bool,
+        owner_destination: bool,
         position: Option<Position>,
+        initial_posture: Option<Posture>,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         let old_deck = if kind == ZoneKind::Deck {
             self.state
@@ -1173,9 +1206,17 @@ impl Game {
         let MovementPlan {
             mut moves,
             mut plans,
-        } = self.plan_movements(execution, members, zone, kind, method, owner_ex, position)?;
+        } = self.plan_movements(
+            execution,
+            members,
+            zone,
+            kind,
+            method,
+            owner_destination,
+            position,
+        )?;
         let mut successful = Vec::new();
-        if owner_ex {
+        if owner_destination && kind == ZoneKind::Ex {
             let mut arrivals = BTreeMap::<String, usize>::new();
             for PlannedMove { previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced) {
                 let count = arrivals.entry(previous.owner.clone()).or_default();
@@ -1206,8 +1247,17 @@ impl Game {
         if method == MoveMethod::Destroy {
             frame.values.insert("destroyed_subjects".into(), json!(ids));
         }
-        if owner_ex {
+        if owner_destination {
             frame.values.insert("owner_destination".into(), json!(true));
+        }
+        match (initial_posture, zone) {
+            (None, _) => {}
+            (Some(Posture::Acted), "field") => {
+                frame.values.insert("field_entry_acted".into(), json!(true));
+            }
+            (Some(Posture::Acted | Posture::Standing), _) => {
+                return Err(unsupported("fixed acted field entry"));
+            }
         }
         if method == MoveMethod::Banish {
             // The ordinary banish event is emitted only for a banish instruction frame.
@@ -1226,7 +1276,7 @@ impl Game {
             self.move_objects(
                 &ids,
                 zone,
-                if shared_destination(zone) && !owner_ex {
+                if shared_destination(zone) && !owner_destination {
                     Some(super::seat_name(execution.context.controller)?)
                 } else {
                     None

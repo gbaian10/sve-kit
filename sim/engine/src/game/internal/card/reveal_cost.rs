@@ -157,6 +157,7 @@ impl Game {
             MoveMethod::Put,
             false,
             position,
+            None,
         )?;
         if moved.len() != members.len()
             || !moved.iter().zip(members).all(|(arrival, selected)| {

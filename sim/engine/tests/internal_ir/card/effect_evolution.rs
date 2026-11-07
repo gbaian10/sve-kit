@@ -248,8 +248,12 @@ fn effect_evolution_uses_private_matching_resource_and_no_intrinsic_payment() {
     )
     .unwrap_err();
     assert_eq!(format!("{game:?}"), atomic);
-    game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![]))
-        .unwrap_err();
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Targets(vec![u64::MAX]),
+    )
+    .unwrap_err();
     assert_eq!(format!("{game:?}"), atomic);
     let activation = resolved(
         game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
@@ -286,7 +290,6 @@ fn effect_evolution_rejects_unneeded_shapes_and_forged_private_domain() {
         json!({"gain_drive":{"ref":"this","into":"other"}}),
         json!({"evolve":{"ref":"this","into":["other"]}}),
         json!({"evolve":{"ref":"this","into":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","name_contains":"other"}}}),
-        json!({"evolve":{"ref":"this","into":"other","result":"changed"}}),
         json!({"evolve":{"ref":"this","into":"other","precondition":{"awakened":true}}}),
         json!({"evolve":{"ref":"this","into":""}}),
     ] {
@@ -388,4 +391,84 @@ fn effect_evolution_field_count_guard_uses_only_the_controllers_field() {
             json!({"if":{"cond":{"entered_from":{"ref":"this","from":"hand"}},"then":[]}}),
         ))
         .unwrap_err();
+}
+
+#[test]
+fn effect_evolution_result_distinguishes_success_absence_and_decline() {
+    for (destination, succeeds) in [
+        ("named destination", true),
+        ("absent destination", false),
+        ("named destination", false),
+    ] {
+        let mut input = tree(json!({"evolve":{
+            "ref":"this", "into":destination, "result":"changed"
+        }}));
+        input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"if":{
+                "cond":{"not":{"did":"changed"}},
+                "then":[{"life":{"who":"self","delta":1}}]
+            }}));
+        let programs = lowerer().lower(&input).unwrap();
+        let mut game = named_position(&programs["unit-follower"]);
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("effect evolution resource choice");
+        };
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("effect evolution private forms");
+        };
+        assert_eq!(
+            domain.members.len(),
+            usize::from(destination == "named destination")
+        );
+        assert!(game.internal_decision(View::P2).is_none());
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets(if succeeds {
+                    domain.members.iter().map(|member| member.handle).collect()
+                } else {
+                    vec![]
+                }),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            if succeeds { 20_u8 } else { 21_u8 }
+        );
+    }
+}
+
+#[test]
+fn evolution_results_cannot_be_read_before_or_outside_their_producer() {
+    let attempt = json!({"evolve":{"ref":"this","result":"changed"}});
+    let read = json!({"if":{"cond":{"did":"changed"},"then":[{"life":{"who":"self","delta":1}}]}});
+    for steps in [
+        json!([read.clone(), attempt.clone()]),
+        json!([{"if":{"cond":{"awakened":true},"then":[attempt]}}, read]),
+    ] {
+        let mut input = tree(json!({"life":{"who":"self","delta":1}}));
+        input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = steps;
+        lowerer().lower(&input).unwrap_err();
+    }
+}
+
+#[test]
+fn evolution_results_cannot_redeclare_an_existing_attempt_name() {
+    let mut input = tree(json!({"evolve":{"ref":"this","result":"first"}}));
+    let steps = &mut input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"];
+    steps
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"evolve":{"ref":"this","result":"second"}}));
+    lowerer().lower(&input).unwrap();
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1]["evolve"]["result"] =
+        json!("first");
+    lowerer().lower(&input).unwrap_err();
 }

@@ -1276,6 +1276,7 @@ fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
+    evolutions: BTreeMap<String, ReceiptId>,
     paid_materials: BTreeMap<String, ReceiptId>,
     paid_material_acts: BTreeMap<String, ReceiptId>,
     /// Declared bounds of named discard payments.
@@ -1288,7 +1289,7 @@ struct ReceiptReads {
 #[derive(Clone)]
 struct FieldOutput {
     receipt: super::MovementReceipt,
-    single_follower_search: bool,
+    single_evolution_subject: bool,
 }
 
 struct BodyContext<'definitions> {

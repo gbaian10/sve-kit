@@ -1,7 +1,7 @@
 use super::super::{
     DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
     MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position, PositiveNat,
-    ReceiptReference, Visibility,
+    Posture, ReceiptReference, Visibility,
 };
 use super::{
     Action, BodyContext, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
@@ -60,7 +60,10 @@ impl BodyContext<'_> {
                     receipt: MovementReceipt::Move {
                         receipt: ReceiptReference::new(receipt),
                     },
-                    single_follower_search: false,
+                    single_evolution_subject: matches!(
+                        value.r#ref,
+                        Some(ast::MoveObjects::Field(ast::Objects::This(_)))
+                    ),
                 },
             );
         }
@@ -194,6 +197,7 @@ impl BodyContext<'_> {
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)
+                || self.receipt_reads.evolutions.contains_key(name)
                 || self.searches.contains(name)
                 || self
                     .observations
@@ -312,7 +316,11 @@ impl BodyContext<'_> {
             movement: MoveSpec {
                 to: MoveDestination::Shared {
                     zone: super::super::ZoneRef {
-                        player: PlayerRef::Controller {},
+                        player: if self.leave_event.is_some() {
+                            PlayerRef::Owner {}
+                        } else {
+                            PlayerRef::Controller {}
+                        },
                         kind: ZoneKind::Field,
                     },
                 },
@@ -396,6 +404,16 @@ impl BodyContext<'_> {
                     Selector::Union { sets }
                 }
                 ast::BanishAction::Objects(objects)
+                    if let ast::ObjectAction::Short(ast::Objects::Follow { follow }) =
+                        objects.as_ref()
+                        && self.field_outputs.get(follow).is_some_and(|output| {
+                            output.single_evolution_subject
+                                && matches!(output.receipt, MovementReceipt::Move { .. })
+                        }) =>
+                {
+                    self.followed(follow, path)?
+                }
+                ast::BanishAction::Objects(objects)
                     if let ast::ObjectAction::Long {
                         r#ref: ast::Objects::Bound(name),
                         result: Some(_),
@@ -435,14 +453,25 @@ impl BodyContext<'_> {
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if value.acted.is_some() && !matches!(value.to, ast::Destination::Field) {
+            return Err(unsupported(path));
+        }
         if let Some(action) = self.hand_departure_self_move(value, path)? {
             return Ok(action);
         }
         if matches!(value.to, ast::Destination::Field) {
             if let Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) = &value.r#ref {
-                return self.self_return(objects, path);
+                let mut action = self.self_return(objects, path)?;
+                if let Action::Move { movement, .. } = &mut action {
+                    movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+                }
+                return Ok(action);
             }
-            return self.field_entry_move(value, path);
+            let mut action = self.field_entry_move(value, path)?;
+            if let Action::Move { movement, .. } = &mut action {
+                movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+            }
+            return Ok(action);
         }
         if let Some(top) = &value.top {
             return self.top_move(value, top, path);
@@ -546,6 +575,7 @@ impl BodyContext<'_> {
             || value.order.is_some()
             || value.result.is_some()
             || value.top.is_some()
+            || value.acted.is_some()
         {
             return Err(unsupported(path));
         }

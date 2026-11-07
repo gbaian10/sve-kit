@@ -77,6 +77,7 @@ impl Game {
                 MoveMethod::Put,
                 false,
                 None,
+                None,
             )?;
         }
         execution.facts.push(Fact::Payment {

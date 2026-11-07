@@ -317,6 +317,8 @@ pub enum InstructionOutcome {
     NestedPlay(Option<ExecutionId>),
     /// Whether the controller accepted an optional body.
     Optional(bool),
+    /// A completed effect-evolution attempt without a successful evolution.
+    EvolutionFailed,
     /// One effect-driven ordinary evolution and its live physical association.
     Evolution {
         /// The public before/after evolution fact.

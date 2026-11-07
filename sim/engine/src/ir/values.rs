@@ -624,6 +624,7 @@ variants!(NatFrozen {
     DiceValue { event: Binding<DiceEvent> } => ["read.event-field"]
 });
 variants!(BoolFrozen {
+    EvolutionSucceeded { receipt: ReceiptReference<super::EvolutionOutcome> } => ["read.receipt.evolution-succeeded"],
     PaymentsComplete { receipts: Binding<ReceiptList<PaymentResult>>, quantifier: ReceiptQuantifier } => ["read.receipt.payments-complete"],
     PaymentZero { event: Binding<PaymentEvent> } => ["read.event-field"],
     PaymentReplaced { event: Binding<PaymentEvent> } => ["read.event-field"],

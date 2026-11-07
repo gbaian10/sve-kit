@@ -1093,6 +1093,7 @@ impl Checker {
 struct OpaqueOutcome;
 const fn outcome(action: &Action) -> TypeId {
     match action {
+        Action::Evolve { .. } => TypeId::of::<super::EvolutionOutcome>(),
         Action::Discard { .. } => TypeId::of::<super::DiscardOutcome>(),
         Action::Draw { .. } => TypeId::of::<CardQuantityOutcome>(),
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
@@ -1112,7 +1113,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::Reveal { .. }
         | Action::RevealUntil { .. }
         | Action::Shuffle { .. }
-        | Action::Evolve { .. }
         | Action::FlipUp { .. }
         | Action::Posture { .. }
         | Action::Resource { .. }

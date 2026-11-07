@@ -4,8 +4,8 @@ use super::{
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
 use crate::ir::{
-    Decision, DecisionKind, Declinable, IterationOrder, PlayerRef, PlayerStage, ReceiptId,
-    StageMode,
+    Decision, DecisionKind, Declinable, EvolutionOutcome, IterationOrder, PlayerRef, PlayerStage,
+    ReceiptId, StageMode,
 };
 use crate::ir::{advance_entry, effect_evolution};
 use alloc::collections::BTreeMap;
@@ -20,7 +20,15 @@ impl Checker {
         }
         let result = self.control_inner(control);
         self.env.play_modes = modes;
-        result
+        result?;
+        if let Some(projection) = effect_evolution::projection(control) {
+            // This closed zero-or-one projection always completes its single attempt receipt.
+            self.env.receipts.insert(
+                projection.instruction.receipt,
+                TypeId::of::<EvolutionOutcome>(),
+            );
+        }
+        Ok(())
     }
 
     fn control_inner(&mut self, control: &Control) -> Checked {

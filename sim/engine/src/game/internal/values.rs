@@ -895,6 +895,50 @@ impl Execution {
             .collect()
     }
 
+    fn evolution_succeeded(&self, receipt: ReceiptId) -> Result<Bool> {
+        match self.receipts.get(&receipt) {
+            Some(InstructionOutcome::Evolution { .. }) => Ok(Bool(true)),
+            Some(InstructionOutcome::EvolutionFailed) => Ok(Bool(false)),
+            _ => Err(invalid("missing effect evolution result")),
+        }
+    }
+
+    fn boolean_receipt(&self, read: &BoolFrozen) -> Result<Bool> {
+        match read {
+            BoolFrozen::EvolutionSucceeded { receipt } => {
+                let ReceiptLocation::Local { id } = receipt.location() else {
+                    return Err(unsupported("iterated effect evolution result"));
+                };
+                self.evolution_succeeded(*id)
+            }
+            BoolFrozen::PaymentComplete {
+                receipt: PaymentReference::Local { receipt },
+            } => {
+                let ReceiptLocation::Local { id } = receipt.location() else {
+                    return Err(unsupported("iterated optional payment"));
+                };
+                match self.receipts.get(id) {
+                    Some(InstructionOutcome::ExchangePayment(payment)) => Ok(payment.complete),
+                    _ => Err(invalid("missing optional payment result")),
+                }
+            }
+            BoolFrozen::PaymentComplete {
+                receipt: PaymentReference::CardPlay { face, receipt },
+            } => match &self.card_payment {
+                Some((paid_face, paid_receipt))
+                    if self.spell && paid_face == face && paid_receipt == receipt =>
+                {
+                    match self.receipts.get(paid_receipt) {
+                        Some(InstructionOutcome::ExchangePayment(payment)) => Ok(payment.complete),
+                        _ => Err(invalid("missing card payment result")),
+                    }
+                }
+                _ => Err(invalid("unavailable card play payment")),
+            },
+            _ => Err(unsupported("boolean receipt")),
+        }
+    }
+
     pub(super) fn boolean(&self, game: &Game, expr: &Expr<Bool>) -> Result<Bool> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -905,35 +949,7 @@ impl Execution {
                     Err(invalid("missing boolean binding"))
                 }
             }
-            Expr::Frozen(read) => match read.as_ref() {
-                BoolFrozen::PaymentComplete {
-                    receipt: PaymentReference::Local { receipt },
-                } => {
-                    let ReceiptLocation::Local { id } = receipt.location() else {
-                        return Err(unsupported("iterated optional payment"));
-                    };
-                    match self.receipts.get(id) {
-                        Some(InstructionOutcome::ExchangePayment(payment)) => Ok(payment.complete),
-                        _ => Err(invalid("missing optional payment result")),
-                    }
-                }
-                BoolFrozen::PaymentComplete {
-                    receipt: PaymentReference::CardPlay { face, receipt },
-                } => match &self.card_payment {
-                    Some((paid_face, paid_receipt))
-                        if self.spell && paid_face == face && paid_receipt == receipt =>
-                    {
-                        match self.receipts.get(paid_receipt) {
-                            Some(InstructionOutcome::ExchangePayment(payment)) => {
-                                Ok(payment.complete)
-                            }
-                            _ => Err(invalid("missing card payment result")),
-                        }
-                    }
-                    _ => Err(invalid("unavailable card play payment")),
-                },
-                _ => Err(unsupported("boolean receipt")),
-            },
+            Expr::Frozen(read) => self.boolean_receipt(read),
             Expr::Compute(operation) => Ok(Bool(match operation.as_ref() {
                 Predicate::And { predicates } => predicates
                     .iter()

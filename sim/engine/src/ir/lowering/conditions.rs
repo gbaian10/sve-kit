@@ -525,6 +525,13 @@ impl BodyContext<'_> {
     }
 
     fn move_success(&self, name: &str, path: &str) -> Result<Expr<Bool>, LoweringError> {
+        if let Some(receipt) = self.receipt_reads.evolutions.get(name) {
+            return Ok(Expr::Frozen(Box::new(
+                super::super::BoolFrozen::EvolutionSucceeded {
+                    receipt: super::super::ReceiptReference::new(*receipt),
+                },
+            )));
+        }
         let receipt = self
             .observations
             .get(name)

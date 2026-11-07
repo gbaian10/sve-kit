@@ -137,9 +137,14 @@ impl Checker {
         let subject = specification
             .as_ref()
             .map_or(ObjectOperand::SourceHolder {}, |spec| spec.subject.clone());
-        let bounds = specification
-            .as_ref()
-            .map_or_else(one, effect_evolution::Specification::cardinality);
+        let bounds = if resolution {
+            Cardinality {
+                minimum: Nat(0),
+                maximum: Some(Nat(1)),
+            }
+        } else {
+            one()
+        };
         if let ObjectOperand::Bound { binding } = &subject
             && self.env.effect_entry_subject != Some(*binding)
         {
