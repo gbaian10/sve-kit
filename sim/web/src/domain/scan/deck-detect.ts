@@ -8,6 +8,10 @@ import type { Point, Quad } from "./tensor"
 const DECK_TILE_SCALES = [0.22, 0.32, 0.45, 0.65, 1.0] as const
 const MERGE_IOU = 0.35
 const MIN_EDGE = 12
+/** Finds at least this sure set the size of a typical card; weaker ones (print, dice) do not. */
+const STRONG = 0.6
+/** A whole-photo find counts only for a card too big for the tiles: long side over this share of the short side. */
+const WHOLE_MIN = 0.4
 
 export interface Tile {
   readonly x: number
@@ -120,6 +124,41 @@ const centre = (q: Quad): Point => [
 ]
 
 /**
+ * The whole photo as one square tile, the photo centred in it: the tiles stop at the short side,
+ * so a card filling more of the photo is only seen whole here.
+ */
+export function wholeTile(width: number, height: number): Tile {
+  const side = Math.max(width, height)
+  return { x: (width - side) / 2, y: (height - side) / 2, side }
+}
+
+/** Finds from `wholeTile`, kept only for cards too big for the tiles. */
+export function placeWholeFinds(
+  finds: readonly Box[],
+  width: number,
+  height: number,
+  input: number,
+): Box[] {
+  const least = WHOLE_MIN * Math.min(width, height)
+  return placeTileFinds(finds, wholeTile(width, height), input).filter(
+    (box) => Math.max(...edges(box.quad)) >= least,
+  )
+}
+
+function contains(q: Quad, p: Point): boolean {
+  let sign = 0
+  for (let i = 0; i < 4; i += 1) {
+    const a = q[i] as Point
+    const b = q[(i + 1) % 4] as Point
+    const cross = Math.sign((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]))
+    if (!cross) continue
+    if (!sign) sign = cross
+    else if (cross !== sign) return false
+  }
+  return true
+}
+
+/**
  * Maps one tile's finds (in the finder's `input` pixels) into photo pixels, dropping quads cut by
  * the tile edge or without a card's shape.
  */
@@ -154,10 +193,9 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
     if (iouOk) keep.push(box)
   }
   if (keep.length >= 5) {
-    // A box mostly inside another: keep the one whose size is nearer a typical card of this photo.
+    // A box mostly inside another (art inside a card, a card inside a bigger false box): keep the
+    // surer one.
     const areas = keep.map((box) => area(box.quad))
-    const median = [...areas].sort((a, b) => a - b)[areas.length >> 1] ?? 1
-    const off = (value: number) => Math.abs(Math.log(value / median))
     const drop = new Set<number>()
     for (let i = 0; i < keep.length; i += 1)
       for (let j = 0; j < keep.length; j += 1) {
@@ -165,7 +203,7 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
         const aj = areas[j] ?? 0
         if (i === j || ai >= aj) continue
         if (overlap((keep[i] as Box).quad, (keep[j] as Box).quad) <= 0.5 * ai) continue
-        drop.add(off(ai) > off(aj) ? i : j)
+        drop.add((keep[i] as Box).score >= (keep[j] as Box).score ? j : i)
       }
     keep = keep.filter((_, i) => !drop.has(i))
     // A box straddling two neighbours is not a card.
@@ -178,20 +216,30 @@ export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
     })
   }
   if (keep.length >= 5) {
-    // Two neighbours merged into one box: much bigger than the cards around it.
+    // Sizes are judged against the nearest sure finds, so printed marks and dice around a card
+    // cannot make it look too big. Far smaller than them: not a card. Much bigger and holding two
+    // other finds: two neighbours merged into one box. A big card on its own stays.
     const sizes = keep.map((box) => area(box.quad))
     const centres = keep.map((box) => centre(box.quad))
-    keep = keep.filter((_, i) => {
+    const sure = keep.flatMap((box, j) => (box.score >= STRONG ? [j] : []))
+    const reference = sure.length > 0 ? sure : keep.map((_, j) => j)
+    keep = keep.filter((box, i) => {
       const [cx, cy] = centres[i] as Point
-      const near = centres
-        .map(([x, y], j) => [Math.hypot(x - cx, y - cy), j] as const)
+      const near = reference
+        .filter((j) => j !== i)
+        .map((j) => {
+          const [x, y] = centres[j] as Point
+          return [Math.hypot(x - cx, y - cy), j] as const
+        })
         .sort((a, b) => a[0] - b[0])
-        .slice(1, 7)
+        .slice(0, 6)
         .map(([, j]) => sizes[j] ?? 0)
         .sort((a, b) => a - b)
       const median = near[near.length >> 1] ?? 0
       const size = sizes[i] ?? 0
-      return size > 0.35 * median && size < 2.2 * median
+      if (size <= 0.35 * median) return false
+      if (size < 2.2 * median) return true
+      return centres.filter((c, j) => j !== i && contains(box.quad, c)).length < 2
     })
   }
   const heights = keep
