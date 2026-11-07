@@ -178,3 +178,72 @@ def test_search_destination_parameters_do_not_replace_structure() -> None:
         },
         accepted=False,
     )
+
+
+def test_acted_search_round_trips_the_single_field_entry_in_schema_and_python() -> None:
+    value: JsonValue = {
+        "sel": {"who": "self", "zone": "deck", "name": "ツタンカーメン"},
+        "n": 1,
+        "to": "field",
+        "acted": True,
+    }
+    _check("A.act.search", value, accepted=True)
+    validator = Draft202012Validator(
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/A.act.search"}
+    )
+    assert validator.is_valid(value)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"to": "hand"},
+        {"to": "ex"},
+        {"to": {"param": "destination"}},
+        {"n": 2},
+        {"n": {"param": "amount"}},
+        {"acted": False},
+    ],
+)
+def test_acted_search_rejects_other_destinations_counts_and_false(
+    change: dict[str, JsonValue],
+) -> None:
+    base: dict[str, JsonValue] = {
+        "sel": {"who": "self", "zone": "deck"},
+        "n": 1,
+        "to": "field",
+    }
+    changed = {**base, **change}
+    changed.pop("acted", None)
+    _check("A.act.search", changed, accepted=True)
+    value = {**base, "acted": True, **change}
+    _check("A.act.search", value, accepted=False)
+    validator = Draft202012Validator(
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/A.act.search"}
+    )
+    assert not validator.is_valid(value)
+
+
+@pytest.mark.parametrize(
+    "quantity",
+    [
+        {"sel": {"who": "self", "zone": "deck"}, "upto": 1},
+        {
+            "groups": [
+                {"sel": {"who": "self", "zone": "deck", "name": "a"}, "n": 1},
+                {"sel": {"who": "self", "zone": "deck", "name": "b"}, "n": 1},
+            ]
+        },
+    ],
+)
+def test_acted_search_does_not_widen_up_to_or_grouped_shapes(
+    quantity: dict[str, JsonValue],
+) -> None:
+    base = {**quantity, "to": "field"}
+    _check("A.act.search", base, accepted=True)
+    value = {**base, "acted": True}
+    _check("A.act.search", value, accepted=False)
+    validator = Draft202012Validator(
+        {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/A.act.search"}
+    )
+    assert not validator.is_valid(value)

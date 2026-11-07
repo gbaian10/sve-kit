@@ -660,6 +660,12 @@ def _move[T: Mapping[str, object]](value: T) -> T:
     return value
 
 
+def _search_entry_posture[T: Mapping[str, object]](value: T) -> T:
+    if "acted" in value and (value["to"] != "field" or value["n"] != 1):
+        raise ValueError("Acted search requires one card onto the field")
+    return value
+
+
 def _replacement[T: Mapping[str, object]](value: T) -> T:
     changed = value.keys() - {"if", "after"}
     if not changed or ("replace_with" in changed and len(changed) != 1):
@@ -1224,13 +1230,29 @@ class DestroyInsteadFields(_DestroyInsteadKeys):
 type DestroyInstead = Annotated[DestroyInsteadFields, AfterValidator(_replacement)]
 
 
-@with_config(CONFIG)
+@with_config(
+    ConfigDict(
+        **CONFIG,
+        json_schema_extra={
+            "allOf": [
+                {
+                    "if": {"required": ["acted"]},
+                    "then": {
+                        "properties": {"to": {"const": "field"}, "n": {"const": 1}}
+                    },
+                }
+            ],
+        },
+    )
+)
 class SearchExactFields(TypedDict):
     sel: ObjectSel
 
     n: SelectionQuantity
 
     to: SearchDestination
+
+    acted: NotRequired[TrueFlag]
 
     result: NotRequired[BindingName]
 
@@ -1245,7 +1267,7 @@ class SearchExactFields(TypedDict):
     instead: NotRequired[Annotated[tuple[SearchInstead, ...], Field(min_length=1)]]
 
 
-type SearchExact = SearchExactFields
+type SearchExact = Annotated[SearchExactFields, AfterValidator(_search_entry_posture)]
 
 
 @with_config(CONFIG)
