@@ -1,0 +1,40 @@
+cards:
+  BP20-029:
+    abilities:
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            any_of:
+              - fused:
+                  material:
+                    trait: 財宝
+                  who: self
+              - played:
+                  sel:
+                    trait: 財宝
+                  who: self
+          per_turn: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 黄金の杯
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token_sources:
+      - card: BP15-P30
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

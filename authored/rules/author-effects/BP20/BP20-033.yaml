@@ -1,0 +1,44 @@
+cards:
+  BP20-033:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - assail
+                on: this
+          on:
+            any_of:
+              - fused:
+                  material:
+                    trait: 財宝
+                  who: self
+              - played:
+                  sel:
+                    trait: 財宝
+                  who: self
+        line: 2
+      - lastword:
+          do:
+            - create:
+                to: ex
+                token:
+                  - 黄金の杯
+                  - 黄金の靴
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-07"
+    token_sources:
+      - card: BP15-P31
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
