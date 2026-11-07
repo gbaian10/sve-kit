@@ -13,6 +13,14 @@ type ReadObject = NonNullable<Awaited<ReturnType<Env["PREVIEW_BUCKET"]["get"]>>>
 const HASH = "a".repeat(64)
 const BLOB = `snapshots/blobs/${HASH}.json`
 const INDEX = "snapshots/versions/index.json"
+const SCAN_MANIFEST = "scan/manifest.json"
+const SCAN_FILES = [
+  `scan/models/${HASH}.onnx`,
+  `scan/index/${HASH}.i8`,
+  `scan/index/${HASH}.scale`,
+  `scan/index/${HASH}.hub`,
+  `scan/index/${HASH}.json`,
+]
 const IMMUTABLE = "private, max-age=31536000, immutable"
 
 function fixture(bytes: Uint8Array = new TextEncoder().encode('{"synthetic":true}')) {
@@ -117,6 +125,7 @@ describe("development Worker", () => {
     `snapshots/manifests/${HASH}.json`,
     `snapshots/manifests/${HASH}.json.br`,
     `construction/${HASH}/jp.json`,
+    ...SCAN_FILES,
   ])("serves immutable %s from the edge after an R2 miss", async (key) => {
     const f = fixture()
     const first = await worker.fetch(
@@ -152,7 +161,7 @@ describe("development Worker", () => {
     }
   })
 
-  it.each([INDEX, "images/card_l/20001.webp", "images/art_s/20001-f1.webp"])(
+  it.each([INDEX, SCAN_MANIFEST, "images/card_l/20001.webp", "images/art_s/20001-f1.webp"])(
     "reads updated %s from R2 even with a version query",
     async (key) => {
       const f = fixture()
@@ -309,6 +318,8 @@ describe("development Worker", () => {
     "images/card_l/20001.webp",
     "images/art_s/20001-f2.webp",
     "images/art_s/9007199254740991.webp",
+    SCAN_MANIFEST,
+    ...SCAN_FILES,
   ])("reads only the public key %s", async (key) => {
     const f = fixture()
     const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env, f.ctx)
@@ -363,6 +374,21 @@ describe("development Worker", () => {
     `/cdn-preview%2fsnapshots/blobs/${HASH}.json`,
     `/cdn-preview%252fsnapshots/blobs/${HASH}.json`,
     `/cdn-preview\\snapshots/blobs/${HASH}.json`,
+    "/cdn-preview/scan/",
+    "/cdn-preview/scan/manifest.json.br",
+    "/cdn-preview/scan/manifest-old.json",
+    "/cdn-preview/scan/release-v1/manifest.json",
+    "/cdn-preview/scan/models/rec-1.onnx",
+    `/cdn-preview/scan/models/${HASH}.onnx.br`,
+    `/cdn-preview/scan/models/${HASH}.i8`,
+    `/cdn-preview/scan/models/${HASH.toUpperCase()}.onnx`,
+    `/cdn-preview/scan/models/${HASH.slice(1)}.onnx`,
+    `/cdn-preview/scan/index/${HASH}.onnx`,
+    `/cdn-preview/scan/index/${HASH}.bin`,
+    `/cdn-preview/scan/index/jp/${HASH}.json`,
+    `/cdn-preview/scan/index/../models/${HASH}.onnx`,
+    `/cdn-preview/scan%2fmodels/${HASH}.onnx`,
+    `/cdn-preview/scan/${HASH}.onnx`,
   ])("rejects the path %s without reading R2 or serving HTML", async (path) => {
     const f = fixture()
     const response = await worker.fetch(request(path), f.env, f.ctx)

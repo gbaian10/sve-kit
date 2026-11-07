@@ -35,6 +35,10 @@ const INDEX = "snapshots/versions/index.json"
 const JSON_KEY =
   /^(?:snapshots\/(?:blobs|manifests)\/[0-9a-f]{64}\.json(?:\.br)?|construction\/[0-9a-f]{64}\/(?:jp|en)\.json)$/
 const IMAGE_KEY = /^images\/(?:card_[sl]|art_s)\/([1-9][0-9]*)(?:-f([1-9][0-9]*))?\.webp$/
+// Card-scanner files are named by their content hash; only the manifest that lists them changes.
+const SCAN_MANIFEST = "scan/manifest.json"
+const SCAN_FILE =
+  /^scan\/(?:models\/[0-9a-f]{64}\.onnx|index\/[0-9a-f]{64}\.(?:i8|scale|hub|json))$/
 const BROWSER_CACHE_CONTROL = "X-Sve-Browser-Cache-Control"
 const EDGE_CACHE_CONTROL = "public, max-age=31536000, immutable"
 // Vite names its build output by content hash, so a reload need not revalidate these files.
@@ -50,7 +54,8 @@ function positiveInteger(value: string | null): boolean {
 function allowedKey(key: string): boolean {
   // Public 2.0 keys need no decoding; rejecting escapes also rejects encoded separators and traversal.
   if (/[^a-z0-9_./-]/.test(key)) return false
-  if (key === INDEX || JSON_KEY.test(key)) return true
+  if (key === INDEX || key === SCAN_MANIFEST || JSON_KEY.test(key) || SCAN_FILE.test(key))
+    return true
   const image = IMAGE_KEY.exec(key)
   return (
     image !== null &&
@@ -141,7 +146,8 @@ export default {
       let edgeCache: EdgeCache | undefined
       let cached: Response | undefined
       // Only immutable paths can share a GET entry across queries, cookies and HEAD requests.
-      const cacheKey = JSON_KEY.test(key) ? new Request(`${url.origin}${PREFIX}${key}`) : null
+      const immutable = JSON_KEY.test(key) || SCAN_FILE.test(key)
+      const cacheKey = immutable ? new Request(`${url.origin}${PREFIX}${key}`) : null
       if (cacheKey !== null) {
         try {
           edgeCache = (globalThis as typeof globalThis & { caches: { default: EdgeCache } }).caches

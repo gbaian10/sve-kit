@@ -94,7 +94,7 @@ Brotli 由鎖定的 Python 套件在行程內處理，不啟動外部壓縮子�
    並在 handler／靜態路徑都驗收；僅 custom domain 的 Access 不能當作別名安全證明。
 4. 關閉或全面保護的設定、既有部署別名是否仍可取用，未驗證，需維護者實測。
    無法證明保護時，使用受審的全路由 host gate，讓別名回 403／404；未通過前不部署真實資料。
-5. handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images key，
+5. handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images／scan key，
    不列桶、不提供任意 pathname、private／reports／PNG；缺物件回 404，不能回 SPA HTML。
 
 參考 [Access HTTP applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)。
@@ -141,6 +141,8 @@ Workers 免費方案每天 10 萬次，超過會失敗（官方文件，2026-10-
 `/assets/` 下以內容雜湊命名的建置輸出（200／304，且不是 SPA fallback 的 HTML）改為 `private, max-age=31536000, immutable`，
 重新整理時不必逐檔回源確認；`index.html` 與 `public/` 的固定檔名檔案維持平台預設的重新驗證。
 `/cdn-preview/` 僅接受 GET／HEAD 與 2.0 公開 JSON／三檔 WebP key，缺件或拒絕均不回 HTML；
+拍卡另只放行 `scan/manifest.json`、`scan/models/<sha256>.onnx` 與 `scan/index/<sha256>.{i8,scale,hub,json}`；
+雜湊檔與 snapshot blob 一樣進邊緣快取，清單與版本索引一樣每次讀 R2。
 R2 壓縮旁檔依 [Response 官方文件](https://developers.cloudflare.com/workers/runtime-apis/response/)
 以 `encodeBody: "manual"` 保留 wire bytes。Access 保護與平台行為仍需維護者實測。
 沿用發布器設定的 Cache-Control，dev 改為 private（僅將 public 換成 private），其餘指令保持原樣。
@@ -264,7 +266,6 @@ uv --directory publish run sve-publish scan upload "$SCAN_RELEASE" \
    中途失敗時舊清單仍有效，用同一資料夾重跑
 
 舊版的雜湊檔留在桶內，目前沒有 `scan/` 的回收，清理日後另議並經維護者同意。
-Dev Worker 白名單目前不含 `scan/`，`/cdn-preview/scan/…` 仍是 404；前端要從 dev 讀取需另改 Worker。
 
 ## 9. 每個入口的未登入驗法與預期結果
 
