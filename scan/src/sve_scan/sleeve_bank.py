@@ -13,8 +13,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+from sve_scan import deck_label, paths
 from sve_scan import gallery as GL
-from sve_scan import paths
 from sve_scan.splits import EVAL_EVENTS
 
 cv2.setNumThreads(3)
@@ -62,7 +62,7 @@ def box(x):
 AB, RR, info, thumbs = [], [], [], []
 classes = json.loads((LAB / "image-classes.json").read_text())
 for e in classes:
-    p = LAB / f"cards/{e['i']}.json"
+    p = LAB / "cards" / deck_label.label_name(e["i"])
     if e["cls"] != "deck_photo" or not p.exists():
         continue
     is_eval = e["event"].replace("_p2", "") in EVAL_EVENTS
@@ -149,6 +149,8 @@ for e in classes:
         thumbs.append(cv2.resize(np.hstack([(A * 255).astype(np.uint8), (Of * 255).astype(np.uint8)]), (W, H // 2)))
         if len(info) % 50 == 0:
             print(len(info), e["event"], flush=True)
+if not AB:
+    raise SystemExit(f"no usable sure cards found under {LAB / 'cards'}: run deck-label first")
 np.savez(out / f"sleeve_{split}.npz", ab=np.stack(AB), res=np.stack(RR))
 (out / f"sleeve_{split}.json").write_text(json.dumps(info, ensure_ascii=False))
 np.save(out / f"sleeve_{split}_thumbs.npy", np.stack(thumbs))

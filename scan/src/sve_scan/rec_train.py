@@ -411,6 +411,9 @@ def evaluate(model: nn.Module, gallery_np: np.ndarray, queries: dict, tag: str) 
 def main() -> None:
     arch, epochs = sys.argv[1], int(sys.argv[2])
     tag = sys.argv[3] if len(sys.argv) > 3 else arch
+    from sve_scan import gallery as GL
+
+    GL.current(OUT)  # refuse an image array built for other gallery rows
     gallery_np = np.load(OUT / "gallery.npy")
     gallery_t = torch.from_numpy(gallery_np)
     queries = {c: load_queries(c) for c in COND}

@@ -58,7 +58,7 @@ def main():
     out_path, configs = sys.argv[2], [c.split(":") for c in sys.argv[3:]]
     res = []
     for e in json.loads((LAB / "image-classes.json").read_text()):
-        p = LAB / f"cards/{e['i']:03d}.json"
+        p = LAB / "cards" / DE.label_name(e["i"])
         if e["cls"] != "deck_photo" or not p.exists() or not is_eval(e["event"]):
             continue
         deck = {c["sift_card"] for c in json.loads(p.read_text())["cards"] if c["sure"]}

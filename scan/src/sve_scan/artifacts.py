@@ -60,6 +60,23 @@ def scores(index: Index, query: np.ndarray, hub_weight: float = REC_SCORING["hub
     return (index.vectors.astype(np.float32) @ query) * index.scale - hub_weight * index.hub
 
 
+def decode_quad(corners: np.ndarray, gx: int, gy: int, stride: int = DET_PARAMS["stride"]) -> np.ndarray:
+    """The four corners predicted at heat cell (gx, gy) in input pixels: offsets are in cells from the cell
+    centre. corners is the model output for one image, [8, G, G]. The order is clockwise from any corner."""
+    return (corners[:, gy, gx].reshape(4, 2) + [gx + 0.5, gy + 0.5]) * stride
+
+
+def order_corners(quad: np.ndarray) -> np.ndarray:
+    """Clockwise on screen (y grows downwards), starting at the corner with the smallest x + y (top left).
+
+    The corner finder is trained without a fixed start corner, so every client orders its quads like this
+    before straightening a card.
+    """
+    c = quad.mean(0)
+    q = quad[np.argsort(np.arctan2(quad[:, 1] - c[1], quad[:, 0] - c[0]))]
+    return np.roll(q, -int(np.argmin(q.sum(1))), 0)
+
+
 def _canonical(value: object) -> bytes:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")).encode()
 

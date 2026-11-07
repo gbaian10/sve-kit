@@ -2,7 +2,10 @@
 
 Outputs (in SVE_SCAN_WORK):
   gallery.json      one row per printing face with an image, sorted by image key:
-                    {n, f, printing_id, face_id, card_id, region, card_no, rarity, art_id, class, type, name}
+                    {n, f, printing_id, face_id, card_id, region, card_no, rarity, card_version, art_id, class,
+                     type, name}
+  gallery-meta.json data_version and manifest hash of the snapshot, row count and rows_sha256 (the identity
+                    of gallery.npy; the array is rebuilt whenever it changes)
   gallery.npy       uint8 [N, 336, 240, 3] official card images, resized
   queries/<cond>/<i>.jpg and queries.json (gallery rows the queries come from)
   sheet_<cond>.jpg  contact sheet (official | synthetic)
@@ -10,6 +13,7 @@ Outputs (in SVE_SCAN_WORK):
 usage: python -m sve_scan gallery [--regallery]
 """
 
+import hashlib
 import json
 import sys
 from multiprocessing import Pool
@@ -40,15 +44,28 @@ def load_small(key: tuple[int, int]) -> np.ndarray:
     return cv2.resize(load_rgb(key), (W, H), interpolation=cv2.INTER_AREA)
 
 
-def build_gallery() -> list[dict]:
-    """Every approved, available printing face image of the export's current snapshot (both editions)."""
+def rows_sha256(gallery: list[dict]) -> str:
+    """Identity of the image array: which image (and which version of it) every row holds, in order."""
+    keys = [[g["n"], g["f"], g["card_version"]] for g in gallery]
+    return hashlib.sha256(json.dumps(keys, separators=(",", ":")).encode()).hexdigest()
+
+
+def current(work: Path) -> tuple[list[dict], dict]:
+    """gallery.json and its meta, refusing an image array that was built for other rows."""
+    gallery = json.loads((work / "gallery.json").read_text())
+    meta = json.loads((work / "gallery-meta.json").read_text())
+    if meta.get("rows_sha256") != rows_sha256(gallery):
+        raise SystemExit("gallery.json and gallery.npy disagree (gallery-meta.json): rerun the gallery step")
+    return gallery, meta
+
+
+def build_gallery() -> tuple[list[dict], dict]:
+    """Every approved, available printing face image of the export's current snapshot (both editions),
+    and the snapshot it came from."""
     from sve_carddb.export.read_api import load_snapshot  # the export's verified reader, as publish/ uses
 
     snapshot = load_snapshot(paths.export())
     tables = snapshot.tables
-    (paths.work() / "gallery-meta.json").write_text(
-        json.dumps({"data_version": snapshot.manifest["data_version"], "manifest_sha256": snapshot.manifest_sha256})
-    )
     prints = {r["id"]: r for r in tables["printing"]}
     faces = {r["id"]: r for r in tables["face"]}
     revisions = {r["id"]: r for r in tables["face_revision"]}
@@ -71,6 +88,7 @@ def build_gallery() -> list[dict]:
                 "region": p["region"],
                 "card_no": p["card_no"],
                 "rarity": p["rarity_raw"],
+                "card_version": media["card_version"],
                 "art_id": art,
                 "class": rev.get("class_code") or "",
                 "type": rev.get("type_code") or "",
@@ -78,6 +96,13 @@ def build_gallery() -> list[dict]:
             }
         )
     gallery.sort(key=lambda g: (g["n"], g["f"]))
+    meta = {
+        "data_version": snapshot.manifest["data_version"],
+        "manifest_sha256": snapshot.manifest_sha256,
+        "rows": len(gallery),
+        "rows_sha256": rows_sha256(gallery),
+    }
+    return gallery, meta
     return gallery
 
 
@@ -279,9 +304,15 @@ def main() -> None:
     OUT = paths.work()
     for c in COND:
         (OUT / "queries" / c).mkdir(parents=True, exist_ok=True)
-    gallery = build_gallery()
+    gallery, meta = build_gallery()
+    meta_path = OUT / "gallery-meta.json"
+    before = json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    # gallery.npy is reused only when it holds exactly these images in this order (new cards, removed cards
+    # or a new image version all change the hash); the meta is written after the array, so a crash midway
+    # never leaves a hash that claims an array it does not describe
+    reuse = (OUT / "gallery.npy").exists() and before.get("rows_sha256") == meta["rows_sha256"]
     (OUT / "gallery.json").write_text(json.dumps(gallery, ensure_ascii=False))
-    print("gallery", len(gallery), flush=True)
+    print("gallery", len(gallery), "reuse gallery.npy" if reuse else "rebuild gallery.npy", flush=True)
 
     rng = np.random.default_rng(0)
     idx = rng.choice(len(gallery), N_QUERIES, replace=False)
@@ -302,11 +333,13 @@ def main() -> None:
             if k % 300 == 0:
                 print("queries", k, flush=True)
 
-    if not (OUT / "gallery.npy").exists() or "--regallery" in sys.argv:
+    if not reuse or "--regallery" in sys.argv:
+        meta_path.unlink(missing_ok=True)
         with Pool(4) as pool:
             arr = np.stack(pool.map(load_small, [(g["n"], g["f"]) for g in gallery], chunksize=64))
         np.save(OUT / "gallery.npy", arr)
         print("gallery.npy", arr.shape, flush=True)
+    meta_path.write_text(json.dumps(meta))
 
     for cond in COND:
         rows = []

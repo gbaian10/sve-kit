@@ -2,22 +2,21 @@
 
 Writes SVE_SCAN_WORK/bg_rooms/<id>.hdr (download), bg_rooms/manifest.json and rooms.npy (uint8 [N, 384, 384, 3]).
 usage: python -m sve_scan fetch-rooms
-Poly Haven assets are CC0 (https://polyhaven.com/license). One request per second.
+Poly Haven assets are CC0 (https://polyhaven.com/license). Requests are at least 2 s apart (fetch.Polite) and every
+file keeps its source URL, fetch time, ETag and SHA-256 in bg_rooms/manifest.json.
 """
 
-import json
 import math
-import time
-import urllib.request
 
 import cv2
 import numpy as np
 
 from sve_scan import paths
+from sve_scan.fetch import Polite
 
+API = "https://api.polyhaven.com"
 DIR = paths.work() / "bg_rooms"
-DIR.mkdir(exist_ok=True)
-UA = {"User-Agent": "sve-kit-scan/0 (texture fetch for synthetic training data)"}
+web = Polite(DIR)
 WANT = (
     "room",
     "lounge",
@@ -42,27 +41,20 @@ WANT = (
 )
 
 
-def get(url: str) -> bytes:
-    with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=120) as r:
-        return r.read()
-
-
-ids = list(json.loads(get("https://api.polyhaven.com/assets?type=hdris&categories=indoor")))
+ids = list(web.json(f"{API}/assets?type=hdris&categories=indoor"))
 pick = [a for a in ids if any(w in a for w in WANT)]
 rng = np.random.default_rng(5)
 pick = list(rng.choice(pick, min(32, len(pick)), replace=False))
-manifest = []
 for aid in pick:
-    dst = DIR / f"{aid}.hdr"
-    if not dst.exists():
-        time.sleep(1)
-        files = json.loads(get(f"https://api.polyhaven.com/files/{aid}"))
-        url = files["hdri"]["2k"]["hdr"]["url"]
-        time.sleep(1)
-        dst.write_bytes(get(url))
-    manifest.append({"id": aid, "file": dst.name, "source": f"https://polyhaven.com/a/{aid}", "license": "CC0"})
-    print(len(manifest), aid, flush=True)
-(DIR / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    name = f"{aid}.hdr"
+    meta = {"id": str(aid), "source": f"https://polyhaven.com/a/{aid}", "license": "CC0"}
+    if web.have(name) and name in web.records:
+        web.download(web.records[name]["url"], name, **meta)
+    else:
+        web.download(web.json(f"{API}/files/{aid}")["hdri"]["2k"]["hdr"]["url"], name, **meta)
+    print(len(web.records), aid, flush=True)
+web.save()
+manifest = [web.records[f"{aid}.hdr"] for aid in pick]
 
 
 def tonemap(hdr: np.ndarray) -> np.ndarray:

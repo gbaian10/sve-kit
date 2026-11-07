@@ -33,6 +33,11 @@ REC = None  # (Recogniser, Gallery) once loaded by setup()
 card_of = no_of = None
 
 
+def label_name(i):
+    """Output file of one labelled photo (its image-classes.json index), shared by every step that reads it."""
+    return f"{int(i):03d}.json"
+
+
 def setup(rec_tag):
     global REC, card_of, no_of
     REC = runtime.load(rec_tag)
@@ -175,7 +180,7 @@ def main():
     a, n = map(int, os.environ.get("SHARD", "0/1").split("/"))
     todo = todo[a::n]
     for k, l in enumerate(todo):
-        stem = f"{l['i']:03d}"
+        stem = label_name(l["i"]).removesuffix(".json")
         if (outd / f"{stem}.json").exists():
             continue
         p = root / l["event"] / l["file"]

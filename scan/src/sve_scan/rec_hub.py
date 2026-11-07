@@ -5,11 +5,13 @@ winning every uncertain photo. Recompute whenever the recogniser or the gallery 
 usage: python -m sve_scan rec-hub <arch> <tag>   ->  SVE_SCAN_WORK/hub_r_<tag>.npy (float32, one per gallery row)
 """
 
+import json
 import sys
 
 import numpy as np
 import torch
 
+from sve_scan import gallery as GL
 from sve_scan import paths
 from sve_scan import rec_train as T
 
@@ -18,6 +20,7 @@ K = 10
 
 def main() -> None:
     arch, tag = sys.argv[1], sys.argv[2]
+    _, meta = GL.current(paths.work())
     model = T.Embedder(arch).to(T.DEV)
     model.load_state_dict(torch.load(paths.work() / f"model_{tag}.pt", map_location=T.DEV))
     model.eval()
@@ -40,6 +43,7 @@ def main() -> None:
     print(f"r_g: mean {r.mean():.3f}, p99 {r.quantile(0.99):.3f}, max {r.max():.3f}")
     print("biggest hubs:", [T.meta[i]["card_no"] for i in r.topk(8).indices.cpu().numpy()])
     np.save(paths.work() / f"hub_r_{tag}.npy", r.cpu().numpy().astype(np.float32))
+    (paths.work() / f"hub_r_{tag}.json").write_text(json.dumps({"rows_sha256": meta["rows_sha256"]}))
 
 
 if __name__ == "__main__":

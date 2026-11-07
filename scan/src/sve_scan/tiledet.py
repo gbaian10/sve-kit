@@ -12,7 +12,7 @@ import cv2
 import numpy as np
 import onnxruntime as ort
 
-from sve_scan import paths
+from sve_scan import artifacts, paths
 
 S, STRIDE = 256, 8
 _sess = {}
@@ -28,12 +28,7 @@ def sess(model):
     return _sess[model]
 
 
-def order(q):
-    c = q.mean(0)
-    a = np.arctan2(q[:, 1] - c[1], q[:, 0] - c[0])
-    q = q[np.argsort(a)]
-    k = np.argmin(q.sum(1))
-    return np.roll(q, -k, 0)
+order = artifacts.order_corners
 
 
 def plausible(q):
@@ -76,7 +71,7 @@ def detect(rgb, model, scales=(0.22, 0.32, 0.45, 0.65, 1.0), thr=0.35, area="glo
             hm = heat[0, 0]
             mx = cv2.dilate(hm, np.ones((3, 3), np.uint8))
             for yy, xx in zip(*np.nonzero((hm == mx) & (hm > thr))):
-                q = (co[0, :, yy, xx].reshape(4, 2) + [xx + 0.5, yy + 0.5]) * STRIDE  # tile-input px
+                q = artifacts.decode_quad(co[0], xx, yy, STRIDE)  # tile-input px
                 margin = 3
                 if q.min() < margin or q.max() > S - margin:
                     continue  # touches the tile edge: probably truncated
