@@ -38,7 +38,7 @@ recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩�
 
 建置 path 仍為 `images/sha256/<前兩碼>/<64hex>.webp`，hex 為實際 WebP bytes 的 SHA-256；2.0 公開 key 如下節，不由來源 image_id／hash 決定。image_variant.bytes/width/height 記當次輸出；發布器驗完整 SHA／尺寸／bytes，不能只驗清單。2.0 reader 不用歷史 SHA 去拒絕同 key 的新 bytes；JSON hash 與建置來源 pin 不變。
 
-官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](../build/build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需三個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；目前沒有第三方圖片，其逐圖確認政策仍依 [build-db.md §17](../build/build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
+官方圖片經來源驗證成為 approved 的規則見 [build-db.md §17.1](../build/build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending 不出 path。直向與橫向 approved available 的圖都需三個檔位，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單。人工版次的母檔 PNG（[manual-printings §6](../domains/manual-printings.md#6-卡圖)）走同一套三檔規則：以 authored 記錄的 sha256 對應母檔，直式預設框、SEP 橫式框，沒有裁切覆寫；逐圖確認政策依 [build-db.md §17](../build/build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
 
 卡圖按需快取或只抓已選牌組與雙面，不預抓全庫；數位卡圖僅連官方頁，不混入 SVE 衍生檔。裁切圖的使用頁仍保留來源與版權標示；原始卡圖不是專案可再授權素材。
 

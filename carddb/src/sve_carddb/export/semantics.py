@@ -755,8 +755,12 @@ def _wording(view: View) -> None:
     }
     physical = _physical_observations(view, revisions)
     regions_by_face: dict[str, set[str]] = {}
-    for (_, face_id), (region, _) in physical.items():
-        regions_by_face.setdefault(face_id, set()).add(region)
+    for (printing_id, face_id), (region, face) in physical.items():
+        # An unlisted printing face with no source observation has no text to adopt or pend.
+        if printings[printing_id]["catalog_state"] == "official" or array(
+            face["observations"]
+        ):
+            regions_by_face.setdefault(face_id, set()).add(region)
     dates = _wording_dates(view)
     blocks = {
         string(row["card_id"]): {

@@ -181,7 +181,12 @@ def printing_index(db: Database) -> dict[tuple[str, str], Mapping[str, Value]]:
     result: dict[tuple[str, str], Mapping[str, Value]] = {}
     for row in db.rows("printing"):
         region, number = row.values["region"], row.values["card_no"]
-        if not isinstance(region, str) or not isinstance(number, str):
+        # Unnumbered manual printings have no official page to match against.
+        if (
+            not isinstance(region, str)
+            or not isinstance(number, str)
+            or row.values["card_no_state"] == "none"
+        ):
             continue
         lookup = region, number
         if lookup in result:

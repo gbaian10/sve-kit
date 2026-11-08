@@ -814,7 +814,7 @@ def test_region_range_exhaustion_fails_whole_batch(
     ],
 )
 def test_index_rejects_cursors_outside_policy(cursor: dict[str, int]) -> None:
-    assert Index(next_int_id={"jp": 60000, "en": 100000}).next_int_id["en"] == 100000
+    assert Index(next_int_id={"jp": 55000, "en": 95000}).next_int_id["en"] == 95000
     with pytest.raises(ValueError, match="cursors disagree"):
         Index(next_int_id=cursor)
 

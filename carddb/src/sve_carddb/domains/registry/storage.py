@@ -27,7 +27,10 @@ from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, parse_yaml
 from sve_carddb.domains.registry.allocation import (
     ALLOCATION_POLICY,
+    PREVIOUS_POLICIES,
     REGION_RANGES,
+    UNLISTED_RANGES,
+    IdRange,
     cursors,
     region_allocations,
 )
@@ -102,21 +105,54 @@ class Index(BaseModel):
     kind: Literal["registry_index"] = "registry_index"
     allocation_policy: str = ALLOCATION_POLICY
     next_int_id: dict[str, int] = Field(
-        default_factory=lambda: {
-            region: bounds.start for region, bounds in sorted(REGION_RANGES.items())
-        }
+        default_factory=lambda: _range_starts(REGION_RANGES)
     )
+    # Manual printings allocate from their own lane; the registry tool never moves it.
+    # A v1 index has no lane, and its historical hash must not gain the field.
+    next_unlisted_int_id: dict[str, int] | None = Field(
+        default_factory=lambda: _range_starts(UNLISTED_RANGES),
+        exclude_if=lambda value: value is None,
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _lane_default(cls, value: object) -> object:
+        if (
+            isinstance(value, dict)
+            and value.get("allocation_policy") in PREVIOUS_POLICIES
+            and "next_unlisted_int_id" not in value
+        ):
+            return value | {"next_unlisted_int_id": None}
+        return value
 
     @model_validator(mode="after")
     def _known_ranges(self) -> Index:
-        if self.allocation_policy != ALLOCATION_POLICY:
+        if self.allocation_policy not in {ALLOCATION_POLICY, *PREVIOUS_POLICIES}:
             raise ValueError(f"Unknown allocation policy: {self.allocation_policy}")
-        if set(self.next_int_id) != set(REGION_RANGES) or any(
-            not bounds.start <= self.next_int_id[region] <= bounds.end + 1
-            for region, bounds in REGION_RANGES.items()
+        if (self.allocation_policy == ALLOCATION_POLICY) == (
+            self.next_unlisted_int_id is None
         ):
-            raise ValueError("Index cursors disagree with the allocation policy")
+            raise ValueError("Unlisted cursors belong to the current allocation policy")
+        lanes = [(self.next_int_id, REGION_RANGES)]
+        if self.next_unlisted_int_id is not None:
+            lanes.append((self.next_unlisted_int_id, UNLISTED_RANGES))
+        for cursor, ranges in lanes:
+            if set(cursor) != set(ranges) or any(
+                not bounds.start <= cursor[region] <= bounds.end + 1
+                for region, bounds in ranges.items()
+            ):
+                raise ValueError("Index cursors disagree with the allocation policy")
         return self
+
+    def unlisted_cursors(self) -> dict[str, int]:
+        """Manual printings need the current policy; a historical index has no lane."""
+        if self.next_unlisted_int_id is None:
+            raise ValueError("Manual printings require the current allocation policy")
+        return dict(self.next_unlisted_int_id)
+
+
+def _range_starts(ranges: dict[str, IdRange]) -> dict[str, int]:
+    return {region: bounds.start for region, bounds in sorted(ranges.items())}
 
 
 def read_yaml(path: Path) -> JsonValue:
@@ -234,7 +270,12 @@ def read_base_files(root: Path) -> RegistryFiles:
         return RegistryFiles(canonical(Index().model_dump(mode="json")), ())
     _safe_file(root, path)
     raw_index, index_content = _read_yaml_content(path)
-    _wire_fields(raw_index, 2, {"format", "kind", "allocation_policy", "next_int_id"})
+    fields = {"format", "kind", "allocation_policy", "next_int_id"}
+    if isinstance(raw_index, dict) and raw_index.get("allocation_policy") not in (
+        PREVIOUS_POLICIES
+    ):
+        fields.add("next_unlisted_int_id")
+    _wire_fields(raw_index, 2, fields)
     Index.model_validate(raw_index)
     shards = []
     keys: set[str] = set()

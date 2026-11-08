@@ -102,6 +102,7 @@ from sve_carddb.workflows.authoring_commands import app as author_app
 from sve_carddb.workflows.export import app as snapshot_app
 from sve_carddb.workflows.extract import extract_cards
 from sve_carddb.workflows.image_index import app as images_app
+from sve_carddb.workflows.manual_printings_commands import app as manual_printings_app
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Generator
@@ -132,6 +133,7 @@ archive_app = typer.Typer(
 app.add_typer(archive_app, name="archive")
 app.add_typer(snapshot_app, name="snapshot")
 app.add_typer(images_app, name="images")
+app.add_typer(manual_printings_app, name="manual-printings")
 app.add_typer(source_import_app, name="source-import")
 
 console = Console(soft_wrap=True)

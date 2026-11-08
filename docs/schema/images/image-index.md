@@ -47,7 +47,10 @@ uv --directory carddb run sve-carddb images build-index --inputs /private/inputs
 | `bindings` | 版次／面與永久 int_id／ordinal，核對固定 key 身分 |
 | `tables` | 已配號的 `image_asset`、`printing_image`、`image_variant` 三種既有公開列 |
 
-索引不含 bitmap、本機圖片路徑或第二份卡表。文字端用已解析卡頁核對每面原始 `img src`、解析 URL、區域與永久 ID，
+人工版次（[manual-printings](../domains/manual-printings.md#6-卡圖)）的母檔由 `--manual-image-dir` 遞迴掃描、以 sha256 對應，沒有母檔的記錄仍佔一列 `pending`／`missing`；
+`image_asset.source_src_raw` 為母檔 sha256（無母檔時 `manual:<slug>`），`source_url` 可為 null。
+
+索引不含 bitmap、本機圖片路徑或第二份卡表。文字端用已解析卡頁核對每面原始 `img src`、解析 URL、區域與永久 ID（人工面改核對 authored 記錄的 sha256／來源 URL／有無母檔），
 並核對公開狀態、三尺寸及版本 metadata；校正核對精確的區域／URL／hash／來源 pin，不重驗圖本體。
 索引與校正來源 pins 只留在私人建置環境，不放公開根、git 或測試 artifact。
 

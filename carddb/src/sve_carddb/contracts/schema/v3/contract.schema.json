@@ -3268,7 +3268,8 @@
         {
           "enum": [
             "official",
-            "provisional"
+            "provisional",
+            "none"
           ]
         },
         {
@@ -3427,11 +3428,31 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 25,
-      "maxItems": 25,
+      "minItems": 27,
+      "maxItems": 27,
       "x-columns": [
         "id",
         "card_id",
@@ -3457,7 +3478,9 @@
         "leader_name_frame",
         "reprint",
         "stamp",
-        "serial"
+        "serial",
+        "printed_code",
+        "manual_name_unit_id"
       ],
       "x-types": [
         {
@@ -3475,7 +3498,8 @@
         {
           "enum": [
             "official",
-            "provisional"
+            "provisional",
+            "none"
           ]
         },
         {
@@ -3580,6 +3604,16 @@
         {
           "nullable": {
             "scalar": "Bool"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Text"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         }
       ],
@@ -3737,35 +3771,7 @@
               {}
             ]
           },
-          "else": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "minItems": 1
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
+          "else": {}
         }
       ]
     },
@@ -7326,7 +7332,14 @@
           "$ref": "#/$defs/Text"
         },
         {
-          "$ref": "#/$defs/URL"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/URL"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         {
           "anyOf": [
@@ -7378,7 +7391,9 @@
           "scalar": "Text"
         },
         {
-          "scalar": "URL"
+          "nullable": {
+            "scalar": "URL"
+          }
         },
         {
           "nullable": {
@@ -8622,7 +8637,8 @@
         {
           "enum": [
             "official",
-            "provisional"
+            "provisional",
+            "none"
           ]
         },
         {
@@ -8781,11 +8797,31 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 25,
-      "maxItems": 25,
+      "minItems": 27,
+      "maxItems": 27,
       "x-columns": [
         "id",
         "card_id",
@@ -8811,7 +8847,9 @@
         "leader_name_frame",
         "reprint",
         "stamp",
-        "serial"
+        "serial",
+        "printed_code",
+        "manual_name_unit_id"
       ],
       "x-types": [
         {
@@ -8829,7 +8867,8 @@
         {
           "enum": [
             "official",
-            "provisional"
+            "provisional",
+            "none"
           ]
         },
         {
@@ -8934,6 +8973,16 @@
         {
           "nullable": {
             "scalar": "Bool"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Text"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         }
       ],
@@ -9088,35 +9137,7 @@
               {}
             ]
           },
-          "else": {
-            "prefixItems": [
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {
-                "minItems": 1
-              },
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
+          "else": {}
         }
       ]
     },
@@ -14124,7 +14145,14 @@
           "$ref": "#/$defs/Text"
         },
         {
-          "$ref": "#/$defs/URL"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/URL"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         {
           "anyOf": [
@@ -14176,7 +14204,9 @@
           "scalar": "Text"
         },
         {
-          "scalar": "URL"
+          "nullable": {
+            "scalar": "URL"
+          }
         },
         {
           "nullable": {
@@ -18102,7 +18132,9 @@
                         "leader_name_frame",
                         "reprint",
                         "stamp",
-                        "serial"
+                        "serial",
+                        "printed_code",
+                        "manual_name_unit_id"
                       ]
                     },
                     "maxItems": 0
@@ -20437,7 +20469,9 @@
                         "leader_name_frame",
                         "reprint",
                         "stamp",
-                        "serial"
+                        "serial",
+                        "printed_code",
+                        "manual_name_unit_id"
                       ]
                     },
                     "minItems": 1,
@@ -22815,7 +22849,9 @@
                         "leader_name_frame",
                         "reprint",
                         "stamp",
-                        "serial"
+                        "serial",
+                        "printed_code",
+                        "manual_name_unit_id"
                       ]
                     },
                     "maxItems": 0

@@ -56,7 +56,7 @@ def test_t0_table_set_exactly_matches_tiers() -> None:
         (DOCS / "implementation-tiers.md").read_text(),
         re.MULTILINE,
     )
-    assert len(expected) == len(set(expected)) == 42
+    assert len(expected) == len(set(expected)) == 43
     assert {table.name for table in TABLES} == set(expected)
 
 

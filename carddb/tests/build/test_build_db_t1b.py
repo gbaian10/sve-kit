@@ -66,7 +66,7 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
         | (EN_TABLES if include_en else set())
     )
     assert {table.name for table in schema.tables} == expected
-    assert len(schema.tables) == (62 if include_en else 56)
+    assert len(schema.tables) == (63 if include_en else 57)
     with create_database(schema) as database:
         with database.transaction():
             populate(database, include_en=include_en)
