@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import FilePin
+from sve_carddb.domains.registry.allocation import ALLOCATION_POLICY
 from sve_carddb.domains.registry.storage import RegistryFiles, read_base_files
 from sve_carddb.domains.registry.validate import check_cursors, validate_structure
 
@@ -111,7 +112,11 @@ def check_append(previous: RegistryFiles | None, current: RegistryFiles) -> None
     ):
         raise ValueError("Registry renewal must preserve exact historical shard bytes")
     before, after = previous.index(), current.index()
-    if before.allocation_policy != after.allocation_policy or any(
+    # The policy may only advance from a recorded predecessor to the current one.
+    if after.allocation_policy not in {
+        before.allocation_policy,
+        ALLOCATION_POLICY,
+    } or any(
         before.next_int_id[region] > after.next_int_id[region]
         for region in ("en", "jp")
     ):

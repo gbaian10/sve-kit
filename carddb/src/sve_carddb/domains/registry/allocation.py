@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sve_carddb.domains.registry.storage import Entry
 
-ALLOCATION_POLICY = "region-ranges-2026-09-28-v1"
+ALLOCATION_POLICY = "region-ranges-2026-11-09-v2"
+# Historical registry bases replayed from Git still carry the previous policy.
+PREVIOUS_POLICIES = ("region-ranges-2026-09-28-v1",)
 
 
 @dataclass(frozen=True)
@@ -24,25 +26,37 @@ class IdRange:
 
 # 1..20000 is reserved and never used by the regular allocator; 60000 and
 # 100000..4294967295 are unassigned so new regions get new disjoint ranges.
+# Each region splits into official catalog printings and unlisted manual printings;
+# v1 gave the whole 20001..59999 / 60001..99999 span to official printings.
 RESERVED = IdRange(1, 20000)
-REGION_RANGES = {"jp": IdRange(20001, 59999), "en": IdRange(60001, 99999)}
+REGION_RANGES = {"jp": IdRange(20001, 54999), "en": IdRange(60001, 94999)}
+UNLISTED_RANGES = {"jp": IdRange(55000, 59999), "en": IdRange(95000, 99999)}
 
 
 def region_range(region: str) -> IdRange:
-    """Look up the range by registered printing region, never by the number itself."""
+    """Look up the official range by registered printing region, never by the number."""
     if region not in REGION_RANGES:
         raise ValueError(f"No int_id range for region: {region}")
     return REGION_RANGES[region]
 
 
-def cursors(allocated: dict[str, list[int]]) -> dict[str, int]:
+def unlisted_range(region: str) -> IdRange:
+    """Look up the unlisted manual-printing range by registered printing region."""
+    if region not in UNLISTED_RANGES:
+        raise ValueError(f"No unlisted int_id range for region: {region}")
+    return UNLISTED_RANGES[region]
+
+
+def cursors(
+    allocated: dict[str, list[int]], ranges: dict[str, IdRange] = REGION_RANGES
+) -> dict[str, int]:
     """Next free value per region: its highest allocation + 1, or the range start."""
-    unknown = set(allocated) - set(REGION_RANGES)
+    unknown = set(allocated) - set(ranges)
     if unknown:
         raise ValueError(f"No int_id range for region: {sorted(unknown)}")
     return {
         region: max(allocated.get(region, []), default=bounds.start - 1) + 1
-        for region, bounds in sorted(REGION_RANGES.items())
+        for region, bounds in sorted(ranges.items())
     }
 
 
