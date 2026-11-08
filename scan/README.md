@@ -16,6 +16,9 @@ models are built from, their licenses, evaluation and limitations are in [MODEL_
 `scan/` is its own uv project, outside the root workspace (PyTorch stays out of carddb's environment). It reads
 exports only through `sve_carddb.export.read_api`, as `publish/` does.
 
+It also turns phone photos of physical cards into card images, for cards the official sites never published
+(see [Card photos](#card-photos)).
+
 ## Common tasks
 
 Commands below are `python -m sve_scan …` run as `uv --directory scan run python -m sve_scan …`, with the three
@@ -59,6 +62,53 @@ MODEL_CARD.md; a new version must not be worse on any set (see "Evaluation").
 Continue the latest stage with the recipe in "Recogniser" or "Corner finder" (`INIT=<previous tag>`), check it,
 then release it with the next version number (`release <out dir> 2 <det tag> 1 rec-ft` for a new corner finder).
 A new recogniser always needs a new index: rerun `rec-hub` and `index` with its tag before `release`.
+
+## Card photos
+
+Some printed cards have no official image: event prizes, shop collaborations, cards with no card number.
+`card-photo` turns a phone photo of one such card into an image like the official ones, ready to be a source
+for the card image pipeline. It needs no models and no data folders.
+
+```bash
+python -m sve_scan card-photo photo.jpg --out <folder> --name 2024-chiba-a --template ep --size 918x1282
+```
+
+It writes `<name>-raw.jpg` (the photo turned so the card stands upright; keep it as the source of record and
+reprocess from it) and `<name>.png` (the card at 63:88 with transparent rounded corners like the official
+images; the image pipeline takes PNG sources). `--size 918x1282` is twice the official 459×641, so `card_l`
+is an exact halving. The last line is `OK` or `RETAKE` with the reasons. Card photos are official artwork and
+stay out of git like other card images.
+
+### Shooting
+
+One card out of its sleeve, flat on a plain wooden table with some table showing on every side.
+Rest the phone on two equal stacks of books, lens over the gap, and use the camera's level and a timer so no hand
+is over the card. Put the ceiling light on the far side of the card, not behind you: your body then casts no
+shadow on it. If the table's glare falls on the card, move the card; any orientation works, the darker end
+(the name bar) is taken as the bottom (`--turn 1|2|3` turns it further clockwise when that guess fails).
+
+### What applies to which card
+
+| Step | Every card | Pale-bordered cards | One frame design (`--template`) |
+| --- | --- | --- | --- |
+| Find the card, straighten it to 63:88, turn it upright | ✓ | | |
+| Rounded corners like official images (3 mm radius, soft edge, faint outer ring) | ✓ | | |
+| Checks: phone tilt, card size in the photo, glare | ✓ | | |
+| White balance, soft-shadow removal and the uneven-light check, all measured on the border | | ✓ | |
+| Tone range: border to official white, darkest 1% to a fixed black | | ✓ (no template) | |
+| Name bar lightness and badge colour pulled to values measured on official images | | | ✓ |
+
+A card counts as pale-bordered when at least 80% of a band just inside its edge is pale; otherwise it is
+full art and keeps the camera's colours. Full-art cards have no reference printed on them, so their colour and
+evenness are only as good as the light; a foil card's glare moves with the camera and cannot be corrected.
+
+Shared parts are what keep a series consistent: the darkest 1% depends on the art (black hair or blonde),
+while a frame's name bar is the same ink on every card. To add a frame design, measure the 40th-percentile Lab
+lightness of its name bar and the badge chroma on an official image of that frame, and add a `FrameTemplate`
+in `sve_scan/card_photo/colour.py`.
+
+The checks fail a photo at more than 15% uneven light on the border, more than 6% length difference between
+opposite sides, a card under 800 px wide, or more than 3% of the card clipped by glare.
 
 ## Setup
 

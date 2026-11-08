@@ -20,6 +20,7 @@ COMMANDS = {
     "det-real-build": ("det_real_build", "real-photo quad index (open card set)"),
     "det-label": ("det_label", "corner labels for deck photos"),
     "det-real-index": ("det_real_index", "merge real-photo indexes for corner-finder training"),
+    "card-photo": ("card_photo", "photo of one physical card -> official-style card image"),
     # recogniser
     "rec-train": ("rec_train", "train the recogniser"),
     "rec-export": ("rec_export", "phone model (weights-only int8 ONNX)"),
