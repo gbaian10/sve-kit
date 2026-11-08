@@ -1,0 +1,16 @@
+format: 1
+kind: product_shard
+records:
+  - kind: product_family
+    filing_key: EP
+    state: confirmed
+    note: 公式カードリスト未掲載の EP／SEP（イベント配布、店舗コラボ、アンバサダー、基本 EP／SEP）の歸檔類別；商品收錄ではない
+    data:
+      id: EP
+      code: ep
+      public_code: EP
+      kind: other
+      name:
+        lang: ja
+        text: EP／SEP（公式カードリスト未掲載）
+    evidence: []
