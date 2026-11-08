@@ -37,7 +37,7 @@ logical Schema；其他相同形狀的 row 不在投影重驗。完整 wire Sche
 | --- | --- | --- |
 | `card.faces`、`face.current` | `face` 的永久 ordinal、`face_current`；current 僅含此次地區的公開 revision | 退役墓碑可缺現行面；缺 current 不偽造 revision |
 | `card.regions` | 同卡版次、`region_availability_override`、`region_mapping_review`、日期、預設版次與角色 | 兩區各一項；無發行證據為 unknown；mapping/release 獨立；nullable 日期／預設／角色不補值 |
-| `printing.review_level/reference_urls/int_id/decklog_source_url` | registry 版次皆為人工確認身分，固定 `confirmed`；`printing_reference→source_record.url`、永久配號、Decklog 的 source URL | 官方 references=[]；unlisted 仍須 Schema 的非空公開 URL；所有版次必有配號；來源／查核日依 verified/unverified 約束 |
+| `printing.review_level/reference_urls/int_id/decklog_source_url/printed_code/manual_name_unit_id` | registry 與人工版次皆為人工確認身分，固定 `confirmed`；`printing_reference.url`、永久配號、Decklog 的 source URL；人工版次的卡面印字與人工卡名 text_unit | 官方 references=[]、兩個人工欄為 null；unlisted 至少一個官方公開 URL，基本 EP／SEP 例外為空；所有版次必有配號；來源／查核日依 verified/unverified 約束 |
 | `printing.faces` | `printing_face` 加 section、stamp、觀測、翻譯、更正；按永久 face ordinal | 未知印刷原文維持 null/unknown；觀測不填回 printed 欄 |
 | `printing_product.available_on/date_precision/date_raw` | 三個 `first_available_*` 覆寫欄 | null precision 沿 product；unknown 明示未知；month/year 不補一日 |
 | `printing_product.first_inclusion_state`、debut | 同卡同區全部 inclusion 的有效日期 | 任一可能更早日期不明就 unknown，不把空 inclusion 宣稱 first |

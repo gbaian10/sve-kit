@@ -39,7 +39,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `card` | `id, layout, identity_state, home_set_id, faces:[face_id], regions:[RegionView]` | 每卡一格、各區預設入口、發行/對照狀態 |
 | `face` | `id, card_id, ordinal, side, current:[{region,revision_id,basis}], wording:[WordingView]` | 雙面切換，兩面算同一實物 |
-| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace], leader_name_frame:gold/white?, reprint?, stamp:{kind:Text?,year:Text?}?, serial:Bool?` | 每版次一格、版本區、分享碼解碼、圖像定位 |
+| `printing` | `id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence?, review_level, reference_urls:[url], variant_key, rarity_code?, rarity_badge?, rarity_raw, premium?, serial_total?, int_id, decklog_available, decklog_verification:unverified/verified, decklog_source_url?, decklog_checked_on?, faces:[PrintingFace], leader_name_frame:gold/white?, reprint?, stamp:{kind:Text?,year:Text?}?, serial:Bool?, printed_code?, manual_name_unit_id?` | 每版次一格、版本區、分享碼解碼、圖像定位；`card_no_state=none` 時 `card_no` 為空字串，末兩欄只有人工版次非 null |
 | `product_family` | `id, code, public_code, kind, name_unit_id, translations:[FieldTranslation]` | /sets 與 set 搜尋 |
 | `product` | `id, family_ids:[ID], region, product_code?, name_unit_id, product_type?, released_on?, date_precision, date_raw?, translations:[FieldTranslation]` | 單卡頁補充的商品名稱與日期 |
 | `printing_product` | `printing_id, product_id, available_on?, date_precision?, date_raw?, inclusion_kind, note_unit_id?, first_inclusion_state` | 複合 `PK(printing_id,product_id)`；單卡頁列出 PR／再錄收錄；初收錄（首次／再錄）篩選 |
@@ -200,7 +200,7 @@ Token 為父項，子項依序為有資料的從者／法術／護符／紋章�
 
 | 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
 | --- | --- | --- |
-| `image_asset` | `id, source_src_raw, source_url, width?, height?, format?` | PK(id)；來源詳情，沿既有型別 |
+| `image_asset` | `id, source_src_raw, source_url?, width?, height?, format?` | PK(id)；來源詳情，沿既有型別；人工母檔的 `source_src_raw` 是母檔 sha256，`source_url` 可為 null |
 | `printing_image` | `printing_id, face_id, image_id, publication_state, availability, card_version?, art_version?, variants` | PK(printing_id,face_id)；卡包 media 的當頁顯圖投影 |
 | `image_variant` | `image_id, size_key, format, width, height, bytes` | PK(前三欄)；當次輸出的詳情尺寸／大小，不含公開 path、不阻擋首圖 |
 
@@ -429,7 +429,7 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 `printing.int_id` 所有出貨列必填，發布後永久不改；依地區分段配發（[authored-layout.md](../domains/authored-layout.md) §3.2），但號段只是配號容量安排，地區一律讀 `printing.region`，不從號碼推算；解碼時一律查表取得版次，查無對應（含保留或未分配號段）即依下述未知 int 處理。`catalog_state/card_no_state/identity_state` 是獨立軸。`review_level=unreviewed/model_reviewed/sampled/confirmed`，由適用的 decision 推導，官方直抓未另審為 unreviewed，不把官方來源當人工確認。unlisted 才出已審可公開 `reference_urls`（至少一個）；official 為 []，一般來源圖網址另在影像清單。信心 `listing_confidence` 不等於 `review_level`。暫定號碼用 `/cards/_provisional/{int_id}`；官方 raw `card_no` 用 exact route；兩者改號 alias 分 namespace。非官方圖依 [build-db.md](../build/build-db.md) §17 採 `mirror_reviewed`，目前只產生官方圖：卡表快照 printing_image 的 `publication_state` 為 pending/approved，待確認不能出 variant/path；來源 URL 保留在 image_asset。建牌准入採 `regional_decklog`：依 printing.region 與 `decklog_available` 判斷，provisional 卡號/身分不擋加入、分享或匯出。verified 必有 `decklog_source_url` 與 `decklog_checked_on`；unverified 的日期為 null，available 依 `catalog_state=official` 預設 true，unlisted 預設 false，來源 URL 可空且 UI 明示未查證。建置資料庫的來源 FK 投影成可公開來源網址，不出完整稽核紀錄。Decklog 證據覆蓋預設，日英不得互相套用。這四欄屬 printing 頂層啟動包主儲存，詳情分片不重複，邏輯欄位白名單必填 Bool 與 verification，nullable 來源/日期依上述約束。
 
-人工限量序號版次沿 [manual-printings-v1](../domains/manual-printings.md#5-重建freshness-與公開呈現)：未確認一般版對應者仍有 provisional card／face，印刷原文狀態 unknown，不以人工名稱造官方文字或 current。官方 PR（含 PR-442）照常顯示卡文。人工名稱／公開來源類別與查核日的欄位方案只在該契約列為待實作；本 PR 不改公開白名單或 printing 欄序，須後續機器契約審核與版本／能力協商再實作。
+官方資料庫未收錄的人工版次沿 [manual-printings-v1](../domains/manual-printings.md#7-建置與匯出)：每筆有 provisional card／face，`card_no_state=none` 時 `card_no=""`，`printed_code` 是卡面印字、`manual_name_unit_id` 是人工卡名的 text_unit（兩欄為 printing 末尾的 nullable 欄，官方版次為 null），印刷原文狀態 unknown，不以人工名稱造官方文字或 current。沒有任何觀測的 unlisted 面 `current=[]`、`wording=[]`，是 §2.3「無 current 的面須有表記未定項目」的唯一例外；`reference_urls` 可為空只限基本 EP／SEP。官方 PR（含 PR-442）照常顯示卡文。
 
 舊碼照常解碼，既有牌組照常開啟保留原 `int_id`/數量/區域/位置；目前 unavailable 顯示 `decklog_unavailable` 警告與可用同地區同名版次替換建議，不能自動換卡/丟行。所有區域禁止新加入 unavailable 版次；新的分享碼與任何牌組匯出拒絕整次操作，舊解碼及本機牌組開啟/編輯不受此拒絕。未知 int 顯示 `needs_update` 並保留，不能猜版次後輸出。反向恢復可用即可再加入/分享/匯出；其他牌組合法性另驗。永久 `int_id` 不因此移除。
 

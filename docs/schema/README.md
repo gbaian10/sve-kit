@@ -52,7 +52,7 @@
 | [風味文字直接對照表](domains/flavor-translation.md) | 以原文 hash 對照整段譯文；不走模板、不設採納政策 |
 | [術語採納與加粗](domains/glossary-adoption.md) | 永久概念、當前選詞、來源主張、可修訂加粗與公開標註 |
 | [身分修復與決定續版](domains/identity-repair.md) | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影 |
-| [人工限量序號版次](domains/manual-printings.md) | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界 |
+| [人工版次（官方資料庫未收錄）](domains/manual-printings.md) | EP／SEP 活動卡入口、未收錄配號號段、官方來源白名單、母檔卡圖紀錄與人工名稱邊界；序號卡待實作 |
 | [模板參數辨識規則](domains/template-parameter-policy.md) | 具名辨識開關、參數驗證與退回原因 |
 | [四層來源位置](domains/four-layer-source-positions.md) | 四層來源核心、binding／未匹配清單與來源定位 |
 | [翻譯與模板契約](domains/translation-contract.md) | JP 唯一一般來源、當前資料、逐 owner 顯示與跨區規則資格 |
