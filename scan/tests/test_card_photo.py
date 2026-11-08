@@ -3,9 +3,9 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from sve_scan.card_photo import process
+from sve_scan.card_photo import Report, process
 from sve_scan.card_photo.__main__ import card_size
-from sve_scan.card_photo.colour import OFFICIAL_BORDER_L, TEMPLATES, border_mask
+from sve_scan.card_photo.colour import FrameTemplate, correct
 
 CARD_W, CARD_H = 820, 1145  # 63:88
 PHOTO_W, PHOTO_H = 1500, 1300
@@ -26,9 +26,7 @@ def drawn_card(full_art=False):
         art[:6, :] = art[-6:, :] = art[:, :6] = art[:, -6:] = (150, 40, 160)
     bar = slice(int(CARD_H * 0.86), int(CARD_H * 0.95))
     card[bar, inset : CARD_W - inset] = (55, 55, 60)
-    tpl = TEMPLATES["ep"]
-    bx0, by0 = int(CARD_W * (tpl.badge_area[0] + 0.03)), int(CARD_H * (tpl.badge_area[1] + 0.02))
-    card[by0 : by0 + 30, bx0 : bx0 + 90] = (40, 170, 200)  # yellow-ish badge, a little faded
+    card[1030:1060, 50:140] = (40, 170, 200)
     return card
 
 
@@ -67,18 +65,30 @@ def same_picture(a, b):
     return float(np.corrcoef(ga[inner].ravel(), gb[inner].ravel())[0, 1])
 
 
+def blank_border(out):
+    h, w = out.shape[:2]
+    return np.concatenate(
+        [
+            out[int(h * 0.1) : int(h * 0.8), int(w * x0) : int(w * x1)].reshape(-1, 3)
+            for x0, x1 in [(0.015, 0.025), (0.975, 0.985)]
+        ]
+    )
+
+
 # a card lying sideways (its top to the left), slightly rotated
 SIDEWAYS = [(180, 1110), (190, 290), (1330, 300), (1320, 1120)]
 
 
 def test_a_sideways_card_comes_out_straight_and_upright(tmp_path):
     card = drawn_card()
-    report = process(save(tmp_path, photo_of(card, SIDEWAYS)), str(tmp_path / "out"), "card")
+    photo = photo_of(card, SIDEWAYS)
+    report = process(save(tmp_path, photo), str(tmp_path / "out"), "card")
     out, alpha = output(tmp_path)
     assert out.shape[0] / out.shape[1] == pytest.approx(88 / 63, abs=0.005)
     assert same_picture(card, out) > 0.95
     raw = Image.open(tmp_path / "out" / "card-raw.jpg")
-    assert raw.height > raw.width  # the photo was turned with the card
+    assert raw.height > raw.width
+    assert np.abs(np.array(raw).astype(float) - np.rot90(photo[..., ::-1], k=3)).mean() < 3
     assert alpha[0, 0] == 0 and alpha[out.shape[0] // 2, out.shape[1] // 2] == 255
     assert report.problems() == []
 
@@ -100,12 +110,15 @@ def test_flip_turns_the_result_half_way_and_keeps_the_card_shape(tmp_path):
 
 
 def test_a_card_turned_45_degrees_is_still_found(tmp_path):
-    c, r = np.array([750, 650]), 560
-    angles = np.radians([225, 315, 45, 135]) + np.radians([-9, 9, -9, 9])  # a 63:88-ish quad at 45°
-    corners = [tuple(c + r * np.array([np.cos(a), np.sin(a)])) for a in angles]
-    process(save(tmp_path, photo_of(drawn_card(), corners)), str(tmp_path / "out"), "card")
+    c = np.array([750, 650])
+    angle = np.radians(45)
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    corners = np.array([[-315, -440], [315, -440], [315, 440], [-315, 440]]) @ rotation.T + c
+    card = drawn_card()
+    process(save(tmp_path, photo_of(card, corners)), str(tmp_path / "out"), "card")
     out, _ = output(tmp_path)
     assert out.shape[0] / out.shape[1] == pytest.approx(88 / 63, abs=0.005)
+    assert same_picture(card, out) > 0.95
 
 
 def test_a_soft_shadow_is_reported_and_evened_out(tmp_path):
@@ -115,7 +128,7 @@ def test_a_soft_shadow_is_reported_and_evened_out(tmp_path):
     assert report.uneven_light is not None and report.uneven_light > 0.15
     assert any("uneven light" in p for p in report.problems())
     out, _ = output(tmp_path)
-    border = out.mean(2)[border_mask(*out.shape[:2])]
+    border = blank_border(out).mean(1)
     assert 1 - np.percentile(border, 5) / np.percentile(border, 95) < 0.06
 
 
@@ -125,11 +138,8 @@ def lab_of(out):
 
 def badge_chroma(out):
     h, w = out.shape[:2]
-    x0, y0, x1, y1 = TEMPLATES["ep"].badge_area
-    hsv = cv2.cvtColor(out, cv2.COLOR_BGR2HSV)[int(h * y0) : int(h * y1), int(w * x0) : int(w * x1)]
-    lab = lab_of(out)[int(h * y0) : int(h * y1), int(w * x0) : int(w * x1)]
-    yellow = (hsv[..., 0] >= 18) & (hsv[..., 0] <= 35) & (hsv[..., 1] > 120)
-    return float(np.median(np.hypot(lab[..., 1][yellow] - 128, lab[..., 2][yellow] - 128)))
+    badge = lab_of(out)[int(h * 0.902) : int(h * 0.92), int(w * 0.075) : int(w * 0.16)]
+    return float(np.median(np.hypot(badge[..., 1] - 128, badge[..., 2] - 128)))
 
 
 def test_the_ep_template_pulls_the_shared_frame_parts_to_official_values(tmp_path):
@@ -139,13 +149,22 @@ def test_the_ep_template_pulls_the_shared_frame_parts_to_official_values(tmp_pat
     out, _ = output(tmp_path)
     plain = cv2.cvtColor(np.array(Image.open(tmp_path / "plain" / "card.png"))[..., :3], cv2.COLOR_RGB2BGR)
     h, w = out.shape[:2]
-    tpl = TEMPLATES["ep"]
-    x0, y0, x1, y1 = tpl.name_bar
-    bar = lab_of(out)[int(h * y0) : int(h * y1), int(w * x0) : int(w * x1), 0]
-    assert np.percentile(bar, 40) == pytest.approx(tpl.name_bar_l, abs=4)
-    assert np.median(lab_of(out)[..., 0][border_mask(h, w)]) == pytest.approx(OFFICIAL_BORDER_L, abs=4)
-    # the faded badge is brought closer to the official colour strength
-    assert abs(badge_chroma(out) - tpl.badge_chroma) < abs(badge_chroma(plain) - tpl.badge_chroma)
+    bar = lab_of(out)[int(h * 0.89) : int(h * 0.93), int(w * 0.4) : int(w * 0.8), 0]
+    # Accepted EP images measure L=90–92 at the name bar and L=229–230 at the border.
+    assert 87 <= np.percentile(bar, 40) <= 96
+    border_lab = cv2.cvtColor(blank_border(out)[None, ...], cv2.COLOR_BGR2LAB)
+    assert 225 <= np.median(border_lab[..., 0]) <= 234
+    assert badge_chroma(out) > badge_chroma(plain)
+    assert 70 <= badge_chroma(out) <= 85
+
+
+def test_a_template_caps_badge_chroma_gain():
+    card = drawn_card().astype(np.float32)
+    regions = dict(name_bar=(0.4, 0.89, 0.8, 0.93), name_bar_l=100, badge_area=(0.04, 0.89, 0.2, 0.94))
+    base = correct(card, FrameTemplate(**regions, badge_chroma=1))
+    saturated = correct(card, FrameTemplate(**regions, badge_chroma=1000))
+    before, after = badge_chroma(base.astype(np.uint8)), badge_chroma(saturated.astype(np.uint8))
+    assert before < after <= 1.4 * before + 4
 
 
 def test_a_template_for_another_frame_is_refused(tmp_path):
@@ -160,6 +179,8 @@ def test_a_full_art_card_is_found_without_a_border_and_skips_border_steps(tmp_pa
     assert report.full_art and report.uneven_light is None
     out, _ = output(tmp_path)
     assert same_picture(card, out) > 0.9
+    reference = cv2.resize(card, out.shape[1::-1], interpolation=cv2.INTER_CUBIC)
+    assert np.median(np.abs(out[40:-40, 40:-40].astype(float) - reference[40:-40, 40:-40]), axis=(0, 1)).max() < 3
 
 
 def test_a_tilted_phone_and_a_small_card_are_reported(tmp_path):
@@ -174,8 +195,10 @@ def test_the_requested_size_and_rounded_corners(tmp_path):
     process(save(tmp_path, photo_of(drawn_card(), SIDEWAYS)), str(tmp_path / "out"), "card", size=(918, 1282))
     out, alpha = output(tmp_path)
     assert out.shape[:2] == (1282, 918)
-    assert alpha[0, 0] == 0  # corner cut away
-    assert 0 < alpha[0, 459] < 255  # faint outer ring, like the official images
+    assert alpha[0, 0] == 0
+    assert alpha[0, 459] == 242
+    interior_alpha = alpha[1:-1, 1:-1]
+    assert np.any((interior_alpha > 0) & (interior_alpha < 255))
     assert alpha[100, 100] == 255 and alpha[641, 459] == 255
     clear = alpha < 255
     assert np.ptp(out[clear].reshape(-1, 3), axis=0).max() < 40  # border colour under the corners, not table
@@ -186,3 +209,49 @@ def test_the_size_option_takes_card_shaped_sizes_only():
     for bad in ("918", "918x918", "axb"):
         with pytest.raises(Exception, match="918|axb"):
             card_size(bad)
+
+
+@pytest.mark.parametrize("width", [20, 30, 50, 100, 200, 300])
+@pytest.mark.filterwarnings("error::RuntimeWarning")
+def test_small_photographed_cards_return_a_retake_report(tmp_path, width):
+    card = cv2.resize(drawn_card(), (width, round(width * 88 / 63)))
+    photo = cv2.copyMakeBorder(card, 30, 30, 30, 30, cv2.BORDER_CONSTANT, value=(60, 115, 175))
+    report = process(save(tmp_path, photo), str(tmp_path / "out"), "card")
+    assert np.isfinite(report.highlights)
+    assert any("wide" in problem for problem in report.problems())
+    out, _ = output(tmp_path)
+    assert out.mean() > 30
+
+
+@pytest.mark.parametrize("size", [(1, 1), (20, 28)])
+@pytest.mark.filterwarnings("error::RuntimeWarning")
+def test_tiny_outputs_keep_the_border_colour_under_the_soft_edge(tmp_path, size):
+    process(save(tmp_path, photo_of(drawn_card(), SIDEWAYS)), str(tmp_path / "out"), "card", size=size)
+    out, alpha = output(tmp_path)
+    assert out.shape[:2] == size[::-1]
+    assert np.all(out[alpha < 255] > 180)
+
+
+def test_clipped_highlights_are_reported(tmp_path):
+    card = drawn_card(full_art=True)
+    card[350:650, 250:550] = 255
+    report = process(save(tmp_path, photo_of(card, SIDEWAYS)), str(tmp_path / "out"), "card")
+    assert report.highlights > 0.03
+    assert any("glare" in problem for problem in report.problems())
+
+
+@pytest.mark.parametrize(
+    ("field", "limit", "over", "problem"),
+    [
+        ("width", 800, 799, "wide"),
+        ("tilt", 0.06, 0.061, "tilted"),
+        ("uneven_light", 0.15, 0.151, "uneven light"),
+        ("highlights", 0.03, 0.031, "glare"),
+    ],
+)
+def test_the_documented_quality_limits(field, limit, over, problem):
+    values = dict(width=800, tilt=0.0, highlights=0.0, uneven_light=0.0, full_art=False)
+    values[field] = limit
+    assert Report(**values).problems() == []
+    values[field] = over
+    assert any(problem in message for message in Report(**values).problems())

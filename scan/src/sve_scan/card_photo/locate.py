@@ -137,6 +137,8 @@ def _refine(img: np.ndarray, guess: np.ndarray, full_art: bool) -> np.ndarray:
             xy = (start + u * tt)[None, :] + n[None, :] * steps[:, None]
             prof = cv2.remap(sat, xy[:, :1].astype(np.float32), xy[:, 1:].astype(np.float32), cv2.INTER_LINEAR).ravel()
             prof = np.convolve(prof, np.ones(5) / 5, mode="same")
+            if len(prof) <= 10:
+                continue
             inside, outside = float(np.median(prof[5:25])), float(np.median(prof[-25:-5]))
             if contrast(outside, inside) < 25:
                 continue  # no clear card/table contrast here (glare, shadow)

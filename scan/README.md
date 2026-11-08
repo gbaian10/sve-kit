@@ -108,8 +108,9 @@ lightness of its name bar and the badge chroma on an official image of that fram
 in `sve_scan/card_photo/colour.py`. A template whose name bar is not dark on the photographed card is refused
 rather than applied.
 
-The checks fail a photo at more than 15% uneven light on the border, more than 6% length difference between
-opposite sides, a card under 800 px wide, or more than 3% of the card clipped by glare.
+The quality report flags more than 15% uneven light on the border, more than 6% length difference between
+opposite sides, a card under 800 px wide, or more than 3% of the card near clipping in any colour channel.
+That last check is a possible-glare warning; saturated printed colours can trigger it too.
 
 ## Setup
 

@@ -107,18 +107,21 @@ def process(
     width = int(round(max(np.linalg.norm(corners[1] - corners[0]), np.linalg.norm(corners[2] - corners[3]))))
     card = warp(img, corners, width).astype(np.float32)
     full_art = not has_pale_border(card)
-    inner = card[int(card.shape[0] * 0.03) : -int(card.shape[0] * 0.03), int(width * 0.03) : -int(width * 0.03)]
+    h = card.shape[0]
+    iy, ix = int(h * 0.03), int(width * 0.03)
+    inner = card[iy : h - iy, ix : width - ix]
     highlights = float((inner.max(2) >= 253).mean())
     light = None if full_art else uneven_light(card)
     if not full_art:
         card = correct(card, TEMPLATES[template] if template else None)
 
+    border_colour = np.median(card[border_mask(*card.shape[:2])], axis=0)
     if size:
         card = cv2.resize(card, size, interpolation=cv2.INTER_AREA if size[0] < width else cv2.INTER_CUBIC)
     h, w = card.shape[:2]
     alpha = rounded_alpha(h, w)
     # under the clear corners put the border colour, so later resizing does not bleed the table in
-    card[alpha < 255] = np.median(card[border_mask(h, w)], axis=0)
+    card[alpha < 255] = border_colour
     rgba = np.dstack([cv2.cvtColor(np.clip(card, 0, 255).astype(np.uint8), cv2.COLOR_BGR2RGB), alpha])
     _save(Image.fromarray(rgba, "RGBA"), os.path.join(out_dir, f"{name}.png"), format="PNG", optimize=True)
 

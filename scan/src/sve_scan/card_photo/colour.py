@@ -47,7 +47,7 @@ MAX_CHROMA_GAIN = 1.4  # a faded photo is brightened at most this much, so print
 
 def border_mask(h: int, w: int) -> np.ndarray:
     """A band just inside the card's outer edge, skipping the rounded corners."""
-    inset, band, corner = int(w * 0.010), int(w * 0.016), int(w * 0.06)
+    inset, band, corner = int(w * 0.010), max(1, int(w * 0.016)), int(w * 0.06)
     m = np.zeros((h, w), bool)
     m[corner : h - corner, inset : inset + band] = m[corner : h - corner, w - inset - band : w - inset] = True
     m[inset : inset + band, corner : w - corner] = m[h - inset - band : h - inset, corner : w - corner] = True
@@ -79,6 +79,9 @@ def _even_out_light(img: np.ndarray, known: np.ndarray) -> np.ndarray:
     # the border is white everywhere, so its brightness is the light falling on the card; fill it
     # inward (Laplace) to estimate the light everywhere and divide it out
     s = 8
+    # A narrow border can fall entirely between the downsampled pixels.
+    while s > 1 and not known[::s, ::s][: img.shape[0] // s, : img.shape[1] // s].any():
+        s //= 2
     h, w = img.shape[0] // s, img.shape[1] // s
     small = cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
     known = known[::s, ::s][:h, :w]
