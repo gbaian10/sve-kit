@@ -42,7 +42,7 @@ class MasterImage(RecordData):
 
 
 class Spec(RecordData):
-    key: str
+    slug: str
     region: Literal["jp", "en"]
     home_set_id: Owner
     card_type: Literal["ep", "sep"]
@@ -149,7 +149,7 @@ def append_command(
                 ),
                 "allocated": [
                     {
-                        "key": entry.data.key,
+                        "slug": entry.data.slug,
                         "region": entry.data.region,
                         "int_id": entry.data.int_id,
                         "printing_id": entry.data.id,

@@ -51,7 +51,7 @@ REFERENCES = (
 
 def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
-        "key": "synthetic-event-ep",
+        "slug": "synthetic-event-ep",
         "region": "jp",
         "home_set_id": "EP",
         "card_type": "ep",
@@ -248,7 +248,7 @@ def test_manual_masters_join_the_image_index(
         case,
         recipe,
         spec(),
-        spec(key="synthetic-missing-master", printed_code=None, with_image=False),
+        spec(slug="synthetic-missing-master", printed_code=None, with_image=False),
     )
     with pytest.raises(ValueError, match="require --manual-image-dir"):
         build_manual_assets(manual, None, roots)
@@ -321,7 +321,7 @@ def assert_manual_media(
     )
     assert pending["variants"] == []
     assert assets_by_id[string(pending["image_id"])]["source_src_raw"] == (
-        "manual:" + without.key
+        "manual:" + without.slug
     )
 
 

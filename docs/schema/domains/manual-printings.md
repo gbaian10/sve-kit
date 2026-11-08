@@ -40,8 +40,8 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 
 | 欄位 | 型別與規則 |
 | --- | --- |
-| `key` | `^[a-z0-9][a-z0-9-]{0,63}$`，維護者取的穩定英文鍵，全域唯一；是永久 ID 的錨點，之後不改 |
-| `id`、`card_id`、`face_id` | 永久 ID，沿 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的 UUIDv5 namespace：`p`／`c` 的 anchor 為 `<region>:manual:<key>`（卡號不會含 `manual:`，不可能撞官方 anchor），face 為 `f` 加 `<card_id>:0`。驗證重算必須相等 |
+| `slug` | `^[a-z0-9][a-z0-9-]{0,63}$`，維護者取的穩定英文識別字，全域唯一；是永久 ID 的錨點，之後不改（不叫 `key`，避免被 secret 掃描誤判） |
+| `id`、`card_id`、`face_id` | 永久 ID，沿 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的 UUIDv5 namespace：`p`／`c` 的 anchor 為 `<region>:manual:<slug>`（卡號不會含 `manual:`，不可能撞官方 anchor），face 為 `f` 加 `<card_id>:0`。驗證重算必須相等 |
 | `int_id` | 落在該區未收錄號段（§4），全域唯一，由工具配發 |
 | `region` | `jp`／`en` |
 | `home_set_id` | 已 confirmed 的 `product_family.id`，等於 owner；EP／SEP 活動卡歸 `EP` 家族 |
@@ -64,7 +64,7 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 
 1–20000 仍保留、60000 仍未分配。`ids/index.yaml`（`format: 2`）同時保存 `next_int_id`（官方）與 `next_unlisted_int_id`（未收錄）兩組游標，
 鍵恰為政策內的地區，值落在 `[start, end+1]`。地區仍讀 `printing.region`，不從號碼反推。
-人工版次由 `manual-printings append` 依 `(region, key)` 排序從 `next_unlisted_int_id` 依序配發，任一區用盡整批失敗；
+人工版次由 `manual-printings append` 依 `(region, slug)` 排序從 `next_unlisted_int_id` 依序配發，任一區用盡整批失敗；
 載入時驗證每號在所屬地區的未收錄號段、全域唯一，且各區游標等於該區最大號＋1（空區為起點）。
 registry 工具不動未收錄游標，人工工具不動官方游標。
 
@@ -97,7 +97,7 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 `images build-index --manual-image-dir <目錄>` 遞迴掃該目錄下的 PNG，以 sha256 對應母檔（檔名無意義），用與官方圖相同的
 [variants 規則](../images/image-variants.md)產生 card_s／card_l／art_s，並核對解碼尺寸等於記錄值。有任何記錄帶 `image` 而沒給目錄即失敗。
 公開 `image_asset`：id 為 `img:manual:` 加 `H({printing_id, sha256})`，`source_src_raw` 為母檔 sha256 字串，`source_url` 為 `image.source_url`（可 null，因此
-`image_asset.source_url` 改為可空）。`image: null` 的記錄仍出一列 `printing_image`（`pending`／`missing`、無 variants），`source_src_raw` 為 `manual:<key>`。
+`image_asset.source_url` 改為可空）。`image: null` 的記錄仍出一列 `printing_image`（`pending`／`missing`、無 variants），`source_src_raw` 為 `manual:<slug>`。
 文字匯出 `attach` 以上述規則核對每個人工面，不讀官方觀測。範圍建置（`--scope`）可用 `home_set_id` 或 printing ID 選到人工版次；人工母檔每次重編碼，
 不借用上一版。
 

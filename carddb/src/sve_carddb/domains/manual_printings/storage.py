@@ -9,12 +9,12 @@ from sve_carddb.core.regions import Region
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.manual_printings.records import (
     AREA,
-    Key,
     ManualEntry,
     ManualImage,
     ManualName,
     Owner,
     Shard,
+    Slug,
     manual_anchor,
 )
 from sve_carddb.domains.registry.allocation import unlisted_range
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 class ManualSpec(RecordData):
     """One printing to register; IDs and the int_id are allocated by the tool."""
 
-    key: Key
+    slug: Slug
     region: Region
     home_set_id: Owner
     card_type: Literal["ep", "sep"]
@@ -53,20 +53,20 @@ def plan_manual_files(
     root: Path, existing: ManualSnapshot, index: Index, specs: tuple[ManualSpec, ...]
 ) -> Plan:
     """Allocate unlisted int_ids from the index cursors and plan new shards only."""
-    keys = {data.key for data in existing.printings()}
-    if len({spec.key for spec in specs}) != len(specs) or keys & {
-        spec.key for spec in specs
+    slugs = {data.slug for data in existing.printings()}
+    if len({spec.slug for spec in specs}) != len(specs) or slugs & {
+        spec.slug for spec in specs
     }:
-        raise ValueError("Manual printing keys must be new and unique")
+        raise ValueError("Manual printing slugs must be new and unique")
     cursor = index.unlisted_cursors()
     entries: list[ManualEntry] = []
-    for spec in sorted(specs, key=lambda item: (item.region, item.key)):
+    for spec in sorted(specs, key=lambda item: (item.region, item.slug)):
         bounds = unlisted_range(spec.region)
         if cursor[spec.region] not in bounds:
             raise ValueError(
                 f"Unlisted int_id range exhausted for region {spec.region}"
             )
-        anchor = manual_anchor(spec.region, spec.key)
+        anchor = manual_anchor(spec.region, spec.slug)
         card_id = permanent_id("c", anchor)
         entries.append(
             # Strict models take tuples only through JSON, as the registry does.

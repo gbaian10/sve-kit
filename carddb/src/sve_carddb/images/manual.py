@@ -27,7 +27,7 @@ def manual_image_id(printing_id: str, sha256: str | None) -> str:
 
 def manual_source_src(data: ManualPrintingData) -> str:
     """The master's hash stands in for an img src; a missing master names the record."""
-    return "manual:" + data.key if data.image is None else data.image.sha256
+    return "manual:" + data.slug if data.image is None else data.image.sha256
 
 
 @dataclass(frozen=True)
@@ -81,7 +81,7 @@ def build_manual_assets(
         hexdigest = image.sha256.removeprefix("sha256:")
         path = files.get(hexdigest)
         if path is None:
-            raise ValueError(f"Missing master PNG for manual printing {data.key}")
+            raise ValueError(f"Missing master PNG for manual printing {data.slug}")
         began = perf_counter()
         result = build_variants(
             ImageSource(
@@ -99,7 +99,7 @@ def build_manual_assets(
         )
         if (result.source_width, result.source_height) != (image.width, image.height):
             raise ValueError(
-                f"Master PNG dimensions differ from the authored record: {data.key}"
+                f"Master PNG dimensions differ from the authored record: {data.slug}"
             )
         images.append(ManualImage(data, result, perf_counter() - began))
     return ManualImages(snapshot, tuple(images))

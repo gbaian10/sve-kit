@@ -50,7 +50,7 @@ def image(**changes: JsonValue) -> dict[str, JsonValue]:
 
 def spec(**changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
-        "key": "synthetic-ep",
+        "slug": "synthetic-ep",
         "region": "jp",
         "home_set_id": "EP",
         "card_type": "ep",
@@ -90,7 +90,7 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
         registry_root,
         spec(),
         spec(
-            key="synthetic-en-sep",
+            slug="synthetic-en-sep",
             region="en",
             card_type="sep",
             name={"lang": "en", "text": "Synthetic SEP"},
@@ -114,10 +114,10 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
     assert jp.card_id.startswith("c:")
     assert jp.face_id != jp.card_id
     # A second append continues the lane in a new shard and rejects a reused key.
-    second = register(registry_root, spec(key="synthetic-ep-2", image=None))
+    second = register(registry_root, spec(slug="synthetic-ep-2", image=None))
     assert {item.int_id for item in second.printings()} == {55000, 55001, 95000}
     assert len(second.shards) == 2
-    with pytest.raises(ValueError, match="keys must be new"):
+    with pytest.raises(ValueError, match="slugs must be new"):
         register(registry_root, spec())
 
 
@@ -176,12 +176,12 @@ def test_batch_exhaustion_preserves_both_allocation_lanes(
     )
     specs = tuple(
         spec(
-            key=key,
+            slug=slug,
             region=region,
             name={"lang": "ja" if region == "jp" else "en", "text": "Synthetic EP"},
             image=None,
         )
-        for key in ("synthetic-last", "synthetic-overflow")
+        for slug in ("synthetic-last", "synthetic-overflow")
     )
     with pytest.raises(ValueError, match="range exhausted"):
         plan_manual_files(registry_root, snapshot(registry_root), index, specs)
@@ -221,7 +221,7 @@ def test_batch_exhaustion_preserves_both_allocation_lanes(
             "maintainer photo has no source URL",
         ),
         ({"printed_code": " 2024"}, "surrounding whitespace"),
-        ({"key": "Synthetic"}, "pattern"),
+        ({"slug": "Synthetic"}, "pattern"),
     ],
 )
 def test_spec_rules_reject_inconsistent_records(
@@ -317,7 +317,7 @@ def test_loader_rejects_cursor_and_registry_collisions(registry_root: Path) -> N
     )
     data = snapshot(registry_root).printings()[0]
     _edit_shard(registry_root, "id", official)
-    # The key recipe already rejects a foreign ID before the registry comparison.
+    # The slug recipe already rejects a foreign ID before the registry comparison.
     with pytest.raises(ValueError, match="value_error"):
         snapshot(registry_root)
     _edit_shard(registry_root, "id", data.id)
@@ -336,7 +336,7 @@ def test_shard_bytes_are_stable_block_yaml(registry_root: Path) -> None:
     assert "\n      image:\n" in text
     assert "\n      card_no:\n" in text
     before = path.read_bytes()
-    register(registry_root, spec(key="synthetic-next", image=None))
+    register(registry_root, spec(slug="synthetic-next", image=None))
     assert path.read_bytes() == before
 
 

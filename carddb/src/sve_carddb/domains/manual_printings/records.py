@@ -13,7 +13,7 @@ from sve_carddb.domains.registry.records import CardId, FaceId, PrintingId
 
 PARSER_VERSION = "manual-printings-v1"
 AREA = "manual-printings/printings"
-Key = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]{0,63}\Z")]
+Slug = Annotated[str, Field(pattern=r"^[a-z0-9][a-z0-9-]{0,63}\Z")]
 Owner = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
 Positive = Annotated[int, Field(ge=1, le=65535)]
 ReferenceClass = Literal["official_site", "official_x", "official_video"]
@@ -78,9 +78,9 @@ def _official_video(host: str, path: str, query: str) -> bool:
     )
 
 
-def manual_anchor(region: str, key: str) -> str:
+def manual_anchor(region: str, slug: str) -> str:
     """Card numbers never contain this infix, so manual anchors cannot collide."""
-    return region + ":manual:" + key
+    return region + ":manual:" + slug
 
 
 class ManualName(RecordData):
@@ -116,7 +116,7 @@ class ManualImage(RecordData):
 
 
 class ManualPrintingData(RecordData):
-    key: Key
+    slug: Slug
     id: PrintingId
     card_id: CardId
     face_id: FaceId
@@ -141,13 +141,13 @@ class ManualPrintingData(RecordData):
 
     @model_validator(mode="after")
     def _consistent(self) -> ManualPrintingData:
-        anchor = manual_anchor(self.region, self.key)
+        anchor = manual_anchor(self.region, self.slug)
         if (
             self.id != permanent_id("p", anchor)
             or self.card_id != permanent_id("c", anchor)
             or self.face_id != permanent_id("f", self.card_id + ":0")
         ):
-            raise ValueError("Manual printing IDs disagree with the key recipe")
+            raise ValueError("Manual printing IDs disagree with the slug recipe")
         if (self.card_no is None) != (self.card_no_state == "none"):
             raise ValueError("card_no is empty exactly when card_no_state is none")
         if self.card_no is not None and self.card_no != self.card_no.strip():

@@ -41,11 +41,11 @@ class ManualSnapshot:
     records: Mapping[str, ManualEntry]
 
     def printings(self) -> tuple[ManualPrintingData, ...]:
-        """Return every manual printing in a stable region/key order."""
+        """Return every manual printing in a stable region/slug order."""
         return tuple(
             sorted(
                 (entry.data for entry in self.records.values()),
-                key=lambda data: (data.region, data.key),
+                key=lambda data: (data.region, data.slug),
             )
         )
 
@@ -102,9 +102,9 @@ def _validate(
     registry: RegistrySnapshot | None,
 ) -> None:
     printings = snapshot.printings()
-    keys = [data.key for data in printings]
-    if len(keys) != len(set(keys)):
-        raise ValueError("Manual printing keys must be unique")
+    slugs = [data.slug for data in printings]
+    if len(slugs) != len(set(slugs)):
+        raise ValueError("Manual printing slugs must be unique")
     allocated: dict[str, list[int]] = {}
     seen: set[int] = set()
     for data in printings:
