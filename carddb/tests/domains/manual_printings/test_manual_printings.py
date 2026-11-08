@@ -17,6 +17,7 @@ from sve_carddb.domains.manual_printings import (
     reference_class,
 )
 from sve_carddb.domains.manual_printings.records import AREA
+from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import Index, read_yaml, write_files
 from sve_carddb.workflows.manual_printings_commands import app
@@ -30,10 +31,10 @@ if TYPE_CHECKING:
 
     from sve_carddb.domains.manual_printings import ManualSnapshot
 
-    from ...support.database_fixtures import DatabaseTemplate
+    from ...support.database_template import DatabaseTemplate
 
 REVISION = "a" * 40
-IMAGE = {
+IMAGE: dict[str, JsonValue] = {
     "sha256": "sha256:" + "3" * 64,
     "width": 918,
     "height": 1282,
@@ -41,6 +42,10 @@ IMAGE = {
     "source_url": None,
     "approved": True,
 }
+
+
+def image(**changes: JsonValue) -> dict[str, JsonValue]:
+    return {**IMAGE, **changes}
 
 
 def spec(**changes: JsonValue) -> ManualSpec:
@@ -92,7 +97,7 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
             printed_code=None,
             release_kind="basic",
             references=[],
-            image=IMAGE | {"width": 1282, "height": 918},
+            image=image(width=1282, height=918),
         ),
     )
     printings = result.printings()
@@ -205,14 +210,14 @@ def test_batch_exhaustion_preserves_both_allocation_lanes(
         ({"references": ["http://shadowverse-evolve.com/news/"]}, "plain https"),
         ({"name": {"lang": "en", "text": "Synthetic"}}, "language must match"),
         ({"card_type": "sep"}, "orientation"),
-        ({"image": IMAGE | {"width": 918, "height": 918}}, "orientation"),
-        ({"image": IMAGE | {"approved": False}}, "approved"),
+        ({"image": image(width=918, height=918)}, "orientation"),
+        ({"image": image(approved=False)}, "approved"),
         (
-            {"image": IMAGE | {"origin": "official_image"}},
+            {"image": image(origin="official_image")},
             "requires its source URL",
         ),
         (
-            {"image": IMAGE | {"source_url": "https://shadowverse-evolve.com/x.png"}},
+            {"image": image(source_url="https://shadowverse-evolve.com/x.png")},
             "maintainer photo has no source URL",
         ),
         ({"printed_code": " 2024"}, "surrounding whitespace"),
@@ -308,9 +313,8 @@ def test_loader_rejects_cursor_and_registry_collisions(registry_root: Path) -> N
     official = next(
         record.data.id
         for record in registry.records.values()
-        if record.kind == "printing"
+        if isinstance(record.data, PrintingData)
     )
-    assert isinstance(official, str)
     data = snapshot(registry_root).printings()[0]
     _edit_shard(registry_root, "id", official)
     # The key recipe already rejects a foreign ID before the registry comparison.
