@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.domains.manual_printings import load_manual_printings
 from sve_carddb.domains.registry.records import AllocationData, FaceData, PrintingData
 from sve_carddb.domains.source_corrections import FrozenImages
 from sve_carddb.domains.text_observations import (
@@ -41,6 +42,12 @@ from sve_carddb.images.assets import (
 from sve_carddb.images.checks import ImageChecks
 from sve_carddb.images.crop_report import CropBinding, crop_report
 from sve_carddb.images.crops import load_image_crops
+from sve_carddb.images.manual import (
+    ManualImages,
+    build_manual_assets,
+    manual_image_id,
+    manual_source_src,
+)
 from sve_carddb.images.variants import DEFAULT_RECIPE
 from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.parse.pages.official_jp import image_url
@@ -92,7 +99,7 @@ class RegionalImages:
 
 
 def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and public rows are built together before version allocation
-    texts: TextPlan, images: ImageBuild
+    texts: TextPlan, images: ImageBuild, manual: ManualImages | None = None
 ) -> tuple[Projection, tuple[ImageBinding, ...], tuple[CropBinding, ...]]:
     """Use the same source-bound image identity as the build database projection."""
     identity = texts.publication_identity()
@@ -194,9 +201,18 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
                         "height": variant.height,
                         "bytes": variant.bytes,
                     }
+    if manual is not None:
+        _manual_media(manual, prints, assets, rows, bindings, variants)
+    face_rows: list[Record] = [
+        {"id": face.id, "ordinal": face.ordinal} for face in faces
+    ]
+    if manual is not None:
+        face_rows.extend(
+            {"id": data.face_id, "ordinal": 0} for data in manual.snapshot.printings()
+        )
     tables: dict[str, list[Record]] = {
         "printing": sorted(prints, key=lambda row: string(row["id"])),
-        "face": [{"id": face.id, "ordinal": face.ordinal} for face in faces],
+        "face": face_rows,
         "image_asset": [assets[key] for key in sorted(assets)],
         "printing_image": sorted(
             rows, key=lambda row: (string(row["printing_id"]), string(row["face_id"]))
@@ -208,6 +224,66 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
         tuple(sorted(bindings, key=lambda item: (item.printing_id, item.face_id))),
         tuple(sorted(crop_bindings, key=lambda item: (item.printing_id, item.face_id))),
     )
+
+
+def _manual_media(
+    manual: ManualImages,
+    prints: list[Record],
+    assets: dict[str, Record],
+    rows: list[Record],
+    bindings: list[ImageBinding],
+    variants: dict[tuple[str, str], Record],
+) -> None:
+    """Manual masters bind by authored hash; a missing master stays a pending row."""
+    converted = manual.by_printing()
+    for data in manual.snapshot.printings():
+        prints.append(
+            {
+                "id": data.id,
+                "int_id": data.int_id,
+                "faces": [{"face_id": data.face_id}],
+            }
+        )
+        master = converted.get(data.id)
+        image_id = manual_image_id(
+            data.id, None if data.image is None else data.image.sha256
+        )
+        assets[image_id] = {
+            "id": image_id,
+            "source_src_raw": manual_source_src(data),
+            "source_url": None if data.image is None else data.image.source_url,
+            "width": None if master is None else master.result.source_width,
+            "height": None if master is None else master.result.source_height,
+            "format": None if master is None else "png",
+        }
+        rows.append(
+            {
+                "printing_id": data.id,
+                "face_id": data.face_id,
+                "image_id": image_id,
+                "publication_state": "pending" if master is None else "approved",
+                "availability": "missing" if master is None else "available",
+            }
+        )
+        bindings.append(
+            ImageBinding(
+                printing_id=data.id,
+                face_id=data.face_id,
+                int_id=data.int_id,
+                ordinal=0,
+            )
+        )
+        if master is not None:
+            for variant in master.result.variants:
+                variants[image_id, variant.size_key] = {
+                    "image_id": image_id,
+                    "size_key": variant.size_key,
+                    "format": variant.format,
+                    "path": variant.path,
+                    "width": variant.width,
+                    "height": variant.height,
+                    "bytes": variant.bytes,
+                }
 
 
 def write_images(
@@ -279,6 +355,12 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     previous_image_upload: Annotated[Path | None, typer.Option()] = None,
     previous_image_dir: Annotated[Path | None, typer.Option()] = None,
     previous_reuse_evidence: Annotated[Path | None, typer.Option()] = None,
+    manual_image_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="Directory of master PNGs for manual printings, matched by SHA-256."
+        ),
+    ] = None,
     workers: Annotated[int, typer.Option(min=1, max=MAX_WORKERS)] = 2,
     verify_all: Annotated[bool, typer.Option()] = False,
     initial: Annotated[
@@ -337,6 +419,11 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     }
     crops = load_image_crops(authored_root(recipe.repo))
     identity = registry_plan(recipe, text_batches)
+    manual = load_manual_printings(
+        authored_root(recipe.repo),
+        next_unlisted_int_id=identity.snapshot.files.index().unlisted_cursors(),
+        registry=identity.snapshot,
+    )
     texts = TextObservations(
         identity,
         RegionalTexts(
@@ -374,7 +461,9 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
             recipe.archive,
             recipe.store_id,
             select_printings(
-                printing_membership(texts), tuple(scope or ()), tuple(printing_id or ())
+                printing_membership(texts, manual),
+                tuple(scope or ()),
+                tuple(printing_id or ()),
             ),
         )
         requests = image_requests(texts)
@@ -410,7 +499,10 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
         ),
         sum(part.elapsed_seconds for part in parts),
     )
-    projection, bindings, crop_bindings = media_projection(texts, images)
+    manual_images = build_manual_assets(
+        manual, manual_image_dir, library, checks=checks
+    )
+    projection, bindings, crop_bindings = media_projection(texts, images, manual_images)
     diagnostics = crop_report(crops, images, crop_bindings)
     revision, previous = reserve(roots)
     if reuse is not None:
@@ -474,7 +566,7 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     upload = description.content()
     upload_path = "image-upload/" + digest(upload)[7:] + ".json"
     preview.write_artifact(roots, upload_path, upload, immutable=True)
-    membership_content = scope_manifest(texts, index, description).content()
+    membership_content = scope_manifest(texts, index, description, manual).content()
     scope_path = "image-scope/" + digest(membership_content)[7:] + ".json"
     preview.write_artifact(roots, scope_path, membership_content, immutable=True)
     commit(roots, plan.state)
@@ -485,6 +577,7 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
                 "image_scope": str(roots.destination(scope_path)),
                 "image_index": str(roots.destination(path, private=True)),
                 "written_images": written,
+                "manual_images": len(manual_images.images),
                 "image_upload": str(roots.destination(upload_path)),
                 "crops": {
                     "applied_source_images": diagnostics["applied_source_images"],

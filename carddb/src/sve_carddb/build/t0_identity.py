@@ -304,7 +304,11 @@ TABLES = (
             Column("card_id", Kind.ID),
             Column("region", Kind.TEXT, choices=("jp", "en")),
             Column("card_no", Kind.TEXT),
-            Column("card_no_state", Kind.TEXT, choices=("official", "provisional")),
+            Column(
+                "card_no_state",
+                Kind.TEXT,
+                choices=("official", "provisional", "none"),
+            ),
             Column("catalog_state", Kind.TEXT, choices=("official", "unlisted")),
             Column("decklog_available", Kind.BOOL),
             Column(
@@ -345,6 +349,8 @@ TABLES = (
             Column("rarity_raw", Kind.TEXT),
             Column("premium", Kind.BOOL, nullable=True),
             Column("serial_total", Kind.UINT, nullable=True),
+            Column("printed_code", Kind.TEXT, nullable=True),
+            Column("manual_name_unit_id", Kind.ID, nullable=True),
             Column("source_id", Kind.ID),
             Column("rarity_kind", Kind.TEXT, fixed="rarity"),
         ),
@@ -354,6 +360,7 @@ TABLES = (
             ForeignKey(("card_id",), "card", ("id",)),
             ForeignKey(("decklog_source_id",), "source_record", ("id",)),
             ForeignKey(("home_set_id",), "product_family", ("id",)),
+            ForeignKey(("manual_name_unit_id",), "text_unit", ("id",)),
             ForeignKey(("source_id",), "source_record", ("id",)),
         ),
         unique=(
@@ -368,7 +375,27 @@ TABLES = (
             Check(
                 "(decklog_verification = 'verified' AND decklog_source_id IS NOT NULL AND decklog_checked_on IS NOT NULL) OR (decklog_verification = 'unverified' AND decklog_checked_on IS NULL AND decklog_available = (catalog_state = 'official'))"
             ),
+            # A card face without any printed number is the only empty card_no.
+            Check("(card_no_state = 'none') = (card_no = '')"),
+            Check("printed_code IS NULL OR printed_code <> ''"),
+            Check(
+                "catalog_state = 'unlisted' OR (card_no_state <> 'none' AND printed_code IS NULL AND manual_name_unit_id IS NULL)"
+            ),
         ),
+    ),
+    Table(
+        "printing_reference",
+        (
+            Column("printing_id", Kind.ID),
+            Column("url", Kind.TEXT),
+            Column("source_id", Kind.ID),
+        ),
+        ("printing_id", "url"),
+        foreign_keys=(
+            ForeignKey(("printing_id",), "printing", ("id",)),
+            ForeignKey(("source_id",), "source_record", ("id",)),
+        ),
+        checks=(Check("url LIKE 'https://%'"),),
     ),
     Table(
         "printing_product",

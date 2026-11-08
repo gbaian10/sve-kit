@@ -44,12 +44,6 @@ def extras() -> dict[str, dict[str, Value]]:
             "color": None,
             "decision_id": "decision",
         },
-        "printing_reference": {
-            "printing_id": "printing",
-            "source_id": "source",
-            "role": "identity",
-            "locator": "private locator",
-        },
         "region_availability_override": {
             "card_id": "card",
             "region": "en",
@@ -275,10 +269,11 @@ def schema(
     *, nullable_observation: bool = False, with_annotations: bool = False
 ) -> CompiledSchema:
     base = compile_minimum(include_en=True)
+    declared = {table.name for table in (*base.tables, *NAME_TABLES)}
     extra = tuple(
         Table(name, tuple(starmap(_column, row.items())), (next(iter(row)),))
         for name, row in extras().items()
-        if name not in {table.name for table in NAME_TABLES}
+        if name not in declared
     ) + tuple(replace(table, query_checks=()) for table in NAME_TABLES)
     # The projector owns field eligibility checks; these fixtures also exercise invalid field inputs.
     base_tables = tuple(

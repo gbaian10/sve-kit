@@ -106,6 +106,11 @@ def rows() -> dict[str, dict[str, Value]]:
             "inclusion_kind": "pack",
             "source_id": "source",
         },
+        "printing_reference": {
+            "printing_id": "printing",
+            "url": "https://example.invalid/reference",
+            "source_id": "source",
+        },
         "printing_face": {
             "printing_id": "printing",
             "face_id": "face",

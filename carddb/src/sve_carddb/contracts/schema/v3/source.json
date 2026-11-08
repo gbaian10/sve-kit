@@ -5379,13 +5379,15 @@
           "schema": {
             "enum": [
               "official",
-              "provisional"
+              "provisional",
+              "none"
             ]
           },
           "descriptor": {
             "enum": [
               "official",
-              "provisional"
+              "provisional",
+              "none"
             ]
           }
         },
@@ -5689,6 +5691,40 @@
               "scalar": "Bool"
             }
           }
+        },
+        "printed_code": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "Text"
+            }
+          }
+        },
+        "manual_name_unit_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
         }
       },
       "constraints": {
@@ -5846,35 +5882,7 @@
                 {}
               ]
             },
-            "else": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "minItems": 1
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            }
+            "else": {}
           }
         ]
       }
@@ -9394,10 +9402,19 @@
         },
         "source_url": {
           "schema": {
-            "$ref": "#/$defs/URL"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/URL"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "descriptor": {
-            "scalar": "URL"
+            "nullable": {
+              "scalar": "URL"
+            }
           }
         },
         "width": {
@@ -9770,6 +9787,12 @@
         },
         "serial": {
           "from": "printing"
+        },
+        "printed_code": {
+          "from": "printing"
+        },
+        "manual_name_unit_id": {
+          "from": "printing"
         }
       },
       "constraints": {
@@ -9924,35 +9947,7 @@
                 {}
               ]
             },
-            "else": {
-              "prefixItems": [
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {
-                  "minItems": 1
-                },
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {}
-              ]
-            }
+            "else": {}
           }
         ]
       }

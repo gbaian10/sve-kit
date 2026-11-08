@@ -35,6 +35,10 @@ from sve_carddb.domains.construction.adoption_models import (
     RestrictionRecord,
 )
 from sve_carddb.domains.digital.links.loader import link_id
+from sve_carddb.domains.manual_printings import (
+    load_manual_printings,
+    populate_manual_printings,
+)
 from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
@@ -70,6 +74,7 @@ from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.files import read_transition_files
 from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
 from sve_carddb.domains.registry.transitions.review_sources import ReviewSources
+from sve_carddb.domains.routes import populate_routes
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
 from sve_carddb.domains.rulings.reader import load as load_rulings
 from sve_carddb.domains.rulings.storage import PROFILE as RULING_PROFILE
@@ -526,6 +531,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     _, jp = inputs.sources
     identity = registry_plan(inputs, batches)
     mark("plan preview identity")
+    manual = load_manual_printings(
+        authored_root(inputs.repo),
+        next_unlisted_int_id=identity.snapshot.files.index().unlisted_cursors(),
+        registry=identity.snapshot,
+    )
+    mark("load manual printings")
     observations = TextObservations(
         identity,
         RegionalTexts(
@@ -549,10 +560,13 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     texts = observations.plan
     mark("text observations (parse sources)")
     publication = texts.publication_identity()
-    printings = frozenset(
-        record.data.id
-        for record in publication.included("printing")
-        if isinstance(record.data, PrintingData)
+    printings = (
+        frozenset(
+            record.data.id
+            for record in publication.included("printing")
+            if isinstance(record.data, PrintingData)
+        )
+        | manual.printing_ids()
     )
     catalog = load_products(authored_root(inputs.repo), registry=identity.snapshot)
     stores = {inputs.store_id: inputs.archive}
@@ -608,6 +622,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ),
         "registry_review_inputs": identity.review_input_pin,
         "identity_transitions": identity.renewal_configuration(),
+        "manual_printings": manual.configuration(),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
@@ -684,6 +699,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 batches=batches,
             )
             mark("db: populate text preview")
+            populate_manual_printings(
+                db, manual, authored_revision=inputs.revision, build=context
+            )
+            # Provisional routes for the new unlisted printings extend the registry's.
+            populate_routes(db)
+            mark("db: manual printings")
             link_result = (
                 None
                 if names is None
@@ -869,7 +890,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             projection, errata=bool(errata), construction=construction_result
         )
         if image_index is not None:
-            projection = image_index.attach(projection, texts)
+            projection = image_index.attach(projection, texts, manual)
         mark("project public tables")
         ownership = Ownership.from_database(db, projection)
         source_gaps = _source_gaps(db, extras)
@@ -950,6 +971,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             ],
         }
         report["missing_pr_badges"] = list(missing_badges)
+        report["manual_printings"] = {
+            "printings": len(manual.records),
+            "with_image": sum(item.image is not None for item in manual.printings()),
+        }
         if link_result is not None:
             report["digital_links"] = {
                 "fresh": len(link_result.fresh),

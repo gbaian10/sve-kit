@@ -11,12 +11,14 @@ from sve_carddb.core.provenance import Source
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.source_corrections.images import evidence_url
 from sve_carddb.export.media_urls import image_path
+from sve_carddb.images.manual import manual_source_src
 from sve_carddb.images.variants import DEFAULT_RECIPE, SIZES
 from sve_carddb.parse.pages.official_jp import image_url
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.domains.manual_printings.loader import ManualSnapshot
     from sve_carddb.domains.registry.records import CorrectionEvidence
     from sve_carddb.domains.text_observations.plan import TextPlan
     from sve_carddb.export.project import Projection
@@ -147,7 +149,12 @@ class ImageIndex(RecordData):
             raise ValueError("Correction image evidence differs from image index pins")
         return source
 
-    def attach(self, projection: Projection, texts: TextPlan) -> Projection:
+    def attach(
+        self,
+        projection: Projection,
+        texts: TextPlan,
+        manual: ManualSnapshot | None = None,
+    ) -> Projection:
         """Check permanent IDs, region and actual parsed img src before joining media."""
         prints = {string(row["id"]): row for row in projection.tables["printing"]}
         faces = {string(row["id"]): row for row in projection.tables["face"]}
@@ -158,28 +165,54 @@ class ImageIndex(RecordData):
             and item.card.source.id
             == texts.identity.evidence[item.region, item.card_no].source.id
         }
+        manual_faces = (
+            {}
+            if manual is None
+            else {(data.id, data.face_id): data for data in manual.printings()}
+        )
         bindings = {(item.printing_id, item.face_id): item for item in self.bindings}
         expected = {
             (string(row["id"]), string(object_value(face)["face_id"]))
             for row in prints.values()
             for face in array(row["faces"])
         }
-        if bindings.keys() != expected or observations.keys() != expected:
+        if (
+            bindings.keys() != expected
+            or observations.keys() != expected - manual_faces.keys()
+        ):
             raise ValueError(
                 "Image index printing-face membership differs from text build"
             )
         assets = {string(row["id"]): row for row in self.tables["image_asset"]}
         for row in self.tables["printing_image"]:
             key = string(row["printing_id"]), string(row["face_id"])
-            binding, observation = bindings[key], observations[key]
+            binding = bindings[key]
+            region = (
+                manual_faces[key].region
+                if key in manual_faces
+                else observations[key].region
+            )
             if (binding.int_id, binding.ordinal) != (
                 integer(prints[key[0]]["int_id"]),
                 integer(faces[key[1]]["ordinal"]),
-            ) or prints[key[0]]["region"] != observation.region:
+            ) or prints[key[0]]["region"] != region:
                 raise ValueError(
                     "Image index permanent identity differs from text build"
                 )
             asset = assets[string(row["image_id"])]
+            if key in manual_faces:
+                data = manual_faces[key]
+                if (
+                    asset["source_src_raw"] != manual_source_src(data)
+                    or asset["source_url"]
+                    != (None if data.image is None else data.image.source_url)
+                    or (row["availability"] == "available") != (data.image is not None)
+                ):
+                    raise ValueError(
+                        "Image index manual asset differs from the authored record"
+                    )
+                continue
+            observation = observations[key]
             if (
                 len(observation.card.image_src) != len(observation.card.faces)
                 or asset["source_src_raw"]

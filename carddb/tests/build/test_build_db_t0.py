@@ -643,6 +643,9 @@ def test_all_enabled_foreign_keys_reject_missing_targets(
     updates: dict[str, Value] = {column: "xx"}
     if (table, column) == ("identity_change", "printing_id"):
         updates["kind"] = "reassign_printing"
+    if (table, column) == ("printing", "manual_name_unit_id"):
+        # Only unlisted printings may carry a manual name, so reach the FK past that CHECK.
+        updates |= {"catalog_state": "unlisted", "decklog_available": False}
     with pytest.raises(sqlite3.IntegrityError, match=r"(?i)foreign key"):
         _update(db, table, updates)
 

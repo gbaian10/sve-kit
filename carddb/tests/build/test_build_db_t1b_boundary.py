@@ -214,6 +214,6 @@ def test_rebuild_revalidates_art(tmp_path: Path) -> None:
         assert connection.execute("PRAGMA user_version").fetchall() == [(17,)]
         assert connection.execute(
             "SELECT count(*) FROM sqlite_schema WHERE type='table'"
-        ).fetchall() == [(62,)]
+        ).fetchall() == [(63,)]
         assert connection.execute("PRAGMA foreign_key_check").fetchall() == []
     assert list(tmp_path.iterdir()) == [path]

@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.core.provenance import Source
     from sve_carddb.core.regions import Region
+    from sve_carddb.domains.manual_printings.loader import ManualSnapshot
     from sve_carddb.domains.text_observations.plan import TextPlan
     from sve_carddb.export.image_upload import ImageObject, ImageUpload
     from sve_carddb.export.preview import Roots
@@ -69,20 +70,29 @@ class ReuseEvidence(RecordData):
         return result
 
 
-def printing_membership(texts: TextPlan) -> dict[str, str]:
+def printing_membership(
+    texts: TextPlan, manual: ManualSnapshot | None = None
+) -> dict[str, str]:
     """Scope is publication membership, including registered but unavailable images."""
     return {
         record.data.id: record.data.home_set_id
         for record in texts.publication_identity().included("printing")
         if isinstance(record.data, PrintingData)
-    }
+    } | (
+        {}
+        if manual is None
+        else {data.id: data.home_set_id for data in manual.printings()}
+    )
 
 
 def scope_manifest(
-    texts: TextPlan, index: ImageIndex, upload: ImageUpload
+    texts: TextPlan,
+    index: ImageIndex,
+    upload: ImageUpload,
+    manual: ManualSnapshot | None = None,
 ) -> ImageScope:
     """Attach public membership without disclosing source URLs or local paths."""
-    membership = printing_membership(texts)
+    membership = printing_membership(texts, manual)
     rows = {
         (string(row["printing_id"]), string(row["face_id"])): row
         for row in index.tables["printing_image"]
