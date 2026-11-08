@@ -7,8 +7,11 @@ import pytest
 from pydantic import JsonValue
 from typer.testing import CliRunner
 
+from sve_carddb.build import create_database
+from sve_carddb.build.t1 import compile_build
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
+from sve_carddb.domains.digital.name_policies.owners import publication_owners
 from sve_carddb.domains.manual_printings import (
     ManualSpec,
     load_manual_printings,
@@ -17,6 +20,7 @@ from sve_carddb.domains.manual_printings import (
     reference_class,
 )
 from sve_carddb.domains.manual_printings.records import AREA
+from sve_carddb.domains.products import load_products
 from sve_carddb.domains.registry.records import PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import Index, read_yaml, write_files
@@ -32,6 +36,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.manual_printings import ManualSnapshot
 
     from ...support.database_template import DatabaseTemplate
+    from ...support.shared_case_fixtures import TextCaseTemplate
 
 REVISION = "a" * 40
 IMAGE: dict[str, JsonValue] = {
@@ -472,3 +477,26 @@ def test_historical_v1_index_reads_without_an_unlisted_lane() -> None:
             }
             | {"next_unlisted_int_id": None}
         )
+
+
+def test_unlisted_faces_are_not_name_owners(
+    default_text_case: TextCaseTemplate, tmp_path: Path
+) -> None:
+    case = default_text_case.copy(tmp_path / "synthetic")
+    install(case.root, "products/family/EP/001.yaml", envelope([family("EP")]))
+    case.catalog = load_products(case.root, registry=case.identity.snapshot)
+    manual = register(case.root, spec(image=None))
+    context = BuildContext.from_inputs(REVISION, {"synthetic": True})
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+            case.compose().populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
+            populate_manual_printings(
+                db, manual, authored_revision=REVISION, build=context
+            )
+        owners = publication_owners(db, case.plan)
+        manual_ids = {data.id for data in manual.printings()}
+        assert owners
+        assert not any(owner.identifier in manual_ids for owner, _ in owners)
