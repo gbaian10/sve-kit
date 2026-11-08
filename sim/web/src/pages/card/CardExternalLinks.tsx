@@ -5,9 +5,11 @@ import { useTranslation } from "react-i18next"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
 import {
+  arrayValue,
   type Catalog,
   type DigitalLink,
   digitalLinkUrl,
+  isUnlistedPrinting,
   loadCardDigitalLinks,
   type OfficialCardLink,
   officialCardLinks,
@@ -15,6 +17,7 @@ import {
 } from "../../data"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
+import { referenceLabel } from "./reference-links"
 
 interface LinksState {
   readonly key: string
@@ -130,6 +133,36 @@ function OfficialLinkRows({ links }: { readonly links: readonly OfficialCardLink
   )
 }
 
+/** An unlisted printing has no official page or digital counterpart; only its public sources. */
+function SourceLinks({ urls }: { readonly urls: readonly string[] }) {
+  const { t } = useTranslation()
+  if (urls.length === 0) return null
+  return (
+    <section className="mt-6" aria-label={t("digital.sectionTitle")}>
+      <h3 className="text-13 font-semibold text-text-3">{t("digital.sectionTitle")}</h3>
+      <div className="mt-1.5 rounded-control border border-border p-2.5">
+        <h4 className="mb-1.5 text-12 text-text-3">{t("digital.sources")}</h4>
+        <ul className="space-y-1.5">
+          {urls.map((url) => (
+            <li key={url} className="text-14">
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-accent-text underline-offset-2 hover:underline"
+              >
+                {referenceLabel(url)}
+                <ExternalLink className="size-3.5" aria-hidden="true" />
+                <span className="sr-only">{t("digital.newTab")}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
 function DigitalLinks({
   client,
   catalog,
@@ -179,6 +212,15 @@ export function CardExternalLinks({
 }) {
   const { t } = useTranslation()
   const { showDigitalLinks } = usePrefs()
+  const printing = catalog.index.printing(printingId)
+  if (isUnlistedPrinting(printing))
+    return (
+      <SourceLinks
+        urls={arrayValue(printing?.["reference_urls"] ?? []).filter(
+          (url): url is string => typeof url === "string",
+        )}
+      />
+    )
   const officialLinks = officialCardLinks(catalog, cardId, printingId, region)
   if (!showDigitalLinks && officialLinks.length === 0) return null
   return (

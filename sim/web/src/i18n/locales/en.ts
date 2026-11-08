@@ -281,6 +281,12 @@ export default {
     stampOnly: "Stamped cards",
     stampOnlyHint: "Only PR cards have stamps.",
     serialOnly: "Numbered cards",
+    serialOnlyHint: "Printed with a serial-number plate",
+    unlistedOnly: "Not in official database",
+    unlistedOnlyHint: "EP/SEP and similar cards missing from the official card list",
+    specialPrintings: "Special printings",
+    specialPrintingsAll: "All",
+    specialPrintingsHint: "Selecting several shows only cards that match all of them",
     errataOnly: "Only show cards with errata",
     errataOnlyHint: "Cards with an official errata announcement",
     keywords: "Keywords",
@@ -550,6 +556,7 @@ export default {
   digital: {
     sectionTitle: "External links",
     officialHeading: "Official card pages",
+    sources: "Sources",
     official: {
       jp: "Official card page (Japanese edition)",
       en: "Official card page (English edition)",
@@ -572,6 +579,10 @@ export default {
   cardPage: {
     anniversaryStamp: "Anniversary stamp",
     unknownStamp: "Unconfirmed stamp kind",
+    unlistedBadge: "Not in official card database",
+    unlistedHint:
+      "The official card list doesn't include this card; its name and image come from the physical card or official announcements",
+    noCardNo: "No card number",
     switchingCard: "Switching card…",
     switchingEdition: "Loading the other edition…",
     otherEditionFailed: "Couldn't load the other edition.",

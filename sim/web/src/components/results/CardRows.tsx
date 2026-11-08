@@ -27,11 +27,13 @@ import { CardTypeBadge } from "../card/CardTypeBadge"
 import { CLASS_ICON } from "../card/classIcons"
 import { DeckLocationBadges } from "../card/DeckLocationBadges"
 import { InlineText } from "../card/InlineText"
+import { listedCardNo } from "../card/listedCardNo"
 import { RarityBadges } from "../card/RarityBadges"
 import { RARITY_BADGE_HEIGHT, RARITY_COLUMN_MIN_WIDTH } from "../card/rarityBadgeSize"
 import { RestrictionBadge } from "../card/RestrictionBadge"
 import { StatLine } from "../card/StatLine"
 import { ATTACK_ICON, DEFENSE_ICON } from "../card/symbolIcons"
+import { UnlistedBadge } from "../card/UnlistedBadge"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { ArtThumb } from "./ArtThumb"
@@ -262,7 +264,8 @@ const TableRow = memo(function TableRow({
               )}
             </span>
             <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-11 text-text-3 tabular-nums">
-              {cell.summary.cardNo}
+              {listedCardNo(cell.summary)}
+              {cell.summary.unlisted && <UnlistedBadge />}
               <RarityBadges {...cell.summary} />
               <RestrictionBadge restrictions={cell.summary.restrictions} />
               <DeckLocationBadges locations={cell.summary.deckLocations} />
@@ -284,20 +287,23 @@ const TableRow = memo(function TableRow({
             <Badge className="mt-0.5 self-start">{labels.wordingPending}</Badge>
           )}
         </span>
-        <span className="min-w-0 basis-full pl-23">
-          {seen ? (
-            <EffectPreview
-              printingId={cell.summary.printingId}
-              faceId={cell.summary.faceId}
-              edition={cell.summary.region}
-              labels={labels}
-            />
-          ) : (
-            <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
-              <span className="text-13 text-text-3 italic">{labels.effectPending}</span>
-            </span>
-          )}
-        </span>
+        {/* An unlisted printing has no card text, so there is nothing to preview. */}
+        {!cell.summary.unlisted && (
+          <span className="min-w-0 basis-full pl-23">
+            {seen ? (
+              <EffectPreview
+                printingId={cell.summary.printingId}
+                faceId={cell.summary.faceId}
+                edition={cell.summary.region}
+                labels={labels}
+              />
+            ) : (
+              <span className="flex min-w-0 flex-col gap-0.5" data-preview="waiting">
+                <span className="text-13 text-text-3 italic">{labels.effectPending}</span>
+              </span>
+            )}
+          </span>
+        )}
       </RowLink>
       {action && <span className="flex shrink-0 items-center pl-3">{action}</span>}
     </li>
@@ -405,7 +411,10 @@ const ListRow = memo(function ListRow({
       }}
     >
       <RestrictionBadge restrictions={cell.summary.restrictions} className="mr-1" />
-      {visibility.name ? cell.name.primary.text : cell.summary.cardNo}
+      {visibility.name
+        ? cell.name.primary.text
+        : listedCardNo(cell.summary) || cell.name.primary.text}
+      {visibility.name && cell.summary.unlisted && <UnlistedBadge className="ml-2 align-middle" />}
       {visibility.name && cell.name.secondary && (
         <>
           <span
@@ -437,7 +446,7 @@ const ListRow = memo(function ListRow({
           case "number":
             return (
               <td key={column} data-list-number="">
-                {visibility.name ? <span>{cell.summary.cardNo}</span> : navigationLink}
+                {visibility.name ? <span>{listedCardNo(cell.summary)}</span> : navigationLink}
               </td>
             )
           case "rarity":
@@ -501,21 +510,25 @@ const ListRow = memo(function ListRow({
             return (
               <td key={column} data-list-effect="">
                 <span data-list-effect-text="">
-                  {cell.summary.wordingPending && (
-                    <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
-                  )}
-                  {seen ? (
-                    <EffectPreview
-                      printingId={cell.summary.printingId}
-                      faceId={cell.summary.faceId}
-                      edition={cell.summary.region}
-                      labels={labels}
-                      singleLine
-                    />
-                  ) : (
-                    <span data-preview="waiting" className="text-text-3 italic">
-                      {labels.effectPending}
-                    </span>
+                  {cell.summary.unlisted ? null : (
+                    <>
+                      {cell.summary.wordingPending && (
+                        <Badge className="mr-2 align-middle">{labels.wordingPending}</Badge>
+                      )}
+                      {seen ? (
+                        <EffectPreview
+                          printingId={cell.summary.printingId}
+                          faceId={cell.summary.faceId}
+                          edition={cell.summary.region}
+                          labels={labels}
+                          singleLine
+                        />
+                      ) : (
+                        <span data-preview="waiting" className="text-text-3 italic">
+                          {labels.effectPending}
+                        </span>
+                      )}
+                    </>
                   )}
                 </span>
               </td>

@@ -3370,6 +3370,88 @@ it("filters printing marks before grouping and preserves them in completed and r
   }
 })
 
+it("names an unlisted printing by its manual name and filters it as a special printing", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const jpPrintings = snapshot.bootstrap
+    .filter((fragment) => fragment.table === "printing")
+    .flatMap((fragment) => fragment.rows)
+    .filter((row) => row["region"] === "jp")
+  const perCard = new Map<string, number>()
+  for (const row of jpPrintings)
+    perCard.set(stringValue(row["card_id"]), (perCard.get(stringValue(row["card_id"])) ?? 0) + 1)
+  // A card with one printing, so rewriting it leaves no listed printing behind.
+  const target = jpPrintings.find((row) => perCard.get(stringValue(row["card_id"])) === 1)
+  if (!target) throw new Error("no single-printing card in the fixture")
+  const unit = { id: "t:manual-unlisted", lang: "ja", text: "ゆいっこ" }
+  const rewrite = (source: readonly (typeof snapshot.bootstrap)[number][]) => {
+    const columns = new BootstrapColumns()
+    const textUnits = source.find((fragment) => fragment.table === "text_unit")
+    if (!textUnits) throw new Error("no text unit fragment")
+    columns.ingest([
+      ...source.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) => {
+          if (fragment.table === "printing" && row["id"] === target["id"])
+            return {
+              ...row,
+              card_no: "",
+              card_no_state: "none",
+              catalog_state: "unlisted",
+              printed_code: "2024千葉-A",
+              manual_name_unit_id: unit.id,
+            }
+          // No observation, so no current wording and no display revision.
+          if (fragment.table === "face" && row["card_id"] === target["card_id"])
+            return { ...row, current: [], wording: [] }
+          return row
+        }),
+      })),
+      { ...textUnits, identity: "synthetic-manual-name", rows: [unit] },
+    ])
+    columns.seal()
+    return columns
+  }
+  const created = new SearchIndex(rewrite(snapshot.bootstrap), "jp")
+  const restored = new SearchIndex(created.encode(), "jp")
+  // A catalog locator knows no marks yet; completing it from the rewritten rows sets the filter.
+  const locators = new BootstrapColumns()
+  locators.ingest(initial.bootstrap)
+  locators.seal()
+  const completed = new SearchIndex(locators, "jp")
+  completed.completePrintings(rewrite(snapshot.bootstrap))
+  for (const index of [created, restored, completed, new SearchIndex(completed.encode(), "jp")]) {
+    const search = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index.search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, ...state } })
+    expect(search({ unlistedOnly: true }).items.map((item) => item.printingId)).toEqual([
+      target["id"],
+    ])
+    expect(search({}).items.length).toBeGreaterThan(1)
+    // Ticking it with another mark keeps only printings that match both.
+    expect(search({ unlistedOnly: true, stampOnly: true }).items).toEqual([])
+  }
+  // An unlisted printing is a card's default one, so the first build already names it.
+  for (const index of [created, restored]) {
+    const search = (state: Partial<typeof DEFAULT_QUERY>) =>
+      index.search({ ...query, limit: 1000, state: { ...DEFAULT_QUERY, ...state } })
+    expect(search({ unlistedOnly: true }).items[0]?.summary).toMatchObject({
+      cardNo: "",
+      cardNoState: "none",
+      unlisted: true,
+      printedCode: "2024千葉-A",
+      name: { original: { lang: "ja", text: "ゆいっこ" } },
+    })
+    expect(search({ text: "ゆいっこ" }).items.map((item) => item.printingId)).toEqual([
+      target["id"],
+    ])
+  }
+})
+
 it("sorts home sets by regional release, groups undated products and PR, and applies independent secondary directions", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()

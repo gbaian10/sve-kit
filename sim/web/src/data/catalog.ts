@@ -45,6 +45,10 @@ export interface CardSummary {
   readonly route?: { readonly cardOwner: string; readonly printingOwner: string }
   readonly intId?: number
   readonly cardNoState?: string
+  /** True for a printing the official card database does not list; its name is a manual one. */
+  readonly unlisted?: boolean
+  /** The code printed at the bottom left of the card face, when the face has one. */
+  readonly printedCode?: string | null
   readonly classCode: string | null
   readonly name: NameSource
   readonly cost: number | null
@@ -120,6 +124,25 @@ export function nameOf(
     }
   }
   return { original: { lang, text: stringValue(unit["text"]) }, translations, translationQuality }
+}
+
+/** The card-face name of an unlisted printing; official faces never have one. */
+function manualNameOf(index: CardIndex, printing: Row | undefined): NameSource | undefined {
+  const unitId = printing?.["manual_name_unit_id"]
+  if (typeof unitId !== "string") return undefined
+  const unit = index.textUnit(unitId)
+  const lang = unit ? stringValue(unit["lang"]) : undefined
+  return unit && lang !== undefined && isTextLang(lang)
+    ? { original: { lang, text: stringValue(unit["text"]) }, translations: {} }
+    : undefined
+}
+
+export const isUnlistedPrinting = (printing: Row | undefined): boolean =>
+  printing?.["catalog_state"] === "unlisted"
+
+function printedCodeOf(printing: Row | undefined): string | null {
+  const code = printing?.["printed_code"]
+  return typeof code === "string" && code !== "" ? code : null
 }
 
 function searchName(lang: TextLang, text: string): SearchName {
@@ -200,22 +223,25 @@ function* catalogCardCursor(
       if (typeof printingId === "string") defaultPrinting[region] = printingId
       const revision = index.displayRevision(faceId, region)
       const pending = index.wording(faceId, region)
-      if (!revision && !pending) continue
+      const printing = index.printing(typeof printingId === "string" ? printingId : "")
+      const manual = manualNameOf(index, printing)
+      if (!revision && !pending && !manual) continue
       const code = revision?.["class_code"]
       if (typeof code === "string") classCode = code
-      const printing = index.printing(typeof printingId === "string" ? printingId : "")
       const nameRow = revision ?? (pending?.["common_name"] as Row | null | undefined)
       const name = nameRow
         ? nameOf(index, nameRow)
-        : printing
-          ? {
-              original: {
-                lang: region === "jp" ? ("ja" as const) : ("en" as const),
-                text: stringValue(printing["card_no"]),
-              },
-              translations: {},
-            }
-          : undefined
+        : manual
+          ? manual
+          : printing
+            ? {
+                original: {
+                  lang: region === "jp" ? ("ja" as const) : ("en" as const),
+                  text: stringValue(printing["card_no"]),
+                },
+                translations: {},
+              }
+            : undefined
       if (!name) continue
       for (const [lang, text] of [
         [name.original.lang, name.original.text] as const,
@@ -256,8 +282,11 @@ function* catalogCardCursor(
           ...(typeof printing["card_no_state"] === "string"
             ? { cardNoState: printing["card_no_state"] }
             : {}),
+          ...(isUnlistedPrinting(printing)
+            ? { unlisted: true, printedCode: printedCodeOf(printing) }
+            : {}),
           classCode: typeof own?.["class_code"] === "string" ? own["class_code"] : null,
-          name: ownName ?? name,
+          name: manualNameOf(index, printing) ?? ownName ?? name,
           cost: nullableInteger(own?.["cost"]),
           attack: nullableInteger(own?.["attack"]),
           defense: nullableInteger(own?.["defense"]),

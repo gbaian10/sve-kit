@@ -1,6 +1,7 @@
 import PQueue from "p-queue"
 
 import { type CardRouteInput, type CardSummary, locateCard, type SnapshotClient } from "../data"
+import { usesIntRoute } from "../domain/cardRoute"
 import { type CardContent, prepareCardContent, yieldCardPreload } from "./card-content"
 
 // Both sources share a budget; each card reads its fragments and images sequentially.
@@ -13,8 +14,8 @@ export interface PrefetchTarget {
 
 export function summaryRoute(summary: CardSummary): CardRouteInput {
   return {
-    namespace: summary.cardNoState === "provisional" ? "provisional" : "official",
-    key: summary.cardNoState === "provisional" ? String(summary.intId) : summary.cardNo,
+    namespace: usesIntRoute(summary.cardNoState) ? "provisional" : "official",
+    key: usesIntRoute(summary.cardNoState) ? String(summary.intId) : summary.cardNo,
     edition: summary.region,
     ...(summary.route
       ? {

@@ -97,6 +97,8 @@ const state = vi.hoisted(() => ({
   credits: null as "found" | "none" | "failed" | null,
   basisPrintingId: "p:undated",
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
+  /** A printing the official database does not list: no number, no card text, a manual name. */
+  unlisted: null as { printedCode: string | null; references: string[] } | null,
   wording: vi.fn(),
 }))
 vi.mock("../../data", async (importOriginal) => ({
@@ -139,6 +141,16 @@ vi.mock("../../app/snapshot", () => {
     region: state.crossRegion ? "en" : "jp",
     int_id: 42,
     faces: [{ face_id: "f:synthetic", art_id: "a:synthetic" }],
+    ...(state.unlisted
+      ? {
+          card_no: "",
+          card_no_state: "none",
+          catalog_state: "unlisted",
+          printed_code: state.unlisted.printedCode,
+          manual_name_unit_id: "t:manual",
+          reference_urls: state.unlisted.references,
+        }
+      : {}),
   })
   // Most cases leave the exact name pending to exercise the catalog stand-in.
   const annotatedText = (
@@ -317,29 +329,46 @@ vi.mock("../../app/snapshot", () => {
               ]
             : []),
         summary: () =>
-          state.doubleFace || state.summary
+          state.unlisted
             ? {
                 cardId: "c:synthetic",
                 printingId: "p:synthetic",
                 faceId: "f:synthetic",
-                cardNo: "BP-SYNTHETIC",
+                cardNo: "",
+                cardNoState: "none",
+                intId: 42,
+                unlisted: true,
+                printedCode: state.unlisted.printedCode,
                 region: "jp",
                 classCode: null,
-                rarityCode: "sr",
-                premium: true,
-                // A pending card's catalog name is the card-number stand-in.
-                name: {
-                  original: {
-                    lang: "ja",
-                    text: state.originalName ? "BP-SYNTHETIC" : "Synthetic front",
-                  },
-                  translations: {},
-                },
-                cost: 1,
-                attack: 1,
-                defense: 1,
+                name: { original: { lang: "ja", text: "ガルミーユ×うどん" }, translations: {} },
+                cost: null,
+                attack: null,
+                defense: null,
               }
-            : undefined,
+            : state.doubleFace || state.summary
+              ? {
+                  cardId: "c:synthetic",
+                  printingId: "p:synthetic",
+                  faceId: "f:synthetic",
+                  cardNo: "BP-SYNTHETIC",
+                  region: "jp",
+                  classCode: null,
+                  rarityCode: "sr",
+                  premium: true,
+                  // A pending card's catalog name is the card-number stand-in.
+                  name: {
+                    original: {
+                      lang: "ja",
+                      text: state.originalName ? "BP-SYNTHETIC" : "Synthetic front",
+                    },
+                    translations: {},
+                  },
+                  cost: 1,
+                  attack: 1,
+                  defense: 1,
+                }
+              : undefined,
         index: {
           cards: [{ id: "c:synthetic" }],
           card: () => ({ id: "c:synthetic", home_set_id: "BP-SYNTHETIC" }),
@@ -358,6 +387,8 @@ vi.mock("../../app/snapshot", () => {
           facesOf: () => [{ id: "f:synthetic" }, ...(state.doubleFace ? [{ id: "f:back" }] : [])],
           wording: (face: string, region: string) => {
             state.wording(face, region)
+            // An unlisted face has no observation, so it has no wording state either.
+            if (state.unlisted) return undefined
             return {
               classification: state.classification,
               basis_printing_id: state.basisPrintingId,
@@ -374,7 +405,7 @@ vi.mock("../../app/snapshot", () => {
             }
           },
           displayRevision: (face: string) =>
-            state.originalName
+            state.originalName || state.unlisted
               ? undefined
               : state.doubleFace
                 ? {
@@ -430,7 +461,9 @@ vi.mock("../../app/snapshot", () => {
               ...printing(),
               id,
               home_set_id: "BP-SYNTHETIC",
-              card_no: undated?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER"),
+              card_no: state.unlisted
+                ? ""
+                : (undated?.cardNo ?? (id === "p:synthetic" ? "BP-SYNTHETIC" : "BP-OTHER")),
             }
           },
         },
@@ -465,6 +498,7 @@ beforeEach(() => {
   state.order = null
   state.suggestions = []
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
+  state.unlisted = null
   state.classification = "same_effect"
   state.untranslated = []
   state.blank = []
@@ -1416,5 +1450,102 @@ describe("the external links block", () => {
     state.printingsFailure = true
     await open("zh-TW")
     expect(await screen.findByText("另一版本資料載入失敗。")).toBeInTheDocument()
+  })
+})
+
+describe("a printing the official database does not list", () => {
+  const open = (language: "zh-TW" | "ja" | "en" = "zh-TW") =>
+    renderRoutes([{ path: "/cards/_provisional/:intId", ...card }], {
+      initialEntries: ["/cards/_provisional/42"],
+      language,
+    })
+
+  it.each([
+    [
+      "zh-TW",
+      "官方資料庫未收錄",
+      "官方卡表沒有收錄這張卡；卡名與卡圖依實卡或官方宣傳整理",
+      "無卡號",
+    ],
+    [
+      "ja",
+      "公式データベース未収録",
+      "公式カードリストに掲載されていないカードです。カード名と画像は実物または公式の告知をもとに整理しています",
+      "番号なし",
+    ],
+    [
+      "en",
+      "Not in official card database",
+      "The official card list doesn't include this card; its name and image come from the physical card or official announcements",
+      "No card number",
+    ],
+  ] as const)(
+    "names the card, tags it beside the name and has no number in %s",
+    async (language, badge, hint, noNumber) => {
+      state.unlisted = { printedCode: null, references: [] }
+      await open(language)
+      const heading = await screen.findByRole("heading", { level: 2 })
+      expect(heading).toHaveTextContent("ガルミーユ×うどん")
+      // The tag shares the name's row and explains itself on hover.
+      const tag = screen.getByText(badge)
+      expect(tag.closest("div")).toBe(heading.parentElement?.parentElement)
+      expect(tag.parentElement).toHaveAttribute("title", hint)
+      expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(noNumber)
+    },
+  )
+
+  it("shows the code printed on the face where the number goes", async () => {
+    state.unlisted = { printedCode: "2024千葉-A", references: [] }
+    await open()
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("2024千葉-A")
+  })
+
+  it("does not claim a missing translation for the card-face name", async () => {
+    state.unlisted = { printedCode: null, references: [] }
+    await open("en")
+    await screen.findByRole("heading", { level: 2 })
+    expect(screen.queryByText("No translation yet")).not.toBeInTheDocument()
+  })
+
+  it("has no card text, wording notice or Q&A", async () => {
+    state.unlisted = { printedCode: null, references: [] }
+    await open()
+    await screen.findByRole("heading", { level: 2 })
+    expect(screen.queryByText("Synthetic selected effect")).not.toBeInTheDocument()
+    expect(screen.queryByText("卡文未定")).not.toBeInTheDocument()
+    expect(screen.queryByText("Q&A")).not.toBeInTheDocument()
+    expect(screen.queryByText("原文")).not.toBeInTheDocument()
+  })
+
+  it("lists only its public sources, labelled by where they point", async () => {
+    state.unlisted = {
+      printedCode: null,
+      references: [
+        "https://x.com/bo_tcg_event/status/1855883163387695327",
+        "https://shadowverse-evolve.com/news/post-234/",
+        "https://www.youtube.com/watch?v=abc",
+      ],
+    }
+    await open()
+    const section = await screen.findByRole("region", { name: "外部連結" })
+    expect(within(section).getByText("來源")).toBeVisible()
+    expect(
+      within(section)
+        .getAllByRole("link")
+        .map((link) => [link.textContent.replace("（另開分頁）", ""), link.getAttribute("href")]),
+    ).toEqual([
+      ["X @bo_tcg_event", "https://x.com/bo_tcg_event/status/1855883163387695327"],
+      ["shadowverse-evolve.com", "https://shadowverse-evolve.com/news/post-234/"],
+      ["YouTube", "https://www.youtube.com/watch?v=abc"],
+    ])
+    expect(within(section).queryByText("數位版")).not.toBeInTheDocument()
+    expect(within(section).queryByText("官方卡片頁")).not.toBeInTheDocument()
+  })
+
+  it("leaves the external links out when it has no source", async () => {
+    state.unlisted = { printedCode: null, references: [] }
+    await open()
+    await screen.findByRole("heading", { level: 2 })
+    expect(screen.queryByRole("region", { name: "外部連結" })).not.toBeInTheDocument()
   })
 })

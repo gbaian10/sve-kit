@@ -194,6 +194,15 @@ export function ConditionChips({
           },
         ]
       : []),
+    ...(query.unlistedOnly
+      ? [
+          {
+            key: "unlisted",
+            label: t("filters.unlistedOnly"),
+            without: { ...query, unlistedOnly: false },
+          },
+        ]
+      : []),
     ...(query.serialOnly
       ? [
           {

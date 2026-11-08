@@ -33,6 +33,7 @@ describe("query codec", () => {
       altArtOnly: true,
       stampOnly: false,
       serialOnly: false,
+      unlistedOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
       reprints: "only",
@@ -208,12 +209,16 @@ describe("query codec", () => {
   })
 })
 
-it("round trips independent stamp and serial filters and rejects other flag values", () => {
-  const state = { ...DEFAULT_QUERY, stampOnly: true, serialOnly: true }
-  expect(querySearch(state)).toBe("?stamp=1&serial=1")
+it("round trips independent stamp, serial and unlisted filters and rejects other flag values", () => {
+  const state = { ...DEFAULT_QUERY, stampOnly: true, serialOnly: true, unlistedOnly: true }
+  expect(querySearch(state)).toBe("?stamp=1&serial=1&unlisted=1")
   expect(parseQuery(formatQuery(state))).toEqual(state)
-  expect(activeFilterCount(state)).toBe(2)
-  expect(parseQuery(new URLSearchParams("stamp=true&serial=0"))).toEqual(DEFAULT_QUERY)
+  expect(activeFilterCount(state)).toBe(3)
+  expect(parseQuery(new URLSearchParams("unlisted=1"))).toEqual({
+    ...DEFAULT_QUERY,
+    unlistedOnly: true,
+  })
+  expect(parseQuery(new URLSearchParams("stamp=true&serial=0&unlisted=yes"))).toEqual(DEFAULT_QUERY)
 })
 
 it("round trips independent ability and keyword matching modes and drops unknown ability names", () => {

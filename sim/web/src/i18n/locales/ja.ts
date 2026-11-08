@@ -273,6 +273,12 @@ export default {
     stampOnly: "ロゴ入りカード",
     stampOnlyHint: "PRカードのみ",
     serialOnly: "シリアルナンバー入りカード",
+    serialOnlyHint: "カードにシリアルナンバーが印字されている",
+    unlistedOnly: "公式未収録",
+    unlistedOnlyHint: "公式カードリストにないEP／SEPなど",
+    specialPrintings: "特殊版",
+    specialPrintingsAll: "すべて",
+    specialPrintingsHint: "複数選ぶと、すべてに当てはまるカードだけを表示",
     errataOnly: "エラッタのあるカードのみ",
     errataOnlyHint: "公式のエラッタ告知があるカード",
     keywords: "キーワード",
@@ -539,6 +545,7 @@ export default {
   digital: {
     sectionTitle: "外部リンク",
     officialHeading: "公式カードページ",
+    sources: "出典",
     official: { jp: "公式カードページ（日本語版）", en: "公式カードページ（英語版）" },
     heading: "デジタル版",
     generation: { sv1: "Shadowverse（初代）", svwb: "Worlds Beyond" },
@@ -558,6 +565,10 @@ export default {
   cardPage: {
     anniversaryStamp: "周年ロゴ",
     unknownStamp: "ロゴの種類未確認",
+    unlistedBadge: "公式データベース未収録",
+    unlistedHint:
+      "公式カードリストに掲載されていないカードです。カード名と画像は実物または公式の告知をもとに整理しています",
+    noCardNo: "番号なし",
     switchingCard: "カードを切り替え中…",
     switchingEdition: "別のバージョンを読み込み中…",
     otherEditionFailed: "別のバージョンを読み込めませんでした。",

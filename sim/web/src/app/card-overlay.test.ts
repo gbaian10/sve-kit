@@ -30,6 +30,9 @@ describe("card parameter", () => {
     expect(cardParamOf({ cardNo: "", cardNoState: "provisional", intId: 42 })).toBe(
       "_provisional/42",
     )
+    expect(cardParamOf({ cardNo: "", cardNoState: "none", intId: 55001 })).toBe(
+      "_provisional/55001",
+    )
     expect(parseCardParam("BP01-001")).toEqual({ namespace: "official", key: "BP01-001" })
     expect(parseCardParam("_provisional/42")).toEqual({ namespace: "provisional", key: "42" })
     expect(parseCardParam(null)).toBeNull()

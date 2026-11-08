@@ -31,6 +31,7 @@ import { DeckLocationBadges } from "../../components/card/DeckLocationBadges"
 import { PrintingMarks } from "../../components/card/PrintingMarks"
 import { RarityBadges } from "../../components/card/RarityBadges"
 import { StatCells } from "../../components/card/StatCells"
+import { UnlistedBadge } from "../../components/card/UnlistedBadge"
 import { type VocabularyKind, vocabularyLabel } from "../../components/card/vocabulary"
 import { Badge } from "../../components/ui/Badge"
 import { Button } from "../../components/ui/Button"
@@ -48,6 +49,7 @@ import {
   type FaceArtist,
   faceBasics,
   type ImageIndex,
+  isUnlistedPrinting,
   type LocatedCard,
   nameOf,
   type Row,
@@ -55,7 +57,7 @@ import {
   type SnapshotStatus,
   stringValue,
 } from "../../data"
-import { CardRouteError, printingPath } from "../../domain/cardRoute"
+import { CardRouteError, printingPath, usesIntRoute } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
 import { deckLocationBadges } from "../../domain/deckLocation"
 import { displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
@@ -209,6 +211,12 @@ export function CardView({
   const region = (printing?.["region"] as Region | undefined) ?? cardEdition
   const faces = printing ? (catalog?.index.facesOf(printing["card_id"] as string) ?? []) : []
   const summary: CardSummary | undefined = printingId ? catalog?.summary(printingId) : undefined
+  // Printings the official database does not list carry no card text, Q&A or official number.
+  const unlisted = isUnlistedPrinting(printing)
+  const printedCode =
+    typeof printing?.["printed_code"] === "string" && printing["printed_code"] !== ""
+      ? printing["printed_code"]
+      : null
   const card = printing ? catalog?.index.card(stringValue(printing["card_id"])) : undefined
   const family = card ? catalog?.index.family(stringValue(card["home_set_id"])) : undefined
   const setCode = family ? stringValue(family["public_code"]) : undefined
@@ -394,7 +402,7 @@ export function CardView({
   ])
   const canonical =
     summary && !frame
-      ? summary.cardNoState === "provisional"
+      ? usesIntRoute(summary.cardNoState)
         ? printingPath(summary)
         : `${printingPath(summary)}/${encodeURIComponent(summary.name.original.text)}`
       : null
@@ -757,7 +765,9 @@ export function CardView({
             </RouterLink>
           )}
           <Heading className="min-w-0 flex-1 truncate text-center font-sans text-15 font-semibold tabular-nums">
-            {resolved?.cardNo ?? frame?.key ?? cardNo ?? intId}
+            {unlisted
+              ? (printedCode ?? t("cardPage.noCardNo"))
+              : (resolved?.cardNo ?? frame?.key ?? cardNo ?? intId)}
           </Heading>
           <button
             type="button"
@@ -893,8 +903,15 @@ export function CardView({
                       {ordinal > 0 && (
                         <Badge className="self-start">{t("cardPage.backFace")}</Badge>
                       )}
-                      <div className="flex items-start gap-2">
-                        <div className="min-w-0 flex-1">
+                      <div
+                        className={cn(
+                          "flex gap-2",
+                          unlisted && ordinal === 0
+                            ? "flex-wrap items-center gap-y-1"
+                            : "items-start",
+                        )}
+                      >
+                        <div className={cn("min-w-0", !(unlisted && ordinal === 0) && "flex-1")}>
                           {typeof nameRevisionId === "string" ? (
                             <CardNameHeading
                               client={client}
@@ -904,9 +921,13 @@ export function CardView({
                               fallback={name}
                             />
                           ) : (
-                            <PlainNameHeading name={name} />
+                            // A card-face name is not translated, so it never lacks a translation.
+                            <PlainNameHeading
+                              name={unlisted ? { ...name, missingTranslation: false } : name}
+                            />
                           )}
                         </div>
+                        {unlisted && ordinal === 0 && <UnlistedBadge />}
                       </div>
                       <p
                         data-card-classification=""
@@ -976,7 +997,7 @@ export function CardView({
                       )}
                     </div>
                   )}
-                  {printingId && catalog && (
+                  {printingId && catalog && !unlisted && (
                     <CardTextPanel
                       cardId={cardId ?? ""}
                       key={printingId}
@@ -1001,7 +1022,7 @@ export function CardView({
                 </section>
               )
             })}
-            {catalog && cardId !== undefined && (
+            {catalog && cardId !== undefined && !unlisted && (
               <CardQa
                 key={`qa:${cardId}`}
                 client={client}
