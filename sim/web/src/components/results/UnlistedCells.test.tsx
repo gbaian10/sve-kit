@@ -128,3 +128,16 @@ it("tags an unlisted card in the spreadsheet list and asks for no card text", as
   expect(asked).not.toContain("p:coded")
   expect(asked).not.toContain("p:bare")
 })
+
+it("keeps the unlisted badge in the list when the name column is hidden", async () => {
+  act(() => {
+    prefsStore.set({
+      ...DEFAULT_PREFS,
+      listVisibility: { ...DEFAULT_PREFS.listVisibility, name: false },
+    })
+  })
+  await renderInRouter(
+    <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[coded]} onOpen={vi.fn()} />,
+  )
+  expect(screen.getByRole("link", { name: /2024千葉-A.*官方資料庫未收錄/u })).toBeVisible()
+})

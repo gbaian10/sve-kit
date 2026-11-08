@@ -414,7 +414,7 @@ const ListRow = memo(function ListRow({
       {visibility.name
         ? cell.name.primary.text
         : listedCardNo(cell.summary) || cell.name.primary.text}
-      {visibility.name && cell.summary.unlisted && <UnlistedBadge className="ml-2 align-middle" />}
+      {cell.summary.unlisted && <UnlistedBadge className="ml-2 align-middle" />}
       {visibility.name && cell.name.secondary && (
         <>
           <span
