@@ -47,7 +47,13 @@ _YOUTUBE_SHORT = re.compile(r"^/[A-Za-z0-9_-]{11}\Z")
 def reference_class(url: str) -> ReferenceClass:
     """Accept only an official site page, an official X post or an official video."""
     parts = urlsplit(url)
-    plain = parts.scheme == "https" and not parts.fragment and bool(parts.hostname)
+    plain = (
+        parts.scheme == "https"
+        and not parts.fragment
+        and bool(parts.hostname)
+        and parts.netloc.casefold() == (parts.hostname or "").casefold()
+        and not any(character.isspace() or character < " " for character in url)
+    )
     if not plain or any(
         item is not None for item in (parts.username, parts.password, parts.port)
     ):
@@ -126,6 +132,13 @@ class ManualPrintingData(RecordData):
     references: tuple[str, ...]
     image: ManualImage | None
 
+    @field_validator("home_set_id")
+    @classmethod
+    def _family(cls, value: str) -> str:
+        if value != "EP":
+            raise ValueError("Manual EP/SEP printings must belong to the EP family")
+        return value
+
     @model_validator(mode="after")
     def _consistent(self) -> ManualPrintingData:
         anchor = manual_anchor(self.region, self.key)
@@ -154,8 +167,9 @@ class ManualPrintingData(RecordData):
             raise ValueError(
                 "Basic EP/SEP have no references; event printings need at least one"
             )
-        if self.image is not None and (self.card_type == "sep") != (
-            self.image.width > self.image.height
+        if self.image is not None and (
+            self.image.width == self.image.height
+            or (self.card_type == "sep") != (self.image.width > self.image.height)
         ):
             raise ValueError("Image orientation disagrees with the card type")
         return self

@@ -2,7 +2,7 @@
 
 import hashlib
 from pathlib import Path
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
 import typer
 from PIL import Image
@@ -16,8 +16,13 @@ from sve_carddb.domains.manual_printings import (
     plan_manual_files,
 )
 from sve_carddb.domains.manual_printings.records import ManualName, Owner
-from sve_carddb.domains.registry.snapshot import load_registry
+from sve_carddb.domains.products import load_products
+from sve_carddb.domains.products.models import FamilyRecord
 from sve_carddb.domains.registry.storage import write_files
+from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
+
+if TYPE_CHECKING:
+    from sve_carddb.domains.registry.snapshot import RegistrySnapshot
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -95,6 +100,21 @@ def _specs(path: Path) -> tuple[ManualSpec, ...]:
         raise typer.BadParameter("Invalid manual printing spec: " + details) from None
 
 
+def _check_families(
+    root: Path, registry: RegistrySnapshot, home_set_ids: set[str]
+) -> None:
+    if not home_set_ids:
+        return
+    catalog = load_products(root, registry=registry)
+    confirmed = {
+        record.data.id
+        for record in catalog.records.values()
+        if isinstance(record, FamilyRecord) and record.state == "confirmed"
+    }
+    if home_set_ids - confirmed:
+        raise ValueError("Manual printings require a confirmed product family")
+
+
 @app.command("append")
 def append_command(
     authored: AuthoredOption,
@@ -105,17 +125,20 @@ def append_command(
     """Validate the whole input, allocate unlisted int_ids and append new shards."""
     root = _absolute(authored, "--authored")
     specs = _specs(_absolute(spec, "--spec"))
-    registry = load_registry(root)
+    registry = load_identity_registry(root)
     index = registry.files.index()
     existing = load_manual_printings(
         root, next_unlisted_int_id=index.unlisted_cursors(), registry=registry
     )
     plan = plan_manual_files(root, existing, index, specs)
+    _check_families(root, registry, {entry.data.home_set_id for entry in plan.entries})
     write_files(plan.files)
     # Re-read so a planning mistake fails here instead of in the next build.
     load_manual_printings(
         root,
-        next_unlisted_int_id=load_registry(root).files.index().unlisted_cursors(),
+        next_unlisted_int_id=load_identity_registry(root)
+        .files.index()
+        .unlisted_cursors(),
         registry=registry,
     )
     typer.echo(
@@ -142,12 +165,13 @@ def append_command(
 def check_command(authored: AuthoredOption) -> None:
     """Validate manual printings against the registry and the unlisted cursors."""
     root = _absolute(authored, "--authored")
-    registry = load_registry(root)
+    registry = load_identity_registry(root)
     snapshot = load_manual_printings(
         root,
         next_unlisted_int_id=registry.files.index().unlisted_cursors(),
         registry=registry,
     )
+    _check_families(root, registry, {data.home_set_id for data in snapshot.printings()})
     typer.echo(
         canonical(
             {

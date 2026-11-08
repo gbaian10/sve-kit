@@ -13,6 +13,7 @@ from sve_carddb.domains.manual_printings import (
     load_manual_printings,
     plan_manual_files,
 )
+from sve_carddb.domains.products import load_products
 from sve_carddb.domains.registry.storage import read_yaml, write_files
 from sve_carddb.export.image_index import MEDIA_TABLES, ImageIndex, ImagePin
 from sve_carddb.export.media import prepare_media
@@ -25,6 +26,7 @@ from sve_carddb.workflows.image_index import media_projection
 
 from ..images.test_image_variants import png
 from ..support.english_image_fixtures import english_images as english_images  # ruff: ignore[useless-import-alias] -- dependency of the sealed image baseline
+from ..support.product_fixtures import envelope, family, install
 from .test_snapshot_offline import prepared as prepared  # ruff: ignore[useless-import-alias] -- reuse the regional text/adoption fixture
 from .test_snapshot_offline_images import regional_images as regional_images  # ruff: ignore[useless-import-alias] -- reuse the sealed image baseline
 
@@ -51,7 +53,7 @@ def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "key": "synthetic-event-ep",
         "region": "jp",
-        "home_set_id": "PR",
+        "home_set_id": "EP",
         "card_type": "ep",
         "card_no": None,
         "card_no_state": "none",
@@ -86,7 +88,8 @@ def register(case: Case, recipe: Inputs, *specs: ManualSpec) -> ManualSnapshot:
     case.identity = replace(
         case.identity, snapshot=replace(case.identity.snapshot, files=files)
     )
-    case.catalog = replace(case.catalog, registry_index_content=content)
+    install(case.root, "products/family/EP/001.yaml", envelope([family("EP")]))
+    case.catalog = load_products(case.root, registry=case.identity.snapshot)
     return load_manual_printings(
         root,
         next_unlisted_int_id=case.identity.snapshot.files.index().unlisted_cursors(),
@@ -109,7 +112,7 @@ def test_offline_build_exports_textless_unlisted_printing(
     pinned = object_value(parse(record.context.configuration.encode()))
     assert [
         string(object_value(item)["path"]) for item in array(pinned["manual_printings"])
-    ] == ["manual-printings/printings/PR/001.yaml"]
+    ] == ["manual-printings/printings/EP/001.yaml"]
     snapshot = export_snapshot(
         prepare_media(built.projection, None, revision=1).projection,
         built.ownership,
@@ -253,19 +256,43 @@ def test_manual_masters_join_the_image_index(
     built = offline.build(recipe, image_index=index)
     assert_manual_media(built.projection.tables, manual)
     assert built.report["manual_printings"] == {"printings": 2, "with_image": 1}
-    tampered = index.model_copy(deep=True)
+    texts = case.compose().plan
     with_image = next(item for item in manual.printings() if item.image is not None)
+    for field, value in (
+        ("source_src_raw", "sha256:" + "0" * 64),
+        ("width", 81),
+        ("height", 113),
+        ("format", "webp"),
+        ("id", "img:manual:" + "0" * 64),
+    ):
+        tampered = index.model_copy(deep=True)
+        row = next(
+            item
+            for item in tampered.tables["printing_image"]
+            if item["printing_id"] == with_image.id
+        )
+        asset = next(
+            item
+            for item in tampered.tables["image_asset"]
+            if item["id"] == row["image_id"]
+        )
+        if field == "id":
+            for variant in tampered.tables["image_variant"]:
+                if variant["image_id"] == asset["id"]:
+                    variant["image_id"] = value
+            row["image_id"] = value
+        asset[field] = value
+        with pytest.raises(ValueError, match="manual asset"):
+            tampered.attach(built.projection, texts, manual)
+    tampered = index.model_copy(deep=True)
     row = next(
         item
         for item in tampered.tables["printing_image"]
         if item["printing_id"] == with_image.id
     )
-    asset = next(
-        item for item in tampered.tables["image_asset"] if item["id"] == row["image_id"]
-    )
-    asset["source_src_raw"] = "sha256:" + "0" * 64
+    row["publication_state"] = "pending"
     with pytest.raises(ValueError, match="manual asset"):
-        offline.build(recipe, image_index=tampered)
+        tampered.attach(built.projection, texts, manual)
 
 
 def assert_manual_media(

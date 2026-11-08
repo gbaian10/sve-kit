@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import JsonValue
+from typer.testing import CliRunner
 
 from sve_carddb.core.json import canonical
 from sve_carddb.core.provenance import BuildContext
@@ -17,7 +18,8 @@ from sve_carddb.domains.manual_printings import (
 )
 from sve_carddb.domains.manual_printings.records import AREA
 from sve_carddb.domains.registry.snapshot import load_registry
-from sve_carddb.domains.registry.storage import Index, encode, read_yaml, write_files
+from sve_carddb.domains.registry.storage import Index, read_yaml, write_files
+from sve_carddb.workflows.manual_printings_commands import app
 
 from ...support.product_fixtures import envelope, family, install, write_yaml
 from ...support.registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose synthetic pytest fixture
@@ -45,7 +47,7 @@ def spec(**changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "key": "synthetic-ep",
         "region": "jp",
-        "home_set_id": "PR",
+        "home_set_id": "EP",
         "card_type": "ep",
         "card_no": None,
         "card_no_state": "none",
@@ -101,7 +103,7 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
     after = load_registry(registry_root).files.index()
     assert after.next_int_id == before.next_int_id
     assert after.next_unlisted_int_id == {"en": 95001, "jp": 55001}
-    assert [shard.path for shard in result.shards] == [AREA + "/PR/001.yaml"]
+    assert [shard.path for shard in result.shards] == [AREA + "/EP/001.yaml"]
     jp = next(item for item in printings if item.region == "jp")
     assert jp.id.startswith("p:")
     assert jp.card_id.startswith("c:")
@@ -114,10 +116,81 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
         register(registry_root, spec())
 
 
+def test_cli_appends_and_checks_a_reviewed_spec(registry_root: Path) -> None:
+    install(registry_root, "products/family/EP/001.yaml", envelope([family("EP")]))
+    path = registry_root / "spec.json"
+    path.write_bytes(canonical([spec(image=None).model_dump(mode="json")]))
+    runner = CliRunner()
+    result = runner.invoke(
+        app, ["append", "--authored", str(registry_root), "--spec", str(path)]
+    )
+    assert result.exit_code == 0, result.output
+    assert snapshot(registry_root).printings()[0].int_id == 55000
+    checked = runner.invoke(app, ["check", "--authored", str(registry_root)])
+    assert checked.exit_code == 0, checked.output
+    assert '"printings":1' in checked.output
+
+
+@pytest.mark.parametrize("state", ["missing", "proposed"])
+def test_cli_rejects_unconfirmed_family_before_writing(
+    registry_root: Path, state: str
+) -> None:
+    (registry_root / "products").mkdir()
+    if state == "proposed":
+        record = family("EP")
+        record["state"] = "proposed"
+        install(registry_root, "products/family/EP/001.yaml", envelope([record]))
+    before = (registry_root / "ids" / "index.yaml").read_bytes()
+    path = registry_root / "spec.json"
+    path.write_bytes(canonical([spec(image=None).model_dump(mode="json")]))
+    runner = CliRunner()
+    result = runner.invoke(
+        app, ["append", "--authored", str(registry_root), "--spec", str(path)]
+    )
+    assert result.exit_code != 0
+    assert isinstance(result.exception, ValueError)
+    assert "confirmed product family" in str(result.exception)
+    assert (registry_root / "ids" / "index.yaml").read_bytes() == before
+    assert not (registry_root / AREA).exists()
+    register(registry_root, spec(image=None))
+    checked = runner.invoke(app, ["check", "--authored", str(registry_root)])
+    assert checked.exit_code != 0
+    assert isinstance(checked.exception, ValueError)
+    assert "confirmed product family" in str(checked.exception)
+
+
+@pytest.mark.parametrize(("region", "last"), [("jp", 59999), ("en", 99999)])
+def test_batch_exhaustion_preserves_both_allocation_lanes(
+    registry_root: Path, region: str, last: int
+) -> None:
+    registry = load_registry(registry_root)
+    before = registry.files.index()
+    cursors = before.unlisted_cursors() | {region: last}
+    index = Index.model_validate(
+        before.model_dump() | {"next_unlisted_int_id": cursors}
+    )
+    specs = tuple(
+        spec(
+            key=key,
+            region=region,
+            name={"lang": "ja" if region == "jp" else "en", "text": "Synthetic EP"},
+            image=None,
+        )
+        for key in ("synthetic-last", "synthetic-overflow")
+    )
+    with pytest.raises(ValueError, match="range exhausted"):
+        plan_manual_files(registry_root, snapshot(registry_root), index, specs)
+    assert index.next_unlisted_int_id == cursors
+    assert index.next_int_id == before.next_int_id
+    assert load_registry(registry_root).files.index() == before
+    assert not (registry_root / AREA).exists()
+
+
 @pytest.mark.parametrize(
     ("changes", "message"),
     [
         ({"card_no": "PR-999"}, "card_no is empty exactly"),
+        ({"home_set_id": "PR"}, "must belong to the EP family"),
         ({"card_no_state": "official"}, "card_no is empty exactly"),
         ({"release_kind": "basic"}, "Basic EP/SEP have no references"),
         ({"references": []}, "need at least one"),
@@ -132,6 +205,7 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
         ({"references": ["http://shadowverse-evolve.com/news/"]}, "plain https"),
         ({"name": {"lang": "en", "text": "Synthetic"}}, "language must match"),
         ({"card_type": "sep"}, "orientation"),
+        ({"image": IMAGE | {"width": 918, "height": 918}}, "orientation"),
         ({"image": IMAGE | {"approved": False}}, "approved"),
         (
             {"image": IMAGE | {"origin": "official_image"}},
@@ -174,6 +248,9 @@ def test_reference_class_accepts_official_sources(url: str, expected: str) -> No
         "https://user:pw@shadowverse-evolve.com/",
         "https://shadowverse-evolve.com/#frag",
         "https://x.com/shadowverse_ev",
+        "https://shadowverse-evolve.com:/news/",
+        " https://shadowverse-evolve.com/news/",
+        "https://shadowverse-evolve.com/ne\nws/",
     ],
 )
 def test_reference_class_rejects_other_sources(url: str) -> None:
@@ -182,7 +259,7 @@ def test_reference_class_rejects_other_sources(url: str) -> None:
 
 
 def _edit_shard(root: Path, edit: str, value: JsonValue) -> None:
-    path = root / AREA / "PR" / "001.yaml"
+    path = root / AREA / "EP" / "001.yaml"
     raw = read_yaml(path)
     assert isinstance(raw, dict)
     records = raw["records"]
@@ -191,7 +268,10 @@ def _edit_shard(root: Path, edit: str, value: JsonValue) -> None:
     assert isinstance(record, dict)
     data = record["data"]
     assert isinstance(data, dict)
-    data[edit] = value
+    if edit == "owner":
+        record[edit] = value
+    else:
+        data[edit] = value
     write_yaml(path, raw)
 
 
@@ -201,7 +281,8 @@ def _edit_shard(root: Path, edit: str, value: JsonValue) -> None:
         ("int_id", 20005, "out-of-range"),
         ("int_id", 55001, "high-water"),
         ("id", "p:" + "0" * 32, "data:value_error"),
-        ("home_set_id", "BP02", "records.0:value_error"),
+        ("home_set_id", "BP02", "home_set_id:value_error"),
+        ("owner", "PR", "records.0:value_error"),
         ("extra", 1, "extra_forbidden"),
     ],
 )
@@ -244,19 +325,28 @@ def test_loader_rejects_cursor_and_registry_collisions(registry_root: Path) -> N
 
 def test_shard_bytes_are_stable_block_yaml(registry_root: Path) -> None:
     register(registry_root, spec(image=None))
-    path = registry_root / AREA / "PR" / "001.yaml"
+    path = registry_root / AREA / "EP" / "001.yaml"
     text = path.read_text(encoding="utf-8")
     assert text.startswith("format: 1\nkind: manual_printings_shard\nrecords:\n")
     # ruamel writes explicit nulls as bare keys; both stay present rather than omitted.
     assert "\n      image:\n" in text
     assert "\n      card_no:\n" in text
-    assert canonical(read_yaml(path)) == canonical(read_yaml(path))
+    before = path.read_bytes()
+    register(registry_root, spec(key="synthetic-next", image=None))
+    assert path.read_bytes() == before
+
+
+def test_oversized_append_is_rejected_before_any_write(registry_root: Path) -> None:
+    before = (registry_root / "ids" / "index.yaml").read_bytes()
+    with pytest.raises(ValueError, match="smaller than one MiB"):
+        register(registry_root, spec(name={"lang": "ja", "text": "x" * 1048576}))
+    assert (registry_root / "ids" / "index.yaml").read_bytes() == before
+    assert not (registry_root / AREA).exists()
 
 
 def test_populate_stages_textless_provisional_card(
     registry_root: Path, t0_database_template: DatabaseTemplate
 ) -> None:
-    install(registry_root, "products/family/PR/002.yaml", envelope([family("PR2")]))
     result = register(
         registry_root,
         spec(
@@ -272,9 +362,9 @@ def test_populate_stages_textless_provisional_card(
             db.insert(
                 "product_family",
                 {
-                    "id": "PR",
-                    "code": "pr",
-                    "public_code": "PR",
+                    "id": "EP",
+                    "code": "ep",
+                    "public_code": "EP",
                     "kind": "promo",
                     "name_unit_id": "text",
                 },
@@ -350,9 +440,7 @@ def test_index_without_unlisted_cursors_is_rejected(registry_root: Path) -> None
     index = Index.model_validate(read_yaml(path))
     raw = index.model_dump(mode="json")
     del raw["next_unlisted_int_id"]
-    path.write_bytes(
-        encode(Index.model_validate(raw)).replace(b"next_unlisted_int_id", b"x")
-    )
+    write_yaml(path, raw)
     with pytest.raises(ValueError, match="envelope"):
         load_registry(registry_root)
 

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Literal
 from sve_carddb.core.json import canonical
 from sve_carddb.core.models import RecordData, Text
 from sve_carddb.core.regions import Region
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.manual_printings.records import (
     AREA,
     Key,
@@ -103,4 +104,6 @@ def plan_manual_files(
         files[root / "ids" / "index.yaml"] = encode(
             Index.model_validate(index.model_dump() | {"next_unlisted_int_id": cursor})
         )
+    if any(len(content) >= MAX_BYTES for content in files.values()):
+        raise ValueError("Manual printing shards must be smaller than one MiB")
     return Plan(files, tuple(entries))

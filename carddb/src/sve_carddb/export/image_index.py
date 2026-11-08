@@ -11,7 +11,7 @@ from sve_carddb.core.provenance import Source
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.source_corrections.images import evidence_url
 from sve_carddb.export.media_urls import image_path
-from sve_carddb.images.manual import manual_source_src
+from sve_carddb.images.manual import manual_image_id, manual_source_src
 from sve_carddb.images.variants import DEFAULT_RECIPE, SIZES
 from sve_carddb.parse.pages.official_jp import image_url
 
@@ -202,11 +202,25 @@ class ImageIndex(RecordData):
             asset = assets[string(row["image_id"])]
             if key in manual_faces:
                 data = manual_faces[key]
+                image = data.image
                 if (
-                    asset["source_src_raw"] != manual_source_src(data)
+                    asset["id"]
+                    != manual_image_id(data.id, None if image is None else image.sha256)
+                    or asset["source_src_raw"] != manual_source_src(data)
                     or asset["source_url"]
-                    != (None if data.image is None else data.image.source_url)
-                    or (row["availability"] == "available") != (data.image is not None)
+                    != (None if image is None else image.source_url)
+                    or (asset["width"], asset["height"], asset["format"])
+                    != (
+                        (None, None, None)
+                        if image is None
+                        else (image.width, image.height, "png")
+                    )
+                    or (row["publication_state"], row["availability"])
+                    != (
+                        ("pending", "missing")
+                        if image is None
+                        else ("approved", "available")
+                    )
                 ):
                     raise ValueError(
                         "Image index manual asset differs from the authored record"

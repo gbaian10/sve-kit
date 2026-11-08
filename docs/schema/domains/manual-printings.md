@@ -70,7 +70,7 @@ registry 工具不動未收錄游標，人工工具不動官方游標。
 
 ## 5. 來源連結
 
-unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官網或官方 X**（維護者決定），由 `reference_class` 以精確規則核驗：
+unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官網、官方 X 或官方影片**（維護者決定），由 `reference_class` 以精確規則核驗：
 
 | 類別 | 規則 |
 | --- | --- |
