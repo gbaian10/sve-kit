@@ -82,16 +82,16 @@ def process(
     name: str,
     template: str | None = None,
     size: tuple[int, int] | None = None,
-    extra_turns: int = 0,
+    flip: bool = False,
 ) -> Report:
     """Write `<name>-raw.jpg` and `<name>.png` to `out_dir`.
 
-    `template` names a frame design in `colour.TEMPLATES`; `size` resizes the output (the card ratio is
-    kept by the caller); `extra_turns` turns the card clockwise when the darker-end guess for the
-    bottom is wrong.
+    `template` names a frame design in `colour.TEMPLATES` (ignored for full-art cards); `size` resizes
+    the output (the caller keeps it at 63:88); `flip` turns the card 180° when the darker-end guess
+    for the bottom is wrong.
     """
     img = cv2.cvtColor(np.array(ImageOps.exif_transpose(Image.open(photo)).convert("RGB")), cv2.COLOR_RGB2BGR)
-    corners = stand_upright(img, find_card(img), extra_turns)
+    corners = stand_upright(img, find_card(img), flip)
 
     os.makedirs(out_dir, exist_ok=True)
     rotation = [None, cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE][photo_turns(corners)]

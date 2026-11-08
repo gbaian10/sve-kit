@@ -122,6 +122,8 @@ def correct(card: np.ndarray, template: FrameTemplate | None) -> np.ndarray:
         lab[..., 0] = np.interp(lightness, [black, white], [FALLBACK_BLACK_L, OFFICIAL_BORDER_L])
         return _bgr(lab)
     dark = float(np.percentile(lightness[_region(h, w, template.name_bar)], 40))
+    if dark > white - 60:
+        raise ValueError("the name bar is not dark: this card does not have the template's frame")
     lab[..., 0] = np.interp(lightness, [0, dark, white, 255], [0, template.name_bar_l, OFFICIAL_BORDER_L, 255])
     hsv = cv2.cvtColor(np.clip(card, 0, 255).astype(np.uint8), cv2.COLOR_BGR2HSV)
     yellow = (hsv[..., 0] >= 18) & (hsv[..., 0] <= 35) & (hsv[..., 1] > 120) & (hsv[..., 2] > 120)

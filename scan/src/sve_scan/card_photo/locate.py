@@ -12,8 +12,12 @@ CARD_RATIO = 88 / 63  # height / width of a standard card
 
 
 def _order(q: np.ndarray) -> np.ndarray:
-    s, d = q.sum(1), np.diff(q, axis=1).ravel()
-    return np.array([q[np.argmin(s)], q[np.argmin(d)], q[np.argmax(s)], q[np.argmax(d)]], np.float32)
+    """Clockwise from the top-left corner. Sorting by angle keeps four distinct corners even at 45°,
+    where two corners can tie on x + y."""
+    q = q.reshape(4, 2).astype(np.float32)
+    centre = q.mean(0)
+    q = q[np.argsort(np.arctan2(q[:, 1] - centre[1], q[:, 0] - centre[0]))]
+    return np.roll(q, -int(np.argmin(q.sum(1))), axis=0)
 
 
 def _card_shaped(q: np.ndarray, area: float, frame_area: float) -> bool:
@@ -139,8 +143,8 @@ def _refine(img: np.ndarray, guess: np.ndarray, full_art: bool) -> np.ndarray:
             half = (inside + outside) / 2
             crossed = prof[5:] > half if outside > inside else prof[5:] < half
             k = int(np.argmax(crossed)) + 5
-            if not crossed[k - 5]:
-                continue
+            if k == 5 or not crossed[k - 5] or prof[k] == prof[k - 1]:
+                continue  # crossed before the first sample, or never: no reliable edge point here
             f = (half - prof[k - 1]) / (prof[k] - prof[k - 1])
             found.append(start + u * tt + n * (steps[k - 1] + f * 0.5))
         if len(found) >= 20:
@@ -173,9 +177,10 @@ def warp(img: np.ndarray, corners: np.ndarray, width: int) -> np.ndarray:
     )
 
 
-def stand_upright(img: np.ndarray, corners: np.ndarray, extra_turns: int = 0) -> np.ndarray:
-    """Corners reordered to start at the card's top left. The darker end of the card (its name bar) is
-    taken as the bottom; `extra_turns` turns the result further clockwise when that guess is wrong."""
+def stand_upright(img: np.ndarray, corners: np.ndarray, flip: bool = False) -> np.ndarray:
+    """Corners reordered to start at the card's top left. Portrait versus landscape follows the side
+    lengths; which end is the top is a guess (the darker end, the name bar, is the bottom), so `flip`
+    turns the result 180° when the guess is wrong."""
     tl, tr, br, bl = corners
     if np.linalg.norm(tr - tl) > np.linalg.norm(bl - tl):  # card lies sideways
         corners = np.array([bl, tl, tr, br], np.float32)
@@ -183,7 +188,7 @@ def stand_upright(img: np.ndarray, corners: np.ndarray, extra_turns: int = 0) ->
     h = probe.shape[0]
     if probe[int(h * 0.03) : int(h * 0.2)].mean() < probe[int(h * 0.8) : int(h * 0.97)].mean():
         corners = np.array([corners[2], corners[3], corners[0], corners[1]], np.float32)
-    return np.roll(corners, extra_turns % 4, axis=0)
+    return np.roll(corners, 2, axis=0) if flip else corners
 
 
 def photo_turns(corners: np.ndarray) -> int:

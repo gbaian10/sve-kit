@@ -85,7 +85,7 @@ One card out of its sleeve, flat on a plain wooden table with some table showing
 Rest the phone on two equal stacks of books, lens over the gap, and use the camera's level and a timer so no hand
 is over the card. Put the ceiling light on the far side of the card, not behind you: your body then casts no
 shadow on it. If the table's glare falls on the card, move the card; any orientation works, the darker end
-(the name bar) is taken as the bottom (`--turn 1|2|3` turns it further clockwise when that guess fails).
+(the name bar) is taken as the bottom, and `--flip` turns the result 180° when that guess fails.
 
 ### What applies to which card
 
@@ -96,16 +96,17 @@ shadow on it. If the table's glare falls on the card, move the card; any orienta
 | Checks: phone tilt, card size in the photo, glare | ✓ | | |
 | White balance, soft-shadow removal and the uneven-light check, all measured on the border | | ✓ | |
 | Tone range: border to official white, darkest 1% to a fixed black | | ✓ (no template) | |
-| Name bar lightness and badge colour pulled to values measured on official images | | | ✓ |
+| Name bar lightness pulled to the official value; a faded badge brought up toward it (at most 1.4×) | | | ✓ (bordered cards only) |
 
-A card counts as pale-bordered when at least 80% of a band just inside its edge is pale; otherwise it is
+A card counts as pale-bordered when more than 80% of a band just inside its edge is pale; otherwise it is
 full art and keeps the camera's colours. Full-art cards have no reference printed on them, so their colour and
 evenness are only as good as the light; a foil card's glare moves with the camera and cannot be corrected.
 
 Shared parts are what keep a series consistent: the darkest 1% depends on the art (black hair or blonde),
 while a frame's name bar is the same ink on every card. To add a frame design, measure the 40th-percentile Lab
 lightness of its name bar and the badge chroma on an official image of that frame, and add a `FrameTemplate`
-in `sve_scan/card_photo/colour.py`.
+in `sve_scan/card_photo/colour.py`. A template whose name bar is not dark on the photographed card is refused
+rather than applied.
 
 The checks fail a photo at more than 15% uneven light on the border, more than 6% length difference between
 opposite sides, a card under 800 px wide, or more than 3% of the card clipped by glare.
