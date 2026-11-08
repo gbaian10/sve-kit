@@ -1,3 +1,5 @@
+import argparse
+
 import cv2
 import numpy as np
 import pytest
@@ -171,6 +173,7 @@ def test_a_template_for_another_frame_is_refused(tmp_path):
     card = (drawn_card() * 0.35 + 150).astype(np.uint8)  # a light frame: nothing dark where the name bar would be
     with pytest.raises(ValueError, match="frame"):
         process(save(tmp_path, photo_of(card, SIDEWAYS)), str(tmp_path / "out"), "card", template="ep")
+    assert not (tmp_path / "out").exists()
 
 
 def test_a_full_art_card_is_found_without_a_border_and_skips_border_steps(tmp_path):
@@ -207,7 +210,7 @@ def test_the_requested_size_and_rounded_corners(tmp_path):
 def test_the_size_option_takes_card_shaped_sizes_only():
     assert card_size("918x1282") == (918, 1282)
     for bad in ("918", "918x918", "axb"):
-        with pytest.raises(Exception, match="918|axb"):
+        with pytest.raises(argparse.ArgumentTypeError, match="918|axb"):
             card_size(bad)
 
 

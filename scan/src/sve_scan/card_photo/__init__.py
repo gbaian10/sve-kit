@@ -93,17 +93,6 @@ def process(
     img = cv2.cvtColor(np.array(ImageOps.exif_transpose(Image.open(photo)).convert("RGB")), cv2.COLOR_RGB2BGR)
     corners = stand_upright(img, find_card(img), flip)
 
-    os.makedirs(out_dir, exist_ok=True)
-    rotation = [None, cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE][photo_turns(corners)]
-    upright = img if rotation is None else cv2.rotate(img, rotation)
-    _save(
-        Image.fromarray(cv2.cvtColor(upright, cv2.COLOR_BGR2RGB)),
-        os.path.join(out_dir, f"{name}-raw.jpg"),
-        format="JPEG",
-        quality=97,
-        subsampling=0,
-    )
-
     width = int(round(max(np.linalg.norm(corners[1] - corners[0]), np.linalg.norm(corners[2] - corners[3]))))
     card = warp(img, corners, width).astype(np.float32)
     full_art = not has_pale_border(card)
@@ -123,6 +112,18 @@ def process(
     # under the clear corners put the border colour, so later resizing does not bleed the table in
     card[alpha < 255] = border_colour
     rgba = np.dstack([cv2.cvtColor(np.clip(card, 0, 255).astype(np.uint8), cv2.COLOR_BGR2RGB), alpha])
+
+    # written only after every step succeeded, so a refused photo leaves the folder as it was
+    os.makedirs(out_dir, exist_ok=True)
+    rotation = [None, cv2.ROTATE_90_COUNTERCLOCKWISE, cv2.ROTATE_180, cv2.ROTATE_90_CLOCKWISE][photo_turns(corners)]
+    upright = img if rotation is None else cv2.rotate(img, rotation)
+    _save(
+        Image.fromarray(cv2.cvtColor(upright, cv2.COLOR_BGR2RGB)),
+        os.path.join(out_dir, f"{name}-raw.jpg"),
+        format="JPEG",
+        quality=97,
+        subsampling=0,
+    )
     _save(Image.fromarray(rgba, "RGBA"), os.path.join(out_dir, f"{name}.png"), format="PNG", optimize=True)
 
     sides = [float(np.linalg.norm(corners[(i + 1) % 4] - corners[i])) for i in range(4)]
