@@ -3573,7 +3573,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
         index
           .search({ ...query, limit: 10000, state: { ...DEFAULT_QUERY, unit, ...state } })
           .items.map((item) => item.printingId)
-      expect(search({ unlistedOnly: true, sort: "no", order: "asc" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "no" })).toEqual(expected)
       expect(search({ unlistedOnly: true, sort: "no", order: "desc" })).toEqual(
         [...expected].reverse(),
       )
