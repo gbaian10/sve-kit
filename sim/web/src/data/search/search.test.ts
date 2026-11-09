@@ -3499,6 +3499,99 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
   }
 })
 
+it("sorts numberless printings by explicit int_id across category gaps and keeps official order", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const rows = snapshot.bootstrap
+    .filter((f) => f.table === "printing")
+    .flatMap((f) => f.rows)
+    .filter((row) => row["region"] === "jp")
+  const counts = new Map<string, number>()
+  for (const row of rows)
+    counts.set(stringValue(row["card_id"]), (counts.get(stringValue(row["card_id"])) ?? 0) + 1)
+  const targets = rows
+    .filter((row) => counts.get(stringValue(row["card_id"])) === 1)
+    .sort((a, b) => stringValue(a["id"]).localeCompare(stringValue(b["id"])))
+    .slice(0, 3)
+  expect(targets).toHaveLength(3)
+  const ids = targets.map((row) => stringValue(row["id"]))
+  const intIds = [55200, 55001, 55103]
+  const text = { id: "t:sort-manual", lang: "ja", text: "合成EP" }
+  const columns = new BootstrapColumns()
+  columns.ingest(
+    snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        const ordinal = fragment.table === "printing" ? ids.indexOf(stringValue(row["id"])) : -1
+        if (
+          fragment.table === "face" &&
+          targets.some((target) => target["card_id"] === row["card_id"])
+        )
+          return { ...row, current: [], wording: [] }
+        return fragment.table === "printing" && ordinal >= 0
+          ? {
+              ...row,
+              card_no: "",
+              card_no_state: "none",
+              catalog_state: "unlisted",
+              int_id: intIds[ordinal],
+              manual_name_unit_id: text.id,
+              manual_type_code: "ep",
+            }
+          : row
+      }),
+    })),
+  )
+  const textFragment = snapshot.bootstrap.find((fragment) => fragment.table === "text_unit")
+  if (!textFragment) throw new Error("missing text units")
+  columns.ingest([{ ...textFragment, identity: "sort-manual-name", rows: [text] }])
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const locators = new BootstrapColumns()
+  locators.ingest(initial.bootstrap)
+  locators.seal()
+  const completed = new SearchIndex(locators, "jp")
+  completed.completePrintings(columns)
+  const originalColumns = new BootstrapColumns()
+  originalColumns.ingest(snapshot.bootstrap)
+  originalColumns.seal()
+  const original = new SearchIndex(originalColumns, "jp")
+  const expected = [ids[1], ids[2], ids[0]]
+  for (const index of [
+    created,
+    new SearchIndex(created.encode(), "jp"),
+    completed,
+    new SearchIndex(completed.encode(), "jp"),
+  ]) {
+    for (const unit of ["printing", "card", "art"] as const) {
+      const search = (state: Partial<typeof DEFAULT_QUERY>) =>
+        index
+          .search({ ...query, limit: 10000, state: { ...DEFAULT_QUERY, unit, ...state } })
+          .items.map((item) => item.printingId)
+      expect(search({ unlistedOnly: true, sort: "no", order: "asc" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "no", order: "desc" })).toEqual(
+        [...expected].reverse(),
+      )
+      expect(search({ unlistedOnly: true, sort: "cost" })).toEqual(expected)
+    }
+    const official = (value: SearchIndex) =>
+      value
+        .search({
+          ...query,
+          limit: 10000,
+          state: { ...DEFAULT_QUERY, unit: "printing", sort: "no" },
+        })
+        .items.map((item) => item.printingId)
+        .filter((id) => !ids.includes(id))
+    expect(official(index)).toEqual(official(original))
+  }
+})
+
 it("sorts home sets by regional release, groups undated products and PR, and applies independent secondary directions", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()

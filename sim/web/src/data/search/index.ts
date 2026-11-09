@@ -1419,7 +1419,20 @@ export class SearchIndex {
         if (representative !== undefined) buckets[top]?.push(representative)
       }
     }
-    const byNumber = (a: number, b: number) => (this.order[a] ?? 0) - (this.order[b] ?? 0)
+    const summary = (p: number) =>
+      this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
+    const byNumber = (a: number, b: number) => {
+      if (
+        !this.pool.get(this.printings.flat[a] ?? 0) &&
+        !this.pool.get(this.printings.flat[b] ?? 0)
+      ) {
+        const first = summary(a),
+          second = summary(b)
+        if (first.cardNoState === "none" && second.cardNoState === "none")
+          return (first.intId ?? 0) - (second.intId ?? 0)
+      }
+      return (this.order[a] ?? 0) - (this.order[b] ?? 0)
+    }
     const matches = ranked
       ? buckets.flatMap((bucket) => bucket.sort(byNumber))
       : buckets.flat().sort(byNumber)
@@ -1428,10 +1441,8 @@ export class SearchIndex {
       this.pool.get(this.printings.lookup[p] ?? 0).replace(/en$/u, "") ||
       this.pool.get(this.printings.flat[p] ?? 0)
     const compareNumber = (a: number, b: number) =>
-      numberKey(a) === numberKey(b) ? 0 : byNumber(a, b)
+      numberKey(a) && numberKey(a) === numberKey(b) ? 0 : byNumber(a, b)
     const releases = new Map(this.releases.map((set) => [set.code, set.releasedOn]))
-    const summary = (p: number) =>
-      this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
     const compare = (
       a: number,
       b: number,
