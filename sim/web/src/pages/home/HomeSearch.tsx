@@ -244,6 +244,7 @@ export function HomeSearch({
       <img src={logo} alt="" className="hidden size-22 rounded-dialog object-cover lg:block" />
       <div className="relative z-20 w-full">
         <SearchBar
+          scanEntry
           value={input}
           onChange={(value) => {
             armed.current = null

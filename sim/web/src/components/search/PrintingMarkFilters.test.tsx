@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react"
+import { fireEvent, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { expect, it } from "vitest"
@@ -6,6 +6,7 @@ import { expect, it } from "vitest"
 import { formatQuery, parseQuery } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { renderInRouter } from "../../test-utils"
+import { ConditionChips } from "./ConditionChips"
 import { FilterPanel } from "./FilterPanel"
 import { RarityFilter } from "./RarityFilter"
 
@@ -38,10 +39,47 @@ function Harness({ sidebar }: { readonly sidebar: boolean }) {
           keywords: null,
         }}
       />
+      <ConditionChips
+        query={query}
+        edition="jp"
+        classLabel={(code) => code}
+        rarityLabel={(code) => code}
+        typeLabel={(code) => code}
+        keywordLabel={(code) => code}
+        traitLabel={(code) => code}
+        artistLabel={(code) => code}
+        setLabel={(code) => code}
+        groups={{}}
+        onChange={setQuery}
+        onClear={() => setQuery(DEFAULT_QUERY)}
+      />
       <output aria-label="URL">{formatQuery(query).toString()}</output>
     </>
   )
 }
+
+it.each(["標誌卡", "編號卡", "官方未收錄"])(
+  "keeps the dropdown open when the first %s condition appears and disappears",
+  async (label) => {
+    await renderInRouter(<Harness sidebar />)
+    const user = userEvent.setup()
+    expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
+    const trigger = screen.getByRole("button", { name: /^特殊版次:/u })
+    await user.click(trigger)
+    const choice = screen.getByRole("checkbox", { name: label })
+    await user.click(choice)
+    expect(choice).toBeChecked()
+    expect(screen.getByRole("group", { name: "目前條件" })).toBeVisible()
+    // The browser adjusts scroll when the condition row and shorter results change page height.
+    fireEvent.scroll(window)
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    await user.click(choice)
+    expect(choice).not.toBeChecked()
+    expect(screen.queryByRole("group", { name: "目前條件" })).not.toBeInTheDocument()
+    fireEvent.scroll(window)
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+  },
+)
 
 it.each(
   [

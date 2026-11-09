@@ -51,6 +51,11 @@ async function goHome(router: Awaited<ReturnType<typeof open>>["router"]) {
 }
 
 describe("home search", () => {
+  it("offers the shared card scanner from the search box", async () => {
+    await open()
+    const camera = screen.getByRole("link", { name: "拍卡辨識" })
+    expect(camera).toHaveAttribute("href", "/cards/scan")
+  })
   it.each([false, true])(
     "submits multiple matches to the list (before debounce: %s)",
     async (early) => {
