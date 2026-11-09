@@ -3462,6 +3462,25 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
     expect(search({}).items.length).toBeGreaterThan(1)
     // Ticking it with another mark keeps only printings that match both.
     expect(search({ unlistedOnly: true, stampOnly: true }).items).toEqual([])
+    // The printed code is searchable text: exact (separators and width ignored), prefix, infix.
+    for (const text of ["2024千葉-A", "２０２４千葉ａ", "2024千葉", "千葉-A"])
+      expect(
+        search({ text, unit: "printing" }).items.map((item) => item.printingId),
+        text,
+      ).toContain(target["id"])
+    expect(search({ text: "2024千葉-A" }).items[0]?.printingId).toBe(target["id"])
+    expect(search({ text: "2024千葉-B" }).items.map((item) => item.printingId)).not.toContain(
+      target["id"],
+    )
+    // A suggestion reads it as the number slot the cell shows, best first when exact.
+    expect(index.suggest("2024千葉-A").items[0]).toMatchObject({
+      summary: { printingId: target["id"] },
+      field: "cardNo",
+      rank: 0,
+    })
+    expect(
+      index.suggest("2024千葉").items.find((item) => item.summary.printingId === target["id"]),
+    ).toMatchObject({ field: "cardNo", rank: 1 })
   }
   // An unlisted printing is a card's default one, so the first build already names it.
   for (const index of [created, restored]) {
