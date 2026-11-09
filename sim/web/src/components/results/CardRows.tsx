@@ -411,10 +411,21 @@ const ListRow = memo(function ListRow({
       }}
     >
       <RestrictionBadge restrictions={cell.summary.restrictions} className="mr-1" />
-      {visibility.name
-        ? cell.name.primary.text
-        : listedCardNo(cell.summary) || cell.name.primary.text}
-      {cell.summary.unlisted && <UnlistedBadge className="ml-2 align-middle" />}
+      {cell.summary.unlisted ? (
+        // The name gives way, so a long name never pushes the tag out of its narrow column.
+        <span className="flex items-center gap-2">
+          <span className="min-w-0 truncate">
+            {visibility.name
+              ? cell.name.primary.text
+              : listedCardNo(cell.summary) || cell.name.primary.text}
+          </span>
+          <UnlistedBadge className="shrink-0" />
+        </span>
+      ) : visibility.name ? (
+        cell.name.primary.text
+      ) : (
+        listedCardNo(cell.summary)
+      )}
       {visibility.name && cell.name.secondary && (
         <>
           <span
