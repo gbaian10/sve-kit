@@ -3522,12 +3522,21 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
   const ids = targets.map((row) => stringValue(row["id"]))
   const intIds = [55200, 55001, 55103]
   const text = { id: "t:sort-manual", lang: "ja", text: "合成EP" }
-  const columns = new BootstrapColumns()
-  columns.ingest(
-    snapshot.bootstrap.map((fragment) => ({
+  // Real unlisted EP/SEP have no stats, so cost ties must fall back to the int_id order.
+  const faces = new Set(
+    snapshot.bootstrap
+      .filter((fragment) => fragment.table === "face")
+      .flatMap((fragment) => fragment.rows)
+      .filter((row) => targets.some((target) => target["card_id"] === row["card_id"]))
+      .map((row) => stringValue(row["id"])),
+  )
+  const synthetic = (fragments: typeof snapshot.bootstrap) =>
+    fragments.map((fragment) => ({
       ...fragment,
       rows: fragment.rows.map((row) => {
         const ordinal = fragment.table === "printing" ? ids.indexOf(stringValue(row["id"])) : -1
+        if (fragment.table === "face_revision" && faces.has(stringValue(row["face_id"])))
+          return { ...row, cost: null, attack: null, defense: null }
         if (
           fragment.table === "face" &&
           targets.some((target) => target["card_id"] === row["card_id"])
@@ -3545,15 +3554,17 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
             }
           : row
       }),
-    })),
-  )
+    }))
+  const columns = new BootstrapColumns()
+  columns.ingest(synthetic(snapshot.bootstrap))
   const textFragment = snapshot.bootstrap.find((fragment) => fragment.table === "text_unit")
   if (!textFragment) throw new Error("missing text units")
   columns.ingest([{ ...textFragment, identity: "sort-manual-name", rows: [text] }])
   columns.seal()
   const created = new SearchIndex(columns, "jp")
   const locators = new BootstrapColumns()
-  locators.ingest(initial.bootstrap)
+  locators.ingest(synthetic(initial.bootstrap))
+  locators.ingest([{ ...textFragment, identity: "sort-manual-name", rows: [text] }])
   locators.seal()
   const completed = new SearchIndex(locators, "jp")
   completed.completePrintings(columns)
@@ -3571,7 +3582,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
     for (const unit of ["printing", "card", "art"] as const) {
       const search = (state: Partial<SearchQuery["state"]>) =>
         index
-          .search({ ...query, limit: 10000, state: { ...DEFAULT_QUERY, unit, ...state } })
+          .search({ ...query, limit: 10000, state: { ...ascendingQuery, unit, ...state } })
           .items.map((item) => item.printingId)
       expect(search({ unlistedOnly: true, sort: "no" })).toEqual(expected)
       expect(search({ unlistedOnly: true, sort: "no", order: "desc" })).toEqual(
