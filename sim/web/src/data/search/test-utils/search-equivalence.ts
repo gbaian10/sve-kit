@@ -70,6 +70,7 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
     { stampOnly: true },
     { serialOnly: true },
     { stampOnly: true, serialOnly: true },
+    { unlistedOnly: true },
     { errataOnly: true },
     { classes: ["synthetic-missing-class"] },
     ...expected.options.classes.map((option) => ({ classes: [option.code] })),

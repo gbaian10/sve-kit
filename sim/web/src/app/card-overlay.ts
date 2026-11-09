@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react"
 
 import type { CardRouteInput } from "../data"
+import { usesIntRoute } from "../domain/cardRoute"
 import type { CardOpenMode } from "../settings"
 import { usePrefs } from "../settings"
 
@@ -14,7 +15,7 @@ export function cardParamOf(printing: {
   readonly cardNoState?: string
   readonly intId?: number
 }): string {
-  return printing.cardNoState === "provisional" && printing.intId !== undefined
+  return usesIntRoute(printing.cardNoState) && printing.intId !== undefined
     ? `${PROVISIONAL_PREFIX}${String(printing.intId)}`
     : printing.cardNo
 }

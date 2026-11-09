@@ -6,7 +6,9 @@ import { useHref, useNavigate } from "react-router"
 import type { CardSummary, ImageIndex } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
+import { listedCardNo } from "../card/listedCardNo"
 import { RestrictionBadge } from "../card/RestrictionBadge"
+import { UnlistedBadge } from "../card/UnlistedBadge"
 import { Badge } from "../ui/Badge"
 import { cn } from "../ui/cn"
 import { type ResultLabels, useResultLabels } from "./labels"
@@ -105,7 +107,7 @@ const CardCell = memo(function CardCell({
             {cell.name.primary.text}
           </span>
           <span className="shrink-0 text-11 whitespace-nowrap text-text-3 tabular-nums">
-            {cell.summary.cardNo}
+            {listedCardNo(cell.summary)}
           </span>
         </span>
         {cell.name.secondary && (
@@ -113,6 +115,7 @@ const CardCell = memo(function CardCell({
             {cell.name.secondary.text}
           </span>
         )}
+        {cell.summary.unlisted && <UnlistedBadge className="mt-1 self-start" />}
         {cell.summary.wordingPending && (
           <Badge className="mt-1 self-start">{labels.wordingPending}</Badge>
         )}

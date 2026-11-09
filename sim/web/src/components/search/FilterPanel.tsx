@@ -19,6 +19,7 @@ import { cn } from "../ui/cn"
 import { Segmented } from "../ui/Segmented"
 import { Switch } from "../ui/Switch"
 import { Section, Toggle } from "./FilterControls"
+import { SpecialPrintingFilter } from "./SpecialPrintingFilter"
 import { StatValue } from "./StatValue"
 
 export interface FilterPanelProps {
@@ -239,25 +240,7 @@ export function FilterPanel({
       </div>
     </>
   )
-  const stampBlock = (
-    <div className="flex items-center gap-2">
-      <Switch
-        size="sm"
-        checked={query.stampOnly}
-        label={t("filters.stampOnly")}
-        describedBy={`${id}-stamp-hint`}
-        onChange={(checked) => {
-          onChange({ ...query, stampOnly: checked })
-        }}
-      />
-      <div>
-        <div className="text-13 text-text-1">{t("filters.stampOnly")}</div>
-        <p id={`${id}-stamp-hint`} className="text-12 text-text-3">
-          {t("filters.stampOnlyHint")}
-        </p>
-      </div>
-    </div>
-  )
+  const specialPrintings = <SpecialPrintingFilter query={query} onChange={onChange} />
   const errataBlock = (
     <>
       <div className="flex items-center gap-2">
@@ -303,17 +286,6 @@ export function FilterPanel({
             {restrictions?.state === "partial" ? ` ${t("filters.restrictionsPartial")}` : ""}
           </p>
         </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Switch
-          size="sm"
-          checked={query.serialOnly}
-          label={t("filters.serialOnly")}
-          onChange={(checked) => {
-            onChange({ ...query, serialOnly: checked })
-          }}
-        />
-        <span className="text-13 text-text-1">{t("filters.serialOnly")}</span>
       </div>
     </>
   )
@@ -366,13 +338,7 @@ export function FilterPanel({
             {stat(t("filters.defense"), "defense", STAT_CAP, query.defense)}
           </>,
         )}
-        {group(
-          t("filters.groups.printing"),
-          <>
-            {facets?.rarity}
-            {stampBlock}
-          </>,
-        )}
+        {group(t("filters.groups.printing"), facets?.rarity)}
         {group(
           t("filters.groups.effects"),
           <>
@@ -387,6 +353,7 @@ export function FilterPanel({
         {group(
           t("filters.groups.more"),
           <div className="space-y-4">
+            {specialPrintings}
             {errataBlock}
             {facets?.artists}
           </div>,
@@ -430,7 +397,6 @@ export function FilterPanel({
       >
         <div className="md:col-span-3 md:row-start-3 md:border-b md:border-border md:p-4">
           {facets?.rarity}
-          <div className="mt-3">{stampBlock}</div>
         </div>
       </FilterGroup>
       <FilterGroup
@@ -465,6 +431,7 @@ export function FilterPanel({
           {t("filters.groups.more")}
         </p>
         <div className="space-y-4">
+          {specialPrintings}
           {errataBlock}
           {facets?.artists}
         </div>

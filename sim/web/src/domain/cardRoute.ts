@@ -28,12 +28,19 @@ export const routeFold = (value: string): string => value.normalize("NFKC").toLo
 function validRouteKey(key: string): boolean {
   return key !== "" && !key.includes(String.fromCharCode(0)) && !/[\u002F\uD800-\uDFFF]/u.test(key)
 }
+/**
+ * Printings without an official card number are addressed by their permanent integer instead:
+ * provisional numbers are not stable, and a printing with no printed number has none to use.
+ */
+export const usesIntRoute = (cardNoState: string | undefined): boolean =>
+  cardNoState === "provisional" || cardNoState === "none"
+
 export function printingPath(printing: {
   readonly cardNo: string
   readonly cardNoState?: string
   readonly intId?: number
 }): string {
-  return printing.cardNoState === "provisional" && printing.intId !== undefined
+  return usesIntRoute(printing.cardNoState) && printing.intId !== undefined
     ? `/cards/_provisional/${String(printing.intId)}`
     : `/cards/${encodeURIComponent(printing.cardNo).replace(/[!'()*]/gu, (value) => `%${value.charCodeAt(0).toString(16).toUpperCase()}`)}`
 }
@@ -49,7 +56,7 @@ export function resolveRoute(
   const active = (namespace: string, key: string): RoutePrinting | undefined => {
     const matches = printings.filter((p) =>
       namespace === "provisional"
-        ? p.cardNoState === "provisional" && String(p.intId) === key
+        ? usesIntRoute(p.cardNoState) && String(p.intId) === key
         : p.cardNoState === "official" && p.cardNo === key,
     )
     if (namespace === "official" && overrides.has(key)) {

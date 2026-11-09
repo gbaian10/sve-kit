@@ -101,6 +101,15 @@ describe("permanent card routes", () => {
     expect(official(first.cardNo, [first, other])).toBe(first)
     expect(() => official("pr-001s", [first, other])).toThrow(/ambiguous/u)
   })
+  it("addresses a printing with no printed number by its permanent integer", () => {
+    const unnumbered = printing("", { cardNoState: "none", intId: 55001 })
+    expect(printingPath(unnumbered)).toBe("/cards/_provisional/55001")
+    expect(
+      resolveRoute({ namespace: "provisional", key: "55001" }, [unnumbered], [], new Map()),
+    ).toBe(unnumbered)
+    // It owns no official key, not even the empty one.
+    expect(() => official("", [unnumbered])).toThrow(CardRouteError)
+  })
   it("keeps provisional integers through correction without claiming guessed official numbers", () => {
     const pending = printing("GUESSED-001", { cardNoState: "provisional" })
     expect(resolveRoute({ namespace: "provisional", key: "42" }, [pending], [], new Map())).toBe(
