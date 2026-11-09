@@ -225,6 +225,17 @@ def test_batch_exhaustion_preserves_both_allocation_lanes(
             {"image": image(source_url="https://shadowverse-evolve.com/x.png")},
             "maintainer photo has no source URL",
         ),
+        (
+            {
+                "release_kind": "basic",
+                "references": [],
+                "image": image(
+                    origin="official_image",
+                    source_url="https://shadowverse-evolve.com/x.png",
+                ),
+            },
+            "Basic EP/SEP keep no image source URL",
+        ),
         ({"printed_code": " 2024"}, "surrounding whitespace"),
         ({"slug": "Synthetic"}, "pattern"),
     ],
@@ -234,6 +245,25 @@ def test_spec_rules_reject_inconsistent_records(
 ) -> None:
     with pytest.raises(ValueError, match=message):
         register(registry_root, spec(**changes))
+
+
+@pytest.mark.parametrize("origin", ["official_image", "official_crop"])
+def test_basic_official_image_needs_no_source_url(
+    registry_root: Path, origin: str
+) -> None:
+    result = register(
+        registry_root,
+        spec(
+            slug="basic-synthetic",
+            printed_code=None,
+            release_kind="basic",
+            references=[],
+            image=image(origin=origin),
+        ),
+    )
+    (data,) = result.printings()
+    assert data.image is not None
+    assert (data.image.origin, data.image.source_url) == (origin, None)
 
 
 @pytest.mark.parametrize(

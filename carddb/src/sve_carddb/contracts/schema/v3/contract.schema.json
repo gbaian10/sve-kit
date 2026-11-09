@@ -3626,7 +3626,10 @@
         },
         {
           "nullable": {
-            "scalar": "Text"
+            "enum": [
+              "ep",
+              "sep"
+            ]
           }
         }
       ],
@@ -9078,7 +9081,10 @@
         },
         {
           "nullable": {
-            "scalar": "Text"
+            "enum": [
+              "ep",
+              "sep"
+            ]
           }
         }
       ],

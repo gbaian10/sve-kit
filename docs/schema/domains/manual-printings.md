@@ -80,7 +80,7 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 
 子網域萬用、同根網域推定、第三方店家頁一律拒絕；新增 host 或帳號要改程式並審核。
 
-**例外**：`release_kind=basic` 的基本 EP、基本 SEP **不放任何來源連結**（`references` 必為空、`reference_urls=[]`）；
+**例外**：`release_kind=basic` 的基本 EP、基本 SEP **不放任何來源連結**（`references` 必為空、`reference_urls=[]`，`image.source_url` 也必為 null）；
 其他 unlisted 版次至少一個。這是維護者 2026-11-09 定的規則，原 v1「unlisted 至少一個 URL」的 Schema 限制已移除，改由本入口驗證。
 
 ## 6. 卡圖
@@ -91,7 +91,8 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 | --- | --- |
 | `sha256` | 母檔 bytes 的 `sha256:<hex>` |
 | `width`、`height` | 母檔像素；EP 須 `height > width`，SEP 相反 |
-| `origin` | `maintainer_photo`（無 `source_url`）、`official_image`（必有官方 `source_url`）、`official_crop`（`source_url` 可空，有則須通過 §5） |
+| `origin` | `maintainer_photo`（無 `source_url`）、`official_image`（必有官方 `source_url`；`release_kind=basic` 例外，見下）、`official_crop`（`source_url` 可空，有則須通過 §5） |
+| `source_url` | 有值時須通過 §5；`release_kind=basic` 一律為 null（維護者 2026-11-09 決定基本卡完全不留來源 URL），即使 `origin=official_image` |
 | `approved` | 固定 `true`：逐張人工核可的內部紀錄，前端不顯示 |
 
 `images build-index --manual-image-dir <目錄>` 遞迴掃該目錄下的 PNG，以 sha256 對應母檔（檔名無意義），用與官方圖相同的

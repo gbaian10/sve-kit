@@ -5736,7 +5736,10 @@
           },
           "descriptor": {
             "nullable": {
-              "scalar": "Text"
+              "enum": [
+                "ep",
+                "sep"
+              ]
             }
           }
         }

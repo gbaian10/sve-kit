@@ -105,13 +105,12 @@ class ManualImage(RecordData):
 
     @model_validator(mode="after")
     def _source(self) -> ManualImage:
+        # Whether an official image needs its URL depends on the release kind; see the printing.
         if self.origin == "maintainer_photo":
             if self.source_url is not None:
                 raise ValueError("A maintainer photo has no source URL")
         elif self.source_url is not None:
             reference_class(self.source_url)
-        elif self.origin == "official_image":
-            raise ValueError("An official image requires its source URL")
         return self
 
 
@@ -167,12 +166,24 @@ class ManualPrintingData(RecordData):
             raise ValueError(
                 "Basic EP/SEP have no references; event printings need at least one"
             )
-        if self.image is not None and (
-            self.image.width == self.image.height
-            or (self.card_type == "sep") != (self.image.width > self.image.height)
+        if self.image is not None:
+            self._check_image(self.image)
+        return self
+
+    def _check_image(self, image: ManualImage) -> None:
+        # The maintainer keeps no source link at all for the basic EP/SEP.
+        if self.release_kind == "basic" and image.source_url is not None:
+            raise ValueError("Basic EP/SEP keep no image source URL")
+        if (
+            self.release_kind == "event"
+            and image.origin == "official_image"
+            and image.source_url is None
+        ):
+            raise ValueError("An official image requires its source URL")
+        if image.width == image.height or (self.card_type == "sep") != (
+            image.width > image.height
         ):
             raise ValueError("Image orientation disagrees with the card type")
-        return self
 
 
 class ManualEntry(RecordData):
