@@ -98,16 +98,10 @@ class Pool:
         released: bool = True,
         starting_amulet: bool = False,
         buildable: bool = True,
+        current: bool | None = None,
     ) -> None:
         face, revision = f"f:{card_id}", f"rev:{card_id}"
-        self.tables["printing"].append(
-            {
-                "id": f"p:{card_id}",
-                "card_id": card_id,
-                "region": self.region,
-                "decklog_available": buildable,
-            }
-        )
+        self.printing(card_id, buildable=buildable)
         units = []
         for ordinal, value in enumerate((text, *sections)):
             unit = None if value is None else f"t:{card_id}:{ordinal}"
@@ -134,10 +128,16 @@ class Pool:
             }
         )
         # An unlisted manual printing has no official wording, so its face has no current.
-        current: list[JsonValue] = (
-            [{"region": self.region, "revision_id": revision}] if buildable else []
+        has_current = buildable if current is None else current
+        self.tables["face"].append(
+            {
+                "id": face,
+                "card_id": card_id,
+                "current": [{"region": self.region, "revision_id": revision}]
+                if has_current
+                else [],
+            }
         )
-        self.tables["face"].append({"id": face, "card_id": card_id, "current": current})
         self.tables["face_revision"].append(
             {
                 "id": revision,
@@ -168,6 +168,20 @@ class Pool:
                 if starting_amulet
                 else [],
                 "checked_mechanisms": ["starting_amulet"],
+            }
+        )
+
+    def printing(
+        self, card_id: str, *, region: str | None = None, buildable: bool = True
+    ) -> None:
+        """One more printing of the card, by default in the pool's region."""
+        rows = self.tables["printing"]
+        rows.append(
+            {
+                "id": f"p:{card_id}:{len(rows)}",
+                "card_id": card_id,
+                "region": region or self.region,
+                "decklog_available": buildable,
             }
         )
 
@@ -245,6 +259,21 @@ def test_same_name_cards_share_one_code_and_zones_follow_deck_role() -> None:
         "c:ep": "none",
     }
     assert cards["c:ep"]["class"] == -1
+
+
+def test_only_cards_with_a_buildable_printing_in_the_region_are_indexed() -> None:
+    pool = Pool()
+    pool.card("c:reprint", "リプリント", buildable=False, current=True)
+    pool.printing("c:reprint")
+    pool.card("c:abroad", "海外のみ", buildable=False, current=True)
+    pool.printing("c:abroad", region="en")
+    pool.card("c:unavailable", "使用不可", buildable=False, current=True)
+    assert set(cards_by_id(pool.build())) == {"c:reprint"}
+
+    pool = Pool()
+    pool.card("c:no-text", "本文なし", current=False)
+    with pytest.raises(ConstructionIndexError, match="no current jp wording"):
+        pool.build()
 
 
 def test_classes_and_titles_are_dictionary_codes() -> None:
