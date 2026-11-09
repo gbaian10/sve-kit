@@ -62,8 +62,8 @@ export function FilterDropdown({
     const top = Math.max(viewportTop, boundary?.top ?? viewportTop) + margin
     const bottom = Math.min(viewportBottom, boundary?.bottom ?? viewportBottom) - margin
     const width = Math.max(0, Math.min(compact ? 320 : 480, right - left))
-    const below = Math.max(0, bottom - rect.bottom - gap)
-    const above = Math.max(0, rect.top - top - gap)
+    const below = Math.max(0, bottom - Math.max(top, rect.bottom) - gap)
+    const above = Math.max(0, Math.min(bottom, rect.top) - top - gap)
     const popupLeft = Math.min(Math.max(rect.left, left), right - width)
     popup.style.width = `${String(width)}px`
     popup.style.maxHeight = "none"
@@ -71,24 +71,17 @@ export function FilterDropdown({
     const upwards = naturalHeight > below && above > below
     popup.style.maxHeight = `${String(upwards ? above : below)}px`
     popup.style.left = `${String(popupLeft)}px`
-    popup.style.top = `${String(upwards ? rect.top - gap - popup.getBoundingClientRect().height : rect.bottom + gap)}px`
+    const height = popup.getBoundingClientRect().height
+    const popupTop = upwards ? rect.top - gap - height : rect.bottom + gap
+    popup.style.top = `${String(Math.max(top, Math.min(popupTop, bottom - height)))}px`
   }, [compact])
   useEffect(() => {
     if (!open) return
-    const closeOnScroll = (event: Event) => {
+    const repositionOnScroll = (event: Event) => {
       if (event.target instanceof Node && panel.current?.contains(event.target)) return
-      panel.current?.hidePopover()
+      // Filtering can shorten the page and make the browser adjust its scroll position.
+      place()
     }
-    const observer =
-      typeof IntersectionObserver === "undefined"
-        ? undefined
-        : new IntersectionObserver(
-            ([entry]) => {
-              if (entry && !entry.isIntersecting) panel.current?.hidePopover()
-            },
-            { root: scrollContainer(button.current ?? document.documentElement) },
-          )
-    if (button.current) observer?.observe(button.current)
     const resizeObserver = new ResizeObserver(place)
     if (button.current) {
       resizeObserver.observe(button.current)
@@ -97,16 +90,15 @@ export function FilterDropdown({
     }
     if (panel.current) resizeObserver.observe(panel.current)
     window.addEventListener("resize", place)
-    window.addEventListener("scroll", closeOnScroll, true)
+    window.addEventListener("scroll", repositionOnScroll, true)
     window.visualViewport?.addEventListener("resize", place)
-    window.visualViewport?.addEventListener("scroll", closeOnScroll)
+    window.visualViewport?.addEventListener("scroll", repositionOnScroll)
     return () => {
-      observer?.disconnect()
       resizeObserver.disconnect()
       window.removeEventListener("resize", place)
-      window.removeEventListener("scroll", closeOnScroll, true)
+      window.removeEventListener("scroll", repositionOnScroll, true)
       window.visualViewport?.removeEventListener("resize", place)
-      window.visualViewport?.removeEventListener("scroll", closeOnScroll)
+      window.visualViewport?.removeEventListener("scroll", repositionOnScroll)
     }
   }, [open, place])
   return (

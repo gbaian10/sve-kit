@@ -5,7 +5,7 @@ import { expect, it, vi } from "vitest"
 import { renderInRouter } from "../../test-utils"
 import { FilterDropdown } from "./FilterDropdown"
 
-it("closes when scrolling instead of leaving the menu detached from its trigger", async () => {
+it("repositions on scrolling and closes only on outside click, Escape or the trigger", async () => {
   await renderInRouter(
     <FilterDropdown label="類型">
       <input type="checkbox" aria-label="妖精" />
@@ -24,9 +24,20 @@ it("closes when scrolling instead of leaving the menu detached from its trigger"
     expect(popup.style.left).toBe("240px")
     expect(popup.style.top).toBe("150px")
 
+    anchor.y = 80
     fireEvent.scroll(window)
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    expect(popup.matches(":popover-open")).toBe(true)
+    expect(popup.style.top).toBe("130px")
+
+    await userEvent.keyboard("{Escape}")
     expect(trigger).toHaveAttribute("aria-expanded", "false")
-    expect(popup.matches(":popover-open")).toBe(false)
+    await userEvent.click(trigger)
+    await userEvent.click(document.body)
+    expect(trigger).toHaveAttribute("aria-expanded", "false")
+    await userEvent.click(trigger)
+    await userEvent.click(trigger)
+    expect(trigger).toHaveAttribute("aria-expanded", "false")
   } finally {
     vi.restoreAllMocks()
   }
@@ -45,10 +56,16 @@ it("fits the panel bounds and aligns the menu inward at the trailing edge", asyn
   const popup = document.getElementById(trigger.getAttribute("aria-controls") ?? "")
   if (!boundary || !popup) throw new Error("Missing dropdown layout")
   vi.spyOn(boundary, "getBoundingClientRect").mockReturnValue(new DOMRect(40, 80, 320, 600))
-  vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(new DOMRect(280, 200, 40, 44))
+  const anchor = new DOMRect(280, 200, 40, 44)
+  vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(anchor)
 
   await userEvent.click(trigger)
 
   expect(popup.style.width).toBe("296px")
   expect(popup.style.left).toBe("52px")
+  anchor.y = 900
+  fireEvent.scroll(boundary)
+  expect(trigger).toHaveAttribute("aria-expanded", "true")
+  expect(Number.parseFloat(popup.style.maxHeight)).toBeLessThanOrEqual(576)
+  expect(Number.parseFloat(popup.style.top)).toBeGreaterThanOrEqual(92)
 })
