@@ -49,6 +49,7 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 | `card_no`、`card_no_state` | `card_no_state=none` ⇔ `card_no=null`；`official`／`provisional` 時 `card_no` 為非空原樣字串（§8 的序號卡） |
 | `printed_code` | 卡面印字的原樣字串或 null；不能有首尾空白 |
 | `name` | `{lang, text}`，lang 等於該區原語，text 非空、無首尾空白 |
+| `available_on`、`date_precision` | 活動開始／基本卡首次發售日期；`day` 為真實曆日 `YYYY-MM-DD`，`month` 僅 `YYYY-MM`，`unknown` 必為 null；禁止替月份補日 |
 | `release_kind` | `event`（比賽／會場／店家／大使）或 `basic`（規則頁附的基本 EP／SEP） |
 | `references` | 排序去重的公開 URL 陣列，每個都要通過 §5 白名單；`event` 至少一個，`basic` 必為空 |
 | `image` | null 或 `{sha256, width, height, origin, source_url, approved}`，見 §6 |
@@ -85,7 +86,7 @@ EP／SEP 依類別分區塊、每類從整百開始；同區塊內依下表與�
 | 保留號（暫不登錄） | 用途 |
 | --- | --- |
 | 55100–55102 | JP 舊設計大使：渡辺雄也、ゆいっこ、Riowh（缺圖，[#1895](https://github.com/gbaian10/sve-kit/issues/1895)） |
-| 95000 | EN 基本 EP（官方圖含 SAMPLE 浮水印，待補） |
+| 95000 | EN 基本 EP（遊戲開賣日 2023-06-30；官方圖含 SAMPLE 浮水印，待補） |
 | 95100–95101 | EN 舊設計大使 DifferentFight、Ignideus（第一代僅這兩位） |
 | 95202–95203 | EN BCS 24/25 Mono 閃卡（可能兩張，對應 Mono 02/03，缺圖） |
 
@@ -133,7 +134,7 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 
 - `source_record`：kind `authored`、`parser_version=manual-printings-v1`、分片 canonical hash 與 authored revision
 - `card`（provisional、single）、`face`（ordinal 0、front）、`card_int_id`
-- `printing`：`catalog_state=unlisted`、`card_no_state`、`card_no`（none 時 `""`）、`printed_code`、`manual_name_unit_id`（人工名稱的 text_unit）、`manual_type_code`（ep／sep）、
+- `printing`：`catalog_state=unlisted`、`card_no_state`、`card_no`（none 時 `""`）、`printed_code`、`manual_name_unit_id`（人工名稱的 text_unit）、`manual_type_code`（ep／sep）、`manual_available_on`／`manual_date_precision`（發放日期與精度）、
   `listing_confidence=high`（維護者逐張看過實卡）、`rarity_raw="-"`（卡面無稀有度，沿官方 EP 的「-」）、`decklog_available=false`、`unverified`
 - `printing_face`：`printed_text_state=unknown`、三個 printed 欄位 null、無 observation
 - `printing_reference`：每個 `references` URL 一列
@@ -142,10 +143,16 @@ DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlis
 不產生 `face_revision`、`face_current`、`rules_name`、翻譯或 DSL；`card_engine_support` 該區 block 為 `identity_unconfirmed`＋`missing_region_source`。
 路由走既有 `/cards/_provisional/{int_id}`（[build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號)），不佔官方 `card_no` 路由；預設版次 method 為 `fallback`。
 
-卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`、`manual_type_code?`，`card_no_state` 新增 `none`；
+卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`、`manual_type_code?`、`manual_available_on?`、`manual_date_precision?`，`card_no_state` 新增 `none`；
 `reference_urls` 來自 `printing_reference.url`。沒有任何觀測的 unlisted 面不要求 current 或「表記未定」項目（`face.current=[]`、`face.wording=[]`），
 這是 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本) 的明示例外，官方面規則不變。
 前端缺少官方種類時，僅 unlisted 版次使用 `manual_type_code` 作種類標示、種類計數與牌組位置篩選；官方種類永遠優先，官方版次不使用人工值。建置配置釘住每片的路徑與 hash（`manual_printings`）。
+
+人工日期由維護者逐筆採納，以活動開始日為準，不以公告日替代。`available_on` 在日／月精度時必填，unknown 必為 null；
+本批 3 筆未知發放日追蹤於 [#1902](https://github.com/gbaian10/sve-kit/issues/1902)，不以推測日期補齊。基本卡依維護者指定的首次發售日。
+快照的日期欄只限 unlisted；official 兩欄必為 null，既有商品／收錄日期不變。
+前端單卡版次資訊共用「發行日」一行與 ISO 日期格式，月精度只顯示 `YYYY-MM`，unknown 不顯示。
+列表的卡包／發行日排序對人工版次使用本欄（unknown 置後），官方仍用既有地區卡包發售日；月精度直接比較 `YYYY-MM`，不補成月初曆日。
 
 ## 8. 尚未實作：限量序號卡與序號補充
 
