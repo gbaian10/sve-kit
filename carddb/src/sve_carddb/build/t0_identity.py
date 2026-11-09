@@ -351,6 +351,7 @@ TABLES = (
             Column("serial_total", Kind.UINT, nullable=True),
             Column("printed_code", Kind.TEXT, nullable=True),
             Column("manual_name_unit_id", Kind.ID, nullable=True),
+            Column("manual_type_code", Kind.TEXT, nullable=True, choices=("ep", "sep")),
             Column("source_id", Kind.ID),
             Column("rarity_kind", Kind.TEXT, fixed="rarity"),
         ),
@@ -379,7 +380,7 @@ TABLES = (
             Check("(card_no_state = 'none') = (card_no = '')"),
             Check("printed_code IS NULL OR printed_code <> ''"),
             Check(
-                "catalog_state = 'unlisted' OR (card_no_state <> 'none' AND printed_code IS NULL AND manual_name_unit_id IS NULL)"
+                "catalog_state = 'unlisted' OR (card_no_state <> 'none' AND printed_code IS NULL AND manual_name_unit_id IS NULL AND manual_type_code IS NULL)"
             ),
         ),
     ),

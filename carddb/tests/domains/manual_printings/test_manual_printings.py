@@ -353,16 +353,19 @@ def test_oversized_append_is_rejected_before_any_write(registry_root: Path) -> N
     assert not (registry_root / AREA).exists()
 
 
+@pytest.mark.parametrize("card_type", ["ep", "sep"])
 def test_populate_stages_textless_provisional_card(
-    registry_root: Path, t0_database_template: DatabaseTemplate
+    registry_root: Path, t0_database_template: DatabaseTemplate, card_type: str
 ) -> None:
     result = register(
         registry_root,
         spec(
+            card_type=card_type,
+            image=None,
             references=[
                 "https://shadowverse-evolve.com/news/post-synthetic/",
                 "https://x.com/shadowverse_ev/status/1715598409107939492",
-            ]
+            ],
         ),
     )
     context = BuildContext.from_inputs(REVISION, {"synthetic": True})
@@ -388,6 +391,7 @@ def test_populate_stages_textless_provisional_card(
         assert not printing["card_no"]
         assert printing["card_no_state"] == "none"
         assert printing["catalog_state"] == "unlisted"
+        assert printing["manual_type_code"] == card_type
         assert printing["decklog_available"] is False
         assert printing["printed_code"] == "2024合成-A"
         assert printing["rarity_raw"] == "-"
@@ -429,6 +433,8 @@ def test_populate_stages_textless_provisional_card(
                 {"id": "printing"},
                 {"manual_name_unit_id": printing["manual_name_unit_id"]},
             )
+        with pytest.raises(sqlite3.IntegrityError, match="CHECK"), db.transaction():
+            db.update("printing", {"id": "printing"}, {"manual_type_code": card_type})
 
 
 def test_populate_requires_registered_family(

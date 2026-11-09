@@ -45,7 +45,7 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 | `int_id` | 落在該區未收錄號段（§4），全域唯一，由工具配發 |
 | `region` | `jp`／`en` |
 | `home_set_id` | 已 confirmed 的 `product_family.id`，等於 owner；EP／SEP 活動卡歸 `EP` 家族 |
-| `card_type` | `ep`／`sep`；只用來核對卡圖方向（EP 直式、SEP 橫式），不投影成卡文 |
+| `card_type` | `ep`／`sep`；核對卡圖方向（EP 直式、SEP 橫式），並投影成版次的 `manual_type_code`；不產生官方卡文 |
 | `card_no`、`card_no_state` | `card_no_state=none` ⇔ `card_no=null`；`official`／`provisional` 時 `card_no` 為非空原樣字串（§8 的序號卡） |
 | `printed_code` | 卡面印字的原樣字串或 null；不能有首尾空白 |
 | `name` | `{lang, text}`，lang 等於該區原語，text 非空、無首尾空白 |
@@ -107,19 +107,19 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 
 - `source_record`：kind `authored`、`parser_version=manual-printings-v1`、分片 canonical hash 與 authored revision
 - `card`（provisional、single）、`face`（ordinal 0、front）、`card_int_id`
-- `printing`：`catalog_state=unlisted`、`card_no_state`、`card_no`（none 時 `""`）、`printed_code`、`manual_name_unit_id`（人工名稱的 text_unit）、
+- `printing`：`catalog_state=unlisted`、`card_no_state`、`card_no`（none 時 `""`）、`printed_code`、`manual_name_unit_id`（人工名稱的 text_unit）、`manual_type_code`（ep／sep）、
   `listing_confidence=high`（維護者逐張看過實卡）、`rarity_raw="-"`（卡面無稀有度，沿官方 EP 的「-」）、`decklog_available=false`、`unverified`
 - `printing_face`：`printed_text_state=unknown`、三個 printed 欄位 null、無 observation
 - `printing_reference`：每個 `references` URL 一列
 
-DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlisted` 可為 none、填 `printed_code` 或 `manual_name_unit_id`。
+DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlisted` 可為 none、填 `printed_code`、`manual_name_unit_id` 或 `manual_type_code`。
 不產生 `face_revision`、`face_current`、`rules_name`、翻譯或 DSL；`card_engine_support` 該區 block 為 `identity_unconfirmed`＋`missing_region_source`。
 路由走既有 `/cards/_provisional/{int_id}`（[build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號)），不佔官方 `card_no` 路由；預設版次 method 為 `fallback`。
 
-卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`，`card_no_state` 新增 `none`；
+卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`、`manual_type_code?`，`card_no_state` 新增 `none`；
 `reference_urls` 來自 `printing_reference.url`。沒有任何觀測的 unlisted 面不要求 current 或「表記未定」項目（`face.current=[]`、`face.wording=[]`），
 這是 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本) 的明示例外，官方面規則不變。
-前端標籤與篩選另拆 sim/web PR；建置配置釘住每片的路徑與 hash（`manual_printings`）。
+前端缺少官方種類時，僅 unlisted 版次使用 `manual_type_code` 作種類標示、種類計數與牌組位置篩選；官方種類永遠優先，官方版次不使用人工值。建置配置釘住每片的路徑與 hash（`manual_printings`）。
 
 ## 8. 尚未實作：限量序號卡與序號補充
 
