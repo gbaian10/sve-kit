@@ -3,7 +3,7 @@
 from sve_carddb.build.model import Check, Column, ForeignKey, Kind, Table, Unique
 from sve_carddb.build.scalars import CODE, HASH, LANG
 from sve_carddb.build.translation_evidence import QUALITY, SOURCE
-from sve_carddb.core.dates import DATE, INSTANT
+from sve_carddb.core.dates import DATE, INSTANT, MONTH
 
 TABLES = (
     Table(
@@ -352,6 +352,18 @@ TABLES = (
             Column("printed_code", Kind.TEXT, nullable=True),
             Column("manual_name_unit_id", Kind.ID, nullable=True),
             Column("manual_type_code", Kind.TEXT, nullable=True, choices=("ep", "sep")),
+            Column(
+                "manual_available_on",
+                Kind.TEXT,
+                nullable=True,
+                pattern=f"(?:{DATE}|{MONTH})",
+            ),
+            Column(
+                "manual_date_precision",
+                Kind.TEXT,
+                nullable=True,
+                choices=("day", "month", "unknown"),
+            ),
             Column("source_id", Kind.ID),
             Column("rarity_kind", Kind.TEXT, fixed="rarity"),
         ),
@@ -379,8 +391,12 @@ TABLES = (
             # A card face without any printed number is the only empty card_no.
             Check("(card_no_state = 'none') = (card_no = '')"),
             Check("printed_code IS NULL OR printed_code <> ''"),
+            Check("catalog_state <> 'unlisted' OR manual_date_precision IS NOT NULL"),
             Check(
-                "catalog_state = 'unlisted' OR (card_no_state <> 'none' AND printed_code IS NULL AND manual_name_unit_id IS NULL AND manual_type_code IS NULL)"
+                "(catalog_state = 'official' AND manual_date_precision IS NULL AND manual_available_on IS NULL) OR (manual_date_precision = 'unknown' AND manual_available_on IS NULL) OR (manual_date_precision = 'day' AND manual_available_on IS NOT NULL AND length(manual_available_on) = 10) OR (manual_date_precision = 'month' AND manual_available_on IS NOT NULL AND length(manual_available_on) = 7)"
+            ),
+            Check(
+                "catalog_state = 'unlisted' OR (card_no_state <> 'none' AND printed_code IS NULL AND manual_name_unit_id IS NULL AND manual_type_code IS NULL AND manual_available_on IS NULL AND manual_date_precision IS NULL)"
             ),
         ),
     ),

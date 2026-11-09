@@ -65,6 +65,8 @@ def spec(**changes: JsonValue) -> ManualSpec:
         "printed_code": "2024合成-A",
         "name": {"lang": "ja", "text": "合成EP"},
         "release_kind": "event",
+        "available_on": "2024-11-17",
+        "date_precision": "day",
         "references": ["https://shadowverse-evolve.com/news/post-synthetic/"],
         "image": IMAGE,
     }
@@ -286,6 +288,39 @@ def test_spec_rules_reject_inconsistent_records(
         register(registry_root, spec(**changes))
 
 
+@pytest.mark.parametrize(
+    ("date", "precision"),
+    [("2024-02-29", "day"), ("2025-09", "month"), (None, "unknown")],
+)
+def test_manual_dates_preserve_their_precision(
+    registry_root: Path, date: str | None, precision: str
+) -> None:
+    result = register(registry_root, spec(available_on=date, date_precision=precision))
+    data = result.printings()[0]
+    assert (data.available_on, data.date_precision) == (date, precision)
+
+
+@pytest.mark.parametrize(
+    ("date", "precision"),
+    [
+        ("2025-02-29", "day"),
+        ("2025-09", "day"),
+        (None, "day"),
+        ("2025-09-01", "month"),
+        ("2025-13", "month"),
+        (None, "month"),
+        ("2025-09", "unknown"),
+        ("", "unknown"),
+        ("0000-09", "month"),
+    ],
+)
+def test_manual_dates_reject_inconsistent_precision(
+    registry_root: Path, date: str | None, precision: str
+) -> None:
+    with pytest.raises(ValueError, match="Date disagrees"):
+        register(registry_root, spec(available_on=date, date_precision=precision))
+
+
 @pytest.mark.parametrize("origin", ["official_image", "official_crop"])
 def test_basic_official_image_needs_no_source_url(
     registry_root: Path, origin: str
@@ -452,6 +487,8 @@ def test_populate_stages_textless_provisional_card(
         assert printing["card_no_state"] == "none"
         assert printing["catalog_state"] == "unlisted"
         assert printing["manual_type_code"] == card_type
+        assert printing["manual_available_on"] == "2024-11-17"
+        assert printing["manual_date_precision"] == "day"
         assert printing["decklog_available"] is False
         assert printing["printed_code"] == "2024合成-A"
         assert printing["rarity_raw"] == "-"

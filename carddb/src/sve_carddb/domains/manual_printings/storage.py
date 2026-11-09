@@ -40,6 +40,8 @@ class ManualSpec(RecordData):
     printed_code: Text | None
     name: ManualName
     release_kind: Literal["event", "basic"]
+    available_on: str | None
+    date_precision: Literal["day", "month", "unknown"]
     references: tuple[str, ...]
     image: ManualImage | None
 

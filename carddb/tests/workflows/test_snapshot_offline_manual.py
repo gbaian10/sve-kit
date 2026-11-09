@@ -60,6 +60,8 @@ def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
         "printed_code": "2024合成-A",
         "name": {"lang": "ja", "text": "合成EP"},
         "release_kind": "event",
+        "available_on": "2024-11-17",
+        "date_precision": "day",
         "references": list(REFERENCES),
         "image": {
             "sha256": "sha256:" + hashlib.sha256(MASTER).hexdigest(),
@@ -88,15 +90,27 @@ def register(case: Case, recipe: Inputs, *specs: ManualSpec) -> ManualSnapshot:
     )
 
 
+@pytest.mark.parametrize(
+    ("date", "precision"),
+    [("2024-11-17", "day"), ("2025-09", "month"), (None, "unknown")],
+)
 def test_offline_build_exports_textless_unlisted_printing(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], tmp_path: Path
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+    date: str | None,
+    precision: str,
 ) -> None:
     case, recipe, _ = prepared
-    manual = register(case, recipe, spec())
+    manual = register(case, recipe, spec(available_on=date, date_precision=precision))
     data = manual.printings()[0]
     built = offline.build(recipe, bundle_dir=tmp_path / "bundle")
     tables = built.projection.tables
     assert_manual_printing(tables, data.id, data.face_id)
+    printing = next(row for row in tables["printing"] if row["id"] == data.id)
+    assert (printing["manual_available_on"], printing["manual_date_precision"]) == (
+        date,
+        precision,
+    )
     assert_provisional_card(tables, data.id, data.card_id, data.face_id)
     assert built.report["manual_printings"] == {"printings": 1, "with_image": 1}
     record = InputRecord.model_validate_json(built.input_content)
@@ -146,6 +160,8 @@ def assert_manual_printing(
             assert row["printed_code"] is None
             assert row["manual_name_unit_id"] is None
             assert row["manual_type_code"] is None
+            assert row["manual_available_on"] is None
+            assert row["manual_date_precision"] is None
 
 
 def assert_provisional_card(

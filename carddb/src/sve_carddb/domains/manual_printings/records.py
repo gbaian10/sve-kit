@@ -6,6 +6,7 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, computed_field, field_validator, model_validator
 
+from sve_carddb.core.dates import check_partial_date
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.regions import Region
 from sve_carddb.domains.registry.build import permanent_id
@@ -128,6 +129,8 @@ class ManualPrintingData(RecordData):
     printed_code: Text | None
     name: ManualName
     release_kind: Literal["event", "basic"]
+    available_on: str | None
+    date_precision: Literal["day", "month", "unknown"]
     references: tuple[str, ...]
     image: ManualImage | None
 
@@ -140,6 +143,7 @@ class ManualPrintingData(RecordData):
 
     @model_validator(mode="after")
     def _consistent(self) -> ManualPrintingData:
+        check_partial_date(self.available_on, self.date_precision)
         anchor = manual_anchor(self.region, self.slug)
         if (
             self.id != permanent_id("p", anchor)

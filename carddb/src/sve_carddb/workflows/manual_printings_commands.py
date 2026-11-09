@@ -52,6 +52,8 @@ class Spec(RecordData):
     printed_code: str | None
     name: ManualName
     release_kind: Literal["event", "basic"]
+    available_on: str | None
+    date_precision: Literal["day", "month", "unknown"]
     references: tuple[str, ...]
     image: MasterImage | None
 
