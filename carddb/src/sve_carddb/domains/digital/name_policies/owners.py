@@ -46,7 +46,8 @@ def publication_owners(
     printings = {r.values["id"]: r.values for r in db.rows("printing")}
     for row in db.rows("printing_face"):
         printing = printings[row.values["printing_id"]]
-        if printing["region"] != "jp":
+        # Unlisted manual printings have no official text, so they own no name.
+        if printing["region"] != "jp" or printing["catalog_state"] != "official":
             continue
         owner = NameOwner(
             "printing_face", str(printing["id"]), str(row.values["face_id"])
