@@ -137,9 +137,17 @@ class _Cards:
         self.zones: list[JsonValue] = []
         self.amulets: list[int] = []
         self.rule_texts: list[tuple[int, int, int, list[str]]] = []
+        # Deck admission follows decklog_available, so a card no printing admits (such as
+        # a manually registered unlisted EP without official text) stays out of the index.
+        buildable = {
+            string(row["card_id"])
+            for row in tables["printing"]
+            if row["region"] == region and row["decklog_available"] is True
+        }
         released = sorted(
             (string(card["id"]), card, view)
             for card in tables["card"]
+            if string(card["id"]) in buildable
             for view in map(object_value, array(card["regions"]))
             if view["region"] == region and view["release_state"] == "released"
         )

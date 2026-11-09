@@ -59,6 +59,7 @@ class Pool:
             "rules_name": [],
             "face_rules_name": [],
             "card_mechanic_coverage": [],
+            "printing": [],
             "rules_profile": [
                 {
                     "id": f"rules-profile:{region}:standard",
@@ -96,8 +97,17 @@ class Pool:
         sections: tuple[str, ...] = (),
         released: bool = True,
         starting_amulet: bool = False,
+        buildable: bool = True,
     ) -> None:
         face, revision = f"f:{card_id}", f"rev:{card_id}"
+        self.tables["printing"].append(
+            {
+                "id": f"p:{card_id}",
+                "card_id": card_id,
+                "region": self.region,
+                "decklog_available": buildable,
+            }
+        )
         units = []
         for ordinal, value in enumerate((text, *sections)):
             unit = None if value is None else f"t:{card_id}:{ordinal}"
@@ -123,13 +133,11 @@ class Pool:
                 ],
             }
         )
-        self.tables["face"].append(
-            {
-                "id": face,
-                "card_id": card_id,
-                "current": [{"region": self.region, "revision_id": revision}],
-            }
+        # An unlisted manual printing has no official wording, so its face has no current.
+        current: list[JsonValue] = (
+            [{"region": self.region, "revision_id": revision}] if buildable else []
         )
+        self.tables["face"].append({"id": face, "card_id": card_id, "current": current})
         self.tables["face_revision"].append(
             {
                 "id": revision,
@@ -214,6 +222,7 @@ def test_same_name_cards_share_one_code_and_zones_follow_deck_role() -> None:
     pool.card("c:orchis", "決意の人形・オーキス", role="evolve")
     pool.card("c:ep", "EP", role=None, class_code=None)
     pool.card("c:unreleased", "未発売", released=False)
+    pool.card("c:manual-ep", "EP", role=None, class_code=None, buildable=False)
     index = pool.build()
     cards = cards_by_id(index)
 
@@ -222,6 +231,7 @@ def test_same_name_cards_share_one_code_and_zones_follow_deck_role() -> None:
         "manifest_sha256": MANIFEST_SHA,
     }
     assert "c:unreleased" not in cards
+    assert "c:manual-ep" not in cards
     assert cards["c:rose-a"]["name"] == cards["c:rose-b"]["name"]
     assert cards["c:rose-a"]["name"] != cards["c:arisa"]["name"]
     assert {

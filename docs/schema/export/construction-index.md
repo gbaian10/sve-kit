@@ -51,7 +51,7 @@ uv --directory carddb run sve-carddb snapshot construction-index --export-dir <�
 
 | 欄位 | 來源 |
 | --- | --- |
-| 收錄的卡 | 該地區 `release_state=released` 的卡；其餘卡驗證時是 `unknownCard` |
+| 收錄的卡 | 該地區 `release_state=released`、且至少一個該地區版次 `decklog_available=true` 的卡；人工登錄的未收錄版次預設不可建牌，所以不收錄；其餘卡驗證時是 `unknownCard` |
 | `name` | 第 1 面在該地區 `role=primary` 的 `face_rules_name`（CR 6.1.1.4.1）；不是恰好一個就停止 |
 | `class`、`titles` | 第 1 面該地區的 current `face_revision` |
 | `zone` | 該地區的 `deck_role`：`leader`、`main`、`evolve` 照用，`extra` 與缺值是 `none` |
