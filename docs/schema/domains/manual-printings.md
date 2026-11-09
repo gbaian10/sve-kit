@@ -26,7 +26,7 @@
 | 路徑（相對 authored） | 內容 |
 | --- | --- |
 | `manual-printings/printings/<home_set_id>/<NNN>.yaml` | `format: 1, kind: manual_printings_shard, records: [...]`，每片至少一筆 |
-| `ids/index.yaml` | 共用的配號 index；本入口只動 `next_unlisted_int_id` |
+| `ids/index.yaml` | 官方版次的配號 index；本入口不修改 |
 
 分片沿 [authored-layout §2](authored-layout.md#2-分片與來源) 的嚴格 YAML 1.2、單檔 <1 MiB、路徑安全規則，拒絕未知欄位、符號連結與重複記錄。
 目錄名就是 `home_set_id`（owner），記錄的 `owner` 必須相同。分片**只增不改**：新批次寫到該 owner 的下一個序號檔，舊檔不重排、不改寫；
@@ -42,7 +42,7 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 | --- | --- |
 | `slug` | `^[a-z0-9][a-z0-9-]{0,63}$`，維護者取的穩定英文識別字，全域唯一；是永久 ID 的錨點，之後不改（不叫 `key`，避免被 secret 掃描誤判） |
 | `id`、`card_id`、`face_id` | 永久 ID，沿 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的 UUIDv5 namespace：`p`／`c` 的 anchor 為 `<region>:manual:<slug>`（卡號不會含 `manual:`，不可能撞官方 anchor），face 為 `f` 加 `<card_id>:0`。驗證重算必須相等 |
-| `int_id` | 落在該區未收錄號段（§4），全域唯一，由工具配發 |
+| `int_id` | 落在該區未收錄號段（§4），全域唯一，由登錄者人工指定，可留空號 |
 | `region` | `jp`／`en` |
 | `home_set_id` | 已 confirmed 的 `product_family.id`，等於 owner；EP／SEP 活動卡歸 `EP` 家族 |
 | `card_type` | `ep`／`sep`；核對卡圖方向（EP 直式、SEP 橫式），並投影成版次的 `manual_type_code`；不產生官方卡文 |
@@ -53,20 +53,45 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 | `references` | 排序去重的公開 URL 陣列，每個都要通過 §5 白名單；`event` 至少一個，`basic` 必為空 |
 | `image` | null 或 `{sha256, width, height, origin, source_url, approved}`，見 §6 |
 
-## 4. 配號政策 v2：`region-ranges-2026-11-09-v2`
+## 4. 配號政策 v3：`region-ranges-2026-11-09-v3`
 
-程式唯一定義在 `sve_carddb.domains.registry.allocation`；已配發的號碼一個都不動，官方版次照常從現在的游標往後配，只是上限變小。
+程式唯一定義在 `sve_carddb.domains.registry.allocation`。官方版次仍從原有 `next_int_id` 游標往後配，號段、既有配號與分片不變。
 
 | 區 | 官方卡表版次（`REGION_RANGES`） | 官方未收錄（`UNLISTED_RANGES`） |
 | --- | --- | --- |
 | jp | 20001–54999 | 55000–59999 |
 | en | 60001–94999 | 95000–99999 |
 
-1–20000 仍保留、60000 仍未分配。`ids/index.yaml`（`format: 2`）同時保存 `next_int_id`（官方）與 `next_unlisted_int_id`（未收錄）兩組游標，
-鍵恰為政策內的地區，值落在 `[start, end+1]`。地區仍讀 `printing.region`，不從號碼反推。
-人工版次由 `manual-printings append` 依 `(region, slug)` 排序從 `next_unlisted_int_id` 依序配發，任一區用盡整批失敗；
-載入時驗證每號在所屬地區的未收錄號段、全域唯一，且各區游標等於該區最大號＋1（空區為起點）。
-registry 工具不動未收錄游標，人工工具不動官方游標。
+1–20000 仍保留、60000 仍未分配。`ids/index.yaml`（`format: 2`）僅保存官方 `next_int_id`；現行 index 不接受 `next_unlisted_int_id`。
+歷史 v1／v2 index 仍可讀以重播身分修復的 basis；v2 保留原有兩組游標，不將它們轉成 v3。
+地區仍讀 `printing.region`，不從號碼反推。
+
+人工版次的每筆記錄與 `manual-printings append --spec` 輸入都必須明定 `int_id`。工具只配發永久字串 ID，
+驗證整批與既有記錄的整數 ID 全域唯一、落在該區未收錄號段；可跳號、可在之後填補空號，不要求連續或最大號＋1。
+重複或出界時整批失敗，人工工具不寫官方 index。區塊與保留號是人工登錄約定，驗證器不限制只能使用列出的區塊或空號。
+
+EP／SEP 依類別分區塊、每類從整百開始；同區塊內依下表與既有記錄配號，後續新增避免佔用保留號。
+
+| 區 | 起點 | 類別 |
+| --- | --- | --- |
+| jp | 55000 | 基本卡（EP 55000、SEP 55001） |
+| jp | 55100 | 官方大使 |
+| jp | 55200 | 店家合作 |
+| jp | 55300 | ご当地 EP（依發放日期） |
+| en | 95000 | 基本卡（SEP 95001） |
+| en | 95100 | 官方大使 |
+| en | 95200 | 活動與賽事獎品 |
+
+| 保留號（暫不登錄） | 用途 |
+| --- | --- |
+| 55100–55102 | JP 舊設計大使：渡辺雄也、ゆいっこ、Riowh（缺圖，[#1895](https://github.com/gbaian10/sve-kit/issues/1895)） |
+| 95000 | EN 基本 EP（官方圖含 SAMPLE 浮水印，待補） |
+| 95100–95101 | EN 舊設計大使 DifferentFight、Ignideus（第一代僅這兩位） |
+| 95202–95203 | EN BCS 24/25 Mono 閃卡（可能兩張，對應 Mono 02/03，缺圖） |
+
+維護者於 2026-11-09 明示授權在正式上線前，將既有 26 筆人工 EP／SEP 的 `int_id` 一次性改為上述區塊，並新增 EN 基本 SEP。
+這是分片只增不改的明示例外，printing／card／face 永久 ID 不變；官方版次的 `int_id`、游標與分片均不變。
+前端在無卡號（`card_no_state=none`）的版次之間依 `int_id` 比較，保留有卡號版次的原排序規則。
 
 ## 5. 來源連結
 
@@ -136,7 +161,7 @@ DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlis
 
 ## 9. 下游驗收
 
-程式以合成資料驗：官方卡不准空卡號或人工欄位；unlisted 配號落在未收錄號段且游標一致；官方游標不受影響；基本 EP／SEP 無連結、活動卡至少一個；
+程式以合成資料驗：官方卡不准空卡號或人工欄位；unlisted 配號人工指定、落在未收錄號段、全域唯一且允許空號；官方游標不受影響；基本 EP／SEP 無連結、活動卡至少一個；
 非官方 host／非官方 X 帳號拒絕；人工卡名只進 `manual_name_unit_id`，不進 `face_revision`／`rules_name`；無觀測的 unlisted 面匯出通過且無 wording；
 母檔以 sha256 對應、尺寸不符或缺檔失敗、無母檔的記錄出 pending 列；索引的人工 asset 與記錄不符拒絕；分片未知欄位、ID 不符 recipe、owner 不等於 home_set 均拒絕。
 
