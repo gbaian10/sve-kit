@@ -140,6 +140,17 @@ function manualNameOf(index: CardIndex, printing: Row | undefined): NameSource |
 export const isUnlistedPrinting = (printing: Row | undefined): boolean =>
   printing?.["catalog_state"] === "unlisted"
 
+/** Manual kinds fill textless unlisted faces without replacing official wording. */
+export function printingTypeCode(
+  printing: Row | undefined,
+  values: Row | undefined,
+): string | null {
+  if (typeof values?.["type_code"] === "string") return values["type_code"]
+  return isUnlistedPrinting(printing) && typeof printing?.["manual_type_code"] === "string"
+    ? printing["manual_type_code"]
+    : null
+}
+
 function printedCodeOf(printing: Row | undefined): string | null {
   const code = printing?.["printed_code"]
   return typeof code === "string" && code !== "" ? code : null
@@ -290,9 +301,9 @@ function* catalogCardCursor(
           cost: nullableInteger(own?.["cost"]),
           attack: nullableInteger(own?.["attack"]),
           defense: nullableInteger(own?.["defense"]),
-          typeCode: typeof own?.["type_code"] === "string" ? own["type_code"] : null,
+          typeCode: printingTypeCode(printing, own),
           deckLocations: deckLocationBadges(
-            typeof own?.["type_code"] === "string" ? own["type_code"] : "",
+            printingTypeCode(printing, own) ?? "",
             arrayValue(own?.["special_kinds"] ?? []),
           ),
           wordingPending:

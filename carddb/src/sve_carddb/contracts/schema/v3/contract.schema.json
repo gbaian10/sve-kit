@@ -3448,11 +3448,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "ep",
+            "sep",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 27,
-      "maxItems": 27,
+      "minItems": 28,
+      "maxItems": 28,
       "x-columns": [
         "id",
         "card_id",
@@ -3480,7 +3487,8 @@
         "stamp",
         "serial",
         "printed_code",
-        "manual_name_unit_id"
+        "manual_name_unit_id",
+        "manual_type_code"
       ],
       "x-types": [
         {
@@ -3614,6 +3622,14 @@
         {
           "nullable": {
             "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "ep",
+              "sep"
+            ]
           }
         }
       ],
@@ -3772,6 +3788,76 @@
             ]
           },
           "else": {}
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                "const": "official"
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
         }
       ]
     },
@@ -8817,11 +8903,18 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "enum": [
+            "ep",
+            "sep",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 27,
-      "maxItems": 27,
+      "minItems": 28,
+      "maxItems": 28,
       "x-columns": [
         "id",
         "card_id",
@@ -8849,7 +8942,8 @@
         "stamp",
         "serial",
         "printed_code",
-        "manual_name_unit_id"
+        "manual_name_unit_id",
+        "manual_type_code"
       ],
       "x-types": [
         {
@@ -8983,6 +9077,14 @@
         {
           "nullable": {
             "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "ep",
+              "sep"
+            ]
           }
         }
       ],
@@ -9138,6 +9240,76 @@
             ]
           },
           "else": {}
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                "const": "official"
+              },
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {}
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {},
+              {
+                "type": "null"
+              }
+            ]
+          }
         }
       ]
     },
@@ -18134,7 +18306,8 @@
                         "stamp",
                         "serial",
                         "printed_code",
-                        "manual_name_unit_id"
+                        "manual_name_unit_id",
+                        "manual_type_code"
                       ]
                     },
                     "maxItems": 0
@@ -20471,7 +20644,8 @@
                         "stamp",
                         "serial",
                         "printed_code",
-                        "manual_name_unit_id"
+                        "manual_name_unit_id",
+                        "manual_type_code"
                       ]
                     },
                     "minItems": 1,
@@ -22851,7 +23025,8 @@
                         "stamp",
                         "serial",
                         "printed_code",
-                        "manual_name_unit_id"
+                        "manual_name_unit_id",
+                        "manual_type_code"
                       ]
                     },
                     "maxItems": 0

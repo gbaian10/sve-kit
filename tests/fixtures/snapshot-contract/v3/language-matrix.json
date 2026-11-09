@@ -669,9 +669,9 @@
       ],
       "files": [
         {
-          "path": "snapshots/blobs/e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79.json",
-          "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79",
-          "bytes": 6628,
+          "path": "snapshots/blobs/6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d.json",
+          "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d",
+          "bytes": 6648,
           "key": "catalog/en/family-BP02/0",
           "role": "bootstrap",
           "purpose": "catalog",
@@ -731,9 +731,9 @@
           }
         },
         {
-          "path": "snapshots/blobs/d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a.json",
-          "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a",
-          "bytes": 6604,
+          "path": "snapshots/blobs/f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6.json",
+          "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6",
+          "bytes": 6624,
           "key": "catalog/jp/family-BP02/0",
           "role": "bootstrap",
           "purpose": "catalog",
@@ -850,8 +850,8 @@
           }
         },
         {
-          "path": "snapshots/blobs/d971d8527116f1db7af22d75976ef66e3d0a7aafce0f3f406cf218fd157c79fd.json",
-          "sha256": "sha256:d971d8527116f1db7af22d75976ef66e3d0a7aafce0f3f406cf218fd157c79fd",
+          "path": "snapshots/blobs/bbfd385ee06f799055c81138885b8031061009c92d205a54c15d6338d8e375a0.json",
+          "sha256": "sha256:bbfd385ee06f799055c81138885b8031061009c92d205a54c15d6338d8e375a0",
           "bytes": 3236,
           "key": "detail/en/family-BP02/0",
           "role": "text",
@@ -887,7 +887,7 @@
           "dependencies": [
             {
               "key": "catalog/en/family-BP02/0",
-              "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+              "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
             },
             {
               "key": "catalog/shared/shared/0",
@@ -901,19 +901,19 @@
           "source_refs": [
             {
               "key": "catalog/en/family-BP02/0",
-              "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+              "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
             },
             {
               "key": "catalog/jp/family-BP02/0",
-              "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+              "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
             },
             {
               "key": "detail/en/family-BP02/0",
-              "sha256": "sha256:d971d8527116f1db7af22d75976ef66e3d0a7aafce0f3f406cf218fd157c79fd"
+              "sha256": "sha256:bbfd385ee06f799055c81138885b8031061009c92d205a54c15d6338d8e375a0"
             },
             {
               "key": "detail/jp/family-BP02/0",
-              "sha256": "sha256:bf54adeb3ff395eec55a7660c66503c4aa7ab5a719c66fa306d6390935733425"
+              "sha256": "sha256:925fb4d83b1e463ec0d22298787cc5139e730fa04edce9bee05cbfeead15afa4"
             },
             {
               "key": "history/jp/family-BP02/0",
@@ -925,8 +925,8 @@
           }
         },
         {
-          "path": "snapshots/blobs/bf54adeb3ff395eec55a7660c66503c4aa7ab5a719c66fa306d6390935733425.json",
-          "sha256": "sha256:bf54adeb3ff395eec55a7660c66503c4aa7ab5a719c66fa306d6390935733425",
+          "path": "snapshots/blobs/925fb4d83b1e463ec0d22298787cc5139e730fa04edce9bee05cbfeead15afa4.json",
+          "sha256": "sha256:925fb4d83b1e463ec0d22298787cc5139e730fa04edce9bee05cbfeead15afa4",
           "bytes": 3185,
           "key": "detail/jp/family-BP02/0",
           "role": "text",
@@ -962,7 +962,7 @@
           "dependencies": [
             {
               "key": "catalog/jp/family-BP02/0",
-              "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+              "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
             },
             {
               "key": "catalog/shared/shared/0",
@@ -976,15 +976,15 @@
           "source_refs": [
             {
               "key": "catalog/en/family-BP02/0",
-              "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+              "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
             },
             {
               "key": "catalog/jp/family-BP02/0",
-              "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+              "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
             },
             {
               "key": "detail/jp/family-BP02/0",
-              "sha256": "sha256:bf54adeb3ff395eec55a7660c66503c4aa7ab5a719c66fa306d6390935733425"
+              "sha256": "sha256:925fb4d83b1e463ec0d22298787cc5139e730fa04edce9bee05cbfeead15afa4"
             },
             {
               "key": "history/en/family-BP02/0",
@@ -1102,8 +1102,8 @@
           }
         },
         {
-          "path": "snapshots/blobs/4c36718e9cd77e0a833ea454e659058253e602a0f5b81f127372d71721338af7.json",
-          "sha256": "sha256:4c36718e9cd77e0a833ea454e659058253e602a0f5b81f127372d71721338af7",
+          "path": "snapshots/blobs/1dcf8231ff7012036e4428b5c6d1c57adde4efcd811e9e09e9049e76d758bd0d.json",
+          "sha256": "sha256:1dcf8231ff7012036e4428b5c6d1c57adde4efcd811e9e09e9049e76d758bd0d",
           "bytes": 2729,
           "key": "print-detail/en/family-BP02/0",
           "role": "text",
@@ -1123,7 +1123,7 @@
           "dependencies": [
             {
               "key": "catalog/en/family-BP02/0",
-              "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+              "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
             },
             {
               "key": "catalog/shared/shared/0",
@@ -1136,8 +1136,8 @@
           }
         },
         {
-          "path": "snapshots/blobs/9a8eb578f8b2e817b844d0856bdcb9e4b5ecad86bd694d06e35400c238ae48cc.json",
-          "sha256": "sha256:9a8eb578f8b2e817b844d0856bdcb9e4b5ecad86bd694d06e35400c238ae48cc",
+          "path": "snapshots/blobs/1f3a7fc965a7f48ed9a930a32bc2851140500e72cfcf9621c74be51faf4ab3a9.json",
+          "sha256": "sha256:1f3a7fc965a7f48ed9a930a32bc2851140500e72cfcf9621c74be51faf4ab3a9",
           "bytes": 2729,
           "key": "print-detail/jp/family-BP02/0",
           "role": "text",
@@ -1157,7 +1157,7 @@
           "dependencies": [
             {
               "key": "catalog/jp/family-BP02/0",
-              "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+              "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
             },
             {
               "key": "catalog/shared/shared/0",
@@ -1876,6 +1876,7 @@
                   null,
                   null,
                   null,
+                  null,
                   null
                 ],
                 [
@@ -1909,6 +1910,7 @@
                       []
                     ]
                   ],
+                  null,
                   null,
                   null,
                   null,
@@ -1952,6 +1954,7 @@
                   null,
                   null,
                   null,
+                  null,
                   null
                 ],
                 [
@@ -1985,6 +1988,7 @@
                       []
                     ]
                   ],
+                  null,
                   null,
                   null,
                   null,
@@ -2734,6 +2738,7 @@
                   null,
                   null,
                   null,
+                  null,
                   null
                 ],
                 [
@@ -2767,6 +2772,7 @@
                       []
                     ]
                   ],
+                  null,
                   null,
                   null,
                   null,
@@ -2810,6 +2816,7 @@
                   null,
                   null,
                   null,
+                  null,
                   null
                 ],
                 [
@@ -2843,6 +2850,7 @@
                       []
                     ]
                   ],
+                  null,
                   null,
                   null,
                   null,
@@ -3302,7 +3310,7 @@
               {
                 "file": {
                   "key": "catalog/en/family-BP02/0",
-                  "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+                  "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
                 },
                 "owner": {
                   "id": "BP02",
@@ -3675,7 +3683,7 @@
               {
                 "file": {
                   "key": "catalog/jp/family-BP02/0",
-                  "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+                  "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
                 },
                 "owner": {
                   "id": "BP02",
@@ -4840,7 +4848,7 @@
               {
                 "file": {
                   "key": "catalog/en/family-BP02/0",
-                  "sha256": "sha256:e4a9c2d4466c4362f7c534c3b2a79ef325bb02cc61d54ea8d8704e106f8beb79"
+                  "sha256": "sha256:6103361147028d1832342bfbce050ae4534cec3281daafb5657a0060cb0aab3d"
                 },
                 "owner": {
                   "id": "BP02",
@@ -5194,7 +5202,7 @@
               {
                 "file": {
                   "key": "catalog/jp/family-BP02/0",
-                  "sha256": "sha256:d39925e6b626c258c2a9416c9f3d16227dc25d1e18b1d4e98886d30034869c2a"
+                  "sha256": "sha256:f8938916cd3f5379f6506ef47f1c4c2e97d114a7ef99f646a8be15a8e1fb57b6"
                 },
                 "owner": {
                   "id": "BP02",

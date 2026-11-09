@@ -131,6 +131,7 @@ def assert_manual_printing(
     assert not printing["card_no"]
     assert printing["card_no_state"] == "none"
     assert printing["catalog_state"] == "unlisted"
+    assert printing["manual_type_code"] == "ep"
     assert printing["printed_code"] == "2024合成-A"
     assert printing["reference_urls"] == sorted(REFERENCES)
     assert printing["int_id"] == 55000
@@ -153,6 +154,7 @@ def assert_manual_printing(
             assert row["card_no_state"] == "official"
             assert row["printed_code"] is None
             assert row["manual_name_unit_id"] is None
+            assert row["manual_type_code"] is None
 
 
 def assert_provisional_card(

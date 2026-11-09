@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { DEFAULT_QUERY } from "../domain/query/model"
-import { catalogOf, prepareCatalog } from "./catalog"
+import { catalogOf, prepareCatalog, printingTypeCode } from "./catalog"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { faceBasics } from "./face-basics"
@@ -35,6 +35,13 @@ if (!snapshot) throw new Error("fixture did not load")
 const catalog = catalogOf(snapshot)
 
 describe("catalog", () => {
+  it("uses a manual kind only for an unlisted printing without an official kind", () => {
+    const unlisted = { catalog_state: "unlisted", manual_type_code: "ep" }
+    expect(printingTypeCode(unlisted, undefined)).toBe("ep")
+    expect(printingTypeCode(unlisted, { type_code: "sep" })).toBe("sep")
+    expect(printingTypeCode({ ...unlisted, catalog_state: "official" }, undefined)).toBeNull()
+    expect(printingTypeCode(undefined, { type_code: "follower" })).toBe("follower")
+  })
   it("keeps prepared summaries and search results equal regardless of which is read first", async () => {
     const candidate = { ...snapshot }
     await prepareCatalog(candidate, () => undefined)

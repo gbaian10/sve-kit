@@ -52,6 +52,7 @@ import {
   isUnlistedPrinting,
   type LocatedCard,
   nameOf,
+  printingTypeCode,
   type Row,
   type SnapshotClient,
   type SnapshotStatus,
@@ -876,8 +877,7 @@ export function CardView({
                   : values?.["class_code"] === null
                     ? null
                     : undefined
-              const typeCode =
-                typeof values?.["type_code"] === "string" ? values["type_code"] : null
+              const typeCode = printingTypeCode(printing, values)
               const locations = deckLocationBadges(
                 typeCode ?? "",
                 arrayValue(values?.["special_kinds"] ?? []),

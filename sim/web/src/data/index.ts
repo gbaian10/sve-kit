@@ -10,7 +10,14 @@ export {
 export { artCredits, type FaceArtist } from "./artists"
 export { appBackgroundDownloads } from "./background-downloads"
 export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
-export { type CardSummary, type Catalog, catalogOf, isUnlistedPrinting, nameOf } from "./catalog"
+export {
+  type CardSummary,
+  type Catalog,
+  catalogOf,
+  isUnlistedPrinting,
+  nameOf,
+  printingTypeCode,
+} from "./catalog"
 export { type LoadedSnapshot, type SnapshotClient, type SnapshotStatus } from "./client"
 export { loadConstructionIndex } from "./construction-index"
 export { type DigitalLink, digitalLinkUrl, loadCardDigitalLinks } from "./digital-links"

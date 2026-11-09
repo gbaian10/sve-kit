@@ -24,7 +24,14 @@ import { matchesRaritySelection, PREMIUM_RARITY, UNRATED_RARITY } from "../../do
 import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
-import { badgeOf, type CardSummary, catalogCards, isUnlistedPrinting, nameOf } from "../catalog"
+import {
+  badgeOf,
+  type CardSummary,
+  catalogCards,
+  isUnlistedPrinting,
+  nameOf,
+  printingTypeCode,
+} from "../catalog"
 import {
   arrayValue,
   integerValue,
@@ -170,6 +177,7 @@ const PRINTING_COLUMNS = [
   "id",
   "lookup",
   "flat",
+  "printed",
   "set",
   "number",
   "owner",
@@ -197,7 +205,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 33
+export const INDEX_IMAGE_FORMAT = 34
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -229,6 +237,20 @@ function locationTokens(kinds: DeckKinds): string[] {
   if (parent === "token") return [parent, `token:${kinds.type}`]
   if (parent === "leader") return [parent, `leader:${kinds.frame}`]
   return [parent]
+}
+
+/** An unlisted printing's printed code, normalized like typed text; others have none. */
+function printedSearchKey(printing: JsonObject | undefined): string {
+  const code = printing?.["printed_code"]
+  return isUnlistedPrinting(printing) && typeof code === "string" ? normalizeText(code) : ""
+}
+
+/** 0 exact, 1 prefix, 3 contains, 4 no match, mirroring the number and name ranks. */
+function printedRank(printed: string, flat: string): number {
+  if (printed === "" || flat === "") return 4
+  if (printed === flat) return 0
+  if (printed.startsWith(flat)) return 1
+  return printed.includes(flat) ? 3 : 4
 }
 
 function tally(counts: Record<string, number>, keys: readonly string[]): void {
@@ -622,7 +644,8 @@ function build(
       const fullPrinting = index.printing(printing.id)
       const art = artOf(fullPrinting)
       const defaultArt = artOf(index.printing(entry.defaultPrinting[edition] ?? ""))
-      printings.type.push(intern(type))
+      const printingType = printingTypeCode(fullPrinting, revision) ?? ""
+      printings.type.push(intern(printingType))
       printings.token.push(Number(token))
       printings.premium.push(Number(fullPrinting?.["premium"] === true))
       const leaderFrame =
@@ -657,6 +680,7 @@ function build(
       printings.id.push(intern(printing.id))
       printings.lookup.push(intern(printing.lookupKey))
       printings.flat.push(intern(printing.flat))
+      printings.printed.push(intern(printedSearchKey(fullPrinting)))
       printings.set.push(intern(printing.key?.set))
       printings.number.push(intern(printing.key?.number))
       const owner = index.printing(printing.id)?.["home_set_id"]
@@ -664,7 +688,7 @@ function build(
       printings.owner.push(intern(ownerCode))
       countPrinting(
         counts,
-        { type, token, frame: leaderFrame, evolve, advance },
+        { type: printingType, token, frame: leaderFrame, evolve, advance },
         cardTraits,
         ownerCode,
       )
@@ -967,9 +991,16 @@ export class SearchIndex {
         const owner = stringValue(row["home_set_id"]),
           code = familyCodes.get(owner)
         const intern = (value: string | undefined | null) => this.pool.intern(value ?? "")
+        const front = index.facesOf(cardId)[0]
+        const revision = front
+          ? index.displayRevision(stringValue(front["id"]), this.edition)
+          : undefined
+        const typeCode = printingTypeCode(row, revision)
+        printings.type[ordinal] = intern(typeCode)
         printings.lookup[ordinal] = intern(cardNoLookupKey(cardNo, this.sets))
         printings.premium[ordinal] = Number(row["premium"] === true)
         printings.flat[ordinal] = intern(normalizeText(cardNo))
+        printings.printed[ordinal] = intern(printedSearchKey(row))
         printings.set[ordinal] = intern(key?.set)
         printings.number[ordinal] = intern(key?.number)
         printings.owner[ordinal] = intern(code)
@@ -1012,6 +1043,7 @@ export class SearchIndex {
             source: summary - 1,
             changes: {
               cardNo,
+              typeCode,
               route: { cardOwner: stringValue(cardRow?.["home_set_id"]), printingOwner: owner },
               intId,
               cardNoState:
@@ -1275,15 +1307,19 @@ export class SearchIndex {
       statSelected(state.attack, STAT_CAP, this.attacks[printing]) &&
       statSelected(state.defense, STAT_CAP, this.defenses[printing])
     // A printing's text rank: 0 for its exact number, 1 for a number prefix, else the card's
-    // name/alias rank (2 prefix, 3 contains, 4 none).
+    // name/alias rank (2 prefix, 3 contains, 4 none). An unlisted printing's printed code stands
+    // in for its number.
     const textRankOf = (p: number, nameRank: number): number => {
       const number = this.pool.get(this.printings.number[p] ?? 0)
+      const printed = printedRank(this.pool.get(this.printings.printed[p] ?? 0), flat)
       if (
         (lookup !== null && this.pool.get(this.printings.lookup[p] ?? 0) === lookup) ||
-        (digits !== null && number === digits)
+        (digits !== null && number === digits) ||
+        printed === 0
       )
         return 0
       if (
+        printed === 1 ||
         this.pool.get(this.printings.flat[p] ?? 0).startsWith(flat) ||
         (number !== "" &&
           typed !== null &&
@@ -1293,7 +1329,7 @@ export class SearchIndex {
         (number !== "" && digits !== null && number.startsWith(digits))
       )
         return 1
-      return nameRank
+      return Math.min(nameRank, printed)
     }
     const positive = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "has")
     const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
@@ -1579,13 +1615,14 @@ export class SearchIndex {
         if (!item.summary) return []
         const card = this.cards.id.findIndex((id) => this.pool.get(id) === item.key)
         const printing = this.printings.id.findIndex((id) => this.pool.get(id) === item.printingId)
+        const printed = printedRank(this.pool.get(this.printings.printed[printing] ?? 0), flat)
         const exact =
           (lookup !== null && this.pool.get(this.printings.lookup[printing] ?? 0) === lookup) ||
-          (digits !== null && this.pool.get(this.printings.number[printing] ?? 0) === digits)
+          (digits !== null && this.pool.get(this.printings.number[printing] ?? 0) === digits) ||
+          printed === 0
         const name = this.textRank(this.names, this.cards.nameStart, card, flat)
         const alias = this.textRank(this.aliases, this.cards.aliasStart, card, flat)
-        const isNumber =
-          exact ||
+        const listedNumber =
           this.pool.get(this.printings.flat[printing] ?? 0).startsWith(flat) ||
           (digits !== null &&
             this.pool.get(this.printings.number[printing] ?? 0).startsWith(digits)) ||
@@ -1593,11 +1630,13 @@ export class SearchIndex {
             this.pool
               .get(this.printings.number[printing] ?? 0)
               .startsWith(cardNoKey(text, this.sets)?.number ?? "!"))
+        // A printed code shows in the number slot, so a match on it reads as a number match.
+        const isNumber = exact || listedNumber || printed < Math.min(name, alias)
         return [
           {
             summary: item.summary,
             field: isNumber ? "cardNo" : name <= alias ? "name" : "alias",
-            rank: exact ? 0 : isNumber ? 1 : Math.min(name, alias),
+            rank: exact ? 0 : listedNumber ? 1 : Math.min(name, alias, printed),
           },
         ]
       }),

@@ -3370,7 +3370,7 @@ it("filters printing marks before grouping and preserves them in completed and r
   }
 })
 
-it("names an unlisted printing by its manual name and filters it as a special printing", async () => {
+it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", async (cardType) => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   const initial = client.snapshot()
@@ -3405,6 +3405,7 @@ it("names an unlisted printing by its manual name and filters it as a special pr
               catalog_state: "unlisted",
               printed_code: "2024千葉-A",
               manual_name_unit_id: unit.id,
+              manual_type_code: cardType,
             }
           // No observation, so no current wording and no display revision.
           if (fragment.table === "face" && row["card_id"] === target["card_id"])
@@ -3418,6 +3419,14 @@ it("names an unlisted printing by its manual name and filters it as a special pr
     return columns
   }
   const created = new SearchIndex(rewrite(snapshot.bootstrap), "jp")
+  const originalColumns = new BootstrapColumns()
+  originalColumns.ingest(snapshot.bootstrap)
+  originalColumns.seal()
+  const original = new SearchIndex(originalColumns, "jp")
+  const originalType = original.search({
+    ...query,
+    state: { ...DEFAULT_QUERY, text: stringValue(target["card_no"]) },
+  }).items[0]?.summary?.typeCode
   const restored = new SearchIndex(created.encode(), "jp")
   // A catalog locator knows no marks yet; completing it from the rewritten rows sets the filter.
   const locators = new BootstrapColumns()
@@ -3431,9 +3440,47 @@ it("names an unlisted printing by its manual name and filters it as a special pr
     expect(search({ unlistedOnly: true }).items.map((item) => item.printingId)).toEqual([
       target["id"],
     ])
+    expect(
+      search({ unlistedOnly: true, locations: [cardType] }).items.map((item) => item.printingId),
+    ).toEqual([target["id"]])
+    expect(search({ unlistedOnly: true, locations: ["main"] }).items).toEqual([])
+    expect(search({ unlistedOnly: true, types: [cardType] }).items).toHaveLength(1)
+    expect(search({ unlistedOnly: true }).items[0]?.summary?.typeCode).toBe(cardType)
+    expect(index.options.typeCounts[cardType]).toBe(
+      (original.options.typeCounts[cardType] ?? 0) + 1,
+    )
+    expect(index.options.locationCounts[cardType]).toBe(
+      (original.options.locationCounts[cardType] ?? 0) + 1,
+    )
+    expect(index.options.locationCounts["main"]).toBe(
+      (original.options.locationCounts["main"] ?? 0) - 1,
+    )
+    if (originalType)
+      expect(index.options.typeCounts[originalType]).toBe(
+        (original.options.typeCounts[originalType] ?? 0) - 1,
+      )
     expect(search({}).items.length).toBeGreaterThan(1)
     // Ticking it with another mark keeps only printings that match both.
     expect(search({ unlistedOnly: true, stampOnly: true }).items).toEqual([])
+    // The printed code is searchable text: exact (separators and width ignored), prefix, infix.
+    for (const text of ["2024千葉-A", "２０２４千葉ａ", "2024千葉", "千葉-A"])
+      expect(
+        search({ text, unit: "printing" }).items.map((item) => item.printingId),
+        text,
+      ).toContain(target["id"])
+    expect(search({ text: "2024千葉-A" }).items[0]?.printingId).toBe(target["id"])
+    expect(search({ text: "2024千葉-B" }).items.map((item) => item.printingId)).not.toContain(
+      target["id"],
+    )
+    // A suggestion reads it as the number slot the cell shows, best first when exact.
+    expect(index.suggest("2024千葉-A").items[0]).toMatchObject({
+      summary: { printingId: target["id"] },
+      field: "cardNo",
+      rank: 0,
+    })
+    expect(
+      index.suggest("2024千葉").items.find((item) => item.summary.printingId === target["id"]),
+    ).toMatchObject({ field: "cardNo", rank: 1 })
   }
   // An unlisted printing is a card's default one, so the first build already names it.
   for (const index of [created, restored]) {

@@ -148,6 +148,7 @@ vi.mock("../../app/snapshot", () => {
           catalog_state: "unlisted",
           printed_code: state.unlisted.printedCode,
           manual_name_unit_id: "t:manual",
+          manual_type_code: "ep",
           reference_urls: state.unlisted.references,
         }
       : {}),
@@ -1486,6 +1487,7 @@ describe("a printing the official database does not list", () => {
       await open(language)
       const heading = await screen.findByRole("heading", { level: 2 })
       expect(heading).toHaveTextContent("ガルミーユ×うどん")
+      expect(screen.getByText("ep", { exact: true })).toBeVisible()
       // The tag shares the name's row and explains itself on hover.
       const tag = screen.getByText(badge)
       expect(tag.closest("div")).toBe(heading.parentElement?.parentElement)

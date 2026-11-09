@@ -96,6 +96,7 @@ def populate_manual_printings(
                 # The card face prints no rarity; "-" is the official label for none.
                 "rarity_raw": "-",
                 "printed_code": data.printed_code,
+                "manual_type_code": data.card_type,
                 "manual_name_unit_id": texts.intern(
                     LocalizedText(lang=data.name.lang, text=data.name.text)
                 ),
