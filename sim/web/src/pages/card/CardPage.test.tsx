@@ -98,7 +98,12 @@ const state = vi.hoisted(() => ({
   basisPrintingId: "p:undated",
   undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   /** A printing the official database does not list: no number, no card text, a manual name. */
-  unlisted: null as { printedCode: string | null; references: string[] } | null,
+  unlisted: null as {
+    printedCode: string | null
+    references: string[]
+    date?: string | null
+    precision?: "day" | "month" | "unknown"
+  } | null,
   wording: vi.fn(),
 }))
 vi.mock("../../data", async (importOriginal) => ({
@@ -149,6 +154,8 @@ vi.mock("../../app/snapshot", () => {
           printed_code: state.unlisted.printedCode,
           manual_name_unit_id: "t:manual",
           manual_type_code: "ep",
+          manual_available_on: state.unlisted.date ?? null,
+          manual_date_precision: state.unlisted.precision ?? "unknown",
           reference_urls: state.unlisted.references,
         }
       : {}),
@@ -1495,6 +1502,18 @@ describe("a printing the official database does not list", () => {
       expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(noNumber)
     },
   )
+
+  it.each([
+    ["2025-07-03", "day"],
+    ["2025-09", "month"],
+    [null, "unknown"],
+  ] as const)("shows the manual release date %s in the card metadata", async (date, precision) => {
+    state.unlisted = { printedCode: null, references: [], date, precision }
+    await open()
+    await screen.findByRole("heading", { level: 2 })
+    if (date === null) expect(screen.queryByText(/發行日/)).not.toBeInTheDocument()
+    else expect(screen.getByText(date, { selector: "time" })).toHaveAttribute("datetime", date)
+  })
 
   it("shows the code printed on the face where the number goes", async () => {
     state.unlisted = { printedCode: "2024千葉-A", references: [] }

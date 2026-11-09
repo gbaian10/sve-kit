@@ -31,6 +31,7 @@ import {
   stringValue,
 } from "./format-v3/json"
 import { type Fragment, mergedRowsCursor, validateCatalogCursor } from "./format-v3/reader"
+import { manualReleaseDate } from "./printing-dates"
 import type { CardRestriction } from "./restrictions"
 import { type CardIndex, cardIndexCursor } from "./store"
 
@@ -45,6 +46,7 @@ export interface CardSummary {
   readonly route?: { readonly cardOwner: string; readonly printingOwner: string }
   readonly intId?: number
   readonly cardNoState?: string
+  readonly availableOn?: string | null
   /** True for a printing the official card database does not list; its name is a manual one. */
   readonly unlisted?: boolean
   /** The code printed at the bottom left of the card face, when the face has one. */
@@ -294,7 +296,11 @@ function* catalogCardCursor(
             ? { cardNoState: printing["card_no_state"] }
             : {}),
           ...(isUnlistedPrinting(printing)
-            ? { unlisted: true, printedCode: printedCodeOf(printing) }
+            ? {
+                unlisted: true,
+                printedCode: printedCodeOf(printing),
+                availableOn: manualReleaseDate(printing) ?? null,
+              }
             : {}),
           classCode: typeof own?.["class_code"] === "string" ? own["class_code"] : null,
           name: manualNameOf(index, printing) ?? ownName ?? name,

@@ -952,6 +952,8 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
       printed_code: null,
       manual_name_unit_id: null,
       manual_type_code: null,
+      manual_available_on: null,
+      manual_date_precision: null,
       rarity_raw:
         printing.rarity === null
           ? ""

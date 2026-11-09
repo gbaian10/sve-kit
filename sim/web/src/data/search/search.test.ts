@@ -3403,6 +3403,8 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
               card_no: "",
               card_no_state: "none",
               catalog_state: "unlisted",
+              manual_available_on: null,
+              manual_date_precision: "unknown",
               printed_code: "2024千葉-A",
               manual_name_unit_id: unit.id,
               manual_type_code: cardType,
@@ -3548,6 +3550,8 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
               card_no: "",
               card_no_state: "none",
               catalog_state: "unlisted",
+              manual_available_on: ordinal === 0 ? "2025-07-03" : ordinal === 1 ? "2025-09" : null,
+              manual_date_precision: ordinal === 0 ? "day" : ordinal === 1 ? "month" : "unknown",
               int_id: integerValue(intIds[ordinal]),
               manual_name_unit_id: text.id,
               manual_type_code: "ep",
@@ -3589,6 +3593,12 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
         [...expected].reverse(),
       )
       expect(search({ unlistedOnly: true, sort: "cost" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "set" })).toEqual([ids[0], ids[1], ids[2]])
+      expect(search({ unlistedOnly: true, sort: "set", order: "desc" })).toEqual([
+        ids[1],
+        ids[0],
+        ids[2],
+      ])
     }
     const official = (value: SearchIndex) =>
       value
