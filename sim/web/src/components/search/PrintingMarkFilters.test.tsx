@@ -51,7 +51,9 @@ function Harness({ sidebar }: { readonly sidebar: boolean }) {
         setLabel={(code) => code}
         groups={{}}
         onChange={setQuery}
-        onClear={() => setQuery(DEFAULT_QUERY)}
+        onClear={() => {
+          setQuery(DEFAULT_QUERY)
+        }}
       />
       <output aria-label="URL">{formatQuery(query).toString()}</output>
     </>
