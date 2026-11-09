@@ -97,9 +97,8 @@ def test_registry_wire_metadata_is_required(tmp_path: Path, *, shard: bool) -> N
     index: dict[str, JsonValue] = {
         "format": 2,
         "kind": "registry_index",
-        "allocation_policy": "region-ranges-2026-11-09-v2",
+        "allocation_policy": "region-ranges-2026-11-09-v3",
         "next_int_id": {"en": 60001, "jp": 20001},
-        "next_unlisted_int_id": {"en": 95000, "jp": 55000},
     }
     path = tmp_path / "ids/index.yaml"
     path.parent.mkdir()

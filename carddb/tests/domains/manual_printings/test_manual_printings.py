@@ -1,4 +1,4 @@
-"""Synthetic unlisted printings: allocation lane, authored rules and build staging."""
+"""Synthetic unlisted printings: explicit allocation, authored rules and build staging."""
 
 import sqlite3
 from typing import TYPE_CHECKING
@@ -56,6 +56,7 @@ def image(**changes: JsonValue) -> dict[str, JsonValue]:
 def spec(**changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "slug": "synthetic-ep",
+        "int_id": 55000,
         "region": "jp",
         "home_set_id": "EP",
         "card_type": "ep",
@@ -74,28 +75,27 @@ def snapshot(root: Path) -> ManualSnapshot:
     registry = load_registry(root)
     return load_manual_printings(
         root,
-        next_unlisted_int_id=registry.files.index().unlisted_cursors(),
         registry=registry,
     )
 
 
 def register(root: Path, *specs: ManualSpec) -> ManualSnapshot:
-    registry = load_registry(root)
-    plan = plan_manual_files(root, snapshot(root), registry.files.index(), specs)
+    plan = plan_manual_files(root, snapshot(root), specs)
     write_files(plan.files)
     return snapshot(root)
 
 
-def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
+def test_append_uses_explicit_ids_with_gaps_and_keeps_official_registry(
     registry_root: Path,
 ) -> None:
-    before = load_registry(registry_root).files.index()
+    before = load_registry(registry_root).files
     assert snapshot(registry_root).records == {}
     result = register(
         registry_root,
         spec(),
         spec(
             slug="synthetic-en-sep",
+            int_id=95105,
             region="en",
             card_type="sep",
             name={"lang": "en", "text": "Synthetic SEP"},
@@ -107,21 +107,26 @@ def test_append_allocates_unlisted_lane_and_keeps_official_cursors(
     )
     printings = result.printings()
     assert [(item.region, item.int_id) for item in printings] == [
-        ("en", 95000),
+        ("en", 95105),
         ("jp", 55000),
     ]
-    after = load_registry(registry_root).files.index()
-    assert after.next_int_id == before.next_int_id
-    assert after.next_unlisted_int_id == {"en": 95001, "jp": 55001}
+    assert load_registry(registry_root).files == before
     assert [shard.path for shard in result.shards] == [AREA + "/EP/001.yaml"]
     jp = next(item for item in printings if item.region == "jp")
     assert jp.id.startswith("p:")
     assert jp.card_id.startswith("c:")
     assert jp.face_id != jp.card_id
-    # A second append continues the lane in a new shard and rejects a reused key.
-    second = register(registry_root, spec(slug="synthetic-ep-2", image=None))
-    assert {item.int_id for item in second.printings()} == {55000, 55001, 95000}
+    # Lower unused IDs can fill gaps in a later shard without touching the registry.
+    second = register(
+        registry_root, spec(slug="synthetic-ep-2", int_id=55009, image=None)
+    )
+    assert {item.int_id for item in second.printings()} == {55000, 55009, 95105}
     assert len(second.shards) == 2
+    filled = register(
+        registry_root, spec(slug="synthetic-gap", int_id=55001, image=None)
+    )
+    assert {item.int_id for item in filled.printings()} == {55000, 55001, 55009, 95105}
+    assert load_registry(registry_root).files == before
     with pytest.raises(ValueError, match="slugs must be new"):
         register(registry_root, spec())
 
@@ -169,31 +174,65 @@ def test_cli_rejects_unconfirmed_family_before_writing(
     assert "confirmed product family" in str(checked.exception)
 
 
-@pytest.mark.parametrize(("region", "last"), [("jp", 59999), ("en", 99999)])
-def test_batch_exhaustion_preserves_both_allocation_lanes(
-    registry_root: Path, region: str, last: int
+@pytest.mark.parametrize(
+    ("region", "int_id"),
+    [
+        ("jp", 54999),
+        ("jp", 60000),
+        ("en", 94999),
+        ("en", 100000),
+        ("jp", 95000),
+        ("en", 55000),
+    ],
+)
+def test_batch_rejects_out_of_range_ids_before_writing(
+    registry_root: Path, region: str, int_id: int
 ) -> None:
-    registry = load_registry(registry_root)
-    before = registry.files.index()
-    cursors = before.unlisted_cursors() | {region: last}
-    index = Index.model_validate(
-        before.model_dump() | {"next_unlisted_int_id": cursors}
-    )
-    specs = tuple(
-        spec(
-            slug=slug,
-            region=region,
-            name={"lang": "ja" if region == "jp" else "en", "text": "Synthetic EP"},
-            image=None,
+    before = load_registry(registry_root).files
+    with pytest.raises(ValueError, match="out-of-range"):
+        register(
+            registry_root,
+            spec(slug="valid"),
+            spec(slug="invalid", region=region, int_id=int_id),
         )
-        for slug in ("synthetic-last", "synthetic-overflow")
-    )
-    with pytest.raises(ValueError, match="range exhausted"):
-        plan_manual_files(registry_root, snapshot(registry_root), index, specs)
-    assert index.next_unlisted_int_id == cursors
-    assert index.next_int_id == before.next_int_id
-    assert load_registry(registry_root).files.index() == before
+    assert load_registry(registry_root).files == before
     assert not (registry_root / AREA).exists()
+
+
+@pytest.mark.parametrize(
+    ("region", "int_id"),
+    [
+        ("jp", 55000),
+        ("jp", 55555),
+        ("jp", 59999),
+        ("en", 95001),
+        ("en", 95555),
+        ("en", 99999),
+    ],
+)
+def test_explicit_ids_accept_range_edges_and_unreserved_gaps(
+    registry_root: Path, region: str, int_id: int
+) -> None:
+    result = register(
+        registry_root,
+        spec(
+            region=region,
+            int_id=int_id,
+            name={"lang": "ja" if region == "jp" else "en", "text": "Synthetic EP"},
+        ),
+    )
+    assert result.printings()[0].int_id == int_id
+
+
+def test_append_rejects_reused_id_in_batch_or_existing_shard(
+    registry_root: Path,
+) -> None:
+    with pytest.raises(ValueError, match="reused"):
+        register(registry_root, spec(), spec(slug="synthetic-other"))
+    assert not (registry_root / AREA).exists()
+    register(registry_root, spec())
+    with pytest.raises(ValueError, match="reused"):
+        register(registry_root, spec(slug="synthetic-other"))
 
 
 @pytest.mark.parametrize(
@@ -319,7 +358,7 @@ def _edit_shard(root: Path, edit: str, value: JsonValue) -> None:
     ("edit", "value", "message"),
     [
         ("int_id", 20005, "out-of-range"),
-        ("int_id", 55001, "high-water"),
+        ("int_id", 95000, "out-of-range"),
         ("id", "p:" + "0" * 32, "data:value_error"),
         ("home_set_id", "BP02", "home_set_id:value_error"),
         ("owner", "PR", "records.0:value_error"),
@@ -335,31 +374,22 @@ def test_loader_rejects_tampered_shards(
         snapshot(registry_root)
 
 
-def test_loader_rejects_cursor_and_registry_collisions(registry_root: Path) -> None:
+def test_loader_rejects_reused_ids_and_registry_collisions(registry_root: Path) -> None:
     register(registry_root, spec())
+    register(registry_root, spec(slug="synthetic-next", int_id=55001))
+    _edit_shard(registry_root, "int_id", 55001)
+    with pytest.raises(ValueError, match="reused"):
+        snapshot(registry_root)
+    _edit_shard(registry_root, "int_id", 55000)
     registry = load_registry(registry_root)
-    index = registry.files.index()
-    with pytest.raises(ValueError, match="high-water"):
-        load_manual_printings(
-            registry_root,
-            next_unlisted_int_id={"en": 95000, "jp": 55000},
-            registry=registry,
-        )
     official = next(
         record.data.id
         for record in registry.records.values()
         if isinstance(record.data, PrintingData)
     )
-    data = snapshot(registry_root).printings()[0]
     _edit_shard(registry_root, "id", official)
-    # The slug recipe already rejects a foreign ID before the registry comparison.
     with pytest.raises(ValueError, match="value_error"):
         snapshot(registry_root)
-    _edit_shard(registry_root, "id", data.id)
-    # Moving the registry cursor backwards is caught by the index model itself.
-    with pytest.raises(ValueError, match="cursors disagree"):
-        Index(next_unlisted_int_id={"en": 95000, "jp": 54999})
-    assert index.next_unlisted_int_id == {"en": 95000, "jp": 55001}
 
 
 def test_shard_bytes_are_stable_block_yaml(registry_root: Path) -> None:
@@ -371,7 +401,7 @@ def test_shard_bytes_are_stable_block_yaml(registry_root: Path) -> None:
     assert "\n      image:\n" in text
     assert "\n      card_no:\n" in text
     before = path.read_bytes()
-    register(registry_root, spec(slug="synthetic-next", image=None))
+    register(registry_root, spec(slug="synthetic-next", int_id=55001, image=None))
     assert path.read_bytes() == before
 
 
@@ -480,38 +510,42 @@ def test_populate_requires_registered_family(
         populate_manual_printings(db, result, authored_revision=REVISION, build=context)
 
 
-def test_index_without_unlisted_cursors_is_rejected(registry_root: Path) -> None:
+def test_current_index_rejects_unlisted_cursors(registry_root: Path) -> None:
     path = registry_root / "ids" / "index.yaml"
     index = Index.model_validate(read_yaml(path))
-    raw = index.model_dump(mode="json")
-    del raw["next_unlisted_int_id"]
+    raw = index.model_dump(mode="json") | {
+        "next_unlisted_int_id": {"en": 95000, "jp": 55000}
+    }
     write_yaml(path, raw)
     with pytest.raises(ValueError, match="envelope"):
         load_registry(registry_root)
 
 
-def test_historical_v1_index_reads_without_an_unlisted_lane() -> None:
+@pytest.mark.parametrize(
+    "policy", ["region-ranges-2026-09-28-v1", "region-ranges-2026-11-09-v2"]
+)
+def test_historical_index_preserves_transition_basis_hashes(policy: str) -> None:
     raw: dict[str, JsonValue] = {
         "format": 2,
         "kind": "registry_index",
-        "allocation_policy": "region-ranges-2026-09-28-v1",
+        "allocation_policy": policy,
         "next_int_id": {"en": 67421, "jp": 27675},
     }
-    index = Index.model_validate(raw)
-    # The identity-transition basis hash covers this dump; the lane must not appear.
-    assert index.model_dump(mode="json") == raw
-    with pytest.raises(ValueError, match="current allocation policy"):
-        index.unlisted_cursors()
-    with pytest.raises(ValueError, match="current allocation policy"):
-        Index.model_validate(raw | {"next_unlisted_int_id": {"en": 95000, "jp": 55000}})
-    with pytest.raises(ValueError, match="current allocation policy"):
+    if policy.endswith("v2"):
+        raw["next_unlisted_int_id"] = {"en": 95007, "jp": 55019}
+    assert Index.model_validate(raw).model_dump(mode="json") == raw
+
+
+@pytest.mark.parametrize("cursors", [None, {"en": 95000, "jp": 54999}])
+def test_historical_v2_index_rejects_missing_or_invalid_cursors(
+    cursors: JsonValue,
+) -> None:
+    with pytest.raises(ValueError, match=r"historical v2|cursors disagree"):
         Index.model_validate(
             {
-                k: v
-                for k, v in Index().model_dump(mode="json").items()
-                if k != "next_unlisted_int_id"
+                "allocation_policy": "region-ranges-2026-11-09-v2",
+                "next_unlisted_int_id": cursors,
             }
-            | {"next_unlisted_int_id": None}
         )
 
 

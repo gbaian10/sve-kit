@@ -533,7 +533,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     mark("plan preview identity")
     manual = load_manual_printings(
         authored_root(inputs.repo),
-        next_unlisted_int_id=identity.snapshot.files.index().unlisted_cursors(),
         registry=identity.snapshot,
     )
     mark("load manual printings")

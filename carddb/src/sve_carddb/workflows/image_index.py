@@ -421,7 +421,6 @@ def build_index_command(  # ruff: ignore[too-many-arguments, too-many-positional
     identity = registry_plan(recipe, text_batches)
     manual = load_manual_printings(
         authored_root(recipe.repo),
-        next_unlisted_int_id=identity.snapshot.files.index().unlisted_cursors(),
         registry=identity.snapshot,
     )
     texts = TextObservations(
