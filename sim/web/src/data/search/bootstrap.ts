@@ -47,6 +47,7 @@ const FIELDS: Readonly<Record<string, readonly string[]>> = {
     "catalog_state",
     "printed_code",
     "manual_name_unit_id",
+    "manual_type_code",
     "rarity_code",
     "rarity_raw",
     "premium",

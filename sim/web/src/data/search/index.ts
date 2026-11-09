@@ -24,7 +24,14 @@ import { matchesRaritySelection, PREMIUM_RARITY, UNRATED_RARITY } from "../../do
 import { pickRepresentative, UNKNOWN_RARITY } from "../../domain/representative"
 import type { MatchedField, Region, TextLang } from "../../domain/search"
 import { datedSets, type PackCounts, recentSets } from "../../domain/sets"
-import { badgeOf, type CardSummary, catalogCards, isUnlistedPrinting, nameOf } from "../catalog"
+import {
+  badgeOf,
+  type CardSummary,
+  catalogCards,
+  isUnlistedPrinting,
+  nameOf,
+  printingTypeCode,
+} from "../catalog"
 import {
   arrayValue,
   integerValue,
@@ -622,7 +629,8 @@ function build(
       const fullPrinting = index.printing(printing.id)
       const art = artOf(fullPrinting)
       const defaultArt = artOf(index.printing(entry.defaultPrinting[edition] ?? ""))
-      printings.type.push(intern(type))
+      const printingType = printingTypeCode(fullPrinting, revision) ?? ""
+      printings.type.push(intern(printingType))
       printings.token.push(Number(token))
       printings.premium.push(Number(fullPrinting?.["premium"] === true))
       const leaderFrame =
@@ -664,7 +672,7 @@ function build(
       printings.owner.push(intern(ownerCode))
       countPrinting(
         counts,
-        { type, token, frame: leaderFrame, evolve, advance },
+        { type: printingType, token, frame: leaderFrame, evolve, advance },
         cardTraits,
         ownerCode,
       )
@@ -967,6 +975,12 @@ export class SearchIndex {
         const owner = stringValue(row["home_set_id"]),
           code = familyCodes.get(owner)
         const intern = (value: string | undefined | null) => this.pool.intern(value ?? "")
+        const front = index.facesOf(cardId)[0]
+        const revision = front
+          ? index.displayRevision(stringValue(front["id"]), this.edition)
+          : undefined
+        const typeCode = printingTypeCode(row, revision)
+        printings.type[ordinal] = intern(typeCode)
         printings.lookup[ordinal] = intern(cardNoLookupKey(cardNo, this.sets))
         printings.premium[ordinal] = Number(row["premium"] === true)
         printings.flat[ordinal] = intern(normalizeText(cardNo))
@@ -1012,6 +1026,7 @@ export class SearchIndex {
             source: summary - 1,
             changes: {
               cardNo,
+              typeCode,
               route: { cardOwner: stringValue(cardRow?.["home_set_id"]), printingOwner: owner },
               intId,
               cardNoState:
