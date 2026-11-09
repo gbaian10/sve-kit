@@ -175,7 +175,14 @@ def test_row_checks_reject_invalid_combinations(
         ("identity_change", {"kind": "reassign_printing", "printing_id": "printing"}),
         ("product", {"date_precision": "day", "released_on": DATE}),
         ("product", {"date_precision": "month", "date_raw": "2026-09"}),
-        ("printing", {"catalog_state": "unlisted", "decklog_available": False}),
+        (
+            "printing",
+            {
+                "catalog_state": "unlisted",
+                "decklog_available": False,
+                "manual_date_precision": "unknown",
+            },
+        ),
         (
             "printing",
             {
@@ -645,7 +652,11 @@ def test_all_enabled_foreign_keys_reject_missing_targets(
         updates["kind"] = "reassign_printing"
     if (table, column) == ("printing", "manual_name_unit_id"):
         # Only unlisted printings may carry a manual name, so reach the FK past that CHECK.
-        updates |= {"catalog_state": "unlisted", "decklog_available": False}
+        updates |= {
+            "catalog_state": "unlisted",
+            "decklog_available": False,
+            "manual_date_precision": "unknown",
+        }
     with pytest.raises(sqlite3.IntegrityError, match=r"(?i)foreign key"):
         _update(db, table, updates)
 
