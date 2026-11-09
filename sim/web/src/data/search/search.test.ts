@@ -3539,7 +3539,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
               card_no: "",
               card_no_state: "none",
               catalog_state: "unlisted",
-              int_id: intIds[ordinal],
+              int_id: integerValue(intIds[ordinal]),
               manual_name_unit_id: text.id,
               manual_type_code: "ep",
             }
@@ -3569,7 +3569,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
     new SearchIndex(completed.encode(), "jp"),
   ]) {
     for (const unit of ["printing", "card", "art"] as const) {
-      const search = (state: Partial<typeof DEFAULT_QUERY>) =>
+      const search = (state: Partial<SearchQuery["state"]>) =>
         index
           .search({ ...query, limit: 10000, state: { ...DEFAULT_QUERY, unit, ...state } })
           .items.map((item) => item.printingId)
