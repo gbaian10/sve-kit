@@ -7,9 +7,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sve_carddb.domains.registry.storage import Entry
 
-ALLOCATION_POLICY = "region-ranges-2026-11-09-v2"
+ALLOCATION_POLICY = "region-ranges-2026-11-09-v3"
+UNLISTED_CURSOR_POLICY = "region-ranges-2026-11-09-v2"
 # Historical registry bases replayed from Git still carry the previous policy.
-PREVIOUS_POLICIES = ("region-ranges-2026-09-28-v1",)
+PREVIOUS_POLICIES = ("region-ranges-2026-09-28-v1", UNLISTED_CURSOR_POLICY)
 
 
 @dataclass(frozen=True)

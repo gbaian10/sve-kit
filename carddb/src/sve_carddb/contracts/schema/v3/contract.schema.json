@@ -3455,11 +3455,29 @@
             "sep",
             null
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "enum": [
+            "day",
+            "month",
+            "unknown",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 28,
-      "maxItems": 28,
+      "minItems": 30,
+      "maxItems": 30,
       "x-columns": [
         "id",
         "card_id",
@@ -3488,7 +3506,9 @@
         "serial",
         "printed_code",
         "manual_name_unit_id",
-        "manual_type_code"
+        "manual_type_code",
+        "manual_available_on",
+        "manual_date_precision"
       ],
       "x-types": [
         {
@@ -3629,6 +3649,20 @@
             "enum": [
               "ep",
               "sep"
+            ]
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Text"
+          }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "day",
+              "month",
+              "unknown"
             ]
           }
         }
@@ -3858,6 +3892,171 @@
               }
             ]
           }
+        },
+        {
+          "anyOf": [
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "official"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "null"
+                },
+                {
+                  "const": null
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "null"
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "$ref": "#/$defs/Date"
+                },
+                {
+                  "const": "day"
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "string",
+                  "pattern": "^(?!0000)[0-9]{4}-(?:0[1-9]|1[0-2])$(?![\\s\\S])"
+                },
+                {
+                  "const": "month"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -8910,11 +9109,29 @@
             "sep",
             null
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Text"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "enum": [
+            "day",
+            "month",
+            "unknown",
+            null
+          ]
         }
       ],
       "items": false,
-      "minItems": 28,
-      "maxItems": 28,
+      "minItems": 30,
+      "maxItems": 30,
       "x-columns": [
         "id",
         "card_id",
@@ -8943,7 +9160,9 @@
         "serial",
         "printed_code",
         "manual_name_unit_id",
-        "manual_type_code"
+        "manual_type_code",
+        "manual_available_on",
+        "manual_date_precision"
       ],
       "x-types": [
         {
@@ -9084,6 +9303,20 @@
             "enum": [
               "ep",
               "sep"
+            ]
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "Text"
+          }
+        },
+        {
+          "nullable": {
+            "enum": [
+              "day",
+              "month",
+              "unknown"
             ]
           }
         }
@@ -9310,6 +9543,171 @@
               }
             ]
           }
+        },
+        {
+          "anyOf": [
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "official"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "null"
+                },
+                {
+                  "const": null
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "null"
+                },
+                {
+                  "const": "unknown"
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "$ref": "#/$defs/Date"
+                },
+                {
+                  "const": "day"
+                }
+              ]
+            },
+            {
+              "prefixItems": [
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "const": "unlisted"
+                },
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                {
+                  "type": "string",
+                  "pattern": "^(?!0000)[0-9]{4}-(?:0[1-9]|1[0-2])$(?![\\s\\S])"
+                },
+                {
+                  "const": "month"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -18307,7 +18705,9 @@
                         "serial",
                         "printed_code",
                         "manual_name_unit_id",
-                        "manual_type_code"
+                        "manual_type_code",
+                        "manual_available_on",
+                        "manual_date_precision"
                       ]
                     },
                     "maxItems": 0
@@ -20645,7 +21045,9 @@
                         "serial",
                         "printed_code",
                         "manual_name_unit_id",
-                        "manual_type_code"
+                        "manual_type_code",
+                        "manual_available_on",
+                        "manual_date_precision"
                       ]
                     },
                     "minItems": 1,
@@ -23026,7 +23428,9 @@
                         "serial",
                         "printed_code",
                         "manual_name_unit_id",
-                        "manual_type_code"
+                        "manual_type_code",
+                        "manual_available_on",
+                        "manual_date_precision"
                       ]
                     },
                     "maxItems": 0

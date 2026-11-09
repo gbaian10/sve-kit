@@ -40,6 +40,7 @@ import {
   objectValue,
   stringValue,
 } from "../format-v3/json"
+import { manualReleaseDate } from "../printing-dates"
 import type { CardRestriction, RestrictionSelection, RestrictionStatus } from "../restrictions"
 import type { CardIndex } from "../store"
 import type { BootstrapColumns } from "./bootstrap"
@@ -1046,6 +1047,7 @@ export class SearchIndex {
               typeCode,
               route: { cardOwner: stringValue(cardRow?.["home_set_id"]), printingOwner: owner },
               intId,
+              ...(isUnlistedPrinting(row) ? { availableOn: manualReleaseDate(row) ?? null } : {}),
               cardNoState:
                 typeof row["card_no_state"] === "string" ? row["card_no_state"] : undefined,
               rarityCode:
@@ -1419,7 +1421,20 @@ export class SearchIndex {
         if (representative !== undefined) buckets[top]?.push(representative)
       }
     }
-    const byNumber = (a: number, b: number) => (this.order[a] ?? 0) - (this.order[b] ?? 0)
+    const summary = (p: number) =>
+      this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
+    const byNumber = (a: number, b: number) => {
+      if (
+        !this.pool.get(this.printings.flat[a] ?? 0) &&
+        !this.pool.get(this.printings.flat[b] ?? 0)
+      ) {
+        const first = summary(a),
+          second = summary(b)
+        if (first.cardNoState === "none" && second.cardNoState === "none")
+          return (first.intId ?? 0) - (second.intId ?? 0)
+      }
+      return (this.order[a] ?? 0) - (this.order[b] ?? 0)
+    }
     const matches = ranked
       ? buckets.flatMap((bucket) => bucket.sort(byNumber))
       : buckets.flat().sort(byNumber)
@@ -1428,10 +1443,8 @@ export class SearchIndex {
       this.pool.get(this.printings.lookup[p] ?? 0).replace(/en$/u, "") ||
       this.pool.get(this.printings.flat[p] ?? 0)
     const compareNumber = (a: number, b: number) =>
-      numberKey(a) === numberKey(b) ? 0 : byNumber(a, b)
+      numberKey(a) && numberKey(a) === numberKey(b) ? 0 : byNumber(a, b)
     const releases = new Map(this.releases.map((set) => [set.code, set.releasedOn]))
-    const summary = (p: number) =>
-      this.summaries.row((this.printings.summary[p] ?? 1) - 1) as unknown as CardSummary
     const compare = (
       a: number,
       b: number,
@@ -1443,8 +1456,14 @@ export class SearchIndex {
       if (sort === "set") {
         const first = this.pool.get(this.printings.owner[a] ?? 0)
         const second = this.pool.get(this.printings.owner[b] ?? 0)
-        const firstRelease = releases.get(first)
-        const secondRelease = releases.get(second)
+        const firstRelease =
+          this.printings.unlisted[a] === 1
+            ? (summary(a).availableOn ?? undefined)
+            : releases.get(first)
+        const secondRelease =
+          this.printings.unlisted[b] === 1
+            ? (summary(b).availableOn ?? undefined)
+            : releases.get(second)
         // Missing release dates stay last in either direction, and PR stays last within that group.
         if (firstRelease === undefined || secondRelease === undefined) {
           if (firstRelease === undefined && secondRelease !== undefined) return 1

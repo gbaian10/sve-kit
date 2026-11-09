@@ -545,6 +545,7 @@ const zhTW = {
     newTab: "（另開分頁）",
   },
   cardPage: {
+    releaseDate: "發行日：",
     anniversaryStamp: "週年標誌",
     unknownStamp: "標誌種類未確認",
     unlistedBadge: "官方資料庫未收錄",

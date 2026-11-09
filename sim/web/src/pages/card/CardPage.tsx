@@ -52,6 +52,7 @@ import {
   isUnlistedPrinting,
   type LocatedCard,
   nameOf,
+  printingReleaseDate,
   printingTypeCode,
   type Row,
   type SnapshotClient,
@@ -72,6 +73,7 @@ import { PageTitle } from "../PageTitle"
 import { frontArtOf, useCardSequence } from "./card-sequence"
 import { CardExternalLinks } from "./CardExternalLinks"
 import { CardQa } from "./CardQa"
+import { CardReleaseDate } from "./CardReleaseDate"
 import { CardRestrictions } from "./CardRestrictions"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
@@ -208,6 +210,7 @@ export function CardView({
   const textLang = UI_TEXT_LANG[uiLanguage]
   const printing = resolved ? catalog?.index.printing(resolved.id) : undefined
   const printingId = printing ? stringValue(printing["id"]) : null
+  const releaseDate = printingReleaseDate(printing, client.snapshot())
   const artId = frontArtOf(printing)
   const region = (printing?.["region"] as Region | undefined) ?? cardEdition
   const faces = printing ? (catalog?.index.facesOf(printing["card_id"] as string) ?? []) : []
@@ -861,6 +864,7 @@ export function CardView({
             )}
           </div>
           <div className="mt-4 min-w-0 lg:mt-1">
+            <CardReleaseDate date={releaseDate} />
             {cardId && catalog && (
               <CardRestrictions client={client} cardId={cardId} region={region} />
             )}

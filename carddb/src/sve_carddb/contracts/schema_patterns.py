@@ -1,6 +1,6 @@
 """Construct portable calendar and URI patterns without format-checker plugins."""
 
-from sve_carddb.core.dates import DATE, INSTANT, date_pattern
+from sve_carddb.core.dates import DATE, INSTANT, MONTH, date_pattern
 
 
 def _ipv6() -> str:
@@ -52,6 +52,6 @@ def patterns() -> dict[str, str]:
         "URL": _url(),
     }
     # Python's $ also matches before a final newline, and \Z is Python-only.
-    return {"Date": DATE, "Instant": INSTANT} | {
+    return {"Date": DATE, "Instant": INSTANT, "Month": MONTH} | {
         key: "^" + value + r"$(?![\s\S])" for key, value in values.items()
     }

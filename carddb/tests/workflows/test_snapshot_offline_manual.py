@@ -1,7 +1,6 @@
 """Unlisted manual printings flow through the offline build, export and image index."""
 
 import hashlib
-from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -14,7 +13,7 @@ from sve_carddb.domains.manual_printings import (
     plan_manual_files,
 )
 from sve_carddb.domains.products import load_products
-from sve_carddb.domains.registry.storage import read_yaml, write_files
+from sve_carddb.domains.registry.storage import write_files
 from sve_carddb.export.image_index import MEDIA_TABLES, ImageIndex, ImagePin
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.reader import read_snapshot
@@ -52,6 +51,7 @@ REFERENCES = (
 def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "slug": "synthetic-event-ep",
+        "int_id": 55000,
         "region": "jp",
         "home_set_id": "EP",
         "card_type": "ep",
@@ -60,6 +60,8 @@ def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
         "printed_code": "2024合成-A",
         "name": {"lang": "ja", "text": "合成EP"},
         "release_kind": "event",
+        "available_on": "2024-11-17",
+        "date_precision": "day",
         "references": list(REFERENCES),
         "image": {
             "sha256": "sha256:" + hashlib.sha256(MASTER).hexdigest(),
@@ -76,36 +78,39 @@ def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
 
 
 def register(case: Case, recipe: Inputs, *specs: ManualSpec) -> ManualSnapshot:
-    """Append manual shards to the recipe repo and move the shared index cursors."""
+    """Append manual shards without changing the official registry."""
     root = recipe.repo / "authored"
-    index = case.identity.snapshot.files.index()
-    existing = load_manual_printings(
-        root, next_unlisted_int_id=index.unlisted_cursors()
-    )
-    write_files(plan_manual_files(root, existing, index, specs).files)
-    content = canonical(read_yaml(root / "ids" / "index.yaml"))
-    files = replace(case.identity.snapshot.files, index_content=content)
-    case.identity = replace(
-        case.identity, snapshot=replace(case.identity.snapshot, files=files)
-    )
+    existing = load_manual_printings(root)
+    write_files(plan_manual_files(root, existing, specs).files)
     install(case.root, "products/family/EP/001.yaml", envelope([family("EP")]))
     case.catalog = load_products(case.root, registry=case.identity.snapshot)
     return load_manual_printings(
         root,
-        next_unlisted_int_id=case.identity.snapshot.files.index().unlisted_cursors(),
         registry=case.identity.snapshot,
     )
 
 
+@pytest.mark.parametrize(
+    ("date", "precision"),
+    [("2024-11-17", "day"), ("2025-09", "month"), (None, "unknown")],
+)
 def test_offline_build_exports_textless_unlisted_printing(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], tmp_path: Path
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+    date: str | None,
+    precision: str,
 ) -> None:
     case, recipe, _ = prepared
-    manual = register(case, recipe, spec())
+    manual = register(case, recipe, spec(available_on=date, date_precision=precision))
     data = manual.printings()[0]
     built = offline.build(recipe, bundle_dir=tmp_path / "bundle")
     tables = built.projection.tables
     assert_manual_printing(tables, data.id, data.face_id)
+    printing = next(row for row in tables["printing"] if row["id"] == data.id)
+    assert (printing["manual_available_on"], printing["manual_date_precision"]) == (
+        date,
+        precision,
+    )
     assert_provisional_card(tables, data.id, data.card_id, data.face_id)
     assert built.report["manual_printings"] == {"printings": 1, "with_image": 1}
     record = InputRecord.model_validate_json(built.input_content)
@@ -155,6 +160,8 @@ def assert_manual_printing(
             assert row["printed_code"] is None
             assert row["manual_name_unit_id"] is None
             assert row["manual_type_code"] is None
+            assert row["manual_available_on"] is None
+            assert row["manual_date_precision"] is None
 
 
 def assert_provisional_card(
@@ -186,25 +193,6 @@ def assert_provisional_card(
     }
     assert {"identity_unconfirmed", "missing_region_source"} <= set(blocks["jp"])
     assert "wording_pending" not in blocks["jp"]
-
-
-def test_offline_build_rejects_stale_unlisted_cursor(
-    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
-) -> None:
-    case, recipe, _ = prepared
-    register(case, recipe, spec())
-    stale = canonical(
-        case.identity.snapshot.files.index()
-        .model_copy(update={"next_unlisted_int_id": {"en": 95000, "jp": 55000}})
-        .model_dump(mode="json")
-    )
-    files = replace(case.identity.snapshot.files, index_content=stale)
-    case.identity = replace(
-        case.identity, snapshot=replace(case.identity.snapshot, files=files)
-    )
-    case.catalog = replace(case.catalog, registry_index_content=stale)
-    with pytest.raises(ValueError, match="high-water"):
-        offline.build(recipe)
 
 
 def make_index(
@@ -250,7 +238,12 @@ def test_manual_masters_join_the_image_index(
         case,
         recipe,
         spec(),
-        spec(slug="synthetic-missing-master", printed_code=None, with_image=False),
+        spec(
+            slug="synthetic-missing-master",
+            int_id=55001,
+            printed_code=None,
+            with_image=False,
+        ),
     )
     with pytest.raises(ValueError, match="require --manual-image-dir"):
         build_manual_assets(manual, None, roots)

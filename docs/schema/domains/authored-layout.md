@@ -17,7 +17,7 @@
 | 定案 | 本批來源更正 | `registry/source-correction/active/<owner>/001.yaml`、`registry/source-correction/needs-review/<owner>/001.yaml` |
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `products/identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
-| 定案 | 人工版次（官方資料庫未收錄的 EP／SEP；序號卡待實作） | `manual-printings/printings/<home_set_id>/<sequence>.yaml`，配號共用 `ids/index.yaml` 的 `next_unlisted_int_id`，見 [manual-printings-v1](manual-printings.md) |
+| 定案 | 人工版次（官方資料庫未收錄的 EP／SEP；序號卡待實作） | `manual-printings/printings/<home_set_id>/<sequence>.yaml`，每筆人工指定 `int_id`、可留空號，見 [manual-printings-v1](manual-printings.md) |
 | 已定案（ADR-0009） | 裁定 | `rules/rulings/R-0001.yaml`，`format: 2, kind: ruling`，revision 必填正整數，原本文不另包 data；依[四層契約 §9](four-layer-translation.md#9-舊模板重鍵與裁定引用) |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/<sequence>.yaml`，見 §12 |
 | 部分實作 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 24 筆 main 禁限（含已解除區間與未來生效項）、2 profiles，保留 2026-09-25／2026-10-26 單日 coverage，以 2026-10-26 官方一覽為準；見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
@@ -48,7 +48,7 @@ YAML 為單一文件、UTF-8；省略版本指示或明示 `%YAML 1.2` 可讀，
 
 Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通 alias 與 merge 由套件展開，循環 alias 報錯，quoted `"<<"` 保留為一般字串鍵。標準 tag 依套件解讀；自訂 tag 保留為物件，再由 strict JSON 拒絕，不註冊 tag callback，也不啟用 include／env／secret／Python 物件執行。合法位置的 tab、NEL／LS／PS、interior BOM 與未知指示由套件處理，不另設 libyaml 字元禁令或 lint；縮排等語法錯誤仍拒絕。Parser 錯誤只回報安全類別，不附原始文字。寫出維持 `ruamel.yaml` 與原有 `storage.encode`，不設 PyYAML fallback；套件升級須重驗 canonical 差分與邊界案例。
 
-人工版次（官方資料庫未收錄）的獨立入口為 `manual-printings/printings/<home_set_id>/<sequence>.yaml`；完整欄位、來源白名單與卡圖紀錄以 [manual-printings-v1](manual-printings.md#2-入口與分片) 為準，記錄不加入身分 registry v1，但 `int_id` 由同一份 `ids/index.yaml` 的未收錄游標配發。
+人工版次（官方資料庫未收錄）的獨立入口為 `manual-printings/printings/<home_set_id>/<sequence>.yaml`；完整欄位、來源白名單與卡圖紀錄以 [manual-printings-v1](manual-printings.md#2-入口與分片) 為準，記錄不加入身分 registry v1，`int_id` 逐筆人工指定、允許空號，驗證所屬地區未收錄號段及全域唯一。
 
 構築採納另有獨立 `construction-policies/index.yaml` 與 `<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml` 政策閉包，見[構築採納 §1.2](construction-adoption.md#12-政策首輪抽查與核可收據載體)；不列採納 includes，不借翻譯政策授權。載體／loader 與真實首輪收據未到位時，不得政策採納。
 
@@ -140,7 +140,7 @@ authored source 的 `parser_version` 是接受封套與 source identity recipe �
 
 **其他入口的批次決定**：region-reviews 等仍採批次決定封套的入口，沿以下 recipe（catalog、display、registry、商品與商品身分對照不採）：先對完整 record（不含封套的決定指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序作為 members，再計 membership hash；decision ID 為 `d:` 加完整 membership hash 的 64 hex；confirmed 的 sample_ids 恰為全部 members 的 record_key。任何新成員或內容變更都不得沿用舊決定。
 
-`ids/index.yaml`（`format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-11-09-v2`）與兩組地區游標：官方版次的 `next_int_id: {en: …, jp: …}` 與人工版次的 `next_unlisted_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在各自號段的 `[start, end+1]`，`end+1` 表示該區已用盡。registry 工具只動 `next_int_id`，`manual-printings append` 只動 `next_unlisted_int_id`。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
+`ids/index.yaml`（`format: 2`）只保存 `allocation_policy`（目前 `region-ranges-2026-11-09-v3`）與官方版次的地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在官方號段的 `[start, end+1]`，`end+1` 表示該區已用盡。人工版次逐筆指定 `int_id`，不保存未收錄游標，`manual-printings append` 不修改 index。歷史 v1／v2 index 為身分修復 basis 重播而保留原格式（v2 含 `next_unlisted_int_id`），現行 v3 不接受該欄位。不認識的政策或格式直接拒絕。讀取掃描 `registry/` 與 `ids/` 下全部 YAML 分片，不另存檔案清單或檔案 hash，內容由 Git 保存；任何不是合法分片的 YAML 都會讓讀取失敗。有分片卻沒有 index 時停止，避免重用配號；官方寫入時先裝分片、最後才更新 index，中斷時多出的配號會使游標檢查失敗。
 
 每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`，reader 只接受 `registry-observation-v2`。唯一明確投影為 `domains.registry.projection` 的 `Card`／`Face`：Card 含 number 與來源順序的 faces；JP 使用現行 parser 的 name、職業、種類、traits、數值、text、sections、image，info／stats 為空物件、speech 為 null；EN 使用 name、完整 info／stats、parsed traits、分開的 text／sections、speech、image，職業／種類為空字串、cost／power／hp 為 `-`。全部預設明示，JP compound traits 保持一項，EN 無 traits 為 `[]`；觀測陣列不排序，grouping 才排序 traits。產品、QA、日期、credits 與抓取 metadata 不進投影。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
 
@@ -193,21 +193,23 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同類�
 
 ### 3.2 UInt32
 
-`card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-11-09-v2` 決定（2026-11-09 自 v1 升版：各區切出官方未收錄號段，已配的號碼不動），程式唯一定義在 `sve_carddb.domains.registry.allocation`：
+`card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-11-09-v3` 決定（v2 切出官方未收錄號段，v3 改為人工指定未收錄 `int_id`；官方版次配號不變），程式唯一定義在 `sve_carddb.domains.registry.allocation`：
 
 | 號段（閉區間） | 用途 |
 | -------------- | ---- |
 | 1..20000 | 保留；一般配號器不得使用，特殊用途須另定放行程序（尚未定義） |
 | 20001..54999 | `region=jp` 的官方卡表 printing |
-| 55000..59999 | `region=jp` 的官方未收錄人工版次（[manual-printings](manual-printings.md#4-配號政策-v2region-ranges-2026-11-09-v2)） |
+| 55000..59999 | `region=jp` 的官方未收錄人工版次（[manual-printings](manual-printings.md#4-配號政策-v3region-ranges-2026-11-09-v3)） |
 | 60000 | 未分配 |
 | 60001..94999 | `region=en` 的官方卡表 printing |
 | 95000..99999 | `region=en` 的官方未收錄人工版次 |
 | 100000..4294967295 | 未分配；新地區開新的、不重疊的號段 |
 
-號段依 printing 登錄的 `region` 查詢，**不從號碼反推地區**。新增只從該區游標往後追加，不回填空號、不依最新卡號排序重編。配發前先算出本批各區需求，任一區超出區段即整批失敗，不部分寫入、不溢出到其他號段；擴區規則日後另定。驗證要求每號落在所屬 printing 地區的閉區間、全域唯一且與 printing 一對一，各區游標等於該區最大號＋1（空區為起點），游標不得回退。
+號段依 printing 登錄的 `region` 查詢，**不從號碼反推地區**。官方版次新增只從該區游標往後追加，不回填空號、不依最新卡號排序重編。配發前先算出本批各區需求，任一區超出區段即整批失敗，不部分寫入、不溢出到其他號段；擴區規則日後另定。驗證要求每號落在所屬 printing 地區的閉區間、全域唯一且與 printing 一對一，各區游標等於該區最大號＋1（空區為起點），游標不得回退。
 
-2026-09-28（首次公開前）曾一次性重配全部 14,789 筆：各區依 `(region, owner, card_no 原樣字串, variant_key, printing id)` 自區段起點連續配發（JP 20001..27369、EN 60001..67420），並同時全量重新分片。字串 ID、地區、卡號與其他語義資料不變。這是公開前唯一的例外；此後只增不改。
+2026-09-28（首次公開前）曾一次性重配全部 14,789 筆：各區依 `(region, owner, card_no 原樣字串, variant_key, printing id)` 自區段起點連續配發（JP 20001..27369、EN 60001..67420），並同時全量重新分片。字串 ID、地區、卡號與其他語義資料不變。這是官方版次的重配例外；此後官方記錄只增不改。
+
+人工版次由登錄者逐筆指定 `int_id`，驗證所屬未收錄號段與全域唯一，允許留空號及之後補登；不移動官方游標。EP／SEP 的類別區塊、保留號及 2026-11-09 僅限 26 筆人工版次的重配例外，見 [manual-printings §4](manual-printings.md#4-配號政策-v3region-ranges-2026-11-09-v3)。
 
 工具持有全域檔案鎖，先驗證全部輸入、既有分片／外鍵、計畫與大小，再寫新分片，最後原子替換 index 的游標。重跑無變更時不寫檔。中斷留下的配號分片會讓游標檢查失敗；恢復者須從 git／備份核對完整批次，不能刪檔後猜 next-id。來源更新拒絕覆寫舊證據，另走來源版本與人工重審流程，不因文字更新產生 identity_change。父 card 改動或合併既有 card 才需 confirmed identity_change；此工具不實作身分修復或同號 variant 猜測。
 

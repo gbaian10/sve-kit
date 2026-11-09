@@ -97,6 +97,8 @@ def populate_manual_printings(
                 "rarity_raw": "-",
                 "printed_code": data.printed_code,
                 "manual_type_code": data.card_type,
+                "manual_available_on": data.available_on,
+                "manual_date_precision": data.date_precision,
                 "manual_name_unit_id": texts.intern(
                     LocalizedText(lang=data.name.lang, text=data.name.text)
                 ),

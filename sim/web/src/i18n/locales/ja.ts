@@ -563,6 +563,7 @@ export default {
     newTab: "（新しいタブで開く）",
   },
   cardPage: {
+    releaseDate: "発行日：",
     anniversaryStamp: "周年ロゴ",
     unknownStamp: "ロゴの種類未確認",
     unlistedBadge: "公式データベース未収録",

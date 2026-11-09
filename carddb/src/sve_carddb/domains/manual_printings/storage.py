@@ -1,4 +1,4 @@
-"""Append-only manual-printing shards sharing the registry's YAML and index writer."""
+"""Append-only manual-printing shards using the registry's YAML writer."""
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
@@ -19,7 +19,7 @@ from sve_carddb.domains.manual_printings.records import (
 )
 from sve_carddb.domains.registry.allocation import unlisted_range
 from sve_carddb.domains.registry.build import permanent_id
-from sve_carddb.domains.registry.storage import Index, encode
+from sve_carddb.domains.registry.storage import encode
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -28,9 +28,10 @@ if TYPE_CHECKING:
 
 
 class ManualSpec(RecordData):
-    """One printing to register; IDs and the int_id are allocated by the tool."""
+    """One printing to register; permanent IDs are derived and int_id is explicitly chosen."""
 
     slug: Slug
+    int_id: int
     region: Region
     home_set_id: Owner
     card_type: Literal["ep", "sep"]
@@ -39,6 +40,8 @@ class ManualSpec(RecordData):
     printed_code: Text | None
     name: ManualName
     release_kind: Literal["event", "basic"]
+    available_on: str | None
+    date_precision: Literal["day", "month", "unknown"]
     references: tuple[str, ...]
     image: ManualImage | None
 
@@ -50,22 +53,20 @@ class Plan:
 
 
 def plan_manual_files(
-    root: Path, existing: ManualSnapshot, index: Index, specs: tuple[ManualSpec, ...]
+    root: Path, existing: ManualSnapshot, specs: tuple[ManualSpec, ...]
 ) -> Plan:
-    """Allocate unlisted int_ids from the index cursors and plan new shards only."""
+    """Validate explicit unlisted int_ids and plan new shards only."""
     slugs = {data.slug for data in existing.printings()}
     if len({spec.slug for spec in specs}) != len(specs) or slugs & {
         spec.slug for spec in specs
     }:
         raise ValueError("Manual printing slugs must be new and unique")
-    cursor = index.unlisted_cursors()
+    seen = {data.int_id for data in existing.printings()}
     entries: list[ManualEntry] = []
     for spec in sorted(specs, key=lambda item: (item.region, item.slug)):
-        bounds = unlisted_range(spec.region)
-        if cursor[spec.region] not in bounds:
-            raise ValueError(
-                f"Unlisted int_id range exhausted for region {spec.region}"
-            )
+        if spec.int_id not in unlisted_range(spec.region) or spec.int_id in seen:
+            raise ValueError("Invalid, out-of-range or reused unlisted int_id")
+        seen.add(spec.int_id)
         anchor = manual_anchor(spec.region, spec.slug)
         card_id = permanent_id("c", anchor)
         entries.append(
@@ -80,13 +81,11 @@ def plan_manual_files(
                             "id": permanent_id("p", anchor),
                             "card_id": card_id,
                             "face_id": permanent_id("f", card_id + ":0"),
-                            "int_id": cursor[spec.region],
                         },
                     }
                 )
             )
         )
-        cursor[spec.region] += 1
     files: dict[Path, bytes] = {}
     by_owner: dict[str, list[ManualEntry]] = {}
     for entry in entries:
@@ -99,10 +98,6 @@ def plan_manual_files(
         )
         files[directory / f"{number:03}.yaml"] = encode(
             Shard(format=1, kind="manual_printings_shard", records=tuple(records))
-        )
-    if entries:
-        files[root / "ids" / "index.yaml"] = encode(
-            Index.model_validate(index.model_dump() | {"next_unlisted_int_id": cursor})
         )
     if any(len(content) >= MAX_BYTES for content in files.values()):
         raise ValueError("Manual printing shards must be smaller than one MiB")

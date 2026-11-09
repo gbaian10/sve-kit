@@ -1,4 +1,4 @@
-"""Register manual unlisted printings from a reviewed spec, allocating their int_ids."""
+"""Register manual unlisted printings from a reviewed spec with explicit int_ids."""
 
 import hashlib
 from pathlib import Path
@@ -43,6 +43,7 @@ class MasterImage(RecordData):
 
 class Spec(RecordData):
     slug: str
+    int_id: int
     region: Literal["jp", "en"]
     home_set_id: Owner
     card_type: Literal["ep", "sep"]
@@ -51,6 +52,8 @@ class Spec(RecordData):
     printed_code: str | None
     name: ManualName
     release_kind: Literal["event", "basic"]
+    available_on: str | None
+    date_precision: Literal["day", "month", "unknown"]
     references: tuple[str, ...]
     image: MasterImage | None
 
@@ -122,23 +125,17 @@ def append_command(
         Path, typer.Option("--spec", help="Absolute JSON list of printings to add.")
     ],
 ) -> None:
-    """Validate the whole input, allocate unlisted int_ids and append new shards."""
+    """Validate explicit unlisted int_ids and append new shards."""
     root = _absolute(authored, "--authored")
     specs = _specs(_absolute(spec, "--spec"))
     registry = load_identity_registry(root)
-    index = registry.files.index()
-    existing = load_manual_printings(
-        root, next_unlisted_int_id=index.unlisted_cursors(), registry=registry
-    )
-    plan = plan_manual_files(root, existing, index, specs)
+    existing = load_manual_printings(root, registry=registry)
+    plan = plan_manual_files(root, existing, specs)
     _check_families(root, registry, {entry.data.home_set_id for entry in plan.entries})
     write_files(plan.files)
     # Re-read so a planning mistake fails here instead of in the next build.
     load_manual_printings(
         root,
-        next_unlisted_int_id=load_identity_registry(root)
-        .files.index()
-        .unlisted_cursors(),
         registry=registry,
     )
     typer.echo(
@@ -163,12 +160,11 @@ def append_command(
 
 @app.command("check")
 def check_command(authored: AuthoredOption) -> None:
-    """Validate manual printings against the registry and the unlisted cursors."""
+    """Validate manual printings against the registry and the unlisted ranges."""
     root = _absolute(authored, "--authored")
     registry = load_identity_registry(root)
     snapshot = load_manual_printings(
         root,
-        next_unlisted_int_id=registry.files.index().unlisted_cursors(),
         registry=registry,
     )
     _check_families(root, registry, {data.home_set_id for data in snapshot.printings()})

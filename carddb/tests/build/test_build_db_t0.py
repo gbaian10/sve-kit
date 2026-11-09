@@ -29,6 +29,9 @@ if TYPE_CHECKING:
 
 # ruff: file-ignore[hardcoded-sql-expression] -- transactions and fixture-authored SQL test native constraint enforcement
 
+# Manual printings arrive validated, so only these rows reach the SQL date checks.
+UNLISTED: dict[str, Value] = {"catalog_state": "unlisted", "decklog_available": False}
+
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
@@ -119,6 +122,24 @@ def test_t0_without_engine_cannot_claim_support(
         ("printing", {"decklog_available": False}),
         ("printing", {"decklog_verification": "verified"}),
         ("printing", {"decklog_checked_on": DATE}),
+        ("printing", UNLISTED),
+        ("printing", UNLISTED | {"manual_date_precision": "day"}),
+        (
+            "printing",
+            UNLISTED
+            | {"manual_available_on": "2026-09", "manual_date_precision": "day"},
+        ),
+        (
+            "printing",
+            UNLISTED | {"manual_available_on": DATE, "manual_date_precision": "month"},
+        ),
+        (
+            "printing",
+            UNLISTED
+            | {"manual_available_on": "2026-09", "manual_date_precision": "unknown"},
+        ),
+        ("printing", {"manual_available_on": DATE, "manual_date_precision": "day"}),
+        ("printing", {"manual_date_precision": "unknown"}),
         ("printing_product", {"first_available_on": DATE}),
         ("printing_product", {"first_available_precision": "day"}),
         ("printing_product", {"first_available_precision": "month"}),
@@ -175,7 +196,23 @@ def test_row_checks_reject_invalid_combinations(
         ("identity_change", {"kind": "reassign_printing", "printing_id": "printing"}),
         ("product", {"date_precision": "day", "released_on": DATE}),
         ("product", {"date_precision": "month", "date_raw": "2026-09"}),
-        ("printing", {"catalog_state": "unlisted", "decklog_available": False}),
+        (
+            "printing",
+            {
+                "catalog_state": "unlisted",
+                "decklog_available": False,
+                "manual_date_precision": "unknown",
+            },
+        ),
+        (
+            "printing",
+            UNLISTED | {"manual_available_on": DATE, "manual_date_precision": "day"},
+        ),
+        (
+            "printing",
+            UNLISTED
+            | {"manual_available_on": "2026-09", "manual_date_precision": "month"},
+        ),
         (
             "printing",
             {
@@ -207,6 +244,22 @@ def test_row_checks_accept_legal_alternatives(
 ) -> None:
     _update(db, table, updates)
     assert all(db.rows(table)[0].values[key] == value for key, value in updates.items())
+
+
+@pytest.mark.parametrize(
+    ("value", "precision"), [("2026-02-29", "day"), ("2026-13", "month")]
+)
+def test_manual_date_shape_alone_cannot_pass_sql_checks(
+    db: Database, value: str, precision: str
+) -> None:
+    # The Python writer rejects these first; raw SQL proves the stored pattern holds too.
+    _update(db, "printing", UNLISTED | {"manual_date_precision": "unknown"})
+    with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
+        with db.transaction():
+            db._connection.execute(
+                "UPDATE printing SET manual_available_on = ?, manual_date_precision = ?",
+                (value, precision),
+            )
 
 
 @pytest.mark.parametrize(
@@ -645,7 +698,11 @@ def test_all_enabled_foreign_keys_reject_missing_targets(
         updates["kind"] = "reassign_printing"
     if (table, column) == ("printing", "manual_name_unit_id"):
         # Only unlisted printings may carry a manual name, so reach the FK past that CHECK.
-        updates |= {"catalog_state": "unlisted", "decklog_available": False}
+        updates |= {
+            "catalog_state": "unlisted",
+            "decklog_available": False,
+            "manual_date_precision": "unknown",
+        }
     with pytest.raises(sqlite3.IntegrityError, match=r"(?i)foreign key"):
         _update(db, table, updates)
 

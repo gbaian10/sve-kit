@@ -577,6 +577,7 @@ export default {
     newTab: "(opens in a new tab)",
   },
   cardPage: {
+    releaseDate: "Release date:",
     anniversaryStamp: "Anniversary stamp",
     unknownStamp: "Unconfirmed stamp kind",
     unlistedBadge: "Not in official card database",

@@ -633,7 +633,13 @@ def test_decklog_defaults_remain_independent(
         db.update(
             "printing",
             {"id": "printing"},
-            {"catalog_state": catalog_state, "decklog_available": available},
+            {
+                "catalog_state": catalog_state,
+                "decklog_available": available,
+                "manual_date_precision": "unknown"
+                if catalog_state == "unlisted"
+                else None,
+            },
         )
         populate_construction(db, staging, build=context(staging))
     printing = next(

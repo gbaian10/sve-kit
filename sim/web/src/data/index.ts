@@ -47,6 +47,7 @@ export {
 } from "./images"
 export { createLocator, GLOBAL_OWNER } from "./locator"
 export { type OfficialCardLink, officialCardLinks } from "./official-card-links"
+export { printingReleaseDate } from "./printing-dates"
 export {
   type CardRestriction,
   type CardRestrictionDetails,

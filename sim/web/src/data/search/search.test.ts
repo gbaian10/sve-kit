@@ -3403,6 +3403,8 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
               card_no: "",
               card_no_state: "none",
               catalog_state: "unlisted",
+              manual_available_on: null,
+              manual_date_precision: "unknown",
               printed_code: "2024千葉-A",
               manual_name_unit_id: unit.id,
               manual_type_code: cardType,
@@ -3496,6 +3498,118 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
     expect(search({ text: "ゆいっこ" }).items.map((item) => item.printingId)).toEqual([
       target["id"],
     ])
+  }
+})
+
+it("sorts numberless printings by explicit int_id across category gaps and keeps official order", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const rows = snapshot.bootstrap
+    .filter((f) => f.table === "printing")
+    .flatMap((f) => f.rows)
+    .filter((row) => row["region"] === "jp")
+  const counts = new Map<string, number>()
+  for (const row of rows)
+    counts.set(stringValue(row["card_id"]), (counts.get(stringValue(row["card_id"])) ?? 0) + 1)
+  const targets = rows
+    .filter((row) => counts.get(stringValue(row["card_id"])) === 1)
+    .sort((a, b) => stringValue(a["id"]).localeCompare(stringValue(b["id"])))
+    .slice(0, 3)
+  expect(targets).toHaveLength(3)
+  const ids = targets.map((row) => stringValue(row["id"]))
+  const intIds = [55200, 55001, 55103]
+  const text = { id: "t:sort-manual", lang: "ja", text: "合成EP" }
+  // Real unlisted EP/SEP have no stats, so cost ties must fall back to the int_id order.
+  const faces = new Set(
+    snapshot.bootstrap
+      .filter((fragment) => fragment.table === "face")
+      .flatMap((fragment) => fragment.rows)
+      .filter((row) => targets.some((target) => target["card_id"] === row["card_id"]))
+      .map((row) => stringValue(row["id"])),
+  )
+  const synthetic = (fragments: typeof snapshot.bootstrap) =>
+    fragments.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) => {
+        const ordinal = fragment.table === "printing" ? ids.indexOf(stringValue(row["id"])) : -1
+        if (fragment.table === "face_revision" && faces.has(stringValue(row["face_id"])))
+          return { ...row, cost: null, attack: null, defense: null }
+        if (
+          fragment.table === "face" &&
+          targets.some((target) => target["card_id"] === row["card_id"])
+        )
+          return { ...row, current: [], wording: [] }
+        return fragment.table === "printing" && ordinal >= 0
+          ? {
+              ...row,
+              card_no: "",
+              card_no_state: "none",
+              catalog_state: "unlisted",
+              manual_available_on: ordinal === 0 ? "2025-07-03" : ordinal === 1 ? "2025-09" : null,
+              manual_date_precision: ordinal === 0 ? "day" : ordinal === 1 ? "month" : "unknown",
+              int_id: integerValue(intIds[ordinal]),
+              manual_name_unit_id: text.id,
+              manual_type_code: "ep",
+            }
+          : row
+      }),
+    }))
+  const columns = new BootstrapColumns()
+  columns.ingest(synthetic(snapshot.bootstrap))
+  const textFragment = snapshot.bootstrap.find((fragment) => fragment.table === "text_unit")
+  if (!textFragment) throw new Error("missing text units")
+  columns.ingest([{ ...textFragment, identity: "sort-manual-name", rows: [text] }])
+  columns.seal()
+  const created = new SearchIndex(columns, "jp")
+  const locators = new BootstrapColumns()
+  locators.ingest(synthetic(initial.bootstrap))
+  locators.ingest([{ ...textFragment, identity: "sort-manual-name", rows: [text] }])
+  locators.seal()
+  const completed = new SearchIndex(locators, "jp")
+  completed.completePrintings(columns)
+  const originalColumns = new BootstrapColumns()
+  originalColumns.ingest(snapshot.bootstrap)
+  originalColumns.seal()
+  const original = new SearchIndex(originalColumns, "jp")
+  const expected = [ids[1], ids[2], ids[0]]
+  for (const index of [
+    created,
+    new SearchIndex(created.encode(), "jp"),
+    completed,
+    new SearchIndex(completed.encode(), "jp"),
+  ]) {
+    for (const unit of ["printing", "card", "art"] as const) {
+      const search = (state: Partial<SearchQuery["state"]>) =>
+        index
+          .search({ ...query, limit: 10000, state: { ...ascendingQuery, unit, ...state } })
+          .items.map((item) => item.printingId)
+      expect(search({ unlistedOnly: true, sort: "no" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "no", order: "desc" })).toEqual(
+        [...expected].reverse(),
+      )
+      expect(search({ unlistedOnly: true, sort: "cost" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "set" })).toEqual([ids[0], ids[1], ids[2]])
+      expect(search({ unlistedOnly: true, sort: "set", order: "desc" })).toEqual([
+        ids[1],
+        ids[0],
+        ids[2],
+      ])
+    }
+    const official = (value: SearchIndex) =>
+      value
+        .search({
+          ...query,
+          limit: 10000,
+          state: { ...DEFAULT_QUERY, unit: "printing", sort: "no" },
+        })
+        .items.map((item) => item.printingId)
+        .filter((id) => !ids.includes(id))
+    expect(official(index)).toEqual(official(original))
   }
 })
 
