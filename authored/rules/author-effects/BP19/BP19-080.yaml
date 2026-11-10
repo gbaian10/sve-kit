@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-080:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel: { kind: follower }
+          do:
+            - if:
+                cond:
+                  entered_from: { ref: it, from: cemetery }
+                then:
+                  - damage:
+                      to: { who: opp, zone: field, kind: follower }
+                      n: 1
+      - line: 2
+        fanfare:
+          cost:
+            discard:
+              n: 1
+              sel: { who: self, zone: hand, trait: 八獄 }
+          do:
+            - draw: { n: 1 }
+      - line: 3
+        activate:
+          cost: { act_self: true }
+          targets:
+            - bind: chosen
+              from: { who: self, zone: cemetery, kind: follower }
+              groups:
+                - { trait: 八獄, orig_cost_le: 5 }
+                - { trait: 八獄, orig_cost_le: 3 }
+              upto: 2
+          do:
+            - move: { ref: chosen, to: field, result: entered }

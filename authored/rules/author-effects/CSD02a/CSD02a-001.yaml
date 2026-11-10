@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD02a-001:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: chosen
+              from: { who: self, zone: cemetery, kind: follower }
+              groups:
+                - { trait: キュート, orig_cost_le: 4 }
+                - { trait: キュート, orig_cost_le: 2 }
+              upto: 2
+          do:
+            - move: { ref: chosen, to: field, result: entered }
+            - buff: { on: { follow: entered }, power: 1, hp: 1 }
+      - line: 2
+        activate:
+          cost: { lesson: 1 }
+          per_turn: 1
+          do:
+            - life: { who: self, delta: 3 }

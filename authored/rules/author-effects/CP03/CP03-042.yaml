@@ -1,0 +1,24 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-042:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        keywords: [rush, twin_drive]
+      - line: 2
+        fanfare:
+          targets:
+            - bind: chosen
+              from: { who: self, zone: banish, kind: follower }
+              groups:
+                - { trait: ペイルムーン, orig_cost_le: 4 }
+                - { trait: ペイルムーン, orig_cost_le: 3 }
+                - { trait: ペイルムーン, orig_cost_le: 2 }
+              upto: 3
+          do:
+            - move: { ref: chosen, to: field, result: entered }
