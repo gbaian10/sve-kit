@@ -154,6 +154,22 @@ BP11-018 與 BP11-024 為整卡種子；後者選零個目標仍會執行後續�
 
 數值 `buff.on`／`set_stat.on` 與 `grant.on` 共用同一效果的入場結果解析：`move.to: field` 的具名結果，以及 `search.to: field` 中 `sel.kind: follower` 且數量明示 `n: 1` 或 `upto: 1` 的具名結果，以及每組均為從者 query、各取 `n: 1` 或 `upto: 1` 且沒有 `distinct_by` 的群組搜尋結果，都可寫成 `{follow: entered}`。它只取實際成功入場的新世代；滿場、沒有找到或選擇不找到時，對空結果的指示不做，後續獨立步驟照常結算。若後續還有對自身的加成，將它寫成獨立的 `buff.on: this`；搜尋沒有結果時，仍結算該自身步驟。
 
+場上與 EX 的同一個 token 從者加成可寫 `buff.on.any_of`（BP16-002）：
+
+```yaml
+buff:
+  on:
+    any_of:
+      - {who: self, zone: field, kind: follower, token: true, trait: 妖精}
+      - {who: self, zone: ex, kind: follower, token: true, trait: 妖精}
+  power: 1
+  hp: 1
+```
+
+兩個 query 必須分別是自己的場上與 EX、`kind: follower`、`token: true`，且具有相同的非空 `trait`；兩區書寫順序可交換。其他玩家、其他區域、額外篩選、不同 `trait`、非 token 從者與 `set_stat` 聯集均不接受。這是一個數值加成指示，對結算時兩區的適正成員整批施加；EX 的數值修正在之後入場時保留（綜合規則 4.8.3.3）。
+
+普通進化只觸發 `evolve_time`；超進化同時觸發 `evolve_time` 與 `super_evolve_time`，由玩家選擇結算順序（Q2078、Q2079）。BP16-002 先建立『フェアリー』再加成時，新 token 也受加成；反序時新 token 保持原數值，既有的場上與 EX『フェアリー』仍受加成。
+
 搜尋固定一張並放到自己場上，可寫 `search: {sel: {who: self, zone: deck, kind: follower, name: クーガークローガール}, n: 1, to: field, acted: true}`。這張卡在進場事件發生前已是アクト狀態，不另做 Act，也不另詢問守護的入場姿態；找不到、選擇不找到或場滿未入場時，仍依搜尋規則洗牌。`acted` 只接受 `true`，且數量與目的區必須是字面 `n: 1`、`to: field`；`upto`、多張、分組、其他目的區與參數仍不開放。此姿態也不與 `distinct_by`、`cost_sum_le`、替代或分配目的地並用。
 
 正式目標與本文 `choose.from` 的公開篩選接受 `traits_any: [獣, 魔法生物]`（任一類型；至少兩個互異的非空類型，BP13-051）、`traits_all: [絶傑, 魔界]`（同時具有全部特徵）、`token: true` 及 `names: [没頭の実験体, 多頭の実験体]`（名稱符合任一項），共用既有物件篩選與目標合法性檢查。
