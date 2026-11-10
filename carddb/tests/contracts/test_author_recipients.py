@@ -171,3 +171,38 @@ def test_object_names_do_not_supply_a_leader_or_a_reserved_reference(
     limbs: list[JsonValue],
 ) -> None:
     _check(RECIPIENT_UNION, {"any_of": limbs}, accepted=False)
+
+
+@pytest.mark.parametrize("limbs", [["victim", "this"], ["this", "victim"]])
+def test_formal_target_and_source_share_one_recipient_union(
+    limbs: list[JsonValue],
+) -> None:
+    value: dict[str, JsonValue] = {"any_of": limbs}
+    _check(RECIPIENT_UNION, value, accepted=True)
+    _check(RECIPIENT, value, accepted=True)
+    definition = NODES["$defs"]
+    assert isinstance(definition, dict)
+    validator = Draft202012Validator(
+        {"$defs": definition, "$ref": "#/$defs/A.sel.recipient-union"}
+    )
+    assert validator.is_valid(value)
+
+
+@pytest.mark.parametrize(
+    "limbs",
+    [
+        ["this"],
+        ["this", "this"],
+        ["this", "victim", "other"],
+        ["this", {"who": "opponent", "zone": "field", "kind": "follower"}],
+        ["this", {"leader": "opponent"}],
+    ],
+)
+def test_source_union_is_one_bound_object_pair(limbs: list[JsonValue]) -> None:
+    _check(RECIPIENT_UNION, {"any_of": limbs}, accepted=False)
+    definition = NODES["$defs"]
+    assert isinstance(definition, dict)
+    validator = Draft202012Validator(
+        {"$defs": definition, "$ref": "#/$defs/A.sel.recipient-union"}
+    )
+    assert not validator.is_valid({"any_of": limbs})

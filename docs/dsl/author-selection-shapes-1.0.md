@@ -76,14 +76,18 @@ A.leader-recipient 只各引用一次，另含 A.multiple-leaders。
 | --- | --- | --- | --- |
 | A.sel.leader-or／LeaderOr | who:PlayerRef、kind:follower、leader_or:嚴格 true | zone:field | who 不收 PlayerSet／param；不收 F、except、where、as，zone 不收列表 |
 | A.sel.recipient-atom／RecipientAtom | ObjectAtom／LeaderRecipient／LeaderOr／BindingName | 依各型 | 不收頂層 any_of；三種領袖原子經 A.leader-recipient 各納入一次；BindingName 指正式目標，不含保留名稱 |
-| A.sel.recipient-union／RecipientUnion | any_of: 非空 RecipientAtom 列表，至少一個領袖類 limb | 無 | 純物件列表不屬本型；不收巢狀 any_of 或 wrapper 的 filter |
+| A.sel.recipient-union／RecipientUnion | any_of: 至少一個領袖類 limb 的非空 RecipientAtom 列表，或恰一個 BindingName 與 this | 無 | 純物件列表不屬本型；不收巢狀 any_of 或 wrapper 的 filter |
 | A.sel.recipient／RecipientSel | ObjectSel／LeaderRecipient／LeaderOr／RecipientUnion | 依各型 | 各 shape 只命中一個葉分支 |
 
 領袖類 limb 指 SingleLeader、MultipleLeaders、LeaderOf、LeaderOr。
-RecipientUnion 在 any_of 陣列層以 `contains` 要求至少一個領袖類；
+不含 `this` 的 RecipientUnion 在 any_of 陣列層以 `contains` 要求至少一個領袖類；
 純物件查詢列表交給 ObjectUnion，因此兩種 any_of 不會重複命中。
 正式目標可與其領袖合用，例如 `{any_of: [enemy, {leader_of: enemy}]}`；名稱本身不算領袖 limb。
-單 limb、重複 limb 均允許；limb 本身仍須通過完整封閉型別。
+領袖聯集的單 limb、重複 limb 均允許；limb 本身仍須通過完整封閉型別。
+另接受 `{any_of: [victim, this]}`（順序可互換），恰含一個正式目標 binding 與自身；
+引擎只准入 `targets` 宣告的單一場上從者目標，不收 `choose`、領袖、複數目標或巢狀聯集。
+`this` 不是另一個正式目標，兩者接受同一個 Damage 指示，不拆為連續傷害。
+BP05-063 的正式目標先宣告，再於解決時檢查覺醒；無合法目標時整個入場能力不執行（Q724）。
 節點聯集採 anyOf，測試遞迴攤平 root 聯集，查重複葉分支並驗每個正例恰命中一支。
 
 ### 語義與 DSL 選用規則
