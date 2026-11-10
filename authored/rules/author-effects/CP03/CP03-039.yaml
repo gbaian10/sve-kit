@@ -1,0 +1,24 @@
+cards:
+  CP03-039:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 1
+          on:
+            drive_checked:
+              holder:
+                kind: follower
+                who: self
+                zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

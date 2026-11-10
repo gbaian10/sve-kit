@@ -1,0 +1,27 @@
+cards:
+  CP03-110:
+    abilities:
+      - keywords:
+          - rush
+          - twin_drive
+        line: 1
+      - auto:
+          do:
+            - draw:
+                n: 1
+          on:
+            drive_trigger:
+              during:
+                turn: self
+              who: self
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

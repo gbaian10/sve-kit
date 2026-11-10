@@ -1,0 +1,57 @@
+cards:
+  CP03-121:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            drive_trigger:
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 2
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 3
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,41 @@
+cards:
+  CP03-094:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - bane
+          while:
+            cmp:
+              left:
+                count:
+                  trait: シャドウパラディン
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 10
+      - auto:
+          do:
+            - move:
+                to: cemetery
+                top:
+                  n: 1
+                  who: self
+          on:
+            drive_checked:
+              holder:
+                kind: follower
+                who: self
+                zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

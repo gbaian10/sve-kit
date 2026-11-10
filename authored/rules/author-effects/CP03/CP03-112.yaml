@@ -1,0 +1,68 @@
+cards:
+  CP03-112:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - auto:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - life:
+                delta: 2
+                who: self
+          on:
+            drive_trigger:
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 5
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                  in: seen
+                to: deck
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
