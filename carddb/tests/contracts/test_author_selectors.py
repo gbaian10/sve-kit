@@ -63,12 +63,12 @@ def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
             ADAPTERS[name].validate_json(json.dumps(value))
 
 
-def test_banish_counts_expose_cardinality_without_object_or_attribute_access() -> None:
+def test_banish_objects_are_public_while_counts_remain_cardinality_only() -> None:
     schemas = NODES["$defs"]
     for name in (COUNTED, OBJECTS, "A.collection"):
         validator = Draft202012Validator({"$ref": f"#/$defs/{name}", "$defs": schemas})
         value: dict[str, JsonValue] = {"who": "self", "zone": "banish"}
-        accepted = name == COUNTED
+        accepted = name != "A.collection"
         _check(name, value, accepted=accepted)
         assert validator.is_valid(value) == accepted
     forbidden: tuple[dict[str, JsonValue], ...] = (

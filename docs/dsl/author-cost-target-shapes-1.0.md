@@ -202,8 +202,8 @@ name／names／name_contains 互斥，token／not_token 互斥。內層算式的
 | cost_sum_le | BP07-071 | 整體總原費用上限 |
 | distinct_by:name | exact BP08-104；up-to BP03-040 | distinct_names 舊拼法、Target distinct_by:orig_cost／class 為合成 |
 
-CP03-042 的三組是分組語義的證據；其消滅領域來源尚無DSL Zone 代碼，
-依承載契約的封閉映射，不把 banished／banish 當可用 DSL 來源，不能宣稱整個 Target 已可寫。
+CP03-042 的三組是分組語義的證據。自己的消滅領域來源現可寫 `zone: banish`，
+例如 CP03-049 的單組正式目標；CP03-042 所需的三組互斥正式目標仍未實作，不能宣稱整卡已准入。
 
 各能力頭是否可帶 targets 仍依語法 §3 與規則登錄；完整能力頭與 delayed 的適用欄位見[能力矩陣](author-ability-shapes-1.0.md)。
 本文 choose 是結算時決定，不能代替打出時 Target。roles、option、總量約束的其他交叉格

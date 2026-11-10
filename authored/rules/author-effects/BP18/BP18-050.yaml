@@ -1,0 +1,49 @@
+cards:
+  BP18-050:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
+            - bind: revived
+              from:
+                who: self
+                zone: banish
+                kind: follower
+                orig_cost_le: 2
+              upto: 2
+              distinct_by: name
+              option: 2
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy:
+                        ref: enemy
+                    - banish:
+                        top:
+                          who: self
+                          n: 2
+                  - - pay:
+                        cost:
+                          pp: 1
+                        do:
+                          - move:
+                              ref: revived
+                              to: field
+                              result: entered
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

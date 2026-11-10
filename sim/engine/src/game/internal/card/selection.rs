@@ -1,6 +1,6 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
-use crate::game::list;
+use crate::game::{Object, list};
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation_selection::{
@@ -520,6 +520,42 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
     target_selector(&target_group(constraint)?.selector)
 }
 
+fn public_object(object: &Object) -> bool {
+    matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+        || (object.zone == "banish" && object.state["face_up"] != false)
+}
+
+fn candidate_zone(selector: &Selector, allow_resolution_zones: bool) -> Result<&'static str> {
+    let Selector::Zone { players, zone, .. } = selector else {
+        return Err(unsupported("public target zone"));
+    };
+    Ok(match zone {
+        ZoneKind::Field => "field",
+        ZoneKind::Ex => "ex",
+        ZoneKind::Evolve
+            if (allow_resolution_zones || public_evolve::selector(selector))
+                && players.relation == PlayerRelation::SelfPlayer =>
+        {
+            "evolve_deck"
+        }
+        ZoneKind::Hand
+            if allow_resolution_zones
+                && players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == (PlayerRef::Controller {}) =>
+        {
+            "hand"
+        }
+        ZoneKind::Cemetery => "cemetery",
+        ZoneKind::Banish
+            if players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == (PlayerRef::Controller {}) =>
+        {
+            "banish"
+        }
+        _ => return Err(unsupported("public target zone")),
+    })
+}
+
 fn target_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Union { sets }
@@ -557,6 +593,17 @@ fn target_selector(selector: &Selector) -> Result<()> {
                 players.relation,
                 PlayerRelation::SelfPlayer | PlayerRelation::Opponents
             ) =>
+        {
+            check_predicate(predicate, *binding, false)
+        }
+        Selector::Zone {
+            zone: ZoneKind::Banish,
+            view: SelectionView::Current {},
+            players,
+            binding,
+            predicate,
+        } if players.relative_to == (PlayerRef::Controller {})
+            && players.relation == PlayerRelation::SelfPlayer =>
         {
             check_predicate(predicate, *binding, false)
         }
@@ -1189,7 +1236,7 @@ impl Game {
                         && object.zone == "hand"
                         && object.owner == actor_seat
                         && object.controller == actor_seat)
-                    || matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+                    || public_object(object)
                     || ((private_evolve
                         || (object.controller == actor_seat && object.state["face_up"] == true))
                         && object.zone == "evolve_deck"))
@@ -1198,7 +1245,7 @@ impl Game {
                         && !(kind.contains("フォロワー") || kind.contains("アミュレット")))
                 {
                     return Err(unsupported(
-                        "target is not a current public field object or EX card or cemetery card",
+                        "target is not a current public field, EX, cemetery or banish card",
                     ));
                 }
                 if !evolution
@@ -1595,34 +1642,18 @@ impl Execution {
                 players,
                 binding,
                 predicate,
-                zone,
                 ..
             } => {
-                let zone = match zone {
-                    ZoneKind::Field => "field",
-                    ZoneKind::Ex => "ex",
-                    ZoneKind::Evolve
-                        if (allow_resolution_zones || public_evolve::selector(selector))
-                            && players.relation == PlayerRelation::SelfPlayer =>
-                    {
-                        "evolve_deck"
-                    }
-                    ZoneKind::Hand
-                        if allow_resolution_zones
-                            && players.relation == PlayerRelation::SelfPlayer
-                            && players.relative_to == (PlayerRef::Controller {}) =>
-                    {
-                        "hand"
-                    }
-                    ZoneKind::Cemetery => "cemetery",
-                    _ => return Err(unsupported("public target zone")),
-                };
+                let zone = candidate_zone(selector, allow_resolution_zones)?;
                 // Public candidates may exclude the source's own names ("これと同名を除く").
                 check_predicate(predicate, *binding, false)?;
                 let predicate = super::super::search::freeze_source_names(game, self, predicate)?;
                 let mut members = Vec::new();
                 for player in self.players(game, players)? {
                     for id in game.zone_ids(super::super::seat_name(player)?, zone) {
+                        if zone == "banish" && game.object(&id)?.state["face_up"] == false {
+                            continue;
+                        }
                         if matches_candidate(game, &id, &predicate)? {
                             members.push(self.reference(game, &id)?);
                         }

@@ -527,7 +527,7 @@ impl Checker {
                 ..
             } if public_evolve::selector(selector) => Ok(()),
             Selector::Zone {
-                zone: ZoneKind::Deck | ZoneKind::Evolve | ZoneKind::Banish,
+                zone: ZoneKind::Deck | ZoneKind::Evolve,
                 ..
             }
             | Selector::Ordered { .. } => self.reject(),
@@ -570,6 +570,8 @@ impl Checker {
                     | ZoneKind::Field
                     | ZoneKind::Ex
                     | ZoneKind::Cemetery
+                    // The banish zone is a public, face-up zone.
+                    | ZoneKind::Banish
                     | ZoneKind::Resolution
                     | ZoneKind::Race
                     | ZoneKind::Drive

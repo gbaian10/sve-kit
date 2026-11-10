@@ -456,7 +456,7 @@ fn public_mode_count(value: &Expr<Int>) -> bool {
             *view == (SelectionView::Current {})
                 && match zone {
                     ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Ex => true,
-                    // Face-down banished cards keep their contents private; only the size is public.
+                    // Filtered banish counts have no admitted consumer yet.
                     ZoneKind::Banish => **predicate == Expr::Literal(Bool(true)),
                     _ => false,
                 }

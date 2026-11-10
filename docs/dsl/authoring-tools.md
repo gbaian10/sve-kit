@@ -451,6 +451,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 這個子集只接受本次自己 Look 的集合與成功 Before 差集；不接受其他位置、結果綁定或牌組外的物件。
 它不詢問順序，也不算整副洗牌。原 Look 紀錄保留原樣；洗過的成員不再有可重用的位置證據。
 
+自己的消滅領域是公開區域，`targets` 的 `from` 可寫 `{who: self, zone: banish, ...}`（CP03-049、CP03-057、BP18-039）。被選中的卡沿用一般移動規則，可回手牌或入場；入場仍需寫 `result`。只接受自己的消滅領域，`who: opp`／`all` 與省略 `who` 都在載入時拒絕；明示裏向的物件不列入公開候選。
+
 Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。`delta` 與非負整數 `set` 二擇一：`set: 0` 把該卡的打出費用設為 0（CP01-035「このターン、それをプレイする際、コストを0にする」、BP02-091 不限本回合），沿用同一個移動回條與費用狀態，只套用到實際移到 EX 的新世代；正數 `delta`、負數 `set` 或與 `next_only` 並用仍拒絕。
 
 牌庫頂送墓（含對手牌庫）也可帶 `result`，但只供卡片條件讀取，不能當移動輸入或追蹤對象。離開牌庫的卡沒有修正，條件讀其印刷資訊：`cmp: {left: {count: {in: {objects_of: milled, view: before}, not_class: ウィッチ}}, op: ge, right: 1}` 表示「{ウィッチ}でないカードを墓場に置いたなら」（BP17-045）；`kind`、`trait`、`class`、`not_class`、`name`、`name_contains`、`orig_cost_ge` 可組合，多種卡擇一用 `any` 連接多個條件（ECP02-040 依キュート／クール／パッション分別判斷）。看牌後選取再移動的收據（`move: {ref: picked, to: hand, result: taken}`）同樣可讀，表示「〜を公開したなら」（CP02-015）。只接受「至少一張符合／沒有符合」的比較；從場上或其他公開區移動的收據可能帶有場上修正，仍拒絕。
@@ -628,7 +630,7 @@ cmp:
 張數沿用公開計數與既有條件式模式流程，不使用另一套執行器。
 エボルヴ牌庫的計數不接受對手、裏向卡、未指定名稱或額外篩選條件。
 
-`instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（消滅區可能有裏向卡，內容不公開，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。`instead[].if.leader_life` 接受任一玩家主戰者體力與常數的單一比較（`eq`／`le`／`ge` 擇一），例如 CP04-091 的「自分のリーダーの体力が10以下なら、代わりに2つまで」寫 `{leader_life: {who: self, le: 10}}`；PP、EP 等其他玩家資源仍不開放。三者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
+`instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（目前未開放有篩選的消滅區計數，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。`instead[].if.leader_life` 接受任一玩家主戰者體力與常數的單一比較（`eq`／`le`／`ge` 擇一），例如 CP04-091 的「自分のリーダーの体力が10以下なら、代わりに2つまで」寫 `{leader_life: {who: self, le: 10}}`；PP、EP 等其他玩家資源仍不開放。三者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
 
 ## 公開數值宣告與查詢上限
 

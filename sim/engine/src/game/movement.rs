@@ -208,7 +208,11 @@ impl Game {
             0
         };
         let acted = destination == "field" && previous.state["acted"] == true;
-        json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":face,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false,"attacks_this_turn":0_i64})
+        let mut attributes = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":face,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false,"attacks_this_turn":0_i64});
+        if destination == "banish" {
+            attributes["face_up"] = json!(true);
+        }
+        attributes
     }
 
     pub(super) fn movable_subjects(&self, node: &Value, frame: &Frame) -> Result<Vec<String>> {

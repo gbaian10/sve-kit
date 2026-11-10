@@ -327,7 +327,10 @@ class ObjectSelectionFields(ObjectFilterFields, _SelectionScope):
 class ZoneObjectsFields(ObjectSelectionFields):
     who: PlayerRef | PlayerSet | ParamRef
     zone: NotRequired[
-        Zone | Annotated[tuple[Zone, ...], Field(min_length=1)] | ParamRef
+        Zone
+        | Annotated[tuple[Zone, ...], Field(min_length=1)]
+        | ParamRef
+        | Literal["banish"]
     ]
 
 

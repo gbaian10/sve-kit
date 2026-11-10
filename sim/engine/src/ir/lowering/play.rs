@@ -101,6 +101,7 @@ fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
             ast::TargetSingleZone::Field => ZoneKind::Field,
             ast::TargetSingleZone::Ex => ZoneKind::Ex,
             ast::TargetSingleZone::Cemetery => ZoneKind::Cemetery,
+            ast::TargetSingleZone::Banish => ZoneKind::Banish,
         }]),
         ast::TargetZone::PublicPair(zones)
             if zones.len() == 2
@@ -418,6 +419,14 @@ impl BodyContext<'_> {
     }
 
     fn check_cemetery_target(&self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
+        // Only the controller's own banish zone is selected by printed cards.
+        if matches!(
+            target.from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Banish))
+        ) && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
+        {
+            return Err(unsupported(path));
+        }
         if matches!(
             target.from.zone,
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))

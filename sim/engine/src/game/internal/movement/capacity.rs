@@ -136,8 +136,11 @@ impl Game {
                     handle: u64::try_from(index).map_err(invalid)?,
                     card: self.object(id)?.card.clone(),
                     name: self.card_name(id)?,
-                    object: matches!(self.object(id)?.zone.as_str(), "field" | "cemetery" | "ex")
-                        .then(|| id.to_owned()),
+                    object: matches!(
+                        self.object(id)?.zone.as_str(),
+                        "field" | "cemetery" | "ex" | "banish"
+                    )
+                    .then(|| id.to_owned()),
                 })
             })
             .collect::<Result<Vec<_>>>()?;

@@ -97,10 +97,11 @@ receipt；不能越過其他節點、跨 stage 或外洩回答。受保護的 in
 discard 接受 Chosen、Random、All、DownTo。Chosen 群組必須 disjoint；群組、population、
 eligible 透過目前手牌的 zone、filter、difference、union 或有手牌限制的 intersection
 證明子集。無法靜態證明的 selector 拒絕；不靠虛構物件列舉驗證動態集合。
-目前只接受 actor 就是手牌持有者。選擇域的公開 zone 白名單為 Field、Ex、Cemetery、
+目前只接受 actor 就是手牌持有者。選擇域的公開 zone 白名單為 Field、Ex、Cemetery、Banish、
 Resolution、Race、Drive、Trigger、Equipment；Hand 只容許持有者私有可見性，包含
-述詞內巢狀集合讀取。Deck、Evolve、Banish 一律拒絕；Evolve 的私有牌組與 Banish
-的裏向物件需另有可見性證據，不能把整區當公開。限定進化入口的私有 Face 選擇
+述詞內巢狀集合讀取。Deck、Evolve 一律拒絕；Evolve 的私有牌組需另有可見性證據。
+Banish 依 CR 4.10.2 原則公開；執行器排除明示裏向的物件，保留逐物件表示面狀態。
+限定進化入口的私有 Face 選擇
 是下節明列的例外，不放寬一般選擇域。
 
 上述為 checker 的保守准入，遊戲資訊規則已有依據：CR 4.1.2.1 使所有區域的張數
@@ -565,7 +566,7 @@ Trigger 暫接受 PerFact、無 limit。EnterField／EnterEx、Damage／StatChan
 CounterChange 使用 AfterEntry；LeaveField／Discard／Destroy／Move／Payment／
 EarthRitePayment／Fused 使用 BeforeExit。這是本 checker 的快照 policy 子集，
 不是宣稱每種事件都由移動或入場產生。AnyOf 每支須與同一 trigger.view 相容，
-各 pattern 述詞遞迴檢查。State、Banish（可能裏向）、其他事件形狀及其他 policy
+各 pattern 述詞遞迴檢查。State、Banish（區域放入事件尚未實作）、其他事件形狀及其他 policy
 尚未接受。Continuous declaration 接受
 Numeric 與 Combined patch，以及遞迴檢查的 GrantAbility Definition；Keyword grant、
 上節以外的 effect、layer 不一致、未驗 duration／usage／timestamp 一律拒絕。

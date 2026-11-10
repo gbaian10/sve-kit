@@ -2023,3 +2023,31 @@ fn target_power_bounds_lower_to_distinct_candidate_filters() {
         "the two bounds keep different candidate predicates"
     );
 }
+
+#[test]
+fn banish_zone_targets_accept_only_the_controllers_own_zone() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let spell = |who: Option<&str>| {
+        let mut from = json!({"zone":"banish","kind":"follower"});
+        if let Some(who) = who {
+            from["who"] = json!(who);
+        }
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({
+            "targets":[{"bind":"t","from":from,"n":1_u64}],
+            "do":[{"move":{"ref":"t","to":"hand"}}]
+        });
+        tree
+    };
+    lowerer
+        .lower_with_printed_costs(&spell(Some("self")), &costs)
+        .unwrap();
+    for who in [Some("opp"), Some("all"), None] {
+        lowerer
+            .lower_with_printed_costs(&spell(who), &costs)
+            .unwrap_err();
+    }
+}
