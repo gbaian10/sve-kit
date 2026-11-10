@@ -1,0 +1,74 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "amount": -1,
+        "condition": {
+          "args": [
+            {
+              "at": "play-start",
+              "value": {
+                "count": {
+                  "side": "self",
+                  "zone": "cemetery"
+                }
+              }
+            },
+            10
+          ],
+          "fn": "ge"
+        },
+        "op": "adjust_cost",
+        "subjects": "self"
+      },
+      "kind": "static",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "move",
+        "subjects": "target.1",
+        "to": "field"
+      },
+      "kind": "spell",
+      "line": 2,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "ability_event": "field_to_cemetery",
+            "side": "self",
+            "type": "follower",
+            "where": {
+              "args": [
+                {
+                  "args": [
+                    {
+                      "read": "item.class"
+                    },
+                    "ナイトメア"
+                  ],
+                  "fn": "eq"
+                },
+                {
+                  "args": [
+                    {
+                      "read": "item.cost"
+                    },
+                    2
+                  ],
+                  "fn": "le"
+                }
+              ],
+              "fn": "and"
+            },
+            "zone": "cemetery"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}
