@@ -325,6 +325,7 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
                     operation: ResourceOperation::Pay, amount: Expr::Literal(Int(amount)) } if *amount >= 0)) {
                 return Err(unsupported("mode PP payment"));
             }
+            check_private_mode_cost(ability, mode)?;
             let mut candidate = ability.clone();
             let definition = candidate
                 .play
@@ -406,6 +407,18 @@ fn check_overlapping_mode_materials(play: &PlaySpec, groups: &[PlayMode]) -> Res
         return Err(unsupported(
             "mode material fee beside another material cost",
         ));
+    }
+    Ok(())
+}
+
+fn check_private_mode_cost(ability: &Ability, mode: &Mode) -> Result<()> {
+    if mode
+        .parameters
+        .iter()
+        .any(|decision| reveal_payment::parameter(decision).is_some())
+        && !reveal_payment::field_mode(ability, mode)
+    {
+        return Err(unsupported("private hand mode cost entry"));
     }
     Ok(())
 }

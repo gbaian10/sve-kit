@@ -1,6 +1,7 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::optional_payment;
 use crate::ir::public_numbers;
+use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead, ObjectRef,
     PlayerResource,
@@ -146,7 +147,18 @@ impl Checker {
                         return Err(checker.error(WellFormedReason::DecisionTiming));
                     };
                     checker.at(&format!("parameters/{parameter_index}"), |checker| {
-                        checker.play_decision(decision, controller)
+                        if kind == ModeChoiceKind::ChoiceKeyword
+                            && reveal_payment::mode_parameter(mode, decision)
+                        {
+                            checker.reveal_cost_decision(decision)?;
+                            if let Some((material_binding, _)) = reveal_payment::parameter(decision)
+                            {
+                                checker.env.reveal_materials.insert(material_binding.key());
+                            }
+                            Ok(())
+                        } else {
+                            checker.play_decision(decision, controller)
+                        }
                     })?;
                 }
                 if kind == ModeChoiceKind::ResolutionAlternative

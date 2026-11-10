@@ -207,7 +207,6 @@ fn reveal_cost_is_atomic_with_source_act_and_a_later_failed_payment() {
 
 #[test]
 fn reveal_materials_do_not_authorize_other_hand_costs_or_public_formal_targets() {
-    let original = program(&cost(1, false), &json!([]));
     for replacement in [
         "banish",
         "move",
@@ -217,6 +216,9 @@ fn reveal_materials_do_not_authorize_other_hand_costs_or_public_formal_targets()
         "opponent",
         "unconsumed",
     ] {
+        // Two-card revelation does not grant the single-card banish admission.
+        let count = if replacement == "banish" { 2 } else { 1 };
+        let original = program(&cost(count, false), &json!([]));
         let mut program = original.card().clone();
         let play = program.abilities[0].node.play.as_mut().unwrap();
         if replacement == "unconsumed" {

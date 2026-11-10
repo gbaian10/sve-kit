@@ -153,11 +153,7 @@ pub(super) fn transfer(
     to_ex: bool,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.n != Some(1) || material.upto.is_some() || material.any || material.result.is_some()
-    {
-        return Err(unsupported(path));
-    }
-    let decision = choice(context, material, path)?;
+    let decision = single_choice(context, material, path)?;
     let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
         return Err(unsupported(path));
     };
@@ -185,6 +181,37 @@ pub(super) fn transfer(
                 entry_effects: vec![],
             },
             reason: MoveReason::Put,
+        },
+        decision,
+    ))
+}
+
+fn single_choice(
+    context: &mut BodyContext<'_>,
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<Decision, LoweringError> {
+    if material.n != Some(1) || material.upto.is_some() || material.any || material.result.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    choice(context, material, path)
+}
+
+pub(super) fn banish(
+    context: &mut BodyContext<'_>,
+    material: &ast::HandMaterial,
+    path: &str,
+) -> Result<(Action, Decision), LoweringError> {
+    let decision = single_choice(context, material, path)?;
+    let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+        return Err(unsupported(path));
+    };
+    Ok((
+        Action::Banish {
+            objects: Selector::Bound {
+                reference: *binding,
+            },
         },
         decision,
     ))
