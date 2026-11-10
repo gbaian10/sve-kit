@@ -2106,3 +2106,44 @@ fn own_dice_events_and_unconditional_field_rerolls_lower() {
         "unsupported_construct"
     );
 }
+
+#[test]
+fn public_top_reveal_reads_only_its_own_published_observation() {
+    let lowerer = lowerer();
+    let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
+    let body = |first: Value| {
+        let mut tree = expanded::spell_tree().clone();
+        *tree
+            .pointer_mut("/cards/SD03-005/abilities/0/spell")
+            .unwrap() = json!({"do":[
+            first,
+            {"life":{"who":"self","delta":{"agg":{"of":{"in":"shown"},"attr":"orig_cost","fn":"sum"}}}}
+        ]});
+        tree
+    };
+    lowerer
+        .lower_with_printed_costs(
+            &body(json!({"reveal":{"top":{"who":"self","n":1_u8},"bind":"shown"}})),
+            &costs,
+        )
+        .unwrap();
+    let nested = json!({"if":{"cond":{"leader_life":{"who":"self","le":20_u8}},"then":[{"reveal":{"top":{"who":"self","n":1_u8},"bind":"shown"}}]}});
+    let failure = lowerer
+        .lower_with_printed_costs(&body(nested), &costs)
+        .unwrap_err();
+    assert_eq!(failure.code, "unsupported_construct");
+    assert!(
+        failure.path.ends_with("/if/then/0"),
+        "the nested producer itself must be rejected"
+    );
+    for invalid in [
+        json!({"look":{"top":{"who":"self","n":1_u8},"bind":"shown"}}),
+        json!({"reveal":{"top":{"who":"opp","n":1_u8},"bind":"shown"}}),
+        json!({"reveal":{"top":{"who":"self","n":0_u8},"bind":"shown"}}),
+        json!({"reveal":{"top":{"who":"self","n":1_u8},"ref":"picked","bind":"shown"}}),
+    ] {
+        lowerer
+            .lower_with_printed_costs(&body(invalid), &costs)
+            .unwrap_err();
+    }
+}

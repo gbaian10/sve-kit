@@ -1,0 +1,49 @@
+cards:
+  BP08-074:
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            pp: 1
+          per_turn: 1
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      agg:
+                        of:
+                          in: shown
+                        attr: orig_cost
+                        fn: sum
+                    op: eq
+                    right: 2
+                then:
+                  - move:
+                      ref:
+                        in: shown
+                      to: ex
+                      result: moved
+                  - apply:
+                      "on":
+                        follow: moved
+                      until: turn
+                      effect:
+                        cost_mod:
+                          when_playing:
+                            in: affected
+                          delta: -2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

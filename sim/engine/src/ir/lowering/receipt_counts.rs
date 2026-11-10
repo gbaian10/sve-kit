@@ -152,13 +152,15 @@ impl BodyContext<'_> {
                 receipt.location(),
                 ReceiptLocation::Local { id } if self.receipt_reads.deck_moves.contains(id)
             ),
+            ObjectReceipt::Look { receipt } => {
+                matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.published_looks.contains(id))
+            }
             ObjectReceipt::Movement { .. }
             | ObjectReceipt::Batch { .. }
             | ObjectReceipt::TransformBanished { .. }
             | ObjectReceipt::TransformCreated { .. }
             | ObjectReceipt::Token { .. }
             | ObjectReceipt::Flip { .. }
-            | ObjectReceipt::Look { .. }
             | ObjectReceipt::RevealUntil { .. } => false,
         };
         if !readable {

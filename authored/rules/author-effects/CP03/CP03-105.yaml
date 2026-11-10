@@ -1,0 +1,85 @@
+cards:
+  CP03-105:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 3
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 3
+            - move:
+                ref: kept
+                to: deck
+                position: top
+                order: chooser
+                result: placed
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: placed
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - damage:
+                to: enemy
+                n:
+                  agg:
+                    of:
+                      in: shown
+                    attr: orig_cost
+                    fn: sum
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                        name: 満月の女神 ツクヨミ
+                    op: ge
+                    right: 1
+                then:
+                  - move:
+                      ref:
+                        in: shown
+                      to: hand
+                      result: moved
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

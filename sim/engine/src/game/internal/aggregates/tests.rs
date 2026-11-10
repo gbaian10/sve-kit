@@ -316,3 +316,43 @@ fn followed_life_reads_current_continuous_changes_from_either_players_context() 
         }
     }
 }
+
+#[test]
+fn public_look_costs_require_same_resolution_revelation_and_current_generation() {
+    let board = paused_after_ex_entry();
+    let mut execution = board.typed.as_ref().unwrap().clone();
+    let objects = Selector::ReceiptMembers {
+        receipt: ObjectReceipt::Look {
+            receipt: ReceiptReference::new(ReceiptId(2)),
+        },
+        projection: MemberProjection::Before,
+    };
+    let cost = Expr::Compute(Box::new(IntOperation::Sum {
+        objects: objects.clone(),
+        property: NumericProperty::OriginalCost,
+    }));
+    execution.integer(&board, &cost).unwrap_err();
+    execution.objects(&board, &objects).unwrap_err();
+    let Some(InstructionOutcome::Look(looked)) = execution.receipts.get(&ReceiptId(2)) else {
+        panic!("the paused program owns a private Look receipt")
+    };
+    let members = looked.looked.iter().map(|view| view.object).collect();
+    execution
+        .receipts
+        .insert(ReceiptId(99), InstructionOutcome::Revealed(members));
+    assert_eq!(execution.integer(&board, &cost).unwrap(), Int(4));
+    let mut stale = board.clone();
+    stale.object_mut("tail").unwrap().generation += 1;
+    execution.integer(&stale, &cost).unwrap_err();
+    execution.objects(&stale, &objects).unwrap_err();
+    let mut displaced = board.clone();
+    displaced.object_mut("tail").unwrap().zone = "hand".into();
+    execution.integer(&displaced, &cost).unwrap_err();
+    let mut foreign = execution.clone();
+    foreign
+        .look_viewers
+        .insert(ReceiptId(2), PlayerId { seat: 2 });
+    foreign.integer(&board, &cost).unwrap_err();
+    execution.receipts.remove(&ReceiptId(99));
+    execution.integer(&board, &cost).unwrap_err();
+}

@@ -2740,9 +2740,9 @@ pub(super) struct DamageDuring {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Reveal {
-    pub r#ref: RevealRef,
-    #[serde(rename = "bind")]
-    pub _bind: String,
+    pub r#ref: Option<RevealRef>,
+    pub top: Option<DeckTop>,
+    pub bind: String,
 }
 
 #[derive(Deserialize)]
@@ -3146,6 +3146,12 @@ pub(super) struct Aggregate {
 pub(super) enum AggregateOf {
     Public(Box<PublicQuery>),
     Followed(FollowedIn),
+    Observed(ObservedAggregate),
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ObservedAggregate {
+    pub r#in: String,
 }
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]

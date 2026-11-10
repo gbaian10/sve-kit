@@ -119,6 +119,16 @@ AtResolution／AtSelection／AtPlay capture 依輸入傳遞 Public 或特定玩�
 私有集合計數不能透過 scalar capture 公開。EachObject 的元素繼承集合證據；
 repeat 的 iteration／collect 繼承 local receipt 的證據。
 
+原位牌庫頂公開沿用 `Look` 的固定 Before 成員，再以 `Reveal` 公開同一回條；
+不重新查詢最新頂牌，也不將一般私有 Look 視為公開。作者入口目前只接受能力本文頂層、自己的正數張頂牌，
+同一解決中的公開回條可讀 `cost`／`orig_cost` 總和與種類、名稱、類型、職業條件，
+並沿既有 Move 移至手牌、EX 或場上。場上與 EX 的成功移動仍由原有回條跟隨機制承載。
+執行器要求同次解決確實產生相同成員的公開結果，且在讀值與移動前重驗擁有者、原區域與世代；
+只有 Look 而未 Reveal、外來玩家的觀測、已移區或舊世代都不授權。
+公開證據於解決結束或原位置改變時失效，不讓對手追蹤其後的隱藏位置。
+空牌庫的總和為零，但不代表曾公開一張零費或偶數牌；卡文依卡片屬性分支時須先檢查存在成員。
+此子集不開放公開觀測的差集餘牌、不同名稱計數或批次洗牌。
+
 FlipDown 採 fail-closed 子集：同一能力依檢查順序一旦可能執行 FlipDown，
 之後一律不接受物件證據，包括 bound、capture、receipt、collect 與迴圈元素。
 repeat、each-object 與 each-player stage 的本文含 FlipDown 時，從該迴圈開始就不接受，

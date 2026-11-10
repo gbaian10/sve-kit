@@ -503,18 +503,19 @@ impl BodyContext<'_> {
         if value.acted.is_some() && !matches!(value.to, ast::Destination::Field) {
             return Err(unsupported(path));
         }
+        if let Some(action) = self.public_reveal_move(value, path)? {
+            return Ok(action);
+        }
         if let Some(action) = self.hand_departure_self_move(value, path)? {
             return Ok(action);
         }
         if matches!(value.to, ast::Destination::Field) {
-            if let Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) = &value.r#ref {
-                let mut action = self.self_return(objects, path)?;
-                if let Action::Move { movement, .. } = &mut action {
-                    movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+            let mut action = match &value.r#ref {
+                Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
+                    self.self_return(objects, path)?
                 }
-                return Ok(action);
-            }
-            let mut action = self.field_entry_move(value, path)?;
+                _ => self.field_entry_move(value, path)?,
+            };
             if let Action::Move { movement, .. } = &mut action {
                 movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
             }
@@ -726,7 +727,10 @@ impl BodyContext<'_> {
         value: &ast::Reveal,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        match &value.r#ref {
+        if value.top.is_some() {
+            return Err(unsupported(path));
+        }
+        match value.r#ref.as_ref().ok_or_else(|| unsupported(path))? {
             ast::RevealRef::Bound(name) => Ok(Action::Reveal {
                 objects: Selector::Bound {
                     reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
@@ -846,7 +850,7 @@ const fn own_deck(top: &ast::DeckTop) -> bool {
     matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
 }
 
-const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
+pub(super) const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
     Action::Move {
         objects,
         movement: MoveSpec {
@@ -865,7 +869,7 @@ const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {
     }
 }
 
-const fn owner_put(objects: Selector, zone: OwnerZone) -> Action {
+pub(super) const fn owner_put(objects: Selector, zone: OwnerZone) -> Action {
     Action::Move {
         objects,
         movement: MoveSpec {

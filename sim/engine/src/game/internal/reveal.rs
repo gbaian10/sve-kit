@@ -2,8 +2,8 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::ir::{
-    Bool, Expr, Instruction, Nat, ObjectRef, PlayerRef, PlayerRelation, SelectionView, Selector,
-    ZoneKind,
+    Bool, Expr, Instruction, MemberProjection, Nat, NumericProperty, ObjectReceipt, ObjectRef,
+    PlayerRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, ZoneKind,
 };
 use core::mem::take;
 
@@ -17,7 +17,7 @@ pub(super) struct PublicReveal {
 }
 
 pub(super) fn check_objects(objects: &Selector) -> Result<()> {
-    if matches!(objects, Selector::Bound { .. }) {
+    if matches!(objects, Selector::Bound { .. }) || look_receipt(objects).is_some() {
         return Ok(());
     }
     let Selector::Zone {
@@ -67,6 +67,10 @@ impl Game {
                 (members, false)
             }
             Selector::Bound { .. } => (execution.objects(self, objects)?, true),
+            Selector::ReceiptMembers { .. } => (
+                execution.observed_objects(self, objects, execution.context.controller)?,
+                true,
+            ),
             _ => return Err(unsupported("whole hand reveal")),
         };
         self.internal_reveal_members(
@@ -84,6 +88,11 @@ impl Game {
         members: &[ObjectRef],
         selected: Option<&Selector>,
     ) -> Result<()> {
+        let zone = if selected.is_some_and(|objects| look_receipt(objects).is_some()) {
+            "deck"
+        } else {
+            "hand"
+        };
         let mut ids = Vec::new();
         let mut current_members = Vec::with_capacity(members.len());
         for member in members {
@@ -96,7 +105,8 @@ impl Game {
             }) {
                 continue;
             }
-            if object.zone != "hand"
+            if (zone == "deck" && object.generation != member.generation.0)
+                || object.zone != zone
                 || object.controller != object.owner
                 || (selected.is_some()
                     && object.controller != seat_name(execution.context.controller)?)
@@ -180,5 +190,109 @@ impl Game {
             }
         }
         execution.reveals = active;
+    }
+}
+
+pub(super) const fn look_receipt(objects: &Selector) -> Option<ReceiptId> {
+    if let Selector::ReceiptMembers {
+        receipt: ObjectReceipt::Look { receipt },
+        projection: MemberProjection::Before,
+    } = objects
+        && let ReceiptLocation::Local { id } = receipt.location()
+    {
+        Some(*id)
+    } else {
+        None
+    }
+}
+
+pub(super) const fn look_sum(objects: &Selector, property: NumericProperty) -> Option<ReceiptId> {
+    if matches!(
+        property,
+        NumericProperty::Cost | NumericProperty::OriginalCost
+    ) {
+        look_receipt(objects)
+    } else {
+        None
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Revelation authority is shared by value and movement consumers."
+)]
+impl Execution {
+    pub(super) fn public_look_objects(
+        &self,
+        game: &Game,
+        objects: &Selector,
+    ) -> Result<Vec<ObjectRef>> {
+        let id = look_receipt(objects).ok_or_else(|| unsupported("public look receipt"))?;
+        let Some(InstructionOutcome::Look(outcome)) = self.receipts.get(&id) else {
+            return Err(invalid("missing public look"));
+        };
+        if self.look_viewers.get(&id) != Some(&self.context.controller) {
+            return Err(unsupported("foreign public look"));
+        }
+        let members: Vec<_> = outcome.looked.iter().map(|view| view.object).collect();
+        let published = self.receipts.values().any(|result| {
+            matches!(result, InstructionOutcome::Revealed(revealed) if revealed == &members)
+        });
+        if !published {
+            return Err(unsupported("look was not revealed"));
+        }
+        for member in &members {
+            let object = game.object(self.object_id(*member)?)?;
+            if object.generation != member.generation.0
+                || object.zone != "deck"
+                || object.owner != seat_name(self.context.controller)?
+                || object.controller != object.owner
+            {
+                return Err(unsupported("stale public look member"));
+            }
+        }
+        Ok(members)
+    }
+
+    pub(super) fn public_look_sum(
+        &self,
+        game: &Game,
+        objects: &Selector,
+        property: NumericProperty,
+    ) -> Result<i64> {
+        look_sum(objects, property).ok_or_else(|| unsupported("public look cost"))?;
+        let mut sum = 0_i64;
+        for member in self.public_look_objects(game, objects)? {
+            let id = self.object_id(member)?;
+            let cost = if property == NumericProperty::Cost {
+                game.internal_effective_cost(id)?
+            } else {
+                super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
+            };
+            sum = sum
+                .checked_add(cost)
+                .ok_or_else(|| invalid("revealed cost overflow"))?;
+        }
+        Ok(sum)
+    }
+
+    pub(super) fn public_look_member(
+        &self,
+        game: &Game,
+        objects: &Selector,
+        member: ObjectRef,
+    ) -> Result<bool> {
+        if look_receipt(objects).is_none() {
+            return Ok(false);
+        }
+        let members = self.public_look_objects(game, objects)?;
+        let id = self.object_id(member)?;
+        Ok(members.contains(&member)
+            && ["P1", "P2"].iter().all(|seat| {
+                game.state
+                    .knowledge
+                    .get(*seat)
+                    .is_some_and(|known| known.located.contains(id))
+            }))
     }
 }

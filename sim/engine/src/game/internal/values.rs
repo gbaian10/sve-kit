@@ -307,6 +307,10 @@ impl Execution {
                 Some(Slot::Created(members)) => members.clone(),
                 _ => return Err(invalid("missing token creation producer")),
             },
+            objects @ Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                ..
+            } => self.public_look_objects(game, objects)?,
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::RevealUntil { receipt, members },
                 projection: MemberProjection::Before,
@@ -600,6 +604,11 @@ impl Execution {
                     if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
                 {
                     super::aggregates::followed_sum(self, game, objects, *property).map(Int)
+                }
+                IntOperation::Sum { objects, property }
+                    if super::reveal::look_sum(objects, *property).is_some() =>
+                {
+                    self.public_look_sum(game, objects, *property).map(Int)
                 }
                 IntOperation::Sum { objects, property } => {
                     super::aggregates::sum(self, game, objects, *property).map(Int)

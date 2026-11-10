@@ -1,0 +1,40 @@
+cards:
+  BP19-049:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - buff:
+                "on": ally
+                hp:
+                  agg:
+                    of:
+                      in: shown
+                    attr: orig_cost
+                    fn: sum
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

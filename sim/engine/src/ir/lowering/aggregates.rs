@@ -24,6 +24,15 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let objects = match &aggregate.of {
+            ast::AggregateOf::Observed(query) => {
+                if !matches!(
+                    aggregate.attr,
+                    ast::AggregateAttribute::Cost | ast::AggregateAttribute::OrigCost
+                ) {
+                    return Err(unsupported(path));
+                }
+                self.public_observation(&query.r#in, path)?
+            }
             ast::AggregateOf::Public(query) => {
                 let binding =
                     Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
