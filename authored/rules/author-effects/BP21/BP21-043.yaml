@@ -1,0 +1,61 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-043:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+          "on":
+            discarded:
+              by:
+                ability_of:
+                  trait: 学院
+                  who: self
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - section: 1
+        line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                cost_sum_le: 6
+                from:
+                  in: seen
+                  kind: follower
+                  trait: 学院
+                may: true
+                upto: 3
+            - move:
+                ref: picked
+                result: taken
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+    rule_sections:
+      - section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
