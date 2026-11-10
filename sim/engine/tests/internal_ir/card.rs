@@ -906,3 +906,6 @@ mod transfer;
 mod grant_enter_ex;
 #[path = "card/mixed_ex.rs"]
 mod mixed_ex;
+
+#[path = "card/hand_position.rs"]
+mod hand_position;

@@ -18,6 +18,7 @@ use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
+use crate::ir::{Position, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -39,6 +40,8 @@ pub struct TargetDomain {
 /// Public role identity and cardinality, without authority-side bindings.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TargetRoleDomain {
+    /// Deck edge answered with a private card; absent for ordinary target roles.
+    pub position: Option<Position>,
     /// Question-scoped role identifier.
     pub role: Nat,
     /// Printed rule for how many selected objects receive this role.
@@ -753,12 +756,15 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     }
     let ChoiceDomain::Objects {
         constraint,
-        target_roles: None,
+        target_roles,
         ..
     } = &decision.domain
     else {
         return Err(unsupported("resolution public choice domain"));
     };
+    if target_roles.is_some() && hand_position::choice(decision).is_none() {
+        return Err(unsupported("resolution position roles"));
+    }
     if private_hand_choice(decision) {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("one hand group"));
@@ -1220,8 +1226,9 @@ pub(in crate::game::internal) fn matches_candidate(
     }
 }
 
-fn role_domains(domain: &ChoiceDomain) -> Vec<TargetRoleDomain> {
-    match domain {
+fn role_domains(decision: &Decision) -> Vec<TargetRoleDomain> {
+    let positioned = hand_position::choice(decision).is_some();
+    match &decision.domain {
         ChoiceDomain::Objects {
             target_roles: Some(spec),
             ..
@@ -1229,6 +1236,11 @@ fn role_domains(domain: &ChoiceDomain) -> Vec<TargetRoleDomain> {
             .roles
             .iter()
             .map(|role| TargetRoleDomain {
+                position: positioned.then_some(if role.role == Nat(1) {
+                    Position::Top {}
+                } else {
+                    Position::Bottom {}
+                }),
                 role: role.role,
                 cardinality: role.cardinality,
             })
@@ -1244,7 +1256,15 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
             RoleCardinality::Remainder {} => json!({"remaining": true}),
             RoleCardinality::Fixed { cardinality } => json!({"minimum": cardinality.minimum.0, "maximum": cardinality.maximum.map(|n| n.0)}),
         };
-        json!({"role": role.role.0, "cardinality": cardinality})
+        let mut entry = json!({"role": role.role.0, "cardinality": cardinality});
+        if let Some(position) = role.position {
+            entry["position"] = match position {
+                Position::Top {} => json!("top"),
+                Position::Bottom {} => json!("bottom"),
+                Position::Index { index } => json!({"nth":index.0.get()}),
+            };
+        }
+        entry
     }).collect::<Vec<_>>();
     json!({"kind":"targets","roles":roles,"distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
 }
@@ -1417,7 +1437,7 @@ impl Game {
                 members: public,
                 cardinality: bounds,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
-                roles: role_domains(&decision.domain),
+                roles: role_domains(decision),
             },
         ))
     }

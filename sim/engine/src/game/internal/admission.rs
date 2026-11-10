@@ -6,6 +6,7 @@ use crate::ir::delayed as delayed_ir;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
+use crate::ir::hand_position;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
@@ -467,6 +468,7 @@ fn play_requirement(code: &str) -> bool {
             | "decision.target-roles"
             | "decision.role-if-nonempty"
             | "decision.role-remainder"
+            | "shape.RoleCardinality.Fixed"
             | "shape.RoleCardinality.IfNonempty"
             | "shape.RoleCardinality.Remainder"
             | "internal.PlaySlot.Targets"
@@ -570,6 +572,9 @@ fn check_program(
     origin: Option<&AbilitySource>,
     reads: &mut super::receipt_counts::DeckReads,
 ) -> Result<()> {
+    if !hand_position::valid(program) {
+        return Err(unsupported("paired private hand and deck-edge choice"));
+    }
     let card = origin.is_some();
     for step in &program.steps {
         if !matches!(&step.node, Node::Instruction { instruction } if matches!(instruction.action, Action::Delay { .. }))
