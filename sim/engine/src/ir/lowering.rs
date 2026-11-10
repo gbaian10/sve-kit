@@ -1679,6 +1679,46 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(self.resolution_payment(payment, &step_path, source, ability_source)?);
                 continue;
             }
+            if let ast::Step::Simultaneous(batch) = step {
+                let body = self.steps(
+                    &batch.steps,
+                    &format!("{step_path}/simultaneous/do"),
+                    source,
+                    ability_source,
+                )?;
+                let members = body
+                    .steps
+                    .into_iter()
+                    .map(|member| {
+                        let Node::Instruction { instruction } = member.node else {
+                            return Err(unsupported(&step_path));
+                        };
+                        Ok(Located {
+                            node: *instruction,
+                            source: member.source,
+                        })
+                    })
+                    .collect::<Result<Vec<_>, LoweringError>>()?;
+                let control = super::Control::Simultaneous {
+                    batch: super::InstructionBatch {
+                        members,
+                        membership: super::BatchMembership::AtBatchStart,
+                        choice_stages: vec![],
+                        commit: super::BatchCommit::SharedCapacityAtomic,
+                        event_views: super::BatchViews::BeforeAndAfter,
+                    },
+                    receipt: ReceiptId(self.card_allocator.id(&step_path)?),
+                };
+                if super::mixed_ex::projection(&control).is_none() {
+                    return Err(unsupported(&step_path));
+                }
+                steps.push(Self::located_step(
+                    source,
+                    &step_path,
+                    Node::Control { control },
+                ));
+                continue;
+            }
             if let ast::Step::Repeat(repeat) = step {
                 let node = self.fixed_repeat(repeat, &step_path, source, ability_source)?;
                 steps.push(Self::located_step(source, &step_path, node));
@@ -1866,6 +1906,7 @@ impl<'definitions> BodyContext<'definitions> {
             | ast::Step::If(_)
             | ast::Step::EachPlayer(_)
             | ast::Step::Repeat(_)
+            | ast::Step::Simultaneous(_)
             | ast::Step::Evolve(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
                 objects: match value {

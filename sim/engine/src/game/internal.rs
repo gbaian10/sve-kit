@@ -7,6 +7,7 @@
 
 use self::card::play::PlayState;
 use super::{Frame, Game, View, int, string};
+use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
 use crate::ir::shuffle as shuffle_shape;
@@ -317,6 +318,8 @@ pub enum Answer {
 /// Typed instruction outcomes retained only by the authority.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InstructionOutcome {
+    /// Child receipts published together after one shared-capacity commit.
+    Batch(BatchOutcome),
     /// One distinct occurrence inserted before the previously scheduled next turn.
     ScheduledTurn(ScheduleToken),
     /// A completed shuffle, with no projectable object or position result.
@@ -590,7 +593,7 @@ pub(super) struct Execution {
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_materials: BTreeMap<ReceiptId, Vec<ObjectRef>>,
-    movement_capacity: BTreeMap<(ReceiptId, u32), Vec<ObjectRef>>,
+    movement_capacity: BTreeMap<(ReceiptId, u32), Vec<movement::ArrivalMember>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: Vec<Fact>,
@@ -1369,6 +1372,15 @@ impl Game {
                             ..
                         },
                 } => self.internal_alternative(execution, control)?,
+                Node::Control {
+                    control: control @ Control::Simultaneous { .. },
+                } => {
+                    let previous = self.card_runtime.active_source;
+                    self.card_runtime.active_source = execution.ability;
+                    let result = self.internal_mixed_ex(execution, &control);
+                    self.card_runtime.active_source = previous;
+                    result?;
+                }
                 Node::Control {
                     control: control @ Control::EachPlayer { .. },
                 } => self.internal_player_stage(execution, &control)?,

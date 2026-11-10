@@ -394,6 +394,7 @@ pub(super) enum Step {
     #[serde(rename = "shuffle")]
     Shuffle(Shuffle),
     Delayed(Delayed),
+    Simultaneous(Simultaneous),
     PlayCard(PlayCard),
     PlayAbility(PlayAbility),
     Pay(ModePayment),
@@ -442,6 +443,13 @@ pub(super) enum Step {
     Pilot(Pilot),
     #[serde(rename = "box")]
     Boxed(Boxed),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Simultaneous {
+    #[serde(rename = "do")]
+    pub steps: Vec<Step>,
 }
 
 #[derive(Deserialize)]

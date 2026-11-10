@@ -93,6 +93,13 @@ fn check_body(
         damage_paths(program, "", event, &mut paths);
     }
     let mut inspected = program.clone();
+    super::movement::mixed::mask(&mut inspected)?;
+    if let Some(origin) = origin {
+        source_paths(&inspected, "", origin, &mut paths);
+    }
+    if let Some(event) = subject {
+        super::card::triggers::event_operand::paths(&inspected, "", event, &mut paths);
+    }
     super::history_turn::mask_public_history(&mut inspected);
     mask_delayed(&mut inspected)?;
     if let Some(origin) = origin {
@@ -596,6 +603,12 @@ fn check_program(
             } => {
                 let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("repeat"))?;
                 check_program(body, source, origin, reads)?;
+            }
+            Node::Control {
+                control: control @ Control::Simultaneous { .. },
+            } => {
+                let body = super::movement::mixed::inspection(control, program.scope)?;
+                check_program(&body, source, origin, reads)?;
             }
             Node::Control {
                 control: Control::Sequence { body },

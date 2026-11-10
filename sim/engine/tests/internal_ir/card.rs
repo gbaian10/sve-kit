@@ -902,3 +902,5 @@ mod transfer;
 
 #[path = "card/grant_enter_ex.rs"]
 mod grant_enter_ex;
+#[path = "card/mixed_ex.rs"]
+mod mixed_ex;

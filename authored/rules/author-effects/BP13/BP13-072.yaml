@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-072:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        lastword:
+          do:
+            - simultaneous:
+                do:
+                  - move: { ref: this, to: ex, result: dormant }
+                  - create: { token: 紅の牙, n: 1, to: ex }
+            - counter:
+                on: { follow: dormant }
+                name: 休眠カウンター
+                delta: 2
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP13-P31

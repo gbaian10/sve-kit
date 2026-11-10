@@ -20,7 +20,8 @@ use core::num::NonZeroU64;
 use serde_json::json;
 
 mod capacity;
-pub(super) use capacity::CapacityWait;
+pub(super) mod mixed;
+pub(super) use capacity::{ArrivalMember, CapacityWait};
 
 // Planning and committing must agree on each destination's limit.
 const FIELD_CAPACITY: i64 = 5;
@@ -1257,7 +1258,6 @@ impl Game {
     }
 
     #[expect(
-        clippy::too_many_lines,
         clippy::too_many_arguments,
         reason = "Replacements, generations and receipts commit at one atomic boundary."
     )]
@@ -1273,6 +1273,52 @@ impl Game {
         initial_posture: Option<Posture>,
         unordered_deck: bool,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
+        let plan = self.plan_movements(
+            execution,
+            members,
+            zone,
+            kind,
+            method,
+            owner_destination,
+            position,
+        )?;
+        self.commit_movement_plan(
+            execution,
+            plan,
+            &[],
+            zone,
+            kind,
+            method,
+            owner_destination,
+            position,
+            initial_posture,
+            unordered_deck,
+        )
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        clippy::too_many_arguments,
+        reason = "Physical moves and selected creations share one atomic movement boundary."
+    )]
+    fn commit_movement_plan(
+        &mut self,
+        execution: &mut Execution,
+        proposal: MovementPlan,
+        created: &[String],
+        zone: &str,
+        kind: ZoneKind,
+        method: MoveMethod,
+        owner_destination: bool,
+        position: Option<Position>,
+        initial_posture: Option<Posture>,
+        unordered_deck: bool,
+    ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
+        if !created.is_empty()
+            && (kind != ZoneKind::Ex || !owner_destination || method != MoveMethod::Put)
+        {
+            return Err(unsupported("mixed creation destination"));
+        }
         let old_deck = if kind == ZoneKind::Deck {
             self.state
                 .objects
@@ -1287,27 +1333,10 @@ impl Game {
         let MovementPlan {
             mut moves,
             mut plans,
-        } = self.plan_movements(
-            execution,
-            members,
-            zone,
-            kind,
-            method,
-            owner_destination,
-            position,
-        )?;
+        } = proposal;
         let mut successful = Vec::new();
         if owner_destination && kind == ZoneKind::Ex {
-            let mut arrivals = BTreeMap::<String, usize>::new();
-            for PlannedMove { previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced) {
-                let count = arrivals.entry(previous.owner.clone()).or_default();
-                *count = count.saturating_add(1);
-            }
-            for (owner, count) in arrivals {
-                if !self.owner_ex_has_room(&owner, count)? {
-                    plans.retain(|plan| plan.stack_replaced || plan.previous.owner != owner);
-                }
-            }
+            self.filter_owner_ex_arrivals(&mut plans, created)?;
         }
         if kind == ZoneKind::Deck && !unordered_deck {
             let mut owners = BTreeSet::new();
@@ -1321,7 +1350,11 @@ impl Game {
                 ));
             }
         }
-        let ids = plans.iter().map(|plan| plan.id.clone()).collect::<Vec<_>>();
+        let ids = plans
+            .iter()
+            .map(|plan| plan.id.clone())
+            .chain(created.iter().cloned())
+            .collect::<Vec<_>>();
         let banished = self.internal_prepare_banish_events(&ids, execution, method)?;
         let departing_source = execution.source_before_move(self, &ids)?;
         let mut frame = execution.frame();
@@ -1366,6 +1399,7 @@ impl Game {
                 &frame,
             )?;
         }
+        self.check_created_ex_arrivals(created)?;
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
             for PlannedMove { id, previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced)
@@ -1485,6 +1519,38 @@ impl Game {
             self.invalidate_deck_observations(execution, &moves, &old_deck)?;
         }
         Ok((moves, successful))
+    }
+
+    fn filter_owner_ex_arrivals(
+        &self,
+        plans: &mut Vec<PlannedMove>,
+        created: &[String],
+    ) -> Result<()> {
+        let mut arrivals = BTreeMap::<String, usize>::new();
+        for PlannedMove { previous, .. } in plans.iter().filter(|plan| !plan.stack_replaced) {
+            let count = arrivals.entry(previous.owner.clone()).or_default();
+            *count = count.saturating_add(1);
+        }
+        for id in created {
+            let count = arrivals.entry(self.object(id)?.owner.clone()).or_default();
+            *count = count.saturating_add(1);
+        }
+        for (owner, count) in arrivals {
+            if !self.owner_ex_has_room(&owner, count)? {
+                plans.retain(|plan| plan.stack_replaced || plan.previous.owner != owner);
+            }
+        }
+        Ok(())
+    }
+
+    fn check_created_ex_arrivals(&self, created: &[String]) -> Result<()> {
+        for id in created {
+            let object = self.object(id)?;
+            if object.zone != "ex" || object.generation != 1 || object.controller != object.owner {
+                return Err(invalid("token arrival diverged from the shared proposal"));
+            }
+        }
+        Ok(())
     }
 
     fn invalidate_deck_observations(

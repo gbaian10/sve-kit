@@ -1412,6 +1412,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
         ast::Step::Repeat(repeat) => contains_choice(&repeat.steps),
+        ast::Step::Simultaneous(batch) => contains_choice(&batch.steps),
         ast::Step::Pay(payment) => contains_choice(&payment.steps),
         ast::Step::Optional(optional) => {
             contains_choice(&optional.steps)

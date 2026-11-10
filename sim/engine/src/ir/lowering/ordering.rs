@@ -173,7 +173,8 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
-            ast::Step::Shuffle(_)
+            ast::Step::Simultaneous(_)
+            | ast::Step::Shuffle(_)
             | ast::Step::StackPlus(_)
             | ast::Step::Win(_)
             | ast::Step::ExtraTurn(_)
