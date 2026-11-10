@@ -39,7 +39,9 @@ count.zone 必填（GAP-A-001／025／040）。區域列表不接受元素 param
 
 `count` 另接受單一 `zone: banish`，此時只帶 `who` 與 `zone`，提供消滅領域的總張數。
 不接受特徵篩選、`except`、`where`／`as` 或含消滅領域的區域列表。
-此例外不擴張一般 `Zone`、ObjectSel 或 CollectionSource；`distinct`／`agg` 不能藉此讀取消滅領域的卡片身分。
+ObjectSel 的單一區域來源另接受 `zone: banish`，可依卡片特徵篩選；引擎目前只准入
+`targets.from`／`choose.from` 的自己消滅領域，明示裏向的卡不列入公開候選。
+一般 `Zone`、含消滅區的區域列表及 CollectionSource 仍不擴張；`distinct`／`agg` 尚不接受消滅區來源。
 
 ObjectSel 的 `except` 是單一 ObjectSel。一般扣除已選集合可寫 `{in:looked,except:{in:chosen}}`；移動後「残り」須扣除成功 before：`{in:looked,except:{in:{objects_of:moved,view:before}}}`，不能扣除容量不足而未移動的 chosen。
 差集保留左側已有順序，按相同物件身分比較；世代及快照視角須相容，
