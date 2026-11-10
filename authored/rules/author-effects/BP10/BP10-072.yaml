@@ -1,0 +1,37 @@
+cards:
+  BP10-072:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    evolved: true
+                    kind: follower
+                    who: self
+                    zone: field
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        name: トロピカルフィッシュ
+                        who: self
+                        zone: deck
+                      to: hand
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

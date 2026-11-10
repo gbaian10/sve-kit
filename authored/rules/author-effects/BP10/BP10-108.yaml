@@ -1,0 +1,56 @@
+cards:
+  BP10-108:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                bind: tiger
+                n: 1
+                to: field
+                token: ホーリータイガー
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - destroy: this
+                      on:
+                        phase:
+                          which: end
+                          whose: self
+                on: tiger
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - life:
+                delta:
+                  at: selection
+                  selection: chosen
+                  value:
+                    orig_cost_of: chosen
+                who: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+    token_sources:
+      - card: BP10-T13
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

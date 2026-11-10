@@ -1,0 +1,63 @@
+cards:
+  BP19-077:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: hand
+                    op: le
+                    right: 2
+                then:
+                  - search:
+                      n: 1
+                      result: paracelise
+                      sel:
+                        name: デモンズグリード・パラセリゼ
+                        who: self
+                        zone: deck
+                      to: ex
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              who: self
+                              zone: hand
+                          op: eq
+                          right: 0
+                      then:
+                        - apply:
+                            effect:
+                              cost_mod:
+                                delta: -3
+                                when_playing:
+                                  in: affected
+                            on:
+                              follow: paracelise
+                            until: turn
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - self_to_ex: true
+          do:
+            - life:
+                delta: 1
+                who: self
+          zone: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

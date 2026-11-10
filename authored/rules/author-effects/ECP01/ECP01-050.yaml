@@ -1,0 +1,45 @@
+cards:
+  ECP01-050:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        race_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - kind: follower
+                      orig_cost_le: 2
+                      trait: ウマ娘
+                      who: self
+                      zone: hand
+                    - kind: amulet
+                      orig_cost_le: 2
+                      trait: ウマ娘
+                      who: self
+                      zone: hand
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+      - fanfare:
+          do:
+            - draw:
+                n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
