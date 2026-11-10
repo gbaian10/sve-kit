@@ -27,9 +27,9 @@ Printed Activated 的印刷面限普通從者、官方進化從者（フォロ�
 
 准入接受已支援卡型的 Printed Spell `[Resolution]`、Printed Activated 的 `[Field]`，以及下節的
 Printed Fanfare／Lastword／OnAttack 及 End Begin。Spell 的唯一固有 Ordered PP Pay 必須等於同 Catalog face 的印刷費用；
-只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP
+只在這個已驗位置按 Resolution 的有效成本實付一次。Activated 沿用 controller 的非負常值 PP 與下述 X PP 子集
 與恰好 SourceHolder 的 Acted Posture／Put 送往 owner 墓地，不能套用卡片減費；成本沒有 materials、precondition 或替代。
-前置 X、追加／替代成本、一般 trigger、通用 Static 與任意對象 LKI 仍整棵拒絕。
+影響模式數或追加費用數量的前置 X、其他追加／替代成本、一般 trigger、通用 Static 與任意對象 LKI 仍整棵拒絕。
 Quick 僅接受 [Quick 契約 §1、§5](quick-semantics.md) 的已准入 Spell 獨立 Static 許可與
 普通場上從者的指定 Activated；共用精確形狀檢查，不開放一般 PlayCard Permission。
 目前只由內部 typed 輸入承載；DSL 入口與正式來源 lowering 尚未完成。
@@ -109,8 +109,27 @@ BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行�
 只以合成來源座標驗抽牌 Fanfare 與 Act／自身送墓／傷害片段。後者的 `usable_if`
 （EX 的クレスト至少三枚）尚未由 lowering 承載，完整能力仍拒絕，不能刪掉條件宣稱整卡可用。
 逐卡候選報告中的 `runtime=supported` 只表示機制子集可執行；C1 來源／資格／完整能力閉包
-尚缺時，外層准入仍為 rejected。起動 `per_turn`、Quick、X、追加／替代成本、Static
+尚缺時，外層准入仍為 rejected。起動 `per_turn`、Quick、下述子集以外的 X、追加／替代成本、Static
 及其他未准入觸發保持拒絕。
+
+### X PP
+
+自由 X 以原有 `D.play-param X` 的公開 Integer／Nat binding 承載，只有下限 0、未指定靜態上限、
+Controller、AtDecision／Current／Inline 且無 captures 的形狀准入。實際問題的上限有限：
+在同一付款計畫中合計固定 PP 與 X 出現次數 k，按 `floor((目前 PP − 固定費用) / k)` 決定。
+固有法術費用呼叫原報價入口，其餘能力費用維持原值；拒付的可選費用不納入。
+固定部分付不起則整次 play 非法；沒有被接受的 X 費用時保存 X=0，不產生多餘問題。
+
+X 在 CR 10.6.2.2.4 決定，早於 targets 與成本材料，並在共同 snapshot／重試起點保留同一 Nat。
+IR 的 PP Pay 只新增 `FromNat(Bound(X))` 這個非負數值形狀，不接受其他任意動態付款算式。
+公開數值的 `FromNat(Bound(_))` 也接受既有的公開整數決定（例如解決時選擇或骰子答案）；
+這個純數值形狀檢查不持有 parameter 身分，是否可讀仍由良構檢查綁定型別、支配與可見性，
+不能以它引用隱藏答案。一般 ResolutionChoice 的整數上限限制不變。
+執行沿原 `internal_card_payment` 與 PP 原語，不另建 X 付款執行器。原費用豁免沿原入口移除 X 問題並保存 0。
+
+BP15-046 的手牌公開追加費用仍先於 X PP 的實際支付；只為完整的 X PP 本文付款開放此組合，
+不改原有其他追加／可選費用限制。模式配 X、會影響模式數的 X、非 PP 的 X 費用與宣告自訂範圍仍拒絕。
+作者語法與範例見[效果作者工具](authoring-tools.md)。
 
 ### 共同選擇 snapshot 與回復
 
