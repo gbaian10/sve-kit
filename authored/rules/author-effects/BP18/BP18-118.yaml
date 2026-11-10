@@ -1,0 +1,57 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-118:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: recovered
+              option: 1
+              from:
+                who: self
+                zone: cemetery
+                name: 炎術検定A級
+              n: 1
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        ref: recovered
+                        result: moved
+                        to: ex
+                    - apply:
+                        on:
+                          follow: moved
+                        effect:
+                          cost_mod:
+                            when_playing:
+                              in: affected
+                            delta: -1
+                        until: turn
+                  - - life:
+                        who: self
+                        delta: 1
+                    - move:
+                        top:
+                          who: self
+                          n: 1
+                        to: cemetery
+                  - - pay:
+                        cost:
+                          banish:
+                            sel:
+                              who: self
+                              zone: hand
+                            n: 1
+                        do:
+                          - draw:
+                              n: 1
