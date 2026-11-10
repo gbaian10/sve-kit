@@ -940,3 +940,16 @@ callback 僅支援固定抽 1、己方回血 2、固定 token 1 張到 EX；
 `auto.on.life_changed` 可加 `crosses_zero: true`，只接收生命從正值變成零以下的實際事件；
 不因零以下再減少而重複誘發。待機能力沿用回合玩家優先順序，設定生命產生的增加仍可觸發其他生命能力。
 此支援不擴充一般 `state` 誘發、條件式或 EX 區勝敗禁止及安裝型玩家權限。
+
+## 本回合從自身消滅區打出
+
+`player_effect` 的 `who:self`、`until:turn` 配合
+`effect.play_permission: {from: [banish], on: {who: self, zone: banish}}`，
+沿既有 `InstallEffect` 與 `Permission(PlayCard)` 准入。許可涵蓋本回合後續進入
+自身消滅區的卡；來源離場不會提早結束，到實際回合結束即失效。
+其他玩家、來源區、物件安裝與永久期間仍不准入。這個封閉入口不擴充通用 Zone。
+
+這是正常打出：仍檢查所有者、控制者、主階段或 Quick 時機、正式目標、印刷費用
+及原有禁止。無指定來源區的打出費用修正也適用；明示 Hand／EX 的修正維持原範圍。
+Quick 只讓本來具有 Quick 的法術成為候選，不授予消滅區起動能力。
+法術先從消滅區進入 Resolution，結算後去所有者墓地（官方 Q2376）。

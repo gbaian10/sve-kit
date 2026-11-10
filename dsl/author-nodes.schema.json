@@ -13324,7 +13324,15 @@
       "properties": {
         "from": {
           "items": {
-            "$ref": "#/$defs/Zone"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Zone"
+              },
+              {
+                "type": "string",
+                "const": "banish"
+              }
+            ]
           },
           "minItems": 1,
           "type": "array"
