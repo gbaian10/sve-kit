@@ -1,0 +1,74 @@
+cards:
+  BP16-022:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        fanfare:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            name: 天下の大泥棒・ジエモン
+                            who: self
+                            zone: field
+                        op: ge
+                        right: 1
+                    upto: 3
+                options:
+                  - - act: enemy
+                    - apply:
+                        on: enemy
+                        effect:
+                          cannot:
+                            what: stand
+                            on: affected
+                            during:
+                              cause: rule
+                              phase: start
+                              who: opp
+                        until:
+                          next_phase:
+                            edge: end
+                            phase: start
+                            who: opp
+                  - - draw:
+                        n: 1
+                    - choose:
+                        bind: picked
+                        from:
+                          who: self
+                          zone: hand
+                        n: 1
+                        position: top_or_bottom
+                    - move:
+                        position:
+                          chosen: picked
+                        ref: picked
+                        to: deck
+                  - - create:
+                        n: 2
+                        to: ex
+                        token: 輝く金貨
+                upto: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
