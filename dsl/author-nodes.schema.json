@@ -2633,7 +2633,14 @@
           "$ref": "#/$defs/BindingName"
         },
         "from": {
-          "$ref": "#/$defs/A.sel.recipient"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.sel.recipient"
+            },
+            {
+              "$ref": "#/$defs/A.sel.named-advance-spell"
+            }
+          ]
         },
         "n": {
           "$ref": "#/$defs/A.selection-quantity"
@@ -21581,6 +21588,39 @@
       "required": [
         "any_of"
       ]
+    },
+    "A.sel.named-advance-spell": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "type": "string",
+          "const": "self"
+        },
+        "zone": {
+          "type": "string",
+          "const": "evolve_deck"
+        },
+        "kind": {
+          "type": "string",
+          "const": "spell"
+        },
+        "advance_spell": {
+          "type": "boolean",
+          "const": true
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "who",
+        "zone",
+        "kind",
+        "advance_spell",
+        "name"
+      ],
+      "additionalProperties": false
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."

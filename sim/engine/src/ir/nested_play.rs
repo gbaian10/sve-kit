@@ -15,7 +15,7 @@ pub(crate) fn card_operand(action: &Action) -> Option<&ObjectOperand> {
         && *controller == (PlayerRef::Controller {})
         && matches!(
             cost_override,
-            Some(CostOverride::SetBase { amount: Int(0) })
+            None | Some(CostOverride::SetBase { amount: Int(0) })
         )
         && *authorization == (EffectReference::CurrentInstallation {})
         && parameters.limit.is_none()

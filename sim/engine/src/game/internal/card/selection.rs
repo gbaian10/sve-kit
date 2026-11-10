@@ -105,7 +105,7 @@ impl TargetWait {
         execution: &Execution,
         members: &[ObjectRef],
     ) -> Result<()> {
-        let Some(name) = advance_entry::name(&self.decision) else {
+        let Some(name) = advance_entry::selection(&self.decision) else {
             return Ok(());
         };
         let seat = super::seat_name(execution.context.controller)?;
@@ -737,7 +737,7 @@ fn target_union(sets: &[Selector]) -> Result<()> {
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
-    if effect_evolution::is_choice(decision) || advance_entry::name(decision).is_some() {
+    if effect_evolution::is_choice(decision) || advance_entry::selection(decision).is_some() {
         return Ok(());
     }
     if let ChoiceDomain::Recipients {
@@ -1332,7 +1332,7 @@ impl Game {
             return Err(unsupported("target groups"));
         }
         let evolution = effect_evolution::is_choice(decision);
-        let private_evolve = evolution || advance_entry::name(decision).is_some();
+        let private_evolve = evolution || advance_entry::selection(decision).is_some();
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
         let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
@@ -1453,7 +1453,7 @@ impl Game {
         decision: &Decision,
         constraint: &SelectionConstraint,
     ) -> Result<Vec<Vec<ObjectRef>>> {
-        if let Some(name) = advance_entry::name(decision) {
+        if let Some(name) = advance_entry::selection(decision) {
             let seat = super::seat_name(execution.context.controller)?;
             let mut members = Vec::new();
             for id in self.zone_ids(seat, "evolve_deck") {
@@ -1513,11 +1513,11 @@ impl Game {
         Ok(members)
     }
 
-    fn named_advance_candidate(
+    pub(super) fn named_advance_candidate(
         &self,
         id: &str,
         seat: &str,
-        name: &advance_entry::AdvanceName,
+        selection: &advance_entry::AdvanceSelection,
     ) -> Result<bool> {
         let object = self.object(id)?;
         let printed = self.catalog.face(&object.card, 0)?;
@@ -1525,8 +1525,13 @@ impl Game {
             && object.owner == seat
             && object.controller == seat
             && object.state["face"] == 0_i64
-            && printed["card_type"] == "フォロワー・アドバンス"
-            && self.card_name_matches(id, |own| name.matches(own))?)
+            && object.state["face_up"] != true
+            && printed["card_type"]
+                == match selection.kind {
+                    advance_entry::AdvanceKind::Follower => "フォロワー・アドバンス",
+                    advance_entry::AdvanceKind::Spell => "スペル・アドバンス",
+                }
+            && self.card_name_matches(id, |own| selection.name.matches(own))?)
     }
 
     pub(super) fn internal_mode_targets_feasible(
@@ -1731,7 +1736,8 @@ impl Execution {
         match selector {
             Selector::Bound { reference } => {
                 self.targets.get(&reference.key()).is_some_and(|wait| {
-                    wait.members.contains(&member) && advance_entry::name(&wait.decision).is_some()
+                    wait.members.contains(&member)
+                        && advance_entry::selection(&wait.decision).is_some()
                 })
             }
             _ => false,

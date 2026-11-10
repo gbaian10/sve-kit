@@ -44,6 +44,8 @@ mod discard_ability_source;
 
 #[path = "card/advance_entry.rs"]
 mod advance_entry;
+#[path = "card/advance_spell.rs"]
+mod advance_spell;
 
 #[path = "card/move_followup.rs"]
 mod move_followup;

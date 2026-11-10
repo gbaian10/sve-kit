@@ -1643,12 +1643,12 @@ impl<'definitions> BodyContext<'definitions> {
             if let ast::Step::Choose(choice) = step
                 && matches!(choice.from, ast::ChooseFrom::Advance(_))
             {
-                let Some((next, ast::Step::Move(movement))) = authored.next() else {
+                let Some((next, consumer)) = authored.next() else {
                     return Err(unsupported(&step_path));
                 };
                 steps.push(self.advance_entry(
                     choice,
-                    movement,
+                    consumer,
                     &step_path,
                     &format!("{path}/{next}"),
                     source,

@@ -4,10 +4,10 @@ use super::{
 };
 use crate::game::int;
 use crate::game::internal::{InstructionOutcome, player_id};
-use crate::ir::nested_play;
+use crate::ir::{advance_entry, nested_play};
 pub(in crate::game::internal) mod ability;
 use crate::ir::{
-    AbilityCostPolicy, Action, CostOverride, Instruction, ObjectOperand, ReceiptId,
+    AbilityCostPolicy, Action, CostOverride, Instruction, Int, ObjectOperand, ReceiptId,
     RuntimeAbilitySource, Selector, ZoneKind,
 };
 
@@ -21,7 +21,16 @@ pub(in crate::game::internal) struct Continuation {
 }
 
 pub(in crate::game::internal) fn check(action: &Action) -> Result<()> {
-    if matches!(action, Action::PlayCard { .. }) && nested_play::card_operand(action).is_none() {
+    if matches!(action, Action::PlayCard { .. })
+        && (nested_play::card_operand(action).is_none()
+            || !matches!(
+                action,
+                Action::PlayCard {
+                    cost_override: Some(CostOverride::SetBase { amount: Int(0) }),
+                    ..
+                }
+            ))
+    {
         return Err(unsupported("effect card play shape"));
     }
     Ok(())
@@ -43,7 +52,19 @@ impl Game {
         if nested.is_none() {
             self.check_card_play_holder(holder, actor)?;
         } else {
-            if object.zone != "cemetery"
+            let normal_advance = nested
+                .as_ref()
+                .is_some_and(|entry| entry.cost_override.is_none());
+            let origin_allowed = if normal_advance {
+                object.zone == "evolve_deck"
+                    && object.owner == seat_name(actor)?
+                    && object.controller == seat_name(actor)?
+                    && object.state["face_up"] != true
+                    && self.object_type(holder)? == "スペル・アドバンス"
+            } else {
+                object.zone == "cemetery"
+            };
+            if !origin_allowed
                 || int(&object.state["face"]) != 0
                 || object.state["evolved_with"].is_string()
                 || self.restricted(holder, "play")?
@@ -82,6 +103,7 @@ impl Game {
             "ex" => ZoneKind::Ex,
             "cemetery" => ZoneKind::Cemetery,
             "banish" => ZoneKind::Banish,
+            "evolve_deck" => ZoneKind::Evolve,
             _ => return Err(unsupported("card play origin")),
         });
         execution.play_origin_player = Some(player_id(&object.controller)?);
@@ -167,7 +189,6 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        check(&instruction.action)?;
         let Action::PlayCard {
             card: ObjectOperand::Selected { selection },
             cost_override,
@@ -176,6 +197,19 @@ impl Game {
         else {
             return Err(unsupported("effect card play"));
         };
+        let advance = execution
+            .targets
+            .get(&selection.key())
+            .and_then(|wait| advance_entry::selection(&wait.decision))
+            .filter(|pick| pick.kind == advance_entry::AdvanceKind::Spell);
+        let normal_advance = cost_override.is_none() && advance.is_some();
+        if normal_advance {
+            if nested_play::card_operand(&instruction.action).is_none() {
+                return Err(unsupported("normal Advance spell play shape"));
+            }
+        } else {
+            check(&instruction.action)?;
+        }
         let selected = execution.objects(
             self,
             &Selector::Bound {
@@ -193,9 +227,12 @@ impl Game {
             .get(&card.id)
             .ok_or_else(|| invalid("missing selected card identity"))?
             .clone();
-        if self.object(&holder)?.generation != card.generation.0
-            || self.object(&holder)?.zone != "cemetery"
-        {
+        let origin_allowed = if let Some(pick) = advance.filter(|_| normal_advance) {
+            self.named_advance_candidate(&holder, seat_name(execution.context.controller)?, &pick)?
+        } else {
+            self.object(&holder)?.zone == "cemetery"
+        };
+        if self.object(&holder)?.generation != card.generation.0 || !origin_allowed {
             execution
                 .receipts
                 .insert(instruction.receipt, InstructionOutcome::NestedPlay(None));
