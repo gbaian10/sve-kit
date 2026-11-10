@@ -1262,3 +1262,29 @@ fn resolving_spell_returns_only_itself_to_ex_or_cleans_up_when_ex_is_full() {
         assert_eq!(state["objects"]["source"]["generation"], 2);
     }
 }
+
+#[test]
+fn resolving_spell_returns_only_its_current_source_to_hand_and_preserves_other_resolution_cards() {
+    let source = || Selector::Objects {
+        objects: vec![ObjectOperand::SourceHolder {}],
+    };
+    let program = card(vec![spell(vec![
+        movement::put(1, source(), OwnerZone::Hand),
+        draw(2, 1),
+        movement::put(3, source(), OwnerZone::Cemetery),
+    ])]);
+    let mut initial = setup(1, json!([{"id":"drawn","card":"unit-follower"}]));
+    initial["players"]["P1"]["pp"] = json!({"current":4_u8,"max":4_u8});
+    initial["players"]["P1"]["zones"]["resolution"] = json!([{"id":"other","card":"unit-spell"}]);
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "self-hand").unwrap();
+    game.load_internal_card("unit-spell", &program).unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 3_u8);
+    assert_eq!(state["P1"]["hand"], json!(["s", "drawn"]));
+    assert_eq!(state["P1"]["resolution"], json!(["other"]));
+    assert_eq!(state["P1"]["cemetery"], json!([]));
+    assert_eq!(state["objects"]["s"]["generation"], 2_u8);
+}
