@@ -32,6 +32,9 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
             IntOperation::FromNat {
                 value: Expr::Live(read),
             } => matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector)),
+            IntOperation::FromNat {
+                value: Expr::Bound(_),
+            } => true,
             // The distinct name count of the same public populations is just as candidate-independent.
             IntOperation::FromNat {
                 value: Expr::Compute(distinct),

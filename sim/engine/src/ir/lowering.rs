@@ -1,5 +1,6 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 use crate::ir::ride;
+use ast::PpAmount;
 
 mod ability_restrictions;
 mod additional;
@@ -45,6 +46,7 @@ mod reveal_until;
 mod stack;
 mod static_keywords;
 mod trigger_restrictions;
+mod x_pp;
 
 mod flip;
 mod fusion;
@@ -679,7 +681,7 @@ impl Allocator {
                 AbilityKind::Spell,
                 Some(payment::lower(
                     &mut context,
-                    &ast::Cost::Short(Box::new(ast::CostOperation::Pp(cost.0))),
+                    &ast::Cost::Short(Box::new(ast::CostOperation::Pp(PpAmount::Literal(cost.0)))),
                     &ability_source,
                     path,
                 )?),
@@ -691,6 +693,7 @@ impl Allocator {
             let trigger = prepared_trigger.ok_or_else(|| unsupported(path))?;
             (AbilityKind::Triggered, triggered_play, Some(trigger))
         };
+        context.check_x(path)?;
         if let Some(play) = &mut play {
             conditions::qualify_costs(&mut play.costs, guard, path)?;
             context.parameters.append(&mut play.parameters);
@@ -1330,6 +1333,7 @@ struct FieldOutput {
 }
 
 struct BodyContext<'definitions> {
+    x: Option<x_pp::Parameter>,
     static_zone: Option<ZoneKind>,
     /// Only an activation printed in the hand may move its own card to EX as a cost.
     activation_zone: Option<ZoneKind>,
@@ -1396,6 +1400,7 @@ impl<'definitions> BodyContext<'definitions> {
         card_allocator: &'definitions mut Allocator,
     ) -> Self {
         Self {
+            x: None,
             static_zone: entry
                 .r#static
                 .as_ref()
@@ -1548,6 +1553,7 @@ impl<'definitions> BodyContext<'definitions> {
         path: &str,
         triggered: bool,
     ) -> Result<bool, LoweringError> {
+        self.prepare_x(body, path)?;
         let reserved = self.allocator.next;
         for value in body.define.values() {
             // Set extrema retain empty-set semantics in their consuming selector.
@@ -1573,6 +1579,9 @@ impl<'definitions> BodyContext<'definitions> {
         } else {
             play::choice_body(body, path)?
         };
+        if self.x.is_some() && choice {
+            return Err(unsupported(path));
+        }
         self.targets(&body.targets, choice, path)?;
         Ok(trigger_choice)
     }

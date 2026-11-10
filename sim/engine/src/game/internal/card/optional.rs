@@ -4,6 +4,7 @@ use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::x_pp;
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
     DiscardEvent, EventPattern, Expr, InstructionContext, Int, MoveDestination, MoveReason,
@@ -44,7 +45,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
             || instruction.context != InstructionContext::Cost
             || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
-            amount: Expr::Literal(Int(amount)) } if *amount >= 0)
+            amount } if x_pp::cost_amount(amount))
                 || (required && super::super::life::is_cost(&instruction.action))
                 || (required
                     && matches!(

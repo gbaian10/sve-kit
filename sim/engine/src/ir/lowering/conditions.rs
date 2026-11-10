@@ -984,6 +984,13 @@ impl BodyContext<'_> {
                 Ok(player_resource(*leader_life, PlayerResource::Life))
             }
             ast::Number::Alias(name) => {
+                if name == "x"
+                    && let Some(parameter) = self.x
+                {
+                    return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                        value: Expr::Bound(parameter.binding),
+                    })));
+                }
                 if !active.insert(name.clone()) {
                     return Err(unsupported(path));
                 }

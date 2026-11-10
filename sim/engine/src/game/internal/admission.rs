@@ -454,6 +454,7 @@ fn play_requirement(code: &str) -> bool {
             | "internal.PlaySlot.Targets"
             | "internal.PlaySlot.CostMaterials"
             | "internal.PlaySlot.Distribution"
+            | "internal.PlaySlot.X"
             | "internal.SelectionSnapshot.AtDecision"
             | "internal.InputMode.Inline"
             | "shape.Control.Mode"

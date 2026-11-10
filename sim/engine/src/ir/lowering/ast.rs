@@ -249,9 +249,22 @@ impl Cost {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum PpAmount {
+    Literal(u64),
+    Variable(PpVariable),
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum PpVariable {
+    X,
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostOperation {
-    Pp(u64),
+    Pp(PpAmount),
     Lesson(u64),
     Counter(CounterCost),
     EarthRite(u64),
@@ -342,6 +355,11 @@ pub(super) struct Ports {
 #[derive(Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Body {
+    #[expect(
+        clippy::zero_sized_map_values,
+        reason = "The empty X declaration must be an object; any supplied key is rejected."
+    )]
+    pub x: Option<BTreeMap<String, IgnoredAny>>,
     pub ub: Option<True>,
     #[serde(rename = "cost")]
     pub head_cost: Option<Cost>,

@@ -864,3 +864,6 @@ mod reveal_until;
 
 #[path = "card/target_self.rs"]
 mod target_self;
+
+#[path = "card/x_pp.rs"]
+mod x_pp;
