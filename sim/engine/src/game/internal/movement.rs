@@ -675,20 +675,22 @@ impl Game {
                         .is_some_and(|knowledge| knowledge.located.contains(&object.id))
                     && (execution.is_private_look_target(objects, member)
                         || execution.public_look_member(self, objects, member)?);
-                if kind == ZoneKind::Hand
-                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
-                    && !private_observed_move
-                {
-                    return Err(unsupported(
-                        "only public field, cemetery or banish departures to hand",
-                    ));
-                }
-                let resolving_source = kind == ZoneKind::Ex
+                let resolving_source = method == MoveMethod::Put
+                    && matches!(kind, ZoneKind::Hand | ZoneKind::Ex)
                     && object.zone == "resolution"
                     && object.id == execution.context.source
                     && member.generation == execution.context.generation
                     && execution.ability.is_some()
                     && self.object_type(&object.id)? == "スペル";
+                if kind == ZoneKind::Hand
+                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
+                    && !private_observed_move
+                    && !resolving_source
+                {
+                    return Err(unsupported(
+                        "only public departures or the resolving spell source to hand",
+                    ));
+                }
                 let special_origin = private_observed_move
                     || private_hand_move
                     || resolving_source
@@ -1548,7 +1550,8 @@ fn check_stack_replacement(previous: &Object, current: &Object) -> Result<()> {
 fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<ZoneKind> {
     match (zone, method, destination) {
         ("evolve_deck", MoveMethod::Put, "field" | "ex") => Ok(ZoneKind::Evolve),
-        ("resolution", MoveMethod::Put, "ex") => Ok(ZoneKind::Resolution),
+        // Source membership is proven before planning; this only labels the departure.
+        ("resolution", MoveMethod::Put, "hand" | "ex") => Ok(ZoneKind::Resolution),
         ("hand", MoveMethod::Discard, "cemetery")
         | ("hand", MoveMethod::Banish, "banish")
         | ("hand", MoveMethod::Put, "deck" | "ex" | "field") => Ok(ZoneKind::Hand),

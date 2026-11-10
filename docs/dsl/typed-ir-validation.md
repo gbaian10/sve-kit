@@ -210,6 +210,11 @@ Numeric 的 stat_changed 與 InstallEffect Continuous 的差異依 IR GAP-S-008�
 checker 不執行重算或事件。CP02-007、BP16-049、BP05-001 僅為動作片段種子，
 不代表完整成本、能力、lowering 或 executor 已驗收。
 
+卡片執行器接受當次正在解決的法術來源自身以 `Put` 移至手牌或 EX：物件必須仍在解決區，
+且 ID、世代與當次能力的來源相同。這個狹義例外不開放任意解決區查詢或其他法術的移動。
+來源移走後，共同收尾不再將它送墓；後續指示的舊來源引用也不自動跟隨新的手牌世代。
+BP05-034 的看牌、公開、餘牌排序與名稱條件仍使用既有回條，只有命中名稱時才回手。
+
 MoveSpec 與 search Partition 使用內部 `MoveDestination`：`Owners(Hand / Deck /
 Cemetery / Banish)` 逐物件解析該物件持有者；`Shared(ZoneRef)` 僅接受 Field／Ex。
 混合持有者的集合不能用來源控制者或來源持有者的一個 ZoneRef 替代。Destroy／Banish
