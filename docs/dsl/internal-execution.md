@@ -430,7 +430,9 @@ Activated、Fanfare 與進化不讀這個入口。完整付款、場容量與回
 查詢可按同一卡表的 kind、trait、name 過濾。這個入口使用隔離的封閉求值器，
 不擴大一般 selector 的 predicate 子集。分段區間由DSL 明示，原樣保留；兩條獨立減費各計一次。
 SC 可明示為墓地 Spell 計數；未展開的關鍵字及缺少封閉原區域讀值的 EX 限定自身條件仍拒絕。
-付款交換、additional／optional／alt、X、動態值、正 delta、複數 set、aura、next-play 共享額度，
+材料付款交換與單一正整數 PP 加費宣告依[付款交換契約](play-payment-exchange.md)的封閉入口，
+加費與其他修正一起報價、最後截零，只支付一次固有 PP；完成後同次 Spell 才能讀其回條。
+其他 additional／optional／alt、X、動態值、正 delta、複數 set、aura、next-play 共享額度，
 以及無明示期限的特定卡修正維持拒絕。完整合成、時點與來源義務見
 [打出費用契約 §2–4](play-cost-semantics.md#2-決定實付-pp)。
 

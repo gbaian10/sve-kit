@@ -561,6 +561,8 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 
 `auto.per_turn` 與 `activate.per_turn` 接受正安全整數 N，額度按能力實例與每個實際回合分開；觸發在進入待機時消耗，起動在付款成功且適正打出時消耗。`activate.usable_if` 與 `per_turn` 可並用，例如墓場キュート卡至少五張才可每回合起動一次；資格不符、拒付與付款失敗都不消耗起動額度。沒有上限時省略 `per_turn`，不能以零表示無限次。
 
+打出時宣告增加 PP 使用 `play.optional_cost: {pp: 4, result: enhanced}`；`pp` 是正整數，不能同時指定材料、`one_of`、`optional_cost_delta` 或 `optional_cost_set`。接受宣告後，增加量與其他費用增減一起報價，最後才套用零下限，整次打出只支付一次 PP。拒絕宣告不加費；本文可用 `paid: {receipt: enhanced}` 讀取已完成的宣告，即使折扣使總費用成為 0。宣告在模式與目標之前，所有輸入完成後才付款；付不起則還原整次出牌。這與能力本文的可選付款不同。
+
 `play.optional_cost.discard` 支援固定張數的自己手牌，配單一常值 `optional_cost_delta` 或 `optional_cost_set` 交換減費。
 它與場上送墓／橫置、墓場消滅使用同一付款流程：先決定是否交換，再宣告效果目標，最後私下選足額手牌；原 PP 與棄牌都成功才打出。
 正在打出的卡不列為手牌材料，拒付不棄牌且支付原費用，材料或 PP 不足則整次回復。Quick、可變張數及混合材料操作仍拒絕。
