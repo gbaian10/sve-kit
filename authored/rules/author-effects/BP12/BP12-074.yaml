@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-074:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create: { token: メドゥシアナ, n: 1, to: ex }
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel: { who: self, zone: [field, ex], trait: 魔界, token: true }
+                  n: 1
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: enemy
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP12-P28

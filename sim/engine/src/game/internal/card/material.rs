@@ -15,8 +15,8 @@ use crate::ir::{
     ZoneRef,
 };
 use crate::ir::{
-    AggregateBound, Bool, Comparison, Expr, NamesRead, NumericProperty, ObjectView, Predicate,
-    SelectionConstraint,
+    AggregateBound, Bool, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NamesRead,
+    NumericProperty, ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
 use alloc::collections::BTreeSet;
 
@@ -415,9 +415,95 @@ pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
             && matches!(&decision.domain, ChoiceDomain::Objects { binding, constraint, .. }
             if binding == reference && constraint.groups.first().is_some_and(|group|
                 zones(&group.selector).is_ok_and(|zones|
-                    (zones.len() == 1 || matches!(action, Action::Banish { .. }))
+                    (zones.len() == 1 || matches!(action, Action::Banish { .. })
+                        || field_ex_token_put(action, constraint))
                     && zones.into_iter().all(|zone| cost_zone(action, zone)))))
     })
+}
+
+// Loading keeps the same closed union shape as author lowering.
+fn field_ex_token_put(action: &Action, constraint: &SelectionConstraint) -> bool {
+    if !matches!(
+        action,
+        Action::Move {
+            movement: MoveSpec {
+                to: MoveDestination::Owners {
+                    zone: OwnerZone::Cemetery
+                },
+                ..
+            },
+            reason: MoveReason::Put,
+            ..
+        }
+    ) || constraint.cardinality
+        != (Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(1)),
+        })
+    {
+        return false;
+    }
+    let [group] = constraint.groups.as_slice() else {
+        return false;
+    };
+    let Selector::Union { sets } = &group.selector else {
+        return false;
+    };
+    let [first, second] = sets.as_slice() else {
+        return false;
+    };
+    let Some(trait_id) = token_material_trait(first) else {
+        return false;
+    };
+    token_material_trait(second) == Some(trait_id)
+}
+
+fn token_material_trait(selector: &Selector) -> Option<&TraitId> {
+    let Selector::Zone {
+        predicate, binding, ..
+    } = selector
+    else {
+        return None;
+    };
+    let Expr::Compute(conjunction) = predicate.as_ref() else {
+        return None;
+    };
+    let Predicate::And {
+        predicates: conjuncts,
+    } = conjunction.as_ref()
+    else {
+        return None;
+    };
+    let [Expr::Compute(base), Expr::Live(token)] = conjuncts.as_slice() else {
+        return None;
+    };
+    let Predicate::And {
+        predicates: base_terms,
+    } = base.as_ref()
+    else {
+        return None;
+    };
+    let [Expr::Compute(trait_test)] = base_terms.as_slice() else {
+        return None;
+    };
+    let Predicate::HasTrait {
+        traits: Expr::Live(traits),
+        trait_id,
+    } = trait_test.as_ref()
+    else {
+        return None;
+    };
+    if trait_id.0.is_empty()
+        || !matches!(traits.as_ref(), TraitsRead::Traits {
+            object: ObjectView::Current { object }, view: CharacteristicView::Effective
+        } if matches!(object.as_ref(), ObjectOperand::Bound { binding: candidate } if candidate == binding))
+        || !matches!(token.as_ref(), BoolRead::State {
+            object: ObjectView::Current { object }, property: BooleanState::TokenStatus
+        } if matches!(object.as_ref(), ObjectOperand::Bound { binding: candidate } if candidate == binding))
+    {
+        return None;
+    }
+    Some(trait_id)
 }
 
 pub(super) fn source_field_cost(action: &Action) -> bool {
