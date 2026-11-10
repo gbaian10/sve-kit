@@ -32,6 +32,7 @@ PARENTS_TYPES: dict[str, tuple[TypeForm[object], str]] = {
     "A.target.any": (parents.TargetAny, "TargetAny"),
     "A.target": (parents.Target, "Target"),
     "A.act.choose.exact": (steps.ChooseExact, "ChooseExact"),
+    "A.sel.named-advance-spell": (steps.NamedAdvanceSpell, "NamedAdvanceSpell"),
     "A.act.choose.up-to": (steps.ChooseUpTo, "ChooseUpTo"),
     "A.act.choose.any": (steps.ChooseAny, "ChooseAny"),
     "A.act.choose": (steps.Choose, "Choose"),
@@ -59,6 +60,22 @@ PARENTS_TYPES: dict[str, tuple[TypeForm[object], str]] = {
 }
 
 CARD_PARENTS: list[tuple[str, str, dict[str, JsonValue]]] = [
+    (
+        "BP13-036",
+        "A.act.choose.exact",
+        {
+            "bind": "blast",
+            "from": {
+                "who": "self",
+                "zone": "evolve_deck",
+                "kind": "spell",
+                "advance_spell": True,
+                "name": "イクシードブラスト",
+            },
+            "n": 1,
+            "may": True,
+        },
+    ),
     (
         "BP01-125",
         "A.target.exact",

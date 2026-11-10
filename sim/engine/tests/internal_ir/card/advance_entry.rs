@@ -128,7 +128,7 @@ fn board_parts(
         }
     }
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
-        {"id":"incoming","card":"incoming","state":{"face_up":face_up}},
+        {"id":"incoming","card":"incoming","face_up":face_up},
         {"id":"decoy","card":"wrong-name"}, {"id":"evolve","card":"wrong-kind"},
         {"id":"normal-form","card":"normal-form"}
     ]);
@@ -592,25 +592,38 @@ fn insufficient_advance_pp_and_forged_resource_materials_do_not_change_authority
 }
 
 #[test]
-fn face_up_advance_resources_remain_eligible_for_named_reentry() {
+fn face_up_advance_resources_are_not_inside_the_evolve_deck() {
     let program = program(false, true);
     let mut game = board(&program, 3, 0, false, true);
-    let play = game
-        .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
-        .unwrap();
-    resolved(choose(&mut game, play, true));
+    let q = question(
+        game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("private Advance choice")
+    };
+    assert!(
+        domain.members.is_empty(),
+        "CR4.6.3 excludes face-up resources unless explicitly referenced"
+    );
+    let before = exact_authority(&game);
+    game.answer_internal_card(q.actor, q.token, Answer::Targets(vec![0]))
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(vec![]))
+            .unwrap(),
+    );
     let view = game.projection(View::Referee).unwrap();
     assert!(
-        view["P1"]["field"]
+        !view["P1"]["field"]
             .as_array()
             .unwrap()
             .contains(&json!("incoming")),
-        "CR9.2.2 returned face-up Advance cards are reusable resources"
+        "an unavailable Advance is not put into the field"
     );
-    assert_eq!(
-        view["objects"]["incoming"]["generation"], 1,
-        "the new entry gets a fresh field generation"
-    );
+    assert_eq!(view["objects"]["incoming"]["face_up"], true);
+    assert_eq!(view["objects"]["incoming"]["generation"], 0);
 }
 
 #[test]

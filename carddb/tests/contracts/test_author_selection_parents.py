@@ -247,3 +247,41 @@ def test_acted_search_does_not_widen_up_to_or_grouped_shapes(
         {"$id": NODES["$id"], "$defs": NODES["$defs"], "$ref": "#/$defs/A.act.search"}
     )
     assert not validator.is_valid(value)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("who", "opp"), ("kind", "follower"), ("advance_spell", False), ("name", "")],
+)
+def test_named_advance_spell_choice_rejects_other_resource_domains(
+    field: str, value: JsonValue
+) -> None:
+    source: dict[str, JsonValue] = {
+        "who": "self",
+        "zone": "evolve_deck",
+        "kind": "spell",
+        "advance_spell": True,
+        "name": "イクシードブラスト",
+    }
+    source[field] = value
+    _check(
+        "A.act.choose.exact",
+        {"bind": "blast", "from": source, "n": 1, "may": True},
+        accepted=False,
+    )
+
+
+def test_named_advance_spell_choice_does_not_become_a_general_target() -> None:
+    source: dict[str, JsonValue] = {
+        "who": "self",
+        "zone": "evolve_deck",
+        "kind": "spell",
+        "advance_spell": True,
+        "name": "イクシードブラスト",
+    }
+    _check("A.target.exact", {"bind": "blast", "from": source, "n": 1}, accepted=False)
+    _check(
+        "A.act.choose.up-to",
+        {"bind": "blast", "from": source, "upto": 1},
+        accepted=False,
+    )
