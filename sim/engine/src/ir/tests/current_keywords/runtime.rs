@@ -921,3 +921,96 @@ fn simultaneous_identical_wards_have_distinct_entry_choices_before_the_batch_mov
         assert_eq!(state(&game, "second")["generation"], 1_u8);
     }
 }
+
+#[test]
+fn follow_keyword_keeps_printed_ward_in_ex_outside_the_follow_query() {
+    let mut movement = entry(ZoneKind::Field);
+    let Action::Move {
+        objects,
+        movement: destination,
+        ..
+    } = &mut movement
+    else {
+        panic!("movement")
+    };
+    *objects = Selector::Bound {
+        reference: Binding::new(10, ScopeId(1)),
+    };
+    destination.to = MoveDestination::Owners {
+        zone: OwnerZone::Ex,
+    };
+    let mut raw = producer(
+        vec![
+            movement,
+            Action::Life {
+                player: PlayerRef::Controller {},
+                change: NumericChange::Add {
+                    amount: Expr::Literal(Int(1)),
+                },
+            },
+        ],
+        Some(PlayerRelation::SelfPlayer),
+    )
+    .card()
+    .clone();
+    let body = raw.abilities[0].node.body.as_mut().unwrap();
+    let mut recovery = body.steps[1].clone();
+    let Node::Instruction { instruction } = &mut recovery.node else {
+        panic!("recovery")
+    };
+    instruction.id = InstructionId(3);
+    instruction.receipt = ReceiptId(3);
+    instruction.action = Action::Life {
+        player: PlayerRef::Controller {},
+        change: NumericChange::Add {
+            amount: Expr::Literal(Int(2)),
+        },
+    };
+    body.steps.insert(
+        1,
+        Located {
+            source: recovery.source.clone(),
+            node: Node::Control {
+                control: Control::If {
+                    condition: Expr::Compute(Box::new(Predicate::Exists {
+                        objects: follow_keyword::selector(
+                            MovementReceipt::Move {
+                                receipt: ReceiptReference::new(ReceiptId(1)),
+                            },
+                            Binding::new(51, ScopeId(1)),
+                        ),
+                    })),
+                    then_body: Program {
+                        scope: ScopeId(2),
+                        steps: vec![recovery],
+                    },
+                    else_body: None,
+                },
+            },
+        },
+    );
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    let mut initial = setup("P1");
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"source","card":"producer"},{"id":"recipient","card":NUMBER}]);
+    let mut game = game(&initial, NUMBER, &checked);
+    let q = question(
+        game.activate_internal_card("source", AbilityId(1), actor("P1"))
+            .unwrap(),
+    );
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("field target")
+    };
+    let recipient = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some(NUMBER))
+        .unwrap();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Targets(vec![recipient.handle]))
+            .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["ex"], json!(["recipient"]));
+    assert_eq!(view["P1"]["leader"]["life"], 21_u8);
+}

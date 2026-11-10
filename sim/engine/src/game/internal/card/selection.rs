@@ -19,7 +19,7 @@ use crate::ir::{
 };
 use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
 use crate::ir::{advance_entry, effect_evolution};
-use crate::ir::{public_evolve, public_numbers};
+use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
@@ -885,6 +885,9 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
 }
 
 pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Result<()> {
+    if follow_keyword::supported(selector) {
+        return Ok(());
+    }
     match selector {
         Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
             public_zone_selector(input)
@@ -1803,6 +1806,11 @@ impl Execution {
                 };
                 let mut filtered = Vec::new();
                 for member in self.public_target_objects(game, input, allow_resolution_zones)? {
+                    if follow_keyword::supported(selector)
+                        && game.object(self.object_id(member)?)?.zone != "field"
+                    {
+                        continue;
+                    }
                     if !private_look
                         && game.object(self.object_id(member)?)?.generation != member.generation.0
                     {

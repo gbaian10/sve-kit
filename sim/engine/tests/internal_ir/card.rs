@@ -893,3 +893,6 @@ mod banish_play;
 
 #[path = "card/choice_any.rs"]
 mod choice_any;
+
+#[path = "card/follow_keyword.rs"]
+mod follow_keyword;

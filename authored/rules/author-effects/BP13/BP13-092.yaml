@@ -1,0 +1,55 @@
+cards:
+  BP13-092:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 2
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: deck
+            - if:
+                cond:
+                  exists:
+                    in:
+                      follow: entered
+                    keyword: ward
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
