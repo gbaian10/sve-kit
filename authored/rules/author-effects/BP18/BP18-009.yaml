@@ -1,0 +1,41 @@
+cards:
+  BP18-009:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - unlimited_evolve:
+                who: self
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: friend
+                power: 1
+          on:
+            evolved:
+              sel:
+                kind: follower
+              who: self
+          targets:
+            - bind: friend
+              from:
+                kind: follower
+                trait: 透京
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
