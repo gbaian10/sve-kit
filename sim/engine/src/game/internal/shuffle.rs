@@ -124,11 +124,14 @@ impl Game {
                     if current.generation != member.generation.0 {
                         continue;
                     }
-                    if current.zone != "cemetery"
+                    if !matches!(current.zone.as_str(), "cemetery" | "banish")
+                        || (current.zone == "banish" && current.state["face_up"] == false)
                         || current.owner != seat
                         || current.controller != seat
                     {
-                        return Err(unsupported("shuffle return requires own cemetery cards"));
+                        return Err(unsupported(
+                            "shuffle return requires own public cemetery or banish cards",
+                        ));
                     }
                 }
                 self.internal_unordered_deck_return(execution, instruction, &members)?

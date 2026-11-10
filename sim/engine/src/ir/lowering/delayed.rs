@@ -30,7 +30,7 @@ impl BodyContext<'_> {
         if !self.follower_targets.contains(&movement.r#ref)
             || self.hand_targets.contains(&movement.r#ref)
             || self.ex_targets.contains(&movement.r#ref)
-            || self.cemetery_return_targets.contains(&movement.r#ref)
+            || self.deck_return_targets.contains(&movement.r#ref)
         {
             return Err(unsupported(path));
         }

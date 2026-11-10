@@ -23,6 +23,8 @@ mod played_original_cost;
 mod played_traits;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
+#[path = "card/public_return_union.rs"]
+mod public_return_union;
 use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]
