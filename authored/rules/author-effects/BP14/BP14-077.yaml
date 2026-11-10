@@ -1,0 +1,64 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-077:
+    admission: light
+    rule_sections:
+      - section: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        activate:
+          zone: cemetery
+          cost:
+            steps:
+              - pp: 1
+              - banish_self: true
+          targets:
+            - bind: returned
+              from:
+                who: self
+                zone:
+                  - cemetery
+                  - banish
+                name: デモンズグリード・パラセリゼ
+              upto: 3
+          do:
+            - move:
+                ref: returned
+                to: deck
+            - shuffle:
+                who: self
+            - choose:
+                bind: forms
+                from:
+                  who: self
+                  zone: evolve_deck
+                  face_up: true
+                  name: デモンズグリード・パラセリゼ
+                any: true
+            - flip_down: forms
+      - section: 1
+        line: 1
+        spell:
+          do:
+            - repeat:
+                n: 2
+                do:
+                  - move:
+                      top:
+                        who: self
+                        n: 1
+                      to: ex
+                  - choose:
+                      bind: hand_card
+                      from:
+                        who: self
+                        zone: hand
+                      n: 1
+                  - banish: hand_card
