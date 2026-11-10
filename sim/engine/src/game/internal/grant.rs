@@ -1,6 +1,7 @@
 //! Grants retain the text provider and receiving physical generation.
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
     Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
@@ -230,7 +231,7 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
     ability.kind == AbilityKind::Triggered
         && ability.qualification == AbilityQualification::Ordinary
         && (ability.active_zones == [ZoneKind::Field] || super::card::triggers::ex_phase(ability))
-        && matches!(
+        && (matches!(
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {
                 pattern: EventPattern::Attack { .. }
@@ -239,7 +240,28 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Damage { .. }
             })
-        )
+        ) || (ability.active_zones == [ZoneKind::Field]
+            && ability.trigger.as_ref().is_some_and(|trigger| {
+                let TriggerCondition::Event {
+                    pattern: EventPattern::EnterEx { binding, predicate },
+                } = &trigger.on
+                else {
+                    return false;
+                };
+                let Some(filter) = SubjectFilter::parse(SubjectFields::Ex(*binding), predicate)
+                else {
+                    return false;
+                };
+                let Some(name) = filter.name.clone().filter(|name| !name.0.is_empty()) else {
+                    return false;
+                };
+                filter
+                    == SubjectFilter {
+                        own: Some(true),
+                        name: Some(name),
+                        ..SubjectFilter::default()
+                    }
+            })))
 }
 
 // The shared delta helper checks effect shape; this additionally closes the ability header.

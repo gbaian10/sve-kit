@@ -1,0 +1,73 @@
+cards:
+  BP22-022:
+    abilities:
+      - line: 1
+        super_evolve_time:
+          do:
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - damage:
+                            n: 1
+                            to:
+                              any_of:
+                                - leaders: opponents
+                                - kind: follower
+                                  who: opp
+                                  zone: field
+                      on:
+                        placed_ex:
+                          sel:
+                            name: 輝く金貨
+                          who: self
+                on: this
+            - create:
+                n: 1
+                to: ex
+                token: 輝く金貨
+      - activate:
+          cost:
+            banish:
+              n: 2
+              sel:
+                name: 輝く金貨
+                who: self
+                zone: ex
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 3
+                        to: enemy
+                  - - draw:
+                        n: 2
+                    - choose:
+                        bind: bottom
+                        from:
+                          who: self
+                          zone: hand
+                        n: 1
+                    - move:
+                        position: bottom
+                        ref: bottom
+                        to: deck
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
