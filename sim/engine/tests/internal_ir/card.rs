@@ -861,3 +861,6 @@ mod unlimited_evolution;
 
 #[path = "card/reveal_until.rs"]
 mod reveal_until;
+
+#[path = "card/target_self.rs"]
+mod target_self;

@@ -2231,34 +2231,66 @@
         "any_of": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.sel.recipient-atom"
-          },
-          "minItems": 1,
-          "contains": {
             "anyOf": [
               {
-                "required": [
-                  "leader"
-                ]
+                "$ref": "#/$defs/A.sel.recipient-atom"
               },
               {
-                "required": [
-                  "leaders"
-                ]
-              },
-              {
-                "required": [
-                  "leader_of"
-                ]
-              },
-              {
-                "required": [
-                  "leader_or"
-                ]
+                "const": "this",
+                "type": "string"
               }
-            ],
-            "type": "object"
-          }
+            ]
+          },
+          "minItems": 1,
+          "anyOf": [
+            {
+              "contains": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "leader"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "leaders"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "leader_of"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "leader_or"
+                    ]
+                  }
+                ],
+                "type": "object"
+              },
+              "not": {
+                "contains": {
+                  "const": "this"
+                }
+              }
+            },
+            {
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "string"
+              },
+              "contains": {
+                "const": "this"
+              },
+              "not": {
+                "items": {
+                  "const": "this"
+                }
+              }
+            }
+          ]
         }
       },
       "required": [

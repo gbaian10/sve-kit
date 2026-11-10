@@ -633,25 +633,51 @@ type RecipientAtom = ObjectAtom | LeaderRecipient | LeaderOr | BindingName
 @with_config(SHAPE_CONFIG)
 class RecipientUnionFields(TypedDict):
     any_of: Annotated[
-        tuple[RecipientAtom, ...],
+        tuple[RecipientAtom | Literal["this"], ...],
         Field(
             min_length=1,
             json_schema_extra={
-                "contains": {
-                    "type": "object",
-                    "anyOf": [
-                        {"required": ["leader"]},
-                        {"required": ["leaders"]},
-                        {"required": ["leader_of"]},
-                        {"required": ["leader_or"]},
-                    ],
-                }
+                "anyOf": [
+                    {
+                        "contains": {
+                            "type": "object",
+                            "anyOf": [
+                                {"required": ["leader"]},
+                                {"required": ["leaders"]},
+                                {"required": ["leader_of"]},
+                                {"required": ["leader_or"]},
+                            ],
+                        },
+                        "not": {"contains": {"const": "this"}},
+                    },
+                    {
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {"type": "string"},
+                        "contains": {"const": "this"},
+                        "not": {"items": {"const": "this"}},
+                    },
+                ]
             },
         ),
     ]
 
 
-def _require_leader(value: RecipientUnionFields) -> RecipientUnionFields:
+_SOURCE_RECIPIENT_PAIR_SIZE = 2
+
+
+def _require_recipient_union(value: RecipientUnionFields) -> RecipientUnionFields:
+    limbs = value["any_of"]
+    if "this" in limbs:
+        if (
+            len(limbs) != _SOURCE_RECIPIENT_PAIR_SIZE
+            or not all(isinstance(limb, str) for limb in limbs)
+            or limbs[0] == limbs[1]
+        ):
+            raise ValueError(
+                "A source recipient requires exactly one other bound object"
+            )
+        return value
     # A bound object name is a recipient, but cannot satisfy the required leader limb.
     if not any(
         (not isinstance(limb, (dict, str)))
@@ -662,7 +688,9 @@ def _require_leader(value: RecipientUnionFields) -> RecipientUnionFields:
     return value
 
 
-type RecipientUnion = Annotated[RecipientUnionFields, AfterValidator(_require_leader)]
+type RecipientUnion = Annotated[
+    RecipientUnionFields, AfterValidator(_require_recipient_union)
+]
 type RecipientSel = ObjectSel | LeaderRecipient | LeaderOr | RecipientUnion
 
 

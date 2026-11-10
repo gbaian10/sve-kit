@@ -95,7 +95,7 @@ CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原�
 計數 any_of 的區域 limb 保留 counted 角色並先去重；
 集合讀值與非歷史條件的封閉 payload 見[讀值形狀矩陣](author-expression-shapes-1.0.md)，
 agg／distinct／count.except 的來源不繼承 counted 參數權限。選取 any_of 另分純物件 ObjectUnion
-與至少含一個領袖 limb 的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
+與含領袖 limb 或恰一個正式從者目標加自身的 RecipientUnion，見[接受者矩陣](author-selection-shapes-1.0.md#領袖與聯集)。
 具名 RecipientSel 不擴大物件消費位置；等義拼法不推定相同 body hash。
 單組 Target／choose／search 的數量父變體、counter 與 DeckSlice 已定形，
 見[要求量矩陣](author-quantity-shapes-1.0.md)的逐 variant 與延後欄位清單。
