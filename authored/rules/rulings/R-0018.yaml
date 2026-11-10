@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0018
+revision: 1
+question: 悪意の憑依結算時，自己墓場不足四張可否選擇消滅？何時將法術回手？
+decision: 自己墓場不足四張時不能選擇消滅。至少四張時，可以拒絕；接受則恰好選四張。只在實際成功消滅四張時，將結算中的法術回到擁有者手牌。
+evidence:
+  - ref: Q2295
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP17-112
+    note: 母なる慈愛自願翻裏兩張時不能只翻一張。把這個完整數量要求類推到同為自願動作的消滅。
+  - ref: Q1116
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP08-085
+    note: 沒有合法的敵方從者目標，不能打出本卡，也不能消滅墓場卡。
+  - ref: Q1117
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP08-085
+    note: 結算中的本卡不在墓場，不能把自己選為消滅對象。
+  - ref: project
+    kind: project
+    date: "2026-11-11"
+    reason: 依 Q2295 類推，玩家可以選擇是否執行整項動作；CR 1.3.2 的盡可能執行並不讓這個自願動作接受部分數量。附帶回手以成功消滅回條為準。
+strength: generalized
+decided_on: "2026-11-11"
+applies_to: [K.may, V.receipt-field]
+hint:
+  zh-TW: 依 Q2295 類推：墓場不足四張時不能選擇消滅。選擇時須恰好四張，實際消滅四張才回手。
+  ja: Q2295からの類推：自分の墓場にカードが4枚未満なら消滅を選べません。選ぶなら4枚ちょうどで、実際に4枚消滅したときだけ手札に戻します。
+  en: "By analogy with Q2295: You may choose to banish exactly four cards from your cemetery only if there are at least four. Return this spell to hand only if four cards were actually banished."
+note: Q2295 是另一張卡的類比依據；Q1116 和 Q1117 並未直接裁定這張卡的可選消滅數量。

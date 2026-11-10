@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-085:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+      rulings: [R-0018]
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - { bind: enemy, from: { who: opp, zone: field, kind: follower }, n: 1 }
+          do:
+            - damage: { to: enemy, n: 3 }
+            - if:
+                cond: { cmp: { left: { count: { who: self, zone: cemetery } }, op: ge, right: 4 } }
+                then:
+                  - optional:
+                      do:
+                        - choose: { bind: fuel, from: { who: self, zone: cemetery }, n: 4 }
+                        - banish: { ref: fuel, result: banished }
+                        - if:
+                            cond: { cmp: { left: { count_of: banished }, op: eq, right: 4 } }
+                            then:
+                              - move: { ref: this, to: hand }
