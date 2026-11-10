@@ -869,3 +869,27 @@ BP18-118 在固定選一項的 `choice.options` 中，模式 3 使用：
 目前只准入場上能力的固定選一項；手牌消滅模式只帶一個材料參數與唯一成本步驟。既有跨模式材料重疊限制不變，公開或移區手牌的模式費用仍不准入。
 手牌為空仍可選該模式後拒付；接受卻付不起則取消打出。CP03-046 的頭費用若拒付，整個入場能力沒有打出（R-0001）。
 不接受複數張數、upto、any、分組、結果命名、對手手牌、法術追加費用或 Quick。
+
+## 本回合安裝的事件能力
+
+`delayed` 目前接受以下 `on`，並要求 `until: turn`、`next_only: false`（可省略 false）：
+
+```yaml
+delayed:
+  on:
+    moved:
+      ref: enemy
+      from: field
+      to: cemetery
+  until: turn
+  next_only: false
+  do:
+    - draw: {who: self, n: 1}
+```
+
+`enemy` 必須是本能力已正式選取的一個公開場上從者；監看的是選取時的物件世代。
+callback 僅支援固定抽 1、己方回血 2、固定 token 1 張到 EX；
+不接受內層 targets、optional_cost、define、前置條件、巢狀 delayed、其他事件或期限。
+
+每次安裝獨立，來源之後離場仍有效。目標回手、消滅、回場的新世代不符合場進墓條件；
+本次傷害導致的破壞會在本文安裝完成後，於共同檢查時點發生。例：BP15-001／008／012。
