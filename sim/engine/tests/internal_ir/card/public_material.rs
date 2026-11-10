@@ -33,9 +33,15 @@ fn public_material_union_preserves_banishment_and_rejects_unconstrained_transfer
             .lower(&expanded("unit-follower", "activate", input))
             .unwrap_err();
     }
-    for who in ["opp", "all"] {
+    for (who, zone) in [
+        ("opp", json!("field")),
+        ("all", json!("ex")),
+        ("all", json!("cemetery")),
+        ("all", json!(["field", "ex"])),
+    ] {
         let mut input = body.clone();
         input["cost"]["banish"]["sel"]["who"] = json!(who);
+        input["cost"]["banish"]["sel"]["zone"] = zone;
         lowerer()
             .lower(&expanded("unit-follower", "activate", input))
             .unwrap_err();
@@ -56,6 +62,66 @@ fn public_material_union_preserves_banishment_and_rejects_unconstrained_transfer
     lowerer()
         .lower(&expanded("unit-follower", "activate", variable))
         .unwrap_err();
+}
+
+#[test]
+fn public_material_banish_cost_uses_both_fields_and_keeps_banish_facts() {
+    let typed = program(
+        "unit-follower",
+        "activate",
+        json!({
+            "cost":{"banish":{"sel":{"who":"all","zone":"field","other":true},"n":2}},
+            "do":[{"life":{"who":"self","delta":1}}]
+        }),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},
+        {"id":"ally","card":"unit-follower"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"ex","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "both-fields-banish-material",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &typed).unwrap();
+    let choice = awaiting(
+        game.activate_internal_card("s", typed.card().abilities[0].node.id, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let InputDomain::CostMaterials(materials) = &choice.domain else {
+        panic!("expected public material payment")
+    };
+    assert_eq!(materials.members.len(), 2);
+    let handles = materials
+        .members
+        .iter()
+        .map(|member| member.handle)
+        .collect();
+    let result = resolved(
+        game.answer_internal_card(choice.actor, choice.token, Answer::CostMaterials(handles))
+            .unwrap(),
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["field"], json!(["s"]));
+    assert_eq!(after["P1"]["banish"], json!(["ally"]));
+    assert_eq!(after["P2"]["banish"], json!(["enemy"]));
+    assert_eq!(after["P2"]["ex"], json!(["ex"]));
+    assert_eq!(after["P1"]["leader"]["life"], 21_u8);
+    assert_eq!(
+        result.progress.facts.iter().filter(|fact| matches!(
+            fact, Fact::Movement(movement) if movement.method == MoveMethod::Banish
+                && movement.from.kind == ZoneKind::Field
+                && movement.movement.actual_to.as_ref().is_some_and(|zone| zone.kind == ZoneKind::Banish)
+        )).count(),
+        2
+    );
 }
 
 #[test]

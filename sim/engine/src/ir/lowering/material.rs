@@ -44,7 +44,7 @@ pub(super) fn lower(
     if !(matches!(material.sel.who, ast::Side::Controller)
         || (matches!(material.sel.who, ast::Side::All)
             && matches!(material.sel.zone, ast::PublicZone::Field)
-            && matches!(operation, Operation::Put)))
+            && matches!(operation, Operation::Put | Operation::Banish)))
     {
         return Err(unsupported(path));
     }
