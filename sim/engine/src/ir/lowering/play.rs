@@ -164,6 +164,21 @@ impl BodyContext<'_> {
 
     fn target(&mut self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
         let (domain, _) = self.object_choice(target, path, false)?;
+        if !target.any
+            && target.roles.is_none()
+            && target.upto.is_none()
+            && matches!(target.n, Some(ast::NumericArgument::Literal(1)))
+            && matches!(target.from.kind, Some(ast::SearchKind::Follower))
+            && matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+            )
+            && !target.from.leader_or
+            && target.from.leader.is_none()
+            && target.from.leaders.is_none()
+        {
+            self.follower_targets.insert(target.bind.clone());
+        }
         self.parameters.push(parameter(
             self.card_allocator.id(path)?,
             PlaySlot::Targets,
@@ -779,12 +794,7 @@ impl BodyContext<'_> {
                     reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
                 },
             },
-            ast::Recipients::Union { any_of } => RecipientSet::Union {
-                sets: any_of
-                    .iter()
-                    .map(|set| self.recipients(set, path))
-                    .collect::<Result<Vec<_>, _>>()?,
-            },
+            ast::Recipients::Union { any_of } => self.recipient_union(any_of, path)?,
         })
     }
 
@@ -1034,6 +1044,7 @@ impl BodyContext<'_> {
                 observed_targets: BTreeSet::new(),
                 field_entry: super::FieldEntryGuard::default(),
                 targets: BTreeMap::new(),
+                follower_targets: BTreeSet::new(),
                 target_roles: BTreeMap::new(),
                 ability_holders: BTreeSet::new(),
                 recipient_targets: BTreeMap::new(),
@@ -1069,6 +1080,7 @@ impl BodyContext<'_> {
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.field_entry.multi = self.field_entry.multi.clone();
                 context.targets.clone_from(&self.targets);
+                context.follower_targets.clone_from(&self.follower_targets);
                 context.target_roles.clone_from(&self.target_roles);
                 context.ability_holders.clone_from(&self.ability_holders);
                 context

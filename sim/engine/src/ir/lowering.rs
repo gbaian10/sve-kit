@@ -37,6 +37,7 @@ mod play;
 mod play_restrictions;
 mod prevention;
 mod receipt_counts;
+mod recipient_union;
 mod resource_entry;
 mod reveal_cost;
 mod reveal_until;
@@ -1371,6 +1372,7 @@ struct BodyContext<'definitions> {
     observed_targets: BTreeSet<String>,
     field_entry: FieldEntryGuard,
     targets: BTreeMap<String, Binding<Selector>>,
+    follower_targets: BTreeSet<String>,
     target_roles: BTreeMap<(String, String), Binding<Selector>>,
     ability_holders: BTreeSet<String>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
@@ -1447,6 +1449,7 @@ impl<'definitions> BodyContext<'definitions> {
             observed_targets: BTreeSet::new(),
             field_entry: FieldEntryGuard::default(),
             targets: BTreeMap::new(),
+            follower_targets: BTreeSet::new(),
             target_roles: BTreeMap::new(),
             ability_holders: BTreeSet::new(),
             recipient_targets: BTreeMap::new(),

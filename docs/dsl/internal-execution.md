@@ -475,6 +475,8 @@ UpToStepwise 每張前只詢問該抽牌者 Continue／Stop；每次問答都有
 Damage 只接受 Ability flags、Instruction batch、Current source（正式整卡亦接受上述 SourceInformation）
 及 Uniform signed amount。
 同指示開始時求值 recipients／amount；Union 依物件 ID＋世代或玩家去重。
+正式單一場上從者目標與自身的傷害聯集沿用同一指示與此去重規則；
+自身使用 SourceHolder，不新增正式目標或另一個傷害批次。
 物件成員無法確認為從者時整次拒絕，不推定非從者是否計入 requested；這是內部准入限制。
 目前世代不在場上的成員、或捕捉時不全在場上的集合，也整次拒絕；capture slot 保存當時的場上來源證據，
 不以「後來已換世代」冒充原本合法的場上選取。從場上捕捉後才失效的從者仍依下述聚合契約處理。
