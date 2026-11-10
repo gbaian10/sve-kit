@@ -118,6 +118,7 @@ fn fixture(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut play: CardPlay, take: bool) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::Targets(d) => {
                 assert!(

@@ -8,6 +8,7 @@ use sve_engine::game::internal::SearchAnswer;
 fn finish(game: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
             InputDomain::Search(domain) => {

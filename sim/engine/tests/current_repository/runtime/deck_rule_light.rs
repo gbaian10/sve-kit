@@ -17,6 +17,7 @@ fn position() -> Value {
 fn finish(board: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(d) => {
                 Answer::Targets(d.members.iter().take(1).map(|m| m.handle).collect())
             }
@@ -103,9 +104,11 @@ fn rapid_fire_uses_grave_thresholds_and_the_targets_leader() {
         initial["players"]["P2"]["zones"]["field"][0]["state"]["hp"] = json!(target_hp);
         initial["players"]["P2"]["zones"]["field"][0]["state"]["max_hp"] = json!(target_hp);
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":card}]);
-        initial["players"]["P1"]["zones"]["cemetery"] = json!((0..grave)
-            .map(|n| json!({"id":format!("old{n}"),"card":"BP11-045"}))
-            .collect::<Vec<_>>());
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(
+            (0..grave)
+                .map(|n| json!({"id":format!("old{n}"),"card":"BP11-045"}))
+                .collect::<Vec<_>>()
+        );
         let mut board = game(&initial);
         play(&mut board, "spell");
         let state = board.projection(View::Referee).unwrap();
@@ -128,9 +131,11 @@ fn mizer_searches_a_spell_loots_and_discounts_only_at_spellchain_five() {
     for grave in [0_u8, 5] {
         let mut initial = position();
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"mizer","card":"BP11-SL09"}]);
-        initial["players"]["P1"]["zones"]["cemetery"] = json!((0..grave)
-            .map(|n| json!({"id":format!("old{n}"),"card":"BP11-045"}))
-            .collect::<Vec<_>>());
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(
+            (0..grave)
+                .map(|n| json!({"id":format!("old{n}"),"card":"BP11-045"}))
+                .collect::<Vec<_>>()
+        );
         initial["players"]["P1"]["zones"]["deck"] = json!([
             {"id":"fire","card":"BP11-P12"},{"id":"draw0","card":"BP01-171"},{"id":"draw1","card":"BP01-171"}
         ]);
@@ -164,9 +169,11 @@ fn onion_gains_storm_and_an_attack_trigger_only_at_five_in_its_grave() {
     for grave in [4_u8, 5] {
         let mut initial = position();
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"onion","card":"BP09-P15"}]);
-        initial["players"]["P1"]["zones"]["cemetery"] = json!((0..grave)
-            .map(|n| json!({"id":format!("old{n}"),"card":"BP09-049"}))
-            .collect::<Vec<_>>());
+        initial["players"]["P1"]["zones"]["cemetery"] = json!(
+            (0..grave)
+                .map(|n| json!({"id":format!("old{n}"),"card":"BP09-049"}))
+                .collect::<Vec<_>>()
+        );
         let mut board = game(&initial);
         play(&mut board, "onion");
         let result = board
@@ -258,9 +265,11 @@ fn construction_card(card: &str, alias: &str) {
         "construction text creates no game ability"
     );
     let mut initial = position();
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!((0_u8..10)
-        .map(|n| json!({"id":format!("copy{n}"),"card":alias}))
-        .collect::<Vec<_>>());
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!(
+        (0_u8..10)
+            .map(|n| json!({"id":format!("copy{n}"),"card":alias}))
+            .collect::<Vec<_>>()
+    );
     let mut board = game(&initial);
     let before = board.projection(View::Referee).unwrap();
     assert_eq!(

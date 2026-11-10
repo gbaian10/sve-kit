@@ -188,7 +188,8 @@ impl BodyContext<'_> {
             } => {
                 matches!(query.zone, ast::PublicZone::Cemetery)
             }
-            ast::Number::Counter { .. }
+            ast::Number::Dice { .. }
+            | ast::Number::Counter { .. }
             | ast::Number::Power { .. }
             | ast::Number::Life { .. }
             | ast::Number::Cost { .. }

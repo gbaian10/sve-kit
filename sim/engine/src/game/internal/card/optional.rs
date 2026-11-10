@@ -8,8 +8,8 @@ use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
     DiscardEvent, EventPattern, Expr, InstructionContext, Int, MoveDestination, MoveReason,
     MovementEvent, Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
-    PlayerRef, Program, ReceiptId, Resource, ResourceOperation, RuntimeReceiptId, Selector,
-    TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef, optional_payment,
+    PlayerRef, Program, ReceiptId, RepeatBody, Resource, ResourceOperation, RuntimeReceiptId,
+    Selector, TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef, optional_payment,
 };
 use core::slice::from_ref;
 
@@ -280,7 +280,7 @@ fn field_resolution_costs(program: &Program) -> bool {
         Node::Control { control: Control::If { then_body, else_body, .. } } => {
             field_resolution_costs(then_body) && else_body.as_ref().is_none_or(field_resolution_costs)
         }
-        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } } => field_resolution_costs(body),
+        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } | Control::Repeat { body: RepeatBody::Program { body }, .. } } => field_resolution_costs(body),
         Node::Control { control: Control::Mode { modes, .. } } => modes.iter().all(|mode| field_resolution_costs(&mode.body)),
         _ => true,
     })
@@ -311,8 +311,15 @@ pub(super) fn check_body(program: &Program, root: bool) -> Result<()> {
                 }
                 check_control(control)?;
             }
+            // A fixed repeat runs its body inline, so the body keeps every payment restriction.
             Node::Control {
-                control: Control::Sequence { body } | Control::May { body, .. },
+                control:
+                    Control::Sequence { body }
+                    | Control::May { body, .. }
+                    | Control::Repeat {
+                        body: RepeatBody::Program { body },
+                        ..
+                    },
             } => check_body(body, false)?,
             Node::Control {
                 control:
@@ -354,7 +361,13 @@ fn has_resolution_payment(program: &Program) -> bool {
                 },
         } => true,
         Node::Control {
-            control: Control::Sequence { body } | Control::May { body, .. },
+            control:
+                Control::Sequence { body }
+                | Control::May { body, .. }
+                | Control::Repeat {
+                    body: RepeatBody::Program { body },
+                    ..
+                },
         } => has_resolution_payment(body),
         Node::Control {
             control:

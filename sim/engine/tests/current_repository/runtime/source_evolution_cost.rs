@@ -28,6 +28,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
     loop {
         while let CardPlay::Awaiting(question) = play {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     Answer::Targets(domain.members.iter().map(|member| member.handle).collect())
                 }
@@ -93,8 +94,15 @@ fn evolve(game: &mut Game, payment: u8) {
         "the printed evolution payment must resolve"
     );
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["pp"]["current"], before.checked_sub(u64::from(payment)).unwrap(), "only the declared evolution payment is deducted");
-    assert_eq!(state["objects"]["source"]["evolved_with"], "form", "successful evolution attaches the selected form");
+    assert_eq!(
+        state["P1"]["pp"]["current"],
+        before.checked_sub(u64::from(payment)).unwrap(),
+        "only the declared evolution payment is deducted"
+    );
+    assert_eq!(
+        state["objects"]["source"]["evolved_with"], "form",
+        "successful evolution attaches the selected form"
+    );
 }
 
 #[test]

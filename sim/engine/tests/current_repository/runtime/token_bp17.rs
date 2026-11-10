@@ -47,6 +47,7 @@ fn start(game: &mut Game, number: &str) -> CardPlay {
 fn finish(game: &mut Game, mut play: CardPlay, choose_ward: bool) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::TokenCapacity { choices } => {
                 let name = if choose_ward {
                     "シールドガーディアン"

@@ -25,6 +25,7 @@ fn from_position(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut result: CardPlay) {
     while let CardPlay::Awaiting(question) = result {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(domain) => {
                 Answer::Targets(domain.members.iter().map(|member| member.handle).collect())
             }

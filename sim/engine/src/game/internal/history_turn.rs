@@ -1,6 +1,7 @@
 //! Current-turn queries read committed public facts; only Combo projects a pending formal play.
 
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
+use crate::ir::dice as ir_dice;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
@@ -322,6 +323,12 @@ pub(super) fn subjects(
     query: &HistoryQuery,
     count: HistoryCount,
 ) -> Result<Nat> {
+    if let Some(filter) = ir_dice::history(query) {
+        if count != HistoryCount::Facts {
+            return Err(unsupported("dice history subject count"));
+        }
+        return super::dice::history_count(execution, game, filter.face);
+    }
     if discarded_plan(query) {
         if count != HistoryCount::Facts {
             return Err(unsupported("discard history subject count"));

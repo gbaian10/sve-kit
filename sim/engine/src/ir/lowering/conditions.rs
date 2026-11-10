@@ -285,7 +285,12 @@ impl BodyContext<'_> {
                     objects: self.attack_target_objects(path)?,
                 }
             }
-            ast::Condition::History(history) => return self.history_condition(history, path),
+            ast::Condition::History(history) => {
+                return match history {
+                    ast::HistoryCondition::Dice(dice) => self.dice_history(dice, path),
+                    ast::HistoryCondition::Other(query) => self.history_condition(query, path),
+                };
+            }
             ast::Condition::EnteredFrom(condition) => return self.entered_from(condition, path),
             ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
@@ -1003,6 +1008,16 @@ impl BodyContext<'_> {
             ast::Number::Min { min } => self.minimum(min, path, active),
             ast::Number::Per { per } => self.per(per, path, active),
             ast::Number::Event { event } => self.event_number(event, path),
+            ast::Number::Dice { dice } => self
+                .dice_results
+                .get(dice)
+                .copied()
+                .map(|binding| {
+                    Expr::Compute(Box::new(IntOperation::FromNat {
+                        value: Expr::Bound(binding),
+                    }))
+                })
+                .ok_or_else(|| unsupported(path)),
             ast::Number::Count { count } => self.zone_count(count, path),
             ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(
                 distinct_names,
@@ -1063,13 +1078,21 @@ impl BodyContext<'_> {
         })))
     }
 
-    /// Only a damage event header provides its actual amount.
     fn event_number(
         &self,
         field: &ast::EventNumber,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let ast::EventNumber::Amount = field;
+        if matches!(field, ast::EventNumber::Value) {
+            return self
+                .dice_event
+                .map(|event| {
+                    Expr::Compute(Box::new(IntOperation::FromNat {
+                        value: Expr::Frozen(Box::new(NatFrozen::DiceValue { event })),
+                    }))
+                })
+                .ok_or_else(|| unsupported(path));
+        }
         self.damage_event
             .map(|event| Expr::Frozen(Box::new(IntFrozen::DamageAmount { event })))
             .ok_or_else(|| unsupported(path))

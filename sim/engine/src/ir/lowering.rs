@@ -13,6 +13,7 @@ mod conditions;
 mod costs;
 mod counters;
 mod current;
+mod dice;
 mod discard;
 mod earth;
 mod evolution;
@@ -484,6 +485,7 @@ impl Allocator {
         if let Some(declaration) = &entry.r#static {
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
+                Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
                 Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
                 Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,
@@ -1012,6 +1014,14 @@ fn lowered_subscription(
         ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_) => {
             fusion::subscription(on, ids, path, allocator)
         }
+        ast::PhaseSubscription::DiceRolled(value) => {
+            let ast::SelfPlayer::Controller = value.who;
+            let binding = Binding::new(event_id, scope);
+            Ok(EventPattern::Dice {
+                binding,
+                predicate: super::dice::predicate(binding),
+            })
+        }
         ast::PhaseSubscription::Equipped(_) => {
             let binding = Binding::new(event_id, scope);
             Ok(EventPattern::Equip {
@@ -1217,6 +1227,7 @@ fn lowered_change(
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_)
+        | ast::PhaseSubscription::DiceRolled(_)
         | ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
     }
 }
@@ -1321,6 +1332,8 @@ struct BodyContext<'definitions> {
     activation_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
+    dice_event: Option<Binding<super::DiceEvent>>,
+    dice_results: BTreeMap<String, Binding<Nat>>,
     equip_event: Option<Binding<super::EquipEvent>>,
     drive_checked_event: Option<Binding<super::DriveCheckedEvent>>,
     source_use: &'definitions ast::SourceUse,
@@ -1392,6 +1405,8 @@ impl<'definitions> BodyContext<'definitions> {
             }),
             subject_event: None,
             damage_event: None,
+            dice_event: None,
+            dice_results: BTreeMap::new(),
             equip_event: None,
             drive_checked_event: None,
             source_use: &entry.sources[0],
@@ -1468,6 +1483,9 @@ impl<'definitions> BodyContext<'definitions> {
             self.subject_event = SubjectFields::from_pattern(pattern);
             self.equip_event = super::events::equipment::binding(pattern);
             self.drive_checked_event = super::events::drive::checked_binding(pattern);
+            if let EventPattern::Dice { binding, .. } = pattern {
+                self.dice_event = Some(*binding);
+            }
             if let EventPattern::Damage { binding, .. } = pattern {
                 self.damage_event = Some(*binding);
             }
@@ -1640,6 +1658,11 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(self.resolution_payment(payment, &step_path, source, ability_source)?);
                 continue;
             }
+            if let ast::Step::Repeat(repeat) = step {
+                let node = self.fixed_repeat(repeat, &step_path, source, ability_source)?;
+                steps.push(Self::located_step(source, &step_path, node));
+                continue;
+            }
             if let ast::Step::EachPlayer(each) = step {
                 let node = self.each_player(each, &step_path, source, ability_source)?;
                 steps.push(Self::located_step(source, &step_path, node));
@@ -1780,6 +1803,10 @@ impl<'definitions> BodyContext<'definitions> {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every closed author step maps to its instruction in one exhaustive dispatch."
+    )]
     fn action(
         &mut self,
         step: &ast::Step,
@@ -1788,6 +1815,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Dice(value) => self.dice(value, path),
             ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
             ast::Step::ExtraTurn(_) => Ok(extra_turn(Binding::new(
@@ -1809,6 +1837,7 @@ impl<'definitions> BodyContext<'definitions> {
             | ast::Step::Choose(_)
             | ast::Step::If(_)
             | ast::Step::EachPlayer(_)
+            | ast::Step::Repeat(_)
             | ast::Step::Evolve(_) => Err(unsupported(path)),
             ast::Step::Destroy(value) => Ok(Action::Destroy {
                 objects: match value {

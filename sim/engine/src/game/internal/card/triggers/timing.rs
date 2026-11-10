@@ -9,6 +9,7 @@ use crate::game::internal::grant;
 use crate::game::internal::source::SourceSnapshot;
 use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
 use crate::game::{Step, int, string};
+use crate::ir::dice as ir_dice;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::fusion;
 use crate::ir::history_turn::source_link::SourceLink;
@@ -182,6 +183,7 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         Event::Draw { .. } => Ok("Draw".into()),
         Event::DriveChecked { .. } => Ok("DriveChecked".into()),
         Event::DriveTrigger { .. } => Ok("DriveTrigger".into()),
+        Event::Dice { event } => Ok(format!("Dice {}", ir_dice::value(event.value))),
         Event::Equip { .. } => Ok(format!("Equip while source at equipment slot {position}")),
         Event::Move { event } => Ok(format!(
             "Move deck to cemetery of player {} at field slot {position}",

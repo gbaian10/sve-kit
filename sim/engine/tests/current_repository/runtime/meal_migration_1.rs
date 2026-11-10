@@ -38,6 +38,7 @@ fn finish(game: &mut Game, play: CardPlay) {
 fn finish_with_cost(game: &mut Game, mut play: CardPlay, pay_cost: bool) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(pay_cost),
             InputDomain::CostMaterials(domain) => Answer::CostMaterials(
@@ -73,7 +74,7 @@ fn finish_with_cost(game: &mut Game, mut play: CardPlay, pay_cost: bool) {
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
             | InputDomain::DamageReplacements(_)
-        | InputDomain::TriggerQuota(_)
+            | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
             | InputDomain::SearchPartition(_)
             | InputDomain::Distribution(_)

@@ -123,6 +123,7 @@ pub(crate) mod advance_entry;
 mod answers;
 pub(crate) mod attack_restrictions;
 mod capabilities;
+pub(crate) mod dice;
 pub(crate) mod effect_evolution;
 mod effects;
 pub(crate) mod events;

@@ -134,6 +134,7 @@ fn game(state: &Value) -> Game {
 fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),

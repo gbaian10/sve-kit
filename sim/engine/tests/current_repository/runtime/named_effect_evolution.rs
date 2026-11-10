@@ -58,6 +58,7 @@ fn finish(board: &mut Game, mut play: CardPlay) {
             | InputDomain::BeforeDraw
             | InputDomain::Pending(_)
             | InputDomain::TriggerQuota(_)
+            | InputDomain::DiceReroll { .. }
             | InputDomain::Integer(_)
             | InputDomain::DamageReplacements(_)
             | InputDomain::DriveTrigger { .. }

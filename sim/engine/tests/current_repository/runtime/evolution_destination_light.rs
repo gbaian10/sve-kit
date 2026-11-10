@@ -32,6 +32,7 @@ fn count(cardinality: &Cardinality, available: usize) -> usize {
 
 fn answer(domain: &InputDomain) -> Answer {
     match domain {
+        InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
         InputDomain::Targets(d) => Answer::Targets(
             d.members
                 .iter()
@@ -175,9 +176,11 @@ fn celia_both_real_faces_create_their_printed_tokens_after_evolution() {
 
 #[test]
 fn orchis_second_named_destination_needs_three_cemetery_puppets() {
-    for (definition, face, pp, puppets, succeeds) in
-        [(0, 0, 1, 0_usize, true), (1, 1, 4, 2, false), (1, 1, 4, 3, true)]
-    {
+    for (definition, face, pp, puppets, succeeds) in [
+        (0, 0, 1, 0_usize, true),
+        (1, 1, 4, 2, false),
+        (1, 1, 4, 3, true),
+    ] {
         let mut initial = position("BP08-002", "BP08-003");
         initial["players"]["P1"]["zones"]["cemetery"] = json!(
             (0..puppets)
@@ -226,9 +229,11 @@ fn vampy_fanfare_creates_a_bat_and_second_evolution_requires_five_vampires() {
         state["objects"][ex[0].as_str().unwrap()]["name"],
         "フォレストバット"
     );
-    for (definition, face, pp, vampires, succeeds) in
-        [(0, 0, 1, 0_usize, true), (1, 1, 3, 4, false), (1, 1, 3, 5, true)]
-    {
+    for (definition, face, pp, vampires, succeeds) in [
+        (0, 0, 1, 0_usize, true),
+        (1, 1, 3, 4, false),
+        (1, 1, 3, 5, true),
+    ] {
         let mut evolved = position("BP09-069", "BP09-070");
         evolved["players"]["P1"]["zones"]["cemetery"] = json!(
             (0..vampires)

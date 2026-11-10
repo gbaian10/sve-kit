@@ -282,6 +282,9 @@ mod conditions {
                     }
                     while let CardPlay::Awaiting(question) = step {
                         let answer = match &question.domain {
+                            InputDomain::DiceReroll { .. } => {
+                                panic!("unexpected fixture dice reroll")
+                            }
                             InputDomain::Targets(domain) => {
                                 assert_eq!(domain.members.len(), 1);
                                 Answer::Targets(vec![domain.members[0].handle])
@@ -327,6 +330,7 @@ mod conditions {
     fn finish_observed_look(game: &mut Game, mut step: CardPlay, take: bool) {
         while let CardPlay::Awaiting(question) = step {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     assert_eq!(
                         domain.members.len(),
@@ -476,6 +480,7 @@ mod conditions {
                     .unwrap();
                 while let CardPlay::Awaiting(question) = step {
                     let answer = match &question.domain {
+                        InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                         InputDomain::Targets(domain) => {
                             assert_eq!(domain.members.len(), 1);
                             Answer::Targets(vec![domain.members[0].handle])
@@ -635,6 +640,7 @@ mod conditions {
             let mut step = choice_conditions::trigger(&mut game);
             while let CardPlay::Awaiting(question) = step {
                 let answer = match &question.domain {
+                    InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                     InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
                     InputDomain::CostMaterials(domain) => {
                         Answer::CostMaterials(vec![domain.members[0].handle])

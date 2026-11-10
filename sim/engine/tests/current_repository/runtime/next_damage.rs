@@ -12,6 +12,7 @@ const fn actor() -> PlayerId {
 fn finish(game: &mut Game, mut play: CardPlay, mode: usize) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Modes { modes, .. } => Answer::Modes(vec![modes[mode]]),
             InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),

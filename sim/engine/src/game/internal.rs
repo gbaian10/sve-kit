@@ -30,7 +30,7 @@ use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, DriveGainedEvent, EvolveEvent,
     FaceId, PaymentEvent, PaymentResult, QuickWindow, RaceEvent,
 };
-use crate::ir::{AttackEvent, EquipEvent};
+use crate::ir::{AttackEvent, DiceEvent, EquipEvent};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -53,7 +53,9 @@ mod alternatives;
 mod card;
 mod cost;
 mod counters;
+mod dice;
 mod discard;
+pub(in crate::game) use dice::DiceHistoryFact;
 mod drive;
 mod duration;
 mod earth;
@@ -168,6 +170,13 @@ pub struct AbilityOption {
 /// First-slice input shapes.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum InputDomain {
+    /// A public die result and the remaining optional rerolls; answer zero or one.
+    DiceReroll {
+        /// Currently visible face before the next optional reroll.
+        value: Nat,
+        /// Unused permissions for this roll.
+        remaining: Nat,
+    },
     /// Current effective definitions addressed only by this question's handles.
     Abilities(Vec<AbilityOption>),
     /// Select evolution-equivalent resources and optionally substitute one EP for one PP.
@@ -483,6 +492,8 @@ pub enum Fact {
     Draw(DrawEvent),
     /// A positive damage application.
     Damage(DamageEvent),
+    /// One roll with its accepted value; reroll attempts are not separate facts.
+    Dice(DiceEvent),
     /// One physical movement, including its action method and causal execution.
     Movement(Box<MovementFact>),
     /// One explicit numeric instruction's nonzero facets for one subject.
@@ -513,6 +524,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    Dice(Box<dice::RollWait>),
     Ability(card::AbilityWait),
     ResourceEntryPayment(card::resource_entry::ResourceEntryWait),
     Discard(discard::HandWait),
@@ -593,6 +605,7 @@ pub(super) struct Execution {
     entry_method: Option<((ScopeId, u64), EntryMethod)>,
     entry_origin: Option<((ScopeId, u64), EntryOrigin)>,
     damage_event: Option<((ScopeId, u64), DamageEvent)>,
+    dice_event: Option<(Binding<DiceEvent>, DiceEvent)>,
     event_move: Option<(MovementEvent, Option<ObjectRef>)>,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
     play: Option<PlayState>,
@@ -776,6 +789,7 @@ impl Game {
                 entry_method: None,
                 entry_origin: None,
                 damage_event: None,
+                dice_event: None,
                 event_move: None,
                 targets: BTreeMap::new(),
                 play: None,
@@ -967,6 +981,10 @@ impl Game {
                     rollback = execution.origin.take();
                     execution.bind_targets(&wait, objects);
                 }
+                (Wait::Dice(wait), Answer::Integer(number)) if number.0 <= 1 => {
+                    rollback = execution.origin.take();
+                    self.internal_dice_answer(&mut execution, *wait, number.0 == 1)?;
+                }
                 (Wait::Alternative(wait), Answer::Modes(modes)) => {
                     let body = wait.validate(&modes)?;
                     rollback = execution.origin.take();
@@ -1124,7 +1142,7 @@ impl Game {
         result
     }
 
-    /// Inspect only the current actor's question; authority may inspect it as referee.
+    /// Inspect the actor's question; dice reroll results are public to both players.
     #[must_use]
     pub fn internal_decision(&self, view: View) -> Option<DecisionView> {
         let question = self
@@ -1143,9 +1161,11 @@ impl Game {
                     .as_ref()
                     .map(|question| &question.view)
             })?;
-        view.player()
-            .is_none_or(|seat| seat == seat_name(question.actor).unwrap_or_default())
-            .then(|| question.clone())
+        (matches!(question.domain, InputDomain::DiceReroll { .. })
+            || view
+                .player()
+                .is_none_or(|seat| seat == seat_name(question.actor).unwrap_or_default()))
+        .then(|| question.clone())
     }
 
     pub(super) fn internal_decision_packet(&self, view: View) -> Value {
@@ -1163,6 +1183,7 @@ impl Game {
                 InputDomain::OptionalCost => json!({"kind":"optional-cost","options":["accept","decline"]}),
                 InputDomain::CostMaterials(domain) => { let mut packet = card::selection::packet(&domain); packet["kind"] = json!("cost-materials"); packet },
                 InputDomain::BeforeDraw => json!({"kind":"before-draw"}),
+                InputDomain::DiceReroll { value, remaining } => json!({"kind":"dice_reroll","value":value.0,"remaining":remaining.0}),
                 InputDomain::Integer(bounds) => json!({"kind":"integer","minimum":bounds.minimum.0,"maximum":bounds.maximum.map(|value| value.0)}),
                 InputDomain::DriveTrigger {icon, targets} => json!({"kind":"drive-trigger","icon":drive::icon_name(icon),"targets":targets.iter().map(|card| json!({"handle":card.handle,"card":card.card,"name":card.name})).collect::<Vec<_>>()}),
                 InputDomain::DamageReplacements(options) => json!({"kind":"damage-replacements","options":options.iter().map(|option| json!({"handle":option.handle,"card":option.card,"name":option.name,"line":option.line})).collect::<Vec<_>>()}),
@@ -1348,6 +1369,9 @@ impl Game {
                 Node::Control {
                     control: control @ Control::EachPlayer { .. },
                 } => self.internal_player_stage(execution, &control)?,
+                Node::Control {
+                    control: control @ Control::Repeat { .. },
+                } => Self::internal_repeat(execution, control)?,
                 Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),
@@ -1577,6 +1601,7 @@ impl Game {
             Action::Reveal { objects } => {
                 self.internal_reveal(execution, &instruction, objects)?;
             }
+            Action::Dice { .. } => self.internal_dice(execution, &instruction)?,
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }

@@ -156,11 +156,12 @@ pub(super) fn offered(play: &CardPlay) -> Vec<String> {
 pub(super) fn finish(game: &mut Game, mut play: CardPlay, prefer: &[&str]) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
-            InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(
-                if prefer.contains(&"mode-2") { 2 } else { 1 },
-            )]),
+            InputDomain::Modes { .. } => {
+                Answer::Modes(vec![ModeId(if prefer.contains(&"mode-2") { 2 } else { 1 })])
+            }
             InputDomain::Targets(domain) | InputDomain::CostMaterials(domain) => {
                 let count = usize::try_from(domain.cardinality.minimum.0.max(1)).unwrap();
                 let mut members: Vec<_> = domain.members.iter().collect();
@@ -178,11 +179,13 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay, prefer: &[&str]) -> Ca
                     Answer::CostMaterials(handles)
                 }
             }
-            InputDomain::Search(domain) => {
-                Answer::Search(SearchAnswer::Ungrouped(
-                    domain.cards.first().map(|m| vec![m.handle]).unwrap_or_default(),
-                ))
-            }
+            InputDomain::Search(domain) => Answer::Search(SearchAnswer::Ungrouped(
+                domain
+                    .cards
+                    .first()
+                    .map(|m| vec![m.handle])
+                    .unwrap_or_default(),
+            )),
             InputDomain::Order(cards) => Answer::Order(cards.iter().map(|m| m.handle).collect()),
             InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
@@ -324,7 +327,11 @@ fn bp02_041_returns_only_an_unevolved_enemy() {
         let play = game
             .play_internal_card("source", PlayerId { seat: 1 })
             .unwrap();
-        assert_eq!(offered(&play), ["flt-enemy"], "an evolved follower is excluded");
+        assert_eq!(
+            offered(&play),
+            ["flt-enemy"],
+            "an evolved follower is excluded"
+        );
         finish(&mut game, play, &[]);
         checks(&mut game);
         let after = state(&game);
@@ -376,8 +383,7 @@ fn turn_start_clears_entry_marks_on_both_fields() {
     assert_eq!(after["turn"]["active"], "P2");
     for id in ["source", "enemy"] {
         assert_eq!(
-            after["objects"][id]["entered_this_turn"],
-            false,
+            after["objects"][id]["entered_this_turn"], false,
             "{id} did not enter during the new turn"
         );
     }
@@ -440,8 +446,18 @@ fn cp01_055_lastword_cannot_return_its_own_name() {
         finish(&mut game, lastword, &[]);
         checks(&mut game);
         let after = state(&game);
-        assert!(after["P1"]["hand"].as_array().unwrap().contains(&json!("runner")));
-        assert!(after["P1"]["cemetery"].as_array().unwrap().contains(&json!("twin")));
+        assert!(
+            after["P1"]["hand"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("runner"))
+        );
+        assert!(
+            after["P1"]["cemetery"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("twin"))
+        );
     }
 }
 

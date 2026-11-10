@@ -475,6 +475,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
                     | InputDomain::DriveTrigger { .. }
                     | InputDomain::WardEntry { .. }
                     | InputDomain::BeforeDraw
+                    | InputDomain::DiceReroll { .. }
                     | InputDomain::Integer(_)
                     | InputDomain::Order(_)
                     | InputDomain::DamageReplacements(_)

@@ -141,6 +141,7 @@ fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
             return play;
         };
         let answer = match q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::Abilities(_)

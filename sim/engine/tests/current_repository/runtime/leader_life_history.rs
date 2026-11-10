@@ -51,6 +51,7 @@ fn resolve_trigger(game: &mut Game, accept: bool) {
         .unwrap();
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(accept),
             InputDomain::Targets(domain) => {
                 assert_eq!(

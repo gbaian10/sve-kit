@@ -63,6 +63,7 @@ fn pending(game: &mut Game, card: &str, line: u64) -> CardPlay {
 fn finish(game: &mut Game, mut play: CardPlay, material: &str, target: &str, accept: bool) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(accept),
             InputDomain::CostMaterials(domain) => Answer::CostMaterials(vec![
                 domain

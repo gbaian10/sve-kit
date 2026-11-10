@@ -25,9 +25,11 @@ fn play(game: &mut Game, mode: u64) -> Vec<Vec<String>> {
     loop {
         while let Some(CardPlay::Awaiting(question)) = &step {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
                 InputDomain::Search(domain) => {
-                    let mut cards: Vec<_> = domain.cards.iter().map(|card| card.card.clone()).collect();
+                    let mut cards: Vec<_> =
+                        domain.cards.iter().map(|card| card.card.clone()).collect();
                     cards.sort();
                     searched.push(cards);
                     Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle]))
@@ -70,8 +72,12 @@ fn play(game: &mut Game, mode: u64) -> Vec<Vec<String>> {
             panic!("expected a trigger");
         };
         step = Some(
-            game.answer_internal_card(pending.actor, pending.token, Answer::Pending(options[0].handle))
-                .unwrap(),
+            game.answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
         );
     }
 }
@@ -91,10 +97,17 @@ fn bp10_046_buffs_its_pawn_and_searches_a_cheap_chess_follower_with_five_chess_c
     ]);
     let mut game = rules_game(&initial);
     let searched = play(&mut game, 1);
-    assert_eq!(searched, [vec!["BP03-051".to_owned()]], "only chess followers with original cost 4 or less");
+    assert_eq!(
+        searched,
+        [vec!["BP03-051".to_owned()]],
+        "only chess followers with original cost 4 or less"
+    );
     let state = game.projection(View::Referee).unwrap();
     let field = state["P1"]["field"].as_array().unwrap();
-    assert!(field.contains(&json!("cheap")), "the searched follower enters");
+    assert!(
+        field.contains(&json!("cheap")),
+        "the searched follower enters"
+    );
     let pawn = field
         .iter()
         .find(|id| *id != "cheap")

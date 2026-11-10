@@ -22,6 +22,7 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, accept: bool) {
     loop {
         while let Some(CardPlay::Awaiting(question)) = &step {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::WardEntry { .. } => Answer::WardEntry(false),
                 InputDomain::Integer(bounds) => {
                     assert_eq!(bounds.maximum, Some(Nat(1)), "a single May");
@@ -61,8 +62,12 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, accept: bool) {
             panic!("expected a trigger");
         };
         step = Some(
-            game.answer_internal_card(pending.actor, pending.token, Answer::Pending(options[0].handle))
-                .unwrap(),
+            game.answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
         );
     }
 }
@@ -78,17 +83,25 @@ fn bp15_101_returns_to_ex_and_heals_when_a_merwyn_enters() {
         settle(&mut game, Some(step), true);
         let state = game.projection(View::Referee).unwrap();
         assert!(
-            state["P1"]["ex"].as_array().unwrap().contains(&json!("source")),
+            state["P1"]["ex"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("source")),
             "{printing}: the accepted May moves it to EX"
         );
-        assert_eq!(state["P1"]["leader"]["life"], 21_u8, "the completed move heals");
+        assert_eq!(
+            state["P1"]["leader"]["life"], 21_u8,
+            "the completed move heals"
+        );
     }
 }
 
 fn banished(count: u8) -> Value {
-    json!((0..count)
-        .map(|index| json!({"id":format!("gone{index}"),"card":"BP01-037"}))
-        .collect::<Vec<_>>())
+    json!(
+        (0..count)
+            .map(|index| json!({"id":format!("gone{index}"),"card":"BP01-037"}))
+            .collect::<Vec<_>>()
+    )
 }
 
 #[test]
@@ -103,8 +116,16 @@ fn bp21_051_creates_its_artifact_once_five_cards_are_banished() {
         let step = game.play_internal_card("source", PLAYER).unwrap();
         settle(&mut game, Some(step), true);
         let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["banish"].as_array().unwrap().len(), 5, "{printing}");
-        assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 2, "the artifact entered");
+        assert_eq!(
+            state["P1"]["banish"].as_array().unwrap().len(),
+            5,
+            "{printing}"
+        );
+        assert_eq!(
+            state["P1"]["field"].as_array().unwrap().len(),
+            2,
+            "the artifact entered"
+        );
     }
 }
 
@@ -135,6 +156,10 @@ fn bp22_047_creates_the_edge_artifact_with_ten_banished_cards() {
             .filter(|id| *id != "base")
             .map(|id| state["objects"][id.as_str().unwrap()]["card"].clone())
             .collect();
-        assert_eq!(tokens, [json!("BP13-T05")], "{form}: ten banished cards upgrade the token");
+        assert_eq!(
+            tokens,
+            [json!("BP13-T05")],
+            "{form}: ten banished cards upgrade the token"
+        );
     }
 }
