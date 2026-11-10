@@ -19,9 +19,9 @@ fn r7b_lunaar_all_prints_evolve_place_a_low_cost_ward_follower_and_heal() {
         initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP13-091"}]);
         initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":number}]);
         initial["players"]["P1"]["zones"]["deck"] = json!([
-            {"id":"ward","card":"BP01-002"},{"id":"high","card":"BP18-042"},
+            {"id":"ward","card":"BP13-091"},{"id":"high","card":"BP18-042"},
             {"id":"spell","card":"BP01-024"},{"id":"plain","card":"BP01-043"},
-            {"id":"tail","card":"BP01-002"}
+            {"id":"tail","card":"BP13-091"}
         ]);
         let mut game = Game::from_selected_effects(
             selection_with_rules().clone(),
@@ -69,7 +69,7 @@ fn r7b_lunaar_all_prints_evolve_place_a_low_cost_ward_follower_and_heal() {
                     let recipient = domain
                         .members
                         .iter()
-                        .find(|m| m.card.as_deref() == Some("BP01-002"))
+                        .find(|m| m.card.as_deref() == Some("BP13-091"))
                         .unwrap();
                     selected = true;
                     Answer::Targets(vec![recipient.handle])
