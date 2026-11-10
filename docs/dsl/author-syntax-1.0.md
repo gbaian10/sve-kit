@@ -808,7 +808,7 @@ evolve_time:
 
 ### GAP-A-027
 
-drive_trigger:{who} → E.drive-trigger，指該玩家真正執行 trigger 效果；不是每次揭牌。原文未限制 checked_card=this，不加此 filter。
+drive_trigger:{who,during?} → E.drive-trigger，指該玩家真正執行 trigger 效果；不是每次揭牌。原文未限制 checked_card=this，不加此 filter。
 
 真實卡例：**CP03-P81 オラクルガーディアン ニケ**；來源 `CP03-P81#0/text/1`，句型 `T9177744e95`。
 

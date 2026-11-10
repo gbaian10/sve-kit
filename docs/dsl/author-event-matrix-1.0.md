@@ -47,7 +47,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | state | Condition | — | BP05-092；不是歷史事實 |
 | dice_rolled | 無 | who:PlayerRef | BP21-SL19；on 不收骰值門檻 |
 | drive_checked | 無 | holder:(Ref 或 EventObjectSel) | CP03-P27、CP03-065 |
-| drive_trigger | 無 | who:PlayerRef | CP03-P81、CP03-110 |
+| drive_trigger | 無 | who:PlayerRef、during | CP03-P81、CP03-110 |
 | moved | 無 | from:(Zone 或 A.move-origin)、ref:Ref、sel:SubjectFilter、to:Zone、during:During、by:By | BP05-029、BP01-012、BP20-025；by 合成 |
 | drew | 無 | who:PlayerRef、not_phase:Phase、by:By | BP05-094；by 合成 |
 | equipped | 無 | equipment:(Ref 或 EventObjectSel) | CP04-PR22；selector 合成 |
