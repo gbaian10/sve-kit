@@ -226,6 +226,7 @@ impl BodyContext<'_> {
             ),
             ast::InstalledEffect::DamageMod(_)
             | ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
@@ -298,6 +299,7 @@ impl BodyContext<'_> {
             ast::InstalledEffect::Prevent(shape) => shape.next_only == Some(true),
             ast::InstalledEffect::DamageMod(shape) => shape.next_only == Some(true),
             ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
@@ -356,6 +358,7 @@ impl BodyContext<'_> {
             }
             ast::InstalledEffect::DamageMod(_) => return Err(unsupported(path)),
             ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)

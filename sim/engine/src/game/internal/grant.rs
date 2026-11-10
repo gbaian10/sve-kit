@@ -343,7 +343,7 @@ impl Game {
             .filter(|state| state.generation == object.generation)
         {
             for grant in &state.grants {
-                if self.internal_box_suppresses(holder, &grant.origin) {
+                if self.internal_suppresses_grant(holder, &grant.origin) {
                     continue;
                 }
                 if zone == ZoneKind::Field && grant.keywords.contains("single_drive") {
@@ -436,7 +436,7 @@ impl Game {
             .filter(|state| object.zone == "field" && state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
-            .filter(|grant| !self.internal_box_suppresses(holder, &grant.origin))
+            .filter(|grant| !self.internal_suppresses_grant(holder, &grant.origin))
             .flat_map(|grant| grant.keywords.iter().cloned())
             .collect())
     }
@@ -536,7 +536,7 @@ impl Game {
             .and_then(|state| {
                 state.grants.iter().find(|grant| {
                     grant.keywords.contains("drain")
-                        && !self.internal_box_suppresses(holder, &grant.origin)
+                        && !self.internal_suppresses_grant(holder, &grant.origin)
                 })
             })
         {
@@ -943,7 +943,10 @@ impl Game {
     reason = "Box captures existing grant identities at installation."
 )]
 impl Game {
-    pub(super) fn internal_box_origins(&self, holder: &str) -> Result<BTreeSet<GrantOrigin>> {
+    pub(super) fn internal_suppression_origins(
+        &self,
+        holder: &str,
+    ) -> Result<BTreeSet<GrantOrigin>> {
         let object = self.object(holder)?;
         let mut origins = self
             .state

@@ -833,6 +833,9 @@ mod target_damage_role;
 #[path = "card/boxed.rs"]
 mod boxed;
 
+#[path = "card/ability_loss.rs"]
+mod ability_loss;
+
 #[path = "card/cemetery_self_cost.rs"]
 mod cemetery_self_cost;
 

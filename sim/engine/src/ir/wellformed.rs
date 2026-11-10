@@ -795,6 +795,22 @@ impl Checker {
                 duration,
                 provider,
             } => self.grant(subjects, abilities, duration, provider),
+            Action::RemoveAbility {
+                subjects: subjects @ Selector::Bound { .. },
+                scope: super::RemoveScope::AllAtTime {},
+                duration,
+                timestamp,
+            } if duration.end == (super::DurationEnd::NoTemporalExpiry {})
+                && duration.anchor == (super::TimeAnchor::Installation {})
+                && duration.usage.is_none()
+                && duration.intervals.is_empty()
+                && *timestamp
+                    == (super::TimestampBasis::ProperPlay {
+                        execution: super::ExecutionRef::Current {},
+                    }) =>
+            {
+                self.selector(subjects)
+            }
             Action::Damage {
                 recipients,
                 amount,

@@ -1,8 +1,8 @@
 use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
     EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
-    NumericChange, ObjectRef, ObjectView, Resource, ResourceOperation, Stat, TimeAnchor,
-    TimestampBasis, TraitId,
+    NumericChange, ObjectRef, ObjectView, RemoveScope, Resource, ResourceOperation, Stat,
+    TimeAnchor, TimestampBasis, TraitId,
 };
 use super::{
     AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
@@ -448,6 +448,22 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
             ast::InstalledEffect::PlayPermission(_) => return Err(unsupported(path)),
+            ast::InstalledEffect::LoseAbilities(_) => {
+                let ast::Objects::Bound(name) = &installation.on else {
+                    return Err(unsupported(path));
+                };
+                if installation.until.is_some() || !self.follower_targets.contains(name) {
+                    return Err(unsupported(path));
+                }
+                return Ok(Action::RemoveAbility {
+                    subjects: self.objects(&installation.on, path)?,
+                    scope: RemoveScope::AllAtTime {},
+                    duration: duration(None, path)?,
+                    timestamp: TimestampBasis::ProperPlay {
+                        execution: ExecutionRef::Current {},
+                    },
+                });
+            }
             ast::InstalledEffect::AddTrait(value) => {
                 if value.r#trait.is_empty()
                     || !matches!(installation.until, None | Some(ast::Until::Game))
