@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-092:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot: { what: lose, who: self }
+            - cannot: { what: win, who: opp }
+      - line: 2
+        auto:
+          on:
+            life_changed: { who: self, crosses_zero: true }
+          do:
+            - move: { ref: this, to: cemetery }
+            - set_life: { who: self, n: 1 }
