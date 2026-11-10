@@ -103,7 +103,8 @@ impl BodyContext<'_> {
                         | ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
                             material.result.as_ref()
                         }
-                        ast::CostOperation::Pp(_)
+                        ast::CostOperation::Banish(ast::BanishMaterial::Top(_))
+                        | ast::CostOperation::Pp(_)
                         | ast::CostOperation::Lesson(_)
                         | ast::CostOperation::Counter(_)
                         | ast::CostOperation::EarthRite(_)

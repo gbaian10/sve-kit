@@ -1,6 +1,6 @@
 use super::super::{
     CostSpec, CostStep, MoveDestination, MoveReason, MoveSpec, NumericChange, OwnerZone, PlaySpec,
-    Posture, Resource, ResourceOperation, ZoneKind,
+    Position, Posture, Resource, ResourceOperation, Selector, SliceDirection, ZoneKind, ZoneRef,
 };
 use super::{
     AbilitySource, Action, BodyContext, Cardinality, Expr, Instruction, InstructionContext,
@@ -40,6 +40,13 @@ pub(super) fn lower_one(
     source: &AbilitySource,
     path: &str,
 ) -> Result<PlaySpec, LoweringError> {
+    // Top slices are ordinary head costs, without optional payment-result bindings.
+    if matches!(
+        operation,
+        ast::CostOperation::Banish(ast::BanishMaterial::Top(_))
+    ) {
+        return Err(unsupported(path));
+    }
     lower_operations(context, from_ref(operation), source, path, false)
 }
 
@@ -56,7 +63,7 @@ pub(super) fn lower_additional(
     if operations.iter().any(|operation| {
         matches!(
             operation,
-            ast::CostOperation::Banish(ast::BanishMaterial::Hand(_))
+            ast::CostOperation::Banish(ast::BanishMaterial::Hand(_) | ast::BanishMaterial::Top(_))
                 | ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
                 | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(_))
         )
@@ -220,6 +227,28 @@ fn lower_operations(
                 let (action, decision) = super::reveal_cost::banish(context, material, path)?;
                 parameters.push(decision);
                 action
+            }
+            ast::CostOperation::Banish(ast::BanishMaterial::Top(material)) => {
+                if material.result.is_some()
+                    || material.top.n == 0
+                    || !matches!(
+                        &material.top.who,
+                        ast::DeckHolder::Side(ast::LeaderSide::Controller)
+                    )
+                {
+                    return Err(unsupported(path));
+                }
+                Action::Banish {
+                    objects: Selector::Ordered {
+                        zone: ZoneRef {
+                            player: PlayerRef::Controller {},
+                            kind: ZoneKind::Deck,
+                        },
+                        start: Position::Top {},
+                        count: Expr::Literal(super::Nat(material.top.n)),
+                        direction: SliceDirection::Forward,
+                    },
+                }
             }
             ast::CostOperation::ToEx(ast::ExMaterial::Hand(material)) => {
                 let (action, decision) =

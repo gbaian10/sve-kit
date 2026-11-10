@@ -289,6 +289,14 @@ pub(super) enum CostOperation {
 pub(super) enum BanishMaterial {
     Public(Box<Material>),
     Hand(Box<HandMaterial>),
+    Top(Box<TopBanishMaterial>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TopBanishMaterial {
+    pub top: DeckTop,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]

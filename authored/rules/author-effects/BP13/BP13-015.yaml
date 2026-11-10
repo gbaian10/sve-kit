@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-015:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        attack_time:
+          cost:
+            banish:
+              top:
+                who: self
+                n: 3
+          do:
+            - buff:
+                "on": this
+                power: 1
+                hp: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"

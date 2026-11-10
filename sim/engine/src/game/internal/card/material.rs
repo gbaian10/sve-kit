@@ -395,6 +395,10 @@ pub(super) const fn cost_objects(action: &Action) -> Option<&Selector> {
 }
 
 pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
+    if matches!(action, Action::Banish { .. }) && super::super::movement::deck_top(action).is_some()
+    {
+        return true;
+    }
     let Some(objects) = cost_objects(action) else {
         return false;
     };
@@ -702,24 +706,43 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<(Quantity, Vec<ObjectRef>, Vec<Characteristics>)> {
-        let members = match objects {
-            Selector::Bound { reference } => {
-                let Some(Slot::Objects { members, .. }) = execution.slots.get(&reference.key())
-                else {
-                    return Err(invalid("missing material selection"));
-                };
-                members.clone()
+        let top = match &instruction.action {
+            action @ Action::Banish { .. } => super::super::movement::deck_top(action),
+            _ => None,
+        };
+        let members = if let Some((player, count)) = top {
+            let members = self.deck_top_members(execution, player, count)?;
+            if u64::try_from(members.len()).map_err(invalid)? != count {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "insufficient deck cards for the complete cost".into(),
+                ));
             }
-            Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}] => {
-                vec![execution.object(self, &ObjectOperand::SourceHolder {})?]
+            members
+        } else {
+            match objects {
+                Selector::Bound { reference } => {
+                    let Some(Slot::Objects { members, .. }) = execution.slots.get(&reference.key())
+                    else {
+                        return Err(invalid("missing material selection"));
+                    };
+                    members.clone()
+                }
+                Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}] => {
+                    vec![execution.object(self, &ObjectOperand::SourceHolder {})?]
+                }
+                _ => return Err(unsupported("bound or source materials")),
             }
-            _ => return Err(unsupported("bound or source materials")),
         };
         for member in &members {
             let id = execution.object_id(*member)?;
             let object = self.object(id)?;
+            let allowed_zone = if top.is_some() {
+                object.zone == "deck"
+            } else {
+                matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+            };
             if object.generation != member.generation.0
-                || !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
+                || !allowed_zone
                 || (object.controller != seat_name(execution.context.controller)?
                     && (!matches!(objects, Selector::Bound { .. }) || object.zone != "field"))
                 || (matches!(instruction.action, Action::Posture { .. })

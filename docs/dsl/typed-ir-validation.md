@@ -160,6 +160,11 @@ materials／receipt 不隱含 join。Optional 的「付不付」、alternative �
 其他成本保守拒絕。Cost 不得帶可略過指示的 precondition。Ordered 的材料／receipt
 只對後續成本及 on_paid 可見，付款 receipt 在所有成本檢查完才公開。
 
+普通打出成本另接受 `Banish` 的精確牌庫頂切片：Controller 的 Deck、Top、Forward、正整數 Literal 張數。
+此固定選取不列舉隱藏身分，也不授權一般 Deck 選擇域；移動前不公開內容，消滅後依公開區規則呈現。
+本文同形放逐可盡可能執行，成本則依 CR 10.4.2.2 必須完整支付，不能以實際移動非零推定成功。
+Quick、追加費用及帶結果的可選付款未開放此子集。
+
 `PlaySpec.limit` 只有 Printed Activated、`active_zones=[Field]` 可帶 Some，
 且只收 maximum=1／2、Turn、AbilityInstance、PlayCommitted 的精確組合；
 Spell、Triggered 及內嵌 Action::PlayCard 的 PlaySpec 不得帶起動額度。
