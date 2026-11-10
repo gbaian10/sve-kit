@@ -89,7 +89,10 @@ impl BodyContext<'_> {
             .observations
             .get(name)
             .ok_or_else(|| unsupported(path))?;
-        if !matches!(receipt, ObjectReceipt::Movement { .. }) {
+        if !matches!(
+            receipt,
+            ObjectReceipt::Movement { .. } | ObjectReceipt::Flip { .. }
+        ) {
             return Err(unsupported(path));
         }
         Ok(super::numeric::aggregate_count(

@@ -109,6 +109,14 @@ impl BodyContext<'_> {
             }
         }
         let saved = match step {
+            ast::Step::FlipDown(ast::ObjectAction::Long {
+                result: Some(name), ..
+            }) => Some((
+                name,
+                ObjectReceipt::Flip {
+                    receipt: ReceiptReference::new(receipt),
+                },
+            )),
             ast::Step::Destroy(ast::ObjectAction::Long {
                 result: Some(name), ..
             }) => Some((

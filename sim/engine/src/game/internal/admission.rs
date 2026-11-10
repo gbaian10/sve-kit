@@ -873,6 +873,7 @@ fn supported(code: &str) -> bool {
             | "shape.Selector.ReceiptMembers"
             | "read.receipt.members"
             | "shape.ObjectReceipt.Look"
+            | "shape.ObjectReceipt.Flip"
             | "shape.ObjectReceipt.Movement"
             | "shape.MovementReceipt.Move"
             | "shape.MovementReceipt.Order"

@@ -12,19 +12,13 @@ impl BodyContext<'_> {
         value: &ast::ObjectAction,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let (ast::ObjectAction::Short(objects)
-        | ast::ObjectAction::Long {
-            r#ref: objects,
-            result: None,
-        }) = value
-        else {
-            return Err(unsupported(path));
-        };
+        let (ast::ObjectAction::Short(objects) | ast::ObjectAction::Long { r#ref: objects, .. }) =
+            value;
         if !matches!(objects, ast::Objects::Bound(name) if self.flip_targets.contains(name)) {
             return Err(unsupported(path));
         }
         Ok(Action::FlipDown {
-            objects: self.action_objects(value, path)?,
+            objects: self.objects(objects, path)?,
         })
     }
 }

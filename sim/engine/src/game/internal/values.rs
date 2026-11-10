@@ -734,6 +734,23 @@ impl Execution {
                         })?;
                 Ok(Nat(count))
             }
+            NatRead::ZoneCount {
+                selector:
+                    Selector::ReceiptMembers {
+                        receipt: ObjectReceipt::Flip { receipt },
+                        projection: MemberProjection::Before,
+                    },
+            } => {
+                let ReceiptLocation::Local { id } = receipt.location() else {
+                    return Err(unsupported("iterated flip count"));
+                };
+                let Some(InstructionOutcome::Flip(outcome)) = self.receipts.get(id) else {
+                    return Err(invalid("missing successful flip outcome"));
+                };
+                Ok(Nat(
+                    u64::try_from(outcome.successful.len()).map_err(invalid)?
+                ))
+            }
             NatRead::ZoneCount { selector } => Ok(Nat(u64::try_from(
                 self.objects(game, selector)?.len(),
             )
