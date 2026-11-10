@@ -1,0 +1,44 @@
+cards:
+  BP18-040:
+    abilities:
+      - evolve_time:
+          cost:
+            banish:
+              n: 1
+              sel:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+          do:
+            - destroy: enemy
+            - draw:
+                n: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ジュエルドレスアップ
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+    token_sources:
+      - card: BP18-P52
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
