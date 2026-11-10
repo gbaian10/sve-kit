@@ -1,0 +1,57 @@
+cards:
+  ECP02-007:
+    abilities:
+      - evolve_time:
+          cost:
+            return_to_hand:
+              n: 1
+              sel:
+                trait: デレマス
+                who: self
+                zone: field
+          do:
+            - move:
+                position: bottom
+                ref: enemy
+                to: deck
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            lesson: 1
+          do:
+            - choose:
+                bind: friend
+                from:
+                  any_of:
+                    - kind: follower
+                      orig_cost_le: 1
+                      trait: デレマス
+                      who: self
+                      zone: hand
+                    - kind: amulet
+                      orig_cost_le: 1
+                      trait: デレマス
+                      who: self
+                      zone: hand
+                upto: 1
+            - move:
+                ref: friend
+                result: entered
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

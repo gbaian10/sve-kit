@@ -1,0 +1,61 @@
+cards:
+  ECP02-059:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            trait: キュート
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    upto: 2
+                n: 1
+                options:
+                  - - damage:
+                        n: 4
+                        to: enemy
+                  - - search:
+                        n: 1
+                        result: entered
+                        sel:
+                          kind: follower
+                          name_contains: 輿水幸子
+                          who: self
+                          zone: deck
+                        to: field
+                    - grant:
+                        keywords:
+                          - drain
+                        on:
+                          follow: entered
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: 魔法のアイテム
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
