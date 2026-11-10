@@ -398,6 +398,7 @@ pub(super) enum Step {
     Search(Search),
     Look(Look),
     Reveal(Reveal),
+    RevealUntil(RevealUntil),
     Move(Move),
     Create(Create),
     Equip(Equip),
@@ -3416,4 +3417,28 @@ pub(super) struct NoTrigger {
 pub(super) enum NoTriggerKind {
     Fanfare,
     EvolveTime,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RevealUntil {
+    pub sel: RevealUntilSelector,
+    pub n: u64,
+    pub bind: String,
+    pub matched: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RevealUntilSelector {
+    pub who: SelfPlayer,
+    pub zone: DeckZone,
+    pub kind: RevealFollower,
+    pub orig_cost_le: u64,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RevealFollower {
+    Follower,
 }

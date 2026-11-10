@@ -39,6 +39,8 @@ use serde::ser::Error as _;
 use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
 
+use crate::ir::RevealUntilOutcome;
+
 mod admission;
 mod aggregates;
 mod boxed;
@@ -71,6 +73,7 @@ mod ordering;
 mod posture;
 mod resource;
 mod reveal;
+mod reveal_until;
 mod scheduled_turn;
 mod search;
 mod shuffle;
@@ -379,6 +382,8 @@ pub enum InstructionOutcome {
     Revealed(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
     Look(LookOutcome),
+    /// The publicly revealed prefix, its matching subset and whether the cursor reached the end.
+    RevealUntil(RevealUntilOutcome),
     /// Successful same-deck ordering; never a cross-zone movement.
     Order(OrderOutcome),
     /// Complete checks in printed order, after each icon and final movement.
@@ -577,7 +582,7 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
-    reveals: Vec<reveal::PublicHand>,
+    reveals: Vec<reveal::PublicReveal>,
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
     ability: Option<RuntimeAbilitySource>,
@@ -1580,6 +1585,7 @@ impl Game {
                 self.internal_shuffle_placement(execution, &instruction)?;
             }
             Action::Look { .. } => self.internal_look(execution, &instruction)?,
+            Action::RevealUntil { .. } => self.internal_reveal_until(execution, &instruction)?,
             Action::Order { .. } => self.internal_order(execution, instruction)?,
             Action::DriveCheck { .. } => self.internal_drive(execution, instruction)?,
             Action::Draw {

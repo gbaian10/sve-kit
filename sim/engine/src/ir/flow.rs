@@ -6,10 +6,10 @@ use super::{
     EvolutionState, ExecutionRef, Expr, FaceId, FlipOutcome, FusionOutcome, Info, InstructionId,
     Int, KeywordId, LimitSpec, LookOutcome, ModeId, MoveOutcome, MoveResult, MovementEvent, Nat,
     ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PaymentReceipt, PaymentResult, Phase,
-    PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RuleId,
-    RuntimeAbilityReference, ScopeId, SearchOutcome, SelectionConstraint, SelectionSnapshot,
-    Selector, TitleId, TokenOutcome, TraitId, TransformOutcome, TriggerSpec, TurnId, Visitor, Walk,
-    ZoneKind, ZoneRef,
+    PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RevealUntilOutcome,
+    RuleId, RuntimeAbilityReference, ScopeId, SearchOutcome, SelectionConstraint,
+    SelectionSnapshot, Selector, TitleId, TokenOutcome, TraitId, TransformOutcome, TriggerSpec,
+    TurnId, Visitor, Walk, ZoneKind, ZoneRef,
 };
 use core::mem::replace;
 
@@ -444,7 +444,8 @@ variants!(#[derive(Copy)] RoleCardinality {
     IfNonempty { count: Nat } => ["decision.role-if-nonempty"],
     Remainder {} => ["decision.role-remainder"]
 });
-variants!(ObjectReceipt { Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [] });
+tags!(RevealUntilMembers { Revealed, Matched });
+variants!(ObjectReceipt { RevealUntil { receipt: ReceiptReference<RevealUntilOutcome>, members: RevealUntilMembers } => [], Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [] });
 
 tags!(PaymentOptionality { Required, Optional });
 tags!(Declinable {

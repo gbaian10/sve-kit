@@ -803,6 +803,14 @@ impl Checker {
     fn selector_receipt(&self, receipt: &ObjectReceipt, projection: MemberProjection) -> Checked {
         match receipt {
             ObjectReceipt::Look { receipt } => self.receipt(receipt),
+            ObjectReceipt::RevealUntil { receipt, .. } => {
+                if projection != MemberProjection::Before
+                    || !matches!(receipt.location(), ReceiptLocation::Local { .. })
+                {
+                    return self.reject();
+                }
+                self.receipt(receipt)
+            }
             ObjectReceipt::Flip { receipt } => self.receipt(receipt),
             ObjectReceipt::Token { receipt } => self.receipt(receipt),
             ObjectReceipt::Batch { receipt } => self.receipt(receipt),

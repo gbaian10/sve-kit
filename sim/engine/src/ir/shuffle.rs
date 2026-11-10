@@ -14,7 +14,12 @@ pub(crate) enum Placement {
 pub(crate) fn observation(selector: &Selector) -> bool {
     match selector {
         Selector::ReceiptMembers {
-            receipt: ObjectReceipt::Look { .. },
+            receipt:
+                ObjectReceipt::Look { .. }
+                | ObjectReceipt::RevealUntil {
+                    members: super::RevealUntilMembers::Revealed,
+                    ..
+                },
             projection: MemberProjection::Before,
         } => true,
         Selector::Difference { input, except } => {

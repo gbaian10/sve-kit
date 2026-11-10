@@ -853,6 +853,15 @@ impl Game {
                     .is_some_and(|knowledge| knowledge.located.contains(&object.id))
                 && execution.is_private_look_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
+            let revealed_match = object.zone == "deck"
+                && execution.is_revealed_match(objects, member)
+                && self.object_type(&object.id)? == "フォロワー"
+                && ["P1", "P2"].iter().all(|viewer| {
+                    self.state
+                        .knowledge
+                        .get(*viewer)
+                        .is_some_and(|known| known.located.contains(&object.id))
+                });
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && (object.zone == "ex"
                     || (object.zone == "evolve_deck"
@@ -863,7 +872,7 @@ impl Game {
                                 ..
                             }
                         ) || execution.is_private_advance_target(objects, member))));
-            if !(ordinary || advance || private_look || private_hand)
+            if !(ordinary || advance || private_look || private_hand || revealed_match)
                 || object.owner != seat
                 || object.controller != seat
                 || object.state["face"] != 0_i64

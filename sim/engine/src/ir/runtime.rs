@@ -401,6 +401,7 @@ runtime_record!(
 runtime_record!(TokenOutcome { created: Vec<ObjectRef> });
 runtime_record!(FlipOutcome { successful: Vec<ResultMember> });
 runtime_record!(LookOutcome { looked: Vec<RuntimeObjectView> });
+runtime_record!(RevealUntilOutcome { revealed: Vec<RuntimeObjectView>, matched: Vec<RuntimeObjectView>, exhausted: Bool });
 /// A fact requiring at least one facet cannot be represented by an empty list.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NonEmpty<T> {

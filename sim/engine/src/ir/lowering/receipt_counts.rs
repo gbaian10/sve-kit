@@ -158,7 +158,8 @@ impl BodyContext<'_> {
             | ObjectReceipt::TransformCreated { .. }
             | ObjectReceipt::Token { .. }
             | ObjectReceipt::Flip { .. }
-            | ObjectReceipt::Look { .. } => false,
+            | ObjectReceipt::Look { .. }
+            | ObjectReceipt::RevealUntil { .. } => false,
         };
         if !readable {
             return Err(unsupported(path));

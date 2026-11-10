@@ -556,6 +556,11 @@ impl Checker {
         {
             return self.reject();
         }
+        if matches!(instruction.action, Action::RevealUntil { .. })
+            && (context != InstructionContext::Effect || instruction.precondition.is_some())
+        {
+            return self.reject();
+        }
         let guarded_inputs = instruction
             .precondition
             .as_ref()
@@ -718,6 +723,20 @@ impl Checker {
                 self.stepwise(mode, player, super::StepwiseTiming::BeforeDraw)?;
                 self.player(player)?;
                 self.integer(count)
+            }
+            Action::RevealUntil {
+                deck,
+                candidate,
+                predicate,
+                ..
+            } if super::reveal_until::action(action)
+                && *instruction_actor == (PlayerRef::Controller {}) =>
+            {
+                self.isolated(|checker| {
+                    checker.env.chooser = Some(deck.clone());
+                    checker.env.private_choice = true;
+                    checker.candidate(*candidate, predicate)
+                })
             }
             Action::Look {
                 viewer,
@@ -1113,6 +1132,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Discard { .. } => TypeId::of::<super::DiscardOutcome>(),
         Action::Draw { .. } => TypeId::of::<CardQuantityOutcome>(),
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
+        Action::RevealUntil { .. } => TypeId::of::<super::RevealUntilOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
         Action::FlipDown { .. } => TypeId::of::<FlipOutcome>(),
         Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
@@ -1127,7 +1147,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::Transfer { .. }
         | Action::Life { .. }
         | Action::Reveal { .. }
-        | Action::RevealUntil { .. }
         | Action::Shuffle { .. }
         | Action::FlipUp { .. }
         | Action::Posture { .. }

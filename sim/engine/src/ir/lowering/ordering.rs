@@ -11,6 +11,7 @@ use core::num::NonZeroU64;
 
 #[derive(Clone, Copy)]
 enum ObservationUse {
+    Shuffle,
     Order,
     OrderRemainder,
     Move,
@@ -32,6 +33,9 @@ impl BodyContext<'_> {
         receipt: ReceiptId,
         path: &str,
     ) -> Result<(), LoweringError> {
+        if let ast::Step::RevealUntil(value) = step {
+            return super::reveal_until::remember(self, value, receipt, path);
+        }
         if let ast::Step::Discard(value) = step
             && let Some(name) = &value.result
         {
@@ -161,6 +165,7 @@ impl BodyContext<'_> {
             | ast::Step::PlayAbility(_)
             | ast::Step::Counter(_)
             | ast::Step::Reveal(_)
+            | ast::Step::RevealUntil(_)
             | ast::Step::Optional(_)
             | ast::Step::Pay(_)
             | ast::Step::EachPlayer(_)
@@ -242,7 +247,21 @@ impl BodyContext<'_> {
             .observations
             .get(name)
             .ok_or_else(|| unsupported(path))?;
-        let look = matches!(receipt, ObjectReceipt::Look { .. });
+        if let ObjectReceipt::RevealUntil { members, .. } = receipt {
+            use super::super::RevealUntilMembers;
+            if !matches!(
+                (members, usage),
+                (RevealUntilMembers::Matched, ObservationUse::Move)
+                    | (RevealUntilMembers::Revealed, ObservationUse::Shuffle)
+            ) || before
+            {
+                return Err(unsupported(path));
+            }
+        }
+        let look = matches!(
+            receipt,
+            ObjectReceipt::Look { .. } | ObjectReceipt::RevealUntil { .. }
+        );
         if matches!(
             receipt,
             ObjectReceipt::Movement {
@@ -278,7 +297,9 @@ impl BodyContext<'_> {
                     except,
                     if matches!(
                         usage,
-                        ObservationUse::Order | ObservationUse::OrderRemainder
+                        ObservationUse::Order
+                            | ObservationUse::OrderRemainder
+                            | ObservationUse::Shuffle
                     ) {
                         ObservationUse::OrderRemainder
                     } else {
@@ -297,7 +318,7 @@ impl BodyContext<'_> {
         observed: &ast::Observed,
         path: &str,
     ) -> Result<Selector, LoweringError> {
-        self.observed(observed, ObservationUse::Order, path)
+        self.observed(observed, ObservationUse::Shuffle, path)
     }
 
     fn self_return(&self, objects: &ast::Objects, path: &str) -> Result<Action, LoweringError> {
@@ -344,6 +365,21 @@ impl BodyContext<'_> {
 
     /// Only a chosen target may enter the field, so the movement stays tied to its decision.
     fn field_entry_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        if let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref {
+            if value.top.is_some()
+                || value.position.is_some()
+                || value.order.is_some()
+                || value.acted.is_some()
+                || value.result.as_ref().is_none_or(String::is_empty)
+            {
+                return Err(unsupported(path));
+            }
+            let objects = self.observed(observed, ObservationUse::Move, path)?;
+            if !super::super::reveal_until::matched(&objects) {
+                return Err(unsupported(path));
+            }
+            return Ok(shared_put(objects, ZoneKind::Field));
+        }
         let Some(ast::MoveObjects::Field(objects @ ast::Objects::Bound(name))) = &value.r#ref
         else {
             return Err(unsupported(path));

@@ -1,4 +1,4 @@
-//! Whole-hand public visibility is local to one resolution and one hidden location.
+//! Public revelation is local to one resolution and one hidden location.
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::ir::{
@@ -8,10 +8,11 @@ use crate::ir::{
 use core::mem::take;
 
 #[derive(Clone, Debug)]
-pub(super) struct PublicHand {
+pub(super) struct PublicReveal {
     object: ObjectRef,
     id: String,
     controller: String,
+    zone: String,
     viewers: Vec<String>,
 }
 
@@ -103,23 +104,7 @@ impl Game {
                 return Err(invalid("foreign hand reveal member"));
             }
             let current_reference = execution.reference(self, &id)?;
-            let controller = object.controller.clone();
-            let viewers = ["P1", "P2"]
-                .into_iter()
-                .filter(|viewer| {
-                    self.state
-                        .knowledge
-                        .get(*viewer)
-                        .is_none_or(|known| !known.located.contains(&id))
-                })
-                .map(str::to_owned)
-                .collect();
-            execution.reveals.push(PublicHand {
-                object: current_reference,
-                id: id.clone(),
-                controller,
-                viewers,
-            });
+            self.internal_record_reveal(execution, current_reference, &id)?;
             ids.push(id);
             current_members.push(current_reference);
         }
@@ -128,6 +113,38 @@ impl Game {
             instruction.receipt,
             InstructionOutcome::Revealed(current_members),
         );
+        Ok(())
+    }
+
+    pub(super) fn internal_record_reveal(
+        &self,
+        execution: &mut Execution,
+        reference: ObjectRef,
+        id: &str,
+    ) -> Result<()> {
+        let object = self.object(id)?;
+        if object.generation != reference.generation.0
+            || !matches!(object.zone.as_str(), "hand" | "deck")
+        {
+            return Err(invalid("current hidden reveal generation"));
+        }
+        let viewers = ["P1", "P2"]
+            .into_iter()
+            .filter(|viewer| {
+                self.state
+                    .knowledge
+                    .get(*viewer)
+                    .is_none_or(|known| !known.located.contains(id))
+            })
+            .map(str::to_owned)
+            .collect();
+        execution.reveals.push(PublicReveal {
+            object: reference,
+            id: id.to_owned(),
+            controller: object.controller.clone(),
+            zone: object.zone.clone(),
+            viewers,
+        });
         Ok(())
     }
 
@@ -144,7 +161,7 @@ impl Game {
             };
             let same_location = current.generation == grant.object.generation.0
                 && current.controller == grant.controller
-                && current.zone == "hand";
+                && current.zone == grant.zone;
             if !end && same_location {
                 active.push(grant);
                 continue;

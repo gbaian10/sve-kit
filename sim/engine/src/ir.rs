@@ -144,6 +144,7 @@ mod projections;
 pub(crate) mod quick;
 pub(crate) mod removal_restrictions;
 pub(crate) mod reveal_cost;
+pub(crate) mod reveal_until;
 pub(crate) mod ride;
 mod runtime;
 pub(crate) mod shuffle;
