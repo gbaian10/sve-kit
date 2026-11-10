@@ -195,7 +195,12 @@ buff:
 
 Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示兩組或三組各至多 1 張，搭配 `may: true` 與 `upto: <組數>`；每組須有 `kind` 或非空 `trait`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與法術、BP11-086 的荒野卡與低費從者、ECP02-034 的キュート／クール／パッション）。每張實體卡最多佔一組，同時符合多組也不能重複選取；某組沒有候選不妨礙選其他組。候選與選擇仍只向控制者公開，放入手牌的公開另寫 `reveal`。`groups` 不與 `any_of`、外層特徵或合計費用並用。可多選的 Look 選取若要進場，`move: {ref: <選取>, to: field}` 必須緊接在 `choose` 之後、位於同一層本文；選項上限在出題時依空位計算，中間或條件分支內的進場會在載入時拒絕。分組或聯集拿回手牌不受場位限制。
 
-已從自己的 Look 選出的牌可用 `banish: {ref: picked, result: banished}` 消滅（CP03-053）。`result` 只接受這種已選的觀察綁定；其成功 Before 成員可用於 `move: {ref: {in: seen, except: {in: {objects_of: banished, view: before}}}, to: deck, position: bottom, order: chooser}`，扣除實際消滅的牌後，將其餘牌依選擇順序放到牌庫底。不以選取張數或預先計數代替成功回條，也不授權結果的新世代引用。執行時仍須是本次私有 Look 選取的成員、留在自己的牌庫且位置仍已知；未觀察的牌庫、對手的牌庫與直接對整份 Look 的消滅均不接受。墓場或 EX 的公開正式目標可沿用一般 `banish: selected`，不需要先看牌。
+已從自己的 Look 選出的牌可用 `banish: {ref: picked, result: banished}` 消滅（CP03-053）。這個觀察綁定的成功 Before 成員可用於 `move: {ref: {in: seen, except: {in: {objects_of: banished, view: before}}}, to: deck, position: bottom, order: chooser}`，扣除實際消滅的牌後，將其餘牌依選擇順序放到牌庫底。不以選取張數或預先計數代替成功回條，也不授權結果的新世代引用。執行時仍須是本次私有 Look 選取的成員、留在自己的牌庫且位置仍已知；未觀察的牌庫、對手的牌庫與直接對整份 Look 的消滅均不接受。墓場或 EX 的公開正式目標可沿用一般 `banish: selected`，不需要先看牌。
+
+本文用 `choose` 從自己的單一墓場選固定正張數時，也可用 `banish: {ref: fuel, result: banished}`，
+以 `count_of: banished` 讀這次成功消滅的 Before 成員數。這不開放對手、聯集區域、正式目標或可變張數的具名消滅。
+悪意の憑依（BP08-085）在自己墓場至少四張時才詢問 `optional`；接受須恰好選四張，成功消滅四張才讓結算中的法術回手。
+結算中的自身不在墓場（Q1117）。不足四張不能選依 [R-0018](../../authored/rules/rulings/R-0018.yaml) 從 Q2295 類推，強度為 `generalized`。
 
 「元のコストの合計がN以下になるように」寫成同層的 `cost_sum_le: N`（非負整數常量），限制所選全部卡片的印刷原費合計；費用修正不影響。目前接受 Look 的私有 `choose`（單一篩選或 `any_of` 聯集，CSD02b-002、BP21-025），以及墓場等公開區的正式目標與本文 `choose`（BP22-091）。出題的張數範圍沿用印刷數量；可行性與結算時的最低張數依最便宜的候選能放進合計的張數計算，超過合計的組合在作答時拒絕、題目不變；必要目標放不下時與其他目標不足相同。不與動態張數、領袖候選、手牌私有選取、`groups`、Advance 選擇並用。
 

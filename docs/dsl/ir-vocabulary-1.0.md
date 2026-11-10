@@ -149,6 +149,10 @@ selector 求「符合的集合／保序視圖」，**不自行讓玩家選**；D
 
 Receipt 不用一個布林「做了」包辦全部。`PaymentResult {complete:Bool,steps:List<CostReceipt>}` 與物理實際量分開：依10.6.2.5.2，費用步驟被取代仍可視為支付；依.5.3，合法0單位成本視為已做。這不表示相應原事件真的發生，亦不適用效果的0單位動作。每個「これによって」「そうしたなら」必須明確綁 **哪一個 ReceiptId＋哪個 typed predicate**，例如指定種類真的被捨棄、指定移動成功、整項付款完成；有裁定疑義標 G.receipt，不能通用地替換成 `actual > 0`。
 
+依 [R-0018](../../authored/rules/rulings/R-0018.yaml)（`generalized`，由 Q2295 類推），
+悪意の憑依的 `K.may` 須有至少四張自己的墓場卡才詢問；執行須選四張，附帶回手讀 `I.banish` 的實際成功四張。
+拒絕與不足四張都不執行可選消滅。選取量不等於 `T.receipt` 的成功量。
+
 ## 5. 指示節點詞彙
 
 共用 `Instruction {id,actor:PlayerRef,source:AbilitySource,precondition?:P.start,context:Effect / Cost,receipt:ReceiptId,source_span}`。下表所有列都產生 T.receipt，欄位「結果」只列特有 payload／計量；預定量與實際量不能混用。效果按1.3.2盡可能做，Cost 由 K.pay 要求完整可支付。一般前提為身分有效、種類／區域適用、未被禁止；**這些執行適用性不自動取消依法已存在的選擇**。表中提到 precondition 時才另加 P.start，不憑「成功機率為0」自動生成它。
