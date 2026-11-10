@@ -1,5 +1,6 @@
 use super::*;
-use sve_engine::game::internal::InputDomain;
+use alloc::collections::BTreeMap;
+use sve_engine::game::internal::{InputDomain, ResumeStage};
 
 pub(super) fn conditional_keyword() -> Located<Ability> {
     let mut located = ability(2, vec![]);
@@ -222,4 +223,211 @@ fn keyword_position(seat: u32, program: &WellFormedCardProgram) -> Game {
     game.load_internal_card("unit-spell", &card(vec![]))
         .unwrap();
     game
+}
+
+fn cross_zone_tree(zones: &Value) -> Value {
+    equipment_played::tree(
+        &json!({"static":{"zone":zones,"effects":[{"grant":{
+            "on":{"who":"self","zone":"field","kind":"follower"},"keywords":["rush"]
+        }}]}}),
+        "unit-amulet",
+    )
+}
+
+fn cross_zone_position(zone: &str) -> Value {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"recipient","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"ex-recipient","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"remove","card":"unit-spell"}]);
+    if initial["players"]["P1"]["zones"][zone].is_null() {
+        initial["players"]["P1"]["zones"][zone] = json!([]);
+    }
+    initial["players"]["P1"]["zones"][zone]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"provider","card":"unit-amulet"}));
+    initial
+}
+
+#[test]
+fn cross_zone_keyword_sources_work_in_field_and_ex_and_stop_when_the_source_leaves() {
+    let provider = lowerer()
+        .lower_with_printed_costs(
+            &cross_zone_tree(&json!(["ex", "field"])),
+            &BTreeMap::from([("unit-amulet".to_owned(), Nat(1))]),
+        )
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let removal = equipment_played::tree(
+        &json!({"spell":{
+            "targets":[{"bind":"provider","from":{"who":"self","zone":"field","kind":"amulet","name":"unit-amulet"},"n":1}],
+            "do":[{"destroy":{"ref":"provider"}}]
+        }}),
+        "unit-spell",
+    );
+    let remover = lowerer()
+        .lower_with_printed_costs(
+            &removal,
+            &BTreeMap::from([("unit-spell".to_owned(), Nat(1))]),
+        )
+        .unwrap()
+        .remove("unit-spell")
+        .unwrap();
+    for zone in ["field", "ex", "cemetery", "hand", "deck"] {
+        let initial = cross_zone_position(zone);
+        let mut game = Game::new(
+            keyword_catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "cross-zone-keywords",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &provider).unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        game.load_internal_card("unit-spell", &remover).unwrap();
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["objects"]["recipient"]["keywords"],
+            if ["field", "ex"].contains(&zone) {
+                json!(["突進"])
+            } else {
+                json!([])
+            }
+        );
+        assert_eq!(view["objects"]["f"]["keywords"], json!([]));
+        assert_eq!(view["objects"]["ex-recipient"]["keywords"], json!([]));
+        if !["field", "ex"].contains(&zone) {
+            continue;
+        }
+        if zone == "ex" {
+            assert!(matches!(
+                game.play_internal_card("provider", PlayerId { seat: 1 })
+                    .unwrap(),
+                CardPlay::Entered(_)
+            ));
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["objects"]["recipient"]["keywords"],
+                json!(["突進"])
+            );
+        }
+        let CardPlay::Awaiting(q) = game
+            .play_internal_card("remove", PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("provider target")
+        };
+        let InputDomain::Targets(domain) = q.domain else {
+            panic!("provider target domain")
+        };
+        assert_eq!(domain.members.len(), 1);
+        resolved(
+            game.answer_internal_card(
+                q.actor,
+                q.token,
+                Answer::Targets(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["recipient"]["keywords"],
+            json!([])
+        );
+    }
+}
+
+#[test]
+fn cross_zone_keyword_sources_reject_unneeded_zones_and_conditional_raw_ir() {
+    for zones in [
+        json!("ex"),
+        json!(["field", "field"]),
+        json!(["field", "cemetery"]),
+        json!(["field", "ex", "cemetery"]),
+    ] {
+        lowerer().lower(&cross_zone_tree(&zones)).unwrap_err();
+    }
+    let mut conditional = conditional_keyword();
+    conditional.node.active_zones = vec![ZoneKind::Field, ZoneKind::Ex];
+    let Effect::Continuous {
+        active_zones,
+        patch,
+        ..
+    } = &mut conditional.node.declarations[0]
+    else {
+        panic!("continuous keyword")
+    };
+    *active_zones = vec![ZoneKind::Field, ZoneKind::Ex];
+    *patch = CharacteristicPatch::GrantAbility {
+        abilities: vec![GrantedAbility::Keyword {
+            keyword: KeywordId::Rush,
+        }],
+    };
+    let program = card(vec![conditional]);
+    let mut game = Game::new(
+        keyword_catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "raw-cross-zone",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program)
+        .unwrap_err();
+}
+
+#[test]
+fn cross_zone_keyword_sources_keep_other_keywords_and_raw_zone_orders_closed() {
+    for keywords in [json!(["ward"]), json!(["rush", "storm"])] {
+        let mut tree = cross_zone_tree(&json!(["field", "ex"]));
+        tree["cards"]["unit-amulet"]["abilities"][0]["static"]["effects"][0]["grant"]["keywords"] =
+            keywords;
+        lowerer().lower(&tree).unwrap_err();
+    }
+    let seed = lowerer()
+        .lower(&cross_zone_tree(&json!(["field", "ex"])))
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    for reverse in [false, true] {
+        let mut raw = seed.card().clone();
+        let ability = &mut raw.abilities[0].node;
+        let Effect::Continuous {
+            active_zones,
+            patch,
+            ..
+        } = &mut ability.declarations[0]
+        else {
+            panic!("The seed has one keyword declaration.")
+        };
+        if reverse {
+            ability.active_zones = vec![ZoneKind::Ex, ZoneKind::Field];
+            *active_zones = ability.active_zones.clone();
+        } else {
+            *patch = CharacteristicPatch::GrantAbility {
+                abilities: vec![GrantedAbility::Keyword {
+                    keyword: KeywordId::Ward,
+                }],
+            };
+        }
+        let checked = WellFormedCardProgram::check(raw).unwrap();
+        let mut game = Game::new(
+            keyword_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "raw-cross-zone-variant",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &checked)
+            .unwrap_err();
+    }
 }
