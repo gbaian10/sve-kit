@@ -99,6 +99,11 @@ CARD_HISTORY_CASES: list[tuple[str, str, JsonValue]] = [
     ),
     ("CP03-P81", "A.event", {"drive_trigger": {"who": "self"}}),
     (
+        "CP03-110",
+        "A.event",
+        {"drive_trigger": {"who": "self", "during": {"turn": "self"}}},
+    ),
+    (
         "BP05-029",
         "A.event",
         {
