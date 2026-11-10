@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-020:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: 空絶の残光
+                to: ex
+                n: 1
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 2
+          do:
+            - player_effect:
+                who: self
+                until: turn
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      trait: 財宝
+                    delta: -2
+                    next_only: true
+      - line: 3
+        activate:
+          cost:
+            banish:
+              sel:
+                who: self
+                zone: cemetery
+                name: 簒奪の絶傑・オクトリス
+              n: 1
+          do:
+            - either:
+                options:
+                  - - create:
+                        token: 黄金の小剣
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: 黄金の杯
+                        to: ex
+                        n: 1
+                  - - create:
+                        token: 黄金の靴
+                        to: ex
+                        n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"

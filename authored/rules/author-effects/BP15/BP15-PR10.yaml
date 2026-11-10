@@ -1,0 +1,81 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-PR10:
+    abilities:
+      - line: 1
+        covers:
+          - 1
+          - 2
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
+          do:
+            - choice:
+                n: 1
+                instead:
+                  - if: &id001
+                      cmp:
+                        left:
+                          count:
+                            who: opp
+                            zone: cemetery
+                        op: ge
+                        right: 10
+                    upto: 2
+                options:
+                  - - if:
+                        cond: *id001
+                        then:
+                          - damage:
+                              to: enemy
+                              n: 8
+                        else:
+                          - damage:
+                              to: enemy
+                              n: 3
+                  - - look:
+                        bind: seen
+                        top:
+                          who: self
+                          n: 3
+                    - choose:
+                        bind: picked
+                        from:
+                          in: seen
+                          trait: 盗賊
+                        n: 1
+                        may: true
+                    - move:
+                        ref: picked
+                        to: hand
+                        result: taken
+                    - reveal:
+                        ref: picked
+                        bind: shown
+                    - move:
+                        ref:
+                          in: seen
+                          except:
+                            in:
+                              objects_of: taken
+                              view: before
+                        to: deck
+                        position: bottom
+                        order: chooser
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    token:
+      name: 空絶の残光
+      template: true
