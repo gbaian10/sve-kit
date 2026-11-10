@@ -25,6 +25,8 @@ uv --directory /absolute/project/carddb run sve-carddb author inspect \
   --inputs /absolute/work/public.json --card SYN-01
 ```
 
+主檔與索引只登錄每張永久卡片的一個代表 `record_key`；同卡的 JP 印刷別名由 current 選用依永久身分展開，不重複寫入主檔。
+
 主檔可直接寫整卡 DSL，也可引用具名本體：
 
 ```yaml
@@ -764,3 +766,12 @@ on:
 `extra_turn: {who: self}` 在這回合之後插入能力控制者的一個追加回合，沿用共用回合排程。它不立即切換回合玩家、刷新 PP 或進行抽牌；這些動作在該回合真正開始時執行。後來建立的追加回合先進行，原先應進行的普通回合保留；追加回合中可以再次追加（Q193）。目前只開放這個單次、自己、下一回合之前的寫法，其他玩家、`skip_turn`、張數、`result`、`precondition` 與自訂 anchor 仍拒絕。
 
 次元の超越的打出時選付費用沿用 `play.optional_cost`：`banish: {sel: {who: self, zone: cemetery, kind: spell}, n: 10}` 配 `optional_cost_set: 7`。只有十張材料實際付款完成才設定原費用，之後再套一般費用修正；打出的那張仍不在墓場，不能拿它作材料（Q192、Q329）。
+
+## 能力種類篩選
+
+看牌選取、正式目標與公開集合的 `keyword`，以及 `search.sel.keyword`，接受
+`earth_rite`（土之秘術）與 `lastword`（謝幕）。沿用既有 `HasAbility` 查詢，
+讀取候選目前卡面的完整能力定義，不以卡文包含關鍵字判斷。
+土之秘術依能力的付款步驟判定，包含可選付款與模式；Stack 宣告不等於土之秘術。
+墓場、牌組與看牌區仍能按持有的能力篩選，無須該能力可在當地發動或當下付得起費用。
+場上的篩選使用有效能力，包含授予、失去能力與目前進化卡面的變化。
