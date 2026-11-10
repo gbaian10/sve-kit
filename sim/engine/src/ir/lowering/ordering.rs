@@ -4,8 +4,8 @@ use super::super::{
     Posture, ReceiptReference, Visibility,
 };
 use super::{
-    Action, BodyContext, Cardinality, LoweringError, Nat, PlayerRef, PlayerRelation, PlayerSet,
-    ReceiptId, Selector, TextQuantifier, ZoneKind, ast, unsupported,
+    Action, BodyContext, Cardinality, FieldOutputKind, LoweringError, Nat, PlayerRef,
+    PlayerRelation, PlayerSet, ReceiptId, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 use core::num::NonZeroU64;
 
@@ -71,10 +71,17 @@ impl BodyContext<'_> {
                     receipt: MovementReceipt::Move {
                         receipt: ReceiptReference::new(receipt),
                     },
-                    single_evolution_subject: matches!(
-                        value.r#ref,
-                        Some(ast::MoveObjects::Field(ast::Objects::This(_)))
-                    ),
+                    kind: match &value.r#ref {
+                        Some(ast::MoveObjects::Field(ast::Objects::This(_))) => {
+                            FieldOutputKind::ReturnedSource
+                        }
+                        Some(ast::MoveObjects::Field(ast::Objects::Bound(target)))
+                            if self.evolution_targets.get(target) == Some(&ZoneKind::Cemetery) =>
+                        {
+                            FieldOutputKind::SingleFollower
+                        }
+                        _ => FieldOutputKind::Other,
+                    },
                 },
             );
         }
@@ -472,8 +479,7 @@ impl BodyContext<'_> {
                     if let ast::ObjectAction::Short(ast::Objects::Follow { follow }) =
                         objects.as_ref()
                         && self.field_outputs.get(follow).is_some_and(|output| {
-                            output.single_evolution_subject
-                                && matches!(output.receipt, MovementReceipt::Move { .. })
+                            output.kind == FieldOutputKind::ReturnedSource
                         }) =>
                 {
                     self.followed(follow, path)?

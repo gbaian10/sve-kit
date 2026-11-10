@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-077:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token: クレスト 混融の継承者・シャム＝ナクア
+                to: ex
+      - line: 2
+        super_evolve_time:
+          targets:
+            - bind: heir
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                class: ナイトメア
+                trait: 絶傑
+              n: 1
+          do:
+            - move:
+                ref: heir
+                to: field
+                result: entered
+            - evolve:
+                ref:
+                  follow: entered
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP20-T06

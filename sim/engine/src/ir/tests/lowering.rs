@@ -644,6 +644,45 @@ fn unsupported_step_rejects_the_entire_candidate() {
 }
 
 #[test]
+fn cemetery_target_follow_evolution_requires_a_single_own_formal_follower_and_field_entry() {
+    let mut tree = expanded::tree().clone();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"] = json!({
+        "targets": [
+            {"bind":"chosen","from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1_u64}
+        ],
+        "do": [
+            {"move":{"ref":"chosen","to":"field","result":"entered"}},
+            {"evolve":{"ref":{"follow":"entered"}}}
+        ]
+    });
+    lowerer().lower(&tree).unwrap();
+    for (pointer, value) in [
+        ("/targets/0/n", json!(2_u64)),
+        ("/targets/0/from/kind", json!("amulet")),
+        ("/do/0/move/to", json!("ex")),
+        ("/do/1/evolve/ref", json!("chosen")),
+    ] {
+        let mut changed = tree.clone();
+        *changed["cards"]["BP08-038"]["abilities"][0]["fanfare"]
+            .pointer_mut(pointer)
+            .unwrap() = value;
+        let error = lowerer().lower(&changed).unwrap_err();
+        assert_eq!(error.code, "unsupported_construct");
+        assert!(error.path.ends_with("/do/1"), "{pointer}: {}", error.path);
+    }
+
+    let body = &mut tree["cards"]["BP08-038"]["abilities"][0]["fanfare"];
+    let choice = body.as_object_mut().unwrap().remove("targets").unwrap()[0].clone();
+    body["do"]
+        .as_array_mut()
+        .unwrap()
+        .insert(0, json!({"choose":choice}));
+    let error = lowerer().lower(&tree).unwrap_err();
+    assert_eq!(error.code, "unsupported_construct");
+    assert!(error.path.ends_with("/do/2"), "{}", error.path);
+}
+
+#[test]
 fn leader_life_lowering_accepts_signed_delta_and_set_but_rejects_unhandled_metadata() {
     let lowerer = lowerer();
     let mut tree = expanded::tree().clone();

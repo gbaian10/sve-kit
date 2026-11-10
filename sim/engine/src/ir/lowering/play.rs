@@ -347,7 +347,7 @@ impl BodyContext<'_> {
         {
             self.field_entry.multi.insert(target.bind.clone());
         }
-        self.remember_evolution_target(target, cardinality, dynamic_count);
+        self.remember_evolution_target(target, cardinality, resolution);
         self.remember_transfer_target(target, cardinality, dynamic_count, resolution);
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
@@ -1121,7 +1121,7 @@ impl BodyContext<'_> {
                 searches: BTreeSet::new(),
                 ex_outputs: BTreeMap::new(),
                 field_outputs: BTreeMap::new(),
-                evolution_targets: BTreeSet::new(),
+                evolution_targets: BTreeMap::new(),
                 transfer_targets: BTreeSet::new(),
                 ex_targets: BTreeSet::new(),
                 flip_targets: BTreeSet::new(),

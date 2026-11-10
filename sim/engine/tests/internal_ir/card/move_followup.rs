@@ -204,11 +204,19 @@ fn numeric_follow_rejects_hidden_destinations_unknown_names_and_escaped_bindings
 }
 
 #[test]
-fn moving_a_follower_to_the_field_does_not_authorize_effect_evolution() {
+fn moving_a_follower_chosen_during_resolution_does_not_authorize_effect_evolution() {
     let mut input = tree(false);
-    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][1] =
-        json!({"evolve":{"ref":{"follow":"entered"}}});
-    reject_follow_at(&input, 1, "move does not authorize evolution");
+    let activation = &mut input["cards"]["unit-follower"]["abilities"][0]["activate"];
+    let choice = activation
+        .as_object_mut()
+        .unwrap()
+        .remove("targets")
+        .unwrap()[0]
+        .clone();
+    let steps = activation["do"].as_array_mut().unwrap();
+    steps[1] = json!({"evolve":{"ref":{"follow":"entered"}}});
+    steps.insert(0, json!({"choose":choice}));
+    reject_follow_at(&input, 2, "resolution choice does not authorize evolution");
 }
 
 #[test]

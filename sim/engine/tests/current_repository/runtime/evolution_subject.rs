@@ -40,6 +40,10 @@ fn evolve_source(board: &mut Game) {
 }
 
 fn trigger(board: &mut Game, card: &str) -> CardPlay {
+    trigger_line(board, card, 1)
+}
+
+fn trigger_line(board: &mut Game, card: &str, line: u64) -> CardPlay {
     if board.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         board.resume_internal_card().unwrap();
     }
@@ -49,7 +53,7 @@ fn trigger(board: &mut Game, card: &str) -> CardPlay {
     };
     let handle = options
         .iter()
-        .find(|option| option.card == card && option.line == 1)
+        .find(|option| option.card == card && option.line == line)
         .unwrap()
         .handle;
     board
@@ -130,6 +134,86 @@ fn revealed(activation: &Activation) -> usize {
             }
         })
         .sum()
+}
+
+fn sham_naqua_position(base: &str, form: &str, full_field: bool) -> Value {
+    let mut initial = position(base, form, 1, 7);
+    initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
+    initial["players"]["P1"]["sep"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"heir","card":"BP20-074"},
+        {"id":"wrong-class","card":"BP20-001"},
+        {"id":"wrong-trait","card":"BP20-078"}
+    ]);
+    initial["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"enemy","card":"BP20-074"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"heir-form","card":"BP20-075"}));
+    if full_field {
+        initial["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .extend((0_u8..4).map(|n| json!({"id":format!("filler-{n}"),"card":"BP01-037"})));
+    }
+    initial
+}
+
+#[test]
+fn sham_naqua_evolves_only_the_actual_cemetery_target_that_entered_the_field() {
+    for (base, form) in [("BP20-076", "BP20-077"), ("BP20-SL22", "BP20-SL23")] {
+        for (full_field, accept) in [(false, true), (false, false), (true, false)] {
+            let mut board = game(&sham_naqua_position(base, form, full_field));
+            let result = board.internal_rule_action(
+                &json!({"do":"evolve","source":"source","evolve_card":"source-form",
+                        "pay":{"pp":1_u8,"sep":1_u8}}),
+            ).unwrap();
+            assert_eq!(result.outcome, "resolved");
+            let pending = board.internal_pending_choice().unwrap().unwrap();
+            assert!(
+                matches!(pending.domain, InputDomain::Pending(options)
+                    if (1..=2).all(|line| options.iter().any(|option| option.card == form && option.line == line))),
+                "either printed trigger can resolve first"
+            );
+            resolved(trigger(&mut board, form));
+            let with_crest = board.projection(View::Referee).unwrap();
+            let ex = with_crest["P1"]["ex"].as_array().unwrap();
+            assert_eq!(ex.len(), 1, "the evolution trigger places the crest in EX");
+            assert!(matches!(
+                with_crest["objects"][ex[0].as_str().unwrap()]["card"].as_str(),
+                Some("BP20-P65" | "BP20-T06")
+            ));
+
+            let target = awaiting(trigger_line(&mut board, form, 2));
+            assert_eq!(target_cards(&target), vec!["BP20-074"]);
+            let entry = choose(&mut board, &target, Some("BP20-074"));
+            if full_field {
+                resolved(entry);
+            } else {
+                let resource = awaiting(entry);
+                assert_eq!(target_cards(&resource), vec!["BP20-075"]);
+                assert!(board.internal_decision(View::P2).is_none());
+                resolved(choose(&mut board, &resource, accept.then_some("BP20-075")));
+            }
+            let after = board.projection(View::Referee).unwrap();
+            assert_eq!(after["P1"]["pp"]["current"], 0_u8);
+            assert_eq!(after["objects"]["heir"]["generation"], u8::from(!full_field));
+            assert_eq!(after["objects"]["heir"]["power"], if accept { 3_u8 } else { 2_u8 });
+            assert_eq!(
+                after["P1"]["field"].as_array().unwrap().contains(&json!("heir")),
+                !full_field
+            );
+            assert_eq!(
+                after["P1"]["evolve_deck"].as_array().unwrap().contains(&json!("heir-form")),
+                !accept
+            );
+            if accept {
+                awaiting(trigger(&mut board, "BP20-075"));
+            } else {
+                checks(&mut board);
+            }
+        }
+    }
 }
 
 fn nilr_position(form: &str) -> Value {

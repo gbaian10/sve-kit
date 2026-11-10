@@ -1,6 +1,7 @@
 //! Intrinsic evolution is a fixed play projection, not a general Evolve body permission.
 use super::{
-    Allocator, CardCoordinates, LoweringError, ability_source, ast, source_span, unsupported,
+    Allocator, CardCoordinates, FieldOutputKind, LoweringError, ability_source, ast, source_span,
+    unsupported,
 };
 use crate::ir::effect_evolution;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
@@ -84,19 +85,22 @@ impl super::BodyContext<'_> {
         &mut self,
         target: &ast::Target,
         bounds: Cardinality,
-        dynamic: bool,
+        resolution: bool,
     ) {
-        if !dynamic
-            && bounds.maximum == Some(Nat(1))
-            && matches!(target.from.who, Some(ast::Side::Controller))
-            && matches!(
-                target.from.zone,
-                Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
-            )
-            && matches!(target.from.kind, Some(ast::SearchKind::Follower))
+        if bounds.maximum != Some(Nat(1))
+            || !matches!(target.from.who, Some(ast::Side::Controller))
+            || !matches!(target.from.kind, Some(ast::SearchKind::Follower))
         {
-            self.evolution_targets.insert(target.bind.clone());
+            return;
         }
+        let zone = match target.from.zone {
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Field)) => ZoneKind::Field,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery)) if !resolution => {
+                ZoneKind::Cemetery
+            }
+            _ => return,
+        };
+        self.evolution_targets.insert(target.bind.clone(), zone);
     }
 
     fn effect_evolution_subject(
@@ -106,7 +110,9 @@ impl super::BodyContext<'_> {
     ) -> Result<(ObjectOperand, Option<Selector>), LoweringError> {
         match reference {
             ast::Objects::This(_) => Ok((ObjectOperand::SourceHolder {}, None)),
-            ast::Objects::Bound(name) if self.evolution_targets.contains(name) => {
+            ast::Objects::Bound(name)
+                if self.evolution_targets.get(name) == Some(&ZoneKind::Field) =>
+            {
                 let selection = self
                     .targets
                     .get(name)
@@ -118,7 +124,7 @@ impl super::BodyContext<'_> {
                 let receipt = self
                     .field_outputs
                     .get(follow)
-                    .filter(|output| output.single_evolution_subject)
+                    .filter(|output| output.kind != FieldOutputKind::Other)
                     .map(|output| output.receipt.clone())
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(3, self.card_allocator.scope(path)?);

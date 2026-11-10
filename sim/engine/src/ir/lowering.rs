@@ -1335,7 +1335,14 @@ struct ReceiptReads {
 #[derive(Clone)]
 struct FieldOutput {
     receipt: super::MovementReceipt,
-    single_evolution_subject: bool,
+    kind: FieldOutputKind,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum FieldOutputKind {
+    ReturnedSource,
+    SingleFollower,
+    Other,
 }
 
 struct BodyContext<'definitions> {
@@ -1371,7 +1378,7 @@ struct BodyContext<'definitions> {
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
     field_outputs: BTreeMap<String, FieldOutput>,
-    evolution_targets: BTreeSet<String>,
+    evolution_targets: BTreeMap<String, ZoneKind>,
     transfer_targets: BTreeSet<String>,
     ex_targets: BTreeSet<String>,
     flip_targets: BTreeSet<String>,
@@ -1451,7 +1458,7 @@ impl<'definitions> BodyContext<'definitions> {
             searches: BTreeSet::new(),
             ex_outputs: BTreeMap::new(),
             field_outputs: BTreeMap::new(),
-            evolution_targets: BTreeSet::new(),
+            evolution_targets: BTreeMap::new(),
             transfer_targets: BTreeSet::new(),
             ex_targets: BTreeSet::new(),
             flip_targets: BTreeSet::new(),
