@@ -408,8 +408,8 @@ pub(crate) fn life_plan(query: &HistoryQuery) -> Option<super::events::life::Lif
     life_filter(query).filter(|filter| {
         !filter.crosses_zero
             && filter.own.is_some()
-            && filter.up == Some(false)
             && filter.own_turn.is_none()
+            && (filter.up == Some(false) || (filter.own == Some(true) && filter.up == Some(true)))
     })
 }
 

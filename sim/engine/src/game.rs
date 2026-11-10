@@ -532,6 +532,7 @@ impl Game {
                 "leader_damaged",
                 "leader_hp_decreased",
                 "leader_hp_increased",
+                "leader_hp_increase_count",
                 "ub_activated",
                 "discarded",
                 "attacks",

@@ -367,7 +367,7 @@ impl Checker {
                     checker.candidate(*binding, predicate)
                 })?;
             }
-            checker.aggregate_bounds(&groups.aggregate_bounds)
+            checker.aggregate_bounds(&groups.aggregate_bounds, false)
         })
     }
 

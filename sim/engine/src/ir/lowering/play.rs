@@ -564,16 +564,17 @@ impl BodyContext<'_> {
         };
         let number: ast::Number = super::decode(argument.as_ref().clone(), path)?;
         let value = self.number(&number, path, &mut BTreeSet::new())?;
-        if !public_numbers::check(&value) {
+        let comparison = if target.n.is_some() {
+            Comparison::Equal
+        } else {
+            Comparison::LessEqual
+        };
+        if !public_numbers::target_count(&value, comparison) {
             return Err(unsupported(path));
         }
         Ok(super::super::AggregateBound {
             property: super::super::NumericProperty::Count,
-            comparison: if target.n.is_some() {
-                Comparison::Equal
-            } else {
-                Comparison::LessEqual
-            },
+            comparison,
             value,
         })
     }

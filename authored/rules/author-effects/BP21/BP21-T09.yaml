@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-T09:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    token:
+      name: 長久の導き
+      template: true
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemies
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto:
+                history_count:
+                  window: this_turn
+                  event: life_changed
+                  who: self
+                  where:
+                    direction: up
+          do:
+            - damage:
+                to: enemies
+                n: 5
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: 学院
+                hp: 1
+                power: 1

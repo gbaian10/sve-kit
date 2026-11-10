@@ -45,6 +45,7 @@ impl Game {
             self.bump(&format!("{seat}.leader_hp_decreased"), 1);
         }
         if life > previous {
+            self.bump(&format!("{seat}.leader_hp_increase_count"), 1);
             self.bump(
                 &format!("{seat}.leader_hp_increased"),
                 life.saturating_sub(previous),

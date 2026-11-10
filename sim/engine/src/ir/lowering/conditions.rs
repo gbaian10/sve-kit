@@ -34,12 +34,9 @@ fn life_history(
     event: Binding<LifeChangeEvent>,
     path: &str,
 ) -> Result<super::super::HistoryQuery, LoweringError> {
-    if history.who.is_none()
-        || history
-            .r#where
-            .as_ref()
-            .is_none_or(|filter| !matches!(filter.direction, ast::LifeDirection::Down))
-    {
+    let filter = history.r#where.as_ref().ok_or_else(|| unsupported(path))?;
+    let up = matches!(filter.direction, ast::LifeDirection::Up);
+    if history.who.is_none() || (up && !matches!(history.who, Some(ast::LeaderSide::Controller))) {
         return Err(unsupported(path));
     }
     Ok(super::super::history_turn::life_query(
@@ -50,7 +47,7 @@ fn life_history(
                 .who
                 .as_ref()
                 .map(|who| matches!(who, ast::LeaderSide::Controller)),
-            up: Some(false),
+            up: Some(up),
             own_turn: None,
         },
     ))

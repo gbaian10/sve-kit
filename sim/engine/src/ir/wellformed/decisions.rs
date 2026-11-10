@@ -147,7 +147,17 @@ impl Checker {
         self.env.private_choice =
             super::visibility::private_to(&decision.visibility, &decision.actor);
         let result = self.at("domain", |checker| {
-            checker.domain(&decision.domain, cardinality)
+            checker.domain(
+                &decision.domain,
+                cardinality,
+                matches!(
+                    decision.kind,
+                    DecisionKind::PlayParameter {
+                        slot: PlaySlot::Targets,
+                        ..
+                    }
+                ),
+            )
         });
         self.env.chooser = None;
         self.env.private_choice = false;
@@ -193,7 +203,12 @@ impl Checker {
         self.define(binding, BindingKind::Ability(filter))
     }
 
-    fn domain(&mut self, domain: &ChoiceDomain, cardinality: Option<Cardinality>) -> Checked {
+    fn domain(
+        &mut self,
+        domain: &ChoiceDomain,
+        cardinality: Option<Cardinality>,
+        formal_targets: bool,
+    ) -> Checked {
         match domain {
             ChoiceDomain::Abilities {
                 holder,
@@ -208,7 +223,7 @@ impl Checker {
                 if cardinality.is_some_and(|cardinality| constraint.cardinality != cardinality) {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
-                self.constraint(constraint)?;
+                self.constraint(constraint, formal_targets)?;
                 self.define(*binding, BindingKind::Value)?;
                 if let Some(roles) = target_roles {
                     self.roles(roles, constraint.cardinality)?;
@@ -252,7 +267,9 @@ impl Checker {
                 let mut after = start.clone();
                 for (index, child) in domains.iter().enumerate() {
                     self.env = start.clone();
-                    self.at(&index.to_string(), |checker| checker.domain(child, None))?;
+                    self.at(&index.to_string(), |checker| {
+                        checker.domain(child, None, formal_targets)
+                    })?;
                     after.bindings.extend(self.env.bindings.clone());
                     after.distributions.extend(self.env.distributions.clone());
                 }
@@ -419,7 +436,11 @@ impl Checker {
         Ok(())
     }
 
-    pub(super) fn constraint(&mut self, constraint: &SelectionConstraint) -> Checked {
+    pub(super) fn constraint(
+        &mut self,
+        constraint: &SelectionConstraint,
+        formal_targets: bool,
+    ) -> Checked {
         self.cardinality(constraint.cardinality)?;
         if constraint.groups.is_empty() {
             return self.reject();
@@ -430,17 +451,37 @@ impl Checker {
                 checker.selector(&group.selector)
             })?;
         }
-        self.aggregate_bounds(&constraint.aggregate_bounds)
+        self.aggregate_bounds(&constraint.aggregate_bounds, formal_targets)
     }
 
-    pub(super) fn aggregate_bounds(&mut self, bounds: &[AggregateBound]) -> Checked {
+    pub(super) fn aggregate_bounds(
+        &mut self,
+        bounds: &[AggregateBound],
+        formal_targets: bool,
+    ) -> Checked {
         for (index, bound) in bounds.iter().enumerate() {
             self.at(&format!("aggregate_bounds/{index}"), |checker| {
-                if bound.property == NumericProperty::Count && !public_numbers::check(&bound.value)
+                let history_limit = bound.property == NumericProperty::Count
+                    && formal_targets
+                    && !public_numbers::check(&bound.value)
+                    && public_numbers::target_count(&bound.value, bound.comparison);
+                if bound.property == NumericProperty::Count
+                    && !public_numbers::check(&bound.value)
+                    && !history_limit
                 {
                     return checker.reject();
                 }
-                checker.integer(&bound.value)
+                // This closed history bound does not inspect the candidate or chooser.
+                let chooser = if history_limit {
+                    checker.env.chooser.take()
+                } else {
+                    None
+                };
+                let checked = checker.integer(&bound.value);
+                if history_limit {
+                    checker.env.chooser = chooser;
+                }
+                checked
             })?;
         }
         Ok(())
@@ -452,7 +493,7 @@ impl Checker {
         };
         self.env.chooser = Some(PlayerRef::Controller {});
         self.env.private_choice = true;
-        let result = self.constraint(materials);
+        let result = self.constraint(materials, false);
         self.env.chooser = None;
         self.env.private_choice = false;
         result
@@ -477,7 +518,7 @@ impl Checker {
                 if constraint.disjoint != Disjointness::Disjoint {
                     return self.reject();
                 }
-                self.constraint(constraint)?;
+                self.constraint(constraint, false)?;
                 for group in &constraint.groups {
                     self.hand(&group.selector, player)?;
                 }

@@ -10,7 +10,7 @@ use crate::ir::{
     Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
     ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
     EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, Node,
-    NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlayerRef,
+    NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlaySlot, PlayerRef,
     PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
     Selector, Stat, TraitsRead,
 };
@@ -501,7 +501,7 @@ fn count_bounds(constraint: &SelectionConstraint) -> bool {
     let [
         AggregateBound {
             property: NumericProperty::Count,
-            comparison: Comparison::Equal | Comparison::LessEqual,
+            comparison,
             value,
         },
     ] = constraint.aggregate_bounds.as_slice()
@@ -512,12 +512,14 @@ fn count_bounds(constraint: &SelectionConstraint) -> bool {
         && constraint.groups[0].cardinality == constraint.cardinality
         && constraint.cardinality.minimum == Nat(0)
         && constraint.cardinality.maximum.is_none()
-        && public_numbers::check(value)
+        && matches!(comparison, Comparison::Equal | Comparison::LessEqual)
+        && public_numbers::target_count(value, *comparison)
 }
 fn evaluated_counts(
     game: &Game,
     execution: &Execution,
     printed: &SelectionConstraint,
+    decision: &Decision,
 ) -> Result<SelectionConstraint> {
     if matches!(
         card_totals(&printed.aggregate_bounds),
@@ -525,7 +527,20 @@ fn evaluated_counts(
     ) {
         return Ok(printed.clone());
     }
-    if !count_bounds(printed) {
+    let formal_targets = matches!(
+        decision.kind,
+        DecisionKind::PlayParameter {
+            slot: PlaySlot::Targets,
+            ..
+        }
+    );
+    if !count_bounds(printed)
+        || (!formal_targets
+            && printed
+                .aggregate_bounds
+                .iter()
+                .any(|bound| !public_numbers::check(&bound.value)))
+    {
         return Err(unsupported("dynamic target count shape"));
     }
     let mut constraint = printed.clone();
@@ -1318,7 +1333,7 @@ impl Game {
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
         let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
-        let constraint = evaluated_counts(self, execution, constraint)?;
+        let constraint = evaluated_counts(self, execution, constraint, decision)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
         // The capacity is the destination's: the controller's field, even when the opponent picks.

@@ -339,14 +339,14 @@ pub(super) fn subjects(
         if count != HistoryCount::Facts {
             return Err(unsupported("life history subject count"));
         }
-        return u64::try_from(life_counter(
-            execution,
-            game,
-            filter,
-            "leader_hp_decreased",
-        )?)
-        .map(Nat)
-        .map_err(invalid);
+        let counter = if filter.up == Some(true) {
+            "leader_hp_increase_count"
+        } else {
+            "leader_hp_decreased"
+        };
+        return u64::try_from(life_counter(execution, game, filter, counter)?)
+            .map(Nat)
+            .map_err(invalid);
     }
     if let Some((player, exclude_current)) = ub_plan(query) {
         if count != HistoryCount::Facts {
