@@ -283,7 +283,11 @@ impl BodyContext<'_> {
                             receipt: ReceiptReference::new(receipt),
                         },
                         // Grouped numeric follow must not widen the singleton evolution permission.
-                        single_evolution_subject: single,
+                        kind: if single {
+                            super::FieldOutputKind::SingleFollower
+                        } else {
+                            super::FieldOutputKind::Other
+                        },
                     },
                 );
             }
