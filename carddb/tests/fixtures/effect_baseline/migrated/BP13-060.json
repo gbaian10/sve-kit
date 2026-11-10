@@ -1,0 +1,72 @@
+{
+  "abilities": [
+    {
+      "additional_costs": [
+        {
+          "costs": [
+            {
+              "amount": 3,
+              "op": "pp"
+            }
+          ],
+          "key": "boost"
+        }
+      ],
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "amount": 3,
+            "op": "damage",
+            "subjects": "target.1"
+          },
+          {
+            "condition": {
+              "read": "paid.boost"
+            },
+            "op": "if",
+            "then": {
+              "op": "seq",
+              "steps": [
+                {
+                  "bind": "entered",
+                  "max": 1,
+                  "min": 0,
+                  "op": "search",
+                  "select": {
+                    "name": "焦熱の竜翼・ドラーク",
+                    "side": "self",
+                    "zone": "deck"
+                  },
+                  "to": "field"
+                },
+                {
+                  "keywords": [
+                    "assail"
+                  ],
+                  "op": "modify",
+                  "subjects": "entered"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "kind": "spell",
+      "line": 2,
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}
