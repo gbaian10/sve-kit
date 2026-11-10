@@ -7,6 +7,8 @@ mod event_combat_life;
 mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]
 mod exchange_routes;
+#[path = "card/formal_target_groups.rs"]
+mod formal_target_groups;
 #[path = "card/hand_banish.rs"]
 mod hand_banish;
 #[path = "card/material_acts.rs"]

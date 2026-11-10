@@ -142,6 +142,7 @@ impl BodyContext<'_> {
         };
         let target = ast::Target {
             any: choice.any,
+            groups: None,
             bind: choice.bind.clone(),
             from: from.clone(),
             distinct_by: choice.distinct_by.clone(),

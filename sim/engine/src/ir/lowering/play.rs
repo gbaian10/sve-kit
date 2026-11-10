@@ -273,6 +273,9 @@ impl BodyContext<'_> {
         path: &str,
         resolution: bool,
     ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        if target.groups.is_some() {
+            return self.grouped_target_choice(target, path, resolution);
+        }
         let dynamic_count = check_choice_shape(target, resolution, path)?;
         if target.from.observation.is_some() {
             if target
@@ -361,6 +364,69 @@ impl BodyContext<'_> {
             },
             cardinality,
         ))
+    }
+
+    fn grouped_target_choice(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+        resolution: bool,
+    ) -> Result<(ChoiceDomain, Cardinality), LoweringError> {
+        let groups = target.groups.as_ref().ok_or_else(|| unsupported(path))?;
+        let count = u64::try_from(groups.len()).map_err(|_overflow| unsupported(path))?;
+        let cardinality = target_cardinality(target, path)?;
+        let required = target.n.is_some();
+        if resolution
+            || !matches!(count, 2 | 3)
+            || cardinality.maximum != Some(Nat(count))
+            || (required && (count != 2 || cardinality.minimum != Nat(count)))
+            || check_choice_shape(target, false, path)?
+            || target.any
+            || target.roles.is_some()
+            || target.distinct_by.is_some()
+            || target.cost_sum_le.is_some()
+            || !matches!(target.from.who, Some(ast::Side::Controller))
+            || !matches!(target.from.kind, Some(ast::SearchKind::Follower))
+            || !matches!(
+                target.from.zone,
+                Some(ast::TargetZone::Single(
+                    ast::TargetSingleZone::Cemetery | ast::TargetSingleZone::Banish
+                ))
+            )
+        {
+            return Err(unsupported(path));
+        }
+        let mut plain = target.clone();
+        plain.groups = None;
+        let (mut domain, _) = self.object_choice(&plain, path, false)?;
+        let mut lowered = Vec::new();
+        for group in groups {
+            if group.orig_cost_eq.is_some() == group.orig_cost_le.is_some()
+                || target.from.orig_cost_eq.is_some()
+                || target.from.orig_cost_le.is_some()
+                || target.from.r#trait.is_some()
+                || target.from.not_class.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            let mut query = target.from.clone();
+            query.orig_cost_eq = group.orig_cost_eq;
+            query.orig_cost_le = group.orig_cost_le.map(ast::NumericArgument::Literal);
+            query.r#trait.clone_from(&group.r#trait);
+            query.not_class.clone_from(&group.not_class);
+            lowered.push(SelectionGroup {
+                selector: self.public_target_selector(&query, path)?,
+                cardinality: Cardinality {
+                    minimum: Nat(u64::from(required)),
+                    maximum: Some(Nat(1)),
+                },
+            });
+        }
+        let ChoiceDomain::Objects { constraint, .. } = &mut domain else {
+            return Err(unsupported(path));
+        };
+        constraint.groups = lowered;
+        Ok((domain, cardinality))
     }
 
     fn lower_target_roles(

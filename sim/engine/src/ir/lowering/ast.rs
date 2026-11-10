@@ -1471,11 +1471,21 @@ pub(super) struct Target {
     pub option: Option<u64>,
     pub bind: String,
     pub from: TargetQuery,
+    pub groups: Option<Vec<FormalTargetGroup>>,
     pub distinct_by: Option<Names>,
     pub cost_sum_le: Option<u64>,
     pub roles: Option<BTreeMap<String, TargetRole>>,
     pub n: Option<NumericArgument>,
     pub upto: Option<NumericArgument>,
+}
+
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FormalTargetGroup {
+    pub r#trait: Option<String>,
+    pub not_class: Option<String>,
+    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_le: Option<u64>,
 }
 
 #[derive(Clone, Deserialize)]

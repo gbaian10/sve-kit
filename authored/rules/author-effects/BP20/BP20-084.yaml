@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-084:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+              groups:
+                - not_class: ナイトメア
+                  orig_cost_le: 5
+                - not_class: ナイトメア
+                  orig_cost_le: 3
+              n: 2
+          do:
+            - move:
+                ref: chosen
+                to: field
+                result: entered
