@@ -2,8 +2,8 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
+use crate::ir::events::{drive, equipment};
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
@@ -43,6 +43,7 @@ pub(super) fn check_card(
         SubjectFields::from_pattern(pattern)
             .map(SubjectFields::object)
             .or_else(|| equipment::binding(pattern).map(equipment::holder))
+            .or_else(|| drive::checked_binding(pattern).map(drive::holder))
     });
     check_body(
         program,
@@ -339,6 +340,7 @@ fn check_requirements(
                             | "shape.ObjectFrozen.EnterExObject"
                             | "shape.ObjectFrozen.UbActivatedHolder"
                             | "shape.ObjectFrozen.EquipHolder"
+                            | "shape.ObjectFrozen.DriveCheckedHolder"
                             | "shape.ObjectFrozen.AttackAttacker"
                             | "shape.ObjectFrozen.EvolveSubject"
                             | "shape.ObjectFrozen.DestroyObjectBefore"

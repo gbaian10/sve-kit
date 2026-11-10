@@ -4,9 +4,9 @@ use crate::ir::events::banish as banish_header;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
-use crate::ir::events::equipment;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
+use crate::ir::events::{drive, equipment};
 use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
 use crate::ir::optional_payment;
 use crate::ir::prevention;
@@ -638,7 +638,8 @@ impl Checker {
                 } else {
                     self.env.trigger_subject = SubjectFields::from_pattern(pattern)
                         .map(SubjectFields::object)
-                        .or_else(|| equipment::binding(pattern).map(equipment::holder));
+                        .or_else(|| equipment::binding(pattern).map(equipment::holder))
+                        .or_else(|| drive::checked_binding(pattern).map(drive::holder));
                 }
                 Ok(())
             }

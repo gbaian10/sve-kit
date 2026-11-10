@@ -218,7 +218,7 @@ impl Projected for ObjectFrozen {
             Self::EquipHolder { event } | Self::EquipEquipment { event } => {
                 checker.reference(*event, BindingKind::Value)
             }
-            Self::DriveCheckedCheckedCard { event } => {
+            Self::DriveCheckedHolder { event } | Self::DriveCheckedCheckedCard { event } => {
                 checker.reference(*event, BindingKind::Value)
             }
             Self::MoveBefore { event } | Self::MoveAfter { event } => {
@@ -660,6 +660,10 @@ impl Checker {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The event matrix keeps each snapshot policy and binding rule in one exhaustive dispatch."
+    )]
     pub(super) fn event_pattern(
         &mut self,
         pattern: &EventPattern,
@@ -750,6 +754,12 @@ impl Checker {
             EventPattern::Phase { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
+            EventPattern::DriveChecked { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
+            EventPattern::DriveTrigger { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Fused { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
@@ -760,11 +770,9 @@ impl Checker {
             | EventPattern::Resolve { .. }
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
-            | EventPattern::DriveTrigger { .. }
             | EventPattern::UbActivated { .. }
             | EventPattern::Equip { .. }
-            | EventPattern::Dice { .. }
-            | EventPattern::DriveChecked { .. } => self.reject(),
+            | EventPattern::Dice { .. } => self.reject(),
         }
     }
 

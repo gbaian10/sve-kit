@@ -988,6 +988,10 @@ fn lowered_trigger(
     })
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "The exhaustive event-header dispatch keeps each admitted subscription auditable together."
+)]
 fn lowered_subscription(
     on: &ast::PhaseSubscription,
     ids: EventIds,
@@ -1019,6 +1023,20 @@ fn lowered_subscription(
             Ok(EventPattern::UbActivated {
                 binding: event,
                 predicate: super::events::ability::subject().predicate(SubjectFields::Ub(event)),
+            })
+        }
+        ast::PhaseSubscription::DriveChecked(_) => {
+            let binding = Binding::new(event_id, scope);
+            Ok(EventPattern::DriveChecked {
+                binding,
+                predicate: super::events::drive::checked(binding),
+            })
+        }
+        ast::PhaseSubscription::DriveTrigger(trigger) => {
+            let binding = Binding::new(event_id, scope);
+            Ok(EventPattern::DriveTrigger {
+                binding,
+                predicate: super::events::drive::triggered(binding, trigger.during.is_some()),
             })
         }
         ast::PhaseSubscription::Drew(draw) => {
@@ -1192,6 +1210,8 @@ fn lowered_change(
         | ast::PhaseSubscription::Damage(_)
         | ast::PhaseSubscription::Attacked(_)
         | ast::PhaseSubscription::Dealt(_)
+        | ast::PhaseSubscription::DriveChecked(_)
+        | ast::PhaseSubscription::DriveTrigger(_)
         | ast::PhaseSubscription::Drew(_)
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_)
@@ -1301,6 +1321,7 @@ struct BodyContext<'definitions> {
     subject_event: Option<SubjectFields>,
     damage_event: Option<Binding<super::DamageEvent>>,
     equip_event: Option<Binding<super::EquipEvent>>,
+    drive_checked_event: Option<Binding<super::DriveCheckedEvent>>,
     source_use: &'definitions ast::SourceUse,
     counter_read_view: CounterReadView,
     entry_event: Option<Binding<super::EnterFieldEvent>>,
@@ -1371,6 +1392,7 @@ impl<'definitions> BodyContext<'definitions> {
             subject_event: None,
             damage_event: None,
             equip_event: None,
+            drive_checked_event: None,
             source_use: &entry.sources[0],
             counter_read_view: CounterReadView::Current,
             leave_event: None,
@@ -1444,6 +1466,7 @@ impl<'definitions> BodyContext<'definitions> {
         if let TriggerCondition::Event { pattern } = &trigger.on {
             self.subject_event = SubjectFields::from_pattern(pattern);
             self.equip_event = super::events::equipment::binding(pattern);
+            self.drive_checked_event = super::events::drive::checked_binding(pattern);
             if let EventPattern::Damage { binding, .. } = pattern {
                 self.damage_event = Some(*binding);
             }
