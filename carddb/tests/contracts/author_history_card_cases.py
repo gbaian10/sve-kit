@@ -128,7 +128,7 @@ CARD_HISTORY_CASES: list[tuple[str, str, JsonValue]] = [
             }
         },
     ),
-    ("BP05-092", "A.event", {"state": {"leader_life": {"who": "self", "le": 0}}}),
+    ("BP05-092", "A.event", {"life_changed": {"who": "self", "crosses_zero": True}}),
     (
         "BP20-P37",
         "A.cond",
