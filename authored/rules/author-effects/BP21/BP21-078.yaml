@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-078:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            dice_rolled:
+              who: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      event: value
+                    op: eq
+                    right: 6
+                then:
+                  - damage:
+                      to: target
+                      n: 3
+                else:
+                  - damage:
+                      to: target
+                      n: 1
+          targets:
+            - bind: target
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+      - line: 2
+        evolve_time:
+          do:
+            - repeat:
+                n: 2
+                do:
+                  - dice:
+                      bind: die

@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - reroll:
+                who: self
+                times: 1

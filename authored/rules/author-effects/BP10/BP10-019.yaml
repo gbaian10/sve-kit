@@ -1,0 +1,57 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-019:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        token: ナイト
+                        n: 1
+                        to: field
+                  - - buff:
+                        "on": this
+                        power: 1
+                    - grant:
+                        "on": this
+                        keywords:
+                          - rush
+                          - ward
+                  - - damage:
+                        to:
+                          leaders: opponents
+                        n: 2
+                  - - pay:
+                        cost:
+                          steps:
+                            - pp: 4
+                            - self_to_cemetery: true
+                        do:
+                          - choose:
+                              bind: incoming
+                              from:
+                                advance_follower: true
+                                kind: follower
+                                name: 《暴走》する戦車・オルオーン
+                                who: self
+                                zone: evolve_deck
+                              may: true
+                              n: 1
+                          - move:
+                              ref: incoming
+                              to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP17-T11

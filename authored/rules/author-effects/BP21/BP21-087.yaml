@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-087:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            dice_rolled:
+              who: self
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      event: value
+                    op: eq
+                    right: 6
+                then:
+                  - buff:
+                      "on": target
+                      power: 1
+                      hp: 1
+          targets:
+            - bind: target
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          do:
+            - dice:
+                bind: die

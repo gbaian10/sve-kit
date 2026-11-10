@@ -1,0 +1,72 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                what: attack
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - repeat:
+                n: 2
+                do:
+                  - dice:
+                      bind: die
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            dice: die
+                          op: le
+                          right: 2
+                      then:
+                        - destroy:
+                            ref:
+                              who: opp
+                              zone: field
+                              kind: follower
+                  - if:
+                      cond:
+                        all:
+                          - cmp:
+                              left:
+                                dice: die
+                              op: ge
+                              right: 3
+                          - cmp:
+                              left:
+                                dice: die
+                              op: le
+                              right: 4
+                      then:
+                        - damage:
+                            to:
+                              leaders: opponents
+                            n: 7
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            dice: die
+                          op: ge
+                          right: 5
+                      then:
+                        - damage:
+                            to:
+                              leader: self
+                            n: 7

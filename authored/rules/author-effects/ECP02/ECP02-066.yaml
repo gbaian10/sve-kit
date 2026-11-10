@@ -1,0 +1,80 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-066:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - reroll:
+                who: self
+                times: 1
+      - line: 2
+        evolve_time:
+          do:
+            - dice:
+                bind: die
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: eq
+                    right: 1
+                then:
+                  - draw:
+                      n: 2
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: eq
+                    right: 2
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 3
+                  - life:
+                      who: self
+                      delta: 3
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: eq
+                    right: 3
+                then:
+                  - choose:
+                      bind: strongest
+                      by: opp
+                      from:
+                        who: opp
+                        zone: field
+                        kind: follower
+                        where:
+                          cmp:
+                            left:
+                              power_of: item
+                            op: eq
+                            right:
+                              agg:
+                                of:
+                                  who: opp
+                                  zone: field
+                                  kind: follower
+                                attr: power
+                                fn: max
+                      n: 1
+                  - move:
+                      ref: strongest
+                      to: cemetery

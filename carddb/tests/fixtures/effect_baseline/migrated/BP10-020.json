@@ -1,0 +1,75 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "restrict",
+        "subjects": "self",
+        "action": "attack"
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "per",
+        "count": 2,
+        "body": {
+          "op": "seq",
+          "steps": [
+            {
+              "op": "dice",
+              "count": 1,
+              "bind": "die"
+            },
+            {
+              "op": "if",
+              "condition": {
+                "fn": "le",
+                "args": [
+                  {
+                    "read": "die"
+                  },
+                  2
+                ]
+              },
+              "then": {
+                "op": "destroy",
+                "subjects": {
+                  "side": "opponent",
+                  "zone": "field",
+                  "type": "follower"
+                }
+              },
+              "else": {
+                "op": "if",
+                "condition": {
+                  "fn": "le",
+                  "args": [
+                    {
+                      "read": "die"
+                    },
+                    4
+                  ]
+                },
+                "then": {
+                  "op": "damage",
+                  "subjects": "opponent.leader",
+                  "amount": 7
+                },
+                "else": {
+                  "op": "damage",
+                  "subjects": "self.leader",
+                  "amount": 7
+                }
+              }
+            }
+          ]
+        }
+      },
+      "event": "end"
+    }
+  ]
+}
