@@ -1316,6 +1316,9 @@ fn check_instruction(
     nested::ability::check_action(&instruction.action)?;
     super::grant::check_action(&instruction.action)?;
     super::numeric::pilot::check_action(&instruction.action)?;
+    if matches!(instruction.action, Action::RemoveAbility { .. }) {
+        super::ability_suppression::check_loss(&instruction.action)?;
+    }
     super::flip::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
     if let Action::Delay { body, .. } = &instruction.action {
@@ -1362,6 +1365,7 @@ fn check_instruction(
             | Action::Token { .. }
             | Action::Equip { .. }
             | Action::BoxPilot { .. }
+            | Action::RemoveAbility { .. }
             | Action::Order { .. }
             | Action::Shuffle { .. }
             | Action::RideDrive {

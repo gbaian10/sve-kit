@@ -325,8 +325,7 @@ impl Game {
     ) -> Result<Vec<String>> {
         let object = self.object(id)?;
         let mut names = self.printed_card_names(card, face, &object.zone)?;
-        if object.state["silenced"] == true || self.internal_box_suppresses_printed(id, card, face)
-        {
+        if object.state["silenced"] == true || self.internal_suppresses_printed(id, card, face) {
             names.truncate(1);
         }
         Ok(names)

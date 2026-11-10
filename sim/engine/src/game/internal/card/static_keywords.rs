@@ -247,7 +247,7 @@ impl Game {
         Ok(self
             .internal_unfiltered_static_grants(holder)?
             .into_iter()
-            .filter(|(_, origin)| !self.internal_box_suppresses(holder, origin))
+            .filter(|(_, origin)| !self.internal_suppresses_grant(holder, origin))
             .collect())
     }
 

@@ -1118,6 +1118,7 @@ pub(super) struct Apply {
 #[serde(rename_all = "snake_case")]
 pub(super) enum InstalledEffect {
     PlayPermission(PlayPermission),
+    LoseAbilities(Empty),
     DamageMod(DamageModifier),
     AddTrait(TraitEffect),
     Stat(ConstantStats),

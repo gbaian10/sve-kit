@@ -43,7 +43,7 @@ impl Game {
             return Ok(None);
         }
         let mut keywords = BTreeSet::new();
-        if self.internal_racing_rush(holder)? && !self.internal_box_suppresses_racing(holder) {
+        if self.internal_racing_rush(holder)? && !self.internal_suppresses_racing(holder) {
             keywords.insert("rush".into());
         }
         for ability in self.internal_printed_abilities(holder)? {

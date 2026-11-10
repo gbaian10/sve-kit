@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-042:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - count:
+                  who: self
+                  zone: banish
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: ジンジャーの言霊
+                n: 1
+                to: ex
+    token_sources:
+      - card: BP18-T04
+        line: 1
+        section: 1

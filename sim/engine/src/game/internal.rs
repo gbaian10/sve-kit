@@ -41,10 +41,10 @@ use serde_json::{Value, json};
 
 use crate::ir::RevealUntilOutcome;
 
+mod ability_suppression;
 mod admission;
 mod aggregates;
-mod boxed;
-pub(in crate::game) use boxed::BoxState;
+pub(in crate::game) use ability_suppression::SuppressionState;
 mod allocation;
 mod damage;
 pub(in crate::game) use damage::DamageOccurrence;
@@ -1590,6 +1590,9 @@ impl Game {
                 ..
             } => self.internal_box(execution, &instruction)?,
             Action::BoxPilot { .. } => self.internal_pilot(execution, &instruction)?,
+            Action::RemoveAbility { .. } => {
+                self.internal_remove_abilities(execution, &instruction)?;
+            }
             Action::Resource { .. } => self.internal_resource(execution, &instruction)?,
             Action::Counter { .. } => {
                 self.internal_counter(execution, &instruction, false)?;

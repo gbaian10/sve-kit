@@ -10,7 +10,7 @@ fn target() -> Value {
     json!({"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1})
 }
 
-fn tree() -> Value {
+pub(super) fn tree() -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let mut candidate = tree["cards"]["BP08-038"].clone();
     let mut template = candidate["abilities"][0].clone();
@@ -45,7 +45,7 @@ fn tree() -> Value {
     tree
 }
 
-fn program(tree: &Value) -> WellFormedCardProgram {
+pub(super) fn program(tree: &Value) -> WellFormedCardProgram {
     lowerer()
         .lower(tree)
         .unwrap()
@@ -53,11 +53,15 @@ fn program(tree: &Value) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn board_with(tree: &Value, enemy_acted: bool) -> (Game, WellFormedCardProgram) {
+pub(super) fn board_with(tree: &Value, enemy_acted: bool) -> (Game, WellFormedCardProgram) {
     board_in_zones(tree, enemy_acted, &Value::Null)
 }
 
-fn board_in_zones(tree: &Value, enemy_acted: bool, zones: &Value) -> (Game, WellFormedCardProgram) {
+pub(super) fn board_in_zones(
+    tree: &Value,
+    enemy_acted: bool,
+    zones: &Value,
+) -> (Game, WellFormedCardProgram) {
     let programs = lowerer().lower(tree).unwrap();
     let card = programs["unit-follower"].clone();
     let mut initial = setup(1, json!([]));
@@ -109,7 +113,7 @@ fn board_in_zones(tree: &Value, enemy_acted: bool, zones: &Value) -> (Game, Well
     (game, card)
 }
 
-fn activate(game: &mut Game, card: &WellFormedCardProgram, line: u32) {
+pub(super) fn activate(game: &mut Game, card: &WellFormedCardProgram, line: u32) {
     let ability = card
         .card()
         .abilities
@@ -135,11 +139,11 @@ fn activate(game: &mut Game, card: &WellFormedCardProgram, line: u32) {
     game.resume_internal_card().unwrap();
 }
 
-fn keywords(game: &Game) -> Value {
+pub(super) fn keywords(game: &Game) -> Value {
     game.projection(View::Referee).unwrap()["objects"]["enemy"]["keywords"].clone()
 }
 
-fn end_turn(game: &mut Game) {
+pub(super) fn end_turn(game: &mut Game) {
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     quick::pass(game);
