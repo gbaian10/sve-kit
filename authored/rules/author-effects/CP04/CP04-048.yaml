@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-048:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-10"
+    rule_sections:
+      - section: 1
+    abilities:
+      - line: 1
+        fanfare:
+          ub: true
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: { count: { who: self, zone: field, kind: follower, trait: なかよし部 } }
+      - line: 1
+        section: 1
+        auto:
+          on:
+            played:
+              who: self
+              sel:
+                any_of:
+                  - { trait: なかよし部 }
+                  - { trait: プリコネ, kind: spell }
+          do:
+            - damage: { to: { leaders: opponents }, n: 1 }
