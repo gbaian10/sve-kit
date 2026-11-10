@@ -1,0 +1,52 @@
+cards:
+  BP13-003:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone:
+              ref: this
+              zone: ex
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                "on":
+                  kind: follower
+                  token: true
+                  trait: 妖精
+                  who: self
+                  zone: field
+          zone:
+            - field
+            - ex
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: フェアリー
+        line: 4
+      - lastword:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+        line: 5
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set

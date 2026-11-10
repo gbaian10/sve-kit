@@ -51,7 +51,7 @@ fn check_header(ability: &Ability) -> Result<()> {
     if !is_static(ability)
         || !matches!(
             ability.active_zones.as_slice(),
-            [ZoneKind::Field | ZoneKind::Equipment]
+            [ZoneKind::Field | ZoneKind::Equipment] | [ZoneKind::Field, ZoneKind::Ex]
         )
         || ability.qualification != AbilityQualification::Ordinary
         || ability.source.holder != (ObjectOperand::SourceHolder {})
@@ -85,7 +85,15 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
         else {
             return Err(unsupported("static keyword declaration"));
         };
-        if source != &ability.source
+        if (ability.active_zones == [ZoneKind::Field, ZoneKind::Ex]
+            && (condition.is_some()
+                || !matches!(
+                    abilities.as_slice(),
+                    [GrantedAbility::Keyword {
+                        keyword: KeywordId::Rush
+                    }]
+                )))
+            || source != &ability.source
             || active_zones != &ability.active_zones
             || timestamp
                 != &(TimestampBasis::ZoneEntry {
@@ -264,7 +272,7 @@ impl Game {
             self.state
                 .objects
                 .values()
-                .filter(|object| object.zone == "equipment")
+                .filter(|object| matches!(object.zone.as_str(), "equipment" | "ex"))
                 .map(|object| object.id.clone()),
         );
         for source in providers {
@@ -273,6 +281,8 @@ impl Game {
                     continue;
                 }
                 ZoneKind::Equipment
+            } else if self.object(&source)?.zone == "ex" {
+                ZoneKind::Ex
             } else {
                 ZoneKind::Field
             };
@@ -284,7 +294,9 @@ impl Game {
             let static_abilities = self
                 .internal_local_abilities(&source)?
                 .into_iter()
-                .filter(|located| is_static(&located.node) && located.node.active_zones == [zone])
+                .filter(|located| {
+                    is_static(&located.node) && located.node.active_zones.contains(&zone)
+                })
                 .collect::<Vec<_>>();
             if static_abilities.is_empty() {
                 continue;
