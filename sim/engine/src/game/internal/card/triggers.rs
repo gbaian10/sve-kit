@@ -3,6 +3,7 @@ use super::super::Slot;
 use super::super::history_turn::subject_count_at;
 use crate::ir::events::banish as banish_header;
 use crate::ir::events::discard as discard_header;
+use crate::ir::events::drive as drive_header;
 use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
@@ -28,6 +29,7 @@ mod banish;
 mod change;
 mod discard;
 mod draw;
+mod drive;
 mod equipment;
 mod fusion;
 pub(in crate::game::internal) use banish::hand_header as hand_banish;
@@ -122,6 +124,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || banish::check_header(ability)?
         || discard::check_header(ability)?
         || draw::check_header(ability)?
+        || drive::check_header(ability)?
         || equipment::check_header(ability)?
         || mill::check_header(ability)?
         || change::check_header(ability)?
@@ -838,6 +841,17 @@ impl PendingOccurrence {
             execution.event_object = Some(EventObject {
                 expression: equipment_event::holder(binding),
                 reference: event.holder,
+                information: None,
+            });
+            return Ok(());
+        }
+        if let Some(binding) = drive_header::checked_binding(pattern) {
+            let Some(EventPayload::DriveChecked { event }) = &self.timing else {
+                return Err(invalid("missing completed Drive check"));
+            };
+            execution.event_object = Some(EventObject {
+                expression: drive_header::holder(binding),
+                reference: event.holder.holder,
                 information: None,
             });
             return Ok(());

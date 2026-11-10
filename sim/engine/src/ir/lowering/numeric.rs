@@ -183,6 +183,13 @@ impl BodyContext<'_> {
                     return self.attack_target_objects(path);
                 }
                 if name == "it" {
+                    if let Some(event) = self.drive_checked_event {
+                        return Ok(Selector::Objects {
+                            objects: vec![ObjectOperand::FromExpression {
+                                value: Box::new(super::super::events::drive::holder(event)),
+                            }],
+                        });
+                    }
                     return self
                         .subject_event
                         .map(|event| Selector::Objects {

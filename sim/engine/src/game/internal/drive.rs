@@ -5,9 +5,9 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, CharacteristicPatch, CheckId, DecisionId, DriveCheckedEvent, DriveTriggerEvent,
-    Duration, DurationEnd, EffectReference, Expr, Instruction, Int, Nat, NumericChange, ObjectRef,
-    PlayerId, PlayerRef, Posture, RuntimeReceiptId, RuntimeZoneRef, Selector, Stat, TimeAnchor,
-    TriggerIcon, ZoneKind,
+    Duration, DurationEnd, EffectReference, EventPayload, Expr, Instruction, Int, Nat,
+    NumericChange, ObjectRef, PlayerId, PlayerRef, Posture, RuntimeReceiptId, RuntimeZoneRef,
+    Selector, Stat, TimeAnchor, TriggerIcon, ZoneKind,
 };
 use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
@@ -279,18 +279,22 @@ impl Game {
             }
             _ => return Err(invalid("missing executable Drive icon")),
         }
-        execution
-            .facts
-            .push(Fact::DriveTrigger(Box::new(DriveTriggerEvent {
-                checked_card: wait.checked,
-                player: wait.run.player,
-                icon: wait.icon.ok_or_else(|| invalid("Drive icon"))?,
-                check: wait.check,
-                effect_receipt: RuntimeReceiptId {
-                    execution: execution.id,
-                    slot: effect.receipt,
-                },
-            })));
+        let event = DriveTriggerEvent {
+            checked_card: wait.checked,
+            player: wait.run.player,
+            icon: wait.icon.ok_or_else(|| invalid("Drive icon"))?,
+            check: wait.check,
+            effect_receipt: RuntimeReceiptId {
+                execution: execution.id,
+                slot: effect.receipt,
+            },
+        };
+        execution.facts.push(Fact::DriveTrigger(Box::new(event)));
+        self.internal_drive_event(
+            &EventPayload::DriveTrigger { event },
+            event.player,
+            execution,
+        )?;
         Ok(())
     }
 
@@ -334,6 +338,11 @@ impl Game {
             },
         };
         execution.facts.push(Fact::DriveChecked(Box::new(event)));
+        self.internal_drive_event(
+            &EventPayload::DriveChecked { event },
+            event.player,
+            execution,
+        )?;
         wait.run.checks.push(event);
         Ok(wait.run)
     }

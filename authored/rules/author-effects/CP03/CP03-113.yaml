@@ -1,0 +1,42 @@
+cards:
+  CP03-113:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+            - life:
+                delta: 2
+                who: self
+          on:
+            drive_trigger:
+              during:
+                turn: self
+              who: self
+          per_turn: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                position:
+                  nth: 3
+                ref: returned
+                to: deck
+          targets:
+            - bind: returned
+              from:
+                who: self
+                zone: cemetery
+              upto: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: Codex gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

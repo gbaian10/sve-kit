@@ -2067,6 +2067,10 @@ pub(super) enum PhaseSubscription {
     Equipped(EquippedSubscription),
     #[serde(rename = "drew")]
     Drew(DrawSubscription),
+    #[serde(rename = "drive_checked")]
+    DriveChecked(DriveCheckedSubscription),
+    #[serde(rename = "drive_trigger")]
+    DriveTrigger(DriveTriggerSubscription),
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
     #[serde(rename = "banished")]
@@ -2127,6 +2131,29 @@ pub(super) struct EquippedSubscription {
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct DriveCheckedSubscription {
+    #[serde(rename = "holder")]
+    pub _holder: DriveHolder,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DriveHolder {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: FieldHolderZone,
+    #[serde(rename = "kind")]
+    pub _kind: FollowerKind,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DriveTriggerSubscription {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    pub during: Option<During>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct DrawSubscription {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
@@ -2147,7 +2174,7 @@ pub(super) struct UbHolder {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
     #[serde(rename = "zone")]
-    pub _zone: UbHolderZone,
+    pub _zone: FieldHolderZone,
     #[serde(rename = "kind")]
     pub _kind: FollowerKind,
     #[serde(rename = "other")]
@@ -2155,7 +2182,7 @@ pub(super) struct UbHolder {
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum UbHolderZone {
+pub(super) enum FieldHolderZone {
     Field,
 }
 

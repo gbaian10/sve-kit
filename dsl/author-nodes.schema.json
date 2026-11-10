@@ -9232,6 +9232,9 @@
       "properties": {
         "who": {
           "$ref": "#/$defs/A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
         }
       },
       "type": "object"

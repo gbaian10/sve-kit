@@ -427,8 +427,10 @@ fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
 
 #[test]
 fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
-    let cp03: Value =
-        serde_saphyr::from_str(include_str!("../../../authored/rules/effects/CP03.yaml")).unwrap();
+    let cocoa: Value = serde_json::from_str(include_str!(
+        "../../../carddb/tests/fixtures/effect_baseline/migrated/CP03-112.json"
+    ))
+    .unwrap();
     // The legacy payment regression survives migration without reading the current DSL.
     let migrated: Value = serde_json::from_str(include_str!(
         "../../../carddb/tests/fixtures/effect_baseline/migrated/CSD03a-006.json"
@@ -438,7 +440,7 @@ fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
         "../../../carddb/tests/fixtures/effect_baseline/migrated/CP03-009.json"
     ))
     .unwrap();
-    for authored in [&valeria, &cp03["cards"]["CP03-112"], &migrated] {
+    for authored in [&valeria, &cocoa, &migrated] {
         let costs = authored["abilities"][0]["costs"].as_array().unwrap();
         let links = costs
             .iter()

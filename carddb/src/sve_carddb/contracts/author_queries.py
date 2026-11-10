@@ -2428,6 +2428,7 @@ type HistoryDriveCheckedCondition = Annotated[
 @with_config(SHAPE_CONFIG)
 class EventDriveTriggerFields(TypedDict):
     who: NotRequired[PlayerRef]
+    during: NotRequired[During]
 
 
 type EventDriveTriggerPayload = Annotated[

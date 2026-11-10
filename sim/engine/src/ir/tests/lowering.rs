@@ -17,6 +17,9 @@ mod drive_mode_count;
 
 mod nested_ability;
 
+#[path = "drive_events.rs"]
+mod drive_events;
+
 use crate::catalog::{Catalog, SelectedEffects};
 use std::{
     env::temp_dir,

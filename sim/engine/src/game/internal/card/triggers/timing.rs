@@ -180,6 +180,8 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         Event::Discard { .. } => Ok("Discard".into()),
         Event::Banish { .. } => Ok("Banish".into()),
         Event::Draw { .. } => Ok("Draw".into()),
+        Event::DriveChecked { .. } => Ok("DriveChecked".into()),
+        Event::DriveTrigger { .. } => Ok("DriveTrigger".into()),
         Event::Equip { .. } => Ok(format!("Equip while source at equipment slot {position}")),
         Event::Move { event } => Ok(format!(
             "Move deck to cemetery of player {} at field slot {position}",

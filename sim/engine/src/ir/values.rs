@@ -664,6 +664,7 @@ variants!(ObjectFrozen {
     FusedSubjectAfter { event: Binding<FusedEvent> } => ["read.event-field"],
     EquipHolder { event: Binding<EquipEvent> } => ["read.event-field"],
     EquipEquipment { event: Binding<EquipEvent> } => ["read.event-field"],
+    DriveCheckedHolder { event: Binding<DriveCheckedEvent> } => ["read.event-field"],
     DriveCheckedCheckedCard { event: Binding<DriveCheckedEvent> } => ["read.event-field"],
     MoveBefore { event: Binding<MoveEvent> } => ["read.event-field"],
     MoveAfter { event: Binding<MoveEvent> } => ["read.event-field"]
