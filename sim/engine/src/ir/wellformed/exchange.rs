@@ -52,7 +52,7 @@ impl Checker {
         match &exchange.change {
             CostChange::Delta {
                 amount: Expr::Literal(Int(value)),
-            } if *value <= 0 => {}
+            } if *value <= 0 || exchange_shape::pp_increase(exchange) => {}
             CostChange::Set {
                 amount: Expr::Literal(Int(value)),
             } if *value >= 0 && !*has_set => *has_set = true,

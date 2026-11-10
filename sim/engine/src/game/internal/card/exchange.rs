@@ -387,7 +387,7 @@ impl Game {
         if int(&self.player(seat_name(execution.context.controller)?)?.pp["current"]) < pay_pp {
             return Ok(false);
         }
-        if accepted {
+        if accepted && !exchange_shape::pp_increase(&exchange.definition) {
             return Ok(!self
                 .exchange_affordable_routes(execution, exchange)?
                 .is_empty());
@@ -433,6 +433,9 @@ impl Game {
             )?);
         }
         if exchange.accepted != Some(true) || exchange.selected.is_some() {
+            return Ok(false);
+        }
+        if exchange_shape::pp_increase(&exchange.definition) {
             return Ok(false);
         }
         if exchange.route.is_none() {
@@ -512,7 +515,9 @@ impl Game {
         let pay_pp = exchange
             .and_then(|state| state.pay_pp)
             .map_or_else(|| self.internal_card_play_cost(execution), Ok)?;
-        if let Some(exchange) = exchange.filter(|state| state.accepted == Some(true)) {
+        if let Some(exchange) = exchange.filter(|state| {
+            state.accepted == Some(true) && !exchange_shape::pp_increase(&state.definition)
+        }) {
             let selected = exchange
                 .selected
                 .as_ref()
@@ -553,10 +558,12 @@ impl Game {
         );
         if let Some(exchange) = exchange {
             let complete = exchange.accepted == Some(true);
-            if complete {
+            let pp_increase = exchange_shape::pp_increase(&exchange.definition);
+            if complete && !pp_increase {
                 self.pay_exchange_materials(execution, exchange)?;
             }
-            if !complete && matches!(step(exchange)?.action, Action::Discard { .. }) {
+            if !complete && !pp_increase && matches!(step(exchange)?.action, Action::Discard { .. })
+            {
                 execution.receipts.insert(
                     step(exchange)?.receipt,
                     InstructionOutcome::Discard(DiscardOutcome {
@@ -565,24 +572,24 @@ impl Game {
                     }),
                 );
             }
+            let mut steps = vec![];
+            if complete {
+                steps.push(RuntimeReceiptId {
+                    execution: execution.id,
+                    slot: intrinsic,
+                });
+                if !pp_increase {
+                    steps.push(RuntimeReceiptId {
+                        execution: execution.id,
+                        slot: step(exchange)?.receipt,
+                    });
+                }
+            }
             execution.receipts.insert(
                 exchange.definition.receipt,
                 InstructionOutcome::ExchangePayment(PaymentResult {
                     complete: Bool(complete),
-                    steps: if complete {
-                        vec![
-                            RuntimeReceiptId {
-                                execution: execution.id,
-                                slot: intrinsic,
-                            },
-                            RuntimeReceiptId {
-                                execution: execution.id,
-                                slot: step(exchange)?.receipt,
-                            },
-                        ]
-                    } else {
-                        vec![]
-                    },
+                    steps,
                 }),
             );
             execution.card_payment = Some((exchange.face.clone(), exchange.definition.receipt));

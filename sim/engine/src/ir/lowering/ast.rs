@@ -2550,6 +2550,7 @@ pub(super) enum ModeCondition {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
+    pub pp: Option<u64>,
     pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,

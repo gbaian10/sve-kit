@@ -4,6 +4,14 @@ use super::{
     PlayCostExchange, Posture, PostureRead, Predicate, Selector, ZoneKind,
 };
 
+/// A PP increase modifies the single play quotation and has no material route.
+pub(crate) const fn pp_increase(exchange: &PlayCostExchange) -> bool {
+    exchange.materials.is_empty()
+        && exchange.route.is_none()
+        && matches!(&exchange.cost, super::CostSpec::Ordered { steps } if steps.is_empty())
+        && matches!(&exchange.change, super::CostChange::Delta { amount: Expr::Literal(super::Int(value)) } if *value > 0)
+}
+
 pub(crate) fn predicate(selector: &Selector) -> Option<(&Expr<Bool>, bool)> {
     let Selector::Zone {
         zone,
