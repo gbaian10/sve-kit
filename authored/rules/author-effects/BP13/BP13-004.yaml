@@ -1,0 +1,44 @@
+cards:
+  BP13-004:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - rush
+                "on":
+                  kind: follower
+                  token: true
+                  trait: 妖精
+                  who: self
+                  zone: field
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: amulet
+                  orig_cost_le: 2
+                  trait: 妖精
+                  who: self
+                  zone: deck
+                to: field
+        line: 2
+      - lastword:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
