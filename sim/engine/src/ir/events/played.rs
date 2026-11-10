@@ -1,9 +1,9 @@
 //! Played subscriptions narrow the committed card through one closed subject plan.
 use super::subject::{SubjectFields, SubjectFilter, SubjectInformation, played_view};
 use crate::ir::{
-    Ability, AbilityOrigin, Binding, Bool, CharacteristicView, Comparison, EventPattern, Expr, Int,
-    IntOperation, NumberRead, ObjectRef, PlayEvent, PlaySubjectFields, PlayerId, Predicate,
-    TraitId, TriggerCondition, ZoneKind,
+    Ability, AbilityOrigin, Binding, Bool, CardKind, CharacteristicView, Comparison, EventPattern,
+    Expr, Int, IntOperation, NumberRead, ObjectRef, PlayEvent, PlaySubjectFields, PlayerId,
+    Predicate, TraitId, TriggerCondition, ZoneKind,
 };
 
 #[derive(Clone, Debug)]
@@ -12,6 +12,7 @@ pub(crate) struct PlayedFilter {
     pub(crate) card: Binding<ObjectRef>,
     pub(crate) original: Option<(Comparison, i64)>,
     pub(crate) traits_any: Vec<TraitId>,
+    pub(crate) alternate: Option<SubjectFilter>,
 }
 
 fn cost(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> NumberRead {
@@ -23,7 +24,35 @@ fn cost(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> NumberRead {
 
 impl PlayedFilter {
     pub(crate) fn valid(&self) -> bool {
-        self.subject.original_cost.is_none()
+        self.alternate.as_ref().is_none_or(|alternate| {
+            self.original.is_none()
+                && !self.subject.own_turn
+                && self.traits_any.is_empty()
+                && self.subject.own == Some(true)
+                && self
+                    .subject
+                    .trait_id
+                    .as_ref()
+                    .is_some_and(|id| !id.0.is_empty())
+                && alternate
+                    .trait_id
+                    .as_ref()
+                    .is_some_and(|id| !id.0.is_empty())
+                && self.subject.trait_id != alternate.trait_id
+                && self.subject
+                    == (SubjectFilter {
+                        own: Some(true),
+                        own_turn: self.subject.own_turn,
+                        trait_id: self.subject.trait_id.clone(),
+                        ..SubjectFilter::default()
+                    })
+                && *alternate
+                    == (SubjectFilter {
+                        kind: Some(CardKind::Spell),
+                        trait_id: alternate.trait_id.clone(),
+                        ..self.subject.clone()
+                    })
+        }) && self.subject.original_cost.is_none()
             && self
                 .subject
                 .class
@@ -78,17 +107,32 @@ impl PlayedFilter {
     }
 
     pub(crate) fn predicate(&self, event: Binding<PlayEvent>) -> Expr<Bool> {
-        let predicate = if self.traits_any.is_empty() {
-            self.branch(event, None)
-        } else {
-            Expr::Compute(Box::new(Predicate::Or {
-                predicates: self
-                    .traits_any
-                    .iter()
-                    .map(|t| self.branch(event, Some(t)))
-                    .collect(),
-            }))
-        };
+        let predicate = self.alternate.as_ref().map_or_else(
+            || {
+                if self.traits_any.is_empty() {
+                    self.branch(event, None)
+                } else {
+                    Expr::Compute(Box::new(Predicate::Or {
+                        predicates: self
+                            .traits_any
+                            .iter()
+                            .map(|trait_id| self.branch(event, Some(trait_id)))
+                            .collect(),
+                    }))
+                }
+            },
+            |alternate| {
+                Expr::Compute(Box::new(Predicate::Or {
+                    predicates: vec![
+                        self.branch(event, None),
+                        alternate.predicate(SubjectFields::Played {
+                            event,
+                            card: self.card,
+                        }),
+                    ],
+                }))
+            },
+        );
         Expr::Compute(Box::new(Predicate::PlayedCard {
             subject: Expr::Frozen(Box::new(PlaySubjectFields::PlaySubject { event })),
             card: self.card,
@@ -107,6 +151,7 @@ impl PlayedFilter {
             return None;
         };
         let fields = SubjectFields::Played { event, card: *card };
+        let mut alternate = None;
         let (subject, original, traits_any) = if let Expr::Compute(operation) = predicate
             && let Predicate::Or { predicates } = operation.as_ref()
         {
@@ -120,12 +165,23 @@ impl PlayedFilter {
             let mut traits = vec![subject.trait_id.take()?];
             for branch in branches {
                 let (mut other, cost) = branch?;
-                traits.push(other.trait_id.take()?);
+                let trait_id = other.trait_id.take()?;
                 if other != subject || cost != original {
-                    return None;
+                    if predicates.len() != 2 || original.is_some() || cost.is_some() {
+                        return None;
+                    }
+                    other.trait_id = Some(trait_id);
+                    alternate = Some(other);
+                    break;
                 }
+                traits.push(trait_id);
             }
-            (subject, original, traits)
+            if alternate.is_some() {
+                subject.trait_id = traits.into_iter().next();
+                (subject, original, vec![])
+            } else {
+                (subject, original, traits)
+            }
         } else {
             let (subject, original) = parse_branch(event, *card, fields, predicate)?;
             (subject, original, vec![])
@@ -135,6 +191,7 @@ impl PlayedFilter {
             card: *card,
             original,
             traits_any,
+            alternate,
         };
         (plan.valid() && *expression == plan.predicate(event)).then_some(plan)
     }
@@ -148,8 +205,12 @@ impl PlayedFilter {
         active: PlayerId,
         token: bool,
     ) -> bool {
-        self.subject
+        (self
+            .subject
             .matches_information(information, same, observer, actor, active, token)
+            || self.alternate.as_ref().is_some_and(|alternate| {
+                alternate.matches_information(information, same, observer, actor, active, token)
+            }))
             && self.original.is_none_or(|(op, n)| {
                 information.original_cost.is_some_and(|value| match op {
                     Comparison::Equal => value == n,

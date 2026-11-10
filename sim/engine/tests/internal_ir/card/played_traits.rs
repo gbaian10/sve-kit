@@ -662,3 +662,185 @@ fn traits_added_after_play_do_not_rewrite_committed_play_information() {
         "the current card gained the trait while its old Play fact did not"
     );
 }
+
+fn union_subscription(filter: &Value) -> Value {
+    equipment_played::tree(
+        &json!({"auto":{"on":{"played":{"who":"self","sel":filter}},
+            "do":[{"damage":{"to":{"leaders":"opponents"},"n":1}}]}}),
+        "unit-follower",
+    )
+}
+
+#[test]
+fn played_union_matches_each_branch_once_including_an_overlapping_spell() {
+    let input = union_subscription(&json!({"any_of":[
+        {"trait":"宴楽"},{"kind":"spell","trait":"魔法使い"}
+    ]}));
+    let reader = lowerer()
+        .lower(&input)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for (kind, traits, seat, active, expected) in [
+        ("spell", json!(["宴楽", "魔法使い"]), 1, 1, 1),
+        ("spell", json!(["宴楽", "魔法使い"]), 1, 2, 1),
+        ("spell", json!(["宴楽"]), 1, 1, 1),
+        ("spell", json!(["魔法使い"]), 1, 1, 1),
+        ("spell", json!([]), 1, 1, 0),
+        ("follower", json!(["宴楽"]), 1, 1, 1),
+        ("follower", json!(["魔法使い"]), 1, 1, 0),
+        ("spell", json!(["宴楽", "魔法使い"]), 2, 2, 0),
+    ] {
+        let (snapshot, keywords, document) = catalog_documents(&json!("1"));
+        let snapshot = snapshot
+            .lines()
+            .map(|line| {
+                let mut row: Value = serde_json::from_str(line).unwrap();
+                row["faces"][0]["traits"] = traits.clone();
+                row.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let catalog = Arc::new(
+            Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+                .unwrap(),
+        );
+        let mut initial = initial();
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        initial["turn"]["active"] = json!(format!("P{active}"));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"][format!("P{seat}")]["zones"]["hand"] = json!([{"id":"played","card":if kind == "spell" {"unit-spell"} else {"unit-follower"}}]);
+        initial["players"][format!("P{seat}")]["pp"] = json!({"current":10,"max":10});
+        let mut game = Game::new(
+            catalog,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "played-union",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &reader).unwrap();
+        game.load_internal_card(
+            "unit-spell",
+            &card(vec![play::spell(vec![]), quick::permit()]),
+        )
+        .unwrap();
+        if active == seat {
+            play_card(&mut game, "played", seat);
+        } else {
+            game.internal_rule_action(&json!({"do":"end-phase"}))
+                .unwrap();
+            let q = game.internal_quick_choice().unwrap().unwrap();
+            assert_eq!(q.actor, PlayerId { seat });
+            let InputDomain::Quick { options, .. } = q.domain else {
+                panic!("Quick window")
+            };
+            assert_eq!(options.len(), 1_usize);
+            resolved(
+                game.answer_internal_card(q.actor, q.token, Answer::Quick(Some(options[0].handle)))
+                    .unwrap(),
+            );
+            if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+        }
+        let mut count = 0_u8;
+        while let Some(q) = game.internal_pending_choice().unwrap() {
+            let InputDomain::Pending(options) = q.domain else {
+                panic!("pending union")
+            };
+            resolved(
+                game.answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+                    .unwrap(),
+            );
+            game.resume_internal_card().unwrap();
+            count = count.checked_add(1).unwrap();
+            assert!(count <= 1, "overlapping branches create one occurrence");
+        }
+        assert_eq!(
+            count, expected,
+            "kind={kind}, traits={traits}, seat={seat}, active={active}"
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+            20_u8.checked_sub(expected).unwrap()
+        );
+    }
+}
+
+#[test]
+fn played_union_rejects_unneeded_branch_filters_and_malformed_unions() {
+    for filter in [
+        json!({"any_of":[{"trait":"宴楽"},{"trait":"魔法使い","kind":"follower"}]}),
+        json!({"any_of":[{"trait":"宴楽"},{"trait":"魔法使い","kind":"spell","orig_cost_le":3}]}),
+        json!({"any_of":[{"trait":"宴楽"},{"trait":"宴楽","kind":"spell"}]}),
+        json!({"any_of":[{"trait":"宴楽"}]}),
+        json!({"any_of":[{"trait":"宴楽"},{"trait":"魔法使い","kind":"spell"},{"trait":"プリコネ"}]}),
+    ] {
+        lowerer().lower(&union_subscription(&filter)).unwrap_err();
+    }
+}
+
+#[test]
+fn played_union_rejects_wider_player_or_turn_qualifiers() {
+    let baseline = union_subscription(&json!({"any_of":[
+        {"trait":"宴楽"},{"kind":"spell","trait":"魔法使い"}
+    ]}));
+    for who in [None, Some("opp")] {
+        let mut input = baseline.clone();
+        let event = input["cards"]["unit-follower"]["abilities"][0]["auto"]["on"]["played"]
+            .as_object_mut()
+            .unwrap();
+        if let Some(who) = who {
+            event.insert("who".into(), json!(who));
+        } else {
+            event.remove("who");
+        }
+        lowerer().lower(&input).unwrap_err();
+    }
+    let mut input = baseline;
+    input["cards"]["unit-follower"]["abilities"][0]["auto"]["on"]["played"]["during"] =
+        json!({"turn":"self"});
+    lowerer().lower(&input).unwrap_err();
+}
+
+#[test]
+fn played_union_raw_ir_rejects_reversed_or_extra_branches() {
+    let input = union_subscription(&json!({"any_of":[
+        {"trait":"宴楽"},{"kind":"spell","trait":"魔法使い"}
+    ]}));
+    let program = lowerer()
+        .lower(&input)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for extra in [false, true] {
+        let mut candidate = program.card().clone();
+        let TriggerCondition::Event {
+            pattern:
+                EventPattern::Play {
+                    predicate: Expr::Compute(outer),
+                    ..
+                },
+        } = &mut candidate.abilities[0].node.trigger.as_mut().unwrap().on
+        else {
+            panic!("played event")
+        };
+        let Predicate::PlayedCard {
+            predicate: Expr::Compute(inner),
+            ..
+        } = outer.as_mut()
+        else {
+            panic!("one card binding")
+        };
+        let Predicate::Or { predicates } = inner.as_mut() else {
+            panic!("union")
+        };
+        if extra {
+            predicates.push(predicates[0].clone());
+        } else {
+            predicates.swap(0, 1);
+        }
+        WellFormedCardProgram::check(candidate).unwrap_err();
+    }
+}
