@@ -37,6 +37,10 @@ QUERY_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.sel.zone-objects", {"who": "each", "zone": "field", "kind": "follower"}),
     ("A.sel.zone-objects", {"who": "self", "trait": "財宝", "orig_cost_ge": 1}),
     ("A.sel.zone-objects", {"who": "self", "zone": ["field", "ex"]}),
+    (
+        "A.sel.zone-objects",
+        {"who": "self", "zone": ["cemetery", "banish"], "name": "SYN-card"},
+    ),
     ("A.sel.in-objects", {"in": "shown", "kind": "follower"}),
     ("A.sel.in-objects", {"in": "looked", "except": {"in": "chosen"}}),
     ("A.sel.object-core", {"in": {"objects_of": "moved", "view": "before"}}),

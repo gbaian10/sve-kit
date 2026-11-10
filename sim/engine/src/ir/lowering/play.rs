@@ -110,6 +110,13 @@ fn target_zones(zone: &ast::TargetZone) -> Option<Vec<ZoneKind>> {
         {
             Some(vec![ZoneKind::Field, ZoneKind::Ex])
         }
+        ast::TargetZone::PublicPair(zones)
+            if zones.len() == 2
+                && zones.contains(&ast::TargetSingleZone::Cemetery)
+                && zones.contains(&ast::TargetSingleZone::Banish) =>
+        {
+            Some(vec![ZoneKind::Cemetery, ZoneKind::Banish])
+        }
         ast::TargetZone::PublicPair(_) => None,
     }
 }
@@ -473,12 +480,20 @@ impl BodyContext<'_> {
     }
 
     fn record_target_zone(&mut self, target: &ast::Target, cardinality: Cardinality) {
-        if matches!(
-            &target.from.zone,
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
-        ) && matches!(target.from.who, None | Some(ast::Side::Controller))
+        if target
+            .from
+            .zone
+            .as_ref()
+            .and_then(target_zones)
+            .is_some_and(|zones| {
+                matches!(
+                    zones.as_slice(),
+                    [ZoneKind::Cemetery] | [ZoneKind::Cemetery, ZoneKind::Banish]
+                )
+            })
+            && matches!(target.from.who, None | Some(ast::Side::Controller))
         {
-            self.cemetery_return_targets.insert(target.bind.clone());
+            self.deck_return_targets.insert(target.bind.clone());
         }
         if ability_holder_target(target, cardinality) {
             self.ability_holders.insert(target.bind.clone());
@@ -504,10 +519,13 @@ impl BodyContext<'_> {
 
     fn check_cemetery_target(&self, target: &ast::Target, path: &str) -> Result<(), LoweringError> {
         // Only the controller's own banish zone is selected by printed cards.
-        if matches!(
-            target.from.zone,
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Banish))
-        ) && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
+        if target
+            .from
+            .zone
+            .as_ref()
+            .and_then(target_zones)
+            .is_some_and(|zones| zones.contains(&ZoneKind::Banish))
+            && (target.from.leader_or || !matches!(target.from.who, Some(ast::Side::Controller)))
         {
             return Err(unsupported(path));
         }
@@ -1107,7 +1125,7 @@ impl BodyContext<'_> {
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
                 opponent_cemetery_targets: BTreeSet::new(),
-                cemetery_return_targets: BTreeSet::new(),
+                deck_return_targets: BTreeSet::new(),
                 nested_targets: super::nested_targets(steps),
                 observations: BTreeMap::new(),
                 receipt_reads: super::ReceiptReads::default(),
@@ -1143,8 +1161,8 @@ impl BodyContext<'_> {
                     .opponent_cemetery_targets
                     .clone_from(&self.opponent_cemetery_targets);
                 context
-                    .cemetery_return_targets
-                    .clone_from(&self.cemetery_return_targets);
+                    .deck_return_targets
+                    .clone_from(&self.deck_return_targets);
                 context.observations.clone_from(&self.observations);
                 context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);

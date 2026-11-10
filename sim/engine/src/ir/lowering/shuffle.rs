@@ -136,7 +136,7 @@ impl BodyContext<'_> {
                 }
             }
             Some(ast::MoveObjects::Field(objects @ ast::Objects::Bound(name)))
-                if self.cemetery_return_targets.contains(name) =>
+                if self.deck_return_targets.contains(name) =>
             {
                 self.objects(objects, path)?
             }

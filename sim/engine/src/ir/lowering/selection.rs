@@ -29,7 +29,7 @@ impl BodyContext<'_> {
         let hand_targets = self.hand_targets.clone();
         let playable_targets = self.playable_targets.clone();
         let opponent_cemetery_targets = self.opponent_cemetery_targets.clone();
-        let cemetery_return_targets = self.cemetery_return_targets.clone();
+        let deck_return_targets = self.deck_return_targets.clone();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         let mut body = self.steps(
@@ -64,7 +64,7 @@ impl BodyContext<'_> {
         self.hand_targets = hand_targets;
         self.playable_targets = playable_targets;
         self.opponent_cemetery_targets = opponent_cemetery_targets;
-        self.cemetery_return_targets = cemetery_return_targets;
+        self.deck_return_targets = deck_return_targets;
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
             maximum: Some(super::Nat(1)),

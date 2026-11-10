@@ -633,21 +633,9 @@ fn candidate_zone(selector: &Selector, allow_resolution_zones: bool) -> Result<&
 fn target_selector(selector: &Selector) -> Result<()> {
     match selector {
         Selector::Union { sets }
-            if sets.len() == 2
-                && sets.iter().all(|set| {
-                    matches!(
-                        set,
-                        Selector::Zone {
-                            zone: ZoneKind::Field | ZoneKind::Ex,
-                            ..
-                        }
-                    )
-                }) =>
+            if sets.len() == 2 && sets.iter().all(|set| matches!(set, Selector::Zone { .. })) =>
         {
-            for set in sets {
-                public_zone_selector(set)?;
-            }
-            Ok(())
+            target_union(sets)
         }
         Selector::Zone {
             zone: ZoneKind::Evolve,
@@ -686,6 +674,51 @@ fn target_selector(selector: &Selector) -> Result<()> {
         }
         selector => field_selector(selector),
     }
+}
+
+fn target_union(sets: &[Selector]) -> Result<()> {
+    let field_ex = sets.iter().all(|set| {
+        matches!(
+            set,
+            Selector::Zone {
+                zone: ZoneKind::Field | ZoneKind::Ex,
+                ..
+            }
+        )
+    });
+    let public_return = matches!(
+        sets,
+        [
+            Selector::Zone {
+                zone: ZoneKind::Cemetery,
+                ..
+            },
+            Selector::Zone {
+                zone: ZoneKind::Banish,
+                ..
+            }
+        ] | [
+            Selector::Zone {
+                zone: ZoneKind::Banish,
+                ..
+            },
+            Selector::Zone {
+                zone: ZoneKind::Cemetery,
+                ..
+            }
+        ]
+    ) && sets.iter().all(own_zone_selector);
+    if !field_ex && !public_return {
+        return Err(unsupported("public target union zones"));
+    }
+    for set in sets {
+        if public_return {
+            target_selector(set)?;
+        } else {
+            public_zone_selector(set)?;
+        }
+    }
+    Ok(())
 }
 
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
