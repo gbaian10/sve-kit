@@ -888,3 +888,6 @@ mod victory_prevention;
 
 #[path = "card/banish_play.rs"]
 mod banish_play;
+
+#[path = "card/choice_any.rs"]
+mod choice_any;
