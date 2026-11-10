@@ -101,6 +101,7 @@ HISTORY_NAMES = {
     "A.history.phase-where": "PhaseHistoryWhere",
     "A.history.phase": "HistoryPhase",
     "A.history.phase-condition": "HistoryPhaseCondition",
+    "A.event.played-union": "EventPlayedUnion",
     "A.event.played-payload": "EventPlayedPayload",
     "A.event.played": "EventPlayed",
     "A.history.played-where": "PlayedHistoryWhere",

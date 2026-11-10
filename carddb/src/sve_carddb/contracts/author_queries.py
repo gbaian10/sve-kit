@@ -1753,6 +1753,10 @@ type HistoryPhaseCondition = Annotated[
 ]
 
 
+class EventPlayedUnion(RecordData):
+    any_of: Annotated[tuple[EventSubjectFilter, ...], Field(min_length=2, max_length=2)]
+
+
 _EventPlayedFieldsKeys = TypedDict(
     "_EventPlayedFieldsKeys", {"from": "NotRequired[Zone]"}
 )
@@ -1761,7 +1765,7 @@ _EventPlayedFieldsKeys = TypedDict(
 @with_config(SHAPE_CONFIG)
 class EventPlayedFields(_EventPlayedFieldsKeys):
     who: NotRequired[PlayerRef]
-    sel: NotRequired[EventSubjectFilter]
+    sel: NotRequired[EventSubjectFilter | EventPlayedUnion]
     during: NotRequired[During]
 
 
