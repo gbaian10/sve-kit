@@ -2928,6 +2928,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    UnlimitedEvolve(UnlimitedEvolution),
     AlsoNamed(AlsoNamed),
     If(Box<StaticConditional>),
     EvolveCostMod(EvolutionCostModifier),
@@ -2939,6 +2940,12 @@ pub(super) enum StaticEffect {
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
     IgnoreWard(IgnoreWard),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct UnlimitedEvolution {
+    pub who: SelfPlayer,
 }
 
 #[derive(Deserialize)]

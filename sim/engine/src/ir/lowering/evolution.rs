@@ -1,5 +1,7 @@
 //! Intrinsic evolution is a fixed play projection, not a general Evolve body permission.
-use super::{Allocator, LoweringError, ast, source_span, unsupported};
+use super::{
+    Allocator, CardCoordinates, LoweringError, ability_source, ast, source_span, unsupported,
+};
 use crate::ir::effect_evolution;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::evolution_destination::Destination;
@@ -12,6 +14,7 @@ use crate::ir::{
     ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
+use crate::ir::{Bool, Effect, Expr, RuleModifier};
 use crate::ir::{CardKind, EventPattern, FollowPermission, TraitId};
 
 #[expect(
@@ -205,7 +208,7 @@ fn instruction(
 }
 
 fn intrinsic_origin(
-    key: &super::CardCoordinates<'_>,
+    key: &CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
 ) -> Result<(super::SourceSpan, AbilitySource), LoweringError> {
@@ -259,7 +262,7 @@ fn destination(
 
 pub(super) fn lower(
     allocator: &mut Allocator,
-    key: &super::CardCoordinates<'_>,
+    key: &CardCoordinates<'_>,
     path: &str,
     entry: &ast::Ability,
     scope: ScopeId,
@@ -419,5 +422,52 @@ pub(super) fn subscription(
     Ok(EventPattern::Evolve {
         binding: event,
         predicate: filter.predicate(SubjectFields::Evolve(event)),
+    })
+}
+
+pub(super) fn unlimited(
+    _allocator: &mut Allocator,
+    key: &CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+) -> Result<Located<Ability>, LoweringError> {
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    let [ast::StaticEffect::UnlimitedEvolve(value)] = head.effects.as_slice() else {
+        return Err(unsupported(path));
+    };
+    let ast::SelfPlayer::Controller = value.who;
+    if head.r#while.is_some()
+        || head
+            .zone
+            .as_ref()
+            .is_some_and(|zones| zones.single() != Some(ZoneKind::Field))
+    {
+        return Err(unsupported(path));
+    }
+    let source = source_span(key, path, entry)?;
+    let origin = ability_source(&source, None);
+    Ok(Located {
+        source,
+        node: Ability {
+            id: AbilityId(scope.0),
+            scope,
+            source: origin.clone(),
+            kind: AbilityKind::Static,
+            qualification: AbilityQualification::Ordinary,
+            active_zones: vec![ZoneKind::Field],
+            event_captures: vec![],
+            play: None,
+            trigger: None,
+            body: None,
+            declarations: vec![Effect::RuleModifier {
+                modifier: RuleModifier::EvolutionPlayLimit {
+                    player: PlayerRef::Controller {},
+                },
+                condition: Expr::Literal(Bool(true)),
+                duration: super::numeric::duration(None, path)?,
+                source: origin,
+            }],
+        },
     })
 }

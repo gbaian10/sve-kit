@@ -1,10 +1,11 @@
-//! Only a checked intrinsic evolution projection may enter the shared rule procedure.
+//! Intrinsic evolution and its field permission share the existing rule procedure.
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Generation, KeywordId, Located, Node,
     Result, SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
 use crate::ir::evolution_destination::Destination;
+use crate::ir::evolution_limits;
 use crate::ir::{
     Bool, ChoiceDomain, Control, Int, PlayerRef, Resource, ResourceOperation, SelectionGroup,
     Selector,
@@ -398,4 +399,25 @@ pub(in crate::game::internal) fn resource_association(
                 })
         })
     }))
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Evolution rule permissions share the authoritative intrinsic procedure."
+)]
+impl Game {
+    pub(in crate::game) fn internal_unlimited_evolution(&self, seat: &str) -> Result<bool> {
+        for provider in self.zone_ids(seat, "field") {
+            let (card, _) = self.internal_effective_print(&provider)?;
+            if !self.card_runtime.is_loaded(&card) {
+                continue;
+            }
+            for ability in self.internal_printed_abilities(&provider)? {
+                if evolution_limits::is_static(&ability.node) {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
+    }
 }
