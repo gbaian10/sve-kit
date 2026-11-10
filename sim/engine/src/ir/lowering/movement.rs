@@ -320,7 +320,13 @@ pub(super) fn played(
     card: Binding<ObjectRef>,
     path: &str,
 ) -> Result<EventPattern, LoweringError> {
-    let mut subject = entry.sel.clone();
+    let (mut subject, alternate) = match &entry.sel {
+        None => (None, None),
+        Some(ast::PlayedSubject::Single(subject)) => (Some(subject.clone()), None),
+        Some(ast::PlayedSubject::Union {
+            any_of: [first, second],
+        }) => (Some(first.clone()), Some(second)),
+    };
     let mut original = None;
     let mut traits_any = Vec::new();
     if let Some(q) = subject.as_mut() {
@@ -362,10 +368,22 @@ pub(super) fn played(
         FilterSupport::Basic,
     )?;
     let plan = PlayedFilter {
-        subject: common,
+        subject: common.clone(),
         card,
         original,
         traits_any,
+        alternate: alternate
+            .map(|branch| {
+                movement_filter(
+                    common.own,
+                    false,
+                    Some(branch),
+                    common.own_turn,
+                    path,
+                    FilterSupport::Basic,
+                )
+            })
+            .transpose()?,
     };
     if !plan.valid() {
         return Err(unsupported(path));

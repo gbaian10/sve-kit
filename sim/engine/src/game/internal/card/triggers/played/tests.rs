@@ -22,6 +22,7 @@ fn unknown_printed_values_do_not_satisfy_zero_or_upper_bounds() {
                 card: Binding::<ObjectRef>::new(1, ScopeId(1)),
                 original: Some((op, 0)),
                 traits_any: vec![],
+                alternate: None,
             };
             let info = SubjectInformation {
                 original_cost: known_original_cost(&value),

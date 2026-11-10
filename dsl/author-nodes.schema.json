@@ -7115,7 +7115,14 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/A.event-subject-filter"
+            },
+            {
+              "$ref": "#/$defs/A.event.played-union"
+            }
+          ]
         },
         "during": {
           "$ref": "#/$defs/A.during"
@@ -21536,6 +21543,23 @@
       "additionalProperties": false,
       "required": [
         "ref"
+      ]
+    },
+    "A.event.played-union": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "any_of": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/A.event-subject-filter"
+          }
+        }
+      },
+      "required": [
+        "any_of"
       ]
     }
   },

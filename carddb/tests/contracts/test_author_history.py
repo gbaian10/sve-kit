@@ -80,6 +80,32 @@ def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
             adapter.validate_json(json.dumps(value), strict=True)
 
 
+def test_played_union_is_an_event_filter_but_not_a_history_selector() -> None:
+    payload: dict[str, JsonValue] = {
+        "who": "self",
+        "sel": {
+            "any_of": [{"trait": "なかよし部"}, {"trait": "プリコネ", "kind": "spell"}]
+        },
+    }
+    _check("A.event.played-payload", payload)
+    _check("A.event.played", {"played": payload})
+    _check(QUERY, {"event": "played", "window": "this_turn", **payload}, accepted=False)
+    invalid_branches: list[JsonValue] = [
+        [{"trait": "なかよし部"}],
+        [
+            {"trait": "なかよし部"},
+            {"trait": "プリコネ", "kind": "spell"},
+            {"trait": "学院"},
+        ],
+    ]
+    for branches in invalid_branches:
+        _check(
+            "A.event.played-payload",
+            {"who": "self", "sel": {"any_of": branches}},
+            accepted=False,
+        )
+
+
 @pytest.mark.parametrize(("event", "payload"), EVENT_CASES[:-1])
 def test_history_promotes_only_registered_roles(
     event: str, payload: dict[str, JsonValue]

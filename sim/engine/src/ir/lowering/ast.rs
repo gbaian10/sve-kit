@@ -2856,9 +2856,15 @@ pub(super) struct Grant {
 pub(super) struct PlayedSubscription {
     pub who: Option<EntryPlayer>,
     #[serde(default)]
-    pub sel: Option<MovementSubject>,
+    pub sel: Option<PlayedSubject>,
     #[serde(default)]
     pub during: Option<During>,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PlayedSubject {
+    Single(MovementSubject),
+    Union { any_of: [MovementSubject; 2] },
 }
 impl Auto {
     /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.

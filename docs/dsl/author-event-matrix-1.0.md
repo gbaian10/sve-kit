@@ -32,7 +32,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | evolved | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef、by:By | BP02-016、BP20-004；history BP16-018；by 合成 |
 | super_evolved | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef、by:By | auto／history 均為合成 |
 | phase | which:(Phase 或 ParamRef)、whose:PlayerRef | — | BP05-006、BP01-153 |
-| played | 無 | from:Zone、who:PlayerRef、sel:SubjectFilter、during:During | CP02-044、BP14-036、BP04-064；from 合成 |
+| played | 無 | from:Zone、who:PlayerRef、sel:(SubjectFilter 或 PlayedUnion any_of[2])、during:During | CP02-044、BP14-036、BP04-064、CP04-048；from 合成 |
 | ability_played | 無 | who:PlayerRef、holder:(Ref 或 EventObjectSel) | 合成 |
 | life_changed | 無 | who:PlayerRef、direction:up/down、during:During、by:By | BP02-095、BP19-075；by 合成 |
 | stat_changed | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down | BP11-082、BP21-100；不收 subject/property/by |
