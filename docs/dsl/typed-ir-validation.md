@@ -149,6 +149,10 @@ repeat、each-object 與 each-player stage 的本文含 FlipDown 時，從該迴
 這不是只撤銷被翻面的成員。不可變的 scalar 回答與 scalar capture 保留原本證據。
 翻面後重新觀察的授權（觀察 epoch）尚未承載。
 
+翻面結果的具名 `count_of` 使用既有 `ObjectReceipt::Flip` 的成功成員數，含零張結果。
+這個純張數讀值不恢復翻面後的物件可見性證據，也不讓回條供後續選擇、移動或卡片屬性讀取；
+分支內的結果綁定維持原有作用域。翻面後只有條件、抽牌與回 PP 的本文可沿用此純數值判斷。
+
 這是保守的靜態來源證明，不取代 executor 的 Observation、
 世代、當時區域與快照檢查。手牌 Bound／Objects 即使已知，仍要與當時手牌相交才能當 discard 材料。
 
