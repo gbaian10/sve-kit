@@ -119,11 +119,12 @@ impl Game {
     ) -> Result<bool> {
         let object = self.object(source)?;
         let next = self.object(evolve)?;
+        let owned_resource = next.owner == next.controller;
         if !self.can_receive_evolution(source)?
             || next.zone != "evolve_deck"
             || next.state["face_up"] == true
             || object.controller != next.controller
-            || object.owner != next.owner
+            || !owned_resource
         {
             return Ok(false);
         }
@@ -359,6 +360,9 @@ impl Game {
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
         self.object_mut(evolve)?.state["face"] = json!(face);
         self.object_mut(source)?.state["evolved"] = json!(true);
+        if self.object(source)?.state["control_changed_this_turn"] == true {
+            self.object_mut(source)?.state["evolved_after_control_change"] = json!(true);
+        }
         self.object_mut(source)?.state["evolved_with"] = json!(evolve);
         self.object_mut(source)?.state["face"] = json!(face);
         for field in ["power", "hp"] {

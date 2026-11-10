@@ -425,6 +425,7 @@ pub(super) enum Step {
     Transform(Transform),
     Act(ObjectAction),
     Stand(ObjectAction),
+    Steal(Steal),
     FlipDown(ObjectAction),
     Buff(Modify),
     Grant(Grant),
@@ -3674,4 +3675,10 @@ pub(super) enum BanishPermissionZone {
 pub(super) struct BanishPermissionCards {
     pub who: SelfPlayer,
     pub zone: BanishPermissionZone,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Steal {
+    pub r#ref: String,
 }

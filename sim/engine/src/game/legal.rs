@@ -385,9 +385,12 @@ impl Game {
         {
             return Ok(false);
         }
-        if object.state["entered_this_turn"] == true
+        let control_changed = object.state["control_changed_this_turn"] == true;
+        let evolution_allows_attack = object.state["evolved"] == true
+            && (!control_changed || object.state["evolved_after_control_change"] == true);
+        if (object.state["entered_this_turn"] == true || control_changed)
             && !keys.contains("storm")
-            && (leader || (!keys.contains("rush") && object.state["evolved"] != true))
+            && (leader || (!keys.contains("rush") && !evolution_allows_attack))
         {
             return Ok(false);
         }

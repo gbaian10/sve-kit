@@ -64,7 +64,16 @@ impl Game {
             let form = self.object(form)?;
             if object.zone != "field"
                 || form.zone != "evolution"
-                || form.owner != object.owner
+                || (form.owner != object.owner
+                    && (object.state["face"] != form.state["face"]
+                        || !super::evolution::resource_association(self, holder, &form.id)?
+                        || self
+                            .state
+                            .objects
+                            .values()
+                            .filter(|base| base.state["evolved_with"] == form.id)
+                            .count()
+                            != 1))
                 || !self.object_type(&form.id)?.contains("エボルヴ")
             {
                 return Err(invalid("invalid evolution information association"));

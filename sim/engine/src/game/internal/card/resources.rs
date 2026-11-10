@@ -55,7 +55,6 @@ impl Game {
                     return Err(invalid("evolution resource needs exactly one base"));
                 };
                 if base.zone != "field"
-                    || base.owner != object.owner
                     || base.state["face"] != object.state["face"]
                     || !string(&self.face(holder)?["card_type"]).contains("エボルヴ")
                     || !super::evolution::resource_association(self, &base.id, holder)?

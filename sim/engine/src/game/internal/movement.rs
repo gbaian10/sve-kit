@@ -421,7 +421,6 @@ impl Game {
         let form_print = self.face(&form.id)?;
         if object.zone != "field"
             || form.zone != "evolution"
-            || form.owner != object.owner
             || base_print["card_type"] != "フォロワー"
             || form_print["card_type"] != "フォロワー・エボルヴ"
             || !super::card::resource_association(self, &object.id, &form.id)?
