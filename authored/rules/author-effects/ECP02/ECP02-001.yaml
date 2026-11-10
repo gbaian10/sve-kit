@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-001:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          cost:
+            steps:
+              - pp: 1
+              - lesson: 1
+          do:
+            - choose:
+                bind: picked
+                from: { who: self, zone: hand, kind: follower, trait: デレマス, orig_cost_le: 2 }
+                upto: 1
+            - move: { ref: picked, to: ex, result: placed }
+            - apply:
+                on: { follow: placed }
+                until: turn
+                effect:
+                  cost_mod:
+                    delta: -2
+                    when_playing: { in: affected }

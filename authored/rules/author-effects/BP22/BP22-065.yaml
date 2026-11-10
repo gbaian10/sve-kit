@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-065:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        evolve_time:
+          cost:
+            to_ex:
+              n: 1
+              sel: { who: self, zone: hand, trait: 海洋 }
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 4 }
+            - life: { who: self, delta: 1 }
