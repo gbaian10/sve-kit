@@ -61,6 +61,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
             InputDomain::Order(d) => Answer::Order(d.iter().map(|m| m.handle).collect()),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
+            InputDomain::DiceReroll { .. } => panic!("unexpected dice decision"),
             InputDomain::Abilities(_)
             | InputDomain::ResourceEntryPayment { .. }
             | InputDomain::Quick { .. }
