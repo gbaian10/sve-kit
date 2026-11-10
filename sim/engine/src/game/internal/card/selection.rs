@@ -270,6 +270,9 @@ impl TargetWait {
     }
 
     fn capacity(&self) -> Result<u64> {
+        if self.group_members.len() > 1 && !self.distinct_names && self.cost_cap.is_none() {
+            return group_capacity(&self.group_members, &self.group_bounds);
+        }
         if !self.distinct_names && self.group_members.len() <= 1 {
             let Some(CostCap { limit, costs }) = &self.cost_cap else {
                 return u64::try_from(self.members.len()).map_err(invalid);
@@ -340,6 +343,50 @@ impl TargetWait {
         }
         Ok(available)
     }
+}
+
+fn group_capacity(members: &[Vec<ObjectRef>], bounds: &[Cardinality]) -> Result<u64> {
+    if !matches!(members.len(), 2 | 3)
+        || bounds.len() != members.len()
+        || bounds
+            .iter()
+            .any(|bound| bound.maximum != Some(Nat(1)) || bound.minimum.0 > 1)
+    {
+        return Err(unsupported("group capacity bounds"));
+    }
+    // Each object fills at most one group, including objects that match several filters.
+    let mut reachable = [false; 8];
+    reachable[0] = true;
+    let mut seen = BTreeSet::new();
+    for member in members.iter().flatten() {
+        if !seen.insert((member.id, member.generation)) {
+            continue;
+        }
+        let previous = reachable;
+        for (mask, _) in previous
+            .iter()
+            .enumerate()
+            .filter(|(_, possible)| **possible)
+        {
+            for (group, candidates) in members.iter().enumerate() {
+                if mask & (1 << group) == 0 && candidates.contains(member) {
+                    reachable[mask | (1 << group)] = true;
+                }
+            }
+        }
+    }
+    let mut maximum = 0;
+    for (mask, possible) in reachable.iter().enumerate() {
+        if *possible
+            && bounds
+                .iter()
+                .enumerate()
+                .all(|(group, bound)| bound.minimum == Nat(0) || mask & (1 << group) != 0)
+        {
+            maximum = maximum.max(u64::from(mask.count_ones()));
+        }
+    }
+    Ok(maximum)
 }
 
 fn assign_groups(
@@ -517,6 +564,33 @@ fn target_bounds(constraint: &SelectionConstraint, group: &SelectionGroup) -> Ca
 }
 
 pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
+    if constraint.groups.len() > 1 {
+        let count = u64::try_from(constraint.groups.len()).map_err(invalid)?;
+        let required = constraint.cardinality.minimum != Nat(0);
+        if !matches!(count, 2 | 3)
+            || constraint.cardinality.maximum != Some(Nat(count))
+            || (required && (count != 2 || constraint.cardinality.minimum != Nat(count)))
+            || constraint.distinct_by.is_some()
+            || !constraint.aggregate_bounds.is_empty()
+            || constraint.disjoint != Disjointness::Disjoint
+        {
+            return Err(unsupported("formal target group bounds"));
+        }
+        for group in &constraint.groups {
+            if group.cardinality
+                != (Cardinality {
+                    minimum: Nat(u64::from(required)),
+                    maximum: Some(Nat(1)),
+                })
+                || !matches!(&group.selector, Selector::Zone { zone: ZoneKind::Cemetery | ZoneKind::Banish, players, .. }
+                if players.relation == PlayerRelation::SelfPlayer && players.relative_to == (PlayerRef::Controller {}))
+            {
+                return Err(unsupported("formal target group selector"));
+            }
+            target_selector(&group.selector)?;
+        }
+        return Ok(());
+    }
     target_selector(&target_group(constraint)?.selector)
 }
 
@@ -1203,7 +1277,7 @@ impl Game {
             return Err(unsupported("target domain"));
         };
         let observed_deck = private_look_choice(decision);
-        if constraint.groups.is_empty() || (constraint.groups.len() > 2 && !observed_deck) {
+        if constraint.groups.is_empty() || constraint.groups.len() > 3 {
             return Err(unsupported("target groups"));
         }
         let evolution = effect_evolution::is_choice(decision);
@@ -1482,6 +1556,9 @@ impl Game {
             return Ok(false);
         }
         let (wait, _) = self.target_domain(&candidate, first)?;
+        if parameters.len() == 1 {
+            return Ok(wait.bounds.minimum.0 <= wait.capacity()?);
+        }
         // Both public fields have a rules-defined capacity of five, so this proof is finite.
         if wait.members.len() > 10 {
             return Err(unsupported("target feasibility exceeds both fields"));
