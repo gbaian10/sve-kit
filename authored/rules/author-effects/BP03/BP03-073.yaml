@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-073:
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+      - line: 2
+        attack_time:
+          do:
+            - discard:
+                who: opp
+                n: 1
+      - line: 3
+        lastword:
+          cost:
+            banish:
+              top:
+                who: self
+                n: 10
+          do:
+            - move:
+                ref: this
+                to: field
+            - discard:
+                who: self
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
