@@ -1520,6 +1520,7 @@ pub(super) enum EvolveDeckZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct ChooseGroup {
     pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
     pub class: Option<String>,
     pub orig_cost_le: Option<u64>,
 }
