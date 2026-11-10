@@ -535,6 +535,7 @@ tags!(BooleanState {
     Boxed,
     Racing,
     AdvanceFollower,
+    AdvanceSpell,
     EnteredThisTurn
 });
 variants!(NameRead { CollaborationName { object: ObjectView } => ["read.collaboration-name"] });

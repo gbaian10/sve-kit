@@ -812,7 +812,8 @@ impl Game {
         Ok(object.zone == "evolve_deck"
             && object.owner == actor
             && object.controller == actor
-            && self.object_type(id)?.contains("アドバンス"))
+            && object.state["face_up"] != true
+            && self.object_type(id)? == "フォロワー・アドバンス")
     }
 
     pub(super) fn deck_top_members(

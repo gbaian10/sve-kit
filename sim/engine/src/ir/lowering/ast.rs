@@ -1559,7 +1559,8 @@ pub(super) struct AdvanceEntryQuery {
     pub who: SelfPlayer,
     pub zone: EvolveDeckZone,
     pub kind: SearchKind,
-    pub advance_follower: True,
+    pub advance_follower: Option<True>,
+    pub advance_spell: Option<True>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
 }

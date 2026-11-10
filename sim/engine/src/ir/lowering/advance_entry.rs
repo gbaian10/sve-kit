@@ -1,8 +1,8 @@
 use super::{
     AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, unsupported,
 };
-use crate::ir::advance_entry::{self, AdvanceName};
-use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId, ZoneKind};
+use crate::ir::advance_entry::{self, AdvanceName, AdvanceUse};
+use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -12,7 +12,7 @@ impl BodyContext<'_> {
     pub(super) fn advance_entry(
         &mut self,
         choice: &ast::Choose,
-        movement: &ast::Move,
+        consumer: &ast::Step,
         path: &str,
         movement_path: &str,
         source: &SourceSpan,
@@ -23,7 +23,13 @@ impl BodyContext<'_> {
         };
         let ast::SelfPlayer::Controller = query.who;
         let ast::EvolveDeckZone::EvolveDeck = query.zone;
-        let ast::True = query.advance_follower;
+        if !matches!(
+            (&query.kind, &query.advance_follower, &query.advance_spell),
+            (ast::SearchKind::Follower, Some(ast::True), None)
+                | (ast::SearchKind::Spell, None, Some(ast::True))
+        ) {
+            return Err(unsupported(path));
+        }
         let advance_name = match (&query.name, &query.name_contains) {
             (Some(name), None) if !name.is_empty() => AdvanceName::Exact(CardName(name.clone())),
             (None, Some(fragment)) if !fragment.is_empty() => {
@@ -31,8 +37,7 @@ impl BodyContext<'_> {
             }
             _ => return Err(unsupported(path)),
         };
-        if !matches!(query.kind, ast::SearchKind::Follower)
-            || choice.any
+        if choice.any
             || choice.groups.is_some()
             || choice.distinct_by.is_some()
             || choice.cost_sum_le.is_some()
@@ -49,22 +54,40 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let to = match movement.to {
-            ast::Destination::Field => ZoneKind::Field,
-            ast::Destination::Ex => ZoneKind::Ex,
-            ast::Destination::Hand | ast::Destination::Cemetery | ast::Destination::Deck => {
-                return Err(unsupported(movement_path));
+        let usage = match (
+            &query.kind,
+            &query.advance_follower,
+            &query.advance_spell,
+            consumer,
+        ) {
+            (ast::SearchKind::Follower, Some(ast::True), None, ast::Step::Move(movement)) => {
+                let usage = match movement.to {
+                    ast::Destination::Field => AdvanceUse::Field,
+                    ast::Destination::Ex => AdvanceUse::Ex,
+                    ast::Destination::Deck
+                    | ast::Destination::Hand
+                    | ast::Destination::Cemetery => return Err(unsupported(movement_path)),
+                };
+                if !matches!(&movement.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if *name == choice.bind)
+                    || movement.top.is_some()
+                    || movement.position.is_some()
+                    || movement.order.is_some()
+                    || movement.result.is_some()
+                    || movement.acted.is_some()
+                {
+                    return Err(unsupported(movement_path));
+                }
+                usage
             }
+            (ast::SearchKind::Spell, None, Some(ast::True), ast::Step::PlayCard(play))
+                if matches!(advance_name, AdvanceName::Exact(_))
+                    && play.r#ref == choice.bind
+                    && play.cost.is_none() =>
+            {
+                AdvanceUse::PlaySpell
+            }
+            _ => return Err(unsupported(movement_path)),
         };
-        if !matches!(&movement.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if *name == choice.bind)
-            || movement.top.is_some()
-            || movement.position.is_some()
-            || movement.order.is_some()
-            || movement.result.is_some()
-            || movement.acted.is_some()
-        {
-            return Err(unsupported(movement_path));
-        }
         let mut choice_source = source.clone();
         choice_source.author_path = path.into();
         let mut movement_source = source.clone();
@@ -86,7 +109,7 @@ impl BodyContext<'_> {
                     &movement_source,
                     origin,
                     &advance_name,
-                    to,
+                    usage,
                 ),
             },
         })

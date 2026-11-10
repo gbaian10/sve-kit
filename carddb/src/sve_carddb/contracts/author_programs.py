@@ -732,7 +732,21 @@ type Position = Placement | PositionChoice | PositionChosen
 type MoveOrder = Literal["chooser", "shuffle"]
 
 
-_ChooseExactKeys = TypedDict("_ChooseExactKeys", {"from": RecipientSel})
+@with_config(CONFIG)
+class NamedAdvanceSpellFields(TypedDict):
+    who: Literal["self"]
+    zone: Literal["evolve_deck"]
+    kind: Literal["spell"]
+    advance_spell: TrueFlag
+    name: Text
+
+
+type NamedAdvanceSpell = NamedAdvanceSpellFields
+
+
+_ChooseExactKeys = TypedDict(
+    "_ChooseExactKeys", {"from": RecipientSel | NamedAdvanceSpell}
+)
 
 
 @with_config(CONFIG)

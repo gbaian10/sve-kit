@@ -276,6 +276,7 @@ struct Checker {
     effect_ids: BTreeSet<super::EffectDefinitionId>,
     bindings: BTreeSet<Key>,
     instructions: BTreeSet<InstructionId>,
+    advance_spell_instruction: Option<InstructionId>,
     decisions: BTreeSet<super::DecisionId>,
     receipts: BTreeSet<ReceiptId>,
     source: Option<Box<SourceSpan>>,
@@ -337,6 +338,7 @@ impl Checker {
             effect_ids: BTreeSet::new(),
             bindings: BTreeSet::new(),
             instructions: BTreeSet::new(),
+            advance_spell_instruction: None,
             decisions: BTreeSet::new(),
             receipts: BTreeSet::new(),
             source: None,
@@ -521,6 +523,7 @@ impl Checker {
         context: InstructionContext,
         guard_checked: bool,
     ) -> Checked {
+        self.check_advance_spell_instruction(instruction)?;
         if !self.instructions.insert(instruction.id) {
             return Err(self.error(WellFormedReason::DuplicateInstruction));
         }

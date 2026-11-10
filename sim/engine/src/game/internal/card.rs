@@ -28,8 +28,8 @@ use crate::ir::{
 use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
+use crate::ir::{advance_entry, victory, x_pp};
 use crate::ir::{choice_rules, evolution_limits};
-use crate::ir::{victory, x_pp};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -1421,6 +1421,17 @@ fn check_nodes(
                     return Err(invalid("foreign effect evolution source"));
                 }
                 check_nodes(game, &projection.body.steps[..1], source, ability_source)?;
+            }
+            Node::Control { control } if advance_entry::projection(control).is_some() => {
+                let projection = advance_entry::projection(control)
+                    .ok_or_else(|| invalid("missing Advance projection"))?;
+                if projection.instruction.source != *ability_source {
+                    return Err(invalid("foreign Advance source"));
+                }
+                for step in &projection.body.steps {
+                    check_node_source(game, &step.source, source)?;
+                }
+                check_resolution_choice(projection.decision)?;
             }
             Node::Control {
                 control:
