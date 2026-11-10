@@ -1,0 +1,65 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-036:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        trait: 学院
+                    op: ge
+                    right: 5
+                then:
+                  - create:
+                      token: アンの大英霊
+                      n: 1
+                      to: ex
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 学院
+              n: 1
+      - line: 2
+        activate:
+          cost:
+            act_self: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  trait: 学院
+              op: ge
+              right: 15
+          do:
+            - choose:
+                bind: blast
+                from:
+                  who: self
+                  zone: evolve_deck
+                  kind: spell
+                  advance_spell: true
+                  name: イクシードブラスト
+                n: 1
+                may: true
+            - play_card:
+                ref: blast
