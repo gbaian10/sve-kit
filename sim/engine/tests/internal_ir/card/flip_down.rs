@@ -147,7 +147,7 @@ fn flip_down_up_to_two_accepts_zero_and_two_and_preserves_the_later_ep_step() {
 }
 
 #[test]
-fn flip_down_rejects_private_opposing_and_non_evolve_queries_and_result_variants() {
+fn flip_down_rejects_private_opposing_and_non_evolve_queries() {
     for query in [
         json!({"who":"self","zone":"evolve_deck","face_up":false}),
         json!({"who":"self","zone":"evolve_deck"}),
@@ -156,11 +156,7 @@ fn flip_down_rejects_private_opposing_and_non_evolve_queries_and_result_variants
     ] {
         lowerer().lower(&tree(&query, false)).unwrap_err();
     }
-    for action in [
-        json!({"flip_up":"turned"}),
-        json!({"flip_down":{"ref":"turned","result":"turned_over"}}),
-        json!({"flip_down":"this"}),
-    ] {
+    for action in [json!({"flip_up":"turned"}), json!({"flip_down":"this"})] {
         let mut tree = tree(&query(), false);
         tree["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([action]);
         lowerer().lower(&tree).unwrap_err();
@@ -207,4 +203,66 @@ fn flip_down_raw_ir_cannot_turn_a_selected_field_card_face_down() {
         "a raw bound selector cannot change cards, resources or knowledge outside the evolve deck"
     );
     assert!(game.internal_decision(View::P1).is_none());
+}
+
+#[test]
+fn flip_down_named_count_drives_scalar_effects_from_actual_successful_members() {
+    let mut input = tree(&query(), true);
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
+        {"flip_down":{"ref":"turned","result":"flipped"}},
+        {"if":{"cond":{"cmp":{"left":{"count_of":"flipped"},"op":"eq","right":2}},
+            "then":[{"ep":{"who":"self","delta":2}}]}}
+    ]);
+    let program = lowerer()
+        .lower(&input)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for handles in [vec![], vec![0], vec![0, 1]] {
+        let mut game = board(&program);
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("printed public targets")
+        };
+        let complete = handles.len() == 2;
+        let result = resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets(handles.clone()),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["ep"],
+            if complete { 2 } else { 0 }
+        );
+        assert!(
+            result
+                .progress
+                .receipts
+                .values()
+                .any(|outcome| matches!(outcome,
+            InstructionOutcome::Flip(outcome) if outcome.successful.len() == handles.len())),
+            "the scalar comparison uses actual successful flips, including zero"
+        );
+    }
+}
+
+#[test]
+fn flip_result_does_not_grant_attributes_or_escape_its_optional_branch() {
+    let flip = json!({"flip_down":{"ref":"turned","result":"flipped"}});
+    for body in [
+        json!([flip, {"life":{"who":"self","delta":{"cost_of":"flipped"}}}]),
+        json!([flip, {"move":{"ref":{"in":{"objects_of":"flipped","view":"before"}},"to":"hand"}}]),
+        json!([flip, {"if":{"cond":{"did":"flipped"},"then":[{"ep":{"delta":1}}]}}]),
+        json!([{"optional":{"do":[flip]}}, {"life":{"who":"self","delta":{"count_of":"flipped"}}}]),
+        json!([{"flip_down":{"ref":"turned","result":"turned"}}]),
+    ] {
+        let mut input = tree(&query(), false);
+        input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = body;
+        lowerer().lower(&input).unwrap_err();
+    }
 }

@@ -1,0 +1,74 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-112:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
+          do:
+            - choice:
+                upto: 2
+                options:
+                  - - destroy: enemy
+                  - - search:
+                        sel:
+                          who: self
+                          zone: deck
+                          name: 母なる君
+                        n: 1
+                        to: field
+                  - - if:
+                        cond:
+                          cmp:
+                            left:
+                              count:
+                                who: self
+                                zone: evolve_deck
+                                face_up: true
+                                kind: evolve_follower
+                                trait: 自然
+                            op: ge
+                            right: 2
+                        then:
+                          - optional:
+                              do:
+                                - choose:
+                                    bind: forms
+                                    from:
+                                      who: self
+                                      zone: evolve_deck
+                                      face_up: true
+                                      kind: evolve_follower
+                                      trait: 自然
+                                    n: 2
+                                - flip_down:
+                                    ref: forms
+                                    result: flipped
+                                - if:
+                                    cond:
+                                      cmp:
+                                        left:
+                                          count_of: flipped
+                                        op: eq
+                                        right: 2
+                                    then:
+                                      - draw:
+                                          n: 1
+                                      - pp:
+                                          who: self
+                                          delta: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
