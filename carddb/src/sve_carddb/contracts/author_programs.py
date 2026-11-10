@@ -310,7 +310,8 @@ type ObjectEffect = ObjectEffectFields
 
 
 _PlayPermissionKeys = TypedDict(
-    "_PlayPermissionKeys", {"from": "Annotated[tuple[Zone, ...], Field(min_length=1)]"}
+    "_PlayPermissionKeys",
+    {"from": "Annotated[tuple[Zone | Literal['banish'], ...], Field(min_length=1)]"},
 )
 
 

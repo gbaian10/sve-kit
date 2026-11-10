@@ -55,7 +55,7 @@ pub(in crate::game) mod trigger_restrictions;
 pub(super) use nested::ability::AbilityWait;
 pub(super) mod optional;
 pub(super) mod other_costs;
-mod play_restrictions;
+pub(in crate::game::internal) mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
 pub(super) mod quick;
@@ -128,6 +128,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
     pub(in crate::game::internal) quick: Option<quick::Question>,
     pub(in crate::game::internal) quick_start: bool,
+    pub(in crate::game::internal) banish_play: BTreeMap<u32, u64>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
 }
 
@@ -169,6 +170,7 @@ impl CardRuntime {
     }
 
     pub(in crate::game::internal) fn terminate(&mut self) {
+        self.banish_play.clear();
         self.pending.clear();
         self.unadmitted.clear();
         self.admission = None;
@@ -184,7 +186,8 @@ impl CardRuntime {
     }
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
-        !self.other_costs.is_empty()
+        !self.banish_play.is_empty()
+            || !self.other_costs.is_empty()
             || self.definitions.cards.values().any(|card| {
                 !card.card().card_play_costs.is_empty()
                     || card.card().abilities.iter().any(|a| {
@@ -208,7 +211,10 @@ impl CardRuntime {
 
     pub(in crate::game) fn is_empty(&self) -> bool {
         // Active installed IR must never be omitted as an empty, saveable runtime.
-        self.definitions.cards.is_empty() && !self.selected && self.other_costs.is_empty()
+        self.definitions.cards.is_empty()
+            && !self.selected
+            && self.other_costs.is_empty()
+            && self.banish_play.is_empty()
     }
 
     pub(in crate::game) fn is_loaded(&self, card: &str) -> bool {

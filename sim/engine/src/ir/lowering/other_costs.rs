@@ -42,7 +42,12 @@ fn query(
     path: &str,
 ) -> Result<Selector, LoweringError> {
     let zones = match &value.zone {
-        None => vec![ZoneKind::Hand, ZoneKind::Ex],
+        None => vec![
+            ZoneKind::Hand,
+            ZoneKind::Ex,
+            ZoneKind::Cemetery,
+            ZoneKind::Banish,
+        ],
         Some(ast::PlayingZones::One(zone)) => vec![zone_kind(zone)],
         Some(ast::PlayingZones::Many(zones)) if !zones.is_empty() => {
             zones.iter().map(zone_kind).collect()

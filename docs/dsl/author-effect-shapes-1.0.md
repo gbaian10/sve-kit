@@ -55,7 +55,7 @@ canonical 只依[承載契約 §4.1](author-contract-1.0.md#41-body-recipe)處�
 | banish_instead | from:field、to:cemetery | on:O | 兩個值是常值，表示這段移動改為消滅；不是任意 Zone 配對 |
 | cannot | what 與對應欄位見 §3 | 見 §3 | 封閉變體聯集 |
 | must_attack、enters_acted、ignore_ward | on:O | 無 | 範圍必須明寫 |
-| play_permission | on:O、from:非空 Zone[] | 無 | 不增加 banish／banished 區域；玩家許可仍待定 |
+| play_permission | on:O、from:非空 (Zone 或 banish)[] | 無 | 執行准入僅開放自身本回合消滅區打出許可；其他來源仍封閉 |
 | no_trigger | kinds:非空 TriggerKind[]；on:Ref 或 who:P 二擇一 | 無 | who 指能力控制者；on 不接受 selector |
 | unlimited_evolve、choice_any | who:P | 無 | 不提供 rule_override 同義入口 |
 | reroll | who:P、times:Q | 無 | 次數計算語義交規則裁定 |
@@ -163,7 +163,7 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 | cannot.pp_max_increase | player_effect BP05-006 | 省略 who 交父節點 |
 | cannot.deal_damage | apply BP12-109 | 父 capture:play 與離場後 LKI 仍需接線 |
 | must_attack | CP04-012 的授予內 static | 能力矩陣含完整巢狀 grant／static 真例 |
-| play_permission | BP18-007 優先用自身 play 頭 | EffectSpec 合成；玩家消滅區來源另待設計 |
+| play_permission | BP18-007 優先用自身 play 頭；BP18-P52 使用 player_effect | 玩家許可僅 self、until:turn、from:[banish]、on:{who:self,zone:banish} |
 | no_trigger.on／who | entry_effects BP19-074；static ECP01-010 | entering／對手能力控制者 |
 | unlimited_evolve | static BP18-001 | who:self |
 | enters_acted | static BP11-112 | 對未來入場的 this，完整入場接線待做 |

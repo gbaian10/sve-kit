@@ -181,6 +181,9 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if matches!(value.effect, ast::InstalledEffect::PlayPermission(_)) {
+            return self.player_play_permission(value, path);
+        }
         if matches!(
             value.effect,
             ast::InstalledEffect::Prevent(_) | ast::InstalledEffect::DamageMod(_)
@@ -222,6 +225,7 @@ impl BodyContext<'_> {
                 shape.source.as_ref(),
             ),
             ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
@@ -293,7 +297,8 @@ impl BodyContext<'_> {
         let limited = match &installation.effect {
             ast::InstalledEffect::Prevent(shape) => shape.next_only == Some(true),
             ast::InstalledEffect::DamageMod(shape) => shape.next_only == Some(true),
-            ast::InstalledEffect::AddTrait(_)
+            ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
@@ -350,7 +355,8 @@ impl BodyContext<'_> {
                 )?
             }
             ast::InstalledEffect::DamageMod(_) => return Err(unsupported(path)),
-            ast::InstalledEffect::AddTrait(_)
+            ast::InstalledEffect::PlayPermission(_)
+            | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)

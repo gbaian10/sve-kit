@@ -1,5 +1,7 @@
+use super::super::{Execution, InstructionOutcome, seat_name};
 use super::{Ability, Context, Game, Generation, Located, PlayerId, Result, unsupported};
 use crate::ir::play_restrictions::card_play_rule;
+use crate::ir::{Action, Instruction, play_restrictions};
 use crate::ir::{Bool, Expr, ZoneKind};
 
 pub(super) fn check(located: &Located<Ability>, ordinal: usize) -> Result<bool> {
@@ -45,6 +47,7 @@ impl Game {
             "hand" => ZoneKind::Hand,
             "ex" => ZoneKind::Ex,
             "cemetery" => ZoneKind::Cemetery,
+            "banish" => ZoneKind::Banish,
             _ => return Ok(false),
         };
         for located in self.internal_printed_abilities(holder)? {
@@ -81,5 +84,53 @@ impl Game {
         let source = probe.internal_card_source(holder, ability.id, actor)?;
         execution.bind_source(&probe, source)?;
         Ok(execution.boolean(&probe, predicate)?.0)
+    }
+}
+
+pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
+    if !play_restrictions::is_banish_play_installation(action) {
+        return Err(unsupported(
+            "own banish play permission for the current turn",
+        ));
+    }
+    Ok(())
+}
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Player play permissions share the authoritative play gate."
+)]
+impl Game {
+    pub(in crate::game::internal) fn internal_install_banish_play(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<()> {
+        check_install(&instruction.action)?;
+        let turn = self.state.schedule.current()?;
+        self.card_runtime
+            .banish_play
+            .insert(execution.context.controller.seat, turn);
+        execution
+            .receipts
+            .insert(instruction.receipt, InstructionOutcome::Installed(vec![]));
+        Ok(())
+    }
+    pub(in crate::game::internal) fn internal_card_banish_play_allowed(
+        &self,
+        holder: &str,
+        actor: PlayerId,
+    ) -> Result<bool> {
+        let object = self.object(holder)?;
+        let seat = seat_name(actor)?;
+        Ok(object.zone == "banish"
+            && object.owner == seat
+            && object.controller == seat
+            && self.card_runtime.banish_play.get(&actor.seat)
+                == Some(&self.state.schedule.current()?))
+    }
+    pub(in crate::game) fn internal_player_play_end_turn(&mut self, turn: u64) {
+        self.card_runtime
+            .banish_play
+            .retain(|_, granted| *granted != turn);
     }
 }
