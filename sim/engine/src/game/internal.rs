@@ -1598,6 +1598,7 @@ impl Game {
             Action::Life { .. } => self.internal_life(execution, &instruction)?,
             Action::Modify { .. } => self.internal_modify(execution, &instruction)?,
             Action::Grant { .. } => self.internal_grant(execution, &instruction)?,
+            Action::Delay { .. } => self.internal_install_delay(execution, &instruction)?,
             Action::Reveal { objects } => {
                 self.internal_reveal(execution, &instruction, objects)?;
             }

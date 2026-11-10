@@ -870,3 +870,6 @@ mod x_pp;
 
 #[path = "card/hand_banish_cost.rs"]
 mod hand_banish_cost;
+
+#[path = "card/delayed_trigger.rs"]
+mod delayed_trigger;

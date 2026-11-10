@@ -259,6 +259,14 @@ fn with_producer(initial: &Value, action: Action) -> Game {
 }
 
 fn with_selected_producer(initial: &Value, action: Action, selected: &SelectedEffects) -> Game {
+    with_selected_producer_program(initial, &producer(action), selected)
+}
+
+fn with_selected_producer_program(
+    initial: &Value,
+    program: &WellFormedCardProgram,
+    selected: &SelectedEffects,
+) -> Game {
     let mut initial = initial.clone();
     let seat = initial["turn"]["active"].as_str().unwrap().to_owned();
     initial["players"][&seat]["zones"]["field"]
@@ -273,8 +281,7 @@ fn with_selected_producer(initial: &Value, action: Action, selected: &SelectedEf
         "producer",
     )
     .unwrap();
-    game.load_internal_card("producer", &producer(action))
-        .unwrap();
+    game.load_internal_card("producer", program).unwrap();
     game
 }
 

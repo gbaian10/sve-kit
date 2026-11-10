@@ -102,7 +102,11 @@ pub(super) fn position(card: &str, active: &str, material: &str, side: &str, zon
 }
 
 pub(super) fn prepared(value: &Value, action: Action) -> Game {
-    let mut game = with_selected_producer(value, action, selected());
+    prepared_program(value, &producer(action))
+}
+
+pub(super) fn prepared_program(value: &Value, program: &WellFormedCardProgram) -> Game {
+    let mut game = with_selected_producer_program(value, program, selected());
     let empty = WellFormedCardProgram::check(CardProgram {
         abilities: vec![],
         card_play_costs: vec![],

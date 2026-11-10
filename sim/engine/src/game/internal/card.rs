@@ -116,6 +116,7 @@ pub(in crate::game) struct CardRuntime {
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
     mode_uses: Vec<ModeUse>,
+    delayed: Vec<triggers::delayed::Installed>,
     admission: Option<triggers::Admission>,
     pub(in crate::game::internal) next_instance: u64,
     entry_result: Option<CardEntry>,
@@ -1306,6 +1307,9 @@ fn check_instruction(
     super::numeric::pilot::check_action(&instruction.action)?;
     super::flip::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
+    if let Action::Delay { body, .. } = &instruction.action {
+        check_nodes(game, &body.steps, source, ability_source)?;
+    }
     if instruction.source != *ability_source {
         return Err(invalid("instruction has a foreign ability source"));
     }
@@ -1340,6 +1344,7 @@ fn check_instruction(
             | Action::Posture { .. }
             | Action::FlipDown { .. }
             | Action::Modify { .. }
+            | Action::Delay { .. }
             | Action::Grant { .. }
             | Action::InstallEffect { .. }
             | Action::Search { .. }

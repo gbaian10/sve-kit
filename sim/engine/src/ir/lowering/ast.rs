@@ -385,6 +385,7 @@ pub(super) struct Body {
 pub(super) enum Step {
     #[serde(rename = "shuffle")]
     Shuffle(Shuffle),
+    Delayed(Delayed),
     PlayCard(PlayCard),
     PlayAbility(PlayAbility),
     Pay(ModePayment),
@@ -3568,4 +3569,32 @@ pub(super) enum DiceThreshold {
     Eq(u64),
     Le(u64),
     Ge(u64),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Delayed {
+    pub on: DelayedOn,
+    #[serde(rename = "do")]
+    pub steps: Vec<Step>,
+    pub until: Until,
+    #[serde(default)]
+    pub next_only: bool,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DelayedOn {
+    pub moved: DelayedMove,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DelayedMove {
+    pub r#ref: String,
+    pub from: FieldZone,
+    pub to: CemeteryZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FieldZone {
+    Field,
 }

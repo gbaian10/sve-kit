@@ -1,0 +1,60 @@
+cards:
+  BP15-001:
+    abilities:
+      - fanfare:
+          cost:
+            banish:
+              n: 1
+              sel:
+                name: 不殺の絶傑・エズディア
+                who: self
+                zone: cemetery
+          do:
+            - set_stat:
+                hp: 1
+                on: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - damage:
+                n: 1
+                to: enemy
+            - delayed:
+                do:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 絶命の痛撃
+                next_only: false
+                on:
+                  moved:
+                    from: field
+                    ref: enemy
+                    to: cemetery
+                until: turn
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

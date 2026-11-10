@@ -60,6 +60,19 @@ AtResolution 在進入執行時一次凍結，之後的節點會看到本體自�
 可見的值（能力入口包含已選參數與已完成的打出付款結果），不能引用同前綴的其他 capture。本文其他位置回報 `UnsupportedShape`，
 scope 不是 root 回報 `WrongScope`。
 
+本文也接受封閉的 `Action::Delay`，安裝本回合指定目標的原世代從場進入擁有者墓場的訂閱。
+`Until` 必須是 Installation／CurrentTurnEnd，沒有 usage、
+interval、次數上限或批次聚合。這是獨立安裝的訂閱，其 trigger 的空有效區不會放寬一般能力入口。
+callback 是獨立 scope，只接受固定抽 1、己方回血 2、
+固定 token 1 張到 EX 的指示；拒絕巢狀 delay、決定、成本、控制結構與外層收據。
+
+指定目標先由原本的 Decision.captures 在 AtSelection 凍結成公開 Objects capture。
+Delay.captures 只接受從這個 capture 轉交到 callback scope：輸入只能是 Captured，
+時點須與原定義完全相同，不能寫 Bound／Live 或在安裝時重讀目標。runtime 複製完整 slot，
+包含原世代與選取時的場上資訊；callback 看不到其他外層 binding。安裝同時封存來源、
+原控制者、卡號與位置，每次取得獨立 instance；來源離場、消去或控制權改變不撤銷訂閱。
+事件仍經共用的移動 commit、pending 佇列與共同檢查時點，回合結束清除訂閱。
+
 值檢查涵蓋這些形狀使用的 signed arithmetic、明示 Nat 轉換、條件值、部分 Live
 讀值、數量 receipt／collect 投影、集合及局部 candidate。支援的式子依各運算元
 遞迴檢查，不以整個型別家族推定所有變體都通過。
@@ -504,6 +517,7 @@ Static 不得有 play 或 body；非 Static 不接受 declarations。UnionBurst 
 | play.captures | AtPlay，execution=Current；自身移區／付款前，尚無 targets／X 回答，同批 capture 互不可讀 |
 | ChoiceKeyword 的模式數與選擇 | 讀 play.captures 後、PlaySpec.parameters 前的環境；不得讀稍後的目標或本文結果 |
 | PlaySpec.parameters | 按序公開回答；每次 Decision.captures 只接受指向該 decision 的 AtSelection，可讀該次回答 |
+| Delay.captures | 只轉交公開的 Objects capture；保留原 AtSelection 時點，輸出在隔離的 callback scope，不重新求值 |
 | 模式 parameters | 只對自己被選模式的 body 可見，不能互讀 sibling 模式 |
 | body | 讀已完成的入口與參數；AtResolution 前綴以共同入口凍結，不讀本文造成的結果 |
 

@@ -2,6 +2,8 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
+use crate::ir::NumericChange;
+use crate::ir::delayed as delayed_ir;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
@@ -92,6 +94,7 @@ fn check_body(
     }
     let mut inspected = program.clone();
     super::history_turn::mask_public_history(&mut inspected);
+    mask_delayed(&mut inspected)?;
     if let Some(origin) = origin {
         effect_evolution::mask(&mut inspected, origin);
     }
@@ -549,7 +552,10 @@ fn check_program(
 ) -> Result<()> {
     let card = origin.is_some();
     for step in &program.steps {
-        super::ordering::check_node(&reads.mask(&step.node)?, source)?;
+        if !matches!(&step.node, Node::Instruction { instruction } if matches!(instruction.action, Action::Delay { .. }))
+        {
+            super::ordering::check_node(&reads.mask(&step.node)?, source)?;
+        }
         match &step.node {
             Node::Control { control }
                 if card && effect_evolution::projection(control).is_some() => {}
@@ -601,6 +607,12 @@ fn check_program(
                 }
             }
             Node::Instruction { instruction } => {
+                if let Action::Delay { body, trigger, .. } = &instruction.action {
+                    if !card || !delayed_ir::valid(&instruction.action) {
+                        return Err(unsupported("delayed body"));
+                    }
+                    check_card(body, source, &instruction.source, Some(trigger))?;
+                }
                 super::dice::check_instruction(instruction)?;
                 check_action(&instruction.action, &instruction.source)?;
                 if instruction.precondition.is_some()
@@ -1284,4 +1296,45 @@ fn damage_boolean(
         ),
         _ => {}
     }
+}
+
+fn mask_delayed(program: &mut Program) -> Result<()> {
+    for step in &mut program.steps {
+        match &mut step.node {
+            Node::Instruction { instruction }
+                if matches!(instruction.action, Action::Delay { .. }) =>
+            {
+                if !delayed_ir::valid(&instruction.action) {
+                    return Err(unsupported("delayed subscription"));
+                }
+                instruction.action = Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(0)),
+                    },
+                };
+            }
+            Node::Control {
+                control:
+                    Control::If {
+                        then_body,
+                        else_body,
+                        ..
+                    },
+            } => {
+                mask_delayed(then_body)?;
+                if let Some(body) = else_body {
+                    mask_delayed(body)?;
+                }
+            }
+            Node::Control {
+                control:
+                    Control::Sequence { body }
+                    | Control::May { body, .. }
+                    | Control::Pay { on_paid: body, .. },
+            } => mask_delayed(body)?,
+            _ => {}
+        }
+    }
+    Ok(())
 }
