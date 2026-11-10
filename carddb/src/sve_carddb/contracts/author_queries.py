@@ -328,7 +328,7 @@ class ZoneObjectsFields(ObjectSelectionFields):
     who: PlayerRef | PlayerSet | ParamRef
     zone: NotRequired[
         Zone
-        | Annotated[tuple[Zone, ...], Field(min_length=1)]
+        | Annotated[tuple[Zone | Literal["banish"], ...], Field(min_length=1)]
         | ParamRef
         | Literal["banish"]
     ]
