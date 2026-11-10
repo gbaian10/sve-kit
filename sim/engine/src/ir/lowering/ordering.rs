@@ -39,17 +39,24 @@ impl BodyContext<'_> {
         if let ast::Step::Discard(value) = step
             && let Some(name) = &value.result
         {
-            if value.any.is_none() || !matches!(value.who, None | Some(ast::LeaderSide::Controller))
+            if !matches!(value.who, None | Some(ast::LeaderSide::Controller))
+                || value.all.is_some()
+                || value.random.is_some()
             {
                 return Err(unsupported(path));
             }
+            let maximum = match (&value.any, value.n) {
+                (Some(_), None) => None,
+                (None, Some(1)) => Some(Nat(1)),
+                _ => return Err(unsupported(path)),
+            };
             return super::payment::record_discard(
                 self,
                 name,
                 receipt,
                 Cardinality {
                     minimum: Nat(0),
-                    maximum: None,
+                    maximum,
                 },
                 path,
             );

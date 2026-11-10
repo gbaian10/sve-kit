@@ -1,0 +1,58 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-070:
+    abilities:
+      - activate:
+          advance: true
+          cost:
+            steps:
+              - pp: 4
+              - banish_self: true
+          do:
+            - choose:
+                bind: incoming
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name: 楽園の終焉・イツルギ
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: incoming
+                to: field
+          usable_if:
+            any:
+              - cmp:
+                  left:
+                    count:
+                      trait: 宴楽
+                      who: self
+                      zone: cemetery
+                  op: ge
+                  right: 5
+              - cmp:
+                  left:
+                    count:
+                      class: ナイトメア
+                      who: self
+                      zone: cemetery
+                  op: ge
+                  right: 10
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 幼狼奮闘
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
