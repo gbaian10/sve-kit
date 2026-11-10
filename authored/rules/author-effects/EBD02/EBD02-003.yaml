@@ -1,0 +1,74 @@
+cards:
+  EBD02-003:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 2
+                to: enemy
+          on:
+            played:
+              sel:
+                trait: 魔法使い
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - kind: follower
+                    orig_cost_le: 3
+                    trait: 魔法使い
+                  - kind: spell
+                    orig_cost_le: 3
+                    trait: 魔法使い
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: taken
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

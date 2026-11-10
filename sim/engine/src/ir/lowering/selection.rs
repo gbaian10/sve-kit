@@ -199,7 +199,7 @@ impl BodyContext<'_> {
         })
     }
 
-    fn observed_cost_groups(
+    fn observed_groups(
         &mut self,
         groups: &[ast::ChooseGroup],
         receipt: &super::super::ObjectReceipt,
@@ -211,7 +211,9 @@ impl BodyContext<'_> {
         };
         let mut lowered_groups = Vec::with_capacity(groups.len());
         for group in groups {
-            if group.kind.is_none() {
+            if (group.kind.is_none() && group.r#trait.is_none())
+                || group.r#trait.as_deref() == Some("")
+            {
                 return Err(unsupported(path));
             }
             let binding = super::Binding::new(1, self.card_allocator.scope(path)?);
@@ -225,6 +227,7 @@ impl BodyContext<'_> {
                     predicate: Box::new(field_filter(
                         &ObjectFilter {
                             kind: group.kind.as_ref().map(super::search::card_kind),
+                            trait_id: group.r#trait.as_deref(),
                             class: group.class.as_deref(),
                             original_cost: [None, group.orig_cost_le, None],
                             ..ObjectFilter::default()
@@ -247,10 +250,12 @@ impl BodyContext<'_> {
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
         let observation = from.observation.as_ref().ok_or_else(|| unsupported(path))?;
-        if groups.len() != 2
+        let group_count = u64::try_from(groups.len()).map_err(|_overflow| unsupported(path))?;
+        if !matches!(group_count, 2 | 3)
+            || choice.any
             || choice.may != Some(true)
             || choice.n.is_some()
-            || choice.upto != Some(2)
+            || choice.upto != Some(group_count)
             || choice.reveal == Some(true)
             || choice.order == Some(true)
             || choice.distinct_by.is_some()
@@ -294,9 +299,9 @@ impl BodyContext<'_> {
             .clone();
         let cardinality = super::super::Cardinality {
             minimum: super::super::Nat(0),
-            maximum: Some(super::super::Nat(2)),
+            maximum: Some(super::super::Nat(group_count)),
         };
-        let lowered_groups = self.observed_cost_groups(groups, &receipt, path)?;
+        let lowered_groups = self.observed_groups(groups, &receipt, path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         if self.targets.insert(choice.bind.clone(), binding).is_some() {
             return Err(unsupported(path));

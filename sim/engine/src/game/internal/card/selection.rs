@@ -1202,13 +1202,13 @@ impl Game {
         else {
             return Err(unsupported("target domain"));
         };
-        if constraint.groups.is_empty() || constraint.groups.len() > 2 {
+        let observed_deck = private_look_choice(decision);
+        if constraint.groups.is_empty() || (constraint.groups.len() > 2 && !observed_deck) {
             return Err(unsupported("target groups"));
         }
         let evolution = effect_evolution::is_choice(decision);
         let private_evolve = evolution || advance_entry::name(decision).is_some();
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
-        let observed_deck = allow_resolution_zones && private_look_choice(decision);
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
         let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
         let constraint = evaluated_counts(self, execution, constraint)?;

@@ -66,7 +66,8 @@ pub(crate) fn private_look_choice(decision: &Decision) -> bool {
 fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
     match constraint.groups.as_slice() {
         [group] => group.cardinality == constraint.cardinality,
-        [first, second] => {
+        groups @ ([_, _] | [_, _, _]) => {
+            let maximum = if groups.len() == 2 { Nat(2) } else { Nat(3) };
             let one = Cardinality {
                 minimum: Nat(0),
                 maximum: Some(Nat(1)),
@@ -75,10 +76,9 @@ fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
                 && constraint.cardinality
                     == (Cardinality {
                         minimum: Nat(0),
-                        maximum: Some(Nat(2)),
+                        maximum: Some(maximum),
                     })
-                && first.cardinality == one
-                && second.cardinality == one
+                && groups.iter().all(|group| group.cardinality == one)
         }
         _ => false,
     }

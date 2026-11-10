@@ -1206,3 +1206,113 @@ fn receipt_card_conditions_reject_movements_that_did_not_leave_the_deck() {
     );
     assert_eq!(game.projection(View::Referee).unwrap(), before);
 }
+
+#[test]
+fn grouped_trait_look_admits_only_two_or_three_private_optional_disjoint_groups() {
+    let steps = json!([
+        {"look":{"top":{"who":"self","n":3},"bind":"seen"}},
+        {"choose":{"bind":"picked","from":{"in":"seen"},"groups":[
+            {"trait":"キュート"},{"trait":"クール"},{"trait":"パッション"}
+        ],"upto":3,"may":true}},
+        {"move":{"ref":"picked","to":"hand","result":"taken"}}
+    ]);
+    lowerer().lower(&tree(&steps)).unwrap();
+    for invalid in [
+        json!({"groups":[{"trait":"キュート"},{"trait":"クール"},{"trait":"パッション"},{"kind":"spell"}],"upto":4}),
+        json!({"groups":[{"class":"ウィッチ"},{"trait":"クール"},{"trait":"パッション"}]}),
+        json!({"groups":[{"trait":""},{"trait":"クール"},{"trait":"パッション"}]}),
+        json!({"upto":2}),
+        json!({"may":false}),
+        json!({"from":{"who":"opp","zone":"deck"}}),
+        json!({"from":{"in":"seen","trait":"キュート"}}),
+        json!({"cost_sum_le":3}),
+        json!({"any":true}),
+    ] {
+        let mut rejected = steps.clone();
+        for (key, value) in invalid.as_object().unwrap() {
+            rejected[1]["choose"][key] = value.clone();
+        }
+        lowerer().lower(&tree(&rejected)).unwrap_err();
+    }
+}
+
+#[test]
+fn three_trait_groups_can_take_one_card_when_the_other_groups_have_no_candidates() {
+    let document = tree(&json!([
+        {"look":{"top":{"who":"self","n":2},"bind":"seen"}},
+        {"choose":{"bind":"picked","from":{"in":"seen"},"groups":[
+            {"trait":"A"},{"trait":"B"},{"trait":"C"}
+        ],"upto":3,"may":true}},
+        {"move":{"ref":"picked","to":"hand"}}
+    ]));
+    let programs = lowerer().lower(&document).unwrap();
+    let (snapshot, registry, legacy) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut record: Value = serde_json::from_str(line).unwrap();
+            record["faces"][0]["traits"] = json!(["A"]);
+            record.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let source = Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), legacy)]).unwrap(),
+    );
+    let mut initial = setup(
+        1,
+        json!([{"id":"one","card":"unit-follower"},{"id":"two","card":"unit-follower"}]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower"}]);
+    let mut board = Game::new(
+        source,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "empty-trait-groups",
+    )
+    .unwrap();
+    board
+        .load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    let CardPlay::Awaiting(choice) = board
+        .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("private grouped choice")
+    };
+    let InputDomain::Targets(domain) = &choice.domain else {
+        panic!("targets")
+    };
+    assert_eq!(domain.members.len(), 2);
+    let handles = domain
+        .members
+        .iter()
+        .map(|member| member.handle)
+        .collect::<Vec<_>>();
+    board
+        .answer_internal_card(choice.actor, choice.token, Answer::Targets(handles.clone()))
+        .unwrap_err();
+    assert!(board.internal_decision(View::P2).is_none());
+    resolved(
+        board
+            .answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::Targets(vec![handles[0]]),
+            )
+            .unwrap(),
+    );
+    let referee = board.projection(View::Referee).unwrap();
+    assert_eq!(referee["P1"]["hand"], json!(["one"]));
+    assert_eq!(referee["P1"]["deck"], json!(["two"]));
+    let opponent = board.projection(View::P2).unwrap();
+    assert!(
+        !opponent["known_cards"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|card| card["id"] == "one")
+    );
+}
