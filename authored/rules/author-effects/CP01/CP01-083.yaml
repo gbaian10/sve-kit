@@ -1,0 +1,63 @@
+cards:
+  CP01-083:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                    op: ge
+                    right: 1
+                then:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            minus:
+                              - agg:
+                                  of:
+                                    in: shown
+                                  attr: cost
+                                  fn: sum
+                              - times:
+                                  - per:
+                                      of:
+                                        agg:
+                                          of:
+                                            in: shown
+                                          attr: cost
+                                          fn: sum
+                                      unit: 2
+                                  - 2
+                          op: eq
+                          right: 1
+                      then:
+                        - damage:
+                            to:
+                              leaders: opponents
+                            n: 2
+                      else:
+                        - damage:
+                            to:
+                              leader: self
+                            n: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

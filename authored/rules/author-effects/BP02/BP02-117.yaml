@@ -1,0 +1,28 @@
+cards:
+  BP02-117:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - buff:
+                "on": this
+                power:
+                  agg:
+                    of:
+                      in: shown
+                    attr: cost
+                    fn: sum
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

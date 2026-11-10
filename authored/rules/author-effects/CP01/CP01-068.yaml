@@ -1,0 +1,50 @@
+cards:
+  CP01-068:
+    abilities:
+      - line: 1
+        feed:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - damage:
+                to:
+                  leaders: opponents
+                n:
+                  agg:
+                    of:
+                      in: shown
+                    attr: cost
+                    fn: sum
+            - life:
+                who: self
+                delta:
+                  agg:
+                    of:
+                      in: shown
+                    attr: cost
+                    fn: sum
+      - line: 3
+        activate:
+          cost:
+            pp: 10
+          do:
+            - buff:
+                "on": this
+                power: 10
+                hp: 10
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

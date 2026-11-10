@@ -1,0 +1,35 @@
+cards:
+  CSD02c-006:
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - damage:
+                to: enemy
+                n:
+                  agg:
+                    of:
+                      in: shown
+                    attr: orig_cost
+                    fn: sum
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

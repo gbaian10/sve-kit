@@ -1,0 +1,56 @@
+cards:
+  BP21-066:
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                    op: ge
+                    right: 1
+                then:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              in:
+                                objects_of: shown
+                                view: before
+                              kind: follower
+                              class: ドラゴン
+                          op: ge
+                          right: 1
+                      then:
+                        - move:
+                            ref:
+                              in: shown
+                            to: field
+                            result: moved
+                      else:
+                        - draw:
+                            n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

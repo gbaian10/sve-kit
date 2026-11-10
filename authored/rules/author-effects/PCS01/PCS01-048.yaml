@@ -1,0 +1,54 @@
+cards:
+  PCS01-048:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - ward
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  trait: プリコネ
+                  other: true
+      - line: 3
+        fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                        kind: follower
+                        trait: プリコネ
+                    op: ge
+                    right: 1
+                then:
+                  - move:
+                      ref:
+                        in: shown
+                      to: field
+                      result: moved
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
