@@ -21,6 +21,7 @@ use crate::ir::{
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
+mod keywords;
 mod replacement;
 pub(super) use replacement::ReplacementWait;
 
@@ -274,7 +275,10 @@ pub(super) fn keyword_filter(
         && predicate.holder.is_none()
         && predicate.origin.is_none()
         && (predicate.keyword == Some(KeywordId::Evolution)
-            || predicate.keyword == Some(KeywordId::Stack)
+            || matches!(
+                predicate.keyword,
+                Some(KeywordId::Stack | KeywordId::EarthRite | KeywordId::Lastword)
+            )
             || predicate.keyword.and_then(super::grant::keyword).is_some())
 }
 
@@ -491,6 +495,8 @@ pub(super) fn keyword_requirement(
             | "internal.KeywordId.Intimidate"
             | "internal.KeywordId.Assail"
             | "internal.KeywordId.Stack"
+            | "internal.KeywordId.EarthRite"
+            | "internal.KeywordId.Lastword"
     ) {
         return false;
     }
@@ -584,6 +590,9 @@ pub(super) fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicat
         .keyword
         .ok_or_else(|| unsupported("search keyword"))?;
     game.require_internal_abilities(id, "search keyword")?;
+    if matches!(keyword, KeywordId::EarthRite | KeywordId::Lastword) {
+        return keywords::matches(game, id, keyword);
+    }
     if let Some(name) = super::grant::keyword(keyword)
         && game.object(id)?.zone == "field"
     {

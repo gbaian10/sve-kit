@@ -361,3 +361,54 @@ fn boxed_filter_stays_closed_for_resolution_choices() {
         }
     }
 }
+
+#[test]
+fn lastword_filter_follows_granted_abilities_and_box_suppression() {
+    let mut tree = tree();
+    let entries = tree["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap();
+    entries.retain(|entry| entry.get("lastword").is_none());
+    let mut query = entries[1].clone();
+    query["line"] = json!(9);
+    query["activate"] = json!({"cost":{"pp":0},"targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","keyword":"lastword"},"n":1}],"do":[{"life":{"who":"self","delta":1}}]});
+    entries.push(query);
+    let (mut game, card) = board_with(&tree, true);
+    let ability = card
+        .card()
+        .abilities
+        .iter()
+        .find(|a| a.source.line == 9)
+        .unwrap()
+        .node
+        .id;
+    assert!(matches!(
+        game.activate_internal_card("s", ability, PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    activate(&mut game, &card, 3);
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("s", ability, PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("the granted Lastword must match");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("formal target");
+    };
+    assert_eq!(domain.members.len(), 1);
+    let play = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap();
+    resolved(play);
+    game.resume_internal_card().unwrap();
+    activate(&mut game, &card, 2);
+    assert!(matches!(
+        game.activate_internal_card("s", ability, PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+}
