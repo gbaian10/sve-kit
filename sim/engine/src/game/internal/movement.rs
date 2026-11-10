@@ -816,7 +816,7 @@ impl Game {
             && self.object_type(id)?.contains("アドバンス"))
     }
 
-    fn deck_top_members(
+    pub(super) fn deck_top_members(
         &self,
         execution: &Execution,
         player: &PlayerRef,

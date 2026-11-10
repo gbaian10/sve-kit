@@ -27,6 +27,8 @@ mod prevent_controller;
 mod public_return_union;
 #[path = "card/token_follower_union.rs"]
 mod token_follower_union;
+#[path = "card/top_banish.rs"]
+mod top_banish;
 use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]

@@ -11,8 +11,9 @@ use crate::ir::{
     DecisionKind, Declinable, DiscardMode, Disjointness, ExecutionRef, InputMode,
     InstructionContext, MealRaceOperation, MemberProjection, MoveDestination, MoveReason, Nat,
     Node, ObjectOperand, OwnerZone, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot,
-    PlayerRef, PlayerRelation, Posture, Program, ReceiptId, RoleCardinality, RuleProcedure,
-    SelectionConstraint, SelectionView, Selector, TargetRoleSpec, Visibility, ZoneKind, ZoneRef,
+    PlayerRef, PlayerRelation, Position, Posture, Program, ReceiptId, RoleCardinality,
+    RuleProcedure, SelectionConstraint, SelectionView, Selector, SliceDirection, TargetRoleSpec,
+    Visibility, ZoneKind, ZoneRef,
 };
 use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
@@ -809,7 +810,13 @@ impl Checker {
                             || matches!(&step.instruction.action, Action::Banish { objects: Selector::Bound { .. } });
                         let private_bottom = matches!(reveal_payment::bottom(&step.instruction.action),
                             Some(Selector::Bound { reference }) if checker.env.reveal_materials.contains(&reference.key()));
-                        if !valid && !source_move && !selected_move && !private_bottom {
+                        let deck_top_banish = matches!(&step.instruction.action,
+                            Action::Banish { objects: Selector::Ordered {
+                                zone: ZoneRef { player: PlayerRef::Controller {}, kind: ZoneKind::Deck },
+                                start: Position::Top {}, count: Expr::Literal(Nat(count)),
+                                direction: SliceDirection::Forward,
+                            }} if *count > 0);
+                        if !valid && !source_move && !selected_move && !private_bottom && !deck_top_banish {
                             return checker.reject();
                         }
                         checker.instruction_in(

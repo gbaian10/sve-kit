@@ -53,6 +53,9 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                         Some(Selector::Bound { .. })
                     ))
                 || (required && source_banish(&instruction.action))
+                || (required
+                    && matches!(instruction.action, Action::Banish { .. })
+                    && super::super::movement::deck_top(&instruction.action).is_some())
                 || super::hand_payment::check_cost(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)

@@ -1181,6 +1181,7 @@ pub(super) fn check_payment(
                     && movement.initial_posture.is_none()
                     && movement.entry_effects.is_empty()
             }
+            action @ Action::Banish { .. } if super::movement::deck_top(action).is_some() => !quick,
             action if reveal_payment::selected(action, &play.parameters) => !quick,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
