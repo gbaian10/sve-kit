@@ -507,7 +507,7 @@ DSL stat_changed 的事件 filter 與 history.where 統一為 ref／stat／direc
 
 ### GAP-S-011
 
-`E.dice {roller:PlayerRef,roll:RollId,value:1..6,attempts:List<DieAttempt>,accepted_attempt}`。重擲程序結束才暴露最終骰值於本次指示；attempts 僅內部 replay，不能數為多次擲骰誘發／歷史。每次新的 I.dice 另有 RollId；E.dice 與 I.dice.bind 同值。BP21-SL19／P40／081；CR 5.20；Q2206 證明重擲後不讀舊值，Q2205 多來源可累加次數、Q2208／2209 每次獨立 roll 各有額度；ECP02-065 重擲許可，若未來卡文針對 attempt 另開登錄，不偷以現有 E.dice 代表。
+`E.dice {roller:PlayerRef,roll:RollId,value:1..6,attempts:List<DieAttempt>,accepted_attempt}`。重擲程序結束才暴露最終骰值於本次指示；attempts 僅保留在 authority 的處理紀錄與 replay，不進玩家事件封包，也不能數為多次擲骰誘發／歷史。每次新的 I.dice 另有 RollId；E.dice 與 I.dice.bind 同值。BP21-SL19／P40／081；CR 5.20；Q2206 證明重擲後不讀舊值，Q2205 多來源可累加次數、Q2208／2209 每次獨立 roll 各有額度；ECP02-065 重擲許可，若未來卡文針對 attempt 另開登錄，不偷以現有 E.dice 代表。
 
 ### GAP-S-012
 
