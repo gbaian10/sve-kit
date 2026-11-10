@@ -186,8 +186,10 @@ fn hishi_all_printings_pay_the_real_meal_and_enter_the_race() {
                 .any(|fact| matches!(fact, Fact::Raced(_))),
             "the real Meal makes the follower enter the race"
         );
+        meal_race::settle(&mut board);
         let after = board.projection(View::Referee).unwrap();
         assert_eq!(after["P1"]["pp"]["current"], 9_u8);
-        assert_eq!(after["objects"]["carrot-0"]["face_up"], true);
+        assert_eq!(after["P1"]["race"], json!(["carrot-0"]));
+        assert_eq!(after["P1"]["evolve_deck"], json!([]));
     }
 }
