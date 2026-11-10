@@ -1,0 +1,35 @@
+cards:
+  BP15-082:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              necro: 10
+      - line: 2
+        spell:
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+          targets:
+            - bind: revived
+              from:
+                class: ナイトメア
+                keyword: lastword
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,27 @@
+cards:
+  BP14-038:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  keyword: earth_rite
+                  kind: follower
+                  orig_cost_le:
+                    resource:
+                      kind: pp_max
+                      who: self
+                  who: self
+                  zone: deck
+                to: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
