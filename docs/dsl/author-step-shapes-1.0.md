@@ -65,7 +65,7 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | declare.name | bind:B、kind:name | who:PlayerRef；拒絕 min/max | BP12-115 |
 | pilot | ref:R | 目前只准入 this；印刷攻體與本回合期限隱含 | BP11-T01、BP11-P29 |
 | equip | on:O、token:CardName | token 不收直接 param | CP04-019、CP04-001 sections/0 |
-| steal/give | ref:O | to:PlayerRef或other_players；不另造玩家 wrapper | give BP13-043；steal 合成 |
+| steal/give | ref:O | to:PlayerRef或other_players；不另造玩家 wrapper | give BP13-043；steal BP03-109（D1 僅單張正式對手從者目標） |
 | stack_plus | N 短形 | 不收 M | BP10-050 |
 | box | ref:O、until:U | until 必填；之前的 act 另一步 | BP11-018 |
 | race | ref:O | n:Q；省略為一次 | CP01-042 |
