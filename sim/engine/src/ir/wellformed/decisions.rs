@@ -1,6 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
 use crate::ir::observation_selection::private_look_choice;
-use crate::ir::printed_keywords;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
 use crate::ir::{
@@ -19,6 +18,7 @@ use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, Precondit
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use crate::ir::{Resource, x_pp};
 use crate::ir::{fusion, shuffle};
+use crate::ir::{hand_position, printed_keywords};
 use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
 use core::iter::once;
@@ -29,7 +29,7 @@ use core::iter::once;
 )]
 impl Checker {
     pub(super) fn program_steps(&mut self, program: &Program) -> Checked {
-        if !shuffle::closed(&program.steps) {
+        if !shuffle::closed(&program.steps) || !hand_position::valid(program) {
             return self.reject();
         }
         let mut steps = program.steps.iter().enumerate();
@@ -133,7 +133,9 @@ impl Checker {
         if let Some(cardinality) = cardinality {
             self.cardinality(cardinality)?;
         }
+        let positioned = hand_position::choice(decision).is_some();
         if has_roles(&decision.domain)
+            && !positioned
             && !matches!(
                 decision.kind,
                 DecisionKind::PlayParameter {
@@ -158,6 +160,7 @@ impl Checker {
                         ..
                     }
                 ),
+                positioned,
             )
         });
         self.env.chooser = None;
@@ -209,6 +212,7 @@ impl Checker {
         domain: &ChoiceDomain,
         cardinality: Option<Cardinality>,
         formal_targets: bool,
+        positioned: bool,
     ) -> Checked {
         match domain {
             ChoiceDomain::Abilities {
@@ -227,7 +231,7 @@ impl Checker {
                 self.constraint(constraint, formal_targets)?;
                 self.define(*binding, BindingKind::Value)?;
                 if let Some(roles) = target_roles {
-                    self.roles(roles, constraint.cardinality)?;
+                    self.roles(roles, constraint.cardinality, positioned)?;
                 }
                 Ok(())
             }
@@ -269,7 +273,7 @@ impl Checker {
                 for (index, child) in domains.iter().enumerate() {
                     self.env = start.clone();
                     self.at(&index.to_string(), |checker| {
-                        checker.domain(child, None, formal_targets)
+                        checker.domain(child, None, formal_targets, false)
                     })?;
                     after.bindings.extend(self.env.bindings.clone());
                     after.distributions.extend(self.env.distributions.clone());
@@ -409,7 +413,13 @@ impl Checker {
         self.define(*binding, BindingKind::Value)
     }
 
-    fn roles(&mut self, spec: &TargetRoleSpec, selected: Cardinality) -> Checked {
+    fn roles(&mut self, spec: &TargetRoleSpec, selected: Cardinality, positioned: bool) -> Checked {
+        if positioned {
+            for role in &spec.roles {
+                self.define(role.binding, BindingKind::Value)?;
+            }
+            return Ok(());
+        }
         if spec.roles.is_empty() || spec.roles.len() > 2 {
             return Err(self.error(WellFormedReason::InvalidRoles));
         }

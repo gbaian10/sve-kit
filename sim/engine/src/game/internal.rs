@@ -981,6 +981,13 @@ impl Game {
                     rollback = execution.origin.take();
                     Self::internal_target_answer(&mut execution, &wait, objects)?;
                 }
+                (Wait::ResolutionTargets(wait), Answer::TargetsWithRoles { targets, roles }) => {
+                    let (objects, answers) = wait.validate_roles(&targets, &roles)?;
+                    wait.check_advance_current(self, &execution, &objects)?;
+                    rollback = execution.origin.take();
+                    execution.bind_target_roles(&wait, &answers);
+                    execution.bind_targets(&wait, objects);
+                }
                 (Wait::ResolutionTargets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
                     wait.check_advance_current(self, &execution, &objects)?;

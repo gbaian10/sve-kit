@@ -25,6 +25,7 @@ mod grant;
 mod granted_play;
 mod hand_exit;
 mod hand_payment;
+mod hand_position;
 mod keywords;
 mod material;
 mod material_values;
@@ -1640,6 +1641,22 @@ impl<'definitions> BodyContext<'definitions> {
         while let Some((index, step)) = authored.next() {
             let step_path = format!("{path}/{index}");
             self.check_paid_material_name(step, &step_path)?;
+            if let ast::Step::Choose(choice) = step
+                && choice.position.is_some()
+            {
+                let Some((next, ast::Step::Move(movement))) = authored.next() else {
+                    return Err(unsupported(&step_path));
+                };
+                steps.extend(self.hand_position_pair(
+                    choice,
+                    movement,
+                    &step_path,
+                    &format!("{path}/{next}"),
+                    source,
+                    ability_source,
+                )?);
+                continue;
+            }
             if let ast::Step::Choose(choice) = step
                 && matches!(choice.from, ast::ChooseFrom::Advance(_))
             {

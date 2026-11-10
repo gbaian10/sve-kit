@@ -101,6 +101,15 @@ fn own_hand_zone(selector: &Selector) -> bool {
 
 /// A hand choice authorizes only its controller to inspect current own-hand candidates.
 pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
+    if matches!(
+        decision.domain,
+        ChoiceDomain::Objects {
+            target_roles: Some(_),
+            ..
+        }
+    ) {
+        return super::hand_position::choice(decision).is_some();
+    }
     let ChoiceDomain::Objects {
         constraint,
         target_roles: None,

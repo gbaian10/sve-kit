@@ -901,11 +901,8 @@ pub(super) enum Destination {
 
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
-#[expect(
-    variant_size_differences,
-    reason = "A fixed index and an edge string keep the authored placement grammar unboxed."
-)]
 pub(super) enum Placement {
+    Chosen { chosen: String },
     Edge(DeckEdge),
     Nth { nth: u64 },
 }
@@ -1537,6 +1534,7 @@ pub(super) struct RoleReference {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Choose {
+    pub position: Option<HandPosition>,
     #[serde(default)]
     pub any: bool,
     pub bind: String,
@@ -1550,6 +1548,12 @@ pub(super) struct Choose {
     pub reveal: Option<bool>,
     pub order: Option<bool>,
     pub by: Option<LeaderSide>,
+}
+
+#[derive(Deserialize)]
+pub(super) enum HandPosition {
+    #[serde(rename = "top_or_bottom")]
+    TopOrBottom,
 }
 
 /// A union keeps one candidate set: a card matching several branches is still one choice.

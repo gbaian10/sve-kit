@@ -1,0 +1,117 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "max": {
+          "else": 2,
+          "if": {
+            "args": [
+              {
+                "count": {
+                  "name": "天下の大泥棒・ジエモン",
+                  "side": "self",
+                  "zone": "field"
+                }
+              },
+              0
+            ],
+            "fn": "gt"
+          },
+          "then": 3
+        },
+        "min": 1,
+        "modes": [
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "op": "act",
+                "subjects": "target.1"
+              },
+              {
+                "action": "normal_stand",
+                "during": "next-controller-start",
+                "op": "restrict",
+                "subjects": "target.1"
+              }
+            ]
+          },
+          {
+            "op": "seq",
+            "steps": [
+              {
+                "count": 1,
+                "op": "draw"
+              },
+              {
+                "labels": [
+                  {
+                    "position": "top"
+                  },
+                  {
+                    "position": "bottom"
+                  }
+                ],
+                "max": 1,
+                "min": 1,
+                "modes": [
+                  {
+                    "op": "move",
+                    "position": "top",
+                    "subjects": "chosen",
+                    "to": "deck"
+                  },
+                  {
+                    "op": "move",
+                    "position": "bottom",
+                    "subjects": "chosen",
+                    "to": "deck"
+                  }
+                ],
+                "op": "choice",
+                "selection": {
+                  "bind": "chosen",
+                  "max": 1,
+                  "min": 1,
+                  "select": {
+                    "side": "self",
+                    "zone": "hand"
+                  }
+                },
+                "timing": "resolve"
+              }
+            ]
+          },
+          {
+            "count": 2,
+            "name": "輝く金貨",
+            "op": "create",
+            "to": "ex"
+          }
+        ],
+        "op": "choice"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self",
+      "targets": [
+        {
+          "key": "1",
+          "max": 1,
+          "min": 1,
+          "modes": [
+            1
+          ],
+          "select": {
+            "side": "opponent",
+            "type": "follower",
+            "zone": "field"
+          }
+        }
+      ]
+    }
+  ],
+  "review": "抽牌後以同一 choice 的 selection 與 position 標籤選手牌及牌庫上下位置。",
+  "status": "complete"
+}
