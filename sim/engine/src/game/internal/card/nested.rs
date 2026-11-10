@@ -81,6 +81,7 @@ impl Game {
             "hand" => ZoneKind::Hand,
             "ex" => ZoneKind::Ex,
             "cemetery" => ZoneKind::Cemetery,
+            "banish" => ZoneKind::Banish,
             _ => return Err(unsupported("card play origin")),
         });
         execution.play_origin_player = Some(player_id(&object.controller)?);

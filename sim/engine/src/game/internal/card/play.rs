@@ -518,6 +518,15 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     Ok(())
 }
 
+fn spell_origin(zone: &str) -> Result<ZoneKind> {
+    match zone {
+        "hand" => Ok(ZoneKind::Hand),
+        "ex" => Ok(ZoneKind::Ex),
+        "banish" => Ok(ZoneKind::Banish),
+        _ => Err(unsupported("Spell play origin")),
+    }
+}
+
 fn conditional_play_modes(ability: &Ability) -> bool {
     ability.play.as_ref().is_some_and(|play| {
         matches!(play,
@@ -638,6 +647,9 @@ impl Game {
             .as_ref()
             .ok_or_else(|| invalid("missing Quick PlaySpec"))?;
         execution.spell = spell;
+        if spell {
+            execution.play_origin = Some(spell_origin(&self.object(holder)?.zone)?);
+        }
         let material = play.parameters.iter().any(super::material::is_parameter);
         if material || super::qualification(&play.costs)?.is_some() {
             let source = probe.internal_card_source(holder, ability.id, actor)?;
@@ -924,6 +936,7 @@ impl Game {
             controller: actor,
         };
         let mut execution = self.new_card_execution(old_context)?;
+        execution.play_origin = Some(spell_origin(&object.zone)?);
         execution.play_origin_player = Some(player_id(&object.controller)?);
         let play = ability
             .play
@@ -950,7 +963,7 @@ impl Game {
         })?;
         if (object.owner != seat && object.zone != "ex")
             || object.controller != seat
-            || !matches!(object.zone.as_str(), "hand" | "ex" | "cemetery")
+            || !matches!(object.zone.as_str(), "hand" | "ex" | "cemetery" | "banish")
             || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)
             || int(&object.state["face"]) != 0
             || !self.prepared.is_empty()
@@ -962,6 +975,8 @@ impl Game {
         if self.internal_card_play_forbidden(holder, actor)?
             || (object.zone == "cemetery"
                 && !self.internal_card_cemetery_play_allowed(holder, actor)?)
+            || (object.zone == "banish"
+                && !self.internal_card_banish_play_allowed(holder, actor)?)
         {
             return Err(unsupported("card play holder, permission or timing"));
         }

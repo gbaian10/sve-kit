@@ -464,7 +464,7 @@ impl Game {
                         self.internal_numeric_stat(id, Stat::Attack)?,
                         self.internal_numeric_stat(id, Stat::Life)?,
                     ),
-                    "hand" | "ex" | "cemetery"
+                    "hand" | "ex" | "cemetery" | "banish"
                         if matches!(
                             self.object_type(id)?,
                             "フォロワー" | "フォロワー・アドバンス"

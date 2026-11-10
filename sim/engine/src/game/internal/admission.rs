@@ -2,7 +2,6 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
-use crate::ir::NumericChange;
 use crate::ir::delayed as delayed_ir;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
@@ -15,6 +14,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
+use crate::ir::{NumericChange, play_restrictions};
 use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
 use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
@@ -169,6 +169,11 @@ fn source_paths(
                 }
                 if super::movement::advance_entry(&instruction.action) {
                     paths.insert(format!("{path}/instruction/action/objects/zone"));
+                }
+                if play_restrictions::is_banish_play_installation(&instruction.action) {
+                    for field in ["subject", "action", "polarity"] {
+                        paths.insert(format!("{path}/instruction/action/effect/{field}"));
+                    }
                 }
                 keyword_source_paths(&instruction.action, &path, origin, paths);
             }
@@ -349,7 +354,10 @@ fn check_requirements(
                     || (card && play_requirement(requirement.capability.code))
                     || (matches!(
                         requirement.capability.code,
-                        "internal.ZoneKind.Evolve"
+                        "shape.PermissionSubject.Players"
+                            | "shape.ActionPattern.PlayCard"
+                            | "internal.Polarity.Allow"
+                            | "internal.ZoneKind.Evolve"
                             | "shape.AbilityOrigin.Keyword"
                             | "shape.ObjectFrozen.EnterFieldObject"
                             | "shape.ObjectFrozen.EnterExObject"
@@ -495,6 +503,10 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     if matches!(action, Action::InstallEffect { effect, .. } if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::Attack { .. }, .. }))
     {
         return super::card::attack_restrictions::check_install(action);
+    }
+    if matches!(action, Action::InstallEffect { effect, .. } if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::PlayCard { .. }, .. }))
+    {
+        return super::card::play_restrictions::check_install(action);
     }
     super::card::nested::check(action)?;
     super::card::nested::ability::check_action(action)?;

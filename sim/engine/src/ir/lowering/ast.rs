@@ -1117,6 +1117,7 @@ pub(super) struct Apply {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum InstalledEffect {
+    PlayPermission(PlayPermission),
     DamageMod(DamageModifier),
     AddTrait(TraitEffect),
     Stat(ConstantStats),
@@ -3630,4 +3631,22 @@ pub(super) struct DelayedMove {
 #[serde(rename_all = "snake_case")]
 pub(super) enum FieldZone {
     Field,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayPermission {
+    pub from: Vec<BanishPermissionZone>,
+    pub on: BanishPermissionCards,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BanishPermissionZone {
+    Banish,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishPermissionCards {
+    pub who: SelfPlayer,
+    pub zone: BanishPermissionZone,
 }

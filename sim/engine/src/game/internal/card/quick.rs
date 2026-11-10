@@ -205,7 +205,10 @@ impl Game {
             if object.controller != seat_name(actor)?
                 || int(&object.state["face"]) != 0
                 || object.state["silenced"] == true
-                || !matches!(object.zone.as_str(), "field" | "hand" | "ex" | "cemetery")
+                || !matches!(
+                    object.zone.as_str(),
+                    "field" | "hand" | "ex" | "cemetery" | "banish"
+                )
             {
                 continue;
             }
@@ -219,7 +222,8 @@ impl Game {
                             self.object_type(holder)?,
                             "スペル" | "スペル・トークン" | "スペル・アドバンス"
                         )
-                        && matches!(object.zone.as_str(), "hand" | "ex")
+                        && (matches!(object.zone.as_str(), "hand" | "ex")
+                            || self.internal_card_banish_play_allowed(holder, actor)?)
                         && self.internal_quick_spell(holder)?
                         && !self.restricted(holder, "play")?
                         && !self.internal_card_play_forbidden(holder, actor)?

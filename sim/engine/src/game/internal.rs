@@ -1722,6 +1722,17 @@ impl Game {
             {
                 self.internal_install_ability_restriction(execution, &instruction)?;
             }
+            Action::InstallEffect { effect, .. }
+                if matches!(
+                    effect.as_ref(),
+                    Effect::Permission {
+                        action: ActionPattern::PlayCard { .. },
+                        ..
+                    }
+                ) =>
+            {
+                self.internal_install_banish_play(execution, &instruction)?;
+            }
             Action::InstallEffect { subjects, .. } => {
                 let InstallationSubjects::Objects { objects, .. } = subjects else {
                     return Err(unsupported("installation subjects"));

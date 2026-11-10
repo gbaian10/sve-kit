@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
+use crate::ir::play_restrictions;
 use crate::ir::prevention;
 use crate::ir::{
     AbilityKind, ActionPattern, Binding, Bool, CharacteristicPatch, ContinuousLayer, CostChange,
@@ -82,6 +83,10 @@ impl Checker {
         if let InstallationSubjects::Players { players, .. } = subjects {
             self.players(players)?;
             self.installed_duration(duration)?;
+            if let Some(objects) = play_restrictions::banish_play_filter(players, effect, duration)
+            {
+                return self.selector(objects);
+            }
             if matches!(effect, Effect::Replacement { duration: inner, .. } if inner == duration) {
                 if duration.usage.is_some() {
                     return self.reject();

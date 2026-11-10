@@ -4,6 +4,10 @@ use super::{
     ActionPattern, Bool, Duration, DurationEnd, Effect, Expr, ObjectOperand, PermissionSubject,
     PlayerRef, Polarity, RuleId, ScopeId, Selector, TimeAnchor, ZoneKind,
 };
+use super::{
+    Action, Binding, Cardinality, InstallationSubjects, InstallationTime, Nat, ObjectRef,
+    PlayerRelation, PlayerSet, SelectionView, TextQuantifier,
+};
 
 pub(crate) fn ability(
     source: AbilitySource,
@@ -90,7 +94,16 @@ pub(crate) fn card_play_rule(ability: &Ability) -> Option<CardPlayRule<'_>> {
         return None;
     };
     let polarity = match (polarity, ability.active_zones.as_slice()) {
-        (Polarity::Forbid, [ZoneKind::Ex] | [ZoneKind::Hand, ZoneKind::Ex]) => Polarity::Forbid,
+        (
+            Polarity::Forbid,
+            [ZoneKind::Ex]
+            | [
+                ZoneKind::Hand,
+                ZoneKind::Ex,
+                ZoneKind::Cemetery,
+                ZoneKind::Banish,
+            ],
+        ) => Polarity::Forbid,
         (Polarity::Allow, [ZoneKind::Cemetery]) => Polarity::Allow,
         _ => return None,
     };
@@ -104,4 +117,86 @@ pub(crate) fn card_play_rule(ability: &Ability) -> Option<CardPlayRule<'_>> {
     );
     expected.id = ability.id;
     (*ability == expected).then_some(CardPlayRule { condition, forbids })
+}
+
+fn banish_play_parts(candidate: Binding<ObjectRef>) -> (PlayerSet, Effect, Duration) {
+    let players = PlayerSet {
+        relation: PlayerRelation::SelfPlayer,
+        relative_to: PlayerRef::Controller {},
+        cardinality: Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(1)),
+        },
+        text_quantifier: TextQuantifier::Implicit,
+    };
+    let duration = Duration {
+        end: DurationEnd::CurrentTurnEnd {},
+        anchor: TimeAnchor::Installation {},
+        usage: None,
+        intervals: vec![],
+    };
+    let objects = Selector::Zone {
+        players: players.clone(),
+        zone: ZoneKind::Banish,
+        view: SelectionView::Current {},
+        binding: candidate,
+        predicate: Box::new(Expr::Literal(Bool(true))),
+    };
+    let effect = Effect::Permission {
+        subject: PermissionSubject::Players {
+            players: players.clone(),
+        },
+        action: ActionPattern::PlayCard { objects },
+        polarity: Polarity::Allow,
+        condition: Expr::Literal(Bool(true)),
+        duration: duration.clone(),
+        rule: RuleId(133),
+    };
+    (players, effect, duration)
+}
+
+pub(crate) fn banish_play_installation(
+    affected: Binding<PlayerSet>,
+    candidate: Binding<ObjectRef>,
+) -> Action {
+    let (players, effect, duration) = banish_play_parts(candidate);
+    Action::InstallEffect {
+        subjects: InstallationSubjects::Players { players, affected },
+        capture: InstallationTime::InstructionStart,
+        effect: Box::new(effect),
+        duration,
+    }
+}
+
+pub(crate) fn banish_play_filter<'effect>(
+    players: &PlayerSet,
+    effect: &'effect Effect,
+    duration: &Duration,
+) -> Option<&'effect Selector> {
+    let Effect::Permission {
+        action: ActionPattern::PlayCard { objects },
+        ..
+    } = effect
+    else {
+        return None;
+    };
+    let Selector::Zone { binding, .. } = objects else {
+        return None;
+    };
+    let (expected_players, expected_effect, expected_duration) = banish_play_parts(*binding);
+    (players == &expected_players && effect == &expected_effect && duration == &expected_duration)
+        .then_some(objects)
+}
+
+pub(crate) fn is_banish_play_installation(action: &Action) -> bool {
+    let Action::InstallEffect {
+        subjects: InstallationSubjects::Players { players, .. },
+        capture: InstallationTime::InstructionStart,
+        effect,
+        duration,
+    } = action
+    else {
+        return false;
+    };
+    banish_play_filter(players, effect, duration).is_some()
 }

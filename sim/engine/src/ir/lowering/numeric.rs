@@ -447,6 +447,7 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         match &installation.effect {
+            ast::InstalledEffect::PlayPermission(_) => return Err(unsupported(path)),
             ast::InstalledEffect::AddTrait(value) => {
                 if value.r#trait.is_empty()
                     || !matches!(installation.until, None | Some(ast::Until::Game))

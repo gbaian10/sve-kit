@@ -52,7 +52,7 @@ fn check_subjects(subjects: &Selector) -> Result<()> {
         }
         Selector::Zone {
             players,
-            zone: ZoneKind::Hand | ZoneKind::Ex,
+            zone: ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Banish,
             view: SelectionView::Current {},
             binding,
             predicate,

@@ -880,3 +880,6 @@ mod delayed_trigger;
 
 #[path = "card/victory_prevention.rs"]
 mod victory_prevention;
+
+#[path = "card/banish_play.rs"]
+mod banish_play;
