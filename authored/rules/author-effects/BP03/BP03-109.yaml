@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-109:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        activate:
+          per_turn: 1
+          cost:
+            banish:
+              sel:
+                who: self
+                zone: cemetery
+                trait: 堕天使
+              n: 3
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - steal:
+                ref: enemy
+            - stand: enemy
