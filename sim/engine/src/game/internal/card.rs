@@ -1326,6 +1326,7 @@ fn check_instruction(
         super::ability_suppression::check_loss(&instruction.action)?;
     }
     super::flip::check_action(&instruction.action)?;
+    super::transfer::check_action(&instruction.action)?;
     check_grant_instruction(game, instruction, source, ability_source)?;
     if let Action::Delay { body, .. } = &instruction.action {
         check_nodes(game, &body.steps, source, ability_source)?;
@@ -1362,6 +1363,7 @@ fn check_instruction(
             | Action::Banish { .. }
             | Action::Transform { .. }
             | Action::Posture { .. }
+            | Action::Transfer { .. }
             | Action::FlipDown { .. }
             | Action::Modify { .. }
             | Action::Delay { .. }

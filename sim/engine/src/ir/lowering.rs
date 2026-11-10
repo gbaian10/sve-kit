@@ -59,6 +59,7 @@ mod search;
 mod selection;
 mod shuffle;
 mod tokens;
+mod transfer;
 mod transform;
 
 use super::events::subject::SubjectFields;
@@ -1370,6 +1371,7 @@ struct BodyContext<'definitions> {
     ex_outputs: BTreeMap<String, Selector>,
     field_outputs: BTreeMap<String, FieldOutput>,
     evolution_targets: BTreeSet<String>,
+    transfer_targets: BTreeSet<String>,
     ex_targets: BTreeSet<String>,
     flip_targets: BTreeSet<String>,
     hand_targets: BTreeSet<String>,
@@ -1448,6 +1450,7 @@ impl<'definitions> BodyContext<'definitions> {
             ex_outputs: BTreeMap::new(),
             field_outputs: BTreeMap::new(),
             evolution_targets: BTreeSet::new(),
+            transfer_targets: BTreeSet::new(),
             ex_targets: BTreeSet::new(),
             flip_targets: BTreeSet::new(),
             hand_targets: BTreeSet::new(),
@@ -1877,6 +1880,7 @@ impl<'definitions> BodyContext<'definitions> {
                 },
             }),
             ast::Step::FlipDown(value) => self.flip_down(value, path),
+            ast::Step::Steal(value) => self.steal(value, path),
             ast::Step::Banish(value) => self.banish(value, path),
             ast::Step::Transform(value) => self.transform(value, path),
             ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {

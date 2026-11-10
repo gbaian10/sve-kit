@@ -325,26 +325,37 @@ impl Game {
         frame.performed = i64::try_from(ids.len()).unwrap_or(i64::MAX);
         let group = self.group();
         for id in ids {
-            let previous = self.object(&id)?.clone();
-            self.player_mut(&previous.controller)?
-                .zones
-                .entry("field".into())
-                .or_default()
-                .retain(|value| *value != id);
-            self.player_mut(&controller)?
-                .zones
-                .entry("field".into())
-                .or_default()
-                .push(json!(id));
-            let object = self.object_mut(&id)?;
-            object.controller.clone_from(&controller);
-            object.state["entered_this_turn"] = json!(true);
-            self.emit(
-                json!({"kind":"移動","object":id,"from":format!("{}.field",previous.controller),"to":format!("{controller}.field")}),
-                &frame.cause,
-                group,
-            );
+            self.transfer_field_controller(&id, &controller, &frame.cause, group)?;
         }
+        Ok(())
+    }
+
+    pub(in crate::game) fn transfer_field_controller(
+        &mut self,
+        id: &str,
+        controller: &str,
+        cause: &Value,
+        group: u64,
+    ) -> Result<()> {
+        let previous = self.object(id)?.clone();
+        self.player_mut(&previous.controller)?
+            .zones
+            .entry("field".into())
+            .or_default()
+            .retain(|value| value != id);
+        self.player_mut(controller)?
+            .zones
+            .entry("field".into())
+            .or_default()
+            .push(json!(id));
+        let object = self.object_mut(id)?;
+        object.controller = controller.into();
+        // A previous evolution does not grant attack permission after control changes (Q534).
+        object.state["control_changed_this_turn"] = json!(true);
+        if let Some(state) = object.state.as_object_mut() {
+            state.remove("evolved_after_control_change");
+        }
+        self.emit(json!({"kind":"移動","object":id,"from":format!("{}.field",previous.controller),"to":format!("{controller}.field")}),cause,group);
         Ok(())
     }
 

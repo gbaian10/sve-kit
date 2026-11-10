@@ -520,6 +520,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
     super::transform::check_action(action)?;
     super::movement::check_action(action)?;
     super::flip::check_action(action)?;
+    super::transfer::check_action(action)?;
     super::resource::check_action(action)?;
     super::counters::check_action(action)?;
     super::discard::check_action(action)?;
@@ -909,6 +910,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Banish"
             | "action.banish"
             | "shape.Action.Posture"
+            | "shape.Action.Transfer"
+            | "action.transfer"
             | "action.posture"
             | "shape.Action.FlipDown"
             | "action.flip-down"

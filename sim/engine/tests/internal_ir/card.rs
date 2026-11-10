@@ -896,3 +896,6 @@ mod choice_any;
 
 #[path = "card/follow_keyword.rs"]
 mod follow_keyword;
+
+#[path = "card/transfer.rs"]
+mod transfer;

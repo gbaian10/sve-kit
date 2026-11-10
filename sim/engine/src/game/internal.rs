@@ -66,6 +66,7 @@ pub(in crate::game) use drive::LeaderAttackLock;
 mod flip;
 mod grant;
 mod history_turn;
+mod transfer;
 pub(in crate::game) use history_turn::DamageHistoryFact;
 pub(super) use history_turn::{SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact};
 mod life;
@@ -320,6 +321,8 @@ pub enum InstructionOutcome {
     ScheduledTurn(ScheduleToken),
     /// A completed shuffle, with no projectable object or position result.
     Shuffled,
+    /// Same field generations whose controller actually changed.
+    Transferred(Vec<ObjectRef>),
     /// Actual before/after counter values, including an unchanged result.
     Counter(CounterChangeEvent),
     /// One atomic transfer preserves both holders' before and after values.
@@ -1577,6 +1580,7 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         match &instruction.action {
             Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
+            Action::Transfer { .. } => self.internal_transfer(execution, &instruction)?,
             Action::ScheduleTurn { .. } => self.internal_extra_turn(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
             Action::PlayAbility { .. } => self.internal_nested_ability(execution, &instruction)?,

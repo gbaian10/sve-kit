@@ -1652,6 +1652,38 @@ impl Game {
     reason = "Selected targets retain a checked producer separate from installation locals."
 )]
 impl Execution {
+    pub(in crate::game::internal) fn record_transferred_controller(
+        &mut self,
+        member: ObjectRef,
+        before: &str,
+        after: &str,
+    ) {
+        let targets = self
+            .targets
+            .values_mut()
+            .flat_map(|wait| wait.characteristics.iter_mut());
+        let recipients = self
+            .slots
+            .values_mut()
+            .filter_map(|slot| {
+                if let Slot::Recipients {
+                    characteristics, ..
+                } = slot
+                {
+                    Some(characteristics)
+                } else {
+                    None
+                }
+            })
+            .flat_map(|characteristics| characteristics.iter_mut());
+        // Only the successful producer's controller delta may advance a frozen target.
+        for (candidate, saved) in targets.chain(recipients) {
+            if *candidate == member && saved.controller == before {
+                after.clone_into(&mut saved.controller);
+            }
+        }
+    }
+
     /// Lowering admits a private multi-card pick onto the field only as the very next step.
     fn feeds_field_entry(&self, key: (ScopeId, u64)) -> bool {
         self.todo.front().is_some_and(|node| {

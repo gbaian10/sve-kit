@@ -348,6 +348,7 @@ impl BodyContext<'_> {
             self.field_entry.multi.insert(target.bind.clone());
         }
         self.remember_evolution_target(target, cardinality, dynamic_count);
+        self.remember_transfer_target(target, cardinality, dynamic_count, resolution);
         let selector = self.public_target_selector(&target.from, path)?;
         let selector = self.target_extremum(&target.from, selector, path)?;
         Ok((
@@ -1121,6 +1122,7 @@ impl BodyContext<'_> {
                 ex_outputs: BTreeMap::new(),
                 field_outputs: BTreeMap::new(),
                 evolution_targets: BTreeSet::new(),
+                transfer_targets: BTreeSet::new(),
                 ex_targets: BTreeSet::new(),
                 flip_targets: BTreeSet::new(),
                 hand_targets: BTreeSet::new(),
@@ -1450,6 +1452,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Transform(_)
         | ast::Step::Act(_)
         | ast::Step::Stand(_)
+        | ast::Step::Steal(_)
         | ast::Step::FlipDown(_)
         | ast::Step::Buff(_)
         | ast::Step::Grant(_)

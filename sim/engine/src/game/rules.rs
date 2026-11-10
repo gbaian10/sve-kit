@@ -863,6 +863,8 @@ impl Game {
             object.state["stats_increased_this_turn"] = json!(false);
             if let Some(state) = object.state.as_object_mut() {
                 state.remove("damaged_this_turn");
+                state.remove("control_changed_this_turn");
+                state.remove("evolved_after_control_change");
             }
             if object.state.get("attacks_this_turn").is_some() {
                 object.state["attacks_this_turn"] = json!(0_i64);
