@@ -1,0 +1,49 @@
+cards:
+  BP13-060:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            pp: 3
+            result: enhanced
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+            - if:
+                cond:
+                  paid:
+                    receipt: enhanced
+                then:
+                  - search:
+                      n: 1
+                      result: drache
+                      sel:
+                        kind: follower
+                        name: 焦熱の竜翼・ドラーク
+                        who: self
+                        zone: deck
+                      to: field
+                  - grant:
+                      keywords:
+                        - assail
+                      on:
+                        follow: drache
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
