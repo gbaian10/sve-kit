@@ -57,6 +57,13 @@ pub(super) fn lower(
             declarations.push(super::posture::static_no_stand(restriction, path)?);
             continue;
         }
+        if let ast::StaticEffect::Cannot(ast::Cannot::Player(shape)) = effect {
+            if head.r#while.is_some() {
+                return Err(unsupported(path));
+            }
+            declarations.push(super::victory::permission(shape, path)?);
+            continue;
+        }
         declarations.push(permission(&mut context, effect, &condition, path)?);
     }
     Ok(Located {

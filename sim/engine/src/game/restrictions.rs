@@ -37,6 +37,12 @@ impl Game {
     }
 
     pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
+        if let Some(seat) = id.strip_suffix(".leader")
+            && matches!(action, "win" | "lose")
+            && self.internal_result_forbidden(seat, action == "win")?
+        {
+            return Ok(true);
+        }
         if (action == "ignore_guard" && self.internal_ignores_ward(id)?)
             || self.internal_removal_restricted(id, action)?
         {

@@ -243,6 +243,7 @@ pub(super) fn life(entry: &ast::LifeSubscription, event_id: u64, scope: ScopeId)
     EventPattern::LifeChange {
         binding: event,
         predicate: LifeFilter {
+            crosses_zero: entry.crosses_zero,
             own: entry
                 .who
                 .as_ref()

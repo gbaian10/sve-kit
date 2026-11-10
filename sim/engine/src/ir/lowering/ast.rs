@@ -3063,11 +3063,26 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotPlayer {
+    pub what: ResultAction,
+    pub who: EntryPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ResultAction {
+    Win,
+    Lose,
 }
 
 #[derive(Deserialize)]
@@ -3356,6 +3371,8 @@ pub(super) enum DamageRecipientSubscription {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct LifeSubscription {
+    #[serde(default)]
+    pub crosses_zero: bool,
     pub who: Option<EntryPlayer>,
     pub direction: Option<LifeDirection>,
     pub during: Option<DamageDuring>,

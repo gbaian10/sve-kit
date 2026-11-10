@@ -47,6 +47,7 @@ mod reveal_until;
 mod stack;
 mod static_keywords;
 mod trigger_restrictions;
+mod victory;
 mod x_pp;
 
 mod flip;

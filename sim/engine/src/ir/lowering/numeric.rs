@@ -471,7 +471,9 @@ impl BodyContext<'_> {
             ast::InstalledEffect::Cannot(ast::Cannot::Stand(_)) => {
                 return self.no_stand(installation, path);
             }
-            ast::InstalledEffect::Cannot(ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_))
+            ast::InstalledEffect::Cannot(
+                ast::Cannot::Player(_) | ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_),
+            )
             | ast::InstalledEffect::Prevent(_)
             | ast::InstalledEffect::DamageMod(_) => {
                 return self.prevent_apply(installation, source, path);

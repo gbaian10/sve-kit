@@ -153,6 +153,7 @@ pub(crate) mod shuffle;
 pub(crate) mod stand_restrictions;
 pub(crate) mod trigger_restrictions;
 mod values;
+pub(crate) mod victory;
 mod wellformed;
 
 pub use actions::*;

@@ -875,3 +875,6 @@ mod hand_banish_cost;
 
 #[path = "card/delayed_trigger.rs"]
 mod delayed_trigger;
+
+#[path = "card/victory_prevention.rs"]
+mod victory_prevention;
