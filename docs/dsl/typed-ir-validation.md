@@ -332,6 +332,9 @@ Public 選擇證據：取代可能把牌移到非公開區域。FlipDown 仍單�
 一般 Bound 或已看過但未選取的牌視為授權，也不從 Banish 推定任意牌庫物件公開。
 准入後沿用一般消滅的同批移動與成功回條，Before 差集供原 Look 的剩餘牌排序。
 
+本文中以控制者選取自己單一墓場的固定正張數物件，可產生本地 Banish 回條供 `count_of` 讀成功 Before 成員數。
+選取後換世代、未完成消滅的成員不計入，回條不授權移動或跨世代引用；既有 Look 差集用途維持原契約。
+
 InstallEffect 接受 InstructionStart、Objects 的獨立 affected binding，以及：
 
 - CostModifier 對同一 binding 的 Delta／Set；負常值 Set 尚未接受，動態數值的合法範圍

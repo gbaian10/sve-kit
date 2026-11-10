@@ -1128,6 +1128,7 @@ impl BodyContext<'_> {
                 hand_targets: BTreeSet::new(),
                 playable_targets: BTreeSet::new(),
                 opponent_cemetery_targets: BTreeSet::new(),
+                cemetery_banish_targets: BTreeSet::new(),
                 deck_return_targets: BTreeSet::new(),
                 nested_targets: super::nested_targets(steps),
                 observations: BTreeMap::new(),
@@ -1163,6 +1164,9 @@ impl BodyContext<'_> {
                 context
                     .opponent_cemetery_targets
                     .clone_from(&self.opponent_cemetery_targets);
+                context
+                    .cemetery_banish_targets
+                    .clone_from(&self.cemetery_banish_targets);
                 context
                     .deck_return_targets
                     .clone_from(&self.deck_return_targets);

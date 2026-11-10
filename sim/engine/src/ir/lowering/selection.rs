@@ -29,6 +29,7 @@ impl BodyContext<'_> {
         let hand_targets = self.hand_targets.clone();
         let playable_targets = self.playable_targets.clone();
         let opponent_cemetery_targets = self.opponent_cemetery_targets.clone();
+        let cemetery_banish_targets = self.cemetery_banish_targets.clone();
         let deck_return_targets = self.deck_return_targets.clone();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
@@ -64,6 +65,7 @@ impl BodyContext<'_> {
         self.hand_targets = hand_targets;
         self.playable_targets = playable_targets;
         self.opponent_cemetery_targets = opponent_cemetery_targets;
+        self.cemetery_banish_targets = cemetery_banish_targets;
         self.deck_return_targets = deck_return_targets;
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
@@ -157,6 +159,11 @@ impl BodyContext<'_> {
             Some(branches) if hand => self.hand_union_choice(&target, branches, path)?,
             Some(branches) => self.observed_object_choice(&target, branches, path, true)?,
         };
+        if matches!(domain, super::super::ChoiceDomain::Objects { .. })
+            && exact_own_cemetery_choice(choice, cardinality)
+        {
+            self.cemetery_banish_targets.insert(choice.bind.clone());
+        }
         let visibility = if target.from.observation.is_some() || hand {
             Visibility::Only {
                 players: super::super::PlayerSet {
@@ -351,6 +358,22 @@ impl BodyContext<'_> {
             },
         })
     }
+}
+
+const fn exact_own_cemetery_choice(choice: &ast::Choose, cardinality: super::Cardinality) -> bool {
+    let ast::ChooseFrom::Query(from) = &choice.from else {
+        return false;
+    };
+    matches!(choice.by, None | Some(ast::LeaderSide::Controller))
+        && !matches!(choice.may, Some(true))
+        && from.observation.is_none()
+        && matches!(from.who, Some(ast::Side::Controller))
+        && matches!(
+            from.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
+        )
+        && cardinality.minimum.0 > 0
+        && matches!(cardinality.maximum, Some(maximum) if maximum.0 == cardinality.minimum.0)
 }
 
 #[derive(Default)]

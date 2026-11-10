@@ -110,6 +110,9 @@ use sve_engine::game::internal::{Activation, CardPlay, ResumeStage};
 #[path = "card/cemetery_play.rs"]
 mod cemetery_play;
 
+#[path = "card/cemetery_banish_receipt.rs"]
+mod cemetery_banish_receipt;
+
 #[path = "card/cemetery_choice.rs"]
 mod cemetery_choice;
 
