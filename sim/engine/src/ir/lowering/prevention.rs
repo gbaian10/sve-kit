@@ -495,7 +495,8 @@ pub(super) fn lower_at_source(
                     },
                 )
             }
-            ast::StaticEffect::AlsoNamed(_)
+            ast::StaticEffect::UnlimitedEvolve(_)
+            | ast::StaticEffect::AlsoNamed(_)
             | ast::StaticEffect::Grant(_)
             | ast::StaticEffect::NoTrigger(_)
             | ast::StaticEffect::Cannot(_)

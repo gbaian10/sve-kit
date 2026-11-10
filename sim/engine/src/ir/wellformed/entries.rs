@@ -425,6 +425,10 @@ impl Checker {
     }
 
     fn ability_declarations(&mut self, ability: &Ability) -> Checked {
+        // The closed printed shape proves its whole lifetime and player boundary together.
+        if super::super::evolution_limits::is_static(ability) {
+            return Ok(());
+        }
         for (index, effect) in ability.declarations.iter().enumerate() {
             if let Some(rule) = super::super::play_restrictions::card_play_rule(ability) {
                 self.at(&format!("declarations/{index}/condition"), |checker| {

@@ -7,6 +7,7 @@ use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
+use crate::ir::evolution_limits;
 use crate::ir::history_turn::evolution_capture_header;
 use crate::ir::names;
 use crate::ir::play_restrictions::card_play_rule;
@@ -918,6 +919,9 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if evolution_limits::is_static(ability) {
+        return Ok(true);
+    }
     if names::name(ability).is_some() {
         return Ok(true);
     }
@@ -972,6 +976,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if names::name(ability).is_some()
+        || evolution_limits::is_static(ability)
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || other_costs::is_static(ability)

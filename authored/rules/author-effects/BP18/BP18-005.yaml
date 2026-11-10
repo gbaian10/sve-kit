@@ -1,0 +1,32 @@
+cards:
+  BP18-005:
+    abilities:
+      - evolve:
+          cost:
+            pp: 0
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - unlimited_evolve:
+                who: self
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            evolved:
+              sel:
+                kind: follower
+              who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

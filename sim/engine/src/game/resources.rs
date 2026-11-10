@@ -278,6 +278,9 @@ impl Game {
     }
 
     pub(super) fn unlimited_evolution(&self, seat: &str) -> Result<bool> {
+        if self.internal_unlimited_evolution(seat)? {
+            return Ok(true);
+        }
         for id in self.zone_ids(seat, "field") {
             for code in self.abilities(&id)? {
                 if code["kind"] == "static"

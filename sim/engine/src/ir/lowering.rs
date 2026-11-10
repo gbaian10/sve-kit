@@ -482,6 +482,7 @@ impl Allocator {
     ) -> Result<bool, LoweringError> {
         if let Some(declaration) = &entry.r#static {
             let lower = match declaration.effects.first() {
+                Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
                 Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
                 Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,

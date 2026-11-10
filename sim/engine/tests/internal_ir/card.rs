@@ -846,3 +846,6 @@ mod fusion;
 
 #[path = "card/shuffle.rs"]
 mod shuffle;
+
+#[path = "card/unlimited_evolution.rs"]
+mod unlimited_evolution;

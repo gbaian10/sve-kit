@@ -127,6 +127,7 @@ pub(crate) mod effect_evolution;
 mod effects;
 pub(crate) mod events;
 pub(crate) mod evolution_destination;
+pub(crate) mod evolution_limits;
 mod flow;
 pub(crate) mod fusion;
 pub(crate) mod granted_cost;

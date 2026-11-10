@@ -114,7 +114,8 @@ fn permission(
                 RuleId(133),
             )
         }
-        ast::StaticEffect::AlsoNamed(_)
+        ast::StaticEffect::UnlimitedEvolve(_)
+        | ast::StaticEffect::AlsoNamed(_)
         | ast::StaticEffect::If(_)
         | ast::StaticEffect::EvolveCostMod(_)
         | ast::StaticEffect::CostMod(_)
