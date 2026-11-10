@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-074:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: revive
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: 学院
+                orig_cost_le: 3
+              n: 1
+          do:
+            - move:
+                ref: revive
+                to: field
+                result: revived
+      - line: 2
+        super_evolve_time:
+          do:
+            - repeat:
+                n: 3
+                do:
+                  - dice:
+                      bind: die

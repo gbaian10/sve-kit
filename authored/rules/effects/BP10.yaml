@@ -1,54 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP10-020:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: restrict
-          subjects: self
-          action: attack
-      - line: 2
-        kind: trigger
-        body:
-          op: per
-          count: 2
-          body:
-            op: seq
-            steps:
-              - op: dice
-                count: 1
-                bind: die
-              - op: if
-                condition:
-                  fn: le
-                  args:
-                    - read: die
-                    - 2
-                then:
-                  op: destroy
-                  subjects:
-                    side: opponent
-                    zone: field
-                    type: follower
-                else:
-                  op: if
-                  condition:
-                    fn: le
-                    args:
-                      - read: die
-                      - 4
-                  then:
-                    op: damage
-                    subjects: opponent.leader
-                    amount: 7
-                  else:
-                    op: damage
-                    subjects: self.leader
-                    amount: 7
-        event: end
   BP10-076:
     status: complete
     review: E25 依 1.3.4，各玩家依序選擇並完成捨牌；不足三張時不執行捨牌選擇。
@@ -241,51 +193,3 @@ cards:
                       subjects: discard_self
         event: enter
         subject: self
-  BP10-SL06:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: restrict
-          subjects: self
-          action: attack
-      - line: 2
-        kind: trigger
-        body:
-          op: per
-          count: 2
-          body:
-            op: seq
-            steps:
-              - op: dice
-                count: 1
-                bind: die
-              - op: if
-                condition:
-                  fn: le
-                  args:
-                    - read: die
-                    - 2
-                then:
-                  op: destroy
-                  subjects:
-                    side: opponent
-                    zone: field
-                    type: follower
-                else:
-                  op: if
-                  condition:
-                    fn: le
-                    args:
-                      - read: die
-                      - 4
-                  then:
-                    op: damage
-                    subjects: opponent.leader
-                    amount: 7
-                  else:
-                    op: damage
-                    subjects: self.leader
-                    amount: 7
-        event: end

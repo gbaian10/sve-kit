@@ -1,0 +1,62 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP01-081:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: main
+              whose: self
+          do:
+            - dice:
+                bind: die
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: eq
+                    right: 1
+                then:
+                  - damage:
+                      to:
+                        leader: self
+                      n: 5
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          dice: die
+                        op: ge
+                        right: 2
+                    - cmp:
+                        left:
+                          dice: die
+                        op: le
+                        right: 5
+                then:
+                  - draw:
+                      n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: eq
+                    right: 6
+                then:
+                  - life:
+                      who: self
+                      delta: 3
+                  - destroy:
+                      ref: this

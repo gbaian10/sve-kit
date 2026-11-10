@@ -1,0 +1,84 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-076:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 学院
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                to: hand
+                result: moved
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: moved
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_playing:
+                      who: self
+                      trait: 学院
+                      orig_cost_le: 2
+                    delta: -2
+                    next_only: true
+                until: turn
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - to_cemetery:
+                  sel:
+                    who: self
+                    zone: field
+                    other: true
+                  n: 1
+          usable_if:
+            history:
+              event: dice_rolled
+              who: self
+              window: this_turn
+          targets:
+            - bind: target
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: target
+                n: 3
+            - draw:
+                n: 1

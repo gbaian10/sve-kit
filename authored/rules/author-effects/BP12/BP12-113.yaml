@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-113:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: 2026-11-10
+    abilities:
+      - line: 1
+        evolve_time:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+              n: 1
+          do:
+            - dice:
+                bind: die
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      dice: die
+                    op: ge
+                    right: 4
+                then:
+                  - draw:
+                      n: 3
