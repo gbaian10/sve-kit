@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-023:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to:
+                  any_of: [victim, this]
+                n: 5
+      - line: 2
+        lastword:
+          do:
+            - create:
+                token: レオニダスの遺志
+                n: 1
+                to: field
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP02-T03

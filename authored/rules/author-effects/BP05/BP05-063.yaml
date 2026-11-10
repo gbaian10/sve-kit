@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-063:
+    abilities:
+      - auto:
+          do:
+            - draw:
+                n: 1
+          "on":
+            damaged:
+              during:
+                turn: self
+              kind: ability
+              recipient: this
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  awakened: true
+                then:
+                  - damage:
+                      n: 1
+                      to:
+                        any_of:
+                          - victim
+                          - this
+          targets:
+            - bind: victim
+              from:
+                kind: follower
+                other: true
+                who: all
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
