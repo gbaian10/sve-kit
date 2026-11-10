@@ -16,6 +16,7 @@ use crate::ir::{
 };
 use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
+use crate::ir::{Resource, x_pp};
 use crate::ir::{fusion, shuffle};
 use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
@@ -746,6 +747,7 @@ impl Checker {
                                 if checker.env.reveal_materials.contains(&reference.key()))
                             || step.instruction.action == ride::attachment(checker.env.scope)
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
+                            || matches!(&step.instruction.action, Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent, operation: ResourceOperation::Pay, amount } if x_pp::amount(amount).is_some())
                             || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
                         let source_move = matches!(&step.instruction.action,
                             Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }

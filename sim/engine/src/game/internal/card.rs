@@ -16,6 +16,7 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::trigger_restrictions as trigger_permission;
+use crate::ir::x_pp;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
     AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
@@ -744,11 +745,9 @@ impl Game {
                 action if reveal_cost::selected(execution, action) => {
                     self.internal_hand_material_cost_payment(execution, &step.instruction)?
                 }
-                Action::Resource {
-                    amount: Expr::Literal(amount),
-                    ..
-                } => {
-                    let amount = self.internal_card_pp_amount(execution, card_cost, *amount)?;
+                Action::Resource { amount, .. } => {
+                    let amount = execution.integer(self, amount)?;
+                    let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
                     (
                         self.internal_pay_pp(execution.context.controller, amount)?,
                         Vec::new(),
@@ -1146,8 +1145,8 @@ pub(super) fn check_payment(
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,
                 operation: ResourceOperation::Pay,
-                amount: Expr::Literal(Int(amount)),
-            } => *amount >= 0,
+                amount,
+            } => x_pp::cost_amount(amount),
             Action::Posture {
                 objects: Selector::Objects { objects },
                 posture: Posture::Acted,

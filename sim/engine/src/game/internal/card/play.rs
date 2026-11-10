@@ -9,6 +9,7 @@ use crate::game::legal::subsets;
 use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::x_pp as x_payment;
 
 use crate::ir::{AbilityCostPolicy, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
 use crate::ir::{
@@ -23,6 +24,7 @@ use crate::ir::{
 };
 
 pub(super) mod ability_cost;
+mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -237,7 +239,7 @@ pub(super) fn check_additional_body(ability: &Ability) -> Result<()> {
         .as_ref()
         .ok_or_else(|| invalid("missing Spell body"))?;
     if !collect_modes(body, conditional_play_modes(ability))?.is_empty()
-        || optional_payment::declaration(body).is_some()
+        || optional_payment::declaration(body).is_some_and(|(costs, _)| !x_payment::payment(costs))
     {
         return Err(unsupported(
             "additional with modes or optional head payment",
@@ -341,6 +343,13 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
             super::check_payment(definition, &ability.source, false, source)?;
         }
     }
+    if parameters
+        .iter()
+        .any(|decision| x_payment::parameter(decision).is_some())
+        && (!groups.is_empty() || is_printed_quick(ability))
+    {
+        return Err(unsupported("X with modes or Quick"));
+    }
     check_overlapping_mode_materials(play, &groups)?;
     parameters.sort_by_key(super::material::is_parameter);
     check_parameters(&parameters)?;
@@ -406,7 +415,13 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut material = false;
     let mut target = None;
     let mut target_count = 0_usize;
-    for decision in parameters {
+    for (index, decision) in parameters.iter().enumerate() {
+        if x_payment::parameter(decision).is_some() {
+            if index != 0 {
+                return Err(unsupported("X must precede targets and materials"));
+            }
+            continue;
+        }
         if super::material::is_parameter(decision) {
             super::material::check_parameter(decision)?;
             material = true;
@@ -1092,7 +1107,7 @@ impl Game {
         } else {
             None
         };
-        let parameters = additional
+        let mut parameters: VecDeque<Decision> = additional
             .as_deref()
             .into_iter()
             .flat_map(|(_, payment)| payment.play.parameters.clone())
@@ -1102,6 +1117,16 @@ impl Game {
                 play.parameters
             })
             .collect();
+        // CR 10.6.2.2.4 fixes X before determining additional hand materials.
+        if let Some(index) = parameters
+            .iter()
+            .position(|decision| x_payment::parameter(decision).is_some())
+        {
+            let x = parameters
+                .remove(index)
+                .ok_or_else(|| invalid("missing X declaration"))?;
+            parameters.push_front(x);
+        }
         execution.play = Some(PlayState {
             cost_policy,
             qualification: ability.qualification,
@@ -1265,6 +1290,10 @@ impl Game {
             return Ok(());
         }
         play.waive_original_costs(execution)?;
+        if self.internal_x_parameter(execution, &mut play)? {
+            execution.play = Some(play);
+            return Ok(());
+        }
         play.freeze_selection(self, execution)?;
         if self.internal_optional_decision(execution, &play)? {
             execution.play = Some(play);

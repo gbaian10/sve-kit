@@ -27,7 +27,7 @@ impl BodyContext<'_> {
             ast::Cost::Ordered { steps } => steps.as_slice(),
         };
         let conditional_pp = self.discard_pp_event.is_some()
-            && matches!(operations, [ast::CostOperation::Pp(n)] if *n > 0)
+            && matches!(operations, [ast::CostOperation::Pp(ast::PpAmount::Literal(n))] if *n > 0)
             && matches!(payment.steps.as_slice(), [ast::Step::Move(value)]
                 if matches!(value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::This(_))))
                     && matches!(value.to, ast::Destination::Field));

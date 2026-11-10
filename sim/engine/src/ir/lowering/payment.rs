@@ -249,9 +249,7 @@ fn lower_operations(
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,
                 operation: ResourceOperation::Pay,
-                amount: Expr::Literal(Int(
-                    i64::try_from(*amount).map_err(|_private| unsupported(path))?
-                )),
+                amount: context.pp_amount(amount, path)?,
             },
             ast::CostOperation::LeaderLife(amount) => Action::Life {
                 player: PlayerRef::Controller {},

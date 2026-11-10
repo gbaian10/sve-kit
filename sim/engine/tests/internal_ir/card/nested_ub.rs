@@ -8,6 +8,7 @@ use sve_engine::game::internal::{DecisionView, InputDomain};
 
 #[derive(Clone, Copy)]
 enum Case {
+    Variable,
     Printed,
     BodyPayment,
     HeaderPayment,
@@ -37,6 +38,9 @@ fn tree(case: Case) -> Value {
     child["activate"] =
         json!({"ub":true,"cost":{"steps":[{"pp":9},{"act_self":true}]},"do":[life(2)]});
     match case {
+        Case::Variable => {
+            child["activate"] = json!({"ub":true,"x":{},"cost":{"steps":[{"pp":"x"},{"act_self":true}]},"do":[{"life":{"who":"self","delta":"x"}}]});
+        }
         Case::BodyPayment => {
             child.as_object_mut().unwrap().remove("activate");
             child["auto"] = json!({"on":{"phase":{"whose":"self","which":"end"}},"ub":true,"cost":{"pp":9},"do":[{"pay":{"cost":{"act_self":true},"do":[life(2)]}}]});
@@ -338,4 +342,16 @@ fn nested_ub_history_retains_prior_same_definition_plays_and_the_committed_mothe
         }
         assert!(game.internal_pending_choice().unwrap().is_none());
     }
+}
+
+#[test]
+fn x_pp_waived_original_cost_seeds_zero_without_asking_or_spending_pp() {
+    let (mut game, parent, _) = build(Case::Variable, true);
+    resolved(select(&mut game, parent, false));
+    state(&game, 9, 31, 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["child"]["acted"],
+        false,
+        "waiving the original X cost also waives its source posture fee"
+    );
 }

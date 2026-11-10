@@ -146,7 +146,10 @@ impl BodyContext<'_> {
     ) -> Result<(), LoweringError> {
         let mut names = BTreeSet::new();
         for target in targets {
-            if self.definitions.contains_key(&target.bind) || !names.insert(&target.bind) {
+            if self.definitions.contains_key(&target.bind)
+                || (self.x.is_some() && target.bind == "x")
+                || !names.insert(&target.bind)
+            {
                 return Err(unsupported(path));
             }
             match (choice, target.option) {
@@ -998,6 +1001,7 @@ impl BodyContext<'_> {
             let mode_id = u64::try_from(mode_id).map_err(|_error| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                x: None,
                 discard_event: self.discard_event,
                 banish_event: self.banish_event,
                 hand_exit: self.hand_exit,

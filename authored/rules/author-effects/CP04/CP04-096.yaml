@@ -1,0 +1,49 @@
+cards:
+  CP04-096:
+    abilities:
+      - evolve_time:
+          cost:
+            pp: x
+          do:
+            - move:
+                ref: chosen
+                result: entered
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le: x
+                trait: プリコネ
+                who: self
+                zone: cemetery
+              n: 1
+          ub: true
+          x: {}
+        line: 1
+      - auto:
+          do:
+            - life:
+                delta: 1
+                who: self
+          on:
+            ub_activated:
+              holder:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              who: self
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

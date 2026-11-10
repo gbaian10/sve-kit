@@ -1,0 +1,39 @@
+cards:
+  BP04-021:
+    abilities:
+      - auto:
+          do:
+            - buff:
+                on: it
+                power: 1
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                trait: 兵士
+              who: self
+        line: 1
+      - evolve_time:
+          cost:
+            pp: x
+          do:
+            - search:
+                n: 1
+                sel:
+                  cost_le: x
+                  kind: follower
+                  trait: 兵士
+                  who: self
+                  zone: deck
+                to: field
+          x: {}
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
