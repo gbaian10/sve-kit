@@ -36,6 +36,7 @@ mod payment;
 mod play;
 mod play_restrictions;
 mod prevention;
+mod public_reveal;
 mod receipt_counts;
 mod resource_entry;
 mod reveal_cost;
@@ -1310,6 +1311,7 @@ fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
+    published_looks: BTreeSet<ReceiptId>,
     evolutions: BTreeMap<String, ReceiptId>,
     paid_materials: BTreeMap<String, ReceiptId>,
     paid_material_acts: BTreeMap<String, ReceiptId>,
@@ -1751,6 +1753,12 @@ impl<'definitions> BodyContext<'definitions> {
                         ability_source,
                     )?);
                 }
+                continue;
+            }
+            if let ast::Step::Reveal(value) = step
+                && value.top.is_some()
+            {
+                steps.extend(self.reveal_top(value, &step_path, source, ability_source)?);
                 continue;
             }
             let instruction_id = self.card_allocator.id(&step_path)?;

@@ -3,11 +3,11 @@ use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsuppor
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
-    Binding, Bool, CardKind, CardName, CharacteristicView, Characteristics, ClassId, ClassRead,
-    Comparison, DiscardOutcome, Expr, Info, Int, IntOperation, KindRead, MaterialActOutcome,
-    MemberProjection, MoveOutcome, MovementReceipt, NamesRead, NumberRead, NumericChange,
-    ObjectReceipt, ObjectRef, ObjectView, Predicate, QuantityUnit, ReceiptId, ReceiptLocation,
-    ReceiptReference, RuntimeObjectView, TraitId, TraitsRead,
+    Binding, Bool, Capture, CardKind, CardName, CharacteristicPatch, CharacteristicView,
+    Characteristics, ClassId, ClassRead, Comparison, DiscardOutcome, Expr, Info, Int, IntOperation,
+    KindRead, MaterialActOutcome, MemberProjection, MoveOutcome, MovementReceipt, NamesRead,
+    NumberRead, NumericChange, ObjectReceipt, ObjectRef, ObjectView, Predicate, QuantityUnit,
+    ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -43,6 +43,10 @@ fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
         ObjectReceipt::Movement {
             receipt: MovementReceipt::Move { receipt },
         } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
+        ObjectReceipt::Look { receipt } => match receipt.location() {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
         },
@@ -93,6 +97,8 @@ pub(super) struct DeckReads {
     cemetery: BTreeSet<ReceiptId>,
     ex: BTreeSet<ReceiptId>,
     field: BTreeSet<ReceiptId>,
+    observations: BTreeSet<ReceiptId>,
+    published: BTreeSet<ReceiptId>,
 }
 
 impl DeckReads {
@@ -105,9 +111,22 @@ impl DeckReads {
                 }
             }
             Node::Instruction { instruction } => {
+                if instruction.precondition.is_none()
+                    && matches!(instruction.action, Action::Look { .. })
+                {
+                    self.observations.insert(instruction.receipt);
+                }
+                if let Action::Reveal { objects } = &instruction.action
+                    && instruction.precondition.is_none()
+                    && let Some(id) = super::reveal::look_receipt(objects)
+                    && self.observations.contains(&id)
+                {
+                    self.published.insert(id);
+                }
                 let looked = matches!(&instruction.action,
                     Action::Move { objects: Selector::Bound { reference }, .. }
-                        if self.looks.contains(reference));
+                        if self.looks.contains(reference))
+                    || matches!(&instruction.action, Action::Move { objects, .. } if super::reveal::look_receipt(objects).is_some_and(|id| self.published.contains(&id)));
                 if looked || super::movement::deck_top(&instruction.action).is_some() {
                     self.moves.insert(instruction.receipt);
                     if let Action::Move { movement, .. } = &instruction.action {
@@ -138,6 +157,7 @@ impl DeckReads {
     /// Masks reads only after their deck movement producers are proven.
     pub(super) fn mask(&self, node: &Node) -> Result<Node> {
         let mut inspected = node.clone();
+        self.mask_published_numbers(&mut inspected)?;
         if let Node::Control {
             control: Control::If { condition, .. },
         } = &mut inspected
@@ -191,6 +211,66 @@ impl DeckReads {
         Ok(inspected)
     }
 
+    fn mask_number(&self, number: &mut Expr<Int>) -> Result<()> {
+        if let Expr::Compute(operation) = number {
+            match operation.as_mut() {
+                IntOperation::Sum { objects, property }
+                    if super::reveal::look_sum(objects, *property).is_some() =>
+                {
+                    let id = super::reveal::look_sum(objects, *property)
+                        .ok_or_else(|| unsupported("public cost sum"))?;
+                    if !self.published.contains(&id) {
+                        return Err(unsupported("cost sum before revelation"));
+                    }
+                    *number = Expr::Literal(Int(0));
+                }
+                IntOperation::Arithmetic { arguments, .. } => {
+                    for argument in arguments {
+                        self.mask_number(argument)?;
+                    }
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    fn mask_change(&self, change: &mut NumericChange) -> Result<()> {
+        let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
+        self.mask_number(amount)
+    }
+
+    fn mask_patch(&self, patch: &mut CharacteristicPatch) -> Result<()> {
+        match patch {
+            CharacteristicPatch::Numeric { change, .. } => self.mask_change(change),
+            CharacteristicPatch::Combined { patches } => {
+                for component in patches {
+                    self.mask_patch(component)?;
+                }
+                Ok(())
+            }
+            _ => Ok(()),
+        }
+    }
+
+    fn mask_published_numbers(&self, node: &mut Node) -> Result<()> {
+        match node {
+            Node::Capture {
+                capture: Capture::Integer { value, .. },
+            } => self.mask_number(value),
+            Node::Instruction { instruction } => match &mut instruction.action {
+                Action::Damage {
+                    amount: DamageAmount::Uniform { amount },
+                    ..
+                } => self.mask_number(amount),
+                Action::Life { change, .. } => self.mask_change(change),
+                Action::Modify { patch, .. } => self.mask_patch(patch),
+                _ => Ok(()),
+            },
+            _ => Ok(()),
+        }
+    }
+
     fn mask_condition(&self, condition: &mut Expr<Bool>) -> Result<()> {
         let Expr::Compute(predicate) = condition else {
             return Ok(());
@@ -202,6 +282,22 @@ impl DeckReads {
                 }
             }
             Predicate::Not { predicate } => self.mask_condition(predicate)?,
+            Predicate::ReceiptAny {
+                receipt: receipt @ ObjectReceipt::Look { .. },
+                projection,
+                member,
+                predicate,
+            } => {
+                if !self.published.contains(&local_receipt(receipt)?) {
+                    return Err(unsupported("look condition without revelation"));
+                }
+                check_shape(receipt, *projection, *member, predicate)?;
+                *condition = Expr::Literal(Bool(false));
+            }
+            Predicate::CompareInt { left, right, .. } => {
+                self.mask_number(left)?;
+                self.mask_number(right)?;
+            }
             Predicate::ReceiptAny {
                 receipt:
                     receipt @ ObjectReceipt::Movement {
@@ -255,6 +351,19 @@ fn members(
     destination: Option<ZoneKind>,
 ) -> Result<Vec<(MemberCard, ObjectRef)>> {
     let id = local_receipt(receipt)?;
+    if matches!(receipt, ObjectReceipt::Look { .. }) {
+        return execution
+            .public_look_objects(
+                game,
+                &Selector::ReceiptMembers {
+                    receipt: receipt.clone(),
+                    projection: MemberProjection::Before,
+                },
+            )?
+            .into_iter()
+            .map(|member| Ok((printed_card(game, execution, member)?, member)))
+            .collect();
+    }
     match execution.receipts.get(&id) {
         Some(InstructionOutcome::Discard(outcome)) => outcome
             .successful

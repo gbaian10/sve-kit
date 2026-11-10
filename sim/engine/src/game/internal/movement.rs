@@ -70,7 +70,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             objects,
             movement,
             reason,
-        } if observed_move(action) || cemetery_ex_move(action) => {
+        } if observed_move(action) || cemetery_ex_move(action) || revealed_move(action) => {
             if (!observation_spine(objects, false) && !cemetery_ex_move(action))
                 || *reason != MoveReason::Put
                 || movement.position.is_some()
@@ -292,6 +292,11 @@ fn banished_hand_return(execution: &Execution, objects: &Selector, member: Objec
         return false;
     };
     execution.event_move == Some((*event, Some(member)))
+}
+
+pub(super) fn revealed_move(action: &Action) -> bool {
+    matches!(action, Action::Move { objects, movement, .. } if super::reveal::look_receipt(objects).is_some()
+        && (movement.to == (MoveDestination::Owners { zone: OwnerZone::Hand }) || field_move(movement)))
 }
 
 pub(super) fn observed_move(action: &Action) -> bool {
@@ -668,7 +673,8 @@ impl Game {
                         .knowledge
                         .get(actor)
                         .is_some_and(|knowledge| knowledge.located.contains(&object.id))
-                    && execution.is_private_look_target(objects, member);
+                    && (execution.is_private_look_target(objects, member)
+                        || execution.public_look_member(self, objects, member)?);
                 if kind == ZoneKind::Hand
                     && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
                     && !private_observed_move
@@ -851,7 +857,8 @@ impl Game {
                     .knowledge
                     .get(seat)
                     .is_some_and(|knowledge| knowledge.located.contains(&object.id))
-                && execution.is_private_look_target(objects, member)
+                && (execution.is_private_look_target(objects, member)
+                    || execution.public_look_member(self, objects, member)?)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let revealed_match = object.zone == "deck"
                 && execution.is_revealed_match(objects, member)
