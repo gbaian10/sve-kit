@@ -7425,6 +7425,10 @@
         },
         "by": {
           "$ref": "#/$defs/A.event-by"
+        },
+        "crosses_zero": {
+          "const": true,
+          "type": "boolean"
         }
       },
       "type": "object"

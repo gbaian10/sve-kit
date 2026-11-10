@@ -138,7 +138,7 @@ where 內獨立 count／exists／算術節點保留原有的參數位置白名�
 | phase | which:Phase 或 ParamRef、whose:PlayerRef，皆必填 | whose 為階段所屬玩家 | BP05-006、BP01-153 |
 | played | who、sel、during、from:Zone | 打出者 | CP02-044、BP14-036、BP04-064；from 合成 |
 | ability_played | who、holder:Ref 或 EventObjectSel | 能力 controller | 合成 |
-| life_changed | who、direction:up/down、during、by | 生命變動玩家 | BP02-095、BP19-075；by 合成 |
+| life_changed | who、direction:up/down、during、by、crosses_zero:true | 生命變動玩家 | BP02-095、BP19-075、BP05-092；by 合成 |
 | stat_changed | ref、stat:power/hp 或非空列表、direction:up/down | 無 | BP11-082、BP21-100；不收 subject/property/by |
 | counter_changed | ref、name:CounterName、after:{eq/le/ge:Nat} 恰一、direction:up/down | 無 | 合成；不把 Stack 提醒文另造誘發 |
 | acted | 主、who | 姿態改變時 controller | CP04-102、BP11-069 |
@@ -148,7 +148,7 @@ where 內獨立 count／exists／算術節點保留原有的參數位置白名�
 | ub_activated | who、holder:Ref 或 EventObjectSel | UB controller | CP04-SL15 |
 | fused | who、material:EventSubjectFilter | 融合者 | BP20-SL05、BP20-029；至少一成功材料符合為推論 |
 | targeted | ref、by | 無 | BP03-071；by 合成 |
-| state | Condition | 無 | BP05-092；不是歷史事實 |
+| state | Condition | 無 | 合成；不是歷史事實 |
 | dice_rolled | who | roller | BP21-SL19；on 不收骰值門檻 |
 | drive_checked | holder:Ref 或 EventObjectSel | 無 | CP03-P27、CP03-065 |
 | drive_trigger | who | 執行 trigger 的玩家 | CP03-P81、CP03-110 |
