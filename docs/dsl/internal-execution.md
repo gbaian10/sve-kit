@@ -575,7 +575,7 @@ BP16-077 的正式打出流程或整卡可執行。每項不同下限與 LKI 仍
 一般 Move 只准入 Put、Owners(Cemetery / Banish)，來源限公開 Field／Ex／Cemetery／Banish；
 Owners(Hand) 僅限公開 Field 來源，見[第二批觸發契約](trigger-second-semantics.md#5-自身離場)。
 不接受 Shared(Field / Ex)、私人目的區、position、order、initial_posture 或 entry_effects；
-唯一例外是〈私有看牌與同區排列〉所述，從自己牌庫放入自己 EX 的受限 Look→Move 流程。
+牌庫來源的例外另限〈私有看牌與同區排列〉的 Look→自己 EX，以及〈逐張公開至匹配數達標〉的公開匹配→自己 Field。
 Destroy 是獨立 action，僅接受仍在 Field 的目前世代；過期 capture 不移動新世代。
 目前世代位於其他區域時整次執行失敗並回復，不外推場外 Destroy 語義。
 
@@ -729,6 +729,30 @@ Subset 的窄讀取驗證每筆同世代 before／after、自己牌組的實際�
 使用原 `Game::shuffle`。WF 與 runtime 都在洗牌後撤銷這份 receipt；作者不得命名結果，
 後續 follow、Before、計數或捕捉不能再讀取。單獨 Subset、夾雜指示或跨 Program 配對均拒絕。
 Subset 只撤銷該段的位置知識，不記整副洗牌事實。整個流程沿原外層交易回復，包含 RNG 與腳本游標。
+
+## 逐張公開至匹配數達標
+
+作者 `reveal_until` 只准入自己 Deck、從者、字面非負 `orig_cost_le` 與正整數 `n`，
+搭配不同名的 `bind`（全部公開）與 `matched`（匹配集合）。降低為既有 `Action::RevealUntil`；
+來源座標、actor、條件與 receipt 都沿原 WF 檢查。其他玩家、有效費用、動態門檻、
+其他種類、付款指示與附加 precondition 尚未准入。
+
+從頂端逐張公開給所有玩家，達到匹配數或游標耗盡即停止；公開本身不移區、不換世代、
+不造成抽空敗北，也不檢查停止點以下卡片的特徵。候選原費用沿 Search 的共同列印資訊求值。
+`RevealUntilOutcome` 分別保存有序公開集合、匹配子集及游標是否到末尾的 `exhausted`。
+兩個作者綁定降低成同一 typed receipt 的不同投影，公開結果不借用私有 Look 授權。
+公開授權與手牌共用原世代／區域／控制者及本次效果的到期處理；
+牌組重排沿共同原語撤銷位置知識，效果結束則恢復隱藏（CR5.21.1.1）。
+
+`matched` 僅能透過本次回條放入自己 Field；每張重驗原世代、owner／controller、
+公開位置證據及從者種類，再沿共同入場、守護選擇、容量分配與 MoveOutcome 提交。
+場上只剩一格時仍公開至兩張匹配，再由控制者選一張入場（Q1324）；
+只有一張或沒有匹配時仍盡可能完成（Q1322、Q1323）。
+
+剩餘集合由全部公開卡減去入場 Move 的成功 Before 求得；容量不足未移動的匹配卡仍在剩餘集合。
+作者只能把這個集合接既有封閉的 Bottom Move＋Subset Shuffle，沿共同 RNG、
+同區重排與位置知識撤銷，不開新的排列或移區程序。未公開的牌庫尾端保持原順序，
+洗回隱藏區後不保留對手可定位的物件身分。
 
 ## 私有看牌與同區排列
 
