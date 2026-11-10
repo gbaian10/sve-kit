@@ -935,10 +935,17 @@ pub(super) enum ObjectAction {
 #[serde(deny_unknown_fields)]
 pub(super) struct Modify {
     pub instead: Option<Vec<PowerInstead>>,
-    pub on: Objects,
+    pub on: NumericSubjects,
     pub power: Option<Number>,
     pub hp: Option<Number>,
     pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum NumericSubjects {
+    Single(Objects),
+    Union { any_of: Box<[ObjectQuery; 2]> },
 }
 
 #[derive(Deserialize)]

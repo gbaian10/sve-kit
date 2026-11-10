@@ -423,14 +423,20 @@ impl BodyContext<'_> {
         }
         // Only numeric modification reaches EX followers; other actions keep the field boundary.
         let subjects = match &modification.on {
-            ast::Objects::Zone(query) if matches!(query.zone, ast::Zone::Ex) => {
-                self.zone_objects(query, ZoneKind::Ex, path)?
+            ast::NumericSubjects::Single(objects) => match objects {
+                ast::Objects::Zone(query) if matches!(query.zone, ast::Zone::Ex) => {
+                    self.zone_objects(query, ZoneKind::Ex, path)?
+                }
+                ast::Objects::Follow { follow } => self.followed(follow, path)?,
+                ast::Objects::This(_)
+                | ast::Objects::Bound(_)
+                | ast::Objects::Zone(_)
+                | ast::Objects::EventHolder { .. } => self.objects(objects, path)?,
+            },
+            ast::NumericSubjects::Union { any_of } if !set => {
+                self.token_follower_union(any_of, path)?
             }
-            ast::Objects::Follow { follow } => self.followed(follow, path)?,
-            ast::Objects::This(_)
-            | ast::Objects::Bound(_)
-            | ast::Objects::Zone(_)
-            | ast::Objects::EventHolder { .. } => self.objects(&modification.on, path)?,
+            ast::NumericSubjects::Union { .. } => return Err(unsupported(path)),
         };
         Ok(Action::Modify {
             subjects,
@@ -438,6 +444,57 @@ impl BodyContext<'_> {
             expires: duration(modification.until.as_ref(), path)?,
             source: EffectReference::CurrentInstallation {},
         })
+    }
+
+    fn token_follower_union(
+        &mut self,
+        queries: &[ast::ObjectQuery; 2],
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let queries = match (&queries[0].zone, &queries[1].zone) {
+            (ast::Zone::Field, ast::Zone::Ex) => [&queries[0], &queries[1]],
+            (ast::Zone::Ex, ast::Zone::Field) => [&queries[1], &queries[0]],
+            _ => return Err(unsupported(path)),
+        };
+        let mut sets = Vec::with_capacity(2);
+        let mut shared_trait: Option<&str> = None;
+        for (index, query) in queries.into_iter().enumerate() {
+            let ast::ObjectQuery {
+                alias: None,
+                r#where: None,
+                who: ast::Side::Controller,
+                zone: ast::Zone::Field | ast::Zone::Ex,
+                kind: Some(ast::FieldKind::Follower),
+                r#trait: Some(trait_id),
+                class: None,
+                not_class: None,
+                token: Some(true),
+                not_token: None,
+                orig_cost_eq: None,
+                orig_cost_le: None,
+                hp_le: None,
+                not_trait: None,
+                name: None,
+                name_contains: None,
+                acted: None,
+                except: None,
+                other: false,
+            } = query
+            else {
+                return Err(unsupported(path));
+            };
+            if trait_id.is_empty() || shared_trait.is_some_and(|value| value != trait_id.as_str()) {
+                return Err(unsupported(path));
+            }
+            shared_trait = Some(trait_id.as_str());
+            let zone = if index == 0 {
+                ZoneKind::Field
+            } else {
+                ZoneKind::Ex
+            };
+            sets.push(self.zone_objects(query, zone, &format!("{path}/on/any_of/{index}"))?);
+        }
+        Ok(Selector::Union { sets })
     }
 
     pub(super) fn continuous(

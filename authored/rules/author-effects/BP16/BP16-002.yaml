@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP16-002:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create: { n: 1, to: field, token: フェアリー }
+      - line: 2
+        super_evolve_time:
+          do:
+            - buff:
+                on:
+                  any_of:
+                    - who: self
+                      zone: field
+                      kind: follower
+                      token: true
+                      trait: 妖精
+                    - who: self
+                      zone: ex
+                      kind: follower
+                      token: true
+                      trait: 妖精
+                power: 1
+                hp: 1

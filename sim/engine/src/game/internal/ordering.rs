@@ -17,7 +17,7 @@ use crate::ir::{
     MovementReceipt, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
     OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
     ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
-    ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -412,7 +412,12 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
                 mask_public_predicate(objects);
             }
             Action::Life { change, .. } => mask_public_number_change(change),
-            Action::Modify { patch, .. } => mask_public_number_patch(patch),
+            Action::Modify {
+                subjects, patch, ..
+            } => {
+                mask_numeric_union(subjects)?;
+                mask_public_number_patch(patch);
+            }
             _ => {}
         },
         _ => {}
@@ -439,6 +444,31 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
 fn mask_public_number_change(change: &mut NumericChange) {
     let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
     mask_public_number(amount);
+}
+
+fn mask_numeric_union(selector: &mut Selector) -> Result<()> {
+    let Selector::Union { sets } = selector else {
+        return Ok(());
+    };
+    if sets.len() != 2
+        || !sets.iter().all(|set| matches!(set, Selector::Zone {
+            zone: ZoneKind::Field | ZoneKind::Ex,
+            view: SelectionView::Current {},
+            players, ..
+        } if players.relative_to == (PlayerRef::Controller {}) && players.relation == PlayerRelation::SelfPlayer))
+        || !sets.iter().any(|set| matches!(set, Selector::Zone { zone: ZoneKind::Field, .. }))
+        || !sets.iter().any(|set| matches!(set, Selector::Zone { zone: ZoneKind::Ex, .. }))
+    {
+        return Ok(());
+    }
+    for set in sets.iter() {
+        super::card::selection::public_zone_selector(set)?;
+    }
+    // Each checked public leaf keeps its own candidate binding; the original node is unchanged.
+    for set in sets {
+        mask_public_predicate(set);
+    }
+    Ok(())
 }
 
 fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
