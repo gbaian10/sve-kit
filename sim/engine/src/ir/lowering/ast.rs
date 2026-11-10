@@ -2545,6 +2545,14 @@ pub(super) enum PowerBound {
 pub(super) enum ExistsQuery {
     Public(PublicQuery),
     Selected(SelectedQuery),
+    FollowedKeyword(FollowedKeywordQuery),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FollowedKeywordQuery {
+    pub r#in: FollowName,
+    pub keyword: FilterKeyword,
 }
 
 #[derive(Deserialize)]

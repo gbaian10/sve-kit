@@ -777,6 +777,18 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        if let ast::ExistsQuery::FollowedKeyword(query) = query {
+            if query.keyword.0 != super::super::KeywordId::Ward {
+                return Err(unsupported(path));
+            }
+            let output = self
+                .field_outputs
+                .get(&query.r#in.follow)
+                .ok_or_else(|| unsupported(path))?;
+            return Ok(Expr::Compute(Box::new(Predicate::Exists {
+                objects: super::super::follow_keyword::selector(output.receipt.clone(), binding),
+            })));
+        }
         let ast::ExistsQuery::Public(query) = query else {
             let ast::ExistsQuery::Selected(query) = query else {
                 return Err(unsupported(path));
