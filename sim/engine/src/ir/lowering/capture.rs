@@ -208,13 +208,16 @@ impl BodyContext<'_> {
             ast::Number::Count { count } => matches!(count.zone, ast::CountZone::Cemetery),
             ast::Number::DistinctNames {
                 distinct_names: query,
-            }
-            | ast::Number::DistinctOriginalCosts {
-                distinct_orig_costs: query,
+            } => matches!(query.zone, ast::PublicZone::Cemetery),
+            ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs: ast::DistinctCostQuery::Public(query),
             } => {
                 matches!(query.zone, ast::PublicZone::Cemetery)
             }
-            ast::Number::Dice { .. }
+            ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs: ast::DistinctCostQuery::Receipt { .. },
+            }
+            | ast::Number::Dice { .. }
             | ast::Number::Counter { .. }
             | ast::Number::Power { .. }
             | ast::Number::Life { .. }

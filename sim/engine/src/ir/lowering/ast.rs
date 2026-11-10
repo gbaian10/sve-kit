@@ -1855,7 +1855,7 @@ pub(super) enum Number {
         distinct_names: PublicQuery,
     },
     DistinctOriginalCosts {
-        distinct_orig_costs: PublicQuery,
+        distinct_orig_costs: DistinctCostQuery,
     },
     Resource {
         resource: ResourceQuery,
@@ -3304,6 +3304,13 @@ pub(super) enum QueryStat {
     Attack(String),
     #[serde(rename = "hp_of")]
     Life(String),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DistinctCostQuery {
+    Receipt { r#in: BeforeObjects },
+    Public(Box<PublicQuery>),
 }
 
 #[derive(Deserialize)]

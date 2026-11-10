@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0017
+revision: 1
+question: ヒシミラクル的入場曲實際只送墓一張或零張時，元のコスト全部相同是否成立？
+decision: 本專案解讀為：讀取這次實際成功送墓的成員，至少一張且所有成員的原始印刷費用相同才抽一張。成功兩張同費或成功一張成立；兩張不同費或零張不成立。
+evidence:
+  - ref: ECP01-037
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=ECP01-037
+    note: 本卡及其他三種日文印刷沒有直接回答牌庫不足時此條件的官方Q&A；卡文要求讀取這次送墓的卡。
+  - ref: CR 1.3.2
+    kind: supporting
+    version: 1.28.0
+    note: 盡可能執行強制送墓，未規定零或單一成員的全部同費條件。
+  - ref: project
+    kind: project
+    date: "2026-11-11"
+    reason: 採非空的動作結果解讀：至少實際送墓一張；單一成員的原費自然全部相同。沒有本卡直接官方依據，保留向官方詢問並可局部修正條件。
+strength: inferred
+decided_on: "2026-11-11"
+applies_to:
+  - X.aggregate
+  - V.receipt-field
+hint:
+  zh-TW: 本專案解讀：這次至少一張成功送墓且原始費用全部相同才抽一張；一張成立，零張不成立。此邊界尚無直接官方裁定。
+  ja: 本プロジェクトの解釈：実際に墓場に置かれたカードが1枚以上あり、元のコストがすべて同じなら1枚引きます。1枚なら成立し、0枚なら成立しません。この境界について直接の公式回答はありません。
+  en: "Project interpretation: draw one only if at least one card was actually put
+    into the cemetery and all their original costs match. One card qualifies; zero
+    cards do not. There is no direct official ruling on this edge case."
+note: 只處理該送墓結果條件，強度維持inferred，不把專案決策或測試通過冒充官方裁定。若官方回答不同，只需局部改條件。

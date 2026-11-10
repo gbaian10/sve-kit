@@ -1045,12 +1045,15 @@ impl BodyContext<'_> {
             ),
             ast::Number::DistinctOriginalCosts {
                 distinct_orig_costs,
-            } => super::numeric::distinct_count(
-                distinct_orig_costs,
-                super::super::ObjectProperty::Cost,
-                Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
-                path,
-            ),
+            } => match distinct_orig_costs {
+                ast::DistinctCostQuery::Public(query) => super::numeric::distinct_count(
+                    query,
+                    super::super::ObjectProperty::Cost,
+                    Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
+                    path,
+                ),
+                ast::DistinctCostQuery::Receipt { r#in } => self.receipt_original_costs(r#in, path),
+            },
             ast::Number::TurnOrdinal { turn_number } => Ok(turn_ordinal(turn_number.who)),
             ast::Number::Resource { resource } => Ok(player_resource(
                 resource.who,

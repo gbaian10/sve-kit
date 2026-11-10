@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP01-037:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+      rulings:
+        - R-0017
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        use: meal_entry.v1
+      - line: 3
+        fanfare:
+          do:
+            - move:
+                top:
+                  who: self
+                  n: 2
+                to: cemetery
+                result: milled
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        in:
+                          objects_of: milled
+                          view: before
+                    op: eq
+                    right: 1
+                then:
+                  - draw:
+                      n: 1
