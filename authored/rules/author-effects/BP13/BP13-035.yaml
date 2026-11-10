@@ -1,0 +1,58 @@
+cards:
+  BP13-035:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            pp: 4
+            result: enhanced
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: enhanced
+                else:
+                  - search:
+                      n: 1
+                      sel:
+                        any_of:
+                          - name: レヴィオンの副団長・マイム
+                            who: self
+                            zone: deck
+                          - name: レヴィオンの魔術師・ミイム
+                            who: self
+                            zone: deck
+                          - name: レヴィオンの武闘家・メイム
+                            who: self
+                            zone: deck
+                      to: hand
+                then:
+                  - search:
+                      groups:
+                        - n: 1
+                          sel:
+                            name: レヴィオンの副団長・マイム
+                            who: self
+                            zone: deck
+                        - n: 1
+                          sel:
+                            name: レヴィオンの魔術師・ミイム
+                            who: self
+                            zone: deck
+                        - n: 1
+                          sel:
+                            name: レヴィオンの武闘家・メイム
+                            who: self
+                            zone: deck
+                      to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

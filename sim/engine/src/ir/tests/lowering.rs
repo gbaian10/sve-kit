@@ -1280,10 +1280,10 @@ fn own_play_costs_preserve_explicit_intervals_and_reject_payment_shapes() {
                 .iter()
                 .all(|location| location.ir_path.contains("card_play_costs"))
     }));
-    tree["cards"]["synthetic"]["abilities"][0]["play"]["optional_cost"] = json!({"pp":1});
+    tree["cards"]["synthetic"]["abilities"][0]["play"]["optional_cost"] = json!({"pp":0});
     assert_eq!(
         lowerer.lower(&tree).unwrap_err().path,
-        "/cards/synthetic/abilities/0"
+        "/cards/synthetic/abilities/0/play/optional_cost"
     );
 }
 

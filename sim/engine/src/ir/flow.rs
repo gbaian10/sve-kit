@@ -303,6 +303,9 @@ impl PlayCostExchange {
                 CostSpec::Ordered { .. } | CostSpec::Alternative { .. } => None,
             }
         }
+        if super::exchange::pp_increase(self) {
+            return Some(vec![]);
+        }
         match (&self.cost, self.materials.as_slice(), self.route) {
             (CostSpec::Ordered { steps }, [material], None) if steps.len() == 1 => {
                 Some(vec![(material, steps.first()?)])

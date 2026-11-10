@@ -973,3 +973,146 @@ fn finish_exchange_checks(game: &mut Game) {
         game.resume_internal_card().unwrap();
     }
 }
+
+#[test]
+fn pp_increase_exchange_quotes_before_clamping_and_body_reads_the_committed_choice() {
+    for (discount, accepted, payment) in [(-3_i64, true, 2_u8), (-3, false, 0), (-9, true, 0)] {
+        let tree = candidate(
+            "unit-spell",
+            json!({
+                "optional_cost":{"pp":4,"result":"exchange"},"cost_delta":discount
+            }),
+            true,
+        );
+        let program = lower(&tree, 1);
+        let mut game = position(
+            &program,
+            &initial("unit-spell", "field", 0, 5),
+            1,
+            "unit-spell",
+        );
+        let question = start(&mut game);
+        let before = exact_authority(&game);
+        game.answer_internal_card(
+            PlayerId { seat: 2 },
+            question.token,
+            Answer::OptionalCost(accepted),
+        )
+        .unwrap_err();
+        assert_eq!(
+            exact_authority(&game),
+            before,
+            "a foreign actor cannot accept the increase"
+        );
+        let result = resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::OptionalCost(accepted),
+            )
+            .unwrap(),
+        );
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["pp"]["current"],
+            5 - payment,
+            "increase joins discounts before the zero floor"
+        );
+        assert_eq!(
+            view["P1"]["hand"].as_array().unwrap().len(),
+            usize::from(accepted),
+            "the receipt tracks the accepted increase even when the final price is zero"
+        );
+        let exchange = &program.card().card_play_costs[0]
+            .node
+            .exchange
+            .as_ref()
+            .unwrap()
+            .node;
+        let InstructionOutcome::ExchangePayment(receipt) =
+            &result.progress.receipts[&exchange.receipt]
+        else {
+            panic!("exchange receipt")
+        };
+        assert_eq!(receipt.complete, Bool(accepted));
+        assert_eq!(
+            receipt.steps.len(),
+            usize::from(accepted),
+            "there is only one PP payment"
+        );
+    }
+}
+
+#[test]
+fn pp_increase_exchange_unaffordable_acceptance_restores_the_entire_play() {
+    let tree = candidate(
+        "unit-spell",
+        json!({"optional_cost":{"pp":4,"result":"exchange"}}),
+        true,
+    );
+    let program = lower(&tree, 1);
+    let mut game = position(
+        &program,
+        &initial("unit-spell", "field", 0, 4),
+        1,
+        "unit-spell",
+    );
+    let origin = game.clone();
+    let question = start(&mut game);
+    game.answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
+        .unwrap_err();
+    transactions::assert_restored(&game, &origin);
+}
+
+#[test]
+fn pp_increase_exchange_rejects_mixed_empty_or_forged_material_routes() {
+    for play in [
+        json!({"optional_cost":{"pp":0}}),
+        json!({"optional_cost":{"pp":4},"optional_cost_delta":-1}),
+        json!({"optional_cost":{"pp":4},"optional_cost_set":2}),
+        json!({"optional_cost":{"pp":4,"act":{"sel":{"who":"self","zone":"field"},"n":1}}}),
+        json!({"optional_cost":{"pp":4,"one_of":[]}}),
+        json!({"optional_cost":{"one_of":[{"pp":4},{"pp":3}]},"optional_cost_delta":-1}),
+        json!({"optional_cost":{}}),
+    ] {
+        lowerer()
+            .lower(&candidate("unit-spell", play, false))
+            .unwrap_err();
+    }
+    let program = lower(
+        &candidate("unit-spell", json!({"optional_cost":{"pp":4}}), false),
+        1,
+    );
+    for delta in [0, -1] {
+        let mut bad = program.card().clone();
+        bad.card_play_costs[0]
+            .node
+            .exchange
+            .as_mut()
+            .unwrap()
+            .node
+            .change = CostChange::Delta {
+            amount: Expr::Literal(Int(delta)),
+        };
+        WellFormedCardProgram::check(bad).unwrap_err();
+    }
+    let material = lower(
+        &candidate(
+            "unit-spell",
+            json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field"},"n":1}},"optional_cost_delta":-1}),
+            false,
+        ),
+        1,
+    );
+    let mut bad = material.card().clone();
+    bad.card_play_costs[0]
+        .node
+        .exchange
+        .as_mut()
+        .unwrap()
+        .node
+        .change = CostChange::Delta {
+        amount: Expr::Literal(Int(4)),
+    };
+    WellFormedCardProgram::check(bad).unwrap_err();
+}

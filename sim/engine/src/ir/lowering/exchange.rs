@@ -26,6 +26,9 @@ pub(super) fn lower(
         }
         return Ok(None);
     };
+    if let Some(pp) = optional.pp {
+        return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
+    }
     let change = match (play.optional_cost_delta, play.optional_cost_set) {
         (Some(value), None) if value <= 0 => CostChange::Delta {
             amount: Expr::Literal(Int(value)),
@@ -44,7 +47,10 @@ pub(super) fn lower(
             || optional.act.is_some()
             || optional.result.is_some()
             || routes.iter().any(|route| {
-                route.one_of.is_some() || route.discard.is_some() || route.result.is_some()
+                route.pp.is_some()
+                    || route.one_of.is_some()
+                    || route.discard.is_some()
+                    || route.result.is_some()
             })
         {
             return Err(unsupported(&path));
@@ -101,6 +107,45 @@ pub(super) fn lower(
             receipt: ReceiptId(allocator.id(&path)?),
         },
     }))
+}
+
+fn pp_increase(
+    pp: u64,
+    optional: &ast::OptionalCost,
+    play: &ast::PlayCosts,
+    source: &SourceSpan,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Located<PlayCostExchange>, LoweringError> {
+    if pp == 0
+        || play.optional_cost_delta.is_some()
+        || play.optional_cost_set.is_some()
+        || optional.one_of.is_some()
+        || optional.discard.is_some()
+        || optional.to_cemetery.is_some()
+        || optional.banish.is_some()
+        || optional.act.is_some()
+    {
+        return Err(unsupported(path));
+    }
+    let mut located = source.clone();
+    path.clone_into(&mut located.author_path);
+    Ok(Located {
+        source: located,
+        node: PlayCostExchange {
+            scope: allocator.scope(path)?,
+            decision: DecisionId(allocator.id(path)?),
+            materials: vec![],
+            route: None,
+            cost: CostSpec::Ordered { steps: vec![] },
+            change: CostChange::Delta {
+                amount: Expr::Literal(
+                    Int(i64::try_from(pp).map_err(|_private| unsupported(path))?),
+                ),
+            },
+            receipt: ReceiptId(allocator.id(path)?),
+        },
+    })
 }
 
 fn lower_material(

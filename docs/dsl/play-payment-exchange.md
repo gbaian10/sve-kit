@@ -1,7 +1,7 @@
 # 付款交換打出費用修正
 
 本契約補足[打出費用修正](play-cost-semantics.md) §3：只定同一次 card play 中，
-一個可選材料成本換一個常值 delta／set 的內部語義。它是 D0 的實作義務，並非 executor
+一個可選材料成本換一個常值 delta／set，以及單一常值 PP 加費宣告的內部語義。它是 D0 的實作義務，並非 executor
 已支援的聲明；DSL 語法仍以 `dsl/` 為權威，不改公開 program、capability 或最低版本。
 
 依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
@@ -13,6 +13,11 @@
 每個可打出 face 至多一組交換；材料恰為自己公開區域或手牌的一個集合、固定正整數張數，
 同一實體不得重選。交換的修正恰為一個 literal Delta≤0 或 Set≥0，無另附條件或列表。
 一般無付款修正仍沿原契約；所有 set 宣告合計至多一個，包括未選的交換 set。
+
+單一 PP 加費宣告另收 `play.optional_cost: {pp: N, result: enhanced}`，N 必須是正整數；
+BP13-035／SD07-021 使用 +4，BP13-060／PR-361 使用 +3。它只將正 delta 加入
+同一次打出報價，不另支付一份 PP 材料；不能與材料、`one_of`、`optional_cost_delta` 或
+`optional_cost_set` 混用。沒有材料的其他空交換仍拒絕。
 
 | 材料成本 | 來源／動作 | 代表片段 |
 | --- | --- | --- |
@@ -33,7 +38,7 @@
 
 以下整卡拒絕，包含未選分支：上述形狀以外的 `one_of`、多組交換、`steps`、材料 groups、
 upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payload.result、動態張數、X、
-其他非公開區域的材料、上述擇一以外的 EX 材料、其他操作、額外／模式內 optional 或 additional、alt、+N、正 delta、
+其他非公開區域的材料、上述擇一以外的 EX 材料、其他操作、額外／模式內 optional 或 additional、alt、上述單一 PP 宣告以外的 +N／正 delta、
 複數 set、未受驗的 aura／next-play／期限。骸の王的兩種材料必須整組承載；
 開闢の予言者的十組原費用不能縮成任選十張。付款交換本身依 CR 屬可選追加成本，
 本節拒絕的是**除此單一交換以外**的追加費用，不是把交換改稱另一種遊戲規則。
@@ -47,9 +52,13 @@ upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payl
 | 步驟 0–1 | 保存整次 origin；公開打出的卡並移入 Resolution；它不再是 Hand／墓地的候選材料 |
 | 步驟 2 | 由 play controller 決定接受／拒絕交換（CR 10.4.7.2、10.6.2.2.2）；只保存 DecisionId 對應的決定，不移材料、不扣 PP、不產生付款 receipt |
 | 步驟 3–4 | 依既有規則選 targets／分配；不把成本材料冒充本文 target。首批不允許交換決定影響模式數、targets、分配或 X |
-| 步驟 5a | 在任何付款之前，以同一 Resolution 狀態求全部成本修正、固定實付 PP（§3）；接受交換時才詢問並驗證足額材料；擇一交換先用既有整數決定選可完整支付的方案，再出該支材料題，仍不修改遊戲狀態 |
+| 步驟 5a | 在任何付款之前，以同一 Resolution 狀態求全部成本修正、固定實付 PP（§3）；接受材料交換時才詢問並驗證足額材料；擇一交換先用既有整數決定選可完整支付的方案，再出該支材料題，仍不修改遊戲狀態 |
 | 步驟 5b | 驗證固有 PP 與整組材料均可完整支付，再依 §3.2 消費一次完整計畫；不在本文再次付款 |
 | 步驟 6–9 | 付款後檢查場容量，成功後才 played／本文／resolved／CheckTiming；付款產生的事件不在步驟 5 插入能力解決 |
+
+PP 加費宣告沿同一接受決定、目標與付款時點，但不出材料或方案題。
+報價先合計增加量與既有費用修正，最後截零；例如印刷 1、加費 4、減費 3 的實付為 2，
+拒絕加費則為 0。接受宣告且完整支付後，PaymentComplete 為 true，即使折扣使實付成為 0。
 
 材料由 play controller 選，預設所屬玩家依 CR 10.4.3；第一版只收 self，不詢問對手。
 回答綁當次 execution、DecisionId、材料選擇狀態版本與世代。公開區域材料公開候選；手牌候選與選擇只送付款者，棄牌完成後才公開已支付的卡。
@@ -151,6 +160,10 @@ scope 封閉材料 binding 與成本指示；既有 face 條件不繼承它。de
 身分須唯一且保留各自來源座標，不以 author mapping 遍歷順序生成執行先後。
 face 可以只有 exchange 而沒有普通 modifiers；兩者都空才是空項，face 唯一性不變。
 
+PP 加費宣告使用同一 `PlayCostExchange`：`materials=[]`、`route=None`、
+`cost=Ordered([])`、`change=Delta(N)` 且 N>0。良構與 runtime 共用此封閉形狀判定；
+材料交換仍不接受正 delta。PP 宣告的完成回條只參照唯一固有 PP receipt，不另造付款指示。
+
 `receipt` 是整組交換的 PaymentResult：拒絕在步驟 5 結束記 Declined／不完整；接受且
 固有 PP 與材料都付完才記 PaymentComplete=true。付不起不產生可供本文消費的結果。
 公開材料自身的動作 receipt 仍只供 authority 記錄。手牌交換的 `discard.result` 可具名其棄牌回條，
@@ -172,11 +185,12 @@ optional，整卡拒絕。同次本文除上述 PaymentComplete 外，只增加�
 
 - DSL 入口接 `play.optional_cost` 的單一 mapping 或 §1 的兩支 `one_of`（每支 exact Material，wrapper.result
   可省略），並且恰有一個 literal `optional_cost_delta` 或 `optional_cost_set`。
-  不帶 option、不帶 choice 關聯；缺修正、帶列表或條件式交換修正均拒絕。
+  單一 PP 宣告則只帶正整數 `pp` 與可選 `result`，不帶上述 delta／set 欄位。
+  兩種入口均不帶 option、不帶 choice 關聯；材料交換缺修正、帶列表或條件式交換修正均拒絕。
   公開材料沿用物件篩選器，包含 `name_contains`；候選 binding 換到材料決定的獨立
   scope 時保留完整篩選條件。名稱包含並不放寬卡種或直立資格，例如 CP04-036 只接受
   名稱含「ペコリーヌ」的直立從者，仍須恰好一張，不能以錯名、錯卡種或已橫置的卡付款。
-- lowering 把這對欄位構成 face 的唯一 exchange，與一般 modifiers 並列；不讓 exchange
+- lowering 把材料與修正或單一 PP 宣告構成 face 的唯一 exchange，與一般 modifiers 並列；不讓 exchange
   change 同時進普通 modifiers。Spell 的 `PlaySpec.costs` 保持唯一印刷 PP literal，
   Follower 仍走卡片規則成本。既有來源 reader 若只能看 abilities，須接 card-level play
   才能開放此功能；不新增DSL 欄位或從卡文 regex 自動由 DSL 推導效果。
@@ -205,6 +219,10 @@ false fallback 讓卡片通過。例子只測承載，不要求次元の超越�
    不增加另一套 snapshot 矩陣。
 4. §5 的提前 receipt 反例仍在靜態時點拒絕；材料誘發驗證完整付款與本文後才開放待機。
    另以 PP 相依常駐守護的離場訂閱，驗證 §3.2 在付款前完整拒絕；其他拒絕沿既有准入。
+5. 單一 PP 加費 Spell：印刷 1、宣告 +4 與減費 −3，接受付 2、拒絕付 0；
+   減費使總額成為 0 時，接受回條仍為 true。付不起回整次 origin，不出材料題，
+   固有 PP receipt 只支付一次。BP13-035 的三組具名搜尋可少找（Q1743）；
+   BP13-060 沒有必要敵方從者目標時不能打出（Q1770），不留下加費或移動。
 
 ## 7. 兩支材料的執行邊界
 
