@@ -341,3 +341,133 @@ fn other_public_class_count_excludes_holder_and_opposing_or_wrong_kind_cards() {
         );
     }
 }
+
+#[test]
+fn single_body_discard_result_counts_only_successful_cards() {
+    let steps = json!([
+        {"discard":{"who":"self","n":1,"result":"discarded"}},
+        {"if":{"cond":{"cmp":{"left":{"count_of":"discarded"},"op":"eq","right":1}},
+            "then":[{"life":{"who":"self","delta":2}}]}},
+        {"life":{"who":"self","delta":{"count":{"in":{"objects_of":"discarded","view":"before"},"kind":"spell"}}}}
+    ]);
+    let mut document = tree(json!({"pp":0}), steps);
+    let entry = document["cards"]["BP08-038"].take();
+    document["cards"] = json!({"unit-follower":entry});
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for present in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["leader"]["life"] = json!(20_u8);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["hand"] = if present {
+            json!([{"id":"fuel","card":"unit-spell"}])
+        } else {
+            json!([])
+        };
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "single-body-discard",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let mut play = game
+            .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap();
+        let CardPlay::Awaiting(question) = play else {
+            panic!("private discard choice, including an empty hand")
+        };
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("discard members")
+        };
+        assert!(
+            game.internal_decision(View::P2).is_none(),
+            "the hand choice remains private"
+        );
+        assert_eq!(
+            domain.members.len(),
+            usize::from(present),
+            "the choice contains only existing hand cards"
+        );
+        play = game
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Targets(domain.members.iter().map(|member| member.handle).collect()),
+            )
+            .unwrap();
+        let result = resolved(play);
+        let discarded = result
+            .progress
+            .receipts
+            .values()
+            .find_map(|outcome| {
+                if let InstructionOutcome::Discard(discard) = outcome {
+                    Some(discard)
+                } else {
+                    None
+                }
+            })
+            .unwrap();
+        assert_eq!(
+            discarded.successful.len(),
+            usize::from(present),
+            "only successful discards enter the receipt"
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["leader"]["life"],
+            if present { 23_u8 } else { 20_u8 }
+        );
+        assert_eq!(
+            state["P1"]["cemetery"],
+            if present { json!(["fuel"]) } else { json!([]) }
+        );
+    }
+}
+
+#[test]
+fn single_body_discard_result_rejects_unadmitted_producers_and_escaping_bindings() {
+    let read = json!({"draw":{"n":{"count_of":"discarded"}}});
+    for discard in [
+        json!({"who":"opp","n":1,"result":"discarded"}),
+        json!({"who":"self","n":2,"result":"discarded"}),
+        json!({"who":"self","n":1,"random":true,"result":"discarded"}),
+        json!({"who":"self","all":true,"result":"discarded"}),
+    ] {
+        lowerer()
+            .lower(&tree(json!({"pp":0}), json!([{"discard":discard},read])))
+            .unwrap_err();
+    }
+    lowerer()
+        .lower(&tree(
+            json!({"pp":0}),
+            json!([
+                {"discard":{"n":1,"result":"discarded"}},
+                {"draw":{"n":{"cost_of":{"objects_of":"discarded","view":"before"}}}}
+            ]),
+        ))
+        .unwrap_err();
+    lowerer()
+        .lower(&tree(
+            json!({"pp":0}),
+            json!([read,{"discard":{"n":1,"result":"discarded"}}]),
+        ))
+        .unwrap_err();
+    lowerer()
+        .lower(&tree(
+            json!({"pp":0}),
+            json!([
+                {"optional":{"do":[{"discard":{"n":1,"result":"discarded"}}]}},read
+            ]),
+        ))
+        .unwrap_err();
+}
