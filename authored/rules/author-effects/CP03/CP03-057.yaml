@@ -1,0 +1,37 @@
+cards:
+  CP03-057:
+    abilities:
+      - fanfare:
+          do:
+            - move:
+                ref: returned
+                to: hand
+            - choose:
+                bind: selected
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - banish:
+                ref: selected
+          targets:
+            - bind: returned
+              from:
+                trait: ペイルムーン
+                who: self
+                zone: banish
+              n: 1
+        line: 1
+    admission: light
+    ignored:
+      - line: 1
+        reason: reminder
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-07"
+format: 2
+kind: author_effect_set

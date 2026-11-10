@@ -1,0 +1,51 @@
+cards:
+  CP03-044:
+    abilities:
+      - line: 1
+        keywords:
+          - twin_drive
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: cheap
+              from:
+                who: self
+                zone: banish
+                kind: follower
+                trait: ペイルムーン
+                orig_cost_le: 2
+              n: 1
+              option: 1
+            - bind: revived
+              from:
+                who: self
+                zone: banish
+                kind: follower
+                trait: ペイルムーン
+              n: 1
+              option: 2
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - move:
+                        ref: cheap
+                        to: field
+                        result: free_entry
+                  - - pay:
+                        cost:
+                          pp: 4
+                        do:
+                          - move:
+                              ref: revived
+                              to: field
+                              result: entered
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
