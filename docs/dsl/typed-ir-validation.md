@@ -752,6 +752,8 @@ Advance 頭使用既有 `KeywordId::AdvanceActivate` 與進化相當付款程序
 
 任意張數捨棄使用既有 Chosen／DiscardOutcome；只接受無篩選的自己當前手牌、單一 disjoint 群組、min=0/max=None。發問時上限夾到現有候選數，回答仍驗 actor、token、世代、owner、controller 與唯一 handle。成功回條的 Before 成員數供 `count_of` 讀取；既有精確一張材料的原費讀取限制不變。
 
+效果本文固定捨棄自己一張手牌也可命名 `result`，以 `count_of` 判斷實際成功捨棄的張數（幼狼奮闘）。空手牌時回條為零，不執行依成功捨棄附帶的後續指示；可放在既有 `optional` 內讓玩家拒絕，回條綁定不離開該分支。此回條的成功範圍是零至一張，不等於已支付的精確一張成本，因此不能讀取單張材料的原費。這次不開放多張、隨機、全捨或對手捨棄的結果命名。
+
 ## 追加回合的執行子集
 
 作者 `extra_turn: {who: self}` 降到既有 `Action::ScheduleTurn`，固定 `Controller`、`InsertBefore(NextTurn)`，並建立 `ScheduleToken` producer。WF 與 runtime 只收這個形狀；其他玩家、`SkipNext` 與任意 anchor 仍拒絕。正式打牌程序沿既有成本及解決流程，插入時不改 active player，而是交共用回合佇列依建立順序選取。

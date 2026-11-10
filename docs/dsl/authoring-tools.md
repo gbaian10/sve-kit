@@ -449,7 +449,7 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
 
-`discard: {any: true, who: self, result: discarded}` 讓控制者從自己的現有手牌選任意張數（含零），透過私有選擇問題回答。`count_of: discarded` 讀取實際捨棄成功的張數，可用 `draw: {n: {plus: [{count_of: discarded}, 1]}}` 接續抽牌。這個結果只開放任意張數的自己手牌捨棄，不擴充牌面屬性、隨機、對手或篩選變體。
+`discard: {any: true, who: self, result: discarded}` 讓控制者從自己的現有手牌選任意張數（含零），透過私有選擇問題回答。`count_of: discarded` 讀取實際捨棄成功的張數，可用 `draw: {n: {plus: [{count_of: discarded}, 1]}}` 接續抽牌。效果本文的 `discard: {who: self, n: 1, result: discarded}` 也可讀取成功張數：幼狼奮闘以 `optional` 包住捨棄，再用 `count_of: discarded` 等於 1 決定是否堆墓；空手牌接受時仍是零張，拒絕時不執行分支。單張回條也沿用既有 `count: {in: {objects_of: discarded, view: before}, kind: spell}` 的牌面條件計數，空回條為零；這不是保證支付的一張成本，不能用 `cost_of` 讀原費。這次不開放多張固定數量、隨機、全捨、對手或手牌篩選的結果命名。
 
 `win: {who: self}` 表示能力控制者在效果處理中勝利，沿用共用勝負判定及禁止檢查。勝利即停止剩餘效果並清除所有待解問題，不先執行下一個檢查時機；因此斯巴達克斯先抽空牌庫、再滿足勝利條件時，勝利先於空牌庫的規則敗北。條件只在本次程序指定處檢查，不因其他待機能力稍後抽牌而重驗（Q1162、Q1480）。此變體不含對手／全體、`result` 或 `precondition`；不提供常駐的禁止勝利／敗北能力。
 
