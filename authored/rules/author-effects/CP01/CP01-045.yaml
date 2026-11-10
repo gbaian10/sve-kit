@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP01-045:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - repeat:
+                        n: 3
+                        do:
+                          - move:
+                              top:
+                                who: self
+                                n: 1
+                              to: ex
+                  - - search:
+                        sel:
+                          who: self
+                          zone: deck
+                          name: カワカミプリンセス
+                        n: 1
+                        to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"

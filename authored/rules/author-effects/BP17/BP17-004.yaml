@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-004:
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        auto:
+          "on":
+            played:
+              who: self
+              sel:
+                trait: 獣
+              during:
+                turn: self
+          per_turn: 1
+          do:
+            - pp:
+                who: self
+                delta: 1
+      - line: 3
+        fanfare:
+          do:
+            - repeat:
+                n: 2
+                do:
+                  - move:
+                      top:
+                        who: self
+                        n: 1
+                      to: ex
+                      result: placed
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              in:
+                                objects_of: placed
+                                view: before
+                              trait: 獣
+                          op: ge
+                          right: 1
+                      then:
+                        - life:
+                            who: self
+                            delta: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
