@@ -5,6 +5,7 @@ use super::{
     PendingOccurrence, Result, RuntimeZoneRef, SnapshotId, SourceInformation, TriggerAggregation,
     TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
+use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, KeywordId, PlayerId};
@@ -186,6 +187,36 @@ impl Game {
             .collect()
     }
 
+    fn ex_observers(&self) -> Result<Vec<(String, Vec<EffectiveAbility>)>> {
+        let mut observers = self
+            .movement_observers(false)?
+            .into_iter()
+            .map(|(holder, abilities)| {
+                (
+                    holder,
+                    abilities.into_iter().map(EffectiveAbility::from).collect(),
+                )
+            })
+            .collect::<Vec<_>>();
+        if self.internal_has_granted_definitions() {
+            for holder in self.field_ids() {
+                let granted = self
+                    .internal_effective_abilities(&holder)?
+                    .into_iter()
+                    .filter(|ability| {
+                        ability.grant.is_some()
+                            && ability.node.active_zones == [ZoneKind::Field]
+                            && matches_kind(&ability.node, false)
+                    })
+                    .collect::<Vec<_>>();
+                if !granted.is_empty() {
+                    observers.push((holder, granted));
+                }
+            }
+        }
+        Ok(observers)
+    }
+
     fn departure_destination(
         &self,
         previous: &Object,
@@ -361,13 +392,14 @@ impl Game {
         if previous.is_empty() {
             return Ok(());
         }
-        let mut observers = self.movement_observers(false)?;
+        let mut observers = self.ex_observers()?;
         // An arriving card's own EX-zone ability sees the move that activates it (CR 10.7.4.2).
         for old in previous {
             let own = self
                 .internal_printed_abilities(&old.id)?
                 .into_iter()
                 .filter(|ability| ex_self_entry(&ability.node))
+                .map(EffectiveAbility::from)
                 .collect::<Vec<_>>();
             if !own.is_empty() {
                 observers.push((old.id.clone(), own));
@@ -405,8 +437,6 @@ impl Game {
                     ) {
                         continue;
                     }
-                    let source = self.internal_card_source(holder, ability.node.id, actor)?;
-                    let information = SourceInformation::current(self, source)?;
                     let header = if let Some(header) = &shared_header {
                         header.clone()
                     } else {
@@ -414,22 +444,19 @@ impl Game {
                         shared_header = Some(generated.clone());
                         generated
                     };
-                    let mut pending = self.new_pending(
+                    let pending = self.timing_occurrence(
                         holder,
-                        source,
                         ability.clone(),
-                        information,
-                        header,
-                        None,
-                    )?;
-                    pending.timing = Some(EventPayload::EnterEx {
-                        event: EnterExEvent {
-                            object,
-                            from: origin(old)?,
-                            controller,
-                            characters: characters.clone(),
+                        &header,
+                        EventPayload::EnterEx {
+                            event: EnterExEvent {
+                                object,
+                                from: origin(old)?,
+                                controller,
+                                characters: characters.clone(),
+                            },
                         },
-                    });
+                    )?;
                     candidates.push(pending);
                 }
             }
