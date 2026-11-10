@@ -1,0 +1,45 @@
+cards:
+  BP21-048:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - kind: follower
+                    trait: 学院
+                  - kind: spell
+                    trait: 学院
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: ex
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

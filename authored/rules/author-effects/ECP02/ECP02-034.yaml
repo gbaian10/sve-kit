@@ -1,0 +1,64 @@
+cards:
+  ECP02-034:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - trait: キュート
+                  - trait: クール
+                  - trait: パッション
+                may: true
+                upto: 3
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - lesson: 2
+              - act_self: true
+          do:
+            - damage:
+                n: 4
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

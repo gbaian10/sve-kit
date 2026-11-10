@@ -1,0 +1,84 @@
+cards:
+  BP12-037:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - kind: follower
+                    trait: 魔法使い
+                  - kind: spell
+                    trait: 魔法使い
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - choose:
+                bind: given
+                from:
+                  class: ウィッチ
+                  kind: spell
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: given
+                result: given_ex
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: given_ex
+                until: turn
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: follower
+                  trait: 魔法使い
+                  who: self
+                  zone: cemetery
+              op: ge
+              right: 5
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
