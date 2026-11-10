@@ -1,0 +1,21 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP20-P65:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    token:
+      name: クレスト 混融の継承者・シャム＝ナクア
+      template: true
+    abilities:
+      - line: 1
+        static:
+          zone: ex
+          effects:
+            - choice_any:
+                who: self

@@ -9,6 +9,7 @@ mod aggregates;
 mod ast;
 mod attack_restrictions;
 mod capture;
+mod choice_rules;
 mod combat;
 mod conditions;
 mod costs;
@@ -491,6 +492,7 @@ impl Allocator {
         if let Some(declaration) = &entry.r#static {
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
+                Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
                 Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
                 Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                 Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,

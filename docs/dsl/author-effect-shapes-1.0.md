@@ -169,7 +169,7 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 | enters_acted | static BP11-112 | 對未來入場的 this，完整入場接線待做 |
 | reroll | static ECP02-065 | times:1 |
 | ignore_ward | static BP04-006 | on:this |
-| choice_any | static BP20-P65 | who:self |
+| choice_any | static BP20-P65 | zone:ex、who:self、無 while；原本至少選一個模式才適用 |
 | extra_trigger | static BP19-092 | phase:end,n:1 |
 | must_target | static BP03-091 | on:this,by:opp |
 | rule.spellchain_population | static BP02-035 | 墓場 spell 與巫師 follower 聯集 |

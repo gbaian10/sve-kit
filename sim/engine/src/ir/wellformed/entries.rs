@@ -426,7 +426,9 @@ impl Checker {
 
     fn ability_declarations(&mut self, ability: &Ability) -> Checked {
         // The closed printed shape proves its whole lifetime and player boundary together.
-        if super::super::evolution_limits::is_static(ability) {
+        if super::super::evolution_limits::is_static(ability)
+            || super::super::choice_rules::is_static(ability)
+        {
             return Ok(());
         }
         for (index, effect) in ability.declarations.iter().enumerate() {

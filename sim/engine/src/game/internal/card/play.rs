@@ -6,10 +6,10 @@ use super::{
 };
 use crate::game::internal::{InstructionOutcome, UbHistoryFact, player_id};
 use crate::game::legal::subsets;
-use crate::ir::optional_payment;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp as x_payment;
+use crate::ir::{choice_rules, optional_payment};
 
 use crate::ir::{AbilityCostPolicy, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
 use crate::ir::{
@@ -527,6 +527,14 @@ fn spell_origin(zone: &str) -> Result<ZoneKind> {
     }
 }
 
+const fn mode_minimum(bounds: Cardinality) -> u64 {
+    if bounds.maximum.is_none() {
+        1
+    } else {
+        bounds.minimum.0
+    }
+}
+
 fn conditional_play_modes(ability: &Ability) -> bool {
     ability.play.as_ref().is_some_and(|play| {
         matches!(play,
@@ -625,6 +633,21 @@ fn conditional_modes(
     reason = "Formal plays share the authority's execution and rollback boundary."
 )]
 impl Game {
+    fn internal_choice_any(&self, actor: PlayerId) -> Result<bool> {
+        for holder in self.zone_ids(seat_name(actor)?, "ex") {
+            let (card, _) = self.internal_effective_print(&holder)?;
+            if self.card_runtime.is_loaded(&card)
+                && self
+                    .internal_printed_abilities(&holder)?
+                    .iter()
+                    .any(|ability| choice_rules::is_static(&ability.node))
+            {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
     pub(in crate::game::internal) fn internal_quick_preflight(
         &self,
         holder: &str,
@@ -845,13 +868,24 @@ impl Game {
         let Some((group, rest)) = groups.split_first() else {
             return self.internal_feasible_targets(execution, &execution.slots, &parameters);
         };
-        let count = execution.natural(self, &group.count)?;
-        let ChoiceDomain::Modes { cardinality, .. } = &group.chosen.domain else {
+        let mut count = execution.natural(self, &group.count)?;
+        let mut chosen = group.chosen.clone();
+        let ChoiceDomain::Modes { cardinality, .. } = &mut chosen.domain else {
             return Err(unsupported("Quick mode domain"));
         };
         if count == Nat(0) {
             return self.quick_mode_plan(execution, rest, parameters);
         }
+        if mode_minimum(*cardinality) > 0
+            && self.internal_choice_any(execution.context.controller)?
+        {
+            count = Nat(u64::try_from(group.modes.len()).map_err(invalid)?);
+            *cardinality = Cardinality {
+                minimum: Nat(0),
+                maximum: Some(count),
+            };
+        }
+        let cardinality = *cardinality;
         let names = group
             .modes
             .iter()
@@ -861,7 +895,12 @@ impl Game {
         let maximum = cardinality.maximum.map_or(count.0, |n| n.0.min(count.0));
         for selection in subsets(
             &names,
-            usize::try_from(cardinality.minimum.0).map_err(invalid)?,
+            usize::try_from(if cardinality.minimum == Nat(0) {
+                0
+            } else {
+                mode_minimum(cardinality)
+            })
+            .map_err(invalid)?,
             usize::try_from(maximum).map_err(invalid)?,
         ) {
             let selected = group
@@ -871,7 +910,7 @@ impl Game {
                 .filter(|(index, _)| selection.contains(&index.to_string()))
                 .map(|(_, mode)| mode.id)
                 .collect::<Vec<_>>();
-            if !group.chosen.accepts_answer(count, &selected) {
+            if !chosen.accepts_answer(count, &selected) {
                 continue;
             }
             let mut parameters = parameters.clone();
@@ -1610,11 +1649,8 @@ impl Game {
                 play.chosen.insert(group.chosen.id, Vec::new());
                 continue;
             }
-            let minimum = if cardinality.maximum.is_none() {
-                1
-            } else {
-                cardinality.minimum.0
-            };
+            let minimum = mode_minimum(*cardinality);
+            let any = minimum > 0 && self.internal_choice_any(execution.context.controller)?;
             let source = execution
                 .ability
                 .ok_or_else(|| invalid("missing mode source"))?;
@@ -1633,11 +1669,21 @@ impl Game {
                     legal.push(mode.id);
                 }
             }
+            let available = u64::try_from(legal.len()).map_err(invalid)?;
+            let (count, minimum) = if any {
+                (Nat(available), 0)
+            } else {
+                (count, minimum)
+            };
             let affordable = self.internal_play_affordable(execution, play)?;
-            if u64::try_from(legal.len()).map_err(invalid)? < minimum || !affordable {
+            if available < minimum || !affordable {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "no legal mode and cost plan".into(),
                 ));
+            }
+            if count == Nat(0) {
+                play.chosen.insert(group.chosen.id, Vec::new());
+                continue;
             }
             let mut chosen = group.chosen;
             let ChoiceDomain::Modes {
