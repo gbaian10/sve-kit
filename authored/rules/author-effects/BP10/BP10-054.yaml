@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-054:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-11"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        auto:
+          on:
+            left_field: { ref: this }
+          do:
+            - life: { who: self, delta: 8 }
+      - line: 3
+        fanfare:
+          do:
+            - move:
+                top: { who: self, n: 1 }
+                to: ex
+                result: placed
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in: { objects_of: placed, view: before }
+                        orig_cost_ge: 5
+                    op: ge
+                    right: 1
+                then:
+                  - evolve: { ref: this, result: changed }
+                  - if:
+                      cond: { not: { did: changed } }
+                      then:
+                        - move: { ref: this, to: hand }
