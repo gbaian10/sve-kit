@@ -14,6 +14,7 @@ mod conditions;
 mod costs;
 mod counters;
 mod current;
+mod delayed;
 mod dice;
 mod discard;
 mod earth;
@@ -1835,6 +1836,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::Delayed(value) => self.delayed(value, path, source, span),
             ast::Step::Dice(value) => self.dice(value, path),
             ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),

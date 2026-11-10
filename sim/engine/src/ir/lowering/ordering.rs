@@ -201,6 +201,7 @@ impl BodyContext<'_> {
             | ast::Step::Create(_)
             | ast::Step::Equip(_)
             | ast::Step::Pilot(_)
+            | ast::Step::Delayed(_)
             | ast::Step::Boxed(_) => None,
         };
         if let Some((name, saved_receipt)) = saved

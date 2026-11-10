@@ -27,6 +27,7 @@ use alloc::collections::BTreeMap;
 mod ability;
 mod banish;
 mod change;
+pub(in crate::game::internal) mod delayed;
 mod dice;
 mod discard;
 mod draw;
@@ -79,6 +80,7 @@ pub(super) struct PendingOccurrence {
     timing: Option<EventPayload>,
     source_position: u64,
     captures: Vec<((ScopeId, u64), Slot)>,
+    installed: bool,
 }
 
 pub(in crate::game) struct DeparturePlan {
@@ -247,6 +249,7 @@ impl Game {
             card,
             timing: None,
             captures: vec![],
+            installed: false,
             source_position: u64::try_from(
                 self.zone_ids(
                     super::seat_name(source.controller)?,
@@ -353,6 +356,9 @@ impl Game {
     ) -> Result<Vec<PendingSourceDeparture>> {
         let mut updates = Vec::new();
         for pending in &self.card_runtime.pending {
+            if pending.installed {
+                continue;
+            }
             let departing = if ids.contains(&pending.holder)
                 && destinations.get(&pending.holder).is_some_and(|to| {
                     self.object(&pending.holder).is_ok_and(|object| {
@@ -398,12 +404,26 @@ impl Game {
                 destinations.get(id).map(String::as_str),
                 frame,
             )?);
-            let observed = self.movement_departures(id, destinations, before, side, frame)?;
-            let observed_header = observed.first().map(|pending| pending.header.clone());
-            for pending in observed {
-                plan.departures.push((pending, self.object(id)?.clone()));
-            }
             let object = self.object(id)?.clone();
+            let observed = self.movement_departures(id, destinations, before, side, frame)?;
+            let mut observed_header = observed.first().map(|pending| pending.header.clone());
+            for pending in observed {
+                plan.departures.push((pending, object.clone()));
+            }
+            let delayed_destination = destinations.get(id).map_or("", String::as_str);
+            let delayed = self.delayed_departures(
+                &object,
+                delayed_destination,
+                before,
+                frame,
+                observed_header.as_ref(),
+            )?;
+            if observed_header.is_none() {
+                observed_header = delayed.first().map(|pending| pending.header.clone());
+            }
+            for pending in delayed {
+                plan.departures.push((pending, object.clone()));
+            }
             let Some(destination) = destinations.get(id).map(String::as_str) else {
                 continue;
             };

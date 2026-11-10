@@ -1381,6 +1381,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Pilot(_)
         | ast::Step::Boxed(_)
         | ast::Step::Win(_)
+        | ast::Step::Delayed(_)
         | ast::Step::ExtraTurn(_) => false,
     })
 }

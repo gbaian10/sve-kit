@@ -605,6 +605,7 @@ impl Checker {
             self.at(&index.to_string(), |checker| checker.capture(capture))?;
             after.bindings.extend(self.env.bindings.clone());
             after.access.extend(self.env.access.clone());
+            after.capture_times.extend(self.env.capture_times.clone());
         }
         self.capture_time = previous;
         self.event_history = None;

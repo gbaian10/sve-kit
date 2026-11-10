@@ -26,6 +26,32 @@ impl BodyContext<'_> {
         Ok((index, selection))
     }
 
+    pub(super) fn selected_objects(
+        &mut self,
+        name: &str,
+        path: &str,
+    ) -> Result<(CaptureTime, CaptureRef<Selector>), LoweringError> {
+        let (index, selection) = self.selected_parameter(name, path)?;
+        let into = CaptureRef {
+            binding: Binding::new(self.allocator.id(path)?, selection.key().0),
+        };
+        let decision = self
+            .parameters
+            .get_mut(index)
+            .ok_or_else(|| unsupported(path))?;
+        let at = CaptureTime::AtSelection {
+            decision: decision.id,
+        };
+        decision.captures.push(Capture::Objects {
+            at,
+            value: Selector::Bound {
+                reference: selection,
+            },
+            into: into.clone(),
+        });
+        Ok((at, into))
+    }
+
     /// Captures the chosen object's player at selection, so later moves cannot change it.
     pub(super) fn selected_player(
         &mut self,

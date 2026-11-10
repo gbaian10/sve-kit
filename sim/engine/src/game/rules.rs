@@ -837,6 +837,7 @@ impl Game {
         self.internal_drive_end_turn(turn);
         self.internal_attack_restrictions_end_turn(turn);
         self.internal_ability_restrictions_end_turn(turn);
+        self.internal_delayed_end_turn(turn);
         self.internal_preventions_end_turn(turn);
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;

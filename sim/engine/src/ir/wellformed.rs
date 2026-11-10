@@ -20,6 +20,7 @@ use core::fmt;
 mod advance_entry;
 mod control;
 mod decisions;
+mod delayed;
 mod entries;
 mod events;
 mod evolution;
@@ -228,6 +229,7 @@ struct Environment {
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
     receipts: BTreeMap<ReceiptId, TypeId>,
+    capture_times: BTreeMap<Key, CaptureTime>,
     field_act_materials: BTreeSet<Key>,
     field_materials: BTreeSet<Key>,
     reveal_materials: BTreeSet<Key>,
@@ -237,6 +239,7 @@ struct Environment {
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
         self.bindings.extend(other.bindings.clone());
+        self.capture_times.extend(other.capture_times.clone());
         self.receipts.extend(other.receipts.clone());
         self.field_act_materials
             .extend(other.field_act_materials.iter().copied());
@@ -311,6 +314,7 @@ impl Checker {
             movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),
             receipts: BTreeMap::new(),
+            capture_times: BTreeMap::new(),
             field_act_materials: BTreeSet::new(),
             field_materials: BTreeSet::new(),
             reveal_materials: BTreeSet::new(),
@@ -646,6 +650,7 @@ impl Checker {
     )]
     fn action(&mut self, action: &Action, instruction_actor: &PlayerRef) -> Checked {
         match action {
+            Action::Delay { .. } => self.delay(action),
             Action::GameResult {
                 players,
                 result: super::Outcome::Win,
@@ -1060,6 +1065,7 @@ impl Checker {
                 Ok(())
             }
             Capture::Objects { at, value, into } => {
+                self.env.capture_times.insert(into.binding.key(), *at);
                 let access = self.capture_access(*at, |checker| checker.selector(value));
                 self.frozen(*at, |checker| checker.selector(value))?;
                 self.define(into.binding, BindingKind::Capture)?;
