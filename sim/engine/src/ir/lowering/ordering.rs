@@ -483,7 +483,8 @@ impl BodyContext<'_> {
                         r#ref: ast::Objects::Bound(name),
                         result: Some(_),
                     } = objects.as_ref()
-                        && self.observed_targets.contains(name) =>
+                        && (self.observed_targets.contains(name)
+                            || self.cemetery_banish_targets.contains(name)) =>
                 {
                     self.objects(&ast::Objects::Bound(name.clone()), path)?
                 }
