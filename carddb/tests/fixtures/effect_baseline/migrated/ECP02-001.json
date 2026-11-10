@@ -1,0 +1,74 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "optional",
+            "selection": {
+              "bind": "chosen",
+              "max": 1,
+              "min": 1,
+              "select": {
+                "side": "self",
+                "trait": "デレマス",
+                "type": "follower",
+                "where": {
+                  "args": [
+                    {
+                      "read": "item.cost"
+                    },
+                    2
+                  ],
+                  "fn": "le"
+                },
+                "zone": "hand"
+              }
+            },
+            "then": {
+              "op": "move",
+              "subjects": "chosen",
+              "to": "ex"
+            }
+          },
+          {
+            "amount": -2,
+            "op": "adjust_cost",
+            "subjects": "chosen",
+            "until": "end-of-turn"
+          }
+        ]
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        },
+        {
+          "count": 1,
+          "op": "lesson"
+        }
+      ],
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
