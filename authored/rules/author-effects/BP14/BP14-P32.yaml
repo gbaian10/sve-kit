@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-P32:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+            - optional:
+                do:
+                  - discard:
+                      who: self
+                      n: 1
+                      result: discarded
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count_of: discarded
+                          op: eq
+                          right: 1
+                      then:
+                        - move:
+                            top:
+                              who: self
+                              n: 1
+                            to: cemetery
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+    token:
+      name: 幼狼奮闘
+      template: true
