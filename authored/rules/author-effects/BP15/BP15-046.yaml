@@ -1,0 +1,75 @@
+cards:
+  BP15-046:
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            reveal:
+              n: 2
+              sel:
+                trait: 陰陽師
+                who: self
+                zone: hand
+      - line: 2
+        spell:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: paid
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        orig_cost_le: x
+                        trait: 陰陽師
+                        who: self
+                        zone: deck
+                      to: field
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            minus:
+                              - count:
+                                  trait: 陰陽師
+                                  who: self
+                                  zone: cemetery
+                              - minus:
+                                  - count:
+                                      kind: spell
+                                      trait: 陰陽師
+                                      who: self
+                                      zone: cemetery
+                                  - count:
+                                      kind: spell
+                                      who: self
+                                      zone: cemetery
+                          op: ge
+                          right: 7
+                      then:
+                        - create:
+                            n: 1
+                            result: shape
+                            to: ex
+                            token: 形代
+                        - grant:
+                            abilities:
+                              - play:
+                                  cost_delta: -1
+                            on:
+                              follow: shape
+          optional_cost:
+            pp: x
+            result: paid
+          x: {}
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

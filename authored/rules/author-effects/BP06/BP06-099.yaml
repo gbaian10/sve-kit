@@ -1,0 +1,34 @@
+cards:
+  BP06-099:
+    abilities:
+      - auto:
+          do:
+            - pp:
+                delta: 1
+                who: self
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          cost:
+            pp: x
+          do:
+            - damage:
+                n: x
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          x: {}
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

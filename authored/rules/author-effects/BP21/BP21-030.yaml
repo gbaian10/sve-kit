@@ -1,0 +1,34 @@
+cards:
+  BP21-030:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: x
+              - act_self: true
+          do:
+            - move:
+                ref: chosen
+                result: entered
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                not_same_name_as_this: true
+                orig_cost_le: x
+                trait: 学院
+                who: self
+                zone: cemetery
+              n: 1
+          x: {}
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
