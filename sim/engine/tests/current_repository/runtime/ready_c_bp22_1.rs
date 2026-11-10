@@ -172,7 +172,6 @@ fn attack(game: &mut Game, attacker: &str, target: &str) {
     settle_combat(game);
 }
 
-// BP22-027 is not admitted yet, so a same-name companion supplies only evolution.
 fn synthetic_base(form: &str, initial: &Value) -> Game {
     let (snapshot, keywords, mut input) = inputs().clone();
     let printed: Value = snapshot

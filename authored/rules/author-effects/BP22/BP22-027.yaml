@@ -1,0 +1,31 @@
+cards:
+  BP22-027:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    traits_all:
+                      - 指揮官
+                      - 盗賊
+                    who: self
+                    zone: field
+                then:
+                  - evolve:
+                      ref: this
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

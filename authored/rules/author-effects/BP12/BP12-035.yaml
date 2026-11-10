@@ -1,0 +1,52 @@
+cards:
+  BP12-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 遮断の触手
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - banish:
+                  n: 2
+                  sel:
+                    token: true
+                    trait: 機械
+                    who: self
+                    zone: ex
+              - self_to_ex: true
+          do:
+            - either:
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 遮断の触手
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 蹂躙の触手
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+    token_sources:
+      - card: BP12-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

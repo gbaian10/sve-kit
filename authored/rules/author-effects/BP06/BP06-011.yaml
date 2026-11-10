@@ -1,0 +1,41 @@
+cards:
+  BP06-011:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        hp: 2
+                        on: fairy
+                        power: 2
+                  - - create:
+                        n: 2
+                        to: ex
+                        token: フェアリー
+          targets:
+            - bind: fairy
+              from:
+                who: self
+                zone:
+                  - field
+                  - ex
+                trait: 妖精
+                token: true
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+    token_sources:
+      - card: BP06-T05
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

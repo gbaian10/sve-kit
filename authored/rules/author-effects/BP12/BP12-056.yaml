@@ -1,0 +1,44 @@
+cards:
+  BP12-056:
+    abilities:
+      - evolve_time:
+          do:
+            - if:
+                cond:
+                  history:
+                    event: discarded
+                    from: hand
+                    who: self
+                    window: this_turn
+                else:
+                  - damage:
+                      n: 2
+                      to: enemy
+                then:
+                  - damage:
+                      n: 4
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - lastword:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ナテラの大樹
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

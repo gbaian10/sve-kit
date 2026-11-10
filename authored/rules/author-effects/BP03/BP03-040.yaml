@@ -1,0 +1,61 @@
+cards:
+  BP03-040:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: chess
+                result: entered
+                to: field
+          targets:
+            - bind: chess
+              distinct_by: name
+              from:
+                cost_le: 4
+                kind: follower
+                trait: チェス
+                who: self
+                zone: cemetery
+              upto: 4
+        line: 1
+      - activate:
+          cost:
+            to_cemetery:
+              n: 1
+              sel:
+                kind: follower
+                other: true
+                trait: チェス
+                who: self
+                zone: field
+          do:
+            - damage:
+                n: 5
+                to: enemy
+            - apply:
+                effect:
+                  cannot:
+                    ability:
+                      except:
+                        - evolution
+                      kind: activated
+                    what: play_ability
+                on: this
+                until: turn
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set
