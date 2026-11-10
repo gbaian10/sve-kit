@@ -429,6 +429,9 @@ impl Game {
                         attrs["hp"] =
                             json!(int(&attrs["hp"]).saturating_sub(int(&attrs["damage"])));
                     }
+                    if zone == "banish" && attrs.get("face_up").is_none() {
+                        attrs["face_up"] = json!(true);
+                    }
                     if zone == "evolve_deck" {
                         attrs["face_up"] = json!(false);
                     }
@@ -566,6 +569,7 @@ impl Game {
         for object in game.state.objects.values().cloned().collect::<Vec<_>>() {
             for seat in ["P1", "P2"] {
                 if object.zone != "void"
+                    && !(object.zone == "banish" && object.state["face_up"] == false)
                     && (!matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
                         || (object.controller == seat && object.zone != "deck")
                         || (object.zone == "evolve_deck" && object.state["face_up"] == true))

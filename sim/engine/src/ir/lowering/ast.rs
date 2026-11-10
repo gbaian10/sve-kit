@@ -1662,6 +1662,8 @@ pub(super) enum TargetSingleZone {
     Field,
     Ex,
     Cemetery,
+    /// 「自分の消滅領域の…を選ぶ」; the banish zone is public.
+    Banish,
 }
 
 #[derive(Deserialize)]

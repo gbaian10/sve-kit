@@ -670,11 +670,11 @@ impl Game {
                         .is_some_and(|knowledge| knowledge.located.contains(&object.id))
                     && execution.is_private_look_target(objects, member);
                 if kind == ZoneKind::Hand
-                    && !matches!(object.zone.as_str(), "field" | "cemetery")
+                    && !matches!(object.zone.as_str(), "field" | "cemetery" | "banish")
                     && !private_observed_move
                 {
                     return Err(unsupported(
-                        "only public field or cemetery departures to hand",
+                        "only public field, cemetery or banish departures to hand",
                     ));
                 }
                 let resolving_source = kind == ZoneKind::Ex
@@ -835,7 +835,7 @@ impl Game {
                 continue;
             }
             let ordinary = (matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット")
-                && matches!(object.zone.as_str(), "cemetery" | "ex"))
+                && matches!(object.zone.as_str(), "cemetery" | "ex" | "banish"))
                 // A follower token waiting in EX enters like any EX follower (BP01-078's ドラゴン).
                 || (self.object_type(&object.id)? == "フォロワー・トークン" && object.zone == "ex");
             let private_hand = object.zone == "hand"

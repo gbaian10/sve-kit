@@ -79,28 +79,31 @@ fn candidates_defined_inside_the_current_domain_can_read_their_attributes() {
 }
 
 #[test]
-fn evolve_and_banish_require_visibility_evidence_even_for_the_owner() {
-    for kind in [ZoneKind::Evolve, ZoneKind::Banish] {
-        for selector in [zone(PlayerRef::Controller {}, kind, 10), opponents(kind)] {
-            for visibility in [
-                Visibility::Public {},
-                Visibility::Only {
-                    players: controller_set(),
-                },
-            ] {
-                let mut choice = chosen_objects(1, 1, selector.clone());
-                choice.visibility = visibility;
-                reject(
-                    body(1, vec![decision(choice)]),
-                    WellFormedReason::UnsupportedShape,
-                );
-            }
+fn evolve_requires_visibility_evidence_and_banish_is_public() {
+    let evolve_zone = ZoneKind::Evolve;
+    for selector in [
+        zone(PlayerRef::Controller {}, evolve_zone, 10),
+        opponents(evolve_zone),
+    ] {
+        for visibility in [
+            Visibility::Public {},
+            Visibility::Only {
+                players: controller_set(),
+            },
+        ] {
+            let mut choice = chosen_objects(1, 1, selector.clone());
+            choice.visibility = visibility;
+            reject(
+                body(1, vec![decision(choice)]),
+                WellFormedReason::UnsupportedShape,
+            );
         }
     }
     for kind in [
         ZoneKind::Field,
         ZoneKind::Ex,
         ZoneKind::Cemetery,
+        ZoneKind::Banish,
         ZoneKind::Resolution,
         ZoneKind::Race,
         ZoneKind::Drive,
