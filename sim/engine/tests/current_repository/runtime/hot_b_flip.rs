@@ -253,6 +253,7 @@ fn real_guide_fanfare_discards_an_uma_card_and_recovers_four_pp() {
     let mut selected = false;
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::CostMaterials(domain) | InputDomain::Targets(domain) => {
                 assert_eq!(domain.members.len(), 1);

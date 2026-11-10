@@ -368,6 +368,8 @@ pub(super) enum Step {
     Optional(Optional),
     Race(Race),
     GainDrive(EffectEvolution),
+    Dice(Dice),
+    Repeat(Repeat),
     Evolve(NamedEffectEvolution),
     If(Conditional),
     EachPlayer(EachPlayer),
@@ -1719,6 +1721,9 @@ pub(super) enum LeaderSide {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
+    Dice {
+        dice: String,
+    },
     Literal(i64),
     PaidAmount {
         x_paid: String,
@@ -1804,11 +1809,12 @@ pub(super) enum Number {
     },
 }
 
-/// A numeric field of the triggering event; only damage's actual amount is wired.
+/// A numeric field of the typed triggering event.
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum EventNumber {
     Amount,
+    Value,
 }
 
 /// 「N枚につき」: how many whole `unit`s fit in `of`, rounded down.
@@ -2072,6 +2078,8 @@ pub(super) enum PhaseSubscription {
     DriveChecked(DriveCheckedSubscription),
     #[serde(rename = "drive_trigger")]
     DriveTrigger(DriveTriggerSubscription),
+    #[serde(rename = "dice_rolled")]
+    DiceRolled(DiceSubscription),
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
     #[serde(rename = "banished")]
@@ -2610,7 +2618,7 @@ pub(super) enum Condition {
     MyTurn(bool),
     InZone(PlayRestrictionZone),
     Is(AttackTargetCondition),
-    History(HistoryQuery),
+    History(HistoryCondition),
     EnteredFrom(EntryOriginCondition),
     EnteredBy(EntryCondition),
     PlayedFrom(PlayedFromCondition),
@@ -2964,6 +2972,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     UnlimitedEvolve(UnlimitedEvolution),
+    Reroll(Reroll),
     AlsoNamed(AlsoNamed),
     If(Box<StaticConditional>),
     EvolveCostMod(EvolutionCostModifier),
@@ -3469,4 +3478,62 @@ pub(super) struct RevealUntilSelector {
 #[serde(rename_all = "snake_case")]
 pub(super) enum RevealFollower {
     Follower,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Dice {
+    pub bind: String,
+    pub who: Option<SelfPlayer>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Repeat {
+    #[serde(rename = "n")]
+    pub times: u64,
+    #[serde(rename = "do")]
+    pub steps: Vec<Step>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiceSubscription {
+    pub who: SelfPlayer,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Reroll {
+    pub who: SelfPlayer,
+    pub times: u64,
+}
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum HistoryCondition {
+    Dice(DiceHistory),
+    Other(HistoryQuery),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiceHistory {
+    pub event: DiceHistoryEvent,
+    pub who: SelfPlayer,
+    pub window: ThisTurn,
+    pub r#where: Option<DiceHistoryWhere>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DiceHistoryEvent {
+    DiceRolled,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DiceHistoryWhere {
+    pub value: DiceThreshold,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DiceThreshold {
+    Eq(u64),
+    Le(u64),
+    Ge(u64),
 }

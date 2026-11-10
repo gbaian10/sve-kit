@@ -77,6 +77,7 @@ fn definition(number: &str, zone: ZoneKind) -> AbilityId {
 fn finish(game: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
             InputDomain::CostMaterials(_) => Answer::CostMaterials(vec![0]),
             InputDomain::Search(domain) => {

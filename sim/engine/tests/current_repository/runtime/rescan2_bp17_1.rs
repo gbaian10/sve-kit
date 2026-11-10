@@ -20,6 +20,7 @@ fn position(card: &str) -> Value {
 fn finish(game: &mut Game, mut step: CardPlay, mode: u64, accept: bool) {
     while let CardPlay::Awaiting(q) = step {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(accept),
             InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),

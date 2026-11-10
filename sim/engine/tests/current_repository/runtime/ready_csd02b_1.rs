@@ -57,6 +57,7 @@ fn game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
     while let CardPlay::Awaiting(question) = step {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Modes { .. } => Answer::Modes(if mode == 0 {
                 vec![ModeId(1), ModeId(2)]
             } else {

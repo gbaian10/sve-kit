@@ -1041,6 +1041,7 @@ impl Game {
             entry_method: None,
             entry_origin: None,
             damage_event: None,
+            dice_event: None,
             event_move: None,
             targets: BTreeMap::new(),
             play: None,

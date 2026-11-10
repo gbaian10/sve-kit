@@ -110,6 +110,7 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::DriveTrigger(_)
         | ast::PhaseSubscription::Drew(_)
         | ast::PhaseSubscription::Discarded(_)
+        | ast::PhaseSubscription::DiceRolled(_)
         | ast::PhaseSubscription::Banished(_)
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_) => Err(unsupported(path)),

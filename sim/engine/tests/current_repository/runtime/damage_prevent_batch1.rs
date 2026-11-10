@@ -22,6 +22,7 @@ fn rules_game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut play: CardPlay, mode: usize, optional: bool) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(optional),
             InputDomain::TokenCapacity { choices } => {

@@ -32,6 +32,7 @@ fn position(card: &str) -> Value {
 fn finish(game: &mut Game, mut step: CardPlay, mode: ModeId) {
     while let CardPlay::Awaiting(q) = step {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(d) => Answer::Targets(
                 d.members
                     .iter()

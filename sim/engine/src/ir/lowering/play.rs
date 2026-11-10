@@ -996,6 +996,8 @@ impl BodyContext<'_> {
                 activation_zone: self.activation_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,
+                dice_event: self.dice_event,
+                dice_results: self.dice_results.clone(),
                 equip_event: self.equip_event,
                 drive_checked_event: self.drive_checked_event,
                 source_use: self.source_use,
@@ -1306,6 +1308,7 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
 fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
+        ast::Step::Repeat(repeat) => contains_choice(&repeat.steps),
         ast::Step::Pay(payment) => contains_choice(&payment.steps),
         ast::Step::Optional(optional) => {
             contains_choice(&optional.steps)
@@ -1322,7 +1325,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
-        ast::Step::Shuffle(_)
+        ast::Step::Dice(_)
+        | ast::Step::Shuffle(_)
         | ast::Step::PlayCard(_)
         | ast::Step::PlayAbility(_)
         | ast::Step::StackPlus(_)

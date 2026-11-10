@@ -2,6 +2,7 @@ use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
 };
+use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
@@ -12,7 +13,7 @@ use crate::ir::{
 use crate::ir::{Action, ActionPattern, DamageAmount, Effect, IntFrozen, IntOperation, Predicate};
 use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
-use crate::ir::{PlayerRef, PlayerStage, Selector};
+use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
 use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
@@ -142,6 +143,10 @@ fn keyword_source_paths(
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every control body that can carry a source path shares one traversal."
+)]
 fn source_paths(
     program: &Program,
     path: &str,
@@ -183,6 +188,13 @@ fn source_paths(
                 }
                 source_paths(on_paid, &format!("{path}/control/on_paid"), origin, paths);
             }
+            Node::Control {
+                control:
+                    Control::Repeat {
+                        body: RepeatBody::Program { body },
+                        ..
+                    },
+            } => source_paths(body, &format!("{path}/control/body/body"), origin, paths),
             Node::Control {
                 control: Control::EachPlayer { stages, .. },
             } => {
@@ -468,6 +480,7 @@ fn play_requirement(code: &str) -> bool {
 }
 
 fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
+    super::dice::check_action(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
     if let Action::InstallEffect { effect, .. } = action
@@ -559,6 +572,12 @@ fn check_program(
                 control: control @ Control::EachPlayer { stages, .. },
             } => check_player_stage(control, stages, source, origin, reads)?,
             Node::Control {
+                control: control @ Control::Repeat { .. },
+            } => {
+                let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("repeat"))?;
+                check_program(body, source, origin, reads)?;
+            }
+            Node::Control {
                 control: Control::Sequence { body },
             } => check_program(body, source, origin, reads)?,
             Node::Control {
@@ -581,6 +600,7 @@ fn check_program(
                 }
             }
             Node::Instruction { instruction } => {
+                super::dice::check_instruction(instruction)?;
                 check_action(&instruction.action, &instruction.source)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
@@ -664,7 +684,8 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                 || requirements.required.iter().any(|other| {
                     matches!(
                         other.capability.code,
-                        "shape.EntryMethodFields.EnterFieldMethod"
+                        "shape.NatFrozen.DiceValue"
+                            | "shape.EntryMethodFields.EnterFieldMethod"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
                         .locations
@@ -682,7 +703,15 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.IntFrozen.PaidMaterialActs"
+        "shape.Action.Dice"
+            | "action.dice"
+            | "shape.DiceOperation.Roll"
+            | "shape.Control.Repeat"
+            | "control.repeat"
+            | "shape.RepeatBody.Program"
+            | "shape.Termination.Count"
+            | "internal.IterationCheck.BeforeIteration"
+            | "shape.IntFrozen.PaidMaterialActs"
             | "read.receipt.paid-material-acts"
             | "shape.IntFrozen.PaidMaterialAttack"
             | "read.receipt.paid-material-attack"
@@ -1074,6 +1103,7 @@ fn supported(code: &str) -> bool {
             | "shape.ValueEquality.EntryOrigin"
             | "shape.EntryOrigin.Zone"
             | "shape.EntryOriginFields.EnterFieldFrom"
+            | "shape.NatFrozen.DiceValue"
             | "shape.EntryMethodFields.EnterFieldMethod"
             | "internal.EntryMethod.Play"
             | "internal.EntryMethod.AbilityPut"

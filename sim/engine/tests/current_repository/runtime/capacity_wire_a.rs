@@ -34,6 +34,7 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, offered: &mut Vec<Vec<Str
     loop {
         while let Some(CardPlay::Awaiting(question)) = &step {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     let mut cards: Vec<_> = domain
                         .members
@@ -94,8 +95,12 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, offered: &mut Vec<Vec<Str
             panic!("expected a trigger");
         };
         step = Some(
-            game.answer_internal_card(pending.actor, pending.token, Answer::Pending(options[0].handle))
-                .unwrap(),
+            game.answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
         );
     }
 }
@@ -146,7 +151,11 @@ fn bp05_036_places_three_cheap_cards_in_ex_and_discounts_them() {
         let mut offered = Vec::new();
         settle(&mut game, None, &mut offered);
         assert_eq!(offered.len(), 1, "{form}: one Look choice");
-        assert_eq!(offered[0].len(), 3, "only the three cards with original cost 3 or less");
+        assert_eq!(
+            offered[0].len(),
+            3,
+            "only the three cards with original cost 3 or less"
+        );
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P1"]["ex"], json!(["cheap_a", "cheap_b", "cheap_c"]));
         assert_eq!(state["P1"]["deck"].as_array().unwrap().len(), 6);
@@ -156,6 +165,9 @@ fn bp05_036_places_three_cheap_cards_in_ex_and_discounts_them() {
         let mut ignored = Vec::new();
         settle(&mut game, Some(step), &mut ignored);
         let played = game.projection(View::Referee).unwrap();
-        assert_eq!(played["P1"]["pp"]["current"], pp, "the discounted card costs 0");
+        assert_eq!(
+            played["P1"]["pp"]["current"], pp,
+            "the discounted card costs 0"
+        );
     }
 }

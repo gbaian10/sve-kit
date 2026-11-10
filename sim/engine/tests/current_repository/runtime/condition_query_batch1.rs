@@ -82,6 +82,7 @@ fn finish(game: &mut Game, mut play: CardPlay, targets: &[&str]) -> CardPlay {
     let mut next = targets.iter();
     while let CardPlay::Awaiting(q) = &play {
         let answer = match &q.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::CostMaterials(d) => Answer::CostMaterials(

@@ -4,6 +4,7 @@ use super::{
     seat_name, unsupported,
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
+use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
@@ -919,7 +920,7 @@ fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
-    if evolution_limits::is_static(ability) {
+    if ir_dice::rerolls(ability).is_some() || evolution_limits::is_static(ability) {
         return Ok(true);
     }
     if names::name(ability).is_some() {
@@ -975,7 +976,8 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
-    if names::name(ability).is_some()
+    if ir_dice::rerolls(ability).is_some()
+        || names::name(ability).is_some()
         || evolution_limits::is_static(ability)
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
@@ -1265,6 +1267,10 @@ fn check_nested_nodes(
                 check_nodes(game, &stage.body.steps, source, origin)?;
             }
         }
+        Control::Repeat { .. } => {
+            let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("fixed repeat"))?;
+            check_nodes(game, &body.steps, source, origin)?;
+        }
         Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
         control @ Control::May { body, .. } => {
             super::alternatives::check_may(control)?;
@@ -1323,6 +1329,7 @@ fn check_instruction(
             | Action::Discard { .. }
             | Action::GameResult { .. }
             | Action::ScheduleTurn { .. }
+            | Action::Dice { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }
@@ -1393,6 +1400,7 @@ fn check_nodes(
                     control @ (Control::EachPlayer { .. }
                     | Control::May { .. }
                     | Control::Sequence { .. }
+                    | Control::Repeat { .. }
                     | Control::If { .. }),
             } => check_nested_nodes(game, control, source, ability_source)?,
             Node::Control {

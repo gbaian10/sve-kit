@@ -745,6 +745,9 @@ impl Checker {
             EventPattern::Attack { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
+            EventPattern::Dice { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
             EventPattern::Race { binding, predicate } => {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
@@ -771,8 +774,7 @@ impl Checker {
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
             | EventPattern::UbActivated { .. }
-            | EventPattern::Equip { .. }
-            | EventPattern::Dice { .. } => self.reject(),
+            | EventPattern::Equip { .. } => self.reject(),
         }
     }
 

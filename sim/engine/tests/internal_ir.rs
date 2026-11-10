@@ -479,7 +479,7 @@ fn dead_arms_costs_hidden_reads_and_unsupported_requirements_reject_whole_body()
             node(Node::Control {
                 control: Control::If {
                     condition: Expr::Literal(Bool(false)),
-                    then_body: body(2, vec![unsupported]),
+                    then_body: body(2, vec![unsupported.clone()]),
                     else_body: None,
                 },
             }),
@@ -499,7 +499,7 @@ fn dead_arms_costs_hidden_reads_and_unsupported_requirements_reject_whole_body()
             node(Node::Control {
                 control: Control::Repeat {
                     body: RepeatBody::Program {
-                        body: body(3, vec![]),
+                        body: body(3, vec![unsupported]),
                     },
                     termination: Termination::Count {
                         count: Expr::Literal(Nat(1)),
@@ -522,12 +522,41 @@ fn dead_arms_costs_hidden_reads_and_unsupported_requirements_reject_whole_body()
             ),
         ]),
     ];
-    for program in programs {
+    for (case, program) in programs.into_iter().enumerate() {
         let mut game = game(1, 3);
         let before = exact_authority(&game);
-        game.execute_internal(&program, &source("synthetic"), context(1))
-            .unwrap_err();
+        let result = game.execute_internal(&program, &source("synthetic"), context(1));
+        assert!(result.is_err(), "unadmitted case {case} must reject");
         assert_eq!(exact_authority(&game), before);
+    }
+}
+
+#[test]
+fn fixed_repeat_executes_an_admitted_body_for_both_controllers() {
+    let program = checked(vec![node(Node::Control {
+        control: Control::Repeat {
+            body: RepeatBody::Program {
+                body: body(3, vec![draw(1, 1)]),
+            },
+            termination: Termination::Count {
+                count: Expr::Literal(Nat(2)),
+            },
+            check: IterationCheck::BeforeIteration,
+            scope: ScopeId(2),
+            receipts: vec![],
+        },
+    })]);
+    for seat in [1, 2] {
+        let mut game = game(seat, 3);
+        let result = game
+            .execute_internal(&program, &source("synthetic"), context(seat))
+            .unwrap();
+        assert!(result.complete);
+        assert_eq!(result.facts.len(), 2);
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view[actor]["hand"], json!(["s", "d0", "d1"]));
+        assert_eq!(view[actor]["deck"], json!(["d2"]));
     }
 }
 

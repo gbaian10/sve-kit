@@ -84,6 +84,7 @@ fn response(question: &DecisionView) -> Answer {
         | InputDomain::ResourceEntryPayment { .. }
         | InputDomain::DriveTrigger { .. }
         | InputDomain::WardEntry { .. }
+        | InputDomain::DiceReroll { .. }
         | InputDomain::Integer(_)
         | InputDomain::SearchReplacement
         | InputDomain::Targets(_)

@@ -841,6 +841,7 @@ impl Checker {
                 self.player(player)
             }
             ActionPattern::IgnoreWard { attacker } => self.selector(attacker),
+            ActionPattern::Reroll { player, .. } => self.player(player),
             ActionPattern::Attack { attacker, target } => {
                 self.selector(attacker)?;
                 if let Some(target) = target {
@@ -857,7 +858,6 @@ impl Checker {
                 ..
             }
             | ActionPattern::IncreasePpMaximum { .. }
-            | ActionPattern::Reroll { .. }
             | ActionPattern::ChooseMode { .. }
             | ActionPattern::Win { .. }
             | ActionPattern::Lose { .. }

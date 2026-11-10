@@ -637,7 +637,7 @@ fn unsupported_step_rejects_the_entire_candidate() {
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"]
         .as_array_mut()
         .unwrap()
-        .push(json!({"dice":{"bind":"roll"}}));
+        .push(json!({"dice":{"bind":"roll","who":"opponent"}}));
     let failure = lowerer().lower(&tree).unwrap_err();
     assert_eq!(failure.code, "unsupported_construct");
     assert_eq!(failure.path, "/cards/BP08-038/abilities/0");
@@ -2053,4 +2053,56 @@ fn banish_zone_targets_accept_only_the_controllers_own_zone() {
             .lower_with_printed_costs(&spell(who), &costs)
             .unwrap_err();
     }
+}
+
+#[test]
+fn dice_bindings_and_fixed_repeats_lower_without_escaping_their_scope() {
+    let mut tree = expanded::tree().clone();
+    let steps = &mut tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"];
+    *steps = json!([
+        {"dice":{"bind":"first"}},
+        {"damage":{"to":{"leaders":"opponents"},"n":{"dice":"first"}}},
+        {"repeat":{"n":2_u8,"do":[{"dice":{"bind":"inside"}}]}}
+    ]);
+    lowerer().lower(&tree).unwrap();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"draw":{"n":{"dice":"inside"}}}));
+    assert_eq!(
+        lowerer().lower(&tree).unwrap_err().code,
+        "unsupported_construct"
+    );
+}
+
+#[test]
+fn dice_value_requires_a_dice_event_or_a_preceding_roll() {
+    for number in [json!({"event":"value"}), json!({"dice":"future"})] {
+        let mut tree = expanded::tree().clone();
+        tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([
+            {"draw":{"n":number}}, {"dice":{"bind":"future"}}
+        ]);
+        assert_eq!(
+            lowerer().lower(&tree).unwrap_err().code,
+            "unsupported_construct"
+        );
+    }
+}
+
+#[test]
+fn own_dice_events_and_unconditional_field_rerolls_lower() {
+    let mut tree = expanded::tree().clone();
+    let entry = &mut tree["cards"]["BP08-038"]["abilities"][0];
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["auto"] = json!({"on":{"dice_rolled":{"who":"self"}},"do":[{"damage":{"to":{"leaders":"opponents"},"n":{"event":"value"}}}]});
+    lowerer().lower(&tree).unwrap();
+    let reroll = &mut tree["cards"]["BP08-038"]["abilities"][0];
+    reroll.as_object_mut().unwrap().remove("auto");
+    reroll["static"] = json!({"effects":[{"reroll":{"who":"self","times":1_u8}}]});
+    lowerer().lower(&tree).unwrap();
+    tree["cards"]["BP08-038"]["abilities"][0]["static"]["while"] = json!({"awakened":true});
+    assert_eq!(
+        lowerer().lower(&tree).unwrap_err().code,
+        "unsupported_construct"
+    );
 }

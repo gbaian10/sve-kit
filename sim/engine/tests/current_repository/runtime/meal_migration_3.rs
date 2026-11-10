@@ -38,6 +38,7 @@ fn finish(game: &mut Game, play: CardPlay) {
 fn finish_with_cost(game: &mut Game, mut play: CardPlay, pay_cost: bool) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(pay_cost),
             InputDomain::CostMaterials(domain) => Answer::CostMaterials(
@@ -196,7 +197,10 @@ fn cp01_074_discards_an_amulet_to_gain_power_and_rush() {
     initial["players"]["P1"]["zones"]["hand"]
         .as_array_mut()
         .unwrap()
-        .extend([json!({"id":"non-amulet","card":"CP01-022"}), json!({"id":"amulet","card":"BP09-102"})]);
+        .extend([
+            json!({"id":"non-amulet","card":"CP01-022"}),
+            json!({"id":"amulet","card":"BP09-102"}),
+        ]);
     let mut game = from_position(&initial);
     play(&mut game, "source");
     let view = game.projection(View::Referee).unwrap();
@@ -256,7 +260,11 @@ fn ecp01_007_attack_draws_and_only_discards_with_three_or_four_uma() {
         settle(&mut game);
         assert_eq!(
             zone(&game.projection(View::Referee).unwrap(), "draw0"),
-            match allies { 3 | 4 => "cemetery", 5 => "hand", _ => "deck" }
+            match allies {
+                3 | 4 => "cemetery",
+                5 => "hand",
+                _ => "deck",
+            }
         );
     }
 }
@@ -270,7 +278,10 @@ fn ecp01_008_two_and_three_races_pay_their_own_costs_and_resolve_each_trigger() 
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(view["objects"]["enemy"]["damage"], times * 3);
         for stat in ["power", "hp"] {
-            assert_eq!(view["objects"]["source"][stat].as_i64().unwrap(), before["objects"]["source"][stat].as_i64().unwrap() + times);
+            assert_eq!(
+                view["objects"]["source"][stat].as_i64().unwrap(),
+                before["objects"]["source"][stat].as_i64().unwrap() + times
+            );
         }
         assert_eq!(view["P1"]["pp"]["current"], 10 - times);
     }

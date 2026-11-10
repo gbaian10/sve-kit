@@ -27,6 +27,7 @@ use alloc::collections::BTreeMap;
 mod ability;
 mod banish;
 mod change;
+mod dice;
 mod discard;
 mod draw;
 mod drive;
@@ -125,6 +126,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || discard::check_header(ability)?
         || draw::check_header(ability)?
         || drive::check_header(ability)?
+        || dice::check_header(ability)?
         || equipment::check_header(ability)?
         || mill::check_header(ability)?
         || change::check_header(ability)?
@@ -723,6 +725,7 @@ impl Game {
             {
                 execution.damage_event = Some((binding.key(), *event));
             }
+            dice::bind_event(&mut execution, &pending);
             execution.ability = Some(pending.source);
             execution.trigger_occurrence = Some(pending.id);
             execution.source_information = Some(pending.information);

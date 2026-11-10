@@ -9,6 +9,7 @@ pub(super) mod pilot;
 
 use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::ir::dice as ir_dice;
 use crate::ir::{
     Action, Bool, CharacteristicPatch, CommitId, ContinuousLayer, Control, Duration, DurationEnd,
     Effect, EffectId, EffectReference, EffectTarget, EventPayload, ExecutionId, ExecutionRef, Expr,
@@ -151,6 +152,17 @@ fn collect_patches<'program>(
                 }
                 _ => {}
             },
+            Node::Control {
+                control: control @ Control::Repeat { .. },
+            } => {
+                if let Some((body, count)) = ir_dice::repeat(control) {
+                    collect_patches(body, patches);
+                    // Iterations share one timestamp, so repeated SetLife must remain rejected.
+                    if count > 1 {
+                        collect_patches(body, patches);
+                    }
+                }
+            }
             Node::Control {
                 control: Control::Sequence { body } | Control::May { body, .. },
             } => collect_patches(body, patches),

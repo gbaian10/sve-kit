@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/dice.rs"]
+mod dice;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
 #[path = "card/evolution_ordinal.rs"]
@@ -196,7 +198,13 @@ fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &Ability
         match &mut step.node {
             Node::Instruction { instruction } => instruction.source = origin.clone(),
             Node::Control {
-                control: Control::Sequence { body } | Control::EachObject { body, .. },
+                control:
+                    Control::Sequence { body }
+                    | Control::EachObject { body, .. }
+                    | Control::Repeat {
+                        body: RepeatBody::Program { body },
+                        ..
+                    },
             } => locate_steps(&mut body.steps, span, origin),
             Node::Control {
                 control:
@@ -598,6 +606,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::Payment { .. }
                     | Fact::AbilityResolved { .. }
                     | Fact::Shuffled { .. }
+                    | Fact::Dice(_)
                     | Fact::Draw(_)
                     | Fact::Discard(_)
                     | Fact::LifeChange(_)

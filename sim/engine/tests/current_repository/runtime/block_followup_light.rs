@@ -80,6 +80,7 @@ fn drazuel_both_evolved_printings_pay_matching_ex_cards_debuff_heal_and_return_a
         let mut play = pending(&mut board, card);
         while let CardPlay::Awaiting(question) = play {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::OptionalCost => Answer::OptionalCost(true),
                 InputDomain::CostMaterials(domain) => {
                     assert_eq!(

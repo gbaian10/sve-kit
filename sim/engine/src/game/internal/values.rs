@@ -8,6 +8,7 @@ use super::{
 };
 use crate::ir::AttackEvent;
 use crate::ir::ObjectRelation;
+use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_plan, damaged_plan};
 use crate::ir::{
@@ -747,6 +748,12 @@ impl Execution {
                 }
             }
             Expr::Frozen(frozen) => match frozen.as_ref() {
+                NatFrozen::DiceValue { event } => self
+                    .dice_event
+                    .as_ref()
+                    .filter(|(binding, _)| binding == event)
+                    .map(|(_, payload)| Nat(ir_dice::value(payload.value)))
+                    .ok_or_else(|| invalid("missing dice event")),
                 NatFrozen::SpellChain {
                     player,
                     execution: ExecutionRef::Current {},

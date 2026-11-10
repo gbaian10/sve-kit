@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-081:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 3
+      - line: 2
+        fanfare:
+          do:
+            - dice:
+                bind: die
+            - if:
+                cond:
+                  history:
+                    event: dice_rolled
+                    who: self
+                    window: this_turn
+                    where:
+                      value:
+                        eq: 6
+                then:
+                  - evolve:
+                      ref: this

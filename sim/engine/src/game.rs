@@ -204,6 +204,8 @@ struct State {
     ir_damage_history: Vec<internal::DamageHistoryFact>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_ub_history: Vec<internal::UbHistoryFact>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    ir_dice_history: Vec<internal::DiceHistoryFact>,
     knowledge: BTreeMap<String, Knowledge>,
     facts: Value,
     game: Value,
@@ -491,6 +493,7 @@ impl Game {
             ir_subject_history: Vec::new(),
             ir_damage_history: Vec::new(),
             ir_ub_history: Vec::new(),
+            ir_dice_history: Vec::new(),
             knowledge: BTreeMap::new(),
             facts: facts.clone(),
             game: json!({"ended":false}),

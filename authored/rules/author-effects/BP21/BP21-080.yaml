@@ -1,0 +1,22 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-080:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-10"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - draw:
+                n: 1
+            - repeat:
+                n: 2
+                do:
+                  - dice:
+                      bind: die

@@ -3,6 +3,7 @@
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
@@ -19,7 +20,8 @@ use crate::ir::{
     ScopeId, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
-    CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
+    CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
+    ObjectProperty,
 };
 use crate::ir::{InstructionContext, NumericProperty, RevealUntilMembers};
 use alloc::collections::BTreeSet;
@@ -518,7 +520,12 @@ fn mask_public_number(number: &mut Expr<Int>) {
 }
 
 fn mask_public_natural(value: &mut Expr<Nat>) {
-    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some() || played_filter(query).is_some()))
+    if matches!(value, Expr::Frozen(frozen) if matches!(frozen.as_ref(), NatFrozen::DiceValue { .. }))
+    {
+        *value = Expr::Literal(Nat(0));
+        return;
+    }
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some() || played_filter(query).is_some() || ir_dice::history(query).is_some()))
     {
         *value = Expr::Literal(Nat(0));
         return;

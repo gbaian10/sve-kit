@@ -879,6 +879,71 @@ fn nested_field_payment_cannot_hide_a_positive_pp_resolution_payment() {
 }
 
 #[test]
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only the repeat wrapper is peeled; the inline payment passes through unchanged."
+)]
+fn fixed_repeat_cannot_hide_a_positive_pp_resolution_payment() {
+    let mut failures = vec![];
+    for wrapped in [false, true] {
+        let pay =
+            json!({"pay":{"cost":{"act_self":true},"do":[{"life":{"who":"self","delta":1_u8}}]}});
+        let step = if wrapped {
+            json!({"repeat":{"n":1_u8,"do":[pay]}})
+        } else {
+            pay
+        };
+        let mut program = lowered_observer(&json!({
+            "on":{"phase":{"which":"end","whose":"self"}},
+            "do":[step]
+        }));
+        let node = match &mut program.abilities[0].node.body.as_mut().unwrap().steps[0].node {
+            Node::Control {
+                control:
+                    Control::Repeat {
+                        body: RepeatBody::Program { body },
+                        ..
+                    },
+            } => &mut body.steps[0].node,
+            other => other,
+        };
+        let Node::Control {
+            control: Control::Pay { costs, .. },
+        } = node
+        else {
+            panic!("resolution payment");
+        };
+        let CostSpec::Ordered { steps } = costs else {
+            panic!("one payment");
+        };
+        steps[0].instruction.action = Action::Resource {
+            player: PlayerRef::Controller {},
+            resource: Resource::PpCurrent,
+            operation: ResourceOperation::Pay,
+            amount: Expr::Literal(Int(3)),
+        };
+        let checked = WellFormedCardProgram::check(program).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &initial(),
+            &Value::Null,
+            &Value::Null,
+            "repeat-resolution-pp-boundary",
+        )
+        .unwrap();
+        failures.push(format!(
+            "{:?}",
+            game.load_internal_card("unit-follower", &checked)
+                .unwrap_err()
+        ));
+    }
+    assert_eq!(
+        failures[0], failures[1],
+        "a fixed repeat keeps the inline payment rejection"
+    );
+}
+
+#[test]
 fn conditional_pp_payment_cannot_move_to_ex_instead_of_returning_to_field() {
     let mut program = lowered_observer(&observer(false, guarded_return()));
     let Node::Control {

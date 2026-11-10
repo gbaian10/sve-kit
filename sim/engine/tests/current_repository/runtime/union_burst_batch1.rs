@@ -89,6 +89,7 @@ pub(super) fn question(play: CardPlay) -> DecisionView {
 pub(super) fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Targets(domain) | InputDomain::CostMaterials(domain) => {
@@ -343,7 +344,8 @@ fn rino_evolution_damages_all_enemies_and_is_ub_even_with_an_empty_opposing_fiel
             let play = pending(&mut game, card);
             ub(&resolved(finish(&mut game, play)));
             assert_eq!(
-                game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]["ub_activated"],
+                game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]
+                    ["ub_activated"],
                 1_u8,
                 "a proper UB is counted even when its body changes nothing"
             );

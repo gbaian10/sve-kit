@@ -67,6 +67,7 @@ fn game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
     while let CardPlay::Awaiting(question) = step {
         let answer = match &question.domain {
+            InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
@@ -470,6 +471,7 @@ fn cp04_099_and_100_require_both_an_amulet_and_another_follower() {
                     game.activate_internal_card("source", ability, PlayerId { seat: 1 })?;
                 while let CardPlay::Awaiting(question) = step {
                     let answer = match &question.domain {
+                        InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                         InputDomain::Targets(domain) => Answer::Targets(
                             domain.members.iter().take(1).map(|m| m.handle).collect(),
                         ),

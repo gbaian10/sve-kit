@@ -106,6 +106,7 @@ pub(super) fn settle(game: &mut Game) {
             .unwrap();
         while let CardPlay::Awaiting(question) = play {
             let answer = match &question.domain {
+                InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => Answer::Targets(
                     domain
                         .members
