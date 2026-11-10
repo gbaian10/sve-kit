@@ -1,7 +1,8 @@
 use super::{Binding, BodyContext, Bool, Expr, Int, LoweringError, ast, unsupported};
 use crate::ir::{
     Cardinality, IntFrozen, IntOperation, MemberProjection, MovementReceipt, Nat, NatOperation,
-    ObjectReceipt, ObjectView, Predicate, ReceiptLocation, RuntimeObjectView, Selector,
+    ObjectProperty, ObjectReceipt, ObjectView, Predicate, ReceiptLocation, RuntimeObjectView,
+    Selector,
 };
 
 #[expect(
@@ -34,6 +35,29 @@ impl BodyContext<'_> {
         Ok(Expr::Frozen(Box::new(IntFrozen::DiscardedCost {
             receipt: receipt.clone(),
         })))
+    }
+
+    pub(super) fn receipt_original_costs(
+        &self,
+        query: &ast::BeforeObjects,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let receipt = self
+            .observations
+            .get(&query.objects_of)
+            .ok_or_else(|| unsupported(path))?;
+        if !matches!(receipt, ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } }
+            if matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.deck_cemetery.contains(id)))
+        {
+            return Err(unsupported(path));
+        }
+        Ok(super::numeric::aggregate_count(
+            Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: MemberProjection::Before,
+            },
+            Some(ObjectProperty::Cost),
+        ))
     }
 
     pub(super) fn count_of(

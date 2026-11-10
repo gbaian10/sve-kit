@@ -6,8 +6,9 @@ use crate::ir::{
     Binding, Bool, Capture, CardKind, CardName, CharacteristicPatch, CharacteristicView,
     Characteristics, ClassId, ClassRead, Comparison, DiscardOutcome, Expr, Info, Int, IntOperation,
     KindRead, MaterialActOutcome, MemberProjection, MoveOutcome, MovementReceipt, NamesRead,
-    NumberRead, NumericChange, ObjectReceipt, ObjectRef, ObjectView, Predicate, QuantityUnit,
-    ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId, TraitsRead,
+    NumberRead, NumericChange, ObjectProperty, ObjectReceipt, ObjectRef, ObjectView, Predicate,
+    QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId,
+    TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -224,6 +225,26 @@ impl DeckReads {
                     }
                     *number = Expr::Literal(Int(0));
                 }
+                IntOperation::FromNat { value } => {
+                    if let Expr::Compute(natural) = value
+                        && let NatOperation::DistinctCount {
+                            objects:
+                                Selector::ReceiptMembers {
+                                    receipt,
+                                    projection,
+                                },
+                            property: ObjectProperty::Cost,
+                        } = natural.as_ref()
+                    {
+                        let id = distinct_cost_receipt(receipt, *projection)?;
+                        if !self.cemetery.contains(&id) {
+                            return Err(unsupported(
+                                "distinct original costs without an own deck-to-cemetery producer",
+                            ));
+                        }
+                        *number = Expr::Literal(Int(0));
+                    }
+                }
                 IntOperation::Arithmetic { arguments, .. } => {
                     for argument in arguments {
                         self.mask_number(argument)?;
@@ -385,32 +406,78 @@ fn members(
                 Ok((MemberCard::from(characters), before.object))
             })
             .collect::<Result<Vec<_>>>(),
-        Some(InstructionOutcome::Move(outcome)) => outcome
-            .moved
-            .iter()
-            .filter(|movement| {
-                movement.after.is_some()
-                    && destination
-                        .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
-            })
-            .map(|movement| {
-                // Printed information stands in only for a card that left the deck.
-                let from_deck = execution.facts.iter().any(|fact| {
-                    matches!(fact, Fact::Movement(moved)
-                        if moved.movement.before == movement.before
-                            && moved.from.kind == ZoneKind::Deck)
-                });
-                if !from_deck {
-                    return Err(unsupported("receipt member that did not leave the deck"));
-                }
-                Ok((
-                    printed_card(game, execution, movement.before)?,
-                    movement.before,
-                ))
-            })
-            .collect::<Result<Vec<_>>>(),
+        Some(InstructionOutcome::Move(_)) => moved_deck_members(execution, receipt, destination)?
+            .into_iter()
+            .map(|before| Ok((printed_card(game, execution, before)?, before)))
+            .collect(),
         _ => Err(invalid("missing receipt member producer")),
     }
+}
+
+fn moved_deck_members(
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+    destination: Option<ZoneKind>,
+) -> Result<Vec<ObjectRef>> {
+    let Some(InstructionOutcome::Move(outcome)) = execution.receipts.get(&local_receipt(receipt)?)
+    else {
+        return Err(invalid("missing deck movement outcome"));
+    };
+    outcome
+        .moved
+        .iter()
+        .filter(|movement| {
+            movement.after.is_some()
+                && destination
+                    .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
+        })
+        .map(|movement| {
+            if !execution.facts.iter().any(|fact| {
+                matches!(fact, Fact::Movement(moved)
+            if moved.movement.before == movement.before && moved.from.kind == ZoneKind::Deck)
+            }) {
+                return Err(unsupported("receipt member that did not leave the deck"));
+            }
+            Ok(movement.before)
+        })
+        .collect()
+}
+
+fn distinct_cost_receipt(
+    receipt: &ObjectReceipt,
+    projection: MemberProjection,
+) -> Result<ReceiptId> {
+    if projection != MemberProjection::Before
+        || !matches!(
+            receipt,
+            ObjectReceipt::Movement {
+                receipt: MovementReceipt::Move { .. }
+            }
+        )
+    {
+        return Err(unsupported(
+            "distinct original costs require successful deck movement before members",
+        ));
+    }
+    local_receipt(receipt)
+}
+
+pub(super) fn distinct_original_costs(
+    game: &Game,
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+    projection: MemberProjection,
+) -> Result<Nat> {
+    distinct_cost_receipt(receipt, projection)?;
+    let mut costs = BTreeSet::new();
+    for before in moved_deck_members(execution, receipt, Some(ZoneKind::Cemetery))? {
+        // Base printing is immutable across generations and effective-cost changes.
+        let card = &game.object(execution.object_id(before)?)?.card;
+        costs.insert(super::cost::printed_play_cost(
+            &game.catalog.face(card, 0)?["cost"],
+        )?);
+    }
+    Ok(Nat(u64::try_from(costs.len()).map_err(invalid)?))
 }
 
 fn check_count(

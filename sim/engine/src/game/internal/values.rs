@@ -819,6 +819,16 @@ impl Execution {
                     self.objects(game, objects)?.len(),
                 )
                 .map_err(invalid)?)),
+                NatOperation::DistinctCount {
+                    objects:
+                        Selector::ReceiptMembers {
+                            receipt,
+                            projection,
+                        },
+                    property: ObjectProperty::Cost,
+                } => {
+                    super::receipt_counts::distinct_original_costs(game, self, receipt, *projection)
+                }
                 NatOperation::DistinctCount { objects, property } => {
                     let members = self.public_zone_objects(game, objects)?;
                     let count = match property {

@@ -909,3 +909,6 @@ mod mixed_ex;
 
 #[path = "card/hand_position.rs"]
 mod hand_position;
+
+#[path = "card/receipt_original_costs.rs"]
+mod receipt_original_costs;
