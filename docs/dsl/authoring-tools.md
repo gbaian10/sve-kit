@@ -764,6 +764,25 @@ cmp:
 
 同名建立若卡文明定「token 從者」，須寫 `token: {same_name_as: chosen, kind: follower}`。依 CR9.1.2.3／1.3.2 推論，名稱解析出的印刷模板不是從者 token 時不建立任何物件，指示與合法法術仍正常結算；不把來源上暫時的操縱效果複製到新物件。只寫「token 卡片」則省略 kind。
 
+## 場上與 EX 的 token 送墓材料
+
+BP12-074 的場上起動能力以同一組候選選取自己場上或 EX 的魔界 token：
+
+```yaml
+cost:
+  steps:
+    - act_self: true
+    - to_cemetery:
+        sel: { who: self, zone: [field, ex], trait: 魔界, token: true }
+        n: 1
+```
+
+兩區書寫順序可交換；只接受固定一張、`token: true`、非空 `trait`，不帶 `kind` 或其他篩選。
+特徵符合的 token 護符也可支付，不能把「token」縮限為從者（Q1685）。正式敵方目標先選，
+再從兩個公開區選材，自身橫置與送墓共用既有原子付款；不新增另一套移區或費用狀態。
+場上送墓會誘發謝幕，EX 送墓不會（Q1684）；token 在抵達墓場後依 CR9.1.4.4 消去，
+不因此取消已完成的付款。其他材料移區、張數、結果命名及額外篩選不由此入口放寬。
+
 ## 場上能力的公開手牌成本
 
 `cost: {reveal: {sel: {who: self, zone: hand, kind: follower, trait: 学院}, n: 1}}`
