@@ -406,7 +406,10 @@ fn life_filter(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> 
 
 pub(crate) fn life_plan(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> {
     life_filter(query).filter(|filter| {
-        filter.own.is_some() && filter.up == Some(false) && filter.own_turn.is_none()
+        !filter.crosses_zero
+            && filter.own.is_some()
+            && filter.up == Some(false)
+            && filter.own_turn.is_none()
     })
 }
 
@@ -430,7 +433,11 @@ pub(crate) fn life_sum_plan(
         window: window.clone(),
         include_execution: *include_execution,
     })?;
-    (filter.up == Some(true) && filter.own.is_some() && filter.own_turn.is_none()).then_some(filter)
+    (!filter.crosses_zero
+        && filter.up == Some(true)
+        && filter.own.is_some()
+        && filter.own_turn.is_none())
+    .then_some(filter)
 }
 
 /// The event-time exception is one public facts query, not a general live snapshot.

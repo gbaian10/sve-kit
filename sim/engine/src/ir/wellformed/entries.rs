@@ -12,7 +12,6 @@ use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
-use crate::ir::trigger_restrictions;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
     Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, Decision,
@@ -30,6 +29,7 @@ use crate::ir::{
     Selector,
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
+use crate::ir::{trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
 /// A fixed-count public head-cost material; activated modes may follow it (BP09-071, BP09-078).
@@ -746,7 +746,10 @@ impl Checker {
     }
 
     fn permission_declaration(&mut self, effect: &Effect, ability_zones: &[ZoneKind]) -> Checked {
-        if ability_zones == [ZoneKind::Field] && trigger_restrictions::keyword(effect).is_some() {
+        if ability_zones == [ZoneKind::Field]
+            && (trigger_restrictions::keyword(effect).is_some()
+                || victory::permission(effect).is_some())
+        {
             return Ok(());
         }
         let Effect::Permission {

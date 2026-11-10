@@ -45,6 +45,7 @@ fn life_history(
     Ok(super::super::history_turn::life_query(
         event,
         super::super::events::life::LifeFilter {
+            crosses_zero: false,
             own: history
                 .who
                 .as_ref()
@@ -886,6 +887,7 @@ impl BodyContext<'_> {
         let query = super::super::history_turn::life_query(
             event,
             super::super::events::life::LifeFilter {
+                crosses_zero: false,
                 own: Some(matches!(history_sum.who, ast::LeaderSide::Controller)),
                 up: Some(true),
                 own_turn: None,

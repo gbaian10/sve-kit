@@ -34,7 +34,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | phase | which:(Phase 或 ParamRef)、whose:PlayerRef | — | BP05-006、BP01-153 |
 | played | 無 | from:Zone、who:PlayerRef、sel:(SubjectFilter 或 PlayedUnion any_of[2])、during:During | CP02-044、BP14-036、BP04-064、CP04-048；from 合成 |
 | ability_played | 無 | who:PlayerRef、holder:(Ref 或 EventObjectSel) | 合成 |
-| life_changed | 無 | who:PlayerRef、direction:up/down、during:During、by:By | BP02-095、BP19-075；by 合成 |
+| life_changed | 無 | who:PlayerRef、direction:up/down、during:During、by:By、crosses_zero:true | BP02-095、BP19-075、BP05-092；by 合成 |
 | stat_changed | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down | BP11-082、BP21-100；不收 subject/property/by |
 | counter_changed | 無 | ref:Ref、name:CounterName、after:A.nat-threshold、direction:up/down | 合成；不把 Stack 提醒文另造誘發 |
 | acted | 無 | ref:Ref、sel:SubjectFilter、who:PlayerRef | CP04-102、BP11-069 |
@@ -44,7 +44,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | ub_activated | 無 | who:PlayerRef、holder:(Ref 或 EventObjectSel) | CP04-SL15 |
 | fused | 無 | who:PlayerRef、material:SubjectFilter | BP20-SL05、BP20-029；至少一成功材料符合為推論 |
 | targeted | 無 | ref:Ref、by:By | BP03-071；by 合成 |
-| state | Condition | — | BP05-092；不是歷史事實 |
+| state | Condition | — | 合成；不是歷史事實 |
 | dice_rolled | 無 | who:PlayerRef | BP21-SL19；on 不收骰值門檻 |
 | drive_checked | 無 | holder:(Ref 或 EventObjectSel) | CP03-P27、CP03-065 |
 | drive_trigger | 無 | who:PlayerRef、during | CP03-P81、CP03-110 |
@@ -80,7 +80,7 @@ any_of 是非空事件列表組合，可含 counter_reached，但不含 state／
 | phase | where | — | which:Phase、whose:PlayerRef | — |
 | played | 無 | from:Zone、who:PlayerRef、sel:SubjectFilter | 無 | during:During |
 | ability_played | 無 | who:PlayerRef | 無 | holder:(Ref 或 EventObjectSel) |
-| life_changed | 無 | who:PlayerRef | 無 | direction:up/down、during:During、by:By |
+| life_changed | 無 | who:PlayerRef | 無 | direction:up/down、during:During、by:By、crosses_zero:true |
 | stat_changed | 無 | — | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down |
 | counter_changed | 無 | — | 無 | ref:Ref、name:CounterName、after:A.nat-threshold、direction:up/down |
 | acted | 無 | sel:SubjectFilter、who:PlayerRef | 無 | ref:Ref |

@@ -8,6 +8,7 @@ use crate::ir::{
 #[derive(Clone, Copy)]
 pub(crate) struct LifeFilter {
     pub(crate) own: Option<bool>,
+    pub(crate) crosses_zero: bool,
     pub(crate) up: Option<bool>,
     pub(crate) own_turn: Option<bool>,
 }
@@ -38,6 +39,18 @@ impl LifeFilter {
         if let Some(own) = self.own_turn {
             predicates.push(turn_predicate(own));
         }
+        if self.crosses_zero {
+            for (field, comparison) in [
+                (IntFrozen::LifeChangeBefore { event }, Comparison::Greater),
+                (IntFrozen::LifeChangeAfter { event }, Comparison::LessEqual),
+            ] {
+                predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
+                    left: Expr::Frozen(Box::new(field)),
+                    comparison,
+                    right: Expr::Literal(Int(0)),
+                })));
+            }
+        }
         Expr::Compute(Box::new(Predicate::And { predicates }))
     }
     pub(crate) fn parse(event: Binding<LifeChangeEvent>, expression: &Expr<Bool>) -> Option<Self> {
@@ -49,8 +62,22 @@ impl LifeFilter {
                     .flat_map(move |up| {
                         [None, Some(false), Some(true)]
                             .into_iter()
-                            .map(move |own_turn| Self { own, up, own_turn })
+                            .map(move |own_turn| Self {
+                                own,
+                                up,
+                                own_turn,
+                                crosses_zero: false,
+                            })
                     })
+            })
+            .flat_map(|plan| {
+                [
+                    plan,
+                    Self {
+                        crosses_zero: true,
+                        ..plan
+                    },
+                ]
             })
             .find(|plan| plan.predicate(event) == *expression)
     }
@@ -61,6 +88,7 @@ impl LifeFilter {
         active: PlayerId,
     ) -> bool {
         event.delta.0 != 0
+            && (!self.crosses_zero || (event.before.0 > 0 && event.after.0 <= 0))
             && self
                 .own
                 .is_none_or(|own| own == (controller == event.subject))

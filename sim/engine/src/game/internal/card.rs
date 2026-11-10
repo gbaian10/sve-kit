@@ -16,7 +16,6 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::trigger_restrictions as trigger_permission;
-use crate::ir::x_pp;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
     AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
@@ -30,6 +29,7 @@ use crate::ir::{
 use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
+use crate::ir::{victory, x_pp};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -951,6 +951,10 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
         super::posture::check_static(located)?;
         return Ok(true);
     }
+    if victory::is_static(ability) {
+        super::victory::check_static(located)?;
+        return Ok(true);
+    }
     if trigger_permission::is_static(ability) {
         trigger_restrictions::check(located)?;
         return Ok(true);
@@ -982,6 +986,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || other_costs::is_static(ability)
+        || victory::is_static(ability)
         || trigger_permission::is_static(ability)
         || stand_restrictions::is_static(ability)
         || attack_restrictions::is_static(ability)

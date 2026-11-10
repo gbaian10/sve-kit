@@ -1863,6 +1863,7 @@ type HistoryAbilityPlayedCondition = Annotated[
 
 @with_config(SHAPE_CONFIG)
 class EventLifeChangedFields(TypedDict):
+    crosses_zero: NotRequired[TrueFlag]
     who: NotRequired[PlayerRef]
     direction: NotRequired[Literal["up", "down"]]
     during: NotRequired[During]
