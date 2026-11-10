@@ -94,12 +94,13 @@ impl BodyContext<'_> {
                     ast::Cost::Short(operation) => match operation.as_ref() {
                         ast::CostOperation::ToCemetery(material)
                         | ast::CostOperation::ReturnToHand(material)
-                        | ast::CostOperation::Banish(material)
                         | ast::CostOperation::Act(material) => material.result.as_ref(),
-                        ast::CostOperation::ToEx(ast::ExMaterial::Public(material)) => {
+                        ast::CostOperation::ToEx(ast::ExMaterial::Public(material))
+                        | ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) => {
                             material.result.as_ref()
                         }
-                        ast::CostOperation::ToEx(ast::ExMaterial::Hand(material)) => {
+                        ast::CostOperation::ToEx(ast::ExMaterial::Hand(material))
+                        | ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
                             material.result.as_ref()
                         }
                         ast::CostOperation::Pp(_)

@@ -76,6 +76,20 @@ fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
 }
 
 impl MaterialWait {
+    pub(super) const fn is_hand(&self) -> bool {
+        matches!(
+            self.selector,
+            Selector::Zone {
+                zone: ZoneKind::Hand,
+                ..
+            }
+        )
+    }
+
+    pub(super) fn has_hand_member(&self, member: ObjectRef) -> bool {
+        self.is_hand() && self.members.contains(&member)
+    }
+
     pub(super) const fn cost(
         receipt: ReceiptId,
         members: Vec<ObjectRef>,

@@ -595,7 +595,12 @@ impl Game {
         let members = if let Some((player, count)) = deck_top(&instruction.action) {
             self.deck_top_members(execution, player, count)?
         } else {
-            let members = execution.objects(self, objects)?;
+            let members =
+                if let Some(materials) = execution.private_hand_banish_materials(instruction) {
+                    materials.to_vec()
+                } else {
+                    execution.objects(self, objects)?
+                };
             for member in &members {
                 let object = self.object(execution.object_id(*member)?)?;
                 if object.generation != member.generation.0 {
@@ -614,7 +619,8 @@ impl Game {
                 let private_hand = object.zone == "hand"
                     && object.owner == actor
                     && object.controller == object.owner
-                    && execution.is_private_hand_target(objects, *member);
+                    && (execution.is_private_hand_target(objects, *member)
+                        || execution.is_private_hand_banish_cost(instruction, *member));
                 if !(private_look || private_hand) {
                     public_zone(&object.zone)?;
                 }

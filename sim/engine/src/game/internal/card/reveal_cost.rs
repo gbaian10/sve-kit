@@ -3,13 +3,13 @@ use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name};
 use crate::game::internal::Slot;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Action, Characteristics, CostSpec, Instruction, Int, MoveMethod, MoveOutcome, ObjectRef,
-    Position, Quantity, QuantityUnit, Selector, ZoneKind,
+    Action, Characteristics, CostSpec, Instruction, InstructionContext, Int, MoveMethod,
+    MoveOutcome, ObjectRef, Position, Quantity, QuantityUnit, Selector, ZoneKind,
 };
 
 pub(super) fn selected(execution: &Execution, action: &Action) -> bool {
     matches!(reveal_payment::objects(action), Some(Selector::Bound { reference })
-        if execution.material_selections.contains_key(&reference.key()))
+        if execution.material_selections.get(&reference.key()).is_some_and(super::material::MaterialWait::is_hand))
 }
 
 #[expect(
@@ -116,6 +116,9 @@ impl Game {
                     movement.position,
                 )?;
             }
+            Action::Banish { .. } => {
+                self.internal_hand_banish_payment(execution, instruction, objects, &members)?;
+            }
             _ => return Err(invalid("mandatory revelation cost")),
         }
         Ok((
@@ -127,6 +130,32 @@ impl Game {
             vec![],
         ))
     }
+    fn internal_hand_banish_payment(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+        members: &[ObjectRef],
+    ) -> Result<()> {
+        let [member] = members else {
+            return Err(invalid("single-card hand banish cost"));
+        };
+        self.internal_banish(execution, instruction, objects)?;
+        if !matches!(execution.receipts.get(&instruction.receipt),
+            Some(InstructionOutcome::Banish(outcome))
+                if outcome.successful.len() == 1 && outcome.moves.len() == 1
+                    && outcome.moves[0].before == *member
+                    && outcome.moves[0].after.is_some()
+                    && outcome.moves[0].actual_to.is_some_and(|to|
+                        to.kind == ZoneKind::Banish && to.player == execution.context.controller))
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "incomplete hand banish cost".into(),
+            ));
+        }
+        Ok(())
+    }
+
     fn internal_hand_transfer_payment(
         &mut self,
         execution: &mut Execution,
@@ -177,5 +206,46 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved }),
         );
         Ok(())
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "A selected hand cost retains its private material proof through banishment."
+)]
+impl Execution {
+    pub(in crate::game::internal) fn private_hand_banish_materials(
+        &self,
+        instruction: &Instruction,
+    ) -> Option<&[ObjectRef]> {
+        let Action::Banish {
+            objects: Selector::Bound { reference },
+        } = &instruction.action
+        else {
+            return None;
+        };
+        if instruction.context != InstructionContext::Cost {
+            return None;
+        }
+        let proof = self.material_selections.get(&reference.key())?;
+        if !proof.is_hand() {
+            return None;
+        }
+        let Slot::Objects { members, .. } = self.slots.get(&reference.key())? else {
+            return None;
+        };
+        members
+            .iter()
+            .all(|member| proof.has_hand_member(*member))
+            .then_some(members.as_slice())
+    }
+
+    pub(in crate::game::internal) fn is_private_hand_banish_cost(
+        &self,
+        instruction: &Instruction,
+        member: ObjectRef,
+    ) -> bool {
+        self.private_hand_banish_materials(instruction)
+            .is_some_and(|members| members.contains(&member))
     }
 }

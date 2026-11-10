@@ -867,3 +867,6 @@ mod target_self;
 
 #[path = "card/x_pp.rs"]
 mod x_pp;
+
+#[path = "card/hand_banish_cost.rs"]
+mod hand_banish_cost;

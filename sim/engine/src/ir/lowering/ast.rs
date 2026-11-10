@@ -272,7 +272,7 @@ pub(super) enum CostOperation {
     ToCemetery(Material),
     ReturnToHand(Material),
     ToEx(ExMaterial),
-    Banish(Material),
+    Banish(BanishMaterial),
     Act(Material),
     Discard(DiscardCost),
     Reveal(Box<HandMaterial>),
@@ -282,6 +282,13 @@ pub(super) enum CostOperation {
     SelfToCemetery(bool),
     /// 「手札のこれをEXエリアに置く」; only a hand activation pays it.
     SelfToEx(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum BanishMaterial {
+    Public(Box<Material>),
+    Hand(Box<HandMaterial>),
 }
 
 #[derive(Deserialize)]

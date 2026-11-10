@@ -325,6 +325,14 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
                     operation: ResourceOperation::Pay, amount: Expr::Literal(Int(amount)) } if *amount >= 0)) {
                 return Err(unsupported("mode PP payment"));
             }
+            if mode
+                .parameters
+                .iter()
+                .any(|decision| reveal_payment::parameter(decision).is_some())
+                && !reveal_payment::field_mode(ability, mode)
+            {
+                return Err(unsupported("private hand mode cost entry"));
+            }
             let mut candidate = ability.clone();
             let definition = candidate
                 .play

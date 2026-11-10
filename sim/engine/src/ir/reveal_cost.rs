@@ -1,12 +1,14 @@
 //! Private hand materials have closed revelation and field-transfer cost entries.
 use super::optional_payment;
+use super::quick::is_printed_quick;
 use super::{
-    Ability, AbilityKind, Action, Binding, Cardinality, ChoiceDomain, CostSpec, Decision,
-    DecisionKind, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int,
-    MoveDestination, MoveReason, Nat, ObjectOperand, OwnerZone, PlaySlot, PlaySpec, PlayerRef,
-    PlayerRelation, Position, Posture, Resource, ResourceOperation, SelectionSnapshot,
-    SelectionView, Selector, Visibility, ZoneKind, ZoneRef,
+    Ability, AbilityKind, Action, Binding, Cardinality, ChoiceDomain, Control, CostSpec, Decision,
+    DecisionKind, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int, Mode,
+    ModeChoiceKind, MoveDestination, MoveReason, Nat, Node, ObjectOperand, OwnerZone, PlaySlot,
+    PlaySpec, PlayerRef, PlayerRelation, Position, Posture, Resource, ResourceOperation,
+    SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind, ZoneRef,
 };
+use core::slice;
 
 pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardinality)> {
     let ChoiceDomain::Objects {
@@ -80,7 +82,7 @@ fn field_steps(costs: &CostSpec, binding: Binding<Selector>, count: Nat) -> bool
         let action = &step.instruction.action;
         if matches!(action, Action::Reveal { objects: Selector::Bound { reference } } if *reference == binding)
             || (count == Nat(1)
-                && matches!(transfer(action), Some(Selector::Bound { reference }) if *reference == binding))
+                && matches!(transfer(action).or_else(|| banish(action)), Some(Selector::Bound { reference }) if *reference == binding))
         {
             selections = selections.saturating_add(1);
             continue;
@@ -121,7 +123,7 @@ pub(crate) fn field_cost(ability: &Ability, costs: &CostSpec) -> bool {
     let Some(play) = &ability.play else {
         return false;
     };
-    play.parameters.iter().any(|decision| {
+    let header = play.parameters.iter().any(|decision| {
         field_parameter(ability, decision)
             && parameter(decision)
                 .is_some_and(|(binding, count)| field_steps(costs, binding, count.minimum))
@@ -129,7 +131,71 @@ pub(crate) fn field_cost(ability: &Ability, costs: &CostSpec) -> bool {
                 || ability.body.as_ref().is_some_and(|body| {
                     optional_payment::declaration(body).is_some_and(|(head, _)| head == costs)
                 }))
-    })
+    });
+    header
+        || field_modes(ability).is_some_and(|modes| {
+            modes.iter().any(|mode| {
+                field_mode(ability, mode)
+                    && optional_payment::mode_declaration(&mode.body)
+                        .is_some_and(|(fee, _, _)| fee == costs)
+            })
+        })
+}
+
+fn field_modes(ability: &Ability) -> Option<&[Mode]> {
+    if is_printed_quick(ability)
+        || ability.active_zones != [ZoneKind::Field]
+        || !matches!(
+            ability.kind,
+            AbilityKind::Activated | AbilityKind::Triggered
+        )
+    {
+        return None;
+    }
+    let [step] = ability.body.as_ref()?.steps.as_slice() else {
+        return None;
+    };
+    let Node::Control {
+        control:
+            Control::Mode {
+                count: Expr::Literal(Nat(1)),
+                choice_kind: ModeChoiceKind::ChoiceKeyword,
+                modes,
+                ..
+            },
+    } = &step.node
+    else {
+        return None;
+    };
+    Some(modes)
+}
+
+pub(crate) fn field_mode(ability: &Ability, mode: &Mode) -> bool {
+    field_modes(ability).is_some_and(|modes| modes.contains(mode))
+        && mode
+            .parameters
+            .first()
+            .is_some_and(|decision| mode_parameter(mode, decision))
+}
+
+pub(crate) fn mode_parameter(mode: &Mode, decision: &Decision) -> bool {
+    if mode.parameters.as_slice() != slice::from_ref(decision)
+        || mode.costs != (CostSpec::Ordered { steps: vec![] })
+    {
+        return false;
+    }
+    let Some((binding, count)) = parameter(decision) else {
+        return false;
+    };
+    let Some((CostSpec::Ordered { steps }, _, _)) = optional_payment::mode_declaration(&mode.body)
+    else {
+        return false;
+    };
+    let [step] = steps.as_slice() else {
+        return false;
+    };
+    count.minimum == Nat(1)
+        && matches!(banish(&step.instruction.action), Some(Selector::Bound { reference }) if *reference == binding)
 }
 
 pub(crate) fn payment(play: &PlaySpec) -> bool {
@@ -200,8 +266,18 @@ pub(crate) fn objects(action: &Action) -> Option<&Selector> {
     if let Action::Reveal { objects } = action {
         Some(objects)
     } else {
-        transfer(action)
+        transfer(action).or_else(|| banish(action))
     }
+}
+
+pub(crate) const fn banish(action: &Action) -> Option<&Selector> {
+    let Action::Banish {
+        objects: objects @ Selector::Bound { .. },
+    } = action
+    else {
+        return None;
+    };
+    Some(objects)
 }
 
 pub(crate) fn transfer(action: &Action) -> Option<&Selector> {

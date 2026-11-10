@@ -56,7 +56,8 @@ pub(super) fn lower_additional(
     if operations.iter().any(|operation| {
         matches!(
             operation,
-            ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
+            ast::CostOperation::Banish(ast::BanishMaterial::Hand(_))
+                | ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
                 | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(_))
         )
     }) {
@@ -92,6 +93,7 @@ fn lower_operations(
                 ast::CostOperation::Discard(
                     ast::DiscardCost::Material(_) | ast::DiscardCost::Groups(_)
                 ) | ast::CostOperation::Reveal(_)
+                    | ast::CostOperation::Banish(ast::BanishMaterial::Hand(_))
                     | ast::CostOperation::ToEx(ast::ExMaterial::Hand(_))
                     | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Hand(_))
             )
@@ -188,7 +190,6 @@ fn lower_operations(
             }
             ast::CostOperation::ToCemetery(value)
             | ast::CostOperation::ReturnToHand(value)
-            | ast::CostOperation::Banish(value)
             | ast::CostOperation::Act(value) => {
                 let operation = material_operation(operation, path)?;
                 let (action, decision) = super::material::lower(
@@ -202,15 +203,21 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::ToEx(ast::ExMaterial::Public(value)) => {
+            ast::CostOperation::ToEx(ast::ExMaterial::Public(value))
+            | ast::CostOperation::Banish(ast::BanishMaterial::Public(value)) => {
                 let (action, decision) = super::material::lower(
                     context.card_allocator,
                     &mut context.allocator,
                     context.scope,
                     value,
-                    super::material::Operation::Ex,
+                    material_operation(operation, path)?,
                     path,
                 )?;
+                parameters.push(decision);
+                action
+            }
+            ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
+                let (action, decision) = super::reveal_cost::banish(context, material, path)?;
                 parameters.push(decision);
                 action
             }
