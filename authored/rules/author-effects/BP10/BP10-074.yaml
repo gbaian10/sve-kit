@@ -1,0 +1,64 @@
+cards:
+  BP10-074:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 20
+                then:
+                  - evolve:
+                      ref: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+          do:
+            - reveal_until:
+                bind: revealed
+                matched: matched
+                n: 2
+                sel:
+                  kind: follower
+                  orig_cost_le: 3
+                  who: self
+                  zone: deck
+            - move:
+                ref:
+                  in: matched
+                result: entered
+                to: field
+            - move:
+                order: shuffle
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: revealed
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-10"
+format: 2
+kind: author_effect_set

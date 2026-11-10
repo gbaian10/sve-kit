@@ -3,11 +3,11 @@
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
-use crate::ir::NumericProperty;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
 use crate::ir::prevention;
+use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
@@ -21,6 +21,7 @@ use crate::ir::{
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatOperation, NumericChange, ObjectProperty,
 };
+use crate::ir::{InstructionContext, NumericProperty, RevealUntilMembers};
 use alloc::collections::BTreeSet;
 use serde_json::json;
 
@@ -87,6 +88,42 @@ fn mask_ability_permission(node: &mut Node) -> Result<()> {
     Ok(())
 }
 
+fn mask_public_prefix(node: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = node
+        && matches!(instruction.action, Action::RevealUntil { .. })
+    {
+        if !reveal_shape::action(&instruction.action)
+            || instruction.actor != (PlayerRef::Controller {})
+            || instruction.context != InstructionContext::Effect
+            || instruction.precondition.is_some()
+        {
+            return Err(unsupported("public reveal-until instruction"));
+        }
+        instruction.action = Action::Draw {
+            player: PlayerRef::Controller {},
+            count: Expr::Literal(Int(0)),
+            mode: StepwiseMode::Exact,
+        };
+    }
+    Ok(())
+}
+
+fn check_prefix_receipts(node: &Node, requirements: &Requirements) -> Result<()> {
+    if requirements
+        .required
+        .iter()
+        .any(|requirement| requirement.capability.code == "shape.ObjectReceipt.RevealUntil")
+        && !matches!(node, Node::Instruction { instruction }
+            if reveal_shape::receipt_action(&instruction.action)
+                && instruction.actor == (PlayerRef::Controller {})
+                && instruction.context == InstructionContext::Effect
+                && instruction.precondition.is_none())
+    {
+        return Err(unsupported("closed reveal-until receipt consumption"));
+    }
+    Ok(())
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "The contextual private-read guard checks the complete local node."
@@ -144,6 +181,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
             mode: StepwiseMode::Exact,
         };
     }
+    mask_public_prefix(&mut inspected)?;
     mask_entry_origin(&mut inspected)?;
     mask_public_selectors(&mut inspected)?;
     super::tokens::mask_operands(&mut inspected);
@@ -214,6 +252,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         },
         source: source.clone(),
     });
+    check_prefix_receipts(node, &requirements)?;
     check_private_requirements(&requirements, private_spine)?;
     if let Node::Instruction { instruction } = node {
         match &instruction.action {
@@ -552,7 +591,12 @@ fn order_leaves<'selector>(
 ) {
     match selector {
         Selector::ReceiptMembers {
-            receipt: ObjectReceipt::Look { .. },
+            receipt:
+                ObjectReceipt::Look { .. }
+                | ObjectReceipt::RevealUntil {
+                    members: RevealUntilMembers::Revealed,
+                    ..
+                },
             ..
         } => {}
         // A reorder receipt only subtracts already ordered cards from the same private spine.
@@ -831,6 +875,10 @@ impl Execution {
         actor: PlayerId,
     ) -> Result<Vec<ObjectRef>> {
         match selector {
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::RevealUntil { receipt, members },
+                projection: MemberProjection::Before,
+            } => self.revealed_objects(receipt, *members),
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Look { receipt },
                 projection: MemberProjection::Before | MemberProjection::After,

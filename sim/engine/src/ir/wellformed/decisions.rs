@@ -552,6 +552,7 @@ impl Checker {
                 projection,
             } => match receipt {
                 ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
+                ObjectReceipt::RevealUntil { receipt, .. } => self.visible_receipt(receipt),
                 ObjectReceipt::Token { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::Movement { receipt } if *projection == MemberProjection::Before => {
                     self.movement_before_visible(receipt)

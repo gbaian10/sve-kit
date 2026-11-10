@@ -307,6 +307,10 @@ impl Execution {
                 _ => return Err(invalid("missing token creation producer")),
             },
             Selector::ReceiptMembers {
+                receipt: ObjectReceipt::RevealUntil { receipt, members },
+                projection: MemberProjection::Before,
+            } => self.revealed_objects(receipt, *members)?,
+            Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },
                 projection: MemberProjection::Before,
             } => self.movement_before(receipt)?,

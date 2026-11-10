@@ -1309,13 +1309,16 @@ fn check_instruction(
         Action::Draw {
             mode: StepwiseMode::Exact,
             ..
-        } | Action::Look {
-            mode: StepwiseMode::Exact,
-            ..
-        } | Action::Damage {
-            amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
-            ..
-        } | Action::Resource { .. }
+        } | Action::RevealUntil { .. }
+            | Action::Look {
+                mode: StepwiseMode::Exact,
+                ..
+            }
+            | Action::Damage {
+                amount: DamageAmount::Uniform { .. } | DamageAmount::Allocation { .. },
+                ..
+            }
+            | Action::Resource { .. }
             | Action::Counter { .. }
             | Action::Discard { .. }
             | Action::GameResult { .. }

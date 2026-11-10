@@ -849,3 +849,6 @@ mod shuffle;
 
 #[path = "card/unlimited_evolution.rs"]
 mod unlimited_evolution;
+
+#[path = "card/reveal_until.rs"]
+mod reveal_until;

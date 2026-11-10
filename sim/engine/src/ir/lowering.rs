@@ -38,6 +38,7 @@ mod prevention;
 mod receipt_counts;
 mod resource_entry;
 mod reveal_cost;
+mod reveal_until;
 mod stack;
 mod static_keywords;
 mod trigger_restrictions;
@@ -1839,6 +1840,7 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::PlayerEffect(value) => self.player_effect(value, source, path),
             ast::Step::Search(value) => self.search(value, path),
             ast::Step::Reveal(value) => self.reveal(value, path),
+            ast::Step::RevealUntil(value) => reveal_until::lower(self, value, path),
             ast::Step::Create(value) => self.create(value, path),
             ast::Step::Pilot(value) => numeric::pilot(value, path),
             ast::Step::Boxed(value) => self.boxed(value, path),

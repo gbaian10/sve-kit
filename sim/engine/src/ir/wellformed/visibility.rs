@@ -202,6 +202,11 @@ impl Checker {
 
     pub(super) fn observation(&mut self, instruction: &Instruction) {
         match &instruction.action {
+            Action::RevealUntil { .. } => {
+                self.env
+                    .receipt_access
+                    .insert(instruction.receipt, Visibility::Public {});
+            }
             Action::Look { viewer, .. } => {
                 self.env
                     .receipt_access
@@ -240,7 +245,6 @@ impl Checker {
             | Action::Life { .. }
             | Action::Draw { .. }
             | Action::Search { .. }
-            | Action::RevealUntil { .. }
             | Action::Shuffle { .. }
             | Action::Order { .. }
             | Action::Evolve { .. }
