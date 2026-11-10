@@ -13,15 +13,25 @@ use alloc::collections::{BTreeMap, BTreeSet};
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct CapacityWait {
     instruction: Box<Instruction>,
+    resume: Node,
     destination: PlayerId,
     zone: ZoneKind,
-    members: Vec<ObjectRef>,
+    members: Vec<ArrivalMember>,
     domain: SearchPartitionDomain,
     available: usize,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(in crate::game::internal) enum ArrivalMember {
+    Object(ObjectRef),
+    Token(String),
+}
+
 impl CapacityWait {
-    pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
+    pub(in crate::game::internal) fn validate(
+        &self,
+        handles: &[u64],
+    ) -> Result<Vec<ArrivalMember>> {
         if handles.len() != self.available
             || handles.iter().collect::<BTreeSet<_>>().len() != handles.len()
         {
@@ -34,7 +44,7 @@ impl CapacityWait {
                     .cards
                     .iter()
                     .position(|card| card.handle == *handle)
-                    .and_then(|index| self.members.get(index).copied())
+                    .and_then(|index| self.members.get(index).cloned())
                     .ok_or_else(|| invalid("unknown movement capacity handle"))
             })
             .collect()
@@ -109,38 +119,48 @@ impl Game {
     fn movement_capacity_domain(
         &self,
         execution: &Execution,
-        members: &[ObjectRef],
+        members: &[ArrivalMember],
         available: usize,
     ) -> Result<SearchPartitionDomain> {
-        // A private unobserved deck slice cannot lend its faces to an allocation question.
         let actor = seat_name(execution.context.controller)?;
-        for &member in members {
-            let id = execution.object_id(member)?;
-            let object = self.object(id)?;
-            if object.zone == "deck"
-                && !self
-                    .state
-                    .knowledge
-                    .get(actor)
-                    .is_some_and(|knowledge| knowledge.located.contains(id))
-            {
-                return Err(unsupported("unobserved deck capacity selection"));
-            }
-        }
         let cards = members
             .iter()
             .enumerate()
-            .map(|(index, &member)| {
-                let id = execution.object_id(member)?;
+            .map(|(index, member)| {
+                let (card, name, object) = match member {
+                    ArrivalMember::Object(reference) => {
+                        let id = execution.object_id(*reference)?;
+                        let object = self.object(id)?;
+                        if object.zone == "deck"
+                            && !self
+                                .state
+                                .knowledge
+                                .get(actor)
+                                .is_some_and(|knowledge| knowledge.located.contains(id))
+                        {
+                            return Err(unsupported("unobserved deck capacity selection"));
+                        }
+                        (
+                            object.card.clone(),
+                            self.card_name(id)?,
+                            matches!(object.zone.as_str(), "field" | "cemetery" | "ex" | "banish")
+                                .then(|| id.to_owned()),
+                        )
+                    }
+                    ArrivalMember::Token(card) => (
+                        card.clone(),
+                        self.catalog.face(card, 0)?["name"]
+                            .as_str()
+                            .ok_or_else(|| invalid("token name"))?
+                            .to_owned(),
+                        None,
+                    ),
+                };
                 Ok(OrderCard {
                     handle: u64::try_from(index).map_err(invalid)?,
-                    card: self.object(id)?.card.clone(),
-                    name: self.card_name(id)?,
-                    object: matches!(
-                        self.object(id)?.zone.as_str(),
-                        "field" | "cemetery" | "ex" | "banish"
-                    )
-                    .then(|| id.to_owned()),
+                    card,
+                    name,
+                    object,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -160,40 +180,79 @@ impl Game {
         instruction: &Instruction,
         plan: &MovementPlan,
     ) -> Result<Option<Vec<ObjectRef>>> {
-        let mut incoming = BTreeMap::<u32, Vec<ObjectRef>>::new();
-        for movement in &plan.plans {
-            if !movement.stack_replaced {
+        let arrivals = plan
+            .plans
+            .iter()
+            .filter(|movement| !movement.stack_replaced)
+            .map(|movement| {
                 let result = plan
                     .moves
                     .get(movement.result_index)
                     .ok_or_else(|| invalid("missing planned movement result"))?;
-                incoming
-                    .entry(result.requested_to.player.seat)
-                    .or_default()
-                    .push(result.before);
-            }
+                Ok((ArrivalMember::Object(result.before), result.requested_to))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let resume = Node::Instruction {
+            instruction: Box::new(instruction.clone()),
+        };
+        let Some(chosen) =
+            self.internal_arrival_capacity(execution, instruction, resume, &arrivals)?
+        else {
+            return Ok(None);
+        };
+        Ok(Some(
+            plan.moves
+                .iter()
+                .filter(|item| {
+                    !arrivals
+                        .iter()
+                        .any(|(member, _)| *member == ArrivalMember::Object(item.before))
+                        || chosen.contains(&ArrivalMember::Object(item.before))
+                })
+                .map(|item| item.before)
+                .collect(),
+        ))
+    }
+
+    pub(in crate::game::internal) fn internal_arrival_capacity(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        resume: Node,
+        arrivals: &[(ArrivalMember, RuntimeZoneRef)],
+    ) -> Result<Option<Vec<ArrivalMember>>> {
+        let mut incoming = BTreeMap::<u32, Vec<ArrivalMember>>::new();
+        for (member, destination) in arrivals {
+            incoming
+                .entry(destination.player.seat)
+                .or_default()
+                .push(member.clone());
         }
-        let mut kept: BTreeSet<_> = plan
-            .moves
+        let mut kept = arrivals
             .iter()
-            .map(|item| reference_key(item.before))
-            .collect();
+            .map(|(member, _)| member.clone())
+            .collect::<Vec<_>>();
         for (seat, members) in incoming {
             let destination = PlayerId { seat };
-            let zone = plan
-                .moves
+            let zone = arrivals
                 .iter()
-                .find(|item| item.requested_to.player == destination)
+                .find(|(_, zone)| zone.player == destination)
                 .ok_or_else(|| invalid("missing movement capacity destination"))?
-                .requested_to
+                .1
                 .kind;
+            if arrivals
+                .iter()
+                .any(|(_, other)| other.player == destination && other.kind != zone)
+            {
+                return Err(unsupported("mixed capacity destination kinds"));
+            }
             let available = self.movement_free_spaces(destination, zone)?;
             if members.len() <= available {
                 continue;
             }
             if available == 0 {
                 for member in members {
-                    kept.remove(&reference_key(member));
+                    kept.retain(|kept_member| *kept_member != member);
                 }
                 continue;
             }
@@ -206,7 +265,7 @@ impl Game {
                 }
                 for member in members {
                     if !chosen.contains(&member) {
-                        kept.remove(&reference_key(member));
+                        kept.retain(|kept_member| *kept_member != member);
                     }
                 }
                 continue;
@@ -214,6 +273,7 @@ impl Game {
             let domain = self.movement_capacity_domain(execution, &members, available)?;
             let wait = CapacityWait {
                 instruction: Box::new(instruction.clone()),
+                resume,
                 destination,
                 zone,
                 members,
@@ -229,26 +289,23 @@ impl Game {
             )?;
             return Ok(None);
         }
-        Ok(Some(
-            plan.moves
-                .iter()
-                .filter(|item| kept.contains(&reference_key(item.before)))
-                .map(|item| item.before)
-                .collect(),
-        ))
+        Ok(Some(kept))
     }
 
     pub(in crate::game::internal) fn internal_movement_capacity_answer(
         &self,
         execution: &mut Execution,
         wait: &CapacityWait,
-        chosen: Vec<ObjectRef>,
+        chosen: Vec<ArrivalMember>,
     ) -> Result<()> {
         if self.movement_free_spaces(wait.destination, wait.zone)? != wait.available {
             return Err(invalid("movement capacity changed before its answer"));
         }
-        for &member in &wait.members {
-            let object = self.object(execution.object_id(member)?)?;
+        for member in &wait.members {
+            let ArrivalMember::Object(member) = member else {
+                continue;
+            };
+            let object = self.object(execution.object_id(*member)?)?;
             if object.generation != member.generation.0 {
                 return Err(invalid("movement capacity candidate changed generation"));
             }
@@ -256,9 +313,7 @@ impl Game {
         execution
             .movement_capacity
             .insert((wait.instruction.receipt, wait.destination.seat), chosen);
-        execution.todo.push_front(Node::Instruction {
-            instruction: wait.instruction.clone(),
-        });
+        execution.todo.push_front(wait.resume.clone());
         Ok(())
     }
 }

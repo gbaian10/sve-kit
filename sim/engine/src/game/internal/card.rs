@@ -9,6 +9,7 @@ use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
 use crate::ir::history_turn::evolution_capture_header;
+use crate::ir::mixed_ex;
 use crate::ir::names;
 use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::quick::{card_permission, is_printed_quick};
@@ -1288,6 +1289,15 @@ fn check_nested_nodes(
             let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("fixed repeat"))?;
             check_nodes(game, &body.steps, source, origin)?;
         }
+        control @ Control::Simultaneous { batch, .. } => {
+            if mixed_ex::projection(control).is_none() {
+                return Err(unsupported("mixed EX whole-card batch"));
+            }
+            for member in &batch.members {
+                check_node_source(game, &member.source, source)?;
+                check_instruction(game, &member.node, source, origin)?;
+            }
+        }
         Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
         control @ Control::May { body, .. } => {
             super::alternatives::check_may(control)?;
@@ -1428,6 +1438,7 @@ fn check_nodes(
                     | Control::May { .. }
                     | Control::Sequence { .. }
                     | Control::Repeat { .. }
+                    | Control::Simultaneous { .. }
                     | Control::If { .. }),
             } => check_nested_nodes(game, control, source, ability_source)?,
             Node::Control {
