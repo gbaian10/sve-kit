@@ -85,8 +85,11 @@ fn query_filter(
     let ast::DeckZone::Deck = query.zone;
     let mut filter = super::selection::ObjectFilter::from(query);
     if let Some(keyword) = &query.keyword {
-        filter.keyword =
-            Some(super::keywords::basic_keyword_id(keyword).ok_or_else(|| unsupported(path))?);
+        filter.keyword = Some(
+            super::keywords::ability_filter_id(keyword)
+                .or_else(|| super::keywords::basic_keyword_id(keyword))
+                .ok_or_else(|| unsupported(path))?,
+        );
     }
     filter.power_at_most = match (&query.alias, &query.r#where) {
         (None, None) => None,

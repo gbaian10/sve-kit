@@ -1578,9 +1578,13 @@ impl TryFrom<String> for FilterKeyword {
     type Error = &'static str;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        match super::keywords::keyword_id(&value) {
+        match super::keywords::ability_filter_id(&value)
+            .or_else(|| super::keywords::keyword_id(&value))
+        {
             Some(
-                keyword @ (super::super::KeywordId::Ward
+                keyword @ (super::super::KeywordId::EarthRite
+                | super::super::KeywordId::Lastword
+                | super::super::KeywordId::Ward
                 | super::super::KeywordId::Aura
                 | super::super::KeywordId::Storm
                 | super::super::KeywordId::Rush

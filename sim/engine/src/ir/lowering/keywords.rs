@@ -114,3 +114,11 @@ pub(super) fn basic_keyword_id(name: &str) -> Option<KeywordId> {
     )
     .then_some(keyword)
 }
+
+pub(super) fn ability_filter_id(name: &str) -> Option<KeywordId> {
+    match name {
+        "earth_rite" => Some(KeywordId::EarthRite),
+        "lastword" => Some(KeywordId::Lastword),
+        _ => None,
+    }
+}
