@@ -4,7 +4,7 @@ use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 #[test]
-fn public_material_union_is_only_own_field_and_ex_banishment() {
+fn public_material_union_preserves_banishment_and_rejects_unconstrained_transfers() {
     let body = json!({"cost":{"banish":{"sel":{"who":"self","zone":["field","ex"],"name":"tree"},"n":1}},"do":[{"life":{"who":"self","delta":1}}]});
     for zones in [json!(["field", "ex"]), json!(["ex", "field"])] {
         let mut input = body.clone();
@@ -452,4 +452,253 @@ fn variable_public_materials_reject_conflicting_quantities_and_unavailable_paid_
     lowerer
         .lower(&expanded("unit-follower", "fanfare", early))
         .unwrap_err();
+}
+
+fn field_ex_token_cost() -> Value {
+    json!({"cost":{"steps":[{"act_self":true},{"to_cemetery":{
+        "sel":{"who":"self","zone":["field","ex"],"trait":"魔界","token":true},"n":1
+    }}]},"do":[{"life":{"who":"self","delta":1}}]})
+}
+
+#[test]
+fn field_ex_token_cemetery_material_accepts_both_zone_orders_and_keeps_other_shapes_closed() {
+    for zones in [json!(["field", "ex"]), json!(["ex", "field"])] {
+        let mut body = field_ex_token_cost();
+        body["cost"]["steps"][1]["to_cemetery"]["sel"]["zone"] = zones;
+        let typed = program("unit-follower", "activate", body);
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "token-material-admission",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &typed).unwrap();
+    }
+    for (key, value) in [
+        ("who", json!("opp")),
+        ("who", json!("all")),
+        ("zone", json!(["field", "cemetery"])),
+        ("kind", json!("follower")),
+        ("kind", json!("amulet")),
+        ("trait", json!("")),
+        ("token", json!(false)),
+        ("name", json!("material")),
+        ("other", json!(true)),
+        ("orig_cost_le", json!(3)),
+    ] {
+        let mut body = field_ex_token_cost();
+        body["cost"]["steps"][1]["to_cemetery"]["sel"][key] = value;
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", body))
+            .unwrap_err();
+    }
+    for key in ["token", "trait"] {
+        let mut body = field_ex_token_cost();
+        body["cost"]["steps"][1]["to_cemetery"]["sel"]
+            .as_object_mut()
+            .unwrap()
+            .remove(key);
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", body))
+            .unwrap_err();
+    }
+    for (key, value) in [
+        ("n", json!(2)),
+        ("result", json!("paid")),
+        ("cost_sum_ge", json!(1)),
+    ] {
+        let mut body = field_ex_token_cost();
+        body["cost"]["steps"][1]["to_cemetery"][key] = value;
+        lowerer()
+            .lower(&expanded("unit-follower", "activate", body))
+            .unwrap_err();
+    }
+}
+
+fn field_ex_material_catalog() -> Arc<Catalog> {
+    let (snapshot, keywords, effects) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            match row["number"].as_str().unwrap() {
+                "unit-amulet" => {
+                    row["faces"][0]["card_type"] = json!("アミュレット・トークン");
+                    row["faces"][0]["traits"] = json!(["魔界"]);
+                }
+                "unit-follower" => row["faces"][0]["traits"] = json!(["魔界"]),
+                "unit-spell" => {
+                    row["faces"][0]["card_type"] = json!("スペル・トークン");
+                    row["faces"][0]["traits"] = json!(["反例"]);
+                }
+                _ => {}
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+    )
+}
+
+#[test]
+fn field_ex_token_cemetery_material_accepts_amulet_tokens_and_pays_atomically() {
+    let catalog = field_ex_material_catalog();
+    let typed = program("unit-follower", "activate", field_ex_token_cost());
+    for zone in ["field", "ex"] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["ex"] = json!([
+            {"id":"ordinary","card":"unit-follower"},{"id":"wrong-trait","card":"unit-spell"}
+        ]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"private","card":"unit-amulet"}]);
+        initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"foreign","card":"unit-amulet"}]);
+        initial["players"]["P1"]["zones"][zone]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"material","card":"unit-amulet"}));
+        let mut game = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "amulet-token-material",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &typed).unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let choice = awaiting(
+            game.activate_internal_card(
+                "s",
+                typed.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap(),
+        );
+        let InputDomain::CostMaterials(materials) = &choice.domain else {
+            panic!("public token payment")
+        };
+        assert_eq!(
+            materials.members.len(),
+            1,
+            "Q1685 admits the own Makai amulet token, excluding ordinary, other-trait, private and opposing cards"
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["s"]["acted"],
+            false,
+            "the ordered act cost waits for the full material choice"
+        );
+        resolved(
+            game.answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::CostMaterials(vec![materials.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            after["objects"]["s"]["acted"], true,
+            "the act cost commits with the token material"
+        );
+        assert!(
+            after["objects"].get("material").is_none(),
+            "the paid token is erased after reaching the cemetery"
+        );
+        assert_eq!(
+            after["P1"]["leader"]["life"], 21_u8,
+            "the body resolves only after the whole cost was paid"
+        );
+        assert_eq!(
+            after["P2"]["ex"],
+            json!(["foreign"]),
+            "opposing public tokens cannot pay"
+        );
+        assert_eq!(
+            after["P1"]["hand"],
+            json!(["private"]),
+            "hidden hand cards cannot pay this public cost"
+        );
+    }
+}
+
+#[test]
+fn field_ex_token_cemetery_material_loader_rejects_other_destinations_counts_and_traits() {
+    let typed = program("unit-follower", "activate", field_ex_token_cost());
+    for change in 0..4 {
+        let mut altered = typed.card().clone();
+        let play = altered.abilities[0].node.play.as_mut().unwrap();
+        if change == 0 {
+            let CostSpec::Ordered { steps } = &mut play.costs else {
+                panic!("ordered payment")
+            };
+            let Action::Move { movement, .. } = &mut steps[1].instruction.action else {
+                panic!("material move")
+            };
+            movement.to = MoveDestination::Owners {
+                zone: OwnerZone::Hand,
+            };
+        } else {
+            let ChoiceDomain::Objects { constraint, .. } = &mut play.parameters[0].domain else {
+                panic!("material domain")
+            };
+            if change == 1 {
+                let count = Cardinality {
+                    minimum: Nat(2),
+                    maximum: Some(Nat(2)),
+                };
+                constraint.cardinality = count;
+                constraint.groups[0].cardinality = count;
+            } else {
+                let Selector::Union { sets } = &mut constraint.groups[0].selector else {
+                    panic!("public union")
+                };
+                if change == 2 {
+                    let Selector::Zone { predicate, .. } = &mut sets[1] else {
+                        panic!("public leaf")
+                    };
+                    **predicate = Expr::Literal(Bool(true));
+                } else {
+                    let mut body = field_ex_token_cost();
+                    body["cost"]["steps"][1]["to_cemetery"]["sel"]["trait"] = json!("反例");
+                    let other = program("unit-follower", "activate", body);
+                    let ChoiceDomain::Objects {
+                        constraint: other_constraint,
+                        ..
+                    } = &other.card().abilities[0]
+                        .node
+                        .play
+                        .as_ref()
+                        .unwrap()
+                        .parameters[0]
+                        .domain
+                    else {
+                        panic!("other material domain")
+                    };
+                    let Selector::Union { sets: other_sets } = &other_constraint.groups[0].selector
+                    else {
+                        panic!("other public union")
+                    };
+                    sets[1] = other_sets[1].clone();
+                }
+            }
+        }
+        let checked = WellFormedCardProgram::check(altered).unwrap();
+        let mut game = Game::new(
+            catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "closed-material-union",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &checked)
+            .unwrap_err();
+    }
 }

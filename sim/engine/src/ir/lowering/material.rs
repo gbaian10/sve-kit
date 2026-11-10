@@ -51,7 +51,8 @@ pub(super) fn lower(
     if (matches!(
         material.sel.zone,
         ast::PublicZone::Cemetery | ast::PublicZone::FieldEx
-    ) && !matches!(operation, Operation::Banish))
+    ) && !matches!(operation, Operation::Banish)
+        && !(matches!(operation, Operation::Put) && field_ex_token_material(material)))
         || (matches!(operation, Operation::Act | Operation::Ex)
             && !matches!(material.sel.zone, ast::PublicZone::Field))
     {
@@ -78,6 +79,47 @@ pub(super) fn lower(
         });
     }
     Ok((material_action(objects, operation), decision))
+}
+
+// Only this token payment needs a cemetery choice across both public zones.
+const fn field_ex_token_material(material: &ast::Material) -> bool {
+    matches!(
+        material,
+        ast::Material {
+            sel: ast::PublicQuery {
+                acted: None,
+                evolved: None,
+                racing: None,
+                other: false,
+                not_same_name_as_this: false,
+                who: ast::Side::Controller,
+                zone: ast::PublicZone::FieldEx,
+                kind: None,
+                keyword: None,
+                r#trait: Some(trait_name),
+                traits_any: None,
+                traits_all,
+                name: None,
+                names,
+                name_contains: None,
+                class: None,
+                not_class: None,
+                token: Some(true),
+                orig_cost_eq: None,
+                orig_cost_le: None,
+                orig_cost_ge: None,
+                cost_eq: None,
+                cost_le: None,
+                cost_ge: None,
+                hp_le: None,
+                r#where: None,
+            },
+            n: Some(1),
+            any: false,
+            result: None,
+            cost_sum_ge: None,
+        } if !trait_name.is_empty() && traits_all.is_empty() && names.is_empty()
+    )
 }
 
 pub(super) fn cardinality(
