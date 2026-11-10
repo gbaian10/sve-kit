@@ -669,6 +669,12 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 
 打出時宣告增加 PP 使用 `play.optional_cost: {pp: 4, result: enhanced}`；`pp` 是正整數，不能同時指定材料、`one_of`、`optional_cost_delta` 或 `optional_cost_set`。接受宣告後，增加量與其他費用增減一起報價，最後才套用零下限，整次打出只支付一次 PP。拒絕宣告不加費；本文可用 `paid: {receipt: enhanced}` 讀取已完成的宣告，即使折扣使總費用成為 0。宣告在模式與目標之前，所有輸入完成後才付款；付不起則還原整次出牌。這與能力本文的可選付款不同。
 
+`play.optional_cost.act` 可選擇橫置自己場上符合篩選的固定張數卡片，配 `optional_cost_delta` 交換減費。
+例如魔術指南使用 `{sel: {who: self, zone: field, kind: follower, trait: 学院}, n: 2}` 與 `optional_cost_delta: -2`；
+温かな抱擁使用同一付款流程，以 `name: ナテラの大樹` 選兩張護符。
+成本未指定玩家的「場の」依 CR 10.4.3／Q806 指自己控制的場，不能橫置對手卡；已橫置或不符條件的卡也不是材料。
+接受時須選足兩張，拒付可支付原 PP 費用。魔術指南的己方從者正式目標仍須合法存在，否則無法打出，也不抽牌（Q2734）。
+
 `play.optional_cost.discard` 支援固定張數的自己手牌，配單一常值 `optional_cost_delta` 或 `optional_cost_set` 交換減費。
 它與場上送墓／橫置、墓場消滅使用同一付款流程：先決定是否交換，再宣告效果目標，最後私下選足額手牌；原 PP 與棄牌都成功才打出。
 正在打出的卡不列為手牌材料，拒付不棄牌且支付原費用，材料或 PP 不足則整次回復。Quick、可變張數及混合材料操作仍拒絕。

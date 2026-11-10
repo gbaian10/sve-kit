@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP17-007:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                name: ナテラの大樹
+              n: 2
+          optional_cost_delta: -2
+      - line: 2
+        spell:
+          do:
+            - life:
+                who: self
+                delta: 1
+            - draw:
+                who: self
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
