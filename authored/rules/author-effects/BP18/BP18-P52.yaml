@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-P52:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-11"
+    token:
+      name: ジュエルドレスアップ
+      template: true
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - player_effect:
+                who: self
+                until: turn
+                effect:
+                  play_permission:
+                    from:
+                      - banish
+                    "on":
+                      who: self
+                      zone: banish
