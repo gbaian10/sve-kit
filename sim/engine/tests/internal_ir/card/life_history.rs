@@ -1,5 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_engine::game::internal::InputDomain;
 
 fn lower_bodies(bodies: &[Value]) -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
@@ -158,7 +159,6 @@ fn life_history_rejects_unhandled_filters_windows_and_directionless_sums() {
         ("distinct", json!("subjects")),
         ("sel", json!({"name":"hidden"})),
         ("exclude", json!("this_execution")),
-        ("where", json!({"direction":"up"})),
         ("where", json!({"direction":"down","by":{"kind":"ability"}})),
         (
             "where",
@@ -169,6 +169,7 @@ fn life_history_rejects_unhandled_filters_windows_and_directionless_sums() {
         query[key] = value;
         queries.push(query);
     }
+    queries.push(history("opp", "up"));
     for missing in ["who", "where"] {
         let mut query = baseline.clone();
         query.as_object_mut().unwrap().remove(missing);
@@ -243,4 +244,231 @@ fn life_payments_outside_a_required_trigger_head_remain_rejected() {
             }
         }
     }
+}
+
+#[test]
+fn life_gain_count_uses_actual_positive_changes_and_resets_with_the_turn() {
+    let mut game = fixture(&initial());
+    let producer = json!({"cost":{"pp":0},"do":[
+        {"life":{"who":"self","delta":3}},
+        {"life":{"who":"self","delta":1}},
+        {"set_life":{"who":"self","n":25}},
+        {"life":{"who":"self","delta":0}},
+        {"set_life":{"who":"self","n":25}},
+        {"life":{"who":"self","delta":-2}},
+        {"set_life":{"who":"opponents","n":23}},
+        {"draw":{"n":{"history_count":history("self","up")}}}
+    ]});
+    let reader = json!({"cost":{"pp":0},"do":[
+        {"draw":{"n":{"history_count":history("self","up")}}}
+    ]});
+    let program = lower_bodies(&[producer, reader]);
+    let producer_id = program.card().abilities[0].node.id;
+    let reader_id = program.card().abilities[1].node.id;
+    game.load_internal_card("unit-follower", &program).unwrap();
+    activate_body(&mut game, producer_id);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["leader"]["life"], 23);
+    assert_eq!(state["P2"]["leader"]["life"], 23);
+    assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 3);
+    for _ in 0..2 {
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        quick::pass(&mut game);
+    }
+    let before = game.projection(View::Referee).unwrap()["P1"]["hand"]
+        .as_array()
+        .unwrap()
+        .len();
+    activate_body(&mut game, reader_id);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"]
+            .as_array()
+            .unwrap()
+            .len(),
+        before
+    );
+}
+
+#[test]
+fn life_gain_count_reads_explicit_count_instead_of_the_total_amount() {
+    let mut initial = initial();
+    initial["semantic_state"]["counters_this_turn"] = json!({"P1":{
+        "leader_hp_increased":9,"leader_hp_increase_count":2
+    }});
+    let mut game = fixture(&initial);
+    let program = lower_bodies(&[json!({"cost":{"pp":0},"do":[
+        {"draw":{"n":{"history_count":history("self","up")}}}
+    ]})]);
+    let ability = program.card().abilities[0].node.id;
+    game.load_internal_card("unit-follower", &program).unwrap();
+    activate_body(&mut game, ability);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
+}
+
+#[test]
+fn life_gain_count_bounds_formal_targets_and_allows_zero_without_healing() {
+    let producer = json!({"cost":{"pp":0},"do":[
+        {"life":{"who":"self","delta":3}}, {"life":{"who":"self","delta":1}}
+    ]});
+    let reader = json!({"cost":{"pp":0},"targets":[{
+        "bind":"enemies","from":{"who":"opp","zone":"field","kind":"follower"},
+        "upto":{"history_count":history("self","up")}
+    }],"do":[{"damage":{"to":"enemies","n":5}}, {"draw":{"n":1}}]});
+    let program = lower_bodies(&[producer, reader]);
+    let producer_id = program.card().abilities[0].node.id;
+    let reader_id = program.card().abilities[1].node.id;
+    for enemy_count in [0_usize, 3] {
+        for healed in [false, true] {
+            let mut initial = initial();
+            initial["players"]["P2"]["zones"]["field"] = json!((0..enemy_count).map(|i|
+                json!({"id":format!("enemy{i}"),"card":"unit-follower","state":{"hp":20,"max_hp":20}})
+            ).collect::<Vec<_>>());
+            let mut game = fixture(&initial);
+            game.load_internal_card("unit-follower", &program).unwrap();
+            if healed {
+                activate_body(&mut game, producer_id);
+            }
+            let play = game
+                .activate_internal_card("s", reader_id, PlayerId { seat: 1 })
+                .unwrap();
+            if let CardPlay::Awaiting(q) = play {
+                let InputDomain::Targets(domain) = q.domain else {
+                    panic!("formal targets")
+                };
+                let members = domain.members.iter().map(|m| m.handle).collect::<Vec<_>>();
+                if !members.is_empty() {
+                    let before = exact_authority(&game);
+                    game.answer_internal_card(q.actor, q.token, Answer::Targets(members.clone()))
+                        .unwrap_err();
+                    assert_eq!(exact_authority(&game), before);
+                }
+                let selected = if healed {
+                    members.into_iter().take(2).collect()
+                } else {
+                    vec![]
+                };
+                resolved(
+                    game.answer_internal_card(q.actor, q.token, Answer::Targets(selected))
+                        .unwrap(),
+                );
+            } else {
+                assert!(!healed || enemy_count == 0);
+                resolved(play);
+            }
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            let view = game.projection(View::Referee).unwrap();
+            let damaged = (0..enemy_count)
+                .filter(|i| view["objects"][format!("enemy{i}")]["damage"] == 5)
+                .count();
+            assert_eq!(damaged, if healed { enemy_count.min(2) } else { 0 });
+            assert_eq!(view["P1"]["hand"].as_array().unwrap().len(), 1);
+        }
+    }
+}
+
+#[test]
+fn dynamic_targets_keep_other_history_reads_outside_the_public_number_subset() {
+    for query in [
+        history("self", "down"),
+        history("opp", "up"),
+        json!({
+            "event":"played","window":"this_turn","who":"self"
+        }),
+    ] {
+        let input = equipment_played::tree(
+            &json!({"activate":{
+                "cost":{"pp":0},"targets":[{
+                    "bind":"enemies","from":{"who":"opp","zone":"field","kind":"follower"},
+                    "upto":{"history_count":query}
+                }],"do":[{"damage":{"to":"enemies","n":5}}]
+            }}),
+            "unit-follower",
+        );
+        lowerer().lower(&input).unwrap_err();
+    }
+}
+
+#[test]
+#[expect(
+    clippy::unreachable,
+    reason = "The accepted target program fixes these IR node shapes."
+)]
+fn life_gain_counts_are_only_upper_bounds_for_formal_targets_including_raw_ir() {
+    let body = json!({"cost":{"pp":0},"targets":[{
+        "bind":"enemies","from":{"who":"opp","zone":"field","kind":"follower"},
+        "upto":{"history_count":history("self","up")}
+    }],"do":[{"damage":{"to":"enemies","n":5}}]});
+    let mut exact = body.clone();
+    let target = exact["targets"][0].as_object_mut().unwrap();
+    let quantity = target.remove("upto").unwrap();
+    target.insert("n".into(), quantity);
+    let input = equipment_played::tree(&json!({"activate":exact}), "unit-follower");
+    lowerer().lower(&input).unwrap_err();
+    let program = lower_bodies(&[body]);
+    let mut raw_exact = program.card().clone();
+    let parameters = &mut raw_exact.abilities[0]
+        .node
+        .play
+        .as_mut()
+        .unwrap()
+        .parameters;
+    let ChoiceDomain::Objects { constraint, .. } = &mut parameters[0].domain else {
+        unreachable!()
+    };
+    constraint.aggregate_bounds[0].comparison = Comparison::Equal;
+    WellFormedCardProgram::check(raw_exact).unwrap_err();
+
+    let mut raw_choice = program.card().clone();
+    let mut decision = raw_choice.abilities[0]
+        .node
+        .play
+        .as_mut()
+        .unwrap()
+        .parameters
+        .remove(0);
+    if let ChoiceDomain::Objects { target_roles, .. } = &mut decision.domain {
+        *target_roles = None;
+    }
+    decision.kind = DecisionKind::ResolutionChoice {
+        may: Declinable::Required,
+        cardinality: Cardinality {
+            minimum: Nat(0),
+            maximum: None,
+        },
+        precondition: None,
+    };
+    let callback = raw_choice.abilities[0].node.body.as_mut().unwrap();
+    callback.steps.insert(
+        0,
+        Located {
+            source: callback.steps[0].source.clone(),
+            node: Node::Decision { decision },
+        },
+    );
+    let mut ordinary_choice = raw_choice.clone();
+    let Node::Decision { decision } = &mut ordinary_choice.abilities[0]
+        .node
+        .body
+        .as_mut()
+        .unwrap()
+        .steps[0]
+        .node
+    else {
+        unreachable!()
+    };
+    let ChoiceDomain::Objects { constraint, .. } = &mut decision.domain else {
+        unreachable!()
+    };
+    constraint.aggregate_bounds[0].value = Expr::Literal(Int(2));
+    WellFormedCardProgram::check(ordinary_choice).unwrap();
+    WellFormedCardProgram::check(raw_choice).unwrap_err();
 }

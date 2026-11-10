@@ -47,6 +47,33 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
         _ => false,
     }
 }
+pub(crate) fn target_count(value: &Expr<Int>, comparison: super::Comparison) -> bool {
+    if check(value) {
+        return true;
+    }
+    if comparison != super::Comparison::LessEqual {
+        return false;
+    }
+    let Expr::Compute(operation) = value else {
+        return false;
+    };
+    let IntOperation::FromNat {
+        value: Expr::Live(read),
+    } = operation.as_ref()
+    else {
+        return false;
+    };
+    let NatRead::HistoryCount {
+        query,
+        count: super::HistoryCount::Facts,
+    } = read.as_ref()
+    else {
+        return false;
+    };
+    super::history_turn::life_plan(query)
+        .is_some_and(|filter| filter.own == Some(true) && filter.up == Some(true))
+}
+
 fn count(selector: &Selector) -> bool {
     match selector {
         Selector::Difference { input, except } => {
