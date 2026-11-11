@@ -62,7 +62,19 @@ pub(super) fn board_in_zones(
     enemy_acted: bool,
     zones: &Value,
 ) -> (Game, WellFormedCardProgram) {
-    let programs = lowerer().lower(tree).unwrap();
+    board_with_card(tree, enemy_acted, zones, None)
+}
+
+pub(super) fn board_with_card(
+    tree: &Value,
+    enemy_acted: bool,
+    zones: &Value,
+    card: Option<&WellFormedCardProgram>,
+) -> (Game, WellFormedCardProgram) {
+    let mut programs = lowerer().lower(tree).unwrap();
+    if let Some(card) = card {
+        programs.insert("unit-follower".into(), card.clone());
+    }
     let card = programs["unit-follower"].clone();
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

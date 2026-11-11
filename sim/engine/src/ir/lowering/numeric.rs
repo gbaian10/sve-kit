@@ -510,22 +510,24 @@ impl BodyContext<'_> {
         match &installation.effect {
             ast::InstalledEffect::PlayPermission(_) => return Err(unsupported(path)),
             ast::InstalledEffect::LoseAbilities(_) => {
-                let ast::Objects::Bound(name) = &installation.on else {
-                    return Err(unsupported(path));
-                };
-                if !matches!(installation.until, None | Some(ast::Until::Turn))
-                    || !self.follower_targets.contains(name)
+                if !matches!(&installation.on, ast::Objects::This(_))
+                    && !matches!(&installation.on, ast::Objects::Bound(name) if self.follower_targets.contains(name))
                 {
                     return Err(unsupported(path));
                 }
-                return Ok(Action::RemoveAbility {
+                let action = Action::RemoveAbility {
                     subjects: self.objects(&installation.on, path)?,
                     scope: RemoveScope::AllAtTime {},
                     duration: duration(installation.until.as_ref(), path)?,
                     timestamp: TimestampBasis::ProperPlay {
                         execution: ExecutionRef::Current {},
                     },
-                });
+                };
+                return if super::super::ability_suppression::supported(&action) {
+                    Ok(action)
+                } else {
+                    Err(unsupported(path))
+                };
             }
             ast::InstalledEffect::AddTrait(value) => {
                 if value.r#trait.is_empty()

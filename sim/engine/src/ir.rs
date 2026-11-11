@@ -118,6 +118,7 @@ macro_rules! runtime_variants {
 }
 
 pub(crate) mod ability_play;
+pub(crate) mod ability_suppression;
 mod actions;
 pub(crate) mod advance_entry;
 mod answers;
