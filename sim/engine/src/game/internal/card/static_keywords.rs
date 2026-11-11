@@ -1,12 +1,12 @@
-use super::super::{Context, admission, grant, player_id};
+use super::super::{admission, grant};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CharacteristicPatch,
     ContinuousLayer, Control, Duration, DurationEnd, Effect, EffectTarget, Expr, FaceId,
-    Generation, GrantedAbility, Instruction, InstructionContext, InstructionId, KeywordId, Node,
-    ObjectId, ObjectOperand, ObjectRelation, ObjectView, PlayerRef, PostureRead, Predicate,
-    Program, ReceiptId, Requirements, Selector, TextProvider, TimeAnchor, TimestampBasis, ZoneKind,
+    GrantedAbility, Instruction, InstructionContext, InstructionId, KeywordId, Node, ObjectOperand,
+    ObjectRelation, ObjectView, PlayerRef, PostureRead, Predicate, Program, ReceiptId,
+    Requirements, Selector, TextProvider, TimeAnchor, TimestampBasis, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -304,23 +304,7 @@ impl Game {
             if static_abilities.is_empty() {
                 continue;
             }
-            let object = self.object(&source)?;
-            let ids = self
-                .state
-                .objects
-                .keys()
-                .cloned()
-                .zip(1_u64..)
-                .map(|(id, number)| (ObjectId(number), id))
-                .collect();
-            let execution = self.card_execution(
-                Context {
-                    source: source.clone(),
-                    generation: Generation(object.generation),
-                    controller: player_id(&object.controller)?,
-                },
-                ids,
-            )?;
+            let execution = self.provider_execution(&source, None)?;
             let member = execution.reference(self, holder)?;
             for located in static_abilities {
                 for effect in &located.node.declarations {
