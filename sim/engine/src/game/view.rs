@@ -30,7 +30,9 @@ impl Game {
             }
             other @ (EngineFailure::IllegalPlay(_)
             | EngineFailure::Unsupported(_)
-            | EngineFailure::Invalid(_)) => other,
+            | EngineFailure::Invalid(_)
+            | EngineFailure::AuthorizationIntegrity(_)
+            | EngineFailure::Invariant(_)) => other,
         })
     }
 

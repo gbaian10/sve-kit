@@ -5,6 +5,7 @@ use super::super::{
     OwnerZone, Posture, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
     SearchPartition, SelectionConstraint, SelectionGroup, TraitId, TraitsRead, ZoneRef,
 };
+use super::groups::{Groups, TotalBounds};
 use super::{
     Action, Binding, BodyContext, Bool, Cardinality, Expr, Int, IntOperation, LoweringError, Nat,
     ObjectOperand, ObjectView, PlayerRef, PlayerRelation, PlayerSet, Predicate, ReceiptId,
@@ -394,56 +395,40 @@ impl BodyContext<'_> {
                 (predicate, cardinality, None)
             }
         } else if let Some(groups) = &search.groups {
-            let mut lowered = Vec::new();
-            let mut minimum = 0_u64;
-            let mut maximum = 0_u64;
+            let mut lowered = Groups::new(TotalBounds::Sum);
             for group in groups {
                 let cardinality = quantity(group.n, group.upto, path)?;
-                minimum = minimum
-                    .checked_add(cardinality.minimum.0)
-                    .ok_or_else(|| unsupported(path))?;
-                maximum = maximum
-                    .checked_add(cardinality.maximum.ok_or_else(|| unsupported(path))?.0)
-                    .ok_or_else(|| unsupported(path))?;
-                let binding = Binding::new(1, self.card_allocator.scope(path)?);
-                let predicate = filter(self, &group.sel, binding, path)?;
-                if matches!(predicate, Expr::Literal(_)) {
-                    return Err(unsupported(path));
-                }
-                lowered.push(SelectionGroup {
-                    selector: Selector::Zone {
-                        players: PlayerSet {
-                            relation: PlayerRelation::SelfPlayer,
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: Cardinality {
-                                minimum: Nat(1),
-                                maximum: Some(Nat(1)),
+                lowered.push(
+                    cardinality,
+                    || {
+                        let binding = Binding::new(1, self.card_allocator.scope(path)?);
+                        let predicate = filter(self, &group.sel, binding, path)?;
+                        if matches!(predicate, Expr::Literal(_)) {
+                            return Err(unsupported(path));
+                        }
+                        Ok(Selector::Zone {
+                            players: PlayerSet {
+                                relation: PlayerRelation::SelfPlayer,
+                                relative_to: PlayerRef::Controller {},
+                                cardinality: Cardinality {
+                                    minimum: Nat(1),
+                                    maximum: Some(Nat(1)),
+                                },
+                                text_quantifier: TextQuantifier::Implicit,
                             },
-                            text_quantifier: TextQuantifier::Implicit,
-                        },
-                        zone: ZoneKind::Deck,
-                        view: SelectionView::Current {},
-                        binding,
-                        predicate: Box::new(predicate),
+                            zone: ZoneKind::Deck,
+                            view: SelectionView::Current {},
+                            binding,
+                            predicate: Box::new(predicate),
+                        })
                     },
-                    cardinality,
-                });
+                    path,
+                )?;
             }
-            let cardinality = Cardinality {
-                minimum: Nat(minimum),
-                maximum: Some(Nat(maximum)),
-            };
-            (
-                Expr::Literal(Bool(true)),
-                cardinality,
-                Some(SelectionConstraint {
-                    groups: lowered,
-                    cardinality,
-                    distinct_by: search.distinct_by.as_ref().map(|_| ObjectProperty::Names),
-                    disjoint: Disjointness::Disjoint,
-                    aggregate_bounds: vec![],
-                }),
-            )
+            let constraint =
+                lowered.finish(search.distinct_by.as_ref().map(|_| ObjectProperty::Names));
+            let cardinality = constraint.cardinality;
+            (Expr::Literal(Bool(true)), cardinality, Some(constraint))
         } else {
             return Err(unsupported(path));
         };

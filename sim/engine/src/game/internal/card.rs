@@ -66,6 +66,7 @@ pub(super) mod other_costs;
 pub(in crate::game::internal) mod play_restrictions;
 pub(super) mod prevention;
 mod printed;
+mod provider;
 pub(super) mod quick;
 mod removal_restrictions;
 pub(in crate::game::internal) mod resource_entry;

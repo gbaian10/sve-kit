@@ -141,6 +141,28 @@ fn body_resource_admission_rejects_payment_other_resources_and_other_players_ato
 }
 
 #[test]
+fn nonliteral_resource_amount_is_a_capability_gap_without_mutation() {
+    let step = instruction(
+        1,
+        Action::Resource {
+            player: PlayerRef::Controller {},
+            resource: Resource::Ep,
+            operation: ResourceOperation::Add,
+            amount: Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Literal(Nat(1)),
+            })),
+        },
+    );
+    let mut game = game(1, 0);
+    let before = exact_authority(&game);
+    let error = game
+        .execute_internal(&checked(vec![step]), &source("synthetic"), context(1))
+        .unwrap_err();
+    assert!(matches!(error, sve_engine::EngineFailure::Unsupported(_)));
+    assert_eq!(exact_authority(&game), before);
+}
+
+#[test]
 fn pp_author_lowering_rejects_dynamic_negative_zero_and_to_max() {
     for pp in [
         json!({"who":"opp","delta":3}),
@@ -304,6 +326,11 @@ fn ep_body_overflow_and_non_controller_requests_preserve_authority() {
                     context(seat),
                 )
                 .unwrap_err();
+            if amount == i64::MAX {
+                assert!(matches!(failure, sve_engine::EngineFailure::Invariant(_)));
+            } else {
+                assert!(matches!(failure, sve_engine::EngineFailure::Unsupported(_)));
+            }
             assert!(
                 failure.to_string().contains(expected),
                 "the intended EP boundary rejects"

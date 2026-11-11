@@ -20,7 +20,8 @@ pub mod ir;
 mod random;
 pub mod replay;
 
-/// Engine, protocol and formal-play failures.
+/// Authority-only diagnostics; player interfaces return reason-free submission results.
+/// Classify the failed contract, never words in the diagnostic message.
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum EngineFailure {
     /// A formal play cannot complete its mandatory targets or full payment.
@@ -32,6 +33,12 @@ pub enum EngineFailure {
     /// Malformed data, a damaged save, or an invalid transport request.
     #[error("invalid: {0}")]
     Invalid(String),
+    /// A runtime read or reference lacks the required information authority.
+    #[error("authorization integrity: {0}")]
+    AuthorizationIntegrity(String),
+    /// An internal invariant or the engine's numeric representation was exceeded.
+    #[error("invariant: {0}")]
+    Invariant(String),
 }
 
 /// Engine fallible operations.

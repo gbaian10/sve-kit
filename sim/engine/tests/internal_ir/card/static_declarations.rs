@@ -519,3 +519,6 @@ fn repeated_public_selectors_keep_distinct_bindings_in_one_mixed_ability() {
     assert_eq!(program.card().abilities[0].node.declarations.len(), 4);
     assert_effects(&board(&program, 7), true, true);
 }
+
+#[path = "provider_reads.rs"]
+mod provider_reads;
