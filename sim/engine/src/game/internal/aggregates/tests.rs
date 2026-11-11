@@ -429,7 +429,7 @@ fn public_selected_and_attack_sums_share_signed_stats_but_keep_stale_policies() 
         .slots
         .insert(binding.key(), super::super::Slot::Created(vec![reference]));
     let event = Binding::new(82, ScopeId(1));
-    execution.attack_event = Some((
+    execution.event_reads = super::super::event_reads::EventReads::for_attack(
         event,
         AttackEvent {
             attacker: reference,
@@ -437,7 +437,7 @@ fn public_selected_and_attack_sums_share_signed_stats_but_keep_stale_policies() 
             controller: PlayerId { seat: 1 },
             ordinal: Nat(1),
         },
-    ));
+    );
     let selected = Selector::Bound { reference: binding };
     let attack = attack::target_selector(event, Binding::new(83, ScopeId(1)));
     let public = zone_population(ZoneKind::Field);
@@ -470,7 +470,7 @@ fn public_selected_and_attack_sums_share_signed_stats_but_keep_stale_policies() 
         }
     }
     aggregate_value(&execution, &board, &attack, NumericProperty::OriginalCost).unwrap_err();
-    execution.attack_event = None;
+    execution.event_reads = super::super::event_reads::EventReads::default();
     aggregate_value(&execution, &board, &attack, NumericProperty::Attack).unwrap_err();
 }
 
