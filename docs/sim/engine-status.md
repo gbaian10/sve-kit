@@ -9,6 +9,7 @@
 - 規則斷言與證據責任：[DSL 驗收規格](../dsl/validation.md)
 - 效果 DSL 正式規格：[docs/dsl/](../dsl/README.md)
 - 玩家資訊與執行要求：[引擎執行與資訊邊界](../dsl/engine-boundaries.md)
+- 公開程式與恢復定版條件：[版本與權威恢復契約](authority-recovery.md)
 
 ## 兩條執行路徑
 
