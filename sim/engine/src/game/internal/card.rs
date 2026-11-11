@@ -1569,9 +1569,6 @@ fn check_grant_instruction(
         }) {
             return Err(unsupported("installed granted definition cannot be UB"));
         }
-        if abilities.iter().any(|granted| matches!(granted, GrantedAbility::Definition { ability } if filter(ability).is_some())) {
-            return Err(unsupported("granted Play requires an equipment provider"));
-        }
         check_granted_definitions(game, abilities, source, ability_source)?;
         if &provider.face != printed_origin(&instruction.source.origin)?.0 {
             return Err(unsupported("grant provider face"));

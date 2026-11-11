@@ -172,6 +172,16 @@ impl BodyContext<'_> {
                             value: Box::new(super::super::events::equipment::holder(event)),
                         }],
                     })
+                    .or_else(|| match self.subject_event {
+                        Some(event @ super::super::events::subject::SubjectFields::Ub(_)) => {
+                            Some(Selector::Objects {
+                                objects: vec![ObjectOperand::FromExpression {
+                                    value: Box::new(event.object()),
+                                }],
+                            })
+                        }
+                        _ => None,
+                    })
                     .ok_or_else(|| unsupported(path));
             }
             ast::Objects::Bound(name) => {
