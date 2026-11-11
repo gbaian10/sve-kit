@@ -1,8 +1,9 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, Decision, DecisionKind, Instruction, InstructionContext,
-    MoveDestination, MoveOutcome, MoveReason, Nat, ObjectOperand, OwnerZone, PlaySlot, PlayerRef,
-    PlayerRelation, Posture, ReceiptLocation, ReceiptReference, Selector, Visibility, ZoneKind,
+    MoveDestination, MoveOutcome, MoveReason, Nat, NumericProperty, ObjectOperand, OwnerZone,
+    PlaySlot, PlayerRef, PlayerRelation, Posture, ReceiptLocation, ReceiptReference, Selector,
+    Visibility, ZoneKind,
 };
 
 #[expect(
@@ -96,7 +97,14 @@ impl Checker {
         }
     }
 
-    pub(super) fn paid_material_attack(&self, receipt: &ReceiptReference<MoveOutcome>) -> Checked {
+    pub(super) fn paid_material_number(
+        &self,
+        receipt: &ReceiptReference<MoveOutcome>,
+        property: NumericProperty,
+    ) -> Checked {
+        if !matches!(property, NumericProperty::Attack | NumericProperty::Cost) {
+            return self.reject();
+        }
         self.receipt(receipt)?;
         if matches!(receipt.location(), ReceiptLocation::Local { id } if self.env.single_material_moves.contains(id))
         {

@@ -595,7 +595,7 @@ impl Walk for NoRead {
 }
 variants!(IntFrozen {
     PaidMaterialActs { receipt: ReceiptReference<MaterialActOutcome> } => ["read.receipt.paid-material-acts"],
-    PaidMaterialAttack { receipt: ReceiptReference<MoveOutcome> } => ["read.receipt.paid-material-attack"],
+    PaidMaterialNumber { receipt: ReceiptReference<MoveOutcome>, property: NumericProperty } => ["read.receipt.paid-material-number"],
     DiscardedCost { receipt: ReceiptReference<DiscardOutcome> } => ["read.receipt.discarded-cost"],
     StatBefore { facet: Binding<StatDelta> } => ["read.event-field"],
     StatAfter { facet: Binding<StatDelta> } => ["read.event-field"],

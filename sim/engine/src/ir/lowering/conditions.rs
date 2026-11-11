@@ -934,9 +934,11 @@ impl BodyContext<'_> {
                     Some(Stat::Attack),
                     CharacteristicView::Effective,
                 )),
-                ast::Observation::Before { objects_of, .. } => {
-                    self.paid_material_attack(objects_of, path)
-                }
+                ast::Observation::Before { objects_of, .. } => self.paid_material_number(
+                    objects_of,
+                    super::super::NumericProperty::Attack,
+                    path,
+                ),
                 // 「前者の攻撃力」: the chosen own follower's attack when read, after earlier buffs.
                 ast::Observation::Binding(name) if self.ability_holders.contains(name) => {
                     let reference = self
@@ -959,7 +961,15 @@ impl BodyContext<'_> {
                     CharacteristicView::Effective,
                 )),
                 ast::Observation::Before { objects_of, .. } => {
-                    self.discarded_cost(objects_of, path)
+                    if self.receipt_reads.paid_materials.contains_key(objects_of) {
+                        self.paid_material_number(
+                            objects_of,
+                            super::super::NumericProperty::Cost,
+                            path,
+                        )
+                    } else {
+                        self.discarded_cost(objects_of, path)
+                    }
                 }
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },

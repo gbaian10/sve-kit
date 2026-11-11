@@ -1,5 +1,5 @@
 use super::{BodyContext, LoweringError, ast, unsupported};
-use crate::ir::{Expr, Int, IntFrozen, ReceiptId, ReceiptReference};
+use crate::ir::{Expr, Int, IntFrozen, NumericProperty, ReceiptId, ReceiptReference};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -101,9 +101,10 @@ impl BodyContext<'_> {
         Ok(())
     }
 
-    pub(super) fn paid_material_attack(
+    pub(super) fn paid_material_number(
         &self,
         name: &str,
+        property: NumericProperty,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
         let receipt = *self
@@ -111,8 +112,9 @@ impl BodyContext<'_> {
             .paid_materials
             .get(name)
             .ok_or_else(|| unsupported(path))?;
-        Ok(Expr::Frozen(Box::new(IntFrozen::PaidMaterialAttack {
+        Ok(Expr::Frozen(Box::new(IntFrozen::PaidMaterialNumber {
             receipt: ReceiptReference::new(receipt),
+            property,
         })))
     }
 }
