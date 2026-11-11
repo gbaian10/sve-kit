@@ -688,7 +688,7 @@ impl BodyContext<'_> {
                     || branch.power_le.is_some()
                     || branch.power_ge.is_some()
             })
-            || target.distinct_by.is_some()
+            || (target.distinct_by.is_some() && target.cost_sum_le.is_some())
             || self.recipient_targets.contains_key(&target.bind)
             || self.targets.contains_key(&target.bind)
             || self.definitions.contains_key(&target.bind)
@@ -745,7 +745,10 @@ impl BodyContext<'_> {
                         cardinality,
                     }],
                     cardinality,
-                    distinct_by: None::<ObjectProperty>,
+                    distinct_by: target
+                        .distinct_by
+                        .as_ref()
+                        .map(|ast::Names::Name| ObjectProperty::Names),
                     disjoint: Disjointness::Disjoint,
                     aggregate_bounds: original_cost_cap(target, path)?.into_iter().collect(),
                 },

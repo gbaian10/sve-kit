@@ -574,8 +574,8 @@ impl Execution {
                 IntFrozen::PaidMaterialActs { receipt } => {
                     super::receipt_members::paid_material_acts(self, receipt)
                 }
-                IntFrozen::PaidMaterialAttack { receipt } => {
-                    super::receipt_members::paid_material_attack(self, receipt)
+                IntFrozen::PaidMaterialNumber { receipt, property } => {
+                    super::receipt_members::paid_material_number(self, receipt, *property)
                 }
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)

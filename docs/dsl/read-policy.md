@@ -198,7 +198,7 @@ Transform 也保留自己的准入，按各控制者實際成功回條算出張�
 | ReceiptAny／ReceiptCount | Discard 與 latest Fusion 讀成功付款或棄牌保存的特徵；deck Move 另驗實際離開牌庫的 fact，公開 Look 必須已揭露 |
 | distinct_original_costs | 只讀成功 deck→cemetery 的 Before，以不可變 base printing 讀原費；不以有效費用替換 |
 | paid_material_acts | 已完成的 Cards 付款數量須與材料成員數一致；不把獨立的來源 Act 算入 |
-| paid_material_attack | 單張已付材料的凍結有效攻擊，保留有號值；不重新讀離場後的數值 |
+| paid_material_number | 單張必付場上從者在付款前保存的有效費用／攻擊；只讀 Before，保留 Int 與資訊缺失，不重新讀離場後數值或以原費代替 |
 | discarded_cost | 恰一張成功棄牌的凍結有效費用，仍要求已保存的非負值 |
 | Destroy 動態成員計數 | 讀成功 Before 清單，逐項驗 departure fact、來源為 Field 與離場前控制者；不把選中或嘗試移動算成功 |
 | 公開 Look 名稱種類數 | 先驗觀察者、整批揭露、原世代仍在己方牌庫，再依每張卡的一個規則名稱計數 |
@@ -211,3 +211,9 @@ foreign producer、過期觀察與未付分支不會因取得成員讀取入口�
 
 公開區 distinct names 仍使用規則名稱集合的聯集，公開 Look 的上述單一名稱政策則保持原樣。
 這兩種已有行為不因共用 adapter 而選成同一算法；多名稱語義未有依據前不擴大其範圍。
+
+`power_of` 與 `cost_of` 的具名材料 Before 讀值共用 `PaidMaterialNumber`，僅接受
+Cost／Attack。材料必須是必付的一張己方場上從者，送往擁有者墓場；
+數量、付款來源與已付支配關係由 WF 驗證，runtime 再檢查 Payment 數量與保存的
+Characteristics。零費是有效值，缺失資訊則失敗；有號攻擊值仍保留。
+After、多張、可選未付分支、非付款的移動與其他數值屬性不取得這個投影。
