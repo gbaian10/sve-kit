@@ -1,6 +1,7 @@
 //! Fusion uses the existing strict material question and the complete play transaction.
 use super::material::MaterialWait;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::source::SourceInformation;
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, Fact, InputDomain, Wait, contains, search,
@@ -119,6 +120,7 @@ impl Game {
                     }),
                 },
                 Wait::MaterialParameter(MaterialWait::cost(
+                    CandidateLinks::capture(self, execution, members.iter().copied())?,
                     step.instruction.receipt,
                     members,
                     bounds,

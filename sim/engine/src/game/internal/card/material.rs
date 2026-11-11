@@ -1,5 +1,9 @@
 //! Cost materials use their own strict selection, without target permissions.
+
+use crate::game::player::{SelectionQuestion, Viewer};
+
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
 };
@@ -18,10 +22,11 @@ use crate::ir::{
     AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
     ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
-use alloc::collections::BTreeSet;
+use alloc::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
+    links: CandidateLinks,
     destination: MaterialDestination,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
@@ -76,6 +81,37 @@ fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
 }
 
 impl MaterialWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &super::TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
+        let mut question = game.player_selection(actor, domain, &references, &self.links)?;
+        if let Some(floor) = &self.floor {
+            question.minimum_original_cost = Some(floor.minimum);
+            let costs = self
+                .members
+                .iter()
+                .zip(&domain.members)
+                .map(|(reference, member)| {
+                    Ok((
+                        member.handle,
+                        floor
+                            .costs
+                            .iter()
+                            .find(|(candidate, _)| candidate == reference)
+                            .ok_or_else(|| invalid("missing captured material cost"))?
+                            .1,
+                    ))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()?;
+            question.set_original_costs(costs);
+        }
+        Ok(question)
+    }
+
     pub(super) fn handles_for(&self, reference: ObjectRef) -> Result<Vec<u64>> {
         self.members
             .iter()
@@ -100,12 +136,14 @@ impl MaterialWait {
     }
 
     pub(super) const fn cost(
+        links: CandidateLinks,
         receipt: ReceiptId,
         members: Vec<ObjectRef>,
         bounds: Cardinality,
         selector: Selector,
     ) -> Self {
         Self {
+            links,
             destination: MaterialDestination::Cost(receipt),
             members,
             bounds,
@@ -762,6 +800,7 @@ impl Game {
                 }),
             },
             Wait::MaterialParameter(MaterialWait {
+                links: CandidateLinks::capture(self, execution, members.iter().copied())?,
                 destination: MaterialDestination::Binding(*binding),
                 members,
                 bounds: constraint.cardinality,

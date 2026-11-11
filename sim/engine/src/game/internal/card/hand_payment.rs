@@ -1,6 +1,7 @@
 //! Hand cost choices are collected before any cost is committed.
 use super::play::PlayState;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
     DecisionId, DistributionMember, InputDomain, InstructionOutcome, Wait, contains,
     discard::HandWait, search,
@@ -245,6 +246,7 @@ impl Game {
                     roles: vec![],
                 }),
                 Wait::CostDiscard(HandWait::strict(
+                    CandidateLinks::capture(self, execution, members.iter().copied())?,
                     instruction.clone(),
                     members,
                     plan.group.cardinality,

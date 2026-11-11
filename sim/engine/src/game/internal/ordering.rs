@@ -1,5 +1,9 @@
 //! Private observations and one frozen, same-owner deck permutation.
 
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::CardOption;
+use crate::game::player::Viewer;
+
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
@@ -51,6 +55,7 @@ pub(super) fn card_packet(card: &OrderCard) -> serde_json::Value {
 
 #[derive(Clone, Debug)]
 pub(super) struct OrderWait {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     cards: Vec<ObjectRef>,
     player: PlayerId,
@@ -704,6 +709,10 @@ impl Game {
                 snapshot: SnapshotId(self.state.ir_epoch),
             });
         }
+        execution.player_receipt_links.insert(
+            instruction.receipt,
+            CandidateLinks::capture(self, execution, looked.iter().map(|member| member.object))?,
+        );
         execution.look_viewers.insert(instruction.receipt, viewer);
         execution.receipts.insert(
             instruction.receipt,
@@ -745,6 +754,7 @@ impl Game {
         if execution.players(self, players)? != vec![player] {
             return Err(unsupported("order audience"));
         }
+        let source_selector = cards.clone();
         let cards = execution.observed_objects(self, cards, player, Consumer::Order)?;
         let mut unique = BTreeSet::new();
         let seat = seat_name(player)?;
@@ -785,6 +795,12 @@ impl Game {
         }
         let decision = *decision;
         let wait = OrderWait {
+            links: CandidateLinks::for_selectors(
+                self,
+                execution,
+                cards.iter().copied(),
+                [&source_selector],
+            )?,
             instruction,
             cards,
             player,
@@ -1002,6 +1018,20 @@ impl Execution {
 }
 
 impl OrderWait {
+    pub(in crate::game::internal) fn player_cards(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        cards: &[OrderCard],
+    ) -> Result<Vec<CardOption>> {
+        game.player_cards(
+            actor,
+            cards,
+            &self.cards.iter().copied().map(Some).collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(super) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         let ordered = handles
             .iter()

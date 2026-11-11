@@ -1,17 +1,22 @@
 //! Capacity choices use the same planned arrivals and movement receipts as the commit.
+
+use crate::game::player::{PartitionQuestion, Viewer};
+
 use super::super::{
     Execution, Game, InputDomain, OrderCard, Result, SearchPartitionDomain, Wait, invalid,
     seat_name, unsupported,
 };
 use super::{EX_CAPACITY, FIELD_CAPACITY, MovementPlan};
+use crate::game::internal::player::CandidateLinks;
 use crate::ir::{
-    Cardinality, DecisionId, Instruction, MoveResult, Nat, Node, ObjectRef, PlayerId,
+    Action, Cardinality, DecisionId, Instruction, MoveResult, Nat, Node, ObjectRef, PlayerId,
     RuntimeZoneRef, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct CapacityWait {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     resume: Node,
     destination: PlayerId,
@@ -28,6 +33,26 @@ pub(in crate::game::internal) enum ArrivalMember {
 }
 
 impl CapacityWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &SearchPartitionDomain,
+    ) -> Result<PartitionQuestion> {
+        let references = self
+            .members
+            .iter()
+            .map(|member| match member {
+                ArrivalMember::Object(reference) => Some(*reference),
+                ArrivalMember::Token(_) => None,
+            })
+            .collect::<Vec<_>>();
+        Ok(PartitionQuestion {
+            cards: game.player_cards(actor, &domain.cards, &references, &self.links)?,
+            cardinality: domain.cardinality,
+        })
+    }
+
     pub(in crate::game::internal) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
         (self.destination, self.zone, self.available)
     }
@@ -275,7 +300,24 @@ impl Game {
                 continue;
             }
             let domain = self.movement_capacity_domain(execution, &members, available)?;
+            let selectors = if let Action::Move { objects, .. } = &instruction.action {
+                Some(objects)
+            } else {
+                None
+            };
             let wait = CapacityWait {
+                links: CandidateLinks::for_selectors(
+                    self,
+                    execution,
+                    members.iter().filter_map(|member| {
+                        if let ArrivalMember::Object(reference) = member {
+                            Some(*reference)
+                        } else {
+                            None
+                        }
+                    }),
+                    selectors,
+                )?,
                 instruction: Box::new(instruction.clone()),
                 resume,
                 destination,

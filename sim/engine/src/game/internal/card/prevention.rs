@@ -895,3 +895,28 @@ pub(in crate::game::internal) fn mask_pattern(
     }
     Ok(())
 }
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Replacement choices share captured prevention providers."
+)]
+impl Game {
+    pub(in crate::game::internal) fn player_replacement_link(
+        &self,
+        reference: &Value,
+    ) -> Option<ObjectLink> {
+        if let Some(id) = reference["effect"].as_u64() {
+            return self
+                .state
+                .ir_preventions
+                .iter()
+                .find(|effect| effect.effect == id)
+                .map(|effect| effect.origin.holder_link());
+        }
+        Some(ObjectLink::capture(
+            self,
+            reference["source"].as_str()?,
+            reference["generation"].as_u64()?,
+        ))
+    }
+}

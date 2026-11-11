@@ -3,9 +3,12 @@ use super::play::PlayState;
 use super::selection::constraints::{DistinctProperties, PropertyKey, check_count, unique_handles};
 use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
+use crate::game::player::SelectionQuestion;
+use crate::game::player::Viewer;
 use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
@@ -28,6 +31,7 @@ pub(super) struct ExchangeState {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
+    links: CandidateLinks,
     members: Vec<MaterialCandidate>,
     count: usize,
 }
@@ -39,6 +43,24 @@ struct MaterialCandidate {
 }
 
 impl MaterialWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &super::TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        game.player_selection(
+            actor,
+            domain,
+            &self
+                .members
+                .iter()
+                .map(|member| Some(member.reference))
+                .collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         let count = Nat(u64::try_from(self.count).map_err(invalid)?);
         check_count(
@@ -554,7 +576,15 @@ impl Game {
                 members: public,
                 cardinality: constraint.cardinality,
             }),
-            Wait::CostMaterials(MaterialWait { members, count }),
+            Wait::CostMaterials(MaterialWait {
+                links: CandidateLinks::capture(
+                    self,
+                    execution,
+                    members.iter().map(|member| member.reference),
+                )?,
+                members,
+                count,
+            }),
         )?;
         Ok(true)
     }

@@ -3,6 +3,10 @@
     reason = "Unexpected public input shapes fail the fixture."
 )]
 
+#[path = "player_pipeline/selection.rs"]
+mod selection;
+pub(super) use selection::{choose as choose_selection, search as choose_search};
+
 use super::*;
 use sve_engine::game::player::{
     Command, Input, MainActionAnswer, MainIntentKind, Question, QuestionShape, Submission,
@@ -254,7 +258,7 @@ fn player_pipeline_unknown_procedure_cannot_appear_as_a_rule_choice() {
     reason = "Every closed shape has an explicit native answer channel."
 )]
 pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: bool) -> Answer {
-    use sve_engine::game::internal::{DamageShare, SearchAnswer, TargetRoleAssignment};
+    use sve_engine::game::internal::{DamageShare, TargetRoleAssignment};
     use sve_engine::game::player::{DecisionShape, DiscardKind};
     let QuestionShape::Decision(shape) = shape else {
         panic!("expected a native decision shape")
@@ -311,23 +315,7 @@ pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: b
             accept,
             target: selected.first().copied(),
         },
-        DecisionShape::Search(search) => Answer::Search(search.groups.as_ref().map_or_else(
-            || SearchAnswer::Ungrouped(selected.to_vec()),
-            |groups| {
-                SearchAnswer::Grouped(
-                    groups
-                        .iter()
-                        .map(|group| {
-                            selected
-                                .iter()
-                                .filter(|handle| group.handles.contains(handle))
-                                .copied()
-                                .collect()
-                        })
-                        .collect(),
-                )
-            },
-        )),
+        DecisionShape::Search(search) => selection::search_selected(search, selected),
         DecisionShape::SearchPartition(_) | DecisionShape::MovementCapacity(_) => {
             Answer::SearchPartition(selected.to_vec())
         }

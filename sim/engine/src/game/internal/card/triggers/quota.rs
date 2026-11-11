@@ -3,6 +3,9 @@ use super::{
     Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id, unsupported,
 };
 use crate::game::internal::{Execution, InputDomain, Wait};
+use crate::game::player::EarlierQuotaChoice;
+use crate::game::player::PendingChoice;
+use crate::game::player::QuotaQuestion;
 use crate::game::player::Viewer;
 use crate::game::player::observation::PendingTrigger;
 use crate::ir::{
@@ -46,6 +49,52 @@ struct QuotaGroup {
     reason = "Quota selection and pending admission share one transaction."
 )]
 impl Game {
+    pub(in crate::game::internal) fn player_quota_question(
+        &self,
+        actor: Viewer,
+        domain: &QuotaDomain,
+    ) -> Result<QuotaQuestion> {
+        let group = self
+            .card_runtime
+            .admission
+            .as_ref()
+            .and_then(|plan| plan.groups.front())
+            .ok_or_else(|| invalid("missing frozen quota group"))?;
+        if group.candidates.len() != domain.candidates.len() {
+            return Err(invalid("inconsistent quota coordinates"));
+        }
+        let candidates = domain
+            .candidates
+            .iter()
+            .zip(&group.candidates)
+            .map(|(option, pending)| pending.player_option(self, actor, option))
+            .collect();
+        let earlier = domain
+            .earlier
+            .iter()
+            .map(|selection| {
+                Ok(EarlierQuotaChoice {
+                    actor: match selection.actor.seat {
+                        1 => Viewer::P1,
+                        2 => Viewer::P2,
+                        _ => return Err(invalid("invalid earlier quota actor")),
+                    },
+                    occurrence: PendingChoice {
+                        handle: selection.occurrence.handle,
+                        card: selection.occurrence.card.clone(),
+                        line: selection.occurrence.line,
+                        event: selection.occurrence.event.clone(),
+                        source: None,
+                    },
+                })
+            })
+            .collect::<Result<_>>()?;
+        Ok(QuotaQuestion {
+            candidates,
+            earlier,
+        })
+    }
+
     pub(super) fn internal_admit_pending(
         &mut self,
         candidates: Vec<PendingOccurrence>,
