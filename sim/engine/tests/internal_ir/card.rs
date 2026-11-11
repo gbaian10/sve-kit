@@ -3,6 +3,8 @@ use super::*;
 mod dice;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
+#[path = "card/event_operand_admission.rs"]
+mod event_operand_admission;
 #[path = "card/evolution_ordinal.rs"]
 mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]
