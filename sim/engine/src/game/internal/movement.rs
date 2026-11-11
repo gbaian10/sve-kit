@@ -621,7 +621,16 @@ impl Game {
                     && object.controller == object.owner
                     && (execution.is_private_hand_target(objects, *member)
                         || execution.is_private_hand_banish_cost(instruction, *member));
-                if !(private_look || private_hand) {
+                let resolving_source = object.zone == "resolution"
+                    && execution.spell
+                    && execution.ability.is_some()
+                    && matches!(objects, Selector::Objects { objects }
+                        if objects.as_slice() == [ObjectOperand::SourceHolder {}])
+                    && object.id == execution.context.source
+                    && member.generation == execution.context.generation
+                    && object.controller == actor
+                    && self.object_type(&object.id)?.starts_with("スペル");
+                if !(private_look || private_hand || resolving_source) {
                     public_zone(&object.zone)?;
                 }
             }
@@ -1242,6 +1251,38 @@ impl Game {
         Ok(moves)
     }
 
+    pub(super) fn internal_whole_deck_return(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        members: &[ObjectRef],
+    ) -> Result<Vec<MoveResult>> {
+        if shuffle_shape::whole_return(&instruction.action).is_none() {
+            return Err(unsupported("whole-zone deck return"));
+        }
+        for member in members {
+            let object = self.object(execution.object_id(*member)?)?;
+            if object.generation != member.generation.0
+                || !matches!(object.zone.as_str(), "hand" | "cemetery")
+                || object.owner != object.controller
+            {
+                return Err(unsupported("whole-zone deck return membership"));
+            }
+        }
+        let (moves, _) = self.commit_move_members(
+            execution,
+            members,
+            "deck",
+            ZoneKind::Deck,
+            MoveMethod::Put,
+            false,
+            None,
+            None,
+            true,
+        )?;
+        Ok(moves)
+    }
+
     #[expect(
         clippy::too_many_arguments,
         reason = "Replacements, generations and receipts commit at one atomic boundary."
@@ -1607,7 +1648,8 @@ fn movement_origin(zone: &str, method: MoveMethod, destination: &str) -> Result<
     match (zone, method, destination) {
         ("evolve_deck", MoveMethod::Put, "field" | "ex") => Ok(ZoneKind::Evolve),
         // Source membership is proven before planning; this only labels the departure.
-        ("resolution", MoveMethod::Put, "hand" | "ex") => Ok(ZoneKind::Resolution),
+        ("resolution", MoveMethod::Put, "hand" | "ex")
+        | ("resolution", MoveMethod::Banish, "banish") => Ok(ZoneKind::Resolution),
         ("hand", MoveMethod::Discard, "cemetery")
         | ("hand", MoveMethod::Banish, "banish")
         | ("hand", MoveMethod::Put, "deck" | "ex" | "field") => Ok(ZoneKind::Hand),

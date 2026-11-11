@@ -4,6 +4,7 @@ use super::{
     MoveDestination, MoveReason, MovementReceipt, Node, ObjectReceipt, OwnerZone, PlayerRef,
     Position, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector, ShuffleScope,
 };
+use core::slice::from_ref;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Placement {
@@ -101,9 +102,10 @@ pub(crate) const fn consumed(action: &Action) -> Option<ReceiptId> {
 
 pub(crate) const fn action(action: &Action) -> bool {
     matches!(action, Action::Shuffle {
-        deck: PlayerRef::Controller {}, scope,
+        deck: PlayerRef::Controller {} | PlayerRef::Bound { .. }, scope,
         randomness: RandomnessPolicy::FreshRequest,
-    } if matches!(scope, ShuffleScope::FullZone {}) || consumed(action).is_some())
+    } if matches!(scope, ShuffleScope::FullZone {})
+        || matches!(action, Action::Shuffle { deck: PlayerRef::Controller {}, .. }) && consumed(action).is_some())
 }
 
 fn instruction(node: &Located<Node>) -> Option<&Instruction> {
@@ -117,14 +119,17 @@ fn pair(left: &Located<Node>, right: &Located<Node>) -> bool {
     let (Some(left), Some(right)) = (instruction(left), instruction(right)) else {
         return false;
     };
-    if left.actor != (PlayerRef::Controller {})
-        || right.actor != left.actor
+    if !matches!(
+        left.actor,
+        PlayerRef::Controller {} | PlayerRef::Bound { .. }
+    ) || right.actor != left.actor
         || left.source != right.source
         || left.context != InstructionContext::Effect
         || right.context != left.context
         || left.precondition.is_some()
         || right.precondition.is_some()
         || !action(&right.action)
+        || !matches!(&right.action, Action::Shuffle { deck, .. } if *deck == left.actor)
     {
         return false;
     }
@@ -139,6 +144,58 @@ fn pair(left: &Located<Node>, right: &Located<Node>) -> bool {
         (_, Some(Placement::Bottom)) => consumed(&right.action) == Some(left.receipt),
         _ => false,
     }
+}
+
+pub(crate) fn whole_return(action: &Action) -> Option<&PlayerRef> {
+    let Action::Move { objects, .. } = action else {
+        return None;
+    };
+    if placement(action) != Some(Placement::Return) {
+        return None;
+    }
+    let selectors = if let Selector::Union { sets } = objects {
+        sets.as_slice()
+    } else {
+        from_ref(objects)
+    };
+    if selectors.is_empty() || selectors.len() > 2 {
+        return None;
+    }
+    let mut player = None;
+    let mut zones = Vec::new();
+    for selector in selectors {
+        let Selector::Zone {
+            players,
+            zone,
+            view: super::SelectionView::Current {},
+            predicate,
+            ..
+        } = selector
+        else {
+            return None;
+        };
+        if !matches!(zone, super::ZoneKind::Hand | super::ZoneKind::Cemetery)
+            || zones.contains(zone)
+            || **predicate != super::Expr::Literal(super::Bool(true))
+            || players.relation != super::PlayerRelation::SelfPlayer
+            || players.cardinality
+                != (super::Cardinality {
+                    minimum: super::Nat(1),
+                    maximum: Some(super::Nat(1)),
+                })
+            || players.text_quantifier != super::TextQuantifier::Implicit
+            || !matches!(
+                players.relative_to,
+                PlayerRef::Controller {} | PlayerRef::Bound { .. }
+            )
+            || player.is_some_and(|previous| previous != &players.relative_to)
+        {
+            return None;
+        }
+        player = Some(&players.relative_to);
+        zones.push(*zone);
+    }
+    player
 }
 
 pub(crate) fn closed(nodes: &[Located<Node>]) -> bool {

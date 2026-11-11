@@ -76,6 +76,7 @@ mod life;
 mod movement;
 mod numeric;
 mod ordering;
+mod player_stages;
 mod posture;
 mod resource;
 mod reveal;
@@ -1424,11 +1425,7 @@ impl Game {
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
                 Node::Instruction { instruction } => {
-                    let previous = self.card_runtime.active_source;
-                    self.card_runtime.active_source = execution.ability;
-                    let result = self.internal_instruction(execution, instruction);
-                    self.card_runtime.active_source = previous;
-                    result?;
+                    self.internal_instruction(execution, instruction)?;
                 }
                 Node::Control { .. } => return Err(unsupported("control")),
             }
@@ -1587,20 +1584,42 @@ impl Game {
         )
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Draw and uniform damage retain one atomic instruction boundary."
-    )]
-    fn internal_instruction(
+    fn internal_instruction_boundary(
         &mut self,
         execution: &mut Execution,
-        instruction: Box<Instruction>,
+        action: impl FnOnce(&mut Self, &mut Execution) -> Result<()>,
     ) -> Result<()> {
         self.state.ir_epoch = self
             .state
             .ir_epoch
             .checked_add(1)
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
+        let previous = self.card_runtime.active_source;
+        self.card_runtime.active_source = execution.ability;
+        let result = action(self, execution);
+        self.card_runtime.active_source = previous;
+        result
+    }
+
+    fn internal_instruction(
+        &mut self,
+        execution: &mut Execution,
+        instruction: Box<Instruction>,
+    ) -> Result<()> {
+        self.internal_instruction_boundary(execution, |game, execution| {
+            game.internal_instruction_action(execution, instruction)
+        })
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Draw and uniform damage retain one atomic instruction boundary."
+    )]
+    fn internal_instruction_action(
+        &mut self,
+        execution: &mut Execution,
+        instruction: Box<Instruction>,
+    ) -> Result<()> {
         match &instruction.action {
             Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
             Action::Transfer { .. } => self.internal_transfer(execution, &instruction)?,
@@ -1802,6 +1821,21 @@ impl Game {
         player: PlayerId,
         ordinal: Nat,
     ) -> Result<bool> {
+        let Some(event) = self.internal_draw_card(execution, instruction, player, ordinal)? else {
+            return Ok(false);
+        };
+        self.internal_draw_event(event, execution)?;
+        execution.facts.push(Fact::Draw(event));
+        Ok(true)
+    }
+
+    fn internal_draw_card(
+        &mut self,
+        execution: &Execution,
+        instruction: &Instruction,
+        player: PlayerId,
+        ordinal: Nat,
+    ) -> Result<Option<DrawEvent>> {
         let seat = seat_name(player)?;
         if let Some(id) = self.zone_ids(seat, "deck").first()
             && self.object(id)?.generation == u64::MAX
@@ -1809,7 +1843,7 @@ impl Game {
             return Err(invalid("draw generation exhausted"));
         }
         let Some(id) = self.draw(seat, &execution.frame())? else {
-            return Ok(false);
+            return Ok(None);
         };
         // Historical identity may remain known; it must not locate the new private slot.
         for (viewer, knowledge) in &mut self.state.knowledge {
@@ -1818,15 +1852,12 @@ impl Game {
             }
         }
         let object = execution.reference(self, &id)?;
-        let event = DrawEvent {
+        Ok(Some(DrawEvent {
             player,
             object,
             ordinal,
             instruction: instruction.id,
-        };
-        self.internal_draw_event(event, execution)?;
-        execution.facts.push(Fact::Draw(event));
-        Ok(true)
+        }))
     }
 }
 

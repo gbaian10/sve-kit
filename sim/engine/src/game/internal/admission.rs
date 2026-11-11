@@ -8,6 +8,7 @@ use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
 use crate::ir::hand_position;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
+use crate::ir::player_stages;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
     Requirement,
@@ -548,6 +549,21 @@ fn check_player_stage(
     super::tokens::check_each(control)?;
     for stage in stages {
         let mut body = stage.body.clone();
+        if player_stages::procedure(control).is_some() {
+            for step in &mut body.steps {
+                if let Node::Instruction { instruction } = &mut step.node {
+                    instruction.actor = PlayerRef::Controller {};
+                    match &mut instruction.action {
+                        Action::Draw { player, .. } => *player = PlayerRef::Controller {},
+                        Action::Shuffle { deck, .. } => *deck = PlayerRef::Controller {},
+                        Action::Move { objects, .. } => {
+                            *objects = Selector::Objects { objects: vec![] }
+                        }
+                        _ => return Err(unsupported("checked player stage")),
+                    }
+                }
+            }
+        }
         if super::movement::player_banish(control).is_some() {
             // Validate the private operand as an own-deck read only inside this checked stage.
             for step in &mut body.steps {

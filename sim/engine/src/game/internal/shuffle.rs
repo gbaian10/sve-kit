@@ -20,10 +20,10 @@ impl Game {
         if !shuffle::action(&instruction.action) {
             return Err(unsupported("shuffle shape"));
         }
-        let Action::Shuffle { scope, .. } = &instruction.action else {
+        let Action::Shuffle { scope, deck, .. } = &instruction.action else {
             return Err(unsupported("shuffle action"));
         };
-        let player = execution.context.controller;
+        let player = execution.player(self, deck)?;
         let seat = seat_name(player)?;
         let ids = match scope {
             ShuffleScope::FullZone {} => self.internal_known_deck(seat)?,
@@ -117,6 +117,10 @@ impl Game {
         };
         let moved = match shuffle::placement(&instruction.action) {
             Some(Placement::Return) => {
+                if shuffle::whole_return(&instruction.action).is_some() {
+                    let members = execution.whole_return_members(self, instruction)?;
+                    return self.internal_whole_return_receipt(execution, instruction, &members);
+                }
                 let members = execution.objects(self, objects)?;
                 let seat = seat_name(execution.context.controller)?;
                 for &member in &members {

@@ -740,6 +740,7 @@ pub(super) struct Life {
 pub(super) enum LifeHolder {
     Controller(SelfPlayer),
     MasterOf { master_of: String },
+    Bound(String),
 }
 
 #[derive(Deserialize)]
@@ -826,14 +827,29 @@ pub(super) enum DeckGroup {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Shuffle {
-    pub who: SelfPlayer,
+    pub who: DeckHolder,
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct WholeCemetery {
-    pub who: SelfPlayer,
-    pub zone: CemeteryZone,
+pub(super) struct WholeDeckReturn {
+    pub who: DeckHolder,
+    pub zone: ReturnZones,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum ReturnZones {
+    One(ReturnZone),
+    Many(Vec<ReturnZone>),
+}
+
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+pub(super) enum ReturnZone {
+    #[serde(rename = "hand")]
+    Hand,
+    #[serde(rename = "cemetery")]
+    Cemetery,
 }
 
 #[derive(Deserialize)]
@@ -866,7 +882,7 @@ pub(super) struct Move {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum MoveObjects {
-    Cemetery(WholeCemetery),
+    Whole(WholeDeckReturn),
     Observed(Observed),
     Field(Objects),
 }

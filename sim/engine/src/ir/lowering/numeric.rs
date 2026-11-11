@@ -110,6 +110,7 @@ impl BodyContext<'_> {
             ast::LifeHolder::MasterOf { master_of } => {
                 self.selected_player(master_of, super::super::Role::Controller, path)?
             }
+            ast::LifeHolder::Bound(_) => return Err(unsupported(path)),
         };
         Ok(Action::Life {
             player,
@@ -127,6 +128,9 @@ impl BodyContext<'_> {
             Some(ast::LifeHolder::MasterOf { master_of }) => {
                 self.selected_player(master_of, super::super::Role::Controller, path)?
             }
+            Some(ast::LifeHolder::Bound(name)) => PlayerRef::Bound {
+                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+            },
         };
         Ok(Action::Draw {
             player,

@@ -141,6 +141,7 @@ pub(crate) mod nested_play;
 pub(crate) mod observation_selection;
 pub(crate) mod optional_payment;
 pub(crate) mod play_restrictions;
+pub(crate) mod player_stages;
 pub(crate) mod prevention;
 pub(crate) mod printed_keywords;
 mod projections;

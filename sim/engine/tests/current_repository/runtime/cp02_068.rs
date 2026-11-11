@@ -115,11 +115,12 @@ fn drawing_exactly_the_last_cards_does_not_lose() {
 fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
     const REJECTIONS: [&str; 4] = [
         "current_ability_closure_mismatch",
-        "unsupported_construct",
+        "current_ability_closure_mismatch",
         "current_ability_closure_mismatch",
         "invalid_current_source",
     ];
-    // head moved, actor flipped (unsupported), count changed, provenance dropped.
+    // Source closure must reject head, actor and count mutations even when they parse.
+    // Dropped provenance must still fail its own evidence check.
     let (snapshot, keywords, accepted) = inputs();
     for (probe, rejection) in REJECTIONS.iter().enumerate() {
         let mut selection = accepted.clone();
@@ -150,12 +151,10 @@ fn source_mutations_cannot_change_spell_head_actor_count_or_provenance() {
             // The last probe drops the source sidecar.
             _ => candidate["sidecar"] = json!([]),
         }
+        let diagnostic = failure(repository::select(snapshot, keywords, &selection));
         assert!(
-            failure(repository::select(
-                snapshot, keywords, &selection
-            ))
-            .contains(*rejection),
-            "mutated input {probe} must be rejected for its own reason"
+            diagnostic.contains(*rejection),
+            "mutated input {probe} must be rejected for its own reason: expected {rejection}, got {diagnostic}"
         );
     }
 }

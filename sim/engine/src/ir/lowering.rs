@@ -1325,6 +1325,8 @@ struct ReceiptReads {
     /// Movements of cards leaving the deck, which carry no modifications.
     deck_moves: BTreeSet<ReceiptId>,
     deck_cemetery: BTreeSet<ReceiptId>,
+    /// Whole-zone returns expose successful counts without private before-member selection.
+    whole_returns: BTreeSet<ReceiptId>,
 }
 
 #[derive(Clone)]
@@ -1975,7 +1977,7 @@ impl<'definitions> BodyContext<'definitions> {
                     count: Nat(1),
                 })
             }
-            ast::Step::Shuffle(value) => Ok(shuffle::full(value)),
+            ast::Step::Shuffle(value) => self.shuffle(value, path),
             ast::Step::Look(value) => {
                 if !matches!(
                     value.top.who,

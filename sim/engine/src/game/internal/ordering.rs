@@ -126,6 +126,15 @@ fn check_prefix_receipts(node: &Node, requirements: &Requirements) -> Result<()>
     Ok(())
 }
 
+fn mask_whole_return(node: &mut Node) {
+    if let Node::Instruction { instruction } = node
+        && shuffle_shape::whole_return(&instruction.action).is_some()
+        && let Action::Move { objects, .. } = &mut instruction.action
+    {
+        *objects = Selector::Objects { objects: vec![] };
+    }
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "The contextual private-read guard checks the complete local node."
@@ -168,6 +177,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
         }
     }
     let mut inspected = node.clone();
+    mask_whole_return(&mut inspected);
     mask_prevention(&mut inspected)?;
     mask_ability_permission(&mut inspected)?;
     mask_discard(&mut inspected)?;
