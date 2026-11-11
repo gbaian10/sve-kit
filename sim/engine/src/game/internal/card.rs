@@ -1,4 +1,5 @@
 use super::super::{Step, list};
+use super::tokens::PaidX;
 use super::{
     Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
     seat_name, unsupported,
@@ -523,12 +524,14 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing body"))?;
-            check_nodes(self, &body.steps, &located.source, &ability.source)?;
-            admission::check_card(
+            let x = super::tokens::paid_x(ability);
+            check_nodes_with_x(self, &body.steps, &located.source, &ability.source, x)?;
+            admission::check_card_with_x(
                 body,
                 &located.source,
                 &ability.source,
                 ability.trigger.as_ref(),
+                x,
             )?;
             play::check(ability, &located.source)?;
         }
@@ -1343,6 +1346,7 @@ fn check_nested_nodes(
     control: &Control,
     source: &SourceSpan,
     origin: &AbilitySource,
+    x: Option<PaidX>,
 ) -> Result<()> {
     match control {
         Control::EachPlayer { stages, .. } => {
@@ -1353,7 +1357,7 @@ fn check_nested_nodes(
         }
         Control::Repeat { .. } => {
             let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("fixed repeat"))?;
-            check_nodes(game, &body.steps, source, origin)?;
+            check_nodes_with_x(game, &body.steps, source, origin, x)?;
         }
         control @ Control::Simultaneous { batch, .. } => {
             if mixed_ex::projection(control).is_none() {
@@ -1361,13 +1365,13 @@ fn check_nested_nodes(
             }
             for member in &batch.members {
                 check_node_source(game, &member.source, source)?;
-                check_instruction(game, &member.node, source, origin)?;
+                check_instruction(game, &member.node, source, origin, x)?;
             }
         }
-        Control::Sequence { body } => check_nodes(game, &body.steps, source, origin)?,
+        Control::Sequence { body } => check_nodes_with_x(game, &body.steps, source, origin, x)?,
         control @ Control::May { body, .. } => {
             super::alternatives::check_may(control)?;
-            check_nodes(game, &body.steps, source, origin)?;
+            check_nodes_with_x(game, &body.steps, source, origin, x)?;
         }
         Control::If {
             condition,
@@ -1375,9 +1379,9 @@ fn check_nested_nodes(
             else_body,
         } => {
             super::history_turn::check_lesson_condition(game, condition)?;
-            check_nodes(game, &then_body.steps, source, origin)?;
+            check_nodes_with_x(game, &then_body.steps, source, origin, x)?;
             if let Some(body) = else_body {
-                check_nodes(game, &body.steps, source, origin)?;
+                check_nodes_with_x(game, &body.steps, source, origin, x)?;
             }
         }
         _ => return Err(unsupported("nested whole-card control")),
@@ -1390,8 +1394,9 @@ fn check_instruction(
     instruction: &Instruction,
     source: &SourceSpan,
     ability_source: &AbilitySource,
+    x: Option<PaidX>,
 ) -> Result<()> {
-    super::tokens::check_catalog(game, &instruction.action, source)?;
+    super::tokens::check_catalog(game, &instruction.action, source, x)?;
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
     super::transform::check_catalog(game, &instruction.action)?;
     nested::check(&instruction.action)?;
@@ -1472,24 +1477,34 @@ fn check_nodes(
     source: &SourceSpan,
     ability_source: &AbilitySource,
 ) -> Result<()> {
+    check_nodes_with_x(game, nodes, source, ability_source, None)
+}
+
+fn check_nodes_with_x(
+    game: &Game,
+    nodes: &[Located<Node>],
+    source: &SourceSpan,
+    ability_source: &AbilitySource,
+    x: Option<PaidX>,
+) -> Result<()> {
     for located in nodes {
         check_node_source(game, &located.source, source)?;
         match &located.node {
             Node::Instruction { instruction } => {
-                super::tokens::check_action(&instruction.action, &located.source)?;
-                check_instruction(game, instruction, source, ability_source)?;
+                super::tokens::check_action(&instruction.action, &located.source, x)?;
+                check_instruction(game, instruction, source, ability_source, x)?;
             }
             Node::Control {
                 control: control @ Control::Pay { on_paid, .. },
             } => {
                 optional::check_costs(control, ability_source)?;
-                check_nodes(game, &on_paid.steps, source, ability_source)?;
+                check_nodes_with_x(game, &on_paid.steps, source, ability_source, x)?;
             }
             Node::Control {
                 control: control @ Control::EachObject { body, .. },
             } if super::counters::iteration(control).is_some() => {
                 super::counters::check_iteration(control)?;
-                check_nodes(game, &body.steps, source, ability_source)?;
+                check_nodes_with_x(game, &body.steps, source, ability_source, x)?;
             }
             Node::Control { control } if projection(control).is_some() => {
                 let projection =
@@ -1497,7 +1512,7 @@ fn check_nodes(
                 if projection.instruction.source != *ability_source {
                     return Err(invalid("foreign effect evolution source"));
                 }
-                check_nodes(game, &projection.body.steps[..1], source, ability_source)?;
+                check_nodes_with_x(game, &projection.body.steps[..1], source, ability_source, x)?;
             }
             Node::Control { control } if advance_entry::projection(control).is_some() => {
                 let projection = advance_entry::projection(control)
@@ -1518,7 +1533,7 @@ fn check_nodes(
                     | Control::Repeat { .. }
                     | Control::Simultaneous { .. }
                     | Control::If { .. }),
-            } => check_nested_nodes(game, control, source, ability_source)?,
+            } => check_nested_nodes(game, control, source, ability_source, x)?,
             Node::Control {
                 control: Control::Mode { modes, .. },
             } => {

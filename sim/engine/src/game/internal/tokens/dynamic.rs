@@ -7,7 +7,7 @@ use crate::ir::{
     TextQuantifier,
 };
 
-pub(super) fn projection(
+pub(in crate::game::internal) fn projection(
     value: &Expr<Nat>,
 ) -> Option<(&ReceiptReference<DestroyOutcome>, &PlayerRef)> {
     let Expr::Compute(operation) = value else {
@@ -106,7 +106,7 @@ pub(crate) fn check_each(control: &Control) -> Result<()> {
     };
     if zone.player != (PlayerRef::Bound { binding: *player })
         || instruction.actor != zone.player
-        || !super::counts::CountPlan::compile(&token.count)?.matches_player(&zone.player)
+        || !super::CountPlan::compile(&token.count)?.matches_player(&zone.player)
     {
         return Err(unsupported(
             "token destination and counted player must match stage",

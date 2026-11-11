@@ -135,11 +135,19 @@ fn mask_whole_return(node: &mut Node) {
     }
 }
 
+pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
+    check_node_with_x(node, source, None)
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "The contextual private-read guard checks the complete local node."
 )]
-pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
+pub(super) fn check_node_with_x(
+    node: &Node,
+    source: &SourceSpan,
+    x: Option<super::tokens::PaidX>,
+) -> Result<()> {
     let private_spine = matches!(node, Node::Instruction { instruction }
         if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action) || super::movement::revealed_move(&instruction.action)
             || shuffle_shape::placement(&instruction.action) == Some(shuffle_shape::Placement::Bottom));
@@ -196,7 +204,7 @@ pub(super) fn check_node(node: &Node, source: &SourceSpan) -> Result<()> {
     mask_public_prefix(&mut inspected)?;
     mask_entry_origin(&mut inspected)?;
     mask_public_selectors(&mut inspected)?;
-    super::tokens::mask_operands(&mut inspected);
+    super::tokens::mask_operands(&mut inspected, x);
     mask_granted_definitions(&mut inspected);
 
     if let Node::Instruction { instruction } = &mut inspected

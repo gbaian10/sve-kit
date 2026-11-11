@@ -1,23 +1,24 @@
 use crate::ir::player_stages;
 mod capacity;
-mod counts;
-mod dynamic;
+pub(super) mod dynamic;
 pub(super) mod equipment;
 
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
+use crate::ir::{optional_payment, x_pp};
 
 pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
 
+use super::number_plan::CountPlan;
 use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_name, unsupported};
 use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
 use crate::ir::{
-    Action, CardKind, CardName, Control, Expr, Instruction, LkiReason, Located, NameOperation, Nat,
-    Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture, Program, ReceiptId,
-    Requirement, SourceSpan, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec,
-    TokenTemplate, ZoneKind, ZoneRef,
+    Ability, Action, Binding, CardKind, CardName, Control, CostSpec, Expr, Instruction, LkiReason,
+    Located, NameOperation, Nat, Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture,
+    Program, ReceiptId, Requirement, Resource, ResourceOperation, SourceSpan, TokenDestination,
+    TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate, ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -26,7 +27,34 @@ pub(super) struct Creation {
     ids: Vec<String>,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub(super) struct PaidX(Binding<Nat>);
+
+pub(super) fn paid_x(ability: &Ability) -> Option<PaidX> {
+    let play = ability.play.as_ref()?;
+    let binding = play.parameters.first().and_then(x_pp::parameter)?;
+    let backed = |costs: &CostSpec| {
+        matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| {
+            matches!(&step.instruction.action, Action::Resource {
+                player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay, amount,
+            } if x_pp::amount(amount) == Some(binding))
+        }))
+    };
+    (backed(&play.costs)
+        || ability
+            .body
+            .as_ref()
+            .and_then(optional_payment::declaration)
+            .is_some_and(|(costs, _)| backed(costs)))
+    .then_some(PaidX(binding))
+}
+
 fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
+    specification_with_x(action, None)
+}
+
+fn specification_with_x(action: &Action, x: Option<PaidX>) -> Option<(&[TokenSpec], &ZoneRef)> {
     let Action::Token {
         tokens,
         destination: TokenDestination::Single {
@@ -62,7 +90,12 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     tokens
         .iter()
         .all(|token| match &token.template {
-            TokenTemplate::Fixed { .. } => counts::CountPlan::compile(&token.count).is_ok(),
+            TokenTemplate::Fixed { .. } => {
+                CountPlan::compile_with_x(&token.count, x.map(|paid| paid.0)).is_ok()
+                    && (x.is_none()
+                        || zone.player == (PlayerRef::Controller {})
+                        || CountPlan::compile(&token.count).is_ok())
+            }
             TokenTemplate::Name { name, kind } => {
                 if !matches!(kind, None | Some(CardKind::Follower)) {
                     return false;
@@ -81,18 +114,21 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
 pub(in crate::game::internal) struct TokenPlan {
     instruction: Instruction,
     destination: ZoneRef,
-    counts: Vec<counts::CountPlan>,
+    counts: Vec<CountPlan>,
 }
 impl TokenPlan {
-    pub(in crate::game::internal) fn compile(instruction: &Instruction) -> Result<Self> {
-        let (tokens, destination) = specification(&instruction.action)
+    pub(in crate::game::internal) fn compile(
+        instruction: &Instruction,
+        x: Option<PaidX>,
+    ) -> Result<Self> {
+        let (tokens, destination) = specification_with_x(&instruction.action, x)
             .ok_or_else(|| unsupported("token creation shape"))?;
         Ok(Self {
             instruction: instruction.clone(),
             destination: destination.clone(),
             counts: tokens
                 .iter()
-                .map(|token| counts::CountPlan::compile(&token.count))
+                .map(|token| CountPlan::compile_with_x(&token.count, x.map(|paid| paid.0)))
                 .collect::<Result<_>>()?,
         })
     }
@@ -130,8 +166,8 @@ pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
             if matches!(frozen.as_ref(), ObjectFrozen::LeaveFieldObjectBefore { .. })))
 }
 
-pub(super) fn check_action(action: &Action, source: &SourceSpan) -> Result<()> {
-    if matches!(action, Action::Token { .. }) && specification(action).is_none() {
+pub(super) fn check_action(action: &Action, source: &SourceSpan, x: Option<PaidX>) -> Result<()> {
+    if matches!(action, Action::Token { .. }) && specification_with_x(action, x).is_none() {
         return Err(unsupported(&format!(
             "token creation with admitted counts and destination at {}:{} ({})",
             source.card_no, source.line, source.author_path
@@ -140,9 +176,14 @@ pub(super) fn check_action(action: &Action, source: &SourceSpan) -> Result<()> {
     Ok(())
 }
 
-pub(super) fn check_catalog(game: &Game, action: &Action, source: &SourceSpan) -> Result<()> {
-    check_action(action, source)?;
-    if let Some((tokens, zone)) = specification(action) {
+pub(super) fn check_catalog(
+    game: &Game,
+    action: &Action,
+    source: &SourceSpan,
+    x: Option<PaidX>,
+) -> Result<()> {
+    check_action(action, source, x)?;
+    if let Some((tokens, zone)) = specification_with_x(action, x) {
         for token in tokens {
             let TokenTemplate::Fixed { template } = &token.template else {
                 continue;
@@ -529,18 +570,18 @@ pub(super) struct Paths {
     kinds: Vec<String>,
 }
 
-pub(super) fn paths(program: &Program) -> Paths {
+pub(super) fn paths(program: &Program, x: Option<PaidX>) -> Paths {
     let mut accepted = Paths::default();
-    collect_paths(program, "", &mut accepted);
+    collect_paths(program, "", &mut accepted, x);
     accepted
 }
 
-fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
+fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths, x: Option<PaidX>) {
     for (index, step) in program.steps.iter().enumerate() {
         let path = format!("{prefix}/steps/{index}");
         match &step.node {
             Node::Instruction { instruction } => {
-                if let Some((tokens, _)) = specification(&instruction.action) {
+                if let Some((tokens, _)) = specification_with_x(&instruction.action, x) {
                     for (token_index, token) in tokens.iter().enumerate() {
                         if matches!(
                             &token.template,
@@ -559,7 +600,9 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                                 "{path}/instruction/action/tokens/{token_index}/template/name"
                             ));
                         }
-                        if let Ok(plan) = counts::CountPlan::compile(&token.count) {
+                        if let Ok(plan) =
+                            CountPlan::compile_with_x(&token.count, x.map(|paid| paid.0))
+                        {
                             accepted.counts.extend(plan.before_paths(&format!(
                                 "{path}/instruction/action/tokens/{token_index}/count"
                             )));
@@ -576,6 +619,7 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                         &stage.body,
                         &format!("{path}/control/stages/{stage_index}/body"),
                         accepted,
+                        None,
                     );
                 }
             }
@@ -587,12 +631,13 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                         &mode.body,
                         &format!("{path}/control/modes/{mode_index}/body"),
                         accepted,
+                        None,
                     );
                 }
             }
             Node::Control {
                 control: Control::Sequence { body } | Control::May { body, .. },
-            } => collect_paths(body, &format!("{path}/control/body"), accepted),
+            } => collect_paths(body, &format!("{path}/control/body"), accepted, x),
             Node::Control {
                 control:
                     Control::If {
@@ -601,9 +646,9 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                         ..
                     },
             } => {
-                collect_paths(then_body, &format!("{path}/control/then_body"), accepted);
+                collect_paths(then_body, &format!("{path}/control/then_body"), accepted, x);
                 if let Some(body) = else_body {
-                    collect_paths(body, &format!("{path}/control/else_body"), accepted);
+                    collect_paths(body, &format!("{path}/control/else_body"), accepted, x);
                 }
             }
             _ => {}
@@ -641,8 +686,8 @@ pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
     })
 }
 
-pub(super) fn mask_operands(node: &mut Node) {
-    let valid = matches!(node, Node::Instruction { instruction } if specification(&instruction.action).is_some());
+pub(super) fn mask_operands(node: &mut Node, x: Option<PaidX>) {
+    let valid = matches!(node, Node::Instruction { instruction } if specification_with_x(&instruction.action, x).is_some());
     if let Node::Instruction { instruction } = node
         && let Action::Token { tokens, .. } = &mut instruction.action
     {
@@ -652,7 +697,7 @@ pub(super) fn mask_operands(node: &mut Node) {
                 *kind = None;
             }
             if valid {
-                counts::CountPlan::mask_before(&mut token.count);
+                CountPlan::mask_before(&mut token.count, x.map(|paid| paid.0));
             }
         }
     }

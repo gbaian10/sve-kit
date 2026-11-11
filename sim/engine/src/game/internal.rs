@@ -80,6 +80,7 @@ pub(super) use history_turn::{
 mod fact_log;
 mod life;
 mod movement;
+mod number_plan;
 mod numeric;
 mod observation;
 mod ordering;

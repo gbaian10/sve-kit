@@ -909,6 +909,17 @@ fn numeric_duration_and_continuous_preserve_distinct_semantics() {
         lowerer().lower(&tree).unwrap_err().code,
         "unsupported_construct"
     );
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["define"]["X"] = json!({
+        "agg":{"of":{"who":"self","zone":"field","kind":"follower"},"attr":"power","fn":"sum"}
+    });
+    assert_eq!(
+        lowerer().lower(&tree).unwrap_err().code,
+        "unsupported_construct",
+        "a Compute aggregate is a reader, rather than a literal composition"
+    );
+    let patch = tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][0]["set_stat"].take();
+    tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"][0] = json!({"buff":patch});
+    lowerer().lower(&tree).unwrap();
 }
 
 #[test]

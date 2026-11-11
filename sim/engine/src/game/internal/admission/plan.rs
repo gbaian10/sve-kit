@@ -134,6 +134,9 @@ impl PlannedAbility {
     fn from_definition(owner: Definition, definition: &Located<Ability>) -> Result<Self> {
         let mut compiler = Compiler::new(&definition.source);
         compiler.root = true;
+        if matches!(&owner, Definition::Card { .. }) {
+            compiler.x = tokens::paid_x(&definition.node);
+        }
         walk::ability(definition, &mut compiler);
         Ok(Self {
             definition: owner,
@@ -235,6 +238,7 @@ impl BodyPlan {
 }
 
 struct Compiler {
+    x: Option<tokens::PaidX>,
     sources: Vec<SourceSpan>,
     root: bool,
     instructions: Vec<Instruction>,
@@ -246,6 +250,7 @@ struct Compiler {
 impl Compiler {
     fn new(source: &SourceSpan) -> Self {
         Self {
+            x: None,
             sources: vec![source.clone()],
             root: false,
             instructions: vec![],
@@ -290,8 +295,10 @@ impl Compiler {
             NodeRef::Instruction(instruction) => {
                 self.instructions.push(instruction.clone());
                 if matches!(instruction.action, Action::Token { .. }) {
-                    self.tokens
-                        .insert(instruction.id, tokens::TokenPlan::compile(instruction)?);
+                    self.tokens.insert(
+                        instruction.id,
+                        tokens::TokenPlan::compile(instruction, self.x)?,
+                    );
                 }
                 if let Action::Delay { body, .. } = &instruction.action {
                     let source = self
