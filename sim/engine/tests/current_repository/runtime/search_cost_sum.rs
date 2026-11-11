@@ -4,6 +4,7 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};
+use sve_engine::game::player::{DecisionShape, Input, QuestionShape, Viewer};
 
 fn search_question(game: &mut Game, card: &str) -> DecisionView {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
@@ -18,11 +19,7 @@ fn search_question(game: &mut Game, card: &str) -> DecisionView {
         .find(|option| option.card == card)
         .unwrap_or_else(|| panic!("expected a trigger from {card}"));
     let CardPlay::Awaiting(question) = game
-        .answer_internal_card(
-            pending.actor,
-            pending.token,
-            Answer::Pending(option.handle),
-        )
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(option.handle))
         .unwrap()
     else {
         panic!("the cost-capped search must be asked");
@@ -106,6 +103,41 @@ fn bp18_025_evolution_searches_tokyo_followers_whose_original_costs_total_at_mos
             found_cards(&question),
             ["BP18-060", "BP18-062", "BP18-071"],
             "only Tokyo followers are found"
+        );
+        let Input::Question(public) = game.input(Viewer::P1) else {
+            panic!("public capped search");
+        };
+        let QuestionShape::Decision(DecisionShape::Search(search)) = public.shape else {
+            panic!("public capped search");
+        };
+        assert_eq!(search.maximum_original_cost, Some(3));
+        assert!(!search.distinct_names);
+        assert!(
+            search
+                .cards
+                .iter()
+                .all(|card| card.original_cost.is_some() && card.object.is_none())
+        );
+        let selected = [1_i64, 2]
+            .iter()
+            .map(|cost| {
+                search
+                    .cards
+                    .iter()
+                    .find(|card| card.original_cost == Some(*cost))
+                    .unwrap()
+                    .handle
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(selected.len(), 2);
+        assert_eq!(
+            search
+                .cards
+                .iter()
+                .filter(|card| selected.contains(&card.handle))
+                .map(|card| card.original_cost.unwrap())
+                .sum::<i64>(),
+            search.maximum_original_cost.unwrap()
         );
         let (one, two, two_b) = (
             handle(&question, "BP18-071"),

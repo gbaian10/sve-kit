@@ -1,5 +1,9 @@
 //! Frozen distribution occurrences and their authority-only damage producer.
 
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::DistributionQuestion;
+use crate::game::player::Viewer;
+
 use super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name, unsupported};
 use crate::game::player::QuestionPurpose;
 use crate::ir::{
@@ -52,6 +56,7 @@ struct Producer {
 
 #[derive(Clone, Debug)]
 pub(super) struct DistributionWait {
+    links: CandidateLinks,
     pub(super) purpose: QuestionPurpose,
     producer: Producer,
     snapshot: SnapshotId,
@@ -62,6 +67,31 @@ pub(super) struct DistributionWait {
 }
 
 impl DistributionWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &DistributionDomain,
+    ) -> Result<DistributionQuestion> {
+        let references = self
+            .recipients
+            .members()
+            .iter()
+            .map(|member| {
+                if let RuntimeDamageRecipient::Object { object } = member {
+                    Some(*object)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        Ok(DistributionQuestion {
+            members: game.player_members(actor, &domain.members, &references, &self.links)?,
+            total: domain.total,
+            minimum: domain.minimum,
+        })
+    }
+
     pub(super) const fn producer_decision(&self) -> DecisionId {
         self.producer.decision
     }
@@ -163,6 +193,17 @@ impl Game {
                 .map_err(|_error| unsupported("distribution total exceeds Damage receipt range"))?;
         }
         let wait = DistributionWait {
+            links: CandidateLinks::capture(
+                self,
+                execution,
+                recipients.members().iter().filter_map(|member| {
+                    if let RuntimeDamageRecipient::Object { object } = member {
+                        Some(*object)
+                    } else {
+                        None
+                    }
+                }),
+            )?,
             purpose: super::player::purpose(&decision.kind),
             producer: Producer {
                 execution: execution.id,

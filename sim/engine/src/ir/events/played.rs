@@ -1,9 +1,9 @@
 //! Played subscriptions narrow the committed card through one closed subject plan.
-use super::subject::{SubjectFields, SubjectFilter, SubjectInformation, played_view};
+use super::subject::{SubjectFields, SubjectFilter, played_view};
 use crate::ir::{
     Ability, AbilityOrigin, Binding, Bool, CardKind, CharacteristicView, Comparison, EventPattern,
-    Expr, Int, IntOperation, NumberRead, ObjectRef, PlayEvent, PlaySubjectFields, PlayerId,
-    Predicate, TraitId, TriggerCondition, ZoneKind,
+    Expr, Int, IntOperation, NumberRead, ObjectRef, PlayEvent, PlaySubjectFields, Predicate,
+    TraitId, TriggerCondition, ZoneKind,
 };
 
 #[derive(Clone, Debug)]
@@ -194,36 +194,6 @@ impl PlayedFilter {
             alternate,
         };
         (plan.valid() && *expression == plan.predicate(event)).then_some(plan)
-    }
-
-    pub(crate) fn matches_information(
-        &self,
-        information: &SubjectInformation<'_>,
-        same: bool,
-        observer: PlayerId,
-        actor: PlayerId,
-        active: PlayerId,
-        token: bool,
-    ) -> bool {
-        (self
-            .subject
-            .matches_information(information, same, observer, actor, active, token)
-            || self.alternate.as_ref().is_some_and(|alternate| {
-                alternate.matches_information(information, same, observer, actor, active, token)
-            }))
-            && self.original.is_none_or(|(op, n)| {
-                information.original_cost.is_some_and(|value| match op {
-                    Comparison::Equal => value == n,
-                    Comparison::LessEqual => value <= n,
-                    Comparison::GreaterEqual => value >= n,
-                    Comparison::NotEqual | Comparison::Less | Comparison::Greater => false,
-                })
-            })
-            && (self.traits_any.is_empty()
-                || self
-                    .traits_any
-                    .iter()
-                    .any(|t| information.traits.contains(t)))
     }
 }
 

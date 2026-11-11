@@ -1,5 +1,10 @@
 //! Search retains its private candidate policy over the shared property-only condition core.
 
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::PartitionQuestion;
+use crate::game::player::Viewer;
+use crate::game::player::{SearchQuestion, SelectionGroup};
+
 use super::card::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
 };
@@ -64,6 +69,7 @@ pub struct SearchPartitionDomain {
 
 #[derive(Clone, Debug)]
 struct PartitionContinuation {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     player: PlayerId,
     outcome: SearchOutcome,
@@ -85,6 +91,7 @@ pub(super) struct PartitionWait {
 
 #[derive(Clone, Debug)]
 pub(super) struct SearchWait {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     player: PlayerId,
     deck: Vec<String>,
@@ -545,6 +552,7 @@ impl Game {
             vec![]
         };
         let wait = SearchWait {
+            links: CandidateLinks::capture(self, execution, members.iter().copied())?,
             instruction,
             player,
             deck,
@@ -592,10 +600,9 @@ impl Game {
         }
         if let Some(limit) = wait.cost_cap
             && !within_original_cost_cap(
-                found.iter().map(|object| {
-                    let id = execution.object_id(*object)?;
-                    super::cost::printed_cost(&self.internal_cost_print(id)?["cost"])
-                }),
+                found
+                    .iter()
+                    .map(|object| search_original_cost(self, execution, *object)),
                 limit,
                 "search cost sum overflow",
             )?
@@ -685,6 +692,10 @@ impl Game {
         Ok(found)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The search transaction keeps reveal, frozen links and destination handoff together."
+    )]
     pub(super) fn internal_search_answer(
         &mut self,
         execution: &mut Execution,
@@ -721,6 +732,11 @@ impl Game {
         if wait.conditional {
             self.reveal(&ids, "all", &execution.frame(), false)?;
         }
+        let links = if wait.conditional {
+            CandidateLinks::capture(self, execution, found.iter().copied())?
+        } else {
+            wait.links.clone()
+        };
         let outcome = SearchOutcome {
             found: views.clone(),
             revealed: if wait.conditional { views } else { Vec::new() },
@@ -740,6 +756,7 @@ impl Game {
                     return self.internal_search_partition(
                         execution,
                         PartitionContinuation {
+                            links,
                             instruction: wait.instruction.clone(),
                             player: wait.player,
                             outcome,
@@ -771,6 +788,7 @@ impl Game {
             } => self.internal_search_partition(
                 execution,
                 PartitionContinuation {
+                    links,
                     instruction: wait.instruction.clone(),
                     player: wait.player,
                     outcome,
@@ -1094,4 +1112,75 @@ fn zone_name(kind: ZoneKind) -> Result<&'static str> {
         ZoneKind::Ex => Ok("ex"),
         _ => Err(unsupported("search capacity zone")),
     }
+}
+
+impl SearchWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        execution: &Execution,
+        actor: Viewer,
+        domain: &SearchDomain,
+    ) -> Result<SearchQuestion> {
+        let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
+        let mut cards = game.player_cards(actor, &domain.cards, &references, &self.links)?;
+        if self.distinct_names {
+            if cards.len() != self.names.len() {
+                return Err(invalid("missing frozen search rules names"));
+            }
+            for (card, names) in cards.iter_mut().zip(&self.names) {
+                card.rules_names = Some(names.clone());
+            }
+        }
+        if self.cost_cap.is_some() {
+            for (card, reference) in cards.iter_mut().zip(&self.members) {
+                card.original_cost = Some(search_original_cost(game, execution, *reference)?);
+            }
+        }
+        Ok(SearchQuestion {
+            cards,
+            cardinality: domain.cardinality,
+            groups: domain.groups.as_ref().map(|groups| {
+                groups
+                    .iter()
+                    .map(|group| SelectionGroup {
+                        handles: group.handles.clone(),
+                        cardinality: group.cardinality,
+                    })
+                    .collect()
+            }),
+            distinct_names: self.distinct_names,
+            maximum_original_cost: self.cost_cap,
+        })
+    }
+}
+
+impl PartitionWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &SearchPartitionDomain,
+    ) -> Result<PartitionQuestion> {
+        let references = self
+            .continuation
+            .remaining
+            .iter()
+            .copied()
+            .map(Some)
+            .collect::<Vec<_>>();
+        Ok(PartitionQuestion {
+            cards: game.player_cards(
+                actor,
+                &domain.cards,
+                &references,
+                &self.continuation.links,
+            )?,
+            cardinality: domain.cardinality,
+        })
+    }
+}
+
+fn search_original_cost(game: &Game, execution: &Execution, reference: ObjectRef) -> Result<i64> {
+    super::cost::printed_cost(&game.internal_cost_print(execution.object_id(reference)?)?["cost"])
 }

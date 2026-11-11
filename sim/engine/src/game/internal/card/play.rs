@@ -1169,6 +1169,7 @@ impl Game {
             waiting: None,
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
+            player_receipt_links: BTreeMap::new(),
             reveals: Vec::new(),
             allocations: BTreeMap::new(),
             origin: None,

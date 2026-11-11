@@ -243,3 +243,39 @@ fn target_roles_runtime_rejects_nonfield_formal_target_domains() {
             .unwrap_err();
     }
 }
+
+#[test]
+fn player_question_roles_accept_one_complete_partition_without_authority_reads() {
+    use crate::player_pipeline::{choose_selection, question, selected_answer};
+    use sve_engine::game::player::{Command, DecisionShape, QuestionShape, SubmissionKind, Viewer};
+    let (mut game, _) = position();
+    let public = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Targets(targets)) = &public.shape else {
+        panic!("public roles");
+    };
+    assert_eq!(targets.roles.len(), 2);
+    assert!(matches!(
+        targets.roles[0].cardinality,
+        RoleCardinality::IfNonempty { count: Nat(1) }
+    ));
+    assert!(matches!(
+        targets.roles[1].cardinality,
+        RoleCardinality::Remainder {}
+    ));
+    let mut selected = choose_selection(targets);
+    if selected.is_empty() {
+        selected.push(targets.members[0].handle);
+    }
+    let complete = selected_answer(&public.shape, &selected, true);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Answer {
+                token: public.token,
+                answer: complete
+            }
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+}

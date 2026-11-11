@@ -275,16 +275,12 @@ impl Game {
                     .collect::<Result<_>>()?,
             )),
             Stage::Materials | Stage::Discard => {
-                let Some((view, _)) = &declaration.selection.waiting else {
-                    return Err(invalid("missing evolution material question"));
-                };
-                let InputDomain::CostMaterials(domain) = &view.domain else {
-                    return Err(invalid("evolution material domain"));
-                };
+                let domain =
+                    self.player_evolution_selection(declaration.actor, &declaration.selection)?;
                 Ok(if matches!(declaration.stage, Stage::Materials) {
-                    EvolutionQuestion::Materials(domain.clone())
+                    EvolutionQuestion::Materials(domain)
                 } else {
-                    EvolutionQuestion::Discard(domain.clone())
+                    EvolutionQuestion::Discard(domain)
                 })
             }
             Stage::Payment(payment) => Ok(EvolutionQuestion::Payment(*payment)),

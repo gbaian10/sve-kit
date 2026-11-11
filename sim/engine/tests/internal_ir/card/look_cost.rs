@@ -441,3 +441,66 @@ fn source_name_exclusion_reaches_public_choices_and_rejects_other_private_reads(
         );
     }
 }
+
+#[test]
+fn player_question_new_private_look_links_only_to_the_choosers_observation() {
+    use crate::player_pipeline::{answer, choose_selection, question};
+    use sve_engine::game::player::{DecisionShape, Input, QuestionShape, SubmissionKind, Viewer};
+    let programs = lowerer().lower(&tree()).unwrap();
+    let mut game = position();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let public = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Targets(targets)) = &public.shape else {
+        panic!("Look targets");
+    };
+    assert_eq!(targets.members.len(), 1);
+    let link = targets.members[0].object.clone().unwrap();
+    let observed = game.observe(Viewer::P1).unwrap();
+    assert!(
+        observed
+            .players
+            .iter()
+            .flat_map(|player| &player.zones)
+            .flat_map(|zone| &zone.cards)
+            .any(|card| card.card.handle == link)
+    );
+    assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+    let other = game.observe(Viewer::P2).unwrap();
+    assert!(
+        !other
+            .players
+            .iter()
+            .flat_map(|player| &player.zones)
+            .flat_map(|zone| &zone.cards)
+            .any(|card| card.card.handle == link)
+    );
+    let before = exact_authority(&game);
+    assert_eq!(question(&game, Viewer::P1), public);
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Targets(choose_selection(targets))
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let order = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Order(cards)) = &order.shape else {
+        panic!("Look remainder");
+    };
+    assert!(cards.iter().all(|card| card.object.is_some()));
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Order(cards.iter().map(|card| card.handle).collect())
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+}

@@ -6,7 +6,7 @@
 use super::*;
 use sve_engine::game::player::{
     Command, EvolutionAnswer, EvolutionQuestion, Input, MainActionAnswer, MainIntentKind, Question,
-    QuestionShape, SubmissionKind, Viewer,
+    QuestionShape, SelectionQuestion, SubmissionKind, Viewer,
 };
 
 fn question(game: &Game) -> Question {
@@ -14,6 +14,36 @@ fn question(game: &Game) -> Question {
         panic!("player evolution question");
     };
     *question
+}
+
+fn assert_selection(game: &Game, selection: &SelectionQuestion) {
+    let observation = game.observe(Viewer::P1).unwrap();
+    assert_eq!(
+        selection.groups.len(),
+        1,
+        "An evolution payment has one effective selection group"
+    );
+    assert_eq!(
+        selection.groups[0].cardinality, selection.cardinality,
+        "The effective group bounds match the complete selection"
+    );
+    assert!(
+        selection.members.iter().all(|member| {
+            member.object.as_ref().is_some_and(|link| {
+                observation
+                    .players
+                    .iter()
+                    .flat_map(|player| &player.zones)
+                    .flat_map(|zone| &zone.cards)
+                    .any(|card| &card.card.handle == link)
+            })
+        }),
+        "Evolution cost candidates must link to the choosers Observation"
+    );
+    assert!(
+        matches!(game.input(Viewer::P2), Input::Waiting(_)),
+        "Only the actor receives evolution cost candidates"
+    );
 }
 
 fn evolve(game: &mut Game, super_evolution: bool) -> SubmissionKind {
@@ -51,28 +81,34 @@ fn evolve_with_ep(game: &mut Game, super_evolution: bool, use_ep: bool) -> Submi
         };
         let (answer, finish) = match stage {
             EvolutionQuestion::Form(forms) => (EvolutionAnswer::Form(forms[0].id), false),
-            EvolutionQuestion::Materials(domain) => (
-                EvolutionAnswer::Materials(
-                    domain
-                        .members
-                        .iter()
-                        .take(usize::try_from(domain.cardinality.minimum.0).unwrap())
-                        .map(|member| member.handle)
-                        .collect(),
-                ),
-                false,
-            ),
-            EvolutionQuestion::Discard(domain) => (
-                EvolutionAnswer::Discard(
-                    domain
-                        .members
-                        .iter()
-                        .take(usize::try_from(domain.cardinality.minimum.0).unwrap())
-                        .map(|member| member.handle)
-                        .collect(),
-                ),
-                false,
-            ),
+            EvolutionQuestion::Materials(domain) => {
+                assert_selection(game, &domain);
+                (
+                    EvolutionAnswer::Materials(
+                        domain
+                            .members
+                            .iter()
+                            .take(usize::try_from(domain.cardinality.minimum.0).unwrap())
+                            .map(|member| member.handle)
+                            .collect(),
+                    ),
+                    false,
+                )
+            }
+            EvolutionQuestion::Discard(domain) => {
+                assert_selection(game, &domain);
+                (
+                    EvolutionAnswer::Discard(
+                        domain
+                            .members
+                            .iter()
+                            .take(usize::try_from(domain.cardinality.minimum.0).unwrap())
+                            .map(|member| member.handle)
+                            .collect(),
+                    ),
+                    false,
+                )
+            }
             EvolutionQuestion::Payment(payment) => (
                 EvolutionAnswer::Payment {
                     pp: payment.total_pp.checked_sub(i64::from(use_ep)).unwrap(),

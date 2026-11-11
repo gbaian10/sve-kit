@@ -1,5 +1,9 @@
 //! Private observations and one frozen, same-owner deck permutation.
 
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::CardOption;
+use crate::game::player::Viewer;
+
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
@@ -13,12 +17,12 @@ use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
-    ChoiceDomain, Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int,
-    IntOperation, IntRead, Located, LookOutcome, MemberProjection, MoveDestination, Nat, NatRead,
-    Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
-    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView,
-    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ChoiceDomain, Control, CounterOperation, Expr, GrantedAbility, Holder, InstallationSubjects,
+    Instruction, Int, IntOperation, IntRead, Located, LookOutcome, MemberProjection,
+    MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
+    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
+    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
+    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -51,6 +55,7 @@ pub(super) fn card_packet(card: &OrderCard) -> serde_json::Value {
 
 #[derive(Clone, Debug)]
 pub(super) struct OrderWait {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     cards: Vec<ObjectRef>,
     player: PlayerId,
@@ -417,10 +422,25 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             }
             Action::Counter {
                 holder: Holder::Object { object },
+                amount,
+                operation,
                 ..
-            } if matches!(object, ObjectOperand::Bound { .. }) => {
-                // The checked object binding does not grant private reads in other operands.
-                *object = ObjectOperand::SourceHolder {};
+            } => {
+                let bound = if let ObjectOperand::Bound { binding } = object {
+                    Some(*binding)
+                } else {
+                    None
+                };
+                if matches!(object, ObjectOperand::Bound { .. }) {
+                    // The checked holder binding does not authorize the amount's reads.
+                    *object = ObjectOperand::SourceHolder {};
+                }
+                if matches!(
+                    operation,
+                    CounterOperation::Add {} | CounterOperation::Remove {}
+                ) {
+                    mask_counter_natural(amount, bound);
+                }
             }
             Action::Damage {
                 amount, recipients, ..
@@ -704,6 +724,10 @@ impl Game {
                 snapshot: SnapshotId(self.state.ir_epoch),
             });
         }
+        execution.player_receipt_links.insert(
+            instruction.receipt,
+            CandidateLinks::capture(self, execution, looked.iter().map(|member| member.object))?,
+        );
         execution.look_viewers.insert(instruction.receipt, viewer);
         execution.receipts.insert(
             instruction.receipt,
@@ -745,6 +769,7 @@ impl Game {
         if execution.players(self, players)? != vec![player] {
             return Err(unsupported("order audience"));
         }
+        let source_selector = cards.clone();
         let cards = execution.observed_objects(self, cards, player, Consumer::Order)?;
         let mut unique = BTreeSet::new();
         let seat = seat_name(player)?;
@@ -785,6 +810,12 @@ impl Game {
         }
         let decision = *decision;
         let wait = OrderWait {
+            links: CandidateLinks::for_selectors(
+                self,
+                execution,
+                cards.iter().copied(),
+                [&source_selector],
+            )?,
             instruction,
             cards,
             player,
@@ -1002,6 +1033,20 @@ impl Execution {
 }
 
 impl OrderWait {
+    pub(in crate::game::internal) fn player_cards(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        cards: &[OrderCard],
+    ) -> Result<Vec<CardOption>> {
+        game.player_cards(
+            actor,
+            cards,
+            &self.cards.iter().copied().map(Some).collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(super) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         let ordered = handles
             .iter()
@@ -1071,4 +1116,103 @@ fn mask_field_entry(value: &mut Expr<Bool>) -> Result<()> {
         _ => {}
     }
     Ok(())
+}
+
+// Counter's natural boundary composes the existing public leaf authorities.
+fn mask_counter_natural(value: &mut Expr<Nat>, bound: Option<Binding<ObjectRef>>) {
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::Counter {
+        holder: Holder::Object { object: ObjectOperand::Bound { binding } }, ..
+    } if Some(*binding) == bound))
+    {
+        // Only the already checked counter holder's binding grants this public read.
+        *value = Expr::Literal(Nat(0));
+        return;
+    }
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            NatOperation::CheckedInt { value: integer } => {
+                mask_counter_number(integer, bound);
+                return;
+            }
+            NatOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                mask_counter_condition(condition, bound);
+                mask_counter_natural(then_value, bound);
+                mask_counter_natural(else_value, bound);
+                return;
+            }
+            NatOperation::ReceiptCount {
+                receipt: receipt @ ObjectReceipt::Fusion { .. },
+                projection,
+                member,
+                predicate,
+            } if super::receipt_counts::check(receipt, *projection, *member, predicate).is_ok() => {
+                *value = Expr::Literal(Nat(0));
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_natural(value);
+}
+
+fn mask_counter_number(value: &mut Expr<Int>, bound: Option<Binding<ObjectRef>>) {
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            IntOperation::FromNat { value: natural } => {
+                mask_counter_natural(natural, bound);
+                return;
+            }
+            IntOperation::Arithmetic { arguments, .. } => {
+                for argument in arguments {
+                    mask_counter_number(argument, bound);
+                }
+                return;
+            }
+            IntOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                mask_counter_condition(condition, bound);
+                mask_counter_number(then_value, bound);
+                mask_counter_number(else_value, bound);
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_number(value);
+}
+
+fn mask_counter_condition(value: &mut Expr<Bool>, bound: Option<Binding<ObjectRef>>) {
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            Predicate::CompareInt { left, right, .. } => {
+                mask_counter_number(left, bound);
+                mask_counter_number(right, bound);
+                return;
+            }
+            Predicate::CompareNat { left, right, .. } => {
+                mask_counter_natural(left, bound);
+                mask_counter_natural(right, bound);
+                return;
+            }
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                for predicate in predicates {
+                    mask_counter_condition(predicate, bound);
+                }
+                return;
+            }
+            Predicate::Not { predicate } => {
+                mask_counter_condition(predicate, bound);
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_condition(value);
 }

@@ -6,6 +6,7 @@ use super::{
     ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
 use crate::game::internal::admission::PlannedAbility;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::history_turn::source_link::SourceLink;
@@ -313,7 +314,8 @@ impl Game {
                 }
                 let plan =
                     filter(&ability.node).ok_or_else(|| invalid("missing movement filter"))?;
-                if !plan.matches_information(
+                if !subject_condition::matches(
+                    &plan,
                     &SubjectInformation {
                         keywords,
                         original_cost: Some(snapshot.original_cost()),
@@ -327,7 +329,7 @@ impl Game {
                     controller,
                     active,
                     token,
-                ) {
+                )? {
                     continue;
                 }
                 if let TriggerCondition::Event {
@@ -428,14 +430,15 @@ impl Game {
                 let actor = player_id(&self.object(holder)?.controller)?;
                 for ability in abilities {
                     let plan = filter(&ability.node).ok_or_else(|| invalid("missing EX filter"))?;
-                    if !plan.matches(
-                        &characters,
+                    if !subject_condition::matches(
+                        &plan,
+                        &SubjectInformation::from_characters(&characters, None),
                         *holder == old.id,
                         actor,
                         controller,
                         active,
                         false,
-                    ) {
+                    )? {
                         continue;
                     }
                     let header = if let Some(header) = &shared_header {

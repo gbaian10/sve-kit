@@ -1,9 +1,13 @@
 //! Evolution-equivalent abilities share EP substitution and the ordinary evolution quota.
+
 use super::super::{DistributionMember, Execution, Fact, InputDomain, InstructionOutcome, Wait};
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Int, KeywordId, Located, Nat, Node,
     Result, invalid, seat_name, unsupported,
 };
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::SelectionQuestion;
+use crate::game::player::Viewer;
 use crate::game::{int, list};
 use crate::ir::ride;
 use crate::ir::{
@@ -66,12 +70,27 @@ pub(in crate::game::internal) struct ResourceEntrySelection {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct ResourceEntryWait {
+    links: CandidateLinks,
     members: Vec<ObjectRef>,
     count: usize,
     ep_allowed: bool,
 }
 
 impl ResourceEntryWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &super::TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        game.player_selection(
+            actor,
+            domain,
+            &self.members.iter().copied().map(Some).collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(in crate::game::internal) fn validate(
         &self,
         handles: &[u64],
@@ -420,6 +439,7 @@ impl Game {
                 ep_allowed,
             },
             Wait::ResourceEntryPayment(ResourceEntryWait {
+                links: CandidateLinks::capture(self, execution, members.iter().copied())?,
                 members,
                 count,
                 ep_allowed,

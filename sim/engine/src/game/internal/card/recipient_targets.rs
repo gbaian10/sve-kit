@@ -3,7 +3,10 @@ use super::super::{
 };
 use super::selection::{TargetCharacteristics, characteristics};
 use super::{Execution, Game, Nat, Result, invalid, player_id, seat_name, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::player::QuestionPurpose;
+use crate::game::player::SelectionQuestion;
+use crate::game::player::Viewer;
 use crate::ir::ObjectRef;
 use crate::ir::{
     Binding, Cardinality, ChoiceDomain, DamageRecipient, Decision, PlayerRef, RecipientSet,
@@ -13,6 +16,7 @@ use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct RecipientWait {
+    links: CandidateLinks,
     pub(in crate::game::internal) purpose: QuestionPurpose,
     pub(in crate::game::internal) binding: Binding<Vec<DamageRecipient>>,
     members: Vec<RuntimeDamageRecipient>,
@@ -40,6 +44,39 @@ pub(super) fn check(candidates: &RecipientSet, bounds: Cardinality) -> Result<()
 }
 
 impl RecipientWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        let references = self
+            .members
+            .iter()
+            .map(|member| {
+                if let RuntimeDamageRecipient::Object { object } = member {
+                    Some(*object)
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        let mut question = game.player_selection(actor, domain, &references, &self.links)?;
+        for (member, reference) in question.members.iter_mut().zip(&references) {
+            if let Some(reference) = reference {
+                member.rules_names = Some(
+                    self.characteristics
+                        .iter()
+                        .find(|(candidate, _)| candidate == reference)
+                        .ok_or_else(|| invalid("missing recipient rules names"))?
+                        .1
+                        .player_names(),
+                );
+            }
+        }
+        Ok(question)
+    }
+
     pub(in crate::game::internal) fn validate(
         &self,
         handles: &[u64],
@@ -152,6 +189,17 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         Ok((
             RecipientWait {
+                links: CandidateLinks::capture(
+                    self,
+                    execution,
+                    members.iter().filter_map(|member| {
+                        if let RuntimeDamageRecipient::Object { object } = member {
+                            Some(*object)
+                        } else {
+                            None
+                        }
+                    }),
+                )?,
                 purpose: super::super::player::purpose(&decision.kind),
                 binding: *binding,
                 members,

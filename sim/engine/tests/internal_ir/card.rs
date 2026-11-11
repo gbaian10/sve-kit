@@ -941,3 +941,6 @@ mod static_declarations;
 
 #[path = "card/receipt_field_costs.rs"]
 mod receipt_field_costs;
+
+#[path = "card/counter_amounts.rs"]
+mod counter_amounts;

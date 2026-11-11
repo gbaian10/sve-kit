@@ -6,6 +6,7 @@ use super::{
     ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::internal::admission::PlannedAbility;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::{Frame, Object};
 use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
@@ -199,14 +200,15 @@ impl Game {
                 for ability in abilities {
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if plan.matches_information(
+                    if subject_condition::matches(
+                        &plan,
                         &SubjectInformation::from_characters(&characters, original_cost),
                         *holder == old.id,
                         controller,
                         entry_controller,
                         active,
                         self.object_type(&old.id)?.contains("トークン"),
-                    ) && !self.internal_trigger_forbidden(&ability.node, controller)?
+                    )? && !self.internal_trigger_forbidden(&ability.node, controller)?
                     {
                         matched.push((holder, ability, controller));
                     }

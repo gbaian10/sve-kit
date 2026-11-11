@@ -2,6 +2,7 @@
 use super::super::Slot;
 use super::super::history_turn::subject_count_at;
 use super::super::observation::EffectOrigin;
+use crate::game::player::PendingChoice;
 use crate::game::player::Viewer;
 use crate::game::player::observation::PendingTrigger;
 use crate::game::player::observation::TriggerTiming;
@@ -899,6 +900,21 @@ impl PendingOccurrence {
         Ok(())
     }
 
+    pub(in crate::game::internal) fn player_option(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        option: &PendingOption,
+    ) -> PendingChoice {
+        PendingChoice {
+            handle: option.handle,
+            card: option.card.clone(),
+            line: option.line,
+            event: option.event.clone(),
+            source: self.origin.observed(game, actor),
+        }
+    }
+
     fn public_option(&self, handle: u64) -> Result<PendingOption> {
         Ok(PendingOption {
             handle,
@@ -962,5 +978,35 @@ const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
         EventPayload::Race { .. } => TriggerTiming::Race,
         EventPayload::LifeChange { .. } => TriggerTiming::LifeChange,
         EventPayload::Damage { .. } => TriggerTiming::Damage,
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Pending projection reads the same cached occurrence identities as native answers."
+)]
+impl Game {
+    pub(in crate::game::internal) fn player_pending_options(
+        &self,
+        actor: Viewer,
+        options: &[PendingOption],
+        ids: &[u64],
+    ) -> Result<Vec<PendingChoice>> {
+        if options.len() != ids.len() {
+            return Err(invalid("inconsistent pending coordinates"));
+        }
+        options
+            .iter()
+            .zip(ids)
+            .map(|(option, id)| {
+                let occurrence = self
+                    .card_runtime
+                    .pending
+                    .iter()
+                    .find(|pending| pending.id == *id)
+                    .ok_or_else(|| invalid("missing frozen pending occurrence"))?;
+                Ok(occurrence.player_option(self, actor, option))
+            })
+            .collect()
     }
 }

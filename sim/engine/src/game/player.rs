@@ -10,8 +10,10 @@ mod closing;
 mod decision;
 mod evolution;
 mod main_actions;
+mod occurrences;
 mod opening;
 mod pipeline;
+mod selection;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
 pub use decision::{
@@ -25,9 +27,15 @@ pub(in crate::game) use main_actions::ActivationOption;
 pub use main_actions::{
     AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,
 };
+pub use occurrences::{
+    AbilityChoice, EarlierQuotaChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice,
+};
 pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
+pub use selection::{
+    DistributionQuestion, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
+};
 
-pub use super::internal::{Answer, InputDomain};
+pub use super::internal::Answer;
 
 use crate::ir::{Nat, PlayerId};
 use core::fmt;

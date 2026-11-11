@@ -1318,3 +1318,15 @@ lowering 消耗相鄰的 choose／chosen move，產生一次決策及原有固�
 
 回答沿既有角色分割驗證與交易回滾，拒絕缺位置、重複或外來角色／成員；角色 binding
 繼承同一私有選擇的權限。對手不能取得問題、手牌候選或被放回牌庫後的可追蹤座標。
+
+## 內部 Counter 效果量
+
+內部 IR 的 Counter Add／Remove 共用數值計畫處理自然數量；CheckedInt 邊界必須能靜態證明非負，未知符號與負值不會截成零。原有讀值權限與 binding 的支配關係仍獨立驗證，計畫本身不授權讀取私有資訊。算式在 Counter 指示開始求值，前一個指示的抽牌或 counter 改變會影響後一個指示。
+
+無指定順序、body 恰為單一 Counter 的 EachObject 形狀是集合 Counter 步驟的投影。動態 Add／Remove 先固定成員，在任何寫入前綁定各 holder 並求出數量，再依原順序寫入；即使量間接依賴 counter，也使用共同開始視圖。raw IR 對 bound holder 的讀值可得到各自的開始數量。此形狀不可用來表示未來作者 foreach 的跨步驟重讀。固定量與既有 Move 路徑保持原語義。
+
+body 的 Remove 飽和到零，Add 使用 checked 加法與既有整數表示範圍，不把 CounterCap 當既有規則上限。量的溢位、舊世代、非 Field／EX holder 或批次中途失敗仍整次回滾。零量保留零差額收據，不發生 counter 改變事件。
+
+效果量的開放不適用付款：整卡、可選及 Quick 的 counter 費用仍只接受既有固定 Remove 數量，付款時再次檢查固定量及可用餘額，不足量不得以 body 的飽和語義付款。已付 PP X／融合回條由既有捕捉與 producer 權限提供，不新增第二次數量選擇。
+
+本節規定內部 IR consumer；作者 Counter delta 的入口與降低仍依現行作者契約，不能由此推定動態作者語法、任意整卡 Integer 決定題或整卡准入已開放。

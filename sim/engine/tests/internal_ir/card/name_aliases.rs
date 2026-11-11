@@ -410,3 +410,50 @@ fn receipt_scalar_does_not_turn_a_private_look_into_a_public_observation() {
             .contains("distinct names before revelation")
     );
 }
+
+#[test]
+fn player_question_search_exposes_complete_rules_names_but_no_unknown_deck_links() {
+    use crate::player_pipeline::{answer, choose_search, question};
+    use sve_engine::game::player::{DecisionShape, Input, QuestionShape, SubmissionKind, Viewer};
+    let caster = json!({"activate":{"cost":{"pp":0},"do":[{"search":{"sel":{"who":"self","zone":"deck"},"upto":2,"distinct_by":"name","to":"hand"}}]}});
+    let mut game = position("deck", false, &caster, false);
+    activate(&mut game);
+    let public = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Search(search)) = &public.shape else {
+        panic!("public search");
+    };
+    assert!(search.distinct_names);
+    assert!(search.cards.iter().all(|card| card.object.is_none()));
+    let follower = search
+        .cards
+        .iter()
+        .find(|card| card.card == "unit-follower")
+        .unwrap();
+    assert_eq!(follower.rules_names.as_ref().unwrap().len(), 2);
+    assert!(
+        follower
+            .rules_names
+            .as_ref()
+            .unwrap()
+            .contains(&"unit-spell".into())
+    );
+    assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+    let before = exact_authority(&game);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Search(SearchAnswer::Grouped(vec![
+                search.cards.iter().map(|card| card.handle).collect()
+            ]))
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(question(&game, Viewer::P1), public);
+    assert_eq!(
+        answer(&mut game, Viewer::P1, choose_search(search)).kind,
+        SubmissionKind::Applied
+    );
+}

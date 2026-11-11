@@ -46,15 +46,43 @@
 
 非應答席先取得 Waiting，不建構私有 shape；骰值依既有規則附在等待摘要中。
 `input` 不推進程序、不付款、不改 RNG，也不配置觀看者或權威代號。
-卡片清單使用沒有實體 ID 欄位的 `CardOption`，只帶本題局部代號、已授權印刷與名稱。
-同印刷的不同候選仍有不同本題代號，不能把印刷號當作物件身分。
+卡片清單使用 `CardOption`；目標、材料、棄牌使用 `SelectionQuestion`。
+這些封閉 DTO 不含實體 ID、權威參照或 continuation。同印刷的不同候選仍有不同
+本題代號，不能把印刷號當作物件身分。
 
-本次語義題型實作暫沿用原生的安全值載荷：AbilityOption、QuickOption、PendingOption、
-QuotaDomain、ReplacementOption、TargetDomain、DistributionDomain 與 SearchGroup。
-這些載荷只含本題座標與已授權資訊，不含權威 continuation 或實體物件參照；
-TargetDomain 原有 roles 與 original_costs 保留。候選與 Observation 的連結，以及
-選取所需的完整凍結名稱、群組與總費限制，列於 [#1977](https://github.com/gbaian10/sve-kit/issues/1977)
-的剩餘驗收，尚未由本片補齊。宿主目前仍須接受原生驗答拒絕，不能從本片題目推定完整合法集合。
+候選的 `object`（能力選擇的 `holder`）可連到本席 `Observation` 中既有的
+`ObjectHandle`。連結保存來源凍結時的世代與辨識期；只有目前仍是同一辨識期、
+同一世代且本席仍能定位時才提供。私有 Look 在取得知識後保存來源連結，後續
+排序、分配沿用該來源；搜尋 continuation 也沿用找到集合的來源。洗牌或退休後
+重新定位不會把舊候選連到新代號。未知牌庫候選、尚未建立的 token 與主戰者沒有
+物件連結，候選本題代號仍可正常回答；不提供隱藏牌庫索引。
+
+`AbilityChoice`、`QuickChoice`、`PendingChoice`、`QuotaQuestion` 與
+`ReplacementChoice` 保留原題座標、已授權印刷及文字來源。Pending 使用原 occurrence
+捕捉的來源；quota 歷史選擇只有已公開上下文，不以印刷或行號推測物件關聯。
+
+## 完整選取限制
+
+`SelectionQuestion.cardinality` 是本次整體有效上下限。`groups` 一律至少一組；
+一般選取的單組界限等於整體界限，多組則要求存在不重疊分派，使每組達到自己的
+有效上下限。同一候選可同時符合多組資格，但只能分派一次。結算時單組的有效
+下限可能依剩餘候選縮減，不能用宣告時的印刷下限取代。
+
+`distinct_names` 使用候選捕捉的完整 `rules_names`，包含追加名稱；`name` 只是顯示
+名稱。`original_costs` 與成員的 `original_cost` 使用原生驗證的原費來源，與目前費用
+不同。`distinct_original_costs` 才表示原費必須互異；有原費 map 本身不表示互異。
+`minimum_original_cost`／`maximum_original_cost` 分別限制選取總原費的下限／上限。
+未參與限制的名稱或原費可省略。`roles` 保留原角色座標、牌庫端點及 Fixed、
+IfNonempty、Remainder 大小規則；有角色時整個選取與完整不重疊分割一起回答。
+
+`SearchQuestion` 同時提供整體界限、完整名稱與總原費上限；原費讀取與原生驗證
+共用同一函式。`groups: Some` 表示必須使用 Grouped 答案，所有群組包含空群組都要
+同時提供；`None` 使用 Ungrouped。答案使用原候選座標，不重新編號。分配與排序
+各有自己的完整集合或排列語義，不能把逐個選擇當成已提交的部分答案。
+
+`EvolutionQuestion::Materials`／`Discard` 共用相同 `SelectionQuestion` 投影，仍經過
+原演化宣告的材料、棄牌與付款重驗。一般演化、超進化及效果演化的原有差異不變。
+宿主可從題目建立完整答案，但提交仍由權威重驗；不一致、錯席與過期 token 仍會拒絕。
 
 權威在提交後交出下一題前驗證投影，包含 typed Wait、pending／quota 與 Quick 快取。
 投影不一致沿原回滾路徑成為持續 EngineFault，雙方一致；投降仍可執行。

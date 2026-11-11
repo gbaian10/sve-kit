@@ -50,7 +50,7 @@ impl ObjectLink {
         .flatten()
     }
 
-    fn observed(&self, game: &Game, perspective: Viewer) -> Option<ObjectHandle> {
+    pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Option<ObjectHandle> {
         let original = self.period(perspective)?;
         let knowledge = game.state.knowledge.get(seat(perspective))?;
         let object = game.state.objects.get(&self.holder)?;
@@ -93,6 +93,10 @@ pub(super) struct EffectOrigin {
 }
 
 impl EffectOrigin {
+    pub(super) fn holder_link(&self) -> ObjectLink {
+        self.link.clone()
+    }
+
     pub(super) fn capture(
         game: &Game,
         execution: &Execution,

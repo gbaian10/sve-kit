@@ -4,6 +4,10 @@ use super::{
     AbilityKind, CardPlay, Game, Generation, PlayerId, Result, int, invalid, printed_origin,
     seat_name, unsupported,
 };
+use crate::game::internal::observation::ObjectLink;
+use crate::game::player::QuickChoice;
+use crate::game::player::Viewer;
+use crate::game::player::observation::zone;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier, ZoneKind};
 use crate::ir::{
@@ -29,6 +33,7 @@ pub struct QuickOption {
 
 #[derive(Clone, Debug)]
 struct Candidate {
+    link: ObjectLink,
     holder: String,
     generation: Generation,
     ability: Option<AbilityId>,
@@ -265,6 +270,7 @@ impl Game {
                     .ok_or_else(|| invalid("Quick position exhausted"))?,
                 });
                 actions.push(Candidate {
+                    link: ObjectLink::capture(self, holder, object.generation),
                     holder: holder.clone(),
                     generation: Generation(object.generation),
                     ability: if spell { None } else { Some(ability.id) },
@@ -382,4 +388,31 @@ impl Game {
 
 pub(in crate::game::internal) fn packet(window: QuickWindow, options: &[QuickOption]) -> Value {
     json!({"kind":"quick","window":format!("{window:?}"),"pass":true,"options":options.iter().map(|o| json!({"handle":o.handle,"card":o.card,"line":o.line,"zone":o.zone,"position":o.position})).collect::<Vec<_>>()})
+}
+
+impl Question {
+    pub(in crate::game::internal) fn player_options(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        options: &[QuickOption],
+    ) -> Result<Vec<QuickChoice>> {
+        if options.len() != self.actions.len() {
+            return Err(invalid("inconsistent Quick coordinates"));
+        }
+        options
+            .iter()
+            .zip(&self.actions)
+            .map(|(option, candidate)| {
+                Ok(QuickChoice {
+                    handle: option.handle,
+                    card: option.card.clone(),
+                    line: option.line,
+                    zone: zone(&option.zone)?,
+                    position: option.position,
+                    object: candidate.link.observed(game, actor),
+                })
+            })
+            .collect()
+    }
 }

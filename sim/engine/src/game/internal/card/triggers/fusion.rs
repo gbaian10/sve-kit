@@ -4,6 +4,7 @@ use super::{
     Result, SnapshotId, SourceInformation, TriggerAggregation, ZoneKind, invalid, player_id,
     unsupported,
 };
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::{Execution, Fact};
 use crate::ir::events::fusion::{combined, filter, material_filter};
 use crate::ir::optional_payment;
@@ -48,7 +49,7 @@ impl Game {
         execution: &mut Execution,
         materials: &[ObjectRef],
     ) -> Result<()> {
-        let mut matched = Vec::new();
+        let mut candidates = Vec::new();
         for &material in materials {
             let holder = execution.object_id(material)?;
             let (card, _) = self.internal_effective_print(holder)?;
@@ -57,18 +58,20 @@ impl Game {
             }
             for ability in self.internal_printed_abilities(holder)? {
                 if let Some(filter) = material_filter(&ability.node) {
-                    matched.push((holder.to_owned(), material, ability, filter));
+                    candidates.push((holder.to_owned(), material, ability, filter));
                 }
             }
         }
-        if matched.is_empty() {
+        if candidates.is_empty() {
             return Ok(());
         }
         let cause = execution.source_snapshot(self)?;
-        matched.retain(|(_, _, _, filter)| {
-            cause.subject.kind == Some(filter.kind)
-                && cause.subject.traits.contains(&filter.trait_id)
-        });
+        let mut matched = Vec::new();
+        for candidate in candidates {
+            if subject_condition::source(&cause.subject, candidate.3.kind, &candidate.3.trait_id)? {
+                matched.push(candidate);
+            }
+        }
         if matched.is_empty() {
             return Ok(());
         }
@@ -159,13 +162,16 @@ impl Game {
                 }
                 continue;
             }
-            if player_id(&self.object(&holder)?.controller)? != event.controller {
+            if !subject_condition::controlled_by(
+                event.controller,
+                player_id(&self.object(&holder)?.controller)?,
+            )? {
                 continue;
             }
             for ability in self.internal_effective_abilities(&holder)? {
                 if ability.node.active_zones == [zone]
-                    && filter(&ability.node)
-                        .is_some_and(|trait_id| event.material_traits.contains(&trait_id))
+                    && let Some(trait_id) = filter(&ability.node)
+                    && subject_condition::traits(&event.material_traits, &trait_id)?
                 {
                     matched.push((holder.clone(), ability));
                 }

@@ -2,7 +2,10 @@ use super::{Context, Continuation, Execution, Game, Generation, Result, seat_nam
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::card::play::ability_cost;
 use crate::game::internal::grant::EffectiveAbility;
+use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{AbilityOption, InputDomain, InstructionOutcome, Slot, Wait};
+use crate::game::player::AbilityChoice;
+use crate::game::player::Viewer;
 use crate::invalid;
 use crate::ir::ability_play;
 use crate::ir::{
@@ -13,12 +16,37 @@ use crate::ir::{
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct AbilityWait {
+    links: CandidateLinks,
     binding: Binding<RuntimeAbilityReference>,
     filter: AbilityChoiceKind,
     candidates: Vec<RuntimeAbilitySource>,
 }
 
 impl AbilityWait {
+    pub(in crate::game::internal) fn player_choices(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        options: &[AbilityOption],
+    ) -> Result<Vec<AbilityChoice>> {
+        if options.len() != self.candidates.len() {
+            return Err(invalid("inconsistent ability choices"));
+        }
+        options
+            .iter()
+            .zip(&self.candidates)
+            .map(|(option, source)| {
+                Ok(AbilityChoice {
+                    handle: option.handle,
+                    source_card: option.source_card.clone(),
+                    source_line: option.source_line,
+                    source_section: option.source_section.clone(),
+                    holder: self.links.observed(game, actor, Some(source.holder))?,
+                })
+            })
+            .collect()
+    }
+
     pub(in crate::game::internal) fn validate(
         &self,
         game: &mut Game,
@@ -172,6 +200,11 @@ impl Game {
             })
             .collect::<Result<Vec<_>>>()?;
         let wait = AbilityWait {
+            links: CandidateLinks::capture(
+                self,
+                execution,
+                candidates.iter().map(|(source, _)| source.holder),
+            )?,
             binding,
             filter,
             candidates: candidates.into_iter().map(|(source, _)| source).collect(),
