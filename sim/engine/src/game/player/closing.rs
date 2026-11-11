@@ -33,7 +33,6 @@ pub enum ClosingAnswer {
 }
 
 enum Action {
-    EndPhase,
     GuardAct(Vec<String>),
     Discard(Vec<String>),
 }
@@ -113,45 +112,23 @@ impl Game {
             .collect()
     }
 
-    pub(super) fn submit_player_end_phase(
-        &mut self,
-        actor: Viewer,
-        token: QuestionToken,
-    ) -> SubmissionKind {
-        self.submit_player_closing_action(actor, token, None)
-    }
-
-    pub(super) fn submit_player_closing(
-        &mut self,
-        actor: Viewer,
-        token: QuestionToken,
-        answer: ClosingAnswer,
-    ) -> SubmissionKind {
-        self.submit_player_closing_action(actor, token, Some(answer))
-    }
-
     fn closing_action(
         &self,
         actor: Viewer,
         shape: &QuestionShape,
-        answer: Option<ClosingAnswer>,
+        answer: ClosingAnswer,
     ) -> Result<Option<Action>> {
         match (shape, answer) {
-            (QuestionShape::ActionWindow, None)
-                if self.state.flow["kind"] == "main" && self.state.turn["phase"] == "main" =>
-            {
-                Ok((!self.attack_required()?).then_some(Action::EndPhase))
-            }
             (
                 QuestionShape::Closing(ClosingQuestion::GuardAct(_)),
-                Some(ClosingAnswer::GuardAct(handles)),
+                ClosingAnswer::GuardAct(handles),
             ) => {
                 let ids = self.closing_selection(actor, &handles, &self.player_end_guards()?)?;
                 Ok(Some(Action::GuardAct(ids)))
             }
             (
                 QuestionShape::Closing(ClosingQuestion::Discard { count, .. }),
-                Some(ClosingAnswer::Discard(handles)),
+                ClosingAnswer::Discard(handles),
             ) => {
                 if u64::try_from(handles.len()).map_err(invalid)? != *count {
                     return Ok(None);
@@ -181,11 +158,11 @@ impl Game {
         Ok(ids)
     }
 
-    fn submit_player_closing_action(
+    pub(super) fn submit_player_closing(
         &mut self,
         actor: Viewer,
         token: QuestionToken,
-        answer: Option<ClosingAnswer>,
+        answer: ClosingAnswer,
     ) -> SubmissionKind {
         if self.player_fault.is_some() {
             return SubmissionKind::EngineFault;
@@ -222,7 +199,6 @@ impl Game {
         self.node = format!("player-rule-{}", self.state.next_decision);
         self.state.next_decision = self.state.next_decision.saturating_add(1);
         let result = match action {
-            Action::EndPhase => self.start_end(),
             Action::GuardAct(ids) => self.apply_end_guard(&ids),
             Action::Discard(ids) => self.apply_end_discard(&ids),
         };

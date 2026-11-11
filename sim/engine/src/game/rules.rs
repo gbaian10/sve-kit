@@ -684,6 +684,19 @@ impl Game {
     fn attack(&mut self, decision: &Value) -> Result<bool> {
         let id = string(&decision["attacker"]);
         let target = string(&decision["target"]);
+        self.apply_attack(id, target, Some(decision))
+    }
+
+    pub(in crate::game) fn apply_attack(
+        &mut self,
+        id: &str,
+        target: &str,
+        original: Option<&Value>,
+    ) -> Result<bool> {
+        // Prototype frames retain their original decision metadata.
+        let request =
+            json!({"do":"attack","attacker":id,"target":target,"by":self.active(),"at":"main"});
+        let decision = original.unwrap_or(&request);
         if !self.can_attack(id, target)? {
             return Ok(false);
         }

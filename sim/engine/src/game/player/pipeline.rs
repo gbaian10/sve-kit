@@ -129,15 +129,22 @@ impl Game {
                     let Some(purpose) = self.player_action_purpose() else {
                         return Input::EngineFault;
                     };
+                    if actor != viewer {
+                        return Input::Waiting(Waiting { actor, dice: None });
+                    }
+                    let token = QuestionToken {
+                        epoch: self.state.ir_epoch,
+                        serial: self.player_epoch,
+                        action: true,
+                    };
+                    let Ok(actions) = self.player_main_actions(actor, token) else {
+                        return Input::EngineFault;
+                    };
                     Question {
-                        token: QuestionToken {
-                            epoch: self.state.ir_epoch,
-                            serial: self.player_epoch,
-                            action: true,
-                        },
+                        token,
                         actor,
                         purpose,
-                        shape: QuestionShape::ActionWindow,
+                        shape: QuestionShape::ActionWindow(actions),
                     }
                 }
             }
@@ -152,7 +159,7 @@ impl Game {
             QuestionShape::Decision(_)
             | QuestionShape::Opening(_)
             | QuestionShape::Closing(_)
-            | QuestionShape::ActionWindow => None,
+            | QuestionShape::ActionWindow(_) => None,
         };
         Input::Waiting(Waiting {
             actor: question.actor,
@@ -165,7 +172,11 @@ impl Game {
     pub fn submit_player(&mut self, viewer: Viewer, command: Command) -> Submission {
         let kind = match command {
             Command::Opening { token, answer } => self.submit_player_opening(viewer, token, answer),
-            Command::EndPhase { token } => self.submit_player_end_phase(viewer, token),
+            Command::MainAction {
+                token,
+                intent,
+                answer,
+            } => self.submit_player_main_action(viewer, token, &intent, answer),
             Command::Closing { token, answer } => self.submit_player_closing(viewer, token, answer),
             Command::Concede => {
                 if self.state.game["ended"] == true {
@@ -265,6 +276,20 @@ impl Game {
         }
         if self.state.game["ended"] != true && self.internal_pending_choice()?.is_none() {
             self.internal_quick_choice()?;
+        }
+        if self.state.game["ended"] != true
+            && self.player_decision().is_none()
+            && self.player_action_purpose().is_some()
+        {
+            let actor = viewer(self.active()).ok_or_else(|| invalid("invalid main actor"))?;
+            self.player_main_actions(
+                actor,
+                QuestionToken {
+                    epoch: self.state.ir_epoch,
+                    serial: self.player_epoch,
+                    action: true,
+                },
+            )?;
         }
         if self.state.game["ended"] != true
             && self.player_decision().is_none()

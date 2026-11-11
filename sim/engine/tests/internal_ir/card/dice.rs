@@ -167,7 +167,7 @@ fn player_pipeline_reroll_waiting_summary_preserves_the_public_die() {
     }
     assert!(matches!(
         player_question(&game, Viewer::P1).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
 }
 

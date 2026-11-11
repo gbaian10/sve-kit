@@ -7,10 +7,14 @@ pub mod events;
 pub mod observation;
 
 mod closing;
+mod main_actions;
 mod opening;
 mod pipeline;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
+pub use main_actions::{
+    AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,
+};
 pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 
 pub use super::internal::{Answer, InputDomain};
@@ -132,8 +136,8 @@ pub enum QuestionShape {
     Closing(ClosingQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
     Decision(InputDomain),
-    /// Main-phase action, without general legal action enumeration.
-    ActionWindow,
+    /// Main-phase intents; card play, activation and evolution are not yet listed.
+    ActionWindow(MainActions),
 }
 
 /// One authorized question, without the authority continuation or execution identity.
@@ -197,10 +201,14 @@ pub enum Command {
         /// Opening choice addressed by viewer capabilities.
         answer: OpeningAnswer,
     },
-    /// Leave the current main phase, subject to existing attack obligations.
-    EndPhase {
+    /// Choose a current main-phase intent and its parameters.
+    MainAction {
         /// Exact main-action question returned to this seat.
         token: QuestionToken,
+        /// Opaque option from that question.
+        intent: MainIntentId,
+        /// Parameters selected from that intent's domain.
+        answer: MainActionAnswer,
     },
     /// Answer a turn-closing rules procedure using current viewer capabilities.
     Closing {
