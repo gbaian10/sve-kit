@@ -22,6 +22,7 @@ mod nested;
 mod opening;
 mod payments;
 mod placement;
+pub mod player;
 mod progression;
 mod randomness;
 mod resources;
