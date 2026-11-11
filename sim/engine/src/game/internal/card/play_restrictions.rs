@@ -1,8 +1,17 @@
+use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, seat_name};
 use super::{Ability, Context, Game, Generation, Located, PlayerId, Result, unsupported};
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::{Action, Instruction, play_restrictions};
 use crate::ir::{Bool, Expr, ZoneKind};
+
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct BanishPermission {
+    turn: u64,
+    origin: EffectOrigin,
+}
 
 pub(super) fn check(located: &Located<Ability>, ordinal: usize) -> Result<bool> {
     let Some(rule) = card_play_rule(&located.node) else {
@@ -20,6 +29,30 @@ pub(super) fn check(located: &Located<Ability>, ordinal: usize) -> Result<bool> 
     reason = "Printed restrictions share the authoritative card play boundary."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_banish_permission(
+        &self,
+        perspective: Viewer,
+        player: Viewer,
+    ) -> Vec<InstalledEffect> {
+        use crate::game::player::observation::{EffectExpiry, InstalledChange, InstalledEffect};
+        self.card_runtime
+            .banish_play
+            .get(&player.player().seat)
+            .filter(|permission| {
+                perspective == player || permission.origin.observed(self, perspective).is_some()
+            })
+            .map(|permission| InstalledEffect {
+                source: permission.origin.observed(self, perspective),
+                expires: EffectExpiry::TurnEnd,
+                main_live: true,
+                intervals: vec![],
+                active: true,
+                change: InstalledChange::BanishPlay,
+            })
+            .into_iter()
+            .collect()
+    }
+
     pub(super) fn internal_card_play_forbidden(
         &self,
         holder: &str,
@@ -107,9 +140,13 @@ impl Game {
     ) -> Result<()> {
         check_install(&instruction.action)?;
         let turn = self.state.schedule.current()?;
-        self.card_runtime
-            .banish_play
-            .insert(execution.context.controller.seat, turn);
+        self.card_runtime.banish_play.insert(
+            execution.context.controller.seat,
+            BanishPermission {
+                turn,
+                origin: EffectOrigin::capture(self, execution, &instruction.source)?,
+            },
+        );
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Installed(vec![]));
@@ -125,12 +162,17 @@ impl Game {
         Ok(object.zone == "banish"
             && object.owner == seat
             && object.controller == seat
-            && self.card_runtime.banish_play.get(&actor.seat)
-                == Some(&self.state.schedule.current()?))
+            && self
+                .card_runtime
+                .banish_play
+                .get(&actor.seat)
+                .map(|permission| permission.turn)
+                == Some(self.state.schedule.current()?))
     }
+
     pub(in crate::game) fn internal_player_play_end_turn(&mut self, turn: u64) {
         self.card_runtime
             .banish_play
-            .retain(|_, granted| *granted != turn);
+            .retain(|_, permission| permission.turn != turn);
     }
 }

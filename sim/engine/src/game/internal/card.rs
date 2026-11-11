@@ -5,6 +5,8 @@ use super::{
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
+use crate::game::player::Viewer;
+use crate::game::player::observation::AbilityQuota;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -133,7 +135,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
     pub(in crate::game::internal) quick: Option<quick::Question>,
     pub(in crate::game::internal) quick_start: bool,
-    pub(in crate::game::internal) banish_play: BTreeMap<u32, u64>,
+    pub(in crate::game::internal) banish_play: BTreeMap<u32, play_restrictions::BanishPermission>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
 }
 
@@ -246,6 +248,69 @@ where
     reason = "Whole-card admission and activation share the authoritative game."
 )]
 impl Game {
+    pub(in crate::game) fn observed_quotas(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<AbilityQuota>> {
+        use super::observation::EffectOrigin;
+        use crate::game::player::observation::AbilityQuota;
+        let object = self.object(holder)?;
+        let turn = self.state.schedule.current()?;
+        if !self.player_knows_object(perspective, holder)
+            || !self.card_runtime.is_loaded(&object.card)
+        {
+            return Err(invalid("ability quota context unavailable"));
+        }
+        let abilities = self
+            .internal_effective_abilities(holder)?
+            .into_iter()
+            .filter_map(|ability| {
+                let limit = ability
+                    .node
+                    .play
+                    .as_ref()
+                    .and_then(|play| play.limit)
+                    .or_else(|| {
+                        let trigger = ability.node.trigger.as_ref()?;
+                        trigger.limit
+                    })?;
+                Some((ability, limit))
+            })
+            .collect::<Vec<_>>();
+        if abilities.is_empty() {
+            return Ok(vec![]);
+        }
+        let mut probe = self.clone();
+        let mut result = vec![];
+        for (ability, limit) in abilities {
+            let source = probe.internal_effective_source(holder, &ability)?;
+            let source_text = if let Some(origin) = &ability.grant {
+                self.observed_grant_source(perspective, holder, origin)
+            } else {
+                EffectOrigin::definition(
+                    self,
+                    holder,
+                    object.generation,
+                    &ability.definition.located().source,
+                    false,
+                )
+                .observed(self, perspective)
+            }
+            .ok_or_else(|| invalid("unavailable quota provenance"))?;
+            result.push(AbilityQuota {
+                source: source_text,
+                kind: ability.node.kind,
+                maximum: limit.maximum.0,
+                remaining: self
+                    .card_runtime
+                    .quota_remaining(source.instance, TurnId(turn), limit),
+                consume_at: limit.consume_at,
+            });
+        }
+        Ok(result)
+    }
+
     /// Construct a game from the complete accepted selection and admit every current card.
     /// Provenance remains authority-only; loaded cards retain the existing save rejection.
     ///

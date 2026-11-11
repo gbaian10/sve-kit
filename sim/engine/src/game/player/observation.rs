@@ -1,5 +1,11 @@
 //! Closed, read-only player observations without authority identities.
 
+mod context;
+pub use context::{
+    AbilityQuota, DamageHistory, DiceHistory, EffectRecipient, HistoryEvent, PendingTrigger,
+    PreventionChange, StatGainHistory, SubjectHistory, TriggerTiming, TurnHistory,
+};
+
 mod costs;
 pub use costs::{
     CardCostQuote, CostGroup, CostGroupKind, CostLine, CostObservation, CostSummary, PendingCost,
@@ -112,6 +118,8 @@ pub struct CardState {
     pub boxed: bool,
     /// Authorized installed changes; effective properties above remain authoritative.
     pub effects: Vec<InstalledEffect>,
+    /// Current limits; absent when this card cannot safely provide its budget.
+    pub quotas: Option<Vec<AbilityQuota>>,
 }
 
 /// Authorized card characteristics, with no open authority state.
@@ -171,6 +179,8 @@ pub struct PlayerObservation {
     pub player: Viewer,
     /// Public resource values.
     pub resources: Resources,
+    /// Disclosed installed effects affecting this player.
+    pub effects: Vec<InstalledEffect>,
     /// Zone counts and authorized cards.
     pub zones: Vec<ZoneObservation>,
 }
@@ -197,6 +207,10 @@ pub struct Observation {
     pub remembered: Vec<CardMemory>,
     /// Viewer-authorized estimates and unresolved play costs.
     pub costs: CostObservation,
+    /// Disclosed pending occurrences, without question or authority identities.
+    pub pending: Vec<PendingTrigger>,
+    /// Committed public facts retained for this turn.
+    pub history: TurnHistory,
 }
 
 pub(in crate::game) const fn seat(viewer: Viewer) -> &'static str {
@@ -279,6 +293,8 @@ impl Game {
             ],
             remembered: self.card_memory(perspective)?,
             costs: self.observed_costs(perspective)?,
+            pending: self.observed_pending(perspective)?,
+            history: self.observed_history(perspective)?,
         })
     }
 
@@ -342,6 +358,7 @@ impl Game {
                 ep: data.ep,
                 sep: data.sep,
             },
+            effects: self.observed_player_effects(perspective, player)?,
             zones,
         })
     }
@@ -461,6 +478,7 @@ impl Game {
             counters,
             boxed: self.internal_boxed(id),
             effects: self.observed_installed_effects(perspective, id)?,
+            quotas: self.observed_quotas(perspective, id).ok(),
         })
     }
 }

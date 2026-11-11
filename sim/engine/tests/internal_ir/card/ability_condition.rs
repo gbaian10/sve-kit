@@ -3,6 +3,7 @@
     reason = "Unexpected fixture shapes must fail the test."
 )]
 use super::*;
+use sve_engine::game::player::Viewer;
 
 fn guarded() -> Located<Ability> {
     let mut value = payment::paid_ability(vec![payment::pp(1), payment::act()], vec![draw(1, 1)]);
@@ -204,6 +205,14 @@ fn cemetery_threshold_and_once_limit_check_eligibility_before_spending_or_consum
         )
         .unwrap();
         board.load_internal_card("unit-follower", &program).unwrap();
+        let before_observe = exact_authority(&board);
+        let quota = rule_observation::field(&board, Viewer::P1, 0)
+            .quotas
+            .unwrap();
+        assert_eq!(quota.len(), 1);
+        assert_eq!(quota[0].maximum, 1);
+        assert_eq!(quota[0].remaining, 1);
+        assert_eq!(before_observe, exact_authority(&board));
         if count == 5 {
             resolved(
                 board
@@ -214,6 +223,13 @@ fn cemetery_threshold_and_once_limit_check_eligibility_before_spending_or_consum
             let state = board.projection(View::Referee).unwrap();
             assert_eq!(state["P1"]["pp"]["current"], 1);
             assert_eq!(state["P1"]["leader"]["life"], 21);
+            assert_eq!(
+                rule_observation::field(&board, Viewer::P1, 0)
+                    .quotas
+                    .unwrap()[0]
+                    .remaining,
+                0
+            );
         }
         // Four cards fail eligibility; five spend the only slot, so the next try fails either way.
         let before = exact_authority(&board);

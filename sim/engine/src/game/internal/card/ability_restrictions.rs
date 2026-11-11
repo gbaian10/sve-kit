@@ -1,7 +1,10 @@
 use super::super::duration::EffectEnd;
+use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome};
 use super::{Ability, Game, Result, unsupported};
 use crate::EngineFailure;
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::{
     AbilityKind, Action, ActionPattern, Bool, DurationEnd, Effect, Expr, InstallationSubjects,
     InstallationTime, Instruction, KeywordId, ObjectOperand, PermissionSubject, Polarity, Selector,
@@ -11,6 +14,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct AbilityLock {
+    origin: EffectOrigin,
     holder: String,
     generation: u64,
     end: EffectEnd,
@@ -64,6 +68,37 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     reason = "Installed permissions share authoritative activation and rule movements."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_ability_locks(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{InstalledChange, InstalledEffect};
+        let object = self.object(holder)?;
+        self.state
+            .ir_ability_restrictions
+            .iter()
+            .filter(|lock| {
+                object.zone == "field"
+                    && lock.holder == holder
+                    && lock.generation == object.generation
+            })
+            .map(|lock| {
+                let live = !lock.end.source_expired(self);
+                Ok(InstalledEffect {
+                    source: lock.origin.observed(self, perspective),
+                    expires: lock.end.observed()?,
+                    main_live: live,
+                    intervals: vec![],
+                    active: live,
+                    change: InstalledChange::AbilityRestriction {
+                        except_evolution: lock.except_evolution,
+                    },
+                })
+            })
+            .collect()
+    }
+
     pub(in crate::game::internal) fn internal_install_ability_restriction(
         &mut self,
         execution: &mut Execution,
@@ -90,6 +125,7 @@ impl Game {
         if object.zone == "field" && object.generation == member.generation.0 {
             let end = EffectEnd::at(self, execution, &duration.end)?;
             self.state.ir_ability_restrictions.push(AbilityLock {
+                origin: EffectOrigin::capture(self, execution, &instruction.source)?,
                 holder,
                 generation: member.generation.0,
                 end,

@@ -1,7 +1,8 @@
 //! Installed effects expressed without authority identities or executable text.
 
 use super::super::{ObjectHandle, Viewer};
-use crate::ir::{AbilityKind, CostKind};
+use super::{EffectRecipient, PreventionChange, TriggerTiming};
+use crate::ir::{AbilityKind, CostKind, DamageKind};
 
 /// Public text origin, with a link only during uninterrupted identification.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -29,6 +30,8 @@ pub enum EffectExpiry {
     NextTurnEnd(Viewer),
     /// When the identified source leaves the field.
     SourceLeavesField,
+    /// End of this player's next rule-start procedure.
+    NextStartEnd(Viewer),
 }
 
 /// A repeated active interval, separate from the effect's principal lifetime.
@@ -91,6 +94,50 @@ pub enum InstalledChange {
     },
     /// An amulet temporarily acts as a follower.
     Pilot,
+    /// The next rule-start procedure cannot stand this card.
+    NoStand {
+        /// Player whose start procedure is restricted.
+        player: Viewer,
+    },
+    /// Attacks are forbidden against every target, or only the listed leaders.
+    AttackRestriction {
+        /// Absent means all targets.
+        leaders: Option<Vec<Viewer>>,
+    },
+    /// Activated abilities are forbidden, with an optional evolution exception.
+    AbilityRestriction {
+        /// Intrinsic evolution remains permitted.
+        except_evolution: bool,
+    },
+    /// A Drive stand prevents attacks against leaders for this turn.
+    NoLeaderAttack,
+    /// A frozen damage replacement; lists include only authorized current links.
+    Prevention {
+        /// Damage category covered by the replacement.
+        kind: DamageKind,
+        /// Prevent or adjust the damage.
+        change: PreventionChange,
+        /// Remaining uses, absent for unlimited usage.
+        remaining: Option<u64>,
+        /// Authorized recipient links, absent for any recipient restriction.
+        recipients: Option<Vec<EffectRecipient>>,
+        /// Authorized source links, absent for any source restriction.
+        sources: Option<Vec<ObjectHandle>>,
+    },
+    /// Player cost layer; applicability is determined by the contextual quote.
+    PlayerCost {
+        /// Frozen operation.
+        change: NumberChange,
+        /// Whether the effect is consumed by one payment.
+        limited: bool,
+    },
+    /// The player can play their own banished cards this turn.
+    BanishPlay,
+    /// A subscription awaiting its event, without its captures or body.
+    Delayed {
+        /// Subscribed event kind.
+        timing: TriggerTiming,
+    },
 }
 
 /// One installed change on the observed card; not an authority effect identifier.

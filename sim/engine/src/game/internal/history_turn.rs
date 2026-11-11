@@ -1,6 +1,9 @@
 //! Current-turn queries read committed public facts; only Combo projects a pending formal play.
 
+use super::observation::ObjectLink;
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
+use crate::game::player::Viewer;
+use crate::game::player::observation::TurnHistory;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::change::StatFilter;
 use crate::ir::events::life::LifeFilter;
@@ -26,8 +29,9 @@ use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
 
 /// The current-turn stat history only needs the positive facets for each committed event.
-#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct StatGainHistoryFact {
+    link: Option<ObjectLink>,
     object: u64,
     generation: u64,
     attack: bool,
@@ -55,13 +59,98 @@ pub(super) fn stat_gain_exists(
     reason = "Stat facts use the common committed change path."
 )]
 impl Game {
+    pub(in crate::game) fn observed_history(&self, perspective: Viewer) -> Result<TurnHistory> {
+        use crate::game::player::observation::{
+            DamageHistory, HistoryEvent, StatGainHistory, SubjectHistory, TurnHistory, viewer, zone,
+        };
+        let subjects = self
+            .state
+            .ir_subject_history
+            .iter()
+            .map(|fact| {
+                Ok(SubjectHistory {
+                    event: match fact.event {
+                        SubjectHistoryEvent::Play => HistoryEvent::Play,
+                        SubjectHistoryEvent::Attack => HistoryEvent::Attack,
+                        SubjectHistoryEvent::Evolve => HistoryEvent::Evolve,
+                        SubjectHistoryEvent::Leave => HistoryEvent::Leave,
+                    },
+                    current: fact.link.observed_public(self, perspective),
+                    controller: viewer(seat_name(PlayerId {
+                        seat: fact.controller,
+                    })?)?,
+                    active: viewer(seat_name(PlayerId { seat: fact.active })?)?,
+                    kind: match fact.kind.as_str() {
+                        "follower" => CardKind::Follower,
+                        "spell" => CardKind::Spell,
+                        "amulet" => CardKind::Amulet,
+                        _ => return Err(invalid("history card kind")),
+                    },
+                    class: (!fact.class.is_empty()).then(|| fact.class.clone()),
+                    traits: fact.traits.clone(),
+                    names: fact.names.clone(),
+                    token: fact.token,
+                    destroyed: fact.destroyed,
+                    destination: fact.destination.as_deref().map(zone).transpose()?,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let damage = self
+            .state
+            .ir_damage_history
+            .iter()
+            .map(|fact| {
+                Ok(DamageHistory {
+                    recipient: fact
+                        .recipient_link
+                        .as_ref()
+                        .and_then(|link| link.observed_public(self, perspective)),
+                    source: fact
+                        .source_link
+                        .as_ref()
+                        .and_then(|link| link.observed_public(self, perspective)),
+                    controller: viewer(seat_name(PlayerId {
+                        seat: fact.controller,
+                    })?)?,
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let stat_gains = self
+            .state
+            .ir_stat_gain_history
+            .iter()
+            .map(|fact| StatGainHistory {
+                current: fact
+                    .link
+                    .as_ref()
+                    .and_then(|link| link.observed_public(self, perspective)),
+                attack: fact.attack,
+                life: fact.life,
+            })
+            .collect();
+        let counters = |name| {
+            Ok([
+                committed_counter(self, PlayerId { seat: 1 }, name)?,
+                committed_counter(self, PlayerId { seat: 2 }, name)?,
+            ])
+        };
+        Ok(TurnHistory {
+            subjects,
+            damage,
+            stat_gains,
+            dice: self.observed_dice_history()?,
+            played: counters("cards_played")?,
+            union_bursts: counters("ub_activated")?,
+        })
+    }
+
     pub(in crate::game::internal) fn internal_record_stat_gains(
         &mut self,
         events: &[EventPayload],
     ) {
-        self.state
-            .ir_stat_gain_history
-            .extend(events.iter().filter_map(|payload| {
+        let recorded = events
+            .iter()
+            .filter_map(|payload| {
                 let EventPayload::StatChange { event } = payload else {
                     return None;
                 };
@@ -75,13 +164,16 @@ impl Game {
                 };
                 let attack = positive(Stat::Attack);
                 let life = positive(Stat::Life);
-                (attack || life).then_some(StatGainHistoryFact {
+                (attack || life).then(|| StatGainHistoryFact {
+                    link: ObjectLink::reference(self, object.id.0, object.generation.0),
                     object: object.id.0,
                     generation: object.generation.0,
                     attack,
                     life,
                 })
-            }));
+            })
+            .collect::<Vec<_>>();
+        self.state.ir_stat_gain_history.extend(recorded);
     }
 }
 
@@ -291,6 +383,7 @@ pub(in crate::game) enum SubjectHistoryEvent {
 /// Only public characteristics needed by the admitted current-turn queries are retained.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct SubjectHistoryFact {
+    pub(in crate::game::internal) link: ObjectLink,
     pub(in crate::game::internal) event: SubjectHistoryEvent,
     pub(in crate::game::internal) destination: Option<String>,
     pub(in crate::game::internal) object: u64,
@@ -328,6 +421,7 @@ impl Game {
             };
             let object = self.internal_current_reference(source)?;
             Some(SubjectHistoryFact {
+                link: ObjectLink::capture(self, source, object.generation.0),
                 event: SubjectHistoryEvent::Play,
                 destination: None,
                 object: object.id.0,
@@ -559,6 +653,8 @@ pub(super) fn life_sum(
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct DamageHistoryFact {
+    recipient_link: Option<ObjectLink>,
+    source_link: Option<ObjectLink>,
     recipient: (u64, u64),
     source: (u64, u64),
     controller: u32,
@@ -577,6 +673,12 @@ impl Game {
         for fact in facts {
             if let RuntimeDamageRecipient::Object { object } = fact.event.recipient {
                 self.state.ir_damage_history.push(DamageHistoryFact {
+                    recipient_link: ObjectLink::reference(self, object.id.0, object.generation.0),
+                    source_link: ObjectLink::reference(
+                        self,
+                        fact.event.source.object.id.0,
+                        fact.event.source.object.generation.0,
+                    ),
                     recipient: (object.id.0, object.generation.0),
                     source: (
                         fact.event.source.object.id.0,

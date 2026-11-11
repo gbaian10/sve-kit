@@ -3,7 +3,7 @@
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::player::Viewer;
-use crate::game::player::observation::{InstalledChange, InstalledEffect};
+use crate::game::player::observation::{EffectSource, InstalledChange, InstalledEffect};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
@@ -287,6 +287,42 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
     reason = "Keyword installation and expiry share generation-bound authority."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_grant_source(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+        origin: &GrantOrigin,
+    ) -> Option<EffectSource> {
+        match origin {
+            GrantOrigin::Installed { .. } => self
+                .state
+                .ir_keywords
+                .get(holder)?
+                .grants
+                .iter()
+                .find(|grant| &grant.origin == origin)?
+                .origin_record
+                .observed(self, perspective),
+            GrantOrigin::Continuous {
+                provider,
+                through: Some(through),
+                ..
+            } => self.observed_grant_source(perspective, &provider.holder, through),
+            GrantOrigin::Continuous {
+                provider,
+                through: None,
+                ..
+            } => super::observation::EffectOrigin::definition(
+                self,
+                &provider.holder,
+                provider.generation,
+                &provider.span,
+                false,
+            )
+            .observed(self, perspective),
+        }
+    }
+
     pub(in crate::game) fn card_traits(&self, holder: &str) -> Result<BTreeSet<String>> {
         // Minimal catalogs can omit printed traits; generation-bound grants still apply.
         let printed = self.face(holder)?.get("traits");

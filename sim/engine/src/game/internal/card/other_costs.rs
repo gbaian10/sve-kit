@@ -1,6 +1,9 @@
+use super::super::observation::EffectOrigin;
 use super::super::{Context, Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
 use crate::game::internal::duration::EffectEnd;
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::public_numbers;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
@@ -13,6 +16,7 @@ use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct InstalledCost {
+    origin: EffectOrigin,
     id: u64,
     controller: PlayerId,
     players: Vec<PlayerId>,
@@ -230,6 +234,46 @@ fn apply(change: &CostChange, base: &mut i64, delta: &mut i64) -> Result<()> {
     reason = "All card payment paths share the installed cost layer."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_player_costs(
+        &self,
+        perspective: Viewer,
+        player: Viewer,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{InstalledChange, InstalledEffect, NumberChange};
+        self.card_runtime
+            .other_costs
+            .iter()
+            .filter(|effect| {
+                effect.players.contains(&player.player())
+                    && (perspective.player() == effect.controller
+                        || effect.origin.observed(self, perspective).is_some())
+            })
+            .map(|effect| {
+                let change = match effect.change {
+                    CostChange::Delta {
+                        amount: Expr::Literal(amount),
+                    } => NumberChange::Add(amount.0),
+                    CostChange::Set {
+                        amount: Expr::Literal(amount),
+                    } => NumberChange::Set(amount.0),
+                    _ => return Err(invalid("unadmitted installed cost")),
+                };
+                let live = !effect.end.source_expired(self);
+                Ok(InstalledEffect {
+                    source: effect.origin.observed(self, perspective),
+                    expires: effect.end.observed()?,
+                    main_live: live,
+                    intervals: vec![],
+                    active: live,
+                    change: InstalledChange::PlayerCost {
+                        change,
+                        limited: effect.limited,
+                    },
+                })
+            })
+            .collect()
+    }
+
     pub(in crate::game::internal) fn internal_install_player_cost(
         &mut self,
         execution: &mut Execution,
@@ -258,6 +302,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("cost identities exhausted"))?;
         self.card_runtime.other_costs.push(InstalledCost {
+            origin: EffectOrigin::capture(self, execution, &instruction.source)?,
             id,
             controller: execution.context.controller,
             players,
