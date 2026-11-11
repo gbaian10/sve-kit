@@ -1,5 +1,11 @@
 //! Closed, read-only player observations without authority identities.
 
+mod costs;
+pub use costs::{
+    CardCostQuote, CostGroup, CostGroupKind, CostLine, CostObservation, CostSummary, PendingCost,
+    PlayCostQuote, PpQuote, QuoteBasis,
+};
+
 mod effects;
 pub use effects::{
     EffectExpiry, EffectInterval, EffectSource, GrantedDefinition, InstalledChange,
@@ -189,6 +195,8 @@ pub struct Observation {
     pub players: [PlayerObservation; 2],
     /// Historical memory independent of current location knowledge.
     pub remembered: Vec<CardMemory>,
+    /// Viewer-authorized estimates and unresolved play costs.
+    pub costs: CostObservation,
 }
 
 pub(in crate::game) const fn seat(viewer: Viewer) -> &'static str {
@@ -270,6 +278,7 @@ impl Game {
                 self.observed_player(perspective, Viewer::P2)?,
             ],
             remembered: self.card_memory(perspective)?,
+            costs: self.observed_costs(perspective)?,
         })
     }
 

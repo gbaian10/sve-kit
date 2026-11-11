@@ -1,4 +1,6 @@
 use super::*;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::QuoteBasis;
 
 fn program(play: &Value) -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
@@ -65,6 +67,16 @@ fn named_count_discounts_use_own_public_cards_and_floor_only_the_total() {
         initial["players"]["P2"]["zones"]["cemetery"] =
             json!([{"id":"opponent","card":"unit-spell"}]);
         let mut game = from_position(&initial, &program);
+        let quoted = cost_observation::preview(&game, Viewer::P1);
+        assert_eq!(quoted.cost.basis, QuoteBasis::CurrentContext);
+        assert_eq!(
+            quoted.cost.total_pp,
+            Some((3_i64 - i64::from(count)).max(0))
+        );
+        assert!(
+            game.observe(Viewer::P2).unwrap().costs.cards.is_empty(),
+            "opponents never receive the private card quote"
+        );
         play(&mut game);
         assert_eq!(
             game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],

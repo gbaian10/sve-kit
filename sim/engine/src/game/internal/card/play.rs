@@ -25,6 +25,7 @@ use crate::ir::{
 };
 
 pub(super) mod ability_cost;
+mod cost_observation;
 mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::slice::from_ref;

@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
 
 fn own_costs(changes: Vec<CostChange>) -> WellFormedCardProgram {
     let source = source("unit-follower");
@@ -45,6 +46,10 @@ fn set_then_independent_deltas_pay_four_and_negative_raw_never_restores_pp() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
     let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "set-cost").unwrap();
     game.load_internal_card("unit-follower", &program).unwrap();
+    assert_eq!(
+        cost_observation::preview(&game, Viewer::P1).cost.total_pp,
+        Some(4)
+    );
     assert!(matches!(
         game.play_internal_card("s", PlayerId { seat: 1 }).unwrap(),
         CardPlay::Entered(_)
@@ -61,6 +66,10 @@ fn set_then_independent_deltas_pay_four_and_negative_raw_never_restores_pp() {
         }]),
     )
     .unwrap();
+    assert_eq!(
+        cost_observation::preview(&free, Viewer::P1).cost.total_pp,
+        Some(0)
+    );
     free.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
     assert_eq!(
         free.projection(View::Referee).unwrap()["P1"]["pp"]["current"],

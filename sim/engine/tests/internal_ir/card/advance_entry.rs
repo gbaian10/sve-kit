@@ -5,6 +5,7 @@
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::observation::{CostLine, PendingCost};
 
 fn entry() -> Value {
     json!([
@@ -235,6 +236,16 @@ fn advance_activation_substitutes_one_ep_and_shares_the_evolution_quota() {
         let play = game
             .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
             .unwrap();
+        let quote = cost_observation::active(&game);
+        assert_eq!(quote.total_pp, None);
+        assert_eq!(quote.pending, [PendingCost::EntryResources]);
+        assert!(
+            quote.groups[0].lines.contains(&CostLine::EntryResources {
+                cards: 0,
+                use_ep: None
+            }),
+            "intrinsic resources and EP substitution remain distinct from PP"
+        );
         resolved(payment(&mut game, play, true));
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(
