@@ -32,6 +32,10 @@ impl AmountPlan {
         })
     }
 
+    pub(super) const fn proven_nonnegative(&self) -> bool {
+        self.lower >= 0
+    }
+
     pub(super) fn nonnegative_constant(&self) -> Option<i64> {
         self.constant.filter(|_| self.lower >= 0)
     }
