@@ -25,6 +25,8 @@ mod next_damage;
 mod played_original_cost;
 #[path = "card/played_traits.rs"]
 mod played_traits;
+#[path = "card/player_main_actions.rs"]
+mod player_main_actions;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
 #[path = "card/public_return_union.rs"]

@@ -5,7 +5,8 @@
 
 use super::*;
 use sve_engine::game::player::{
-    Command, Input, Question, QuestionShape, Submission, SubmissionKind, Viewer,
+    Command, Input, MainActionAnswer, MainIntentKind, Question, QuestionShape, Submission,
+    SubmissionKind, Viewer,
 };
 
 pub(super) fn question(game: &Game, viewer: Viewer) -> Question {
@@ -24,6 +25,22 @@ pub(super) fn answer(game: &mut Game, viewer: Viewer, answer: Answer) -> Submiss
             answer,
         },
     )
+}
+
+pub(super) fn end_command(question: &Question) -> Command {
+    let QuestionShape::ActionWindow(actions) = &question.shape else {
+        panic!("main actions");
+    };
+    let end = actions
+        .intents
+        .iter()
+        .find(|intent| matches!(intent.kind, MainIntentKind::EndPhase))
+        .unwrap();
+    Command::MainAction {
+        token: question.token,
+        intent: end.id.clone(),
+        answer: MainActionAnswer::None,
+    }
 }
 
 #[test]
@@ -90,7 +107,7 @@ fn player_pipeline_reads_and_rejections_preserve_the_question_and_rng() {
     assert_eq!(result.kind, SubmissionKind::Applied);
     assert!(matches!(
         question(&game, Viewer::P1).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["hand"],

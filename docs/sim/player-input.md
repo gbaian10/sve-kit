@@ -42,14 +42,14 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 [#1973](https://github.com/gbaian10/sve-kit/issues/1973)及
 [#1977](https://github.com/gbaian10/sve-kit/issues/1977)。
 
-`QuestionShape::ActionWindow` 標示主要階段的權威行動邊界，不列一般合法行動，
-也不接受一般決定的答案。其他未受支援的程序及仍有舊原型續體的權威狀態是
+`QuestionShape::ActionWindow` 提供主要階段的[合法行動意圖](main-actions.md)與參數範圍，
+以 `Command::MainAction` 選定；不接受一般決定的答案。其他未受支援的程序及仍有舊原型續體的權威狀態是
 `EngineFault`，不會冒充行動視窗。一般主要階段行動介面仍有限，不保證可從開局
 打完整局；完整行動介面的需求見 [#1975](https://github.com/gbaian10/sve-kit/issues/1975)。
 
 ## 回合收尾與終局
 
-`Command::EndPhase` 需要當席主要階段的 token，仍重驗既有攻擊義務、權威是否閒置與
+主要階段的 `EndPhase` 意圖需要當席 token，仍重驗既有攻擊義務、權威是否閒置與
 資源完整性，再啟動結束階段。階段誘發先完成，才出回合末守護與 Quick 題。
 `QuestionShape::Closing` 與 `Command::Closing` 對應兩種規則程序：
 

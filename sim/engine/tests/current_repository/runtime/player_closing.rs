@@ -6,8 +6,8 @@
 use super::*;
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
-    ClosingAnswer, ClosingQuestion, Command, Input, ObjectHandle, Question, QuestionPurpose,
-    QuestionShape, SubmissionKind, Viewer,
+    ClosingAnswer, ClosingQuestion, Command, Input, MainActionAnswer, MainIntentKind, ObjectHandle,
+    Question, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
 };
 
 fn assert_event_history_available(game: &Game) {
@@ -59,10 +59,26 @@ fn close(game: &mut Game, actor: Viewer, answer: ClosingAnswer) {
     assert_event_history_available(game);
 }
 
+fn end_command(question: &Question) -> Command {
+    let QuestionShape::ActionWindow(actions) = &question.shape else {
+        panic!("main actions");
+    };
+    let end = actions
+        .intents
+        .iter()
+        .find(|intent| matches!(intent.kind, MainIntentKind::EndPhase))
+        .unwrap();
+    Command::MainAction {
+        token: question.token,
+        intent: end.id.clone(),
+        answer: MainActionAnswer::None,
+    }
+}
+
 fn end(game: &mut Game, actor: Viewer) {
-    let token = question(game, actor).token;
+    let command = end_command(&question(game, actor));
     assert_eq!(
-        game.submit_player(actor, Command::EndPhase { token }).kind,
+        game.submit_player(actor, command).kind,
         SubmissionKind::Applied,
         "The active seat must be allowed to begin the end phase"
     );
@@ -165,13 +181,7 @@ fn player_closing_guard_quick_and_hand_limit_use_distinct_questions_and_safe_han
         assert_eq!(question(&game, Viewer::P1), guard);
     }
     assert_eq!(
-        game.submit_player(
-            Viewer::P1,
-            Command::EndPhase {
-                token: original.token
-            }
-        )
-        .kind,
+        game.submit_player(Viewer::P1, end_command(&original)).kind,
         SubmissionKind::Rejected
     );
     close(
@@ -214,7 +224,7 @@ fn player_closing_guard_quick_and_hand_limit_use_distinct_questions_and_safe_han
     );
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let referee = game.projection(View::Referee).unwrap();
     assert_eq!(referee["P1"]["hand"].as_array().unwrap().len(), 7);
@@ -290,7 +300,7 @@ fn player_closing_machinus_recovery_finishes_before_repeating_the_hand_limit_rul
     );
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["hand"]
@@ -358,7 +368,7 @@ fn player_closing_end_triggers_finish_before_quick_and_start_triggers_follow_the
     answer(&mut game, Viewer::P2, Answer::Targets(vec![drawn.handle]));
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let referee = game.projection(View::Referee).unwrap();
     assert_eq!(referee["P2"]["hand"], json!(["keep"]));
