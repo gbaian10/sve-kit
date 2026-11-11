@@ -536,6 +536,15 @@ Resource(Add)。EP 不套用 PP 的上限，PP、最大 PP 與 SEP 保持原值�
 沿既有公開「EP変化」事件保留來源；不新增一般資源事件 consumer、result 或 after。
 EP 付款及進化程序仍由原付款邊界處理，不因本文增加而重設進化次數。
 
+### 內部 IR 的資源數量
+
+`Resource(Add)` 的控制者 PP／最大 PP／EP 數量使用共用數值計畫檢查非負下界，
+並在各次指示開始求值一次；零請求保留完成收據，三種資源都不產生增加事件。
+組合算式仍以 checked arithmetic 求值，溢位不能被 PP 上限掩蓋；EP 表示範圍溢位
+回復整份執行。公開數量與本次已驗證的成功牌庫送墓回條沿原讀值權限，不能藉
+資源 consumer 選取隱藏物件或偽造 producer。作者 `pp`／`pp_max`／`ep` 入口仍限
+上節的正整數常值；這個 IR 數量邊界不擴充作者入口、付款或 SEP。
+
 ## 觀察與測試種子
 
 `internal_decision(view)` 只向 actor 或 Referee 提供目前 token／actor／輸入形狀，
@@ -842,11 +851,23 @@ Look 選擇的作者入口與組合如下；這些是句段能力，不代表整
 | 既有兩／三組 Look `choose` | 每組至多一張、總量至多組數、可零選、同一物件不可重用；組內非空字面 `name` 可與種類、特徵、職業及單張原費篩選相交 | 多群組加名稱互異、空群組／空名字、只有職業或原費的群組、以 `same_as` 等物件作群組名字 |
 | 群組共用的 `from` | `not_same_name_as_this` 沿封閉的 SourceInformation 名稱快照，套用至每一組；來源離場後仍讀該快照 | 逐組作者欄位 `not_same_name_as_this`、live SourceHolder 名稱、任意其他綁定的名字；同 Look 字面名字除外仍不適用分組 |
 | 私有來源 | 同一 controller 的已授權 Look；現有 viewer、世代、位置及 owner 檢查持續生效 | 任意 Deck Zone、他人 Look、未知綁定、公開或外席的 Look 選擇 |
+| 同一 Look 的多次 `choose` | 前一次移走的牌在候選條件求值前移除；每次仍可獨立拒選，空或不足候選沿原 resolution 基數處理 | 已移走或失去位置證據的牌重新成為候選；藉候選失效跳過完整條件驗證 |
+| Order／觀察移動的 remainder | `except` 接單一觀察 atom 或非空 `any_of` atom 聯集；atom 可再帶 except，每一層沿用排除位置 | 直接巢狀 union、空 union、未知 binding、任意區域來源；Bottom 洗回不接受 union |
+| 已選 Look 牌仍在 deck 的 `reveal` | 實際選中 Bound，重新驗私有 Look 來源及目前自己牌庫的世代、位置證據；重用 scoped reveal／expiry | 未選候選、任意 deck Bound、混合手牌與牌庫、失效觀察；不擴大整 Look／整手牌以外的其他揭露形狀 |
 
 名稱互異沿用完整有效名稱集合，兩張牌只要共享原名或別名就不能同選；不同印刷不會成為不同名稱。
 候選不足、空 Look 與場上空位沿既有 resolution／field entry 的容量計算，不另設 Look 裁切規則。
 沒有名稱互異的原有 `cost_sum_le` 仍可使用。群組匹配與候選只出現在操作者的私有題目，
 移手牌後再揭露同一選中綁定只公開已取牌，不公開未選牌或群組命中關係。
+
+例如 `A except {any_of: [B, C]}` 表示 `A \ (B ∪ C)`，不是 `A \ (B \ C)`。
+排除項使用成功移動或 Order 的 Before；只有最後保留者要求目前位置仍有效，不能因為聯集或空結果
+省略任一葉的來源證明。已選牌放頂／底仍是單 Placement Order，單張照常問答、空集合自動完成。
+作者的這條 Order 使用單獨 Bound；既有 raw IR 中 Bound 位於 Union／Difference 的公開路徑保持原准入。
+
+BP01-072／BP13-006 僅驗兩次可不做的 Spell 選取與餘牌，BP04-041 驗不足四張時的入手／墓場／頂底，
+CP03-116 驗扣除入手與已排序結果，BP14-066 僅驗選中仍在 deck 成員的揭露及後續頂底／撤權。
+這些句段不涵蓋各卡其他能力、付款、計數器或整卡准入。
 
 BP08-071 對應不分組 Look 至多四個不同名的選取句；BP17-042 對應機械與字面名字兩組。
 BP18-104 的同名排除原文只修飾透京組；作者共用 `from` 會套所有組，但第二組字面名字與來源不同，

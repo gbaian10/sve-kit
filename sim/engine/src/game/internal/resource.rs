@@ -5,9 +5,12 @@
     reason = "The PP object fields are validated before mutation."
 )]
 
-use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
+use super::{
+    Execution, Game, InstructionOutcome, Result, invalid, number_plan::AmountPlan, seat_name,
+    unsupported,
+};
 use crate::EngineFailure;
-use crate::ir::{Action, Expr, Instruction, Int, PlayerId, PlayerRef, Resource, ResourceOperation};
+use crate::ir::{Action, Instruction, Int, PlayerId, PlayerRef, Resource, ResourceOperation};
 use serde_json::json;
 
 /// Authority-only result of one body resource instruction.
@@ -17,7 +20,7 @@ pub struct ResourceOutcome {
     pub player: PlayerId,
     /// Explicitly requested resource.
     pub resource: Resource,
-    /// Requested positive increase, distinct from the actual delta.
+    /// Requested nonnegative increase, distinct from the actual delta.
     pub requested: Int,
     /// Value before the increase.
     pub before: Int,
@@ -28,15 +31,23 @@ pub struct ResourceOutcome {
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
-    if let Action::Resource { .. } = action
-        && !matches!(action, Action::Resource {
-            player: PlayerRef::Controller {},
-            resource: Resource::PpCurrent | Resource::PpMaximum | Resource::Ep,
-            operation: ResourceOperation::Add,
-            amount: Expr::Literal(Int(amount)),
-        } if *amount > 0)
-    {
-        return Err(unsupported("fixed positive own resource increase"));
+    let Action::Resource {
+        player: PlayerRef::Controller {},
+        resource: Resource::PpCurrent | Resource::PpMaximum | Resource::Ep,
+        operation: ResourceOperation::Add,
+        amount,
+    } = action
+    else {
+        return if matches!(action, Action::Resource { .. }) {
+            Err(unsupported("nonnegative own resource increase"))
+        } else {
+            Ok(())
+        };
+    };
+    if !AmountPlan::compile(amount)?.proven_nonnegative() {
+        return Err(unsupported(
+            "resource increase cannot be proved nonnegative",
+        ));
     }
     Ok(())
 }
@@ -53,13 +64,18 @@ impl Game {
     ) -> Result<()> {
         check_action(&instruction.action)?;
         let Action::Resource {
-            resource,
-            amount: Expr::Literal(requested),
-            ..
-        } = instruction.action
+            resource, amount, ..
+        } = &instruction.action
         else {
             return Err(unsupported("resource recovery amount"));
         };
+        let resource = *resource;
+        let requested = execution.integer(self, amount)?;
+        if requested.0 < 0 {
+            return Err(EngineFailure::Invariant(
+                "proved resource increase became negative".into(),
+            ));
+        }
         if resource == Resource::Ep {
             return self.internal_ep_increase(execution, instruction, requested);
         }
@@ -126,13 +142,15 @@ impl Game {
             EngineFailure::Invariant("EP increase exceeds the integer representation".into())
         })?;
         self.player_mut(seat)?.ep = after;
-        let group = self.group();
-        self.emit(
-            json!({"kind":"EP変化","player":seat,"source":execution.frame().source,
-                "delta":requested.0,"before":before,"after":after}),
-            &execution.frame().cause,
-            group,
-        );
+        if requested.0 > 0 {
+            let group = self.group();
+            self.emit(
+                json!({"kind":"EP変化","player":seat,"source":execution.frame().source,
+                    "delta":requested.0,"before":before,"after":after}),
+                &execution.frame().cause,
+                group,
+            );
+        }
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Resource(ResourceOutcome {

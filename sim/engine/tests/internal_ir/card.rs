@@ -740,6 +740,8 @@ mod play_restrictions;
 mod look_cost;
 #[path = "card/look_names.rs"]
 mod look_names;
+#[path = "card/observed_spine.rs"]
+mod observed_spine;
 
 #[path = "card/query_conditions.rs"]
 mod query_conditions;

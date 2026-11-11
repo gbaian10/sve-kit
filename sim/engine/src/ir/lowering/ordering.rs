@@ -329,7 +329,7 @@ impl BodyContext<'_> {
         if let Some(except) = &value.except {
             Ok(Selector::Difference {
                 input: Box::new(input),
-                except: Box::new(self.observed(
+                except: Box::new(self.observed_except(
                     except,
                     if matches!(
                         usage,
@@ -346,6 +346,28 @@ impl BodyContext<'_> {
             })
         } else {
             Ok(input)
+        }
+    }
+
+    fn observed_except(
+        &self,
+        value: &ast::ObservedExcept,
+        usage: ObservationUse,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        match value {
+            ast::ObservedExcept::Atom(atom) => self.observed(atom, usage, path),
+            ast::ObservedExcept::Union { any_of } => {
+                if any_of.is_empty() {
+                    return Err(unsupported(path));
+                }
+                Ok(Selector::Union {
+                    sets: any_of
+                        .iter()
+                        .map(|atom| self.observed(atom, usage, path))
+                        .collect::<Result<Vec<_>, _>>()?,
+                })
+            }
         }
     }
 
