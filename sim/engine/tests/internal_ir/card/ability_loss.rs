@@ -114,10 +114,50 @@ fn an_ability_pending_before_loss_keeps_its_committed_source() {
 }
 
 #[test]
+fn ability_loss_until_turn_restores_live_abilities_after_the_end_phase() {
+    let mut timed = input();
+    let abilities = &mut timed["cards"]["unit-follower"]["abilities"];
+    abilities[4]["activate"]["do"] = abilities[1]["activate"]["do"].clone();
+    abilities[1]["activate"]["do"][0]["apply"]["until"] = json!("turn");
+    for overlapping_loss in [false, true] {
+        let (mut game, program) = boxed::board_with(&timed, false);
+        boxed::activate(&mut game, &program, 3);
+        assert_eq!(boxed::keywords(&game), json!(["guard", "storm"]));
+        boxed::activate(&mut game, &program, 2);
+        assert_eq!(boxed::keywords(&game), json!([]));
+        if overlapping_loss {
+            boxed::activate(&mut game, &program, 5);
+        }
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        assert_eq!(
+            boxed::keywords(&game),
+            json!([]),
+            "the end phase begins before the turn duration expires"
+        );
+        quick::pass(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["turn"]["active"],
+            "P2"
+        );
+        assert_eq!(
+            boxed::keywords(&game),
+            if overlapping_loss {
+                json!([])
+            } else {
+                json!(["guard", "storm"])
+            },
+            "only the ending turn's effect expires"
+        );
+    }
+}
+
+#[test]
 fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
     for body in [
         json!({"apply":{"on":"this","effect":{"lose_abilities":{}}}}),
-        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"turn_end"}}),
+        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"next_opp_turn"}}),
+        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"game"}}),
         json!({"apply":{"on":{"who":"opp","zone":"field","kind":"follower"},"effect":{"lose_abilities":{}}}}),
         json!({"apply":{"on":"enemy","effect":{"lose_abilities":{"on":"enemy"}}}}),
     ] {
@@ -149,7 +189,7 @@ fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
                     }),
                 }
             }
-            1 => duration.end = DurationEnd::CurrentTurnEnd {},
+            1 => duration.end = DurationEnd::EndResolution {},
             2 => *subjects = zone(ZoneKind::Field, 99),
             _ => panic!("unknown removal fixture variant"),
         }

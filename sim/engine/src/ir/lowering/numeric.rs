@@ -509,13 +509,15 @@ impl BodyContext<'_> {
                 let ast::Objects::Bound(name) = &installation.on else {
                     return Err(unsupported(path));
                 };
-                if installation.until.is_some() || !self.follower_targets.contains(name) {
+                if !matches!(installation.until, None | Some(ast::Until::Turn))
+                    || !self.follower_targets.contains(name)
+                {
                     return Err(unsupported(path));
                 }
                 return Ok(Action::RemoveAbility {
                     subjects: self.objects(&installation.on, path)?,
                     scope: RemoveScope::AllAtTime {},
-                    duration: duration(None, path)?,
+                    duration: duration(installation.until.as_ref(), path)?,
                     timestamp: TimestampBasis::ProperPlay {
                         execution: ExecutionRef::Current {},
                     },
