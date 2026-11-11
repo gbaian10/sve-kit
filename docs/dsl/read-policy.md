@@ -189,13 +189,13 @@ Transform 也保留自己的准入，按各控制者實際成功回條算出張�
 ## 回條成員與屬性
 
 `game/internal/receipt_members.rs` 集中 producer adapter 與回條成員讀取。
-`MemberView` 只帶原成員參照與該來源已保存或可合法投影的 kind、class、trait、names；
+`MemberView` 只帶原成員參照，以及該來源已保存或可合法投影的部分特徵或原印刷身分；
 它不建立 receipt 未保存的完整 After state。靜態的 producer／scope 證明仍由既有准入計畫
-與 `receipt_counts::DeckReads` 檢查，讀取模組不另造可跨分支使用的白名單。
+與 `receipt_counts::ReceiptReads` 檢查，讀取模組不另造可跨分支使用的白名單。
 
 | 入口 | 保留的來源與資料政策 |
 | --- | --- |
-| ReceiptAny／ReceiptCount | Discard 與 latest Fusion 讀成功付款或棄牌保存的特徵；deck Move 另驗實際離開牌庫的 fact，公開 Look 必須已揭露 |
+| ReceiptAny／ReceiptCount | Discard 與 latest Fusion 讀成功付款或棄牌保存的特徵；deck Move 另驗實際離開牌庫的 fact，公開 Look 必須已揭露；field→cemetery 的 Before 條件只讀保存印刷身分的原費 |
 | distinct_original_costs | 只讀成功 deck→cemetery 的 Before，以不可變 base printing 讀原費；不以有效費用替換 |
 | paid_material_acts | 已完成的 Cards 付款數量須與材料成員數一致；不把獨立的來源 Act 算入 |
 | paid_material_number | 單張必付場上從者在付款前保存的有效費用／攻擊；只讀 Before，保留 Int 與資訊缺失，不重新讀離場後數值或以原費代替 |
@@ -217,6 +217,29 @@ Cost／Attack。材料必須是必付的一張己方場上從者，送往擁有�
 數量、付款來源與已付支配關係由 WF 驗證，runtime 再檢查 Payment 數量與保存的
 Characteristics。零費是有效值，缺失資訊則失敗；有號攻擊值仍保留。
 After、多張、可選未付分支、非付款的移動與其他數值屬性不取得這個投影。
+
+### 場上送墓的原費條件
+
+己方場上 current selector（可扣除既有對象）整批 Put 到擁有者墓場時，
+可記具名結果，並以成功 Before 成員的 `orig_cost_eq`／`orig_cost_ge` 判定是否存在。
+`ir/receipt_reads.rs` 的 producer 形狀同時供 lowering 與 runtime 准入使用；
+其他目的地、對手來源、After、foreign producer 與 iteration 不取得這個授權。
+既有公開場上 selector 的 `orig_cost_ge` 則沿共用 ObjectFilter 讀原費。
+
+movement fact 保留離場前的 base printing 身分；field adapter 只從這個不可變身分
+讀原費，不查付款後有效費用，也不從目前物件重建完整 Before。
+它沒有保存 kind／trait／class／names，因此這些 field receipt 條件仍拒絕；
+它們可以用於移動的公開 selector，不能假裝也是回條保存的特徵。
+
+成功仍須符合原 Field 的 Put fact、相同物件的新世代與實際墓場目的地。
+已在墓場的卡、空結果或 Stack 替代後仍留場的成員不算成功；
+從者 token 確實送墓後被抹除，仍可讀保存的印刷原費。
+此入口不開放新的 RedirectMove 替代鏈或 field receipt 算術聚合。
+
+BP17-040 所需的「己方原費至少 6 的機械從者整批送墓、具名成功結果、
+原費等於 6／7 的 Before 條件」屬於這個組合。這只說明 reader 契約；
+原費降費頭、觸手 token 的疾走與 Lastword、整卡其餘本文等閉包仍須各自驗證，
+不能用這個片段宣稱整卡已准入。
 
 ## 觀察集合的 consumer 邊界
 
