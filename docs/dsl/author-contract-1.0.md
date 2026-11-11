@@ -86,6 +86,9 @@ D0 核對所有能力／ignored 座標與獨立行清單、面與 owner、完整
 
 IR 所需語義能力仍由節點與參數形狀推導，runtime 必須實際支援；light 或 shared 標記不授予缺失的付款、事件、取代、token 或私有資訊機制。actor、合法回答與玩家／AI 觀察隔離保持不變。
 
+程式公開版本與對局權威恢復的保存責任不同；typed 入口對外定版的條件及恢復驗收見
+[版本與權威恢復契約](../sim/authority-recovery.md)。目前的內部 IR／計畫型別不構成公開 wire 或 save 格式。
+
 ## 8. 驗證時點與拒絕診斷
 
 write 先驗完整候選再寫入；check 與建置只讀作者資料，不改 reviewed 或重算證據檔。Rust 選用驗 lowering，建立對局時再驗實際引擎能力。測試只跑相關範圍，完整回歸交 CI。
