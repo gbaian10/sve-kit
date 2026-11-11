@@ -296,3 +296,76 @@ fn reject_old_token(game: &mut Game, seat: u32, old_token: DecisionToken) {
         "the second discard increments history independently"
     );
 }
+
+#[test]
+fn player_question_effect_discard_exposes_only_the_actor_hand() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{
+        Command, DecisionShape, DiscardKind, Input, QuestionShape, SubmissionKind, Viewer,
+    };
+    let program = lowerer()
+        .lower(&tree(&json!({"who":"self","n":1})))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"private-discard","card":"unit-spell"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "player-discard",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.activate_internal_card(
+        "s",
+        program.card().abilities[0].node.id,
+        PlayerId { seat: 1 },
+    )
+    .unwrap();
+    game.advance_player_input();
+    let discard = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Discard {
+        kind: DiscardKind::Effect,
+        cards,
+    }) = &discard.shape
+    else {
+        panic!("effect discard")
+    };
+    assert_eq!(cards.cardinality.minimum, Nat(1));
+    assert_eq!(cards.members[0].card.as_deref(), Some("unit-spell"));
+    assert!(!format!("{discard:?}").contains("private-discard"));
+    assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+    let before = exact_authority(&game);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P2,
+            Command::Answer {
+                token: discard.token,
+                answer: Answer::Targets(vec![cards.members[0].handle])
+            }
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Targets(vec![cards.members[0].handle])
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+        json!(["private-discard"])
+    );
+}

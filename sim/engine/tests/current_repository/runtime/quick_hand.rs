@@ -1,3 +1,4 @@
+use sve_engine::game::player::{DecisionShape, DiscardKind};
 use super::*;
 use sve_engine::game::internal::DecisionView;
 
@@ -251,15 +252,15 @@ fn player_pipeline_printed_quick_pays_targets_and_private_material_before_its_bo
         };
         assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
         let payload = match (&question.shape, stage) {
-            (QuestionShape::Decision(InputDomain::Quick { options, .. }), 0) => {
+            (QuestionShape::Decision(DecisionShape::Quick { options, .. }), 0) => {
                 assert_eq!(options.len(), 1);
                 Answer::Quick(Some(options[0].handle))
             }
-            (QuestionShape::Decision(InputDomain::Targets(domain)), 1) => {
+            (QuestionShape::Decision(DecisionShape::Targets(domain)), 1) => {
                 assert_eq!(domain.members.len(), 1);
                 Answer::Targets(vec![domain.members[0].handle])
             }
-            (QuestionShape::Decision(InputDomain::CostMaterials(domain)), 2) => {
+            (QuestionShape::Decision(DecisionShape::Discard { kind: DiscardKind::Cost, cards: domain }), 2) => {
                 assert_eq!(domain.members.len(), 1);
                 let before = game.projection(View::Referee).unwrap();
                 assert_eq!(before["P1"]["pp"]["current"], 2_u8);
@@ -281,5 +282,5 @@ fn player_pipeline_printed_quick_pays_targets_and_private_material_before_its_bo
     let Input::Question(next) = game.input(Viewer::P1) else {
         panic!("explicit next Quick window");
     };
-    assert!(matches!(next.shape, QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty()));
+    assert!(matches!(next.shape, QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.is_empty()));
 }

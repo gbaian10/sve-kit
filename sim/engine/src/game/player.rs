@@ -7,12 +7,17 @@ pub mod events;
 pub mod observation;
 
 mod closing;
+mod decision;
 mod evolution;
 mod main_actions;
 mod opening;
 mod pipeline;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
+pub use decision::{
+    CardOption, DecisionShape, DiscardKind, MovementCapacityQuestion, PartitionQuestion,
+    SearchQuestion, TokenCapacityQuestion,
+};
 pub use evolution::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
 };
@@ -142,7 +147,7 @@ pub enum QuestionShape {
     /// A specific turn-closing rules procedure, distinct from Ward entry.
     Closing(ClosingQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
-    Decision(InputDomain),
+    Decision(DecisionShape),
     /// Main-phase intents, followed by serial declaration parameters.
     ActionWindow(MainActions),
 }

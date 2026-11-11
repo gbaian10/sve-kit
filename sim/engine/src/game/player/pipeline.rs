@@ -1,8 +1,8 @@
 //! Player submissions reuse authority validation and its original rollback boundaries.
 
 use super::{
-    Command, Input, InputDomain, Question, QuestionPurpose, QuestionShape, QuestionToken,
-    Submission, SubmissionKind, Viewer, Waiting,
+    Command, Input, Question, QuestionPurpose, QuestionShape, QuestionToken, Submission,
+    SubmissionKind, Viewer, Waiting,
 };
 use crate::game::{Game, internal};
 use crate::ir::PlayerId;
@@ -24,38 +24,6 @@ const fn actor(seat: PlayerId) -> Option<Viewer> {
     }
 }
 
-fn player_domain(mut domain: InputDomain) -> InputDomain {
-    match &mut domain {
-        InputDomain::Order(cards)
-        | InputDomain::DriveTrigger { targets: cards, .. }
-        | InputDomain::Search(internal::SearchDomain { cards, .. })
-        | InputDomain::SearchPartition(internal::SearchPartitionDomain { cards, .. }) => {
-            // Authority capacity domains may contain physical IDs; A06 will link viewer handles.
-            for card in cards {
-                card.object = None;
-            }
-        }
-        InputDomain::DiceReroll { .. }
-        | InputDomain::Abilities(_)
-        | InputDomain::ResourceEntryPayment { .. }
-        | InputDomain::WardEntry { .. }
-        | InputDomain::Quick { .. }
-        | InputDomain::OptionalCost
-        | InputDomain::CostMaterials(_)
-        | InputDomain::BeforeDraw
-        | InputDomain::Pending(_)
-        | InputDomain::TriggerQuota(_)
-        | InputDomain::Integer(_)
-        | InputDomain::DamageReplacements(_)
-        | InputDomain::Distribution(_)
-        | InputDomain::SearchReplacement
-        | InputDomain::Targets(_)
-        | InputDomain::TokenCapacity { .. }
-        | InputDomain::Modes { .. } => {}
-    }
-    domain
-}
-
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "The player boundary shares the existing game authority."
@@ -70,7 +38,10 @@ impl Game {
         }
         let before = self.clone();
         let published = self.published_knowledge();
-        if let Err(error) = self.advance_player_rules() {
+        if let Err(error) = self
+            .advance_player_rules()
+            .and_then(|()| self.validate_player_decision_projection())
+        {
             self.player_fault = Some(match self.restore_player_state(before, &published) {
                 Ok(()) => error,
                 Err(restore) => restore,
@@ -110,6 +81,19 @@ impl Game {
             let Some(actor) = actor(question.actor) else {
                 return Input::EngineFault;
             };
+            if actor != viewer {
+                let dice = if let internal::InputDomain::DiceReroll { value, remaining } =
+                    question.domain
+                {
+                    Some((value, remaining))
+                } else {
+                    None
+                };
+                return Input::Waiting(Waiting { actor, dice });
+            }
+            let Ok(shape) = self.player_decision_shape() else {
+                return Input::EngineFault;
+            };
             Question {
                 token: QuestionToken {
                     epoch: self.state.ir_epoch,
@@ -118,7 +102,7 @@ impl Game {
                 },
                 actor,
                 purpose,
-                shape: QuestionShape::Decision(player_domain(question.domain)),
+                shape: QuestionShape::Decision(shape),
             }
         } else {
             if self.typed.is_some() || self.internal_card_stage().is_some() {
@@ -157,19 +141,9 @@ impl Game {
         if question.actor == viewer {
             return Input::Question(Box::new(question));
         }
-        let dice = match &question.shape {
-            QuestionShape::Decision(InputDomain::DiceReroll { value, remaining }) => {
-                Some((*value, *remaining))
-            }
-            QuestionShape::Decision(_)
-            | QuestionShape::Opening(_)
-            | QuestionShape::Closing(_)
-            | QuestionShape::ActionWindow(_)
-            | QuestionShape::Evolution(_) => None,
-        };
         Input::Waiting(Waiting {
             actor: question.actor,
-            dice,
+            dice: None,
         })
     }
 

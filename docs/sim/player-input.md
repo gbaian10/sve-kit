@@ -32,12 +32,12 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 `Input`：當席待答、等待他席、正常終局或 `EngineFault`。非應答席不取得 token 或
 私有候選；骰子重擲仍提供公開骰值與剩餘次數的等待摘要。
 
-`Question` 的用途與答案形狀分開。現有 typed 決定沿用 `InputDomain` 與 `Answer` 的
+`Question` 的用途與答案形狀分開。現有 typed 決定以玩家專用的 [`DecisionShape`](player-questions.md) 描述操作，沿用 `Answer` 的
 當題候選代號，`QuestionToken` 只代表輸入 occurrence，不暴露 execution 或 instruction
 座標。題目不包含 authority receipts、facts 或 continuation。
 玩家輸入序號在已驗答後保留單調遞增，即使整次打出回滾重現了先前的 pending 題，
 也不會恢復舊玩家 token。
-權威容量候選原有的實體物件字串在玩家邊界省略；當題候選仍以不同選項代號回答，
+玩家卡片清單的 `CardOption` 型別沒有實體物件字串欄位；當題候選仍以不同選項代號回答，
 不含盤面物件代號。既有權威題目不變。候選與觀察的連結需求見
 [#1973](https://github.com/gbaian10/sve-kit/issues/1973)及
 [#1977](https://github.com/gbaian10/sve-kit/issues/1977)。
@@ -54,7 +54,7 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 `QuestionShape::Closing` 與 `Command::Closing` 對應兩種規則程序：
 
 - `GuardAct`：以當席代號選擇任意子集的未橫置守護從者，也可不選。這是回合末規則
-  選擇；入場 Ward 仍使用不同的 `InputDomain::WardEntry` 與其原答案，兩者不互通。
+  選擇；入場 Ward 仍使用不同的 `DecisionShape::WardEntry` 與其原答案，兩者不互通。
 - `Discard`：題目提供當席手牌與超出上限的確切張數，答案必須是符合數量的不重複
   當前代號。棄牌觸發的能力先完成，再重新檢查手牌上限；效果回收手牌造成再次超額
   時，會再出一題，不會提前換回合或重放已完成的能力。
