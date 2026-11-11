@@ -1,71 +1,85 @@
-# 規則引擎現況與已知限制
+# 規則引擎的執行路徑與邊界
 
-`sim/engine`（crate `sve-engine`）目前是**原型**，不是正式引擎。
-這份文件只記錄長期成立的邊界與契約；**進度、待辦與尚未重新確認的限制**由
-[#478「模擬器引擎：範圍與進度」](https://github.com/gbaian10/sve-kit/issues/478) 追蹤。
+`sim/engine`（crate `sve-engine`）是開發中的引擎原型。
+本頁記錄執行路徑與持續成立的邊界；進度、排程及待確認項目由
+[#1971 引擎重構](https://github.com/gbaian10/sve-kit/issues/1971) 與
+[#478 引擎範圍與進度](https://github.com/gbaian10/sve-kit/issues/478) 追蹤。
+文件未列的功能不能推定已支援；規格要求也不能當成已通過測試的保證。
 
 - 規則斷言與證據責任：[DSL 驗收規格](../dsl/validation.md)
-- 載入期會拒絕哪些 YAML：[載入期拒絕的 YAML](rejected-yaml.md)
-- 效果 DSL 的正式規格：[docs/dsl/](../dsl/README.md)
+- 效果 DSL 正式規格：[docs/dsl/](../dsl/README.md)
+- 玩家資訊與執行要求：[引擎執行與資訊邊界](../dsl/engine-boundaries.md)
 
-文件裡沒有寫的功能，不代表已經支援；#478 標「待確認」的項目沒有逐項重新驗證，
-補上測試或核對程式之前，不要當成已修好，也不要當成仍然成立。
+## 兩條執行路徑
 
-## 對 DSL 的支援範圍
+兩條路徑共用 `Game`／權威狀態及部分規則基本動作，不能按新舊檔案目錄整批刪除。
+卡片事實均來自有版號快照；兩條路徑的差別是效果輸入與執行方式，不是真卡與測試卡的差別。
 
-- 引擎讀的是 D 階段的原型文法 `astra/1`：`authored/rules/effects/*.yaml` 與 `dsl/effects.schema.json` 使用 `format: 1, kind: effect_set` 文件封套選定這個文法；keywords 使用 `kind: keyword_registry`、format 1。
-  `astra/1` 的語法以該 Schema 為準，語義以引擎程式與測試為準
-- [DSL 1.0](../dsl/README.md)（入口 `format: 1, kind: author_effect_set`）目前只有規格：還沒有對應的 JSON Schema、載入器或 IR，
-  也還沒有卡片用它DSL。引擎改讀 DSL 1.0 之前，這裡的限制都是針對 `astra/1`；兩者的落差見 #478
-- Schema 通過不代表卡文正確，也不代表引擎能正確執行；載入期檢查只擋下已知不支援的構造（見下一節）
+| 路徑 | 作者資料與載入 | 執行與使用邊界 |
+| --- | --- | --- |
+| typed | `authored/rules/author-effects/` 與 `effect-bodies/`；Schema 由 `dsl/author-nodes.schema.json` 等定義；Python current reader 展開完整作者選擇，Rust `ExpandedLowerer` 產生受驗 IR | `Catalog::from_current_selection`／`Game::from_selected_effects` 建立已准入整卡的局面，`game/internal/` 執行 typed IR；有 Rust authority API，宿主接通狀態以 #1971 為準 |
+| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection`、JSON 效果解譯器、AI 與回放原型；共同規則題本仍經原型 adapter 執行，不能充當 typed 路徑的完整驗收 |
 
-## 載入期檢查
+DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering、IR 良構與 runtime 准入。
+作者儲存格式與展開入口依[承載契約](../dsl/author-contract-1.0.md)及[作者工具](../dsl/authoring-tools.md)，
+不能再以舊原型的單一封套概括；語法通過、良構及實際可執行是不同保證。
 
-`Catalog` 載入 `authored/` 時，除了 JSON Schema，還用 `sim/engine/src/catalog/semantics.rs` 檢查每張卡。
-檢查的對象是**已列舉且實際比對**的種類與值：各位置可執行的 opcode 清單、引擎會發出的誘發事件、
-已知的讀值路徑與選擇器欄位、有到期處理的期間，以及 [rejected-yaml.md〈檢查項目〉](rejected-yaml.md) 列出的參數。
-不在清單內的會帶卡號與行號拒絕，被拒絕的卡永不執行。
+## 已定的開發邊界
 
-通過載入只是必要條件，不代表能正確執行：仍須靠執行測試與逐卡語義審查。
-尚待確認的靜默忽略、捕捉及作用域限制由 #478 追蹤。
+依 [#1971 的維護者決定](https://github.com/gbaian10/sve-kit/issues/1971)，
+舊 façade、JSON 效果解譯器、舊玩家封包、AI 與回放原型凍結不修，對局入口建在 typed 路徑，
+在宿主遷移及替代驗收完成後退場。typed 仍呼叫的抽牌、移區、攻擊、回合、終局等共用規則基本動作不在凍結範圍。
+
+重構期間不新增窄積木或准入卡片以繞過共同地基；同一合法範圍先等價合併，
+組合放寬另列驗收。來源、raw IR、付款、物件世代與揭露權限的檢查仍保留。
+讀值與持續效果的共同路徑不得抹掉規則上刻意的差異。
+A、B、C 組的交付清單與 D 組後續排程留在 #1971，不在本頁複製工作進度。
+
+AI 第一版使用基礎 policy，僅靠與玩家相同的觀察及決定介面完成對局；搜尋另行處理。
+這是介面邊界，不表示舊 `ai.rs` 已遷移或完整 typed 對局已驗收。
+`docs/ai/` 的 v2 profile 仍是未實作設計，現行原型載入器不接受該格式。
+
+## 載入與執行驗證
+
+typed 的 current selection 保存永久身分、整卡及來源閉包；Rust lowering、良構及 backend
+執行准入各有責任，不能以 Schema 通過代替。未知或未支援的構造須拒絕，
+不得回退到原型卡片程式。整卡可執行仍須逐卡對局測試及語義審查。
+
+舊 `Catalog` 載入原型 YAML 時，除 Schema 外，還以 `catalog/semantics.rs` 比對
+opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原型載入期拒絕的 YAML](rejected-yaml.md)；
+該清單不代表 typed backend 的接受集合。
 
 ## 驗證方式
 
-測試數量與通過結果會隨卡表快照與程式改變，不在文件裡保存。需要確認時直接執行：
+測試數量與結果由當次輸入與測試輸出決定，不在文字文件保存固定總數。
 
-- 共用測試與共同題本 `tests/rules-scenarios/`、已知失敗清單 `tests/engine/known-failures.yaml`；
-  `authored/` 的載入結果必須與 `tests/engine/rejected-yaml.yaml` 完全相同
-- 執行方式與 `SVE_TEST_SNAPSHOT` 的設定見 [sim/engine/README.md](../../sim/engine/README.md)
+- 舊原型共同題本位於 `tests/rules-scenarios/`；`tests/engine/known-failures.yaml` 的
+  `expected_scenarios` 是 gate 的總數契約，`known` 明列允許的未通過結果。
+  原型 YAML 載入拒絕結果須與 `tests/engine/rejected-yaml.yaml` 相符。
+- typed 的 lowering、raw IR、准入及執行測試位於 `sim/engine/src/ir/tests/`、
+  `sim/engine/tests/internal_ir/` 與 `sim/engine/tests/current_repository/` 等；
+  共同原型題本通過不表示這些路徑已被驗收。
+- 執行方式與公開測試輸入依 [sim/engine/README.md](../../sim/engine/README.md)。
 
-題本通過只表示這些局面正確，不能推論任意卡片、初始狀態或組合都正確。
-規則族的正反例與推定強度依 [DSL 驗收規格](../dsl/validation.md)。
-
-## 執行邊界
-
-- 解算燃料 20,000 步、部分列舉上限 10,000 是原型的防護界線，不是 CR 15.2 的循環判定（見 `sim/engine/src/game/effects.rs`、`payments.rs` 等的常數）
-- 場上（`field`）上限固定為 5，從者與護符放不下時依規則處理（見 `sim/engine/src/game/rules.rs`、`legal.rs`）
-- 引擎不驗牌組構築合法性；牌組合法性屬建牌器範圍
-- 動作原子、選擇、付款、持續效果、取代、區域與誘發構造的執行限制與待確認項目，以 #478 的清單為準；
-  載入期拒絕的部分以 [rejected-yaml.md](rejected-yaml.md) 為準
-
-## AI
-
-- 根節點確定化取樣（profile 的 `samples`）加固定啟發式延伸，展望到當回合、最多 128 個決定深度（`sim/engine/src/ai.rs`）。
-  不是完整的 IS-MCTS，沒有對手策略學習或跨回合價值
-- 原型 CLI 固定載入 `sim/engine/profiles/` 的 `general`、`aggro`、`control` 三個 profile；
-  `profiles.yaml` 提供共用 AI 測試資料，公開的 `Profile::load` 接受呼叫者指定的檔案。
-  [docs/ai/](../ai/profile.schema.json) 的 v2 profile 是未實作的設計，現行載入器不接受
-- `Game` 以深複製分支，只有 `Catalog` 以 `Arc` 共用；先驗、數值宣告與複製成本的限制見 #478
+題本通過只表示受測局面正確，不能推論任意卡片或組合都正確。
+規則族正反例與推定強度依 [DSL 驗收規格](../dsl/validation.md)。
 
 ## 回放、輔助與資訊邊界
 
-資訊可見性是設計契約；回放與輔助原型的封存記錄仍待確認，見 #478。
+玩家與 AI 僅取得獲授權的觀察與決定題；未公開隱藏物件不得有可跨區追蹤的固定 ID。
+裁判狀態、來源證據、續體及含秘密的存檔不可當一般玩家封包。
+這是共同資訊契約，不以舊投影已省略部分欄位推論完整符合。
 
-- 玩家投影不送出未公開手牌或背面起始護符的固定 ID；裁判視角與存檔含秘密，不能當一般封包傳送
-- 回放持久化、續體、輔助 `realign`、網路／權限／不可信存檔驗證與 `Catalog` digest 的限制及待確認項目見 #478；
-  封存記錄不能當成版本相容或線上恢復的保證
+已載入的 typed CardRuntime 目前拒絕序列化與摘要；舊 `astra-save/1` 回放／輔助原型
+不構成 typed 恢復、版本相容或不可信輸入授權保證。
+恢復與對外入口的交付由 #1971 追蹤。
 
-## 建置目標
+舊回放與輔助原型的封存記錄仍待重新確認，追蹤於 #478；不得據此推論線上恢復已完成驗收。
 
-函式庫設計上可用 `--no-default-features` 編譯到 `wasm32-unknown-unknown`；
-WASM 編譯、JS 綁定、瀏覽器宿主與計時驗證的待確認項目見 #478。
+## 執行與建置邊界
+
+原型解算燃料與列舉上限是實作防護，不是 CR 15.2 的循環判定。
+場上容量依規則為五；牌組構築驗證屬建牌器，對戰宿主不能把載入效果等同驗牌完成。
+
+函式庫可用 `--no-default-features` 建置至 `wasm32-unknown-unknown`；
+這不表示瀏覽器宿主、JS 綁定、計時或完整線上對局已完成驗收。
