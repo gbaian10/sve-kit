@@ -22,7 +22,7 @@ macro_rules! identifiers {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub struct $name(pub u64);
         impl Walk for $name {
-            fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+            fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
         }
     )* };
 }
@@ -96,7 +96,7 @@ impl<T> Binding<T> {
     }
 }
 impl<T> Walk for Binding<T> {
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
 }
 /// A frozen value reference is not a Live read or an object identity.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -105,7 +105,7 @@ pub struct CaptureRef<T> {
     pub binding: Binding<T>,
 }
 impl<T> Walk for CaptureRef<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         visitor.require("value.capture", path);
     }
 }
@@ -145,7 +145,7 @@ where
     T::Operation: Walk,
     T::Frozen: Walk,
 {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         match self {
             Self::Literal(value) => {
                 visitor.require("shape.Expr.Literal", path);
@@ -199,17 +199,17 @@ domain!(
 );
 domain!(ZoneRef, ZoneRead, ZoneOperation, ZoneFrozen, ZoneRef);
 impl Walk for Int {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         if self.0 < 0 {
             visitor.require("value.signed-literal", path);
         }
     }
 }
 impl Walk for Nat {
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
 }
 impl Walk for Bool {
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
 }
 
 macro_rules! names {
@@ -217,7 +217,7 @@ macro_rules! names {
         #[doc = concat!("Registry-backed ", stringify!($name), "; not an operation name.")]
         #[derive(Clone, Debug, PartialEq, Eq)]
         pub struct $name(pub String);
-        impl Walk for $name { fn walk(&self, _visitor: &mut Visitor, _path: &str) {} }
+        impl Walk for $name { fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {} }
     )* };
 }
 names!(
@@ -311,7 +311,7 @@ pub struct Cardinality {
     pub maximum: Option<Nat>,
 }
 impl Walk for Cardinality {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         visitor.require(
             if self.maximum.is_some() {
                 "cardinality.bounded"
@@ -361,7 +361,7 @@ record!(
         permission: FollowPermission
     }
 );
-variants!(ObjectOperand {
+variants!(@visit ObjectOperand {
     Selected { selection: Binding<Selector> } => ["reference.selected-object"],
     // This follows only the triggering subject's saved successful movement member.
     // Lowering must prove explicit card-text permission; payload after fields alone grant none.
@@ -589,7 +589,7 @@ impl Walk for NoRead {
         clippy::uninhabited_references,
         reason = "Value requires Walk for every associated domain; safe Rust cannot construct this domain or call its walker."
     )]
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {
         match *self {}
     }
 }
@@ -714,7 +714,7 @@ domain!(
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PositiveNat(pub NonZeroU64);
 impl Walk for PositiveNat {
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
 }
 variants!(#[derive(Copy)] ExecutionRef { Current {} => [], Bound { binding: Binding<ExecutionId> } => [] });
 variants!(#[derive(Copy)] EventContext { Trigger {} => [], Bound { binding: Binding<Event> } => [],

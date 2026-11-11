@@ -52,35 +52,63 @@
 //! let followed = MovedRef { receipt: draw, member: Binding::new(2, ScopeId(1)), permission: FollowPermission::SameEffectExplicitReference {} };
 //! ```
 
+macro_rules! visit_children {
+    ([], $visitor:ident, $path:ident, $node:ident, $body:block) => {
+        $body
+    };
+    ([$name:ident], $visitor:ident, $path:ident, $node:ident, $body:block) => {{
+        if $visitor.enter(super::walk::NodeRef::$name($node), $path)
+            == super::walk::Traversal::Descend
+        {
+            $body
+        }
+        $visitor.leave(super::walk::NodeRef::$name($node), $path);
+    }};
+}
+
 macro_rules! record {
+    (@visit $(#[$meta:meta])* $name:ident { $($field:ident : $ty:ty),* $(,)? }) => {
+        record!(@impl [$name] $(#[$meta])* $name { $($field: $ty),* });
+    };
     ($(#[$meta:meta])* $name:ident { $($field:ident : $ty:ty),* $(,)? }) => {
+        record!(@impl [] $(#[$meta])* $name { $($field: $ty),* });
+    };
+    (@impl [$($visit:ident)?] $(#[$meta:meta])* $name:ident { $($field:ident : $ty:ty),* $(,)? }) => {
         $(#[$meta])*
         #[doc = concat!("Internal IR ", stringify!($name), ".")]
         #[derive(Clone, Debug, PartialEq, Eq)]
         pub struct $name { $(#[doc = stringify!($field)] pub $field: $ty),* }
         impl super::Walk for $name {
-            fn walk(&self, visitor: &mut super::Visitor, path: &str) {
-                $(self.$field.walk(visitor, &format!("{path}/{}", stringify!($field)));)*
+            fn walk(&self, visitor: &mut impl super::Visitor, path: &str) {
+                visit_children!([$($visit)?], visitor, path, self, {
+                    $(self.$field.walk(visitor, &format!("{path}/{}", stringify!($field)));)*
+                });
             }
         }
     };
 }
 
 macro_rules! variants {
+    (@visit $(#[$meta:meta])* $name:ident { $($variant:ident { $($field:ident : $ty:ty),* $(,)? } => [$($code:literal),*]),* $(,)? }) => {
+        variants!(@impl [$name] $(#[$meta])* $name { $($variant { $($field: $ty),* } => [$($code),*]),* });
+    };
     ($(#[$meta:meta])* $name:ident { $($variant:ident { $($field:ident : $ty:ty),* $(,)? } => [$($code:literal),*]),* $(,)? }) => {
+        variants!(@impl [] $(#[$meta])* $name { $($variant { $($field: $ty),* } => [$($code),*]),* });
+    };
+    (@impl [$($visit:ident)?] $(#[$meta:meta])* $name:ident { $($variant:ident { $($field:ident : $ty:ty),* $(,)? } => [$($code:literal),*]),* $(,)? }) => {
         $(#[$meta])*
         #[doc = concat!("Closed internal IR ", stringify!($name), ".")]
         #[derive(Clone, Debug, PartialEq, Eq)]
         pub enum $name { $(#[doc = stringify!($variant)] $variant { $(#[doc = stringify!($field)] $field: $ty),* }),* }
         impl super::Walk for $name {
-            fn walk(&self, visitor: &mut super::Visitor, path: &str) {
-                match self {
+            fn walk(&self, visitor: &mut impl super::Visitor, path: &str) {
+                visit_children!([$($visit)?], visitor, path, self, { match self {
                     $(Self::$variant { $($field),* } => {
                         visitor.require(concat!("shape.", stringify!($name), ".", stringify!($variant)), path);
                         $(visitor.require($code, path);)*
                         $($field.walk(visitor, &format!("{path}/{}", stringify!($field)));)*
                     }),*
-                }
+                }});
             }
         }
     };
@@ -92,7 +120,7 @@ macro_rules! tags {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
         pub enum $name { $(#[doc = stringify!($variant)] $variant),* }
         impl super::Walk for $name {
-            fn walk(&self, visitor: &mut super::Visitor, path: &str) {
+            fn walk(&self, visitor: &mut impl super::Visitor, path: &str) {
                 let code = match self { $(Self::$variant => concat!("internal.", stringify!($name), ".", stringify!($variant))),* };
                 visitor.require(code, path);
             }
@@ -156,6 +184,7 @@ pub(crate) mod stand_restrictions;
 pub(crate) mod trigger_restrictions;
 mod values;
 pub(crate) mod victory;
+pub mod walk;
 mod wellformed;
 
 pub use actions::*;
@@ -175,26 +204,26 @@ pub use wellformed::{
     WellFormedReason,
 };
 
-use capabilities::Visitor;
+use walk::Visitor;
 
 trait Walk {
-    fn walk(&self, visitor: &mut Visitor, path: &str);
+    fn walk(&self, visitor: &mut impl Visitor, path: &str);
 }
 
 impl<T: Walk> Walk for Box<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         self.as_ref().walk(visitor, path);
     }
 }
 impl<T: Walk> Walk for Option<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         if let Some(value) = self {
             value.walk(visitor, path);
         }
     }
 }
 impl<T: Walk> Walk for Vec<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         for (index, value) in self.iter().enumerate() {
             value.walk(visitor, &format!("{path}/{index}"));
         }

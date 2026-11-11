@@ -11,7 +11,6 @@ use super::{
     SelectionSnapshot, Selector, TitleId, TokenOutcome, TraitId, TransformOutcome, TriggerSpec,
     TurnId, Visitor, Walk, ZoneKind, ZoneRef,
 };
-use core::mem::replace;
 
 /// Publishable source coordinates only; never a filesystem path or card text.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
@@ -47,20 +46,23 @@ pub struct Located<T> {
     pub source: SourceSpan,
 }
 impl<T: Walk> Walk for Located<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
-        let previous = replace(&mut visitor.source, self.source.clone());
-        self.node.walk(visitor, path);
-        visitor.source = previous;
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
+        if visitor.enter(super::walk::NodeRef::Source(&self.source), path)
+            == super::walk::Traversal::Descend
+        {
+            self.node.walk(visitor, path);
+        }
+        visitor.leave(super::walk::NodeRef::Source(&self.source), path);
     }
 }
-record!(Program { scope: ScopeId, steps: Vec<Located<Node>> });
+record!(@visit Program { scope: ScopeId, steps: Vec<Located<Node>> });
 variants!(Node {
     Instruction { instruction: Box<Instruction> } => [],
     Control { control: Control } => [],
     Capture { capture: Capture } => ["value.capture"],
     Decision { decision: Decision } => ["decision.input"],
 });
-record!(Instruction { id: InstructionId, actor: PlayerRef, source: AbilitySource, precondition: Option<Precondition>, context: InstructionContext, receipt: ReceiptId, action: Action });
+record!(@visit Instruction { id: InstructionId, actor: PlayerRef, source: AbilitySource, precondition: Option<Precondition>, context: InstructionContext, receipt: ReceiptId, action: Action });
 tags!(InstructionContext { Effect, Cost });
 record!(AbilitySource {
     holder: ObjectOperand,
@@ -90,7 +92,7 @@ tags!(AbilityChoiceKind {
     EvolutionTime,
     UnionBurst
 });
-record!(Ability { id: AbilityId, scope: ScopeId, source: AbilitySource, kind: AbilityKind, qualification: AbilityQualification, active_zones: Vec<ZoneKind>, event_captures: Vec<Capture>, play: Option<PlaySpec>, trigger: Option<TriggerSpec>, body: Option<Program>, declarations: Vec<Effect> });
+record!(@visit Ability { id: AbilityId, scope: ScopeId, source: AbilitySource, kind: AbilityKind, qualification: AbilityQualification, active_zones: Vec<ZoneKind>, event_captures: Vec<Capture>, play: Option<PlaySpec>, trigger: Option<TriggerSpec>, body: Option<Program>, declarations: Vec<Effect> });
 tags!(AbilityKind {
     Spell,
     Activated,
@@ -189,7 +191,7 @@ variants!(Capture {
     Name { at: CaptureTime, value: Expr<CardName>, into: CaptureRef<CardName> } => ["value.capture"],
     Zone { at: CaptureTime, value: Expr<ZoneRef>, into: CaptureRef<ZoneRef> } => ["value.capture"]
 });
-variants!(Control {
+variants!(@visit Control {
     Simultaneous { batch: InstructionBatch, receipt: ReceiptId } => ["control.simultaneous", "transaction.shared-capacity"],
     Match { value: DamageRecipient, leader: Binding<PlayerRef>, leader_body: Program, follower: Binding<ObjectRef>, follower_body: Program } => ["control.match"],
     Sequence { body: Program } => ["control.sequence"],
@@ -326,7 +328,7 @@ impl PlayCostExchange {
 record!(PlayCostModifier { condition: Option<Expr<Bool>>, change: super::CostChange });
 
 impl Walk for FacePlayCost {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         visitor.require("card.play-cost", path);
         self.face.walk(visitor, &format!("{path}/face"));
         self.modifiers.walk(visitor, &format!("{path}/modifiers"));
@@ -337,7 +339,7 @@ impl Walk for FacePlayCost {
         }
     }
 }
-variants!(CostSpec { Ordered { steps: Vec<CostStep> } => [], Alternative { alternatives: Vec<CostSpec> } => [] });
+variants!(@visit CostSpec { Ordered { steps: Vec<CostStep> } => [], Alternative { alternatives: Vec<CostSpec> } => [] });
 
 /// Typed reference to one instruction result; lowering proves its defining instruction.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -367,7 +369,7 @@ impl<T> ReceiptReference<T> {
     }
 }
 impl<T> Walk for ReceiptReference<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         match &self.location {
             ReceiptLocation::Local { .. } => visitor.require("receipt.local", path),
             ReceiptLocation::Iteration { .. } => visitor.require("receipt.iteration", path),
@@ -432,7 +434,7 @@ pub struct TargetRoleSpec {
     pub roles: Vec<TargetRole>,
 }
 impl Walk for TargetRoleSpec {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         visitor.require("decision.target-roles", path);
         self.roles.walk(visitor, path);
     }

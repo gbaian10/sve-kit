@@ -1,5 +1,6 @@
 //! Direct action subjects may consume only this pending occurrence's exact subject.
 use crate::ir::events::attack::target_plan;
+use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Action, Binding, Bool, Control, EnterFieldEvent, Expr, InstallationSubjects, LkiReason,
     NameOperation, Node, ObjectOperand, ObjectRef, ObjectView, Program, Selector, TokenTemplate,
@@ -24,102 +25,89 @@ fn subjects(
     }
 }
 
+struct DirectPaths<'paths> {
+    event: &'paths Expr<ObjectRef>,
+    allowed: &'paths mut BTreeSet<String>,
+}
+
+impl Visitor for DirectPaths<'_> {
+    fn enter(&mut self, node: NodeRef<'_>, path: &str) -> Traversal {
+        match node {
+            NodeRef::Control(
+                Control::Sequence { .. }
+                | Control::May { .. }
+                | Control::If { .. }
+                | Control::Mode { .. },
+            ) => Traversal::Descend,
+            NodeRef::Control(_) | NodeRef::CostSpec(_) => Traversal::Skip,
+            NodeRef::Instruction(instruction) => {
+                direct_action_paths(&instruction.action, path, self.event, self.allowed);
+                // This policy grants only direct subjects, never nested definitions or delayed bodies.
+                Traversal::Skip
+            }
+            _ => Traversal::Descend,
+        }
+    }
+}
+
 pub(in crate::game::internal) fn paths(
     program: &Program,
     path: &str,
     event: &Expr<ObjectRef>,
     allowed: &mut BTreeSet<String>,
 ) {
-    for (index, step) in program.steps.iter().enumerate() {
-        let path = format!("{path}/steps/{index}");
-        match &step.node {
-            Node::Instruction { instruction } => match &instruction.action {
-                Action::Modify {
-                    subjects: objects, ..
-                }
-                | Action::Grant {
-                    subjects: objects, ..
-                } => subjects(
-                    objects,
-                    &format!("{path}/instruction/action/subjects"),
-                    event,
-                    allowed,
-                ),
-                Action::Token { tokens, .. } => {
-                    for (token_index, token) in tokens.iter().enumerate() {
-                        if let TokenTemplate::Name {
-                            name: Expr::Compute(operation),
-                            ..
-                        } = &token.template
-                            && let NameOperation::UniqueName {
-                                object:
-                                    ObjectView::LastKnown {
-                                        object,
-                                        reason: LkiReason::ZoneExit,
-                                    },
-                            } = operation.as_ref()
-                            && matches!(object.as_ref(), ObjectOperand::FromExpression { value } if value.as_ref() == event)
-                        {
-                            let prefix = format!(
-                                "{path}/instruction/action/tokens/{token_index}/template/name/compute/object/object"
-                            );
-                            allowed.insert(prefix.clone());
-                            allowed.insert(format!("{prefix}/value/frozen"));
-                        }
-                    }
-                }
-                Action::Move { objects, .. } => subjects(
-                    objects,
-                    &format!("{path}/instruction/action/objects"),
-                    event,
-                    allowed,
-                ),
-                Action::InstallEffect {
-                    subjects: InstallationSubjects::Objects { objects, .. },
-                    ..
-                } => subjects(
-                    objects,
-                    &format!("{path}/instruction/action/subjects/objects"),
-                    event,
-                    allowed,
-                ),
-                _ => {}
-            },
-            Node::Control {
-                control: Control::Sequence { body } | Control::May { body, .. },
-            } => paths(body, &format!("{path}/control/body"), event, allowed),
-            Node::Control {
-                control:
-                    Control::If {
-                        then_body,
-                        else_body,
-                        ..
-                    },
-            } => {
-                paths(
-                    then_body,
-                    &format!("{path}/control/then_body"),
-                    event,
-                    allowed,
-                );
-                if let Some(body) = else_body {
-                    paths(body, &format!("{path}/control/else_body"), event, allowed);
-                }
-            }
-            Node::Control {
-                control: Control::Mode { modes, .. },
-            } => {
-                for (mode_index, mode) in modes.iter().enumerate() {
-                    paths(
-                        &mode.body,
-                        &format!("{path}/control/modes/{mode_index}/body"),
-                        event,
-                        allowed,
-                    );
-                }
-            }
-            _ => {}
+    walk::program(program, path, &mut DirectPaths { event, allowed });
+}
+
+fn direct_action_paths(
+    action: &Action,
+    path: &str,
+    event: &Expr<ObjectRef>,
+    allowed: &mut BTreeSet<String>,
+) {
+    match action {
+        Action::Modify {
+            subjects: objects, ..
         }
+        | Action::Grant {
+            subjects: objects, ..
+        } => subjects(objects, &format!("{path}/action/subjects"), event, allowed),
+        Action::Token { tokens, .. } => {
+            for (token_index, token) in tokens.iter().enumerate() {
+                if let TokenTemplate::Name {
+                    name: Expr::Compute(operation),
+                    ..
+                } = &token.template
+                    && let NameOperation::UniqueName {
+                        object:
+                            ObjectView::LastKnown {
+                                object,
+                                reason: LkiReason::ZoneExit,
+                            },
+                    } = operation.as_ref()
+                    && matches!(object.as_ref(), ObjectOperand::FromExpression { value } if value.as_ref() == event)
+                {
+                    let prefix = format!(
+                        "{path}/action/tokens/{token_index}/template/name/compute/object/object"
+                    );
+                    allowed.insert(prefix.clone());
+                    allowed.insert(format!("{prefix}/value/frozen"));
+                }
+            }
+        }
+        Action::Move { objects, .. } => {
+            subjects(objects, &format!("{path}/action/objects"), event, allowed);
+        }
+        Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, .. },
+            ..
+        } => subjects(
+            objects,
+            &format!("{path}/action/subjects/objects"),
+            event,
+            allowed,
+        ),
+        _ => {}
     }
 }
 
@@ -221,47 +209,44 @@ fn target_condition(value: &Expr<Bool>, path: &str, allowed: &mut BTreeSet<Strin
     }
 }
 
+struct TargetPaths<'paths> {
+    allowed: &'paths mut BTreeSet<String>,
+}
+
+impl Visitor for TargetPaths<'_> {
+    fn enter(&mut self, node: NodeRef<'_>, path: &str) -> Traversal {
+        match node {
+            NodeRef::Control(Control::If { condition, .. }) => {
+                target_condition(condition, &format!("{path}/condition"), self.allowed);
+                Traversal::Descend
+            }
+            NodeRef::Control(Control::Sequence { .. } | Control::May { .. }) => Traversal::Descend,
+            NodeRef::Control(_) | NodeRef::CostSpec(_) => Traversal::Skip,
+            NodeRef::Instruction(instruction) => {
+                target_action_paths(&instruction.action, path, self.allowed);
+                Traversal::Skip
+            }
+            _ => Traversal::Descend,
+        }
+    }
+}
+
 pub(in crate::game::internal) fn target_paths(
     program: &Program,
     path: &str,
     allowed: &mut BTreeSet<String>,
 ) {
-    for (index, step) in program.steps.iter().enumerate() {
-        let path = format!("{path}/steps/{index}");
-        match &step.node {
-            Node::Instruction { instruction } => match &instruction.action {
-                Action::Modify { subjects, .. } | Action::Grant { subjects, .. } => {
-                    target_selector_path(
-                        subjects,
-                        &format!("{path}/instruction/action/subjects"),
-                        allowed,
-                    );
-                }
-                Action::Move { objects, .. } | Action::Destroy { objects } => target_selector_path(
-                    objects,
-                    &format!("{path}/instruction/action/objects"),
-                    allowed,
-                ),
-                _ => {}
-            },
-            Node::Control { control } => match control {
-                Control::If {
-                    condition,
-                    then_body,
-                    else_body,
-                } => {
-                    target_condition(condition, &format!("{path}/control/condition"), allowed);
-                    target_paths(then_body, &format!("{path}/control/then_body"), allowed);
-                    if let Some(body) = else_body {
-                        target_paths(body, &format!("{path}/control/else_body"), allowed);
-                    }
-                }
-                Control::Sequence { body } | Control::May { body, .. } => {
-                    target_paths(body, &format!("{path}/control/body"), allowed);
-                }
-                _ => {}
-            },
-            _ => {}
+    walk::program(program, path, &mut TargetPaths { allowed });
+}
+
+fn target_action_paths(action: &Action, path: &str, allowed: &mut BTreeSet<String>) {
+    match action {
+        Action::Modify { subjects, .. } | Action::Grant { subjects, .. } => {
+            target_selector_path(subjects, &format!("{path}/action/subjects"), allowed);
         }
+        Action::Move { objects, .. } | Action::Destroy { objects } => {
+            target_selector_path(objects, &format!("{path}/action/objects"), allowed);
+        }
+        _ => {}
     }
 }

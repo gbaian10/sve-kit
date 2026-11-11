@@ -7,7 +7,7 @@ use super::{
     Selector, Stat, TimeAnchor, TitleId, TraitId, Visibility, ZoneKind,
 };
 
-variants!(Effect {
+variants!(@visit Effect {
     Continuous { id: EffectDefinitionId, source: AbilitySource, target: EffectTarget, condition: Option<Expr<Bool>>, patch: CharacteristicPatch, layer: ContinuousLayer, timestamp: TimestampBasis, active_zones: Vec<ZoneKind>, duration: Duration } => ["effect.continuous"],
     Replacement { id: EffectDefinitionId, source: AbilitySource, pattern: ProposedEventPattern, condition: Expr<Bool>, rewrite: EventRewrite, scope: ReplacementScope, affected_player: PlayerRef, once_per_event: OncePerEvent, usage: Option<UseLimit>, prospective_chars: Option<CharacteristicView>, duration: Duration } => ["effect.replacement"],
     Permission { subject: PermissionSubject, action: ActionPattern, polarity: Polarity, condition: Expr<Bool>, duration: Duration, rule: RuleId } => ["effect.permission"],

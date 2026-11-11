@@ -34,7 +34,7 @@ tags!(EventSnapshotPolicy {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PositiveInt(pub NonZeroU64);
 impl Walk for PositiveInt {
-    fn walk(&self, _visitor: &mut Visitor, _path: &str) {}
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
 }
 tags!(DieFace {
     One,
@@ -88,7 +88,7 @@ pub enum Info<T> {
     AbsentByRules,
 }
 impl<T: Walk> Walk for Info<T> {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         match self {
             Self::Present(value) => {
                 visitor.require("shape.Info.Present", path);

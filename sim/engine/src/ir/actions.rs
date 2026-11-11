@@ -9,7 +9,7 @@ use super::{
 };
 
 // I.swap remains rule-only; there is deliberately no constructible variant.
-variants!(Action {
+variants!(@visit Action {
     InstallEffect { subjects: InstallationSubjects, capture: InstallationTime, effect: Box<Effect>, duration: Duration } => ["action.install-effect"],
     Move { objects: Selector, movement: MoveSpec, reason: MoveReason } => ["action.move", "receipt.move-after"],
     Destroy { objects: Selector } => ["action.destroy", "receipt.move-after"],
@@ -78,7 +78,7 @@ pub enum StepwiseMode {
     },
 }
 impl Walk for StepwiseMode {
-    fn walk(&self, visitor: &mut Visitor, path: &str) {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
         match self {
             Self::Exact => visitor.require("internal.StepwiseMode.Exact", path),
             Self::UpToStepwise { decision } => {
