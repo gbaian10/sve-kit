@@ -12,6 +12,19 @@ use crate::ir::{
 };
 use serde_json::{Value, json};
 
+mod declaration;
+pub(in crate::game) use declaration::Declaration as EvolutionDeclaration;
+
+fn rule_code(ability: &Ability) -> Result<Value> {
+    let amount = cost(ability)?;
+    let mut code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}]});
+    let mut body = destination_spec(&destination(ability)?);
+    body["op"] = json!("evolve");
+    body["subjects"] = json!("self");
+    code["body"] = body;
+    Ok(code)
+}
+
 pub(super) fn destination_spec(destination: &Destination) -> Value {
     match destination {
         Destination::SameName => json!({}),
@@ -305,12 +318,7 @@ impl Game {
         if !usable(self, holder, &entry.node)? {
             return Ok(false);
         }
-        let amount = cost(&entry.node)?;
-        let mut code = json!({"kind":"evolve","costs":[{"op":"pp","amount":amount}],"body":{"op":"evolve","subjects":"self"}});
-        let mut body = destination_spec(&destination(&entry.node)?);
-        body["op"] = json!("evolve");
-        body["subjects"] = json!("self");
-        code["body"] = body;
+        let code = rule_code(&entry.node)?;
         let resource = self.object(string(&decision["evolve_card"]))?;
         if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);

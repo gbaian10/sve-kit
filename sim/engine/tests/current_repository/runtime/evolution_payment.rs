@@ -1,6 +1,6 @@
 use super::*;
 
-fn position(card: &str, form: &str) -> Value {
+pub(super) fn position(card: &str, form: &str) -> Value {
     let mut initial = draw_position();
     initial["turn"]["elapsed_turns"]["P1"] = json!(7_i64);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -8,7 +8,7 @@ fn position(card: &str, form: &str) -> Value {
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     initial
 }
-fn game(initial: &Value) -> Game {
+pub(super) fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),
         initial,

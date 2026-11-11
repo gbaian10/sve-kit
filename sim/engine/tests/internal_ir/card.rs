@@ -194,6 +194,8 @@ mod evolution_cost_mod;
 
 #[path = "card/evolution.rs"]
 mod evolution;
+#[path = "card/player_evolution.rs"]
+mod player_evolution;
 
 #[path = "card/second.rs"]
 mod second;

@@ -78,7 +78,7 @@ pub(super) fn position_with_decks(
     position_with_zones(seat, base, form, turn_decks, &Value::Null)
 }
 
-fn position_with_zones(
+pub(super) fn position_with_zones(
     seat: u32,
     base: &WellFormedCardProgram,
     form: &WellFormedCardProgram,
@@ -164,7 +164,7 @@ fn named_position(
 }
 
 // Schema compilation dominates these tests, so they share one immutable lowered fixture.
-fn programs() -> &'static (WellFormedCardProgram, WellFormedCardProgram) {
+pub(super) fn programs() -> &'static (WellFormedCardProgram, WellFormedCardProgram) {
     static PROGRAMS: OnceLock<(WellFormedCardProgram, WellFormedCardProgram)> = OnceLock::new();
     PROGRAMS.get_or_init(lowered_programs)
 }
