@@ -5,9 +5,11 @@
 
 pub mod observation;
 
+mod closing;
 mod opening;
 mod pipeline;
 
+pub use closing::{ClosingAnswer, ClosingQuestion};
 pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 
 pub use super::internal::{Answer, InputDomain};
@@ -125,9 +127,11 @@ impl fmt::Debug for QuestionToken {
 pub enum QuestionShape {
     /// Serial opening procedure, using this viewer's current object capabilities.
     Opening(OpeningQuestion),
+    /// A specific turn-closing rules procedure, distinct from Ward entry.
+    Closing(ClosingQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
     Decision(InputDomain),
-    /// Main-phase or turn-closing action, without legal action enumeration.
+    /// Main-phase action, without general legal action enumeration.
     ActionWindow,
 }
 
@@ -191,6 +195,18 @@ pub enum Command {
         token: QuestionToken,
         /// Opening choice addressed by viewer capabilities.
         answer: OpeningAnswer,
+    },
+    /// Leave the current main phase, subject to existing attack obligations.
+    EndPhase {
+        /// Exact main-action question returned to this seat.
+        token: QuestionToken,
+    },
+    /// Answer a turn-closing rules procedure using current viewer capabilities.
+    Closing {
+        /// Exact closing question returned to this seat.
+        token: QuestionToken,
+        /// Guard or hand-limit choice, never an entry Ward answer.
+        answer: ClosingAnswer,
     },
     /// Respond only to the current decision occurrence.
     Answer {

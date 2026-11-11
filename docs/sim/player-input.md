@@ -42,11 +42,30 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 [#1973](https://github.com/gbaian10/sve-kit/issues/1973)及
 [#1977](https://github.com/gbaian10/sve-kit/issues/1977)。
 
-`QuestionShape::ActionWindow` 僅標示主要階段或回合收尾的權威行動邊界，不列合法行動，
+`QuestionShape::ActionWindow` 標示主要階段的權威行動邊界，不列一般合法行動，
 也不接受一般決定的答案。其他未受支援的程序及仍有舊原型續體的權威狀態是
-`EngineFault`，不會冒充行動視窗。本介面以既有權威入口作測試起點，不保證可從開局
-打完整局；專用行動介面的需求見 [#1975](https://github.com/gbaian10/sve-kit/issues/1975)及
-[#1976](https://github.com/gbaian10/sve-kit/issues/1976)。
+`EngineFault`，不會冒充行動視窗。一般主要階段行動介面仍有限，不保證可從開局
+打完整局；完整行動介面的需求見 [#1975](https://github.com/gbaian10/sve-kit/issues/1975)。
+
+## 回合收尾與終局
+
+`Command::EndPhase` 需要當席主要階段的 token，仍重驗既有攻擊義務、權威是否閒置與
+資源完整性，再啟動結束階段。階段誘發先完成，才出回合末守護與 Quick 題。
+`QuestionShape::Closing` 與 `Command::Closing` 對應兩種規則程序：
+
+- `GuardAct`：以當席代號選擇任意子集的未橫置守護從者，也可不選。這是回合末規則
+  選擇；入場 Ward 仍使用不同的 `InputDomain::WardEntry` 與其原答案，兩者不互通。
+- `Discard`：題目提供當席手牌與超出上限的確切張數，答案必須是符合數量的不重複
+  當前代號。棄牌觸發的能力先完成，再重新檢查手牌上限；效果回收手牌造成再次超額
+  時，會再出一題，不會提前換回合或重放已完成的能力。
+
+以上兩題均屬 `QuestionPurpose::RuleChoice`，具體規則用途由各自題型標示；非應答席
+只有等待摘要。驗答不枚舉所有合法子集合，仍重驗所在區域、守護資格及確切數量。
+最後一個 Quick Pass 與棄牌程序後會沿原管線完成期限到期、換回合、刷新、抽牌、
+檢查時點及主要階段開始誘發，然後才提供下一個主要行動視窗。
+
+正常敗北、同時敗北與效果終局沿用既有清理程序，不再出續行題；等待中投降保留
+已執行前綴並清除所有續體。新入口沒有額外製造 resolved 結果來推動終局。
 
 ## 提交結果與續行
 

@@ -61,6 +61,9 @@ mod terminal;
 #[path = "internal_ir/player_pipeline.rs"]
 mod player_pipeline;
 
+#[path = "internal_ir/player_closing.rs"]
+mod player_closing;
+
 #[path = "internal_ir/search.rs"]
 mod search;
 

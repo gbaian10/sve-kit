@@ -117,21 +117,27 @@ impl Game {
             if self.typed.is_some() || self.internal_card_stage().is_some() {
                 return Input::EngineFault;
             }
-            let Some(actor) = self::viewer(self.active()) else {
-                return Input::EngineFault;
-            };
-            let Some(purpose) = self.player_action_purpose() else {
-                return Input::EngineFault;
-            };
-            Question {
-                token: QuestionToken {
-                    epoch: self.state.ir_epoch,
-                    serial: self.player_epoch,
-                    action: true,
-                },
-                actor,
-                purpose,
-                shape: QuestionShape::ActionWindow,
+            match self.player_closing_question() {
+                Ok(Some(question)) => question,
+                Err(_) => return Input::EngineFault,
+                Ok(None) => {
+                    let Some(actor) = self::viewer(self.active()) else {
+                        return Input::EngineFault;
+                    };
+                    let Some(purpose) = self.player_action_purpose() else {
+                        return Input::EngineFault;
+                    };
+                    Question {
+                        token: QuestionToken {
+                            epoch: self.state.ir_epoch,
+                            serial: self.player_epoch,
+                            action: true,
+                        },
+                        actor,
+                        purpose,
+                        shape: QuestionShape::ActionWindow,
+                    }
+                }
             }
         };
         if question.actor == viewer {
@@ -143,6 +149,7 @@ impl Game {
             }
             QuestionShape::Decision(_)
             | QuestionShape::Opening(_)
+            | QuestionShape::Closing(_)
             | QuestionShape::ActionWindow => None,
         };
         Input::Waiting(Waiting {
@@ -156,6 +163,8 @@ impl Game {
     pub fn submit_player(&mut self, viewer: Viewer, command: Command) -> Submission {
         let kind = match command {
             Command::Opening { token, answer } => self.submit_player_opening(viewer, token, answer),
+            Command::EndPhase { token } => self.submit_player_end_phase(viewer, token),
+            Command::Closing { token, answer } => self.submit_player_closing(viewer, token, answer),
             Command::Concede => {
                 if self.state.game["ended"] == true {
                     SubmissionKind::Rejected
@@ -255,6 +264,7 @@ impl Game {
         if self.state.game["ended"] != true
             && self.player_decision().is_none()
             && self.player_action_purpose().is_none()
+            && self.player_closing_question()?.is_none()
         {
             return Err(EngineFailure::Unsupported(
                 "typed action window for this procedure".into(),
@@ -272,8 +282,9 @@ impl Game {
             self.state.flow["kind"].as_str(),
             self.state.flow["stage"].as_str(),
         ) {
-            (Some("main"), _) => Some(QuestionPurpose::MainAction),
-            (Some("end"), Some("guard" | "discard")) => Some(QuestionPurpose::RuleChoice),
+            (Some("main"), _) if self.state.turn["phase"] == "main" => {
+                Some(QuestionPurpose::MainAction)
+            }
             _ => None,
         }
     }
