@@ -13,6 +13,8 @@ mod evolution_ordinal;
 mod exchange_routes;
 #[path = "card/formal_target_groups.rs"]
 mod formal_target_groups;
+#[path = "card/granted_played.rs"]
+mod granted_played;
 #[path = "card/hand_banish.rs"]
 mod hand_banish;
 #[path = "card/material_acts.rs"]
@@ -738,6 +740,8 @@ mod play_restrictions;
 mod look_cost;
 #[path = "card/look_names.rs"]
 mod look_names;
+#[path = "card/observed_spine.rs"]
+mod observed_spine;
 
 #[path = "card/query_conditions.rs"]
 mod query_conditions;

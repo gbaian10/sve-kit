@@ -159,6 +159,15 @@ Delay 安裝時保留該 Delay 的本文計畫；pending 與巢狀執行隨定�
 不以合成 callback 的 AbilityId 搜尋 printed 能力。runtime 合成的 Drive／Drain
 能力仍由既有規則工廠建立，經明示的內部編譯入口附上計畫。
 
+既有 UB 事件的 `event:holder` 與 `it` 都投影同一個已提交 holder；
+解算仍重驗該物件的世代與有效區，不從現在的來源或其他事件補值。
+Equipment 的 holder 投影維持自己的事件角色；此別名不開放其他事件頭。
+
+安裝式 Grant 可以授予既有 Field Played observer，沿用受驗事件頭、提供者、
+接收者世代與安裝期限。多次安裝各保留自己的能力 instance；Play 提交時先捕捉
+符合條件的觀察者，之後持有者離場不取消已排入的 pending，離場或到期後不再觀察新 Play。
+持續效果授予 Played 的提供者仍限定 Equipment；其他授予事件頭與 UB 資格的准入不變。
+
 一般 Token、EachPlayer token stage 及 Delay 本文的 Token 在准入時選定數量讀者：
 固定值、既有公開區域計數，或 destroy-success 的 Before controller 計數。
 固定 token 模板的數量可沿既有 Nat／Int／Bool 型別組合這些葉：
@@ -257,7 +266,7 @@ BP17-040 所需的「己方原費至少 6 的機械從者整批送墓、具名�
 | 私有觀察移動（墓場／EX） | Look Before／After；except 只接受 Move／Order Before | Union／Difference 遞迴；目的區、Put、position、order、posture 與 entry effects 的原限制保留 |
 | 已公開 Look 移到手牌／場上 | 原有直接 local Look Before，沿觀察移動文法檢查 | 執行仍讀已公開 Look，不借用私有 reader；尚未公開的讀取仍失敗 |
 | Bottom placement 後洗回 | Look Before 或 RevealUntil Revealed Before；except 限單個任意 Movement Before | Difference 只在 input 遞迴，Union 拒絕；必須緊接既有 Subset Shuffle，prefix／suffix 契約不變 |
-| 直接 Look Reveal | local Look Before | Bound 的選中手牌與單一整手牌仍走原獨立路徑；不授權任意 deck Bound |
+| Look Reveal | local Look Before；私有 Look 實際選中的 Bound 仍在自己牌庫 | Bound 的選中手牌與單一整手牌仍走原獨立路徑；不授權任意 deck Bound |
 | Look 選擇 | Filter 的 input 為 Look Before | actor、visibility、群組、名稱互異、aggregate 與私有候選的條件政策維持原範圍 |
 
 Order 的一般葉必須經原 Capture／私有讀取的完整樹檢查，不能把「可求值」當成准入證明。
@@ -269,3 +278,13 @@ Movement After 不會被誤讀為 Before；在 Order 中仍依原一般 selector
 直接重用 `receipt_members` 的成功成員投影，RevealUntil 直接讀原有揭露結果，不重新查現在的牌庫頂。
 Order 的已驗一般葉（包括其 Movement Before）仍派到一般 selector 求值器，保留原有的成員去重；
 其他 consumer 沒有通用退回路徑。
+
+同一 Look 的後續選擇只列目前仍在自己牌庫、世代相符且保有位置證據的候選；先準備完整條件，
+再排除失效成員，最後才求值名字、原費等候選條件。移到手牌的牌不能重新落入公開目標路徑。
+這不改 Order／Move 最後保留成員的重驗：被保留的過期成員仍使執行失敗，歷史排除項則讀成功 Before。
+
+選中牌仍在牌庫時的揭露讀實際選中集合，與移動共用私有 Look 來源、世代、擁有者、控制者、
+牌庫成員及位置證據檢查，不把候選池當成結果。原本無權揭露的 Bound、公開區成員或混合手牌／牌庫
+維持 `Invalid`；新 Look 牌庫路徑失去世代或位置權限使用 `AuthorizationIntegrity`。
+過期私有手牌的略過仍先執行；Look 選中後移手牌的既有揭露不要求舊選取世代等於新手牌世代。
+揭露沿用原到期機制，Order 換位仍撤銷位置知識；記得已公開的卡名不代表能定位排序後的頂牌。

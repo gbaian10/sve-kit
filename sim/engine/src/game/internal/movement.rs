@@ -522,15 +522,7 @@ impl Game {
                     continue;
                 }
                 let actor = super::seat_name(execution.context.controller)?;
-                let private_look = object.zone == "deck"
-                    && object.owner == actor
-                    && object.controller == actor
-                    && execution.is_private_look_target(objects, *member)
-                    && self
-                        .state
-                        .knowledge
-                        .get(actor)
-                        .is_some_and(|knowledge| knowledge.knows_location(&object.id));
+                let private_look = self.private_look_deck_member(execution, objects, *member)?;
                 let private_hand = object.zone == "hand"
                     && object.owner == actor
                     && object.controller == object.owner
@@ -593,18 +585,17 @@ impl Game {
                     && object.owner == actor
                     && object.controller == actor
                     && private_hand_member(execution, instruction, objects, object, member);
-                let private_observed_move = method == MoveMethod::Put
-                    && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
-                    && object.zone == "deck"
-                    && object.owner == actor
-                    && object.controller == actor
-                    && self
-                        .state
-                        .knowledge
-                        .get(actor)
-                        .is_some_and(|knowledge| knowledge.knows_location(&object.id))
-                    && (execution.is_private_look_target(objects, member)
-                        || execution.public_look_member(self, objects, member)?);
+                let private_observed_move =
+                    method == MoveMethod::Put
+                        && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
+                        && (self.private_look_deck_member(execution, objects, member)?
+                            || (object.zone == "deck"
+                                && object.owner == actor
+                                && object.controller == actor
+                                && self.state.knowledge.get(actor).is_some_and(|knowledge| {
+                                    knowledge.knows_location(&object.id)
+                                })
+                                && execution.public_look_member(self, objects, member)?));
                 let resolving_source = method == MoveMethod::Put
                     && matches!(kind, ZoneKind::Hand | ZoneKind::Ex)
                     && object.zone == "resolution"
@@ -782,16 +773,17 @@ impl Game {
                 && object.controller == seat
                 && execution.is_private_hand_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
-            let private_look = object.zone == "deck"
-                && object.owner == seat
-                && object.controller == seat
-                && self
-                    .state
-                    .knowledge
-                    .get(seat)
-                    .is_some_and(|knowledge| knowledge.knows_location(&object.id))
-                && (execution.is_private_look_target(objects, member)
-                    || execution.public_look_member(self, objects, member)?)
+            let private_look = ((seat == super::seat_name(execution.context.controller)?
+                && self.private_look_deck_member(execution, objects, member)?)
+                || (object.zone == "deck"
+                    && object.owner == seat
+                    && object.controller == seat
+                    && self
+                        .state
+                        .knowledge
+                        .get(seat)
+                        .is_some_and(|knowledge| knowledge.knows_location(&object.id))
+                    && execution.public_look_member(self, objects, member)?))
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             let revealed_match = object.zone == "deck"
                 && execution.is_revealed_match(objects, member)

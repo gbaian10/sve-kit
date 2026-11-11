@@ -412,7 +412,9 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             Action::Destroy { objects } if damaged_plan(objects).is_some() => {
                 *objects = Selector::Objects { objects: vec![] };
             }
-            Action::Draw { count: amount, .. } => mask_public_number(amount),
+            Action::Draw { count: amount, .. } | Action::Resource { amount, .. } => {
+                mask_public_number(amount);
+            }
             Action::Counter {
                 holder: Holder::Object { object },
                 amount,

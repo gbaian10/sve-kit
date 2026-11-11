@@ -95,11 +95,12 @@ impl Game {
         members: &[ObjectRef],
         selected: Option<&Selector>,
     ) -> Result<()> {
-        let zone = if selected.is_some_and(|objects| look_receipt(objects).is_some()) {
+        let direct_look = selected.is_some_and(|objects| look_receipt(objects).is_some());
+        let mut zone = (direct_look || selected.is_none()).then_some(if direct_look {
             "deck"
         } else {
             "hand"
-        };
+        });
         let mut ids = Vec::new();
         let mut current_members = Vec::with_capacity(members.len());
         for member in members {
@@ -112,7 +113,9 @@ impl Game {
             }) {
                 continue;
             }
-            if (zone == "deck" && object.generation != member.generation.0)
+            let zone = *zone.get_or_insert(object.zone.as_str());
+            if !matches!(zone, "hand" | "deck")
+                || (direct_look && object.generation != member.generation.0)
                 || object.zone != zone
                 || object.controller != object.owner
                 || (selected.is_some()
@@ -120,10 +123,25 @@ impl Game {
             {
                 return Err(invalid("foreign hand reveal member"));
             }
+            if zone == "deck" && !direct_look {
+                let Some(objects) = selected else {
+                    return Err(invalid("foreign hand reveal member"));
+                };
+                if !execution.is_private_look_target(objects, *member) {
+                    return Err(invalid("foreign hand reveal member"));
+                }
+                if !self.private_look_deck_member(execution, objects, *member)? {
+                    return Err(EngineFailure::AuthorizationIntegrity(
+                        "selected Look reveal requires current deck authority".into(),
+                    ));
+                }
+            }
             let current_reference = execution.reference(self, &id)?;
-            self.internal_record_reveal(execution, current_reference, &id)?;
             ids.push(id);
             current_members.push(current_reference);
+        }
+        for (member, id) in current_members.iter().zip(&ids) {
+            self.internal_record_reveal(execution, *member, id)?;
         }
         self.reveal(&ids, "all", &execution.frame(), true)?;
         execution.receipts.insert(

@@ -235,10 +235,13 @@ fn unaffordable_ub_does_not_emit_an_occurrence() {
 
 #[test]
 fn the_pending_body_binds_it_to_the_committed_generation_of_the_ub_holder() {
-    for depart in [false, true] {
+    for (depart, target) in [false, true]
+        .into_iter()
+        .flat_map(|depart| [json!("it"), json!({"event":"holder"})].map(|target| (depart, target)))
+    {
         let mut input = tree(true, false, 0);
         input["cards"]["unit-follower"]["abilities"][1]["auto"]["do"] =
-            json!([{"buff":{"on":"it","power":1,"hp":1}}]);
+            json!([{"buff":{"on":target,"power":1,"hp":1}}]);
         if depart {
             input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] =
                 json!([{"move":{"ref":"this","to":"cemetery"}}]);
@@ -325,4 +328,125 @@ fn an_observer_paid_to_the_cemetery_before_the_ub_commit_does_not_trigger() {
     );
     assert_eq!(state["P1"]["leader"]["life"], 20_u8);
     assert!(game.internal_pending_choice().unwrap().is_none());
+}
+
+#[test]
+fn an_explicit_ub_holder_alias_does_not_authorize_other_subject_events() {
+    let mut input = tree(true, false, 0);
+    for on in [
+        json!({"enter_field":{"ref":"this"}}),
+        json!({"phase":{"whose":"self","which":"end"}}),
+    ] {
+        input["cards"]["unit-follower"]["abilities"][1]["auto"] = json!({
+            "on":on,"do":[{"buff":{"on":"this","power":1}}]
+        });
+        lowerer().lower(&input).unwrap();
+        input["cards"]["unit-follower"]["abilities"][1]["auto"]["do"][0]["buff"]["on"] =
+            json!({"event":"holder"});
+        let error = lowerer().lower(&input).unwrap_err();
+        assert_eq!(error.code, "unsupported_construct");
+        assert!(
+            error
+                .path
+                .starts_with("/cards/unit-follower/abilities/1/auto/do/0")
+        );
+    }
+}
+
+#[test]
+fn cp04_112_empty_cemetery_still_commits_ub_and_both_aliases_buff_its_holder() {
+    for target in [json!("it"), json!({"event":"holder"})] {
+        let mut input = tree(true, false, 0);
+        let abilities = &mut input["cards"]["unit-follower"]["abilities"];
+        abilities[0].as_object_mut().unwrap().remove("activate");
+        // The synthetic card reproduces both CP04-112 clauses without claiming card admission.
+        abilities[0]["fanfare"] = json!({"ub":true,"targets":[{
+            "bind":"returned","from":{"who":"self","zone":"cemetery","kind":"follower","orig_cost_le":2},
+            "upto":3,"distinct_by":"name"
+        }],"do":[{"move":{"ref":"returned","to":"field","result":"entered"}}]});
+        abilities[1]["auto"]["do"] = json!([{"buff":{"on":target,"power":1,"hp":1}}]);
+        let programs = lowerer().lower(&input).unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["construction"] = json!("title");
+        initial["players"]["P1"]["title_code"] = json!("ub_test");
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"observer","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["hand"] =
+            json!([{"id":"producer","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["cemetery"] = json!([]);
+        let mut game = Game::new(
+            title_catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "empty-ub",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        assert!(matches!(
+            game.play_internal_card("producer", PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Entered(_)
+        ));
+        finish(&mut game);
+        let q = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &q.domain else {
+            panic!("fanfare pending")
+        };
+        assert_eq!(options.len(), 1);
+        let mut play = game
+            .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+            .unwrap();
+        if let CardPlay::Awaiting(q) = play {
+            let InputDomain::Targets(domain) = &q.domain else {
+                panic!("empty cemetery targets")
+            };
+            assert_eq!(
+                domain.members.len(),
+                0,
+                "an empty cemetery offers no follower"
+            );
+            assert_eq!(domain.cardinality.minimum, Nat(0));
+            play = game
+                .answer_internal_card(q.actor, q.token, Answer::Targets(vec![]))
+                .unwrap();
+        }
+        let result = resolved(play);
+        assert_eq!(
+            result
+                .progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(
+                    fact,
+                    Fact::AbilityPlayed {
+                        qualification: AbilityQualification::UnionBurst,
+                        ..
+                    }
+                ))
+                .count(),
+            1
+        );
+        finish(&mut game);
+        let q = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &q.domain else {
+            panic!("one other-holder observer")
+        };
+        assert_eq!(options.len(), 1);
+        resolved(
+            game.answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+                .unwrap(),
+        );
+        finish(&mut game);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["objects"]["producer"]["power"], 3);
+        assert_eq!(state["objects"]["producer"]["hp"], 4);
+        assert_eq!(state["objects"]["observer"]["power"], 2);
+        assert_eq!(
+            state["semantic_state"]["counters_this_turn"]["P1"]["ub_activated"],
+            1
+        );
+        assert!(game.internal_pending_choice().unwrap().is_none());
+    }
 }
