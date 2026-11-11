@@ -186,12 +186,13 @@ impl BodyContext<'_> {
             | ObjectReceipt::Movement {
                 receipt: MovementReceipt::Discard { .. },
             } => true,
-            // Only cards leaving the deck carry no field modifications to read as LKI.
+            // Field movements expose only their retained immutable printing.
             ObjectReceipt::Movement {
                 receipt: MovementReceipt::Move { receipt },
             } => matches!(
                 receipt.location(),
                 ReceiptLocation::Local { id } if self.receipt_reads.deck_moves.contains(id)
+                    || self.receipt_reads.field_cemetery.contains(id)
             ),
             ObjectReceipt::Look { receipt } => {
                 matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.published_looks.contains(id))
@@ -205,6 +206,17 @@ impl BodyContext<'_> {
             | ObjectReceipt::RevealUntil { .. } => false,
         };
         if !readable {
+            return Err(unsupported(path));
+        }
+        if matches!(&receipt, ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } }
+            if matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.field_cemetery.contains(id)))
+            && (query.kind.is_some()
+                || query.r#trait.is_some()
+                || query.class.is_some()
+                || query.not_class.is_some()
+                || query.name.is_some()
+                || query.name_contains.is_some())
+        {
             return Err(unsupported(path));
         }
         let (member, predicate) = self.count_query_filter(query, path)?;
@@ -229,7 +241,7 @@ impl BodyContext<'_> {
                 not_class: query.not_class.as_deref(),
                 name: query.name.as_deref(),
                 contains: query.name_contains.as_deref(),
-                original_cost: [None, None, query.orig_cost_ge],
+                original_cost: [query.orig_cost_eq, None, query.orig_cost_ge],
                 ..super::selection::ObjectFilter::default()
             },
             path,

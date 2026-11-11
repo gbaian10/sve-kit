@@ -176,6 +176,7 @@ pub(crate) mod prevention;
 pub(crate) mod printed_keywords;
 mod projections;
 pub(crate) mod quick;
+pub(crate) mod receipt_reads;
 pub(crate) mod removal_restrictions;
 pub(crate) mod reveal_cost;
 pub(crate) mod reveal_until;

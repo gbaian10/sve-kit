@@ -198,3 +198,58 @@ fn ordinary_amulet_has_no_stack_counter_or_stack_departure_replacement() {
         Value::Null
     );
 }
+
+#[test]
+fn replaced_field_move_has_no_successful_before_member_for_original_cost() {
+    let mut action = movement(OwnerZone::Cemetery);
+    let Action::Move { objects, .. } = &mut action else { panic!("movement") };
+    let mut own = subjects();
+    let Selector::Zone { players, .. } = &mut own else { panic!("field") };
+    players.relation = PlayerRelation::SelfPlayer;
+    players.cardinality = Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) };
+    players.text_quantifier = TextQuantifier::Implicit;
+    *objects = Selector::Difference {
+        input: Box::new(own),
+        except: Box::new(Selector::Objects { objects: vec![ObjectOperand::SourceHolder {}] }),
+    };
+    let mut raw = producer_steps(vec![action, Action::Life {
+        player: PlayerRef::Controller {},
+        change: NumericChange::Add { amount: Expr::Literal(Int(1)) },
+    }]).card().clone();
+    let body = raw.abilities[0].node.body.as_mut().unwrap();
+    let effect = body.steps.pop().unwrap();
+    let member = Binding::new(60, ScopeId(3));
+    body.steps.push(Located {
+        source: effect.source.clone(),
+        node: Node::Control { control: Control::If {
+            condition: Expr::Compute(Box::new(Predicate::ReceiptAny {
+                receipt: ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt: ReceiptReference::new(ReceiptId(1)) } },
+                projection: MemberProjection::Before,
+                member,
+                predicate: Expr::Compute(Box::new(Predicate::CompareInt {
+                    left: Expr::Compute(Box::new(IntOperation::InformationOrZero { information: NumberRead::Cost {
+                        object: ObjectView::Snapshot { value: Box::new(Expr::Bound(member)) },
+                        view: CharacteristicView::Original,
+                    } })),
+                    comparison: Comparison::GreaterEqual,
+                    right: Expr::Literal(Int(0)),
+                })),
+            })),
+            then_body: Program { scope: ScopeId(2), steps: vec![effect] },
+            else_body: None,
+        } },
+    });
+    let program = WellFormedCardProgram::check(raw).unwrap();
+    let mut value = initial("BP01-075");
+    value["players"]["P1"]["zones"]["hand"] = json!([]);
+    value["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"BP01-075","state":{"counters":{"stack_counter":2_u8}}}
+    ]);
+    value["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = with_selected_producer_program(&value, &program, producer_selection());
+    activate(&mut game, "P1");
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["leader"]["life"], 20_u8, "a selected Stack amulet that stayed in the field supplied no successful member");
+    assert!(view["P1"]["field"].as_array().unwrap().contains(&json!("source")));
+    assert_eq!(view["objects"]["source"]["counters"]["スタックカウンター"], 1_u8);
+}

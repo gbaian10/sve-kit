@@ -4,6 +4,7 @@ use super::receipt_members::{
 };
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::observation_selection::private_look_choice;
+use crate::ir::receipt_reads;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
     Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead, Comparison, Expr,
@@ -48,11 +49,12 @@ fn check_shape(
     matches(predicate, member, None, None).map(|_| ())
 }
 
-/// Movement receipts whose members provably left the deck, in program order.
+/// Only previously proven producers authorize the corresponding member reads.
 #[derive(Default)]
-pub(super) struct DeckReads {
+pub(super) struct ReceiptReads {
     looks: Vec<Binding<Selector>>,
     moves: BTreeSet<ReceiptId>,
+    field_cemetery: BTreeSet<ReceiptId>,
     cemetery: BTreeSet<ReceiptId>,
     ex: BTreeSet<ReceiptId>,
     field: BTreeSet<ReceiptId>,
@@ -60,8 +62,8 @@ pub(super) struct DeckReads {
     published: BTreeSet<ReceiptId>,
 }
 
-impl DeckReads {
-    /// Records a deck-top movement or a movement of a private Look choice.
+impl ReceiptReads {
+    /// Keeps producer evidence in program order, separate from the member data.
     pub(super) fn record(&mut self, node: &Node) {
         match node {
             Node::Decision { decision } if private_look_choice(decision) => {
@@ -70,6 +72,11 @@ impl DeckReads {
                 }
             }
             Node::Instruction { instruction } => {
+                if instruction.precondition.is_none()
+                    && receipt_reads::field_cemetery(&instruction.action)
+                {
+                    self.field_cemetery.insert(instruction.receipt);
+                }
                 if instruction.precondition.is_none()
                     && matches!(instruction.action, Action::Look { .. })
                 {
@@ -296,10 +303,15 @@ impl DeckReads {
                 member,
                 predicate,
             } => {
-                if !self.moves.contains(&local_receipt(receipt)?) {
+                let id = local_receipt(receipt)?;
+                let field = self.field_cemetery.contains(&id);
+                if !field && !self.moves.contains(&id) {
                     return Err(unsupported(
-                        "receipt member condition outside a deck movement",
+                        "receipt member condition outside a checked movement",
                     ));
+                }
+                if field {
+                    check_original_predicate(predicate, *member)?;
                 }
                 check_shape(receipt, *projection, *member, predicate)?;
                 *condition = Expr::Literal(Bool(false));
@@ -322,7 +334,7 @@ pub(super) fn any(
     let members = members(game, execution, receipt, None)?;
     for view in &members {
         let card = view.card();
-        if matches(predicate, member, Some(card), Some((game, execution, view)))? {
+        if matches(predicate, member, card, Some((game, execution, view)))? {
             return Ok(true);
         }
     }
@@ -363,7 +375,7 @@ pub(super) fn count(
     let mut count = 0_u64;
     for view in &members {
         let card = view.card();
-        if matches(predicate, member, Some(card), Some((game, execution, view)))? {
+        if matches(predicate, member, card, Some((game, execution, view)))? {
             count = count
                 .checked_add(1)
                 .ok_or_else(|| invalid("receipt member count overflow"))?;
@@ -411,8 +423,10 @@ fn matches(
             left: Expr::Compute(operation),
             comparison,
             right: Expr::Literal(Int(threshold)),
-        } if *threshold >= 0 && *comparison == Comparison::GreaterEqual => {
-            original_cost_matches(operation, member, *threshold, original)
+        } if *threshold >= 0
+            && matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) =>
+        {
+            original_cost_matches(operation, member, *comparison, *threshold, original)
         }
         Predicate::KindEquals {
             left: Expr::Live(read),
@@ -473,6 +487,7 @@ fn matches(
 fn original_cost_matches(
     operation: &IntOperation,
     member: Binding<RuntimeObjectView>,
+    comparison: Comparison,
     threshold: i64,
     original: Option<(&Game, &Execution, &MemberView)>,
 ) -> Result<bool> {
@@ -491,5 +506,36 @@ fn original_cost_matches(
         return Ok(false);
     };
     let cost = view.original_cost(game, execution)?;
-    Ok(cost >= threshold)
+    Ok(super::values::compare(cost, comparison, threshold))
+}
+
+fn check_original_predicate(
+    predicate: &Expr<Bool>,
+    member: Binding<RuntimeObjectView>,
+) -> Result<()> {
+    let Expr::Compute(predicate) = predicate else {
+        return match predicate {
+            Expr::Literal(_) => Ok(()),
+            _ => Err(unsupported("field receipt original cost condition")),
+        };
+    };
+    match predicate.as_ref() {
+        Predicate::And { predicates } | Predicate::Or { predicates } => {
+            for child in predicates {
+                check_original_predicate(child, member)?;
+            }
+            Ok(())
+        }
+        Predicate::Not { predicate } => check_original_predicate(predicate, member),
+        Predicate::CompareInt {
+            left: Expr::Compute(operation),
+            comparison,
+            right: Expr::Literal(Int(threshold)),
+        } if *threshold >= 0
+            && matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) =>
+        {
+            original_cost_matches(operation, member, *comparison, *threshold, None).map(|_| ())
+        }
+        _ => Err(unsupported("field receipt only retains original printing")),
+    }
 }

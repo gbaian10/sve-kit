@@ -932,3 +932,6 @@ mod receipt_original_costs;
 
 #[path = "card/static_declarations.rs"]
 mod static_declarations;
+
+#[path = "card/receipt_field_costs.rs"]
+mod receipt_field_costs;

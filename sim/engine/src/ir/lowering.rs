@@ -1339,6 +1339,7 @@ struct ReceiptReads {
     /// Movements of cards leaving the deck, which carry no modifications.
     deck_moves: BTreeSet<ReceiptId>,
     deck_cemetery: BTreeSet<ReceiptId>,
+    field_cemetery: BTreeSet<ReceiptId>,
     /// Whole-zone returns expose successful counts without private before-member selection.
     whole_returns: BTreeSet<ReceiptId>,
 }
@@ -1859,7 +1860,7 @@ impl<'definitions> BodyContext<'definitions> {
             }
             let instruction_id = self.card_allocator.id(&step_path)?;
             let action = self.action(step, &step_path, ability_source, source)?;
-            self.remember(step, ReceiptId(instruction_id), &step_path)?;
+            self.remember(step, ReceiptId(instruction_id), &action, &step_path)?;
             let mut step_source = source.clone();
             step_source.author_path = step_path;
             steps.push(Located {

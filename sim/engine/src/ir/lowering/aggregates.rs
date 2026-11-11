@@ -112,7 +112,7 @@ impl BodyContext<'_> {
             racing: None,
             orig_cost_eq: query.orig_cost_eq,
             orig_cost_le: query.orig_cost_le,
-            orig_cost_ge: None,
+            orig_cost_ge: query.orig_cost_ge,
             cost_eq: None,
             cost_le: None,
             cost_ge: None,
