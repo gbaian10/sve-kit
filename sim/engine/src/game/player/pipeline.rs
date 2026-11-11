@@ -64,6 +64,7 @@ impl Game {
     /// Hand a trusted authority fixture or action to the player submission pipeline.
     /// This mutating entry is unnecessary between player answers; input itself is read-only.
     pub fn advance_player_input(&mut self) {
+        self.enable_player_events();
         if self.player_fault.is_some() {
             return;
         }
@@ -75,6 +76,7 @@ impl Game {
                 Err(restore) => restore,
             });
         }
+        self.publish_player_events();
     }
 
     /// Inspect already prepared input without changing tokens, randomness or events.
@@ -183,6 +185,9 @@ impl Game {
             }
             Command::Answer { token, answer } => self.submit_player_answer(viewer, token, answer),
         };
+        if kind != SubmissionKind::Rejected {
+            self.publish_player_events();
+        }
         Submission {
             kind,
             input: self.input(viewer),

@@ -1,6 +1,7 @@
 use super::player_pipeline::{answer, question};
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::events::{ActionKind, EventKind, MovementMethod};
 use sve_engine::game::player::{
     Command, Input, QuestionPurpose, QuestionShape, QuestionToken, SubmissionKind, Viewer,
 };
@@ -97,6 +98,33 @@ fn player_closing_expires_turn_effects_refreshes_and_draws_before_main_input() {
     );
     assert_eq!(referee["P2"]["hand"], json!(["next-0"]));
     assert_eq!(referee["P2"]["deck"], json!(["next-1"]));
+    let events = game.events(Viewer::P1, None).unwrap().collect::<Vec<_>>();
+    let phases = events
+        .iter()
+        .filter_map(|event| match &event.kind {
+            EventKind::Phase(turn) => turn.phase,
+            EventKind::Movement { .. } | EventKind::Action(_) | EventKind::Result { .. } => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(phases, vec![Phase::End, Phase::Start, Phase::Main]);
+    let stand = events.iter().position(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Stand)).unwrap();
+    let draw = events
+        .iter()
+        .position(|event| {
+            matches!(
+                &event.kind,
+                EventKind::Movement {
+                    method: MovementMethod::Draw,
+                    ..
+                }
+            )
+        })
+        .unwrap();
+    assert!(
+        stand < draw && draw < events.len() - 1,
+        "Start phase stands and draws before Main begins"
+    );
+
     assert_eq!(
         game.submit_player(Viewer::P2, Command::EndPhase { token: old })
             .kind,
@@ -150,6 +178,12 @@ fn player_closing_leader_defeats_are_checked_before_any_action_question() {
             );
         }
         assert!(game.internal_decision(View::Referee).is_none());
+        let losses = game
+            .events(Viewer::P1, None)
+            .unwrap()
+            .filter(|event| matches!(event.kind, EventKind::Result { loser: Some(_), .. }))
+            .count();
+        assert_eq!(losses, if both { 2 } else { 1 });
         assert_eq!(
             game.submit_player(Viewer::P1, Command::Concede).kind,
             SubmissionKind::Rejected

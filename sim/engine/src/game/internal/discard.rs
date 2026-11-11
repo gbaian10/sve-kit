@@ -372,9 +372,7 @@ impl Game {
                     characters,
                     actual_to,
                 };
-                execution
-                    .facts
-                    .push(super::Fact::Discard(Box::new(event.clone())));
+                execution.record_fact(self, super::Fact::Discard(Box::new(event.clone())));
                 events.push((event, movement.after));
             }
         }

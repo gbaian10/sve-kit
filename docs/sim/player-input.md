@@ -112,3 +112,9 @@ Quick 在 pending 與規則檢查完成後出題，即使沒有合法行動也�
 
 本介面沒有新增 wire 或權威恢復格式；目前不持久化玩家故障狀態，typed 對局原有的
 存檔限制仍適用。
+
+## 已提交事件
+
+`Game::events(viewer, after)` 只讀取該觀看者已提交的[公開事件序列](player-events.md)。
+懸置執行的事件延後到權威提交邊界發布；中途狀態仍從 `observe` 讀取。
+事件投影缺口與 A01 的權威 `EngineFault` 分開。

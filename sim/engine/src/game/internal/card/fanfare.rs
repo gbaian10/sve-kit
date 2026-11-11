@@ -80,11 +80,14 @@ impl Game {
         if let Some(nested) = execution.nested.as_mut() {
             nested.committed = true;
         }
-        execution.facts.push(super::Fact::CardPlayed {
-            execution: execution.id,
-            object: played,
-            controller: actor,
-        });
+        execution.record_fact(
+            self,
+            super::Fact::CardPlayed {
+                execution: execution.id,
+                object: played,
+                controller: actor,
+            },
+        );
         self.internal_commit_card_play(&holder, seat)?;
         self.internal_played_card_events(execution, ReceiptId(0))?;
         let group = self.group();
@@ -93,6 +96,7 @@ impl Game {
             &frame.cause,
             group,
         );
+        self.player_step_actor(&event, seat);
         frame.cause = json!({"event":event});
         if execution.nested.is_some() {
             self.move_effect_playing_card(&holder, seat, "field", &frame)?;
@@ -102,17 +106,23 @@ impl Game {
         self.internal_ward_entry_posture(execution, played)?;
         self.internal_numeric_end_resolution(execution.id)?;
         self.internal_preventions_end_resolution(execution.id);
+        let player_source = self.player_subject_before(&holder);
         let resolve_group = self.group();
-        self.emit(
+        let player_step = self.emit(
             json!({"kind":"解決","object":holder}),
             &frame.cause,
             resolve_group,
         );
-        execution.facts.push(super::Fact::CardResolved {
-            execution: execution.id,
-            object: played,
-            controller: actor,
-        });
+        self.player_subject_after(&player_step, player_source);
+        self.player_step_actor(&player_step, seat);
+        execution.record_fact(
+            self,
+            super::Fact::CardResolved {
+                execution: execution.id,
+                object: played,
+                controller: actor,
+            },
+        );
         if execution.nested.is_some() {
             return Ok(());
         }

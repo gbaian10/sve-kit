@@ -118,9 +118,9 @@ impl Game {
             .into_iter()
             .map(|(_, event)| event)
             .collect::<Vec<_>>();
-        execution
-            .facts
-            .extend(changes.iter().copied().map(Fact::Posture));
+        for event in &changes {
+            execution.record_fact(self, Fact::Posture(*event));
+        }
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Posture(changes));

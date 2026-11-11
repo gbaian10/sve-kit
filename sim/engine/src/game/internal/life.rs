@@ -79,7 +79,7 @@ impl Game {
                 false,
                 life_before,
             )?;
-            execution.facts.push(Fact::LifeChange(outcome));
+            execution.record_fact(self, Fact::LifeChange(outcome));
         }
         execution
             .receipts

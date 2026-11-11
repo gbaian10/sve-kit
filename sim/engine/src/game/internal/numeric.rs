@@ -744,7 +744,7 @@ impl Game {
                 changes.push(EventPayload::StatChange {
                     event: fact.event.clone(),
                 });
-                execution.facts.push(Fact::StatChange(fact));
+                execution.record_fact(self, Fact::StatChange(fact));
             }
         }
         self.internal_change_events(&changes, &execution.frame().cause, change_before)?;

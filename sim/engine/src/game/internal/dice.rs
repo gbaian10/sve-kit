@@ -217,7 +217,7 @@ impl Game {
             &execution.frame().cause,
             group,
         );
-        execution.facts.push(super::Fact::Dice(wait.event.clone()));
+        execution.record_fact(self, super::Fact::Dice(wait.event.clone()));
         self.internal_dice_event(&wait.event, execution)
     }
 }

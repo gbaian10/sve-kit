@@ -1,6 +1,7 @@
 use super::super::Slot;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
 use crate::game::internal::{Fact, InstructionOutcome};
+use crate::game::player::events::{ActionDetails, ActionKind, EventError};
 use crate::ir::effect_evolution;
 use crate::ir::{
     Action, Control, EvolutionMode, EvolutionState, EvolveEvent, Instruction, Node, ObjectOperand,
@@ -240,7 +241,24 @@ impl Game {
                 association: *association,
             },
         );
-        execution.facts.push(Fact::Evolved(Box::new(event)));
+        if let Some(step) = frame.cause["event"].as_str() {
+            self.enrich_player_step(
+                step,
+                Some(ActionKind::EffectEvolve),
+                &ActionDetails::Evolution(event.kind),
+                &[],
+            );
+        } else {
+            self.record_player_fact_views(
+                [
+                    Err(EventError::ProjectionGap),
+                    Err(EventError::ProjectionGap),
+                ],
+                &frame.cause,
+                None,
+            );
+        }
+        execution.record_fact(self, Fact::Evolved(Box::new(event)));
         Ok(())
     }
 }

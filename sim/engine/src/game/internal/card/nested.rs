@@ -287,7 +287,7 @@ impl Game {
             return false;
         };
         let mut parent = nested.parent;
-        parent.facts.append(&mut execution.facts);
+        parent.facts.append_recorded(&mut execution.facts);
         parent.receipts.insert(
             nested.receipt,
             InstructionOutcome::NestedPlay(Some(execution.id)),

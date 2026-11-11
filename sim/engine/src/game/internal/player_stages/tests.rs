@@ -46,7 +46,7 @@ fn execution(game: &mut Game) -> Execution {
         movement_capacity: BTreeMap::new(),
         material_selections: BTreeMap::new(),
         effect_evolution_destinations: BTreeMap::new(),
-        facts: Vec::new(),
+        facts: super::super::fact_log::Facts::default(),
         fusion_material_pending: vec![],
         waiting: None,
         destroy_guards: Vec::new(),
