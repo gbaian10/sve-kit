@@ -3,9 +3,9 @@ use crate::ir::{
     Action, Binding, Bool, Cardinality, ChoiceDomain, CostChange, CostSpec, CostStep, Decision,
     DecisionId, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, InputMode,
     Instruction, InstructionContext, InstructionId, Int, MoveDestination, MoveReason, MoveSpec,
-    Nat, ObjectOperand, ObjectView, OwnerZone, PlayCostExchange, PlaySlot, PlayerRef, Posture,
-    PostureRead, Predicate, ReceiptId, SelectionConstraint, SelectionGroup, SelectionSnapshot,
-    SelectionView, Selector, Visibility, ZoneKind,
+    Nat, ObjectOperand, ObjectProperty, ObjectView, OwnerZone, PlayCostExchange, PlaySlot,
+    PlayerRef, Posture, PostureRead, Predicate, ReceiptId, SelectionConstraint, SelectionGroup,
+    SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 enum MaterialAction {
@@ -221,6 +221,8 @@ fn lower_material(
         || material.any
         || material.result.is_some()
         || !matches!(material.sel.who, ast::Side::Controller)
+        || (material.distinct_by.is_some()
+            && (multiple || !matches!(operation, MaterialAction::Banish)))
     {
         return Err(unsupported(path));
     }
@@ -310,7 +312,9 @@ fn materials(
                 cardinality,
             }],
             cardinality,
-            distinct_by: None,
+            distinct_by: material.distinct_by.as_ref().map(|by| match by {
+                ast::MaterialDistinct::OrigCost => ObjectProperty::Cost,
+            }),
             disjoint: Disjointness::Disjoint,
             aggregate_bounds: vec![],
         },

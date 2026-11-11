@@ -33,6 +33,8 @@ pub struct TargetDomain {
     pub cardinality: Cardinality,
     /// Selected objects must not share a rules name.
     pub distinct_names: bool,
+    /// Printed costs keyed by handle when a cost-material answer requires distinct costs.
+    pub original_costs: Option<BTreeMap<u64, i64>>,
     /// Roles assigned in the same answer as this target set.
     pub roles: Vec<TargetRoleDomain>,
 }
@@ -1266,7 +1268,18 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
         }
         entry
     }).collect::<Vec<_>>();
-    json!({"kind":"targets","roles":roles,"distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":domain.members.iter().map(|member| json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name})).collect::<Vec<_>>()})
+    let members = domain.members.iter().map(|member| {
+        let mut candidate = json!({"handle":member.handle,"player":member.player.seat,"card":member.card,"name":member.name});
+        if let Some(cost) = domain.original_costs.as_ref().and_then(|costs| costs.get(&member.handle)) {
+            candidate["orig_cost"] = json!(cost);
+        }
+        candidate
+    }).collect::<Vec<_>>();
+    let mut packet = json!({"kind":"targets","roles":roles,"distinct_names":domain.distinct_names,"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|n| n.0),"members":members});
+    if domain.original_costs.is_some() {
+        packet["distinct_by"] = json!("orig_cost");
+    }
+    packet
 }
 
 fn private_observed_deck(game: &Game, id: &str, actor_seat: &str, enabled: bool) -> bool {
@@ -1419,24 +1432,24 @@ impl Game {
         let on_field_at_capture = characteristics
             .iter()
             .all(|(_, saved)| saved.zone == "field");
-        let cost_cap = self.target_cost_cap(execution, &constraint, &members)?;
         Ok((
             TargetWait {
                 decision: decision.clone(),
                 binding: *binding,
+                cost_cap: self.target_cost_cap(execution, &constraint, &members)?,
                 members,
                 bounds,
                 group_members,
                 group_bounds,
                 characteristics,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
-                cost_cap,
                 on_field_at_capture,
             },
             TargetDomain {
                 members: public,
                 cardinality: bounds,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+                original_costs: None,
                 roles: role_domains(decision),
             },
         ))

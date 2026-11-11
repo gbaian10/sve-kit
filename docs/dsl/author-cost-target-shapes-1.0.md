@@ -74,7 +74,7 @@ one_of 至少兩個 CostAlternative，只選一支；禁止直接 one_of 套 one
 | self_to_cemetery | true | BP07-067；多步 BP01-016 |
 | banish_self | true | BP08-041，auto 本文 pay 的費用 |
 | discard | Material、RandomDiscardMaterial 或 DiscardRef | exact BP03-045；upto CP02-056；random BP03-088；ref BP08-037；groups SD08-017／BP20-SL14；any 合成 |
-| banish | Material 或 BanishTop | exact BP14-023；groups BP08-037；top BP03-073／BP13-015；distinct_by BP10-003；upto／any 合成 |
+| banish | Material 或 BanishTop | exact BP14-023；top BP03-073／BP13-015；distinct_by BP10-003／BP08-037；groups／upto／any 合成 |
 | to_cemetery | Material | exact BP01-SL15；groups BP01-166／BP20-104；upto／any 合成 |
 | return_to_hand | Material | exact BP01-002；any CP01-003；upto／groups 合成 |
 | reveal | Material | exact BP04-022；upto／any／groups 合成 |
