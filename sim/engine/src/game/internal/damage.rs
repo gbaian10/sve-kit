@@ -28,8 +28,14 @@ pub struct ReplacementOption {
 
 #[derive(Clone, Debug)]
 pub(in crate::game) struct DamageOccurrence {
-    pub(super) event: DamageEvent,
+    pub(in crate::game) event: DamageEvent,
     pub(super) source: SourceSnapshot,
+}
+
+impl DamageOccurrence {
+    pub(in crate::game) const fn source_generation(&self) -> u64 {
+        self.source.view().object.generation.0
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -287,9 +293,9 @@ impl Game {
         })?;
         self.commit_damage_uses(&run.consumed)?;
         self.apply_damage(&run.hits, &execution.frame(), Some(&run.facts))?;
-        execution
-            .facts
-            .extend(run.facts.into_iter().map(|fact| Fact::Damage(fact.event)));
+        for fact in run.facts {
+            execution.record_fact(self, Fact::Damage(fact.event));
+        }
         execution.receipts.insert(
             run.instruction.receipt,
             InstructionOutcome::Damage(DamageQuantityOutcome {

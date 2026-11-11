@@ -1116,7 +1116,7 @@ impl Game {
             movement_capacity: BTreeMap::new(),
             material_selections: BTreeMap::new(),
             effect_evolution_destinations: BTreeMap::new(),
-            facts: Vec::new(),
+            facts: super::super::fact_log::Facts::default(),
             waiting: None,
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
@@ -1542,6 +1542,10 @@ impl Game {
         self.commit_internal_play(execution, play)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The original payment and play commit order remains one authority transaction."
+    )]
     fn commit_internal_play(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let source = execution
             .ability
@@ -1552,11 +1556,12 @@ impl Game {
                 seat_name(source.controller)?,
             )?;
             let group = self.group();
-            self.emit(
+            let player_step = self.emit(
                 json!({"kind":"プレイ","object":execution.context.source}),
                 &execution.frame().cause,
                 group,
             );
+            self.player_step_actor(&player_step, &execution.frame().controller);
         }
         let turn = TurnId(self.state.schedule.current()?);
         if let Some(limit) = play.limit {
@@ -1589,19 +1594,22 @@ impl Game {
         if let Some(nested) = execution.nested.as_mut() {
             nested.committed = true;
         }
-        execution.facts.push(if execution.spell {
-            Fact::CardPlayed {
-                execution: execution.id,
-                object: source.holder,
-                controller: source.controller,
-            }
-        } else {
-            Fact::AbilityPlayed {
-                execution: execution.id,
-                source,
-                qualification: play.qualification,
-            }
-        });
+        execution.record_fact(
+            self,
+            if execution.spell {
+                Fact::CardPlayed {
+                    execution: execution.id,
+                    object: source.holder,
+                    controller: source.controller,
+                }
+            } else {
+                Fact::AbilityPlayed {
+                    execution: execution.id,
+                    source,
+                    qualification: play.qualification,
+                }
+            },
+        );
         if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
             self.bump(
                 &format!("{}.ub_activated", seat_name(source.controller)?),

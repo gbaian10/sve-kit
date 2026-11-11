@@ -214,7 +214,7 @@ pub(in crate::game) fn viewer(value: &str) -> Result<Viewer> {
     }
 }
 
-fn zone(value: &str) -> Result<ObservedZone> {
+pub(in crate::game) fn zone(value: &str) -> Result<ObservedZone> {
     match value {
         "deck" => Ok(ObservedZone::Deck),
         "hand" => Ok(ObservedZone::Hand),

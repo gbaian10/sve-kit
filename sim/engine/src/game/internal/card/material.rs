@@ -876,11 +876,14 @@ impl Game {
                 ));
             }
             for member in &members {
-                execution.facts.push(super::Fact::Posture(PostureEvent {
-                    object: *member,
-                    before: Posture::Standing,
-                    after: Posture::Acted,
-                }));
+                execution.record_fact(
+                    self,
+                    super::Fact::Posture(PostureEvent {
+                        object: *member,
+                        before: Posture::Standing,
+                        after: Posture::Acted,
+                    }),
+                );
             }
         } else {
             let (destination, kind, method) = cost_destination(&instruction.action)?;

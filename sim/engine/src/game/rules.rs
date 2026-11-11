@@ -703,6 +703,8 @@ impl Game {
             &cause,
             group,
         );
+        let actor = self.active().to_owned();
+        self.player_step_actor(&event, &actor);
         self.state.flow = json!({"kind":"battle","attacker":id,"attacker_generation":self.object(id)?.generation,"target":target,"target_generation":if target.ends_with(".leader") { None } else { Some(self.object(target)?.generation) },"decision":decision,"cause":{"event":event}});
         let pending = self.collect_triggers(
             "attack",
@@ -765,6 +767,7 @@ impl Game {
     /// Opening and turn start share this entry so Main Begin fires exactly once per turn.
     pub(super) fn start_main(&mut self) -> Result<()> {
         self.state.turn["phase"] = json!("main");
+        self.record_player_phase();
         self.state.flow = json!({"kind":"main"});
         self.internal_phase_event(Phase::Main, SnapshotId(self.state.ir_epoch))?;
         let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
@@ -775,6 +778,7 @@ impl Game {
     pub(in crate::game) fn start_end(&mut self) -> Result<()> {
         let before = SnapshotId(self.state.ir_epoch);
         self.state.turn["phase"] = json!("end");
+        self.record_player_phase();
         self.state.flow = json!({"kind":"end","stage":"triggers"});
         let pending = self.collect_triggers("end", &[], &json!({"decision":self.node}))?;
         self.enqueue(pending);
@@ -862,6 +866,7 @@ impl Game {
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =
             json!(int(&self.state.turn["elapsed_turns"][&seat]).saturating_add(1));
+        self.record_player_phase();
         for value in self.state.counters.values_mut() {
             *value = 0;
         }

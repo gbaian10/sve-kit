@@ -80,26 +80,29 @@ impl Game {
                 None,
             )?;
         }
-        execution.facts.push(Fact::Payment {
-            player: execution.context.controller,
-            event: PaymentEvent {
-                payment: PaymentResult {
-                    complete: Bool(true),
-                    steps: vec![RuntimeReceiptId {
-                        execution: execution.id,
-                        slot: step.instruction.receipt,
-                    }],
-                },
-                component: PaidComponent::EarthRite {
-                    paid: EarthRitePaidComponent {
-                        removed_stack: removed,
+        execution.record_fact(
+            self,
+            Fact::Payment {
+                player: execution.context.controller,
+                event: PaymentEvent {
+                    payment: PaymentResult {
+                        complete: Bool(true),
+                        steps: vec![RuntimeReceiptId {
+                            execution: execution.id,
+                            slot: step.instruction.receipt,
+                        }],
                     },
+                    component: PaidComponent::EarthRite {
+                        paid: EarthRitePaidComponent {
+                            removed_stack: removed,
+                        },
+                    },
+                    phase: PaymentTime::PlayParameter,
+                    zero: Bool(removed == Nat(0)),
+                    replaced: Bool(false),
                 },
-                phase: PaymentTime::PlayParameter,
-                zero: Bool(removed == Nat(0)),
-                replaced: Bool(false),
             },
-        });
+        );
         Ok(())
     }
 }

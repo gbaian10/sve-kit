@@ -136,7 +136,7 @@ impl Game {
             // Both hands have changed before either player's draw observers capture their event.
             for event in events {
                 self.internal_draw_event(event, execution)?;
-                execution.facts.push(Fact::Draw(event));
+                execution.record_fact(self, Fact::Draw(event));
                 actual = actual
                     .checked_add(1)
                     .ok_or_else(|| invalid("player draw count overflow"))?;

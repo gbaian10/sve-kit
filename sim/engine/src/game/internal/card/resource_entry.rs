@@ -646,7 +646,7 @@ impl Game {
                 ordinal: Nat(ordinal),
                 link,
             };
-            execution.facts.push(Fact::Raced(event));
+            execution.record_fact(self, Fact::Raced(event));
             self.internal_race_event(&holder, event, execution)?;
         }
         Ok(())

@@ -198,18 +198,21 @@ impl Game {
             }
         }
         let after = self.move_fusion_source(execution, source)?;
-        execution.facts.push(Fact::Fused(FusedEvent {
-            execution: execution.id,
-            controller: execution.context.controller,
-            subject_before: source,
-            subject_after: after,
-            materials: material_views,
-            material_traits: traits,
-            payment: RuntimeReceiptId {
+        execution.record_fact(
+            self,
+            Fact::Fused(FusedEvent {
                 execution: execution.id,
-                slot: instruction.receipt,
-            },
-        }));
+                controller: execution.context.controller,
+                subject_before: source,
+                subject_after: after,
+                materials: material_views,
+                material_traits: traits,
+                payment: RuntimeReceiptId {
+                    execution: execution.id,
+                    slot: instruction.receipt,
+                },
+            }),
+        );
         Ok((
             Quantity {
                 amount: Int(i64::try_from(count).map_err(invalid)?),

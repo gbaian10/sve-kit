@@ -37,6 +37,7 @@ use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
 use core::result;
+use core::slice::from_ref;
 use serde::ser::Error as _;
 use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
@@ -74,6 +75,7 @@ pub(in crate::game) use history_turn::DamageHistoryFact;
 pub(super) use history_turn::{
     StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact,
 };
+mod fact_log;
 mod life;
 mod movement;
 mod numeric;
@@ -606,7 +608,7 @@ pub(super) struct Execution {
     movement_capacity: BTreeMap<(ReceiptId, u32), Vec<movement::ArrivalMember>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
-    facts: Vec<Fact>,
+    facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
@@ -793,7 +795,7 @@ impl Game {
                 movement_capacity: BTreeMap::new(),
                 material_selections: BTreeMap::new(),
                 effect_evolution_destinations: BTreeMap::new(),
-                facts: Vec::new(),
+                facts: fact_log::Facts::default(),
                 waiting: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
@@ -1463,12 +1465,16 @@ impl Game {
         self.internal_numeric_end_resolution(execution.id)?;
         self.internal_preventions_end_resolution(execution.id);
         if execution.spell {
+            let frame = execution.frame();
+            let player_source = self.player_source_before(&frame.source, frame.source_generation);
             let group = self.group();
-            self.emit(
+            let player_step = self.emit(
                 json!({"kind":"解決","object":execution.context.source}),
                 &execution.frame().cause,
                 group,
             );
+            self.player_subject_after(&player_step, player_source);
+            self.player_step_actor(&player_step, &frame.controller);
         }
         self.internal_fused_events(execution)?;
         match execution.ability {
@@ -1476,18 +1482,21 @@ impl Game {
                 if execution.nested.is_none() {
                     self.card_runtime.checkpoint = Some(execution.id);
                 }
-                execution.facts.push(if execution.spell {
-                    Fact::CardResolved {
-                        execution: execution.id,
-                        object: source.holder,
-                        controller: source.controller,
-                    }
-                } else {
-                    Fact::AbilityResolved {
-                        execution: execution.id,
-                        source,
-                    }
-                });
+                execution.record_fact(
+                    self,
+                    if execution.spell {
+                        Fact::CardResolved {
+                            execution: execution.id,
+                            object: source.holder,
+                            controller: source.controller,
+                        }
+                    } else {
+                        Fact::AbilityResolved {
+                            execution: execution.id,
+                            source,
+                        }
+                    },
+                );
             }
             None => {
                 if execution.nested.is_none() {
@@ -1844,7 +1853,7 @@ impl Game {
             return Ok(false);
         };
         self.internal_draw_event(event, execution)?;
-        execution.facts.push(Fact::Draw(event));
+        execution.record_fact(self, Fact::Draw(event));
         Ok(true)
     }
 
@@ -1861,6 +1870,7 @@ impl Game {
         {
             return Err(invalid("draw generation exhausted"));
         }
+        let player_mark = self.player_event_mark();
         let Some(id) = self.draw(seat, &execution.frame())? else {
             return Ok(None);
         };
@@ -1870,6 +1880,7 @@ impl Game {
                 knowledge.forget_location(&id);
             }
         }
+        self.player_movement_private_hand(player_mark, from_ref(&id));
         let object = execution.reference(self, &id)?;
         Ok(Some(DrawEvent {
             player,
@@ -1897,7 +1908,7 @@ impl Execution {
         Progress {
             complete: !self.terminated && self.waiting.is_none() && self.todo.is_empty(),
             receipts: self.receipts.clone(),
-            facts: self.facts.clone(),
+            facts: self.facts.to_vec(),
         }
     }
     fn prepend(&mut self, program: Program) {

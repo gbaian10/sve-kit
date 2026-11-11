@@ -34,7 +34,10 @@ struct HandleSnapshot {
 
 /// Call-local knowledge boundary; never stored in an execution or event.
 #[derive(Debug)]
-pub(in crate::game) struct PublishedKnowledge(BTreeMap<String, HandleSnapshot>);
+pub(in crate::game) struct PublishedKnowledge(
+    BTreeMap<String, HandleSnapshot>,
+    super::player::events::PublishedEvents,
+);
 
 impl Knowledge {
     pub(super) const fn located(&self) -> &BTreeSet<String> {
@@ -198,6 +201,7 @@ impl Game {
                     )
                 })
                 .collect(),
+            self.player_events.published(),
         )
     }
 
@@ -230,6 +234,7 @@ impl Game {
                 target.learn_members(seat, &interrupted, true)?;
             }
         }
+        target.player_events.restore(&published.1);
         *self = target;
         Ok(())
     }

@@ -2,6 +2,7 @@ use super::*;
 use std::sync::OnceLock;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Viewer;
+use sve_engine::game::player::events::{ActionDetails, ActionKind, EventKind, EventSubject};
 use sve_engine::game::player::observation::Observation;
 use sve_engine::game::player::observation::ObservedZone;
 
@@ -927,5 +928,63 @@ fn entry_origin_evolution_rejects_unknown_zones_and_event_subjects_without_an_ev
             zone,
         }));
         assert_cemetery_qualification_rejected(candidate);
+    }
+}
+
+#[test]
+fn player_events_evolution_stages_preserve_the_actor_and_final_super_state() {
+    let (base, form) = programs();
+    for super_payment in [0_u8, 1] {
+        let mut game = position(1, base, form);
+        game.advance_player_input();
+        game.internal_rule_action(&json!({"do":"evolve","source":"s","evolve_card":"e","pay":{"pp":1,"ep":0,"sep":super_payment}})).unwrap();
+        game.advance_player_input();
+        let stages = game
+            .events(Viewer::P2, None)
+            .unwrap()
+            .filter_map(|event| match &event.kind {
+                EventKind::Action(action) if action.kind == ActionKind::Evolve => Some(action),
+                EventKind::Action(_)
+                | EventKind::Movement { .. }
+                | EventKind::Phase(_)
+                | EventKind::Result { .. } => None,
+            })
+            .collect::<Vec<_>>();
+        let expected = if super_payment == 1 {
+            vec![EvolutionState::Evolved, EvolutionState::SuperEvolved]
+        } else {
+            vec![EvolutionState::Evolved]
+        };
+        assert_eq!(
+            stages
+                .iter()
+                .map(|stage| stage.details.clone())
+                .collect::<Vec<_>>(),
+            expected
+                .into_iter()
+                .map(ActionDetails::Evolution)
+                .map(Some)
+                .collect::<Vec<_>>()
+        );
+        for stage in &stages {
+            assert_eq!(stage.player, Some(Viewer::P1));
+        }
+        let Some(EventSubject::Card(card)) = &stages.last().unwrap().subjects[0] else {
+            panic!("evolved source");
+        };
+        let observed = game.observe(Viewer::P2).unwrap();
+        let current = &observed.players[0]
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap()
+            .cards[0]
+            .card
+            .properties;
+        assert_eq!(
+            card.properties.state.as_ref().unwrap().evolution,
+            current.state.as_ref().unwrap().evolution,
+            "Super evolution freezes the result after its authority flag is committed"
+        );
     }
 }

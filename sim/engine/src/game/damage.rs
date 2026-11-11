@@ -5,7 +5,7 @@
 use super::internal::DamageOccurrence;
 use super::legal::permutations;
 use super::{BTreeMap, Frame, Game, int, list, string};
-use crate::ir::SnapshotId;
+use crate::ir::{DamageFlags, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
@@ -134,7 +134,7 @@ impl Game {
         let group = self.group();
         let mut damaged = Vec::new();
         let mut life_changes = Vec::new();
-        for hit in actual {
+        for (hit_index, hit) in actual.iter().enumerate() {
             let id = string(&hit["target"]);
             let source = string(&hit["source"]);
             let amount = int(&hit["amount"]);
@@ -158,10 +158,38 @@ impl Game {
                 );
             }
             damaged.push(self.event_subject(id)?);
-            self.emit(
+            let source_generation = facts
+                .and_then(|facts| facts.get(hit_index))
+                .map(DamageOccurrence::source_generation)
+                .or_else(|| {
+                    (source == frame.source)
+                        .then_some(frame.source_generation)
+                        .flatten()
+                });
+            let player_source = self.player_source_before(source, source_generation);
+            let player_step = self.emit(
                 json!({"kind":"ダメージ","source":source,"target":id,"amount":amount}),
                 &frame.cause,
                 group,
+            );
+            self.player_source_after(&player_step, player_source);
+            if let Some(fact) = facts.and_then(|facts| facts.get(hit_index)) {
+                self.player_step_actor(&player_step, &format!("P{}", fact.event.controller.seat));
+            }
+            let flags = facts.and_then(|facts| facts.get(hit_index)).map_or_else(
+                || match (hit["battle"] == true, hit["attack"] == true) {
+                    (true, true) => DamageFlags::AttackCombat,
+                    (true, false) => DamageFlags::Combat,
+                    (false, true) => DamageFlags::Attack,
+                    (false, false) => DamageFlags::Ability,
+                },
+                |fact| fact.event.flags,
+            );
+            self.enrich_player_step(
+                &player_step,
+                None,
+                &super::player::events::ActionDetails::Damage(flags),
+                &[],
             );
         }
         pending.extend(self.collect_subject_event(

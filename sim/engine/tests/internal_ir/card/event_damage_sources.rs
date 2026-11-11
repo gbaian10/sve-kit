@@ -1,6 +1,8 @@
 use super::triggers::lastword;
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::events::{ActionKind, EventKind, EventSubject};
 
 fn source_tree(head: &Value, number: &str) -> Value {
     let mut tree = equipment_played::tree(head, number);
@@ -326,6 +328,83 @@ fn departed_sources_keep_their_field_zone_and_trait_without_reading_the_hand_gen
             json!(["s"])
         );
         assert_eq!(observe_all(&mut game), usize::from(has_trait));
+    }
+}
+
+#[test]
+fn player_events_departed_source_cannot_reconnect_to_a_newly_revealed_hand_identity() {
+    let departure = movement::put(
+        1,
+        Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        },
+        OwnerZone::Hand,
+    );
+    let reveal = instruction(
+        2,
+        Action::Reveal {
+            objects: Selector::Zone {
+                players: PlayerSet {
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    ..players(PlayerRelation::SelfPlayer)
+                },
+                zone: ZoneKind::Hand,
+                view: SelectionView::Current {},
+                binding: Binding::new(90, ScopeId(1)),
+                predicate: Box::new(Expr::Literal(Bool(true))),
+            },
+        },
+    );
+    let source = card(vec![ability(
+        1,
+        vec![departure, reveal, field_hit(3, 1, false)],
+    )]);
+    let mut initial = source_position("field", "unit-follower", &json!({}));
+    initial["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"indistinguishable-private-copy","card":"unit-follower"}]);
+    let mut game = source_game(
+        &initial,
+        true,
+        "unit-follower",
+        &source,
+        &printed_observer(true),
+    );
+    game.advance_player_input();
+    activate(&mut game, 1);
+    game.advance_player_input();
+    let events = game.events(Viewer::P2, None).unwrap().collect::<Vec<_>>();
+    assert_eq!(events.iter().filter(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Reveal)).count(), 2);
+    let damage = events
+        .iter()
+        .filter_map(|event| match &event.kind {
+            EventKind::Action(action) if action.kind == ActionKind::Damage => Some(action),
+            EventKind::Action(_)
+            | EventKind::Movement { .. }
+            | EventKind::Phase(_)
+            | EventKind::Result { .. } => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(damage.len(), 2);
+    for hit in damage {
+        assert_eq!(
+            hit.player,
+            Some(Viewer::P1),
+            "The typed damage controller is retained independently of the departed source"
+        );
+        let Some(EventSubject::Card(source)) = &hit.subjects[0] else {
+            panic!("historical public source");
+        };
+        assert_eq!(
+            source.handle, None,
+            "An old field source cannot select one of the newly disclosed identical hand copies"
+        );
+        assert!(
+            source.properties.state.as_ref().unwrap().stats.is_some(),
+            "The source keeps its field snapshot rather than reading the new hand generation"
+        );
     }
 }
 

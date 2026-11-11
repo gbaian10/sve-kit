@@ -129,7 +129,7 @@ impl Game {
                 slot: instruction.receipt,
             },
         };
-        execution.facts.push(Fact::Equipped(event));
+        execution.record_fact(self, Fact::Equipped(event));
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Equipped(vec![event]),

@@ -1,6 +1,7 @@
 use super::ordering::{look, looked, order};
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::events::EventKind;
 use sve_engine::game::player::observation::{
     CardObservation, Observation, ObservedZone, ZoneObservation,
 };
@@ -282,6 +283,7 @@ fn public_movement_preserves_identification_across_authority_generations() {
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     let mut game = board(&initial);
+    game.advance_player_input();
     let before = [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap());
     let generation = game.projection(View::Referee).unwrap()["objects"]["s"]["generation"].clone();
     game.execute_internal(
@@ -296,6 +298,7 @@ fn public_movement_preserves_identification_across_authority_generations() {
         context(1),
     )
     .unwrap();
+    game.advance_player_input();
     assert_ne!(
         game.projection(View::Referee).unwrap()["objects"]["s"]["generation"],
         generation
@@ -303,6 +306,17 @@ fn public_movement_preserves_identification_across_authority_generations() {
     for observation in before {
         let old = &visible(&observation, Viewer::P1, ObservedZone::Field)[0].handle;
         let after = game.observe(observation.viewer).unwrap();
+        let events = game
+            .events(observation.viewer, None)
+            .unwrap()
+            .collect::<Vec<_>>();
+        assert_eq!(events.len(), 1);
+        assert!(
+            matches!(&events[0].kind, EventKind::Movement { before, after, .. }
+            if before.card.as_ref().and_then(|card| card.handle.as_ref()) == Some(old)
+            && after.card.as_ref().and_then(|card| card.handle.as_ref()) == Some(old))
+        );
+
         assert_eq!(
             &visible(&after, Viewer::P1, ObservedZone::Cemetery)[0].handle,
             old

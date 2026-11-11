@@ -3,6 +3,7 @@
 //! Authority setup hands control to this interface with `Game::advance_player_input`.
 //! The observation module exposes authorized state; player submissions are separate.
 
+pub mod events;
 pub mod observation;
 
 mod closing;

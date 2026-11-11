@@ -6,6 +6,7 @@
 
 use super::*;
 use core::array::from_fn;
+use sve_engine::game::player::events::{ActionKind, EventKind};
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, DeckConstruction, Input, OpeningAnswer, OpeningQuestion, PlayerDeck, Question,
@@ -197,6 +198,7 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
         "title-opening",
     )
     .unwrap();
+    assert_eq!(game.events(Viewer::P2, None).unwrap().count(), 0);
     let original = question(&game, Viewer::P1);
     let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = original.shape else {
         panic!("start amulet");
@@ -223,6 +225,9 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
         ),
         SubmissionKind::Applied
     );
+    let placed = game.events(Viewer::P2, None).unwrap().collect::<Vec<_>>();
+    assert_eq!(placed.len(), 1);
+    assert!(matches!(&placed[0].kind, EventKind::Movement { after, .. } if after.card.is_none()));
     assert_eq!(
         submit(
             &mut game,
@@ -243,6 +248,13 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
         question(&game, Viewer::P2).shape,
         QuestionShape::ActionWindow
     ));
+    let events = game.events(Viewer::P2, None).unwrap().collect::<Vec<_>>();
+    assert_eq!(events.iter().filter(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Reveal)).count(), 1,
+        "The opening amulet is disclosed only after both mulligans");
+    assert!(
+        matches!(&events.last().unwrap().kind, EventKind::Phase(turn) if turn.phase == Some(Phase::Main))
+    );
+
     for viewer in [Viewer::P1, Viewer::P2] {
         let observation = game.observe(viewer).unwrap();
         let field = observation
