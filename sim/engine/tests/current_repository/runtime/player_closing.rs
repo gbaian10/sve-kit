@@ -3,6 +3,7 @@
     reason = "Serial real-card rule scenarios stop on unexpected public input."
 )]
 
+use sve_engine::game::player::{DecisionShape, DiscardKind};
 use super::*;
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
@@ -253,23 +254,23 @@ fn player_closing_machinus_recovery_finishes_before_repeating_the_hand_limit_rul
     loop {
         let current = question(&game, Viewer::P1);
         let payload = match current.shape {
-            QuestionShape::Decision(InputDomain::Pending(options)) => {
+            QuestionShape::Decision(DecisionShape::Pending(options)) => {
                 assert_eq!(options.len(), 1);
                 assert_eq!(options[0].card, "BP12-103");
                 seen.push("pending");
                 Answer::Pending(options[0].handle)
             }
-            QuestionShape::Decision(InputDomain::Targets(domain)) => {
+            QuestionShape::Decision(DecisionShape::Targets(domain)) => {
                 assert_eq!(domain.members.len(), 1);
                 assert_eq!(domain.members[0].card.as_deref(), Some("BP07-017"));
                 seen.push("target");
                 Answer::Targets(vec![domain.members[0].handle])
             }
-            QuestionShape::Decision(InputDomain::OptionalCost) => {
+            QuestionShape::Decision(DecisionShape::OptionalCost) => {
                 seen.push("optional cost");
                 Answer::OptionalCost(true)
             }
-            QuestionShape::Decision(InputDomain::CostMaterials(domain)) => {
+            QuestionShape::Decision(DecisionShape::CostMaterials(domain)) => {
                 assert_eq!(domain.members.len(), 1);
                 seen.push("tree payment");
                 Answer::CostMaterials(vec![domain.members[0].handle])
@@ -325,7 +326,7 @@ fn player_closing_end_triggers_finish_before_quick_and_start_triggers_follow_the
         .as_i64()
         .unwrap();
     end(&mut game, Viewer::P1);
-    let QuestionShape::Decision(InputDomain::Pending(options)) = question(&game, Viewer::P1).shape
+    let QuestionShape::Decision(DecisionShape::Pending(options)) = question(&game, Viewer::P1).shape
     else {
         panic!("end trigger");
     };
@@ -337,7 +338,7 @@ fn player_closing_end_triggers_finish_before_quick_and_start_triggers_follow_the
         power + 1
     );
     answer(&mut game, Viewer::P2, Answer::Quick(None));
-    let QuestionShape::Decision(InputDomain::Pending(start_options)) =
+    let QuestionShape::Decision(DecisionShape::Pending(start_options)) =
         question(&game, Viewer::P2).shape
     else {
         panic!("main start trigger");
@@ -356,7 +357,7 @@ fn player_closing_end_triggers_finish_before_quick_and_start_triggers_follow_the
         Viewer::P2,
         Answer::Pending(start_options[0].handle),
     );
-    let QuestionShape::Decision(InputDomain::Targets(domain)) = question(&game, Viewer::P2).shape
+    let QuestionShape::Decision(DecisionShape::Discard { kind: DiscardKind::Effect, cards: domain }) = question(&game, Viewer::P2).shape
     else {
         panic!("start discard");
     };

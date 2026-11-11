@@ -1,7 +1,7 @@
 use super::player_pipeline::{answer, question};
 use super::*;
-use sve_engine::game::internal::InputDomain;
 use sve_engine::game::internal::SearchAnswer;
+use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::events::EventSubject;
 use sve_engine::game::player::events::{
     ActionKind, EventError, EventKind, MovementMethod, PlayerEvent,
@@ -382,7 +382,7 @@ fn player_events_private_look_and_order_do_not_change_the_opponents_sequence() {
             )
             .unwrap();
         branch.advance_player_input();
-        let QuestionShape::Decision(InputDomain::Order(cards)) =
+        let QuestionShape::Decision(DecisionShape::Order(cards)) =
             question(&branch, Viewer::P1).shape
         else {
             panic!("order");

@@ -766,3 +766,100 @@ fn optional_counter_change_is_visible_to_a_later_counter_read() {
         );
     }
 }
+
+#[test]
+fn player_question_may_and_resolution_alternative_keep_the_original_answers() {
+    use crate::player_pipeline::{answer, question, selected_answer};
+    use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind, Viewer};
+
+    let mut input = tree(
+        &json!({"bind":"outer","from":{"who":"opp","zone":"field","kind":"follower"},"upto":1}),
+        &json!({"optional":{"do":[
+            {"choose":{"bind":"inner","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}}
+        ],"then":[
+            {"either":{"options":[
+                [{"damage":{"to":"inner","n":1}}],
+                [{"damage":{"to":"inner","n":2}}]
+            ]}}
+        ]}}),
+    );
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .remove(0);
+    let programs = lowerer().lower(&input).unwrap();
+    for accept in [false, true] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "nested-optional",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+        game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap();
+        game.advance_player_input();
+        let may = question(&game, Viewer::P1);
+        assert_eq!(may.shape, QuestionShape::Decision(DecisionShape::May));
+        assert_eq!(
+            answer(
+                &mut game,
+                Viewer::P1,
+                selected_answer(&may.shape, &[], accept)
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        if accept {
+            let target = question(&game, Viewer::P1);
+            let QuestionShape::Decision(DecisionShape::Targets(domain)) = &target.shape else {
+                panic!("inner target")
+            };
+            assert_eq!(domain.members.len(), 1);
+            assert_eq!(
+                answer(
+                    &mut game,
+                    Viewer::P1,
+                    selected_answer(&target.shape, &[domain.members[0].handle], true)
+                )
+                .kind,
+                SubmissionKind::Applied
+            );
+            let alternative = question(&game, Viewer::P1);
+            let QuestionShape::Decision(DecisionShape::ResolutionAlternative {
+                modes,
+                cardinality,
+                count,
+            }) = &alternative.shape
+            else {
+                panic!("resolution alternative")
+            };
+            assert_eq!(modes.as_slice(), &[ModeId(1), ModeId(2)]);
+            assert_eq!(cardinality.minimum, Nat(1));
+            assert_eq!(*count, Nat(1));
+            assert_eq!(
+                answer(
+                    &mut game,
+                    Viewer::P1,
+                    selected_answer(&alternative.shape, &[modes[1].0], true)
+                )
+                .kind,
+                SubmissionKind::Applied
+            );
+        }
+        assert!(game.internal_decision(View::Referee).is_none());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
+            u8::from(accept) * 2
+        );
+    }
+}

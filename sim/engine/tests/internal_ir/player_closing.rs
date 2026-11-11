@@ -1,6 +1,6 @@
 use super::player_pipeline::{answer, end_command, question};
 use super::*;
-use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::events::{ActionKind, EventKind, MovementMethod};
 use sve_engine::game::player::{
     Command, Input, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
@@ -79,7 +79,7 @@ fn player_closing_expires_turn_effects_refreshes_and_draws_before_main_input() {
     let old = end(&mut game);
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::Decision(InputDomain::Quick { .. })
+        QuestionShape::Decision(DecisionShape::Quick { .. })
     ));
     let next = answer(&mut game, Viewer::P2, Answer::Quick(None));
     assert_eq!(next.kind, SubmissionKind::Applied);

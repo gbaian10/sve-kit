@@ -4,6 +4,7 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::Viewer;
 
 fn reroll() -> Located<Ability> {
@@ -161,7 +162,8 @@ fn player_pipeline_reroll_waiting_summary_preserves_the_public_die() {
         .unwrap();
     for _ in 0..2 {
         let question = player_question(&game, Viewer::P1);
-        let QuestionShape::Decision(InputDomain::DiceReroll { value, remaining }) = question.shape
+        let QuestionShape::Decision(DecisionShape::DiceReroll { value, remaining }) =
+            question.shape
         else {
             panic!("reroll question");
         };

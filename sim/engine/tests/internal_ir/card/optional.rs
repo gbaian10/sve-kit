@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::observation::{CostGroupKind, PendingCost};
 
 fn tree() -> Value {
@@ -152,7 +153,7 @@ fn player_pipeline_illegal_optional_payment_reverts_without_reviving_the_pending
     let retry = player_question(&game, Viewer::P1);
     assert!(matches!(
         retry.shape,
-        QuestionShape::Decision(InputDomain::Pending(_))
+        QuestionShape::Decision(DecisionShape::Pending(_))
     ));
     assert_ne!(retry.token, pending.token);
     let before = exact_authority(&game);

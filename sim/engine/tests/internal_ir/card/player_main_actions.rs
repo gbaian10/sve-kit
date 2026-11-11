@@ -2,7 +2,7 @@
 
 use super::*;
 use crate::player_pipeline::{answer, end_command, question};
-use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     AttackTarget, Command, Input, MainActionAnswer, MainActions, MainIntent, MainIntentKind,
@@ -184,7 +184,7 @@ fn player_main_actions_reject_wrong_seat_target_payload_and_retired_intent() {
     );
     let quick = question(&game, Viewer::P2);
     assert!(
-        matches!(&quick.shape, QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty())
+        matches!(&quick.shape, QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.is_empty())
     );
     assert_eq!(
         answer(&mut game, Viewer::P2, Answer::Quick(None)).kind,
@@ -311,7 +311,7 @@ fn player_main_actions_attack_pending_finishes_before_the_empty_quick_window_and
         SubmissionKind::Applied
     );
     let pending = question(&game, Viewer::P1);
-    let QuestionShape::Decision(InputDomain::Pending(options)) = pending.shape else {
+    let QuestionShape::Decision(DecisionShape::Pending(options)) = pending.shape else {
         panic!("attack pending");
     };
     assert_eq!(options.len(), 1);
@@ -320,7 +320,7 @@ fn player_main_actions_attack_pending_finishes_before_the_empty_quick_window_and
         SubmissionKind::Applied
     );
     assert!(
-        matches!(&question(&game, Viewer::P2).shape, QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty())
+        matches!(&question(&game, Viewer::P2).shape, QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.is_empty())
     );
     assert_eq!(
         answer(&mut game, Viewer::P2, Answer::Quick(None)).kind,
