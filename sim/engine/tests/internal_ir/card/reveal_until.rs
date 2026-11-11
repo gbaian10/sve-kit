@@ -475,3 +475,35 @@ fn original_cost_boundary_ignores_effective_cost_changes() {
         "original four never matches even at effective one"
     );
 }
+
+#[test]
+fn a_raw_prefix_does_not_gain_a_dynamic_cost_condition() {
+    let mut raw = lowerer()
+        .lower(&tree())
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap()
+        .card()
+        .clone();
+    let Node::Instruction { instruction } =
+        &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("prefix")
+    };
+    let Action::RevealUntil {
+        candidate,
+        predicate,
+        ..
+    } = &mut instruction.action
+    else {
+        panic!("prefix")
+    };
+    let Expr::Compute(operation) = predicate else {
+        panic!("prefix conditions")
+    };
+    let Predicate::And { predicates } = operation.as_mut() else {
+        panic!("kind and cost")
+    };
+    predicates[1] = condition_inputs::unprepared_cost(*candidate);
+    WellFormedCardProgram::check(raw).unwrap_err();
+}
