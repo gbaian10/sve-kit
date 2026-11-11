@@ -1,5 +1,6 @@
 use crate::ir::player_stages;
 mod capacity;
+mod counts;
 mod dynamic;
 pub(super) mod equipment;
 
@@ -15,8 +16,8 @@ use crate::ir::events::timing::opponent;
 use crate::ir::{
     Action, CardKind, CardName, Control, Expr, Instruction, LkiReason, Located, NameOperation, Nat,
     Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture, Program, ReceiptId,
-    Requirement, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate,
-    ZoneKind, ZoneRef,
+    Requirement, SourceSpan, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec,
+    TokenTemplate, ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -61,11 +62,7 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     tokens
         .iter()
         .all(|token| match &token.template {
-            TokenTemplate::Fixed { .. } => {
-                matches!(token.count, Expr::Literal(_))
-                    || dynamic::projection(&token.count).is_some()
-                    || dynamic::zone_count(&token.count).is_some()
-            }
+            TokenTemplate::Fixed { .. } => counts::CountPlan::compile(&token.count).is_ok(),
             TokenTemplate::Name { name, kind } => {
                 if !matches!(kind, None | Some(CardKind::Follower)) {
                     return false;
@@ -84,7 +81,7 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
 pub(in crate::game::internal) struct TokenPlan {
     instruction: Instruction,
     destination: ZoneRef,
-    counts: Vec<dynamic::CountPlan>,
+    counts: Vec<counts::CountPlan>,
 }
 impl TokenPlan {
     pub(in crate::game::internal) fn compile(instruction: &Instruction) -> Result<Self> {
@@ -95,7 +92,7 @@ impl TokenPlan {
             destination: destination.clone(),
             counts: tokens
                 .iter()
-                .map(|token| dynamic::CountPlan::compile(&token.count))
+                .map(|token| counts::CountPlan::compile(&token.count))
                 .collect::<Result<_>>()?,
         })
     }
@@ -133,17 +130,18 @@ pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
             if matches!(frozen.as_ref(), ObjectFrozen::LeaveFieldObjectBefore { .. })))
 }
 
-pub(super) fn check_action(action: &Action) -> Result<()> {
+pub(super) fn check_action(action: &Action, source: &SourceSpan) -> Result<()> {
     if matches!(action, Action::Token { .. }) && specification(action).is_none() {
-        return Err(unsupported(
-            "token creation with admitted counts and destination",
-        ));
+        return Err(unsupported(&format!(
+            "token creation with admitted counts and destination at {}:{} ({})",
+            source.card_no, source.line, source.author_path
+        )));
     }
     Ok(())
 }
 
-pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
-    check_action(action)?;
+pub(super) fn check_catalog(game: &Game, action: &Action, source: &SourceSpan) -> Result<()> {
+    check_action(action, source)?;
     if let Some((tokens, zone)) = specification(action) {
         for token in tokens {
             let TokenTemplate::Fixed { template } = &token.template else {
@@ -561,10 +559,10 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                                 "{path}/instruction/action/tokens/{token_index}/template/name"
                             ));
                         }
-                        if dynamic::projection(&token.count).is_some() {
-                            accepted.counts.push(format!(
+                        if let Ok(plan) = counts::CountPlan::compile(&token.count) {
+                            accepted.counts.extend(plan.before_paths(&format!(
                                 "{path}/instruction/action/tokens/{token_index}/count"
-                            ));
+                            )));
                         }
                     }
                 }
@@ -653,8 +651,8 @@ pub(super) fn mask_operands(node: &mut Node) {
                 // A validated literal constrains the new template; it observes no private card.
                 *kind = None;
             }
-            if dynamic::projection(&token.count).is_some() {
-                token.count = Expr::Literal(Nat(0));
+            if valid {
+                counts::CountPlan::mask_before(&mut token.count);
             }
         }
     }

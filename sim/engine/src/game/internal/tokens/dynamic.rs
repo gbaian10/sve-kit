@@ -1,35 +1,11 @@
 use super::super::{Execution, Fact, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::player_stages;
 use crate::ir::{
-    Control, DestroyOutcome, Expr, IntOperation, LkiReason, MemberProjection, MoveMethod,
-    MovementReceipt, Nat, NatOperation, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectView,
-    PlayerOrder, PlayerRead, PlayerRef, PlayerRelation, Predicate, ReceiptLocation,
-    ReceiptReference, Role, Selector, StageMode, TextQuantifier, ZoneKind,
+    Control, DestroyOutcome, Expr, LkiReason, MemberProjection, MoveMethod, MovementReceipt, Nat,
+    NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectView, PlayerOrder, PlayerRead,
+    PlayerRef, PlayerRelation, Predicate, ReceiptLocation, ReceiptReference, Role, Selector,
+    StageMode, TextQuantifier, ZoneKind,
 };
-
-pub(super) fn zone_count(value: &Expr<Nat>) -> Option<&Selector> {
-    let Expr::Compute(operation) = value else {
-        return None;
-    };
-    let NatOperation::CheckedInt {
-        value: Expr::Compute(integer),
-    } = operation.as_ref()
-    else {
-        return None;
-    };
-    let IntOperation::FromNat {
-        value: Expr::Live(read),
-    } = integer.as_ref()
-    else {
-        return None;
-    };
-    let NatRead::ZoneCount { selector } = read.as_ref() else {
-        return None;
-    };
-    (super::super::card::selection::field_selector(selector).is_ok()
-        || super::super::card::selection::public_zone_selector(selector).is_ok())
-    .then_some(selector)
-}
 
 pub(super) fn projection(
     value: &Expr<Nat>,
@@ -88,36 +64,7 @@ pub(super) fn projection(
     Some((receipt, player))
 }
 
-#[derive(Clone, Debug)]
-pub(super) enum CountPlan {
-    Literal(u64),
-    PublicZone(Expr<Nat>),
-    DestroyedController(ReceiptReference<DestroyOutcome>, PlayerRef),
-}
-impl CountPlan {
-    pub(super) fn compile(value: &Expr<Nat>) -> Result<Self> {
-        if let Expr::Literal(Nat(count)) = value {
-            return Ok(Self::Literal(*count));
-        }
-        if zone_count(value).is_some() {
-            return Ok(Self::PublicZone(value.clone()));
-        }
-        let (receipt, player) =
-            projection(value).ok_or_else(|| unsupported("destroyed-controller token count"))?;
-        Ok(Self::DestroyedController(receipt.clone(), player.clone()))
-    }
-    pub(super) fn evaluate(&self, execution: &Execution, game: &super::super::Game) -> Result<u64> {
-        match self {
-            Self::Literal(count) => Ok(*count),
-            Self::PublicZone(value) => execution.natural(game, value).map(|value| value.0),
-            Self::DestroyedController(receipt, player) => {
-                destroyed_controller(execution, game, receipt, player)
-            }
-        }
-    }
-}
-
-fn destroyed_controller(
+pub(super) fn destroyed_controller(
     execution: &Execution,
     game: &super::super::Game,
     receipt: &ReceiptReference<DestroyOutcome>,
@@ -198,7 +145,7 @@ pub(crate) fn check_each(control: &Control) -> Result<()> {
     };
     if zone.player != (PlayerRef::Bound { binding: *player })
         || instruction.actor != zone.player
-        || projection(&token.count).is_some_and(|(_, counted)| counted != &zone.player)
+        || !super::counts::CountPlan::compile(&token.count)?.matches_player(&zone.player)
     {
         return Err(unsupported(
             "token destination and counted player must match stage",

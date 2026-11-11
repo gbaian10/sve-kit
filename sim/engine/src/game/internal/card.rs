@@ -1339,7 +1339,7 @@ fn check_instruction(
     source: &SourceSpan,
     ability_source: &AbilitySource,
 ) -> Result<()> {
-    super::tokens::check_catalog(game, &instruction.action)?;
+    super::tokens::check_catalog(game, &instruction.action, source)?;
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
     super::transform::check_catalog(game, &instruction.action)?;
     nested::check(&instruction.action)?;
@@ -1424,6 +1424,7 @@ fn check_nodes(
         check_node_source(game, &located.source, source)?;
         match &located.node {
             Node::Instruction { instruction } => {
+                super::tokens::check_action(&instruction.action, &located.source)?;
                 check_instruction(game, instruction, source, ability_source)?;
             }
             Node::Control {

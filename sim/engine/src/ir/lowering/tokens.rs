@@ -9,6 +9,7 @@ use crate::ir::{
     Selector, SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec, TokenTemplate,
     TokenTemplateId, ZoneRef,
 };
+use alloc::collections::BTreeSet;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -128,16 +129,20 @@ impl BodyContext<'_> {
         value: Option<&ast::TokenCount>,
         path: &str,
     ) -> Result<Expr<Nat>, LoweringError> {
-        if let Some(ast::TokenCount::Query { count }) = value {
-            return Ok(Expr::Compute(Box::new(NatOperation::CheckedInt {
-                value: self.zone_count(count, path)?,
-            })));
-        }
-        let Some(ast::TokenCount::Receipt { count }) = value else {
-            return Ok(Expr::Literal(Nat(match value {
-                Some(ast::TokenCount::Fixed(count)) => *count,
-                _ => 1,
-            })));
+        let count = match value {
+            None => return Ok(Expr::Literal(Nat(1))),
+            Some(ast::TokenCount::Fixed(count)) => return Ok(Expr::Literal(Nat(*count))),
+            Some(ast::TokenCount::Query { count }) => {
+                return Ok(Expr::Compute(Box::new(NatOperation::CheckedInt {
+                    value: self.zone_count(count, path)?,
+                })));
+            }
+            Some(ast::TokenCount::Number(number)) => {
+                return Ok(Expr::Compute(Box::new(NatOperation::CheckedInt {
+                    value: self.number(number, path, &mut BTreeSet::new())?,
+                })));
+            }
+            Some(ast::TokenCount::Receipt { count }) => count,
         };
         let ast::BeforeOnly::Before = count.r#in.view;
         let ast::EqualOnly::Eq = count.r#where.player_cmp.op;

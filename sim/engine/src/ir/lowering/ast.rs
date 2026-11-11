@@ -657,6 +657,7 @@ pub(super) enum TokenCount {
     Fixed(u64),
     Receipt { count: TokenCollection },
     Query { count: CountQuery },
+    Number(Box<Number>),
 }
 
 #[derive(Deserialize)]

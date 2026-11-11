@@ -520,7 +520,7 @@ fn play_requirement(code: &str) -> bool {
     )
 }
 
-fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
+fn check_action(action: &Action, source: &AbilitySource, span: &SourceSpan) -> Result<()> {
     super::dice::check_action(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
@@ -544,7 +544,7 @@ fn check_action(action: &Action, source: &AbilitySource) -> Result<()> {
         return super::card::ability_restrictions::check_install(action);
     }
     super::search::check_action(action)?;
-    super::tokens::check_action(action)?;
+    super::tokens::check_action(action, span)?;
     super::tokens::equipment::check_action(action)?;
     super::transform::check_action(action)?;
     super::movement::check_action(action)?;
@@ -680,7 +680,7 @@ fn check_program(
                     check_card(body, source, &instruction.source, Some(trigger))?;
                 }
                 super::dice::check_instruction(instruction)?;
-                check_action(&instruction.action, &instruction.source)?;
+                check_action(&instruction.action, &instruction.source, &step.source)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {

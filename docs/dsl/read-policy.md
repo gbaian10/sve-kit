@@ -76,6 +76,21 @@ Delay 安裝時保留該 Delay 的本文計畫；pending 與巢狀執行隨定�
 
 一般 Token、EachPlayer token stage 及 Delay 本文的 Token 在准入時選定數量讀者：
 固定值、既有公開區域計數，或 destroy-success 的 Before controller 計數。
+固定 token 模板的數量可沿既有 Nat／Int／Bool 型別組合這些葉：
+CheckedInt、FromNat、七種 Arithmetic、Conditional，以及 And／Or／Not、
+CompareNat／CompareInt；作者的既有 `per` 降成正 literal 除數的 FloorDivide，
+不另造 token 專用運算。每個 CheckedInt 都在載入時證明結果非負，
+包括條件與兩個分支中的巢狀節點；無法證明即附來源位置拒絕。
+中間 Int 可為負，最終用 Maximum 拉回非負範圍，或透過上下界證明的減法可准入；
+區間端點的飽和只供編譯期證明，runtime 仍用共用 checked arithmetic。
+確定的常數溢位與 Nat 轉 Int 越界在載入拒絕，獨立 Nat literal 保留 u64 範圍。
+作者 JSON 仍遵守既有的安全整數界；u64 範圍指 raw IR 的 Nat literal。
+And／Or 沿用 eager 求值，Conditional 只求選中的分支；編譯仍檢查所有分支。
+EachPlayer 遞迴核對每個 Destroy-controller 葉的計數玩家與目的地玩家相同。
+准入遮罩只涵蓋這些 Before 葉，外層運算與條件仍接受一般 capability 檢查。
+PP X、Resource、Event、Dice、DistinctNames 與私有區域等新葉不在此試點內；
+Name 模板仍只接受固定一張，成本 token、mixed EX 與 Transform 不隨之放寬。
+公開 selector 仍須通過既有選取驗證與觀測 spine 限制，數量計畫不授予新的身份讀取。
 執行時依自己的計畫查找 InstructionId，且完整指示必須一致；缺少或不一致即拒絕，
 不退回合法形狀推測。destroy 計數仍逐項驗證成功 receipt、departure fact 與離場前控制者。
 付款成功、物件世代、位置及真實 reveal 仍在使用時重驗，計畫不能代替它們。
@@ -84,4 +99,4 @@ mixed EX 的固定一張 Simultaneous 家族仍使用獨立的既有准入及 pr
 Transform 也保留自己的准入，按各控制者實際成功回條算出張數後，才交共用配置核心。
 配置核心只收已求值的模板與數量，保留整卡准入、種類、容量、同名上限與選擇流程；
 它不接受可任意求值的數量 Expr。同名建立的 follower 種類限制仍由 Token consumer 保留。
-這些界線不授予其他 token 算式或完整卡片的執行資格。
+這些界線不授予未列出的 token 讀者或完整卡片的執行資格。
