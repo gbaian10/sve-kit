@@ -51,13 +51,17 @@ fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
         },
+        ObjectReceipt::Fusion { receipt } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
         _ => return Err(unsupported("receipt member condition")),
     };
     id.copied()
         .ok_or_else(|| unsupported("iterated receipt member condition"))
 }
 
-/// The public mask admits only discard receipts; deck movements need their producer.
+/// Discards and Fusion costs have public before-members. Deck moves need a checked producer.
 pub(super) fn check(
     receipt: &ObjectReceipt,
     projection: MemberProjection,
@@ -68,7 +72,7 @@ pub(super) fn check(
         receipt,
         ObjectReceipt::Movement {
             receipt: MovementReceipt::Discard { .. }
-        }
+        } | ObjectReceipt::Fusion { .. }
     ) {
         return Err(unsupported(
             "receipt member condition without a checked producer",
@@ -382,6 +386,24 @@ fn members(
     destination: Option<ZoneKind>,
 ) -> Result<Vec<(MemberCard, ObjectRef)>> {
     let id = local_receipt(receipt)?;
+    if matches!(receipt, ObjectReceipt::Fusion { .. }) {
+        let Some(InstructionOutcome::Payment {
+            subjects,
+            characters,
+            ..
+        }) = execution.receipts.get(&id)
+        else {
+            return Err(invalid("missing Fusion payment outcome"));
+        };
+        if subjects.len() != characters.len() {
+            return Err(invalid("missing Fusion material characteristics"));
+        }
+        return Ok(characters
+            .iter()
+            .map(MemberCard::from)
+            .zip(subjects.iter().copied())
+            .collect());
+    }
     if matches!(receipt, ObjectReceipt::Look { .. }) {
         return execution
             .public_look_objects(
@@ -496,6 +518,9 @@ fn check_count(
     member: Binding<RuntimeObjectView>,
     predicate: &Expr<Bool>,
 ) -> Result<()> {
+    if matches!(receipt, ObjectReceipt::Fusion { .. }) {
+        return check_shape(receipt, projection, member, predicate);
+    }
     if !matches!(
         receipt,
         ObjectReceipt::Movement {

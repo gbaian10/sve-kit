@@ -1168,6 +1168,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Transform { .. } => TypeId::of::<super::TransformOutcome>(),
         Action::Search { .. } => TypeId::of::<super::SearchOutcome>(),
         Action::Order { .. } => TypeId::of::<super::OrderOutcome>(),
+        Action::Fusion { .. } => TypeId::of::<super::FusionOutcome>(),
         Action::InstallEffect { .. }
         | Action::Transfer { .. }
         | Action::Life { .. }
@@ -1186,7 +1187,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::RideDrive { .. }
         | Action::DriveCheck { .. }
         | Action::Equip { .. }
-        | Action::Fusion { .. }
         | Action::Random { .. }
         | Action::Dice { .. }
         | Action::Declare { .. }

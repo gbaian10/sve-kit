@@ -87,7 +87,10 @@ pub(super) fn lower(
         distinct_by: None,
         aggregate_bounds: vec![],
     };
-    let id = context.card_allocator.id(path)?;
+    let receipt = ReceiptId(context.card_allocator.id(path)?);
+    if let Some(name) = fusion.result.as_deref() {
+        record_receipt(context, name, receipt, path)?;
+    }
     Ok(PlaySpec {
         limit: None,
         captures: vec![],
@@ -97,8 +100,8 @@ pub(super) fn lower(
                 keyword: None,
                 materials: None,
                 instruction: Box::new(Instruction {
-                    id: InstructionId(id),
-                    receipt: ReceiptId(id),
+                    id: InstructionId(receipt.0),
+                    receipt,
                     source: source.clone(),
                     actor: PlayerRef::Controller {},
                     context: InstructionContext::Cost,
@@ -119,6 +122,27 @@ fn token_filter(query: &ast::FusionQuery, path: &str) -> Result<Option<bool>, Lo
         (None, Some(true)) => Ok(Some(false)),
         _ => Err(unsupported(path)),
     }
+}
+
+fn record_receipt(
+    context: &mut BodyContext<'_>,
+    name: &str,
+    receipt: ReceiptId,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if name.is_empty()
+        || context.observations.contains_key(name)
+        || context.definitions.contains_key(name)
+    {
+        return Err(unsupported(path));
+    }
+    context.observations.insert(
+        name.to_owned(),
+        super::super::ObjectReceipt::Fusion {
+            receipt: super::super::ReceiptReference::new(receipt),
+        },
+    );
+    Ok(())
 }
 
 fn cardinality(fusion: &ast::Fusion, path: &str) -> Result<Cardinality, LoweringError> {

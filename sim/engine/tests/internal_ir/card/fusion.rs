@@ -9,11 +9,15 @@ fn position(up_to: bool, full_ex: bool) -> (Game, AbilityId) {
     let mut fusion =
         json!({"sel":{"who":"self","zone":["hand","ex"],"kind":"spell","orig_cost_ge":1}});
     fusion[if up_to { "upto" } else { "n" }] = json!(if up_to { 2_u8 } else { 1_u8 });
+    fusion["result"] = json!("materials");
     let tree = evolution_linked_movement::tree(&[(
         "activate",
         json!({
             "fusion":fusion,
-            "do":[{"counter":{"on":"this","name":"fusion_counter","delta":1_i8}}]
+            "do":[{"if":{"cond":{"cmp":{
+                "left":{"count":{"in":{"objects_of":"materials","view":"before"},"kind":"spell"}},
+                "op":"eq","right":if up_to { 2_u8 } else { 1_u8 }
+            }},"then":[{"counter":{"on":"this","name":"fusion_counter","delta":1_i8}}]}}]
         }),
     )]);
     let programs = lowerer().lower(&tree).unwrap();
@@ -117,7 +121,7 @@ fn mixed_fusion_discards_only_hand_material_and_follows_source_into_ex() {
     assert_eq!(state["P1"]["cemetery"], json!(["h", "e"]));
     assert_eq!(
         state["objects"]["source"]["counters"]["fusion_counter"], 1_u8,
-        "body sees the source's new EX generation"
+        "body sees both paid spell materials and the source's new EX generation"
     );
     let after = exact_authority(&game);
     game.answer_internal_card(

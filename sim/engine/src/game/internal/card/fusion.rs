@@ -17,6 +17,7 @@ struct FusionMaterials {
     ex: Vec<ObjectRef>,
     views: Vec<RuntimeObjectView>,
     traits: Vec<TraitId>,
+    characters: Vec<Characteristics>,
 }
 
 pub(super) fn check_cost(action: &Action) -> bool {
@@ -157,6 +158,7 @@ impl Game {
             ex,
             views: material_views,
             traits,
+            characters,
         } = self.prepare_fusion_materials(execution, &members)?;
         if self
             .zone_count(seat_name(execution.context.controller)?, "ex")
@@ -213,11 +215,11 @@ impl Game {
                 unit: QuantityUnit::Cards,
             },
             members,
-            vec![],
+            characters,
         ))
     }
     fn prepare_fusion_materials(
-        &self,
+        &mut self,
         execution: &Execution,
         members: &[ObjectRef],
     ) -> Result<FusionMaterials> {
@@ -225,9 +227,10 @@ impl Game {
         let mut ex = Vec::new();
         let mut material_views = Vec::new();
         let mut traits = Vec::new();
+        let mut characters = Vec::new();
         for member in members {
-            let id = execution.object_id(*member)?;
-            let object = self.object(id)?;
+            let id = execution.object_id(*member)?.to_owned();
+            let object = self.object(&id)?;
             let seat = seat_name(execution.context.controller)?;
             if object.generation != member.generation.0
                 || object.controller != seat
@@ -239,26 +242,37 @@ impl Game {
             }
             let snapshot = self.information_snapshot(*member)?;
             material_views.push(snapshot.view());
-            for trait_id in snapshot.subject.traits {
-                if !traits.contains(&trait_id) {
-                    traits.push(trait_id);
+            let mut characteristics = match object.zone.as_str() {
+                "hand" => {
+                    hand.push(*member);
+                    self.internal_hand_characteristics(&id)?
                 }
-            }
-            match object.zone.as_str() {
-                "hand" => hand.push(*member),
-                "ex" => ex.push(*member),
+                "ex" => {
+                    ex.push(*member);
+                    self.internal_characteristics(&id)?
+                }
                 _ => {
                     return Err(crate::EngineFailure::IllegalPlay(
                         "Fusion material zone".into(),
                     ));
                 }
+            };
+            characteristics
+                .traits
+                .sort_unstable_by(|left, right| left.0.cmp(&right.0));
+            for trait_id in &characteristics.traits {
+                if !traits.contains(trait_id) {
+                    traits.push(trait_id.clone());
+                }
             }
+            characters.push(characteristics);
         }
         Ok(FusionMaterials {
             hand,
             ex,
             views: material_views,
             traits,
+            characters,
         })
     }
 

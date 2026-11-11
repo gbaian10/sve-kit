@@ -489,9 +489,11 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 融合用 `activate: {fusion: {sel: {who: self, zone: [hand, ex], trait: 財宝, orig_cost_ge: 1}, n: 1}, do: [...]}`，省略有效區時固定為手牌，也可明寫 `zone: hand`。沿用私有成本選材問題及原子付款：材料排除來源本身，手牌材料捨棄，EX 材料送墓，再把來源放到自己的 EX。EX 滿格時可先用 EX 材料騰出空位；整份付款失敗一併回復。本文的 `this` 精確跟隨該來源移入 EX 後的世代，原有的發動來源仍保留在能力紀錄。
 
-目前融合入口接受固定 `n: 1` 或 `upto: 2`，材料可依卡型、單一特徵、`token: true` 或 `not_token: true` 與原始費用下限篩選；不接受 `any`、`result`、其他張數、Quick、額外成本、可選成本或模式宣告。`upto: 2` 的可選材料非空時至少選一張；沒有材料時可選零張，來源仍移入 EX，整個本文略過。這是融合的最低材料規則與零材料例外，依 [CR 1.28.0 §12.18](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，不能套用普通 `upto` 可任意選零的規則。
+目前融合入口接受固定 `n: 1` 或 `upto: 2`，材料可依卡型、單一特徵、`token: true` 或 `not_token: true` 與原始費用下限篩選；不接受 `any`、其他張數、Quick、額外成本、可選成本或模式宣告。`upto: 2` 的可選材料非空時至少選一張；沒有材料時可選零張，來源仍移入 EX，整個本文略過。這是融合的最低材料規則與零材料例外，依 [CR 1.28.0 §12.18](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，不能套用普通 `upto` 可任意選零的規則。
 
 從 EX 打出卡片時，原有計數器跟隨卡片進入結算領域。從者或護符結算入場時，場上的新世代保留同一批計數器，入場能力可以支付這些計數器作為費用。從 EX 直接入場也保留計數器。依 CR 10.6.2.1.3、10.6.2.8.1.1 與 [Q2737](https://shadowverse-evolve.com/cardlist/?cardno=BP21-057)。
+
+`fusion.result: fused` 為該次融合的實付材料命名。本文條件可用 `count: {in: {objects_of: fused, view: before}, kind: follower, trait: 八獄}` 讀符合條件的實付張數（BP19-038）。手牌與 EX 材料皆使用付款前凍結的資訊，每張符合卡計入一次。回條隨完整融合付款提交，讀取範圍限該能力的本文。規則依據為 CR 12.18.4.1。
 
 融合事件用 `auto: {on: {fused: {who: self, material: {trait: 財宝}}}, do: [...]}`，可在場上或 EX 訂閱。一次融合不論材料張數只產生一次事實，使用實際材料付款前凍結的特徵；來源本身的特徵不代替材料。融合與打出共用一條能力時寫 `on: {any_of: [{fused: {who: self, material: {trait: 財宝}}}, {played: {who: self, sel: {trait: 財宝}}}]}`，也可再加自己的 Main 時點。分支保留各自的事件快照時點，所有分支共用同一個能力實例與 `per_turn` 額度；只准這個所需組合，不能任意拼接其他事件或不同材料特徵。
 

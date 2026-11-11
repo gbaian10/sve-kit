@@ -168,6 +168,7 @@ pub(super) struct Fusion {
     pub sel: FusionQuery,
     pub n: Option<u64>,
     pub upto: Option<u64>,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]

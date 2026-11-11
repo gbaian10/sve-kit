@@ -133,6 +133,19 @@ impl BodyContext<'_> {
         query: &ast::ReceiptCountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        if let Some(receipt @ ObjectReceipt::Fusion { .. }) =
+            self.observations.get(&query.r#in.objects_of).cloned()
+        {
+            let (member, predicate) = self.count_query_filter(query, path)?;
+            return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Compute(Box::new(NatOperation::ReceiptCount {
+                    receipt,
+                    projection: MemberProjection::Before,
+                    member,
+                    predicate,
+                })),
+            })));
+        }
         let Some(ObjectReceipt::Movement {
             receipt: MovementReceipt::Discard { receipt },
         }) = self.observations.get(&query.r#in.objects_of)
@@ -169,7 +182,8 @@ impl BodyContext<'_> {
             .ok_or_else(|| unsupported(path))?
             .clone();
         let readable = match &receipt {
-            ObjectReceipt::Movement {
+            ObjectReceipt::Fusion { .. }
+            | ObjectReceipt::Movement {
                 receipt: MovementReceipt::Discard { .. },
             } => true,
             // Only cards leaving the deck carry no field modifications to read as LKI.
@@ -193,7 +207,21 @@ impl BodyContext<'_> {
         if !readable {
             return Err(unsupported(path));
         }
-        let (member, predicate) = self.receipt_filter(
+        let (member, predicate) = self.count_query_filter(query, path)?;
+        Ok(Expr::Compute(Box::new(Predicate::ReceiptAny {
+            receipt,
+            projection: MemberProjection::Before,
+            member,
+            predicate,
+        })))
+    }
+
+    fn count_query_filter(
+        &mut self,
+        query: &ast::ReceiptCountQuery,
+        path: &str,
+    ) -> Result<(Binding<RuntimeObjectView>, Expr<Bool>), LoweringError> {
+        self.receipt_filter(
             &super::selection::ObjectFilter {
                 kind: query.kind.as_ref().map(super::search::card_kind),
                 trait_id: query.r#trait.as_deref(),
@@ -205,13 +233,7 @@ impl BodyContext<'_> {
                 ..super::selection::ObjectFilter::default()
             },
             path,
-        )?;
-        Ok(Expr::Compute(Box::new(Predicate::ReceiptAny {
-            receipt,
-            projection: MemberProjection::Before,
-            member,
-            predicate,
-        })))
+        )
     }
 
     fn receipt_filter(

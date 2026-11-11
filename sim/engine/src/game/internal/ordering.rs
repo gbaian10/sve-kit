@@ -511,6 +511,21 @@ fn mask_public_condition(condition: &mut Expr<Bool>) {
 }
 
 fn mask_public_number(number: &mut Expr<Int>) {
+    if let Expr::Compute(operation) = number
+        && let IntOperation::FromNat {
+            value: Expr::Compute(natural),
+        } = operation.as_ref()
+        && let NatOperation::ReceiptCount {
+            receipt: receipt @ ObjectReceipt::Fusion { .. },
+            projection,
+            member,
+            predicate,
+        } = natural.as_ref()
+        && super::receipt_counts::check(receipt, *projection, *member, predicate).is_ok()
+    {
+        *number = Expr::Literal(Int(0));
+        return;
+    }
     if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if life_sum_plan(query).is_some()))
     {
         *number = Expr::Literal(Int(0));

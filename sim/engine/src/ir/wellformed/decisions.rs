@@ -612,6 +612,7 @@ impl Checker {
                 }
                 ObjectReceipt::Movement { receipt } => self.movement_visible(receipt),
                 ObjectReceipt::Batch { .. }
+                | ObjectReceipt::Fusion { .. }
                 | ObjectReceipt::TransformBanished { .. }
                 | ObjectReceipt::TransformCreated { .. }
                 | ObjectReceipt::Flip { .. } => self.reject(),

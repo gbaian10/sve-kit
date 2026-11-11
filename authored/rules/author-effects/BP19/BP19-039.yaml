@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-039:
+    admission: light
+    abilities:
+      - line: 1
+        covers: [1, 2]
+        evolve_time:
+          targets:
+            - option: 1
+              bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - choice:
+                n: 1
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: cemetery
+                            kind: follower
+                            trait: 八獄
+                        op: ge
+                        right: 10
+                    upto: 2
+                options:
+                  - - damage:
+                        to: enemy
+                        n: 5
+                  - - create:
+                        token: 多頭の実験体
+                        to: field
+                        n: 1
+      - line: 3
+        super_evolve_time:
+          targets:
+            - bind: experiments
+              from:
+                who: self
+                zone: field
+                kind: follower
+                names:
+                  - 没頭の実験体
+                  - 多頭の実験体
+              upto: 2
+          do:
+            - grant:
+                "on": experiments
+                keywords:
+                  - storm
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-11"
