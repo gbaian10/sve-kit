@@ -21488,6 +21488,9 @@
         },
         {
           "$ref": "#/$defs/A.static-prevention-if"
+        },
+        {
+          "$ref": "#/$defs/A.static-grant-if"
         }
       ]
     },
@@ -21536,6 +21539,45 @@
                         "type": "string"
                       }
                     }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "A.static-grant-if": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "properties": {
+        "if": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cond",
+            "then"
+          ],
+          "properties": {
+            "cond": {
+              "$ref": "#/$defs/A.cond"
+            },
+            "then": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "grant"
+                ],
+                "properties": {
+                  "grant": {
+                    "$ref": "#/$defs/A.effect.grant"
                   }
                 }
               }
