@@ -130,3 +130,23 @@ fn public_cemetery_moves_reject_hidden_sources_and_unimplemented_receipts() {
             .unwrap_err();
     }
 }
+
+#[test]
+fn authored_constant_set_arithmetic_reaches_the_shared_numeric_plan() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["activate"] = json!({"cost":{"pp":0},"do":[
+        {"set_stat":{"on":"this","power":{"plus":[1,1]},"hp":{"minus":[5,1]}}}
+    ]});
+    let meta = tree["cards"]["BP08-038"]["meta"].clone();
+    tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
+    let programs = lowerer().lower(&tree).unwrap();
+    let mut board = position_with_card(1, &programs["unit-follower"]);
+    let result = activate(&mut board, 1);
+    assert!(result.progress.complete);
+    let view = board.projection(View::Referee).unwrap();
+    assert_eq!(view["objects"]["s"]["power"], 2);
+    assert_eq!(view["objects"]["s"]["hp"], 4);
+    assert_eq!(view["objects"]["s"]["damage"], 0);
+}

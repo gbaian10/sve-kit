@@ -1,20 +1,48 @@
-//! Count admission composes only public-zone and successful Before readers.
+//! Shared numeric composition keeps count proofs separate from effect evaluation.
 
 use super::tokens::dynamic;
 use super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use crate::ir::{
-    Arithmetic, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat, NatOperation,
-    NatRead, PlayerRef, Predicate, ReceiptReference,
+    Arithmetic, Binding, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat,
+    NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference,
 };
 use core::convert::identity;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Policy {
+    TokenCount(Option<Binding<Nat>>),
+    EffectAmount,
+}
 
 #[derive(Clone, Debug)]
 pub(super) struct CountPlan(Natural);
 
+#[derive(Clone, Copy, Debug)]
+pub(super) struct AmountPlan {
+    constant: Option<i64>,
+    lower: i64,
+}
+
+impl AmountPlan {
+    pub(super) fn compile(value: &Expr<Int>) -> Result<Self> {
+        let checked = integer(value, Policy::EffectAmount)?;
+        Ok(Self {
+            constant: checked.constant,
+            lower: checked.bounds.lower,
+        })
+    }
+
+    pub(super) fn nonnegative_constant(&self) -> Option<i64> {
+        self.constant.filter(|_| self.lower >= 0)
+    }
+}
+
 #[derive(Clone, Debug)]
 enum Natural {
     Literal(u64),
+    PaidX(Binding<Nat>),
     PublicZone(Box<Expr<Nat>>),
+    Effect(Box<Expr<Nat>>),
     DestroyedController(ReceiptReference<DestroyOutcome>, PlayerRef),
     CheckedInt(Box<Integer>),
     Conditional(Box<Boolean>, Box<Self>, Box<Self>),
@@ -23,6 +51,7 @@ enum Natural {
 #[derive(Clone, Debug)]
 enum Integer {
     Literal(i64),
+    Effect(Box<Expr<Int>>),
     FromNat(Box<Natural>),
     Arithmetic(Arithmetic, Vec<Self>),
     Conditional(Box<Boolean>, Box<Self>, Box<Self>),
@@ -31,6 +60,7 @@ enum Integer {
 #[derive(Clone, Debug)]
 enum Boolean {
     Literal(bool),
+    Effect(Box<Expr<Bool>>),
     And(Vec<Self>),
     Or(Vec<Self>),
     Not(Box<Self>),
@@ -117,7 +147,11 @@ struct CheckedBoolean {
 
 impl CountPlan {
     pub(super) fn compile(value: &Expr<Nat>) -> Result<Self> {
-        natural(value).map(|checked| Self(checked.plan))
+        Self::compile_with_x(value, None)
+    }
+
+    pub(super) fn compile_with_x(value: &Expr<Nat>, x: Option<Binding<Nat>>) -> Result<Self> {
+        natural(value, Policy::TokenCount(x)).map(|checked| Self(checked.plan))
     }
 
     pub(super) fn evaluate(&self, execution: &Execution, game: &Game) -> Result<u64> {
@@ -138,16 +172,19 @@ impl CountPlan {
         paths
     }
 
-    pub(super) fn mask_before(value: &mut Expr<Nat>) {
-        if Self::compile(value).is_ok() {
+    pub(super) fn mask_before(value: &mut Expr<Nat>, x: Option<Binding<Nat>>) {
+        if Self::compile_with_x(value, x).is_ok() {
             mask_natural(value);
         }
     }
 }
 
-fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
+fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
     let (plan, constant) = match expression {
         Expr::Literal(Nat(count)) => (Natural::Literal(*count), Some(*count)),
+        Expr::Bound(binding) if matches!(policy, Policy::TokenCount(Some(expected)) if expected == *binding) => {
+            (Natural::PaidX(*binding), None)
+        }
         Expr::Live(read)
             if matches!(read.as_ref(), NatRead::ZoneCount { selector }
             if super::card::selection::field_selector(selector).is_ok()
@@ -157,15 +194,21 @@ fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
         }
         Expr::Compute(operation) => match operation.as_ref() {
             NatOperation::CheckedInt { value } => {
-                let checked = integer(value)?;
-                if checked.bounds.lower < 0 {
+                let checked = integer(value, policy)?;
+                if matches!(policy, Policy::TokenCount(_)) && checked.bounds.lower < 0 {
                     return Err(unsupported("token count cannot be proved nonnegative"));
                 }
-                let constant = checked
-                    .constant
-                    .map(u64::try_from)
-                    .transpose()
-                    .map_err(invalid)?;
+                let constant = if matches!(policy, Policy::TokenCount(_)) {
+                    checked
+                        .constant
+                        .map(u64::try_from)
+                        .transpose()
+                        .map_err(invalid)?
+                } else {
+                    checked
+                        .constant
+                        .and_then(|constant| u64::try_from(constant).ok())
+                };
                 (Natural::CheckedInt(Box::new(checked.plan)), constant)
             }
             NatOperation::Conditional {
@@ -173,12 +216,19 @@ fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
                 then_value,
                 else_value,
             } => {
-                let condition = boolean(condition)?;
-                let yes = natural(then_value)?;
-                let no = natural(else_value)?;
-                let constant = condition
-                    .constant
-                    .and_then(|selected| if selected { yes.constant } else { no.constant });
+                let condition = boolean(condition, policy)?;
+                let yes = natural(then_value, policy)?;
+                let no = natural(else_value, policy)?;
+                let constant = match policy {
+                    Policy::TokenCount(_) => condition
+                        .constant
+                        .and_then(|selected| if selected { yes.constant } else { no.constant }),
+                    Policy::EffectAmount => condition
+                        .constant
+                        .zip(yes.constant)
+                        .zip(no.constant)
+                        .map(|((selected, yes), no)| if selected { yes } else { no }),
+                };
                 (
                     Natural::Conditional(
                         Box::new(condition.plan),
@@ -188,7 +238,7 @@ fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
                     constant,
                 )
             }
-            NatOperation::Count { .. } => {
+            NatOperation::Count { .. } if matches!(policy, Policy::TokenCount(_)) => {
                 let (receipt, player) = dynamic::projection(expression)
                     .ok_or_else(|| unsupported("token count receipt reader"))?;
                 (
@@ -196,14 +246,20 @@ fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
                     None,
                 )
             }
+            _ if policy == Policy::EffectAmount => {
+                (Natural::Effect(Box::new(expression.clone())), None)
+            }
             _ => return Err(unsupported("token natural count operation")),
         },
+        _ if policy == Policy::EffectAmount => {
+            (Natural::Effect(Box::new(expression.clone())), None)
+        }
         _ => return Err(unsupported("token natural count reader")),
     };
     Ok(CheckedNatural { plan, constant })
 }
 
-fn integer(expression: &Expr<Int>) -> Result<CheckedInteger> {
+fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
     match expression {
         Expr::Literal(Int(value)) => Ok(CheckedInteger {
             plan: Integer::Literal(*value),
@@ -212,8 +268,8 @@ fn integer(expression: &Expr<Int>) -> Result<CheckedInteger> {
         }),
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value } => {
-                let checked = natural(value)?;
-                let constant =
+                let checked = natural(value, policy)?;
+                let constant = if matches!(policy, Policy::TokenCount(_)) {
                     checked
                         .constant
                         .map(i64::try_from)
@@ -222,7 +278,12 @@ fn integer(expression: &Expr<Int>) -> Result<CheckedInteger> {
                             unsupported(&format!(
                                 "constant token count exceeds signed domain: {error}"
                             ))
-                        })?;
+                        })?
+                } else {
+                    checked
+                        .constant
+                        .and_then(|constant| i64::try_from(constant).ok())
+                };
                 let bounds = constant.map_or(
                     Bounds {
                         lower: 0,
@@ -239,18 +300,25 @@ fn integer(expression: &Expr<Int>) -> Result<CheckedInteger> {
             IntOperation::Arithmetic {
                 operation,
                 arguments,
-            } => arithmetic(*operation, arguments),
+            } => arithmetic(*operation, arguments, policy),
             IntOperation::Conditional {
                 condition,
                 then_value,
                 else_value,
             } => {
-                let condition = boolean(condition)?;
-                let yes = integer(then_value)?;
-                let no = integer(else_value)?;
-                let constant = condition
-                    .constant
-                    .and_then(|selected| if selected { yes.constant } else { no.constant });
+                let condition = boolean(condition, policy)?;
+                let yes = integer(then_value, policy)?;
+                let no = integer(else_value, policy)?;
+                let constant = match policy {
+                    Policy::TokenCount(_) => condition
+                        .constant
+                        .and_then(|selected| if selected { yes.constant } else { no.constant }),
+                    Policy::EffectAmount => condition
+                        .constant
+                        .zip(yes.constant)
+                        .zip(no.constant)
+                        .map(|((selected, yes), no)| if selected { yes } else { no }),
+                };
                 Ok(CheckedInteger {
                     plan: Integer::Conditional(
                         Box::new(condition.plan),
@@ -261,13 +329,33 @@ fn integer(expression: &Expr<Int>) -> Result<CheckedInteger> {
                     constant,
                 })
             }
+            _ if policy == Policy::EffectAmount => Ok(CheckedInteger {
+                plan: Integer::Effect(Box::new(expression.clone())),
+                bounds: Bounds {
+                    lower: i64::MIN,
+                    upper: i64::MAX,
+                },
+                constant: None,
+            }),
             _ => Err(unsupported("token integer count operation")),
         },
+        _ if policy == Policy::EffectAmount => Ok(CheckedInteger {
+            plan: Integer::Effect(Box::new(expression.clone())),
+            bounds: Bounds {
+                lower: i64::MIN,
+                upper: i64::MAX,
+            },
+            constant: None,
+        }),
         _ => Err(unsupported("token integer count reader")),
     }
 }
 
-fn arithmetic(operation: Arithmetic, arguments: &[Expr<Int>]) -> Result<CheckedInteger> {
+fn arithmetic(
+    operation: Arithmetic,
+    arguments: &[Expr<Int>],
+    policy: Policy,
+) -> Result<CheckedInteger> {
     let expected = match operation {
         Arithmetic::HalfUp => 1..=1,
         Arithmetic::Minimum | Arithmetic::Maximum => 1..=usize::MAX,
@@ -281,31 +369,44 @@ fn arithmetic(operation: Arithmetic, arguments: &[Expr<Int>]) -> Result<CheckedI
     {
         return Err(unsupported("positive literal token divisor"));
     }
-    let checked = arguments.iter().map(integer).collect::<Result<Vec<_>>>()?;
-    let constant = checked
+    let checked = arguments
+        .iter()
+        .map(|value| integer(value, policy))
+        .collect::<Result<Vec<_>>>()?;
+    let folded = checked
         .iter()
         .map(|value| value.constant)
         .collect::<Option<Vec<_>>>()
-        .map(|values| {
-            values::arithmetic(operation, &values).map_err(|error| {
-                unsupported(&format!("constant token arithmetic overflow: {error}"))
-            })
-        })
-        .transpose()?;
+        .map(|values| values::arithmetic(operation, &values));
+    let constant = match (policy, folded) {
+        (Policy::TokenCount(_), result) => result.transpose().map_err(|error| {
+            unsupported(&format!("constant token arithmetic overflow: {error}"))
+        })?,
+        (Policy::EffectAmount, result) => result.and_then(Result::ok),
+    };
     let first = checked
         .first()
         .ok_or_else(|| unsupported("empty token arithmetic proof"))?
         .bounds;
-    let bounds = if operation == Arithmetic::HalfUp {
-        Bounds {
-            lower: values::arithmetic(operation, &[first.lower])?,
-            upper: values::arithmetic(operation, &[first.upper])?,
+    let bounds = (|| {
+        if operation == Arithmetic::HalfUp {
+            Ok(Bounds {
+                lower: values::arithmetic(operation, &[first.lower])?,
+                upper: values::arithmetic(operation, &[first.upper])?,
+            })
+        } else {
+            checked
+                .iter()
+                .skip(1)
+                .try_fold(first, |left, right| left.binary(operation, right.bounds))
         }
-    } else {
-        checked
-            .iter()
-            .skip(1)
-            .try_fold(first, |left, right| left.binary(operation, right.bounds))?
+    })();
+    let bounds = match (policy, bounds) {
+        (Policy::TokenCount(_), value) => value?,
+        (Policy::EffectAmount, value) => value.unwrap_or(Bounds {
+            lower: i64::MIN,
+            upper: i64::MAX,
+        }),
     };
     Ok(CheckedInteger {
         plan: Integer::Arithmetic(
@@ -317,12 +418,15 @@ fn arithmetic(operation: Arithmetic, arguments: &[Expr<Int>]) -> Result<CheckedI
     })
 }
 
-fn boolean(expression: &Expr<Bool>) -> Result<CheckedBoolean> {
+fn boolean(expression: &Expr<Bool>, policy: Policy) -> Result<CheckedBoolean> {
     let (plan, constant) = match expression {
         Expr::Literal(Bool(value)) => (Boolean::Literal(*value), Some(*value)),
         Expr::Compute(operation) => match operation.as_ref() {
             Predicate::And { predicates } | Predicate::Or { predicates } => {
-                let checked = predicates.iter().map(boolean).collect::<Result<Vec<_>>>()?;
+                let checked = predicates
+                    .iter()
+                    .map(|value| boolean(value, policy))
+                    .collect::<Result<Vec<_>>>()?;
                 let constants = checked
                     .iter()
                     .map(|value| value.constant)
@@ -341,7 +445,7 @@ fn boolean(expression: &Expr<Bool>) -> Result<CheckedBoolean> {
                 }
             }
             Predicate::Not { predicate } => {
-                let checked = boolean(predicate)?;
+                let checked = boolean(predicate, policy)?;
                 (
                     Boolean::Not(Box::new(checked.plan)),
                     checked.constant.map(|value| !value),
@@ -352,8 +456,8 @@ fn boolean(expression: &Expr<Bool>) -> Result<CheckedBoolean> {
                 comparison,
                 right,
             } => {
-                let left = integer(left)?;
-                let right = integer(right)?;
+                let left = integer(left, policy)?;
+                let right = integer(right, policy)?;
                 let constant = left
                     .constant
                     .zip(right.constant)
@@ -368,8 +472,8 @@ fn boolean(expression: &Expr<Bool>) -> Result<CheckedBoolean> {
                 comparison,
                 right,
             } => {
-                let left = natural(left)?;
-                let right = natural(right)?;
+                let left = natural(left, policy)?;
+                let right = natural(right, policy)?;
                 let constant = left
                     .constant
                     .zip(right.constant)
@@ -379,8 +483,14 @@ fn boolean(expression: &Expr<Bool>) -> Result<CheckedBoolean> {
                     constant,
                 )
             }
+            _ if policy == Policy::EffectAmount => {
+                (Boolean::Effect(Box::new(expression.clone())), None)
+            }
             _ => return Err(unsupported("token count predicate")),
         },
+        _ if policy == Policy::EffectAmount => {
+            (Boolean::Effect(Box::new(expression.clone())), None)
+        }
         _ => return Err(unsupported("token count boolean reader")),
     };
     Ok(CheckedBoolean { plan, constant })
@@ -390,7 +500,12 @@ impl Natural {
     fn evaluate(&self, execution: &Execution, game: &Game) -> Result<u64> {
         match self {
             Self::Literal(value) => Ok(*value),
-            Self::PublicZone(value) => execution.natural(game, value).map(|value| value.0),
+            Self::PaidX(binding) => execution
+                .natural(game, &Expr::Bound(*binding))
+                .map(|value| value.0),
+            Self::PublicZone(value) | Self::Effect(value) => {
+                execution.natural(game, value).map(|value| value.0)
+            }
             Self::DestroyedController(receipt, player) => {
                 receipt_members::destroyed_controller(execution, game, receipt, player)
             }
@@ -419,7 +534,7 @@ impl Natural {
                 yes.visit_before(&format!("{path}/compute/then_value"), visitor);
                 no.visit_before(&format!("{path}/compute/else_value"), visitor);
             }
-            Self::Literal(_) | Self::PublicZone(_) => {}
+            Self::Literal(_) | Self::PaidX(_) | Self::PublicZone(_) | Self::Effect(_) => {}
         }
     }
 }
@@ -428,6 +543,7 @@ impl Integer {
     fn evaluate(&self, execution: &Execution, game: &Game) -> Result<i64> {
         match self {
             Self::Literal(value) => Ok(*value),
+            Self::Effect(value) => execution.integer(game, value).map(|value| value.0),
             Self::FromNat(value) => {
                 i64::try_from(value.evaluate(execution, game)?).map_err(invalid)
             }
@@ -462,7 +578,7 @@ impl Integer {
                 yes.visit_before(&format!("{path}/compute/then_value"), visitor);
                 no.visit_before(&format!("{path}/compute/else_value"), visitor);
             }
-            Self::Literal(_) => {}
+            Self::Literal(_) | Self::Effect(_) => {}
         }
     }
 }
@@ -486,13 +602,14 @@ impl Boolean {
                 left.visit_before(&format!("{path}/compute/left"), visitor);
                 right.visit_before(&format!("{path}/compute/right"), visitor);
             }
-            Self::Literal(_) => {}
+            Self::Literal(_) | Self::Effect(_) => {}
         }
     }
 
     fn evaluate(&self, execution: &Execution, game: &Game) -> Result<bool> {
         match self {
             Self::Literal(value) => Ok(*value),
+            Self::Effect(value) => execution.boolean(game, value).map(|value| value.0),
             Self::And(predicates) => Ok(predicates
                 .iter()
                 .map(|value| value.evaluate(execution, game))

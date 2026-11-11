@@ -11,6 +11,7 @@ use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 
 use super::duration::{EffectEnd, TurnInterval};
+use super::number_plan::AmountPlan;
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::dice as ir_dice;
 use crate::ir::{
@@ -201,13 +202,15 @@ fn shape(patch: &CharacteristicPatch) -> Result<(Option<Change>, Option<Change>)
     match patch {
         CharacteristicPatch::Numeric { stat, change } => {
             let change = match change {
-                NumericChange::Add { .. } => Change::Add(0),
-                NumericChange::Set {
-                    amount: Expr::Literal(Int(value)),
-                } if *value >= 0 => Change::Set(*value),
-                NumericChange::Set { .. } => {
-                    return Err(unsupported("Set requires a nonnegative literal"));
+                NumericChange::Add { amount } => {
+                    AmountPlan::compile(amount)?;
+                    Change::Add(0)
                 }
+                NumericChange::Set { amount } => Change::Set(
+                    AmountPlan::compile(amount)?
+                        .nonnegative_constant()
+                        .ok_or_else(|| unsupported("Set requires a nonnegative constant plan"))?,
+                ),
             };
             Ok(match stat {
                 Stat::Attack => (Some(change), None),
@@ -610,6 +613,7 @@ impl Game {
             Some(members) => members,
             None => execution.objects(self, subjects)?,
         };
+        check_patch(patch)?;
         let (attack, life) = changes(execution, self, patch)?;
         let end = EffectEnd::at(self, execution, &expires.end)?;
         let origin_record =
@@ -882,7 +886,13 @@ fn changes(
         CharacteristicPatch::Numeric { stat, change } => {
             let change = match change {
                 NumericChange::Add { amount } => Change::Add(execution.integer(game, amount)?.0),
-                NumericChange::Set { amount } => Change::Set(execution.integer(game, amount)?.0),
+                NumericChange::Set { amount } => {
+                    let value = execution.integer(game, amount)?.0;
+                    if value < 0 {
+                        return Err(invalid("negative Set operand"));
+                    }
+                    Change::Set(value)
+                }
             };
             Ok(match stat {
                 Stat::Attack => (Some(change), None),

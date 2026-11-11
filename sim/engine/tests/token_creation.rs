@@ -18,6 +18,8 @@ use sve_engine::ir::PlayerId;
 mod banish_observed;
 #[path = "token_creation/extra_turn.rs"]
 mod extra_turn;
+#[path = "token_creation/paid_x.rs"]
+mod paid_x;
 #[path = "token_creation/per.rs"]
 mod per;
 #[path = "token_creation/victory.rs"]
@@ -209,6 +211,7 @@ fn token_creation_rejects_ambiguous_and_reused_result_bindings() {
 fn fixed_token_creation_reports_only_tokens_that_fit_in_own_ex() {
     for (kind, occupied, expected) in [
         ("フォロワー・トークン", 0_usize, 2_usize),
+        ("フォロワー・トークン", 3, 2),
         ("フォロワー・トークン", 4, 1),
         ("フォロワー・トークン", 5, 0),
         ("クレスト・トークン", 0, 1),

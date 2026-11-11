@@ -412,7 +412,10 @@ impl BodyContext<'_> {
                         else_value: amount,
                     }));
                 }
-                if set && !matches!(&amount, Expr::Literal(Int(literal)) if *literal >= 0) {
+                if set
+                    && (super::super::integer_requires_context(&amount)
+                        || matches!(&amount, Expr::Literal(Int(literal)) if *literal < 0))
+                {
                     return Err(unsupported(path));
                 }
                 patches.push(CharacteristicPatch::Numeric {

@@ -175,6 +175,35 @@ where
         }
     }
 }
+
+pub(crate) fn integer_requires_context(expression: &Expr<Int>) -> bool {
+    struct Context(bool);
+    impl Visitor for Context {
+        fn require(&mut self, code: &'static str, _path: &str) {
+            let composition = code
+                .strip_prefix("shape.Expr.")
+                .map(|shape| matches!(shape, "Literal" | "Compute"))
+                .or_else(|| {
+                    code.strip_prefix("shape.IntOperation.")
+                        .map(|shape| matches!(shape, "Arithmetic" | "FromNat" | "Conditional"))
+                })
+                .or_else(|| {
+                    code.strip_prefix("shape.NatOperation.")
+                        .map(|shape| matches!(shape, "CheckedInt" | "Conditional"))
+                })
+                .or_else(|| {
+                    code.strip_prefix("shape.Predicate.").map(|shape| {
+                        matches!(shape, "CompareInt" | "CompareNat" | "And" | "Or" | "Not")
+                    })
+                });
+            self.0 |= composition == Some(false);
+        }
+    }
+    let mut context = Context(false);
+    expression.walk(&mut context, "");
+    context.0
+}
+
 macro_rules! domain {
     ($value:ty, $read:ty, $operation:ty, $frozen:ty, $literal:ty) => {
         impl sealed::Value for $value {}

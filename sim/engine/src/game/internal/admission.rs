@@ -1,3 +1,4 @@
+use super::tokens::PaidX;
 use crate::ir::{AbilityId, InstructionId, ScopeId, WellFormedCardProgram};
 mod plan;
 pub(crate) use plan::AdmittedCard;
@@ -42,7 +43,7 @@ use alloc::collections::BTreeSet;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {
-    check_body(program.program(), source, None, None, None, None)
+    check_body(program.program(), source, None, None, None, None, None)
 }
 
 pub(super) fn check_card(
@@ -50,6 +51,16 @@ pub(super) fn check_card(
     source: &SourceSpan,
     origin: &AbilitySource,
     trigger: Option<&TriggerSpec>,
+) -> Result<()> {
+    check_card_with_x(program, source, origin, trigger, None)
+}
+
+pub(super) fn check_card_with_x(
+    program: &Program,
+    source: &SourceSpan,
+    origin: &AbilitySource,
+    trigger: Option<&TriggerSpec>,
+    x: Option<PaidX>,
 ) -> Result<()> {
     let (entry, damage) = match trigger.map(|trigger| &trigger.on) {
         Some(TriggerCondition::Event {
@@ -76,6 +87,7 @@ pub(super) fn check_card(
         entry,
         damage,
         subject.as_ref(),
+        x,
     )
 }
 
@@ -92,7 +104,7 @@ pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
     {
         return Err(unsupported("play-time source information"));
     }
-    check_requirements(program, source, true, &BTreeSet::new())
+    check_requirements(program, source, true, &BTreeSet::new(), None)
 }
 
 fn check_body(
@@ -102,6 +114,7 @@ fn check_body(
     entry: Option<Binding<EnterFieldEvent>>,
     damage: Option<Binding<DamageEvent>>,
     subject: Option<&Expr<ObjectRef>>,
+    x: Option<PaidX>,
 ) -> Result<()> {
     let mut paths = BTreeSet::new();
     if let Some(origin) = origin {
@@ -129,13 +142,14 @@ fn check_body(
     if let Some(event) = entry {
         super::card::triggers::event_operand::mask_origin(&mut inspected, event);
     }
-    check_requirements(&inspected, source, origin.is_some(), &paths)?;
+    check_requirements(&inspected, source, origin.is_some(), &paths, x)?;
     super::numeric::check_program(program)?;
     check_program(
         program,
         source,
         origin,
         &mut super::receipt_counts::DeckReads::default(),
+        x,
     )
 }
 
@@ -343,13 +357,14 @@ fn check_requirements(
     source: &SourceSpan,
     card: bool,
     origins: &BTreeSet<String>,
+    x: Option<PaidX>,
 ) -> Result<()> {
     let located = Located {
         node: program.clone(),
         source: source.clone(),
     };
     let requirements = parent_requirements(&located, card);
-    let token_paths = super::tokens::paths(program);
+    let token_paths = super::tokens::paths(program, x);
     let mut attack_targets = BTreeSet::new();
     super::card::triggers::event_operand::target_paths(program, "", &mut attack_targets);
     let missing = requirements
@@ -520,7 +535,12 @@ fn play_requirement(code: &str) -> bool {
     )
 }
 
-fn check_action(action: &Action, source: &AbilitySource, span: &SourceSpan) -> Result<()> {
+fn check_action(
+    action: &Action,
+    source: &AbilitySource,
+    span: &SourceSpan,
+    x: Option<PaidX>,
+) -> Result<()> {
     super::dice::check_action(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
@@ -544,7 +564,7 @@ fn check_action(action: &Action, source: &AbilitySource, span: &SourceSpan) -> R
         return super::card::ability_restrictions::check_install(action);
     }
     super::search::check_action(action)?;
-    super::tokens::check_action(action, span)?;
+    super::tokens::check_action(action, span, x)?;
     super::tokens::equipment::check_action(action)?;
     super::transform::check_action(action)?;
     super::movement::check_action(action)?;
@@ -596,7 +616,7 @@ fn check_player_stage(
                 }
             }
         }
-        check_program(&body, source, origin, reads)?;
+        check_program(&body, source, origin, reads, None)?;
     }
     Ok(())
 }
@@ -606,6 +626,7 @@ fn check_program(
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
     reads: &mut super::receipt_counts::DeckReads,
+    x: Option<PaidX>,
 ) -> Result<()> {
     if !hand_position::valid(program) {
         return Err(unsupported("paired private hand and deck-edge choice"));
@@ -614,7 +635,7 @@ fn check_program(
     for step in &program.steps {
         if !matches!(&step.node, Node::Instruction { instruction } if matches!(instruction.action, Action::Delay { .. }))
         {
-            super::ordering::check_node(&reads.mask(&step.node)?, source)?;
+            super::ordering::check_node_with_x(&reads.mask(&step.node)?, source, x)?;
         }
         match &step.node {
             Node::Control { control }
@@ -627,13 +648,13 @@ fn check_program(
                 control: control @ Control::Pay { on_paid, .. },
             } if card => {
                 super::card::optional::check_control(control)?;
-                check_program(on_paid, source, origin, reads)?;
+                check_program(on_paid, source, origin, reads, x)?;
             }
             Node::Control {
                 control: control @ Control::EachObject { body, .. },
             } if card && super::counters::iteration(control).is_some() => {
                 super::counters::check_iteration(control)?;
-                check_program(body, source, origin, reads)?;
+                check_program(body, source, origin, reads, x)?;
             }
             Node::Control {
                 control: control @ Control::EachPlayer { stages, .. },
@@ -642,22 +663,22 @@ fn check_program(
                 control: control @ Control::Repeat { .. },
             } => {
                 let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("repeat"))?;
-                check_program(body, source, origin, reads)?;
+                check_program(body, source, origin, reads, x)?;
             }
             Node::Control {
                 control: control @ Control::Simultaneous { .. },
             } => {
                 let body = super::movement::mixed::inspection(control, program.scope)?;
-                check_program(&body, source, origin, reads)?;
+                check_program(&body, source, origin, reads, x)?;
             }
             Node::Control {
                 control: Control::Sequence { body },
-            } => check_program(body, source, origin, reads)?,
+            } => check_program(body, source, origin, reads, x)?,
             Node::Control {
                 control: control @ Control::May { body, .. },
             } => {
                 super::alternatives::check_may(control)?;
-                check_program(body, source, origin, reads)?;
+                check_program(body, source, origin, reads, x)?;
             }
             Node::Control {
                 control:
@@ -667,9 +688,9 @@ fn check_program(
                         ..
                     },
             } => {
-                check_program(then_body, source, origin, reads)?;
+                check_program(then_body, source, origin, reads, x)?;
                 if let Some(body) = else_body {
-                    check_program(body, source, origin, reads)?;
+                    check_program(body, source, origin, reads, x)?;
                 }
             }
             Node::Instruction { instruction } => {
@@ -680,7 +701,7 @@ fn check_program(
                     check_card(body, source, &instruction.source, Some(trigger))?;
                 }
                 super::dice::check_instruction(instruction)?;
-                check_action(&instruction.action, &instruction.source, &step.source)?;
+                check_action(&instruction.action, &instruction.source, &step.source, x)?;
                 if instruction.precondition.is_some()
                     || instruction.context != InstructionContext::Effect
                 {
@@ -692,7 +713,7 @@ fn check_program(
                 control: Control::Mode { modes, .. },
             } if card => {
                 for mode in modes {
-                    check_program(&mode.body, source, origin, reads)?;
+                    check_program(&mode.body, source, origin, reads, None)?;
                 }
             }
             Node::Capture { .. } => {}
