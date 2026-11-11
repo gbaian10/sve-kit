@@ -205,17 +205,44 @@ fn a_trigger_captured_before_the_host_leaves_uses_the_hosts_last_known_power() {
 }
 
 #[test]
-fn played_definitions_still_require_an_equipment_provider() {
-    for head in [
-        json!({"static":{"effects":[{"grant":{"on":"this","abilities":[definition()]}}]}}),
-        json!({"activate":{"cost":{"pp":0},"do":[{"grant":{"on":"this","abilities":[definition()]}}]}}),
-    ] {
-        let mut game = game(&initial(1, 1), vec![]);
-        let program = lowerer()
-            .lower(&tree(&head, "unit-follower"))
-            .unwrap()
-            .remove("unit-follower")
-            .unwrap();
-        assert!(game.load_internal_card("unit-follower", &program).is_err());
-    }
+fn continuous_played_definitions_still_require_an_equipment_provider() {
+    let head = json!({"static":{"effects":[{"grant":{"on":"this","abilities":[definition()]}}]}});
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "grant-admission",
+    )
+    .unwrap();
+    let program = lowerer()
+        .lower(&tree(&head, "unit-follower"))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    assert!(
+        game.load_internal_card("unit-follower", &program)
+            .unwrap_err()
+            .to_string()
+            .contains("continuous granted zone or transitive aura")
+    );
+}
+
+#[test]
+fn installed_played_definitions_use_the_existing_grant_admission() {
+    let head = json!({"activate":{"cost":{"pp":0},"do":[{"grant":{"on":"this","abilities":[definition()]}}]}});
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "grant-admission",
+    )
+    .unwrap();
+    let program = lowerer()
+        .lower(&tree(&head, "unit-follower"))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
 }

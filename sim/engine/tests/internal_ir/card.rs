@@ -13,6 +13,8 @@ mod evolution_ordinal;
 mod exchange_routes;
 #[path = "card/formal_target_groups.rs"]
 mod formal_target_groups;
+#[path = "card/granted_played.rs"]
+mod granted_played;
 #[path = "card/hand_banish.rs"]
 mod hand_banish;
 #[path = "card/material_acts.rs"]
@@ -937,3 +939,6 @@ mod static_declarations;
 
 #[path = "card/receipt_field_costs.rs"]
 mod receipt_field_costs;
+
+#[path = "card/counter_amounts.rs"]
+mod counter_amounts;
