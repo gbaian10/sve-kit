@@ -1,7 +1,7 @@
 use super::{
     AggregateBound, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Declinable,
-    Disjointness, Expr, Int, MemberProjection, Nat, NumericProperty, ObjectReceipt, PlayerRef,
-    PlayerRelation, SelectionConstraint, Selector, Visibility,
+    Disjointness, Expr, Int, MemberProjection, Nat, NumericProperty, ObjectProperty, ObjectReceipt,
+    PlayerRef, PlayerRelation, SelectionConstraint, Selector, Visibility,
 };
 
 /// Aggregate bounds a choice of concrete cards admits besides dynamic counts.
@@ -55,7 +55,11 @@ pub(crate) fn private_look_choice(decision: &Decision) -> bool {
         && decision.actor == (PlayerRef::Controller {})
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
-        && constraint.distinct_by.is_none()
+        && match constraint.distinct_by {
+            None => true,
+            Some(ObjectProperty::Names) => constraint.groups.len() == 1 && constraint.aggregate_bounds.is_empty(),
+            _ => false,
+        }
         && !matches!(
             card_totals(&constraint.aggregate_bounds),
             CardTotals::Unsupported
