@@ -99,6 +99,8 @@ impl BodyContext<'_> {
                     &entry,
                     scope,
                     nested_source,
+                    &static_head.effects,
+                    &mut super::Allocator::default(),
                 )?
             } else if entry.play.is_some() {
                 super::granted_play::lower(&entry, scope, nested_source, &nested_path)?

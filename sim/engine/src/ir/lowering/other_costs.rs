@@ -7,6 +7,7 @@ use crate::ir::{
     AbilityKind, AbilityQualification, Action, CostChange, CostKind, DurationEnd, Effect,
     EffectReference, InstallationSubjects, InstallationTime, Int, UsageScope, UseLimit,
 };
+use core::mem::swap;
 
 const fn players(side: &ast::Side) -> PlayerSet {
     PlayerSet {
@@ -117,21 +118,43 @@ pub(super) fn lower(
     entry: &ast::Ability,
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
+    let source = super::source_span(key, path, entry)?;
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    lower_at_source(
+        allocator,
+        path,
+        entry,
+        scope,
+        source,
+        &head.effects,
+        &mut Allocator::default(),
+    )
+}
+
+pub(super) fn lower_at_source(
+    allocator: &mut Allocator,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+    source: super::SourceSpan,
+    effects: &[ast::StaticEffect],
+    bindings: &mut Allocator,
+) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
     if head.zone.is_some() || entry.imports.is_some() {
         return Err(unsupported(path));
     }
-    let source = super::source_span(key, path, entry)?;
     let origin = super::ability_source(&source, None);
     let empty = ast::Body::default();
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
+    swap(&mut context.allocator, bindings);
     let condition = head
         .r#while
         .as_ref()
         .map(|value| context.qualification(value, path))
         .transpose()?;
     let mut declarations = Vec::new();
-    for value in &head.effects {
+    for value in effects {
         if let ast::StaticEffect::EvolveCostMod(modifier) = value {
             if !matches!(modifier.on, ast::EvolutionCostSubject::This)
                 || modifier.set.is_some()
@@ -172,6 +195,7 @@ pub(super) fn lower(
             usage: None,
         });
     }
+    swap(&mut context.allocator, bindings);
     Ok(Located {
         source,
         node: Ability {

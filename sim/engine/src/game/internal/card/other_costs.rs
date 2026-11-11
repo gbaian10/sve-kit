@@ -2,12 +2,14 @@ use super::super::{Context, Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::ir::public_numbers;
+use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, CostChange, CostKind, Duration,
     DurationEnd, Effect, EffectReference, Expr, Generation, InstallationSubjects, InstallationTime,
     Instruction, Int, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation, SelectionView,
     Selector, TimeAnchor, UsageScope, ZoneKind,
 };
+use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct InstalledCost {
@@ -18,16 +20,6 @@ pub(in crate::game::internal) struct InstalledCost {
     change: CostChange,
     end: EffectEnd,
     limited: bool,
-}
-
-pub(super) fn is_static(ability: &Ability) -> bool {
-    ability.kind == AbilityKind::Static
-        && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
-        && !ability.declarations.is_empty()
-        && ability
-            .declarations
-            .iter()
-            .all(|effect| matches!(effect, Effect::CostModifier { .. }))
 }
 
 fn check_change(change: &CostChange) -> Result<()> {
@@ -88,9 +80,11 @@ fn check_duration(duration: &Duration, installed: bool) -> Result<()> {
     }
 }
 
-pub(super) fn check(located: &Located<Ability>) -> Result<()> {
+pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Result<()> {
     let ability = &located.node;
-    if !is_static(ability)
+    if ability.kind != AbilityKind::Static
+        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        || ability.declarations.is_empty()
         || ability.active_zones != [ZoneKind::Field]
         || ability.qualification != AbilityQualification::Ordinary
         || ability.source.holder != (ObjectOperand::SourceHolder {})
@@ -102,7 +96,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     {
         return Err(unsupported("static player cost header"));
     }
-    for effect in &ability.declarations {
+    for effect in declarations {
         if let Effect::CostModifier {
             kind: CostKind::Evolution,
             subjects,
@@ -319,7 +313,7 @@ impl Game {
             let abilities = self
                 .internal_printed_abilities(&source)?
                 .into_iter()
-                .filter(|ability| is_static(&ability.node))
+                .filter(|ability| static_declarations::contains(&ability.node, Family::Cost))
                 .collect::<Vec<_>>();
             if abilities.is_empty() {
                 continue;
@@ -351,6 +345,9 @@ impl Game {
                         ..
                     } = effect
                     else {
+                        if static_declarations::family(effect).is_some() {
+                            continue;
+                        }
                         return Err(unsupported("static cost declaration"));
                     };
                     if let DurationEnd::While { predicate } = &duration.end
@@ -393,7 +390,7 @@ impl Game {
             .internal_printed_abilities(holder)?
             .into_iter()
             .filter(|ability| {
-                is_static(&ability.node)
+                static_declarations::contains(&ability.node, Family::Cost)
                     && ability.node.declarations.iter().any(|effect| {
                         matches!(
                             effect,
@@ -421,7 +418,6 @@ impl Game {
         )?;
         let mut total = 0_i64;
         for ability in &abilities {
-            check(ability)?;
             for effect in &ability.node.declarations {
                 if let Effect::CostModifier {
                     kind: CostKind::Evolution,
@@ -429,6 +425,7 @@ impl Game {
                     ..
                 } = effect
                 {
+                    check(ability, from_ref(effect))?;
                     total = total
                         .checked_add(execution.integer(&quote, amount)?.0)
                         .ok_or_else(|| invalid("static evolution delta overflow"))?;

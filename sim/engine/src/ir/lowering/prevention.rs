@@ -11,6 +11,7 @@ use crate::ir::{
     ProposedEventPattern, RecipientPredicate, ReplacementScope, ScopeId, Selector, SourcePredicate,
     TextQuantifier, UsageScope, UseLimit, ZoneKind,
 };
+use core::mem::swap;
 
 fn recipient(objects: Selector, binding: Binding<DamageRecipient>) -> RecipientPredicate {
     RecipientPredicate {
@@ -393,7 +394,16 @@ pub(super) fn lower(
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
     let source = source_span(key, path, entry)?;
-    lower_at_source(allocator, path, entry, scope, source)
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    lower_at_source(
+        allocator,
+        path,
+        entry,
+        scope,
+        source,
+        &head.effects,
+        &mut Allocator::default(),
+    )
 }
 
 #[expect(
@@ -406,6 +416,8 @@ pub(super) fn lower_at_source(
     entry: &ast::Ability,
     scope: ScopeId,
     source: super::SourceSpan,
+    effects: &[ast::StaticEffect],
+    bindings: &mut Allocator,
 ) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
     let zone = match &head.zone {
@@ -420,6 +432,7 @@ pub(super) fn lower_at_source(
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
+    swap(&mut context.allocator, bindings);
     let condition = head
         .r#while
         .as_ref()
@@ -427,7 +440,7 @@ pub(super) fn lower_at_source(
         .transpose()?
         .unwrap_or(Expr::Literal(Bool(true)));
     let mut declarations = Vec::new();
-    for declaration in &head.effects {
+    for declaration in effects {
         let (on, damage_source, kind, rewrite) = match declaration {
             ast::StaticEffect::Cannot(ast::Cannot::Removal(shape)) => {
                 if head.r#while.is_some() {
@@ -545,6 +558,7 @@ pub(super) fn lower_at_source(
         }
         declarations.push(effect);
     }
+    swap(&mut context.allocator, bindings);
     Ok(Located {
         source,
         node: Ability {
