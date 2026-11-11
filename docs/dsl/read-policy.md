@@ -185,3 +185,29 @@ Transform 也保留自己的准入，按各控制者實際成功回條算出張�
 配置核心只收已求值的模板與數量，保留整卡准入、種類、容量、同名上限與選擇流程；
 它不接受可任意求值的數量 Expr。同名建立的 follower 種類限制仍由 Token consumer 保留。
 這些界線不授予未列出的 token 讀者或完整卡片的執行資格。
+
+## 回條成員與屬性
+
+`game/internal/receipt_members.rs` 集中 producer adapter 與回條成員讀取。
+`MemberView` 只帶原成員參照與該來源已保存或可合法投影的 kind、class、trait、names；
+它不建立 receipt 未保存的完整 After state。靜態的 producer／scope 證明仍由既有准入計畫
+與 `receipt_counts::DeckReads` 檢查，讀取模組不另造可跨分支使用的白名單。
+
+| 入口 | 保留的來源與資料政策 |
+| --- | --- |
+| ReceiptAny／ReceiptCount | Discard 與 latest Fusion 讀成功付款或棄牌保存的特徵；deck Move 另驗實際離開牌庫的 fact，公開 Look 必須已揭露 |
+| distinct_original_costs | 只讀成功 deck→cemetery 的 Before，以不可變 base printing 讀原費；不以有效費用替換 |
+| paid_material_acts | 已完成的 Cards 付款數量須與材料成員數一致；不把獨立的來源 Act 算入 |
+| paid_material_attack | 單張已付材料的凍結有效攻擊，保留有號值；不重新讀離場後的數值 |
+| discarded_cost | 恰一張成功棄牌的凍結有效費用，仍要求已保存的非負值 |
+| Destroy 動態成員計數 | 讀成功 Before 清單，逐項驗 departure fact、來源為 Field 與離場前控制者；不把選中或嘗試移動算成功 |
+| 公開 Look 名稱種類數 | 先驗觀察者、整批揭露、原世代仍在己方牌庫，再依每張卡的一個規則名稱計數 |
+
+底層 Move、Search、Discard、Destroy、Banish 五種 movement producer 仍各驗對應的
+outcome，並依 after 世代改變及 actual destination 篩成功。Order 的 Before 讀取另取
+successful 清單；同一牌庫重排不改世代，不能套用一般跨區移動的判定。
+local／iteration、Before／After、已付分支與公開授權仍各沿原範圍，未公開 Look、
+foreign producer、過期觀察與未付分支不會因取得成員讀取入口而被放行。
+
+公開區 distinct names 仍使用規則名稱集合的聯集，公開 Look 的上述單一名稱政策則保持原樣。
+這兩種已有行為不因共用 adapter 而選成同一算法；多名稱語義未有依據前不擴大其範圍。
