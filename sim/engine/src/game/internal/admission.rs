@@ -148,7 +148,7 @@ fn check_body(
         program,
         source,
         origin,
-        &mut super::receipt_counts::DeckReads::default(),
+        &mut super::receipt_counts::ReceiptReads::default(),
         x,
     )
 }
@@ -583,7 +583,7 @@ fn check_player_stage(
     stages: &[PlayerStage],
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
-    reads: &mut super::receipt_counts::DeckReads,
+    reads: &mut super::receipt_counts::ReceiptReads,
 ) -> Result<()> {
     super::tokens::check_each(control)?;
     for stage in stages {
@@ -625,7 +625,7 @@ fn check_program(
     program: &Program,
     source: &SourceSpan,
     origin: Option<&AbilitySource>,
-    reads: &mut super::receipt_counts::DeckReads,
+    reads: &mut super::receipt_counts::ReceiptReads,
     x: Option<PaidX>,
 ) -> Result<()> {
     if !hand_position::valid(program) {

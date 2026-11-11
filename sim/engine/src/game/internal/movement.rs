@@ -56,6 +56,8 @@ pub struct MovementFact {
     pub cause: Cause,
     /// Controller immediately before leaving the zone.
     pub controller_before: PlayerId,
+    /// Immutable base printing, retained even when a token is erased on departure.
+    pub card_before: String,
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -1424,6 +1426,7 @@ impl Game {
                         execution: execution.id,
                     },
                     controller_before,
+                    card_before: previous.card.clone(),
                 })),
             );
             if matches!(

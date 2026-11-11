@@ -31,6 +31,7 @@ impl BodyContext<'_> {
         &mut self,
         step: &ast::Step,
         receipt: ReceiptId,
+        action: &Action,
         path: &str,
     ) -> Result<(), LoweringError> {
         if let ast::Step::RevealUntil(value) = step {
@@ -114,6 +115,9 @@ impl BodyContext<'_> {
             {
                 self.receipt_reads.deck_cemetery.insert(receipt);
             }
+        }
+        if super::super::receipt_reads::field_cemetery(action) {
+            self.receipt_reads.field_cemetery.insert(receipt);
         }
         let saved = match step {
             ast::Step::FlipDown(ast::ObjectAction::Long {
@@ -870,6 +874,10 @@ impl BodyContext<'_> {
     fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
         value.result.is_none()
             || matches!(value.to, ast::Destination::Ex)
+            || (matches!(value.to, ast::Destination::Cemetery)
+                && matches!(objects, ast::Objects::Zone(query)
+                    if matches!(query.who, ast::Side::Controller)
+                        && matches!(query.zone, ast::Zone::Field)))
             || matches!(objects, ast::Objects::Bound(name)
                 if self.observed_targets.contains(name)
                     && matches!(value.to, ast::Destination::Hand | ast::Destination::Cemetery))
