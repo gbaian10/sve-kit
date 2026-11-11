@@ -3251,7 +3251,31 @@ class StaticPreventionIfFields(_StaticPreventionIfKeys):
 
 
 type StaticPreventionIf = StaticPreventionIfFields
-type StaticEffect = EffectSpec | StaticPreventionIf
+
+
+@with_config(CONFIG)
+class StaticGrantEffectFields(TypedDict):
+    grant: GrantEffect
+
+
+@with_config(CONFIG)
+class StaticGrantBranchFields(TypedDict):
+    cond: Condition
+    then: Annotated[
+        tuple[StaticGrantEffectFields, ...], Field(min_length=1, max_length=1)
+    ]
+
+
+_StaticGrantIfKeys = TypedDict("_StaticGrantIfKeys", {"if": StaticGrantBranchFields})
+
+
+@with_config(CONFIG)
+class StaticGrantIfFields(_StaticGrantIfKeys):
+    pass
+
+
+type StaticGrantIf = StaticGrantIfFields
+type StaticEffect = EffectSpec | StaticPreventionIf | StaticGrantIf
 
 
 _StaticHeadKeys = TypedDict("_StaticHeadKeys", {"while": NotRequired[Condition]})

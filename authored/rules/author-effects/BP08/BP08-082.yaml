@@ -1,0 +1,45 @@
+cards:
+  BP08-082:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 7
+                then:
+                  - grant:
+                      keywords:
+                        - assail
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 15
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                        - bane
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set

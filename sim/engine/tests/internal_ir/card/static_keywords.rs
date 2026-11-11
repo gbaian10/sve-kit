@@ -431,3 +431,6 @@ fn cross_zone_keyword_sources_keep_other_keywords_and_raw_zone_orders_closed() {
             .unwrap_err();
     }
 }
+
+#[path = "static_keywords/conditions.rs"]
+mod conditions;

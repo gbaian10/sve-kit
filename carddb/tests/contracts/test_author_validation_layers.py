@@ -101,7 +101,7 @@ if TYPE_CHECKING:
                     ]
                 }
             },
-            False,
+            True,
             id="static-per-grant-condition",
         ),
         pytest.param(
@@ -127,6 +127,10 @@ if TYPE_CHECKING:
 def test_author_syntax_acceptance_at_consumer_sites(
     head: JsonValue, *, accepted: bool
 ) -> None:
+    _assert_acceptance(head, accepted=accepted)
+
+
+def _assert_acceptance(head: JsonValue, *, accepted: bool) -> None:
     schema = {
         "$id": NODES["$id"],
         "$defs": NODES["$defs"],
@@ -140,3 +144,109 @@ def test_author_syntax_acceptance_at_consumer_sites(
     else:
         with pytest.raises(ValidationError):
             adapter.validate_json(canonical(head), strict=True)
+
+
+@pytest.mark.parametrize(
+    ("branch", "accepted"),
+    [
+        pytest.param(
+            {"cond": {"my_turn": True}, "then": [{"grant": {"keywords": ["ward"]}}]},
+            True,
+            id="one-grant",
+        ),
+        pytest.param(
+            {
+                "cond": {"my_turn": True},
+                "then": [
+                    {
+                        "grant": {
+                            "abilities": [{"lastword": {"do": [{"draw": {"n": 1}}]}}]
+                        }
+                    }
+                ],
+            },
+            True,
+            id="one-granted-body",
+        ),
+        pytest.param(
+            {"cond": {"my_turn": True}, "then": []},
+            False,
+            id="empty-then",
+        ),
+        pytest.param(
+            {
+                "cond": {"my_turn": True},
+                "then": [{"grant": {"keywords": ["ward"]}}] * 2,
+            },
+            False,
+            id="multiple-declarations-in-one-branch",
+        ),
+        pytest.param(
+            {"cond": {"my_turn": True}, "then": [{"grant": {}}]},
+            False,
+            id="empty-grant",
+        ),
+        pytest.param(
+            {
+                "cond": {"my_turn": True},
+                "then": [{"grant": {"keywords": ["ward"]}}],
+                "else": [{"grant": {"keywords": ["storm"]}}],
+            },
+            False,
+            id="else-branch",
+        ),
+        pytest.param(
+            {
+                "cond": {"my_turn": True},
+                "then": [
+                    {
+                        "if": {
+                            "cond": {"awakened": True},
+                            "then": [{"grant": {"keywords": ["ward"]}}],
+                        }
+                    }
+                ],
+            },
+            False,
+            id="nested-conditional",
+        ),
+        pytest.param(
+            {"cond": {"my_turn": True}, "then": [{"cost_mod": {"delta": -1}}]},
+            False,
+            id="other-effect-family",
+        ),
+        pytest.param(
+            {
+                "cond": {"my_turn": True},
+                "then": [{"prevent": {"kind": "ability", "on": "this"}}] * 2,
+            },
+            False,
+            id="prevention-count-unchanged",
+        ),
+        pytest.param(
+            {"cond": {"my_turn": True}, "then": [{"prevent": {"kind": "battle"}}]},
+            False,
+            id="prevention-kind-unchanged",
+        ),
+    ],
+)
+def test_conditional_static_declarations_are_closed(
+    branch: JsonValue, *, accepted: bool
+) -> None:
+    _assert_acceptance({"static": {"effects": [{"if": branch}]}}, accepted=accepted)
+
+
+def test_conditional_grants_preserve_the_head_and_stay_out_of_installed_effects() -> (
+    None
+):
+    declaration: JsonValue = {
+        "if": {"cond": {"my_turn": True}, "then": [{"grant": {"keywords": ["ward"]}}]}
+    }
+    _assert_acceptance(
+        {"static": {"while": {"awakened": True}, "effects": [declaration]}},
+        accepted=True,
+    )
+    _assert_acceptance(
+        {"spell": {"do": [{"apply": {"on": "this", "effect": declaration}}]}},
+        accepted=False,
+    )

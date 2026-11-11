@@ -33,7 +33,7 @@ Rust 欄位及控制分派的說明是程式盤點，不宣稱這些合成案例
 | `create.n: {per: {of: {count: {who: self, zone: cemetery}}, unit: 5}}` | 接受；`A.act.create` → `A.count-amount` → `A.quantity` → numeric operation → `A.expr.per`，Python 對應 `CountAmount`／`ExprPer` | `ast::TokenCount` 只有 Fixed／Receipt／Query，無 per；`tokens.rs::token_count` 只降低這三種 | `wellformed/producers.rs::tokens` 已交給一般 natural checker；runtime `tokens.rs::specification` 仍只收 literal、receipt projection 或 zone count | token AST／lowering 與執行讀值計畫；不擴 Schema／Python，不預設須放寬 wellformed |
 | `per.unit: 0` 或不存在的 `div` | 拒絕：單位須正整數、未知運算鍵不接受 | 不因 token 試點增加別名 | raw IR 仍須符合自己的數域與讀值契約 | 無可刪的防護 |
 | static 的整能力 `while` 加無條件 Grant | 接受 | `static_keywords.rs` 把 head 條件放入每條 declaration | runtime `card/static_keywords.rs` 逐條判定已支援的 declaration | 不應把既有整能力條件視為逐條條件已可作者化 |
-| static `effects` 中 `if.then` 包 Grant | 拒絕；`StaticEffect` 只在一般 `EffectSpec` 外另加 prevention If 特例 | `StaticConditional` 可解碼一般 StaticEffect，但 `static_keywords.rs` 的宣告迴圈只收直接 Grant；`lowering.rs` 依首項選家族 | IR Continuous declaration 已有 condition；runtime 已逐 declaration 求值，仍受支援家族與讀權限限制 | 同步 Schema／Python／AST 契約與 lowering；跨家族載入／分派另行驗收，不藉拆成多個能力繞過 |
+| static `effects` 中 `if.then` 包 Grant | 接受 `A.static-grant-if`／`StaticGrantIf`；then 恰一條 Grant，無 else 或巢狀條件 | `StaticConditional` 只解碼單一 Grant 或既有 prevention 分支；`static_keywords.rs` 每條保留分支條件，與 head while 取交集，維持同一來源能力 | IR Continuous declaration 的 condition 沿既有逐宣告求值與讀權限；普通場上 Grant 以外的條件式仍受原邊界限制 | Schema／Python 局部形狀對齊；跨家族載入／分派仍另行驗收，不藉拆成多個能力繞過 |
 | static prevention If 特例 | then 恰一條 prevent，`kind: ability`，`on` 可省略、只能是 `this`，無 else | `prevention.rs` 額外要求同能力含 removal 禁止，且不能同時有 head while | 只保證既有 prevention 路徑的範圍 | 逐條條件擴充仍須保留此既有語義；語法接受不是任意 prevention 可執行 |
 
 原費／有效值、當前／凍結／LKI、選中／成功、公開數量／私有身分均非可互換的值；

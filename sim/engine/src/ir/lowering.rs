@@ -497,7 +497,7 @@ impl Allocator {
                 Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
                 Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
                 Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
-                Some(ast::StaticEffect::Grant(_)) => static_keywords::lower,
+                Some(effect) if static_keywords::grant(effect).is_some() => static_keywords::lower,
                 Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,
                 Some(ast::StaticEffect::CostMod(_) | ast::StaticEffect::EvolveCostMod(_)) => {
                     other_costs::lower
@@ -517,7 +517,9 @@ impl Allocator {
                 Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
                     attack_restrictions::lower
                 }
-                Some(ast::StaticEffect::If(_)) | None => return Err(unsupported(path)),
+                Some(ast::StaticEffect::If(_) | ast::StaticEffect::Grant(_)) | None => {
+                    return Err(unsupported(path));
+                }
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
             return Ok(true);

@@ -438,14 +438,13 @@ pub(super) fn lower_at_source(
             }
             ast::StaticEffect::If(shape) => {
                 if head.r#while.is_some()
-                    || shape.r#else.is_some()
                     || !head.effects.iter().any(|effect| {
                         matches!(effect, ast::StaticEffect::Cannot(ast::Cannot::Removal(_)))
                     })
                 {
                     return Err(unsupported(path));
                 }
-                let [ast::StaticEffect::Prevent(prevent)] = shape.then.as_slice() else {
+                let [ast::StaticConditionalEffect::Prevent(prevent)] = &shape.then else {
                     return Err(unsupported(path));
                 };
                 let branch_condition = context.qualification(&shape.cond, path)?;

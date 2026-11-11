@@ -6,28 +6,35 @@ use crate::ir::{
     AbilityKind, AbilityQualification, CharacteristicPatch, ContinuousLayer, Effect,
     EffectDefinitionId, EffectTarget, ObjectOperand, ScopeId, TimestampBasis, ZoneKind,
 };
+use crate::ir::{Bool, Expr, Predicate};
 use crate::ir::{GrantedAbility, KeywordId, ObjectRelation};
 use crate::ir::{ObjectView, Selector};
 
-pub(super) fn lower(
-    allocator: &mut Allocator,
-    key: &CardCoordinates<'_>,
-    path: &str,
-    entry: &ast::Ability,
-    scope: ScopeId,
-) -> Result<Located<Ability>, LoweringError> {
-    let source = source_span(key, path, entry)?;
-    lower_at_source(allocator, path, entry, scope, source)
+pub(super) fn grant(
+    effect: &ast::StaticEffect,
+) -> Option<(&ast::StaticGrant, Option<&ast::Condition>)> {
+    if let ast::StaticEffect::Grant(grant) = effect {
+        return Some((grant, None));
+    }
+    if let ast::StaticEffect::If(branch) = effect
+        && let [ast::StaticConditionalEffect::Grant(grant)] = &branch.then
+    {
+        return Some((grant, Some(&branch.cond)));
+    }
+    None
 }
 
-pub(super) fn lower_at_source(
-    allocator: &mut Allocator,
-    path: &str,
-    entry: &ast::Ability,
-    scope: ScopeId,
-    source: super::SourceSpan,
-) -> Result<Located<Ability>, LoweringError> {
-    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+fn combined(head: Option<&Expr<Bool>>, branch: Option<Expr<Bool>>) -> Option<Expr<Bool>> {
+    match (head, branch) {
+        (Some(head), Some(branch)) => Some(Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![head.clone(), branch],
+        }))),
+        (Some(head), None) => Some(head.clone()),
+        (None, branch) => branch,
+    }
+}
+
+fn active_zones(head: &ast::Static, path: &str) -> Result<Vec<ZoneKind>, LoweringError> {
     let zones = match head.zone.as_ref() {
         Some(ast::ActivationZones::Many(zones))
             if matches!(zones.as_slice(),
@@ -50,19 +57,52 @@ pub(super) fn lower_at_source(
     {
         return Err(unsupported(path));
     }
+    Ok(zones)
+}
+
+pub(super) fn lower(
+    allocator: &mut Allocator,
+    key: &CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+) -> Result<Located<Ability>, LoweringError> {
+    let source = source_span(key, path, entry)?;
+    lower_at_source(allocator, path, entry, scope, source)
+}
+
+pub(super) fn lower_at_source(
+    allocator: &mut Allocator,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+    source: super::SourceSpan,
+) -> Result<Located<Ability>, LoweringError> {
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    let zones = active_zones(head, path)?;
+    let equipment = zones == [ZoneKind::Equipment];
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
-    let condition = head
+    let head_condition = head
         .r#while
         .as_ref()
         .map(|condition| context.qualification(condition, path))
         .transpose()?;
     let mut declarations = Vec::new();
     for effect in &head.effects {
-        let ast::StaticEffect::Grant(grant) = effect else {
+        let Some((grant, branch)) = grant(effect) else {
             return Err(unsupported(path));
         };
+        let condition = combined(
+            head_condition.as_ref(),
+            branch
+                .map(|predicate| context.qualification(predicate, path))
+                .transpose()?,
+        );
+        if (equipment || zones.len() > 1) && condition.is_some() {
+            return Err(unsupported(path));
+        }
         if grant.keywords.is_empty() && grant.abilities.is_empty() {
             return Err(unsupported(path));
         }

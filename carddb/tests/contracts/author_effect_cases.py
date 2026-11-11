@@ -57,6 +57,7 @@ EFFECT_NAMES = {
     "A.effect": "EffectSpec",
     "A.static-effect": "StaticEffect",
     "A.static-prevention-if": "StaticPreventionIf",
+    "A.static-grant-if": "StaticGrantIf",
 }
 
 
