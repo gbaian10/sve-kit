@@ -512,38 +512,30 @@ authority 的 `DamageQuantityOutcome` 依[執行語義 §1.3](runtime-semantics.
 selected play targets 的最低 1 點限制依
 [執行語義 §1](runtime-semantics.md#1-分配最低量與打出-snapshot)，不能外推為所有結算分配的預設。
 
-## 本文固定 PP 回復
+## 本文資源增加
 
-本文 `pp: {who: self, delta: N}` 接受正整數常值 N，降低為控制者目前 PP
-的 Resource(Add)。實際回復量為 `min(N, 最大 PP − 目前 PP)`，最大 PP 不變；
-已滿時仍產生零實際回復的完成收據，不視為付款，也不產生回復事件。
+本文 `pp`／`pp_max`／`ep` 的 `{who: self, delta: N}` 共用數值作者入口與
+數值計畫。N 可以是零、正整數常值，或能證明非負下界的受驗算式；在各次指示
+開始求值一次，因此看得到本文先前完成的抽牌或移區，也重用既有 PP 決定／支付
+捕捉的 X。負值與無法證明非負的數量不准入；公開讀值與完成回條仍須通過各自
+權限，不能藉資源 consumer 選取隱藏物件或偽造 producer。
+
+`pp` 降低為控制者目前 PP 的 Resource(Add)，實際回復量為
+`min(N, 最大 PP − 目前 PP)`，最大 PP 不變。`pp_max` 增加最大 PP，實際量為
+`min(N, 10 − 原最大 PP)`；目前 PP 保持原值，不因提高上限而回復。
+`ep` 增加控制者 EP，不套用 PP 上限；PP、最大 PP 與 SEP 保持原值。
 
 `InstructionOutcome::Resource` 為 authority-only，保存玩家、資源、請求量、
-前後值與實際增加量；沿既有公開回復事件，不新增玩家協定。本文不接受 Pay、
-Set、RecoverToMax、SEP、其他玩家或動態數量；打出費用仍走原付款路徑。
+前後值與實際增加量。零請求與已達上限都保留零實際量的完成收據，不產生增加事件。
+有增加時沿既有公開回復／「PP最大値変化」／「EP変化」事件保留來源與前後值，
+不新增玩家協定、一般資源事件 consumer、result 或 after。
 
-本文 `pp_max: {who: self, delta: N}` 同樣只接受正整數常值 N，降低為控制者
-最大 PP 的 Resource(Add)。最大 PP 上限為 10，實際增加量為 `min(N, 10 − 原最大 PP)`，
-目前 PP 保持原值，不因提高上限而回復。達上限時仍記錄零實際量的 Resource 收據；
-有增加時沿既有公開「PP最大値変化」事件，保留來源與前後值。減少、Set、付款與
-動態數量未准入，也不開放一般資源事件 consumer 或完成量接續。
+組合算式仍以 checked arithmetic 求值，溢位不能被 PP 上限掩蓋；EP 表示範圍
+溢位回復整份執行。資源 consumer（pp／pp_max／ep）可接本次已驗證的成功牌庫送墓回條，只有符合篩選
+且實際離開牌庫的成員納入完成量。這不擴充其他 consumer 的回條權限。
 
-## 本文固定 EP 增加
-
-本文 `ep: {who: self, delta: N}` 只接受正整數常值 N，降低為控制者 EP 的
-Resource(Add)。EP 不套用 PP 的上限，PP、最大 PP 與 SEP 保持原值；超出整數表示
-時拒絕並沿既有執行交易回復。Resource 收據保存請求量、前後值與實際增加量，
-沿既有公開「EP変化」事件保留來源；不新增一般資源事件 consumer、result 或 after。
-EP 付款及進化程序仍由原付款邊界處理，不因本文增加而重設進化次數。
-
-### 內部 IR 的資源數量
-
-`Resource(Add)` 的控制者 PP／最大 PP／EP 數量使用共用數值計畫檢查非負下界，
-並在各次指示開始求值一次；零請求保留完成收據，三種資源都不產生增加事件。
-組合算式仍以 checked arithmetic 求值，溢位不能被 PP 上限掩蓋；EP 表示範圍溢位
-回復整份執行。公開數量與本次已驗證的成功牌庫送墓回條沿原讀值權限，不能藉
-資源 consumer 選取隱藏物件或偽造 producer。作者 `pp`／`pp_max`／`ep` 入口仍限
-上節的正整數常值；這個 IR 數量邊界不擴充作者入口、付款或 SEP。
+本文不接受 Pay、Set、RecoverToMax、SEP 或其他玩家；打出費用、EP 付款及進化
+程序仍由原付款邊界處理，不因本文增加而重設進化次數。
 
 ## 觀察與測試種子
 

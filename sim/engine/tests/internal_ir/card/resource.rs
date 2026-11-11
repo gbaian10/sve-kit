@@ -164,12 +164,9 @@ fn unproved_signed_resource_amount_is_a_capability_gap_without_mutation() {
 }
 
 #[test]
-fn pp_author_lowering_rejects_dynamic_negative_zero_and_to_max() {
+fn pp_author_lowering_rejects_opponent_and_to_max() {
     for pp in [
         json!({"who":"opp","delta":3}),
-        json!({"who":"self","delta":-1}),
-        json!({"who":"self","delta":0}),
-        json!({"who":"self","delta":{"resource":{"who":"self","kind":"pp"}}}),
         json!({"who":"self","to_max":true}),
     ] {
         for kind in ["pp", "pp_max", "ep"] {
