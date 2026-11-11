@@ -434,3 +434,91 @@ fn material_holder_authority_does_not_extend_to_other_positions_or_foreign_bindi
         ));
     }
 }
+
+struct EvolvedKind;
+
+impl Reader for EvolvedKind {
+    fn boolean(&self, _property: &BooleanProperty) -> Result<bool> {
+        Err(unsupported("kind-only view"))
+    }
+
+    fn number(&self, _property: &NumberProperty) -> Result<Option<i64>> {
+        Err(unsupported("kind-only view"))
+    }
+
+    fn matches_labels(
+        &self,
+        property: &LabelsProperty,
+        matches: &dyn Fn(&str) -> bool,
+    ) -> Result<bool> {
+        if matches!(
+            property,
+            LabelsProperty::Kind(CharacteristicView::Effective)
+        ) {
+            Ok(matches("フォロワー・エボルヴ"))
+        } else {
+            Err(unsupported("kind-only view"))
+        }
+    }
+}
+
+#[test]
+fn captured_kinds_remain_exact_while_candidate_kind_inclusion_stays_unchanged() {
+    use crate::ir::events::subject::{SubjectFilter, SubjectInformation};
+    use crate::ir::{PlayerId, TraitId};
+    let observer = PlayerId { seat: 1 };
+    let traits = [TraitId("Golem".into())];
+    let mut information = SubjectInformation {
+        original_cost: None,
+        keywords: &[],
+        kind: Some(CardKind::EvolveFollower),
+        traits: &traits,
+        names: &[],
+        class: None,
+    };
+    let filter = SubjectFilter {
+        kind: Some(CardKind::Follower),
+        ..SubjectFilter::default()
+    };
+    assert!(
+        EvolvedKind
+            .matches_kind(CharacteristicView::Effective, CardKind::Follower)
+            .unwrap()
+    );
+    assert!(
+        !subject::matches(
+            &filter,
+            &information,
+            false,
+            observer,
+            observer,
+            observer,
+            false
+        )
+        .unwrap()
+    );
+    let mut source = super::super::source::PublicCharacteristics {
+        kind: information.kind,
+        token: false,
+        class: None,
+        traits: traits.to_vec(),
+        names: vec![],
+    };
+    assert!(!subject::source(&source, CardKind::Follower, &traits[0]).unwrap());
+    assert!(subject::source(&source, CardKind::EvolveFollower, &traits[0]).unwrap());
+    information.kind = Some(CardKind::Follower);
+    assert!(
+        subject::matches(
+            &filter,
+            &information,
+            false,
+            observer,
+            observer,
+            observer,
+            false
+        )
+        .unwrap()
+    );
+    source.kind = None;
+    assert!(!subject::source(&source, CardKind::Follower, &traits[0]).unwrap());
+}

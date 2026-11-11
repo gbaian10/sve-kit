@@ -5,6 +5,7 @@
     reason = "Counter writes address a constructed object state map."
 )]
 
+use super::number_plan::NaturalAmountPlan;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
     Action, Binding, ChoiceDomain, Control, CounterChangeEvent, CounterKind, CounterOperation,
@@ -37,7 +38,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     };
     let fixed = matches!(amount, Expr::Literal(Nat(n)) if i64::try_from(*n).is_ok());
     let valid = match operation {
-        CounterOperation::Add {} | CounterOperation::Remove {} => fixed,
+        CounterOperation::Add {} | CounterOperation::Remove {} => {
+            NaturalAmountPlan::compile(amount).is_ok()
+        }
         CounterOperation::Move { to } => {
             object_holder(to)
                 && (fixed
@@ -60,8 +63,10 @@ pub(super) fn is_cost(action: &Action) -> bool {
             holder: Holder::Object {
                 object: ObjectOperand::SourceHolder {} | ObjectOperand::Selected { .. }
             },
+            amount: Expr::Literal(Nat(n)),
             ..
         }
+        if i64::try_from(*n).is_ok()
     ) && check_action(action).is_ok()
 }
 
@@ -210,26 +215,47 @@ impl Game {
         payment: bool,
     ) -> Result<Quantity> {
         check_action(&instruction.action)?;
-        if let Action::Counter {
+        let Action::Counter {
             holder,
             kind,
-            operation: CounterOperation::Move { to },
+            operation,
             amount,
         } = &instruction.action
-        {
+        else {
+            return Err(unsupported("counter amount"));
+        };
+        if let CounterOperation::Move { to } = operation {
             if payment {
                 return Err(unsupported("counter movement is not a payment"));
             }
             return self.internal_counter_move(execution, instruction, holder, kind, to, amount);
         }
+        let amount = if payment {
+            let Expr::Literal(amount) = amount else {
+                return Err(unsupported("fixed counter amount"));
+            };
+            *amount
+        } else {
+            Nat(NaturalAmountPlan::compile(amount)?.evaluate(execution, self)?)
+        };
+        self.internal_counter_change(execution, instruction, amount, payment)
+    }
+
+    fn internal_counter_change(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        amount: Nat,
+        payment: bool,
+    ) -> Result<Quantity> {
         let Action::Counter {
             holder,
             kind,
             operation,
-            amount: Expr::Literal(amount),
+            ..
         } = &instruction.action
         else {
-            return Err(unsupported("fixed counter amount"));
+            return Err(unsupported("object counter change"));
         };
         let before = execution.counter(self, holder, kind)?;
         let Holder::Object { object } = holder else {
@@ -328,7 +354,45 @@ impl Game {
     ) -> Result<()> {
         let (input, binding, instruction) =
             iteration(control).ok_or_else(|| unsupported("counter iteration"))?;
-        for reference in execution.objects(self, input)? {
+        let references = execution.objects(self, input)?;
+        if let Action::Counter {
+            operation: CounterOperation::Add {} | CounterOperation::Remove {},
+            amount,
+            ..
+        } = &instruction.action
+            && !matches!(amount, Expr::Literal(_))
+        {
+            let plan = NaturalAmountPlan::compile(amount)?;
+            let mut prepared = Vec::with_capacity(references.len());
+            // This shape projects one set counter step, so all reads precede its writes.
+            // A future author foreach must retain its distinct sequential-step semantics.
+            for reference in &references {
+                execution.slots.insert(
+                    binding.key(),
+                    super::Slot::Objects {
+                        members: vec![*reference],
+                        on_field_at_capture: false,
+                    },
+                );
+                prepared.push((*reference, Nat(plan.evaluate(execution, self)?)));
+            }
+            for (reference, prepared_amount) in prepared {
+                execution.slots.insert(
+                    binding.key(),
+                    super::Slot::Objects {
+                        members: vec![reference],
+                        on_field_at_capture: false,
+                    },
+                );
+                self.internal_instruction_boundary(execution, |game, execution| {
+                    game.internal_counter_change(execution, instruction, prepared_amount, false)
+                        .map(|_| ())
+                })?;
+            }
+            execution.slots.remove(&binding.key());
+            return Ok(());
+        }
+        for reference in references {
             execution.slots.insert(
                 binding.key(),
                 super::Slot::Objects {
@@ -383,7 +447,7 @@ pub(super) fn selected_cost(action: &Action) -> Option<Binding<Selector>> {
                 },
             operation: CounterOperation::Remove {},
             ..
-        } if check_action(action).is_ok() => Some(*selection),
+        } if is_cost(action) => Some(*selection),
         _ => None,
     }
 }

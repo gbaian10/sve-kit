@@ -6,11 +6,12 @@ use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
     CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
     EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, NamesRead, NatRead,
-    NumberRead, ObjectOperand, ObjectRef, ObjectView, Posture, PostureRead, Predicate, Stat,
-    TraitsRead,
+    NumberRead, ObjectOperand, ObjectRef, ObjectView, PlayerId, Posture, PostureRead, Predicate,
+    Stat, TraitsRead,
 };
 
 pub(super) mod candidate;
+pub(super) mod subject;
 
 #[cfg(test)]
 mod tests;
@@ -24,6 +25,9 @@ pub(super) enum Policy {
 
 #[derive(Clone, Debug)]
 pub(super) enum BooleanProperty {
+    Controller(PlayerId),
+    ActivePlayer(PlayerId),
+    SameSource,
     State(BooleanState),
     Posture(Posture),
     Evolution(EvolutionState),
@@ -53,6 +57,11 @@ pub(super) trait Reader {
         property: &LabelsProperty,
         matches: &dyn Fn(&str) -> bool,
     ) -> Result<bool>;
+    fn matches_kind(&self, view: CharacteristicView, expected: CardKind) -> Result<bool> {
+        self.matches_labels(&LabelsProperty::Kind(view), &|actual| {
+            actual.contains(kind_name(expected))
+        })
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -83,6 +92,7 @@ enum Names {
 
 #[derive(Clone, Debug)]
 enum Atom {
+    Kind(CharacteristicView, CardKind),
     Boolean(BooleanProperty),
     Labels(LabelsProperty, Names),
     Contains(String),
@@ -97,6 +107,7 @@ enum Operand<T> {
 
 #[derive(Clone, Debug)]
 enum PreparedAtom {
+    Kind(CharacteristicView, CardKind),
     Boolean(BooleanProperty),
     Labels(LabelsProperty, Operand<Vec<String>>),
     Contains(String),
@@ -394,19 +405,7 @@ fn atomic(expression: &Expr<Bool>, binding: Binding<ObjectRef>, policy: Policy) 
         } if matches!(read.as_ref(), KindRead::Kind { object,view } if candidate(object,binding) && (*view==CharacteristicView::Effective || (policy==Policy::Search && *view==CharacteristicView::Original))) =>
         {
             let KindRead::Kind { view, .. } = read.as_ref();
-            return Ok(Atom::Labels(
-                LabelsProperty::Kind(*view),
-                Names::Literal(vec![
-                    match kind {
-                        CardKind::Follower => "フォロワー",
-                        CardKind::Spell => "スペル",
-                        CardKind::Amulet => "アミュレット",
-                        CardKind::EvolveFollower => "フォロワー・エボルヴ",
-                        CardKind::Crest => "クレスト",
-                    }
-                    .into(),
-                ]),
-            ));
+            return Ok(Atom::Kind(*view, *kind));
         }
         Predicate::HasTrait {
             traits: Expr::Live(read),
@@ -474,6 +473,7 @@ impl Tree<Atom> {
                     .collect::<Result<_>>()?,
             ),
             Self::Atom(atom) => Tree::Atom(match atom {
+                Atom::Kind(view, kind) => PreparedAtom::Kind(*view, *kind),
                 Atom::Boolean(property) => PreparedAtom::Boolean(property.clone()),
                 Atom::Contains(text) => PreparedAtom::Contains(text.clone()),
                 Atom::Labels(property, source) => PreparedAtom::Labels(
@@ -537,6 +537,7 @@ impl Tree<PreparedAtom> {
 impl PreparedAtom {
     fn evaluate(&self, reader: &impl Reader) -> Result<bool> {
         match self {
+            Self::Kind(view, kind) => reader.matches_kind(*view, *kind),
             Self::Boolean(property) => reader.boolean(property),
             Self::Contains(text) => {
                 reader.matches_labels(&LabelsProperty::Names, &|name| name.contains(text))
@@ -559,5 +560,15 @@ impl PreparedAtom {
                 Err(unsupported("unprepared candidate condition operand"))
             }
         }
+    }
+}
+
+const fn kind_name(kind: CardKind) -> &'static str {
+    match kind {
+        CardKind::Follower => "フォロワー",
+        CardKind::Spell => "スペル",
+        CardKind::Amulet => "アミュレット",
+        CardKind::EvolveFollower => "フォロワー・エボルヴ",
+        CardKind::Crest => "クレスト",
     }
 }

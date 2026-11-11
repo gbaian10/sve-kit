@@ -875,25 +875,6 @@ impl SubjectFilter {
         true
     }
 
-    pub(crate) fn matches(
-        &self,
-        characters: &Characteristics,
-        same: bool,
-        observer_controller: PlayerId,
-        subject_controller: PlayerId,
-        active: PlayerId,
-        token: bool,
-    ) -> bool {
-        self.matches_information(
-            &SubjectInformation::from_characters(characters, None),
-            same,
-            observer_controller,
-            subject_controller,
-            active,
-            token,
-        )
-    }
-
     pub(crate) fn matches_information(
         &self,
         characters: &SubjectInformation<'_>,

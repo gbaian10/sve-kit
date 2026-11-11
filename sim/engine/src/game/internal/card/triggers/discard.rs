@@ -7,6 +7,7 @@ use super::{
 };
 use crate::game::internal::Execution;
 use crate::game::internal::admission::PlannedAbility;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
@@ -193,18 +194,25 @@ impl Game {
                     continue;
                 };
                 if ability.node.active_zones != [zone]
-                    || !plan.matches(player, card_before, source, actor, active)
+                    || !subject_condition::discard_roles(
+                        &plan,
+                        player,
+                        card_before,
+                        source,
+                        actor,
+                        active,
+                    )?
                 {
                     continue;
                 }
-                if plan.card.is_some() {
+                if let Some(card_filter) = &plan.card {
                     if characters.is_none() {
                         characters = Some(self.internal_hand_characteristics(id)?);
                     }
-                    if !characters
-                        .as_ref()
-                        .is_some_and(|characters| plan.matches_card(characters))
-                    {
+                    let Some(characters) = &characters else {
+                        continue;
+                    };
+                    if !subject_condition::discard_card(card_filter, characters)? {
                         continue;
                     }
                 }
@@ -249,7 +257,7 @@ impl Game {
                     else {
                         continue;
                     };
-                    if source.controller != actor {
+                    if !subject_condition::controlled_by(source.controller, actor)? {
                         continue;
                     }
                     if execution.id != execution_id
@@ -261,10 +269,10 @@ impl Game {
                     if cause_traits.is_none() {
                         cause_traits = Some(execution.source_traits(self)?);
                     }
-                    if !cause_traits
-                        .as_ref()
-                        .is_some_and(|traits| traits.contains(&by.trait_id))
-                    {
+                    let Some(traits) = &cause_traits else {
+                        continue;
+                    };
+                    if !subject_condition::traits(traits, &by.trait_id)? {
                         continue;
                     }
                 }
