@@ -328,13 +328,14 @@ fn overflowing_answer_restores_execution_and_accepts_a_fresh_attempt() {
             .unwrap();
         assert!(!initial.complete);
         let question = game.internal_decision(View::Referee).unwrap();
+        let published = game.clone();
         game.answer_internal(
             PlayerId { seat },
             question.token,
             Answer::Integer(Nat(u64::try_from(i64::MAX).unwrap())),
         )
         .unwrap_err();
-        transactions::assert_restored(&game, &origin);
+        transactions::assert_reverted_from(&game, &origin, &published);
         game.execute_internal(&program, &source("synthetic"), context(seat))
             .unwrap();
         let question = game.internal_decision(View::Referee).unwrap();

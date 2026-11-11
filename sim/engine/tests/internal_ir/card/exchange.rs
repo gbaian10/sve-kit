@@ -190,11 +190,12 @@ fn distinct_cost_exchange_requires_enough_original_costs_before_asking_for_mater
     );
     let origin = game.clone();
     let question = start(&mut game);
+    let published = game.clone();
     let error = game
         .answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
         .unwrap_err();
     assert!(matches!(error, sve_engine::EngineFailure::IllegalPlay(_)));
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted_from(&game, &origin, &published);
 
     tree["cards"]["unit-follower"]["abilities"][0]["play"]["optional_cost"]["banish"]["distinct_by"] =
         json!("name");
@@ -266,10 +267,11 @@ fn exchange_set_then_delta_banishes_exact_materials_or_restores_the_entire_play(
     );
     let origin = short.clone();
     let question = start(&mut short);
+    let published = short.clone();
     short
         .answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
         .unwrap_err();
-    transactions::assert_restored(&short, &origin);
+    transactions::assert_reverted_from(&short, &origin, &published);
     let mut poor = position(
         &program,
         &initial("unit-spell", "cemetery", 10, 1),
@@ -279,13 +281,14 @@ fn exchange_set_then_delta_banishes_exact_materials_or_restores_the_entire_play(
     let origin = poor.clone();
     let question = start(&mut poor);
     let question = materials(&mut poor, &question);
+    let published = poor.clone();
     poor.answer_internal_card(
         question.actor,
         question.token,
         Answer::CostMaterials((0..10).collect()),
     )
     .unwrap_err();
-    transactions::assert_restored(&poor, &origin);
+    transactions::assert_reverted_from(&poor, &origin, &published);
 }
 
 #[test]
@@ -854,6 +857,7 @@ fn posture_exchange_defers_its_trigger_and_insufficient_pp_restores_play_before_
         let accept = start(&mut game);
         let material = materials(&mut game, &accept);
         game.internal_pending_choice().unwrap_err();
+        let published = game.clone();
         let paid = game.answer_internal_card(
             material.actor,
             material.token,
@@ -861,7 +865,7 @@ fn posture_exchange_defers_its_trigger_and_insufficient_pp_restores_play_before_
         );
         if pp == 1 {
             paid.unwrap_err();
-            transactions::assert_restored(&game, &origin);
+            transactions::assert_reverted_from(&game, &origin, &published);
             assert!(game.internal_pending_choice().unwrap().is_none());
             continue;
         }
@@ -1100,9 +1104,10 @@ fn pp_increase_exchange_unaffordable_acceptance_restores_the_entire_play() {
     );
     let origin = game.clone();
     let question = start(&mut game);
+    let published = game.clone();
     game.answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
         .unwrap_err();
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted_from(&game, &origin, &published);
 }
 
 #[test]

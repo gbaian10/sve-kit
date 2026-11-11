@@ -385,13 +385,14 @@ fn a_failure_after_banish_restores_the_hand_pending_and_random_authority() {
     let InputDomain::Search(domain) = &search.domain else {
         panic!("search after banish")
     };
+    let published = game.clone();
     game.answer_internal_card(
         search.actor,
         search.token,
         Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle])),
     )
     .unwrap_err();
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted_from(&game, &origin, &published);
     assert_eq!(game.projection(View::Referee).unwrap(), before);
     checks(&mut game);
     assert!(game.internal_pending_choice().unwrap().is_none());
@@ -399,13 +400,14 @@ fn a_failure_after_banish_restores_the_hand_pending_and_random_authority() {
     let InputDomain::Search(domain) = &retry.domain else {
         panic!("retry search")
     };
+    let published = game.clone();
     game.answer_internal_card(
         retry.actor,
         retry.token,
         Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle])),
     )
     .unwrap_err();
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted_from(&game, &origin, &published);
     assert_eq!(
         game.projection(View::Referee).unwrap(),
         before,

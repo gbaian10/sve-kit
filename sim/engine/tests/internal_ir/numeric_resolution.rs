@@ -272,10 +272,11 @@ fn overflow_revealed_by_expiry_rolls_back_the_entire_closed_execution() {
         run(&mut board, pending, seat);
         stats(&board, i64::MAX, 3, 3, 0);
         let question = board.internal_decision(View::Referee).unwrap();
+        let published = board.clone();
         board
             .answer_internal(PlayerId { seat }, question.token, Answer::Integer(Nat(0)))
             .unwrap_err();
-        transactions::assert_restored(&board, &origin);
+        transactions::assert_reverted_from(&board, &origin, &published);
     }
 }
 

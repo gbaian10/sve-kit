@@ -11,7 +11,7 @@ pub(super) fn assert_restored(actual: &Game, expected: &Game) {
     assert_rollback(actual, expected, false);
 }
 
-fn normalize_issuance(debug: &str) -> (String, Vec<u64>) {
+pub(super) fn normalize_issuance(debug: &str) -> (String, Vec<u64>) {
     let mut normalized = debug.to_owned();
     let ranges = debug
         .match_indices(", issued: ")
@@ -142,6 +142,22 @@ pub(super) fn assert_reverted(actual: &Game, origin: &Game) {
             "published rollback must preserve uninterrupted visible identities"
         );
     }
+}
+
+pub(super) fn assert_reverted_from(actual: &Game, origin: &Game, published: &Game) {
+    assert_reverted(actual, origin);
+    let origin_issued = normalize_issuance(&exact_authority(origin)).1;
+    let published_issued = normalize_issuance(&exact_authority(published)).1;
+    let expected = origin_issued
+        .iter()
+        .zip(published_issued)
+        .map(|(before, visible)| (*before).max(visible))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        normalize_issuance(&exact_authority(actual)).1,
+        expected,
+        "uninterrupted identities must retain exactly the published issuance high water mark"
+    );
 }
 
 #[expect(
