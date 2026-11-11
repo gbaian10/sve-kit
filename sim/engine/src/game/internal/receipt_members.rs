@@ -58,17 +58,30 @@ pub(super) fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
 
 pub(super) struct MemberView {
     pub(super) before: ObjectRef,
-    card: MemberCard,
+    information: MemberInformation,
+}
+
+enum MemberInformation {
+    Properties(MemberCard),
+    OriginalPrinting(String),
 }
 
 impl MemberView {
-    pub(super) const fn card(&self) -> &MemberCard {
-        &self.card
+    pub(super) const fn card(&self) -> Option<&MemberCard> {
+        match &self.information {
+            MemberInformation::Properties(card) => Some(card),
+            MemberInformation::OriginalPrinting(_) => None,
+        }
     }
 
     pub(super) fn original_cost(&self, game: &Game, execution: &Execution) -> Result<i64> {
         // Base printing is immutable across generations and effective-cost changes.
-        let card = &game.object(execution.object_id(self.before)?)?.card;
+        let card = match &self.information {
+            MemberInformation::OriginalPrinting(card) => card,
+            MemberInformation::Properties(_) => {
+                &game.object(execution.object_id(self.before)?)?.card
+            }
+        };
         super::cost::printed_cost(&game.catalog.face(card, 0)?["cost"])
     }
 }
@@ -138,7 +151,7 @@ impl<'execution> PaidMembers<'execution> {
             .zip(self.subjects)
             .map(|(characters, before)| MemberView {
                 before: *before,
-                card: MemberCard::from(characters),
+                information: MemberInformation::Properties(MemberCard::from(characters)),
             })
             .collect())
     }
@@ -182,7 +195,9 @@ pub(super) fn members(
             .map(|before| {
                 Ok(MemberView {
                     before,
-                    card: printed_card(game, execution, before)?,
+                    information: MemberInformation::Properties(printed_card(
+                        game, execution, before,
+                    )?),
                 })
             })
             .collect();
@@ -197,20 +212,56 @@ pub(super) fn members(
                     .ok_or_else(|| invalid("missing discard before member"))?;
                 Ok(MemberView {
                     before: before.object,
-                    card: MemberCard::from(discarded_characters(
-                        execution,
-                        before.object,
-                        "missing discarded characteristics",
-                    )?),
+                    information: MemberInformation::Properties(MemberCard::from(
+                        discarded_characters(
+                            execution,
+                            before.object,
+                            "missing discarded characteristics",
+                        )?,
+                    )),
                 })
             })
             .collect(),
-        Some(InstructionOutcome::Move(_)) => moved_deck_members(execution, receipt, destination)?
-            .into_iter()
-            .map(|before| {
+        Some(InstructionOutcome::Move(outcome)) => outcome
+            .moved
+            .iter()
+            .filter(|movement| {
+                movement.after.is_some()
+                    && destination
+                        .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
+            })
+            .map(|movement| {
+                let fact = execution
+                    .facts
+                    .iter()
+                    .find_map(|fact| match fact {
+                        Fact::Movement(fact) if fact.movement == *movement => Some(fact),
+                        _ => None,
+                    })
+                    .ok_or_else(|| invalid("missing receipt movement fact"))?;
+                let information = match fact.from.kind {
+                    ZoneKind::Deck => MemberInformation::Properties(printed_card(
+                        game,
+                        execution,
+                        movement.before,
+                    )?),
+                    ZoneKind::Field
+                        if fact.method == MoveMethod::Put
+                            && movement.after.is_some_and(|after| {
+                                after.id == movement.before.id
+                                    && after.generation != movement.before.generation
+                            })
+                            && movement
+                                .actual_to
+                                .is_some_and(|to| to.kind == ZoneKind::Cemetery) =>
+                    {
+                        MemberInformation::OriginalPrinting(fact.card_before.clone())
+                    }
+                    _ => return Err(unsupported("receipt member movement origin or destination")),
+                };
                 Ok(MemberView {
-                    before,
-                    card: printed_card(game, execution, before)?,
+                    before: movement.before,
+                    information,
                 })
             })
             .collect(),

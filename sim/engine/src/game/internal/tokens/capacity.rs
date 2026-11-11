@@ -14,6 +14,10 @@ pub(in crate::game::internal) struct CapacityWait {
 }
 
 impl CapacityWait {
+    pub(in crate::game::internal) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
+        (self.actor, self.zone, self.available)
+    }
+
     pub(in crate::game::internal) fn validate(&self, handle: u64) -> Result<Vec<String>> {
         let chosen = usize::try_from(handle)
             .ok()

@@ -1155,3 +1155,89 @@ fn resolution_alternative_can_use_an_earlier_created_set_without_leaking_branch_
 
 #[path = "token_creation/ward_bypass.rs"]
 mod ward_bypass;
+
+#[test]
+fn player_question_token_capacity_uses_names_and_exact_destination() {
+    use sve_engine::game::player::observation::ObservedZone;
+    use sve_engine::game::player::{
+        Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
+    };
+    use sve_engine::ir::Nat;
+    for (zone, expected_zone) in [("field", ObservedZone::Field), ("ex", ObservedZone::Ex)] {
+        let selected = mixed_selection(
+            json!([{"create":{"token":["token","second"],"n":2_u8,"to":zone,"result":"made"}}]),
+            false,
+        );
+        let mut initial = initial(4);
+        if zone == "field" {
+            initial["players"]["P1"]["zones"]["field"] =
+                initial["players"]["P1"]["zones"]["ex"].take();
+            initial["players"]["P1"]["zones"]["ex"] = json!([]);
+        }
+        let mut game = Game::from_selected_effects(
+            selected,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "player-token-capacity",
+        )
+        .unwrap();
+        game.play_internal_card("creator", PlayerId { seat: 1 })
+            .unwrap();
+        game.advance_player_input();
+        let Input::Question(question) = game.input(Viewer::P1) else {
+            panic!("token capacity question")
+        };
+        let QuestionShape::Decision(DecisionShape::TokenCapacity(capacity)) = &question.shape
+        else {
+            panic!("token capacity shape")
+        };
+        assert_eq!(capacity.destination, Viewer::P1);
+        assert_eq!(capacity.zone, expected_zone);
+        assert_eq!(capacity.available, Nat(1));
+        let handle = u64::try_from(
+            capacity
+                .choices
+                .iter()
+                .position(|names| names == &["second"])
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+        let before = format!("{game:?}");
+        assert_eq!(
+            game.submit_player(
+                Viewer::P2,
+                Command::Answer {
+                    token: question.token,
+                    answer: Answer::TokenCapacity(handle)
+                }
+            )
+            .kind,
+            SubmissionKind::Rejected
+        );
+        assert_eq!(format!("{game:?}"), before);
+        assert_eq!(
+            game.submit_player(
+                Viewer::P1,
+                Command::Answer {
+                    token: question.token,
+                    answer: Answer::TokenCapacity(handle)
+                }
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(after["P1"][zone].as_array().unwrap().len(), 5);
+        assert_eq!(
+            after["objects"]
+                .as_object()
+                .unwrap()
+                .values()
+                .filter(|object| object["card"] == "second")
+                .count(),
+            1
+        );
+    }
+}

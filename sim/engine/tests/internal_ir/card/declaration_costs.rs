@@ -349,3 +349,104 @@ fn two_selected_fees_ask_both_choices_then_both_targets_before_one_public_materi
         "both paid bodies resolve"
     );
 }
+
+#[test]
+fn player_question_resolution_payment_keeps_acceptance_separate_from_declared_cost() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{
+        DecisionShape, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
+    };
+    for accept in [false, true] {
+        let tree = evolution_linked_movement::tree(&[(
+            "auto",
+            json!({"on":{"phase":{"whose":"self","which":"end"}},"do":[{"pay":{"cost":{"act_self":true},"do":[{"life":{"who":"self","delta":2}}]}}]}),
+        )]);
+        let program = lowerer()
+            .lower(&tree)
+            .unwrap()
+            .remove("unit-follower")
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"source","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "player-resolution-pay",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        game.advance_player_input();
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
+            SubmissionKind::Applied
+        );
+        game.advance_player_input();
+        let payment = question(&game, Viewer::P1);
+        assert_eq!(payment.purpose, QuestionPurpose::ResolutionChoice);
+        assert_eq!(
+            payment.shape,
+            QuestionShape::Decision(DecisionShape::ResolutionPayment)
+        );
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::OptionalCost(accept)).kind,
+            SubmissionKind::Applied
+        );
+        let after = game.projection(View::Referee).unwrap();
+        assert_eq!(after["P1"]["leader"]["life"], if accept { 22 } else { 20 });
+        assert_eq!(
+            after["P1"]["pp"]["current"].as_u64().unwrap(),
+            before["P1"]["pp"]["current"].as_u64().unwrap()
+        );
+    }
+}
+
+#[test]
+fn player_question_cost_discard_keeps_the_native_material_answer_channel() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{
+        DecisionShape, DiscardKind, QuestionShape, SubmissionKind, Viewer,
+    };
+    let (mut game, _) = start(
+        json!({"discard":{"sel":{"who":"self","zone":"hand"},"n":1}}),
+        1,
+    );
+    game.advance_player_input();
+    assert_eq!(
+        question(&game, Viewer::P1).shape,
+        QuestionShape::Decision(DecisionShape::OptionalCost)
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::OptionalCost(true)).kind,
+        SubmissionKind::Applied
+    );
+    let discard = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Discard {
+        kind: DiscardKind::Cost,
+        cards,
+    }) = discard.shape
+    else {
+        panic!("cost discard")
+    };
+    assert_eq!(cards.members.len(), 1);
+    assert_eq!(cards.cardinality.minimum, Nat(1));
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::CostMaterials(vec![cards.members[0].handle])
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!([]));
+    assert_eq!(state["P1"]["cemetery"], json!(["material"]));
+    assert_eq!(state["P1"]["leader"]["life"], 22);
+}

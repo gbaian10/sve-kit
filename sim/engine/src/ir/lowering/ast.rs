@@ -1065,6 +1065,7 @@ pub(super) struct ObjectQuery {
     pub not_token: Option<bool>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
+    pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
     pub not_trait: Option<String>,
     pub name: Option<String>,
@@ -3379,6 +3380,7 @@ pub(super) struct ReceiptCountQuery {
     pub not_class: Option<String>,
     pub name: Option<String>,
     pub name_contains: Option<String>,
+    pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
 }
 #[derive(Deserialize)]

@@ -247,3 +247,161 @@ fn player_pipeline_unknown_procedure_cannot_appear_as_a_rule_choice() {
     game.advance_player_input();
     assert_eq!(game.input(Viewer::P2), Input::EngineFault);
 }
+
+// A host supplies its selected coordinates; this adapter never inspects authority state.
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every closed shape has an explicit native answer channel."
+)]
+pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: bool) -> Answer {
+    use sve_engine::game::internal::{DamageShare, SearchAnswer, TargetRoleAssignment};
+    use sve_engine::game::player::{DecisionShape, DiscardKind};
+    let QuestionShape::Decision(shape) = shape else {
+        panic!("expected a native decision shape")
+    };
+    match shape {
+        DecisionShape::DiceReroll { .. } | DecisionShape::May => {
+            Answer::Integer(Nat(u64::from(accept)))
+        }
+        DecisionShape::Abilities(options) => {
+            Answer::Ability(selected.first().copied().unwrap_or(options[0].handle))
+        }
+        DecisionShape::ResourceEntryPayment { .. } => Answer::ResourceEntryPayment {
+            materials: selected.to_vec(),
+            use_ep: accept,
+        },
+        DecisionShape::WardEntry { .. } => Answer::WardEntry(accept),
+        DecisionShape::Quick { .. } => Answer::Quick(selected.first().copied()),
+        DecisionShape::OptionalCost | DecisionShape::ResolutionPayment => {
+            Answer::OptionalCost(accept)
+        }
+        DecisionShape::CostMaterials(_)
+        | DecisionShape::Discard {
+            kind: DiscardKind::Cost,
+            ..
+        } => Answer::CostMaterials(selected.to_vec()),
+        DecisionShape::Discard {
+            kind: DiscardKind::Effect,
+            ..
+        } => Answer::Targets(selected.to_vec()),
+        DecisionShape::ExchangeRoutes(routes) => {
+            Answer::Integer(selected.first().map_or(routes[0], |value| Nat(*value)))
+        }
+        DecisionShape::BeforeDraw => Answer::Stepwise(if accept {
+            StepwiseAnswer::Continue
+        } else {
+            StepwiseAnswer::Stop
+        }),
+        DecisionShape::Pending(options) => {
+            Answer::Pending(selected.first().copied().unwrap_or(options[0].handle))
+        }
+        DecisionShape::TriggerQuota(quota) => Answer::TriggerQuota(
+            selected
+                .first()
+                .copied()
+                .unwrap_or(quota.candidates[0].handle),
+        ),
+        DecisionShape::Integer(bounds) => {
+            Answer::Integer(selected.first().map_or(bounds.minimum, |value| Nat(*value)))
+        }
+        DecisionShape::Order(_) | DecisionShape::DamageReplacements(_) => {
+            Answer::Order(selected.to_vec())
+        }
+        DecisionShape::DriveTrigger { .. } => Answer::DriveTrigger {
+            accept,
+            target: selected.first().copied(),
+        },
+        DecisionShape::Search(search) => Answer::Search(search.groups.as_ref().map_or_else(
+            || SearchAnswer::Ungrouped(selected.to_vec()),
+            |groups| {
+                SearchAnswer::Grouped(
+                    groups
+                        .iter()
+                        .map(|group| {
+                            selected
+                                .iter()
+                                .filter(|handle| group.handles.contains(handle))
+                                .copied()
+                                .collect()
+                        })
+                        .collect(),
+                )
+            },
+        )),
+        DecisionShape::SearchPartition(_) | DecisionShape::MovementCapacity(_) => {
+            Answer::SearchPartition(selected.to_vec())
+        }
+        DecisionShape::Distribution(domain) => {
+            let rest = domain
+                .minimum
+                .0
+                .checked_mul(u64::try_from(domain.members.len().saturating_sub(1)).unwrap())
+                .unwrap();
+            Answer::Distribution(
+                domain
+                    .members
+                    .iter()
+                    .enumerate()
+                    .map(|(index, member)| DamageShare {
+                        handle: member.handle,
+                        amount: if index == 0 {
+                            Nat(domain.total.0.checked_sub(rest).unwrap())
+                        } else {
+                            domain.minimum
+                        },
+                    })
+                    .collect(),
+            )
+        }
+        DecisionShape::SearchReplacement => Answer::SearchReplacement(if accept {
+            SearchReplacementAnswer::Replacement
+        } else {
+            SearchReplacementAnswer::Original
+        }),
+        DecisionShape::Targets(targets) => {
+            if targets.roles.is_empty() {
+                Answer::Targets(selected.to_vec())
+            } else {
+                let mut cursor = 0_usize;
+                let roles = targets
+                    .roles
+                    .iter()
+                    .map(|role| {
+                        let count = match role.cardinality {
+                            RoleCardinality::Fixed { cardinality } => {
+                                usize::try_from(cardinality.minimum.0).unwrap()
+                            }
+                            RoleCardinality::IfNonempty { count } => {
+                                if selected.is_empty() {
+                                    0
+                                } else {
+                                    usize::try_from(count.0).unwrap()
+                                }
+                            }
+                            RoleCardinality::Remainder {} => {
+                                selected.len().checked_sub(cursor).unwrap()
+                            }
+                        };
+                        let end = cursor.checked_add(count).unwrap();
+                        let assignment = TargetRoleAssignment {
+                            role: role.role,
+                            targets: selected[cursor..end].to_vec(),
+                        };
+                        cursor = end;
+                        assignment
+                    })
+                    .collect();
+                Answer::TargetsWithRoles {
+                    targets: selected.to_vec(),
+                    roles,
+                }
+            }
+        }
+        DecisionShape::TokenCapacity(_) => {
+            Answer::TokenCapacity(selected.first().copied().unwrap_or(0))
+        }
+        DecisionShape::Modes { .. } | DecisionShape::ResolutionAlternative { .. } => {
+            Answer::Modes(selected.iter().copied().map(ModeId).collect())
+        }
+    }
+}

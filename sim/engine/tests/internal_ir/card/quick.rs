@@ -6,6 +6,7 @@
 use super::*;
 use sve_engine::game::Step;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
+use sve_engine::game::player::DecisionShape;
 
 pub(super) fn permit() -> Located<Ability> {
     let mut tree = fanfare::expanded::tree().clone();
@@ -183,7 +184,7 @@ fn player_pipeline_resumes_pending_and_quick_until_an_explicit_empty_pass() {
     game.advance_player_input();
     assert!(matches!(
         player_question(&game, Viewer::P1).shape,
-        QuestionShape::Decision(InputDomain::Pending(_))
+        QuestionShape::Decision(DecisionShape::Pending(_))
     ));
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
@@ -192,14 +193,14 @@ fn player_pipeline_resumes_pending_and_quick_until_an_explicit_empty_pass() {
     for remaining in [2, 1] {
         let quick = player_question(&game, Viewer::P2);
         assert!(matches!(quick.shape,
-            QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.len() == remaining));
+            QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.len() == remaining));
         assert_eq!(
             answer(&mut game, Viewer::P2, Answer::Quick(Some(0))).kind,
             SubmissionKind::Applied
         );
         assert!(matches!(
             player_question(&game, Viewer::P1).shape,
-            QuestionShape::Decision(InputDomain::Pending(_))
+            QuestionShape::Decision(DecisionShape::Pending(_))
         ));
         assert_eq!(
             answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
@@ -208,7 +209,7 @@ fn player_pipeline_resumes_pending_and_quick_until_an_explicit_empty_pass() {
     }
     let empty = player_question(&game, Viewer::P2);
     assert!(matches!(&empty.shape,
-        QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty()));
+        QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.is_empty()));
     let before = exact_authority(&game);
     for _ in 0..4 {
         assert_eq!(player_question(&game, Viewer::P2), empty);

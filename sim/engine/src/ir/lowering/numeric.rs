@@ -258,6 +258,7 @@ impl BodyContext<'_> {
                 not_token: None,
                 orig_cost_eq: None,
                 orig_cost_le: None,
+                orig_cost_ge: None,
                 hp_le: None,
                 not_trait: None,
                 name: None,
@@ -325,7 +326,7 @@ impl BodyContext<'_> {
                     token: query
                         .token
                         .or_else(|| query.not_token.map(|excluded| !excluded)),
-                    original_cost: [query.orig_cost_eq, query.orig_cost_le, None],
+                    original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
                     hp_at_most: query.hp_le,
                     not_trait: query.not_trait.as_deref(),
                     name: query.name.as_deref(),
@@ -479,6 +480,7 @@ impl BodyContext<'_> {
                 not_token: None,
                 orig_cost_eq: None,
                 orig_cost_le: None,
+                orig_cost_ge: None,
                 hp_le: None,
                 not_trait: None,
                 name: None,

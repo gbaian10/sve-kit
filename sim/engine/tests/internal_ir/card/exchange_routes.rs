@@ -146,3 +146,85 @@ fn exchange_routes_reject_extra_routes_nested_shapes_and_broader_posture_queries
         "posture is not opened for ordinary counts"
     );
 }
+
+#[test]
+fn player_question_exchange_preserves_the_only_affordable_route_index() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{Command, DecisionShape, QuestionShape, SubmissionKind, Viewer};
+    let (snapshot, keywords, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            row["faces"][0]["card_class"] = json!("ナイトメア");
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!(
+        (0..4)
+            .map(|i| json!({"id":format!("ex-{i}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "player-route-index",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program())
+        .unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.advance_player_input();
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::OptionalCost(true)).kind,
+        SubmissionKind::Applied
+    );
+    let route = question(&game, Viewer::P1);
+    assert_eq!(
+        route.shape,
+        QuestionShape::Decision(DecisionShape::ExchangeRoutes(vec![Nat(1)]))
+    );
+    let before = exact_authority(&game);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Answer {
+                token: route.token,
+                answer: Answer::Integer(Nat(0))
+            }
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Integer(Nat(1))).kind,
+        SubmissionKind::Applied
+    );
+    let material = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::CostMaterials(domain)) = material.shape else {
+        panic!("route materials")
+    };
+    assert_eq!(domain.members.len(), 4);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::CostMaterials(domain.members.iter().map(|member| member.handle).collect())
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["ex"], json!([]));
+    assert_eq!(state["P1"]["field"], json!(["s"]));
+    assert_eq!(state["P1"]["banish"].as_array().unwrap().len(), 4);
+}
