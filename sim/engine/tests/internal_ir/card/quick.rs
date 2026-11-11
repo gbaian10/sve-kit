@@ -221,7 +221,7 @@ fn player_pipeline_resumes_pending_and_quick_until_an_explicit_empty_pass() {
     );
     assert!(matches!(
         player_question(&game, Viewer::P1).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P2"]["pp"]["current"], 0);

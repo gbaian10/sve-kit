@@ -415,7 +415,7 @@ fn player_pipeline_unpayable_required_head_cancels_only_the_pending_occurrence()
     assert_eq!(cancelled.kind, SubmissionKind::Cancelled);
     assert!(matches!(
         player_question(&game, Viewer::P1).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 4);

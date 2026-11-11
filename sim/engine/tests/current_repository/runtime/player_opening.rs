@@ -164,7 +164,7 @@ fn player_opening_is_serial_private_and_reproducible_from_the_accepted_selection
         );
         assert!(matches!(
             question(game, Viewer::P1).shape,
-            QuestionShape::ActionWindow
+            QuestionShape::ActionWindow(_)
         ));
     }
     assert_eq!(
@@ -246,7 +246,7 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
     );
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let events = game.events(Viewer::P2, None).unwrap().collect::<Vec<_>>();
     assert_eq!(events.iter().filter(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Reveal)).count(), 1,

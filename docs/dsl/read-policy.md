@@ -59,6 +59,64 @@ raw IR 仍由 wellformed 檢查，作者路徑仍保留來源閉包與 lowering�
 未付、跨迴圈／execution、錯誤 producer 或未授權私有讀取的拒絕不因共用走訪而消失。
 靜態計畫建立後，使用時仍重驗付款、世代、位置、follow 與實際 reveal。
 
+## 候選條件核心
+
+selection、Search 及已委派的費用對象判斷共用封閉的候選條件計畫。
+compile 走完整個條件樹，驗證候選 binding、來源與每個原子；
+不能因前面的條件為 false／true 而略過未授權分支。
+核心只從指定候選的 reader 取得布林、數值或標籤匹配結果，不持有 Game 或任意物件查詢。
+數值比較沿用共用核心；名稱比對保留「印刷名已命中就不必讀額外名稱」的規則。
+
+下表描述既有來源政策，不能把其中一欄的權限套給另一欄。
+
+| 條件／屬性 | Selection | 私有 Look Filter | Search 及使用其政策的 consumer |
+| --- | --- | --- | --- |
+| Not、And、Or | 保留 eager；空組合拒絕 | 同 Selection | 保留短路；空組合及以無條件 true 作子條件的歧義組合拒絕 |
+| class 與 Not class | IR 要求 Effective，讀印刷 class | 同 Selection | Original／Effective 均讀印刷 class |
+| 名稱 OR／排除／子字串 | 比對規則名稱；來源側只允許原有 SourceHolder 讀法 | 來源名稱須是受權 SourceInformation | 來源名稱須是受權 SourceInformation |
+| kind、trait、token 交集 | Effective kind／trait 與 object token 狀態 | 同 Selection | kind 依 Original／Effective；trait 與 token 依印刷面 |
+| cost／original cost 比較 | Eq／Le／Ge；分別讀有效費用與原印刷費用 | 同 Selection | IR 保留既有六種比較；原費與有效費用不混用 |
+| hp／power 比較 | 有效數值；只適用 Field follower，其他候選整個原子為 false | 同 Selection | 只有 power；沿用既有 power 欄位，非 follower 為 0；hp 拒絕 |
+| counter 比較 | 拒絕 | 拒絕 | 只讀同一候選的既有 counter，不跨卡相加 |
+| keyword／trait／token 交集 | 經原有 keyword 授權；場內有效 keyword 含抑制，場外用印刷能力 | 同 Selection | 同一 keyword reader，保留 Evolution、Stack、EarthRite、Lastword 的既有區別 |
+| 其他物件狀態 | FaceUp、Racing、EnteredThisTurn、Boxed、posture、evolution 依既有位置限制 | 同 Selection | 只允許 token 狀態 |
+
+Comparison 的右值仍限原有 `public_numbers`，不是任意數值讀取。
+公開素材另保留既有的「與持有者不同名」特例：只能是整個條件，或最外層 And 的最後一項。
+該項必須是候選名稱與 SourceHolder 名稱相交的 Not，其餘部分仍按 Search 政策驗證。
+准入與 runtime 使用同一個素材 compiler，列舉前準備一次持有者名稱；
+此特例不適用於一般 Search、私有手牌素材或其他使用 Search 政策的 consumer。
+原子計畫保留 Original／Effective 標記；reader 仍須依 consumer 決定實際來源與缺值政策。
+凍結的有效資訊不能充當缺少的原資訊；缺少所需欄位或快照須拒絕，不能改查目前 Game。
+四種 reader 的核心介面有合成對照測試：
+
+| 資訊來源 | 核心對照與生產範圍 |
+| --- | --- |
+| 目前公開候選 | 使用 Selection adapter，外層保留公開區域、世代與位置檢查 |
+| 授權私有候選 | 使用既有 Search／Look／手牌決定的政策；不取得任意私有查詢權 |
+| 印刷資訊 | reader 明示提供印刷欄位，原費與有效費用仍是不同請求 |
+| 凍結資訊 | 同一計畫讀已提供的保存值；缺快照、欄位或 Original 資訊時拒絕 |
+
+一般 frozen receipt、event、history 的 producer、Before／After 與快照授權
+仍由各自 adapter 接入；核心對照不新增這些 raw IR 來源。
+
+準備操作數的時點亦保留在 consumer：
+
+| consumer | 準備來源名稱／動態右值 |
+| --- | --- |
+| Search 本體與分組、材料 | 沿原有時點，在列舉前準備；私有來源名稱走 execution 的封閉授權 |
+| Selection Zone、私有 Look Filter | 沿原有時點準備，保留各自的名稱政策 |
+| 非私有 Selection Filter、費用對象、手牌付款、exchange、reveal-until | LiteralOnly；不新增準備，未準備操作數仍在實際求到該原子時拒絕 |
+
+手牌選擇的外層決定、擁有者、區域及觀測授權保持原有檢查；不能只看 zone 是 hand，
+就將其改成另一種 reader 政策。Search 可找不到與正式目標必選也仍由 consumer 決定，
+不取決於共用布林核心。世代、位置、付款、成功回條與真實揭露仍在使用時重驗。
+
+作者既有 ObjectFilter 簡寫繼續共用原有 lowering，不把一般算術、事件或回條查詢硬改成固定欄位。
+支援表是 IR 與各 consumer 的既有範圍，不宣稱作者端所有簡寫都已串接：
+Search 的作者 power 篩選仍只有上限比較，PlayingQuery 的原費也仍只有上限比較；
+own-hand 同名排除的既有作者形狀限制亦保留。這些缺口不能靠共用 reader 自動放行。
+
 ## 准入結果與 token 數量
 
 `WellFormedProgram`／`WellFormedCardProgram` 證明 IR 的型別、scope 與 producer 關係，

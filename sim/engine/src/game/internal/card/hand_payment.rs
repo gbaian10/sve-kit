@@ -199,7 +199,10 @@ impl Game {
                 continue;
             }
             let plan = selection(&instruction.action)?;
-            let Selector::Zone { predicate, .. } = &plan.group.selector else {
+            let Selector::Zone {
+                binding, predicate, ..
+            } = &plan.group.selector
+            else {
                 return Err(unsupported("hand cost selector"));
             };
             let source_reserved = plan.source
@@ -215,8 +218,16 @@ impl Game {
                     ));
                 }
             }
-            let (members, candidates) =
-                self.internal_hand_cost_candidates(execution, predicate, source_reserved)?;
+            let (members, candidates) = self.internal_hand_cost_candidates(
+                execution,
+                &super::super::conditions::ConditionPlan::compile(
+                    predicate,
+                    *binding,
+                    super::super::conditions::Policy::Search,
+                )?
+                .prepare(None)?,
+                source_reserved,
+            )?;
             if u64::try_from(members.len()).map_err(invalid)? < plan.group.cardinality.minimum.0 {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "insufficient hand cost materials".into(),
@@ -247,7 +258,7 @@ impl Game {
     fn internal_hand_cost_candidates(
         &self,
         execution: &Execution,
-        predicate: &Expr<Bool>,
+        predicate: &super::super::conditions::PreparedCondition,
         source_reserved: bool,
     ) -> Result<(Vec<ObjectRef>, Vec<DistributionMember>)> {
         let seat = seat_name(execution.context.controller)?;

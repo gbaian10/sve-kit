@@ -1,9 +1,9 @@
-use super::player_pipeline::{answer, question};
+use super::player_pipeline::{answer, end_command, question};
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::events::{ActionKind, EventKind, MovementMethod};
 use sve_engine::game::player::{
-    Command, Input, QuestionPurpose, QuestionShape, QuestionToken, SubmissionKind, Viewer,
+    Command, Input, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
 };
 
 fn board(next_deck: bool) -> Game {
@@ -35,11 +35,12 @@ fn board(next_deck: bool) -> Game {
     game
 }
 
-fn end(game: &mut Game) -> QuestionToken {
-    let token = question(game, Viewer::P1).token;
+fn end(game: &mut Game) -> Command {
+    let current = question(game, Viewer::P1);
+    let token = current.token;
+    let command = end_command(&current);
     assert_eq!(
-        game.submit_player(Viewer::P2, Command::EndPhase { token })
-            .kind,
+        game.submit_player(Viewer::P2, command.clone()).kind,
         SubmissionKind::Rejected,
         "Only the active seat can end its main phase"
     );
@@ -49,12 +50,11 @@ fn end(game: &mut Game) -> QuestionToken {
         "Wrong-seat submission preserves the question"
     );
     assert_eq!(
-        game.submit_player(Viewer::P1, Command::EndPhase { token })
-            .kind,
+        game.submit_player(Viewer::P1, command.clone()).kind,
         SubmissionKind::Applied,
         "The active seat can begin the end phase"
     );
-    token
+    command
 }
 
 #[test]
@@ -85,7 +85,7 @@ fn player_closing_expires_turn_effects_refreshes_and_draws_before_main_input() {
     assert_eq!(next.kind, SubmissionKind::Applied);
     assert!(matches!(
         question(&game, Viewer::P2).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     let referee = game.projection(View::Referee).unwrap();
     assert_eq!(referee["turn"]["active"], "P2");
@@ -126,8 +126,7 @@ fn player_closing_expires_turn_effects_refreshes_and_draws_before_main_input() {
     );
 
     assert_eq!(
-        game.submit_player(Viewer::P2, Command::EndPhase { token: old })
-            .kind,
+        game.submit_player(Viewer::P2, old).kind,
         SubmissionKind::Rejected
     );
 }
@@ -146,8 +145,7 @@ fn player_closing_empty_next_deck_finishes_without_a_main_question() {
     );
     assert!(game.internal_decision(View::Referee).is_none());
     assert_eq!(
-        game.submit_player(Viewer::P1, Command::EndPhase { token: old })
-            .kind,
+        game.submit_player(Viewer::P1, old).kind,
         SubmissionKind::Rejected
     );
 }
@@ -224,7 +222,7 @@ fn player_closing_attack_quick_returns_to_the_existing_main_phase() {
     );
     assert!(matches!(
         question(&game, Viewer::P1).shape,
-        QuestionShape::ActionWindow
+        QuestionShape::ActionWindow(_)
     ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
