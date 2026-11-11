@@ -1,3 +1,4 @@
+use super::super::number_plan::CostConditionPlan;
 use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
@@ -78,7 +79,7 @@ fn check_duration(duration: &Duration, installed: bool) -> Result<()> {
         DurationEnd::NoTemporalExpiry {} => Ok(()),
         DurationEnd::CurrentTurnEnd {} if installed => Ok(()),
         DurationEnd::While { predicate } if !installed => {
-            super::costs::check_condition(predicate, false)
+            CostConditionPlan::compile(predicate, false).map(|_plan| ())
         }
         _ => Err(unsupported("player cost lifetime")),
     }
@@ -398,7 +399,8 @@ impl Game {
                         return Err(unsupported("static cost declaration"));
                     };
                     if let DurationEnd::While { predicate } = &duration.end
-                        && !provider.boolean(self, predicate)?.0
+                        && !CostConditionPlan::compile(predicate, false)?
+                            .evaluate(&provider, self)?
                     {
                         continue;
                     }

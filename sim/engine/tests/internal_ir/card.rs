@@ -942,3 +942,6 @@ mod receipt_field_costs;
 
 #[path = "card/counter_amounts.rs"]
 mod counter_amounts;
+
+#[path = "card/cost_number_plan.rs"]
+mod cost_number_plan;
