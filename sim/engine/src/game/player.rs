@@ -12,6 +12,7 @@ mod opening;
 mod pipeline;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
+pub(in crate::game) use main_actions::ActivationOption;
 pub use main_actions::{
     AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,
 };
@@ -136,7 +137,7 @@ pub enum QuestionShape {
     Closing(ClosingQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
     Decision(InputDomain),
-    /// Main-phase intents; card play, activation and evolution are not yet listed.
+    /// Main-phase intents; evolution is not yet listed.
     ActionWindow(MainActions),
 }
 

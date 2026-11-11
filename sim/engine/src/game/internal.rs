@@ -67,6 +67,7 @@ mod earth;
 pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
+mod receipt_members;
 pub(in crate::game) use drive::LeaderAttackLock;
 mod flip;
 mod grant;

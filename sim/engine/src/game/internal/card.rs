@@ -59,6 +59,8 @@ pub(super) mod material;
 pub(in crate::game::internal) mod nested;
 pub(in crate::game) mod trigger_restrictions;
 pub(super) use nested::ability::AbilityWait;
+mod activation;
+mod declarations;
 pub(super) mod optional;
 pub(super) mod other_costs;
 pub(in crate::game::internal) mod play_restrictions;
@@ -81,10 +83,14 @@ pub(super) mod selection;
 pub use play::{CardEntry, CardPlay};
 pub use selection::{TargetDomain, TargetRoleAssignment, TargetRoleDomain};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 enum ActivationKey {
     Definition(AbilityId),
     Instance(AbilityInstanceId),
+    Effective {
+        definition: AbilityId,
+        grant: Option<Box<super::grant::GrantOrigin>>,
+    },
 }
 
 /// Explicit authority boundary after a complete ability resolution.
@@ -540,7 +546,12 @@ impl Game {
         definition: AbilityId,
         actor: PlayerId,
     ) -> Result<CardPlay> {
-        self.activate_internal_entry(holder, ActivationKey::Definition(definition), actor)
+        self.activate_internal_entry(
+            holder,
+            &ActivationKey::Definition(definition),
+            actor,
+            &mut false,
+        )
     }
 
     /// Allocate cached authority identities for effective activated definitions.
@@ -568,20 +579,27 @@ impl Game {
         instance: AbilityInstanceId,
         actor: PlayerId,
     ) -> Result<CardPlay> {
-        self.activate_internal_entry(holder, ActivationKey::Instance(instance), actor)
+        self.activate_internal_entry(
+            holder,
+            &ActivationKey::Instance(instance),
+            actor,
+            &mut false,
+        )
     }
 
     fn activate_internal_entry(
         &mut self,
         holder: &str,
-        key: ActivationKey,
+        key: &ActivationKey,
         actor: PlayerId,
+        declared: &mut bool,
     ) -> Result<CardPlay> {
         if self.card_runtime.quick.is_some() {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
-        let result = self.activate_loaded_card(holder, key, actor, &before.published_knowledge());
+        let result =
+            self.activate_loaded_card(holder, key, actor, &before.published_knowledge(), declared);
         self.finish_card_attempt(before, result)
     }
 
@@ -626,30 +644,37 @@ impl Game {
     fn activate_loaded_card(
         &mut self,
         holder: &str,
-        key: ActivationKey,
+        key: &ActivationKey,
         actor: PlayerId,
         published: &PublishedKnowledge,
+        declared: &mut bool,
     ) -> Result<CardPlay> {
         let query = match key {
             ActivationKey::Definition(definition) => format!("activate ability {}", definition.0),
             ActivationKey::Instance(instance) => {
                 format!("activate ability instance {}", instance.0)
             }
+            ActivationKey::Effective { definition, .. } => {
+                format!("activate ability {}", definition.0)
+            }
         };
         self.require_internal_abilities(holder, &query)?;
-        let object = self.object(holder)?.clone();
         let mut selected = None;
         for candidate in self
             .internal_effective_abilities(holder)?
             .into_iter()
             .filter(|candidate| candidate.node.kind == AbilityKind::Activated)
         {
-            if matches!(key, ActivationKey::Definition(definition) if candidate.node.id != definition)
+            if matches!(key, ActivationKey::Definition(definition) if candidate.node.id != *definition)
+            {
+                continue;
+            }
+            if matches!(key, ActivationKey::Effective { definition, grant } if candidate.node.id != *definition || candidate.grant.as_ref() != grant.as_deref())
             {
                 continue;
             }
             let source = self.internal_effective_source(holder, &candidate)?;
-            if matches!(key, ActivationKey::Instance(instance) if source.instance != instance) {
+            if matches!(key, ActivationKey::Instance(instance) if source.instance != *instance) {
                 continue;
             }
             if selected.replace((candidate, source)).is_some() {
@@ -660,56 +685,16 @@ impl Game {
         }
         let (ability, source) =
             selected.ok_or_else(|| invalid("ability is not effective for this holder"))?;
-        self.internal_require_ability_permission(holder, &ability.node)?;
-        let seat = seat_name(actor)?;
-        if ability.node.kind != AbilityKind::Activated
-            || !matches!(
-                (object.zone.as_str(), ability.node.active_zones.as_slice()),
-                ("field", [ZoneKind::Field])
-                    | ("ex", [ZoneKind::Ex])
-                    | ("hand", [ZoneKind::Hand])
-                    | ("cemetery", [ZoneKind::Cemetery])
-            )
-            || object.controller != seat
-            || !self.internal_play_timing(actor, is_printed_quick(&ability.node))
-            // Installed grants follow initial ability loss; equipment grants are filtered upstream.
-            || (object.state["silenced"] == true && ability.grant.is_none())
-            || !activation_type(self.object_type(holder)?, &ability.node.active_zones)
-            || (is_printed_quick(&ability.node)
-                && !quick_activation_type(self.object_type(holder)?, &ability.node.active_zones))
-            || !self.prepared.is_empty()
-        {
-            return Err(unsupported("activation holder, controller or timing"));
-        }
-        if ability.grant.is_none() {
-            let (face, _) = printed_origin(&ability.node.source.origin)?;
-            let (card, ordinal) = self.internal_effective_print(holder)?;
-            if self.printed_face_ordinal(&card, face)? != ordinal {
-                return Err(invalid("printed ability belongs to another face"));
-            }
-        }
-        let context = Context {
-            source: holder.into(),
-            generation: Generation(object.generation),
-            controller: player_id(&object.controller)?,
-        };
-        self.internal_context(&context)?;
-        self.check_internal_resources()?;
-        if resource_entry::intrinsic(&ability.node) {
-            self.check_resource_entry_available(holder, &ability.node)?;
-        }
-        if let Some(limit) = ability.node.play.as_ref().and_then(|play| play.limit)
-            && !self.card_runtime.quota_available(
-                source.instance,
-                TurnId(self.state.schedule.current()?),
-                limit,
-            )
-        {
-            return Err(crate::EngineFailure::IllegalPlay(
-                "activated ability quota exhausted".into(),
-            ));
-        }
-        self.start_internal_ability(ability.definition, context, source, false, published)
+        let context =
+            self.check_internal_activation(holder, &ability, actor, Some(source.instance))?;
+        self.start_internal_ability(
+            ability.definition,
+            context,
+            source,
+            false,
+            published,
+            declared,
+        )
     }
 
     pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {
@@ -978,13 +963,13 @@ fn check_printed_face(printed: &serde_json::Value, pilot: bool) -> Result<()> {
     Ok(())
 }
 
-fn quick_activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
+pub(super) fn quick_activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     kind == "フォロワー"
         || (zones == [ZoneKind::Field] && matches!(kind, "アミュレット" | "フォロワー・エボルヴ"))
 }
 
 // Evolved forms carry their own printed definitions.
-fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
+pub(super) fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     match zones {
         [ZoneKind::Field] => matches!(
             kind,

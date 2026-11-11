@@ -12,8 +12,8 @@ use crate::ir::{
     InstructionContext, MemberProjection, MoveDestination, MoveMethod, MoveOutcome, MoveReason,
     MoveResult, MoveSpec, MovementEvent, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
     ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat,
-    Posture, ReceiptId, ReceiptLocation, ResultMember, ResultMemberId, RuntimeObjectView,
-    RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
+    Posture, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView,
+    Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
@@ -327,77 +327,6 @@ fn observation_spine(selector: &Selector, remainder: bool) -> bool {
         }
         Selector::Union { sets } => sets.iter().all(|set| observation_spine(set, remainder)),
         _ => false,
-    }
-}
-
-impl Execution {
-    pub(super) fn successful_moves(
-        &self,
-        receipt: &MovementReceipt,
-    ) -> Result<impl Iterator<Item = &MoveResult>> {
-        let moves = match receipt {
-            MovementReceipt::Move { receipt } => {
-                match self.receipts.get(local_id(receipt.location())?) {
-                    Some(InstructionOutcome::Move(outcome)) => &outcome.moved,
-                    _ => return Err(invalid("missing move receipt")),
-                }
-            }
-            MovementReceipt::Search { receipt } => {
-                match self.receipts.get(local_id(receipt.location())?) {
-                    Some(InstructionOutcome::Search(outcome)) => &outcome.moved,
-                    _ => return Err(invalid("missing search receipt")),
-                }
-            }
-            MovementReceipt::Discard { receipt } => {
-                match self.receipts.get(local_id(receipt.location())?) {
-                    Some(InstructionOutcome::Discard(outcome)) => &outcome.moves,
-                    _ => return Err(invalid("missing discard receipt")),
-                }
-            }
-            MovementReceipt::Destroy { receipt } => {
-                match self.receipts.get(local_id(receipt.location())?) {
-                    Some(InstructionOutcome::Destroy(outcome)) => &outcome.moves,
-                    _ => return Err(invalid("missing destroy receipt")),
-                }
-            }
-            MovementReceipt::Banish { receipt } => {
-                match self.receipts.get(local_id(receipt.location())?) {
-                    Some(InstructionOutcome::Banish(outcome)) => &outcome.moves,
-                    _ => return Err(invalid("missing banish receipt")),
-                }
-            }
-            _ => return Err(unsupported("movement receipt projection")),
-        };
-        Ok(moves.iter().filter(|movement| {
-            movement.after.is_some_and(|after| {
-                after.id == movement.before.id && after.generation != movement.before.generation
-            }) && movement.actual_to.is_some()
-        }))
-    }
-
-    /// Successful before members; a same-deck reorder keeps generations, so all ordered cards count.
-    pub(super) fn movement_before(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
-        let MovementReceipt::Order { receipt } = receipt else {
-            return Ok(self
-                .successful_moves(receipt)?
-                .map(|movement| movement.before)
-                .collect());
-        };
-        match self.receipts.get(local_id(receipt.location())?) {
-            Some(InstructionOutcome::Order(outcome)) => Ok(outcome
-                .successful
-                .iter()
-                .filter_map(|member| member.before.map(|view| view.object))
-                .collect()),
-            _ => Err(invalid("missing order receipt")),
-        }
-    }
-}
-
-fn local_id<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
-    match location {
-        ReceiptLocation::Local { id } => Ok(id),
-        ReceiptLocation::Iteration { .. } => Err(unsupported("iteration movement receipt")),
     }
 }
 

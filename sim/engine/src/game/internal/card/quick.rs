@@ -355,12 +355,18 @@ impl Game {
             if let Some(ability) = action.ability {
                 self.activate_loaded_card(
                     &action.holder,
-                    super::ActivationKey::Definition(ability),
+                    &super::ActivationKey::Definition(ability),
                     actor,
                     &before.published_knowledge(),
+                    &mut false,
                 )
             } else {
-                self.play_internal_spell(&action.holder, actor, &before.published_knowledge())
+                self.play_internal_spell(
+                    &action.holder,
+                    actor,
+                    &before.published_knowledge(),
+                    &mut false,
+                )
             }
         } else {
             // Each Pass is a separate match input, so its events need their own causal node.

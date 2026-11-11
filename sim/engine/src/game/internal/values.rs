@@ -572,16 +572,16 @@ impl Execution {
                     Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
                 }
                 IntFrozen::PaidMaterialActs { receipt } => {
-                    super::receipt_counts::paid_material_acts(self, receipt)
+                    super::receipt_members::paid_material_acts(self, receipt)
                 }
                 IntFrozen::PaidMaterialAttack { receipt } => {
-                    super::receipt_counts::paid_material_attack(self, receipt)
+                    super::receipt_members::paid_material_attack(self, receipt)
                 }
                 IntFrozen::ReceiptRequested { receipt } => {
                     self.quantity(receipt).map(|(requested, _)| requested)
                 }
                 IntFrozen::DiscardedCost { receipt } => {
-                    super::receipt_counts::discarded_cost(self, receipt)
+                    super::receipt_members::discarded_cost(self, receipt)
                 }
                 _ => Err(unsupported("signed projection")),
             },
@@ -813,12 +813,7 @@ impl Execution {
                     objects,
                     property: ObjectProperty::Names,
                 } if super::reveal::look_receipt(objects).is_some() => {
-                    let names = self
-                        .public_look_objects(game, objects)?
-                        .into_iter()
-                        .map(|member| game.card_name(self.object_id(member)?))
-                        .collect::<Result<BTreeSet<_>>>()?;
-                    Ok(Nat(u64::try_from(names.len()).map_err(invalid)?))
+                    super::receipt_members::public_look_distinct_names(game, self, objects)
                 }
                 NatOperation::DistinctCount {
                     objects:
@@ -827,9 +822,12 @@ impl Execution {
                             projection,
                         },
                     property: ObjectProperty::Cost,
-                } => {
-                    super::receipt_counts::distinct_original_costs(game, self, receipt, *projection)
-                }
+                } => super::receipt_members::distinct_original_costs(
+                    game,
+                    self,
+                    receipt,
+                    *projection,
+                ),
                 NatOperation::DistinctCount { objects, property } => {
                     let members = self.public_zone_objects(game, objects)?;
                     let count = match property {

@@ -361,8 +361,7 @@ fn impossible_or_live_predicate_targets_reject_before_any_target_question() {
     assert_eq!(before, exact_authority(&empty));
 }
 
-#[test]
-fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets() {
+fn choice_program() -> WellFormedCardProgram {
     let chosen = ModeDecision {
         id: DecisionId(20),
         actor: PlayerRef::Controller {},
@@ -433,7 +432,12 @@ fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets(
         &a.source,
         &a.node.source,
     );
-    let program = card(vec![a]);
+    card(vec![a])
+}
+
+#[test]
+fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets() {
+    let program = choice_program();
     let mut game = position(&program, "hand", 0);
     let modes = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
     assert!(matches!(
@@ -451,6 +455,145 @@ fn choice_keyword_precedes_targets_and_only_selected_modes_need_current_targets(
             .unwrap(),
     );
     cards(&result.progress, 2, 1, 1);
+}
+
+#[test]
+fn player_declarations_mode_then_target_then_payment_uses_the_formal_program() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{QuestionShape, SubmissionKind, Viewer};
+    let mut game = position(&choice_program(), "hand", 1);
+    game.advance_player_input();
+    let command = player_declarations::play_command(&game, "unit-spell");
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::Applied
+    );
+    assert!(matches!(
+        question(&game, Viewer::P1).shape,
+        QuestionShape::Decision(InputDomain::Modes { .. })
+    ));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Modes(vec![ModeId(1)])).kind,
+        SubmissionKind::Applied
+    );
+    assert!(matches!(
+        question(&game, Viewer::P1).shape,
+        QuestionShape::Decision(InputDomain::Targets(_))
+    ));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 3);
+    assert_eq!(state["objects"]["f0"]["hp"], 1);
+    assert_eq!(state["P1"]["hand"], json!([]));
+    assert_eq!(state["P1"]["cemetery"], json!(["s"]));
+}
+
+#[test]
+fn player_declarations_target_retry_distribution_and_payment_keep_the_same_snapshot() {
+    use crate::player_pipeline::{answer, question};
+    use sve_engine::game::player::{Command, QuestionShape, SubmissionKind, Viewer};
+    let mut game = position(&distribution_spell(0, Expr::Literal(Bool(true))), "ex", 5);
+    game.advance_player_input();
+    let command = player_declarations::play_command(&game, "unit-spell");
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::Applied
+    );
+    let first = question(&game, Viewer::P1);
+    assert!(matches!(
+        first.shape,
+        QuestionShape::Decision(InputDomain::Targets(_))
+    ));
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0, 1, 2, 3, 4])).kind,
+        SubmissionKind::Applied
+    );
+    let retry = question(&game, Viewer::P1);
+    assert_ne!(retry.token, first.token);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+        4
+    );
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Answer {
+                token: first.token,
+                answer: Answer::Targets(vec![0, 1])
+            }
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0, 1])).kind,
+        SubmissionKind::Applied
+    );
+    let allocation = question(&game, Viewer::P1);
+    assert!(
+        matches!(&allocation.shape, QuestionShape::Decision(InputDomain::Distribution(domain)) if domain.total == Nat(4) && domain.minimum == Nat(1))
+    );
+    let before = exact_authority(&game);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Distribution(vec![
+                DamageShare {
+                    handle: 0,
+                    amount: Nat(4)
+                },
+                DamageShare {
+                    handle: 1,
+                    amount: Nat(0)
+                }
+            ])
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Distribution(vec![
+                DamageShare {
+                    handle: 0,
+                    amount: Nat(3)
+                },
+                DamageShare {
+                    handle: 1,
+                    amount: Nat(1)
+                }
+            ])
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 3);
+    assert_eq!(state["objects"]["f1"]["hp"], 2);
+    assert_eq!(state["P2"]["leader"]["life"], 19);
+    assert_eq!(state["P1"]["hand"], json!(["d"]));
+    assert!(matches!(
+        question(&game, Viewer::P1).shape,
+        QuestionShape::ActionWindow(_)
+    ));
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_ne!(game.events(viewer, None).unwrap().count(), 0);
+    }
 }
 
 #[test]
