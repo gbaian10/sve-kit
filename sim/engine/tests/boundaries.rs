@@ -13,6 +13,9 @@ use sve_engine::game::{Game, View};
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
+#[path = "boundaries/player_opening.rs"]
+mod player_opening;
+
 /// Authored programs cannot name runtime object ids (the loader rejects unknown
 /// references), so fixtures select one object by its id instead.
 fn by_id(id: &str) -> Value {

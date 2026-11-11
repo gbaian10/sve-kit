@@ -6,6 +6,26 @@
 `Game::input(viewer)` 查詢、`Game::submit_player(viewer, command)` 回答或投降。
 提交本身會續行，不需在每次回答之間手動呼叫檢查或出題。
 
+## 建立與開局
+
+`Game::start_player_game(selected, decks, first_chooser, seed)` 是可信宿主的建立入口。
+`PlayerDeck` 只帶構築依據與主牌組／進化牌組的快照卡號，沒有卡面資料、實體 ID、
+匿名填充物或任意局面。宿主先依[牌組構築契約](deck-construction.md)驗證牌組；
+引擎不另做一份構築規則，而會重驗 `SelectedEffects` 的來源、每張牌的完整 typed 選用、
+准入與可抽取的開局牌數。載入失敗回傳 `Result::Err`，尚未交付對局；局內回答的錯誤
+使用 `SubmissionKind`。同版本、同牌組、同先攻選擇席與私密 seed 可重現同一開局。
+宿主把驗證後的永久卡片 ID 與張數對應至同一快照的實際版次卡號，逐張展開；
+構築輸入未指定職業時，使用已驗主戰者的印刷職業值。現行 typed 對局以玩家座位及
+資源表示主戰者，沒有主戰者卡片物件；其卡片資格由宿主驗證。先攻選擇席沿用既有
+宿主輸入，可來自猜拳等局外程序，不從洗牌 seed 另抽一次。
+
+`QuestionShape::Opening` 依序提供起始護符、先後攻與換牌題。起始護符按 P1、P2
+逐席處理；指定席選擇先攻後，先攻再後攻決定換牌。`Command::Opening` 需要當席
+token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時再核對位置知識與
+完整候選集合。換牌只能保留整手，或把整手依指定順序放回牌庫底後重抽，不能部分換牌。
+另一席只取得等待摘要。起始護符在雙方換牌完成後公開，初始 PP／EP／SEP、生命與
+主要階段開始沿用既有規則。接受回答後的程序故障會回到本次回答前並停止出題。
+
 ## 查詢與題目
 
 `input` 只讀既有狀態，不配置 token、不改 RNG、不執行規則或重發事件。回傳封閉的
@@ -25,8 +45,7 @@
 `QuestionShape::ActionWindow` 僅標示主要階段或回合收尾的權威行動邊界，不列合法行動，
 也不接受一般決定的答案。其他未受支援的程序及仍有舊原型續體的權威狀態是
 `EngineFault`，不會冒充行動視窗。本介面以既有權威入口作測試起點，不保證可從開局
-打完整局；專用行動介面的需求見 [#1974](https://github.com/gbaian10/sve-kit/issues/1974)、
-[#1975](https://github.com/gbaian10/sve-kit/issues/1975)及
+打完整局；專用行動介面的需求見 [#1975](https://github.com/gbaian10/sve-kit/issues/1975)及
 [#1976](https://github.com/gbaian10/sve-kit/issues/1976)。
 
 ## 提交結果與續行

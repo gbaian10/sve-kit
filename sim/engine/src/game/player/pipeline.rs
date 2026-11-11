@@ -8,7 +8,7 @@ use crate::game::{Game, internal};
 use crate::ir::PlayerId;
 use crate::{EngineFailure, Result, invalid};
 
-fn viewer(seat: &str) -> Option<Viewer> {
+pub(super) fn viewer(seat: &str) -> Option<Viewer> {
     match seat {
         "P1" => Some(Viewer::P1),
         "P2" => Some(Viewer::P2),
@@ -68,11 +68,12 @@ impl Game {
             return;
         }
         let before = self.clone();
+        let published = self.published_knowledge();
         if let Err(error) = self.advance_player_rules() {
-            let high = self.state.ir_epoch;
-            *self = before;
-            self.state.ir_epoch = self.state.ir_epoch.max(high);
-            self.player_fault = Some(error);
+            self.player_fault = Some(match self.restore_player_state(before, &published) {
+                Ok(()) => error,
+                Err(restore) => restore,
+            });
         }
     }
 
@@ -93,7 +94,12 @@ impl Game {
                 None => Input::EngineFault,
             };
         }
-        let question = if let Some((question, purpose)) = self.player_decision() {
+        let question = if self.state.flow["kind"] == "pregame" {
+            let Ok(question) = self.player_opening_question() else {
+                return Input::EngineFault;
+            };
+            question
+        } else if let Some((question, purpose)) = self.player_decision() {
             let Some(actor) = actor(question.actor) else {
                 return Input::EngineFault;
             };
@@ -135,7 +141,9 @@ impl Game {
             QuestionShape::Decision(InputDomain::DiceReroll { value, remaining }) => {
                 Some((*value, *remaining))
             }
-            QuestionShape::Decision(_) | QuestionShape::ActionWindow => None,
+            QuestionShape::Decision(_)
+            | QuestionShape::Opening(_)
+            | QuestionShape::ActionWindow => None,
         };
         Input::Waiting(Waiting {
             actor: question.actor,
@@ -147,6 +155,7 @@ impl Game {
     #[must_use]
     pub fn submit_player(&mut self, viewer: Viewer, command: Command) -> Submission {
         let kind = match command {
+            Command::Opening { token, answer } => self.submit_player_opening(viewer, token, answer),
             Command::Concede => {
                 if self.state.game["ended"] == true {
                     SubmissionKind::Rejected
@@ -226,6 +235,10 @@ impl Game {
             ));
         }
         if self.state.game["ended"] == true || self.player_decision().is_some() {
+            return Ok(());
+        }
+        if self.state.flow["kind"] == "pregame" {
+            self.player_opening_question()?;
             return Ok(());
         }
         if self.typed.is_some() || !self.prepared.is_empty() {

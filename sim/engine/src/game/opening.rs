@@ -65,7 +65,7 @@ impl Game {
         Ok(())
     }
 
-    fn start_amulets(&self, seat: &str) -> Result<Vec<String>> {
+    pub(in crate::game) fn start_amulets(&self, seat: &str) -> Result<Vec<String>> {
         let mut ids = Vec::new();
         for id in self.zone_ids(seat, "deck") {
             let start = match self.internal_start_amulet(&id)? {
@@ -124,6 +124,11 @@ impl Game {
         {
             return Ok(false);
         }
+        self.apply_opening_decision(decision)?;
+        Ok(true)
+    }
+
+    pub(in crate::game) fn apply_opening_decision(&mut self, decision: &Value) -> Result<()> {
         let seat = string(&decision["by"]);
         match string(&decision["do"]) {
             "choose-start-amulet" => {
@@ -172,9 +177,9 @@ impl Game {
                     self.finish_opening()?;
                 }
             }
-            _ => return Ok(false),
+            _ => return Err(invalid("unknown opening procedure")),
         }
-        Ok(true)
+        Ok(())
     }
 
     fn place_start_amulet(&mut self, seat: &str, id: &str) -> Result<()> {
