@@ -1106,6 +1106,7 @@ impl Game {
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
+            fusion_material_pending: vec![],
             movement_capacity: BTreeMap::new(),
             material_selections: BTreeMap::new(),
             effect_evolution_destinations: BTreeMap::new(),

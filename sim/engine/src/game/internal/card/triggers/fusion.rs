@@ -1,15 +1,17 @@
 //! Fusion observers run at resolution, using material traits captured before payment.
 use super::{
-    Ability, AbilityKind, Cause, EventPayload, EventSnapshotPolicy, Game, Result, SnapshotId,
-    TriggerAggregation, ZoneKind, invalid, player_id, unsupported,
+    Ability, AbilityKind, Cause, EventPayload, EventSnapshotPolicy, Game, PendingOccurrence,
+    Result, SnapshotId, SourceInformation, TriggerAggregation, ZoneKind, invalid, player_id,
+    unsupported,
 };
 use crate::game::internal::{Execution, Fact};
-use crate::ir::events::fusion::{combined, filter};
+use crate::ir::events::fusion::{combined, filter, material_filter};
 use crate::ir::optional_payment;
-use crate::ir::{FusedEvent, LimitSpec, TriggerCondition};
+use crate::ir::{FusedEvent, LimitSpec, ObjectRef, TriggerCondition};
+use core::mem;
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
-    if filter(ability).is_none() {
+    if filter(ability).is_none() && material_filter(ability).is_none() {
         return Ok(false);
     }
     let trigger = ability
@@ -29,6 +31,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
             .limit
             .is_some_and(|limit| !LimitSpec::is_triggered(limit))
         || trigger.aggregation != (TriggerAggregation::PerFact {})
+        || trigger.active_zones != ability.active_zones
     {
         return Err(unsupported("per-Fusion material trait observer"));
     }
@@ -40,19 +43,92 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     reason = "Fusion resolution shares pending observer admission."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_prepare_fused_materials(
+        &mut self,
+        execution: &mut Execution,
+        materials: &[ObjectRef],
+    ) -> Result<()> {
+        let mut matched = Vec::new();
+        for &material in materials {
+            let holder = execution.object_id(material)?;
+            let (card, _) = self.internal_effective_print(holder)?;
+            if !self.card_runtime.is_loaded(&card) {
+                continue;
+            }
+            for ability in self.internal_printed_abilities(holder)? {
+                if let Some(filter) = material_filter(&ability.node) {
+                    matched.push((holder.to_owned(), material, ability, filter));
+                }
+            }
+        }
+        if matched.is_empty() {
+            return Ok(());
+        }
+        let cause = execution.source_snapshot(self)?;
+        matched.retain(|(_, _, _, filter)| {
+            cause.subject.kind == Some(filter.kind)
+                && cause.subject.traits.contains(&filter.trait_id)
+        });
+        if matched.is_empty() {
+            return Ok(());
+        }
+        let actor = execution.context.controller;
+        let header = self.pending_header(
+            actor,
+            Cause::Effect {
+                execution: execution.id,
+            },
+            execution.ability,
+            SnapshotId(self.state.ir_epoch),
+        )?;
+        for (holder, material, ability, _) in matched {
+            let source = self.internal_card_source(&holder, ability.node.id, actor)?;
+            let mut information = SourceInformation::current(self, source)?;
+            information.seal(Some(self.information_snapshot(material)?.at(header.before)));
+            execution.fusion_material_pending.push(self.new_pending(
+                &holder,
+                source,
+                ability,
+                information,
+                header.clone(),
+                None,
+            )?);
+        }
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn internal_fused_events(
         &mut self,
-        execution: &Execution,
+        execution: &mut Execution,
     ) -> Result<()> {
         for fact in &execution.facts {
             if let Fact::Fused(event) = fact {
-                self.fused_event(execution, event)?;
+                let candidates = mem::take(&mut execution.fusion_material_pending);
+                self.fused_event(execution, event, candidates)?;
             }
         }
         Ok(())
     }
 
-    fn fused_event(&mut self, execution: &Execution, event: &FusedEvent) -> Result<()> {
+    fn fused_event(
+        &mut self,
+        execution: &Execution,
+        event: &FusedEvent,
+        mut candidates: Vec<PendingOccurrence>,
+    ) -> Result<()> {
+        for occurrence in &mut candidates {
+            if !event
+                .materials
+                .iter()
+                .any(|member| member.object == occurrence.source.holder)
+            {
+                return Err(invalid("Fusion material occurrence without a paid member"));
+            }
+            occurrence.header.after = SnapshotId(self.state.ir_epoch);
+            occurrence.timing = Some(EventPayload::Fused {
+                event: event.clone(),
+            });
+        }
         if !self.card_runtime.definitions.cards.values().any(|program| {
             program
                 .card()
@@ -60,7 +136,11 @@ impl Game {
                 .iter()
                 .any(|ability| filter(&ability.node).is_some())
         }) {
-            return Ok(());
+            return if candidates.is_empty() {
+                Ok(())
+            } else {
+                self.internal_admit_pending(candidates)
+            };
         }
         let mut observers = self.field_ids();
         observers.extend(self.zone_ids("P1", "ex"));
@@ -92,7 +172,11 @@ impl Game {
             }
         }
         if matched.is_empty() {
-            return Ok(());
+            return if candidates.is_empty() {
+                Ok(())
+            } else {
+                self.internal_admit_pending(candidates)
+            };
         }
         let header = self.pending_header(
             event.controller,
@@ -102,7 +186,6 @@ impl Game {
             execution.ability,
             SnapshotId(self.state.ir_epoch),
         )?;
-        let mut candidates = Vec::new();
         for (holder, ability) in matched {
             candidates.push(self.timing_occurrence(
                 &holder,

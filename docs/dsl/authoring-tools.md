@@ -501,6 +501,8 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 融合事件用 `auto: {on: {fused: {who: self, material: {trait: 財宝}}}, do: [...]}`，可在場上或 EX 訂閱。一次融合不論材料張數只產生一次事實，使用實際材料付款前凍結的特徵；來源本身的特徵不代替材料。融合與打出共用一條能力時寫 `on: {any_of: [{fused: {who: self, material: {trait: 財宝}}}, {played: {who: self, sel: {trait: 財宝}}}]}`，也可再加自己的 Main 時點。分支保留各自的事件快照時點，所有分支共用同一個能力實例與 `per_turn` 額度；只准這個所需組合，不能任意拼接其他事件或不同材料特徵。
 
+自身作為融合材料可用 `auto.on: {fused_as_material: {ref: this, by: {ability_of: {who: self, kind: follower, trait: 八獄}}}}`（BP19-048）。手牌捨棄與 EX 送墓都能成為實付材料。觸發使用付款前的自身世代，以及發動融合的從者與特徵。融合完成後，每張符合的實付材料各有一次待機能力，沿用同一融合事件的結算時點。
+
 紋章達門檻後消滅與後續找牌仍走共用移動流程。Token 的存活區域採同一份 CR9.1.4 判斷：紋章只可留在 EX，法術 Token 只可留在 EX 或結算領域；移到其他區域後立即消去，再繼續本文，不把 Token 留在除外區。
 
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。

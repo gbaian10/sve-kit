@@ -110,7 +110,7 @@ impl Execution {
         Ok(())
     }
 
-    fn source_snapshot(&self, game: &Game) -> Result<SourceSnapshot> {
+    pub(super) fn source_snapshot(&self, game: &Game) -> Result<SourceSnapshot> {
         self.source_information
             .as_ref()
             .ok_or_else(|| invalid("missing ability source information producer"))?

@@ -764,6 +764,21 @@ impl Checker {
                 event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
             }
             EventPattern::Fused { binding, predicate } => {
+                if let Some(plan) = fusion::MaterialSource::parse(*binding, predicate) {
+                    // Only the closed Fusion header can inspect its cause's earlier snapshot.
+                    let Some(checked) = self.committed_header(
+                        *binding,
+                        EventSnapshotPolicy::BeforeExit,
+                        true,
+                        view,
+                        triggering,
+                    ) else {
+                        return self.reject();
+                    };
+                    checked?;
+                    self.local_value(plan.member, &Expr::Literal(Bool(true)))?;
+                    return self.local_value(plan.source, &Expr::Literal(Bool(true)));
+                }
                 event!(binding, predicate, EventSnapshotPolicy::BeforeExit)
             }
             EventPattern::Play { binding, predicate } => {
