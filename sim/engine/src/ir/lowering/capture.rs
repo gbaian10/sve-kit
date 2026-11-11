@@ -207,15 +207,16 @@ impl BodyContext<'_> {
         let cemetery = match value {
             ast::Number::Count { count } => matches!(count.zone, ast::CountZone::Cemetery),
             ast::Number::DistinctNames {
-                distinct_names: query,
-            } => matches!(query.zone, ast::PublicZone::Cemetery),
-            ast::Number::DistinctOriginalCosts {
-                distinct_orig_costs: ast::DistinctCostQuery::Public(query),
-            } => {
-                matches!(query.zone, ast::PublicZone::Cemetery)
+                distinct_names: ast::DistinctQuery::Public(query),
             }
-            ast::Number::DistinctOriginalCosts {
-                distinct_orig_costs: ast::DistinctCostQuery::Receipt { .. },
+            | ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs: ast::DistinctQuery::Public(query),
+            } => matches!(query.zone, ast::PublicZone::Cemetery),
+            ast::Number::DistinctNames {
+                distinct_names: ast::DistinctQuery::Receipt { .. },
+            }
+            | ast::Number::DistinctOriginalCosts {
+                distinct_orig_costs: ast::DistinctQuery::Receipt { .. },
             }
             | ast::Number::Dice { .. }
             | ast::Number::Counter { .. }

@@ -225,17 +225,26 @@ impl DeckReads {
                     }
                     *number = Expr::Literal(Int(0));
                 }
-                IntOperation::FromNat { value } => {
-                    if let Expr::Compute(natural) = value
-                        && let NatOperation::DistinctCount {
-                            objects:
-                                Selector::ReceiptMembers {
-                                    receipt,
-                                    projection,
-                                },
-                            property: ObjectProperty::Cost,
-                        } = natural.as_ref()
-                    {
+                IntOperation::FromNat {
+                    value: Expr::Compute(natural),
+                } => match natural.as_ref() {
+                    NatOperation::DistinctCount {
+                        objects,
+                        property: ObjectProperty::Names,
+                    } if let Some(id) = super::reveal::look_receipt(objects) => {
+                        if !self.published.contains(&id) {
+                            return Err(unsupported("distinct names before revelation"));
+                        }
+                        *number = Expr::Literal(Int(0));
+                    }
+                    NatOperation::DistinctCount {
+                        objects:
+                            Selector::ReceiptMembers {
+                                receipt,
+                                projection,
+                            },
+                        property: ObjectProperty::Cost,
+                    } => {
                         let id = distinct_cost_receipt(receipt, *projection)?;
                         if !self.cemetery.contains(&id) {
                             return Err(unsupported(
@@ -244,7 +253,8 @@ impl DeckReads {
                         }
                         *number = Expr::Literal(Int(0));
                     }
-                }
+                    _ => {}
+                },
                 IntOperation::Arithmetic { arguments, .. } => {
                     for argument in arguments {
                         self.mask_number(argument)?;

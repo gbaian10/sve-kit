@@ -1,0 +1,53 @@
+cards:
+  BP19-113:
+    abilities:
+      - fanfare:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 9
+                bind: shown
+            - move:
+                ref:
+                  in: shown
+                to: deck
+                position: bottom
+                order: shuffle
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_names:
+                        in:
+                          objects_of: shown
+                          view: before
+                    op: eq
+                    right: 9
+                then:
+                  - move:
+                      ref: this
+                      to: cemetery
+                  - choose:
+                      bind: incoming
+                      from:
+                        who: self
+                        zone: evolve_deck
+                        kind: follower
+                        advance_follower: true
+                        name: 流転の統治者・ゼラエル
+                      n: 1
+                      may: true
+                  - move:
+                      ref: incoming
+                      to: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
