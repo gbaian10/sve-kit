@@ -3133,8 +3133,14 @@ pub(super) struct IgnoreWard {
 #[serde(deny_unknown_fields)]
 pub(super) struct StaticConditional {
     pub cond: Condition,
-    pub then: Vec<StaticEffect>,
-    pub r#else: Option<Vec<StaticEffect>>,
+    pub then: [StaticConditionalEffect; 1],
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StaticConditionalEffect {
+    Grant(StaticGrant),
+    Prevent(Prevent),
 }
 
 #[derive(Deserialize)]
