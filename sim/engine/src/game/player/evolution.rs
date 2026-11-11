@@ -1,11 +1,11 @@
 //! Normal evolution keeps its rule payment separate from effect evolution.
 
+use super::SelectionQuestion;
 use super::observation::CardObservation;
 use super::{
     Input, Question, QuestionPurpose, QuestionShape, QuestionToken, SubmissionKind, Viewer,
 };
 use crate::game::Game;
-use crate::game::internal::TargetDomain;
 use crate::{EngineFailure, Result, invalid};
 use core::fmt;
 
@@ -67,9 +67,9 @@ pub enum EvolutionQuestion {
     /// Choose exactly one destination, in authorized card/face/name/handle order.
     Form(Vec<EvolutionForm>),
     /// Select the printed material count using the existing material domain.
-    Materials(TargetDomain),
+    Materials(SelectionQuestion),
     /// Select the printed own-hand discard count using the existing discard domain.
-    Discard(TargetDomain),
+    Discard(SelectionQuestion),
     /// Select one PP/EP payment and whether to use SEP; fixed printed costs are automatic.
     Payment(EvolutionPayment),
 }

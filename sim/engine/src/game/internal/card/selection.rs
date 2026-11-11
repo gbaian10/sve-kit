@@ -1,6 +1,9 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
 use crate::game::Object;
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::Viewer;
+use crate::game::player::{self, SelectionQuestion};
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation::{self, Consumer};
@@ -65,6 +68,7 @@ pub struct TargetRoleAssignment {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct TargetWait {
+    links: CandidateLinks,
     pub(in crate::game::internal) decision: Decision,
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
@@ -93,6 +97,12 @@ pub(in crate::game::internal) struct TargetCharacteristics {
     names: Vec<String>,
 }
 
+impl TargetCharacteristics {
+    pub(in crate::game::internal) fn player_names(&self) -> Vec<String> {
+        self.names.clone()
+    }
+}
+
 pub(in crate::game::internal) fn characteristics(
     game: &Game,
     id: &str,
@@ -108,6 +118,76 @@ pub(in crate::game::internal) fn characteristics(
 }
 
 impl TargetWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
+        let mut question = game.player_selection(actor, domain, &references, &self.links)?;
+        question.groups = self
+            .group_members
+            .iter()
+            .zip(&self.group_bounds)
+            .map(|(members, bounds)| {
+                Ok(player::SelectionGroup {
+                    handles: members
+                        .iter()
+                        .map(|member| {
+                            let index = self
+                                .members
+                                .iter()
+                                .position(|candidate| candidate == member)
+                                .ok_or_else(|| invalid("missing selection group member"))?;
+                            Ok(domain
+                                .members
+                                .get(index)
+                                .ok_or_else(|| invalid("missing selection coordinate"))?
+                                .handle)
+                        })
+                        .collect::<Result<_>>()?,
+                    cardinality: if self.group_members.len() == 1 {
+                        self.bounds
+                    } else {
+                        *bounds
+                    },
+                })
+            })
+            .collect::<Result<_>>()?;
+        for (member, reference) in question.members.iter_mut().zip(&self.members) {
+            member.rules_names = Some(
+                self.characteristics
+                    .iter()
+                    .find(|(candidate, _)| candidate == reference)
+                    .ok_or_else(|| invalid("missing captured rules names"))?
+                    .1
+                    .names
+                    .clone(),
+            );
+        }
+        if let Some(cap) = &self.cost_cap {
+            question.maximum_original_cost = Some(cap.limit);
+            let costs = self
+                .members
+                .iter()
+                .zip(&domain.members)
+                .map(|(reference, member)| {
+                    Ok((
+                        member.handle,
+                        cap.costs
+                            .iter()
+                            .find(|(candidate, _)| candidate == reference)
+                            .ok_or_else(|| invalid("missing captured original cost"))?
+                            .1,
+                    ))
+                })
+                .collect::<Result<BTreeMap<_, _>>>()?;
+            question.set_original_costs(costs);
+        }
+        Ok(question)
+    }
+
     pub(in crate::game::internal) fn check_advance_current(
         &self,
         game: &Game,
@@ -1097,6 +1177,10 @@ impl Game {
         )
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Target candidates, captured characteristics and links freeze together."
+    )]
     fn target_domain(
         &self,
         execution: &Execution,
@@ -1184,6 +1268,12 @@ impl Game {
             .all(|(_, saved)| saved.zone == "field");
         Ok((
             TargetWait {
+                links: CandidateLinks::for_selectors(
+                    self,
+                    execution,
+                    members.iter().copied(),
+                    constraint.groups.iter().map(|group| &group.selector),
+                )?,
                 decision: decision.clone(),
                 binding: *binding,
                 cost_cap: self.target_cost_cap(execution, &constraint, &members)?,

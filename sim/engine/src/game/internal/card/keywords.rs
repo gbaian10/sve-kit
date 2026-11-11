@@ -1,6 +1,7 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
+use crate::game::internal::player::CandidateLinks;
 use crate::game::list;
 use crate::ir::events::{banish as banish_header, discard as discard_header};
 use crate::ir::lowering::PrintedKeyword;
@@ -131,7 +132,10 @@ impl Game {
                 zone: previous.zone.clone(),
                 position,
             },
-            Wait::WardEntry(reference),
+            Wait::WardEntry {
+                reference,
+                links: CandidateLinks::capture(self, execution, [reference])?,
+            },
         )?;
         Ok(true)
     }

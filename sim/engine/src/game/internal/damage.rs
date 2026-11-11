@@ -4,6 +4,8 @@ use super::{
     seat_name, unsupported,
 };
 use crate::game::damage::{DamageReplacement, DamageUse};
+use crate::game::player::ReplacementChoice;
+use crate::game::player::Viewer;
 use crate::game::{BTreeMap, int, string};
 use crate::ir::{
     Action, DamageEvent, DamageFlags, DamageQuantityOutcome, DecisionId, Instruction, Int, Nat,
@@ -49,9 +51,34 @@ pub(super) struct DamageRun {
     consumed: BTreeMap<DamageUse, i64>,
     facts: Vec<DamageOccurrence>,
     choices: Vec<DamageReplacement>,
+    choice_links: BTreeMap<u64, super::observation::ObjectLink>,
 }
 
 impl DamageRun {
+    pub(in crate::game::internal) fn player_options(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        options: &[ReplacementOption],
+    ) -> Result<Vec<ReplacementChoice>> {
+        if options.len() != self.choices.len() {
+            return Err(invalid("inconsistent replacement choices"));
+        }
+        Ok(options
+            .iter()
+            .map(|option| ReplacementChoice {
+                handle: option.handle,
+                card: option.card.clone(),
+                name: option.name.clone(),
+                line: option.line,
+                object: self
+                    .choice_links
+                    .get(&option.handle)
+                    .and_then(|link| link.observed(game, actor)),
+            })
+            .collect())
+    }
+
     pub(super) fn validate(&self, handles: &[u64]) -> Result<Vec<DamageReplacement>> {
         let mut seen = BTreeSet::new();
         if handles.len() != self.choices.len() {
@@ -175,6 +202,7 @@ impl Game {
                 consumed: BTreeMap::new(),
                 facts: vec![],
                 choices: vec![],
+                choice_links: BTreeMap::new(),
             },
             None,
         )
@@ -239,6 +267,14 @@ impl Game {
                 };
                 let options = self.damage_replacement_options(&replacements)?;
                 run.remaining.push((recipient, hit));
+                run.choice_links = replacements
+                    .iter()
+                    .zip(0_u64..)
+                    .filter_map(|(choice, handle)| {
+                        self.player_replacement_link(&choice.reference)
+                            .map(|link| (handle, link))
+                    })
+                    .collect();
                 run.choices = replacements;
                 self.internal_wait(
                     execution,

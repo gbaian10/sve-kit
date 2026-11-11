@@ -37,10 +37,9 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 座標。題目不包含 authority receipts、facts 或 continuation。
 玩家輸入序號在已驗答後保留單調遞增，即使整次打出回滾重現了先前的 pending 題，
 也不會恢復舊玩家 token。
-玩家卡片清單的 `CardOption` 型別沒有實體物件字串欄位；當題候選仍以不同選項代號回答，
-不含盤面物件代號。既有權威題目不變。候選與觀察的連結需求見
-[#1973](https://github.com/gbaian10/sve-kit/issues/1973)及
-[#1977](https://github.com/gbaian10/sve-kit/issues/1977)。
+玩家候選的本題代號用於回答；可選的 `ObjectHandle` 只連到本席目前仍能辨識的
+Observation 物件，不含實體 ID 字串。連結保存凍結來源的世代與辨識期，退休後
+不會重新綁到新代號。完整名稱、群組、角色與原費限制見[玩家決定題](player-questions.md)。
 
 `QuestionShape::ActionWindow` 提供主要階段的[合法行動意圖](main-actions.md)與參數範圍，
 以 `Command::MainAction` 選定；不接受一般決定的答案。其他未受支援的程序及仍有舊原型續體的權威狀態是

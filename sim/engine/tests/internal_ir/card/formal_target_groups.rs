@@ -139,3 +139,38 @@ fn grouped_targets_reject_unneeded_zones_counts_and_combined_constraints() {
         lower(&input).unwrap_err();
     }
 }
+
+#[test]
+fn player_question_groups_supply_a_disjoint_answer_for_overlapping_candidates() {
+    use crate::player_pipeline::{answer, choose_selection, question};
+    use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind, Viewer};
+    let mut game = loaded(2, true, 3);
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    let public = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Targets(targets)) = &public.shape else {
+        panic!("public grouped targets");
+    };
+    assert_eq!(targets.groups.len(), 2);
+    assert_eq!(targets.groups[0].handles, targets.groups[1].handles);
+    assert!(
+        targets
+            .groups
+            .iter()
+            .all(|group| group.cardinality.minimum == Nat(1))
+    );
+    let selected = choose_selection(targets);
+    assert_eq!(selected.len(), 2);
+    assert_ne!(selected[0], selected[1]);
+    assert!(targets.members.iter().all(|member| member.object.is_some()));
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(selected)).kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
+}

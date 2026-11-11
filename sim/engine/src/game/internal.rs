@@ -548,7 +548,10 @@ enum Wait {
     ResourceEntryPayment(card::resource_entry::ResourceEntryWait),
     Discard(discard::HandWait),
     CostDiscard(discard::HandWait),
-    WardEntry(ObjectRef),
+    WardEntry {
+        reference: ObjectRef,
+        links: player::CandidateLinks,
+    },
     OptionalCost,
     ResolutionPayment {
         costs: CostSpec,
@@ -616,6 +619,7 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
+    player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
     reveals: Vec<reveal::PublicReveal>,
     allocations: BTreeMap<(ScopeId, u64), allocation::Allocation>,
     origin: Option<Box<Game>>,
@@ -797,6 +801,7 @@ impl Game {
                 waiting: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
+                player_receipt_links: BTreeMap::new(),
                 reveals: Vec::new(),
                 allocations: BTreeMap::new(),
                 origin: Some(Box::new(before.clone())),
@@ -905,7 +910,12 @@ impl Game {
                     rollback = execution.answer_origin(validated);
                     self.internal_discard_answer(&mut execution, &wait, &members)?;
                 }
-                (Wait::WardEntry(object), Answer::WardEntry(acted)) => {
+                (
+                    Wait::WardEntry {
+                        reference: object, ..
+                    },
+                    Answer::WardEntry(acted),
+                ) => {
                     rollback = execution.answer_origin(validated);
                     execution.ward_entries.push((object, acted));
                 }

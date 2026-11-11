@@ -1,5 +1,9 @@
 //! The chooser's hand is exposed only through token-local candidates for this discard.
 
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::SelectionQuestion;
+use crate::game::player::Viewer;
+
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, contains, invalid, seat_name,
     unsupported,
@@ -13,6 +17,7 @@ use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(super) struct HandWait {
+    links: CandidateLinks,
     instruction: Box<Instruction>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
@@ -143,12 +148,28 @@ fn bounds(action: &Action) -> Result<Cardinality> {
 }
 
 impl HandWait {
+    pub(in crate::game::internal) fn player_question(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        domain: &super::TargetDomain,
+    ) -> Result<SelectionQuestion> {
+        game.player_selection(
+            actor,
+            domain,
+            &self.members.iter().copied().map(Some).collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(super) const fn strict(
+        links: CandidateLinks,
         instruction: Box<Instruction>,
         members: Vec<ObjectRef>,
         bounds: Cardinality,
     ) -> Self {
         Self {
+            links,
             instruction,
             members,
             bounds,
@@ -303,6 +324,7 @@ impl Game {
                 roles: vec![],
             }),
             Wait::Discard(HandWait {
+                links: CandidateLinks::capture(self, execution, members.iter().copied())?,
                 instruction,
                 members,
                 bounds: count,

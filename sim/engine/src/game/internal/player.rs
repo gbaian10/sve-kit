@@ -6,6 +6,8 @@ use super::{
 use crate::game::player::{QuestionPurpose, SubmissionKind};
 use crate::ir::DecisionKind;
 
+mod candidates;
+pub(super) use candidates::CandidateLinks;
 mod projection;
 
 pub(super) const fn purpose(kind: &DecisionKind) -> QuestionPurpose {
@@ -31,7 +33,7 @@ impl Wait {
             | Self::ExchangeRoute { .. }
             | Self::MaterialParameter(_)
             | Self::Modes(_) => QuestionPurpose::PlayParameter,
-            Self::WardEntry(_)
+            Self::WardEntry { .. }
             | Self::TriggerQuota { .. }
             | Self::TokenCapacity(_)
             | Self::MovementCapacity(_)

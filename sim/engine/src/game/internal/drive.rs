@@ -1,9 +1,12 @@
 //! Complete Drive checks share typed continuations and the authority's ordinary mutations.
+
 use super::observation::EffectOrigin;
 use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, invalid,
     player_id, seat_name, unsupported,
 };
+use crate::game::internal::player::CandidateLinks;
+use crate::game::player::CardOption;
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 use crate::ir::{
@@ -43,6 +46,7 @@ struct Run {
 
 #[derive(Clone, Debug)]
 pub(super) struct DriveWait {
+    links: CandidateLinks,
     run: Run,
     check: CheckId,
     checked: ObjectRef,
@@ -52,6 +56,25 @@ pub(super) struct DriveWait {
 }
 
 impl DriveWait {
+    pub(in crate::game::internal) fn player_cards(
+        &self,
+        game: &Game,
+        actor: Viewer,
+        cards: &[OrderCard],
+    ) -> Result<Vec<CardOption>> {
+        game.player_cards(
+            actor,
+            cards,
+            &self
+                .candidates
+                .iter()
+                .copied()
+                .map(Some)
+                .collect::<Vec<_>>(),
+            &self.links,
+        )
+    }
+
     pub(super) fn validate(&self, accept: bool, handle: Option<u64>) -> Result<Option<ObjectRef>> {
         if !accept {
             return if handle.is_none() {
@@ -170,6 +193,7 @@ impl Game {
                 .checked_sub(1)
                 .ok_or_else(|| invalid("Drive count underflow"))?;
             let mut wait = DriveWait {
+                links: CandidateLinks::default(),
                 run,
                 check: CheckId(self.state.ir_epoch),
                 checked,
@@ -193,6 +217,8 @@ impl Game {
                         }
                     }
                 }
+                wait.links =
+                    CandidateLinks::capture(self, execution, wait.candidates.iter().copied())?;
                 return self.internal_wait(
                     execution,
                     DecisionId(wait.run.instruction.id.0),

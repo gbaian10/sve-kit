@@ -106,7 +106,11 @@ fn bp11_p30_cannot_be_piloted_when_every_follower_together_costs_less_than_five(
     let before = format!("{game:?}");
     game.activate_internal_card("train", ability("BP11-P30", 0), PLAYER)
         .unwrap_err();
-    assert_eq!(format!("{game:?}"), before, "an impossible crew leaves the game unchanged");
+    assert_eq!(
+        format!("{game:?}"),
+        before,
+        "an impossible crew leaves the game unchanged"
+    );
 }
 
 #[test]
@@ -150,4 +154,67 @@ fn bp11_069_creates_a_magic_train_only_when_none_is_on_the_field() {
             assert_eq!(trains, 1, "{printing} with an existing train: {existing}");
         }
     }
+}
+
+#[test]
+fn player_question_real_train_cost_floor_uses_frozen_printed_costs() {
+    use sve_engine::game::player::{
+        Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
+    };
+    let mut game = train(
+        "BP11-P30",
+        &json!([
+            {"id":"one","card":"BP01-171","state":{"cost":9_i64}},
+            {"id":"two","card":"BP17-077","state":{"cost":0_i64}},
+            {"id":"three","card":"BP07-076","state":{"cost":0_i64}}
+        ]),
+    );
+    game.activate_internal_card("train", ability("BP11-P30", 0), PLAYER)
+        .unwrap();
+    let Input::Question(public) = game.input(Viewer::P1) else {
+        panic!("player crew question");
+    };
+    let QuestionShape::Decision(DecisionShape::CostMaterials(materials)) = &public.shape else {
+        panic!("player crew materials");
+    };
+    assert_eq!(materials.minimum_original_cost, Some(5));
+    assert_eq!(materials.maximum_original_cost, None);
+    assert!(!materials.distinct_original_costs);
+    assert!(
+        materials
+            .members
+            .iter()
+            .all(|member| member.object.is_some())
+    );
+    assert_eq!(
+        materials
+            .members
+            .iter()
+            .map(|member| member.original_cost.unwrap())
+            .collect::<Vec<_>>(),
+        vec![1, 2, 3]
+    );
+    let selected = materials
+        .members
+        .iter()
+        .filter(|member| member.original_cost.unwrap() >= 2)
+        .map(|member| member.handle)
+        .collect();
+    assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Answer {
+                token: public.token,
+                answer: Answer::CostMaterials(selected)
+            }
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["one"]["acted"], false);
+    assert_eq!(state["objects"]["two"]["acted"], true);
+    assert_eq!(state["objects"]["three"]["acted"], true);
+    assert_eq!(state["objects"]["train"]["power"], 4_u8);
 }

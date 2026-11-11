@@ -1,11 +1,8 @@
 //! Player questions describe the operation without exposing authority continuations.
 
-use super::Viewer;
 use super::observation::ObservedZone;
-use crate::game::internal::{
-    AbilityOption, DistributionDomain, PendingOption, QuickOption, QuotaDomain, ReplacementOption,
-    SearchGroup, TargetDomain,
-};
+use super::{AbilityChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice};
+use super::{DistributionQuestion, ObjectHandle, SelectionGroup, SelectionQuestion, Viewer};
 use crate::ir::{Cardinality, ModeId, Nat, QuickWindow, TriggerIcon};
 
 /// One printed choice addressed only within the current question.
@@ -17,6 +14,12 @@ pub struct CardOption {
     pub card: String,
     /// Authorized rules name supplied by the original question.
     pub name: String,
+    /// Current Observation capability, never a physical identity.
+    pub object: Option<ObjectHandle>,
+    /// Complete frozen names when distinct-name selection requires them.
+    pub rules_names: Option<Vec<String>>,
+    /// Original cost when a total or distinct-cost constraint requires it.
+    pub original_cost: Option<i64>,
 }
 
 /// Search bounds and printed groups, retaining the original answer coordinates.
@@ -27,7 +30,11 @@ pub struct SearchQuestion {
     /// Effective total bounds.
     pub cardinality: Cardinality,
     /// Every printed group, including empty entries.
-    pub groups: Option<Vec<SearchGroup>>,
+    pub groups: Option<Vec<SelectionGroup>>,
+    /// No rules name may occur in two chosen cards.
+    pub distinct_names: bool,
+    /// Upper bound across every selected group together.
+    pub maximum_original_cost: Option<i64>,
 }
 
 /// A selection from the frozen remaining search or movement candidates.
@@ -88,11 +95,11 @@ pub enum DecisionShape {
         remaining: Nat,
     },
     /// Effective definitions; answer `Ability(handle)`.
-    Abilities(Vec<AbilityOption>),
+    Abilities(Vec<AbilityChoice>),
     /// Evolution-equivalent resources; answer `ResourceEntryPayment`.
     ResourceEntryPayment {
         /// Question-local private resource choices.
-        materials: TargetDomain,
+        materials: SelectionQuestion,
         /// Whether one EP can replace one PP.
         ep_allowed: bool,
     },
@@ -106,26 +113,28 @@ pub enum DecisionShape {
         zone: String,
         /// One-based source position, valid only in this question.
         position: u64,
+        /// Current Observation capability of the entering card, when still identifiable.
+        object: Option<ObjectHandle>,
     },
     /// Rule-owned Quick plays and explicit Pass; answer `Quick`.
     Quick {
         /// Original rule window.
         window: QuickWindow,
         /// Private plays, visible only to their actor.
-        options: Vec<QuickOption>,
+        options: Vec<QuickChoice>,
     },
     /// Accept or decline a declaration payment; answer `OptionalCost`.
     OptionalCost,
     /// Accept or decline a resolution payment; answer `OptionalCost`.
     ResolutionPayment,
     /// Head-cost materials; answer `CostMaterials`.
-    CostMaterials(TargetDomain),
+    CostMaterials(SelectionQuestion),
     /// A hand discard with its original bounds and answer channel.
     Discard {
         /// Resolution effect or play cost.
         kind: DiscardKind,
         /// Authorized hand choices and exact count.
-        cards: TargetDomain,
+        cards: SelectionQuestion,
     },
     /// Genuine affordable route indices, without filling gaps; answer `Integer(route)`.
     ExchangeRoutes(Vec<Nat>),
@@ -134,15 +143,15 @@ pub enum DecisionShape {
     /// Optional draw continuation; answer `Stepwise`.
     BeforeDraw,
     /// Pending occurrences; answer `Pending(handle)`.
-    Pending(Vec<PendingOption>),
+    Pending(Vec<PendingChoice>),
     /// Simultaneous limited admission; answer `TriggerQuota`.
-    TriggerQuota(QuotaDomain),
+    TriggerQuota(QuotaQuestion),
     /// A printed numeric parameter; answer `Integer` within these bounds.
     Integer(Cardinality),
     /// Frozen permutation; answer `Order` with every handle once.
     Order(Vec<CardOption>),
     /// Replacement order; answer `Order`.
-    DamageReplacements(Vec<ReplacementOption>),
+    DamageReplacements(Vec<ReplacementChoice>),
     /// Public icon and optional target; answer `DriveTrigger`.
     DriveTrigger {
         /// Already revealed trigger icon.
@@ -157,11 +166,11 @@ pub enum DecisionShape {
     /// Arrivals competing for field or EX space; answer `SearchPartition`.
     MovementCapacity(MovementCapacityQuestion),
     /// Frozen recipients and totals; answer `Distribution`.
-    Distribution(DistributionDomain),
+    Distribution(DistributionQuestion),
     /// Hand-movement replacement; answer `SearchReplacement`.
     SearchReplacement,
     /// Declared or resolution targets; answer `Targets` or `TargetsWithRoles`.
-    Targets(TargetDomain),
+    Targets(SelectionQuestion),
     /// Token-name combinations constrained by destination capacity.
     TokenCapacity(TokenCapacityQuestion),
     /// Declaration modes; answer `Modes`.

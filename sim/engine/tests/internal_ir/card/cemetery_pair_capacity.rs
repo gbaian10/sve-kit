@@ -91,3 +91,52 @@ fn cemetery_pair_capacity_rejects_name_or_cost_shortages_before_payment_atomical
         );
     }
 }
+
+#[test]
+fn player_question_cost_cap_keeps_original_costs_and_full_names_without_cost_uniqueness() {
+    use crate::player_pipeline::{answer, choose_selection, question};
+    use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind, Viewer};
+    let mut game = position(true, 2);
+    game.activate_internal_card("caster", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    let public = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Targets(targets)) = &public.shape else {
+        panic!("public capped targets");
+    };
+    assert!(targets.distinct_names);
+    assert!(
+        !targets.distinct_original_costs,
+        "A sum cap does not require different costs"
+    );
+    assert_eq!(targets.maximum_original_cost, Some(2));
+    assert_eq!(targets.minimum_original_cost, None);
+    assert!(targets.members.iter().all(|member| {
+        member
+            .rules_names
+            .as_ref()
+            .unwrap()
+            .contains(member.name.as_ref().unwrap())
+    }));
+    let selected = choose_selection(targets);
+    assert_eq!(selected.len(), 2);
+    assert_eq!(
+        selected
+            .iter()
+            .map(|handle| targets.original_costs.as_ref().unwrap()[handle])
+            .sum::<i64>(),
+        2
+    );
+    let before = exact_authority(&game);
+    for _ in 0..3 {
+        assert_eq!(question(&game, Viewer::P1), public);
+    }
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(selected)).kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        11
+    );
+}
