@@ -1,5 +1,7 @@
+use super::walk::{NodeRef, Traversal, Visitor};
 use super::{CardProgram, Located, SourceSpan, Walk};
 use alloc::collections::{BTreeMap, BTreeSet};
+use core::mem::replace;
 use core::num::NonZeroU32;
 use sha2::{Digest as _, Sha256};
 use std::sync::OnceLock;
@@ -70,12 +72,28 @@ pub enum AdmissionError {
     Missing(Vec<Requirement>),
 }
 
-pub(super) struct Visitor {
-    pub(super) source: SourceSpan,
+struct RequirementsVisitor {
+    source: SourceSpan,
+    sources: Vec<SourceSpan>,
     required: BTreeMap<Capability, BTreeSet<Location>>,
 }
-impl Visitor {
-    pub(super) fn require(&mut self, code: &'static str, path: &str) {
+impl Visitor for RequirementsVisitor {
+    fn enter(&mut self, node: NodeRef<'_>, _path: &str) -> Traversal {
+        if let NodeRef::Source(source) = node {
+            self.sources.push(replace(&mut self.source, source.clone()));
+        }
+        Traversal::Descend
+    }
+
+    fn leave(&mut self, node: NodeRef<'_>, _path: &str) {
+        if let NodeRef::Source(_) = node
+            && let Some(source) = self.sources.pop()
+        {
+            self.source = source;
+        }
+    }
+
+    fn require(&mut self, code: &'static str, path: &str) {
         self.required
             .entry(Capability {
                 code,
@@ -105,8 +123,9 @@ impl Requirements {
     where
         T: Walk,
     {
-        let mut visitor = Visitor {
+        let mut visitor = RequirementsVisitor {
             source: program.source.clone(),
+            sources: vec![],
             required: BTreeMap::new(),
         };
         program.walk(&mut visitor, "");
@@ -260,6 +279,7 @@ fn derivation_identity() -> Identity {
             let mut digest = Sha256::new();
             digest.update(schema_identity().hash.as_bytes());
             digest.update(include_bytes!("capabilities.rs"));
+            digest.update(include_bytes!("walk.rs"));
             Identity {
                 id: "internal:d0-derivation:1",
                 hash: hex_digest(digest.finalize().as_slice()),

@@ -538,6 +538,8 @@ mod events;
 
 mod composition;
 
+mod walk;
+
 mod wellformed;
 
 mod lowering;
