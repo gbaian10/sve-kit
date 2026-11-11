@@ -8,18 +8,16 @@ use crate::ir::{
 };
 
 #[derive(Default)]
-struct Budget {
-    fixed: i64,
-    copies: u64,
+pub(super) struct Budget {
+    pub(super) fixed: i64,
+    pub(super) copies: u64,
 }
 impl Budget {
-    fn include(
+    pub(super) fn include(
         &mut self,
-        game: &Game,
-        execution: &Execution,
         costs: &CostSpec,
-        binding: Binding<Nat>,
-        card_cost: bool,
+        binding: Option<Binding<Nat>>,
+        read_pp: impl Fn(Int) -> Result<Int>,
     ) -> Result<()> {
         let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("X cost alternatives"));
@@ -35,12 +33,12 @@ impl Budget {
                 continue;
             };
             if let Expr::Literal(value) = amount {
-                let Int(value) = game.internal_card_pp_amount(execution, card_cost, *value)?;
+                let Int(value) = read_pp(*value)?;
                 self.fixed = self
                     .fixed
                     .checked_add(value)
                     .ok_or_else(|| invalid("X fixed PP overflow"))?;
-            } else if x_pp::amount(amount) == Some(binding) {
+            } else if binding.is_some() && x_pp::amount(amount) == binding {
                 self.copies = self
                     .copies
                     .checked_add(1)
@@ -73,14 +71,16 @@ impl Game {
             return Err(unsupported("X beside modes or card cost exchange"));
         }
         let mut budget = Budget::default();
-        budget.include(self, execution, &play.costs, binding, execution.spell)?;
-        budget.include(self, execution, &play.mode_costs, binding, false)?;
+        budget.include(&play.costs, Some(binding), |printed| {
+            self.internal_card_pp_amount(execution, execution.spell, printed)
+        })?;
+        budget.include(&play.mode_costs, Some(binding), Ok)?;
         if let Some((_, additional)) = play.additional.as_deref() {
-            budget.include(self, execution, &additional.play.costs, binding, false)?;
+            budget.include(&additional.play.costs, Some(binding), Ok)?;
         }
         for payment in &play.optional {
             if payment.accepted == Some(true) {
-                budget.include(self, execution, &payment.costs, binding, false)?;
+                budget.include(&payment.costs, Some(binding), Ok)?;
             }
         }
         let decision = play

@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::observation::{CostLine, PendingCost};
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn program(later_failure: bool) -> WellFormedCardProgram {
@@ -60,6 +61,18 @@ fn hand_cost_selection_is_private_strict_and_payment_rolls_back_as_a_whole() {
         let CardPlay::Awaiting(question) = start.unwrap() else {
             panic!("hand materials");
         };
+        let quote = cost_observation::active(&game);
+        assert_eq!(quote.total_pp, None);
+        assert_eq!(quote.pending, [PendingCost::Materials]);
+        assert!(
+            quote.groups[0]
+                .lines
+                .contains(&CostLine::Posture { cards: Some(1) })
+        );
+        assert!(quote.groups[0].lines.contains(&CostLine::Discard {
+            cards: Some(1),
+            selected: false
+        }));
         let InputDomain::CostMaterials(domain) = &question.domain else {
             panic!("cost materials");
         };
