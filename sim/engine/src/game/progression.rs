@@ -231,7 +231,7 @@ impl Game {
             ));
         }
         self.numeric_evolution_allowed(source, false)?;
-        self.reveal(&[resource.into()], "all", frame, false);
+        self.reveal(&[resource.into()], "all", frame, false)?;
         self.apply_evolution(source, resource, face, 0, frame)?;
         frame.performed = 1;
         Ok(())
@@ -326,7 +326,7 @@ impl Game {
             return Ok(false);
         }
         if intrinsic.is_some() {
-            self.reveal(&[evolve.into()], "all", &frame, false);
+            self.reveal(&[evolve.into()], "all", &frame, false)?;
         }
         self.consume_cost_adjustments(source, CostKind::Evolution)?;
         self.pay_costs(&non_pp, &mut frame)?;

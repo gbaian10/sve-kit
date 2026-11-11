@@ -323,7 +323,7 @@ fn failure_after_choice_and_shuffle_restores_execution_and_real_rng() {
                 Answer::SearchReplacement(SearchReplacementAnswer::Replacement),
             )
             .unwrap_err();
-        super::super::transactions::assert_restored(&games[0], &origin);
+        super::super::transactions::assert_reverted(&games[0], &origin);
         games[1] = super::super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))

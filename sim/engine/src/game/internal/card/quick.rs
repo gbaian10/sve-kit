@@ -357,9 +357,10 @@ impl Game {
                     &action.holder,
                     super::ActivationKey::Definition(ability),
                     actor,
+                    &before.published_knowledge(),
                 )
             } else {
-                self.play_internal_spell(&action.holder, actor)
+                self.play_internal_spell(&action.holder, actor, &before.published_knowledge())
             }
         } else {
             // Each Pass is a separate match input, so its events need their own causal node.

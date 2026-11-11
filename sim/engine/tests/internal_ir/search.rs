@@ -210,7 +210,7 @@ fn failure_driven_by_successful_after_restores_the_execution_and_real_rng() {
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        super::transactions::assert_restored(&games[0], &origin);
+        super::transactions::assert_reverted(&games[0], &origin);
         games[1] = super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
@@ -815,7 +815,7 @@ fn a_later_failure_rolls_back_the_real_rng_shuffle_with_the_answer() {
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        super::transactions::assert_restored(&games[0], &origin);
+        super::transactions::assert_reverted(&games[0], &origin);
         games[1] = super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))

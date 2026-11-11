@@ -6,6 +6,7 @@
 )]
 
 use self::card::play::PlayState;
+use super::knowledge::PublishedKnowledge;
 use super::{Frame, Game, View, int, string};
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
@@ -765,6 +766,7 @@ impl Game {
         // Admission is pure over the immutable checked body; only the context can go stale.
         self.internal_context(&prepared.context)?;
         let before = self.clone();
+        let published = before.published_knowledge();
         let result = (|| {
             self.prepared.remove(&play.execution);
             let mut execution = Execution {
@@ -817,7 +819,7 @@ impl Game {
                 cost_override: None,
                 play_origin_player: None,
             };
-            self.internal_run(&mut execution)?;
+            self.internal_run(&mut execution, &published)?;
             let progress = execution.progress();
             if !progress.complete && !execution.terminated {
                 self.typed = Some(execution);
@@ -862,6 +864,7 @@ impl Game {
         validated: &mut bool,
     ) -> Result<Progress> {
         let before = self.clone();
+        let published = before.published_knowledge();
         let mut rollback = None;
         let result = (|| {
             let mut execution = self
@@ -917,7 +920,7 @@ impl Game {
                             .as_ref()
                             .is_some_and(PlayState::required_head_pending);
                     if declined_child {
-                        self.cancel_nested_card(&mut execution)?;
+                        self.cancel_nested_card(&mut execution, &published)?;
                     } else {
                         let handled = card::optional::accept(&mut execution, accepted)?;
                         if !handled {
@@ -1145,7 +1148,7 @@ impl Game {
                 }
                 _ => return Err(invalid("answer is outside the internal domain")),
             }
-            self.internal_run(&mut execution)?;
+            self.internal_run(&mut execution, &published)?;
             execution.origin = rollback.take();
             let progress = execution.progress();
             if !progress.complete && !execution.terminated {
@@ -1156,9 +1159,9 @@ impl Game {
         if result.is_err() {
             if let Some(origin) = rollback {
                 let epoch = self.state.ir_epoch.max(before.state.ir_epoch);
-                *self = *origin;
+                self.restore_player_state(*origin, &published)?;
                 // An externally observed token must never become live again after rollback.
-                self.state.ir_epoch = epoch;
+                self.state.ir_epoch = self.state.ir_epoch.max(epoch);
                 self.refresh_internal_quick()?;
             } else {
                 *self = before;
@@ -1335,7 +1338,11 @@ impl Game {
         Ok(())
     }
 
-    fn internal_run(&mut self, execution: &mut Execution) -> Result<()> {
+    fn internal_run(
+        &mut self,
+        execution: &mut Execution,
+        published: &PublishedKnowledge,
+    ) -> Result<()> {
         loop {
             match self.internal_run_current(execution) {
                 Err(EngineFailure::IllegalPlay(_))
@@ -1344,7 +1351,7 @@ impl Game {
                         .as_ref()
                         .is_some_and(|nested| !nested.committed) =>
                 {
-                    self.cancel_nested_card(execution)?;
+                    self.cancel_nested_card(execution, published)?;
                 }
                 result => return result,
             }

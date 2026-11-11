@@ -1009,7 +1009,7 @@ impl Game {
             .map(|&object| execution.object_id(object).map(str::to_owned))
             .collect::<Result<Vec<_>>>()?;
         if wait.conditional {
-            self.reveal(&ids, "all", &execution.frame(), false);
+            self.reveal(&ids, "all", &execution.frame(), false)?;
         }
         let outcome = SearchOutcome {
             found: views.clone(),

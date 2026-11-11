@@ -1,6 +1,9 @@
 use super::*;
 use std::sync::OnceLock;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::Observation;
+use sve_engine::game::player::observation::ObservedZone;
 
 #[expect(
     clippy::panic,
@@ -224,11 +227,45 @@ fn lowered_programs() -> (WellFormedCardProgram, WellFormedCardProgram) {
     (base, card(vec![evolved, lastword]))
 }
 
+fn assert_evolved_observation(
+    before: &Observation,
+    after: &Observation,
+    actor: usize,
+    state: EvolutionState,
+) {
+    let field_card = |observation: &Observation| {
+        observation.players[actor]
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap()
+            .cards[0]
+            .card
+            .clone()
+    };
+    let evolved = field_card(after);
+    assert_eq!(
+        evolved.handle,
+        field_card(before).handle,
+        "evolution must retain continuous identification"
+    );
+    assert_eq!(
+        evolved.properties.card, "unit-form",
+        "visible catalog identity must follow the evolution card"
+    );
+    assert_eq!(
+        evolved.properties.state.unwrap().evolution,
+        state,
+        "observation must follow the authority evolution facet"
+    );
+}
+
 #[test]
 fn bp20_r14_evolve_draw_fragment_uses_new_print_instance_and_real_super_facet() {
     let (base, form) = programs();
     for seat in [1, 2] {
         let mut game = position(seat, base, form);
+        let observations = [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap());
         let prior = resolved(
             game.activate_internal_card("s", AbilityId(7), PlayerId { seat })
                 .unwrap(),
@@ -237,6 +274,19 @@ fn bp20_r14_evolve_draw_fragment_uses_new_print_instance_and_real_super_facet() 
         let super_evolution = u64::from(seat == 2);
         let step=game.internal_rule_action(&json!({"do":"evolve","source":"s","evolve_card":"e","pay":{"pp":1,"ep":0,"sep":super_evolution},"kind":"forged-unused"})).unwrap();
         assert_eq!(step.outcome, "resolved");
+        for before in &observations {
+            let after = game.observe(before.viewer).unwrap();
+            assert_evolved_observation(
+                before,
+                &after,
+                usize::from(seat != 1),
+                if seat == 1 {
+                    EvolutionState::Evolved
+                } else {
+                    EvolutionState::SuperEvolved
+                },
+            );
+        }
         assert!(
             step.events
                 .iter()

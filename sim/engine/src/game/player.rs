@@ -1,5 +1,8 @@
 //! Shared vocabulary for typed player input, observations and projected events.
 //! Authority setup hands control to this interface with `Game::advance_player_input`.
+//! The observation module exposes authorized state; player submissions are separate.
+
+pub mod observation;
 
 mod pipeline;
 

@@ -136,7 +136,7 @@ impl Game {
                                 .state
                                 .knowledge
                                 .get(actor)
-                                .is_some_and(|knowledge| knowledge.located().contains(id))
+                                .is_some_and(|knowledge| knowledge.knows_location(id))
                         {
                             return Err(unsupported("unobserved deck capacity selection"));
                         }

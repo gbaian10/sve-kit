@@ -5,10 +5,72 @@ use super::ordering::{look, looked, order};
 use super::search::{cardinality, conditional, hand, search};
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
+use sve_engine::game::player::Viewer;
 
 pub(super) fn assert_restored(actual: &Game, expected: &Game) {
-    let actual_debug = exact_authority(actual);
-    let expected_debug = exact_authority(expected);
+    assert_rollback(actual, expected, false);
+}
+
+fn normalize_issuance(debug: &str) -> (String, Vec<u64>) {
+    let mut normalized = debug.to_owned();
+    let ranges = debug
+        .match_indices(", issued: ")
+        .take(2)
+        .map(|(offset, marker)| {
+            let start = offset.checked_add(marker.len()).unwrap();
+            let digits = debug
+                .get(start..)
+                .unwrap()
+                .bytes()
+                .take_while(u8::is_ascii_digit)
+                .count();
+            assert!(
+                digits > 0,
+                "authority debug must include its issuance counter"
+            );
+            start..start.checked_add(digits).unwrap()
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(ranges.len(), 2, "both seats must carry an issuance counter");
+    let issued = ranges
+        .iter()
+        .map(|range| debug.get(range.clone()).unwrap().parse().unwrap())
+        .collect();
+    for range in ranges.into_iter().rev() {
+        normalized.replace_range(range, "0");
+    }
+    (normalized, issued)
+}
+
+fn normalize_saved_issuance(actual: &mut Value, expected: &mut Value) {
+    for seat in ["P1", "P2"] {
+        let issued = &mut actual["state"]["knowledge"][seat]["issued"];
+        let previous = &mut expected["state"]["knowledge"][seat]["issued"];
+        assert!(
+            issued.as_u64().unwrap() >= previous.as_u64().unwrap(),
+            "published handle issuance must never rewind"
+        );
+        *issued = Value::Null;
+        *previous = Value::Null;
+    }
+}
+
+fn assert_rollback(actual: &Game, expected: &Game, published: bool) {
+    let mut actual_debug = exact_authority(actual);
+    let mut expected_debug = exact_authority(expected);
+    if published {
+        let (normalized_actual, issued) = normalize_issuance(&actual_debug);
+        let (normalized_expected, previous) = normalize_issuance(&expected_debug);
+        assert!(
+            issued
+                .iter()
+                .zip(&previous)
+                .all(|(after, before)| after >= before),
+            "published handle issuance must never rewind"
+        );
+        actual_debug = normalized_actual;
+        expected_debug = normalized_expected;
+    }
     let epoch = |debug: &str| -> u64 {
         debug
             .split_once("ir_epoch: ")
@@ -36,9 +98,12 @@ pub(super) fn assert_restored(actual: &Game, expected: &Game) {
         "rollback must restore every authority field except the epoch high water mark",
     );
     match serde_json::to_value(expected) {
-        Ok(before) => {
+        Ok(mut before) => {
             let mut after = serde_json::to_value(actual).unwrap();
             after["state"]["ir_epoch"] = before["state"]["ir_epoch"].clone();
+            if published {
+                normalize_saved_issuance(&mut after, &mut before);
+            }
             assert_eq!(after, before, "saved RNG and authority must match");
         }
         Err(_) => {
@@ -59,9 +124,24 @@ pub(super) fn assert_restored(actual: &Game, expected: &Game) {
 
 pub(super) fn aligned_control(actual: &Game, pristine: &Game) -> Game {
     let mut control = serde_json::to_value(pristine).unwrap();
-    control["state"]["ir_epoch"] =
-        serde_json::to_value(actual).unwrap()["state"]["ir_epoch"].clone();
+    let current = serde_json::to_value(actual).unwrap();
+    control["state"]["ir_epoch"] = current["state"]["ir_epoch"].clone();
+    for seat in ["P1", "P2"] {
+        control["state"]["knowledge"][seat]["issued"] =
+            current["state"]["knowledge"][seat]["issued"].clone();
+    }
     serde_json::from_value(control).unwrap()
+}
+
+pub(super) fn assert_reverted(actual: &Game, origin: &Game) {
+    assert_rollback(actual, origin, true);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            actual.observe(viewer).unwrap(),
+            origin.observe(viewer).unwrap(),
+            "published rollback must preserve uninterrupted visible identities"
+        );
+    }
 }
 
 #[expect(
@@ -185,7 +265,7 @@ fn every_interaction_rolls_back_all_prior_answers_and_never_revives_tokens() {
                         }
                     }
                 }
-                assert_restored(&game, &origin);
+                assert_reverted(&game, &origin);
                 game.execute_internal(&program, &source("synthetic"), context(seat))
                     .unwrap();
                 let fresh = game.internal_decision(View::Referee).unwrap();
@@ -284,7 +364,7 @@ fn draw_mutation_and_next_question_failures_restore_the_origin() {
                 }),
                 "{error}"
             );
-            assert_restored(&game, &origin);
+            assert_reverted(&game, &origin);
         }
     }
 }
@@ -347,7 +427,7 @@ fn search_order_and_partition_next_question_errors_are_commit_failures() {
                     }
                 }
             }
-            assert_restored(&game, &origin);
+            assert_reverted(&game, &origin);
         }
     }
 }

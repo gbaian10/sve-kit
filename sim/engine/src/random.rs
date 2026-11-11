@@ -3,7 +3,7 @@
 use alloc::boxed::Box;
 
 use rand::seq::SliceRandom as _;
-use rand::{RngExt as _, SeedableRng as _};
+use rand::{Rng as _, RngExt as _, SeedableRng as _};
 use rand_chacha::ChaCha12Rng;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest as _, Sha256};
@@ -71,6 +71,22 @@ impl Random {
         hash.update(b"sve-engine/chacha12-sha256-rand09-v1\0");
         hash.update(seed.as_bytes());
         Self(Box::new(ChaCha12Rng::from_seed(hash.finalize().into())))
+    }
+
+    pub(crate) fn fork(&self, label: &str) -> Self {
+        let mut hash = Sha256::new();
+        hash.update(b"sve-engine/private-fork/v0\0");
+        hash.update(self.0.get_seed());
+        hash.update(label.as_bytes());
+        Self(Box::new(ChaCha12Rng::from_seed(hash.finalize().into())))
+    }
+
+    pub(crate) fn opaque_at(&self, index: u64) -> [u8; 32] {
+        let mut rng = self.0.clone();
+        rng.set_word_pos(u128::from(index) * 8);
+        let mut bytes = [0_u8; 32];
+        rng.fill_bytes(&mut bytes);
+        bytes
     }
 
     pub(crate) fn bounded(&mut self, bound: u64) -> Result<u64> {

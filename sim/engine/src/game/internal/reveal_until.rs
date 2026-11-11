@@ -42,7 +42,7 @@ impl Game {
             let object = execution.reference(self, id)?;
             let qualifies = super::search::matches_candidate(self, id, predicate)?;
             self.internal_record_reveal(execution, object, id)?;
-            self.reveal(slice::from_ref(id), "all", &execution.frame(), true);
+            self.reveal(slice::from_ref(id), "all", &execution.frame(), true)?;
             let member = RuntimeObjectView {
                 object,
                 snapshot: SnapshotId(self.state.ir_epoch),

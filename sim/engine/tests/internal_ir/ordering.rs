@@ -312,7 +312,7 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
                 Answer::Order(vec![0, 1, 2]),
             )
             .unwrap_err();
-        super::transactions::assert_restored(&stale, &origin);
+        super::transactions::assert_reverted(&stale, &origin);
     }
 }
 

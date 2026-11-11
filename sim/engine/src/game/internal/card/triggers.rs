@@ -706,6 +706,7 @@ impl Game {
             .ok_or_else(|| invalid("pending is no longer selectable"))?;
         *validated = true;
         let before = self.clone();
+        let published = before.published_knowledge();
         let pending = self.card_runtime.pending.remove(position);
         self.card_runtime.question = None;
         let result = (|| {
@@ -758,7 +759,7 @@ impl Game {
             execution.ability = Some(pending.source);
             execution.trigger_occurrence = Some(pending.id);
             execution.source_information = Some(pending.information);
-            self.run_card_play(execution, pending.ability.node)
+            self.run_card_play(execution, pending.ability.node, &published)
         })();
         if matches!(result, Err(crate::EngineFailure::IllegalPlay(_))) {
             let high = self.state.ir_epoch;

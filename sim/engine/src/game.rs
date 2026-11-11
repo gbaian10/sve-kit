@@ -354,6 +354,7 @@ pub(crate) fn scalar(value: &Value) -> i64 {
 )]
 impl Game {
     /// Builds a neutral position without reading question identifiers or expected answers.
+    /// The host keeps the seed private: it protects shuffles and viewer handle streams.
     ///
     /// # Errors
     /// Rejects missing card facts, malformed positions and unsupported historical state.
@@ -413,6 +414,9 @@ impl Game {
                         continue;
                     }
                     let id = string(&item["id"]).to_owned();
+                    if id.starts_with("vobj:") {
+                        return Err(invalid("reserved physical object identity"));
+                    }
                     let card = string(&item["card"]).to_owned();
                     let owner = item["owner"].as_str().unwrap_or(seat);
                     if !matches!(owner, "P1" | "P2") {
@@ -573,21 +577,21 @@ impl Game {
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;
-        #[expect(
-            clippy::needless_collect,
-            reason = "The snapshot releases the immutable state borrow before learning mutates knowledge."
-        )]
-        for object in game.state.objects.values().cloned().collect::<Vec<_>>() {
-            for seat in ["P1", "P2"] {
-                if object.zone != "void"
-                    && !(object.zone == "banish" && object.state["face_up"] == false)
-                    && (!matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
-                        || (object.controller == seat && object.zone != "deck")
-                        || (object.zone == "evolve_deck" && object.state["face_up"] == true))
-                {
-                    game.learn(seat, &object.id, true);
-                }
-            }
+        for seat in ["P1", "P2"] {
+            let visible = game
+                .state
+                .objects
+                .values()
+                .filter(|object| {
+                    object.zone != "void"
+                        && !(object.zone == "banish" && object.state["face_up"] == false)
+                        && (!matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
+                            || (object.controller == seat && object.zone != "deck")
+                            || (object.zone == "evolve_deck" && object.state["face_up"] == true))
+                })
+                .map(|object| object.id.clone())
+                .collect::<Vec<_>>();
+            game.learn_members(seat, &visible, true)?;
         }
         Ok(game)
     }

@@ -1283,7 +1283,7 @@ fn private_observed_deck(game: &Game, id: &str, actor_seat: &str, enabled: bool)
             .state
             .knowledge
             .get(actor_seat)
-            .is_some_and(|knowledge| knowledge.located().contains(id))
+            .is_some_and(|knowledge| knowledge.knows_location(id))
 }
 
 #[expect(

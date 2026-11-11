@@ -118,7 +118,7 @@ impl Game {
             ids.push(id);
             current_members.push(current_reference);
         }
-        self.reveal(&ids, "all", &execution.frame(), true);
+        self.reveal(&ids, "all", &execution.frame(), true)?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Revealed(current_members),
@@ -144,7 +144,7 @@ impl Game {
                 self.state
                     .knowledge
                     .get(*viewer)
-                    .is_none_or(|known| !known.located().contains(id))
+                    .is_none_or(|known| !known.knows_location(id))
             })
             .map(str::to_owned)
             .collect();
@@ -287,7 +287,7 @@ impl Execution {
                 game.state
                     .knowledge
                     .get(*seat)
-                    .is_some_and(|known| known.located().contains(id))
+                    .is_some_and(|known| known.knows_location(id))
             }))
     }
 }

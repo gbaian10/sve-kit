@@ -96,7 +96,7 @@ impl Game {
                             .state
                             .knowledge
                             .get(seat)
-                            .is_some_and(|knowledge| knowledge.located().contains(id)))
+                            .is_some_and(|knowledge| knowledge.knows_location(id)))
                 {
                     return Err(unsupported(
                         "shuffle placement requires current own-deck evidence",

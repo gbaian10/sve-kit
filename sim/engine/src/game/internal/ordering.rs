@@ -711,9 +711,13 @@ impl Game {
         let count = usize::try_from(execution.natural(self, count)?.0).map_err(invalid)?;
         let deck = self.internal_known_deck(seat)?;
         let mut looked = Vec::new();
+        self.learn_members(
+            seat,
+            &deck.iter().take(count).cloned().collect::<Vec<_>>(),
+            true,
+        )?;
         for id in deck.iter().take(count) {
             let object = execution.reference(self, id)?;
-            self.learn(seat, id, true);
             looked.push(RuntimeObjectView {
                 object,
                 snapshot: SnapshotId(self.state.ir_epoch),
@@ -785,7 +789,7 @@ impl Game {
                 .state
                 .knowledge
                 .get(seat)
-                .is_some_and(|knowledge| knowledge.located().contains(id))
+                .is_some_and(|knowledge| knowledge.knows_location(id))
             {
                 return Err(unsupported(
                     "private order requires current observation evidence",

@@ -4,6 +4,7 @@ use super::{
     seat_name, unsupported,
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
+use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -502,7 +503,7 @@ impl Game {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
-        let result = self.activate_loaded_card(holder, key, actor);
+        let result = self.activate_loaded_card(holder, key, actor, &before.published_knowledge());
         self.finish_card_attempt(before, result)
     }
 
@@ -549,6 +550,7 @@ impl Game {
         holder: &str,
         key: ActivationKey,
         actor: PlayerId,
+        published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         let query = match key {
             ActivationKey::Definition(definition) => format!("activate ability {}", definition.0),
@@ -629,7 +631,7 @@ impl Game {
                 "activated ability quota exhausted".into(),
             ));
         }
-        self.start_internal_ability(ability.definition.node, context, source, false)
+        self.start_internal_ability(ability.definition.node, context, source, false, published)
     }
 
     pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {

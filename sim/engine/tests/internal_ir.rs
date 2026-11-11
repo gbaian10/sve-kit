@@ -33,6 +33,8 @@ mod damage;
 mod life;
 #[path = "internal_ir/pilot.rs"]
 mod pilot;
+#[path = "internal_ir/player_observation.rs"]
+mod player_observation;
 
 #[path = "internal_ir/next_damage.rs"]
 mod next_damage;
@@ -758,7 +760,7 @@ fn runtime_expression_failure_rolls_back_draw_events_random_and_all_authority_fi
                 Answer::Integer(Nat(1)),
             )
             .unwrap_err();
-            transactions::assert_restored(&game, &origin);
+            transactions::assert_reverted(&game, &origin);
         } else {
             result.unwrap_err();
             assert_eq!(exact_authority(&game), before);
