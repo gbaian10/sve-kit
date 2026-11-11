@@ -77,7 +77,15 @@ impl BodyContext<'_> {
             nested_source.author_path.clone_from(&nested_path);
             let ability = if let Some(static_head) = &entry.r#static {
                 let lower = match static_head.effects.first() {
-                    Some(ast::StaticEffect::Grant(_)) => super::static_keywords::lower_at_source,
+                    // Per-grant conditions are admitted only for printed static abilities.
+                    Some(ast::StaticEffect::Grant(_))
+                        if !static_head
+                            .effects
+                            .iter()
+                            .any(|effect| matches!(effect, ast::StaticEffect::If(_))) =>
+                    {
+                        super::static_keywords::lower_at_source
+                    }
                     Some(
                         ast::StaticEffect::Prevent(_)
                         | ast::StaticEffect::DamageMod(_)

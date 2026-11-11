@@ -154,9 +154,44 @@ fn conditional_grants_keep_other_families_and_cross_zone_conditions_closed() {
     mixed["cards"]["unit-follower"]["abilities"][0]["static"]["effects"][1] =
         json!({"cost_mod":{"delta":-1}});
     lowerer().lower(&mixed).unwrap_err();
-    for zones in [json!("equipment"), json!(["field", "ex"])] {
-        let mut cross = tree();
-        cross["cards"]["unit-follower"]["abilities"][0]["static"]["zone"] = zones;
-        lowerer().lower(&cross).unwrap_err();
+    // Each grant is admitted unconditionally, so only its condition can cause the rejection.
+    for (zones, grant) in [
+        (
+            json!("equipment"),
+            json!({"on":"host","keywords":["storm"]}),
+        ),
+        (json!(["field", "ex"]), json!({"keywords":["rush"]})),
+    ] {
+        let direct = json!({"static":{"zone":zones,"effects":[{"grant":grant}]}});
+        lowerer()
+            .lower(&equipment_played::tree(&direct, "unit-follower"))
+            .unwrap();
+        let conditional = json!({"static":{"zone":zones,"effects":[
+            {"if":{"cond":{"awakened":true},"then":[{"grant":grant}]}}
+        ]}});
+        lowerer()
+            .lower(&equipment_played::tree(&conditional, "unit-follower"))
+            .unwrap_err();
+    }
+}
+
+#[test]
+fn granted_static_definitions_keep_per_grant_conditions_closed() {
+    let nested = |effects: Value| {
+        equipment_played::tree(
+            &json!({"static":{"effects":[{"grant":{"abilities":[{"static":{"effects":effects}}]}}]}}),
+            "unit-follower",
+        )
+    };
+    let conditional =
+        json!({"if":{"cond":{"awakened":true},"then":[{"grant":{"keywords":["bane"]}}]}});
+    lowerer()
+        .lower(&nested(json!([{"grant":{"keywords":["storm"]}}])))
+        .unwrap();
+    for effects in [
+        json!([{"grant":{"keywords":["storm"]}}, conditional.clone()]),
+        json!([conditional]),
+    ] {
+        lowerer().lower(&nested(effects)).unwrap_err();
     }
 }
