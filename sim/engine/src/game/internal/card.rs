@@ -1023,7 +1023,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
             || is_printed_quick(ability));
     let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
-    let played_trigger = filter(ability).is_some() || fusion_events::filter(ability).is_some();
+    let played_trigger = filter(ability).is_some()
+        || fusion_events::filter(ability).is_some()
+        || fusion_events::material_filter(ability).is_some();
     let hand_trigger = triggers::hand_discard(ability) || triggers::hand_banish(ability);
     let cemetery_entry_trigger = triggers::cemetery_entry(ability);
     let equipment_trigger = triggers::equipment_header(ability)?;

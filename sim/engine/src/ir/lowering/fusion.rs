@@ -167,10 +167,29 @@ pub(super) fn subscription(
 ) -> Result<EventPattern, LoweringError> {
     let EventIds {
         event: event_id,
+        subject,
+        facet,
         scope,
-        ..
     } = ids;
-    if let ast::PhaseSubscription::Fused(subscription) = on {
+    if let ast::PhaseSubscription::FusedAsMaterial(subscription) = on {
+        let ast::This::This = subscription.reference;
+        let source = &subscription.by.ability_of;
+        let ast::SelfPlayer::Controller = source.who;
+        if source.kind != ast::SearchKind::Follower || source.r#trait.is_empty() {
+            return Err(unsupported(path));
+        }
+        let binding = Binding::new(event_id, scope);
+        let filter = fusion::MaterialSource {
+            member: Binding::new(subject, scope),
+            source: Binding::new(facet, scope),
+            kind: super::search::card_kind(&source.kind),
+            trait_id: TraitId(source.r#trait.clone()),
+        };
+        Ok(EventPattern::Fused {
+            binding,
+            predicate: filter.predicate(binding),
+        })
+    } else if let ast::PhaseSubscription::Fused(subscription) = on {
         let binding = Binding::new(event_id, scope);
         if subscription.material.r#trait.is_empty() {
             return Err(unsupported(path));

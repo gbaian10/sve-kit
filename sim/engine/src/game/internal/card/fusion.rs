@@ -169,6 +169,7 @@ impl Game {
                 "insufficient EX capacity for Fusion".into(),
             ));
         }
+        self.internal_prepare_fused_materials(execution, &members)?;
         if !hand.is_empty() {
             let discarded = self.internal_discard_members(execution, &hand)?;
             if discarded.moves.len() != hand.len()

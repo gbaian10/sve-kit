@@ -2138,6 +2138,8 @@ pub(super) enum AutoAggregation {
 pub(super) enum PhaseSubscription {
     #[serde(rename = "fused")]
     Fused(FusedSubscription),
+    #[serde(rename = "fused_as_material")]
+    FusedAsMaterial(FusedAsMaterialSubscription),
     #[serde(rename = "any_of")]
     AnyOf(Vec<Self>),
     #[serde(rename = "equipped")]
@@ -2194,6 +2196,28 @@ pub(super) struct FusedSubscription {
     #[serde(rename = "who")]
     pub _who: SelfPlayer,
     pub material: FusedMaterial,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusedAsMaterialSubscription {
+    #[serde(rename = "ref")]
+    pub reference: This,
+    pub by: FusedAsMaterialBy,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusedAsMaterialBy {
+    pub ability_of: FusedAsMaterialSource,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FusedAsMaterialSource {
+    pub who: SelfPlayer,
+    pub kind: SearchKind,
+    pub r#trait: String,
 }
 
 #[derive(Deserialize)]

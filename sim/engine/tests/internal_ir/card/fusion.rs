@@ -461,3 +461,82 @@ fn fusion_accepts_a_foreign_owned_card_in_its_controllers_ex_and_returns_it_to_i
         1_u8
     );
 }
+#[test]
+fn fusion_material_observes_only_its_own_successful_payment_by_the_matching_source() {
+    for (has_trait, from, expected) in
+        [(true, "hand", 1_usize), (true, "ex", 1), (false, "hand", 0)]
+    {
+        let source = lowerer()
+            .lower(&equipment_played::tree(
+                &json!({"activate":{
+                    "fusion":{"sel":{"who":"self","zone":["hand","ex"],"kind":"spell"},"n":1_u8},
+                    "do":[{"counter":{"on":"this","name":"fusion_counter","delta":1_i8}}]
+                }}),
+                "unit-follower",
+            ))
+            .unwrap();
+        let material = lowerer()
+            .lower(&equipment_played::tree(
+                &json!({"auto":{
+                    "on":{"fused_as_material":{"ref":"this","by":{"ability_of":{
+                        "who":"self","kind":"follower","trait":"財宝"
+                    }}}},
+                    "do":[{"life":{"who":"self","delta":1_i8}}]
+                }}),
+                "unit-spell",
+            ))
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"unit-follower"}]);
+        if from == "ex" {
+            initial["players"]["P1"]["zones"]["ex"] =
+                json!([{"id":"material","card":"unit-spell"}]);
+        } else {
+            initial["players"]["P1"]["zones"]["hand"]
+                .as_array_mut()
+                .unwrap()
+                .extend([
+                    json!({"id":"material","card":"unit-spell"}),
+                    json!({"id":"unpaid","card":"unit-spell"}),
+                ]);
+        }
+        let mut game = Game::new(
+            trait_catalog(has_trait, !has_trait),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "fusion-material-occurrence",
+        )
+        .unwrap();
+        let source = &source["unit-follower"];
+        game.load_internal_card("unit-follower", source).unwrap();
+        game.load_internal_card("unit-spell", &material["unit-spell"])
+            .unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card(
+                "source",
+                source.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap()
+        else {
+            panic!("Fusion material decision");
+        };
+        let InputDomain::CostMaterials(domain) = &question.domain else {
+            panic!("Fusion cost materials");
+        };
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::CostMaterials(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            pending_count(&mut game),
+            expected,
+            "only the selected material can see a Fusion by the matching follower"
+        );
+    }
+}

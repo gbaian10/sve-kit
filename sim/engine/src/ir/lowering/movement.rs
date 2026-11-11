@@ -94,6 +94,7 @@ pub(super) fn subscription(
             })
         }
         ast::PhaseSubscription::Fused(_)
+        | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Acted(_)
         | ast::PhaseSubscription::Stood(_)

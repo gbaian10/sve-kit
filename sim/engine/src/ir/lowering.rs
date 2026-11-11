@@ -770,6 +770,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         None if hand_exit::is_union(entry) || entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None if entry.activate.as_ref().is_some_and(|head| head.fusion.is_some()) => vec![ZoneKind::Hand],
+        None if entry.auto.as_ref().is_some_and(|head| matches!(head.on, ast::PhaseSubscription::FusedAsMaterial(_))) => vec![ZoneKind::Hand, ZoneKind::Ex],
         None => vec![ZoneKind::Field],
     };
     // Quick candidates do not pre-check EX room, so a hand card cannot offer itself there.
@@ -791,6 +792,13 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         return Err(unsupported(path));
     }
     if let Some(auto) = &entry.auto {
+        if matches!(auto.on, ast::PhaseSubscription::FusedAsMaterial(_)) {
+            return if zones == [ZoneKind::Hand, ZoneKind::Ex] {
+                Ok(zones)
+            } else {
+                Err(unsupported(path))
+            };
+        }
         if matches!(auto.on, ast::PhaseSubscription::Equipped(_)) {
             return if zones == [ZoneKind::Equipment] {
                 Ok(zones)
@@ -1022,9 +1030,9 @@ fn lowered_subscription(
         ast::PhaseSubscription::AnyOf(_) if hand_exit::is_hand_union(on) => {
             Ok(hand_exit::discard(event_id, scope))
         }
-        ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_) => {
-            fusion::subscription(on, ids, path, allocator)
-        }
+        ast::PhaseSubscription::Fused(_)
+        | ast::PhaseSubscription::FusedAsMaterial(_)
+        | ast::PhaseSubscription::AnyOf(_) => fusion::subscription(on, ids, path, allocator),
         ast::PhaseSubscription::DiceRolled(value) => {
             let ast::SelfPlayer::Controller = value.who;
             let binding = Binding::new(event_id, scope);
@@ -1219,6 +1227,7 @@ fn lowered_change(
             })
         }
         ast::PhaseSubscription::Fused(_)
+        | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Evolved(_)
         | ast::PhaseSubscription::UbActivated(_)

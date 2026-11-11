@@ -5,6 +5,7 @@ use crate::ir::events::banish as banish_header;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::drive as drive_header;
 use crate::ir::events::equipment as equipment_event;
+use crate::ir::events::fusion::material_filter;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
 use crate::ir::{HistoryCount, LimitSpec, Requirements, ScopeId};
@@ -66,7 +67,7 @@ pub struct PendingOption {
 }
 
 #[derive(Clone, Debug)]
-pub(super) struct PendingOccurrence {
+pub(in crate::game::internal) struct PendingOccurrence {
     id: u64,
     holder: String,
     source: RuntimeAbilitySource,
@@ -935,7 +936,11 @@ impl PendingOccurrence {
             handle,
             card: self.card.clone(),
             line: printed_origin(&self.ability.node.source.origin)?.1.0,
-            event: if let Some(event) = &self.timing {
+            event: if matches!(&self.timing, Some(EventPayload::Fused { .. }))
+                && material_filter(&self.ability.node).is_some()
+            {
+                "Fused as material".into()
+            } else if let Some(event) = &self.timing {
                 timing::public_event(event, self.source_position)?
             } else if self.leave.is_some() {
                 format!("LeaveField from field slot {}", self.source_position)
