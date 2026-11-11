@@ -1,5 +1,6 @@
 use super::{Execution, Game, Result, unsupported};
-use crate::ir::{DurationEnd, Interval, ObjectOperand, ZoneKind};
+use crate::game::player::observation::{EffectExpiry, EffectInterval, viewer};
+use crate::ir::{DurationEnd, Interval, ObjectOperand, PlayerId, ZoneKind};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -65,6 +66,18 @@ impl EffectEnd {
         }
         false
     }
+
+    pub(super) fn observed(self) -> Result<EffectExpiry> {
+        Ok(match self {
+            Self::NoTemporalExpiry => EffectExpiry::NoTemporalExpiry,
+            Self::EndResolution => EffectExpiry::ResolutionEnd,
+            Self::Turn(_) => EffectExpiry::TurnEnd,
+            Self::NextTurn { player, .. } => {
+                EffectExpiry::NextTurnEnd(viewer(super::seat_name(PlayerId { seat: player })?)?)
+            }
+            Self::SourceField { .. } => EffectExpiry::SourceLeavesField,
+        })
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -105,5 +118,15 @@ impl TurnInterval {
     }
     pub(super) const fn pending(self) -> bool {
         !matches!(self, Self::Finished)
+    }
+
+    pub(super) fn observed(self) -> Result<Option<EffectInterval>> {
+        Ok(match self {
+            Self::Waiting { player, .. } => Some(EffectInterval::NextTurn(viewer(
+                super::seat_name(PlayerId { seat: player })?,
+            )?)),
+            Self::Active(_) => Some(EffectInterval::CurrentTurn),
+            Self::Finished => None,
+        })
     }
 }

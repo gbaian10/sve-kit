@@ -1,6 +1,8 @@
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::Frame;
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::{
     Action, CostChange, CostKind, DurationEnd, Effect, EffectId, Expr, InstallationSubjects,
     InstallationTime, Instruction, Int, Selector, TimeAnchor,
@@ -16,6 +18,7 @@ pub(in crate::game) struct CostState {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct CostModifier {
+    origin_record: super::observation::EffectOrigin,
     effect: u64,
     execution: u64,
     timestamp: u64,
@@ -312,6 +315,8 @@ impl Game {
                 .checked_add(1)
                 .ok_or_else(|| invalid("cost effect identities exhausted"))?;
         }
+        let origin_record =
+            super::observation::EffectOrigin::capture(self, execution, &instruction.source)?;
         for (id, reference) in &subjects {
             let state = self
                 .state
@@ -328,6 +333,7 @@ impl Game {
                 };
             }
             state.effects.push(CostModifier {
+                origin_record: origin_record.clone(),
                 effect: installed.0,
                 execution: execution.id.0,
                 timestamp: execution.timestamp,
@@ -426,5 +432,47 @@ impl Game {
                 .retain(|effect| effect.end != EffectEnd::Turn(turn));
             !state.effects.is_empty()
         });
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Observation reads the same generation-bound cost layers."
+)]
+impl Game {
+    pub(super) fn observed_cost_effects(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{InstalledChange, NumberChange};
+        let object = self.object(holder)?;
+        self.state
+            .ir_cost
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+            .into_iter()
+            .flat_map(|state| &state.effects)
+            .map(|effect| {
+                Ok(InstalledEffect {
+                    source: effect.origin_record.observed(self, perspective),
+                    expires: effect.end.observed()?,
+                    main_live: true,
+                    intervals: vec![],
+                    active: true,
+                    change: InstalledChange::Cost {
+                        kind: if effect.evolution {
+                            CostKind::Evolution
+                        } else {
+                            CostKind::Play
+                        },
+                        change: match effect.change {
+                            Change::Delta(amount) => NumberChange::Add(amount),
+                            Change::Set(amount) => NumberChange::Set(amount),
+                        },
+                    },
+                })
+            })
+            .collect()
     }
 }

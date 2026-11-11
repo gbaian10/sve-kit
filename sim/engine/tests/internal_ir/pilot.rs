@@ -1,4 +1,8 @@
 use super::*;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::EffectExpiry;
+use sve_engine::game::player::observation::InstalledChange;
+use sve_engine::game::player::observation::ObservedZone;
 
 pub(super) fn pilot(id: u64) -> Located<Node> {
     instruction(
@@ -104,6 +108,20 @@ fn pilot_keeps_token_kind_and_repeated_instruction_preserves_modifications() {
             pilot(3),
         ],
     );
+    let observed = board.observe(Viewer::P1).unwrap();
+    let card = &observed.players[0]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card;
+    assert_eq!(card.properties.kind, "フォロワー・トークン");
+    let effects = &card.properties.state.as_ref().unwrap().effects;
+    assert!(effects.iter().any(|effect| effect.active
+        && effect.change == InstalledChange::Pilot
+        && effect.expires == EffectExpiry::TurnEnd));
+
     assert!(
         matches!(&result.receipts[&ReceiptId(1)], InstructionOutcome::Piloted(subjects) if subjects.len()==1)
     );

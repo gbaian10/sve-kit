@@ -7,6 +7,9 @@
 
 pub(super) mod pilot;
 
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
+
 use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::dice as ir_dice;
@@ -65,6 +68,7 @@ impl Change {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Modifier {
+    origin_record: super::observation::EffectOrigin,
     effect: u64,
     timestamp: u64,
     execution: u64,
@@ -76,16 +80,18 @@ struct Modifier {
     life: Option<Change>,
 }
 
+impl Modifier {
+    fn active(&self) -> bool {
+        self.enabled && (self.main_live || self.intervals.iter().copied().any(TurnInterval::active))
+    }
+}
+
 impl NumericState {
     fn effective(&self, damage: i64) -> Result<(i64, i64, i64)> {
         let mut effects = self
             .effects
             .iter()
-            .filter(|effect| {
-                effect.enabled
-                    && (effect.main_live
-                        || effect.intervals.iter().copied().any(TurnInterval::active))
-            })
+            .filter(|effect| effect.active())
             .collect::<Vec<_>>();
         // Frozen subjects and operands cannot change another layer's applicability or operation.
         effects.sort_by_key(|effect| effect.timestamp);
@@ -606,6 +612,8 @@ impl Game {
         };
         let (attack, life) = changes(execution, self, patch)?;
         let end = EffectEnd::at(self, execution, &expires.end)?;
+        let origin_record =
+            super::observation::EffectOrigin::capture(self, execution, &instruction.source)?;
         let effect = EffectId(self.state.next_ir_effect);
         let mut plans = Vec::new();
         for subject in subjects {
@@ -653,6 +661,7 @@ impl Game {
                 value => value,
             };
             state.effects.push(Modifier {
+                origin_record: origin_record.clone(),
                 effect: effect.0,
                 timestamp: execution.timestamp,
                 execution: execution.id.0,
@@ -902,4 +911,51 @@ fn number(state: &serde_json::Value, field: &str) -> Result<i64> {
 fn add(left: i64, right: i64) -> Result<i64> {
     left.checked_add(right)
         .ok_or_else(|| invalid("numeric addition overflow"))
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Observation uses installed numeric layers without recalculating them."
+)]
+impl Game {
+    pub(super) fn observed_numeric_effects(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{InstalledChange, NumberChange};
+        let Some(state) = self.numeric_state(holder) else {
+            return Ok(vec![]);
+        };
+        let change = |value| match value {
+            Change::Add(amount) => NumberChange::Add(amount),
+            Change::Set(amount) => NumberChange::Set(amount),
+        };
+        let mut result = Vec::new();
+        if let Some(pilot) = &state.pilot {
+            result.push(pilot.observed(self, perspective)?);
+        }
+        for effect in &state.effects {
+            result.push(InstalledEffect {
+                source: effect.origin_record.observed(self, perspective),
+                expires: effect.end.observed()?,
+                main_live: effect.main_live,
+                intervals: effect
+                    .intervals
+                    .iter()
+                    .copied()
+                    .map(TurnInterval::observed)
+                    .collect::<Result<Vec<_>>>()?
+                    .into_iter()
+                    .flatten()
+                    .collect(),
+                active: effect.active(),
+                change: InstalledChange::Numeric {
+                    attack: effect.attack.map(change),
+                    life: effect.life.map(change),
+                },
+            });
+        }
+        Ok(result)
+    }
 }

@@ -1,12 +1,15 @@
 //! Later grants survive both Box and ability removal (CR 5.31.2.1, 10.9.1.6).
+
 use super::duration::EffectEnd;
 use super::grant::GrantOrigin;
 use super::{Execution, Game, InstructionOutcome, Result, Selector, unsupported};
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::ability_suppression::supported;
 use crate::ir::events::timing::opponent;
 use crate::ir::{
-    Action, BoxPilotMode, Duration, DurationEnd, ExecutionRef, Instruction, ObjectOperand,
-    ObjectRef, TimeAnchor, TimestampBasis,
+    AbilitySource, Action, BoxPilotMode, Duration, DurationEnd, ExecutionRef, Instruction,
+    ObjectOperand, ObjectRef, TimeAnchor, TimestampBasis,
 };
 use alloc::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
@@ -19,6 +22,7 @@ pub(in crate::game) struct SuppressionState {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Suppression {
+    origin_record: super::observation::EffectOrigin,
     end: EffectEnd,
     boxed: bool,
     origins: BTreeSet<GrantOrigin>,
@@ -125,6 +129,7 @@ impl Game {
             },
             duration,
             true,
+            &instruction.source,
         )?;
         execution
             .receipts
@@ -144,7 +149,8 @@ impl Game {
         else {
             return Err(unsupported("ability removal instruction"));
         };
-        let affected = self.suppress_abilities(execution, subjects, duration, false)?;
+        let affected =
+            self.suppress_abilities(execution, subjects, duration, false, &instruction.source)?;
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Installed(affected));
@@ -157,6 +163,7 @@ impl Game {
         subjects: &Selector,
         duration: &Duration,
         boxed: bool,
+        source: &AbilitySource,
     ) -> Result<Vec<ObjectRef>> {
         let members = execution.objects(self, subjects)?;
         let [reference] = members.as_slice() else {
@@ -167,6 +174,7 @@ impl Game {
         let mut affected = vec![];
         if object.zone == "field" && object.generation == reference.generation.0 {
             let effect = Suppression {
+                origin_record: super::observation::EffectOrigin::capture(self, execution, source)?,
                 end: EffectEnd::at(self, execution, &duration.end)?,
                 boxed,
                 // Underlying grants remain captured when another box currently suppresses them.
@@ -213,5 +221,35 @@ impl Game {
                 .retain(|effect| effect.end != EffectEnd::Turn(turn));
             !state.effects.is_empty()
         });
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Suppression observation uses the active generation-bound entries."
+)]
+impl Game {
+    pub(super) fn observed_suppression_effects(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::InstalledChange;
+        self.suppression_state(holder)
+            .into_iter()
+            .flat_map(|state| &state.effects)
+            .map(|effect| {
+                Ok(InstalledEffect {
+                    source: effect.origin_record.observed(self, perspective),
+                    expires: effect.end.observed()?,
+                    main_live: true,
+                    intervals: vec![],
+                    active: true,
+                    change: InstalledChange::AbilityRemoval {
+                        boxed: effect.boxed,
+                    },
+                })
+            })
+            .collect()
     }
 }

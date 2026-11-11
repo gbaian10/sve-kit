@@ -1,11 +1,15 @@
 //! Printed amulets become followers for one turn without changing physical identity.
+
 use super::{EffectEnd, Execution, Game, InstructionOutcome, NumericState, Result, unsupported};
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::{Action, BoxPilotMode, DurationEnd, Instruction, ObjectOperand, TimeAnchor};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(super) struct State {
+    origin_record: super::super::observation::EffectOrigin,
     end: EffectEnd,
     kind: Option<Value>,
     attack: Value,
@@ -68,6 +72,11 @@ impl Game {
                     return Err(unsupported("pilot would replace a live numeric base"));
                 }
                 let prior = State {
+                    origin_record: super::super::observation::EffectOrigin::capture(
+                        self,
+                        execution,
+                        &instruction.source,
+                    )?,
                     end,
                     kind: object.state.get("card_type").cloned(),
                     attack: object.state["power"].clone(),
@@ -143,4 +152,18 @@ impl Game {
 
 fn printed_number(value: &Value) -> Option<i64> {
     value.as_i64().or_else(|| value.as_str()?.parse().ok())
+}
+
+impl State {
+    pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Result<InstalledEffect> {
+        use crate::game::player::observation::InstalledChange;
+        Ok(InstalledEffect {
+            source: self.origin_record.observed(game, perspective),
+            expires: self.end.observed()?,
+            main_live: true,
+            intervals: vec![],
+            active: true,
+            change: InstalledChange::Pilot,
+        })
+    }
 }

@@ -1,4 +1,9 @@
 use super::*;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::EffectExpiry;
+use sve_engine::game::player::observation::InstalledChange;
+use sve_engine::game::player::observation::NumberChange;
+use sve_engine::game::player::observation::ObservedZone;
 
 fn program(set: bool) -> WellFormedCardProgram {
     program_with(set, false, false)
@@ -54,6 +59,43 @@ fn source_evolution_delta_and_set_change_only_its_actual_rule_payment() {
         while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
             game.resume_internal_card().unwrap();
         }
+        let observed = game.observe(Viewer::P2).unwrap();
+        let field = observed.players[0]
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap();
+        let effect = field.cards[0]
+            .card
+            .properties
+            .state
+            .as_ref()
+            .unwrap()
+            .effects
+            .iter()
+            .find(|effect| {
+                matches!(
+                    effect.change,
+                    InstalledChange::Cost {
+                        kind: CostKind::Evolution,
+                        ..
+                    }
+                )
+            })
+            .unwrap();
+        assert!(effect.active);
+        assert_eq!(effect.expires, EffectExpiry::TurnEnd);
+        assert_eq!(
+            effect.change,
+            InstalledChange::Cost {
+                kind: CostKind::Evolution,
+                change: if set {
+                    NumberChange::Set(0)
+                } else {
+                    NumberChange::Add(-1)
+                }
+            }
+        );
         for (holder, pp) in [("s", 0_u8), ("u", 1)] {
             let mut attempt = game.clone();
             let before = attempt.projection(View::Referee).unwrap()["P1"]["pp"]["current"]
