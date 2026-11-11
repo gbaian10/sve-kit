@@ -114,7 +114,8 @@ pub(in crate::game) struct CardRuntime {
         BTreeMap<(String, u64, String, usize, AbilityId), AbilityInstanceId>,
     pub(in crate::game::internal) keyword_instances:
         BTreeMap<(String, u64, super::grant::GrantOrigin, AbilityId), AbilityInstanceId>,
-    pub(in crate::game::internal) granted_definitions: BTreeMap<(String, AbilityId), Ability>,
+    pub(in crate::game::internal) granted_definitions:
+        BTreeMap<(String, AbilityId), admission::PlannedAbility>,
     links: BTreeMap<(u64, u64, u64, u64), AssociationId>,
     quotas: BTreeMap<(AbilityInstanceId, ConsumptionPoint), (TurnId, u64)>,
     mode_uses: Vec<ModeUse>,
@@ -356,6 +357,18 @@ impl Game {
         card_no: &str,
         card: &WellFormedCardProgram,
     ) -> Result<()> {
+        let admitted = admission::compile_card(self, card_no, card)?;
+        Arc::make_mut(&mut self.card_runtime.definitions)
+            .cards
+            .insert(card_no.into(), Arc::new(admitted));
+        Ok(())
+    }
+
+    pub(in crate::game::internal) fn check_internal_card(
+        &self,
+        card_no: &str,
+        card: &WellFormedCardProgram,
+    ) -> Result<()> {
         let base_print = self.catalog.face(card_no, 0)?;
         let base_face = self.printed_face_id(card_no, 0)?;
         check_base_face(base_print, pilot_face(card, &base_face.0))?;
@@ -444,9 +457,6 @@ impl Game {
             )?;
             play::check(ability, &located.source)?;
         }
-        Arc::make_mut(&mut self.card_runtime.definitions)
-            .cards
-            .insert(card_no.into(), Arc::new(card.clone()));
         Ok(())
     }
 
@@ -631,7 +641,7 @@ impl Game {
                 "activated ability quota exhausted".into(),
             ));
         }
-        self.start_internal_ability(ability.definition.node, context, source, false, published)
+        self.start_internal_ability(ability.definition, context, source, false, published)
     }
 
     pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {

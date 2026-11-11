@@ -1,7 +1,7 @@
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, Expr, Instruction, MoveMethod, Nat, Selector, TokenAllocation, TokenSpec,
-    TokenTemplate, TokenTemplateId, TransformOutcome, ZoneKind,
+    Action, Instruction, MoveMethod, Selector, TokenAllocation, TokenTemplateId, TransformOutcome,
+    ZoneKind,
 };
 
 fn specification(action: &Action) -> Option<(&Selector, &TokenTemplateId)> {
@@ -96,18 +96,15 @@ impl Game {
                     })
                 })
                 .count();
-            let specs = [TokenSpec {
-                template: TokenTemplate::Fixed {
-                    template: template.clone(),
-                },
-                count: Expr::Literal(Nat(u64::try_from(count).map_err(invalid)?)),
-            }];
-            ids.extend(
-                self.allocate_token_specs(execution, instruction, &specs, ZoneKind::Ex, player)?
-                    .ok_or_else(|| {
-                        invalid("single-template transformation requested a capacity choice")
-                    })?,
-            );
+            let requests = [(template.0.clone(), u64::try_from(count).map_err(invalid)?)];
+            let super::tokens::TokenAllocation::Created(created) =
+                self.allocate_token_requests(&requests, ZoneKind::Ex, player)?
+            else {
+                return Err(invalid(
+                    "single-template transformation requested a capacity choice",
+                ));
+            };
+            ids.extend(created);
         }
         let created = self.commit_token_objects(execution, ZoneKind::Ex, &ids)?;
         execution.receipts.insert(

@@ -1,10 +1,11 @@
 //! Movement observers separate the event subject from their live or departed source information.
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventHeader, EventPattern, EventPayload,
-    EventSnapshotPolicy, Frame, Game, LeaveFieldEvent, LimitSpec, Located, Object,
-    PendingOccurrence, Result, RuntimeZoneRef, SnapshotId, SourceInformation, TriggerAggregation,
-    TriggerCondition, ZoneKind, invalid, optional_payment, player_id, unsupported,
+    EventSnapshotPolicy, Frame, Game, LeaveFieldEvent, LimitSpec, Object, PendingOccurrence,
+    Result, RuntimeZoneRef, SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition,
+    ZoneKind, invalid, optional_payment, player_id, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::history_turn::source_link::SourceLink;
@@ -161,7 +162,7 @@ impl Game {
         )
     }
 
-    fn movement_observers(&self, exit: bool) -> Result<Vec<(String, Vec<Located<Ability>>)>> {
+    fn movement_observers(&self, exit: bool) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
             program
                 .card()

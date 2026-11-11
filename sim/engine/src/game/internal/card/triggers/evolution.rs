@@ -2,8 +2,9 @@
 use super::{Cause, Game, Result, SnapshotId, player_id, unsupported};
 use crate::game::Frame;
 use crate::game::internal::SubjectHistoryEvent;
+use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
-use crate::ir::{Ability, AbilityOrigin, KeywordId, Located};
+use crate::ir::{Ability, AbilityOrigin, KeywordId};
 use crate::ir::{
     Characteristics, EventPattern, EventPayload, EvolutionState, EvolveEvent, ExecutionId,
     TriggerCondition,
@@ -32,7 +33,7 @@ pub(in crate::game) struct EvolutionPlan {
     reason = "Evolution shares the authority's rule commit boundary."
 )]
 impl Game {
-    fn evolution_observers(&self) -> Result<Vec<(String, Vec<Located<Ability>>)>> {
+    fn evolution_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         self.field_ids()
             .into_iter()
             .map(|id| {

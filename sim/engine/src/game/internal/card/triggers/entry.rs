@@ -5,11 +5,12 @@ use super::{
     Game, PlayerId, Result, SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition,
     ZoneKind, invalid, player_id, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::{Frame, Object};
 use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
-use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, Located};
+use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -116,7 +117,7 @@ fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
 )]
 impl Game {
     /// Cemetery cards observe only through abilities active in the cemetery.
-    fn entry_observers(&self) -> Result<Vec<(String, Vec<Located<Ability>>)>> {
+    fn entry_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         let mut holders = self.field_ids();
         holders.extend(self.zone_ids("P1", "cemetery"));
         holders.extend(self.zone_ids("P2", "cemetery"));

@@ -1,5 +1,5 @@
 //! Effective printed definitions are resolved once at the catalogue boundary.
-use super::{Ability, Game, Located, Result, invalid, player_id, printed_origin};
+use super::{Game, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
 use crate::ir::names;
 use crate::ir::{
@@ -93,7 +93,7 @@ impl Game {
     pub(in crate::game::internal) fn internal_printed_abilities(
         &self,
         holder: &str,
-    ) -> Result<Vec<Located<Ability>>> {
+    ) -> Result<Vec<super::super::admission::PlannedAbility>> {
         let object = self.object(holder)?;
         let field = object.zone == "field";
         let ub_enabled = self.internal_ub_enabled(holder)?;
@@ -112,7 +112,7 @@ impl Game {
     pub(in crate::game::internal) fn internal_characteristic_abilities(
         &self,
         holder: &str,
-    ) -> Result<Vec<Located<Ability>>> {
+    ) -> Result<Vec<super::super::admission::PlannedAbility>> {
         let object = self.object(holder)?;
         if self.card_runtime.is_empty() {
             if object.state["silenced"] != true {
@@ -141,7 +141,7 @@ impl Game {
         {
             return Ok(Vec::new());
         }
-        Ok(program
+        program
             .card()
             .abilities
             .iter()
@@ -151,8 +151,8 @@ impl Game {
                         .is_ok_and(|ordinal| ordinal == face)
                 })
             })
-            .cloned()
-            .collect())
+            .map(|ability| program.ability(ability))
+            .collect::<Result<Vec<_>>>()
     }
 
     pub(in crate::game) fn internal_printed_name_aliases(

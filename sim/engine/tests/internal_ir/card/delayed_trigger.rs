@@ -259,3 +259,85 @@ fn a_returned_and_replayed_target_is_a_new_generation_in_the_same_turn() {
     assert_eq!(state["P1"]["hand"], json!([]));
     assert_eq!(state["turn"]["active"], "P1");
 }
+
+#[test]
+fn a_delayed_token_body_keeps_its_plan_when_its_callback_id_matches_a_printed_ability() {
+    let mut delay = delayed();
+    delay["delayed"]["do"] = json!([{"create":{"token":"unit-spell","to":"ex"}}]);
+    let mut document = tree(&delay);
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] =
+        json!([delay, {"destroy":{"ref":"enemy"}}]);
+    let lowered = lowerer().lower(&document).unwrap();
+    let mut definition = lowered["unit-follower"].card().clone();
+    let Node::Instruction { instruction } =
+        &definition.abilities[0].node.body.as_ref().unwrap().steps[0].node
+    else {
+        panic!("delay instruction");
+    };
+    let printed_id = AbilityId(instruction.id.0);
+    definition.abilities[0].node.id = printed_id;
+    let program = WellFormedCardProgram::check(definition).unwrap();
+    let (snapshot, keywords, effects) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-spell" {
+                row["faces"][0]["card_type"] = json!("スペル・トークン");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "delayed-plan",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("s", printed_id, PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("formal target");
+    };
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["ex"],
+        json!([])
+    );
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("delayed callback");
+    };
+    assert_eq!(options.len(), 1);
+    let result = resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap(),
+    );
+    assert_eq!(result.source.definition, printed_id);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["ex"].as_array().unwrap().len(), 1);
+    assert_eq!(view["P2"]["field"], json!([]));
+}

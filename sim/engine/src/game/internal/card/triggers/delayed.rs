@@ -17,7 +17,7 @@ pub(in crate::game::internal) struct Installed {
     turn: u64,
     holder: String,
     source: RuntimeAbilitySource,
-    ability: Located<Ability>,
+    ability: super::super::super::admission::PlannedAbility,
     information: SourceInformation,
     card: String,
     position: u64,
@@ -81,7 +81,11 @@ impl Game {
             definition: AbilityId(instruction.id.0),
             ..original
         };
-        let ability = callback(instruction, source)?;
+        let ability = execution
+            .plan
+            .as_ref()
+            .ok_or_else(|| invalid("delayed execution has no admitted plan"))?
+            .delayed(instruction, callback(instruction, source)?)?;
         self.card_runtime.delayed.push(Installed {
             turn: self.state.schedule.current()?,
             holder,

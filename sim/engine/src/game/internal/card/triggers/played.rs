@@ -220,7 +220,7 @@ impl Game {
             .card_runtime
             .granted_definitions
             .values()
-            .any(|ability| filter(ability).is_some())
+            .any(|ability| filter(&ability.node).is_some())
         {
             return Ok(());
         }

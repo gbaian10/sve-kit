@@ -4,7 +4,6 @@ mod dynamic;
 pub(super) mod equipment;
 
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
-use alloc::sync::Arc;
 
 pub(super) use capacity::CapacityWait;
 
@@ -81,6 +80,40 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
         .then_some((tokens, zone))
 }
 
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct TokenPlan {
+    instruction: Instruction,
+    destination: ZoneRef,
+    counts: Vec<dynamic::CountPlan>,
+}
+impl TokenPlan {
+    pub(in crate::game::internal) fn compile(instruction: &Instruction) -> Result<Self> {
+        let (tokens, destination) = specification(&instruction.action)
+            .ok_or_else(|| unsupported("token creation shape"))?;
+        Ok(Self {
+            instruction: instruction.clone(),
+            destination: destination.clone(),
+            counts: tokens
+                .iter()
+                .map(|token| dynamic::CountPlan::compile(&token.count))
+                .collect::<Result<_>>()?,
+        })
+    }
+    pub(in crate::game::internal) const fn instruction(&self) -> &Instruction {
+        &self.instruction
+    }
+}
+
+pub(super) enum TokenAllocation {
+    Created(Vec<String>),
+    Capacity {
+        prints: Vec<String>,
+        names: Vec<String>,
+        choices: Vec<Vec<String>>,
+        available: usize,
+    },
+}
+
 pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
     let Expr::Compute(operation) = name else {
         return false;
@@ -129,7 +162,7 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
                 let program = definitions
                     .cards
                     .get(&card)
-                    .map(Arc::as_ref)
+                    .map(|card| card.checked())
                     .or_else(|| {
                         definitions
                             .current
@@ -176,8 +209,8 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        let (_, destination) = specification(&instruction.action)
-            .ok_or_else(|| unsupported("token creation shape"))?;
+        let plan = execution.token_plan(instruction)?;
+        let destination = &plan.destination;
         let ids = if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
             ids
         } else {
@@ -202,7 +235,6 @@ impl Game {
         execution: &mut Execution,
         control: &Control,
     ) -> Result<()> {
-        check_each(control)?;
         if player_stages::procedure(control).is_some() {
             return self.internal_nonchoice_player_stages(execution, control);
         }
@@ -234,8 +266,8 @@ impl Game {
         else {
             return Err(invalid("token stage instruction"));
         };
-        let (_, destination) = specification(&instruction.action)
-            .ok_or_else(|| unsupported("token creation shape"))?;
+        let plan = execution.token_plan(instruction)?;
+        let destination = &plan.destination;
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
         let result = (|| {
@@ -290,30 +322,14 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<Option<Vec<String>>> {
-        let (tokens, destination) = specification(&instruction.action)
-            .ok_or_else(|| unsupported("token creation shape"))?;
-        let actor = execution.player(self, &destination.player)?;
-        self.allocate_token_specs(execution, instruction, tokens, destination.kind, actor)
-    }
-
-    pub(super) fn allocate_token_specs(
-        &mut self,
-        execution: &mut Execution,
-        instruction: &Instruction,
-        tokens: &[TokenSpec],
-        destination: ZoneKind,
-        actor: PlayerId,
-    ) -> Result<Option<Vec<String>>> {
-        let seat = seat_name(actor)?;
-        let zone = if destination == ZoneKind::Field {
-            "field"
-        } else {
-            "ex"
+        let plan = execution.token_plan(instruction)?;
+        let actor = execution.player(self, &plan.destination.player)?;
+        let Action::Token { tokens, .. } = &plan.instruction.action else {
+            return Err(invalid("token plan action"));
         };
-        let available = self.token_capacity(seat, zone)?;
-        let mut requested = Vec::new();
-        for token in tokens {
-            let count = dynamic::count(execution, self, &token.count)?;
+        let mut requests = Vec::new();
+        for (token, count) in tokens.iter().zip(&plan.counts) {
+            let count = count.evaluate(execution, self)?;
             let name = match &token.template {
                 TokenTemplate::Fixed { template } => template.0.clone(),
                 TokenTemplate::Name { name, .. } => execution.name(self, name)?.0,
@@ -327,24 +343,20 @@ impl Game {
                 }
             ) && self.catalog.face(&card, 0)?["card_type"] != "フォロワー・トークン"
             {
-                // CR 9.1.2.3 / 1.3.2: a name cannot create a token of a different printed kind.
+                // CR 9.1.2.3 / 1.3.2 constrains a named template by its printed kind.
                 continue;
             }
-            check_template(self, &name, destination)?;
-            if !self.card_runtime.is_loaded(&card) {
-                return Err(unsupported("created token requires an admitted whole card"));
-            }
-            // At most five identical names can contribute to any capacity-limited combination.
-            requested.extend(vec![card; usize::try_from(count.min(5)).map_err(invalid)?]);
+            requests.push((name, count));
         }
-        let prints = self.unique_crest_creations(&requested, zone, seat)?;
-        let selected = if prints.len() > available {
-            let names = prints
-                .iter()
-                .map(|card| self.token_name(card))
-                .collect::<Result<Vec<_>>>()?;
-            let choices = token_combinations(&names, available)?;
-            if choices.len() > 1 {
+        let destination = plan.destination.kind;
+        match self.allocate_token_requests(&requests, destination, actor)? {
+            TokenAllocation::Created(ids) => Ok(Some(ids)),
+            TokenAllocation::Capacity {
+                prints,
+                names,
+                choices,
+                available,
+            } => {
                 self.internal_token_capacity_wait(
                     execution,
                     CapacityWait {
@@ -357,7 +369,50 @@ impl Game {
                         available,
                     },
                 )?;
-                return Ok(None);
+                Ok(None)
+            }
+        }
+    }
+
+    pub(super) fn allocate_token_requests(
+        &mut self,
+        requests: &[(String, u64)],
+        destination: ZoneKind,
+        actor: PlayerId,
+    ) -> Result<TokenAllocation> {
+        let seat = seat_name(actor)?;
+        let zone = if destination == ZoneKind::Field {
+            "field"
+        } else {
+            "ex"
+        };
+        let available = self.token_capacity(seat, zone)?;
+        let mut requested = Vec::new();
+        for (name, count) in requests {
+            let card = self.catalog.token_print(name)?;
+            check_template(self, name, destination)?;
+            if !self.card_runtime.is_loaded(&card) {
+                return Err(unsupported("created token requires an admitted whole card"));
+            }
+            requested.extend(vec![
+                card;
+                usize::try_from((*count).min(5)).map_err(invalid)?
+            ]);
+        }
+        let prints = self.unique_crest_creations(&requested, zone, seat)?;
+        let selected = if prints.len() > available {
+            let names = prints
+                .iter()
+                .map(|card| self.token_name(card))
+                .collect::<Result<Vec<_>>>()?;
+            let choices = token_combinations(&names, available)?;
+            if choices.len() > 1 {
+                return Ok(TokenAllocation::Capacity {
+                    prints,
+                    names,
+                    choices,
+                    available,
+                });
             }
             let chosen = choices
                 .first()
@@ -366,7 +421,8 @@ impl Game {
         } else {
             prints
         };
-        self.internal_create_prints(&selected, seat).map(Some)
+        self.internal_create_prints(&selected, seat)
+            .map(TokenAllocation::Created)
     }
 
     fn commit_tokens(

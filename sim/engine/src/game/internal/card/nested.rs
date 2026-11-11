@@ -1,6 +1,6 @@
 use super::{
-    Ability, AbilityKind, Context, Execution, Game, Generation, PlayerId, Result, invalid,
-    printed_origin, seat_name, unsupported,
+    AbilityKind, Context, Execution, Game, Generation, PlayerId, Result, invalid, printed_origin,
+    seat_name, unsupported,
 };
 use crate::game::int;
 use crate::game::internal::{InstructionOutcome, player_id};
@@ -85,7 +85,7 @@ impl Game {
         if nested.is_none()
             && let Some(ability) = ability
         {
-            let mut execution = self.spell_execution(holder, actor, &ability)?;
+            let mut execution = self.spell_execution(holder, actor, &ability.node)?;
             self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
             return Ok(execution);
         }
@@ -117,6 +117,7 @@ impl Game {
             execution.captures(
                 self,
                 &ability
+                    .node
                     .play
                     .as_ref()
                     .ok_or_else(|| invalid("missing Spell play"))?
@@ -139,7 +140,7 @@ impl Game {
         self.object_mut(holder)?.state["entered_from"] = serde_json::json!(object.zone);
         execution.context.generation = Generation(self.object(holder)?.generation);
         if let Some(ability) = ability {
-            let source = self.internal_card_source(holder, ability.id, actor)?;
+            let source = self.internal_card_source(holder, ability.node.id, actor)?;
             execution.bind_source(self, source)?;
             self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
         } else {
@@ -148,7 +149,10 @@ impl Game {
         Ok(execution)
     }
 
-    fn card_play_ability(&self, holder: &str) -> Result<Option<Ability>> {
+    fn card_play_ability(
+        &self,
+        holder: &str,
+    ) -> Result<Option<super::super::admission::PlannedAbility>> {
         match self.object_type(holder)? {
             "フォロワー" | "アミュレット" | "フォロワー・トークン" | "アミュレット・トークン" =>
             {
@@ -177,8 +181,8 @@ impl Game {
         let [located] = abilities.as_slice() else {
             return Err(unsupported("one printed Spell per card"));
         };
-        let ability = located.node.clone();
-        let (face, _) = printed_origin(&ability.source.origin)?;
+        let ability = definition.ability(located)?;
+        let (face, _) = printed_origin(&ability.node.source.origin)?;
         if self.printed_face_ordinal(&object.card, face)? != 0 {
             return Err(unsupported("Spell belongs to another face"));
         }

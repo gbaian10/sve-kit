@@ -7,7 +7,7 @@ use crate::ir::{
     Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
     EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand,
     ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan,
-    TimeAnchor, TriggerCondition, ZoneKind, granted_cost, printed_keywords,
+    TimeAnchor, TriggerCondition, ZoneKind, granted_cost,
 };
 use crate::ir::{RideDriveOperation, TextProvider, UsageReference};
 use alloc::collections::BTreeSet;
@@ -31,12 +31,12 @@ struct KeywordGrant {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct EffectiveAbility {
-    pub definition: Located<Ability>,
+    pub definition: super::admission::PlannedAbility,
     pub grant: Option<GrantOrigin>,
 }
 
-impl From<Located<Ability>> for EffectiveAbility {
-    fn from(definition: Located<Ability>) -> Self {
+impl From<super::admission::PlannedAbility> for EffectiveAbility {
+    fn from(definition: super::admission::PlannedAbility) -> Self {
         Self {
             definition,
             grant: None,
@@ -45,7 +45,7 @@ impl From<Located<Ability>> for EffectiveAbility {
 }
 
 impl Deref for EffectiveAbility {
-    type Target = Located<Ability>;
+    type Target = super::admission::PlannedAbility;
     fn deref(&self) -> &Self::Target {
         &self.definition
     }
@@ -94,17 +94,16 @@ impl GrantOrigin {
         }
     }
 
-    pub(in crate::game::internal) fn drain_ability(&self) -> Located<Ability> {
+    pub(in crate::game::internal) fn drain_ability(
+        &self,
+    ) -> Result<super::admission::PlannedAbility> {
         let provider = self.provider();
-        Located {
-            node: printed_keywords::drain_definition(
-                AbilityId(provider.ability),
-                ScopeId(provider.ability),
-                InstructionId(1),
-                &provider.span,
-            ),
-            source: provider.span.clone(),
-        }
+        super::admission::drain_ability(
+            AbilityId(provider.ability),
+            ScopeId(provider.ability),
+            InstructionId(1),
+            &provider.span,
+        )
     }
 
     pub(in crate::game::internal) const fn provider(&self) -> &KeywordProvider {
@@ -370,19 +369,15 @@ impl Game {
                 }
                 if zone == ZoneKind::Field && grant.keywords.contains("single_drive") {
                     let provider = grant.origin.provider();
-                    let definition = printed_keywords::drive_definition(
+                    let definition = super::admission::drive_ability(
                         KeywordId::SingleDrive,
                         AbilityId(provider.ability),
                         ScopeId(provider.ability),
                         InstructionId(1),
                         &provider.span,
-                    )
-                    .ok_or_else(|| invalid("Drive definition"))?;
+                    )?;
                     result.push(EffectiveAbility {
-                        definition: Located {
-                            node: definition,
-                            source: provider.span.clone(),
-                        },
+                        definition,
                         grant: Some(grant.origin.clone()),
                     });
                 }
@@ -392,14 +387,11 @@ impl Game {
                         .granted_definitions
                         .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
                         .ok_or_else(|| invalid("missing installed definition"))?;
-                    if !ability.active_zones.contains(&zone) {
+                    if !ability.node.active_zones.contains(&zone) {
                         continue;
                     }
                     result.push(EffectiveAbility {
-                        definition: Located {
-                            node: ability.clone(),
-                            source: grant.origin.provider().span.clone(),
-                        },
+                        definition: ability.clone(),
                         grant: Some(grant.origin.clone()),
                     });
                 }
@@ -416,10 +408,19 @@ impl Game {
         for (ability, origin) in self.internal_static_grants(holder)? {
             if let GrantedAbility::Definition { ability } = ability {
                 result.push(EffectiveAbility {
-                    definition: Located {
-                        node: *ability,
-                        source: origin.provider().span.clone(),
-                    },
+                    definition: self
+                        .card_runtime
+                        .definitions
+                        .cards
+                        .get(&origin.provider().card)
+                        .ok_or_else(|| invalid("missing static grant provider"))?
+                        .granted(
+                            AbilityId(origin.provider().ability),
+                            &Located {
+                                node: *ability,
+                                source: origin.provider().span.clone(),
+                            },
+                        )?,
                     grant: Some(origin),
                 });
             }
@@ -513,11 +514,7 @@ impl Game {
                         .granted_definitions
                         .get(&(provider.card.clone(), AbilityId(*id)))
                         .ok_or_else(|| invalid("missing exchange observer definition"))?;
-                    let located = Located {
-                        node: definition.clone(),
-                        source: provider.span.clone(),
-                    };
-                    if super::card::payment_dependent(&located) {
+                    if super::card::payment_dependent(definition.located()) {
                         return Ok(true);
                     }
                 }
@@ -542,7 +539,7 @@ impl Game {
             .card_runtime
             .granted_definitions
             .values()
-            .any(|ability| ability.declarations.iter().any(grants_drain))
+            .any(|ability| ability.node.declarations.iter().any(grants_drain))
     }
 
     pub(super) fn internal_drain_grant(&self, holder: &str) -> Result<Option<GrantOrigin>> {
@@ -756,7 +753,17 @@ impl Game {
                 definitions.push(ability.id.0);
                 self.card_runtime.granted_definitions.insert(
                     (origin.provider().card.clone(), ability.id),
-                    *ability.clone(),
+                    execution
+                        .plan
+                        .as_ref()
+                        .ok_or_else(|| invalid("grant execution has no admitted plan"))?
+                        .granted(
+                            Some(instruction),
+                            &Located {
+                                node: *ability.clone(),
+                                source: origin.provider().span.clone(),
+                            },
+                        )?,
                 );
             }
         }
@@ -906,7 +913,7 @@ impl Game {
                         self.card_runtime
                             .granted_definitions
                             .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
-                            .is_some_and(static_cost)
+                            .is_some_and(|ability| static_cost(&ability.node))
                     })
                 })
         })
@@ -934,10 +941,10 @@ impl Game {
                         .granted_definitions
                         .get(&(grant.origin.provider().card.clone(), AbilityId(*id)))
                         .ok_or_else(|| invalid("missing granted cost definition"))?;
-                    if !static_cost(ability) {
+                    if !static_cost(&ability.node) {
                         continue;
                     }
-                    for effect in &ability.declarations {
+                    for effect in &ability.node.declarations {
                         if let Some(amount) = granted_cost::delta(effect) {
                             delta = delta
                                 .checked_add(amount)

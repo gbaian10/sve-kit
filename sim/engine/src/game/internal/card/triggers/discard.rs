@@ -1,11 +1,12 @@
 //! A hand source leaves its generation before observers run, so its authority is captured first.
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
-    Frame, Game, LimitSpec, Located, PendingOccurrence, Result, RuntimeAbilitySource, SnapshotId,
+    Frame, Game, LimitSpec, PendingOccurrence, Result, RuntimeAbilitySource, SnapshotId,
     SourceInformation, TriggerAggregation, TriggerCondition, ZoneKind, invalid, optional_payment,
     player_id, unsupported,
 };
 use crate::game::internal::Execution;
+use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
@@ -157,7 +158,7 @@ impl Game {
         id: &str,
         card_before: ObjectRef,
         player: PlayerId,
-    ) -> Result<Vec<(String, Located<Ability>)>> {
+    ) -> Result<Vec<(String, PlannedAbility)>> {
         let mut observers = Vec::new();
         let mut characters = None;
         let active = player_id(self.active())?;

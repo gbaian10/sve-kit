@@ -88,19 +88,41 @@ pub(super) fn projection(
     Some((receipt, player))
 }
 
-pub(super) fn count(
+#[derive(Clone, Debug)]
+pub(super) enum CountPlan {
+    Literal(u64),
+    PublicZone(Expr<Nat>),
+    DestroyedController(ReceiptReference<DestroyOutcome>, PlayerRef),
+}
+impl CountPlan {
+    pub(super) fn compile(value: &Expr<Nat>) -> Result<Self> {
+        if let Expr::Literal(Nat(count)) = value {
+            return Ok(Self::Literal(*count));
+        }
+        if zone_count(value).is_some() {
+            return Ok(Self::PublicZone(value.clone()));
+        }
+        let (receipt, player) =
+            projection(value).ok_or_else(|| unsupported("destroyed-controller token count"))?;
+        Ok(Self::DestroyedController(receipt.clone(), player.clone()))
+    }
+    pub(super) fn evaluate(&self, execution: &Execution, game: &super::super::Game) -> Result<u64> {
+        match self {
+            Self::Literal(count) => Ok(*count),
+            Self::PublicZone(value) => execution.natural(game, value).map(|value| value.0),
+            Self::DestroyedController(receipt, player) => {
+                destroyed_controller(execution, game, receipt, player)
+            }
+        }
+    }
+}
+
+fn destroyed_controller(
     execution: &Execution,
     game: &super::super::Game,
-    value: &Expr<Nat>,
+    receipt: &ReceiptReference<DestroyOutcome>,
+    player: &PlayerRef,
 ) -> Result<u64> {
-    if let Expr::Literal(Nat(count)) = value {
-        return Ok(*count);
-    }
-    if zone_count(value).is_some() {
-        return execution.natural(game, value).map(|value| value.0);
-    }
-    let (receipt, player) =
-        projection(value).ok_or_else(|| unsupported("destroyed-controller token count"))?;
     let ReceiptLocation::Local { id } = receipt.location() else {
         return Err(unsupported("local destroy result"));
     };

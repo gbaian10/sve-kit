@@ -4,6 +4,7 @@ use super::{
     Game, LimitSpec, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind, invalid,
     optional_payment, player_id, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::{Object, int};
 use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::{ExecutionId, ObjectRef, PlayerId, RuntimeHolder};
@@ -156,7 +157,7 @@ impl Game {
         &mut self,
         event: &EventPayload,
         active: PlayerId,
-    ) -> Result<Vec<(String, super::Located<Ability>)>> {
+    ) -> Result<Vec<(String, PlannedAbility)>> {
         let mut observers = Vec::new();
         for holder in self.field_ids() {
             let (card, _) = self.internal_effective_print(&holder)?;
