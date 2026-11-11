@@ -1,6 +1,7 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{InstalledChange, NumberChange};
 
 fn own_costs(changes: Vec<CostChange>) -> WellFormedCardProgram {
     let source = source("unit-follower");
@@ -420,6 +421,32 @@ fn one_matching_play_consumes_all_stacked_player_discounts() {
     assert!(
         game.legal().unwrap().is_empty(),
         "prototype enumeration cannot bypass a player cost layer"
+    );
+    let observed = game.observe(Viewer::P1).unwrap();
+    let player = observed
+        .players
+        .iter()
+        .find(|player| player.player == Viewer::P1)
+        .unwrap();
+    assert_eq!(
+        player
+            .effects
+            .iter()
+            .filter(|effect| effect.change
+                == InstalledChange::PlayerCost {
+                    change: NumberChange::Add(-1),
+                    limited: true
+                })
+            .count(),
+        2
+    );
+    assert_eq!(observed.costs.cards.len(), 2);
+    assert!(
+        observed
+            .costs
+            .cards
+            .iter()
+            .all(|card| card.cost.total_pp == Some(1))
     );
     game.play_internal_card("first", PlayerId { seat: 1 })
         .unwrap();

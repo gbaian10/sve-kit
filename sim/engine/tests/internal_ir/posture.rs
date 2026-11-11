@@ -1,4 +1,6 @@
 use super::*;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{EffectExpiry, InstalledChange};
 
 fn subjects(scope: u64) -> Selector {
     Selector::Zone {
@@ -112,6 +114,24 @@ fn no_stand_only_blocks_one_rule_start_and_never_effect_stand() {
     for seat in [1, 2] {
         let mut game = board(seat);
         run(&mut game, vec![lock()], seat).unwrap();
+        let viewer = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+        let target = if viewer == Viewer::P1 {
+            Viewer::P2
+        } else {
+            Viewer::P1
+        };
+        let state = rule_observation::field(&game, target, 0);
+        let lock = state
+            .effects
+            .iter()
+            .find(|effect| matches!(effect.change, InstalledChange::NoStand { .. }))
+            .unwrap();
+        assert!(matches!(lock.expires, EffectExpiry::NextStartEnd(_)));
+        assert!(lock.source.is_some());
+        assert!(
+            !lock.active,
+            "the next rule-start restriction is not active during this turn"
+        );
         let mut effect = game.clone();
         run(
             &mut effect,

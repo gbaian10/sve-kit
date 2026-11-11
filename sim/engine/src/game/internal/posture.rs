@@ -1,4 +1,8 @@
 //! Body posture changes share the ordinary mutation and emit facts only for changed members.
+use super::observation::EffectOrigin;
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
+use crate::ir::PlayerId;
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
@@ -11,10 +15,20 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct StandLock {
+    origin: EffectOrigin,
     object: u64,
     generation: u64,
     player: u32,
     after: u64,
+}
+
+impl StandLock {
+    const fn applies(&self, object: u64, generation: u64, player: u32, turn: u64) -> bool {
+        self.object == object
+            && self.generation == generation
+            && self.player == player
+            && turn > self.after
+    }
 }
 
 pub(super) fn check_install(action: &Action) -> Result<()> {
@@ -63,6 +77,46 @@ pub(super) fn check_install(action: &Action) -> Result<()> {
     reason = "Posture instructions mutate the same authoritative Game."
 )]
 impl Game {
+    pub(super) fn observed_stand_locks(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{
+            EffectExpiry, InstalledChange, InstalledEffect, viewer,
+        };
+        let object = self.object(holder)?;
+        let Some(number) = self.state.ir_objects.get(holder) else {
+            return Ok(vec![]);
+        };
+        let now = super::player_id(self.active())
+            .ok()
+            .map(|player| player.seat)
+            .zip(self.state.schedule.current().ok());
+        self.state
+            .ir_no_stand
+            .iter()
+            .filter(|lock| {
+                object.zone == "field"
+                    && lock.object == *number
+                    && lock.generation == object.generation
+            })
+            .map(|lock| {
+                let player = viewer(super::seat_name(PlayerId { seat: lock.player })?)?;
+                Ok(InstalledEffect {
+                    source: lock.origin.observed(self, perspective),
+                    expires: EffectExpiry::NextStartEnd(player),
+                    main_live: true,
+                    intervals: vec![],
+                    active: now.is_some_and(|(active_player, turn)| {
+                        lock.applies(*number, object.generation, active_player, turn)
+                    }),
+                    change: InstalledChange::NoStand { player },
+                })
+            })
+            .collect()
+    }
+
     pub(super) fn internal_posture(
         &mut self,
         execution: &mut Execution,
@@ -159,6 +213,7 @@ impl Game {
                 continue;
             }
             self.state.ir_no_stand.push(StandLock {
+                origin: EffectOrigin::capture(self, execution, &instruction.source)?,
                 object: member.id.0,
                 generation: member.generation.0,
                 player,
@@ -194,12 +249,11 @@ impl Game {
         };
         let player = super::player_id(self.active())?.seat;
         let turn = self.state.schedule.current()?;
-        Ok(self.state.ir_no_stand.iter().any(|lock| {
-            lock.object == *number
-                && lock.generation == object.generation
-                && lock.player == player
-                && turn > lock.after
-        }))
+        Ok(self
+            .state
+            .ir_no_stand
+            .iter()
+            .any(|lock| lock.applies(*number, object.generation, player, turn)))
     }
 
     pub(in crate::game) fn internal_finish_rule_stand(&mut self) -> Result<()> {

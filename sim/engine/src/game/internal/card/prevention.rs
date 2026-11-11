@@ -1,7 +1,12 @@
 use super::super::grant::EffectiveAbility;
+use super::super::observation::{EffectOrigin, ObjectLink};
 use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
+use crate::game::player::ObjectHandle;
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
+use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
     DamageSource, Prevention, Recipients, own_leader, projection, whole_turn_leader_reduction,
@@ -52,6 +57,7 @@ fn damage_source_matches(
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Member {
+    link: ObjectLink,
     id: String,
     generation: u64,
 }
@@ -104,6 +110,7 @@ struct Label {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct PreventionState {
+    origin: EffectOrigin,
     effect: u64,
     execution: u64,
     recipients: Option<Targets>,
@@ -347,6 +354,7 @@ fn frozen(execution: &Execution, game: &Game, members: &[ObjectRef]) -> Result<V
                 return Err(unsupported("non-field prevention subject"));
             }
             Ok(Member {
+                link: ObjectLink::capture(game, id, member.generation.0),
                 id: id.into(),
                 generation: member.generation.0,
             })
@@ -378,6 +386,91 @@ fn source_matches(
     reason = "Prevention shares authoritative damage and duration state."
 )]
 impl Game {
+    fn observed_prevention(
+        &self,
+        perspective: Viewer,
+        effect: &PreventionState,
+    ) -> Result<InstalledEffect> {
+        use crate::game::player::observation::{
+            EffectRecipient, InstalledChange, InstalledEffect, PreventionChange, viewer,
+        };
+        let recipients = effect
+            .recipients
+            .as_ref()
+            .map(|targets| match targets {
+                Targets::Objects(members) => Ok(members
+                    .iter()
+                    .filter_map(|member| self.prevention_member(perspective, member))
+                    .map(EffectRecipient::Card)
+                    .collect()),
+                Targets::Leaders(players) => players
+                    .iter()
+                    .map(|name| {
+                        Ok(EffectRecipient::Leader(viewer(
+                            name.strip_suffix(".leader")
+                                .ok_or_else(|| crate::invalid("prevention leader"))?,
+                        )?))
+                    })
+                    .collect(),
+            })
+            .transpose()?;
+        let sources = effect.sources.as_ref().map(|members| {
+            members
+                .iter()
+                .filter_map(|member| self.prevention_member(perspective, member))
+                .collect()
+        });
+        let live = !effect.end.source_expired(self);
+        Ok(InstalledEffect {
+            source: effect.origin.observed(self, perspective),
+            expires: effect.end.observed()?,
+            main_live: live,
+            intervals: vec![],
+            active: live && effect.remaining != Some(0),
+            change: InstalledChange::Prevention {
+                kind: match effect.kind {
+                    Kind::Any => DamageKind::Any,
+                    Kind::Combat => DamageKind::Combat,
+                    Kind::Ability => DamageKind::Ability,
+                },
+                change: match effect.rewrite {
+                    Rewrite::Prevent => PreventionChange::Prevent,
+                    Rewrite::Add(amount) => PreventionChange::Add(amount),
+                },
+                remaining: effect.remaining,
+                recipients,
+                sources,
+            },
+        })
+    }
+
+    fn prevention_member(&self, perspective: Viewer, member: &Member) -> Option<ObjectHandle> {
+        member.link.observed_public(self, perspective)
+    }
+
+    pub(in crate::game::internal) fn observed_card_preventions(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        let object = self.object(holder)?;
+        self.state.ir_preventions.iter().filter(|effect| {
+            let matches = |members: &[Member]| members.iter().any(|member| member.id == holder && member.generation == object.generation);
+            object.zone == "field" && (matches!(&effect.recipients, Some(Targets::Objects(members)) if matches(members)) || effect.sources.as_ref().is_some_and(|members| matches(members)))
+        }).map(|effect| self.observed_prevention(perspective,effect)).collect()
+    }
+
+    pub(in crate::game::internal) fn observed_leader_preventions(
+        &self,
+        perspective: Viewer,
+        player: Viewer,
+    ) -> Result<Vec<InstalledEffect>> {
+        self.state.ir_preventions.iter().filter(|effect| {
+            let target = format!("{}.leader", seat(player));
+            matches!(&effect.recipients, Some(Targets::Leaders(players)) if players.contains(&target)) && (player == perspective || effect.origin.observed(self,perspective).is_some())
+        }).map(|effect| self.observed_prevention(perspective,effect)).collect()
+    }
+
     pub(in crate::game::internal) fn internal_install_prevention(
         &mut self,
         execution: &mut Execution,
@@ -439,6 +532,7 @@ impl Game {
                 .checked_add(1)
                 .ok_or_else(|| crate::invalid("prevention identities exhausted"))?;
             self.state.ir_preventions.push(PreventionState {
+                origin: EffectOrigin::capture(self, execution, &instruction.source)?,
                 effect,
                 execution: execution.id.0,
                 recipients,

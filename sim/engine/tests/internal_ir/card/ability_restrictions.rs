@@ -1,5 +1,7 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{EffectExpiry, InstalledChange};
 
 fn restriction(except_evolution: bool) -> Value {
     let mut predicate = json!({"kind":"activated"});
@@ -54,6 +56,20 @@ fn activation_prohibition_follows_evolution_and_leaves_other_copies_independent(
         let actor = PlayerId { seat };
         let mut game = evolution::position_with_decks(seat, &base, &form, true);
         resolved(game.activate_internal_card("s", lock, actor).unwrap());
+        let viewer = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+        let state = rule_observation::field(&game, viewer, 0);
+        let effect = state
+            .effects
+            .iter()
+            .find(|effect| matches!(effect.change, InstalledChange::AbilityRestriction { .. }))
+            .unwrap();
+        assert_eq!(
+            effect.change,
+            InstalledChange::AbilityRestriction {
+                except_evolution: true
+            }
+        );
+        assert_eq!(effect.expires, EffectExpiry::TurnEnd);
         game.resume_internal_card().unwrap();
         let before = exact_authority(&game);
         game.activate_internal_card("s", lock, actor).unwrap_err();

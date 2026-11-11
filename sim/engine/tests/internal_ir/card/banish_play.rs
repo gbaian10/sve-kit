@@ -1,6 +1,8 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::InstalledChange;
 use sve_engine::ir::lowering::LoweringError;
 
 fn permission() -> Value {
@@ -96,6 +98,22 @@ fn banish_play_permission_keeps_normal_payment_owner_and_resolution_cleanup() {
         .unwrap_err();
     assert_eq!(game.projection(View::Referee).unwrap(), before);
     install(&mut game, &programs);
+    let observation = game.observe(Viewer::P1).unwrap();
+    let player = observation
+        .players
+        .iter()
+        .find(|player| player.player == Viewer::P1)
+        .unwrap();
+    let permission = player
+        .effects
+        .iter()
+        .find(|effect| effect.change == InstalledChange::BanishPlay)
+        .unwrap();
+    assert!(permission.source.is_some());
+    assert!(
+        permission.source.as_ref().unwrap().holder.is_none(),
+        "a departed provider has no current link"
+    );
     for (holder, seat) in [("foreign", 1), ("banished", 2)] {
         let before = game.projection(View::Referee).unwrap();
         game.play_internal_card(holder, PlayerId { seat })

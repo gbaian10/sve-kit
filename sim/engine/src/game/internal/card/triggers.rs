@@ -1,6 +1,10 @@
 //! Authority occurrences share one queue and return to state-based checks after each play.
 use super::super::Slot;
 use super::super::history_turn::subject_count_at;
+use super::super::observation::EffectOrigin;
+use crate::game::player::Viewer;
+use crate::game::player::observation::PendingTrigger;
+use crate::game::player::observation::TriggerTiming;
 use crate::ir::events::banish as banish_header;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::drive as drive_header;
@@ -68,6 +72,7 @@ pub struct PendingOption {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct PendingOccurrence {
+    origin: EffectOrigin,
     id: u64,
     holder: String,
     source: RuntimeAbilitySource,
@@ -181,6 +186,22 @@ const fn is_lastword(ability: &Ability) -> bool {
     reason = "Pending order and departure producers share the authoritative game."
 )]
 impl Game {
+    pub(in crate::game) fn observed_pending(
+        &self,
+        perspective: Viewer,
+    ) -> Result<Vec<PendingTrigger>> {
+        let mut result = self
+            .card_runtime
+            .pending
+            .iter()
+            .filter_map(|pending| pending.observed(self, perspective, None))
+            .collect::<Result<Vec<_>>>()?;
+        if let Some(admission) = &self.card_runtime.admission {
+            result.extend(admission.observed(self, perspective)?);
+        }
+        Ok(result)
+    }
+
     fn pending_header(
         &mut self,
         actor: PlayerId,
@@ -237,7 +258,15 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
         let (card, _) = self.internal_effective_print(holder)?;
+        let origin = EffectOrigin::definition(
+            self,
+            holder,
+            source.holder.generation.0,
+            &ability.located().source,
+            information.publicly_identified(),
+        );
         let mut pending = PendingOccurrence {
+            origin,
             id: self.card_runtime.next_pending,
             holder: holder.into(),
             source,
@@ -786,6 +815,34 @@ impl Game {
 }
 
 impl PendingOccurrence {
+    fn observed(
+        &self,
+        game: &Game,
+        perspective: Viewer,
+        remaining: Option<u64>,
+    ) -> Option<Result<PendingTrigger>> {
+        use crate::game::player::observation::{PendingTrigger, TriggerTiming, viewer};
+        if perspective.player() != self.source.controller && !self.information.publicly_identified()
+        {
+            return None;
+        }
+        let source = self.origin.observed(game, perspective)?;
+        let timing = self
+            .timing
+            .as_ref()
+            .map(trigger_timing)
+            .or_else(|| self.leave.map(|_| TriggerTiming::LeaveField));
+        Some((|| {
+            Ok(PendingTrigger {
+                source,
+                controller: viewer(super::seat_name(self.source.controller)?)?,
+                timing: timing.ok_or_else(|| invalid("missing pending timing"))?,
+                admission_remaining: remaining
+                    .filter(|_| perspective.player() == self.source.controller),
+            })
+        })())
+    }
+
     fn capture_history(&mut self, game: &Game) -> Result<()> {
         use crate::ir::history_turn::{evolution_capture_header, evolution_capture_query};
         use crate::ir::{Capture, CaptureTime, EventContext, Int};
@@ -969,5 +1026,39 @@ fn departure_destination(destination: &str) -> Result<ZoneKind> {
         "banish" => Ok(ZoneKind::Banish),
         "ex" => Ok(ZoneKind::Ex),
         _ => Err(unsupported("departure destination")),
+    }
+}
+
+const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
+    use crate::game::player::observation::TriggerTiming;
+    match event {
+        EventPayload::EnterField { .. } => TriggerTiming::EnterField,
+        EventPayload::EnterEx { .. } => TriggerTiming::EnterEx,
+        EventPayload::LeaveField { .. } => TriggerTiming::LeaveField,
+        EventPayload::Attack { .. } => TriggerTiming::Attack,
+        EventPayload::Evolve { .. } => TriggerTiming::Evolve,
+        EventPayload::Phase { .. } => TriggerTiming::Phase,
+        EventPayload::StatChange { .. } => TriggerTiming::StatChange,
+        EventPayload::Posture { .. } => TriggerTiming::Posture,
+        EventPayload::Destroy { .. } => TriggerTiming::Destroy,
+        EventPayload::UbActivated { .. } => TriggerTiming::UnionBurst,
+        EventPayload::Fused { .. } => TriggerTiming::Fusion,
+        EventPayload::Play { .. } => TriggerTiming::Play,
+        EventPayload::Targeted { .. } => TriggerTiming::Targeted,
+        EventPayload::Resolve { .. } => TriggerTiming::Resolve,
+        EventPayload::Payment { .. } => TriggerTiming::Payment,
+        EventPayload::CounterChange { .. } => TriggerTiming::CounterChange,
+        EventPayload::Discard { .. } => TriggerTiming::Discard,
+        EventPayload::Banish { .. } => TriggerTiming::Banish,
+        EventPayload::Draw { .. } => TriggerTiming::Draw,
+        EventPayload::DriveGained { .. } => TriggerTiming::DriveGained,
+        EventPayload::DriveChecked { .. } => TriggerTiming::DriveChecked,
+        EventPayload::DriveTrigger { .. } => TriggerTiming::DriveTrigger,
+        EventPayload::Dice { .. } => TriggerTiming::Dice,
+        EventPayload::Equip { .. } => TriggerTiming::Equip,
+        EventPayload::Move { .. } => TriggerTiming::Move,
+        EventPayload::Race { .. } => TriggerTiming::Race,
+        EventPayload::LifeChange { .. } => TriggerTiming::LifeChange,
+        EventPayload::Damage { .. } => TriggerTiming::Damage,
     }
 }

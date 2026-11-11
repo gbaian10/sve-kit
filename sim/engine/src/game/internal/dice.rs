@@ -1,5 +1,7 @@
 //! A roll accepts one final value after its instruction-local optional rerolls.
 use super::{Execution, Game, InputDomain, Result, Slot, Wait, invalid, seat_name, unsupported};
+use crate::game::player::observation::DiceHistory;
+use crate::ir::PlayerId;
 use crate::ir::dice as ir_dice;
 use crate::ir::{
     Action, Comparison, Control, DecisionId, DiceEvent, DiceOperation, DieFace, Expr, Instruction,
@@ -74,6 +76,20 @@ pub(super) fn history_count(
     reason = "Dice shares the game's seeded stream and transaction boundary."
 )]
 impl Game {
+    pub(super) fn observed_dice_history(&self) -> Result<Vec<DiceHistory>> {
+        use crate::game::player::observation::{DiceHistory, viewer};
+        self.state
+            .ir_dice_history
+            .iter()
+            .map(|fact| {
+                Ok(DiceHistory {
+                    player: viewer(seat_name(PlayerId { seat: fact.player })?)?,
+                    value: fact.value,
+                })
+            })
+            .collect()
+    }
+
     fn internal_die(&mut self) -> Result<DieFace> {
         match self.state.rng.bounded(6)? {
             0 => Ok(DieFace::One),

@@ -4,6 +4,8 @@
 )]
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::InstalledChange;
 
 const fn own_leader() -> PlayerSet {
     PlayerSet {
@@ -17,7 +19,7 @@ const fn own_leader() -> PlayerSet {
     }
 }
 
-fn install(id: u64, reduction: bool) -> Located<Node> {
+pub(super) fn install(id: u64, reduction: bool) -> Located<Node> {
     let duration = Duration {
         end: DurationEnd::CurrentTurnEnd {},
         anchor: TimeAnchor::Installation {},
@@ -178,6 +180,27 @@ fn replacement_order_preserves_unused_prevention_or_reduction() {
             for reverse in [false, true] {
                 let mut game = game(seat, 0);
                 install_pair(&mut game, seat, false);
+                let viewer = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+                let observation = game.observe(viewer).unwrap();
+                let player = observation
+                    .players
+                    .iter()
+                    .find(|player| player.player == viewer)
+                    .unwrap();
+                assert_eq!(
+                    player
+                        .effects
+                        .iter()
+                        .filter(|effect| matches!(
+                            effect.change,
+                            InstalledChange::Prevention {
+                                remaining: Some(1),
+                                ..
+                            }
+                        ))
+                        .count(),
+                    2
+                );
                 let first = perform(&mut game, seat, amount, reverse);
                 assert!(first.complete);
                 assert!(

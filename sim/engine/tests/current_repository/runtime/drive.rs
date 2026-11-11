@@ -5,6 +5,8 @@
 )]
 use super::*;
 use sve_engine::game::internal::DecisionView;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{InstalledChange, ObservedZone};
 
 // Synthetic icon controls isolate rule ordering from source-image verification; the holders are real current cards.
 
@@ -221,6 +223,18 @@ fn cp03_047_and_p30_critical_only_increases_attack_and_stand_locks_leader_attack
             );
             let result = resolved(answer(&mut game, &q, true, Some(1)));
             assert_eq!(checks(&result).len(), 2_usize);
+            let observation = game.observe(Viewer::P1).unwrap();
+            let ally = &observation
+                .players
+                .iter()
+                .find(|player| player.player == Viewer::P1)
+                .unwrap()
+                .zones
+                .iter()
+                .find(|zone| zone.kind == ObservedZone::Field)
+                .unwrap()
+                .cards[1];
+            assert!(ally.card.properties.state.as_ref().unwrap().effects.iter().any(|effect| effect.active && effect.change == InstalledChange::NoLeaderAttack));
             assert_eq!(
                 game.projection(View::Referee).unwrap()["objects"]["ally"]["acted"],
                 false
