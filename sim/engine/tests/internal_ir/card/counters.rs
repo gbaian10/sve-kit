@@ -100,8 +100,14 @@ fn overflow_and_stale_source_counter_reads_reject_atomically() {
             &json!({"counters":{"test":count}}),
         );
         let before = exact_authority(&game);
-        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        let failure = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
             .unwrap_err();
+        if count == i64::MAX {
+            assert!(matches!(failure, sve_engine::EngineFailure::Invalid(_)));
+        } else {
+            assert!(matches!(failure, sve_engine::EngineFailure::Unsupported(_)));
+        }
         assert_eq!(exact_authority(&game), before);
     }
 }
