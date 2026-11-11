@@ -13,12 +13,12 @@ use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
-    ChoiceDomain, Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int,
-    IntOperation, IntRead, Located, LookOutcome, MemberProjection, MoveDestination, Nat, NatRead,
-    Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
-    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
-    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView,
-    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ChoiceDomain, Control, CounterOperation, Expr, GrantedAbility, Holder, InstallationSubjects,
+    Instruction, Int, IntOperation, IntRead, Located, LookOutcome, MemberProjection,
+    MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
+    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
+    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
+    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -415,10 +415,25 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             Action::Draw { count: amount, .. } => mask_public_number(amount),
             Action::Counter {
                 holder: Holder::Object { object },
+                amount,
+                operation,
                 ..
-            } if matches!(object, ObjectOperand::Bound { .. }) => {
-                // The checked object binding does not grant private reads in other operands.
-                *object = ObjectOperand::SourceHolder {};
+            } => {
+                let bound = if let ObjectOperand::Bound { binding } = object {
+                    Some(*binding)
+                } else {
+                    None
+                };
+                if matches!(object, ObjectOperand::Bound { .. }) {
+                    // The checked holder binding does not authorize the amount's reads.
+                    *object = ObjectOperand::SourceHolder {};
+                }
+                if matches!(
+                    operation,
+                    CounterOperation::Add {} | CounterOperation::Remove {}
+                ) {
+                    mask_counter_natural(amount, bound);
+                }
             }
             Action::Damage {
                 amount, recipients, ..
@@ -1069,4 +1084,103 @@ fn mask_field_entry(value: &mut Expr<Bool>) -> Result<()> {
         _ => {}
     }
     Ok(())
+}
+
+// Counter's natural boundary composes the existing public leaf authorities.
+fn mask_counter_natural(value: &mut Expr<Nat>, bound: Option<Binding<ObjectRef>>) {
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::Counter {
+        holder: Holder::Object { object: ObjectOperand::Bound { binding } }, ..
+    } if Some(*binding) == bound))
+    {
+        // Only the already checked counter holder's binding grants this public read.
+        *value = Expr::Literal(Nat(0));
+        return;
+    }
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            NatOperation::CheckedInt { value: integer } => {
+                mask_counter_number(integer, bound);
+                return;
+            }
+            NatOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                mask_counter_condition(condition, bound);
+                mask_counter_natural(then_value, bound);
+                mask_counter_natural(else_value, bound);
+                return;
+            }
+            NatOperation::ReceiptCount {
+                receipt: receipt @ ObjectReceipt::Fusion { .. },
+                projection,
+                member,
+                predicate,
+            } if super::receipt_counts::check(receipt, *projection, *member, predicate).is_ok() => {
+                *value = Expr::Literal(Nat(0));
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_natural(value);
+}
+
+fn mask_counter_number(value: &mut Expr<Int>, bound: Option<Binding<ObjectRef>>) {
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            IntOperation::FromNat { value: natural } => {
+                mask_counter_natural(natural, bound);
+                return;
+            }
+            IntOperation::Arithmetic { arguments, .. } => {
+                for argument in arguments {
+                    mask_counter_number(argument, bound);
+                }
+                return;
+            }
+            IntOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => {
+                mask_counter_condition(condition, bound);
+                mask_counter_number(then_value, bound);
+                mask_counter_number(else_value, bound);
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_number(value);
+}
+
+fn mask_counter_condition(value: &mut Expr<Bool>, bound: Option<Binding<ObjectRef>>) {
+    if let Expr::Compute(operation) = value {
+        match operation.as_mut() {
+            Predicate::CompareInt { left, right, .. } => {
+                mask_counter_number(left, bound);
+                mask_counter_number(right, bound);
+                return;
+            }
+            Predicate::CompareNat { left, right, .. } => {
+                mask_counter_natural(left, bound);
+                mask_counter_natural(right, bound);
+                return;
+            }
+            Predicate::And { predicates } | Predicate::Or { predicates } => {
+                for predicate in predicates {
+                    mask_counter_condition(predicate, bound);
+                }
+                return;
+            }
+            Predicate::Not { predicate } => {
+                mask_counter_condition(predicate, bound);
+                return;
+            }
+            _ => {}
+        }
+    }
+    mask_public_condition(value);
 }

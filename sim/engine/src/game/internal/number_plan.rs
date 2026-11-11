@@ -12,10 +12,33 @@ use core::convert::identity;
 enum Policy {
     TokenCount(Option<Binding<Nat>>),
     EffectAmount,
+    CounterAmount,
+}
+
+impl Policy {
+    const fn opaque_leaves(self) -> bool {
+        matches!(self, Self::EffectAmount | Self::CounterAmount)
+    }
 }
 
 #[derive(Clone, Debug)]
 pub(super) struct CountPlan(Natural);
+
+#[derive(Clone, Debug)]
+pub(super) struct NaturalAmountPlan(Natural);
+
+impl NaturalAmountPlan {
+    pub(super) fn compile(value: &Expr<Nat>) -> Result<Self> {
+        if matches!(value, Expr::Literal(Nat(count)) if i64::try_from(*count).is_err()) {
+            return Err(unsupported("counter amount exceeds signed representation"));
+        }
+        natural(value, Policy::CounterAmount).map(|checked| Self(checked.plan))
+    }
+
+    pub(super) fn evaluate(&self, execution: &Execution, game: &Game) -> Result<u64> {
+        self.0.evaluate(execution, game)
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
 pub(super) struct AmountPlan {
@@ -134,8 +157,12 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
         Expr::Compute(operation) => match operation.as_ref() {
             NatOperation::CheckedInt { value } => {
                 let checked = integer(value, policy)?;
-                if matches!(policy, Policy::TokenCount(_)) && checked.bounds.lower < 0 {
-                    return Err(unsupported("token count cannot be proved nonnegative"));
+                if policy != Policy::EffectAmount && checked.bounds.lower < 0 {
+                    return Err(unsupported(if matches!(policy, Policy::TokenCount(_)) {
+                        "token count cannot be proved nonnegative"
+                    } else {
+                        "counter amount cannot be proved nonnegative"
+                    }));
                 }
                 let constant = if matches!(policy, Policy::TokenCount(_)) {
                     checked
@@ -162,7 +189,7 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
                     Policy::TokenCount(_) => condition
                         .constant
                         .and_then(|selected| if selected { yes.constant } else { no.constant }),
-                    Policy::EffectAmount => condition
+                    Policy::EffectAmount | Policy::CounterAmount => condition
                         .constant
                         .zip(yes.constant)
                         .zip(no.constant)
@@ -185,14 +212,10 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
                     None,
                 )
             }
-            _ if policy == Policy::EffectAmount => {
-                (Natural::Effect(Box::new(expression.clone())), None)
-            }
+            _ if policy.opaque_leaves() => (Natural::Effect(Box::new(expression.clone())), None),
             _ => return Err(unsupported("token natural count operation")),
         },
-        _ if policy == Policy::EffectAmount => {
-            (Natural::Effect(Box::new(expression.clone())), None)
-        }
+        _ if policy.opaque_leaves() => (Natural::Effect(Box::new(expression.clone())), None),
         _ => return Err(unsupported("token natural count reader")),
     };
     Ok(CheckedNatural { plan, constant })
@@ -252,7 +275,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
                     Policy::TokenCount(_) => condition
                         .constant
                         .and_then(|selected| if selected { yes.constant } else { no.constant }),
-                    Policy::EffectAmount => condition
+                    Policy::EffectAmount | Policy::CounterAmount => condition
                         .constant
                         .zip(yes.constant)
                         .zip(no.constant)
@@ -268,7 +291,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
                     constant,
                 })
             }
-            _ if policy == Policy::EffectAmount => Ok(CheckedInteger {
+            _ if policy.opaque_leaves() => Ok(CheckedInteger {
                 plan: Integer::Effect(Box::new(expression.clone())),
                 bounds: Bounds {
                     lower: i64::MIN,
@@ -278,7 +301,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
             }),
             _ => Err(unsupported("token integer count operation")),
         },
-        _ if policy == Policy::EffectAmount => Ok(CheckedInteger {
+        _ if policy.opaque_leaves() => Ok(CheckedInteger {
             plan: Integer::Effect(Box::new(expression.clone())),
             bounds: Bounds {
                 lower: i64::MIN,
@@ -321,7 +344,7 @@ fn arithmetic(
         (Policy::TokenCount(_), result) => result.transpose().map_err(|error| {
             unsupported(&format!("constant token arithmetic overflow: {error}"))
         })?,
-        (Policy::EffectAmount, result) => result.and_then(Result::ok),
+        (Policy::EffectAmount | Policy::CounterAmount, result) => result.and_then(Result::ok),
     };
     let first = checked
         .first()
@@ -342,7 +365,7 @@ fn arithmetic(
     })();
     let bounds = match (policy, bounds) {
         (Policy::TokenCount(_), value) => value?,
-        (Policy::EffectAmount, value) => value.unwrap_or(Bounds {
+        (Policy::EffectAmount | Policy::CounterAmount, value) => value.unwrap_or(Bounds {
             lower: i64::MIN,
             upper: i64::MAX,
         }),
@@ -422,14 +445,10 @@ fn boolean(expression: &Expr<Bool>, policy: Policy) -> Result<CheckedBoolean> {
                     constant,
                 )
             }
-            _ if policy == Policy::EffectAmount => {
-                (Boolean::Effect(Box::new(expression.clone())), None)
-            }
+            _ if policy.opaque_leaves() => (Boolean::Effect(Box::new(expression.clone())), None),
             _ => return Err(unsupported("token count predicate")),
         },
-        _ if policy == Policy::EffectAmount => {
-            (Boolean::Effect(Box::new(expression.clone())), None)
-        }
+        _ if policy.opaque_leaves() => (Boolean::Effect(Box::new(expression.clone())), None),
         _ => return Err(unsupported("token count boolean reader")),
     };
     Ok(CheckedBoolean { plan, constant })
