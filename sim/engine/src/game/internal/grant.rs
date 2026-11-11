@@ -487,6 +487,72 @@ impl Game {
         }
     }
 
+    pub(in crate::game::internal) fn cached_effective_instance(
+        &self,
+        holder: &str,
+        ability: &EffectiveAbility,
+    ) -> Result<Option<AbilityInstanceId>> {
+        let generation = self.object(holder)?.generation;
+        Ok(if let Some(origin) = &ability.grant {
+            self.card_runtime
+                .keyword_instances
+                .get(&(holder.into(), generation, origin.clone(), ability.node.id))
+                .copied()
+        } else {
+            let (card, face) = self.internal_effective_print(holder)?;
+            self.card_runtime
+                .instances
+                .get(&(holder.into(), generation, card, face, ability.node.id))
+                .copied()
+        })
+    }
+
+    pub(in crate::game::internal) fn activation_text_source(
+        &self,
+        holder: &str,
+        ability: &EffectiveAbility,
+        perspective: Viewer,
+    ) -> Result<Option<EffectSource>> {
+        use crate::game::player::observation::seat;
+        let generation = self.object(holder)?.generation;
+        let known = self.state.knowledge.get(seat(perspective));
+        let Some(origin) = &ability.grant else {
+            let (face, line) = super::card::printed_origin(&ability.node.source.origin)?;
+            return Ok(Some(EffectSource {
+                card: self.internal_effective_print(holder)?.0,
+                face: Some(face.0.clone()),
+                line: Some(line.0),
+                holder: known.and_then(|knowledge| knowledge.handle(holder)),
+            }));
+        };
+        if let Some(grant) = self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == generation)
+            .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
+        {
+            return Ok(grant.origin_record.observed(self, perspective));
+        }
+        let provider = origin.provider();
+        let link = known
+            .and_then(|knowledge| knowledge.handle(&provider.holder))
+            .filter(|_| {
+                self.player_knows_object(perspective, &provider.holder)
+                    && self
+                        .state
+                        .objects
+                        .get(&provider.holder)
+                        .is_some_and(|object| object.generation == provider.generation)
+            });
+        Ok(link.map(|handle| EffectSource {
+            card: provider.card.clone(),
+            face: Some(provider.span.face.clone()),
+            line: Some(u64::from(provider.span.line)),
+            holder: Some(handle),
+        }))
+    }
+
     pub(in crate::game) fn internal_granted_keywords(
         &self,
         holder: &str,

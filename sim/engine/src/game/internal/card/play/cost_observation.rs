@@ -349,6 +349,16 @@ fn play_cost(play: &PlayState, game: &Game, execution: &Execution) -> CostSummar
     reason = "Cost observations read the same card context and play state as payment."
 )]
 impl Game {
+    pub(in crate::game::internal) fn prepared_declaration_cost(
+        &self,
+        execution: &Execution,
+    ) -> Option<CostSummary> {
+        execution
+            .play
+            .as_ref()
+            .map(|play| play_cost(play, self, execution))
+    }
+
     pub(in crate::game) fn observed_costs(&self, perspective: Viewer) -> Result<CostObservation> {
         let mut cards = Vec::new();
         let mut candidates = Vec::new();

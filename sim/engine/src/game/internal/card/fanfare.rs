@@ -50,8 +50,10 @@ impl Game {
         holder: &str,
         actor: PlayerId,
         published: &PublishedKnowledge,
+        declared: &mut bool,
     ) -> Result<super::CardPlay> {
         let mut execution = self.prepare_card_execution(holder, actor, None)?;
+        *declared = true;
         self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
