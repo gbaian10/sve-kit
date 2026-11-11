@@ -360,7 +360,7 @@ fn failure_after_final_partition_restores_execution_and_real_rng() {
         games[0]
             .answer_internal(PlayerId { seat }, token, Answer::SearchPartition(handles))
             .unwrap_err();
-        super::super::transactions::assert_restored(&games[0], &origin);
+        super::super::transactions::assert_reverted(&games[0], &origin);
         games[1] = super::super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
@@ -579,6 +579,6 @@ fn failed_final_nonempty_segment_restores_even_the_prior_hand_movement() {
                 .contains("draw request exceeds internal execution limit"),
             "{error}"
         );
-        super::super::transactions::assert_restored(&game, &origin);
+        super::super::transactions::assert_reverted(&game, &origin);
     }
 }

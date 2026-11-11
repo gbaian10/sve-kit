@@ -220,7 +220,7 @@ impl Game {
         self.numeric_evolution_allowed(&source, false)?;
         let before = self.internal_characteristics(&source)?;
         let mut frame = execution.frame();
-        self.reveal(from_ref(&resource), "all", &frame, false);
+        self.reveal(from_ref(&resource), "all", &frame, false)?;
         self.apply_evolution(&source, &resource, 0, 0, &mut frame)?;
         let event = EvolveEvent {
             subject: execution.reference(self, &source)?,

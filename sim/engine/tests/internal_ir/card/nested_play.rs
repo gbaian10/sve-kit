@@ -5,6 +5,8 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::Observation;
 
 fn tree(side: &str, child: &str, extra_cost: bool, stale: bool) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -49,6 +51,7 @@ enum Scenario {
     FullField,
     TwoLayers,
     ParentDeparture,
+    ReturnMaterial { fail: bool },
 }
 
 #[expect(
@@ -87,13 +90,56 @@ fn use_parent_source_cost(programs: &mut BTreeMap<String, WellFormedCardProgram>
     );
 }
 
-fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
+fn return_child_material(programs: &mut BTreeMap<String, WellFormedCardProgram>, fail: bool) {
+    let mut child = programs.remove("unit-spell").unwrap().card().clone();
+    let payment = child.card_play_costs[0].node.additional.as_mut().unwrap();
+    let CostSpec::Ordered { steps } = &mut payment.node.play.costs else {
+        panic!("ordered additional payment");
+    };
+    let first = &mut steps[0];
+    let Action::Move {
+        objects, movement, ..
+    } = &mut first.instruction.action
+    else {
+        panic!("material movement payment");
+    };
+    movement.to = MoveDestination::Owners {
+        zone: OwnerZone::Hand,
+    };
+    let action = Action::Posture {
+        objects: objects.clone(),
+        posture: Posture::Acted,
+    };
+    if fail {
+        let mut second = first.clone();
+        second.instruction.id = InstructionId(900);
+        second.instruction.receipt = ReceiptId(900);
+        second.instruction.action = action;
+        steps.push(second);
+    }
+    programs.insert(
+        "unit-spell".into(),
+        WellFormedCardProgram::check(child).unwrap(),
+    );
+}
+
+fn build_programs(
+    side: &str,
+    child: &str,
+    scenario: Scenario,
+) -> BTreeMap<String, WellFormedCardProgram> {
     let extra_cost = matches!(
         scenario,
-        Scenario::AdditionalCost { .. } | Scenario::MandatoryReveal { .. }
+        Scenario::AdditionalCost { .. }
+            | Scenario::MandatoryReveal { .. }
+            | Scenario::ReturnMaterial { .. }
     );
     let stale = matches!(scenario, Scenario::StaleSelection);
     let mut input = tree(side, child, extra_cost, stale);
+    if matches!(scenario, Scenario::ReturnMaterial { .. }) {
+        input["cards"]["unit-spell"]["abilities"][0]["spell"]["targets"][0]["from"]["who"] =
+            json!("self");
+    }
     if matches!(scenario, Scenario::MandatoryReveal { .. }) {
         input["cards"]["unit-spell"]["abilities"][1]["play"]["additional_cost"] =
             json!({"reveal":{"sel":{"who":"self","zone":"hand","kind":"follower"},"n":1}});
@@ -115,9 +161,17 @@ fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, Abi
             &BTreeMap::from([("unit-spell".into(), Nat(1)), ("unit-leaf".into(), Nat(1))]),
         )
         .unwrap();
+    if let Scenario::ReturnMaterial { fail } = scenario {
+        return_child_material(&mut programs, fail);
+    }
     if matches!(scenario, Scenario::ParentDeparture) {
         use_parent_source_cost(&mut programs);
     }
+    programs
+}
+
+fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
+    let programs = build_programs(side, child, scenario);
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -125,7 +179,10 @@ fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, Abi
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"hidden","card":"unit-follower"}]);
     }
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
-    if matches!(scenario, Scenario::AdditionalCost { material: true }) {
+    if matches!(
+        scenario,
+        Scenario::AdditionalCost { material: true } | Scenario::ReturnMaterial { .. }
+    ) {
         initial["players"]["P1"]["zones"]["field"]
             .as_array_mut()
             .unwrap()
@@ -377,6 +434,7 @@ fn effect_play_keeps_unrequested_author_shapes_closed() {
 #[test]
 fn full_field_cancels_the_child_entry_without_undoing_the_parent() {
     let (mut game, definition) = build("opp", "unit-follower", false, Scenario::FullField);
+    let observations = [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap());
     let outer = question(
         game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
             .unwrap(),
@@ -387,6 +445,12 @@ fn full_field_cancels_the_child_entry_without_undoing_the_parent() {
     assert_eq!(state["P2"]["cemetery"], json!(["child"]));
     assert_eq!(state["P1"]["leader"]["life"], 31_u8);
     assert_eq!(state["P1"]["pp"]["current"], 2_u8);
+    for before in &observations {
+        let after = game.observe(before.viewer).unwrap();
+        assert_eq!(after.players[0].zones, before.players[0].zones);
+        assert_eq!(after.players[1].zones, before.players[1].zones);
+        assert_eq!(after.remembered, before.remembered);
+    }
     assert!(
         !result
             .progress
@@ -394,6 +458,70 @@ fn full_field_cancels_the_child_entry_without_undoing_the_parent() {
             .iter()
             .any(|fact| matches!(fact, Fact::CardPlayed { .. }))
     );
+}
+
+#[test]
+fn cancelled_child_cannot_retire_a_handle_only_revoked_by_unpublished_payment() {
+    for fail in [false, true] {
+        let (mut game, definition) = build(
+            "self",
+            "unit-spell",
+            false,
+            Scenario::ReturnMaterial { fail },
+        );
+        let outer = question(
+            game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let CardPlay::Awaiting(materials) = select(&mut game, &outer) else {
+            panic!("child material question");
+        };
+        assert!(matches!(materials.domain, InputDomain::CostMaterials(_)));
+        let victim = question(
+            game.answer_internal_card(
+                materials.actor,
+                materials.token,
+                Answer::CostMaterials(vec![0]),
+            )
+            .unwrap(),
+        );
+        let viewer = Viewer::P2;
+        let before = game.observe(viewer).unwrap();
+        let follower_handle = |observation: &Observation| {
+            observation.players[0]
+                .zones
+                .iter()
+                .flat_map(|zone| &zone.cards)
+                .find(|entry| entry.card.properties.card == "unit-follower")
+                .unwrap()
+                .card
+                .handle
+                .clone()
+        };
+        let result = resolved(select(&mut game, &victim));
+        let played = result
+            .progress
+            .facts
+            .iter()
+            .any(|fact| matches!(fact, Fact::CardPlayed { .. }));
+        let after = game.observe(viewer).unwrap();
+        let state = game.projection(View::Referee).unwrap();
+        if fail {
+            assert!(!played);
+            assert_eq!(follower_handle(&after), follower_handle(&before));
+            assert_eq!(state["P1"]["hand"], json!([]));
+        } else {
+            assert!(played);
+            assert_eq!(state["P1"]["hand"], json!(["material"]));
+            assert!(
+                after.players[0]
+                    .zones
+                    .iter()
+                    .flat_map(|zone| &zone.cards)
+                    .all(|entry| entry.card.handle != follower_handle(&before))
+            );
+        }
+    }
 }
 
 #[test]

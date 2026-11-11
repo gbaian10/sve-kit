@@ -4,6 +4,7 @@ use super::{
 };
 use crate::game::int;
 use crate::game::internal::{InstructionOutcome, player_id};
+use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::{advance_entry, nested_play};
 pub(in crate::game::internal) mod ability;
 use crate::ir::{
@@ -294,6 +295,7 @@ impl Game {
     pub(in crate::game::internal) fn cancel_nested_card(
         &mut self,
         execution: &mut Execution,
+        published: &PublishedKnowledge,
     ) -> Result<()> {
         let nested = execution
             .nested
@@ -302,7 +304,7 @@ impl Game {
         let epoch = self.state.ir_epoch;
         // Dispatch owns the live source; its temporary binding is outside child rollback.
         let active_source = self.card_runtime.active_source;
-        *self = *nested.before;
+        self.restore_player_state(*nested.before, published)?;
         self.state.ir_epoch = self.state.ir_epoch.max(epoch);
         self.card_runtime.active_source = active_source;
         let mut parent = nested.parent;

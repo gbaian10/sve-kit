@@ -728,7 +728,7 @@ fn late_resume_failure_restores_the_entire_execution_and_guards() {
         Answer::Stepwise(StepwiseAnswer::Continue),
     )
     .unwrap_err();
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted(&game, &origin);
 }
 
 #[cfg(feature = "runner")]

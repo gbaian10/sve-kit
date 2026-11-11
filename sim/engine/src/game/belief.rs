@@ -87,6 +87,10 @@ impl Game {
                 serde_json::from_value(continuation["prompt"].clone()).map_err(invalid)?;
         }
 
+        let handle_key = game
+            .state
+            .rng
+            .fork(&format!("player-object-handles/{seat}"));
         if let Some(knowledge) = game.state.knowledge.get_mut(seat) {
             for known in list(&packet["known_cards"]) {
                 knowledge.seen.insert(string(&known["id"]).into(), known);
@@ -95,7 +99,7 @@ impl Game {
                 .iter()
                 .filter_map(Value::as_str)
             {
-                knowledge.locate(id);
+                knowledge.locate(id, &handle_key)?;
             }
             knowledge.carried = list(&packet["knowledge"]["carried"]);
         }

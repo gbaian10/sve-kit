@@ -615,7 +615,7 @@ impl Game {
                         .state
                         .knowledge
                         .get(actor)
-                        .is_some_and(|knowledge| knowledge.located().contains(&object.id));
+                        .is_some_and(|knowledge| knowledge.knows_location(&object.id));
                 let private_hand = object.zone == "hand"
                     && object.owner == actor
                     && object.controller == object.owner
@@ -687,7 +687,7 @@ impl Game {
                         .state
                         .knowledge
                         .get(actor)
-                        .is_some_and(|knowledge| knowledge.located().contains(&object.id))
+                        .is_some_and(|knowledge| knowledge.knows_location(&object.id))
                     && (execution.is_private_look_target(objects, member)
                         || execution.public_look_member(self, objects, member)?);
                 let resolving_source = method == MoveMethod::Put
@@ -874,7 +874,7 @@ impl Game {
                     .state
                     .knowledge
                     .get(seat)
-                    .is_some_and(|knowledge| knowledge.located().contains(&object.id))
+                    .is_some_and(|knowledge| knowledge.knows_location(&object.id))
                 && (execution.is_private_look_target(objects, member)
                     || execution.public_look_member(self, objects, member)?)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
@@ -885,7 +885,7 @@ impl Game {
                     self.state
                         .knowledge
                         .get(*viewer)
-                        .is_some_and(|known| known.located().contains(&object.id))
+                        .is_some_and(|known| known.knows_location(&object.id))
                 });
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && (object.zone == "ex"
@@ -1071,7 +1071,7 @@ impl Game {
                     .state
                     .knowledge
                     .get(seat)
-                    .is_some_and(|knowledge| knowledge.located().contains(id))
+                    .is_some_and(|knowledge| knowledge.knows_location(id))
             {
                 return Err(unsupported(
                     "observed move requires current own-deck evidence",

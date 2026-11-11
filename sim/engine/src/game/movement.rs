@@ -287,9 +287,9 @@ impl Game {
         self.move_objects(ids, "evolve_deck", None, None, &frame)?;
         for id in ids {
             self.object_mut(id)?.state["face_up"] = json!(true);
-            for seat in ["P1", "P2"] {
-                self.learn(seat, id, true);
-            }
+        }
+        for seat in ["P1", "P2"] {
+            self.learn_members(seat, ids, true)?;
         }
         Ok(())
     }

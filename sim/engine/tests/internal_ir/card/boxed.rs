@@ -5,6 +5,8 @@
 )]
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::ObservedZone;
 
 fn target() -> Value {
     json!({"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1})
@@ -173,6 +175,27 @@ fn box_cutoff_preserves_later_grants_and_expiry_restores_earlier_ones() {
     );
     activate(&mut game, &card, 2);
     assert_eq!(keywords(&game), json!([]));
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observation = game.observe(viewer).unwrap();
+        let zone = observation.players[1]
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap();
+        assert!(zone.cards[0].card.properties.state.as_ref().unwrap().boxed);
+        assert_eq!(
+            zone.cards[0]
+                .card
+                .properties
+                .state
+                .as_ref()
+                .unwrap()
+                .keywords
+                .len(),
+            0
+        );
+    }
+
     assert_eq!(
         game.projection(View::Referee).unwrap()["objects"]["enemy"]["boxed"],
         true
@@ -188,6 +211,23 @@ fn box_cutoff_preserves_later_grants_and_expiry_restores_earlier_ones() {
     let after_expiry = game.projection(View::Referee).unwrap();
     assert_eq!(after_expiry["objects"]["enemy"]["boxed"], false);
     assert_eq!(keywords(&game), json!(["guard", "storm"]));
+    let observation = game.observe(Viewer::P1).unwrap();
+    let zone = observation.players[1]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap();
+    assert!(!zone.cards[0].card.properties.state.as_ref().unwrap().boxed);
+    assert_eq!(
+        zone.cards[0]
+            .card
+            .properties
+            .state
+            .as_ref()
+            .unwrap()
+            .keywords,
+        vec!["guard", "storm"]
+    );
 }
 
 #[test]

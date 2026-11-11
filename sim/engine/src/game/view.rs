@@ -59,7 +59,7 @@ impl Game {
                         self.state
                             .knowledge
                             .get(seat)
-                            .is_some_and(|k| k.located().contains(id))
+                            .is_some_and(|k| k.knows_location(id))
                     });
                     if can_see {
                         let object = self.object(id)?;

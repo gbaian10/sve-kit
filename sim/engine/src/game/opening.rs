@@ -44,9 +44,7 @@ impl Game {
                     .capability(&player.title_code, "opening_ex_resource");
             if start_selection && !self.start_amulets(seat)?.is_empty() {
                 queue.push(json!(seat));
-                for id in self.start_amulets(seat)? {
-                    self.learn(seat, &id, true);
-                }
+                self.learn_members(seat, &self.start_amulets(seat)?, true)?;
             }
             if opening_resources {
                 let frame = Frame {
@@ -195,7 +193,7 @@ impl Game {
         object.generation = object.generation.saturating_add(1);
         object.state["pregame_hidden"] = json!(true);
         object.state["face_up"] = json!(false);
-        self.learn(seat, id, true);
+        self.learn(seat, id, true)?;
         let group = self.group();
         self.emit(
             json!({"kind":"場に出す","object":id,"from":format!("{seat}.deck"),"to":format!("{seat}.field"),"face_up":false}),
@@ -251,12 +249,13 @@ impl Game {
             player.ep = if seat == first { 0 } else { 3 };
             player.sep = 1;
             player.leader["life"] = json!(20_i64);
-            for id in self.zone_ids(seat, "field") {
-                self.object_mut(&id)?.state["pregame_hidden"] = json!(false);
-                self.object_mut(&id)?.state["face_up"] = json!(true);
-                self.learn("P1", &id, true);
-                self.learn("P2", &id, true);
+            let public = self.zone_ids(seat, "field");
+            for id in &public {
+                self.object_mut(id)?.state["pregame_hidden"] = json!(false);
+                self.object_mut(id)?.state["face_up"] = json!(true);
             }
+            self.learn_members("P1", &public, true)?;
+            self.learn_members("P2", &public, true)?;
         }
         self.state.turn["elapsed_turns"][&first] = json!(1_i64);
         self.start_main()

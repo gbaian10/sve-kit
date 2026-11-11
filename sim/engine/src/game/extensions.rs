@@ -217,7 +217,7 @@ impl Game {
             let controller = object.controller.clone();
             if face_up {
                 for viewer in ["P1", "P2"] {
-                    self.learn(viewer, id, true);
+                    self.learn(viewer, id, true)?;
                 }
             } else {
                 for (viewer, knowledge) in &mut self.state.knowledge {
@@ -418,7 +418,7 @@ impl Game {
                 count = count.saturating_add(1);
             }
         }
-        self.reveal(&revealed, "all", frame, false);
+        self.reveal(&revealed, "all", frame, false)?;
         frame
             .bindings
             .insert(string(&node["bind"]).into(), revealed);

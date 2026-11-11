@@ -120,7 +120,7 @@ impl Game {
                     .filter_map(Value::as_str)
                     .map(str::to_owned)
                     .collect::<Vec<_>>();
-                self.reveal(&selected, other(&frame.controller), &frame, false);
+                self.reveal(&selected, other(&frame.controller), &frame, false)?;
                 frame.bindings.insert("search-result".into(), selected);
                 Self::prepend(
                     &mut frame,
@@ -361,14 +361,12 @@ impl Game {
                     .into_iter()
                     .take(count)
                     .collect::<Vec<_>>();
-                for id in &ids {
-                    self.learn(&frame.controller, id, true);
-                }
+                self.learn_members(&frame.controller, &ids, true)?;
                 frame.bindings.insert(string(&node["bind"]).into(), ids);
             }
             "search" => {
                 for id in self.zone_ids(&frame.controller, "deck") {
-                    self.learn(&frame.controller, &id, false);
+                    self.learn(&frame.controller, &id, false)?;
                 }
                 let choices = self
                     .resolution_subsets(node, frame)?
@@ -407,7 +405,7 @@ impl Game {
             }
             "reveal" => {
                 let ids = self.select(&node["subjects"], frame)?;
-                self.reveal(&ids, string(&node["to"]), frame, true);
+                self.reveal(&ids, string(&node["to"]), frame, true)?;
             }
             "modify" => self.modify(node, frame)?,
             "pp" => {
@@ -695,6 +693,7 @@ impl Game {
         pending.extend(self.collect_triggers("field_to_cemetery", &buried, &frame.cause)?);
         pending.extend(self.collect_delayed("field_to_cemetery", &buried, &frame.cause)?);
         let group = self.group();
+        let mut learned: BTreeMap<String, Vec<String>> = BTreeMap::new();
         let mut entered = Vec::new();
         let mut erased = Vec::new();
         let mut advances = Vec::new();
@@ -762,19 +761,7 @@ impl Game {
             {
                 *count = 0;
             }
-            for viewer in ["P1", "P2"] {
-                let was_known = self
-                    .state
-                    .knowledge
-                    .get(viewer)
-                    .is_some_and(|k| k.located().contains(id));
-                if !matches!(destination, "hand" | "deck" | "evolve_deck")
-                    || (owner == viewer && destination == "hand")
-                    || was_known
-                {
-                    self.learn(viewer, id, true);
-                }
-            }
+            self.collect_movement_knowledge(id, owner, destination, &mut learned);
             if previous.zone == "ex"
                 && destination == "banish"
                 && self.catalog.rule_bindings.has_resource("lesson_item")
@@ -790,6 +777,9 @@ impl Game {
             {
                 advances.push(id.clone());
             }
+        }
+        for (viewer, members) in learned {
+            self.learn_members(&viewer, &members, true)?;
         }
         self.internal_commit_departures(typed_departures)?;
         self.internal_numeric_cleanup()?;
@@ -1038,20 +1028,49 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn reveal(&mut self, ids: &[String], to: &str, frame: &Frame, located: bool) {
-        let group = self.group();
-        for id in ids {
-            for seat in ["P1", "P2"] {
-                if to == "all" || seat == to {
-                    self.learn(seat, id, located);
-                }
+    fn collect_movement_knowledge(
+        &self,
+        id: &str,
+        owner: &str,
+        destination: &str,
+        learned: &mut BTreeMap<String, Vec<String>>,
+    ) {
+        for viewer in ["P1", "P2"] {
+            let was_known = self
+                .state
+                .knowledge
+                .get(viewer)
+                .is_some_and(|known| known.knows_location(id));
+            if !matches!(destination, "hand" | "deck" | "evolve_deck")
+                || (owner == viewer && destination == "hand")
+                || was_known
+            {
+                learned.entry(viewer.into()).or_default().push(id.into());
             }
+        }
+    }
+
+    pub(super) fn reveal(
+        &mut self,
+        ids: &[String],
+        to: &str,
+        frame: &Frame,
+        located: bool,
+    ) -> Result<()> {
+        let group = self.group();
+        for seat in ["P1", "P2"] {
+            if to == "all" || seat == to {
+                self.learn_members(seat, ids, located)?;
+            }
+        }
+        for id in ids {
             self.emit(
                 json!({"kind":"公開","object":id,"to":to,"source":frame.source}),
                 &frame.cause,
                 group,
             );
         }
+        Ok(())
     }
 
     pub(super) fn shuffle(&mut self, seat: &str, ids: &[String]) -> Result<()> {

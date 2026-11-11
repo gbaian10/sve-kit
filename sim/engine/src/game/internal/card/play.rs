@@ -5,6 +5,7 @@ use super::{
     admission, int, invalid, seat_name, unsupported,
 };
 use crate::game::internal::{InstructionOutcome, UbHistoryFact, player_id};
+use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
@@ -941,13 +942,14 @@ impl Game {
             return Err(invalid("Quick requires its authority question"));
         }
         let before = self.clone();
+        let published = before.published_knowledge();
         let result = if matches!(
             self.object_type(holder)?,
             "スペル" | "スペル・トークン" | "スペル・アドバンス"
         ) {
-            self.play_internal_spell(holder, actor)
+            self.play_internal_spell(holder, actor, &published)
         } else {
-            self.play_internal_field_card(holder, actor)
+            self.play_internal_field_card(holder, actor, &published)
         };
         self.finish_card_attempt(before, result)
     }
@@ -956,9 +958,10 @@ impl Game {
         &mut self,
         holder: &str,
         actor: PlayerId,
+        published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         let mut execution = self.prepare_card_execution(holder, actor, None)?;
-        self.internal_run(&mut execution)?;
+        self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
 
@@ -1028,6 +1031,7 @@ impl Game {
         context: Context,
         source: RuntimeAbilitySource,
         spell: bool,
+        published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         let mut execution = self.new_card_execution(context)?;
         execution.bind_source(self, source)?;
@@ -1036,7 +1040,7 @@ impl Game {
             self.internal_use_prerequisite(&execution, &play.costs)?;
             execution.captures(self, &play.captures)?;
         }
-        self.run_card_play(execution, ability)
+        self.run_card_play(execution, ability, published)
     }
 
     fn internal_play_counts(&self) -> Result<BTreeMap<u32, (Nat, Nat)>> {
@@ -1146,9 +1150,10 @@ impl Game {
         &mut self,
         mut execution: Execution,
         ability: Ability,
+        published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
-        self.internal_run(&mut execution)?;
+        self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
 

@@ -469,7 +469,7 @@ impl Game {
             })
     }
 
-    pub(super) fn internal_numeric_stat(&self, id: &str, stat: Stat) -> Result<i64> {
+    pub(in crate::game) fn internal_numeric_stat(&self, id: &str, stat: Stat) -> Result<i64> {
         let object = self.object(id)?;
         if object.zone != "field" || !self.object_type(id)?.contains("フォロワー") {
             return Err(unsupported("numeric reads require field followers"));

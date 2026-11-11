@@ -425,7 +425,7 @@ fn successful_after_is_usable_but_reordering_revokes_old_look_authority() {
         revoked
             .answer_internal(PlayerId { seat }, question.token, Answer::Order(vec![0]))
             .unwrap_err();
-        transactions::assert_restored(&revoked, &origin);
+        transactions::assert_reverted(&revoked, &origin);
         assert!(revoked.internal_decision(view(seat)).is_none());
     }
 }

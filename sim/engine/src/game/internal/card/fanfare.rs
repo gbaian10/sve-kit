@@ -3,6 +3,7 @@ use super::{
     PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, invalid, json, seat_name, take,
     unsupported,
 };
+use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -48,9 +49,10 @@ impl Game {
         &mut self,
         holder: &str,
         actor: PlayerId,
+        published: &PublishedKnowledge,
     ) -> Result<super::CardPlay> {
         let mut execution = self.prepare_card_execution(holder, actor, None)?;
-        self.internal_run(&mut execution)?;
+        self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
 
