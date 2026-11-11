@@ -1,15 +1,30 @@
 # Independent rules prototype
 
-Card facts come from the versioned card database snapshot. Effects come from
-`authored/rules/effects/`, validated against `dsl/effects.schema.json` before and after
-macro expansion. Missing and partial programs are rejected. Some declared
-semantics are not executable yet; see
-[docs/sim/engine-status.md](../../docs/sim/engine-status.md).
+Card facts come from the versioned card database snapshot. The engine has two
+effect paths sharing one `Game` and authority state:
 
-`Game` owns resolution, visibility and legal actions. Runner adapters convert
-protocol types. `Replay` owns immutable branches; `Assist` owns sandbox and shadow
-state. AI accepts a player packet and the public catalogue, with no reference to
-the source game.
+- The typed path reads the complete accepted author selection from
+  `authored/rules/author-effects/` and named `effect-bodies/`. DSL Schemas, the
+  Python reader, Rust `ExpandedLowerer`, typed IR and runtime admission exist;
+  syntax validation alone does not establish execution support.
+  `Catalog::from_current_selection` and `Game::from_selected_effects` admit current
+  whole cards. See [the author contract](../../docs/dsl/author-contract-1.0.md).
+- The frozen prototype reads `authored/rules/effects/`, validated against
+  `dsl/effects.schema.json` before and after macro expansion. Runner adapters,
+  the old player packet, AI, `Replay` and `Assist` still use this path. Its shared
+  scenario gate does not establish typed-path coverage.
+
+The player match interface is being built on the typed path. The old
+`decide`/`legal`/`projection`, JSON interpreter, AI and replay prototype are frozen
+for retirement after host migration and replacement validation. Draw, movement,
+combat, turn and terminal primitives still called by typed execution remain
+maintained. The first typed AI uses a basic policy through the player interface;
+search is a separate follow-up. Scope and progress are tracked in
+[#1971](https://github.com/gbaian10/sve-kit/issues/1971); enduring boundaries are in
+[engine status](../../docs/sim/engine-status.md).
+
+The CLI instructions below evaluate the frozen prototype. Some declared semantics
+are not executable; missing and partial programs are rejected.
 
 From the repository root, first generate the pinned JP input used by the prototype.
 Use the `batch_id` in `tests/engine/card-input.json`, absolute input/output paths,
@@ -39,7 +54,8 @@ excess arguments exit with status 2 before input loading or report creation.
 Put `--` before positional arguments if a path starts with a dash.
 
 `all` runs G1 and the three architecture/AI suites. Use `rules` without a selection
-to run all 706 public scenarios, or supply a selection file as the final argument,
+to run every public scenario discovered in `tests/rules-scenarios/`, or supply a
+selection file as the final argument,
 for example the G1 selection:
 
 ```bash
@@ -65,9 +81,12 @@ python3 .github/ci/rust_tests.py
 
 Mutation tests use the same wrapper through the manual `cargo-mutants` hook.
 
-The G1 regression requires all 41 scenarios to pass every checkpoint. The gate
-test requires all 706 public scenarios to pass or be listed in
-`tests/engine/known-failures.yaml`, which is currently empty. Pending choices include
+The G1 regression checks its selected scenarios at every checkpoint; the
+selection is `tests/rules-scenarios/g1-selection.yaml` and its expected count is
+asserted by `sim/engine/tests/shared.rs`. The full gate count is the
+`expected_scenarios` field in `tests/engine/known-failures.yaml`; every discovered
+scenario must pass or exactly match a `known` entry. These are prototype scenario
+counts, separate from typed integration tests and their results. Pending choices include
 each legal parameter combination, and resolution events follow effect completion
 and removal from the resolution zone. Remaining engine errors and open questions
 are tracked in [the engine tracking issue](https://github.com/gbaian10/sve-kit/issues/478).
