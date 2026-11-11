@@ -1,4 +1,5 @@
 use super::super::{Execution, Fact, InstructionOutcome, Result, invalid, unsupported};
+use crate::ir::player_stages;
 use crate::ir::{
     Control, DestroyOutcome, Expr, IntOperation, LkiReason, MemberProjection, MoveMethod,
     MovementReceipt, Nat, NatOperation, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectView,
@@ -134,6 +135,9 @@ pub(super) fn count(
 }
 
 pub(crate) fn check_each(control: &Control) -> Result<()> {
+    if player_stages::procedure(control).is_some() {
+        return Ok(());
+    }
     let Control::EachPlayer {
         players,
         player,

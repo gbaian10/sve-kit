@@ -189,20 +189,32 @@ impl BodyContext<'_> {
         span: &SourceSpan,
         source: &AbilitySource,
     ) -> Result<Node, LoweringError> {
-        let [stage] = each.stages.as_slice() else {
-            return Err(unsupported(path));
-        };
-        let allowed = match stage.as_slice() {
-            [ast::Step::Create(create)] => {
-                create.by.as_ref() == Some(&each.binding)
-                    && create.result.is_none()
-                    && create.bind.is_none()
-            }
-            [ast::Step::Banish(ast::BanishAction::Top { top })] => {
-                matches!(&top.who, ast::DeckHolder::Bound(name) if name == &each.binding)
-            }
+        let legacy = match each.stages.as_slice() {
+            [stage] => match stage.as_slice() {
+                [ast::Step::Create(create)] => {
+                    create.by.as_ref() == Some(&each.binding)
+                        && create.result.is_none()
+                        && create.bind.is_none()
+                }
+                [ast::Step::Banish(ast::BanishAction::Top { top })] => {
+                    matches!(&top.who, ast::DeckHolder::Bound(name) if name == &each.binding)
+                }
+                _ => false,
+            },
             _ => false,
         };
+        let procedure = !each.stages.is_empty() && each.stages.iter().all(|stage| {
+            !stage.is_empty() && stage.iter().all(|step| {
+                matches!(step, ast::Step::Draw(draw)
+                    if matches!(&draw.who, Some(ast::LifeHolder::Bound(name)) if name == &each.binding)
+                        && matches!(draw.n, ast::Number::Literal(0..=10_000)))
+                    || matches!(step, ast::Step::Shuffle(shuffle)
+                        if matches!(&shuffle.who, ast::DeckHolder::Bound(name) if name == &each.binding))
+                    || matches!(step, ast::Step::Move(movement)
+                        if matches!(&movement.r#ref, Some(ast::MoveObjects::Whole(whole)) if matches!(&whole.who, ast::DeckHolder::Bound(name) if name == &each.binding))
+                            && Self::unordered_deck(movement) && movement.result.is_none())
+            })
+        });
         if matches!(
             each.binding.as_str(),
             "self" | "opp" | "turn" | "non_turn" | "current" | "item"
@@ -210,7 +222,7 @@ impl BodyContext<'_> {
             || self.targets.contains_key(&each.binding)
             || self.observations.contains_key(&each.binding)
             || self.searches.contains(&each.binding)
-            || !allowed
+            || !(legacy || procedure)
         {
             return Err(unsupported(path));
         }
@@ -218,15 +230,27 @@ impl BodyContext<'_> {
         self.scope = self.card_allocator.scope(path)?;
         let player = Binding::new(self.allocator.id(path)?, self.scope);
         self.players.insert(each.binding.clone(), player);
-        let body = self.steps(stage, &format!("{path}/each_player/stages/0"), span, source);
+        let mut stages = Vec::new();
+        let result: Result<(), LoweringError> = (|| {
+            for (index, stage) in each.stages.iter().enumerate() {
+                let stage_path = format!("{path}/each_player/stages/{index}");
+                self.scope = self.card_allocator.scope(&stage_path)?;
+                let mut body = self.steps(stage, &stage_path, span, source)?;
+                for step in &mut body.steps {
+                    if let Node::Instruction { instruction } = &mut step.node {
+                        instruction.actor = PlayerRef::Bound { binding: player };
+                    }
+                }
+                stages.push(PlayerStage {
+                    body,
+                    mode: StageMode::NonChoiceSimultaneous {},
+                });
+            }
+            Ok(())
+        })();
         self.players.remove(&each.binding);
         self.scope = parent;
-        let mut body = body?;
-        for step in &mut body.steps {
-            if let Node::Instruction { instruction } = &mut step.node {
-                instruction.actor = PlayerRef::Bound { binding: player };
-            }
-        }
+        result?;
         Ok(Node::Control {
             control: Control::EachPlayer {
                 players: PlayerSet {
@@ -239,10 +263,7 @@ impl BodyContext<'_> {
                     text_quantifier: TextQuantifier::All,
                 },
                 player,
-                stages: vec![PlayerStage {
-                    body,
-                    mode: StageMode::NonChoiceSimultaneous {},
-                }],
+                stages,
                 choice_order: PlayerOrder::TurnPlayerFirst,
             },
         })

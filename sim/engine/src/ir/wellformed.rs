@@ -682,10 +682,10 @@ impl Checker {
             } if *instruction_actor == (PlayerRef::Controller {}) => {
                 self.define(*occurrence, BindingKind::Value)
             }
-            Action::Shuffle { scope, .. }
-                if super::shuffle::action(action)
-                    && instruction_actor == &(PlayerRef::Controller {}) =>
+            Action::Shuffle { deck, scope, .. }
+                if super::shuffle::action(action) && instruction_actor == deck =>
             {
+                self.player(deck)?;
                 if let super::ShuffleScope::Subset { cards } = scope {
                     self.selector(cards)?;
                     let Some(receipt) = super::shuffle::consumed(action) else {

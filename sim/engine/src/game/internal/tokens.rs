@@ -1,3 +1,4 @@
+use crate::ir::player_stages;
 mod capacity;
 mod dynamic;
 pub(super) mod equipment;
@@ -202,6 +203,9 @@ impl Game {
         control: &Control,
     ) -> Result<()> {
         check_each(control)?;
+        if player_stages::procedure(control).is_some() {
+            return self.internal_nonchoice_player_stages(execution, control);
+        }
         if super::movement::player_banish(control).is_some() {
             let previous = self.card_runtime.active_source;
             self.card_runtime.active_source = execution.ability;

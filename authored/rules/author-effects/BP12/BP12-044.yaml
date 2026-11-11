@@ -1,0 +1,41 @@
+cards:
+  BP12-044:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - banish:
+                ref: this
+            - each_player:
+                as: p
+                stages:
+                  - - move:
+                        ref:
+                          who: p
+                          zone:
+                            - hand
+                            - cemetery
+                        to: deck
+                    - shuffle:
+                        who: p
+                  - - draw:
+                        n: 5
+                        who: p
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -7
+                    next_only: true
+                    when_playing:
+                      who: self
+                until: turn
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set

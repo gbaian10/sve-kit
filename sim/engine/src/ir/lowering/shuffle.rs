@@ -7,24 +7,46 @@ use crate::ir::shuffle as shape;
 use crate::ir::{
     Binding, Bool, Cardinality, FollowPermission, Instruction, InstructionContext, InstructionId,
     MoveDestination, MoveReason, MoveSpec, MovementEvent, MovementReceipt, Nat, ObjectOperand,
-    OwnerZone, PlayerRef, PlayerRelation, PlayerSet, Position, RandomnessPolicy, ReceiptId,
-    ReceiptReference, SelectionView, Selector, ShuffleScope, TextQuantifier, ZoneKind,
+    ObjectReceipt, OwnerZone, PlayerRef, PlayerRelation, PlayerSet, Position, RandomnessPolicy,
+    ReceiptId, ReceiptReference, SelectionView, Selector, ShuffleScope, TextQuantifier, ZoneKind,
 };
-
-pub(super) const fn full(value: &ast::Shuffle) -> Action {
-    let ast::SelfPlayer::Controller = value.who;
-    Action::Shuffle {
-        deck: PlayerRef::Controller {},
-        scope: ShuffleScope::FullZone {},
-        randomness: RandomnessPolicy::FreshRequest,
-    }
-}
+use core::slice::from_ref;
 
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Paired instructions share the enclosing lowering scope and allocator."
 )]
 impl BodyContext<'_> {
+    pub(super) fn shuffle(
+        &self,
+        value: &ast::Shuffle,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        Ok(Action::Shuffle {
+            deck: self.return_player(&value.who, path)?,
+            scope: ShuffleScope::FullZone {},
+            randomness: RandomnessPolicy::FreshRequest,
+        })
+    }
+
+    fn return_player(
+        &self,
+        player: &ast::DeckHolder,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        match player {
+            ast::DeckHolder::Side(ast::LeaderSide::Controller) => Ok(PlayerRef::Controller {}),
+            ast::DeckHolder::Bound(name) => self
+                .players
+                .get(name)
+                .map(|binding| PlayerRef::Bound { binding: *binding })
+                .ok_or_else(|| unsupported(path)),
+            ast::DeckHolder::Side(_)
+            | ast::DeckHolder::Group(_)
+            | ast::DeckHolder::OwnerOf { .. } => Err(unsupported(path)),
+        }
+    }
+
     pub(super) const fn unordered_deck(value: &ast::Move) -> bool {
         matches!(value.to, ast::Destination::Deck)
             && (matches!(value.order, Some(ast::MoveOrder::Shuffle))
@@ -39,7 +61,7 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         ability_source: &AbilitySource,
     ) -> Result<Vec<Located<Node>>, LoweringError> {
-        if movement.result.is_some() || movement.top.is_some() {
+        if movement.top.is_some() {
             return Err(unsupported(path));
         }
         let (objects, position) = if matches!(movement.order, Some(ast::MoveOrder::Shuffle)) {
@@ -77,11 +99,36 @@ impl BodyContext<'_> {
             },
             reason: MoveReason::Put,
         };
+        if movement.result.is_some() && shape::whole_return(&movement_action).is_none() {
+            return Err(unsupported(path));
+        }
         let first = self.shuffle_instruction(movement_action, path, source, ability_source)?;
         let Node::Instruction { instruction } = &first.node else {
             return Err(unsupported(path));
         };
         let receipt = instruction.receipt;
+        if movement.result.is_some() {
+            self.receipt_reads.whole_returns.insert(receipt);
+        }
+        if let Some(name) = &movement.result
+            && (self.targets.contains_key(name)
+                || self.players.contains_key(name)
+                || self.receipt_reads.evolutions.contains_key(name)
+                || self.searches.contains(name)
+                || self
+                    .observations
+                    .insert(
+                        name.clone(),
+                        ObjectReceipt::Movement {
+                            receipt: MovementReceipt::Move {
+                                receipt: ReceiptReference::new(receipt),
+                            },
+                        },
+                    )
+                    .is_some())
+        {
+            return Err(unsupported(path));
+        }
         let (action, shuffle_path) = if position.is_some() {
             (
                 Action::Shuffle {
@@ -102,7 +149,7 @@ impl BodyContext<'_> {
             let Some((ast::Step::Shuffle(shuffle), next)) = following else {
                 return Err(unsupported(path));
             };
-            (full(shuffle), next.to_owned())
+            (self.shuffle(shuffle, next)?, next.to_owned())
         };
         Ok(vec![
             first,
@@ -116,23 +163,43 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         Ok(match &movement.r#ref {
-            Some(ast::MoveObjects::Cemetery(whole)) => {
-                let ast::SelfPlayer::Controller = whole.who;
-                let ast::CemeteryZone::Cemetery = whole.zone;
-                Selector::Zone {
-                    players: PlayerSet {
-                        relative_to: PlayerRef::Controller {},
-                        relation: PlayerRelation::SelfPlayer,
-                        cardinality: Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
+            Some(ast::MoveObjects::Whole(whole)) => {
+                let zones = match &whole.zone {
+                    ast::ReturnZones::One(zone) => from_ref(zone),
+                    ast::ReturnZones::Many(zones) => zones,
+                };
+                if zones.is_empty()
+                    || zones.len() > 2
+                    || matches!(zones, [first, second] if first == second)
+                {
+                    return Err(unsupported(path));
+                }
+                let player = self.return_player(&whole.who, path)?;
+                let mut sets = Vec::new();
+                for zone in zones {
+                    sets.push(Selector::Zone {
+                        players: PlayerSet {
+                            relative_to: player.clone(),
+                            relation: PlayerRelation::SelfPlayer,
+                            cardinality: Cardinality {
+                                minimum: Nat(1),
+                                maximum: Some(Nat(1)),
+                            },
+                            text_quantifier: TextQuantifier::Implicit,
                         },
-                        text_quantifier: TextQuantifier::Implicit,
-                    },
-                    zone: ZoneKind::Cemetery,
-                    view: SelectionView::Current {},
-                    binding: Binding::new(self.allocator.id(path)?, self.scope),
-                    predicate: Box::new(Expr::Literal(Bool(true))),
+                        zone: match zone {
+                            ast::ReturnZone::Hand => ZoneKind::Hand,
+                            ast::ReturnZone::Cemetery => ZoneKind::Cemetery,
+                        },
+                        view: SelectionView::Current {},
+                        binding: Binding::new(self.allocator.id(path)?, self.scope),
+                        predicate: Box::new(Expr::Literal(Bool(true))),
+                    });
+                }
+                if sets.len() == 1 {
+                    sets.remove(0)
+                } else {
+                    Selector::Union { sets }
                 }
             }
             Some(ast::MoveObjects::Field(objects @ ast::Objects::Bound(name)))

@@ -274,6 +274,11 @@ impl BodyContext<'_> {
             .observations
             .get(name)
             .ok_or_else(|| unsupported(path))?;
+        if matches!(receipt, ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } }
+            if matches!(receipt.location(), super::super::ReceiptLocation::Local { id } if self.receipt_reads.whole_returns.contains(id)))
+        {
+            return Err(unsupported(path));
+        }
         if let ObjectReceipt::RevealUntil { members, .. } = receipt {
             use super::super::RevealUntilMembers;
             if !matches!(
