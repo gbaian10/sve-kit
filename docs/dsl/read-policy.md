@@ -234,7 +234,11 @@ movement fact 保留離場前的 base printing 身分；field adapter 只從這�
 成功仍須符合原 Field 的 Put fact、相同物件的新世代與實際墓場目的地。
 已在墓場的卡、空結果或 Stack 替代後仍留場的成員不算成功；
 從者 token 確實送墓後被抹除，仍可讀保存的印刷原費。
-此入口不開放新的 RedirectMove 替代鏈或 field receipt 算術聚合。
+一般的 `count_of` 與 `did` 也能讀這個具名結果；它們只看成功移動，不讀成員特徵。
+`count_of` 可進既有算式，`did` 判斷是否至少一次成功；兩者沿原 movement_before
+規則（相同物件的新世代且存在 actual destination），不把目前墓場張數當成本次結果。
+此入口不開放新的 RedirectMove 替代鏈，亦不開放依成員特徵篩選的
+`ReceiptCount` 算術聚合。
 
 BP17-040 所需的「己方原費至少 6 的機械從者整批送墓、具名成功結果、
 原費等於 6／7 的 Before 條件」屬於這個組合。這只說明 reader 契約；
