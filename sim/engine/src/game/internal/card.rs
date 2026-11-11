@@ -16,6 +16,7 @@ use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::static_declarations::{self, Family};
 use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
@@ -35,6 +36,7 @@ use crate::ir::{choice_rules, evolution_limits};
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
+use core::slice::from_ref;
 use core::{mem::take, result};
 use serde::Serializer;
 use serde::ser::Error as _;
@@ -196,7 +198,7 @@ impl CardRuntime {
                     || card.card().abilities.iter().any(|a| {
                         is_printed_quick(&a.node)
                             || card_play_rule(&a.node).is_some()
-                            || other_costs::is_static(&a.node)
+                            || static_declarations::contains(&a.node, Family::Cost)
                             || choice_rules::is_static(&a.node)
                     })
                     || card.card().abilities.iter().any(|ability| {
@@ -949,6 +951,19 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     if names::name(ability).is_some() {
         return Ok(true);
     }
+    if static_declarations::is_static(ability) {
+        for effect in &ability.declarations {
+            let declaration = from_ref(effect);
+            match static_declarations::family(effect) {
+                Some(Family::Grant) => static_keywords::check(located, declaration)?,
+                Some(Family::Prevention) => prevention::check(located, declaration)?,
+                Some(Family::Cost) => other_costs::check(located, declaration)?,
+                None => return Err(unsupported("static declaration provider")),
+            }
+        }
+        check_static_granted_definitions(game, located)?;
+        return Ok(true);
+    }
     if holder_removal::is_mixed_static(ability) {
         for effect in &ability.declarations {
             let mut single = located.clone();
@@ -961,7 +976,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
             if holder_removal::is_static(&single.node) {
                 removal_restrictions::check(&single)?;
             } else {
-                prevention::check(&single)?;
+                prevention::check(&single, &single.node.declarations)?;
             }
         }
         return Ok(true);
@@ -986,19 +1001,6 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
         attack_restrictions::check(located)?;
         return Ok(true);
     }
-    if other_costs::is_static(ability) {
-        other_costs::check(located)?;
-        return Ok(true);
-    }
-    if static_keywords::is_static(ability) {
-        static_keywords::check(located)?;
-        check_static_granted_definitions(game, located)?;
-        return Ok(true);
-    }
-    if prevention::is_static(ability) {
-        prevention::check(located)?;
-        return Ok(true);
-    }
     Ok(false)
 }
 
@@ -1009,13 +1011,11 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || choice_rules::is_static(ability)
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
-        || other_costs::is_static(ability)
+        || static_declarations::is_static(ability)
         || victory::is_static(ability)
         || trigger_permission::is_static(ability)
         || stand_restrictions::is_static(ability)
         || attack_restrictions::is_static(ability)
-        || static_keywords::is_static(ability)
-        || prevention::is_static(ability)
         || card_permission(ability)
         || printed_keywords::card_declaration(ability).is_some()
         || card_play_rule(ability).is_some()
@@ -1551,14 +1551,14 @@ fn equipment_definition(ability: &Ability) -> bool {
 
 fn check_granted_static(located: &Located<Ability>) -> Result<()> {
     if prevention::is_static(&located.node) {
-        prevention::check(located)
+        prevention::check(located, &located.node.declarations)
     } else if static_keywords::is_static(&located.node) {
         if located.node.declarations.iter().any(|effect| matches!(effect,
             Effect::Continuous { patch: CharacteristicPatch::GrantAbility { abilities }, .. }
                 if abilities.iter().any(|ability| matches!(ability, GrantedAbility::Definition { .. })))) {
             return Err(unsupported("nested continuous definitions"));
         }
-        static_keywords::check(located)
+        static_keywords::check(located, &located.node.declarations)
     } else if super::grant::static_cost(&located.node) {
         Ok(())
     } else {

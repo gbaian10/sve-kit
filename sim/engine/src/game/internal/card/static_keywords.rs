@@ -1,5 +1,6 @@
 use super::super::{Context, admission, grant, player_id};
 use super::{Ability, Game, Located, Result, unsupported};
+use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CharacteristicPatch,
     ContinuousLayer, Control, Duration, DurationEnd, Effect, EffectTarget, Expr, FaceId,
@@ -48,7 +49,8 @@ fn grant_subjects(
 }
 
 fn check_header(ability: &Ability) -> Result<()> {
-    if !is_static(ability)
+    if ability.kind != AbilityKind::Static
+        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
         || !matches!(
             ability.active_zones.as_slice(),
             [ZoneKind::Field | ZoneKind::Equipment] | [ZoneKind::Field, ZoneKind::Ex]
@@ -67,10 +69,10 @@ fn check_header(ability: &Ability) -> Result<()> {
     Ok(())
 }
 
-pub(super) fn check(located: &Located<Ability>) -> Result<()> {
+pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Result<()> {
     let ability = &located.node;
     check_header(ability)?;
-    for effect in &ability.declarations {
+    for effect in declarations {
         let Effect::Continuous {
             source,
             target: EffectTarget::Dynamic { selector },
@@ -295,7 +297,8 @@ impl Game {
                 .internal_local_abilities(&source)?
                 .into_iter()
                 .filter(|located| {
-                    is_static(&located.node) && located.node.active_zones.contains(&zone)
+                    static_declarations::contains(&located.node, Family::Grant)
+                        && located.node.active_zones.contains(&zone)
                 })
                 .collect::<Vec<_>>();
             if static_abilities.is_empty() {
@@ -329,6 +332,9 @@ impl Game {
                         ..
                     } = effect
                     else {
+                        if static_declarations::family(effect).is_some() {
+                            continue;
+                        }
                         return Err(unsupported("static keyword effect"));
                     };
                     if condition

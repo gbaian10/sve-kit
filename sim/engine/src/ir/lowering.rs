@@ -47,6 +47,7 @@ mod resource_entry;
 mod reveal_cost;
 mod reveal_until;
 mod stack;
+mod static_declarations;
 mod static_keywords;
 mod trigger_restrictions;
 mod victory;
@@ -492,6 +493,16 @@ impl Allocator {
         abilities: &mut Vec<Located<Ability>>,
     ) -> Result<bool, LoweringError> {
         if let Some(declaration) = &entry.r#static {
+            if static_declarations::supports(declaration) {
+                abilities.push(static_declarations::lower(
+                    self,
+                    key,
+                    path,
+                    entry,
+                    entry_scope(index, path)?,
+                )?);
+                return Ok(true);
+            }
             let lower = match declaration.effects.first() {
                 Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
                 Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,

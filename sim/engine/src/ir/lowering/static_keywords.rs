@@ -9,6 +9,7 @@ use crate::ir::{
 use crate::ir::{Bool, Expr, Predicate};
 use crate::ir::{GrantedAbility, KeywordId, ObjectRelation};
 use crate::ir::{ObjectView, Selector};
+use core::mem::swap;
 
 pub(super) fn grant(
     effect: &ast::StaticEffect,
@@ -68,7 +69,16 @@ pub(super) fn lower(
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
     let source = source_span(key, path, entry)?;
-    lower_at_source(allocator, path, entry, scope, source)
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    lower_at_source(
+        allocator,
+        path,
+        entry,
+        scope,
+        source,
+        &head.effects,
+        &mut Allocator::default(),
+    )
 }
 
 pub(super) fn lower_at_source(
@@ -77,6 +87,8 @@ pub(super) fn lower_at_source(
     entry: &ast::Ability,
     scope: ScopeId,
     source: super::SourceSpan,
+    effects: &[ast::StaticEffect],
+    bindings: &mut Allocator,
 ) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
     let zones = active_zones(head, path)?;
@@ -84,13 +96,14 @@ pub(super) fn lower_at_source(
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
+    swap(&mut context.allocator, bindings);
     let head_condition = head
         .r#while
         .as_ref()
         .map(|condition| context.qualification(condition, path))
         .transpose()?;
     let mut declarations = Vec::new();
-    for effect in &head.effects {
+    for effect in effects {
         let Some((grant, branch)) = grant(effect) else {
             return Err(unsupported(path));
         };
@@ -148,6 +161,7 @@ pub(super) fn lower_at_source(
             duration: numeric::duration(None, path)?,
         });
     }
+    swap(&mut context.allocator, bindings);
     Ok(Located {
         source,
         node: Ability {

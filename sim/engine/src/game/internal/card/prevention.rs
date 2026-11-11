@@ -7,6 +7,7 @@ use crate::ir::prevention::{
     DamageSource, Prevention, Recipients, own_leader, projection, whole_turn_leader_reduction,
 };
 use crate::ir::removal_restrictions as holder_removal;
+use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
@@ -163,9 +164,11 @@ fn check_static_source(shape: &Prevention<'_>, origin: &AbilitySource) -> Result
     Ok(())
 }
 
-pub(super) fn check(located: &Located<Ability>) -> Result<()> {
+pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Result<()> {
     let ability = &located.node;
-    if !is_static(ability)
+    if ability.kind != AbilityKind::Static
+        || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+        || ability.declarations.is_empty()
         || !matches!(
             ability.active_zones.as_slice(),
             [ZoneKind::Field | ZoneKind::Equipment]
@@ -180,7 +183,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     {
         return Err(unsupported("static damage prevention header"));
     }
-    for effect in &ability.declarations {
+    for effect in declarations {
         let shape = projection(effect).ok_or_else(|| unsupported("static damage prevention"))?;
         check_static_source(&shape, &ability.source)?;
         let equipment = ability.active_zones == [ZoneKind::Equipment];
@@ -603,8 +606,7 @@ impl Game {
                 .into_iter()
                 .filter(|ability| {
                     ability.node.active_zones == [zone]
-                        && (is_static(&ability.node)
-                            || holder_removal::is_mixed_static(&ability.node))
+                        && static_declarations::contains(&ability.node, Family::Prevention)
                 })
                 .collect::<Vec<_>>();
             if abilities.is_empty() {
@@ -615,7 +617,9 @@ impl Game {
             for located in abilities {
                 for effect in &located.node.declarations {
                     let Some(shape) = projection(effect) else {
-                        if holder_removal::projection(effect).is_some() {
+                        if static_declarations::family(effect).is_some()
+                            || holder_removal::projection(effect).is_some()
+                        {
                             continue;
                         }
                         return Err(unsupported("static prevention declaration"));
