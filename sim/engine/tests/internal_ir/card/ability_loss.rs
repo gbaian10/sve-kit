@@ -155,9 +155,8 @@ fn ability_loss_until_turn_restores_live_abilities_after_the_end_phase() {
 #[test]
 fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
     for body in [
-        json!({"apply":{"on":"this","effect":{"lose_abilities":{}}}}),
-        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"next_opp_turn"}}),
-        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"game"}}),
+        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"this_and_next_opp_turn"}}),
+        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":{"during_next_turn":{"who":"opp"}}}}),
         json!({"apply":{"on":{"who":"opp","zone":"field","kind":"follower"},"effect":{"lose_abilities":{}}}}),
         json!({"apply":{"on":"enemy","effect":{"lose_abilities":{"on":"enemy"}}}}),
     ] {
@@ -166,13 +165,13 @@ fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
         lowerer().lower(&input).unwrap_err();
     }
     let (_, program) = boxed::board_with(&input(), false);
-    for variant in 0_u8..3 {
+    for variant in 0_u8..11 {
         let mut raw = program.card().clone();
         let Action::RemoveAbility {
             scope,
             duration,
             subjects,
-            ..
+            timestamp,
         } = loss_mut(&mut raw)
         else {
             panic!("raw removal")
@@ -191,6 +190,46 @@ fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
             }
             1 => duration.end = DurationEnd::EndResolution {},
             2 => *subjects = zone(ZoneKind::Field, 99),
+            3 => {
+                duration.end = DurationEnd::SourceZoneExit {
+                    source: ObjectOperand::SourceHolder {},
+                    zone: ZoneKind::Field,
+                }
+            }
+            4 => {
+                duration.intervals = vec![Interval::DuringNextTurn {
+                    player: PlayerRef::Controller {},
+                }];
+            }
+            5 => *subjects = Selector::Objects { objects: vec![] },
+            6 => {
+                *subjects = Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}; 2],
+                }
+            }
+            7 => {
+                duration.end = DurationEnd::NextTurnEnd {
+                    player: PlayerRef::ProposedDamageRecipient {},
+                }
+            }
+            8 => {
+                *timestamp = TimestampBasis::ZoneEntry {
+                    object: ObjectOperand::SourceHolder {},
+                }
+            }
+            9 => {
+                duration.anchor = TimeAnchor::Bound {
+                    binding: Binding::new(999, ScopeId(1)),
+                }
+            }
+            10 => {
+                duration.usage = Some(UseLimit {
+                    count: Nat(1),
+                    scope: UsageScope::PerObject {
+                        object: ObjectOperand::SourceHolder {},
+                    },
+                });
+            }
             _ => panic!("unknown removal fixture variant"),
         }
         WellFormedCardProgram::check(raw).unwrap_err();
@@ -233,3 +272,6 @@ fn ability_loss_suppresses_the_printed_return_to_hand_trigger() {
         assert_eq!(after["objects"]["enemy"]["generation"], 1);
     }
 }
+
+#[path = "ability_loss/lifetimes.rs"]
+mod lifetimes;

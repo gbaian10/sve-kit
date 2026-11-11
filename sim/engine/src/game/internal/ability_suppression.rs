@@ -2,10 +2,11 @@
 use super::duration::EffectEnd;
 use super::grant::GrantOrigin;
 use super::{Execution, Game, InstructionOutcome, Result, Selector, unsupported};
+use crate::ir::ability_suppression::supported;
 use crate::ir::events::timing::opponent;
 use crate::ir::{
     Action, BoxPilotMode, Duration, DurationEnd, ExecutionRef, Instruction, ObjectOperand,
-    ObjectRef, RemoveScope, TimeAnchor, TimestampBasis,
+    ObjectRef, TimeAnchor, TimestampBasis,
 };
 use alloc::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
@@ -48,27 +49,8 @@ pub(super) fn check_box(action: &Action) -> Result<()> {
 }
 
 pub(super) fn check_loss(action: &Action) -> Result<()> {
-    let Action::RemoveAbility {
-        subjects: Selector::Bound { .. },
-        scope: RemoveScope::AllAtTime {},
-        duration,
-        timestamp,
-    } = action
-    else {
-        return Err(unsupported("one formal target ability removal"));
-    };
-    if !matches!(
-        duration.end,
-        DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-    ) || duration.anchor != (TimeAnchor::Installation {})
-        || duration.usage.is_some()
-        || !duration.intervals.is_empty()
-        || *timestamp
-            != (TimestampBasis::ProperPlay {
-                execution: ExecutionRef::Current {},
-            })
-    {
-        return Err(unsupported("ability removal cutoff and duration"));
+    if !supported(action) {
+        return Err(unsupported("singleton ability removal cutoff and duration"));
     }
     Ok(())
 }
