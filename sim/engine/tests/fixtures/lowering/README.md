@@ -26,6 +26,22 @@ neither whole-card admission nor evidence of source qualification.
 This fixture is expanded separately by the Look selection tests; it is outside
 the older candidate batch used by the diagnostic report below.
 
+`observed-spine.yaml` uses one synthetic card with four activated fragments for
+BP01-072/BP13-006's independent optional Spell picks (first to hand and revealed,
+second to cemetery), BP04-041's short Look partition, CP03-116's optional revealed
+Oracle follower to hand and arbitrary subset to the top, and BP14-066's selected
+deck revelation and top/bottom ordering. The reviewed source inputs are
+`card-data/jp/BP01/000-099.json`, `BP04/000-099.json`, `BP13/000-099.json`,
+`BP14/000-099.json` and `CP03/100-199.json` under the same `card-data/jp` root.
+Identity, costs, headers, source coordinates and the small candidate populations
+are synthetic; the fragments test these combinations without admitting whole
+cards or their other costs, counters and abilities. Its tests expand the fixture
+once through C0 separately from the older diagnostic batch, without storing
+generated trees or adding it to that batch's fixed report.
+The shared Spell fragment uses a three-card Look instead of BP01's four or
+BP13's five, and omits BP13's Forest class restriction; its small synthetic
+population tests the selection/exclusion sequence rather than whole-card admission.
+
 ## Per-card diagnostic entry
 
 After changing these YAML fixtures, lowering or D1 admission, run:

@@ -1007,23 +1007,48 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
     packet
 }
 
-fn private_observed_deck(game: &Game, id: &str, actor_seat: &str, enabled: bool) -> bool {
-    enabled
-        && game.object(id).is_ok_and(|object| {
-            object.zone == "deck" && object.owner == actor_seat && object.controller == actor_seat
-        })
-        && game
-            .state
-            .knowledge
-            .get(actor_seat)
-            .is_some_and(|knowledge| knowledge.knows_location(id))
-}
-
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Target evaluation uses the play's frozen authority view."
 )]
 impl Game {
+    pub(in crate::game::internal) fn current_observed_deck(
+        &self,
+        execution: &Execution,
+        member: ObjectRef,
+        actor: &str,
+    ) -> Result<bool> {
+        let id = execution.object_id(member)?;
+        let object = self.object(id)?;
+        Ok(object.generation == member.generation.0
+            && object.zone == "deck"
+            && object.owner == actor
+            && object.controller == actor
+            && self
+                .zone_ids(actor, "deck")
+                .iter()
+                .any(|current| current == id)
+            && self
+                .state
+                .knowledge
+                .get(actor)
+                .is_some_and(|knowledge| knowledge.knows_location(id)))
+    }
+
+    pub(in crate::game::internal) fn private_look_deck_member(
+        &self,
+        execution: &Execution,
+        selector: &Selector,
+        member: ObjectRef,
+    ) -> Result<bool> {
+        Ok(execution.is_private_look_target(selector, member)
+            && self.current_observed_deck(
+                execution,
+                member,
+                super::seat_name(execution.context.controller)?,
+            )?)
+    }
+
     pub(super) fn internal_target(
         &self,
         execution: &mut Execution,
@@ -1112,8 +1137,8 @@ impl Game {
                 let id = execution.object_id(*reference)?;
                 let object = self.object(id)?;
                 let kind = self.object_type(id)?;
-                let private_observation =
-                    private_observed_deck(self, id, actor_seat, observed_deck);
+                let private_observation = observed_deck
+                    && self.current_observed_deck(execution, *reference, actor_seat)?;
                 if !(private_observation
                     || (own_hand
                         && object.zone == "hand"
@@ -1260,11 +1285,15 @@ impl Game {
     ) -> Result<Vec<ObjectRef>> {
         let mut members = Vec::new();
         for member in execution.public_target_objects(self, selector, allow_resolution_zones)? {
+            if observed_deck {
+                if self.current_observed_deck(execution, member, actor_seat)? {
+                    members.push(member);
+                }
+                continue;
+            }
             let id = execution.object_id(member)?;
             let object = self.object(id)?;
-            if private_observed_deck(self, id, actor_seat, observed_deck)
-                || (object.zone != "deck" && self.targetable_by(id, actor_seat)?)
-            {
+            if object.zone != "deck" && self.targetable_by(id, actor_seat)? {
                 members.push(member);
             }
         }
@@ -1601,46 +1630,14 @@ impl Execution {
                 input,
                 binding,
                 predicate,
-            } => {
-                let private_look = private_look_filter(selector).is_some();
-                let policy = if private_look {
-                    super::super::conditions::Policy::PrivateSelection
-                } else {
-                    super::super::conditions::Policy::Selection
-                };
-                let plan =
-                    super::super::conditions::ConditionPlan::compile(predicate, *binding, policy)?;
-                let operands = super::super::conditions::candidate::Operands {
-                    game,
-                    execution: self,
-                };
-                let condition = plan.prepare(private_look.then_some(&operands))?;
-                let mut filtered = Vec::new();
-                for member in self.public_target_objects(game, input, allow_resolution_zones)? {
-                    if follow_keyword::supported(selector)
-                        && game.object(self.object_id(member)?)?.zone != "field"
-                    {
-                        continue;
-                    }
-                    if !private_look
-                        && game.object(self.object_id(member)?)?.generation != member.generation.0
-                    {
-                        continue;
-                    }
-                    if !private_look
-                        && !matches!(
-                            game.object(self.object_id(member)?)?.zone.as_str(),
-                            "field" | "ex" | "cemetery"
-                        )
-                    {
-                        return Err(unsupported("selected condition requires public objects"));
-                    }
-                    if matches_candidate(game, self.object_id(member)?, &condition)? {
-                        filtered.push(member);
-                    }
-                }
-                filtered
-            }
+            } => self.filtered_target_objects(
+                game,
+                selector,
+                input,
+                *binding,
+                predicate,
+                allow_resolution_zones,
+            )?,
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Look { .. },
                 ..
@@ -1657,6 +1654,63 @@ impl Execution {
             .into_iter()
             .filter(|member| seen.insert((member.id, member.generation)))
             .collect())
+    }
+
+    fn filtered_target_objects(
+        &self,
+        game: &Game,
+        selector: &Selector,
+        input: &Selector,
+        binding: Binding<ObjectRef>,
+        predicate: &Expr<Bool>,
+        allow_resolution_zones: bool,
+    ) -> Result<Vec<ObjectRef>> {
+        let private_look = private_look_filter(selector).is_some();
+        let policy = if private_look {
+            super::super::conditions::Policy::PrivateSelection
+        } else {
+            super::super::conditions::Policy::Selection
+        };
+        let plan = super::super::conditions::ConditionPlan::compile(predicate, binding, policy)?;
+        let operands = super::super::conditions::candidate::Operands {
+            game,
+            execution: self,
+        };
+        let condition = plan.prepare(private_look.then_some(&operands))?;
+        let mut filtered = Vec::new();
+        for member in self.public_target_objects(game, input, allow_resolution_zones)? {
+            if private_look
+                && !game.current_observed_deck(
+                    self,
+                    member,
+                    super::super::seat_name(self.context.controller)?,
+                )?
+            {
+                continue;
+            }
+            if follow_keyword::supported(selector)
+                && game.object(self.object_id(member)?)?.zone != "field"
+            {
+                continue;
+            }
+            if !private_look
+                && game.object(self.object_id(member)?)?.generation != member.generation.0
+            {
+                continue;
+            }
+            if !private_look
+                && !matches!(
+                    game.object(self.object_id(member)?)?.zone.as_str(),
+                    "field" | "ex" | "cemetery"
+                )
+            {
+                return Err(unsupported("selected condition requires public objects"));
+            }
+            if matches_candidate(game, self.object_id(member)?, &condition)? {
+                filtered.push(member);
+            }
+        }
+        Ok(filtered)
     }
 
     pub(in crate::game::internal) fn bind_target_roles(
