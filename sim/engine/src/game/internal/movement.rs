@@ -296,7 +296,10 @@ fn banished_hand_return(execution: &Execution, objects: &Selector, member: Objec
     else {
         return false;
     };
-    execution.event_move == Some((*event, Some(member)))
+    execution
+        .event_reads
+        .movement(*event)
+        .is_ok_and(|after| after == Some(member))
 }
 
 pub(super) fn revealed_move(action: &Action) -> bool {
