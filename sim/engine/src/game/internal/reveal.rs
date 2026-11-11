@@ -2,9 +2,10 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
+use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::{
-    Bool, Expr, Instruction, MemberProjection, Nat, NumericProperty, ObjectReceipt, ObjectRef,
-    PlayerRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, ZoneKind,
+    Bool, Expr, Instruction, Nat, NumericProperty, ObjectRef, PlayerRef, PlayerRelation, ReceiptId,
+    ReceiptLocation, SelectionView, Selector, ZoneKind,
 };
 use core::mem::take;
 
@@ -69,7 +70,12 @@ impl Game {
             }
             Selector::Bound { .. } => (execution.objects(self, objects)?, true),
             Selector::ReceiptMembers { .. } => (
-                execution.observed_objects(self, objects, execution.context.controller)?,
+                execution.observed_objects(
+                    self,
+                    objects,
+                    execution.context.controller,
+                    Consumer::Reveal,
+                )?,
                 true,
             ),
             _ => return Err(unsupported("whole hand reveal")),
@@ -194,11 +200,11 @@ impl Game {
     }
 }
 
-pub(super) const fn look_receipt(objects: &Selector) -> Option<ReceiptId> {
-    if let Selector::ReceiptMembers {
-        receipt: ObjectReceipt::Look { receipt },
-        projection: MemberProjection::Before,
-    } = objects
+pub(super) fn look_receipt(objects: &Selector) -> Option<ReceiptId> {
+    if let Some(Shape::Leaf(observation::Leaf {
+        kind: LeafKind::Look(receipt),
+        ..
+    })) = observation::classify(objects, Consumer::Reveal, Position::Input)
         && let ReceiptLocation::Local { id } = receipt.location()
     {
         Some(*id)
@@ -207,7 +213,7 @@ pub(super) const fn look_receipt(objects: &Selector) -> Option<ReceiptId> {
     }
 }
 
-pub(super) const fn look_sum(objects: &Selector, property: NumericProperty) -> Option<ReceiptId> {
+pub(super) fn look_sum(objects: &Selector, property: NumericProperty) -> Option<ReceiptId> {
     if matches!(
         property,
         NumericProperty::Cost | NumericProperty::OriginalCost
