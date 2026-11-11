@@ -3,6 +3,8 @@ use super::{Cause, Game, Result, SnapshotId, player_id, unsupported};
 use crate::game::Frame;
 use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::admission::PlannedAbility;
+use crate::game::internal::conditions::subject as subject_condition;
+use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{Ability, AbilityOrigin, KeywordId};
 use crate::ir::{
@@ -139,14 +141,15 @@ impl Game {
             let controller = player_id(&self.object(&observer)?.controller)?;
             for ability in abilities {
                 let eligible = if let Some(filter) = observer_filter(&ability.node) {
-                    filter.matches(
-                        &event.after,
+                    subject_condition::matches(
+                        &filter,
+                        &SubjectInformation::from_characters(&event.after, None),
                         observer == holder,
                         controller,
                         subject_controller,
                         active,
                         false,
-                    )
+                    )?
                 } else {
                     observer == holder
                         && (super_evolved

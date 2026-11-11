@@ -5,6 +5,7 @@ use super::{
     optional_payment, player_id, unsupported,
 };
 use crate::game::internal::admission::PlannedAbility;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::{Object, int};
 use crate::ir::events::change::{PostureFilter, StatFilter};
 use crate::ir::{ExecutionId, ObjectRef, PlayerId, RuntimeHolder};
@@ -219,14 +220,15 @@ impl Game {
                     .ok_or_else(|| invalid("unknown change subject"))?;
                 let information = self.event_subject_information(&id)?;
                 let controller = player_id(&self.object(&id)?.controller)?;
-                Ok(plan.subject.matches_information(
+                subject_condition::matches(
+                    &plan.subject,
                     &information.borrowed(),
                     source == event.object,
                     actor,
                     controller,
                     active,
                     information.token,
-                ))
+                )
             }
             _ => Ok(false),
         }

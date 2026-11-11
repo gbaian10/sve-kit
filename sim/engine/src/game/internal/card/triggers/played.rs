@@ -4,6 +4,7 @@ use super::{
     TriggerAggregation, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::internal::Execution;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::played::filter;
 use crate::ir::optional_payment;
@@ -189,14 +190,15 @@ impl Game {
                             .and_then(known_original_cost);
                         cost_loaded = true;
                     }
-                    if plan.matches_information(
+                    if subject_condition::played(
+                        &plan,
                         &info.borrowed(),
                         holder == source,
                         controller,
                         actor,
                         active,
                         info.token,
-                    ) {
+                    )? {
                         matched.push((holder.clone(), ability));
                     }
                 }
