@@ -13,6 +13,19 @@ fixture and its documented source. A shared test helper calls Python's actual
 `AuthorExpander`, passes the selected expanded trees and separate source-proof diagnostics to Rust, and never
 stores generated JSON or sidecars. These tests do not admit cards for production.
 
+`look-names.yaml` uses one synthetic card with three activated fragments to test
+BP08-071's distinct-name Look selection, BP17-042's trait/literal-name groups,
+and BP18-104's Look groups with a shared source-name exclusion. Source wording is
+preserved in `card-data/jp/BP08/000-099.json`, `card-data/jp/BP17/000-099.json`
+and `card-data/jp/BP18/100-199.json`. Costs, ability headers, card identity and
+source coordinates are synthetic. BP08's later destruction and BP17's other
+evolution ability are outside these fragments. The BP18 source-name exclusion
+applies to both groups in this fixture; its literal second-group name differs
+from the printed source name, so this matches that selection clause. This is
+neither whole-card admission nor evidence of source qualification.
+This fixture is expanded separately by the Look selection tests; it is outside
+the older candidate batch used by the diagnostic report below.
+
 ## Per-card diagnostic entry
 
 After changing these YAML fixtures, lowering or D1 admission, run:

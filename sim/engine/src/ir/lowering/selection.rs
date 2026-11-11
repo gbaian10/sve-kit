@@ -213,6 +213,7 @@ impl BodyContext<'_> {
         groups: &[ast::ChooseGroup],
         receipt: &super::super::ObjectReceipt,
         cardinality: super::Cardinality,
+        exclude_source_name: bool,
         path: &str,
     ) -> Result<super::super::SelectionConstraint, LoweringError> {
         let group_cardinality = super::super::Cardinality {
@@ -221,8 +222,9 @@ impl BodyContext<'_> {
         };
         let mut lowered_groups = Groups::new(TotalBounds::Explicit(cardinality));
         for group in groups {
-            if (group.kind.is_none() && group.r#trait.is_none())
+            if (group.kind.is_none() && group.r#trait.is_none() && group.name.is_none())
                 || group.r#trait.as_deref() == Some("")
+                || group.name.as_deref() == Some("")
             {
                 return Err(unsupported(path));
             }
@@ -230,22 +232,29 @@ impl BodyContext<'_> {
                 group_cardinality,
                 || {
                     let binding = super::Binding::new(1, self.card_allocator.scope(path)?);
+                    let predicate = field_filter(
+                        &ObjectFilter {
+                            kind: group.kind.as_ref().map(super::search::card_kind),
+                            name: group.name.as_deref(),
+                            trait_id: group.r#trait.as_deref(),
+                            class: group.class.as_deref(),
+                            original_cost: [None, group.orig_cost_le, None],
+                            ..ObjectFilter::default()
+                        },
+                        binding,
+                    );
+                    let predicate = if exclude_source_name {
+                        super::search::exclude_source_name(predicate, binding)
+                    } else {
+                        predicate
+                    };
                     Ok(super::super::Selector::Filter {
                         input: Box::new(super::super::Selector::ReceiptMembers {
                             receipt: receipt.clone(),
                             projection: super::super::MemberProjection::Before,
                         }),
                         binding,
-                        predicate: Box::new(field_filter(
-                            &ObjectFilter {
-                                kind: group.kind.as_ref().map(super::search::card_kind),
-                                trait_id: group.r#trait.as_deref(),
-                                class: group.class.as_deref(),
-                                original_cost: [None, group.orig_cost_le, None],
-                                ..ObjectFilter::default()
-                            },
-                            binding,
-                        )),
+                        predicate: Box::new(predicate),
                     })
                 },
                 path,
@@ -292,7 +301,6 @@ impl BodyContext<'_> {
             || from.name_contains.is_some()
             || from.has_evolve.is_some()
             || from.has_state_filter()
-            || from.not_same_name_as_this
             || from.except.is_some()
             || from.other
             || from.has_numeric_filter()
@@ -314,7 +322,13 @@ impl BodyContext<'_> {
             minimum: super::super::Nat(0),
             maximum: Some(super::super::Nat(group_count)),
         };
-        let constraint = self.observed_groups(groups, &receipt, cardinality, path)?;
+        let constraint = self.observed_groups(
+            groups,
+            &receipt,
+            cardinality,
+            from.not_same_name_as_this,
+            path,
+        )?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         if self.targets.insert(choice.bind.clone(), binding).is_some() {
             return Err(unsupported(path));
