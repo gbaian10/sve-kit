@@ -699,6 +699,7 @@ impl Game {
         let mut advances = Vec::new();
         let typed_departures =
             self.internal_before_departures(&movable, &destinations, side, frame)?;
+        let player_before = self.player_movement_before(&movable);
         let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
         for plan in &plans {
             if !plan.changed {
@@ -784,8 +785,10 @@ impl Game {
         self.internal_commit_departures(typed_departures)?;
         self.internal_numeric_cleanup()?;
         self.conceal_placement_order(&plans, frame);
+        self.player_movement_after(player_before);
         let erase_group = self.group();
         for id in erased {
+            let player_subject = self.player_subject_before(&id);
             let object = self.object(&id)?.clone();
             if let Some(items) = self
                 .player_mut(&object.controller)?
@@ -798,11 +801,12 @@ impl Game {
             token.zone = "void".into();
             // Erasure invalidates every earlier reference to the token (CR 9.1.3, 9.1.4.4).
             token.generation = token.generation.saturating_add(1);
-            self.emit(
+            let player_step = self.emit(
                 json!({"kind":"消去","object":id,"by":"rule-9.1.4.4"}),
                 &json!({"rule":"9.1.4.4"}),
                 erase_group,
             );
+            self.player_subject_after(&player_step, player_subject);
         }
         self.return_advances(&advances)?;
         self.release_links(&leaving, frame)?;
@@ -974,11 +978,17 @@ impl Game {
             .ok_or_else(|| EngineFailure::Unsupported("a filler was observed by drawing".into()))?
             .to_owned();
         let generation = self.object(&id)?.generation;
+        let player_mark = self.player_event_mark();
         self.move_objects(from_ref(&id), "hand", None, None, frame)?;
         let actual = self.object(&id)?;
         if actual.generation == generation || actual.zone != "hand" || actual.controller != seat {
             return Ok(None);
         }
+        self.player_movement_method(
+            player_mark,
+            from_ref(&id),
+            super::player::events::MovementMethod::Draw,
+        );
         let group = self.group();
         self.emit(
             json!({"kind":"引く","player":seat,"object":id}),

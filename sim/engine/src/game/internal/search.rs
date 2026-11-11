@@ -855,7 +855,7 @@ impl Game {
         let remaining = self.internal_known_deck(seat)?;
         self.shuffle(seat, &remaining)?;
         execution.look_viewers.clear();
-        execution.facts.push(Fact::Shuffled { player });
+        execution.record_fact(self, Fact::Shuffled { player });
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Search(outcome));

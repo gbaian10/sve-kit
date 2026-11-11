@@ -285,8 +285,14 @@ pub struct Game {
     player_fault: Option<EngineFailure>,
     #[serde(skip)]
     player_epoch: u64,
+    #[serde(skip)]
+    player_events: player::events::Journal,
 }
 
+#[expect(
+    clippy::missing_fields_in_debug,
+    reason = "Viewer event history is transport state, outside the authority snapshot."
+)]
 impl fmt::Debug for Game {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut debug = f.debug_struct("Game");
@@ -574,6 +580,7 @@ impl Game {
             card_runtime: internal::CardRuntime::default(),
             player_fault: None,
             player_epoch: 0,
+            player_events: player::events::Journal::default(),
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;
@@ -986,6 +993,7 @@ impl Game {
         event["id"] = json!(id);
         event["cause"] = cause.clone();
         event["group"] = json!(group);
+        self.record_player_step(&event);
         self.emitted.push(event);
         id
     }

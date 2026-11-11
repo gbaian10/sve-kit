@@ -211,6 +211,7 @@ impl Game {
     }
 
     pub(super) fn change_face_up(&mut self, id: &str, face_up: bool, cause: &Value) -> Result<()> {
+        let player_subject = self.player_subject_before(id);
         self.object_mut(id)?.state["face_up"] = json!(face_up);
         let object = self.object(id)?;
         if object.zone == "evolve_deck" {
@@ -228,11 +229,14 @@ impl Game {
             }
         }
         let group = self.group();
-        self.emit(
+        let player_step = self.emit(
             json!({"kind":"表向き／裏向き","object":id,"face_up":face_up}),
             cause,
             group,
         );
+        if !face_up {
+            self.player_subject_after(&player_step, player_subject);
+        }
         Ok(())
     }
 
@@ -337,6 +341,7 @@ impl Game {
         cause: &Value,
         group: u64,
     ) -> Result<()> {
+        let player_before = self.player_movement_before(&[id.into()]);
         let previous = self.object(id)?.clone();
         self.player_mut(&previous.controller)?
             .zones
@@ -356,6 +361,7 @@ impl Game {
             state.remove("evolved_after_control_change");
         }
         self.emit(json!({"kind":"移動","object":id,"from":format!("{}.field",previous.controller),"to":format!("{controller}.field")}),cause,group);
+        self.player_movement_after(player_before);
         Ok(())
     }
 

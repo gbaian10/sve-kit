@@ -10,6 +10,12 @@ use sve_engine::game::player::{
     QuestionShape, SubmissionKind, Viewer,
 };
 
+fn assert_event_history_available(game: &Game) {
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let _history = game.events(viewer, None).unwrap();
+    }
+}
+
 fn board(initial: &Value) -> Game {
     let mut game = Game::from_selected_effects(
         selection_with_rules().clone(),
@@ -20,6 +26,7 @@ fn board(initial: &Value) -> Game {
     )
     .unwrap();
     game.advance_player_input();
+    assert_event_history_available(&game);
     game
 }
 
@@ -38,6 +45,7 @@ fn answer(game: &mut Game, actor: Viewer, answer: Answer) {
         SubmissionKind::Applied,
         "The expected typed decision must apply"
     );
+    assert_event_history_available(game);
 }
 
 fn close(game: &mut Game, actor: Viewer, answer: ClosingAnswer) {
@@ -48,6 +56,7 @@ fn close(game: &mut Game, actor: Viewer, answer: ClosingAnswer) {
         SubmissionKind::Applied,
         "The expected turn-closing answer must apply"
     );
+    assert_event_history_available(game);
 }
 
 fn end(game: &mut Game, actor: Viewer) {
@@ -57,6 +66,7 @@ fn end(game: &mut Game, actor: Viewer) {
         SubmissionKind::Applied,
         "The active seat must be allowed to begin the end phase"
     );
+    assert_event_history_available(game);
 }
 
 fn observed_handle(game: &Game, actor: Viewer, zone: ObservedZone, number: &str) -> ObjectHandle {

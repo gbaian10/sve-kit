@@ -1,4 +1,6 @@
 use super::*;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::events::{ActionKind, EventKind};
 
 fn equip_action() -> Action {
     Action::Equip {
@@ -417,4 +419,37 @@ fn equipment_damage_modifiers_do_not_open_ordinary_host_names_or_non_host_target
         let mut game = board_with_token("イクイップメント・トークン", false);
         assert!(game.load_internal_card("unit-spell", &program).is_err());
     }
+}
+
+#[test]
+fn player_events_equipment_has_one_result_with_its_actor_and_authorized_endpoints() {
+    let mut game = board("イクイップメント・トークン");
+    game.load_internal_card(
+        "unit-follower",
+        &card(vec![ability(1, vec![instruction(1, equip_action())])]),
+    )
+    .unwrap();
+    game.advance_player_input();
+    activate(&mut game, 1);
+    game.resume_internal_card().unwrap();
+    game.advance_player_input();
+    let equipment = game
+        .events(Viewer::P2, None)
+        .unwrap()
+        .filter_map(|event| match &event.kind {
+            EventKind::Action(action) if action.kind == ActionKind::Equip => Some(action),
+            EventKind::Action(_)
+            | EventKind::Movement { .. }
+            | EventKind::Phase(_)
+            | EventKind::Result { .. } => None,
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        equipment.len(),
+        1,
+        "The Step and typed equipment fact describe one association"
+    );
+    assert_eq!(equipment[0].player, Some(Viewer::P1));
+    assert_eq!(equipment[0].subjects.len(), 2);
+    assert!(equipment[0].subjects.iter().all(Option::is_some));
 }

@@ -392,23 +392,31 @@ impl Game {
             &frame.cause,
             group,
         );
+        self.player_step_actor(&event, &frame.controller);
         frame.cause = json!({"event":event});
         let affected = [self.object(source)?.clone()];
         let mut pending = self.stat_change_triggers(&[previous], &frame.cause)?;
         pending.extend(self.collect_triggers("evolve", &affected, &frame.cause)?);
         self.enqueue(pending);
+        let mut player_super_step = None;
         if sep > 0 {
             let super_group = self.group();
-            self.emit(
+            let player_step = self.emit(
                 json!({"kind":"超進化","object":source}),
                 &frame.cause,
                 super_group,
             );
+            self.player_step_actor(&player_step, &frame.controller);
+            player_super_step = Some(player_step);
             let super_pending = self.collect_triggers("super_evolve", &affected, &frame.cause)?;
             self.enqueue(super_pending);
         }
         if !self.card_runtime.is_empty() {
             self.object_mut(source)?.state["super_evolved"] = json!(sep > 0);
+        }
+        if let Some(step) = player_super_step {
+            let subjects = self.player_subject_before(source);
+            self.player_subject_after(&step, subjects);
         }
         self.internal_evolve_event(
             source,

@@ -181,7 +181,13 @@ impl Game {
             .iter()
             .map(|object| object.id.clone())
             .collect::<Vec<_>>();
+        let player_mark = self.player_event_mark();
         self.move_objects(&actual, "cemetery", None, None, frame)?;
+        self.player_movement_method(
+            player_mark,
+            &actual,
+            super::player::events::MovementMethod::Discard,
+        );
         self.enqueue(pending);
         Ok(())
     }
@@ -309,15 +315,17 @@ impl Game {
         }
         self.object_mut(equipment)?.state["equipped_to"] = json!(holder);
         let group = self.group();
-        self.emit(
+        let player_step = self.emit(
             json!({"kind":"装備","object":holder,"equipment":equipment}),
             &frame.cause,
             group,
         );
+        self.player_step_actor(&player_step, &frame.controller);
         Ok(())
     }
 
     pub(super) fn erase_equipment(&mut self, id: &str) -> Result<()> {
+        let player_subject = self.player_subject_before(id);
         let object = self.object(id)?.clone();
         let generation = object
             .generation
@@ -333,11 +341,12 @@ impl Game {
         equipment.generation = generation;
         equipment.state["equipped_to"] = Value::Null;
         let group = self.group();
-        self.emit(
+        let player_step = self.emit(
             json!({"kind":"消去","object":id,"by":"rule-11.11.1"}),
             &json!({"rule":"11.11.1"}),
             group,
         );
+        self.player_subject_after(&player_step, player_subject);
         Ok(())
     }
 

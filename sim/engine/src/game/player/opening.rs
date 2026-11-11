@@ -102,7 +102,7 @@ impl Game {
         }
         let setup = json!({"pregame":true,"players":players});
         let random = json!({"first_chooser":seat(first_chooser)});
-        let game = Self::from_selected_effects(selected, &setup, &Value::Null, &random, seed)?;
+        let mut game = Self::from_selected_effects(selected, &setup, &Value::Null, &random, seed)?;
         // Validate the complete opening hand requirement before returning a live game.
         for player in ["P1", "P2"] {
             let reserved = usize::from(
@@ -116,6 +116,7 @@ impl Game {
             }
         }
         game.player_opening_question()?;
+        game.enable_player_events();
         Ok(game)
     }
 

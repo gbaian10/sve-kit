@@ -153,11 +153,14 @@ impl Game {
                     return Err(invalid("Ward is unavailable after entry"));
                 }
                 self.change_posture(from_ref(&id), true, &json!({"rule":"12.8.2"}))?;
-                execution.facts.push(super::Fact::Posture(PostureEvent {
-                    object: execution.reference(self, &id)?,
-                    before: Posture::Standing,
-                    after: Posture::Acted,
-                }));
+                execution.record_fact(
+                    self,
+                    super::Fact::Posture(PostureEvent {
+                        object: execution.reference(self, &id)?,
+                        before: Posture::Standing,
+                        after: Posture::Acted,
+                    }),
+                );
             }
         }
         Ok(())

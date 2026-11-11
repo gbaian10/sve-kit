@@ -1410,6 +1410,7 @@ impl Game {
             Position::Bottom {} => json!("bottom"),
             Position::Index { index } => json!(index.0.get()),
         });
+        let player_mark = self.player_event_mark();
         if method == MoveMethod::Discard {
             self.discard(&ids, &frame)?;
         } else {
@@ -1425,6 +1426,11 @@ impl Game {
                 &frame,
             )?;
         }
+        self.player_movement_method(
+            player_mark,
+            &ids,
+            super::super::player::events::MovementMethod::Effect(method),
+        );
         self.check_created_ex_arrivals(created)?;
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
@@ -1436,6 +1442,9 @@ impl Game {
                     }
                 }
             }
+        }
+        if kind == ZoneKind::Hand {
+            self.player_movement_private_hand(player_mark, &ids);
         }
         self.state.ir_epoch = self
             .state
@@ -1492,18 +1501,21 @@ impl Game {
                     });
             }
             let controller_before = player_id(&previous.controller)?;
-            execution.facts.push(Fact::Movement(Box::new(MovementFact {
-                movement: result.clone(),
-                from: RuntimeZoneRef {
-                    player: controller_before,
-                    kind: from_kind,
-                },
-                method,
-                cause: Cause::Effect {
-                    execution: execution.id,
-                },
-                controller_before,
-            })));
+            execution.record_fact(
+                self,
+                Fact::Movement(Box::new(MovementFact {
+                    movement: result.clone(),
+                    from: RuntimeZoneRef {
+                        player: controller_before,
+                        kind: from_kind,
+                    },
+                    method,
+                    cause: Cause::Effect {
+                        execution: execution.id,
+                    },
+                    controller_before,
+                })),
+            );
             if matches!(
                 method,
                 MoveMethod::Destroy | MoveMethod::Banish | MoveMethod::Discard
@@ -1522,11 +1534,12 @@ impl Game {
                 });
             }
             if method == MoveMethod::Destroy {
-                self.emit(
+                let player_step = self.emit(
                     json!({"kind":"破壊","object":id,"source":frame.source}),
                     &frame.cause,
                     group,
                 );
+                self.omit_player_step(&player_step);
             }
         }
         let departed = departing_source

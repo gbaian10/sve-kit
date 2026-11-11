@@ -183,6 +183,7 @@ impl Game {
     }
 
     fn place_start_amulet(&mut self, seat: &str, id: &str) -> Result<()> {
+        let player_before = self.player_movement_before(&[id.into()]);
         self.player_mut(seat)?
             .zones
             .entry("deck".into())
@@ -205,6 +206,7 @@ impl Game {
             &json!({"rule":"14.4.3.1"}),
             group,
         );
+        self.player_movement_after(player_before);
         Ok(())
     }
 
@@ -261,6 +263,7 @@ impl Game {
             }
             self.learn_members("P1", &public, true)?;
             self.learn_members("P2", &public, true)?;
+            self.record_player_opening_reveal(&public);
         }
         self.state.turn["elapsed_turns"][&first] = json!(1_i64);
         self.start_main()

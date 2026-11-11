@@ -689,11 +689,14 @@ impl Game {
                     ));
                 }
                 for object in members {
-                    execution.facts.push(super::Fact::Posture(PostureEvent {
-                        object: *object,
-                        before: Posture::Standing,
-                        after: Posture::Acted,
-                    }));
+                    execution.record_fact(
+                        self,
+                        super::Fact::Posture(PostureEvent {
+                            object: *object,
+                            before: Posture::Standing,
+                            after: Posture::Acted,
+                        }),
+                    );
                 }
                 InstructionOutcome::Payment {
                     characters: vec![],

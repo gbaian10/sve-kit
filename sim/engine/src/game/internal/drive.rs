@@ -289,7 +289,7 @@ impl Game {
                 slot: effect.receipt,
             },
         };
-        execution.facts.push(Fact::DriveTrigger(Box::new(event)));
+        execution.record_fact(self, Fact::DriveTrigger(Box::new(event)));
         self.internal_drive_event(
             &EventPayload::DriveTrigger { event },
             event.player,
@@ -337,7 +337,7 @@ impl Game {
                 slot: wait.run.instruction.receipt,
             },
         };
-        execution.facts.push(Fact::DriveChecked(Box::new(event)));
+        execution.record_fact(self, Fact::DriveChecked(Box::new(event)));
         self.internal_drive_event(
             &EventPayload::DriveChecked { event },
             event.player,
@@ -406,7 +406,7 @@ impl Game {
             controller,
             first_gain: Bool(true),
         };
-        execution.facts.push(Fact::DriveGained(event));
+        execution.record_fact(self, Fact::DriveGained(event));
         self.internal_drive_gained_event(&holder, event, execution)?;
         Ok(())
     }
