@@ -66,6 +66,8 @@ raw IR 仍由 wellformed 檢查，作者路徑仍保留來源閉包與 lowering�
 `AdmittedProgram`／`AdmittedCard`；它們持有不可變的受驗 IR 與一起編譯的計畫。
 計畫沒有序列化、版本欄或額外 hash，也不能從候選卡片取得。
 selection 共用的計畫只依賴 catalog 與受驗定義，不保存局面或遊戲快照。
+printed 能力共用同一份不可變受驗全卡 IR，計畫不再複製完整本文；
+授予定義、合成 callback 與配對所需的原指示仍由各自計畫持有。
 
 printed 能力、授予定義與 Delay 本文分別持有自己的計畫。授予時保留提供者與原指示，
 Delay 安裝時保留該 Delay 的本文計畫；pending 與巢狀執行隨定義傳遞計畫，
