@@ -261,19 +261,14 @@ impl Execution {
         property: NumericProperty,
     ) -> Result<i64> {
         look_sum(objects, property).ok_or_else(|| unsupported("public look cost"))?;
-        let mut sum = 0_i64;
-        for member in self.public_look_objects(game, objects)? {
-            let id = self.object_id(member)?;
-            let cost = if property == NumericProperty::Cost {
-                game.internal_effective_cost(id)?
-            } else {
-                super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
-            };
-            sum = sum
-                .checked_add(cost)
-                .ok_or_else(|| invalid("revealed cost overflow"))?;
-        }
-        Ok(sum)
+        super::aggregates::checked_sum(
+            self.public_look_objects(game, objects)?
+                .into_iter()
+                .map(|member| {
+                    super::aggregates::numeric_value(game, self.object_id(member)?, property)
+                }),
+            "revealed cost overflow",
+        )
     }
 
     pub(super) fn public_look_member(
