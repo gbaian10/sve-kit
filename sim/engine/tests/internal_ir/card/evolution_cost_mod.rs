@@ -5,7 +5,7 @@ use sve_engine::game::player::observation::InstalledChange;
 use sve_engine::game::player::observation::NumberChange;
 use sve_engine::game::player::observation::ObservedZone;
 
-fn program(set: bool) -> WellFormedCardProgram {
+pub(super) fn program(set: bool) -> WellFormedCardProgram {
     program_with(set, false, false)
 }
 

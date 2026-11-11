@@ -50,6 +50,7 @@ pub(in crate::game) mod attack_restrictions;
 mod costs;
 mod effect_evolution;
 mod evolution;
+pub(in crate::game) use evolution::EvolutionDeclaration;
 pub(super) use evolution::resource_association;
 pub(super) mod exchange;
 mod fanfare;

@@ -312,3 +312,182 @@ fn negative_material_attack_is_preserved_for_comparison_and_deals_no_damage() {
         "zero damage creates no damage event"
     );
 }
+
+#[test]
+fn paid_material_cost_and_attack_share_the_before_projection_in_arithmetic() {
+    let cost = json!({"cost_of":{"objects_of":"fee","view":"before"}});
+    let amount = json!({"plus":[{"times":[cost,2]},read()]});
+    let program = lowerer().lower(&tree(&fee(), &amount)).unwrap()["unit-follower"].clone();
+    for seat in [1, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let opponent = if seat == 1 { "P2" } else { "P1" };
+        let mut initial = setup(seat, json!([]));
+        initial["turn"]["active"] = json!(actor);
+        initial["players"][actor]["zones"]["hand"] = json!([]);
+        initial["players"][actor]["zones"]["field"] = json!([
+            {"id":"s","card":"unit-follower"},
+            {"id":"material","card":"unit-follower","state":{"cost":7,"power":3}}
+        ]);
+        let mut board = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "paid-material-number",
+        )
+        .unwrap();
+        board.load_internal_card("unit-follower", &program).unwrap();
+        let CardPlay::Awaiting(question) = board
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat })
+            .unwrap()
+        else {
+            panic!("materials")
+        };
+        resolved(
+            board
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::CostMaterials(vec![0]),
+                )
+                .unwrap(),
+        );
+        let state = board.projection(View::Referee).unwrap();
+        assert_eq!(state[actor]["cemetery"], json!(["material"]));
+        assert_eq!(
+            state[opponent]["leader"]["life"], 3,
+            "two times the frozen effective cost plus the frozen attack, after both modifiers have disappeared"
+        );
+    }
+}
+
+#[test]
+fn zero_paid_material_cost_remains_available_to_a_comparison() {
+    let mut input = tree(&fee(), &json!(0));
+    input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
+        {"if":{"cond":{"cmp":{"left":{"cost_of":{"objects_of":"fee","view":"before"}},"op":"eq","right":0}},"then":[{"life":{"who":"self","delta":1}}]}}
+    ]);
+    let program = lowerer().lower(&input).unwrap()["unit-follower"].clone();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},
+        {"id":"material","card":"unit-follower","state":{"cost":0}}
+    ]);
+    let mut board = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "zero-paid-material-cost",
+    )
+    .unwrap();
+    board.load_internal_card("unit-follower", &program).unwrap();
+    let CardPlay::Awaiting(question) = board
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("materials")
+    };
+    resolved(
+        board
+            .answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::CostMaterials(vec![0]),
+            )
+            .unwrap(),
+    );
+    let state = board.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P1"]["leader"]["life"], 21,
+        "zero is a saved numeric value, not missing information or the printed cost"
+    );
+}
+
+#[test]
+fn paid_material_cost_keeps_cardinality_zone_timing_and_paid_branch_restrictions() {
+    let read = json!({"cost_of":{"objects_of":"fee","view":"before"}});
+    for cost in [
+        json!({"to_cemetery":{"sel":{"who":"self","zone":"field","kind":"follower"},"n":2,"result":"fee"}}),
+        json!({"to_cemetery":{"sel":{"who":"self","zone":"field","kind":"follower"},"any":true,"result":"fee"}}),
+        json!({"banish":{"sel":{"who":"self","zone":"field","kind":"follower"},"n":1,"result":"fee"}}),
+        json!({"to_cemetery":{"sel":{"who":"self","zone":"ex","kind":"follower"},"n":1,"result":"fee"}}),
+        json!({"pp":0}),
+    ] {
+        lowerer().lower(&tree(&cost, &read)).unwrap_err();
+    }
+    for amount in [
+        json!({"cost_of":{"objects_of":"fee","view":"after"}}),
+        json!({"cost_of":{"objects_of":"unknown","view":"before"}}),
+    ] {
+        lowerer().lower(&tree(&fee(), &amount)).unwrap_err();
+    }
+    let mut optional = tree(&fee(), &read);
+    let ability = optional["cards"]["unit-follower"]["abilities"][0]
+        .as_object_mut()
+        .unwrap();
+    let mut body = ability.remove("activate").unwrap();
+    body.as_object_mut().unwrap().remove("cost");
+    let mut cost = fee();
+    cost["result"] = json!("paid");
+    body["optional_cost"] = cost;
+    ability.insert("fanfare".into(), body);
+    assert!(
+        lowerer().lower(&optional).is_err(),
+        "an optional unpaid branch cannot produce a frozen cost scalar"
+    );
+    let mut early = tree(&fee(), &read);
+    early["cards"]["unit-follower"]["abilities"][0]["activate"]["targets"] = json!([{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower","cost_le":read},"n":1}]);
+    assert!(
+        lowerer().lower(&early).is_err(),
+        "formal targets precede payment"
+    );
+}
+
+#[test]
+fn raw_paid_material_number_does_not_open_other_properties_or_future_payments() {
+    let read = json!({"cost_of":{"objects_of":"fee","view":"before"}});
+    let original = lowerer().lower(&tree(&fee(), &read)).unwrap()["unit-follower"]
+        .card()
+        .clone();
+    for property in [
+        NumericProperty::Count,
+        NumericProperty::Life,
+        NumericProperty::OriginalCost,
+    ] {
+        let mut raw = original.clone();
+        let Node::Instruction { instruction } =
+            &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
+        else {
+            panic!("damage")
+        };
+        let Action::Damage {
+            amount:
+                DamageAmount::Uniform {
+                    amount: Expr::Frozen(value),
+                },
+            ..
+        } = &mut instruction.action
+        else {
+            panic!("scalar")
+        };
+        let IntFrozen::PaidMaterialNumber {
+            property: target, ..
+        } = value.as_mut()
+        else {
+            panic!("material")
+        };
+        *target = property;
+        assert!(
+            WellFormedCardProgram::check(raw).is_err(),
+            "the receipt only retains the supported cost and attack projections"
+        );
+    }
+    let mut no_payment = original;
+    no_payment.abilities[0].node.play.as_mut().unwrap().costs = CostSpec::Ordered { steps: vec![] };
+    assert!(
+        WellFormedCardProgram::check(no_payment).is_err(),
+        "an object selection alone cannot supply a paid snapshot"
+    );
+}

@@ -4,8 +4,8 @@ use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsuppor
 use crate::ir::{
     CardKind, CardName, Characteristics, ClassId, DestroyOutcome, DiscardOutcome, Info, Int,
     MaterialActOutcome, MemberProjection, MoveMethod, MoveOutcome, MoveResult, MovementReceipt,
-    Nat, ObjectReceipt, ObjectRef, PlayerRef, Quantity, QuantityUnit, ReceiptId, ReceiptLocation,
-    ReceiptReference, Selector, TraitId, ZoneKind,
+    Nat, NumericProperty, ObjectReceipt, ObjectRef, PlayerRef, Quantity, QuantityUnit, ReceiptId,
+    ReceiptLocation, ReceiptReference, Selector, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -110,16 +110,21 @@ impl<'execution> PaidMembers<'execution> {
         Ok(self.quantity.amount)
     }
 
-    fn attack(&self) -> Result<Int> {
+    fn number(&self, property: NumericProperty) -> Result<Int> {
         let ([_], [characters]) = (self.subjects, self.characters) else {
-            return Err(invalid("material attack requires one frozen follower"));
+            return Err(invalid("material number requires one frozen follower"));
         };
         if self.quantity.unit != QuantityUnit::Cards || self.quantity.amount != Int(1) {
-            return Err(invalid("material attack quantity"));
+            return Err(invalid("material number quantity"));
         }
-        match characters.attack {
-            Info::Present(amount) => Ok(amount),
-            Info::AbsentByRules => Err(invalid("missing frozen material attack")),
+        let information = match property {
+            NumericProperty::Attack => &characters.attack,
+            NumericProperty::Cost => &characters.cost,
+            _ => return Err(unsupported("paid material numeric property")),
+        };
+        match information {
+            Info::Present(amount) => Ok(*amount),
+            Info::AbsentByRules => Err(invalid("missing frozen material number")),
         }
     }
 
@@ -318,14 +323,15 @@ pub(super) fn paid_material_acts(
     PaidMembers::load(execution, *id, "missing material Act payment")?.count()
 }
 
-pub(super) fn paid_material_attack(
+pub(super) fn paid_material_number(
     execution: &Execution,
     receipt: &ReceiptReference<MoveOutcome>,
+    property: NumericProperty,
 ) -> Result<Int> {
     let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated paid material attack"));
+        return Err(unsupported("iterated paid material number"));
     };
-    PaidMembers::load(execution, *id, "missing material payment")?.attack()
+    PaidMembers::load(execution, *id, "missing material payment")?.number(property)
 }
 
 pub(super) fn discarded_cost(

@@ -109,7 +109,7 @@ pub use card::{
     Activation, CardEntry, CardPlay, PendingOption, QuotaDomain, QuotaSelection, ResumeStage,
     TargetDomain, TargetRoleAssignment, TargetRoleDomain,
 };
-pub(super) use card::{CardRuntime, serialize_cards};
+pub(super) use card::{CardRuntime, EvolutionDeclaration, serialize_cards};
 pub(super) use cost::CostState;
 pub(super) use grant::KeywordState;
 pub use movement::MovementFact;
