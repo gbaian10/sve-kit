@@ -27,6 +27,8 @@ mod basic_actions;
 mod card;
 #[path = "internal_ir/cost.rs"]
 mod cost;
+#[path = "internal_ir/cost_observation.rs"]
+mod cost_observation;
 #[path = "internal_ir/damage.rs"]
 mod damage;
 #[path = "internal_ir/effect_observation.rs"]

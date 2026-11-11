@@ -1,6 +1,7 @@
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::observation::{CostLine, PendingCost};
 
 fn expanded(counter: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -71,6 +72,13 @@ fn named_counter_material_filters_balance_and_spends_only_the_selected_holder() 
     else {
         panic!("counter material choice");
     };
+    let quote = cost_observation::active(&game);
+    assert_eq!(quote.total_pp, None);
+    assert_eq!(quote.pending, [PendingCost::Materials]);
+    assert!(quote.groups[0].lines.contains(&CostLine::Counter {
+        name: "test".into(),
+        count: Some(2)
+    }));
     let InputDomain::CostMaterials(domain) = &question.domain else {
         panic!("material domain");
     };

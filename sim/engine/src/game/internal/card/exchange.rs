@@ -5,6 +5,7 @@ use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
+use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId, Int, MoveMethod,
@@ -739,5 +740,32 @@ impl Game {
         };
         execution.receipts.insert(instruction.receipt, outcome);
         Ok(())
+    }
+}
+
+impl ExchangeState {
+    pub(super) fn observed_pp(&self, game: &Game, execution: &Execution) -> Result<i64> {
+        self.pay_pp.map_or_else(
+            || {
+                game.internal_card_play_cost_with(
+                    execution,
+                    (self.accepted == Some(true)).then_some(&self.definition.change),
+                )
+            },
+            Ok,
+        )
+    }
+    pub(super) fn observed_pending(&self) -> Vec<PendingCost> {
+        let mut pending = vec![];
+        if self.accepted.is_none() || (self.accepted == Some(true) && self.route.is_none()) {
+            pending.push(PendingCost::Exchange);
+        }
+        if self.accepted == Some(true)
+            && self.selected.is_none()
+            && !exchange_shape::pp_increase(&self.definition)
+        {
+            pending.push(PendingCost::Materials);
+        }
+        pending
     }
 }

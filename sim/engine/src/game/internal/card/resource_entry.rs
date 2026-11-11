@@ -478,13 +478,13 @@ impl Game {
             let Action::Resource { amount, .. } = &mut pp.instruction.action else {
                 return Err(invalid("Advance PP action"));
             };
-            *amount = Expr::Literal(Int(entry.pp.saturating_sub(i64::from(chosen.ep))));
+            *amount = Expr::Literal(Int(entry.pp_amount(chosen.ep)));
             self.internal_card_payment(execution, &costs, false)?;
             return self.commit_entry_payment(execution, chosen.ep);
         }
         let paid = self.internal_pay_pp(
             execution.context.controller,
-            Int(entry.pp.saturating_sub(i64::from(chosen.ep))),
+            Int(entry.pp_amount(chosen.ep)),
         )?;
         self.pay_entry_ep(execution, chosen.ep)?;
         let ids = chosen
@@ -650,5 +650,21 @@ impl Game {
             self.internal_race_event(&holder, event, execution)?;
         }
         Ok(())
+    }
+}
+
+impl ResourceEntryState {
+    fn pp_amount(&self, ep: bool) -> i64 {
+        self.pp.saturating_sub(i64::from(ep))
+    }
+
+    pub(super) fn observed_cost(&self) -> (i64, u64, Option<bool>) {
+        (
+            self.selected
+                .as_ref()
+                .map_or(self.pp, |selected| self.pp_amount(selected.ep)),
+            self.count,
+            self.selected.as_ref().map(|selected| selected.ep),
+        )
     }
 }

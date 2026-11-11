@@ -1,6 +1,7 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::observation::{CostLine, PendingCost, PpQuote};
 
 pub(super) fn candidate(card_no: &str, play: Value, spell: bool) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -112,6 +113,12 @@ fn exchange_act_composes_cost_and_same_spell_body_reads_acceptance_after_payment
             "unit-spell",
         );
         let decision = start(&mut game);
+        let quote = cost_observation::active(&game);
+        assert_eq!(quote.total_pp, None);
+        assert!(
+            quote.pending.contains(&PendingCost::Exchange),
+            "exchange acceptance is still undecided"
+        );
         let before = exact_authority(&game);
         let mut stale = decision.token;
         stale.epoch = stale.epoch.saturating_add(1);
@@ -132,6 +139,10 @@ fn exchange_act_composes_cost_and_same_spell_body_reads_acceptance_after_payment
             .unwrap();
         let result = if accepted {
             let selection = awaiting(payment);
+            let quote = cost_observation::active(&game);
+            assert_eq!(quote.total_pp, None);
+            assert_eq!(quote.pending, [PendingCost::Materials]);
+            assert_eq!(quote.groups[0].lines, [CostLine::Pp(PpQuote::Known(1))]);
             let before = exact_authority(&game);
             game.answer_internal_card(
                 selection.actor,

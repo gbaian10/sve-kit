@@ -5,6 +5,8 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{CostLine, PendingCost, PpQuote};
 
 fn tree(head: &str, body: Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -66,6 +68,19 @@ fn x_pp_counts_repeated_payments_and_fixed_fees_and_uses_one_immutable_answer() 
     let mut game = board(&program, 7);
     let question = start(&mut game, &program);
     bounds(&question, 2);
+    let cost = cost_observation::active(&game);
+    assert_eq!(cost.total_pp, None);
+    assert_eq!(cost.pending, [PendingCost::X]);
+    assert!(
+        cost.groups[0]
+            .lines
+            .contains(&CostLine::Pp(PpQuote::Variable {
+                fixed: 2,
+                copies: 2,
+                x: None
+            })),
+        "the quote explains fixed PP and the repeated X payments"
+    );
     let before = exact_authority(&game);
     for (actor, value) in [
         (PlayerId { seat: 2 }, 1),
@@ -142,6 +157,9 @@ fn x_pp_binds_before_cost_filtered_targets_and_impossible_targets_restore_the_wh
         matches!(&target.domain, InputDomain::Targets(domain) if domain.members.len()==1),
         "target cost limits see the chosen X"
     );
+    let quoted = cost_observation::active(&game);
+    assert_eq!(quoted.total_pp, Some(1));
+    assert_eq!(quoted.pending, []);
     let before = exact_authority(&game);
     game.answer_internal_card(target.actor, target.token, Answer::Targets(vec![999]))
         .unwrap_err();
@@ -193,6 +211,9 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
         game.load_internal_card("unit-spell", &program).unwrap();
         game.load_internal_card("unit-follower", &card(vec![]))
             .unwrap();
+        let preview = cost_observation::preview(&game, Viewer::P1);
+        assert_eq!(preview.cost.total_pp, None);
+        assert_eq!(preview.cost.pending, [PendingCost::Optional]);
         let declare = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
         assert_eq!(declare.domain, InputDomain::OptionalCost);
         let play = game
@@ -201,6 +222,9 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
         let play = if accepted {
             let question = awaiting(play);
             bounds(&question, 4);
+            let quote = cost_observation::active(&game);
+            assert_eq!(quote.total_pp, None);
+            assert_eq!(quote.pending, [PendingCost::X]);
             game.answer_internal_card(question.actor, question.token, Answer::Integer(Nat(4)))
                 .unwrap()
         } else {

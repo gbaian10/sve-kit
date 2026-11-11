@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::observation::{CostGroupKind, PendingCost};
 
 fn tree() -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -41,6 +42,16 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
             panic!("declaration");
         };
         assert_eq!(declare.domain, InputDomain::OptionalCost);
+        let quote = cost_observation::active(&game);
+        assert_eq!(quote.total_pp, None);
+        assert_eq!(quote.pending, [PendingCost::Optional]);
+        assert_eq!(
+            cost_observation::optional(&quote),
+            &CostGroupKind::Optional {
+                required: false,
+                accepted: None
+            }
+        );
         let before = exact_authority(&game);
         game.answer_internal_card(
             PlayerId { seat: 2 },
@@ -55,6 +66,15 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
         else {
             panic!("target before payment");
         };
+        let quote = cost_observation::active(&game);
+        assert_eq!(quote.total_pp, Some(if accept { 2 } else { 0 }));
+        assert_eq!(
+            cost_observation::optional(&quote),
+            &CostGroupKind::Optional {
+                required: false,
+                accepted: Some(accept)
+            }
+        );
         assert_eq!(
             game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
             pp - 1
