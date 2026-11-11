@@ -5,7 +5,10 @@
 
 pub mod observation;
 
+mod opening;
 mod pipeline;
+
+pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 
 pub use super::internal::{Answer, InputDomain};
 
@@ -120,6 +123,8 @@ impl fmt::Debug for QuestionToken {
 /// Existing decision shapes or a separate action boundary.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum QuestionShape {
+    /// Serial opening procedure, using this viewer's current object capabilities.
+    Opening(OpeningQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
     Decision(InputDomain),
     /// Main-phase or turn-closing action, without legal action enumeration.
@@ -180,6 +185,13 @@ impl Input {
 /// An authenticated player's submission; surrender is independent of the current token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
+    /// Answer the current opening procedure.
+    Opening {
+        /// Exact question returned to this seat.
+        token: QuestionToken,
+        /// Opening choice addressed by viewer capabilities.
+        answer: OpeningAnswer,
+    },
     /// Respond only to the current decision occurrence.
     Answer {
         /// Exact question returned to this seat.
