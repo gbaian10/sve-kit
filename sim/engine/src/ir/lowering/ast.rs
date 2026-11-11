@@ -892,7 +892,14 @@ pub(super) enum MoveObjects {
 #[serde(deny_unknown_fields)]
 pub(super) struct Observed {
     pub r#in: Observation,
-    pub except: Option<Box<Self>>,
+    pub except: Option<ObservedExcept>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum ObservedExcept {
+    Atom(Box<Observed>),
+    Union { any_of: Vec<Observed> },
 }
 
 #[derive(Deserialize)]
