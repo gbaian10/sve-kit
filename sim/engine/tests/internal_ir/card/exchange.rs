@@ -1173,3 +1173,42 @@ fn pp_increase_exchange_rejects_mixed_empty_or_forged_material_routes() {
     };
     WellFormedCardProgram::check(bad).unwrap_err();
 }
+
+#[test]
+fn an_exchange_does_not_start_preparing_a_dynamic_comparison_operand() {
+    let tree = candidate(
+        "unit-spell",
+        json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field","kind":"follower"},"n":1},"result":"exchange"},"optional_cost_delta":-1}),
+        true,
+    );
+    let mut raw = lower(&tree, 3).card().clone();
+    let exchange = &mut raw.card_play_costs[0].node.exchange.as_mut().unwrap().node;
+    let ChoiceDomain::Objects { constraint, .. } = &mut exchange.materials[0].domain else {
+        panic!("material choice")
+    };
+    let Selector::Zone {
+        binding, predicate, ..
+    } = &mut constraint.groups[0].selector
+    else {
+        panic!("field material")
+    };
+    **predicate = condition_inputs::unprepared_cost(*binding);
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    let mut game = position(
+        &checked,
+        &initial("unit-spell", "field", 1, 4),
+        3,
+        "unit-spell",
+    );
+    let start = game.play_internal_card("s", PlayerId { seat: 1 });
+    let result = if let Ok(CardPlay::Awaiting(question)) = start {
+        assert!(matches!(question.domain, InputDomain::OptionalCost));
+        game.answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
+    } else {
+        start
+    };
+    assert!(matches!(
+        result,
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+}

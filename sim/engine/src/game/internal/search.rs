@@ -9,16 +9,13 @@ use super::{
 };
 use crate::ir::observation_selection::{CardTotals, card_totals};
 use crate::ir::printed_keywords;
-use crate::ir::public_numbers;
 use crate::ir::{
-    AbilitiesRead, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding, Bool,
-    BoolRead, BooleanState, CardName, Cardinality, CharacteristicView, ClassRead, DecisionId, Expr,
-    Info, Instruction, IntOperation, KeywordId, KindRead, MoveDestination, MoveMethod, MoveResult,
-    MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef, ObjectView,
-    OwnerZone, PlayerId, PlayerRelation, Posture, Predicate, Requirement, Requirements,
-    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
-    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat,
-    TraitsRead, ZoneKind, ZoneRef,
+    AbilityOrigin, Action, Binding, Bool, Cardinality, CharacteristicView, DecisionId, Expr,
+    Instruction, KeywordId, MoveDestination, MoveMethod, MoveResult, MoveSpec, Nat, ObjectOperand,
+    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Posture, Predicate,
+    Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
+    SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
+    SnapshotId, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -108,111 +105,9 @@ pub(super) fn packet(domain: &SearchDomain) -> Value {
         "groups":domain.groups.as_ref().map(|groups| groups.iter().map(|group| json!({"handles":group.handles,"minimum":group.cardinality.minimum.0,"maximum":group.cardinality.maximum.map(|n| n.0)})).collect::<Vec<_>>())})
 }
 
-// This closed grammar classifies conditions without consulting the hidden candidate population.
 pub(super) fn check_predicate(value: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Result<bool> {
-    match value {
-        Expr::Literal(Bool(true)) => Ok(false),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus } if candidate_view(object, candidate)) => {
-            Ok(true)
-        }
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::ClassEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(Info::Present(class)),
-            } if !class.0.is_empty()
-                && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Original | CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-            {
-                Ok(true)
-            }
-            Predicate::CompareInt {
-                left: Expr::Compute(read),
-                right,
-                ..
-            } if public_numbers::check(right) && numeric_filter(read, candidate) => Ok(true),
-            Predicate::HasAbility {
-                abilities,
-                predicate,
-            } if keyword_filter(abilities, predicate, candidate) => Ok(true),
-            Predicate::NameContains {
-                object,
-                name: Expr::Literal(name),
-            } if candidate_view(object, candidate) && !name.0.is_empty() => Ok(true),
-            Predicate::NamesIntersect {
-                left: Expr::Live(read),
-                right,
-            } if matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate))
-                && search_names(right) =>
-            {
-                Ok(true)
-            }
-            Predicate::HasTrait {
-                traits: Expr::Live(read),
-                ..
-            } if matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Original | CharacteristicView::Effective } if candidate_view(object, candidate)) => {
-                Ok(true)
-            }
-            Predicate::KindEquals {
-                left: Expr::Live(read),
-                right: Expr::Literal(_),
-            } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Original | CharacteristicView::Effective } if candidate_view(object, candidate)) => {
-                Ok(true)
-            }
-            Predicate::Not { predicate } if check_predicate(predicate, candidate)? => Ok(true),
-            Predicate::And { predicates } | Predicate::Or { predicates }
-                if !predicates.is_empty() =>
-            {
-                for predicate in predicates {
-                    if !check_predicate(predicate, candidate)? {
-                        return Err(unsupported("ambiguous search condition"));
-                    }
-                }
-                Ok(true)
-            }
-            _ => Err(unsupported("search predicate")),
-        },
-        _ => Err(unsupported("search predicate")),
-    }
-}
-
-pub(in crate::game::internal) fn search_names(names: &Expr<Vec<CardName>>) -> bool {
-    match names {
-        Expr::Literal(names) => !names.is_empty() && names.iter().all(|name| !name.0.is_empty()),
-        Expr::Live(read) => matches!(
-            read.as_ref(),
-            NamesRead::Names {
-                object: ObjectView::SourceInformation {}
-            }
-        ),
-        _ => false,
-    }
-}
-
-fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
-    super::counters::candidate_read(read, candidate)
-        || matches!(read, IntOperation::InformationOrZero { information:
-        NumberRead::Cost { object, view: CharacteristicView::Original | CharacteristicView::Effective }
-        | NumberRead::Stats { object, view: CharacteristicView::Effective, property: Stat::Attack }
-    } if candidate_view(object, candidate))
-}
-
-pub(super) fn keyword_filter(
-    abilities: &Expr<Vec<AbilityReference>>,
-    predicate: &AbilityPredicate,
-    candidate: Binding<ObjectRef>,
-) -> bool {
-    matches!(abilities, Expr::Live(read)
-        if matches!(read.as_ref(), AbilitiesRead::Abilities { object, view: CharacteristicView::Effective }
-            if candidate_view(object, candidate)))
-        && predicate.kind.is_none()
-        && predicate.except.is_empty()
-        && predicate.holder.is_none()
-        && predicate.origin.is_none()
-        && (predicate.keyword == Some(KeywordId::Evolution)
-            || matches!(
-                predicate.keyword,
-                Some(KeywordId::Stack | KeywordId::EarthRite | KeywordId::Lastword)
-            )
-            || predicate.keyword.and_then(super::grant::keyword).is_some())
+    super::conditions::ConditionPlan::compile(value, candidate, super::conditions::Policy::Search)
+        .map(|plan| plan.conditional())
 }
 
 fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
@@ -551,7 +446,6 @@ impl Game {
             Some(SearchDestination::Partition { .. }) => {}
             _ => return Err(unsupported("search destination")),
         }
-        check_predicate(filter, *candidate)?;
         let plan = super::conditions::ConditionPlan::compile(
             filter,
             *candidate,

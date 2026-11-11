@@ -148,24 +148,28 @@ impl Reader for Candidate<'_> {
     ) -> Result<bool> {
         match property {
             LabelsProperty::Names => self.game.card_name_matches(self.id, matches),
-            LabelsProperty::Class => Ok(self
-                .game
-                .face(self.id)?
-                .get("card_class")
-                .and_then(Value::as_str)
-                .is_some_and(matches)),
-            LabelsProperty::Traits if self.policy == Policy::Search => Ok(self
+            LabelsProperty::Class(CharacteristicView::Original | CharacteristicView::Effective) => {
+                Ok(self
+                    .game
+                    .face(self.id)?
+                    .get("card_class")
+                    .and_then(Value::as_str)
+                    .is_some_and(matches))
+            }
+            LabelsProperty::Traits(
+                CharacteristicView::Original | CharacteristicView::Effective,
+            ) if self.policy == Policy::Search => Ok(self
                 .game
                 .face(self.id)?
                 .get("traits")
                 .and_then(Value::as_array)
                 .is_some_and(|traits| traits.iter().filter_map(Value::as_str).any(matches))),
-            LabelsProperty::Traits => Ok(super::super::card::selection::characteristics(
-                self.game, self.id,
-            )?
-            .traits
-            .iter()
-            .any(|value| matches(value))),
+            LabelsProperty::Traits(CharacteristicView::Effective) => Ok(
+                super::super::card::selection::characteristics(self.game, self.id)?
+                    .traits
+                    .iter()
+                    .any(|value| matches(value)),
+            ),
             LabelsProperty::Kind(CharacteristicView::Original) => Ok(matches(
                 self.game
                     .face(self.id)?
@@ -176,7 +180,9 @@ impl Reader for Candidate<'_> {
             LabelsProperty::Kind(CharacteristicView::Effective) => {
                 Ok(matches(self.game.object_type(self.id)?))
             }
-            LabelsProperty::Kind(_) => Err(unsupported("candidate kind view")),
+            LabelsProperty::Kind(_) | LabelsProperty::Class(_) | LabelsProperty::Traits(_) => {
+                Err(unsupported("candidate characteristic view"))
+            }
         }
     }
 }

@@ -3,10 +3,11 @@
 use super::{Result, unsupported, values};
 use crate::ir::public_numbers;
 use crate::ir::{
-    Binding, Bool, BoolRead, BooleanState, CardKind, CardName, CharacteristicView, ClassRead,
-    Comparison, CounterKind, EvolutionRead, EvolutionState, Expr, Info, Int, IntOperation,
-    KeywordId, KindRead, NamesRead, NatRead, NumberRead, ObjectOperand, ObjectRef, ObjectView,
-    Posture, PostureRead, Predicate, Stat, TraitsRead,
+    AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
+    CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
+    EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, NamesRead, NatRead,
+    NumberRead, ObjectOperand, ObjectRef, ObjectView, Posture, PostureRead, Predicate, Stat,
+    TraitsRead,
 };
 
 pub(super) mod candidate;
@@ -38,9 +39,9 @@ pub(super) enum NumberProperty {
 
 #[derive(Clone, Debug)]
 pub(super) enum LabelsProperty {
-    Class,
+    Class(CharacteristicView),
     Kind(CharacteristicView),
-    Traits,
+    Traits(CharacteristicView),
     Names,
 }
 
@@ -249,6 +250,26 @@ fn compile(
     }
 }
 
+fn keyword_filter(
+    abilities: &Expr<Vec<AbilityReference>>,
+    predicate: &AbilityPredicate,
+    binding: Binding<ObjectRef>,
+) -> bool {
+    matches!(abilities, Expr::Live(read)
+        if matches!(read.as_ref(), AbilitiesRead::Abilities { object, view: CharacteristicView::Effective }
+            if candidate(object, binding)))
+        && predicate.kind.is_none()
+        && predicate.except.is_empty()
+        && predicate.holder.is_none()
+        && predicate.origin.is_none()
+        && (predicate.keyword == Some(KeywordId::Evolution)
+            || matches!(
+                predicate.keyword,
+                Some(KeywordId::Stack | KeywordId::EarthRite | KeywordId::Lastword)
+            )
+            || predicate.keyword.and_then(super::grant::keyword).is_some())
+}
+
 fn boolean_atom(
     expression: &Expr<Bool>,
     binding: Binding<ObjectRef>,
@@ -292,7 +313,7 @@ fn boolean_atom(
         Predicate::HasAbility {
             abilities,
             predicate,
-        } if super::search::keyword_filter(abilities, predicate, binding) => {
+        } if keyword_filter(abilities, predicate, binding) => {
             predicate.keyword.map(BooleanProperty::Keyword)
         }
         _ => None,
@@ -313,7 +334,11 @@ fn atomic(expression: &Expr<Bool>, binding: Binding<ObjectRef>, policy: Policy) 
         } if !class.0.is_empty()
             && matches!(read.as_ref(), ClassRead::Class { object,view } if candidate(object,binding) && (*view==CharacteristicView::Effective || (policy==Policy::Search && *view==CharacteristicView::Original))) =>
         {
-            (LabelsProperty::Class, Names::Literal(vec![class.0.clone()]))
+            let ClassRead::Class { view, .. } = read.as_ref();
+            (
+                LabelsProperty::Class(*view),
+                Names::Literal(vec![class.0.clone()]),
+            )
         }
         Predicate::KindEquals {
             left: Expr::Live(read),
@@ -341,8 +366,9 @@ fn atomic(expression: &Expr<Bool>, binding: Binding<ObjectRef>, policy: Policy) 
         } if (policy == Policy::Search || !trait_id.0.is_empty())
             && matches!(read.as_ref(), TraitsRead::Traits { object,view } if candidate(object,binding) && (*view==CharacteristicView::Effective || (policy==Policy::Search && *view==CharacteristicView::Original))) =>
         {
+            let TraitsRead::Traits { view, .. } = read.as_ref();
             (
-                LabelsProperty::Traits,
+                LabelsProperty::Traits(*view),
                 Names::Literal(vec![trait_id.0.clone()]),
             )
         }

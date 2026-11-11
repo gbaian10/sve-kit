@@ -7,11 +7,9 @@ use crate::ir::observation_selection::{
     CardTotals, card_totals, private_hand_choice, private_look_choice,
 };
 use crate::ir::{
-    Action, Binding, BoolRead, BooleanState, CardName, Cardinality, CharacteristicView,
-    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead, Info,
-    IntOperation, KindRead, MemberProjection, NamesRead, Node, NumberRead, ObjectOperand,
-    ObjectProperty, ObjectReceipt, ObjectView, PlaySlot, PlayerRef, PlayerRelation, PostureRead,
-    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
+    Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
+    MemberProjection, Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot, PlayerRef,
+    PlayerRelation, ScopeId, SelectionConstraint, SelectionGroup, Selector,
 };
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
@@ -919,25 +917,6 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
     }
 }
 
-fn candidate_view(view: &ObjectView, candidate: Binding<ObjectRef>) -> bool {
-    matches!(view, ObjectView::Current { object } if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
-}
-
-fn candidate_number(read: &NumberRead, candidate: Binding<ObjectRef>) -> bool {
-    match read {
-        NumberRead::Cost {
-            object,
-            view: CharacteristicView::Original | CharacteristicView::Effective,
-        }
-        | NumberRead::Stats {
-            object,
-            view: CharacteristicView::Effective,
-            property: Stat::Life | Stat::Attack,
-        } => candidate_view(object, candidate),
-        _ => false,
-    }
-}
-
 fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr<Bool>)> {
     let Selector::Filter {
         input,
@@ -957,112 +936,17 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
     .then_some((*binding, predicate))
 }
 
-// Private reads use only sealed source information; public candidates may compare against the
-// holder's own card names instead ("これと同名を除く" on formal targets).
-fn permitted_names(value: &Expr<Vec<CardName>>, private_observation: bool) -> bool {
-    if private_observation || matches!(value, Expr::Literal(_)) {
-        return super::super::search::search_names(value);
-    }
-    matches!(value, Expr::Live(read) if matches!(read.as_ref(), NamesRead::Names { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})))
-}
-
 pub(in crate::game::internal) fn check_predicate(
     value: &Expr<Bool>,
     candidate: Binding<ObjectRef>,
     private_observation: bool,
 ) -> Result<()> {
-    match value {
-        Expr::Literal(Bool(true)) => Ok(()),
-        Expr::Live(read) if matches!(read.as_ref(), BoolRead::State { object, property: BooleanState::TokenStatus | BooleanState::FaceUp | BooleanState::Racing | BooleanState::EnteredThisTurn | BooleanState::Boxed } if candidate_view(object, candidate)) => {
-            Ok(())
-        }
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::And { predicates } | Predicate::Or { predicates }
-                if !predicates.is_empty() =>
-            {
-                for predicate in predicates {
-                    check_predicate(predicate, candidate, private_observation)?;
-                }
-                Ok(())
-            }
-            Predicate::Not { predicate } => {
-                check_predicate(predicate, candidate, private_observation)
-            }
-            _ => check_atomic_predicate(operation, candidate, private_observation),
-        },
-        _ => Err(unsupported("field target predicate")),
-    }
-}
-
-fn check_atomic_predicate(
-    operation: &Predicate,
-    candidate: Binding<ObjectRef>,
-    private_observation: bool,
-) -> Result<()> {
-    match operation {
-        Predicate::PostureEquals {
-            left: Expr::Live(read),
-            right: Expr::Literal(_),
-        } if matches!(read.as_ref(), PostureRead::Posture { object } if candidate_view(object, candidate)) => {
-            Ok(())
-        }
-        Predicate::EvolutionEquals {
-            left: Expr::Live(read),
-            right: Expr::Literal(_),
-        } if matches!(read.as_ref(), EvolutionRead::Evolution { object } if candidate_view(object, candidate)) => {
-            Ok(())
-        }
-        Predicate::HasAbility {
-            abilities,
-            predicate,
-        } if super::super::search::keyword_filter(abilities, predicate, candidate) => Ok(()),
-        Predicate::ClassEquals {
-            left: Expr::Live(read),
-            right: Expr::Literal(Info::Present(class)),
-        } if !class.0.is_empty()
-            && matches!(read.as_ref(), ClassRead::Class { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-        {
-            Ok(())
-        }
-        Predicate::KindEquals {
-            left: Expr::Live(read),
-            right: Expr::Literal(_),
-        } if matches!(read.as_ref(), KindRead::Kind { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) => {
-            Ok(())
-        }
-        Predicate::NamesIntersect {
-            left: Expr::Live(read),
-            right,
-        } if permitted_names(right, private_observation)
-            && matches!(read.as_ref(), NamesRead::Names { object } if candidate_view(object, candidate)) =>
-        {
-            Ok(())
-        }
-        Predicate::NameContains {
-            object,
-            name: Expr::Literal(name),
-        } if !name.0.is_empty() && candidate_view(object, candidate) => Ok(()),
-        Predicate::HasTrait {
-            traits: Expr::Live(read),
-            trait_id,
-        } if !trait_id.0.is_empty()
-            && matches!(read.as_ref(), TraitsRead::Traits { object, view: CharacteristicView::Effective } if candidate_view(object, candidate)) =>
-        {
-            Ok(())
-        }
-        Predicate::CompareInt {
-            left: Expr::Compute(left),
-            comparison: Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual,
-            right,
-        } if public_numbers::check(right)
-            && matches!(left.as_ref(), IntOperation::InformationOrZero { information } if candidate_number(information, candidate)) =>
-        {
-            Ok(())
-        }
-        _ => Err(unsupported(
-            "unstable or unsupported field target predicate",
-        )),
-    }
+    let policy = if private_observation {
+        super::super::conditions::Policy::PrivateSelection
+    } else {
+        super::super::conditions::Policy::Selection
+    };
+    super::super::conditions::ConditionPlan::compile(value, candidate, policy).map(|_checked| ())
 }
 
 pub(in crate::game::internal) fn matches_candidate(
@@ -1690,7 +1574,6 @@ impl Execution {
             } => {
                 let zone = candidate_zone(selector, allow_resolution_zones)?;
                 // Public candidates may exclude the source's own names ("これと同名を除く").
-                check_predicate(predicate, *binding, false)?;
                 let predicate = super::super::conditions::ConditionPlan::compile(
                     predicate,
                     *binding,
@@ -1724,7 +1607,6 @@ impl Execution {
                 predicate,
             } => {
                 let private_look = private_look_filter(selector).is_some();
-                check_predicate(predicate, *binding, private_look)?;
                 let policy = if private_look {
                     super::super::conditions::Policy::PrivateSelection
                 } else {

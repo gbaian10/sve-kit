@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/condition_inputs.rs"]
+mod condition_inputs;
 #[path = "card/dice.rs"]
 mod dice;
 #[path = "card/event_combat_life.rs"]
