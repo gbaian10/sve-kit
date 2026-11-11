@@ -5,20 +5,16 @@ use super::super::observation::EffectOrigin;
 use crate::game::player::Viewer;
 use crate::game::player::observation::PendingTrigger;
 use crate::game::player::observation::TriggerTiming;
-use crate::ir::events::banish as banish_header;
-use crate::ir::events::discard as discard_header;
-use crate::ir::events::drive as drive_header;
-use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::fusion::material_filter;
 use crate::ir::events::timing::leave_filter;
 use crate::ir::optional_payment;
 use crate::ir::{HistoryCount, LimitSpec, Requirements, ScopeId};
 
-use super::super::source::{EventObject, SourceInformation, SourceSnapshot};
+use super::super::source::{SourceInformation, SourceSnapshot};
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, player_id};
 use super::{
-    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Execution, Game, Located, PlayerId,
-    Result, RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
+    Ability, AbilityKind, AbilityOrigin, CardPlay, Context, Game, Located, PlayerId, Result,
+    RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
 use crate::ir::{
@@ -764,27 +760,14 @@ impl Game {
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
-            pending.bind_event_move(&mut execution)?;
-            pending.bind_event_object(&mut execution)?;
+            execution.event_reads = super::super::event_reads::EventReads::capture(
+                pending.ability.node.trigger.as_ref(),
+                pending.timing.as_ref(),
+                pending.leave,
+                pending.movement_after,
+                pending.subject_information.as_ref(),
+            )?;
             execution.slots.extend(pending.captures.clone());
-            if let (Some(EventPayload::EnterField { event }), Some(trigger)) =
-                (&pending.timing, &pending.ability.node.trigger)
-                && let TriggerCondition::Event {
-                    pattern: EventPattern::EnterField { binding, .. },
-                } = &trigger.on
-            {
-                execution.entry_method = Some((binding.key(), event.method));
-                execution.entry_origin = Some((binding.key(), event.from));
-            }
-            if let (Some(EventPayload::Damage { event }), Some(trigger)) =
-                (&pending.timing, &pending.ability.node.trigger)
-                && let TriggerCondition::Event {
-                    pattern: EventPattern::Damage { binding, .. },
-                } = &trigger.on
-            {
-                execution.damage_event = Some((binding.key(), *event));
-            }
-            dice::bind_event(&mut execution, &pending);
             execution.ability = Some(pending.source);
             execution.trigger_occurrence = Some(pending.id);
             execution.source_information = Some(pending.information);
@@ -913,87 +896,6 @@ impl PendingOccurrence {
             game.information_snapshot(event.object_before)?
                 .at(event.lki.snapshot),
         );
-        Ok(())
-    }
-
-    fn bind_event_object(&self, execution: &mut Execution) -> Result<()> {
-        use crate::ir::events::subject::SubjectFields;
-        let Some(trigger) = &self.ability.node.trigger else {
-            return Ok(());
-        };
-        let TriggerCondition::Event { pattern } = &trigger.on else {
-            return Ok(());
-        };
-        if let Some(binding) = equipment_event::binding(pattern) {
-            let Some(EventPayload::Equip { event }) = &self.timing else {
-                return Err(invalid("missing triggering equipment payload"));
-            };
-            execution.event_object = Some(EventObject {
-                expression: equipment_event::holder(binding),
-                reference: event.holder,
-                information: None,
-            });
-            return Ok(());
-        }
-        if let Some(binding) = drive_header::checked_binding(pattern) {
-            let Some(EventPayload::DriveChecked { event }) = &self.timing else {
-                return Err(invalid("missing completed Drive check"));
-            };
-            execution.event_object = Some(EventObject {
-                expression: drive_header::holder(binding),
-                reference: event.holder.holder,
-                information: None,
-            });
-            return Ok(());
-        }
-        let Some(fields) = SubjectFields::from_pattern(pattern) else {
-            return Ok(());
-        };
-        let departure = self.leave.map(|event| EventPayload::LeaveField { event });
-        let payload = self
-            .timing
-            .as_ref()
-            .or(departure.as_ref())
-            .ok_or_else(|| invalid("missing triggering subject payload"))?;
-        let object = fields
-            .payload_object(payload)
-            .ok_or_else(|| invalid("triggering subject payload type disagrees"))?;
-        if let (SubjectFields::Attack(binding), Some(EventPayload::Attack { event })) =
-            (fields, self.timing.as_ref())
-        {
-            execution.attack_event = Some((binding, *event));
-        }
-        execution.event_object = Some(EventObject {
-            expression: fields.object(),
-            reference: object,
-            information: self.subject_information.clone(),
-        });
-        Ok(())
-    }
-
-    fn bind_event_move(&self, execution: &mut Execution) -> Result<()> {
-        use crate::ir::MovementEvent;
-        if let Some(trigger) = &self.ability.node.trigger {
-            let event = match &trigger.on {
-                TriggerCondition::Event {
-                    pattern: EventPattern::LeaveField { binding, .. },
-                } => {
-                    if self.movement_after.is_none() {
-                        return Err(invalid("missing committed departure"));
-                    }
-                    Some(MovementEvent::LeaveField { event: *binding })
-                }
-                _ => discard_header::self_event(trigger)
-                    .map(|event| MovementEvent::Discard { event })
-                    .or_else(|| {
-                        banish_header::self_event(trigger)
-                            .map(|event| MovementEvent::Banish { event })
-                    }),
-            };
-            if let Some(event) = event {
-                execution.event_move = Some((event, self.movement_after));
-            }
-        }
         Ok(())
     }
 

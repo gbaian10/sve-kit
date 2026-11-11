@@ -177,7 +177,7 @@ impl ReceiptReads {
         Ok(inspected)
     }
 
-    fn mask_number(&self, number: &mut Expr<Int>) -> Result<()> {
+    fn mask_number(&self, number: &mut Expr<Int>, deck_count: bool) -> Result<()> {
         if let Expr::Compute(operation) = number {
             match operation.as_mut() {
                 IntOperation::Sum { objects, property }
@@ -193,6 +193,20 @@ impl ReceiptReads {
                 IntOperation::FromNat {
                     value: Expr::Compute(natural),
                 } => match natural.as_ref() {
+                    NatOperation::ReceiptCount {
+                        receipt,
+                        projection,
+                        member,
+                        predicate,
+                    } if deck_count => {
+                        if !self.cemetery.contains(&local_receipt(receipt)?) {
+                            return Err(unsupported(
+                                "filtered count outside a deck-to-cemetery producer",
+                            ));
+                        }
+                        check_count(receipt, *projection, *member, predicate)?;
+                        *number = Expr::Literal(Int(0));
+                    }
                     NatOperation::DistinctCount {
                         objects,
                         property: ObjectProperty::Names,
@@ -222,7 +236,7 @@ impl ReceiptReads {
                 },
                 IntOperation::Arithmetic { arguments, .. } => {
                     for argument in arguments {
-                        self.mask_number(argument)?;
+                        self.mask_number(argument, deck_count)?;
                     }
                 }
                 _ => {}
@@ -233,7 +247,7 @@ impl ReceiptReads {
 
     fn mask_change(&self, change: &mut NumericChange) -> Result<()> {
         let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
-        self.mask_number(amount)
+        self.mask_number(amount, false)
     }
 
     fn mask_patch(&self, patch: &mut CharacteristicPatch) -> Result<()> {
@@ -253,12 +267,13 @@ impl ReceiptReads {
         match node {
             Node::Capture {
                 capture: Capture::Integer { value, .. },
-            } => self.mask_number(value),
+            } => self.mask_number(value, false),
             Node::Instruction { instruction } => match &mut instruction.action {
                 Action::Damage {
                     amount: DamageAmount::Uniform { amount },
                     ..
-                } => self.mask_number(amount),
+                } => self.mask_number(amount, false),
+                Action::Resource { amount, .. } => self.mask_number(amount, true),
                 Action::Life { change, .. } => self.mask_change(change),
                 Action::Modify { patch, .. } => self.mask_patch(patch),
                 _ => Ok(()),
@@ -291,8 +306,8 @@ impl ReceiptReads {
                 *condition = Expr::Literal(Bool(false));
             }
             Predicate::CompareInt { left, right, .. } => {
-                self.mask_number(left)?;
-                self.mask_number(right)?;
+                self.mask_number(left, false)?;
+                self.mask_number(right, false)?;
             }
             Predicate::ReceiptAny {
                 receipt:

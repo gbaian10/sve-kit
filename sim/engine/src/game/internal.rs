@@ -17,22 +17,22 @@ use crate::ir::{
     BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
     ChoiceDomain, Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
-    DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, EntryMethod,
-    EntryOrigin, ExecutionId, Expr, FlipOutcome, FusedEvent, Generation, InstallationSubjects,
-    Instruction, InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent,
-    Located, LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, MovementEvent, Nat,
-    NatFrozen, NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef,
-    OrderOutcome, PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent,
-    Predicate, Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements,
-    ResolvedRecipients, RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome,
-    SearchReplacementAnswer, Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome,
-    TransformOutcome, TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
+    DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, ExecutionId,
+    Expr, FlipOutcome, FusedEvent, Generation, InstallationSubjects, Instruction,
+    InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
+    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
+    NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
+    PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
+    Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
+    RuntimeAbilitySource, RuntimeDamageRecipient, ScopeId, SearchOutcome, SearchReplacementAnswer,
+    Selector, SourceSpan, StepwiseAnswer, StepwiseMode, TokenOutcome, TransformOutcome,
+    TriggerIcon, Visibility, WellFormedProgram, ZoneKind,
 };
 use crate::ir::{
     AssociationId, BanishOutcome, DiscardEvent, DiscardOutcome, DriveGainedEvent, EvolveEvent,
     FaceId, PaymentEvent, PaymentResult, QuickWindow, RaceEvent,
 };
-use crate::ir::{AttackEvent, DiceEvent, EquipEvent};
+use crate::ir::{DiceEvent, EquipEvent};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -64,6 +64,7 @@ pub(in crate::game) use dice::DiceHistoryFact;
 mod drive;
 mod duration;
 mod earth;
+mod event_reads;
 pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
@@ -621,13 +622,7 @@ pub(super) struct Execution {
     ability: Option<RuntimeAbilitySource>,
     source_information: Option<source::SourceInformation>,
     trigger_occurrence: Option<u64>,
-    event_object: Option<source::EventObject>,
-    attack_event: Option<(Binding<AttackEvent>, AttackEvent)>,
-    entry_method: Option<((ScopeId, u64), EntryMethod)>,
-    entry_origin: Option<((ScopeId, u64), EntryOrigin)>,
-    damage_event: Option<((ScopeId, u64), DamageEvent)>,
-    dice_event: Option<(Binding<DiceEvent>, DiceEvent)>,
-    event_move: Option<(MovementEvent, Option<ObjectRef>)>,
+    event_reads: event_reads::EventReads,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
     play: Option<PlayState>,
     spell: bool,
@@ -808,13 +803,7 @@ impl Game {
                 ability: None,
                 source_information: None,
                 trigger_occurrence: None,
-                event_object: None,
-                attack_event: None,
-                entry_method: None,
-                entry_origin: None,
-                damage_event: None,
-                dice_event: None,
-                event_move: None,
+                event_reads: event_reads::EventReads::default(),
                 targets: BTreeMap::new(),
                 play: None,
                 spell: false,

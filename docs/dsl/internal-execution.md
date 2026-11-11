@@ -536,6 +536,15 @@ Resource(Add)。EP 不套用 PP 的上限，PP、最大 PP 與 SEP 保持原值�
 沿既有公開「EP変化」事件保留來源；不新增一般資源事件 consumer、result 或 after。
 EP 付款及進化程序仍由原付款邊界處理，不因本文增加而重設進化次數。
 
+### 內部 IR 的資源數量
+
+`Resource(Add)` 的控制者 PP／最大 PP／EP 數量使用共用數值計畫檢查非負下界，
+並在各次指示開始求值一次；零請求保留完成收據，三種資源都不產生增加事件。
+組合算式仍以 checked arithmetic 求值，溢位不能被 PP 上限掩蓋；EP 表示範圍溢位
+回復整份執行。公開數量與本次已驗證的成功牌庫送墓回條沿原讀值權限，不能藉
+資源 consumer 選取隱藏物件或偽造 producer。作者 `pp`／`pp_max`／`ep` 入口仍限
+上節的正整數常值；這個 IR 數量邊界不擴充作者入口、付款或 SEP。
+
 ## 觀察與測試種子
 
 `internal_decision(view)` 只向 actor 或 Referee 提供目前 token／actor／輸入形狀，
