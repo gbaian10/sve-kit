@@ -16,6 +16,7 @@ mod grants;
 mod history;
 pub mod internal;
 mod keywords;
+mod knowledge;
 mod legal;
 mod movement;
 mod nested;
@@ -41,6 +42,7 @@ mod view;
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::fmt;
+use knowledge::Knowledge;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -107,13 +109,6 @@ struct Player {
     title_code: String,
     deck_list: Value,
     zones: BTreeMap<String, Vec<Value>>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-struct Knowledge {
-    seen: BTreeMap<String, Value>,
-    located: BTreeSet<String>,
-    carried: Vec<Value>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

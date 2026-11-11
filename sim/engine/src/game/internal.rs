@@ -1848,7 +1848,7 @@ impl Game {
         // Historical identity may remain known; it must not locate the new private slot.
         for (viewer, knowledge) in &mut self.state.knowledge {
             if viewer != seat {
-                knowledge.located.remove(&id);
+                knowledge.forget_location(&id);
             }
         }
         let object = execution.reference(self, &id)?;

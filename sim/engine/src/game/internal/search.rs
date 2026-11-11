@@ -1369,7 +1369,7 @@ impl Game {
                 let id = execution.object_id(movement.before)?;
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if viewer != seat {
-                        knowledge.located.remove(id);
+                        knowledge.forget_location(id);
                     }
                 }
             }

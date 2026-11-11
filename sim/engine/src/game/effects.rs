@@ -767,7 +767,7 @@ impl Game {
                     .state
                     .knowledge
                     .get(viewer)
-                    .is_some_and(|k| k.located.contains(id));
+                    .is_some_and(|k| k.located().contains(id));
                 if !matches!(destination, "hand" | "deck" | "evolve_deck")
                     || (owner == viewer && destination == "hand")
                     || was_known
@@ -1095,7 +1095,7 @@ impl Game {
         self.player_mut(seat)?.zones.insert("deck".into(), deck);
         for knowledge in self.state.knowledge.values_mut() {
             for id in ids {
-                knowledge.located.remove(id);
+                knowledge.forget_location(id);
             }
         }
         Ok(())

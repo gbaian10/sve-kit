@@ -15,19 +15,6 @@ use crate::{EngineFailure, Result, invalid};
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
-    pub(super) fn learn(&mut self, seat: &str, id: &str, located: bool) {
-        let Some(object) = self.state.objects.get(id) else {
-            return;
-        };
-        let knowledge = self.state.knowledge.entry(seat.into()).or_default();
-        knowledge.seen.entry(id.into()).or_insert_with(
-            || json!({"id":id,"card":object.card,"owner":object.owner,"from":self.node}),
-        );
-        if located {
-            knowledge.located.insert(id.into());
-        }
-    }
-
     /// The actual outgoing packet. No adapter applies a second visibility filter.
     ///
     /// # Errors
@@ -72,7 +59,7 @@ impl Game {
                         self.state
                             .knowledge
                             .get(seat)
-                            .is_some_and(|k| k.located.contains(id))
+                            .is_some_and(|k| k.located().contains(id))
                     });
                     if can_see {
                         let object = self.object(id)?;
@@ -108,7 +95,7 @@ impl Game {
         }
         packet["semantic_state"] = self.semantic_projection(view);
         let knowledge = seat.and_then(|seat| self.state.knowledge.get(seat));
-        packet["knowledge"] = knowledge.map_or_else(||json!({"identifiable":self.state.objects.keys().collect::<Vec<_>>(),"carried":[]}),|knowledge|json!({"identifiable":knowledge.seen.keys().collect::<Vec<_>>(),"located":knowledge.located,"carried":knowledge.carried}));
+        packet["knowledge"] = knowledge.map_or_else(||json!({"identifiable":self.state.objects.keys().collect::<Vec<_>>(),"carried":[]}),|knowledge|json!({"identifiable":knowledge.seen.keys().collect::<Vec<_>>(),"located":knowledge.located(),"carried":knowledge.carried}));
         packet["known_cards"] = knowledge.map_or_else(||json!([]),|knowledge| {
             json!(
                 knowledge

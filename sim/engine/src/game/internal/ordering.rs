@@ -785,7 +785,7 @@ impl Game {
                 .state
                 .knowledge
                 .get(seat)
-                .is_some_and(|knowledge| knowledge.located.contains(id))
+                .is_some_and(|knowledge| knowledge.located().contains(id))
             {
                 return Err(unsupported(
                     "private order requires current observation evidence",
@@ -906,7 +906,7 @@ impl Game {
             for (viewer, knowledge) in &mut self.state.knowledge {
                 let revoked = if viewer == seat { reordered } else { original };
                 for id in revoked {
-                    knowledge.located.remove(id);
+                    knowledge.forget_location(id);
                 }
             }
         }

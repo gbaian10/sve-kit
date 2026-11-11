@@ -171,7 +171,7 @@ impl Game {
                 .unwrap_or(owner);
             if let Some(knowledge) = self.state.knowledge.get_mut(other(chooser)) {
                 for plan in hidden {
-                    knowledge.located.remove(&plan.previous.id);
+                    knowledge.forget_location(&plan.previous.id);
                 }
             }
         }
