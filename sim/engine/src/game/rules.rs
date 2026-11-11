@@ -772,7 +772,7 @@ impl Game {
         Ok(())
     }
 
-    fn start_end(&mut self) -> Result<()> {
+    pub(in crate::game) fn start_end(&mut self) -> Result<()> {
         let before = SnapshotId(self.state.ir_epoch);
         self.state.turn["phase"] = json!("end");
         self.state.flow = json!({"kind":"end","stage":"triggers"});
@@ -801,9 +801,14 @@ impl Game {
                 return Ok(false);
             }
         }
-        self.change_posture(&selected, true, &json!({"decision":self.node}))?;
-        self.state.flow["stage"] = json!("quick");
+        self.apply_end_guard(&selected)?;
         Ok(true)
+    }
+
+    pub(in crate::game) fn apply_end_guard(&mut self, selected: &[String]) -> Result<()> {
+        self.change_posture(selected, true, &json!({"decision":self.node}))?;
+        self.state.flow["stage"] = json!("quick");
+        Ok(())
     }
 
     fn end_discard(&mut self, decision: &Value) -> Result<bool> {
@@ -819,15 +824,20 @@ impl Game {
             .iter()
             .map(|id| string(id).to_owned())
             .collect::<Vec<_>>();
+        self.apply_end_discard(&selected)?;
+        Ok(true)
+    }
+
+    pub(in crate::game) fn apply_end_discard(&mut self, selected: &[String]) -> Result<()> {
         let frame = Frame {
             controller: self.active().into(),
             cause: json!({"rule":"7.4.7"}),
             ..Frame::default()
         };
-        let pending = self.internal_prepare_rule_discard(&selected, &frame)?;
-        self.discard(&selected, &frame)?;
+        let pending = self.internal_prepare_rule_discard(selected, &frame)?;
+        self.discard(selected, &frame)?;
         self.internal_commit_rule_discard(pending)?;
-        Ok(true)
+        Ok(())
     }
     fn next_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.close()?;

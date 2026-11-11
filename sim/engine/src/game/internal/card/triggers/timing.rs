@@ -233,7 +233,18 @@ impl Game {
                 | "choose-start-amulet"
                 | "choose-first"
                 | "mulligan"
-        ) || self.typed.is_some()
+        ) {
+            return Err(unsupported("internal rule action or timing"));
+        }
+        self.check_internal_rule_input()?;
+        let node = format!("internal-rule-{}", self.state.next_decision);
+        let result = self.apply_rule_decision(decision, &node)?;
+        self.state.next_decision = self.state.next_decision.saturating_add(1);
+        Ok(result)
+    }
+
+    pub(in crate::game) fn check_internal_rule_input(&self) -> Result<()> {
+        if self.typed.is_some()
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
             || self.card_runtime.question.is_some()
@@ -243,11 +254,7 @@ impl Game {
             return Err(unsupported("internal rule action or timing"));
         }
         self.internal_prototype_abilities()?;
-        self.check_internal_resources()?;
-        let node = format!("internal-rule-{}", self.state.next_decision);
-        let result = self.apply_rule_decision(decision, &node)?;
-        self.state.next_decision = self.state.next_decision.saturating_add(1);
-        Ok(result)
+        self.check_internal_resources()
     }
 
     fn timing_abilities(&self, holder: &str) -> Result<Vec<EffectiveAbility>> {
