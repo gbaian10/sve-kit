@@ -803,8 +803,10 @@ impl Checker {
                 scope: super::RemoveScope::AllAtTime {},
                 duration,
                 timestamp,
-            } if duration.end == (super::DurationEnd::NoTemporalExpiry {})
-                && duration.anchor == (super::TimeAnchor::Installation {})
+            } if matches!(
+                duration.end,
+                super::DurationEnd::NoTemporalExpiry {} | super::DurationEnd::CurrentTurnEnd {}
+            ) && duration.anchor == (super::TimeAnchor::Installation {})
                 && duration.usage.is_none()
                 && duration.intervals.is_empty()
                 && *timestamp

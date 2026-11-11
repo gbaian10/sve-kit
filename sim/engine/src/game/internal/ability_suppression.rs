@@ -57,13 +57,12 @@ pub(super) fn check_loss(action: &Action) -> Result<()> {
     else {
         return Err(unsupported("one formal target ability removal"));
     };
-    if *duration
-        != (Duration {
-            end: DurationEnd::NoTemporalExpiry {},
-            anchor: TimeAnchor::Installation {},
-            usage: None,
-            intervals: vec![],
-        })
+    if !matches!(
+        duration.end,
+        DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
+    ) || duration.anchor != (TimeAnchor::Installation {})
+        || duration.usage.is_some()
+        || !duration.intervals.is_empty()
         || *timestamp
             != (TimestampBasis::ProperPlay {
                 execution: ExecutionRef::Current {},

@@ -1,0 +1,40 @@
+cards:
+  BP11-041:
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - apply:
+                "on": enemy
+                effect:
+                  lose_abilities: {}
+                until: turn
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_orig_costs:
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 6
+                then:
+                  - life:
+                      who: self
+                      delta: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
