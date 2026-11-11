@@ -7,23 +7,24 @@ use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
+use crate::ir::observation::{self, Consumer, LeafKind, Shape};
 use crate::ir::prevention;
 use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
     ChoiceDomain, Control, Expr, GrantedAbility, Holder, InstallationSubjects, Instruction, Int,
-    IntOperation, IntRead, Located, LookOutcome, MemberProjection, MoveDestination,
-    MovementReceipt, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
-    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
-    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
-    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    IntOperation, IntRead, Located, LookOutcome, MemberProjection, MoveDestination, Nat, NatRead,
+    Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId,
+    PlayerRef, PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet,
+    Requirements, ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView,
+    Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
     ObjectProperty,
 };
-use crate::ir::{InstructionContext, NumericProperty, RevealUntilMembers};
+use crate::ir::{InstructionContext, NumericProperty};
 use alloc::collections::BTreeSet;
 use serde_json::json;
 
@@ -166,8 +167,14 @@ pub(super) fn check_node_with_x(
         };
         // Private selectors are admitted only on the spine evaluated with observation authority.
         let mut leaves = Vec::new();
-        if let Some(cards) = cards {
-            order_leaves(cards, false, &mut leaves);
+        if let Some(cards) = cards
+            && !observation::visit(cards, Consumer::Order, &mut |leaf| {
+                if leaf.public_order {
+                    leaves.push(leaf.selector);
+                }
+            })
+        {
+            return Err(unsupported("order observation spine"));
         }
         for leaf in leaves {
             check_node(
@@ -655,42 +662,6 @@ fn mask_public_predicate(selector: &mut Selector) {
     }
 }
 
-fn order_leaves<'selector>(
-    selector: &'selector Selector,
-    remainder: bool,
-    leaves: &mut Vec<&'selector Selector>,
-) {
-    match selector {
-        Selector::ReceiptMembers {
-            receipt:
-                ObjectReceipt::Look { .. }
-                | ObjectReceipt::RevealUntil {
-                    members: RevealUntilMembers::Revealed,
-                    ..
-                },
-            ..
-        } => {}
-        // A reorder receipt only subtracts already ordered cards from the same private spine.
-        Selector::ReceiptMembers {
-            receipt:
-                ObjectReceipt::Movement {
-                    receipt: MovementReceipt::Order { .. },
-                },
-            projection: MemberProjection::Before,
-        } if remainder => {}
-        Selector::Union { sets } => {
-            for set in sets {
-                order_leaves(set, remainder, leaves);
-            }
-        }
-        Selector::Difference { input, except } => {
-            order_leaves(input, remainder, leaves);
-            order_leaves(except, true, leaves);
-        }
-        _ => leaves.push(selector),
-    }
-}
-
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Ordering mutates the same authoritative deck and observation state."
@@ -772,7 +743,7 @@ impl Game {
         if execution.players(self, players)? != vec![player] {
             return Err(unsupported("order audience"));
         }
-        let cards = execution.observed_objects(self, cards, player)?;
+        let cards = execution.observed_objects(self, cards, player, Consumer::Order)?;
         let mut unique = BTreeSet::new();
         let seat = seat_name(player)?;
         let deck = self.internal_known_deck(seat)?;
@@ -948,40 +919,72 @@ impl Execution {
         game: &Game,
         selector: &Selector,
         actor: PlayerId,
+        consumer: Consumer,
     ) -> Result<Vec<ObjectRef>> {
-        match selector {
-            Selector::ReceiptMembers {
-                receipt: ObjectReceipt::RevealUntil { receipt, members },
-                projection: MemberProjection::Before,
-            } => self.revealed_objects(receipt, *members),
-            Selector::ReceiptMembers {
-                receipt: ObjectReceipt::Look { receipt },
-                projection: MemberProjection::Before | MemberProjection::After,
-            } => {
-                let ReceiptLocation::Local { id } = receipt.location() else {
-                    return Err(unsupported("iteration look receipt"));
-                };
-                if self.look_viewers.get(id) != Some(&actor) {
-                    return Err(unsupported("private look audience"));
+        self.observed_members(
+            game,
+            selector,
+            actor,
+            consumer,
+            observation::Position::Input,
+        )
+    }
+
+    fn observed_members(
+        &self,
+        game: &Game,
+        selector: &Selector,
+        actor: PlayerId,
+        consumer: Consumer,
+        position: observation::Position,
+    ) -> Result<Vec<ObjectRef>> {
+        match observation::classify(selector, consumer, position) {
+            Some(Shape::Leaf(leaf)) if leaf.public_order => self.objects(game, leaf.selector),
+            Some(Shape::Leaf(leaf)) => match leaf.kind {
+                LeafKind::Look(receipt) => {
+                    let ReceiptLocation::Local { id } = receipt.location() else {
+                        return Err(unsupported("iteration look receipt"));
+                    };
+                    if self.look_viewers.get(id) != Some(&actor) {
+                        return Err(unsupported("private look audience"));
+                    }
+                    let Some(InstructionOutcome::Look(outcome)) = self.receipts.get(id) else {
+                        return Err(invalid("missing look receipt"));
+                    };
+                    Ok(outcome.looked.iter().map(|member| member.object).collect())
                 }
-                let Some(InstructionOutcome::Look(outcome)) = self.receipts.get(id) else {
-                    return Err(invalid("missing look receipt"));
-                };
-                Ok(outcome.looked.iter().map(|member| member.object).collect())
-            }
-            Selector::Difference { input, except } => {
-                let input = self.observed_objects(game, input, actor)?;
-                let except = self.observed_objects(game, except, actor)?;
+                LeafKind::MovementBefore(receipt) => self.movement_before(receipt),
+                LeafKind::RevealUntil {
+                    receipt,
+                    members,
+                    projection: MemberProjection::Before,
+                } => self.revealed_objects(receipt, members),
+                LeafKind::RevealUntil { .. } => Err(crate::EngineFailure::Invariant(
+                    "admission excluded reveal-until projection".into(),
+                )),
+                LeafKind::Public => Err(crate::EngineFailure::Invariant(
+                    "nonpublic observation leaf used the Order public reader".into(),
+                )),
+            },
+            Some(Shape::Difference { input, except }) => {
+                let input = self.observed_members(game, input, actor, consumer, position)?;
+                let except = self.observed_members(
+                    game,
+                    except,
+                    actor,
+                    consumer,
+                    observation::Position::Except,
+                )?;
                 Ok(input
                     .into_iter()
                     .filter(|object| !except.contains(object))
                     .collect())
             }
-            Selector::Union { sets } => {
+            Some(Shape::Union(sets)) => {
                 let mut seen = BTreeSet::new();
                 let mut result = Vec::new();
                 for set in sets {
-                    for object in self.observed_objects(game, set, actor)? {
+                    for object in self.observed_members(game, set, actor, consumer, position)? {
                         if seen.insert((object.id, object.generation)) {
                             result.push(object);
                         }
@@ -989,7 +992,9 @@ impl Execution {
                 }
                 Ok(result)
             }
-            _ => self.objects(game, selector),
+            None => Err(crate::EngineFailure::Invariant(
+                "admission excluded observation consumer shape".into(),
+            )),
         }
     }
 }

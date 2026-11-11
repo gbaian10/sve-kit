@@ -217,3 +217,28 @@ Cost／Attack。材料必須是必付的一張己方場上從者，送往擁有�
 數量、付款來源與已付支配關係由 WF 驗證，runtime 再檢查 Payment 數量與保存的
 Characteristics。零費是有效值，缺失資訊則失敗；有號攻擊值仍保留。
 After、多張、可選未付分支、非付款的移動與其他數值屬性不取得這個投影。
+
+## 觀察集合的 consumer 邊界
+
+觀察集合的准入走訪與執行讀取共用 `ir::observation` 的葉分類器；它依 consumer 與 input／except 位置
+保留不同文法，不把各入口的允許來源取聯集。分類器不建立全域 receipt 白名單，也不取代
+原本的 producer／scope 證明、指示 metadata 與使用時的世代、區域及位置檢查。
+
+| consumer | 觀察葉與位置 | 結構與外層限制 |
+| --- | --- | --- |
+| Order | Look Before／After；Order Before 只在 except 略過公開 Capture 檢查；其他葉仍經原完整 Capture 檢查 | Union／Difference 遞迴、空 Union 保持空；RevealUntil 仍由全域 prefix 閘門拒絕；Bound 與一般 selector 不因共用分類器增加私有讀權 |
+| 私有觀察移動（墓場／EX） | Look Before／After；except 只接受 Move／Order Before | Union／Difference 遞迴；目的區、Put、position、order、posture 與 entry effects 的原限制保留 |
+| 已公開 Look 移到手牌／場上 | 原有直接 local Look Before，沿觀察移動文法檢查 | 執行仍讀已公開 Look，不借用私有 reader；尚未公開的讀取仍失敗 |
+| Bottom placement 後洗回 | Look Before 或 RevealUntil Revealed Before；except 限單個任意 Movement Before | Difference 只在 input 遞迴，Union 拒絕；必須緊接既有 Subset Shuffle，prefix／suffix 契約不變 |
+| 直接 Look Reveal | local Look Before | Bound 的選中手牌與單一整手牌仍走原獨立路徑；不授權任意 deck Bound |
+| Look 選擇 | Filter 的 input 為 Look Before | actor、visibility、群組、名稱互異、aggregate 與私有候選的條件政策維持原範圍 |
+
+Order 的一般葉必須經原 Capture／私有讀取的完整樹檢查，不能把「可求值」當成准入證明。
+例如藏在另一個 selector 下的私有 Look，不會因為外層被歸到一般葉就得到權限。
+Movement After 不會被誤讀為 Before；在 Order 中仍依原一般 selector 路徑處理。
+
+`Execution::observed_objects` 保留唯一的觀察集合運算：差集兩側都求值；聯集依物件與世代去重，
+保留第一次出現的順序。Look 仍檢查 viewer 並讀本次觀察；私有排除葉的 Movement Before
+直接重用 `receipt_members` 的成功成員投影，RevealUntil 直接讀原有揭露結果，不重新查現在的牌庫頂。
+Order 的已驗一般葉（包括其 Movement Before）仍派到一般 selector 求值器，保留原有的成員去重；
+其他 consumer 沒有通用退回路徑。

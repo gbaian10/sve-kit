@@ -3,6 +3,7 @@ use super::{
     AbilitySource, Action, BodyContext, Expr, Located, LoweringError, Node, SourceSpan, ast,
     unsupported,
 };
+use crate::ir::observation::{self, Consumer};
 use crate::ir::shuffle as shape;
 use crate::ir::{
     Binding, Bool, Cardinality, FollowPermission, Instruction, InstructionContext, InstructionId,
@@ -75,7 +76,7 @@ impl BodyContext<'_> {
                 return Err(unsupported(path));
             };
             let cards = self.shuffled_bottom_cards(observed, path)?;
-            if !shape::observation(&cards) {
+            if !observation::visit(&cards, Consumer::BottomShuffle, &mut |_| {}) {
                 return Err(unsupported(path));
             }
             (cards, Some(Position::Bottom {}))
