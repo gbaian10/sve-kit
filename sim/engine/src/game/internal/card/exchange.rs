@@ -1,3 +1,4 @@
+use super::super::conditions::{ConditionPlan, Policy};
 use super::play::PlayState;
 use super::selection::constraints::{DistinctProperties, PropertyKey, check_count, unique_handles};
 use super::static_keywords;
@@ -285,6 +286,8 @@ impl Game {
         let (predicate, standing) = exchange_shape::predicate(&group.selector)
             .ok_or_else(|| unsupported("exchange predicate"))?;
         search::check_predicate(predicate, *binding)?;
+        let condition =
+            ConditionPlan::compile(predicate, *binding, Policy::Search)?.prepare(None)?;
         let action = &route_step(exchange, index)?.action;
         let posture = matches!(action, Action::Posture { .. });
         let token_put = exchange.materials.len() == 2
@@ -303,7 +306,7 @@ impl Game {
         for id in self.zone_ids(controller, zone) {
             let object = self.object(&id)?;
             if (zone == "hand" && id == execution.context.source)
-                || !search::matches_candidate(self, &id, predicate)?
+                || !search::matches_candidate(self, &id, &condition)?
                 || ((posture || standing) && object.state["acted"] == true)
             {
                 continue;

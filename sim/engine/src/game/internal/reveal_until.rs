@@ -23,9 +23,9 @@ impl Game {
         }
         let Action::RevealUntil {
             deck,
+            candidate,
             predicate,
             required: Expr::Literal(Nat(required)),
-            ..
         } = &instruction.action
         else {
             return Err(unsupported("reveal-until action"));
@@ -33,6 +33,12 @@ impl Game {
         let player = execution.player(self, deck)?;
         let cards = self.internal_known_deck(seat_name(player)?)?;
         let required = usize::try_from(*required).map_err(invalid)?;
+        let predicate = &super::conditions::ConditionPlan::compile(
+            predicate,
+            *candidate,
+            super::conditions::Policy::Search,
+        )?
+        .prepare(None)?;
         let mut revealed = Vec::new();
         let mut matched = Vec::new();
         for id in &cards {

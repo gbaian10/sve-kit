@@ -569,6 +569,7 @@ impl Game {
         let Selector::Zone {
             players,
             zone,
+            binding,
             predicate,
             ..
         } = selector
@@ -576,7 +577,15 @@ impl Game {
             return Err(unsupported("material selector"));
         };
         // A holder-name exclusion reads the holder once, before any candidate is classified.
-        let predicate = &search::freeze_source_names(self, execution, predicate)?;
+        let predicate = &super::super::conditions::ConditionPlan::compile(
+            predicate,
+            *binding,
+            super::super::conditions::Policy::Search,
+        )?
+        .prepare(Some(&super::super::conditions::candidate::Operands {
+            game: self,
+            execution,
+        }))?;
         let mut members = vec![];
         for player in execution.players(self, players)? {
             for id in self.zone_ids(

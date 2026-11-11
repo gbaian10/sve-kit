@@ -1,18 +1,17 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
 use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
-use crate::game::{Object, list};
+use crate::game::Object;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation_selection::{
     CardTotals, card_totals, private_hand_choice, private_look_choice,
 };
 use crate::ir::{
-    Action, Binding, BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView,
-    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead,
-    EvolutionState, Info, Int, IntOperation, KindRead, MemberProjection, NamesRead, Node,
-    NumberRead, ObjectOperand, ObjectProperty, ObjectReceipt, ObjectView, PlaySlot, PlayerRef,
-    PlayerRelation, Posture, PostureRead, Predicate, ScopeId, SelectionConstraint, SelectionGroup,
-    Selector, Stat, TraitsRead,
+    Action, Binding, BoolRead, BooleanState, CardName, Cardinality, CharacteristicView,
+    ChoiceDomain, ClassRead, Comparison, Decision, DecisionKind, Disjointness, EvolutionRead, Info,
+    IntOperation, KindRead, MemberProjection, NamesRead, Node, NumberRead, ObjectOperand,
+    ObjectProperty, ObjectReceipt, ObjectView, PlaySlot, PlayerRef, PlayerRelation, PostureRead,
+    Predicate, ScopeId, SelectionConstraint, SelectionGroup, Selector, Stat, TraitsRead,
 };
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
@@ -91,7 +90,7 @@ pub(in crate::game::internal) struct TargetCharacteristics {
     controller: String,
     zone: String,
     kind: String,
-    traits: Vec<String>,
+    pub(in crate::game::internal) traits: Vec<String>,
     names: Vec<String>,
 }
 
@@ -1066,158 +1065,12 @@ fn check_atomic_predicate(
     }
 }
 
-fn matches_state(game: &Game, id: &str, read: &BoolRead) -> Result<bool> {
-    match read {
-        BoolRead::State {
-            property: BooleanState::Boxed,
-            ..
-        } => Ok(game.internal_boxed(id)),
-        BoolRead::State {
-            property: BooleanState::Racing,
-            ..
-        } => {
-            let object = game.object(id)?;
-            Ok(object.zone == "field"
-                && object.state["racing"] == true
-                && !list(&object.state["links"]["出走"]).is_empty())
-        }
-        BoolRead::State {
-            property: BooleanState::FaceUp,
-            ..
-        } => Ok(game.object(id)?.state["face_up"] == true),
-        BoolRead::State {
-            property: BooleanState::TokenStatus,
-            ..
-        } => Ok(game.object_type(id)?.contains("トークン")),
-        BoolRead::State {
-            property: BooleanState::EnteredThisTurn,
-            ..
-        } => {
-            let object = game.object(id)?;
-            Ok(object.zone == "field" && object.state["entered_this_turn"] == true)
-        }
-        _ => Err(unsupported("field target state filter")),
-    }
-}
-
-fn posture_equals(game: &Game, id: &str, posture: Posture) -> Result<bool> {
-    let object = game.object(id)?;
-    Ok(object.zone == "field"
-        && object.state["acted"].as_bool().unwrap_or(false) == (posture == Posture::Acted))
-}
-
-fn evolution_equals(game: &Game, id: &str, expected: EvolutionState) -> Result<bool> {
-    let object = game.object(id)?;
-    if object.zone != "field" || !game.object_type(id)?.contains("フォロワー") {
-        return Ok(false);
-    }
-    let actual = if object.state["super_evolved"] == true {
-        EvolutionState::SuperEvolved
-    } else if object.state["evolved"] == true {
-        EvolutionState::Evolved
-    } else {
-        EvolutionState::Base
-    };
-    Ok(actual == expected)
-}
-
 pub(in crate::game::internal) fn matches_candidate(
     game: &Game,
     id: &str,
-    value: &Expr<Bool>,
+    condition: &super::super::conditions::PreparedCondition,
 ) -> Result<bool> {
-    match value {
-        Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Live(read) => matches_state(game, id, read),
-        Expr::Compute(operation) => match operation.as_ref() {
-            Predicate::PostureEquals {
-                right: Expr::Literal(posture),
-                ..
-            } => posture_equals(game, id, *posture),
-            Predicate::EvolutionEquals {
-                right: Expr::Literal(expected),
-                ..
-            } => evolution_equals(game, id, *expected),
-            Predicate::HasAbility { predicate, .. } => {
-                super::super::search::matches_keyword(game, id, predicate)
-            }
-            Predicate::ClassEquals {
-                right: Expr::Literal(Info::Present(class)),
-                ..
-            } => {
-                Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
-                    == Some(class.0.as_str()))
-            }
-            Predicate::KindEquals {
-                right: Expr::Literal(kind),
-                ..
-            } => Ok(game.object_type(id)?.contains(match kind {
-                CardKind::Follower => "フォロワー",
-                CardKind::Spell => "スペル",
-                CardKind::Amulet => "アミュレット",
-                CardKind::EvolveFollower => "フォロワー・エボルヴ",
-                CardKind::Crest => "クレスト",
-            })),
-            Predicate::NamesIntersect {
-                right: Expr::Literal(names),
-                ..
-            } => game.card_name_matches(id, |actual| names.iter().any(|name| name.0 == actual)),
-            Predicate::NameContains {
-                name: Expr::Literal(name),
-                ..
-            } => game.card_name_matches(id, |actual| actual.contains(&name.0)),
-            Predicate::HasTrait { trait_id, .. } => {
-                Ok(characteristics(game, id)?.traits.contains(&trait_id.0))
-            }
-            Predicate::CompareInt {
-                left: Expr::Compute(left),
-                comparison,
-                right: Expr::Literal(Int(limit)),
-            } => {
-                let IntOperation::InformationOrZero { information } = left.as_ref() else {
-                    return Err(unsupported("field target number"));
-                };
-                let actual = match information {
-                    NumberRead::Cost {
-                        view: CharacteristicView::Original,
-                        ..
-                    } => super::super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
-                    NumberRead::Cost {
-                        view: CharacteristicView::Effective,
-                        ..
-                    } => game.internal_effective_cost(id)?,
-                    NumberRead::Stats {
-                        view: CharacteristicView::Effective,
-                        property,
-                        ..
-                    } => {
-                        if game.object(id)?.zone != "field"
-                            || !game.object_type(id)?.contains("フォロワー")
-                        {
-                            return Ok(false);
-                        }
-                        game.internal_numeric_stat(id, *property)?
-                    }
-                    _ => return Err(unsupported("field target characteristic")),
-                };
-                Ok(super::super::values::compare(actual, *comparison, *limit))
-            }
-            Predicate::And { predicates } | Predicate::Or { predicates } => {
-                let values = predicates
-                    .iter()
-                    .map(|predicate| matches_candidate(game, id, predicate))
-                    .collect::<Result<Vec<_>>>()?;
-                Ok(if matches!(operation.as_ref(), Predicate::And { .. }) {
-                    values.iter().all(|matched| *matched)
-                } else {
-                    values.iter().any(|matched| *matched)
-                })
-            }
-            Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
-            _ => Err(unsupported("field target predicate evaluation")),
-        },
-        _ => Err(unsupported("field target predicate evaluation")),
-    }
+    super::super::conditions::candidate::matches(condition, game, id)
 }
 
 fn role_domains(decision: &Decision) -> Vec<TargetRoleDomain> {
@@ -1838,7 +1691,17 @@ impl Execution {
                 let zone = candidate_zone(selector, allow_resolution_zones)?;
                 // Public candidates may exclude the source's own names ("これと同名を除く").
                 check_predicate(predicate, *binding, false)?;
-                let predicate = super::super::search::freeze_source_names(game, self, predicate)?;
+                let predicate = super::super::conditions::ConditionPlan::compile(
+                    predicate,
+                    *binding,
+                    super::super::conditions::Policy::Selection,
+                )?
+                .prepare(Some(
+                    &super::super::conditions::candidate::Operands {
+                        game,
+                        execution: self,
+                    },
+                ))?;
                 let mut members = Vec::new();
                 for player in self.players(game, players)? {
                     for id in game.zone_ids(super::super::seat_name(player)?, zone) {
@@ -1862,11 +1725,18 @@ impl Execution {
             } => {
                 let private_look = private_look_filter(selector).is_some();
                 check_predicate(predicate, *binding, private_look)?;
-                let predicate = if private_look {
-                    super::super::search::freeze_source_names(game, self, predicate)?
+                let policy = if private_look {
+                    super::super::conditions::Policy::PrivateSelection
                 } else {
-                    predicate.as_ref().clone()
+                    super::super::conditions::Policy::Selection
                 };
+                let plan =
+                    super::super::conditions::ConditionPlan::compile(predicate, *binding, policy)?;
+                let operands = super::super::conditions::candidate::Operands {
+                    game,
+                    execution: self,
+                };
+                let condition = plan.prepare(private_look.then_some(&operands))?;
                 let mut filtered = Vec::new();
                 for member in self.public_target_objects(game, input, allow_resolution_zones)? {
                     if follow_keyword::supported(selector)
@@ -1887,7 +1757,7 @@ impl Execution {
                     {
                         return Err(unsupported("selected condition requires public objects"));
                     }
-                    if matches_candidate(game, self.object_id(member)?, &predicate)? {
+                    if matches_candidate(game, self.object_id(member)?, &condition)? {
                         filtered.push(member);
                     }
                 }

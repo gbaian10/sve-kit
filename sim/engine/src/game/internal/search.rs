@@ -1,4 +1,4 @@
-//! Search owns its private candidate evaluator and never lends it to ordinary selectors.
+//! Search retains its private candidate policy over the shared property-only condition core.
 
 use super::card::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
@@ -12,14 +12,13 @@ use crate::ir::printed_keywords;
 use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityOrigin, AbilityPredicate, AbilityReference, Action, Binding, Bool,
-    BoolRead, BooleanState, CardKind, CardName, Cardinality, CharacteristicView, ClassRead,
-    Comparison, DecisionId, Expr, Info, Instruction, Int, IntOperation, KeywordId, KindRead,
-    MoveDestination, MoveMethod, MoveResult, MoveSpec, NamesRead, Nat, NatRead, NumberRead,
-    ObjectOperand, ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation,
-    Posture, Predicate, Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef,
-    SearchDestination, SearchOutcome, SearchPartition, SearchPartitionAnswer,
-    SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat, TraitsRead, ZoneKind,
-    ZoneRef,
+    BoolRead, BooleanState, CardName, Cardinality, CharacteristicView, ClassRead, DecisionId, Expr,
+    Info, Instruction, IntOperation, KeywordId, KindRead, MoveDestination, MoveMethod, MoveResult,
+    MoveSpec, NamesRead, Nat, NumberRead, ObjectOperand, ObjectProperty, ObjectRef, ObjectView,
+    OwnerZone, PlayerId, PlayerRelation, Posture, Predicate, Requirement, Requirements,
+    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
+    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, Stat,
+    TraitsRead, ZoneKind, ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -186,75 +185,6 @@ pub(in crate::game::internal) fn search_names(names: &Expr<Vec<CardName>>) -> bo
         ),
         _ => false,
     }
-}
-
-// Freeze the checked source through its existing authority before consulting hidden candidates.
-pub(in crate::game::internal) fn freeze_source_names(
-    game: &Game,
-    execution: &Execution,
-    value: &Expr<Bool>,
-) -> Result<Expr<Bool>> {
-    let Expr::Compute(operation) = value else {
-        return Ok(value.clone());
-    };
-    let operation = match operation.as_ref() {
-        Predicate::NamesIntersect {
-            left,
-            right: Expr::Live(read),
-        } if matches!(
-            read.as_ref(),
-            NamesRead::Names {
-                object: ObjectView::SourceInformation {}
-            }
-        ) =>
-        {
-            Predicate::NamesIntersect {
-                left: left.clone(),
-                right: Expr::Literal(execution.source_names(game)?),
-            }
-        }
-        // The holder's printed names stay readable after it leaves the field (Lastword targets).
-        Predicate::NamesIntersect {
-            left,
-            right: Expr::Live(read),
-        } if matches!(read.as_ref(), NamesRead::Names { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})) => {
-            Predicate::NamesIntersect {
-                left: left.clone(),
-                right: Expr::Literal(
-                    game.card_names(&execution.context.source)?
-                        .into_iter()
-                        .map(CardName)
-                        .collect(),
-                ),
-            }
-        }
-        Predicate::CompareInt {
-            left,
-            comparison,
-            right,
-        } if public_numbers::check(right) => Predicate::CompareInt {
-            left: left.clone(),
-            comparison: *comparison,
-            right: Expr::Literal(execution.integer(game, right)?),
-        },
-        Predicate::Not { predicate } => Predicate::Not {
-            predicate: freeze_source_names(game, execution, predicate)?,
-        },
-        Predicate::And { predicates } => Predicate::And {
-            predicates: predicates
-                .iter()
-                .map(|p| freeze_source_names(game, execution, p))
-                .collect::<Result<_>>()?,
-        },
-        Predicate::Or { predicates } => Predicate::Or {
-            predicates: predicates
-                .iter()
-                .map(|p| freeze_source_names(game, execution, p))
-                .collect::<Result<_>>()?,
-        },
-        other => other.clone(),
-    };
-    Ok(Expr::Compute(Box::new(operation)))
 }
 
 fn numeric_filter(read: &IntOperation, candidate: Binding<ObjectRef>) -> bool {
@@ -543,55 +473,7 @@ fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<C
     })
 }
 
-fn matches_number(
-    game: &Game,
-    id: &str,
-    read: &IntOperation,
-    comparison: Comparison,
-    amount: i64,
-) -> Result<bool> {
-    if let IntOperation::FromNat {
-        value: Expr::Live(value),
-    } = read
-        && let NatRead::Counter { kind, .. } = value.as_ref()
-    {
-        let actual = i64::try_from(game.card_counter(id, kind)?.0).map_err(invalid)?;
-        return Ok(super::values::compare(actual, comparison, amount));
-    }
-    let IntOperation::InformationOrZero { information } = read else {
-        return Err(unsupported("search number operation"));
-    };
-    let actual = match information {
-        NumberRead::Cost {
-            view: CharacteristicView::Original,
-            ..
-        } => super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?,
-        NumberRead::Cost {
-            view: CharacteristicView::Effective,
-            ..
-        } => game.internal_effective_cost(id)?,
-        NumberRead::Stats {
-            view: CharacteristicView::Effective,
-            property: Stat::Attack,
-            ..
-        } => {
-            if game.object_type(id)?.contains("フォロワー") {
-                game.object(id)?.state["power"]
-                    .as_i64()
-                    .ok_or_else(|| invalid("search candidate power"))?
-            } else {
-                0
-            }
-        }
-        _ => return Err(unsupported("search numeric characteristic")),
-    };
-    Ok(super::values::compare(actual, comparison, amount))
-}
-
-pub(super) fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicate) -> Result<bool> {
-    let keyword = predicate
-        .keyword
-        .ok_or_else(|| unsupported("search keyword"))?;
+pub(super) fn matches_keyword(game: &Game, id: &str, keyword: KeywordId) -> Result<bool> {
     game.require_internal_abilities(id, "search keyword")?;
     if matches!(keyword, KeywordId::EarthRite | KeywordId::Lastword) {
         return keywords::matches(game, id, keyword);
@@ -617,98 +499,12 @@ pub(super) fn matches_keyword(game: &Game, id: &str, predicate: &AbilityPredicat
         }))
 }
 
-pub(super) fn matches_candidate(game: &Game, id: &str, expression: &Expr<Bool>) -> Result<bool> {
-    match expression {
-        Expr::Literal(Bool(true)) => Ok(true),
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                BoolRead::State {
-                    property: BooleanState::TokenStatus,
-                    ..
-                }
-            ) =>
-        {
-            Ok(game
-                .face(id)?
-                .get("card_type")
-                .and_then(Value::as_str)
-                .is_some_and(|kind| kind.contains("トークン")))
-        }
-        Expr::Compute(operation) => {
-            match operation.as_ref() {
-                Predicate::ClassEquals {
-                    right: Expr::Literal(Info::Present(class)),
-                    ..
-                } => Ok(game.face(id)?.get("card_class").and_then(Value::as_str)
-                    == Some(class.0.as_str())),
-                Predicate::CompareInt {
-                    left: Expr::Compute(read),
-                    right: Expr::Literal(Int(amount)),
-                    comparison,
-                } => matches_number(game, id, read, *comparison, *amount),
-                Predicate::HasAbility { predicate, .. } => matches_keyword(game, id, predicate),
-                Predicate::NameContains {
-                    name: Expr::Literal(name),
-                    ..
-                } => game.card_name_matches(id, |own| own.contains(&name.0)),
-                Predicate::NamesIntersect {
-                    right: Expr::Literal(names),
-                    ..
-                } => game.card_name_matches(id, |own| names.iter().any(|name| own == name.0)),
-                Predicate::HasTrait { trait_id, .. } => Ok(game
-                    .face(id)?
-                    .get("traits")
-                    .and_then(Value::as_array)
-                    .is_some_and(|traits| {
-                        traits
-                            .iter()
-                            .any(|value| value.as_str() == Some(trait_id.0.as_str()))
-                    })),
-                Predicate::KindEquals {
-                    left: Expr::Live(read),
-                    right: Expr::Literal(kind),
-                } => {
-                    let KindRead::Kind { view, .. } = read.as_ref();
-                    let kind_name = match view {
-                        CharacteristicView::Original => game
-                            .face(id)?
-                            .get("card_type")
-                            .and_then(Value::as_str)
-                            .ok_or_else(|| invalid("missing printed kind"))?,
-                        CharacteristicView::Effective => game.object_type(id)?,
-                        _ => return Err(unsupported("search kind view")),
-                    };
-                    Ok(kind_name.contains(match kind {
-                        CardKind::Follower => "フォロワー",
-                        CardKind::Spell => "スペル",
-                        CardKind::Amulet => "アミュレット",
-                        CardKind::EvolveFollower => "フォロワー・エボルヴ",
-                        CardKind::Crest => "クレスト",
-                    }))
-                }
-                Predicate::Not { predicate } => Ok(!matches_candidate(game, id, predicate)?),
-                Predicate::And { predicates } => {
-                    for predicate in predicates {
-                        if !matches_candidate(game, id, predicate)? {
-                            return Ok(false);
-                        }
-                    }
-                    Ok(true)
-                }
-                Predicate::Or { predicates } => {
-                    for predicate in predicates {
-                        if matches_candidate(game, id, predicate)? {
-                            return Ok(true);
-                        }
-                    }
-                    Ok(false)
-                }
-                _ => Err(unsupported("search predicate evaluation")),
-            }
-        }
-        _ => Err(unsupported("search predicate evaluation")),
-    }
+pub(super) fn matches_candidate(
+    game: &Game,
+    id: &str,
+    condition: &super::conditions::PreparedCondition,
+) -> Result<bool> {
+    super::conditions::candidate::matches(condition, game, id)
 }
 
 #[expect(
@@ -755,15 +551,24 @@ impl Game {
             Some(SearchDestination::Partition { .. }) => {}
             _ => return Err(unsupported("search destination")),
         }
-        let conditional = check_predicate(filter, *candidate)? || groups.is_some();
-        let filter = freeze_source_names(self, execution, filter)?;
+        check_predicate(filter, *candidate)?;
+        let plan = super::conditions::ConditionPlan::compile(
+            filter,
+            *candidate,
+            super::conditions::Policy::Search,
+        )?;
+        let conditional = plan.conditional() || groups.is_some();
+        let condition = plan.prepare(Some(&super::conditions::candidate::Operands {
+            game: self,
+            execution,
+        }))?;
         let mut members = Vec::new();
         for id in &deck {
             let object = self.object(id)?;
             if object.owner != seat || object.controller != seat || object.zone != "deck" {
                 return Err(unsupported("search deck membership"));
             }
-            if matches_candidate(self, id, &filter)? {
+            if matches_candidate(self, id, &condition)? {
                 members.push(execution.reference(self, id)?);
             }
         }
@@ -786,10 +591,21 @@ impl Game {
             let mut domains = Vec::new();
             let mut views = Vec::new();
             for group in &constraint.groups {
-                let Selector::Zone { predicate, .. } = &group.selector else {
+                let Selector::Zone {
+                    binding, predicate, ..
+                } = &group.selector
+                else {
                     return Err(unsupported("search group"));
                 };
-                let predicate = freeze_source_names(self, execution, predicate)?;
+                let predicate = super::conditions::ConditionPlan::compile(
+                    predicate,
+                    *binding,
+                    super::conditions::Policy::Search,
+                )?
+                .prepare(Some(&super::conditions::candidate::Operands {
+                    game: self,
+                    execution,
+                }))?;
                 let mut domain = Vec::new();
                 let mut handles = Vec::new();
                 for (index, &object) in members.iter().enumerate() {
