@@ -1,4 +1,5 @@
 use super::super::{Decision, DecisionId, DecisionKind, Declinable, Visibility};
+use super::groups::{Groups, TotalBounds};
 use super::{BodyContext, Located, LoweringError, Node, PlayerRef, SourceSpan, ast, unsupported};
 use crate::ir::public_numbers;
 
@@ -211,42 +212,46 @@ impl BodyContext<'_> {
         &mut self,
         groups: &[ast::ChooseGroup],
         receipt: &super::super::ObjectReceipt,
+        cardinality: super::Cardinality,
         path: &str,
-    ) -> Result<Vec<super::super::SelectionGroup>, LoweringError> {
+    ) -> Result<super::super::SelectionConstraint, LoweringError> {
         let group_cardinality = super::super::Cardinality {
             minimum: super::super::Nat(0),
             maximum: Some(super::super::Nat(1)),
         };
-        let mut lowered_groups = Vec::with_capacity(groups.len());
+        let mut lowered_groups = Groups::new(TotalBounds::Explicit(cardinality));
         for group in groups {
             if (group.kind.is_none() && group.r#trait.is_none())
                 || group.r#trait.as_deref() == Some("")
             {
                 return Err(unsupported(path));
             }
-            let binding = super::Binding::new(1, self.card_allocator.scope(path)?);
-            lowered_groups.push(super::super::SelectionGroup {
-                selector: super::super::Selector::Filter {
-                    input: Box::new(super::super::Selector::ReceiptMembers {
-                        receipt: receipt.clone(),
-                        projection: super::super::MemberProjection::Before,
-                    }),
-                    binding,
-                    predicate: Box::new(field_filter(
-                        &ObjectFilter {
-                            kind: group.kind.as_ref().map(super::search::card_kind),
-                            trait_id: group.r#trait.as_deref(),
-                            class: group.class.as_deref(),
-                            original_cost: [None, group.orig_cost_le, None],
-                            ..ObjectFilter::default()
-                        },
+            lowered_groups.push(
+                group_cardinality,
+                || {
+                    let binding = super::Binding::new(1, self.card_allocator.scope(path)?);
+                    Ok(super::super::Selector::Filter {
+                        input: Box::new(super::super::Selector::ReceiptMembers {
+                            receipt: receipt.clone(),
+                            projection: super::super::MemberProjection::Before,
+                        }),
                         binding,
-                    )),
+                        predicate: Box::new(field_filter(
+                            &ObjectFilter {
+                                kind: group.kind.as_ref().map(super::search::card_kind),
+                                trait_id: group.r#trait.as_deref(),
+                                class: group.class.as_deref(),
+                                original_cost: [None, group.orig_cost_le, None],
+                                ..ObjectFilter::default()
+                            },
+                            binding,
+                        )),
+                    })
                 },
-                cardinality: group_cardinality,
-            });
+                path,
+            )?;
         }
-        Ok(lowered_groups)
+        Ok(lowered_groups.finish(None))
     }
 
     fn grouped_observed_choose(
@@ -309,7 +314,7 @@ impl BodyContext<'_> {
             minimum: super::super::Nat(0),
             maximum: Some(super::super::Nat(group_count)),
         };
-        let lowered_groups = self.observed_groups(groups, &receipt, path)?;
+        let constraint = self.observed_groups(groups, &receipt, cardinality, path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         if self.targets.insert(choice.bind.clone(), binding).is_some() {
             return Err(unsupported(path));
@@ -318,13 +323,7 @@ impl BodyContext<'_> {
         self.observed_targets.insert(choice.bind.clone());
         self.field_entry.multi.insert(choice.bind.clone());
         let domain = super::super::ChoiceDomain::Objects {
-            constraint: super::super::SelectionConstraint {
-                groups: lowered_groups,
-                cardinality,
-                distinct_by: None,
-                disjoint: super::super::Disjointness::Disjoint,
-                aggregate_bounds: vec![],
-            },
+            constraint,
             binding,
             target_roles: None,
         };
