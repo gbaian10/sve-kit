@@ -1470,10 +1470,7 @@ impl Game {
                 ChoiceDomain::Distribution {
                     recipients, total, ..
                 } => {
-                    let members = execution.recipients(snapshot, recipients)?;
-                    let total = execution.natural(snapshot, total)?;
-                    if !members.members().is_empty()
-                        && u64::try_from(members.members().len()).map_err(invalid)? > total.0
+                    if !super::super::allocation::feasible(execution, snapshot, recipients, total)?
                     {
                         Self::retry_play_targets(execution, &mut play)?;
                         execution.play = Some(play);
