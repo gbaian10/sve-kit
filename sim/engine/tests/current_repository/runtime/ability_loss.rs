@@ -155,8 +155,30 @@ fn cp03_072_stand_trigger_preserves_its_independent_leader_lock_and_both_pending
         "Q1419: the printed restriction is suppressed, so a follower can be attacked"
     );
     pass(&mut game);
-    end(&mut game);
-    end(&mut game);
+    assert_restored_on_the_next_own_turn(&mut game);
+}
+
+fn assert_restored_on_the_next_own_turn(game: &mut Game) {
+    end(game);
+    assert_eq!(
+        game.internal_rule_action(&json!({"do":"attack","attacker":"enemy","target":"P1.leader"}))
+            .unwrap()
+            .outcome,
+        "resolved",
+        "the enemy stays acted so the follower check depends on the printed restriction"
+    );
+    pass(game);
+    end(game);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        view["turn"]["active"], "P1",
+        "back on the source's own turn"
+    );
+    assert_eq!(view["objects"]["ally"]["acted"], false, "the source stood");
+    assert_eq!(
+        view["objects"]["enemy"]["acted"], true,
+        "an acted enemy is otherwise attackable"
+    );
     for target in ["P2.leader", "enemy"] {
         assert_eq!(
             game.internal_rule_action(&json!({"do":"attack","attacker":"ally","target":target}))
