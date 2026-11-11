@@ -279,3 +279,27 @@ Order 的已驗一般葉（包括其 Movement Before）仍派到一般 selector 
 維持 `Invalid`；新 Look 牌庫路徑失去世代或位置權限使用 `AuthorizationIntegrity`。
 過期私有手牌的略過仍先執行；Look 選中後移手牌的既有揭露不要求舊選取世代等於新手牌世代。
 揭露沿用原到期機制，Order 換位仍撤銷位置知識；記得已公開的卡名不代表能定位排序後的頂牌。
+
+## 事件主體與來源條件
+
+`game/internal/conditions/subject.rs` 把既有事件 filter 的角色與特徵條件編入共用
+`ConditionPlan`，由只讀 adapter 提供各 producer 已捕捉的資料。這不把 frozen
+expression 改成 current object，也不以臨時物件或 binding 取得讀取權限。
+
+| adapter | 可讀來源與保留政策 |
+| --- | --- |
+| 事件主體 | 沿原事件時點的 SubjectInformation 與 controller／active／同一來源／token；入場後、離場前 LKI、攻擊與傷害來源各讀原有投影，不重新補齊缺失欄位 |
+| 棄牌主體 | 角色先依原手牌事件判斷；只有 filter 需要時才捕捉移動前手牌的 kind／class，不替它補出其他可讀資料 |
+| Fusion 母體 | 付款前 source snapshot 保存的 kind／traits；不從付款後物件重讀來源 |
+| Fusion 材料集合 | 成功 Fusion 事件保存的 material_traits；這是原有批次聯集，不假造單張成員的其他特徵 |
+| 控制者條件 | 只比對事件或來源已帶入的 controller；保留能力列舉前的原控制者閘門 |
+
+卡種的既有差異留在 reader：一般候選依原字串包含政策比對，事件與 Fusion 來源
+依已捕捉的 `CardKind` 精確相等。缺失的原費、職業或卡種不變成零費、任意職業或
+任意卡種；只有實際保存的資料可用。controller、active、來源身分或 token 等角色
+沒有提供時，不取得相應讀取權限。
+
+主體條件在排入 pending 前判斷；本文的 If 仍在原解算時點求值，兩者不互換，quota
+消耗政策也不因共用條件核心改變。Fusion 的付款前保存、成功付款後投遞仍是獨立
+queue，不放入事件讀取 context。歷史查詢保留自己的准入與保存資料政策，不因
+事件 adapter 共用核心而取得新的條件或來源。
