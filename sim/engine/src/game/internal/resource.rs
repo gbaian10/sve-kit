@@ -6,6 +6,7 @@
 )]
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
+use crate::EngineFailure;
 use crate::ir::{Action, Expr, Instruction, Int, PlayerId, PlayerRef, Resource, ResourceOperation};
 use serde_json::json;
 
@@ -121,9 +122,9 @@ impl Game {
         if before < 0 {
             return Err(invalid("negative EP value"));
         }
-        let after = before
-            .checked_add(requested.0)
-            .ok_or_else(|| unsupported("EP increase exceeds the integer representation"))?;
+        let after = before.checked_add(requested.0).ok_or_else(|| {
+            EngineFailure::Invariant("EP increase exceeds the integer representation".into())
+        })?;
         self.player_mut(seat)?.ep = after;
         let group = self.group();
         self.emit(

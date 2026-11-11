@@ -1048,6 +1048,118 @@ fn activated_definition_grant(end: DurationEnd) -> Located<Node> {
 }
 
 #[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "One instance lifecycle shares quota, query-purity and source-departure assertions against the same game."
+)]
+fn player_declarations_granted_instances_are_distinct_and_keep_separate_quotas_after_source_departure()
+ {
+    use crate::player_pipeline::question;
+    use sve_engine::game::player::{MainIntentKind, QuestionShape, SubmissionKind, Viewer};
+    let mut granting = activated_definition_grant(DurationEnd::CurrentTurnEnd {});
+    let Node::Instruction { instruction } = &mut granting.node else {
+        panic!("grant instruction");
+    };
+    let Action::Grant { abilities, .. } = &mut instruction.action else {
+        panic!("grant definitions");
+    };
+    let GrantedAbility::Definition { ability: granted } = &mut abilities[0] else {
+        panic!("granted activation");
+    };
+    granted.play.as_mut().unwrap().limit = Some(LimitSpec {
+        maximum: Nat(1),
+        window: LimitWindow::Turn,
+        scope: LimitScope::AbilityInstance,
+        consume_at: ConsumptionPoint::PlayCommitted,
+    });
+    let program = grant_program(vec![
+        ability(1, vec![granting]),
+        ability(
+            2,
+            vec![movement::put(
+                2,
+                Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+                OwnerZone::Hand,
+            )],
+        ),
+    ]);
+    let mut game = position(&program);
+    activate_grant(&mut game);
+    activate_grant(&mut game);
+    game.advance_player_input();
+    let first = question(&game, Viewer::P1);
+    let QuestionShape::ActionWindow(actions) = &first.shape else {
+        panic!("main activations");
+    };
+    let offers = actions.intents.iter().filter(|intent| matches!(&intent.kind, MainIntentKind::Activate { holder, .. } if holder.properties.card == "unit-follower")).collect::<Vec<_>>();
+    assert_eq!(offers.len(), 4);
+    for (index, offer) in offers.iter().enumerate() {
+        for other in offers.iter().skip(index + 1) {
+            assert_ne!(offer.id, other.id);
+        }
+    }
+    let before = exact_authority(&game);
+    assert_eq!(question(&game, Viewer::P1), first);
+    assert_eq!(
+        exact_authority(&game),
+        before,
+        "Listing allocates no real instance or quota"
+    );
+    for _ in 0..2 {
+        let command = player_declarations::activation_command(&game, "unit-follower", 0);
+        assert_eq!(
+            game.submit_player(Viewer::P1, command).kind,
+            SubmissionKind::Applied
+        );
+    }
+    resolved(
+        game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    game.advance_player_input();
+    let remaining = question(&game, Viewer::P1);
+    let QuestionShape::ActionWindow(actions) = &remaining.shape else {
+        panic!("remaining activations");
+    };
+    let offers = actions.intents.iter().filter(|intent| matches!(&intent.kind, MainIntentKind::Activate { holder, .. } if holder.properties.card == "unit-follower")).collect::<Vec<_>>();
+    assert_eq!(
+        offers.len(),
+        2,
+        "Only the other holder retains its two instance quotas"
+    );
+    for offer in offers {
+        let MainIntentKind::Activate { source, .. } = &offer.kind else {
+            panic!("activation");
+        };
+        let source = source.as_ref().unwrap();
+        assert_eq!(source.card, "unit-amulet");
+        assert!(
+            source.holder.is_none(),
+            "The old grant origin cannot link to the provider's new hand period"
+        );
+    }
+    for _ in 0..2 {
+        let command = player_declarations::activation_command(&game, "unit-follower", 0);
+        assert_eq!(
+            game.submit_player(Viewer::P1, command).kind,
+            SubmissionKind::Applied
+        );
+    }
+    let last = question(&game, Viewer::P1);
+    let QuestionShape::ActionWindow(actions) = &last.shape else {
+        panic!("main actions");
+    };
+    assert!(!actions.intents.iter().any(|intent| matches!(&intent.kind, MainIntentKind::Activate { holder, .. } if holder.properties.card == "unit-follower")));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        24
+    );
+}
+
+#[test]
 fn installed_activations_keep_distinct_instances_when_the_provider_leaves_and_expire_at_turn_end() {
     let program = grant_program(vec![
         ability(

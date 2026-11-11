@@ -117,47 +117,59 @@ fn player_pipeline_reads_and_rejections_preserve_the_question_and_rng() {
 
 #[test]
 fn player_pipeline_fault_rolls_back_the_play_without_a_rules_defeat() {
-    let mut game = game(1, 3);
-    let origin = game.clone();
-    game.execute_internal(
-        &checked(vec![draw(1, 1), up_to(2, 1), draw(3, 10_001)]),
-        &source("synthetic"),
-        context(1),
-    )
-    .unwrap();
-    let failed = answer(
-        &mut game,
-        Viewer::P1,
-        Answer::Stepwise(StepwiseAnswer::Stop),
-    );
-    assert_eq!(failed.kind, SubmissionKind::EngineFault);
-    assert_eq!(failed.input, Input::EngineFault);
-    assert_eq!(game.input(Viewer::P2), Input::EngineFault);
-    let mut expected = serde_json::to_value(&origin).unwrap();
-    let mut restored = serde_json::to_value(&game).unwrap();
-    assert!(
-        restored["state"]["ir_epoch"].as_u64().unwrap()
-            >= expected["state"]["ir_epoch"].as_u64().unwrap()
-    );
-    restored["state"]["ir_epoch"] = expected["state"]["ir_epoch"].clone();
-    transactions::normalize_saved_issuance(&mut restored, &mut expected);
-    assert_eq!(
-        restored, expected,
-        "all authority and RNG data must roll back"
-    );
-    for viewer in [Viewer::P1, Viewer::P2] {
+    let ep = |id, amount| {
+        instruction(
+            id,
+            Action::Resource {
+                player: PlayerRef::Controller {},
+                resource: Resource::Ep,
+                operation: ResourceOperation::Add,
+                amount: Expr::Literal(Int(amount)),
+            },
+        )
+    };
+    for tail in [vec![draw(3, 10_001)], vec![ep(3, i64::MAX), ep(4, 1)]] {
+        let mut game = game(1, 3);
+        let origin = game.clone();
+        let mut steps = vec![draw(1, 1), up_to(2, 1)];
+        steps.extend(tail);
+        game.execute_internal(&checked(steps), &source("synthetic"), context(1))
+            .unwrap();
+        let failed = answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Stepwise(StepwiseAnswer::Stop),
+        );
+        assert_eq!(failed.kind, SubmissionKind::EngineFault);
+        assert_eq!(failed.input, Input::EngineFault);
+        assert_eq!(game.input(Viewer::P2), Input::EngineFault);
+        let mut expected = serde_json::to_value(&origin).unwrap();
+        let mut restored = serde_json::to_value(&game).unwrap();
+        assert!(
+            restored["state"]["ir_epoch"].as_u64().unwrap()
+                >= expected["state"]["ir_epoch"].as_u64().unwrap()
+        );
+        restored["state"]["ir_epoch"] = expected["state"]["ir_epoch"].clone();
+        transactions::normalize_saved_issuance(&mut restored, &mut expected);
         assert_eq!(
-            game.observe(viewer).unwrap(),
-            origin.observe(viewer).unwrap()
+            restored, expected,
+            "all authority and RNG data must roll back"
+        );
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert_eq!(
+                game.observe(viewer).unwrap(),
+                origin.observe(viewer).unwrap()
+            );
+        }
+        assert!(!format!("{failed:?}").contains("draw request"));
+        assert!(!format!("{failed:?}").contains("integer representation"));
+        game.advance_player_input();
+        assert_eq!(game.input(Viewer::P1), Input::EngineFault);
+        assert_ne!(
+            game.projection(View::Referee).unwrap()["game"]["ended"],
+            true
         );
     }
-    assert!(!format!("{failed:?}").contains("draw request"));
-    game.advance_player_input();
-    assert_eq!(game.input(Viewer::P1), Input::EngineFault);
-    assert_ne!(
-        game.projection(View::Referee).unwrap()["game"]["ended"],
-        true
-    );
 }
 
 #[test]

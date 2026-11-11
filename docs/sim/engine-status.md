@@ -84,3 +84,5 @@ opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原�
 
 函式庫可用 `--no-default-features` 建置至 `wasm32-unknown-unknown`；
 這不表示瀏覽器宿主、JS 綁定、計時或完整線上對局已完成驗收。
+
+執行失敗的內部分類、玩家安全結果及工具遷移規則見[引擎執行失敗](engine-failures.md)。

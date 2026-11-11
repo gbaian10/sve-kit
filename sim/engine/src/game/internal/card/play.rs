@@ -722,8 +722,23 @@ impl Game {
         actor: PlayerId,
         spell: bool,
     ) -> Result<bool> {
-        let CostSpec::Ordered { steps } = costs else {
+        if !matches!(costs, CostSpec::Ordered { .. }) {
             return Err(unsupported("Quick costs"));
+        }
+        self.known_costs_available(holder, execution, costs, actor, spell)?
+            .ok_or_else(|| unsupported("Quick cost proof"))
+    }
+
+    pub(super) fn known_costs_available(
+        &self,
+        holder: &str,
+        execution: &Execution,
+        costs: &CostSpec,
+        actor: PlayerId,
+        spell: bool,
+    ) -> Result<Option<bool>> {
+        let CostSpec::Ordered { steps } = costs else {
+            return Ok(None);
         };
         let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
         let mut life = int(&self.player(seat_name(actor)?)?.leader["life"]);
@@ -741,7 +756,7 @@ impl Game {
                         *amount
                     };
                     if pp < amount {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                     pp = pp
                         .checked_sub(amount)
@@ -758,7 +773,7 @@ impl Game {
                         .entry(key)
                         .or_insert(execution.counter(self, counter_holder, kind)?.0);
                     if *count < amount.0 {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                     *count = count
                         .checked_sub(amount.0)
@@ -766,7 +781,7 @@ impl Game {
                 }
                 Action::Posture { .. } => {
                     if !standing {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                     standing = false;
                 }
@@ -781,7 +796,7 @@ impl Game {
                         .checked_add(*delta)
                         .ok_or_else(|| invalid("life quote overflow"))?;
                     if life < 0 {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                 }
                 Action::Discard { .. }
@@ -789,7 +804,7 @@ impl Game {
                 {
                     let object = self.object(holder)?;
                     if object.zone != "hand" || object.owner != seat_name(actor)? {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                 }
                 Action::Banish {
@@ -799,14 +814,14 @@ impl Game {
                     if !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
                         || object.owner != seat_name(actor)?
                     {
-                        return Ok(false);
+                        return Ok(Some(false));
                     }
                 }
                 Action::Move { .. } => {}
-                _ => return Err(unsupported("Quick cost proof")),
+                _ => return Ok(None),
             }
         }
-        Ok(true)
+        Ok(Some(true))
     }
 
     fn quick_additional_costs_available(
@@ -938,6 +953,15 @@ impl Game {
     /// # Errors
     /// Rejects unsupported cards, timing, carry, payment and body failures atomically.
     pub fn play_internal_card(&mut self, holder: &str, actor: PlayerId) -> Result<CardPlay> {
+        self.play_main_card(holder, actor, &mut false)
+    }
+
+    pub(in crate::game) fn play_main_card(
+        &mut self,
+        holder: &str,
+        actor: PlayerId,
+        declared: &mut bool,
+    ) -> Result<CardPlay> {
         self.require_internal_abilities(holder, "card play")?;
         if self.card_runtime.quick.is_some() {
             return Err(invalid("Quick requires its authority question"));
@@ -948,9 +972,9 @@ impl Game {
             self.object_type(holder)?,
             "スペル" | "スペル・トークン" | "スペル・アドバンス"
         ) {
-            self.play_internal_spell(holder, actor, &published)
+            self.play_internal_spell(holder, actor, &published, declared)
         } else {
-            self.play_internal_field_card(holder, actor, &published)
+            self.play_internal_field_card(holder, actor, &published, declared)
         };
         self.finish_card_attempt(before, result)
     }
@@ -960,8 +984,10 @@ impl Game {
         holder: &str,
         actor: PlayerId,
         published: &PublishedKnowledge,
+        declared: &mut bool,
     ) -> Result<CardPlay> {
         let mut execution = self.prepare_card_execution(holder, actor, None)?;
+        *declared = true;
         self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
@@ -998,12 +1024,20 @@ impl Game {
 
     pub(super) fn check_card_play_holder(&self, holder: &str, actor: PlayerId) -> Result<()> {
         let object = self.object(holder)?;
-        let seat = seat_name(actor)?;
         self.internal_context(&Context {
             source: holder.into(),
             generation: Generation(object.generation),
             controller: actor,
         })?;
+        if !self.card_play_permission(holder, actor)? {
+            return Err(unsupported("card play holder, permission or timing"));
+        }
+        self.check_internal_resources()
+    }
+
+    pub(super) fn card_play_permission(&self, holder: &str, actor: PlayerId) -> Result<bool> {
+        let object = self.object(holder)?;
+        let seat = seat_name(actor)?;
         if (object.owner != seat && object.zone != "ex")
             || object.controller != seat
             || !matches!(object.zone.as_str(), "hand" | "ex" | "cemetery" | "banish")
@@ -1013,7 +1047,7 @@ impl Game {
             || object.state["evolved_with"].is_string()
             || self.restricted(holder, "play")?
         {
-            return Err(unsupported("card play holder, permission or timing"));
+            return Ok(false);
         }
         if self.internal_card_play_forbidden(holder, actor)?
             || (object.zone == "cemetery"
@@ -1021,9 +1055,9 @@ impl Game {
             || (object.zone == "banish"
                 && !self.internal_card_banish_play_allowed(holder, actor)?)
         {
-            return Err(unsupported("card play holder, permission or timing"));
+            return Ok(false);
         }
-        self.check_internal_resources()
+        Ok(true)
     }
 
     pub(super) fn start_internal_ability(
@@ -1033,7 +1067,21 @@ impl Game {
         source: RuntimeAbilitySource,
         spell: bool,
         published: &PublishedKnowledge,
+        declared: &mut bool,
     ) -> Result<CardPlay> {
+        let mut execution = self.prepare_activated_execution(ability, context, source, spell)?;
+        *declared = true;
+        self.internal_run(&mut execution, published)?;
+        self.card_play_result(execution)
+    }
+
+    pub(super) fn prepare_activated_execution(
+        &mut self,
+        ability: admission::PlannedAbility,
+        context: Context,
+        source: RuntimeAbilitySource,
+        spell: bool,
+    ) -> Result<Execution> {
         let mut execution = self.new_card_execution(context)?;
         execution.bind_source(self, source)?;
         execution.spell = spell;
@@ -1041,7 +1089,8 @@ impl Game {
             self.internal_use_prerequisite(&execution, &play.costs)?;
             execution.captures(self, &play.captures)?;
         }
-        self.run_card_play(execution, ability, published)
+        self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
+        Ok(execution)
     }
 
     fn internal_play_counts(&self) -> Result<BTreeMap<u32, (Nat, Nat)>> {

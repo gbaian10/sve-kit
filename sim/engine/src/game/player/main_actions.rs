@@ -1,6 +1,6 @@
 //! Main intents expose parameter domains while shared primitives retain authority.
 
-use super::observation::{CardObservation, seat};
+use super::observation::{CardObservation, EffectSource, seat};
 use super::{Input, ObjectHandle, QuestionShape, QuestionToken, SubmissionKind, Viewer};
 use crate::game::{Game, other};
 use crate::{EngineFailure, Result, invalid};
@@ -13,6 +13,15 @@ pub struct MainIntentId {
     token: QuestionToken,
     source: Option<ObjectHandle>,
     generation: Option<u64>,
+    kind: IntentKind,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum IntentKind {
+    Attack,
+    EndPhase,
+    Play,
+    Activate(u64),
 }
 
 impl fmt::Debug for MainIntentId {
@@ -39,7 +48,7 @@ pub enum MainActionAnswer {
     Attack(AttackTarget),
 }
 
-/// Supported main intents; card play, activation and evolution are not yet listed.
+/// Supported main intents; evolution is not yet listed.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MainIntentKind {
     /// Declare one attack, choosing its target separately.
@@ -48,6 +57,20 @@ pub enum MainIntentKind {
         attacker: Box<CardObservation>,
         /// Legal recipients, with the leader first and cards in public field order.
         targets: Vec<AttackTarget>,
+    },
+    /// Start the existing formal card-play declaration procedure.
+    Play {
+        /// Authorized card at its current permitted origin.
+        card: Box<CardObservation>,
+    },
+    /// Start one effective activation instance's declaration procedure.
+    Activate {
+        /// Authorized holder of the effective ability.
+        holder: Box<CardObservation>,
+        /// Text origin authorized for this actor, when available.
+        source: Option<EffectSource>,
+        /// Line of the effective definition.
+        line: u64,
     },
     /// End the main phase when there is no outstanding attack obligation.
     EndPhase,
@@ -62,8 +85,8 @@ pub struct MainIntent {
     pub kind: MainIntentKind,
 }
 
-/// Current attack intents in own field order, followed by an optional `EndPhase`.
-/// Card play, activation and evolution are not yet included.
+/// Current intents in public zone order, followed by an optional `EndPhase`.
+/// Evolution is not yet included.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MainActions {
     /// Options for this question's authenticated actor only.
@@ -73,6 +96,15 @@ pub struct MainActions {
 enum Action {
     Attack { attacker: String, target: String },
     EndPhase,
+    Play(String),
+    Activate { holder: String, ordinal: u64 },
+}
+
+#[derive(Clone, Debug)]
+pub(in crate::game) struct ActivationOption {
+    pub(in crate::game) ordinal: u64,
+    pub(in crate::game) source: Option<EffectSource>,
+    pub(in crate::game) line: u64,
 }
 
 #[expect(
@@ -112,6 +144,7 @@ impl Game {
                         token,
                         source: Some(attacker.handle.clone()),
                         generation: Some(self.object(&id)?.generation),
+                        kind: IntentKind::Attack,
                     },
                     kind: MainIntentKind::Attack {
                         attacker: Box::new(attacker),
@@ -120,12 +153,57 @@ impl Game {
                 });
             }
         }
+        for zone in ["hand", "ex", "cemetery", "banish"] {
+            for id in self.zone_ids(seat(actor), zone) {
+                if !self.player_knows_object(actor, &id)
+                    || !self.main_card_declaration_available(&id, actor.player())?
+                {
+                    continue;
+                }
+                let card = self.main_object(actor, &id)?;
+                intents.push(MainIntent {
+                    id: MainIntentId {
+                        token,
+                        source: Some(card.handle.clone()),
+                        generation: Some(self.object(&id)?.generation),
+                        kind: IntentKind::Play,
+                    },
+                    kind: MainIntentKind::Play {
+                        card: Box::new(card),
+                    },
+                });
+            }
+        }
+        for zone in ["field", "hand", "ex", "cemetery"] {
+            for id in self.zone_ids(seat(actor), zone) {
+                if !self.player_knows_object(actor, &id) {
+                    continue;
+                }
+                for option in self.main_activation_options(&id, actor)? {
+                    let holder = self.main_object(actor, &id)?;
+                    intents.push(MainIntent {
+                        id: MainIntentId {
+                            token,
+                            source: Some(holder.handle.clone()),
+                            generation: Some(self.object(&id)?.generation),
+                            kind: IntentKind::Activate(option.ordinal),
+                        },
+                        kind: MainIntentKind::Activate {
+                            holder: Box::new(holder),
+                            source: option.source,
+                            line: option.line,
+                        },
+                    });
+                }
+            }
+        }
         if !self.attack_required()? {
             intents.push(MainIntent {
                 id: MainIntentId {
                     token,
                     source: None,
                     generation: None,
+                    kind: IntentKind::EndPhase,
                 },
                 kind: MainIntentKind::EndPhase,
             });
@@ -172,6 +250,20 @@ impl Game {
                 Ok(self
                     .can_attack(&attacker, &target)?
                     .then_some(Action::Attack { attacker, target }))
+            }
+            (MainIntentKind::Play { card }, MainActionAnswer::None) => Ok(Some(Action::Play(
+                self.resolve_player_object(actor, &card.handle)?.to_owned(),
+            ))),
+            (MainIntentKind::Activate { holder, .. }, MainActionAnswer::None) => {
+                let IntentKind::Activate(ordinal) = intent.id.kind else {
+                    return Ok(None);
+                };
+                Ok(Some(Action::Activate {
+                    holder: self
+                        .resolve_player_object(actor, &holder.handle)?
+                        .to_owned(),
+                    ordinal,
+                }))
             }
             _ => Ok(None),
         }
@@ -231,15 +323,32 @@ impl Game {
         let published = self.published_knowledge();
         self.node = format!("player-rule-{}", self.state.next_decision);
         self.state.next_decision = self.state.next_decision.saturating_add(1);
+        let mut declared = false;
         let result = match action {
-            Action::Attack { attacker, target } => self.apply_attack(&attacker, &target, None),
-            Action::EndPhase => self.start_end().map(|()| true),
+            Action::Attack { attacker, target } => self
+                .apply_attack(&attacker, &target, None)
+                .map(|accepted| accepted.then_some(SubmissionKind::Applied)),
+            Action::EndPhase => self.start_end().map(|()| Some(SubmissionKind::Applied)),
+            Action::Play(holder) => self
+                .play_main_card(&holder, actor.player(), &mut declared)
+                .map(|_play| Some(SubmissionKind::Applied)),
+            Action::Activate { holder, ordinal } => self
+                .activate_main_option(&holder, ordinal, actor, &mut declared)
+                .map(|_play| Some(SubmissionKind::Applied)),
         };
-        match result {
-            Ok(true) => {}
-            Ok(false) => {
+        let kind = match result {
+            Ok(Some(applied)) => applied,
+            Ok(None) => {
                 *self = before;
                 return SubmissionKind::Rejected;
+            }
+            Err(EngineFailure::IllegalPlay(_)) if declared => {
+                if let Err(error) = self.restore_player_state(before, &published) {
+                    self.player_fault = Some(error);
+                    SubmissionKind::EngineFault
+                } else {
+                    SubmissionKind::Reverted
+                }
             }
             Err(error) => {
                 self.player_fault = Some(match self.restore_player_state(before, &published) {
@@ -249,13 +358,13 @@ impl Game {
                 self.player_epoch = next;
                 return SubmissionKind::EngineFault;
             }
-        }
+        };
         self.player_epoch = next;
         self.advance_player_input();
         if self.player_fault.is_some() {
             SubmissionKind::EngineFault
         } else {
-            SubmissionKind::Applied
+            kind
         }
     }
 }
