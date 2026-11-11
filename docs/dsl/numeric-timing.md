@@ -20,8 +20,8 @@ PDF SHA-256 為 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd4
 [BP20-058 侮蔑の継承者・アジュラフリート](https://shadowverse-evolve.com/cardlist/?cardno=BP20-058)
 Q2659 在同一能力內先受傷至體力 0，再「これの体力を7にする」，之後的 check timing
 體力為 7、不破壞。下述 hp／max_hp／D 的拆分仍是本專案表示，屬 `generalized`。
-Q2104 只證明原已為 1／1 仍能繼續後文。SpellChain capture 與 RemoveAbility 未接好時
-BP16-049 整能力仍拒絕。
+Q2104 確認原已為 1／1 的目標仍會繼續處理後文。SpellChain 達 10 時，
+同一能力接著移除目標的全部能力。
 
 引擎使用 `hp`、`max_hp` 與受傷量的表示時，須維持以下內部不變量：
 

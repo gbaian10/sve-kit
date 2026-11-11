@@ -982,8 +982,8 @@ Continuous 的 Live 條件與操作數、一般動態依存、下節以外的 in
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
 Set 層有效時的進化／基礎替換由數值寫入邊界拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
-觸發或整卡准入。BP16-049 只驗受傷對象的 Set 1／1，未承載 SpellChain capture、
-RemoveAbility 或整能力；上述未承載的整卡部分仍待後片驗收。
+觸發或整卡准入。BP16-049 的數值片段驗證受傷對象的 Set 1／1。完整法術另由作者 DSL
+及實卡測試覆蓋解決起始的 SpellChain 計數，以及條件成立時移除目標的全部能力。
 
 ### 常值 Continuous 與非連續回合區間
 

@@ -1,0 +1,45 @@
+cards:
+  CP03-005:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          into: ネイブルゲイザー・ドラゴン
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_count:
+                        event: attacked
+                        sel:
+                          kind: follower
+                          trait: アクアフォース
+                        who: self
+                        window: this_turn
+                    op: eq
+                    right: 3
+                then:
+                  - life:
+                      delta: 2
+                      who: self
+                  - draw:
+                      n: 1
+          on:
+            attacked:
+              sel:
+                kind: follower
+                trait: アクアフォース
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set
