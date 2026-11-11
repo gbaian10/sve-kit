@@ -1090,7 +1090,7 @@ impl Game {
                     .granted_definitions
                     .get(&(provider.card.clone(), AbilityId(*id)))
                     .ok_or_else(|| invalid("missing installed definition"))?;
-                let line = match ability.source.origin {
+                let line = match ability.node.source.origin {
                     AbilityOrigin::Printed { line, .. } => line.0,
                     _ => u64::from(provider.span.line),
                 };
@@ -1101,13 +1101,13 @@ impl Game {
                         keywords: vec![],
                         traits: vec![],
                         definitions: vec![GrantedDefinition {
-                            kind: ability.kind,
+                            kind: ability.node.kind,
                             line,
                         }],
                     },
                     effective.iter().any(|current| {
                         current.grant.as_ref() == Some(&grant.origin)
-                            && current.node.id == ability.id
+                            && current.node.id == ability.node.id
                     }),
                 )?);
             }
