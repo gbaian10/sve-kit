@@ -1,5 +1,6 @@
 use super::*;
 use crate::ir::{ClassId, IntRead, PlayerRef, PlayerResource, ScopeId};
+use core::cell::Cell;
 
 struct Saved {
     names: Vec<String>,
@@ -328,6 +329,107 @@ fn an_unprepared_public_filter_does_not_gain_the_holders_names() {
     for policy in [Policy::Search, Policy::PrivateSelection] {
         assert!(matches!(
             ConditionPlan::compile(&expression, binding, policy),
+            Err(crate::EngineFailure::Unsupported(_))
+        ));
+    }
+}
+
+fn holder_names(binding: Binding<ObjectRef>) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::NamesIntersect {
+        left: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::Bound { binding }),
+            },
+        })),
+        right: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            },
+        })),
+    }))
+}
+
+fn holder_exclusion(binding: Binding<ObjectRef>) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::Not {
+        predicate: holder_names(binding),
+    }))
+}
+
+#[test]
+fn public_materials_prepare_the_holder_exclusion_once_and_exclude_every_shared_name() {
+    struct HolderNames(Cell<usize>);
+    impl Resolver for HolderNames {
+        fn number(&self, _expression: &Expr<Int>) -> Result<i64> {
+            Err(unsupported("no number source"))
+        }
+        fn names(&self, source: SourceNames) -> Result<Vec<CardName>> {
+            match source {
+                SourceNames::Holder => {
+                    self.0.set(self.0.get() + 1);
+                    Ok(vec![CardName("holder".into()), CardName("alias".into())])
+                }
+                SourceNames::Information => Err(unsupported("no private source")),
+            }
+        }
+    }
+    let binding = Binding::new(1, ScopeId(1));
+    for expression in [
+        holder_exclusion(binding),
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![class(binding, "Elf"), holder_exclusion(binding)],
+        })),
+    ] {
+        let source = HolderNames(Cell::new(0));
+        let plan = ConditionPlan::compile_public_material(&expression, binding)
+            .unwrap()
+            .prepare(Some(&source))
+            .unwrap();
+        for (names, expected) in [
+            (vec!["holder"], false),
+            (vec!["other", "alias"], false),
+            (vec!["different"], true),
+        ] {
+            let saved = Saved {
+                names: names.into_iter().map(str::to_owned).collect(),
+                class: "Elf".into(),
+                cost: None,
+            };
+            assert_eq!(plan.evaluate(&Frozen(Some(&saved))).unwrap(), expected);
+        }
+        assert_eq!(source.0.get(), 1);
+        for policy in [Policy::Search, Policy::PrivateSelection] {
+            assert!(matches!(
+                ConditionPlan::compile(&expression, binding, policy),
+                Err(crate::EngineFailure::Unsupported(_))
+            ));
+        }
+    }
+}
+
+#[test]
+fn material_holder_authority_does_not_extend_to_other_positions_or_foreign_bindings() {
+    let binding = Binding::new(1, ScopeId(1));
+    let exclusion = holder_exclusion(binding);
+    for expression in [
+        holder_names(binding),
+        holder_exclusion(Binding::new(2, ScopeId(1))),
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![exclusion.clone(), class(binding, "Elf")],
+        })),
+        Expr::Compute(Box::new(Predicate::Or {
+            predicates: vec![class(binding, "Elf"), exclusion.clone()],
+        })),
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![
+                class(binding, "Elf"),
+                Expr::Compute(Box::new(Predicate::And {
+                    predicates: vec![class(binding, "Elf"), exclusion],
+                })),
+            ],
+        })),
+    ] {
+        assert!(matches!(
+            ConditionPlan::compile_public_material(&expression, binding),
             Err(crate::EngineFailure::Unsupported(_))
         ));
     }

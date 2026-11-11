@@ -82,6 +82,10 @@ compile 走完整個條件樹，驗證候選 binding、來源與每個原子；
 | 其他物件狀態 | FaceUp、Racing、EnteredThisTurn、Boxed、posture、evolution 依既有位置限制 | 同 Selection | 只允許 token 狀態 |
 
 Comparison 的右值仍限原有 `public_numbers`，不是任意數值讀取。
+公開素材另保留既有的「與持有者不同名」特例：只能是整個條件，或最外層 And 的最後一項。
+該項必須是候選名稱與 SourceHolder 名稱相交的 Not，其餘部分仍按 Search 政策驗證。
+准入與 runtime 使用同一個素材 compiler，列舉前準備一次持有者名稱；
+此特例不適用於一般 Search、私有手牌素材或其他使用 Search 政策的 consumer。
 原子計畫保留 Original／Effective 標記；reader 仍須依 consumer 決定實際來源與缺值政策。
 凍結的有效資訊不能充當缺少的原資訊；缺少所需欄位或快照須拒絕，不能改查目前 Game。
 四種 reader 的核心介面有合成對照測試：

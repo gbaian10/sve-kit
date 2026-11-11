@@ -15,8 +15,8 @@ use crate::ir::{
     ZoneRef,
 };
 use crate::ir::{
-    AggregateBound, Bool, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NamesRead,
-    NumericProperty, ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
+    AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
+    ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
 use alloc::collections::BTreeSet;
 
@@ -209,37 +209,6 @@ pub(super) fn uses_parameter(action: &Action, play: &PlaySpec) -> bool {
         is_parameter(decision) && matches!(&decision.domain,ChoiceDomain::Objects {binding,..} if binding==reference)))
 }
 
-/// これと同名を除く is the one public-material filter beyond the search classification:
-/// the candidate shares no name with the ability holder, read at payment.
-fn without_holder_name(predicate: &Expr<Bool>, candidate: Binding<ObjectRef>) -> Expr<Bool> {
-    let holder_name = |item: &Expr<Bool>| {
-        matches!(item, Expr::Compute(not) if matches!(not.as_ref(), Predicate::Not { predicate: negated }
-            if matches!(negated, Expr::Compute(names) if matches!(names.as_ref(),
-                Predicate::NamesIntersect { left: Expr::Live(left), right: Expr::Live(right) }
-                    if matches!(left.as_ref(), NamesRead::Names { object: ObjectView::Current { object } }
-                        if matches!(object.as_ref(), ObjectOperand::Bound { binding } if *binding == candidate))
-                    && matches!(right.as_ref(), NamesRead::Names { object: ObjectView::Current { object } }
-                        if matches!(object.as_ref(), ObjectOperand::SourceHolder {}))))))
-    };
-    if holder_name(predicate) {
-        return Expr::Literal(Bool(true));
-    }
-    if let Expr::Compute(and) = predicate
-        && let Predicate::And { predicates } = and.as_ref()
-        && let Some((last, rest)) = predicates.split_last()
-        && holder_name(last)
-    {
-        return match rest {
-            [] => Expr::Literal(Bool(true)),
-            [single] => single.clone(),
-            rest => Expr::Compute(Box::new(Predicate::And {
-                predicates: rest.to_vec(),
-            })),
-        };
-    }
-    predicate.clone()
-}
-
 fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
     match selector {
         Selector::Zone {
@@ -263,7 +232,7 @@ fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
                     })),
                 }) =>
         {
-            search::check_predicate(&without_holder_name(predicate, *binding), *binding)?;
+            super::super::conditions::ConditionPlan::compile_public_material(predicate, *binding)?;
             Ok(vec![*zone])
         }
         Selector::Difference { input, except }
@@ -577,12 +546,16 @@ impl Game {
             return Err(unsupported("material selector"));
         };
         // A holder-name exclusion reads the holder once, before any candidate is classified.
-        let predicate = &super::super::conditions::ConditionPlan::compile(
-            predicate,
-            *binding,
-            super::super::conditions::Policy::Search,
-        )?
-        .prepare(Some(&super::super::conditions::candidate::Operands {
+        let plan = if *zone == ZoneKind::Hand {
+            super::super::conditions::ConditionPlan::compile(
+                predicate,
+                *binding,
+                super::super::conditions::Policy::Search,
+            )?
+        } else {
+            super::super::conditions::ConditionPlan::compile_public_material(predicate, *binding)?
+        };
+        let condition = &plan.prepare(Some(&super::super::conditions::candidate::Operands {
             game: self,
             execution,
         }))?;
@@ -609,7 +582,7 @@ impl Game {
                 if standing && self.object(&id)?.state["acted"] != false {
                     continue;
                 }
-                if search::matches_candidate(self, &id, predicate)? {
+                if search::matches_candidate(self, &id, condition)? {
                     members.push(execution.reference(self, &id)?);
                 }
             }

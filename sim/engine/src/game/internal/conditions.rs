@@ -116,6 +116,45 @@ pub(super) struct PreparedCondition {
 }
 
 impl ConditionPlan {
+    pub(super) fn compile_public_material(
+        expression: &Expr<Bool>,
+        binding: Binding<ObjectRef>,
+    ) -> Result<Self> {
+        // Only public materials admit a holder-name exclusion at this exact position.
+        let exclusion = || {
+            Tree::Not(Box::new(Tree::Atom(Atom::Labels(
+                LabelsProperty::Names,
+                Names::Source(SourceNames::Holder),
+            ))))
+        };
+        let root = if holder_name_exclusion(expression, binding) {
+            exclusion()
+        } else if let Expr::Compute(operation) = expression
+            && let Predicate::And { predicates } = operation.as_ref()
+            && let Some((last, rest)) = predicates.split_last()
+            && holder_name_exclusion(last, binding)
+        {
+            let remaining = match rest {
+                [] => Tree::True,
+                [single] => compile(single, binding, Policy::Search)?,
+                rest => compile(
+                    &Expr::Compute(Box::new(Predicate::And {
+                        predicates: rest.to_vec(),
+                    })),
+                    binding,
+                    Policy::Search,
+                )?,
+            };
+            Tree::And(vec![remaining, exclusion()])
+        } else {
+            compile(expression, binding, Policy::Search)?
+        };
+        Ok(Self {
+            root,
+            policy: Policy::Search,
+        })
+    }
+
     pub(super) fn compile(
         expression: &Expr<Bool>,
         binding: Binding<ObjectRef>,
@@ -137,6 +176,15 @@ impl ConditionPlan {
             policy: self.policy,
         })
     }
+}
+
+fn holder_name_exclusion(expression: &Expr<Bool>, binding: Binding<ObjectRef>) -> bool {
+    matches!(expression, Expr::Compute(not) if matches!(not.as_ref(), Predicate::Not { predicate }
+        if matches!(predicate, Expr::Compute(names) if matches!(names.as_ref(),
+            Predicate::NamesIntersect { left: Expr::Live(left), right: Expr::Live(right) }
+                if matches!(left.as_ref(), NamesRead::Names { object } if candidate(object, binding))
+                && matches!(right.as_ref(), NamesRead::Names { object: ObjectView::Current { object } }
+                    if matches!(object.as_ref(), ObjectOperand::SourceHolder {}))))))
 }
 
 impl PreparedCondition {
