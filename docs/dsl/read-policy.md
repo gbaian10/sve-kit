@@ -159,6 +159,15 @@ Delay 安裝時保留該 Delay 的本文計畫；pending 與巢狀執行隨定�
 不以合成 callback 的 AbilityId 搜尋 printed 能力。runtime 合成的 Drive／Drain
 能力仍由既有規則工廠建立，經明示的內部編譯入口附上計畫。
 
+既有 UB 事件的 `event:holder` 與 `it` 都投影同一個已提交 holder；
+解算仍重驗該物件的世代與有效區，不從現在的來源或其他事件補值。
+Equipment 的 holder 投影維持自己的事件角色；此別名不開放其他事件頭。
+
+安裝式 Grant 可以授予既有 Field Played observer，沿用受驗事件頭、提供者、
+接收者世代與安裝期限。多次安裝各保留自己的能力 instance；Play 提交時先捕捉
+符合條件的觀察者，之後持有者離場不取消已排入的 pending，離場或到期後不再觀察新 Play。
+持續效果授予 Played 的提供者仍限定 Equipment；其他授予事件頭與 UB 資格的准入不變。
+
 一般 Token、EachPlayer token stage 及 Delay 本文的 Token 在准入時選定數量讀者：
 固定值、既有公開區域計數，或 destroy-success 的 Before controller 計數。
 固定 token 模板的數量可沿既有 Nat／Int／Bool 型別組合這些葉：
