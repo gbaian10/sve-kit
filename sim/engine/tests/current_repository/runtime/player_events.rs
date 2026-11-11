@@ -3,6 +3,7 @@
     reason = "The real-card protocol must expose the expected typed question."
 )]
 
+use sve_engine::game::player::DecisionShape;
 use super::*;
 use sve_engine::game::player::events::{ActionKind, EventKind, MovementMethod, PlayerEvent};
 use sve_engine::game::player::{
@@ -97,7 +98,7 @@ fn player_events_real_multi_question_payment_commits_once_or_reverts_without_his
         let optional = question(&game);
         assert!(matches!(
             optional.shape,
-            QuestionShape::Decision(InputDomain::OptionalCost)
+            QuestionShape::Decision(DecisionShape::OptionalCost)
         ));
         assert_eq!(
             game.submit_player(
@@ -113,7 +114,7 @@ fn player_events_real_multi_question_payment_commits_once_or_reverts_without_his
         let target = question(&game);
         assert!(matches!(
             target.shape,
-            QuestionShape::Decision(InputDomain::Targets(_))
+            QuestionShape::Decision(DecisionShape::Targets(_))
         ));
         for viewer in [Viewer::P1, Viewer::P2] {
             assert_eq!(history(&game, viewer), vec![]);

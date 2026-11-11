@@ -1,6 +1,7 @@
 use super::*;
 use core::slice::from_mut;
 use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};
+use sve_engine::game::player::DecisionShape;
 
 pub(super) fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
     let mut ability = payment::paid_ability(vec![payment::pp(1)], steps);
@@ -470,7 +471,7 @@ fn player_declarations_mode_then_target_then_payment_uses_the_formal_program() {
     );
     assert!(matches!(
         question(&game, Viewer::P1).shape,
-        QuestionShape::Decision(InputDomain::Modes { .. })
+        QuestionShape::Decision(DecisionShape::Modes { .. })
     ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
@@ -482,7 +483,7 @@ fn player_declarations_mode_then_target_then_payment_uses_the_formal_program() {
     );
     assert!(matches!(
         question(&game, Viewer::P1).shape,
-        QuestionShape::Decision(InputDomain::Targets(_))
+        QuestionShape::Decision(DecisionShape::Targets(_))
     ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
@@ -513,7 +514,7 @@ fn player_declarations_target_retry_distribution_and_payment_keep_the_same_snaps
     let first = question(&game, Viewer::P1);
     assert!(matches!(
         first.shape,
-        QuestionShape::Decision(InputDomain::Targets(_))
+        QuestionShape::Decision(DecisionShape::Targets(_))
     ));
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::Targets(vec![0, 1, 2, 3, 4])).kind,
@@ -542,7 +543,7 @@ fn player_declarations_target_retry_distribution_and_payment_keep_the_same_snaps
     );
     let allocation = question(&game, Viewer::P1);
     assert!(
-        matches!(&allocation.shape, QuestionShape::Decision(InputDomain::Distribution(domain)) if domain.total == Nat(4) && domain.minimum == Nat(1))
+        matches!(&allocation.shape, QuestionShape::Decision(DecisionShape::Distribution(domain)) if domain.total == Nat(4) && domain.minimum == Nat(1))
     );
     let before = exact_authority(&game);
     assert_eq!(

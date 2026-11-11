@@ -28,6 +28,10 @@ pub(in crate::game::internal) enum ArrivalMember {
 }
 
 impl CapacityWait {
+    pub(in crate::game::internal) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
+        (self.destination, self.zone, self.available)
+    }
+
     pub(in crate::game::internal) fn validate(
         &self,
         handles: &[u64],

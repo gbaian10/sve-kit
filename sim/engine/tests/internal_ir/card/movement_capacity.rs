@@ -4,6 +4,8 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionToken, DecisionView, InputDomain};
+use sve_engine::game::player::DecisionShape;
+use sve_engine::game::player::observation::ObservedZone;
 
 fn question(play: CardPlay) -> DecisionView {
     let CardPlay::Awaiting(question) = play else {
@@ -195,12 +197,21 @@ fn player_pipeline_capacity_preserves_distinct_choices_without_physical_ids() {
         SubmissionKind::Applied
     );
     let capacity = player_question(&game, Viewer::P1);
-    let QuestionShape::Decision(InputDomain::SearchPartition(domain)) = &capacity.shape else {
+    let QuestionShape::Decision(DecisionShape::MovementCapacity(details)) = &capacity.shape else {
         panic!("capacity question");
     };
+    let domain = &details.selection;
+    assert_eq!(details.destination, Viewer::P1);
+    assert_eq!(details.zone, ObservedZone::Field);
+    assert_eq!(details.available, Nat(1));
     assert_eq!(domain.cards.len(), 2);
     assert_ne!(domain.cards[0].handle, domain.cards[1].handle);
-    assert!(domain.cards.iter().all(|card| card.object.is_none()));
+    assert!(
+        domain
+            .cards
+            .iter()
+            .all(|card| card.card == "unit-follower" && !card.name.is_empty())
+    );
     assert!(!format!("{capacity:?}").contains("grave-"));
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::SearchPartition(vec![1])).kind,

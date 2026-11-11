@@ -6,6 +6,8 @@ use super::{
 use crate::game::player::{QuestionPurpose, SubmissionKind};
 use crate::ir::DecisionKind;
 
+mod projection;
+
 pub(super) const fn purpose(kind: &DecisionKind) -> QuestionPurpose {
     match kind {
         DecisionKind::PlayParameter { .. } => QuestionPurpose::PlayParameter,
