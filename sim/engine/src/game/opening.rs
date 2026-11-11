@@ -292,7 +292,7 @@ impl Game {
                 let ids = self.zone_ids(seat, "deck");
                 for knowledge in self.state.knowledge.values_mut() {
                     for id in &ids {
-                        knowledge.located.remove(id);
+                        knowledge.forget_location(id);
                     }
                 }
             } else {

@@ -615,7 +615,7 @@ impl Game {
                         .state
                         .knowledge
                         .get(actor)
-                        .is_some_and(|knowledge| knowledge.located.contains(&object.id));
+                        .is_some_and(|knowledge| knowledge.located().contains(&object.id));
                 let private_hand = object.zone == "hand"
                     && object.owner == actor
                     && object.controller == object.owner
@@ -687,7 +687,7 @@ impl Game {
                         .state
                         .knowledge
                         .get(actor)
-                        .is_some_and(|knowledge| knowledge.located.contains(&object.id))
+                        .is_some_and(|knowledge| knowledge.located().contains(&object.id))
                     && (execution.is_private_look_target(objects, member)
                         || execution.public_look_member(self, objects, member)?);
                 let resolving_source = method == MoveMethod::Put
@@ -874,7 +874,7 @@ impl Game {
                     .state
                     .knowledge
                     .get(seat)
-                    .is_some_and(|knowledge| knowledge.located.contains(&object.id))
+                    .is_some_and(|knowledge| knowledge.located().contains(&object.id))
                 && (execution.is_private_look_target(objects, member)
                     || execution.public_look_member(self, objects, member)?)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
@@ -885,7 +885,7 @@ impl Game {
                     self.state
                         .knowledge
                         .get(*viewer)
-                        .is_some_and(|known| known.located.contains(&object.id))
+                        .is_some_and(|known| known.located().contains(&object.id))
                 });
             let advance = self.object_type(&object.id)? == "フォロワー・アドバンス"
                 && (object.zone == "ex"
@@ -1071,7 +1071,7 @@ impl Game {
                     .state
                     .knowledge
                     .get(seat)
-                    .is_some_and(|knowledge| knowledge.located.contains(id))
+                    .is_some_and(|knowledge| knowledge.located().contains(id))
             {
                 return Err(unsupported(
                     "observed move requires current own-deck evidence",
@@ -1432,7 +1432,7 @@ impl Game {
             {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != previous.owner {
-                        knowledge.located.remove(id);
+                        knowledge.forget_location(id);
                     }
                 }
             }
@@ -1602,7 +1602,7 @@ impl Game {
         for knowledge in self.state.knowledge.values_mut() {
             for (id, owner) in old_deck {
                 if changed_owners.contains(&owner.as_str()) {
-                    knowledge.located.remove(id);
+                    knowledge.forget_location(id);
                 }
             }
         }

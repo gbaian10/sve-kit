@@ -144,7 +144,7 @@ impl Game {
                 self.state
                     .knowledge
                     .get(*viewer)
-                    .is_none_or(|known| !known.located.contains(id))
+                    .is_none_or(|known| !known.located().contains(id))
             })
             .map(str::to_owned)
             .collect();
@@ -164,7 +164,7 @@ impl Game {
             let Some(current) = self.state.objects.get(&grant.id) else {
                 for viewer in grant.viewers {
                     if let Some(known) = self.state.knowledge.get_mut(&viewer) {
-                        known.located.remove(&grant.id);
+                        known.forget_location(&grant.id);
                     }
                 }
                 continue;
@@ -184,7 +184,7 @@ impl Game {
                         && let Some(known) = self.state.knowledge.get_mut(&viewer)
                     {
                         // Remember the printed card, but never locate its later private slot.
-                        known.located.remove(&grant.id);
+                        known.forget_location(&grant.id);
                     }
                 }
             }
@@ -287,7 +287,7 @@ impl Execution {
                 game.state
                     .knowledge
                     .get(*seat)
-                    .is_some_and(|known| known.located.contains(id))
+                    .is_some_and(|known| known.located().contains(id))
             }))
     }
 }

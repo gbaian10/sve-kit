@@ -91,12 +91,12 @@ impl Game {
             for known in list(&packet["known_cards"]) {
                 knowledge.seen.insert(string(&known["id"]).into(), known);
             }
-            knowledge.located.extend(
-                list(&packet["knowledge"]["located"])
-                    .iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned),
-            );
+            for id in list(&packet["knowledge"]["located"])
+                .iter()
+                .filter_map(Value::as_str)
+            {
+                knowledge.locate(id);
+            }
             knowledge.carried = list(&packet["knowledge"]["carried"]);
         }
         Ok(game)

@@ -222,7 +222,7 @@ impl Game {
             } else {
                 for (viewer, knowledge) in &mut self.state.knowledge {
                     if *viewer != controller {
-                        knowledge.located.remove(id);
+                        knowledge.forget_location(id);
                     }
                 }
             }
