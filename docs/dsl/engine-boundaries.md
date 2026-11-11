@@ -3,6 +3,7 @@
 本文件定義 DSL 引擎的規格要求，不表示原型已完成驗收。型別與程序依 [IR 詞彙](ir-vocabulary-1.0.md)。
 內部打出准入、分配投影、成功移動與排列協定依[執行語義契約](runtime-semantics.md)；
 其中局面表是 executor 的驗收要求，不是目前已實作的保證。
+各層的解碼、來源、binding、良構與執行准入責任依[驗證責任表](validation-responsibilities.md)；通過語法不代表可執行。
 
 ## 權威狀態與觀察
 
