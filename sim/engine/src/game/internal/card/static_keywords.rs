@@ -332,7 +332,9 @@ impl Game {
                         ..
                     } = effect
                     else {
-                        if static_declarations::family(effect).is_some() {
+                        if static_declarations::family(effect)
+                            .is_some_and(|family| family != Family::Grant)
+                        {
                             continue;
                         }
                         return Err(unsupported("static keyword effect"));
