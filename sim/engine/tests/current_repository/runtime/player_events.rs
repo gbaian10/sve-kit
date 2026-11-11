@@ -5,13 +5,41 @@
 
 use super::*;
 use sve_engine::game::player::events::{ActionKind, EventKind, MovementMethod, PlayerEvent};
-use sve_engine::game::player::{Command, Input, Question, QuestionShape, SubmissionKind, Viewer};
+use sve_engine::game::player::{
+    Command, Input, MainActionAnswer, MainIntentKind, Question, QuestionShape, SubmissionKind,
+    Viewer,
+};
 
 fn question(game: &Game) -> Question {
     let Input::Question(question) = game.input(Viewer::P1) else {
         panic!("player question");
     };
     *question
+}
+
+fn declare_spell(game: &mut Game) {
+    let main = question(game);
+    let QuestionShape::ActionWindow(actions) = &main.shape else {
+        panic!("main declarations");
+    };
+    let play = actions.intents.iter().find(|intent| matches!(&intent.kind, MainIntentKind::Play { card } if card.properties.card == "BP04-066")).unwrap();
+    let submission = game.submit_player(
+        Viewer::P1,
+        Command::MainAction {
+            token: main.token,
+            intent: play.id.clone(),
+            answer: MainActionAnswer::None,
+        },
+    );
+    assert_eq!(
+        submission.kind,
+        SubmissionKind::Applied,
+        "The public intent starts the real card declaration"
+    );
+    assert!(
+        matches!(submission.input, Input::Question(_)),
+        "The accepted declaration continues with its existing typed question"
+    );
 }
 
 fn history(game: &Game, viewer: Viewer) -> Vec<PlayerEvent> {
@@ -65,12 +93,7 @@ fn player_events_real_multi_question_payment_commits_once_or_reverts_without_his
         let mut game = game(&initial);
         game.advance_player_input();
         let pristine = game.clone();
-        assert!(matches!(
-            game.play_internal_card("spell", PlayerId { seat: 1 })
-                .unwrap(),
-            CardPlay::Awaiting(_)
-        ));
-        game.advance_player_input();
+        declare_spell(&mut game);
         let optional = question(&game);
         assert!(matches!(
             optional.shape,
