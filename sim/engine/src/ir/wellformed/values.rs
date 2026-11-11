@@ -50,7 +50,9 @@ impl Checker {
                         Err(self.error(WellFormedReason::UnavailableReceipt))
                     }
                 }
-                IntFrozen::PaidMaterialAttack { receipt } => self.paid_material_attack(receipt),
+                IntFrozen::PaidMaterialNumber { receipt, property } => {
+                    self.paid_material_number(receipt, *property)
+                }
                 IntFrozen::ReceiptRequested { receipt } => self.measured(receipt),
                 IntFrozen::DiscardedCost { receipt } => {
                     self.receipt(receipt)?;
