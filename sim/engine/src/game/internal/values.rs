@@ -19,7 +19,7 @@ use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
     ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView, SnapshotFields,
 };
-use crate::ir::{NumericProperty, Posture, PostureRead, Stat};
+use crate::ir::{NumericProperty, Posture, PostureRead};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
@@ -645,20 +645,15 @@ impl Execution {
         objects: &Selector,
         property: NumericProperty,
     ) -> Result<i64> {
-        let stat = match property {
-            NumericProperty::Attack => Stat::Attack,
-            NumericProperty::Life => Stat::Life,
-            NumericProperty::Count | NumericProperty::Cost | NumericProperty::OriginalCost => {
-                return Err(unsupported("attack target numeric property"));
-            }
-        };
-        self.objects(game, objects)?
-            .into_iter()
-            .try_fold(0_i64, |sum, object| {
-                let value = game.internal_numeric_stat(self.object_id(object)?, stat)?;
-                sum.checked_add(value)
-                    .ok_or_else(|| invalid("numeric aggregate overflow"))
-            })
+        if !matches!(property, NumericProperty::Attack | NumericProperty::Life) {
+            return Err(unsupported("attack target numeric property"));
+        }
+        super::aggregates::checked_sum(
+            self.objects(game, objects)?.into_iter().map(|object| {
+                super::aggregates::numeric_value(game, self.object_id(object)?, property)
+            }),
+            "numeric aggregate overflow",
+        )
     }
 
     /// A chosen follower's current stat; one that left the field or changed generation adds 0.
@@ -668,22 +663,17 @@ impl Execution {
         objects: &Selector,
         property: NumericProperty,
     ) -> Result<i64> {
-        let stat = if property == NumericProperty::Attack {
-            Stat::Attack
-        } else {
-            Stat::Life
-        };
-        self.objects(game, objects)?
-            .into_iter()
-            .try_fold(0_i64, |sum, object| {
+        super::aggregates::checked_sum(
+            self.objects(game, objects)?.into_iter().map(|object| {
                 let id = self.object_id(object)?;
                 let current = game.object(id)?;
                 if current.generation != object.generation.0 || current.zone != "field" {
-                    return Ok(sum);
+                    return Ok(0);
                 }
-                sum.checked_add(game.internal_numeric_stat(id, stat)?)
-                    .ok_or_else(|| invalid("numeric aggregate overflow"))
-            })
+                super::aggregates::numeric_value(game, id, property)
+            }),
+            "numeric aggregate overflow",
+        )
     }
 
     fn live_natural(&self, game: &Game, read: &NatRead) -> Result<Nat> {

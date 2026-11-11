@@ -367,3 +367,200 @@ fn public_look_reads_require_same_resolution_revelation_and_current_generation()
     execution.receipts.remove(&ReceiptId(99));
     rejects_reads(&execution, &board);
 }
+
+fn zone_population(zone: ZoneKind) -> Selector {
+    let candidate = Binding::new(80, ScopeId(1));
+    Selector::Zone {
+        players: PlayerSet {
+            relation: PlayerRelation::SelfPlayer,
+            relative_to: PlayerRef::Controller {},
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+            text_quantifier: TextQuantifier::One,
+        },
+        zone,
+        view: SelectionView::Current {},
+        binding: candidate,
+        predicate: Box::new(Expr::Compute(Box::new(Predicate::KindEquals {
+            left: Expr::Live(Box::new(KindRead::Kind {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: candidate }),
+                },
+                view: CharacteristicView::Effective,
+            })),
+            right: Expr::Literal(CardKind::Follower),
+        }))),
+    }
+}
+
+fn aggregate_value(
+    execution: &Execution,
+    game: &Game,
+    objects: &Selector,
+    property: NumericProperty,
+) -> Result<Int> {
+    execution.integer(
+        game,
+        &Expr::Compute(Box::new(IntOperation::Sum {
+            objects: objects.clone(),
+            property,
+        })),
+    )
+}
+
+#[test]
+fn public_selected_and_attack_sums_share_signed_stats_but_keep_stale_policies() {
+    let mut board = paused_after_ex_entry();
+    let mut execution = board.typed.as_ref().unwrap().clone();
+    let reference = execution.reference(&board, "s").unwrap();
+    let binding = Binding::new(81, ScopeId(1));
+    execution
+        .slots
+        .insert(binding.key(), super::super::Slot::Created(vec![reference]));
+    let event = Binding::new(82, ScopeId(1));
+    execution.attack_event = Some((
+        event,
+        AttackEvent {
+            attacker: reference,
+            target: RuntimeDamageRecipient::Object { object: reference },
+            controller: PlayerId { seat: 1 },
+            ordinal: Nat(1),
+        },
+    ));
+    let selected = Selector::Bound { reference: binding };
+    let attack = attack::target_selector(event, Binding::new(83, ScopeId(1)));
+    let public = zone_population(ZoneKind::Field);
+    for (property, key) in [
+        (NumericProperty::Attack, "power"),
+        (NumericProperty::Life, "hp"),
+    ] {
+        for number in [-3_i64, 0, 7, i64::MAX] {
+            board.object_mut("s").unwrap().state[key] = json!(number);
+            for objects in [&public, &selected, &attack] {
+                assert_eq!(
+                    aggregate_value(&execution, &board, objects, property).unwrap(),
+                    Int(number)
+                );
+            }
+        }
+    }
+    for changed_generation in [false, true] {
+        let mut stale = board.clone();
+        if changed_generation {
+            stale.object_mut("s").unwrap().generation += 1;
+        } else {
+            stale.object_mut("s").unwrap().zone = "cemetery".into();
+        }
+        for objects in [&selected, &attack] {
+            assert_eq!(
+                aggregate_value(&execution, &stale, objects, NumericProperty::Life).unwrap(),
+                Int(0)
+            );
+        }
+    }
+    aggregate_value(&execution, &board, &attack, NumericProperty::OriginalCost).unwrap_err();
+    execution.attack_event = None;
+    aggregate_value(&execution, &board, &attack, NumericProperty::Attack).unwrap_err();
+}
+
+#[test]
+fn public_and_selected_sums_reject_signed_overflow_and_empty_sums_are_zero() {
+    let mut board = paused_after_ex_entry();
+    board.object_mut("opposer").unwrap().controller = "P1".into();
+    board
+        .player_mut("P1")
+        .unwrap()
+        .zones
+        .get_mut("field")
+        .unwrap()
+        .push("opposer".into());
+    let mut execution = board.typed.as_ref().unwrap().clone();
+    let binding = Binding::new(84, ScopeId(1));
+    let members = ["s", "opposer"]
+        .map(|id| execution.reference(&board, id).unwrap())
+        .to_vec();
+    execution
+        .slots
+        .insert(binding.key(), super::super::Slot::Created(members));
+    let selected = Selector::Bound { reference: binding };
+    let public = zone_population(ZoneKind::Field);
+    board.object_mut("s").unwrap().state["power"] = json!(2_i64);
+    board.object_mut("opposer").unwrap().state["power"] = json!(3_i64);
+    for objects in [&public, &selected] {
+        assert_eq!(
+            aggregate_value(&execution, &board, objects, NumericProperty::Attack).unwrap(),
+            Int(5)
+        );
+    }
+    for (first, second) in [(i64::MAX, 1_i64), (i64::MIN, -1_i64)] {
+        board.object_mut("s").unwrap().state["power"] = json!(first);
+        board.object_mut("opposer").unwrap().state["power"] = json!(second);
+        for objects in [&public, &selected] {
+            aggregate_value(&execution, &board, objects, NumericProperty::Attack).unwrap_err();
+        }
+    }
+    execution
+        .slots
+        .insert(binding.key(), super::super::Slot::Created(vec![]));
+    assert_eq!(
+        aggregate_value(&execution, &board, &selected, NumericProperty::Attack).unwrap(),
+        Int(0)
+    );
+    board
+        .player_mut("P1")
+        .unwrap()
+        .zones
+        .insert("field".into(), vec![]);
+    assert_eq!(
+        aggregate_value(&execution, &board, &public, NumericProperty::Attack).unwrap(),
+        Int(0)
+    );
+}
+
+#[test]
+fn public_followed_and_revealed_sums_agree_on_original_cost() {
+    let mut board = paused_after_ex_entry();
+    let mut execution = board.typed.as_ref().unwrap().clone();
+    let followed = Selector::MoveAfter {
+        receipt: MovementReceipt::Move {
+            receipt: ReceiptReference::new(ReceiptId(1)),
+        },
+        permission: FollowPermission::SameEffectExplicitReference {},
+    };
+    let looked = Selector::ReceiptMembers {
+        receipt: ObjectReceipt::Look {
+            receipt: ReceiptReference::new(ReceiptId(2)),
+        },
+        projection: MemberProjection::Before,
+    };
+    let Some(InstructionOutcome::Look(outcome)) = execution.receipts.get(&ReceiptId(2)) else {
+        panic!("paused Look receipt")
+    };
+    let members = outcome.looked.iter().map(|view| view.object).collect();
+    execution
+        .receipts
+        .insert(ReceiptId(99), InstructionOutcome::Revealed(members));
+    for objects in [zone_population(ZoneKind::Ex), followed, looked.clone()] {
+        assert_eq!(
+            aggregate_value(&execution, &board, &objects, NumericProperty::OriginalCost).unwrap(),
+            Int(4)
+        );
+    }
+    for cost in [1_i64, -2] {
+        board.object_mut("arrived").unwrap().state["cost"] = json!(cost);
+        board.object_mut("tail").unwrap().state["cost"] = json!(cost);
+        for objects in [zone_population(ZoneKind::Ex), looked.clone()] {
+            assert_eq!(
+                aggregate_value(&execution, &board, &objects, NumericProperty::Cost).unwrap(),
+                Int(cost.max(0))
+            );
+            assert_eq!(
+                aggregate_value(&execution, &board, &objects, NumericProperty::OriginalCost)
+                    .unwrap(),
+                Int(4)
+            );
+        }
+    }
+}

@@ -5,6 +5,27 @@ use crate::ir::{
     ReceiptLocation, ReceiptReference, SelectionView, Selector, Stat, ZoneKind,
 };
 
+pub(super) fn numeric_value(game: &Game, id: &str, property: NumericProperty) -> Result<i64> {
+    match property {
+        NumericProperty::OriginalCost => {
+            super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])
+        }
+        NumericProperty::Cost => game.internal_effective_cost(id),
+        NumericProperty::Attack => game.internal_numeric_stat(id, Stat::Attack),
+        NumericProperty::Life => game.internal_numeric_stat(id, Stat::Life),
+        NumericProperty::Count => Err(unsupported("count is a selection bound, not an object sum")),
+    }
+}
+
+pub(super) fn checked_sum(
+    values: impl IntoIterator<Item = Result<i64>>,
+    overflow: &'static str,
+) -> Result<i64> {
+    values.into_iter().try_fold(0_i64, |sum, value| {
+        sum.checked_add(value?).ok_or_else(|| invalid(overflow))
+    })
+}
+
 pub(super) const fn followed_sum_plan(
     objects: &Selector,
     property: NumericProperty,
@@ -38,9 +59,8 @@ pub(super) fn followed_sum(
     let receipt = MovementReceipt::Move {
         receipt: ReceiptReference::new(receipt_id),
     };
-    execution
-        .successful_moves(&receipt)?
-        .try_fold(0_i64, |sum, movement| {
+    checked_sum(
+        execution.successful_moves(&receipt)?.map(|movement| {
             let after = movement
                 .after
                 .ok_or_else(|| invalid("missing aggregate after member"))?;
@@ -60,16 +80,10 @@ pub(super) fn followed_sum(
                     "followed aggregate member did not remain at its destination",
                 ));
             }
-            let value = match property {
-                NumericProperty::OriginalCost => {
-                    super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
-                }
-                NumericProperty::Life => game.internal_numeric_stat(id, Stat::Life)?,
-                _ => return Err(unsupported("followed aggregate property")),
-            };
-            sum.checked_add(value)
-                .ok_or_else(|| invalid("aggregate sum overflow"))
-        })
+            numeric_value(game, id, property)
+        }),
+        "aggregate sum overflow",
+    )
 }
 
 pub(super) fn check(objects: &Selector, property: NumericProperty) -> Result<()> {
@@ -146,17 +160,7 @@ fn values(
             {
                 return Err(unsupported("public current aggregate member"));
             }
-            let value = match property {
-                NumericProperty::Count => {
-                    return Err(unsupported("count is a selection bound, not an object sum"));
-                }
-                NumericProperty::OriginalCost => {
-                    super::cost::printed_cost(&game.internal_cost_print(id)?["cost"])?
-                }
-                NumericProperty::Cost => game.internal_effective_cost(id)?,
-                NumericProperty::Attack => game.internal_numeric_stat(id, Stat::Attack)?,
-                NumericProperty::Life => game.internal_numeric_stat(id, Stat::Life)?,
-            };
+            let value = numeric_value(game, id, property)?;
             Ok((reference, value))
         })
         .collect()
@@ -168,12 +172,12 @@ pub(super) fn sum(
     objects: &Selector,
     property: NumericProperty,
 ) -> Result<i64> {
-    values(execution, game, objects, property)?
-        .into_iter()
-        .try_fold(0_i64, |sum, (_, value)| {
-            sum.checked_add(value)
-                .ok_or_else(|| invalid("aggregate sum overflow"))
-        })
+    checked_sum(
+        values(execution, game, objects, property)?
+            .into_iter()
+            .map(|(_, value)| Ok(value)),
+        "aggregate sum overflow",
+    )
 }
 
 pub(super) fn extremum(
