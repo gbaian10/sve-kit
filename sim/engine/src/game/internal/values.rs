@@ -820,6 +820,17 @@ impl Execution {
                 )
                 .map_err(invalid)?)),
                 NatOperation::DistinctCount {
+                    objects,
+                    property: ObjectProperty::Names,
+                } if super::reveal::look_receipt(objects).is_some() => {
+                    let names = self
+                        .public_look_objects(game, objects)?
+                        .into_iter()
+                        .map(|member| game.card_name(self.object_id(member)?))
+                        .collect::<Result<BTreeSet<_>>>()?;
+                    Ok(Nat(u64::try_from(names.len()).map_err(invalid)?))
+                }
+                NatOperation::DistinctCount {
                     objects:
                         Selector::ReceiptMembers {
                             receipt,

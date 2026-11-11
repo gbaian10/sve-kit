@@ -1037,22 +1037,28 @@ impl BodyContext<'_> {
                 })
                 .ok_or_else(|| unsupported(path)),
             ast::Number::Count { count } => self.zone_count(count, path),
-            ast::Number::DistinctNames { distinct_names } => super::numeric::distinct_count(
-                distinct_names,
-                super::super::ObjectProperty::Names,
-                Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
-                path,
-            ),
+            ast::Number::DistinctNames { distinct_names } => match distinct_names {
+                ast::DistinctQuery::Public(query) => super::numeric::distinct_count(
+                    query,
+                    super::super::ObjectProperty::Names,
+                    Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
+                    path,
+                ),
+                ast::DistinctQuery::Receipt { r#in } => Ok(super::numeric::aggregate_count(
+                    self.public_observation(&r#in.objects_of, path)?,
+                    Some(super::super::ObjectProperty::Names),
+                )),
+            },
             ast::Number::DistinctOriginalCosts {
                 distinct_orig_costs,
             } => match distinct_orig_costs {
-                ast::DistinctCostQuery::Public(query) => super::numeric::distinct_count(
+                ast::DistinctQuery::Public(query) => super::numeric::distinct_count(
                     query,
                     super::super::ObjectProperty::Cost,
                     Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?),
                     path,
                 ),
-                ast::DistinctCostQuery::Receipt { r#in } => self.receipt_original_costs(r#in, path),
+                ast::DistinctQuery::Receipt { r#in } => self.receipt_original_costs(r#in, path),
             },
             ast::Number::TurnOrdinal { turn_number } => Ok(turn_ordinal(turn_number.who)),
             ast::Number::Resource { resource } => Ok(player_resource(

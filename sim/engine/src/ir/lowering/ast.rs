@@ -1853,10 +1853,10 @@ pub(super) enum Number {
         agg: Aggregate,
     },
     DistinctNames {
-        distinct_names: PublicQuery,
+        distinct_names: DistinctQuery,
     },
     DistinctOriginalCosts {
-        distinct_orig_costs: DistinctCostQuery,
+        distinct_orig_costs: DistinctQuery,
     },
     Resource {
         resource: ResourceQuery,
@@ -3315,7 +3315,7 @@ pub(super) enum QueryStat {
 
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
-pub(super) enum DistinctCostQuery {
+pub(super) enum DistinctQuery {
     Receipt { r#in: BeforeObjects },
     Public(Box<PublicQuery>),
 }

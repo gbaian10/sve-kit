@@ -318,7 +318,7 @@ fn followed_life_reads_current_continuous_changes_from_either_players_context() 
 }
 
 #[test]
-fn public_look_costs_require_same_resolution_revelation_and_current_generation() {
+fn public_look_reads_require_same_resolution_revelation_and_current_generation() {
     let board = paused_after_ex_entry();
     let mut execution = board.typed.as_ref().unwrap().clone();
     let objects = Selector::ReceiptMembers {
@@ -331,7 +331,17 @@ fn public_look_costs_require_same_resolution_revelation_and_current_generation()
         objects: objects.clone(),
         property: NumericProperty::OriginalCost,
     }));
-    execution.integer(&board, &cost).unwrap_err();
+    let names = Expr::Compute(Box::new(IntOperation::FromNat {
+        value: Expr::Compute(Box::new(NatOperation::DistinctCount {
+            objects: objects.clone(),
+            property: ObjectProperty::Names,
+        })),
+    }));
+    let rejects_reads = |candidate: &Execution, game: &Game| {
+        candidate.integer(game, &cost).unwrap_err();
+        candidate.integer(game, &names).unwrap_err();
+    };
+    rejects_reads(&execution, &board);
     execution.objects(&board, &objects).unwrap_err();
     let Some(InstructionOutcome::Look(looked)) = execution.receipts.get(&ReceiptId(2)) else {
         panic!("the paused program owns a private Look receipt")
@@ -341,18 +351,19 @@ fn public_look_costs_require_same_resolution_revelation_and_current_generation()
         .receipts
         .insert(ReceiptId(99), InstructionOutcome::Revealed(members));
     assert_eq!(execution.integer(&board, &cost).unwrap(), Int(4));
+    assert_eq!(execution.integer(&board, &names).unwrap(), Int(1));
     let mut stale = board.clone();
     stale.object_mut("tail").unwrap().generation += 1;
-    execution.integer(&stale, &cost).unwrap_err();
+    rejects_reads(&execution, &stale);
     execution.objects(&stale, &objects).unwrap_err();
     let mut displaced = board.clone();
     displaced.object_mut("tail").unwrap().zone = "hand".into();
-    execution.integer(&displaced, &cost).unwrap_err();
+    rejects_reads(&execution, &displaced);
     let mut foreign = execution.clone();
     foreign
         .look_viewers
         .insert(ReceiptId(2), PlayerId { seat: 2 });
-    foreign.integer(&board, &cost).unwrap_err();
+    rejects_reads(&foreign, &board);
     execution.receipts.remove(&ReceiptId(99));
-    execution.integer(&board, &cost).unwrap_err();
+    rejects_reads(&execution, &board);
 }
