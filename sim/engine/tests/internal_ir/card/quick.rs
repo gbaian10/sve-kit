@@ -153,6 +153,84 @@ fn attack_quick_repeats_after_pending_even_without_the_attacker() {
 }
 
 #[test]
+#[expect(
+    clippy::cognitive_complexity,
+    reason = "One trace covers pending, repeated Quick windows and Pass without resetting authority."
+)]
+fn player_pipeline_resumes_pending_and_quick_until_an_explicit_empty_pass() {
+    use crate::player_pipeline::{answer, question as player_question};
+    use sve_engine::game::player::{Input, QuestionShape, SubmissionKind, Viewer};
+
+    let spell = card(vec![
+        play::spell(vec![instruction(
+            1,
+            Action::Destroy {
+                objects: zone(ZoneKind::Field, 9),
+            },
+        )]),
+        permit(),
+    ]);
+    let follower = card(vec![
+        timing::on_attack(ability(1, vec![draw(1, 0)])),
+        triggers::lastword(ability(
+            2,
+            vec![entry::enter(2, entry::own_zone(ZoneKind::Cemetery, 22))],
+        )),
+    ]);
+    let mut game = board(&spell, &follower, false);
+    game.internal_rule_action(&json!({"do":"attack","attacker":"a","target":"P2.leader"}))
+        .unwrap();
+    game.advance_player_input();
+    assert!(matches!(
+        player_question(&game, Viewer::P1).shape,
+        QuestionShape::Decision(InputDomain::Pending(_))
+    ));
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
+        SubmissionKind::Applied
+    );
+    for remaining in [2, 1] {
+        let quick = player_question(&game, Viewer::P2);
+        assert!(matches!(quick.shape,
+            QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.len() == remaining));
+        assert_eq!(
+            answer(&mut game, Viewer::P2, Answer::Quick(Some(0))).kind,
+            SubmissionKind::Applied
+        );
+        assert!(matches!(
+            player_question(&game, Viewer::P1).shape,
+            QuestionShape::Decision(InputDomain::Pending(_))
+        ));
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
+            SubmissionKind::Applied
+        );
+    }
+    let empty = player_question(&game, Viewer::P2);
+    assert!(matches!(&empty.shape,
+        QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty()));
+    let before = exact_authority(&game);
+    for _ in 0..4 {
+        assert_eq!(player_question(&game, Viewer::P2), empty);
+        assert!(matches!(game.input(Viewer::P1), Input::Waiting(_)));
+    }
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        answer(&mut game, Viewer::P2, Answer::Quick(None)).kind,
+        SubmissionKind::Applied
+    );
+    assert!(matches!(
+        player_question(&game, Viewer::P1).shape,
+        QuestionShape::ActionWindow
+    ));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P2"]["pp"]["current"], 0);
+    assert_eq!(view["P2"]["cemetery"], json!(["q1", "q2"]));
+    assert_eq!(view["P1"]["field"], json!(["a"]));
+    assert_eq!(view["P2"]["leader"]["life"], 20);
+}
+
+#[test]
 fn quick_activation_pays_act_without_granting_card_play_and_main_spell_stays_ordinary() {
     let follower = card(vec![quick_activated(payment::paid_ability(
         vec![payment::act()],

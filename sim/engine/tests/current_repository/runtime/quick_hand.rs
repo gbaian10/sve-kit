@@ -236,3 +236,50 @@ fn distorted_progress_both_printings_pay_before_damage_heal_and_draw() {
         assert_eq!(state[name]["cemetery"], json!(["fuel", "source"]));
     }
 }
+
+#[test]
+fn player_pipeline_printed_quick_pays_targets_and_private_material_before_its_body() {
+    use sve_engine::game::player::{Command, Input, QuestionShape, SubmissionKind, Viewer};
+
+    let actor = PlayerId { seat: 1 };
+    let mut game = board("BP18-119", actor, true);
+    game.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
+    game.advance_player_input();
+    for stage in 0_u8..3 {
+        let Input::Question(question) = game.input(Viewer::P1) else {
+            panic!("printed Quick player question");
+        };
+        assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+        let payload = match (&question.shape, stage) {
+            (QuestionShape::Decision(InputDomain::Quick { options, .. }), 0) => {
+                assert_eq!(options.len(), 1);
+                Answer::Quick(Some(options[0].handle))
+            }
+            (QuestionShape::Decision(InputDomain::Targets(domain)), 1) => {
+                assert_eq!(domain.members.len(), 1);
+                Answer::Targets(vec![domain.members[0].handle])
+            }
+            (QuestionShape::Decision(InputDomain::CostMaterials(domain)), 2) => {
+                assert_eq!(domain.members.len(), 1);
+                let before = game.projection(View::Referee).unwrap();
+                assert_eq!(before["P1"]["pp"]["current"], 2_u8);
+                assert_eq!(before["objects"]["enemy"]["damage"], 0_u8);
+                Answer::CostMaterials(vec![domain.members[0].handle])
+            }
+            _ => panic!("unexpected printed play order"),
+        };
+        assert_eq!(game.submit_player(Viewer::P1, Command::Answer {
+            token: question.token, answer: payload,
+        }).kind, SubmissionKind::Applied);
+    }
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["enemy"]["damage"], 4_u8);
+    assert_eq!(state["P1"]["leader"]["life"], 19_u8);
+    assert_eq!(state["P1"]["pp"]["current"], 0_u8);
+    assert_eq!(state["P1"]["hand"], json!(["wrong", "drawn"]));
+    assert_eq!(state["P1"]["cemetery"], json!(["fuel", "source"]));
+    let Input::Question(next) = game.input(Viewer::P1) else {
+        panic!("explicit next Quick window");
+    };
+    assert!(matches!(next.shape, QuestionShape::Decision(InputDomain::Quick { options, .. }) if options.is_empty()));
+}

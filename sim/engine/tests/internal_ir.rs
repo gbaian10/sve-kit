@@ -54,6 +54,9 @@ mod scheduled_turn;
 #[path = "internal_ir/terminal.rs"]
 mod terminal;
 
+#[path = "internal_ir/player_pipeline.rs"]
+mod player_pipeline;
+
 #[path = "internal_ir/search.rs"]
 mod search;
 

@@ -312,6 +312,7 @@ impl Game {
         actor: PlayerId,
         token: DecisionToken,
         answer: &Answer,
+        validated: &mut bool,
     ) -> Result<CardPlay> {
         let question = self
             .card_runtime
@@ -346,6 +347,7 @@ impl Game {
             return Err(invalid("stale Quick source"));
         }
         let seat = seat_name(actor)?;
+        *validated = true;
         let before = self.clone();
         self.card_runtime.quick = None;
         self.card_runtime.quick_start = true;

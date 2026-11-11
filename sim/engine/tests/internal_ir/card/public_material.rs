@@ -376,6 +376,55 @@ fn trigger_head_requires_five_own_cemetery_cards_or_cancels_without_playing() {
 }
 
 #[test]
+fn player_pipeline_unpayable_required_head_cancels_only_the_pending_occurrence() {
+    use crate::player_pipeline::{answer, question as player_question};
+    use sve_engine::game::player::{QuestionShape, SubmissionKind, Viewer};
+
+    let typed = program(
+        "unit-follower",
+        "fanfare",
+        json!({
+            "cost":{"banish":{"sel":{"who":"self","zone":"cemetery"},"n":5}},
+            "do":[{"life":{"who":"self","delta":1}}]
+        }),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"c0","card":"unit-spell"}, {"id":"c1","card":"unit-spell"},
+        {"id":"c2","card":"unit-spell"}, {"id":"c3","card":"unit-spell"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "player-cancel",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &typed).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.advance_player_input();
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
+        SubmissionKind::Applied
+    );
+    let cancelled = answer(&mut game, Viewer::P1, Answer::OptionalCost(true));
+    assert_eq!(cancelled.kind, SubmissionKind::Cancelled);
+    assert!(matches!(
+        player_question(&game, Viewer::P1).shape,
+        QuestionShape::ActionWindow
+    ));
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 4);
+    assert_eq!(state["P1"]["leader"]["life"], 20);
+    assert_eq!(state["P1"]["pp"]["current"], 1);
+    assert_eq!(state["P1"]["field"], json!(["s"]));
+}
+
+#[test]
 fn optional_public_cost_rejects_extra_operations_and_unknown_keys() {
     let valid = json!({"optional_cost":{"act":{"sel":{"who":"self","zone":"field"},"n":1},"result":"paid"},"do":[{"draw":{"n":1}}]});
     let lowerer = ExpandedLowerer::new().unwrap();

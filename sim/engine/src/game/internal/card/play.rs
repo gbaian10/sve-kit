@@ -1269,11 +1269,21 @@ impl Game {
         token: DecisionToken,
         answer: Answer,
     ) -> Result<CardPlay> {
+        self.answer_internal_card_validated(actor, token, answer, &mut false)
+    }
+
+    pub(in crate::game::internal) fn answer_internal_card_validated(
+        &mut self,
+        actor: PlayerId,
+        token: DecisionToken,
+        answer: Answer,
+        validated: &mut bool,
+    ) -> Result<CardPlay> {
         if self.card_runtime.quick.is_some() {
-            return self.answer_internal_quick(actor, token, &answer);
+            return self.answer_internal_quick(actor, token, &answer, validated);
         }
         if self.typed.is_none() && self.card_runtime.question.is_some() {
-            return self.answer_internal_pending(actor, token, &answer);
+            return self.answer_internal_pending(actor, token, &answer, validated);
         }
         if self
             .typed
@@ -1283,6 +1293,7 @@ impl Game {
             return Err(invalid("no pending formal play"));
         }
         if self.decline_internal_head_payment(actor, token, &answer)? {
+            *validated = true;
             return Ok(CardPlay::Cancelled);
         }
         let occurrence = self
@@ -1297,7 +1308,7 @@ impl Game {
             })
             .and_then(|execution| execution.trigger_occurrence.map(|id| (id, execution.id)));
         let source = self.typed.as_ref().and_then(Execution::root_ability);
-        let progress = match self.answer_internal_step(actor, token, answer) {
+        let progress = match self.answer_internal_step(actor, token, answer, validated) {
             Err(crate::EngineFailure::IllegalPlay(_)) if occurrence.is_some() => {
                 let (id, checkpoint) = occurrence.ok_or_else(|| invalid("missing occurrence"))?;
                 self.internal_cancel_occurrence(id, checkpoint);

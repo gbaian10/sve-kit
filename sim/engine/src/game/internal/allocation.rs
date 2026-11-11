@@ -1,6 +1,7 @@
 //! Frozen distribution occurrences and their authority-only damage producer.
 
 use super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name, unsupported};
+use crate::game::player::QuestionPurpose;
 use crate::ir::{
     Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Nat,
     PlayerId, RecipientSet, ResolvedDamageAllocation, ResolvedRecipients, RuntimeDamageRecipient,
@@ -51,6 +52,7 @@ struct Producer {
 
 #[derive(Clone, Debug)]
 pub(super) struct DistributionWait {
+    pub(super) purpose: QuestionPurpose,
     producer: Producer,
     snapshot: SnapshotId,
     recipients: ResolvedRecipients,
@@ -161,6 +163,7 @@ impl Game {
                 .map_err(|_error| unsupported("distribution total exceeds Damage receipt range"))?;
         }
         let wait = DistributionWait {
+            purpose: super::player::purpose(&decision.kind),
             producer: Producer {
                 execution: execution.id,
                 scope: binding.key().0,

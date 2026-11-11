@@ -1,7 +1,12 @@
 //! Shared vocabulary for typed player input, observations and projected events.
-//! These types do not yet provide the player submission or observation APIs.
+//! Authority setup hands control to this interface with `Game::advance_player_input`.
 
-use crate::ir::PlayerId;
+mod pipeline;
+
+pub use super::internal::{Answer, InputDomain};
+
+use crate::ir::{Nat, PlayerId};
+use core::fmt;
 
 /// An authenticated player perspective supplied by the host.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -65,7 +70,7 @@ pub enum QuestionPurpose {
     MainAction,
 }
 
-/// Classification for the future read-only player input result.
+/// Classification for the read-only player input result.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum InputKind {
     /// This viewer must answer the current question.
@@ -78,7 +83,7 @@ pub enum InputKind {
     EngineFault,
 }
 
-/// Classification for the future player submission result.
+/// Classification for the player submission result.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SubmissionKind {
     /// Accepted input advanced the procedure, possibly returning to target selection.
@@ -92,4 +97,101 @@ pub enum SubmissionKind {
     /// An engine failure preserved its rollback scope and stopped player progression.
     /// A rolled-back unsupported operation or damaged state remains an engine fault.
     EngineFault,
+}
+
+/// Opaque occurrence coordinate; it contains no execution or instruction identity.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub struct QuestionToken {
+    epoch: u64,
+    serial: u64,
+    action: bool,
+}
+
+impl fmt::Debug for QuestionToken {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("QuestionToken").finish_non_exhaustive()
+    }
+}
+
+/// Existing decision shapes or a separate action boundary.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum QuestionShape {
+    /// Token-scoped candidates from the existing typed decision procedure.
+    Decision(InputDomain),
+    /// Main-phase or turn-closing action, without legal action enumeration.
+    ActionWindow,
+}
+
+/// One authorized question, without the authority continuation or execution identity.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Question {
+    /// Coordinate required by the answer command.
+    pub token: QuestionToken,
+    /// Authenticated seat permitted to answer.
+    pub actor: Viewer,
+    /// Rules role independent of the answer's shape.
+    pub purpose: QuestionPurpose,
+    /// Only candidates authorized for this actor.
+    pub shape: QuestionShape,
+}
+
+/// Public information available while another seat answers.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Waiting {
+    /// Seat currently deciding.
+    pub actor: Viewer,
+    /// Public die face and remaining rerolls, when the current decision is a reroll.
+    pub dice: Option<(Nat, Nat)>,
+}
+
+/// Read-only player input state; no receipts, facts or continuation are returned.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Input {
+    /// This viewer is authorized to answer.
+    Question(Box<Question>),
+    /// Another seat is deciding; no private candidates accompany the summary.
+    Waiting(Waiting),
+    /// Normal rules termination; an absent winner is a draw.
+    Finished {
+        /// Winning seat, if the game was not drawn.
+        winner: Option<Viewer>,
+    },
+    /// Player progression stopped; private diagnostic details remain with the authority.
+    EngineFault,
+}
+
+impl Input {
+    /// Stable classification shared by input consumers.
+    #[must_use]
+    pub const fn kind(&self) -> InputKind {
+        match self {
+            Self::Question(_) => InputKind::Question,
+            Self::Waiting(_) => InputKind::Waiting,
+            Self::Finished { .. } => InputKind::Finished,
+            Self::EngineFault => InputKind::EngineFault,
+        }
+    }
+}
+
+/// An authenticated player's submission; surrender is independent of the current token.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Command {
+    /// Respond only to the current decision occurrence.
+    Answer {
+        /// Exact question returned to this seat.
+        token: QuestionToken,
+        /// Existing typed payload, addressed only by question-scoped handles.
+        answer: Answer,
+    },
+    /// Surrender even while another player is deciding.
+    Concede,
+}
+
+/// Submission result and the submitting viewer's next input state.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Submission {
+    /// Preserves rejection, rollback, cancellation and engine-fault distinctions.
+    pub kind: SubmissionKind,
+    /// Already advanced to the next player input point.
+    pub input: Input,
 }

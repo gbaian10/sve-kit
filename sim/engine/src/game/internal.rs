@@ -76,6 +76,7 @@ mod life;
 mod movement;
 mod numeric;
 mod ordering;
+mod player;
 mod player_stages;
 mod posture;
 mod resource;
@@ -575,6 +576,7 @@ enum Wait {
     Integer {
         binding: Binding<Nat>,
         bounds: Cardinality,
+        purpose: super::player::QuestionPurpose,
     },
     Draw {
         instruction: Box<Instruction>,
@@ -845,7 +847,7 @@ impl Game {
         {
             return Err(invalid("formal play requires answer_internal_card"));
         }
-        self.answer_internal_step(actor, token, answer)
+        self.answer_internal_step(actor, token, answer, &mut false)
     }
 
     #[expect(
@@ -857,6 +859,7 @@ impl Game {
         actor: PlayerId,
         token: DecisionToken,
         answer: Answer,
+        validated: &mut bool,
     ) -> Result<Progress> {
         let before = self.clone();
         let mut rollback = None;
@@ -875,7 +878,7 @@ impl Game {
             match (wait, answer) {
                 (Wait::Ability(wait), Answer::Ability(handle)) => {
                     let source = wait.validate(self, &execution, handle)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     wait.bind(&mut execution, Some(source));
                 }
                 (
@@ -883,7 +886,7 @@ impl Game {
                     Answer::ResourceEntryPayment { materials, use_ep },
                 ) => {
                     let payment = wait.validate(&materials, use_ep)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution
                         .play
                         .as_mut()
@@ -893,20 +896,20 @@ impl Game {
                 }
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.cost_materials.insert(wait.receipt(), members);
                 }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_discard_answer(&mut execution, &wait, &members)?;
                 }
                 (Wait::WardEntry(object), Answer::WardEntry(acted)) => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.ward_entries.push((object, acted));
                 }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     let declined_child = !accepted
                         && execution.nested.is_some()
                         && execution
@@ -930,7 +933,7 @@ impl Game {
                     },
                     Answer::OptionalCost(accepted),
                 ) => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.resolve_internal_payment(
                         &mut execution,
                         &costs,
@@ -941,7 +944,7 @@ impl Game {
                 }
                 (Wait::MaterialParameter(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     wait.bind(&mut execution, members);
                 }
                 (Wait::ExchangeRoute { affordable }, Answer::Integer(route)) => {
@@ -949,24 +952,24 @@ impl Game {
                     if !affordable.contains(&index) {
                         return Err(invalid("unavailable exchange route"));
                     }
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     card::exchange::choose_route(&mut execution, index)?;
                 }
                 (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     card::exchange::select(&mut execution, members)?;
                 }
                 (Wait::TriggerQuota { count }, Answer::TriggerQuota(handle))
                     if usize::try_from(handle)
                         .is_ok_and(|handle| handle > 0 && handle <= count) =>
                 {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_quota_answer(handle)?;
                 }
                 (Wait::RecipientTargets(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.slots.insert(
                         wait.binding.key(),
                         Slot::Recipients {
@@ -977,35 +980,35 @@ impl Game {
                 }
                 (Wait::Targets(wait), Answer::TargetsWithRoles { targets, roles }) => {
                     let (objects, answers) = wait.validate_roles(&targets, &roles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.bind_target_roles(&wait, &answers);
                     Self::internal_target_answer(&mut execution, &wait, objects)?;
                 }
                 (Wait::Targets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     Self::internal_target_answer(&mut execution, &wait, objects)?;
                 }
                 (Wait::ResolutionTargets(wait), Answer::TargetsWithRoles { targets, roles }) => {
                     let (objects, answers) = wait.validate_roles(&targets, &roles)?;
                     wait.check_advance_current(self, &execution, &objects)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.bind_target_roles(&wait, &answers);
                     execution.bind_targets(&wait, objects);
                 }
                 (Wait::ResolutionTargets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
                     wait.check_advance_current(self, &execution, &objects)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.bind_targets(&wait, objects);
                 }
                 (Wait::Dice(wait), Answer::Integer(number)) if number.0 <= 1 => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_dice_answer(&mut execution, *wait, number.0 == 1)?;
                 }
                 (Wait::Alternative(wait), Answer::Modes(modes)) => {
                     let body = wait.validate(&modes)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.prepend(body);
                 }
                 (
@@ -1016,7 +1019,7 @@ impl Game {
                     },
                     Answer::Integer(number),
                 ) if number.0 <= 1 => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution.slots.insert(binding.key(), Slot::Natural(number));
                     execution
                         .receipts
@@ -1027,19 +1030,19 @@ impl Game {
                 }
                 (Wait::TokenCapacity(wait), Answer::TokenCapacity(handle)) => {
                     let prints = wait.validate(handle)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_token_capacity_answer(&mut execution, &wait, &prints)?;
                 }
                 (Wait::MovementCapacity(wait), Answer::SearchPartition(handles)) => {
                     let chosen = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_movement_capacity_answer(&mut execution, &wait, chosen)?;
                 }
                 (Wait::Modes(wait), Answer::Modes(modes)) => {
                     if !wait.chosen.accepts_answer(wait.count, &modes) {
                         return Err(invalid("invalid mode selection"));
                     }
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     execution
                         .play
                         .as_mut()
@@ -1049,7 +1052,7 @@ impl Game {
                 }
                 (Wait::Distribution(wait), Answer::Distribution(shares)) => {
                     execution.distribution_answer(&wait, &shares)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     Self::internal_play_distribution_captures(
                         &mut execution,
                         wait.producer_decision(),
@@ -1057,37 +1060,41 @@ impl Game {
                 }
                 (Wait::Drive(wait), Answer::DriveTrigger { accept, target }) => {
                     let selected = wait.validate(accept, target)?;
+                    *validated = true;
                     self.internal_drive_answer(&mut execution, *wait, accept, selected)?;
                 }
                 (Wait::DamageReplacements(wait), Answer::Order(handles)) => {
                     let ordered = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.continue_damage(&mut execution, *wait, Some(ordered))?;
                 }
                 (Wait::Order(wait), Answer::Order(handles)) => {
                     let ordered = wait.validate(&handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_order_answer(&mut execution, &wait, ordered)?;
                 }
                 (Wait::Search(wait), Answer::Search(answer)) => {
                     let found = self.internal_search_validate(&execution, &wait, answer)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_search_answer(&mut execution, &wait, found)?;
                 }
                 (Wait::SearchPartition(wait), Answer::SearchPartition(handles)) => {
                     let cards =
                         self.internal_search_partition_validate(&execution, &wait, &handles)?;
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_search_partition_answer(&mut execution, &wait, &cards)?;
                 }
                 (Wait::SearchReplacement(wait), Answer::SearchReplacement(answer)) => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     self.internal_search_replacement_answer(&mut execution, &wait, answer)?;
                 }
-                (Wait::Integer { binding, bounds }, Answer::Integer(number))
-                    if contains(bounds, number) =>
-                {
-                    rollback = execution.origin.take();
+                (
+                    Wait::Integer {
+                        binding, bounds, ..
+                    },
+                    Answer::Integer(number),
+                ) if contains(bounds, number) => {
+                    rollback = execution.answer_origin(validated);
                     execution.slots.insert(binding.key(), Slot::Natural(number));
                 }
                 (
@@ -1100,7 +1107,7 @@ impl Game {
                     },
                     Answer::Stepwise(answer),
                 ) => {
-                    rollback = execution.origin.take();
+                    rollback = execution.answer_origin(validated);
                     if answer == StepwiseAnswer::Continue {
                         actual.0 = actual
                             .0
@@ -1517,6 +1524,7 @@ impl Game {
                     Wait::Integer {
                         binding: *binding,
                         bounds: *cardinality,
+                        purpose: player::purpose(&decision.kind),
                     },
                 )
             }

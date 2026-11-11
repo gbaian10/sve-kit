@@ -638,13 +638,19 @@ impl Game {
         Ok(question)
     }
 
-    fn answer_pending_quota(&mut self, answer: &Answer, count: usize) -> Result<CardPlay> {
+    fn answer_pending_quota(
+        &mut self,
+        answer: &Answer,
+        count: usize,
+        validated: &mut bool,
+    ) -> Result<CardPlay> {
         let Answer::TriggerQuota(handle) = answer else {
             return Err(invalid("wrong quota answer"));
         };
         if !usize::try_from(*handle).is_ok_and(|handle| handle > 0 && handle <= count) {
             return Err(invalid("unknown quota handle"));
         }
+        *validated = true;
         let before = self.clone();
         let result = (|| {
             self.internal_quota_answer(*handle)?;
@@ -666,6 +672,7 @@ impl Game {
         actor: PlayerId,
         token: DecisionToken,
         answer: &Answer,
+        validated: &mut bool,
     ) -> Result<CardPlay> {
         let (question, members) = self
             .card_runtime
@@ -677,7 +684,7 @@ impl Game {
         }
         if let InputDomain::TriggerQuota(domain) = &question.domain {
             let count = domain.candidates.len();
-            return self.answer_pending_quota(answer, count);
+            return self.answer_pending_quota(answer, count, validated);
         }
         let Answer::Pending(handle) = answer else {
             return Err(invalid("wrong pending answer"));
@@ -697,6 +704,7 @@ impl Game {
             .iter()
             .position(|pending| pending.id == id && pending.source.controller == actor)
             .ok_or_else(|| invalid("pending is no longer selectable"))?;
+        *validated = true;
         let before = self.clone();
         let pending = self.card_runtime.pending.remove(position);
         self.card_runtime.question = None;
