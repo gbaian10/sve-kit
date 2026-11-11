@@ -1,5 +1,11 @@
 //! Closed, read-only player observations without authority identities.
 
+mod effects;
+pub use effects::{
+    EffectExpiry, EffectInterval, EffectSource, GrantedDefinition, InstalledChange,
+    InstalledEffect, NumberChange,
+};
+
 use super::{ObjectHandle, Viewer};
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
@@ -98,6 +104,8 @@ pub struct CardState {
     pub counters: Vec<Counter>,
     /// Whether Box currently suppresses this card.
     pub boxed: bool,
+    /// Authorized installed changes; effective properties above remain authoritative.
+    pub effects: Vec<InstalledEffect>,
 }
 
 /// Authorized card characteristics, with no open authority state.
@@ -232,6 +240,11 @@ impl Game {
     }
 
     fn player_observation(&self, perspective: Viewer) -> Result<Observation> {
+        if !self.state.continuous.is_empty() {
+            return Err(invalid(
+                "prototype continuous effects are not a typed observation",
+            ));
+        }
         let turn = &self.state.turn;
         let phase = match turn["phase"].as_str() {
             Some("start") => Some(Phase::Start),
@@ -370,7 +383,7 @@ impl Game {
         let public_state = !matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
             || (object.controller == seat(perspective) && object.zone != "deck");
         let state = public_state
-            .then(|| self.observed_card_state(id, object))
+            .then(|| self.observed_card_state(perspective, id, object))
             .transpose()?;
         Ok(CardProperties {
             card: source.card.clone(),
@@ -384,7 +397,12 @@ impl Game {
         })
     }
 
-    fn observed_card_state(&self, id: &str, object: &Object) -> Result<CardState> {
+    fn observed_card_state(
+        &self,
+        perspective: Viewer,
+        id: &str,
+        object: &Object,
+    ) -> Result<CardState> {
         let mut counters = Vec::new();
         if let Some(values) = object.state["counters"].as_object() {
             for (key, amount) in values {
@@ -433,6 +451,7 @@ impl Game {
                 .collect(),
             counters,
             boxed: self.internal_boxed(id),
+            effects: self.observed_installed_effects(perspective, id)?,
         })
     }
 }

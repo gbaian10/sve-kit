@@ -1,6 +1,9 @@
 //! Grants retain the text provider and receiving physical generation.
+
 use super::duration::EffectEnd;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::game::player::Viewer;
+use crate::game::player::observation::{InstalledChange, InstalledEffect};
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
@@ -22,6 +25,7 @@ pub(in crate::game) struct KeywordState {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct KeywordGrant {
+    origin_record: super::observation::EffectOrigin,
     end: EffectEnd,
     keywords: BTreeSet<String>,
     traits: BTreeSet<String>,
@@ -769,6 +773,11 @@ impl Game {
         }
         let trait_grant = !traits.is_empty();
         let grant = KeywordGrant {
+            origin_record: super::observation::EffectOrigin::capture(
+                self,
+                execution,
+                &instruction.source,
+            )?,
             end,
             keywords,
             traits,
@@ -992,5 +1001,136 @@ impl Game {
                 .map(|(_, origin)| origin),
         );
         Ok(origins)
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Observation shares grant generation and suppression checks."
+)]
+impl Game {
+    pub(super) fn observed_grant_effects(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::GrantedDefinition;
+        let object = self.object(holder)?;
+        let zone = match object.zone.as_str() {
+            "field" => ZoneKind::Field,
+            "ex" => ZoneKind::Ex,
+            "resolution" => ZoneKind::Resolution,
+            _ => return Ok(vec![]),
+        };
+        let effective = if self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+            .is_some_and(|state| {
+                state
+                    .grants
+                    .iter()
+                    .any(|grant| !grant.definitions.is_empty())
+            }) {
+            self.internal_effective_abilities(holder)?
+        } else {
+            vec![]
+        };
+        let mut result = vec![];
+        for grant in self
+            .state
+            .ir_keywords
+            .get(holder)
+            .filter(|state| state.generation == object.generation)
+            .into_iter()
+            .flat_map(|state| &state.grants)
+        {
+            let provider = grant.origin.provider();
+            let unsuppressed = !self.internal_suppresses_grant(holder, &grant.origin);
+            if !grant.keywords.is_empty() {
+                let keywords = grant
+                    .keywords
+                    .iter()
+                    .map(|key| {
+                        let name = self.catalog.keyword_name(key);
+                        if name.is_empty() {
+                            key.clone()
+                        } else {
+                            name.into()
+                        }
+                    })
+                    .collect();
+                result.push(grant.observed(
+                    self,
+                    perspective,
+                    InstalledChange::Grant {
+                        keywords,
+                        traits: vec![],
+                        definitions: vec![],
+                    },
+                    zone == ZoneKind::Field && unsuppressed,
+                )?);
+            }
+            if !grant.traits.is_empty() {
+                result.push(grant.observed(
+                    self,
+                    perspective,
+                    InstalledChange::Grant {
+                        keywords: vec![],
+                        traits: grant.traits.iter().cloned().collect(),
+                        definitions: vec![],
+                    },
+                    zone == ZoneKind::Field,
+                )?);
+            }
+            for id in &grant.definitions {
+                let ability = self
+                    .card_runtime
+                    .granted_definitions
+                    .get(&(provider.card.clone(), AbilityId(*id)))
+                    .ok_or_else(|| invalid("missing installed definition"))?;
+                let line = match ability.source.origin {
+                    AbilityOrigin::Printed { line, .. } => line.0,
+                    _ => u64::from(provider.span.line),
+                };
+                result.push(grant.observed(
+                    self,
+                    perspective,
+                    InstalledChange::Grant {
+                        keywords: vec![],
+                        traits: vec![],
+                        definitions: vec![GrantedDefinition {
+                            kind: ability.kind,
+                            line,
+                        }],
+                    },
+                    effective.iter().any(|current| {
+                        current.grant.as_ref() == Some(&grant.origin)
+                            && current.node.id == ability.id
+                    }),
+                )?);
+            }
+        }
+        Ok(result)
+    }
+}
+
+impl KeywordGrant {
+    fn observed(
+        &self,
+        game: &Game,
+        perspective: Viewer,
+        change: InstalledChange,
+        active: bool,
+    ) -> Result<InstalledEffect> {
+        Ok(InstalledEffect {
+            source: self.origin_record.observed(game, perspective),
+            expires: self.end.observed()?,
+            main_live: true,
+            intervals: vec![],
+            active,
+            change,
+        })
     }
 }

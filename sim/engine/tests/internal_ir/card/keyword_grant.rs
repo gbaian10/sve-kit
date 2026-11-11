@@ -2,6 +2,9 @@ use super::*;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::InstalledChange;
+use sve_engine::game::player::observation::ObservedZone;
 
 fn granted(keyword: KeywordId, end: DurationEnd) -> Located<Node> {
     instruction(
@@ -41,6 +44,22 @@ fn basic_keyword_grants_are_effective_and_other_keywords_stay_closed() {
     ] {
         let mut game = grant_position(vec![granted(keyword, DurationEnd::NoTemporalExpiry {})]);
         let result = activate(&mut game, 1);
+        let observed = game.observe(Viewer::P2).unwrap();
+        let state = observed.players[0]
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap()
+            .cards[0]
+            .card
+            .properties
+            .state
+            .as_ref()
+            .unwrap();
+        assert_eq!(state.keywords, [key]);
+        let effect = state.effects.iter().find(|effect| matches!(&effect.change, InstalledChange::Grant { keywords, .. } if keywords == &[key])).unwrap();
+        assert!(effect.active);
+        assert_eq!(effect.source.as_ref().unwrap().line, Some(1));
         assert!(result.progress.receipts.values().any(|receipt| matches!(receipt, InstructionOutcome::Granted(subjects) if subjects.len() == 1)));
         assert_eq!(
             game.projection(View::Referee).unwrap()["objects"]["s"]["keywords"],
@@ -406,4 +425,37 @@ fn departure_triggers_read_the_added_trait_from_the_same_lki_as_history() {
         game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
         21
     );
+}
+
+#[test]
+fn an_effect_keeps_its_public_text_origin_after_the_installer_returns_to_hand() {
+    let mut game = grant_position(vec![
+        movement::put(
+            1,
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            },
+            OwnerZone::Hand,
+        ),
+        numeric::buff(2, 2, 0),
+    ]);
+    activate(&mut game, 1);
+    let observation = game.observe(Viewer::P2).unwrap();
+    let state = observation.players[1]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .properties
+        .state
+        .as_ref()
+        .unwrap();
+    assert_eq!(state.stats.as_ref().unwrap().attack, 4);
+    let origin = state.effects[0].source.as_ref().unwrap();
+    assert_eq!(origin.card, "unit-follower");
+    assert_eq!(origin.face.as_deref(), Some("0"));
+    assert_eq!(origin.line, Some(1));
+    assert!(origin.holder.is_none());
 }

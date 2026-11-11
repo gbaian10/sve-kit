@@ -45,6 +45,10 @@ impl Knowledge {
         self.located.contains(id)
     }
 
+    pub(super) fn identity_period(&self, id: &str) -> Option<u64> {
+        self.handles.get(id).map(|entry| entry.index)
+    }
+
     pub(super) fn handle(&self, id: &str) -> Option<ObjectHandle> {
         self.handles
             .get(id)

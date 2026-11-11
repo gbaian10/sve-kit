@@ -77,6 +77,7 @@ pub(super) use history_turn::{
 mod life;
 mod movement;
 mod numeric;
+mod observation;
 mod ordering;
 mod player;
 mod player_stages;

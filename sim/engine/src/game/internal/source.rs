@@ -2,6 +2,7 @@
 
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::Object;
+use crate::game::player::Viewer;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr, LkiReason,
@@ -15,6 +16,7 @@ use serde_json::Value;
 pub(super) struct SourceInformation {
     holder: ObjectRef,
     zone: String,
+    publicly_identified: bool,
     departed: Option<SourceSnapshot>,
 }
 
@@ -316,6 +318,10 @@ impl Execution {
 }
 
 impl SourceInformation {
+    pub(super) const fn publicly_identified(&self) -> bool {
+        self.publicly_identified
+    }
+
     pub(super) fn departing_equipment_host<'game>(
         &self,
         game: &'game Game,
@@ -351,6 +357,8 @@ impl SourceInformation {
         Ok(Self {
             holder: source.holder,
             zone: game.object(id)?.zone.clone(),
+            publicly_identified: game.player_knows_object(Viewer::P1, id)
+                && game.player_knows_object(Viewer::P2, id),
             departed: None,
         })
     }

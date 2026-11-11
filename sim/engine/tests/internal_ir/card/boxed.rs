@@ -6,6 +6,8 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::EffectExpiry;
+use sve_engine::game::player::observation::InstalledChange;
 use sve_engine::game::player::observation::ObservedZone;
 
 fn target() -> Value {
@@ -253,7 +255,42 @@ fn box_blocks_rule_stand_but_allows_effect_stand_and_reboxing_captures_new_grant
 fn boxed_follower_has_no_lastword_and_move_does_not_carry_box_to_the_new_generation() {
     let (mut game, card) = board_with(&tree(), false);
     activate(&mut game, &card, 3);
+    let before_box = game.observe(Viewer::P1).unwrap();
+    let state = before_box.players[1]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .properties
+        .state
+        .as_ref()
+        .unwrap();
+    assert!(state.effects.iter().any(|effect| effect.active && matches!(&effect.change, InstalledChange::Grant { definitions, .. } if !definitions.is_empty())));
     activate(&mut game, &card, 2);
+    let observed = game.observe(Viewer::P1).unwrap();
+    let state = observed.players[1]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .properties
+        .state
+        .as_ref()
+        .unwrap();
+    assert!(state.boxed);
+    assert!(state.effects.iter().any(|effect| effect.active
+        && effect.change == InstalledChange::AbilityRemoval { boxed: true }
+        && effect.expires == EffectExpiry::NextTurnEnd(Viewer::P2)));
+    assert!(
+        state
+            .effects
+            .iter()
+            .any(|effect| !effect.active && matches!(effect.change, InstalledChange::Grant { .. }))
+    );
     activate(&mut game, &card, 6);
     assert!(game.internal_pending_choice().unwrap().is_none());
     let state = game.projection(View::Referee).unwrap();
