@@ -1,10 +1,11 @@
 //! Field observers of deck-to-cemetery moves read only the committed zones and owner.
 use super::{
     Ability, AbilityKind, AbilityOrigin, EventHeader, EventPattern, EventPayload,
-    EventSnapshotPolicy, Frame, Game, LimitSpec, Located, Object, Result, RuntimeZoneRef,
-    SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition, ZoneKind, invalid,
-    optional_payment, player_id, unsupported,
+    EventSnapshotPolicy, Frame, Game, LimitSpec, Object, Result, RuntimeZoneRef, SnapshotId,
+    SourceInformation, TriggerAggregation, TriggerCondition, ZoneKind, invalid, optional_payment,
+    player_id, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::mill::MillFilter;
 use crate::ir::{Generation, MoveEvent, MoveMethod, ObjectRef, Position};
 
@@ -48,7 +49,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     reason = "Mill observers share the common movement transaction."
 )]
 impl Game {
-    fn mill_observers(&self) -> Result<Vec<(String, Vec<Located<Ability>>)>> {
+    fn mill_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
             program
                 .card()

@@ -71,7 +71,7 @@ pub(in crate::game::internal) struct PendingOccurrence {
     id: u64,
     holder: String,
     source: RuntimeAbilitySource,
-    ability: Located<Ability>,
+    ability: super::admission::PlannedAbility,
     information: SourceInformation,
     subject_information: Option<SourceSnapshot>,
     header: EventHeader,
@@ -226,7 +226,7 @@ impl Game {
         &mut self,
         holder: &str,
         source: RuntimeAbilitySource,
-        ability: Located<Ability>,
+        ability: super::admission::PlannedAbility,
         information: SourceInformation,
         header: EventHeader,
         leave: Option<LeaveFieldEvent>,
@@ -759,7 +759,7 @@ impl Game {
             execution.ability = Some(pending.source);
             execution.trigger_occurrence = Some(pending.id);
             execution.source_information = Some(pending.information);
-            self.run_card_play(execution, pending.ability.node, &published)
+            self.run_card_play(execution, pending.ability, &published)
         })();
         if matches!(result, Err(crate::EngineFailure::IllegalPlay(_))) {
             let high = self.state.ir_epoch;

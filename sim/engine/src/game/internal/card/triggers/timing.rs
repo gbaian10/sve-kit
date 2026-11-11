@@ -586,7 +586,7 @@ impl Game {
         // CR 12.13.3 treats printed and granted copies as a single Drain.
         if !printed_drain && let Some(origin) = self.internal_drain_grant(holder)? {
             abilities.push(EffectiveAbility {
-                definition: origin.drain_ability(),
+                definition: origin.drain_ability()?,
                 grant: Some(origin),
             });
         }

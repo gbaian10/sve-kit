@@ -2,7 +2,7 @@
 
 use super::current::CurrentCard;
 use super::{Card, Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
-use crate::ir::WellFormedCardProgram;
+use crate::game::internal::AdmittedCard;
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -29,7 +29,7 @@ pub struct SelectedEffects {
 
 #[derive(Clone, Default)]
 pub(crate) struct RuntimeCards {
-    pub(crate) cards: BTreeMap<String, Arc<WellFormedCardProgram>>,
+    pub(crate) cards: BTreeMap<String, Arc<AdmittedCard>>,
     pub(crate) current: BTreeMap<String, Arc<CurrentCard>>,
 }
 

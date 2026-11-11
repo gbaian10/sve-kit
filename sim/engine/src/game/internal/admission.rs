@@ -1,3 +1,22 @@
+use crate::ir::{AbilityId, InstructionId, ScopeId, WellFormedCardProgram};
+mod plan;
+pub(crate) use plan::AdmittedCard;
+pub(super) use plan::{AdmittedProgram, BodyPlan, PlannedAbility};
+
+pub(super) fn compile(program: &WellFormedProgram, source: &SourceSpan) -> Result<AdmittedProgram> {
+    check(program, source)?;
+    AdmittedProgram::compile(program, source)
+}
+
+pub(super) fn compile_card(
+    game: &super::Game,
+    number: &str,
+    program: &WellFormedCardProgram,
+) -> Result<AdmittedCard> {
+    game.check_internal_card(number, program)?;
+    AdmittedCard::compile(program)
+}
+
 use super::{
     Cardinality, ChoiceDomain, Control, DecisionKind, Declinable, InstructionContext, Located,
     Node, Program, Requirements, Result, SourceSpan, Visibility, WellFormedProgram, unsupported,
@@ -1391,4 +1410,31 @@ fn mask_delayed(program: &mut Program) -> Result<()> {
         }
     }
     Ok(())
+}
+
+pub(super) fn drive_ability(
+    keyword: KeywordId,
+    id: AbilityId,
+    scope: ScopeId,
+    instruction: InstructionId,
+    source: &SourceSpan,
+) -> Result<PlannedAbility> {
+    let node = printed_keywords::drive_definition(keyword, id, scope, instruction, source)
+        .ok_or_else(|| super::invalid("Drive definition"))?;
+    PlannedAbility::compile(&Located {
+        node,
+        source: source.clone(),
+    })
+}
+pub(super) fn drain_ability(
+    id: AbilityId,
+    scope: ScopeId,
+    instruction: InstructionId,
+    source: &SourceSpan,
+) -> Result<PlannedAbility> {
+    let node = printed_keywords::drain_definition(id, scope, instruction, source);
+    PlannedAbility::compile(&Located {
+        node,
+        source: source.clone(),
+    })
 }

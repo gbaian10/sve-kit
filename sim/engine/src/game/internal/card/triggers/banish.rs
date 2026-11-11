@@ -1,10 +1,11 @@
 //! A hand source is captured before the banish instruction commits its new generation.
 use super::{
-    Ability, AbilityKind, AbilityOrigin, Cause, EventPayload, EventSnapshotPolicy, Game, Located,
+    Ability, AbilityKind, AbilityOrigin, Cause, EventPayload, EventSnapshotPolicy, Game,
     PendingOccurrence, Result, SnapshotId, SourceInformation, TriggerAggregation, ZoneKind,
     invalid, optional_payment, player_id, unsupported,
 };
 use crate::game::internal::Execution;
+use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::banish as header;
 use crate::ir::{BanishEvent, MoveMethod, MoveResult, RuntimeZoneRef};
 
@@ -73,7 +74,7 @@ impl Game {
                 .internal_printed_abilities(id)?
                 .into_iter()
                 .filter(|ability| hand_header(&ability.node))
-                .collect::<Vec<Located<Ability>>>();
+                .collect::<Vec<PlannedAbility>>();
             if abilities.is_empty() {
                 continue;
             }

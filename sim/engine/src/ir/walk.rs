@@ -68,3 +68,11 @@ where
 {
     card.walk(visitor, "");
 }
+
+/// Visit one independent definition, including declarations and nested abilities.
+pub fn ability<Observer>(ability: &Located<Ability>, visitor: &mut Observer)
+where
+    Observer: Visitor,
+{
+    ability.walk(visitor, "");
+}

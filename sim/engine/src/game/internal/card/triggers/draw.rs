@@ -4,6 +4,7 @@ use super::{
     Game, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind, invalid,
     optional_payment, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::{Execution, seat_name};
 use crate::ir::events::draw::predicate as draw_predicate;
 use crate::ir::{DrawEvent, LimitSpec};
@@ -44,7 +45,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     reason = "Draw observers share the authoritative pending queue."
 )]
 impl Game {
-    fn draw_observers(&self, seat: &str) -> Result<Vec<(String, super::Located<Ability>)>> {
+    fn draw_observers(&self, seat: &str) -> Result<Vec<(String, PlannedAbility)>> {
         let mut observers = Vec::new();
         if self.state.turn["phase"] == "start" {
             return Ok(observers);

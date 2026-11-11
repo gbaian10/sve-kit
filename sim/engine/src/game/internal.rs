@@ -45,6 +45,7 @@ use crate::ir::RevealUntilOutcome;
 
 mod ability_suppression;
 mod admission;
+pub(crate) use admission::AdmittedCard;
 mod aggregates;
 pub(in crate::game) use ability_suppression::SuppressionState;
 mod allocation;
@@ -135,7 +136,7 @@ pub struct ProperPlay {
 pub(super) struct PreparedPlay {
     association: Arc<()>,
     context: Context,
-    program: WellFormedProgram,
+    program: admission::AdmittedProgram,
     timestamp: u64,
 }
 
@@ -590,6 +591,7 @@ enum Wait {
 
 #[derive(Clone, Debug)]
 pub(super) struct Execution {
+    plan: Option<Arc<admission::BodyPlan>>,
     terminated: bool,
     context: Context,
     id: ExecutionId,
@@ -712,13 +714,13 @@ impl Game {
         if self.card_runtime.requires_typed_play() {
             return Err(unsupported("synthetic play cannot bypass loaded triggers"));
         }
-        admission::check(program, source)?;
+        let program = admission::compile(program, source)?;
         self.prepare_admitted_internal_play(program, context)
     }
 
     fn prepare_admitted_internal_play(
         &mut self,
-        program: &WellFormedProgram,
+        program: admission::AdmittedProgram,
         context: Context,
     ) -> Result<ProperPlay> {
         self.internal_context(&context)?;
@@ -740,7 +742,7 @@ impl Game {
             PreparedPlay {
                 association: Arc::clone(&association),
                 context,
-                program: program.clone(),
+                program,
                 timestamp,
             },
         );
@@ -770,6 +772,7 @@ impl Game {
         let result = (|| {
             self.prepared.remove(&play.execution);
             let mut execution = Execution {
+                plan: Some(prepared.program.plan()),
                 terminated: false,
                 context: prepared.context,
                 id: ExecutionId(play.execution),
@@ -1881,6 +1884,14 @@ impl Game {
     reason = "Value evaluation shares the private execution environment."
 )]
 impl Execution {
+    fn token_plan(&self, instruction: &Instruction) -> Result<tokens::TokenPlan> {
+        self.plan
+            .as_ref()
+            .ok_or_else(|| invalid("token execution has no admitted plan"))?
+            .token(instruction)
+            .cloned()
+    }
+
     fn progress(&self) -> Progress {
         Progress {
             complete: !self.terminated && self.waiting.is_none() && self.todo.is_empty(),

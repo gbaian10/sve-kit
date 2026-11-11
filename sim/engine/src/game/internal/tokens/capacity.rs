@@ -80,7 +80,7 @@ impl Game {
         usize::try_from(5_i64.saturating_sub(self.zone_count(seat, zone)).max(0)).map_err(invalid)
     }
 
-    pub(in crate::game::internal::tokens) fn internal_create_prints(
+    pub(in crate::game::internal) fn internal_create_prints(
         &mut self,
         prints: &[String],
         seat: &str,

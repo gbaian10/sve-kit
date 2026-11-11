@@ -58,3 +58,28 @@ walk 的 enter／leave 是語法結構通知，不是 dominance、執行時順�
 raw IR 仍由 wellformed 檢查，作者路徑仍保留來源閉包與 lowering；
 未付、跨迴圈／execution、錯誤 producer 或未授權私有讀取的拒絕不因共用走訪而消失。
 靜態計畫建立後，使用時仍重驗付款、世代、位置、follow 與實際 reveal。
+
+## 准入結果與 token 數量
+
+`WellFormedProgram`／`WellFormedCardProgram` 證明 IR 的型別、scope 與 producer 關係，
+不是 backend 執行許可。raw 程式與全卡入口通過既有 backend 檢查後，才建立私有建構的
+`AdmittedProgram`／`AdmittedCard`；它們持有不可變的受驗 IR 與一起編譯的計畫。
+計畫沒有序列化、版本欄或額外 hash，也不能從候選卡片取得。
+selection 共用的計畫只依賴 catalog 與受驗定義，不保存局面或遊戲快照。
+
+printed 能力、授予定義與 Delay 本文分別持有自己的計畫。授予時保留提供者與原指示，
+Delay 安裝時保留該 Delay 的本文計畫；pending 與巢狀執行隨定義傳遞計畫，
+不以合成 callback 的 AbilityId 搜尋 printed 能力。runtime 合成的 Drive／Drain
+能力仍由既有規則工廠建立，經明示的內部編譯入口附上計畫。
+
+一般 Token、EachPlayer token stage 及 Delay 本文的 Token 在准入時選定數量讀者：
+固定值、既有公開區域計數，或 destroy-success 的 Before controller 計數。
+執行時依自己的計畫查找 InstructionId，且完整指示必須一致；缺少或不一致即拒絕，
+不退回合法形狀推測。destroy 計數仍逐項驗證成功 receipt、departure fact 與離場前控制者。
+付款成功、物件世代、位置及真實 reveal 仍在使用時重驗，計畫不能代替它們。
+
+mixed EX 的固定一張 Simultaneous 家族仍使用獨立的既有准入及 projection。
+Transform 也保留自己的准入，按各控制者實際成功回條算出張數後，才交共用配置核心。
+配置核心只收已求值的模板與數量，保留整卡准入、種類、容量、同名上限與選擇流程；
+它不接受可任意求值的數量 Expr。同名建立的 follower 種類限制仍由 Token consumer 保留。
+這些界線不授予其他 token 算式或完整卡片的執行資格。

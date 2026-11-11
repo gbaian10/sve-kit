@@ -1,9 +1,10 @@
 //! Accepted die rolls capture field observers before the instruction continues.
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
-    Game, Located, PendingOccurrence, Result, SnapshotId, TriggerAggregation, TriggerCondition,
-    ZoneKind, invalid, optional_payment, unsupported,
+    Game, PendingOccurrence, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind,
+    invalid, optional_payment, unsupported,
 };
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::{Execution, seat_name};
 use crate::ir::dice::predicate as dice_predicate;
 use crate::ir::{DiceEvent, LimitSpec};
@@ -56,7 +57,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     reason = "Dice observers share the authoritative pending queue."
 )]
 impl Game {
-    fn dice_observers(&self, seat: &str) -> Result<Vec<(String, Located<Ability>)>> {
+    fn dice_observers(&self, seat: &str) -> Result<Vec<(String, PlannedAbility)>> {
         let mut observers = Vec::new();
         for holder in self.zone_ids(seat, "field") {
             let (card, _) = self.internal_effective_print(&holder)?;

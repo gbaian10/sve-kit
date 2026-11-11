@@ -1027,7 +1027,7 @@ impl Game {
 
     pub(super) fn start_internal_ability(
         &mut self,
-        ability: Ability,
+        ability: admission::PlannedAbility,
         context: Context,
         source: RuntimeAbilitySource,
         spell: bool,
@@ -1036,7 +1036,7 @@ impl Game {
         let mut execution = self.new_card_execution(context)?;
         execution.bind_source(self, source)?;
         execution.spell = spell;
-        if let Some(play) = &ability.play {
+        if let Some(play) = &ability.node.play {
             self.internal_use_prerequisite(&execution, &play.costs)?;
             execution.captures(self, &play.captures)?;
         }
@@ -1101,6 +1101,7 @@ impl Game {
                     _ => None,
                 });
         Ok(Execution {
+            plan: None,
             terminated: false,
             context,
             id: ExecutionId(self.state.ir_epoch),
@@ -1149,7 +1150,7 @@ impl Game {
     pub(super) fn run_card_play(
         &mut self,
         mut execution: Execution,
-        ability: Ability,
+        ability: admission::PlannedAbility,
         published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
@@ -1160,9 +1161,11 @@ impl Game {
     pub(super) fn prepare_ability_play(
         &self,
         execution: &mut Execution,
-        ability: Ability,
+        ability: admission::PlannedAbility,
         cost_policy: AbilityCostPolicy,
     ) -> Result<()> {
+        let (ability, body_plan) = ability.into_parts();
+        execution.plan = Some(body_plan);
         self.internal_require_ability_permission(&execution.context.source, &ability)?;
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;

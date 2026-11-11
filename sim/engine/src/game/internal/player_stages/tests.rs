@@ -29,6 +29,7 @@ fn fixture() -> Game {
 
 fn execution(game: &mut Game) -> Execution {
     Execution {
+        plan: None,
         terminated: false,
         context: Context {
             source: "s".into(),

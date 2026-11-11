@@ -1,4 +1,5 @@
 use super::{Context, Continuation, Execution, Game, Generation, Result, seat_name, unsupported};
+use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::card::play::ability_cost;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::game::internal::{AbilityOption, InputDomain, InstructionOutcome, Slot, Wait};
@@ -234,7 +235,7 @@ impl Game {
                 game.prepare_effect_ability(
                     &holder,
                     source,
-                    ability.node.clone(),
+                    ability.definition.clone(),
                     policy,
                     continuation,
                 )
@@ -246,7 +247,7 @@ impl Game {
         &mut self,
         holder: &str,
         source: RuntimeAbilitySource,
-        ability: Ability,
+        ability: PlannedAbility,
         policy: AbilityCostPolicy,
         continuation: Box<Continuation>,
     ) -> Result<Execution> {
@@ -258,7 +259,7 @@ impl Game {
         })?;
         execution.nested = Some(continuation);
         execution.bind_source(self, source)?;
-        if let Some(play) = &ability.play {
+        if let Some(play) = &ability.node.play {
             if policy == AbilityCostPolicy::WaiveOriginal {
                 ability_cost::seed_original_x(&mut execution, &play.parameters)?;
             }
