@@ -1,4 +1,6 @@
 //! Closed public history queries retain their existing counter and object-state authorities.
+use crate::ir::StatChangeEvent;
+use crate::ir::events::change::StatFilter;
 use crate::ir::{
     BanishEvent, Binding, Bool, BoolRead, CardKind, CardName, Cardinality, CharacteristicView,
     DamageEvent, DamageRecipient, EventContext, EventPattern, EventSnapshotPolicy, Expr,
@@ -18,6 +20,29 @@ const fn current_turn(pattern: EventPattern) -> HistoryQuery {
         },
         include_execution: InclusionPolicy::IncludeAll {},
     }
+}
+
+pub(crate) fn stat_gain_query(
+    event: Binding<StatChangeEvent>,
+    filter: &StatFilter,
+) -> HistoryQuery {
+    current_turn(EventPattern::StatChange {
+        binding: event,
+        predicate: filter.predicate(event),
+    })
+}
+
+pub(crate) fn stat_gain_plan(query: &HistoryQuery) -> Option<StatFilter> {
+    let EventPattern::StatChange { binding, predicate } = &query.pattern else {
+        return None;
+    };
+    let filter = StatFilter::parse(*binding, predicate)?;
+    (filter.itself
+        && filter.up == Some(true)
+        && matches!(filter.properties.as_slice(), [_] | [_, _])
+        && !matches!(filter.properties.as_slice(), [first, second] if first == second)
+        && *query == stat_gain_query(*binding, &filter))
+    .then_some(filter)
 }
 
 pub(crate) fn banished_query(event: Binding<BanishEvent>, name: CardName) -> HistoryQuery {

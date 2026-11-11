@@ -10,7 +10,7 @@ use crate::ir::AttackEvent;
 use crate::ir::ObjectRelation;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
-use crate::ir::history_turn::public::{banished_plan, damaged_plan};
+use crate::ir::history_turn::public::{banished_plan, damaged_plan, stat_gain_plan};
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
     ExecutionRef, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
@@ -1087,6 +1087,10 @@ impl Execution {
             BoolRead::HistoryExists { query } if banished_plan(query).is_some() => {
                 super::history_turn::lesson_exists(self, game, &Expr::Live(Box::new(read.clone())))
             }
+            BoolRead::HistoryExists { query } => stat_gain_plan(query).map_or_else(
+                || Err(unsupported("boolean expression")),
+                |plan| super::history_turn::stat_gain_exists(self, game, &plan),
+            ),
             BoolRead::FieldEntryOrigin {
                 object: ObjectOperand::SourceHolder {},
                 zone: ZoneKind::Cemetery,

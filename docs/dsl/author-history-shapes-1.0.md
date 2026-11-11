@@ -187,6 +187,8 @@ dice_rolled.where 額外收 `value:{eq/le/ge:1..6}` 恰一（BP21-081、PR-573�
 payment 只在歷史：who 選填，where 必填且恰為 `{cost_kind:earth_rite}`，不收 phase。
 state、any_of、counter_reached 不作 history.event。歷史保存事件當時特徵，不查目前卡片。
 
+目前 `evolve.usable_if` 的 `stat_changed` 歷史接通 `window: this_turn`、`where.ref: this` 與 `where.direction: up`。指定一或兩個相異的 `stat`，任一正差額即符合。省略 `stat` 會同時檢查攻擊力與體力。舊世代或前回合的事件不符合，`at_least` 只收省略或 1。此入口只讀存在條件，完整形狀表仍以 schema 為準。
+
 | history_sum 變體 | field | 必要窄化 | 卡例 |
 | --- | --- | --- | --- |
 | damaged、dealt_damage | amount | 對應事件 | 合成 |

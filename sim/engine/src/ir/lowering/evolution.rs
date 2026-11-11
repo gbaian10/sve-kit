@@ -4,8 +4,10 @@ use super::{
     unsupported,
 };
 use crate::ir::effect_evolution;
+use crate::ir::events::change::StatFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::evolution_destination::Destination;
+use crate::ir::history_turn::public::stat_gain_query;
 use crate::ir::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Binding, CardName, Cardinality, ChoiceDomain, Control, CostSpec, CostStep, Decision,
@@ -15,7 +17,7 @@ use crate::ir::{
     ScopeId, SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector,
     TextQuantifier, Visibility, ZoneKind,
 };
-use crate::ir::{Bool, Effect, Expr, RuleModifier};
+use crate::ir::{Bool, BoolRead, Effect, Expr, RuleModifier};
 use crate::ir::{CardKind, EventPattern, FollowPermission, TraitId};
 
 #[expect(
@@ -289,7 +291,7 @@ pub(super) fn lower(
     let predicate = head
         .usable_if
         .as_ref()
-        .map(|condition| context.qualification(condition, path))
+        .map(|condition| evolution_qualification(&mut context, condition, path))
         .transpose()?;
     let reveal = instruction(
         Action::Reveal {
@@ -372,6 +374,37 @@ pub(super) fn lower(
             }),
         },
     })
+}
+
+fn evolution_qualification(
+    context: &mut super::BodyContext<'_>,
+    condition: &ast::Condition,
+    path: &str,
+) -> Result<Expr<Bool>, LoweringError> {
+    let ast::Condition::History(ast::HistoryCondition::StatChanged(history)) = condition else {
+        return context.qualification(condition, path);
+    };
+    let entry = &history.r#where;
+    let properties = entry.properties();
+    if entry.reference.is_none()
+        || !matches!(entry.direction, Some(ast::LifeDirection::Up))
+        || history.at_least.is_some_and(|count| count != 1)
+        || !matches!(properties.as_slice(), [_] | [_, _])
+        || matches!(properties.as_slice(), [first, second] if first == second)
+    {
+        return Err(unsupported(path));
+    }
+    let event = Binding::new(context.allocator.id(path)?, context.scope);
+    let filter = StatFilter {
+        itself: true,
+        properties,
+        up: Some(true),
+        subject: Binding::new(context.allocator.id(path)?, context.scope),
+        facet: Binding::new(context.allocator.id(path)?, context.scope),
+    };
+    Ok(Expr::Live(Box::new(BoolRead::HistoryExists {
+        query: stat_gain_query(event, &filter),
+    })))
 }
 
 pub(super) fn subscription(
