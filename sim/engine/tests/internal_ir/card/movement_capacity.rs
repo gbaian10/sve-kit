@@ -173,6 +173,44 @@ fn field_capacity_is_a_resolution_choice_and_follow_buffs_only_successful_arriva
     }
 }
 
+#[test]
+fn player_pipeline_capacity_preserves_distinct_choices_without_physical_ids() {
+    use crate::player_pipeline::{answer, question as player_question};
+    use sve_engine::game::player::{QuestionShape, SubmissionKind, Viewer};
+
+    let program = lowerer()
+        .lower(&field_tree())
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut game = evolution_linked_movement::loaded(&field_position(1), &program);
+    game.activate_internal_card(
+        "source",
+        program.card().abilities[0].node.id,
+        PlayerId { seat: 1 },
+    )
+    .unwrap();
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0, 1])).kind,
+        SubmissionKind::Applied
+    );
+    let capacity = player_question(&game, Viewer::P1);
+    let QuestionShape::Decision(InputDomain::SearchPartition(domain)) = &capacity.shape else {
+        panic!("capacity question");
+    };
+    assert_eq!(domain.cards.len(), 2);
+    assert_ne!(domain.cards[0].handle, domain.cards[1].handle);
+    assert!(domain.cards.iter().all(|card| card.object.is_none()));
+    assert!(!format!("{capacity:?}").contains("grave-"));
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::SearchPartition(vec![1])).kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["grave-b"]["power"], 3);
+    assert_eq!(state["objects"]["grave-a"]["generation"], 0);
+}
+
 fn private_look_game() -> (Game, AbilityId) {
     let tree = evolution_linked_movement::tree(&[(
         "activate",

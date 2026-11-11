@@ -140,6 +140,38 @@ fn rerolls_replace_the_result_and_fixed_repeats_reset_the_permission() {
 }
 
 #[test]
+fn player_pipeline_reroll_waiting_summary_preserves_the_public_die() {
+    use crate::player_pipeline::{answer as player_answer, question as player_question};
+    use sve_engine::game::player::{Input, QuestionShape, SubmissionKind, Viewer};
+
+    let program = card(vec![repeated(), reroll()]);
+    let mut game = position_with_card(1, &program);
+    game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap();
+    for _ in 0..2 {
+        let question = player_question(&game, Viewer::P1);
+        let QuestionShape::Decision(InputDomain::DiceReroll { value, remaining }) = question.shape
+        else {
+            panic!("reroll question");
+        };
+        let before = exact_authority(&game);
+        for _ in 0..4 {
+            assert!(matches!(game.input(Viewer::P2), Input::Waiting(summary)
+                if summary.dice == Some((value, remaining))));
+        }
+        assert_eq!(exact_authority(&game), before);
+        assert_eq!(
+            player_answer(&mut game, Viewer::P1, Answer::Integer(Nat(0))).kind,
+            SubmissionKind::Applied
+        );
+    }
+    assert!(matches!(
+        player_question(&game, Viewer::P1).shape,
+        QuestionShape::ActionWindow
+    ));
+}
+
+#[test]
 fn multiple_reroll_sources_stack_and_invalid_answers_preserve_the_choice() {
     let program = card(vec![ability(1, vec![roll(1)]), reroll()]);
     let mut initial = setup(1, json!([]));

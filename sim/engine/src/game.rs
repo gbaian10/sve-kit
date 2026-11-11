@@ -281,6 +281,10 @@ pub struct Game {
         serialize_with = "internal::serialize_cards"
     )]
     card_runtime: internal::CardRuntime,
+    #[serde(skip)]
+    player_fault: Option<EngineFailure>,
+    #[serde(skip)]
+    player_epoch: u64,
 }
 
 impl fmt::Debug for Game {
@@ -299,6 +303,8 @@ impl fmt::Debug for Game {
             .field("typed", &self.typed)
             .field("prepared", &self.prepared)
             .field("card_runtime", &self.card_runtime)
+            .field("player_fault", &self.player_fault)
+            .field("player_epoch", &self.player_epoch)
             .finish()
     }
 }
@@ -562,6 +568,8 @@ impl Game {
             typed: None,
             prepared: BTreeMap::new(),
             card_runtime: internal::CardRuntime::default(),
+            player_fault: None,
+            player_epoch: 0,
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;

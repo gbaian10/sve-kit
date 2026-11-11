@@ -99,6 +99,59 @@ fn optional_declaration_rejects_activation_and_exchange() {
 }
 
 #[test]
+fn player_pipeline_illegal_optional_payment_reverts_without_reviving_the_pending_token() {
+    use crate::player_pipeline::{answer, question as player_question};
+    use sve_engine::game::player::{Command, QuestionShape, SubmissionKind, Viewer};
+
+    let programs = lowerer().lower(&tree()).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "player-revert",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.advance_player_input();
+    let pending = player_question(&game, Viewer::P1);
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::OptionalCost(true)).kind,
+        SubmissionKind::Applied
+    );
+    let failed = answer(&mut game, Viewer::P1, Answer::Targets(vec![0]));
+    assert_eq!(failed.kind, SubmissionKind::Reverted);
+    let retry = player_question(&game, Viewer::P1);
+    assert!(matches!(
+        retry.shape,
+        QuestionShape::Decision(InputDomain::Pending(_))
+    ));
+    assert_ne!(retry.token, pending.token);
+    let before = exact_authority(&game);
+    let rejected = game.submit_player(
+        Viewer::P1,
+        Command::Answer {
+            token: pending.token,
+            answer: Answer::Pending(1),
+        },
+    );
+    assert_eq!(rejected.kind, SubmissionKind::Rejected);
+    assert_eq!(exact_authority(&game), before);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 1);
+    assert_eq!(state["objects"]["f"]["damage"], 0);
+    assert_eq!(state["P1"]["field"], json!(["s"]));
+}
+
+#[test]
 fn ordered_trigger_costs_roll_back_earlier_discard_and_pp_on_late_failure() {
     let mut tree = tree();
     tree["cards"]["unit-follower"]["abilities"][0]["fanfare"] = json!({

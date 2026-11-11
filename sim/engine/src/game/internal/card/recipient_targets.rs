@@ -3,6 +3,7 @@ use super::super::{
 };
 use super::selection::{TargetCharacteristics, characteristics};
 use super::{Execution, Game, Nat, Result, invalid, player_id, seat_name, unsupported};
+use crate::game::player::QuestionPurpose;
 use crate::ir::ObjectRef;
 use crate::ir::{
     Binding, Cardinality, ChoiceDomain, DamageRecipient, Decision, PlayerRef, RecipientSet,
@@ -12,6 +13,7 @@ use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct RecipientWait {
+    pub(in crate::game::internal) purpose: QuestionPurpose,
     pub(in crate::game::internal) binding: Binding<Vec<DamageRecipient>>,
     members: Vec<RuntimeDamageRecipient>,
     bounds: Cardinality,
@@ -150,6 +152,7 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         Ok((
             RecipientWait {
+                purpose: super::super::player::purpose(&decision.kind),
                 binding: *binding,
                 members,
                 bounds: *cardinality,

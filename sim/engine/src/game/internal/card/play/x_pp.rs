@@ -113,7 +113,11 @@ impl Game {
             decision.id,
             execution.context.controller,
             InputDomain::Integer(bounds),
-            Wait::Integer { binding, bounds },
+            Wait::Integer {
+                binding,
+                bounds,
+                purpose: super::super::super::player::purpose(&decision.kind),
+            },
         )?;
         Ok(true)
     }
