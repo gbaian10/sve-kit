@@ -376,9 +376,9 @@ pub enum InstructionOutcome {
     Payment {
         /// Equal requested and actual quantity for a successful step.
         quantity: Quantity,
-        /// Generations whose posture changed, empty for resource payments.
+        /// Object generations used to pay the step, empty for resource payments.
         subjects: Vec<ObjectRef>,
-        /// Frozen field information for a single follower moved to the cemetery.
+        /// Frozen information for Fusion materials or a follower moved to the cemetery.
         characters: Vec<Characteristics>,
     },
     /// One outcome for the whole draw instruction.

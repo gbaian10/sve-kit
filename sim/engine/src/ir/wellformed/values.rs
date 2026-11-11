@@ -756,6 +756,18 @@ impl Checker {
         member: Binding<RuntimeObjectView>,
         predicate: &Expr<Bool>,
     ) -> Checked {
+        if let ObjectReceipt::Fusion { receipt } = receipt {
+            if projection != MemberProjection::Before
+                || !matches!(receipt.location(), ReceiptLocation::Local { .. })
+            {
+                return self.reject();
+            }
+            self.receipt(receipt)?;
+            return self.isolated(|checker| {
+                checker.save_access(member.key(), Some(Visibility::Public {}));
+                checker.local_value(member, predicate)
+            });
+        }
         let card_discard = match (receipt, self.card_payment_body.as_ref()) {
             (
                 ObjectReceipt::Movement {
@@ -820,9 +832,9 @@ impl Checker {
                 }
                 self.movement_receipt(receipt)
             }
-            ObjectReceipt::TransformBanished { .. } | ObjectReceipt::TransformCreated { .. } => {
-                self.reject()
-            }
+            ObjectReceipt::TransformBanished { .. }
+            | ObjectReceipt::TransformCreated { .. }
+            | ObjectReceipt::Fusion { .. } => self.reject(),
         }
     }
 

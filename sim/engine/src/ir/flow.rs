@@ -448,7 +448,7 @@ variants!(#[derive(Copy)] RoleCardinality {
     Remainder {} => ["decision.role-remainder"]
 });
 tags!(RevealUntilMembers { Revealed, Matched });
-variants!(ObjectReceipt { RevealUntil { receipt: ReceiptReference<RevealUntilOutcome>, members: RevealUntilMembers } => [], Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [] });
+variants!(ObjectReceipt { Fusion { receipt: ReceiptReference<FusionOutcome> } => [], RevealUntil { receipt: ReceiptReference<RevealUntilOutcome>, members: RevealUntilMembers } => [], Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [] });
 
 tags!(PaymentOptionality { Required, Optional });
 tags!(Declinable {

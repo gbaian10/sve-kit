@@ -894,6 +894,7 @@ fn supported(code: &str) -> bool {
             | "shape.ObjectReceipt.Look"
             | "shape.ObjectReceipt.Flip"
             | "shape.ObjectReceipt.Movement"
+            | "shape.ObjectReceipt.Fusion"
             | "shape.MovementReceipt.Move"
             | "shape.MovementReceipt.Order"
             | "shape.MovementReceipt.Search"
