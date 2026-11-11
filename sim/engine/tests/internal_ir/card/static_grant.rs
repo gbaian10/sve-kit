@@ -949,12 +949,12 @@ fn granted_static_definitions_reject_private_predicates_and_recursive_definition
 }
 
 #[test]
-fn direct_ex_entry_rejects_unimplemented_counter_carry_before_moving_the_object() {
+fn direct_ex_entry_rejects_invalid_counter_before_moving_the_object() {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"t","card":"unit-amulet"}]);
     initial["players"]["P1"]["zones"]["ex"] =
-        json!([{"id":"r","card":"unit-follower","state":{"counters":{"stack_counter":1}}}]);
+        json!([{"id":"r","card":"unit-follower","state":{"counters":{"stack_counter":-1}}}]);
     let mut game = Game::new(
         named_catalog(),
         &initial,
@@ -974,12 +974,12 @@ fn direct_ex_entry_rejects_unimplemented_counter_carry_before_moving_the_object(
     assert!(
         error
             .to_string()
-            .contains("unimplemented counter rule carry")
+            .contains("invalid counter for rule movement")
     );
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(
         after["P1"]["ex"], before["P1"]["ex"],
-        "unimplemented carry must fail before a physical movement"
+        "invalid counters must fail before a physical movement"
     );
     assert_eq!(after["P1"]["field"], before["P1"]["field"]);
 }

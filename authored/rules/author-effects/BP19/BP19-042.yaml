@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-042:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            counter:
+              "on": this
+              name: 融合カウンター
+              n: 1
+          do:
+            - create:
+                token: 多頭の実験体
+                to: field
+                n: 1
+      - line: 3
+        activate:
+          fusion:
+            sel:
+              who: self
+              zone:
+                - hand
+                - ex
+              kind: follower
+              not_token: true
+            n: 1
+          do:
+            - counter:
+                "on": this
+                name: 融合カウンター
+                delta: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-11"

@@ -950,22 +950,6 @@ impl Game {
         let destination = self.field_entry_player(execution, movement)?;
         let owner_destination = destination != execution.context.controller;
         let seat = super::seat_name(destination)?;
-        if matches!(objects, Selector::Objects { objects }
-            if objects == &[ObjectOperand::SourceHolder {}])
-        {
-            for &member in &members {
-                let object = self.object(execution.object_id(member)?)?;
-                if object.zone == "ex"
-                    && object.state["counters"]
-                        .as_object()
-                        .is_some_and(|counters| {
-                            counters.values().any(|count| count.as_i64() != Some(0))
-                        })
-                {
-                    return Err(unsupported("EX source counter carry into Field"));
-                }
-            }
-        }
         self.check_field_entry(execution, &members, objects, seat)?;
         if self.zone_count(seat, "field") >= FIELD_CAPACITY {
             execution.receipts.insert(
