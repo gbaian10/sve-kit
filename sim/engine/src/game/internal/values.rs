@@ -129,11 +129,9 @@ impl Execution {
             ObjectOperand::FollowEventMove {
                 event: MovementEvent::LeaveField { event },
             } => {
-                let (_, after) = self
-                    .event_move
-                    .as_ref()
-                    .filter(|(binding, _)| *binding == MovementEvent::LeaveField { event: *event })
-                    .ok_or_else(|| unsupported("missing triggering movement authority"))?;
+                let after = self
+                    .event_reads
+                    .movement(MovementEvent::LeaveField { event: *event })?;
                 after.ok_or_else(|| invalid("missing committed departure"))
             }
             ObjectOperand::Bound { binding } => {
@@ -169,8 +167,8 @@ impl Execution {
                     self.object(game, &ObjectOperand::SourceHolder {})
                 }
                 Expr::Frozen(_) => self
-                    .event_object
-                    .as_ref()
+                    .event_reads
+                    .object()
                     .filter(|subject| &subject.expression == value.as_ref())
                     .map(|subject| subject.reference)
                     .ok_or_else(|| unsupported("missing triggering object authority")),
@@ -186,9 +184,8 @@ impl Execution {
         binding: Binding<AttackEvent>,
     ) -> Result<Vec<ObjectRef>> {
         let event = self
-            .attack_event
-            .filter(|(saved, _)| *saved == binding)
-            .map(|(_, event)| event)
+            .event_reads
+            .attack(binding)
             .ok_or_else(|| unsupported("missing attack target authority"))?;
         let RuntimeDamageRecipient::Object { object } = event.target else {
             return Ok(Vec::new());
@@ -231,11 +228,7 @@ impl Execution {
             event: event @ (MovementEvent::Discard { .. } | MovementEvent::Banish { .. }),
         } = object
         {
-            self.event_move
-                .as_ref()
-                .filter(|(saved, _)| saved == event)
-                .map(|(_, after)| *after)
-                .ok_or_else(|| unsupported("missing triggering hand departure authority"))
+            self.event_reads.movement(*event)
         } else {
             self.object(game, object).map(Some)
         }
@@ -565,9 +558,9 @@ impl Execution {
             },
             Expr::Frozen(frozen) => match frozen.as_ref() {
                 IntFrozen::DamageAmount { event } => {
-                    let (_, hit) = self
-                        .damage_event
-                        .filter(|(binding, _)| *binding == event.key())
+                    let hit = self
+                        .event_reads
+                        .damage(*event)
                         .ok_or_else(|| invalid("missing damage event authority"))?;
                     Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
                 }
@@ -765,10 +758,9 @@ impl Execution {
             }
             Expr::Frozen(frozen) => match frozen.as_ref() {
                 NatFrozen::DiceValue { event } => self
-                    .dice_event
-                    .as_ref()
-                    .filter(|(binding, _)| binding == event)
-                    .map(|(_, payload)| Nat(ir_dice::value(payload.value)))
+                    .event_reads
+                    .dice(*event)
+                    .map(|payload| Nat(ir_dice::value(payload.value)))
                     .ok_or_else(|| invalid("missing dice event")),
                 NatFrozen::SpellChain {
                     player,
@@ -894,9 +886,8 @@ impl Execution {
             Expr::Literal(origin) => Ok(*origin),
             Expr::Frozen(field) => match field.as_ref() {
                 EntryOriginFields::EnterFieldFrom { event } => self
-                    .entry_origin
-                    .filter(|(binding, _)| *binding == event.key())
-                    .map(|(_, origin)| origin)
+                    .event_reads
+                    .entry_origin(*event)
                     .ok_or_else(|| invalid("missing entry origin authority")),
                 EntryOriginFields::EnterExFrom { .. } => {
                     Err(unsupported("entry origin event family"))
@@ -911,9 +902,8 @@ impl Execution {
             Expr::Literal(method) => Ok(*method),
             Expr::Frozen(field) => match field.as_ref() {
                 EntryMethodFields::EnterFieldMethod { event } => self
-                    .entry_method
-                    .filter(|(binding, _)| *binding == event.key())
-                    .map(|(_, method)| method)
+                    .event_reads
+                    .entry_method(*event)
                     .ok_or_else(|| invalid("missing entry method authority")),
             },
             _ => Err(unsupported("entry method expression")),
