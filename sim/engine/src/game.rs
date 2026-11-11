@@ -286,6 +286,8 @@ pub struct Game {
     #[serde(skip)]
     player_epoch: u64,
     #[serde(skip)]
+    player_evolution: Option<Box<internal::EvolutionDeclaration>>,
+    #[serde(skip)]
     player_events: player::events::Journal,
 }
 
@@ -311,6 +313,7 @@ impl fmt::Debug for Game {
             .field("card_runtime", &self.card_runtime)
             .field("player_fault", &self.player_fault)
             .field("player_epoch", &self.player_epoch)
+            .field("player_evolution", &self.player_evolution)
             .finish()
     }
 }
@@ -580,6 +583,7 @@ impl Game {
             card_runtime: internal::CardRuntime::default(),
             player_fault: None,
             player_epoch: 0,
+            player_evolution: None,
             player_events: player::events::Journal::default(),
         };
         game.initialize_evolved(&position)?;

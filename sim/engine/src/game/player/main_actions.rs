@@ -22,6 +22,7 @@ enum IntentKind {
     EndPhase,
     Play,
     Activate(u64),
+    Evolve(u64),
 }
 
 impl fmt::Debug for MainIntentId {
@@ -48,9 +49,16 @@ pub enum MainActionAnswer {
     Attack(AttackTarget),
 }
 
-/// Supported main intents; evolution is not yet listed.
+/// Supported main intents, without complete answer combinations.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum MainIntentKind {
+    /// Begin normal evolution, choosing its form and payment in subsequent questions.
+    Evolve {
+        /// Authorized field card that owns the printed intrinsic ability.
+        holder: Box<CardObservation>,
+        /// Printed line of that evolution definition.
+        line: u64,
+    },
     /// Declare one attack, choosing its target separately.
     Attack {
         /// Authorized attacking card.
@@ -86,7 +94,6 @@ pub struct MainIntent {
 }
 
 /// Current intents in public zone order, followed by an optional `EndPhase`.
-/// Evolution is not yet included.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MainActions {
     /// Options for this question's authenticated actor only.
@@ -94,6 +101,7 @@ pub struct MainActions {
 }
 
 enum Action {
+    Evolve { holder: String, ordinal: u64 },
     Attack { attacker: String, target: String },
     EndPhase,
     Play(String),
@@ -197,6 +205,7 @@ impl Game {
                 }
             }
         }
+        intents.extend(self.main_evolution_intents(actor, token)?);
         if !self.attack_required()? {
             intents.push(MainIntent {
                 id: MainIntentId {
@@ -211,7 +220,33 @@ impl Game {
         Ok(MainActions { intents })
     }
 
-    fn main_object(&self, actor: Viewer, id: &str) -> Result<CardObservation> {
+    fn main_evolution_intents(
+        &self,
+        actor: Viewer,
+        token: QuestionToken,
+    ) -> Result<Vec<MainIntent>> {
+        let mut intents = Vec::new();
+        for id in self.zone_ids(seat(actor), "field") {
+            for option in self.main_evolution_options(&id, actor)? {
+                let holder = self.main_object(actor, &id)?;
+                intents.push(MainIntent {
+                    id: MainIntentId {
+                        token,
+                        source: Some(holder.handle.clone()),
+                        generation: Some(self.object(&id)?.generation),
+                        kind: IntentKind::Evolve(option.ordinal),
+                    },
+                    kind: MainIntentKind::Evolve {
+                        holder: Box::new(holder),
+                        line: option.line,
+                    },
+                });
+            }
+        }
+        Ok(intents)
+    }
+
+    pub(in crate::game) fn main_object(&self, actor: Viewer, id: &str) -> Result<CardObservation> {
         let handle = self
             .state
             .knowledge
@@ -232,6 +267,15 @@ impl Game {
         answer: MainActionAnswer,
     ) -> Result<Option<Action>> {
         match (&intent.kind, answer) {
+            (MainIntentKind::Evolve { holder, .. }, MainActionAnswer::None) => {
+                let IntentKind::Evolve(ordinal) = intent.id.kind else {
+                    return Err(invalid("evolution intent identity"));
+                };
+                Ok(Some(Action::Evolve {
+                    holder: self.resolve_player_object(actor, &holder.handle)?.into(),
+                    ordinal,
+                }))
+            }
             (MainIntentKind::EndPhase, MainActionAnswer::None) => {
                 Ok((!self.attack_required()?).then_some(Action::EndPhase))
             }
@@ -325,6 +369,9 @@ impl Game {
         self.state.next_decision = self.state.next_decision.saturating_add(1);
         let mut declared = false;
         let result = match action {
+            Action::Evolve { holder, ordinal } => self
+                .begin_main_evolution(&holder, ordinal, actor)
+                .map(|accepted| accepted.then_some(SubmissionKind::Applied)),
             Action::Attack { attacker, target } => self
                 .apply_attack(&attacker, &target, None)
                 .map(|accepted| accepted.then_some(SubmissionKind::Applied)),

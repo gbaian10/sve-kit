@@ -7,11 +7,15 @@ pub mod events;
 pub mod observation;
 
 mod closing;
+mod evolution;
 mod main_actions;
 mod opening;
 mod pipeline;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
+pub use evolution::{
+    EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
+};
 pub(in crate::game) use main_actions::ActivationOption;
 pub use main_actions::{
     AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,
@@ -131,13 +135,15 @@ impl fmt::Debug for QuestionToken {
 /// Existing decision shapes or a separate action boundary.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum QuestionShape {
+    /// Serial parameters of normal evolution, distinct from effect evolution.
+    Evolution(EvolutionQuestion),
     /// Serial opening procedure, using this viewer's current object capabilities.
     Opening(OpeningQuestion),
     /// A specific turn-closing rules procedure, distinct from Ward entry.
     Closing(ClosingQuestion),
     /// Token-scoped candidates from the existing typed decision procedure.
     Decision(InputDomain),
-    /// Main-phase intents; evolution is not yet listed.
+    /// Main-phase intents, followed by serial declaration parameters.
     ActionWindow(MainActions),
 }
 
@@ -195,6 +201,13 @@ impl Input {
 /// An authenticated player's submission; surrender is independent of the current token.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Command {
+    /// Answer the current normal evolution declaration using its question capabilities.
+    Evolution {
+        /// Exact question returned to this seat.
+        token: QuestionToken,
+        /// One answer from that stage's displayed domain.
+        answer: EvolutionAnswer,
+    },
     /// Answer the current opening procedure.
     Opening {
         /// Exact question returned to this seat.

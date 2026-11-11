@@ -77,7 +77,7 @@ impl Game {
         Ok(result)
     }
 
-    fn evolution_pair(
+    pub(in crate::game) fn evolution_pair(
         &self,
         source: &str,
         evolve: &str,
@@ -237,7 +237,7 @@ impl Game {
         Ok(())
     }
 
-    fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
+    pub(in crate::game) fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
         let base = list(&code["costs"])
             .iter()
             .filter(|cost| cost["op"] == "pp")
@@ -250,7 +250,7 @@ impl Game {
             .map(|cost| cost.max(0))
     }
 
-    fn can_super_evolve(&self, seat: &str) -> bool {
+    pub(in crate::game) fn can_super_evolve(&self, seat: &str) -> bool {
         int(&self.state.turn["elapsed_turns"][seat])
             >= if self.state.turn["first_player"] == seat {
                 7

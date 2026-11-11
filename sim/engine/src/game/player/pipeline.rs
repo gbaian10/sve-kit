@@ -96,6 +96,11 @@ impl Game {
                 None => Input::EngineFault,
             };
         }
+        match self.player_evolution_question(viewer) {
+            Ok(Some(input)) => return input,
+            Err(_) => return Input::EngineFault,
+            Ok(None) => {}
+        }
         let question = if self.state.flow["kind"] == "pregame" {
             let Ok(question) = self.player_opening_question() else {
                 return Input::EngineFault;
@@ -159,7 +164,8 @@ impl Game {
             QuestionShape::Decision(_)
             | QuestionShape::Opening(_)
             | QuestionShape::Closing(_)
-            | QuestionShape::ActionWindow(_) => None,
+            | QuestionShape::ActionWindow(_)
+            | QuestionShape::Evolution(_) => None,
         };
         Input::Waiting(Waiting {
             actor: question.actor,
@@ -171,6 +177,9 @@ impl Game {
     #[must_use]
     pub fn submit_player(&mut self, viewer: Viewer, command: Command) -> Submission {
         let kind = match command {
+            Command::Evolution { token, answer } => {
+                self.submit_player_evolution(viewer, token, answer)
+            }
             Command::Opening { token, answer } => self.submit_player_opening(viewer, token, answer),
             Command::MainAction {
                 token,
@@ -184,6 +193,7 @@ impl Game {
                 } else {
                     match self.concede_internal(viewer.player()) {
                         Ok(_terminal) => {
+                            self.player_evolution = None;
                             self.player_fault = None;
                             SubmissionKind::Applied
                         }
@@ -260,6 +270,11 @@ impl Game {
             ));
         }
         if self.state.game["ended"] == true || self.player_decision().is_some() {
+            return Ok(());
+        }
+        if let Some(actor) = self.evolution_actor() {
+            self.player_evolution_question(actor)?
+                .ok_or_else(|| invalid("missing evolution question"))?;
             return Ok(());
         }
         if self.state.flow["kind"] == "pregame" {

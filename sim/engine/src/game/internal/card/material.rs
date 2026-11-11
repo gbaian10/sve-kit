@@ -76,6 +76,15 @@ fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
 }
 
 impl MaterialWait {
+    pub(super) fn handles_for(&self, reference: ObjectRef) -> Result<Vec<u64>> {
+        self.members
+            .iter()
+            .enumerate()
+            .filter(|(_, member)| **member == reference)
+            .map(|(index, _)| u64::try_from(index).map_err(invalid))
+            .collect()
+    }
+
     pub(super) const fn is_hand(&self) -> bool {
         matches!(
             self.selector,
