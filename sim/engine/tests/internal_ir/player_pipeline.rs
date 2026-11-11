@@ -116,17 +116,24 @@ fn player_pipeline_fault_rolls_back_the_play_without_a_rules_defeat() {
     assert_eq!(failed.kind, SubmissionKind::EngineFault);
     assert_eq!(failed.input, Input::EngineFault);
     assert_eq!(game.input(Viewer::P2), Input::EngineFault);
-    let expected = serde_json::to_value(&origin).unwrap();
+    let mut expected = serde_json::to_value(&origin).unwrap();
     let mut restored = serde_json::to_value(&game).unwrap();
     assert!(
         restored["state"]["ir_epoch"].as_u64().unwrap()
             >= expected["state"]["ir_epoch"].as_u64().unwrap()
     );
     restored["state"]["ir_epoch"] = expected["state"]["ir_epoch"].clone();
+    transactions::normalize_saved_issuance(&mut restored, &mut expected);
     assert_eq!(
         restored, expected,
         "all authority and RNG data must roll back"
     );
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            game.observe(viewer).unwrap(),
+            origin.observe(viewer).unwrap()
+        );
+    }
     assert!(!format!("{failed:?}").contains("draw request"));
     game.advance_player_input();
     assert_eq!(game.input(Viewer::P1), Input::EngineFault);

@@ -42,7 +42,7 @@ fn normalize_issuance(debug: &str) -> (String, Vec<u64>) {
     (normalized, issued)
 }
 
-fn normalize_saved_issuance(actual: &mut Value, expected: &mut Value) {
+pub(super) fn normalize_saved_issuance(actual: &mut Value, expected: &mut Value) {
     for seat in ["P1", "P2"] {
         let issued = &mut actual["state"]["knowledge"][seat]["issued"];
         let previous = &mut expected["state"]["knowledge"][seat]["issued"];
