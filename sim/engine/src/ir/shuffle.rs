@@ -1,8 +1,8 @@
 //! Unordered deck placement is closed by its immediately following shuffle.
 use super::{
-    Action, FollowPermission, Instruction, InstructionContext, Located, MemberProjection,
-    MoveDestination, MoveReason, MovementReceipt, Node, ObjectReceipt, OwnerZone, PlayerRef,
-    Position, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector, ShuffleScope,
+    Action, FollowPermission, Instruction, InstructionContext, Located, MoveDestination,
+    MoveReason, MovementReceipt, Node, OwnerZone, PlayerRef, Position, RandomnessPolicy, ReceiptId,
+    ReceiptLocation, Selector, ShuffleScope,
 };
 use core::slice::from_ref;
 
@@ -10,47 +10,6 @@ use core::slice::from_ref;
 pub(crate) enum Placement {
     Return,
     Bottom,
-}
-
-pub(crate) fn observation(selector: &Selector) -> bool {
-    match selector {
-        Selector::ReceiptMembers {
-            receipt:
-                ObjectReceipt::Look { .. }
-                | ObjectReceipt::RevealUntil {
-                    members: super::RevealUntilMembers::Revealed,
-                    ..
-                },
-            projection: MemberProjection::Before,
-        } => true,
-        Selector::Difference { input, except } => {
-            observation(input)
-                && matches!(
-                    except.as_ref(),
-                    Selector::ReceiptMembers {
-                        receipt: ObjectReceipt::Movement { .. },
-                        projection: MemberProjection::Before,
-                    }
-                )
-        }
-        Selector::SearchFound { .. }
-        | Selector::SearchRevealed { .. }
-        | Selector::CollectedMembers { .. }
-        | Selector::MoveAfterAll { .. }
-        | Selector::Created { .. }
-        | Selector::ReceiptMembers { .. }
-        | Selector::MoveAfter { .. }
-        | Selector::Zone { .. }
-        | Selector::Extremum { .. }
-        | Selector::Filter { .. }
-        | Selector::Union { .. }
-        | Selector::Intersection { .. }
-        | Selector::Ordered { .. }
-        | Selector::Objects { .. }
-        | Selector::Captured { .. }
-        | Selector::Bound { .. }
-        | Selector::Relation { .. } => false,
-    }
 }
 
 pub(crate) fn placement(action: &Action) -> Option<Placement> {
@@ -74,7 +33,15 @@ pub(crate) fn placement(action: &Action) -> Option<Placement> {
     }
     match movement.position {
         None => Some(Placement::Return),
-        Some(Position::Bottom {}) if observation(objects) => Some(Placement::Bottom),
+        Some(Position::Bottom {})
+            if super::observation::visit(
+                objects,
+                super::observation::Consumer::BottomShuffle,
+                &mut |_| {},
+            ) =>
+        {
+            Some(Placement::Bottom)
+        }
         _ => None,
     }
 }

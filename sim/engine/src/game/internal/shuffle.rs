@@ -1,5 +1,6 @@
 //! Closed placements share ordinary movement, deck ordering, and the existing RNG.
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
+use crate::ir::observation::Consumer;
 use crate::ir::shuffle::{self, Placement};
 use crate::ir::{
     Action, Instruction, MoveOutcome, MoveResult, ObjectRef, PlayerId, Position, PositiveNat,
@@ -157,7 +158,7 @@ impl Game {
     ) -> Result<Vec<MoveResult>> {
         let player = execution.context.controller;
         let seat = seat_name(player)?;
-        let members = execution.observed_objects(self, objects, player)?;
+        let members = execution.observed_objects(self, objects, player, Consumer::BottomShuffle)?;
         let ids = self.shuffle_member_ids(execution, &members, player, true)?;
         let original = self.internal_known_deck(seat)?;
         self.internal_reorder_deck(seat, &original, &ids, Position::Bottom {})?;

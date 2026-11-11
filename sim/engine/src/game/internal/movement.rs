@@ -5,15 +5,16 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
+use crate::ir::observation::{self, Consumer};
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
-    InstructionContext, MemberProjection, MoveDestination, MoveMethod, MoveOutcome, MoveReason,
-    MoveResult, MoveSpec, MovementEvent, MovementReceipt, Nat, Node, ObjectOperand, ObjectReceipt,
-    ObjectRef, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Polarity, Position, PositiveNat,
-    Posture, ResultMember, ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView,
-    Selector, SliceDirection, SnapshotId, TimeAnchor, ZoneKind,
+    InstructionContext, MoveDestination, MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec,
+    MovementEvent, Nat, Node, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef,
+    PlayerRelation, Polarity, Position, PositiveNat, Posture, ResultMember, ResultMemberId,
+    RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId,
+    TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::NonZeroU64;
@@ -72,7 +73,8 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             movement,
             reason,
         } if observed_move(action) || cemetery_ex_move(action) || revealed_move(action) => {
-            if (!observation_spine(objects, false) && !cemetery_ex_move(action))
+            if (!observation::visit(objects, Consumer::ObservedMove, &mut |_| {})
+                && !cemetery_ex_move(action))
                 || *reason != MoveReason::Put
                 || movement.position.is_some()
                 || movement.order.is_some()
@@ -306,28 +308,7 @@ pub(super) fn observed_move(action: &Action) -> bool {
         if matches!(&movement.to, MoveDestination::Shared { zone }
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
             || (movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
-                && observation_spine(objects, false)))
-}
-
-fn observation_spine(selector: &Selector, remainder: bool) -> bool {
-    match selector {
-        Selector::ReceiptMembers {
-            receipt: ObjectReceipt::Look { .. },
-            ..
-        } => true,
-        Selector::ReceiptMembers {
-            receipt:
-                ObjectReceipt::Movement {
-                    receipt: MovementReceipt::Move { .. } | MovementReceipt::Order { .. },
-                },
-            projection: MemberProjection::Before,
-        } => remainder,
-        Selector::Difference { input, except } => {
-            observation_spine(input, remainder) && observation_spine(except, true)
-        }
-        Selector::Union { sets } => sets.iter().all(|set| observation_spine(set, remainder)),
-        _ => false,
-    }
+                && observation::visit(objects, Consumer::ObservedMove, &mut |_| {})))
 }
 
 #[expect(
@@ -987,7 +968,7 @@ impl Game {
         objects: &Selector,
     ) -> Result<()> {
         let player = execution.context.controller;
-        let members = execution.observed_objects(self, objects, player)?;
+        let members = execution.observed_objects(self, objects, player, Consumer::ObservedMove)?;
         let seat = super::seat_name(player)?;
         for &member in &members {
             let id = execution.object_id(member)?;

@@ -3,13 +3,14 @@ use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsuppo
 use crate::game::Object;
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
+use crate::ir::observation::{self, Consumer};
 use crate::ir::observation_selection::{
     CardTotals, card_totals, private_hand_choice, private_look_choice,
 };
 use crate::ir::{
     Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
-    MemberProjection, Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot, PlayerRef,
-    PlayerRelation, ScopeId, SelectionConstraint, SelectionGroup, Selector,
+    Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot, PlayerRef, PlayerRelation,
+    ScopeId, SelectionConstraint, SelectionGroup, Selector,
 };
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
@@ -926,14 +927,9 @@ fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr
     else {
         return None;
     };
-    matches!(
-        input.as_ref(),
-        Selector::ReceiptMembers {
-            receipt: ObjectReceipt::Look { .. },
-            projection: MemberProjection::Before,
-        }
-    )
-    .then_some((*binding, predicate))
+    observation::classify(input, Consumer::Choice, observation::Position::Input)
+        .is_some()
+        .then_some((*binding, predicate))
 }
 
 pub(in crate::game::internal) fn check_predicate(
@@ -1652,7 +1648,7 @@ impl Execution {
                 if !allow_resolution_zones {
                     return Err(unsupported("look choice outside resolution"));
                 }
-                self.observed_objects(game, selector, self.context.controller)?
+                self.observed_objects(game, selector, self.context.controller, Consumer::Choice)?
             }
             _ => self.objects(game, selector)?,
         };
