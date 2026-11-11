@@ -154,6 +154,26 @@ BP11-018 與 BP11-024 為整卡種子；後者選零個目標仍會執行後續�
 
 基本關鍵字的持續授予使用 `static: {while: {awakened: true}, effects: [{grant: {keywords: [storm]}}]}`；省略 `on` 表示自身，省略 `while` 表示無額外條件。`grant.on` 可用目前場上的公開篩選，例如 `{who: self, zone: field, name: オルカ, token: true}`。接受七種基本關鍵字及 `drain`，場上來源失去能力或離場時不再授予；條件與受影響對象每次查詢都依目前狀態重算，包含稍後入場的對象，不會改寫印刷關鍵字或既有授予效果。此入口預設只在場上生效；一般能力定義授予與其他持續修正仍依各自的 runtime 准入範圍。
 
+同一印刷能力可以讓每條 Grant 宣告使用自己的條件；例如 BP08-082 的同一來源行：
+
+```yaml
+static:
+  effects:
+    - if:
+        cond: {cmp: {left: {count: {who: self, zone: cemetery}}, op: ge, right: 7}}
+        then:
+          - grant: {keywords: [assail]}
+    - if:
+        cond: {cmp: {left: {count: {who: self, zone: cemetery}}, op: ge, right: 15}}
+        then:
+          - grant: {keywords: [storm, bane]}
+```
+
+墓場張數即時變化時各自重算；15 張以上兩條同時有效（Q1112、Q1113）。`while` 若存在，還須同時成立。
+每個 `then` 恰一條 Grant，不新增來源能力或拆開來源行；`else`、巢狀條件及其他條件式家族不開放。
+條件仍經既有讀值准入，不能用條件式讀取未授權的私有屬性。這次只接普通場上 Grant；裝備或場上／EX 跨區的條件式授予仍拒絕。
+既有 prevention If 特例仍須搭配同能力的移除禁止，且不能同時使用頭部 `while`；宣告數與限制維持。
+
 `static.zone: [field, ex]` 另接受無額外條件、每個宣告只授予單一 `rush` 的持續能力（BP13-003／BP13-SL03／EBD01-005）；作者陣列的反向順序會正規化為同一 IR，有效區只允許標準順序的場上與 EX。來源位於任一區域時，皆使用相同的持續授予求值、能力失去及世代規則，受益者仍依既有場上篩選；來源移到其他區域後停止授予。單一 EX、其他區域組合、條件式、其他關鍵字組合與能力定義授予不包含在此新增入口。
 
 名稱追加使用 `static: {effects: [{also_named: {name: ゴースト}}]}`；不指定 `zone` 表示這條名稱宣告在所有遊戲區域有效，`zone: field` 表示「場にいる限り」。這個預設只適用於 `also_named`，其他持續能力仍以場上為預設。兩者都保留印刷名；失去能力時不追加名稱，場上限定宣告離場後不延續。`on` 只接受省略或 `this`，不接受額外條件、其他有效區、混合修正或解算時施加名稱。

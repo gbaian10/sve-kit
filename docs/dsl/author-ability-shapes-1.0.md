@@ -29,8 +29,12 @@ T=既有非空、保序 Targets；O=OptionalCosts；X=XParameter；D=非空 Map<
 | ride | cost | 無 | CP03-008 |
 | feed | cost | times:正安全整數 | CP01-042 三行省略/2/3；明寫1合成且不與省略同 hash |
 | spell | do | T,O,X,D | BP01-007 T、BP15-046 O/X；不收 cost/zone/per_turn/ub |
-| static | effects:非空 EffectSpec 列表 | while:Condition,zone | BP12-029、CP04-PR21；不收 do/T/cost/D |
+| static | effects:非空 A.static-effect 列表 | while:Condition,zone | BP12-029、CP04-PR21；不收 do/T/cost/D |
 | play | 至少一個打出修飾鍵 | PlayCosts 的欄＋cannot_if、playable_from、D | 三張條件減費、BP13-093、BP18-007、BP06-016 D、CP01-057 cannot_if；define 單獨拒絕 |
+
+`A.static-effect` 另接受靜態專用 `if: {cond: Condition, then: [...]}`：每個 Grant 分支恰有一個 `grant` 效果，
+保留一條宣告及同一印刷能力來源，分支條件與頭部 `while` 取交集。沒有 `else` 或巢狀條件。
+既有自身能力防傷分支仍恰一個 `prevent: {kind: ability, on?: this}`；不擴充到其他條件式效果家族。
 
 所有欄位封閉。7 個觸發巨集頭不接受 zone；事件定義與 LKI 已決定自身的觸發位置。auto／activate／static 的 zone 用 AbilityZone=既有六值＋equipment，允許單值或非空列表，保留重數，不接受 param；不擴張 Sel／參數的 Zone。auto/activate.zone 的合法值及對應卡文由 C1 驗證，C0 不把只標合成的組合當全卡准入。
 
