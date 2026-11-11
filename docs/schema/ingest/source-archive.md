@@ -190,7 +190,7 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 
 ## 人工版次的 URL-only 參考邊界
 
-[manual-printings-v1](../domains/manual-printings.md#5-來源連結) 的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。
+[manual-printings-v1](../domains/manual-printings.md#8-尚未實作限量序號卡與序號補充) 規劃中（尚未實作）的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。
 
 ## 7. 已取得規則原檔的離線登錄
 
