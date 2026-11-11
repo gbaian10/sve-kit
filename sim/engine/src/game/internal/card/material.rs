@@ -766,6 +766,7 @@ impl Game {
                     members: public,
                     cardinality: constraint.cardinality,
                     distinct_names: false,
+                    original_costs: None,
                     roles: vec![],
                 }),
             },

@@ -935,6 +935,8 @@ on:
 
 次元の超越的打出時選付費用沿用 `play.optional_cost`：`banish: {sel: {who: self, zone: cemetery, kind: spell}, n: 10}` 配 `optional_cost_set: 7`。只有十張材料實際付款完成才設定原費用，之後再套一般費用修正；打出的那張仍不在墓場，不能拿它作材料（Q192、Q329）。
 
+開闢の予言者使用 `play.optional_cost.banish: {sel: {who: self, zone: cemetery, orig_cost_ge: 1, orig_cost_le: 10}, n: 10, distinct_by: orig_cost}` 搭配 `optional_cost_delta: -10`。篩選與互異限制共同要求墓場的原費 1 到 10 各一張，沒有印刷原費的卡不算材料。這個互異限制限單一墓場消滅交換的固定張數材料。
+
 ## 能力種類篩選
 
 看牌選取、正式目標與公開集合的 `keyword`，以及 `search.sel.keyword`，接受

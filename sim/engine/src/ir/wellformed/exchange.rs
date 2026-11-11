@@ -4,8 +4,9 @@ use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, Decision, DecisionKind,
     DiscardMode, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int,
-    MoveDestination, MoveReason, OwnerZone, PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef,
-    PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    MoveDestination, MoveReason, ObjectProperty, OwnerZone, PlayCostExchange, PlayCostPayment,
+    PlaySlot, PlayerRef, PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector,
+    Visibility, ZoneKind,
 };
 
 #[expect(
@@ -90,12 +91,12 @@ impl Checker {
 
         self.env.scope = exchange.scope;
         for (decision, step) in routes {
-            self.exchange_route(decision, step)?;
+            self.exchange_route(decision, step, exchange.route.is_some())?;
         }
         Ok(())
     }
 
-    fn exchange_route(&mut self, decision: &Decision, step: &CostStep) -> Checked {
+    fn exchange_route(&mut self, decision: &Decision, step: &CostStep, multiple: bool) -> Checked {
         let checker = self;
         let ChoiceDomain::Objects {
             constraint,
@@ -127,7 +128,10 @@ impl Checker {
             || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
             || group.cardinality != constraint.cardinality
             || constraint.disjoint != Disjointness::Disjoint
-            || constraint.distinct_by.is_some()
+            || (constraint.distinct_by.is_some()
+                && (constraint.distinct_by != Some(ObjectProperty::Cost)
+                    || multiple
+                    || *zone != ZoneKind::Cemetery))
             || !constraint.aggregate_bounds.is_empty()
             || !decision.captures.is_empty()
             || decision.actor != (PlayerRef::Controller {})

@@ -113,6 +113,7 @@ impl Game {
                         members: candidates,
                         cardinality: bounds,
                         distinct_names: false,
+                        original_costs: None,
                         roles: vec![],
                     }),
                 },

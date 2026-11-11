@@ -1,0 +1,50 @@
+cards:
+  BP08-037:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            banish:
+              distinct_by: orig_cost
+              n: 10
+              sel:
+                orig_cost_ge: 1
+                orig_cost_le: 10
+                who: self
+                zone: cemetery
+          optional_cost_delta: -10
+      - keywords:
+          - ward
+          - aura
+        line: 2
+      - line: 3
+        static:
+          effects:
+            - cannot:
+                by: ability
+                on: this
+                what: destroy
+      - activate:
+          cost:
+            discard:
+              ref: this
+          do:
+            - draw:
+                n: 1
+            - discard:
+                n: 1
+          zone: hand
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-06"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set

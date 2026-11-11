@@ -409,6 +409,7 @@ impl Game {
             InputDomain::ResourceEntryPayment {
                 materials: super::TargetDomain {
                     distinct_names: false,
+                    original_costs: None,
                     roles: vec![],
                     members: public,
                     cardinality: Cardinality {

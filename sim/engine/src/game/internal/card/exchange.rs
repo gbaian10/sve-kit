@@ -7,8 +7,8 @@ use crate::game::internal::{
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId, Int, MoveMethod,
-    MoveOutcome, Nat, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity, QuantityUnit,
-    Selector, ZoneKind,
+    MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity,
+    QuantityUnit, Selector, ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
 use alloc::collections::BTreeSet;
@@ -25,28 +25,62 @@ pub(super) struct ExchangeState {
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
-    members: Vec<ObjectRef>,
+    members: Vec<MaterialCandidate>,
     count: usize,
 }
+
+#[derive(Clone, Debug)]
+struct MaterialCandidate {
+    reference: ObjectRef,
+    original_cost: Option<i64>,
+}
+
 impl MaterialWait {
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
         if handles.len() != self.count {
             return Err(invalid("material cardinality"));
         }
         let mut unique = BTreeSet::new();
+        let mut costs = BTreeSet::new();
         handles
             .iter()
             .map(|handle| {
                 if !unique.insert(*handle) {
                     return Err(invalid("duplicate material handle"));
                 }
-                self.members
+                let candidate = self
+                    .members
                     .get(usize::try_from(*handle).map_err(invalid)?)
-                    .copied()
-                    .ok_or_else(|| invalid("foreign material handle"))
+                    .ok_or_else(|| invalid("foreign material handle"))?;
+                if let Some(cost) = candidate.original_cost
+                    && !costs.insert(cost)
+                {
+                    return Err(invalid("duplicate original material cost"));
+                }
+                Ok(candidate.reference)
             })
             .collect()
     }
+}
+
+fn available_count(members: &[MaterialCandidate], distinct: Option<ObjectProperty>) -> usize {
+    if distinct == Some(ObjectProperty::Cost) {
+        members
+            .iter()
+            .filter_map(|member| member.original_cost)
+            .collect::<BTreeSet<_>>()
+            .len()
+    } else {
+        members.len()
+    }
+}
+
+fn original_material_cost(game: &Game, id: &str) -> Result<Option<i64>> {
+    let cost = &game.internal_cost_print(id)?["cost"];
+    if cost.is_null() || cost == "-" {
+        return Ok(None);
+    }
+    super::super::cost::printed_play_cost(cost).map(Some)
 }
 
 pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<()> {
@@ -224,7 +258,7 @@ impl Game {
         execution: &Execution,
         exchange: &PlayCostExchange,
         index: usize,
-    ) -> Result<Vec<ObjectRef>> {
+    ) -> Result<Vec<MaterialCandidate>> {
         let decision = exchange
             .materials
             .get(index)
@@ -273,44 +307,53 @@ impl Game {
             {
                 continue;
             }
-            if zone == "hand" {
-                if object.owner != controller || object.controller != controller {
-                    return Err(invalid("foreign hand exchange material"));
-                }
-                members.push(execution.reference(self, &id)?);
-                continue;
+            let original_cost = if constraint.distinct_by == Some(ObjectProperty::Cost) {
+                let Some(cost) = original_material_cost(self, &id)? else {
+                    continue;
+                };
+                Some(cost)
+            } else {
+                None
+            };
+            let candidate = MaterialCandidate {
+                reference: execution.reference(self, &id)?,
+                original_cost,
+            };
+            if zone == "hand" && (object.owner != controller || object.controller != controller) {
+                return Err(invalid("foreign hand exchange material"));
             }
-            if object.controller != controller
-                || (!posture && !token_put && self.object_type(&id)?.contains("トークン"))
-                || self.object_type(&id)?.contains("アドバンス")
-                || object
-                    .state
-                    .get("evolved_with")
-                    .is_some_and(|value| !value.is_null())
-                || object
-                    .state
-                    .get("links")
-                    .is_some_and(|value| !value.is_null())
-                || self.state.objects.values().any(|other| {
-                    matches!(other.zone.as_str(), "field" | "cemetery")
-                        && other.state["equipped_to"] == id
-                })
-                || self.restricted(
-                    &id,
-                    if posture {
-                        "act"
-                    } else if zone == "field" {
-                        "move"
-                    } else {
-                        "banish"
-                    },
-                )?
+            if zone != "hand"
+                && (object.controller != controller
+                    || (!posture && !token_put && self.object_type(&id)?.contains("トークン"))
+                    || self.object_type(&id)?.contains("アドバンス")
+                    || object
+                        .state
+                        .get("evolved_with")
+                        .is_some_and(|value| !value.is_null())
+                    || object
+                        .state
+                        .get("links")
+                        .is_some_and(|value| !value.is_null())
+                    || self.state.objects.values().any(|other| {
+                        matches!(other.zone.as_str(), "field" | "cemetery")
+                            && other.state["equipped_to"] == id
+                    })
+                    || self.restricted(
+                        &id,
+                        if posture {
+                            "act"
+                        } else if zone == "field" {
+                            "move"
+                        } else {
+                            "banish"
+                        },
+                    )?)
             {
                 return Err(unsupported(
                     "exchange material has unsupported movement or permission",
                 ));
             }
-            members.push(execution.reference(self, &id)?);
+            members.push(candidate);
         }
         Ok(members)
     }
@@ -405,11 +448,8 @@ impl Game {
             let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
                 return Err(unsupported("exchange route domain"));
             };
-            if u64::try_from(
-                self.exchange_candidates(execution, &exchange.definition, index)?
-                    .len(),
-            )
-            .map_err(invalid)?
+            let members = self.exchange_candidates(execution, &exchange.definition, index)?;
+            if u64::try_from(available_count(&members, constraint.distinct_by)).map_err(invalid)?
                 >= constraint.cardinality.minimum.0
             {
                 affordable.push(index);
@@ -473,7 +513,7 @@ impl Game {
             return Err(unsupported("exchange domain"));
         };
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
-        if members.len() < count {
+        if available_count(&members, constraint.distinct_by) < count {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient exchange materials".into(),
             ));
@@ -482,7 +522,7 @@ impl Game {
             .iter()
             .enumerate()
             .map(|(index, reference)| {
-                let id = execution.object_id(*reference)?;
+                let id = execution.object_id(reference.reference)?;
                 Ok(DistributionMember {
                     handle: u64::try_from(index).map_err(invalid)?,
                     player: execution.context.controller,
@@ -497,6 +537,15 @@ impl Game {
             execution.context.controller,
             InputDomain::CostMaterials(super::TargetDomain {
                 distinct_names: false,
+                original_costs: (constraint.distinct_by == Some(ObjectProperty::Cost)).then(|| {
+                    public
+                        .iter()
+                        .zip(&members)
+                        .filter_map(|(option, member)| {
+                            member.original_cost.map(|cost| (option.handle, cost))
+                        })
+                        .collect()
+                }),
                 roles: vec![],
                 members: public,
                 cardinality: constraint.cardinality,
@@ -529,7 +578,11 @@ impl Game {
                     .route
                     .ok_or_else(|| invalid("missing selected route"))?,
             )?;
-            if selected.iter().any(|member| !candidates.contains(member)) {
+            if selected.iter().any(|member| {
+                !candidates
+                    .iter()
+                    .any(|candidate| candidate.reference == *member)
+            }) {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "exchange materials changed".into(),
                 ));

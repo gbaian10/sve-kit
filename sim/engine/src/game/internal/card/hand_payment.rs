@@ -230,6 +230,7 @@ impl Game {
                     members: candidates,
                     cardinality: plan.group.cardinality,
                     distinct_names: false,
+                    original_costs: None,
                     roles: vec![],
                 }),
                 Wait::CostDiscard(HandWait::strict(

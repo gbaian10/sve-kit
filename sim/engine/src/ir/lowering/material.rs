@@ -26,7 +26,7 @@ pub(super) fn lower(
     operation: Operation,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.sel.acted.is_some() {
+    if material.sel.acted.is_some() || material.distinct_by.is_some() {
         return Err(unsupported(path));
     }
     let cardinality = cardinality(material, path)?;
@@ -117,6 +117,7 @@ const fn field_ex_token_material(material: &ast::Material) -> bool {
             n: Some(1),
             any: false,
             result: None,
+            distinct_by: None,
             cost_sum_ge: None,
         } if !trait_name.is_empty() && traits_all.is_empty() && names.is_empty()
     )

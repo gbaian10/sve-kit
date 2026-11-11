@@ -37,11 +37,17 @@ BP13-035／SD07-021 使用 +4，BP13-060／PR-361 使用 +3。它只將正 delta
 從 EX 打出的來源卡算進材料。兩支共用原有常值費用修正。
 
 以下整卡拒絕，包含未選分支：上述形狀以外的 `one_of`、多組交換、`steps`、材料 groups、
-upto／any、random、distinct_by、cost_sum_ge、`discard` 以外的材料 payload.result、動態張數、X、
+upto／any、random、下述形狀以外的 distinct_by、cost_sum_ge、`discard` 以外的材料 payload.result、動態張數、X、
 其他非公開區域的材料、上述擇一以外的 EX 材料、其他操作、額外／模式內 optional 或 additional、alt、上述單一 PP 宣告以外的 +N／正 delta、
 複數 set、未受驗的 aura／next-play／期限。骸の王的兩種材料必須整組承載；
-開闢の予言者的十組原費用不能縮成任選十張。付款交換本身依 CR 屬可選追加成本，
+開闢の予言者要求十種原費各一張。付款交換本身依 CR 屬可選追加成本，
 本節拒絕的是**除此單一交換以外**的追加費用，不是把交換改稱另一種遊戲規則。
+
+單一墓場 `banish` 交換可寫 `distinct_by: orig_cost`，從有印刷原費用的候選中選出固定張數，
+每種原費至多一張。開闢の予言者以 `orig_cost_ge: 1`、`orig_cost_le: 10` 和 `n: 10`
+表示每種指定原費各一張。預檢計算可用的原費種類數，出題後以題內候選的印刷原費驗證答案。
+`cost-materials` 題目在此形狀帶 `distinct_by: orig_cost`，各候選帶 `orig_cost`；
+同原費的不同 handle 作答無效並可重答，整組可支付才消滅材料與套用費用修正。
 
 ## 2. 決定、選材料與付款
 

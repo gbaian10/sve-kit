@@ -299,6 +299,7 @@ impl Game {
                 members: candidates,
                 cardinality: count,
                 distinct_names: false,
+                original_costs: None,
                 roles: vec![],
             }),
             Wait::Discard(HandWait {

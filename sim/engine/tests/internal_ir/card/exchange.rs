@@ -175,6 +175,47 @@ fn exchange_act_composes_cost_and_same_spell_body_reads_acceptance_after_payment
 }
 
 #[test]
+fn distinct_cost_exchange_requires_enough_original_costs_before_asking_for_materials() {
+    let mut tree = candidate(
+        "unit-follower",
+        json!({"optional_cost":{"banish":{"sel":{"who":"self","zone":"cemetery","kind":"spell"},"n":2,"distinct_by":"orig_cost"}},"optional_cost_delta":-2}),
+        false,
+    );
+    let program = lower(&tree, 0);
+    let mut game = position(
+        &program,
+        &initial("unit-follower", "cemetery", 2, 0),
+        0,
+        "unit-follower",
+    );
+    let origin = game.clone();
+    let question = start(&mut game);
+    let error = game
+        .answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
+        .unwrap_err();
+    assert!(matches!(error, sve_engine::EngineFailure::IllegalPlay(_)));
+    transactions::assert_restored(&game, &origin);
+
+    tree["cards"]["unit-follower"]["abilities"][0]["play"]["optional_cost"]["banish"]["distinct_by"] =
+        json!("name");
+    lowerer().lower(&tree).unwrap_err();
+}
+
+#[test]
+fn activation_cost_still_rejects_distinct_original_costs() {
+    let mut tree = candidate("unit-follower", json!({}), false);
+    let entry = tree["cards"]["unit-follower"]["abilities"][0]
+        .as_object_mut()
+        .unwrap();
+    entry.remove("play");
+    entry.insert("activate".into(), json!({"cost":{"banish":{"sel":{"who":"self","zone":"cemetery","kind":"spell"},"n":2}},"do":[{"draw":{"n":1}}]}));
+    lowerer().lower(&tree).unwrap();
+    tree["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"]["banish"]["distinct_by"] =
+        json!("orig_cost");
+    lowerer().lower(&tree).unwrap_err();
+}
+
+#[test]
 fn exchange_set_then_delta_banishes_exact_materials_or_restores_the_entire_play() {
     let tree = candidate(
         "unit-spell",
