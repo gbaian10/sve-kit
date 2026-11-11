@@ -345,3 +345,68 @@ fn a_printed_search_match_is_conclusive_while_unknown_additional_names_remain_un
         }
     }
 }
+
+#[test]
+fn public_look_distinct_names_keep_one_rule_label_and_reject_departed_members() {
+    for moved in [false, true] {
+        let mut steps = vec![json!({"reveal":{"top":{"who":"self","n":1},"bind":"seen"}})];
+        if moved {
+            steps.push(json!({"move":{"ref":{"in":"seen"},"to":"hand"}}));
+        }
+        steps.push(json!({"life":{"who":"self","delta":{"distinct_names":{"in":{"objects_of":"seen","view":"before"}}}}}));
+        let caster = json!({"activate":{"cost":{"pp":0},"do":steps}});
+        let mut game = position("deck", false, &caster, false);
+        let before = game.projection(View::Referee).unwrap();
+        let result = game.activate_internal_card("caster", AbilityId(1), PlayerId { seat: 1 });
+        if moved {
+            assert!(
+                result
+                    .unwrap_err()
+                    .to_string()
+                    .contains("stale public look member")
+            );
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
+        } else {
+            resolved(result.unwrap());
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+                21,
+                "a revealed card's additional alias is not a second rule label"
+            );
+        }
+    }
+}
+
+#[test]
+fn receipt_scalar_does_not_turn_a_private_look_into_a_public_observation() {
+    let public = json!({"activate":{"cost":{"pp":0},"do":[
+        {"reveal":{"top":{"who":"self","n":1},"bind":"seen"}},
+        {"life":{"who":"self","delta":{"distinct_names":{"in":{"objects_of":"seen","view":"before"}}}}}
+    ]}});
+    let mut private = public.clone();
+    private["activate"]["do"][0] = json!({"look":{"top":{"who":"self","n":1},"bind":"seen"}});
+    lowerer()
+        .lower(&same_name::tree(&private, "unit-amulet"))
+        .unwrap_err();
+    let mut raw = program(&public, "unit-amulet").card().clone();
+    raw.abilities[0].node.body.as_mut().unwrap().steps.retain(|step| {
+        !matches!(&step.node, Node::Instruction { instruction } if matches!(instruction.action, Action::Reveal { .. }))
+    });
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "private-look-scalar",
+    )
+    .unwrap();
+    let error = game
+        .load_internal_card("unit-amulet", &checked)
+        .unwrap_err();
+    assert!(
+        error
+            .to_string()
+            .contains("distinct names before revelation")
+    );
+}

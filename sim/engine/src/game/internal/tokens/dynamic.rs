@@ -1,10 +1,10 @@
-use super::super::{Execution, Fact, InstructionOutcome, Result, invalid, unsupported};
+use super::super::{Result, unsupported};
 use crate::ir::player_stages;
 use crate::ir::{
-    Control, DestroyOutcome, Expr, LkiReason, MemberProjection, MoveMethod, MovementReceipt, Nat,
-    NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectView, PlayerOrder, PlayerRead,
-    PlayerRef, PlayerRelation, Predicate, ReceiptLocation, ReceiptReference, Role, Selector,
-    StageMode, TextQuantifier, ZoneKind,
+    Control, DestroyOutcome, Expr, LkiReason, MemberProjection, MovementReceipt, Nat, NatOperation,
+    Node, ObjectOperand, ObjectReceipt, ObjectView, PlayerOrder, PlayerRead, PlayerRef,
+    PlayerRelation, Predicate, ReceiptLocation, ReceiptReference, Role, Selector, StageMode,
+    TextQuantifier,
 };
 
 pub(super) fn projection(
@@ -62,45 +62,6 @@ pub(super) fn projection(
         return None;
     }
     Some((receipt, player))
-}
-
-pub(super) fn destroyed_controller(
-    execution: &Execution,
-    game: &super::super::Game,
-    receipt: &ReceiptReference<DestroyOutcome>,
-    player: &PlayerRef,
-) -> Result<u64> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("local destroy result"));
-    };
-    let Some(InstructionOutcome::Destroy(outcome)) = execution.receipts.get(id) else {
-        return Err(invalid("missing destroy result"));
-    };
-    let player = execution.player(game, player)?;
-    outcome.successful.iter().try_fold(0_u64, |count, member| {
-        let before = member
-            .before
-            .ok_or_else(|| invalid("destroy result missing Before"))?;
-        let movement = execution
-            .facts
-            .iter()
-            .find_map(|fact| match fact {
-                Fact::Movement(fact)
-                    if fact.method == MoveMethod::Destroy
-                        && fact.movement.before == before.object =>
-                {
-                    Some(fact)
-                }
-                _ => None,
-            })
-            .ok_or_else(|| invalid("destroy result missing departure fact"))?;
-        if movement.from.kind != ZoneKind::Field {
-            return Err(invalid("destroy result did not leave field"));
-        }
-        count
-            .checked_add(u64::from(movement.controller_before == player))
-            .ok_or_else(|| invalid("token count overflow"))
-    })
 }
 
 pub(crate) fn check_each(control: &Control) -> Result<()> {

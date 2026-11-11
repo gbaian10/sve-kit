@@ -1,65 +1,19 @@
 use super::Node;
-use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
+use super::receipt_members::{
+    MemberCard, MemberView, distinct_cost_receipt, local_receipt, members,
+};
+use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
-    Binding, Bool, Capture, CardKind, CardName, CharacteristicPatch, CharacteristicView,
-    Characteristics, ClassId, ClassRead, Comparison, DiscardOutcome, Expr, Info, Int, IntOperation,
-    KindRead, MaterialActOutcome, MemberProjection, MoveOutcome, MovementReceipt, NamesRead,
-    NumberRead, NumericChange, ObjectProperty, ObjectReceipt, ObjectRef, ObjectView, Predicate,
-    QuantityUnit, ReceiptId, ReceiptLocation, ReceiptReference, RuntimeObjectView, TraitId,
-    TraitsRead,
+    Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead, Comparison, Expr,
+    Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt, NamesRead, NumberRead,
+    NumericChange, ObjectProperty, ObjectReceipt, ObjectView, Predicate, ReceiptId,
+    RuntimeObjectView, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
-
-/// The member information a receipt condition may read.
-struct MemberCard {
-    names: Vec<CardName>,
-    kind: CardKind,
-    traits: Vec<TraitId>,
-    class: Option<ClassId>,
-}
-
-impl From<&Characteristics> for MemberCard {
-    fn from(characters: &Characteristics) -> Self {
-        Self {
-            names: characters.names.clone(),
-            kind: characters.kind,
-            traits: characters.traits.clone(),
-            class: characters.class.clone(),
-        }
-    }
-}
-
-fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
-    let id = match receipt {
-        ObjectReceipt::Movement {
-            receipt: MovementReceipt::Discard { receipt },
-        } => match receipt.location() {
-            ReceiptLocation::Local { id } => Some(id),
-            ReceiptLocation::Iteration { .. } => None,
-        },
-        ObjectReceipt::Movement {
-            receipt: MovementReceipt::Move { receipt },
-        } => match receipt.location() {
-            ReceiptLocation::Local { id } => Some(id),
-            ReceiptLocation::Iteration { .. } => None,
-        },
-        ObjectReceipt::Look { receipt } => match receipt.location() {
-            ReceiptLocation::Local { id } => Some(id),
-            ReceiptLocation::Iteration { .. } => None,
-        },
-        ObjectReceipt::Fusion { receipt } => match receipt.location() {
-            ReceiptLocation::Local { id } => Some(id),
-            ReceiptLocation::Iteration { .. } => None,
-        },
-        _ => return Err(unsupported("receipt member condition")),
-    };
-    id.copied()
-        .ok_or_else(|| unsupported("iterated receipt member condition"))
-}
 
 /// Discards and Fusion costs have public before-members. Deck moves need a checked producer.
 pub(super) fn check(
@@ -366,150 +320,13 @@ pub(super) fn any(
 ) -> Result<bool> {
     check_shape(receipt, projection, member, predicate)?;
     let members = members(game, execution, receipt, None)?;
-    for (card, before) in &members {
-        if matches(
-            predicate,
-            member,
-            Some(card),
-            Some((game, execution, *before)),
-        )? {
+    for view in &members {
+        let card = view.card();
+        if matches(predicate, member, Some(card), Some((game, execution, view)))? {
             return Ok(true);
         }
     }
     Ok(false)
-}
-
-fn members(
-    game: &Game,
-    execution: &Execution,
-    receipt: &ObjectReceipt,
-    destination: Option<ZoneKind>,
-) -> Result<Vec<(MemberCard, ObjectRef)>> {
-    let id = local_receipt(receipt)?;
-    if matches!(receipt, ObjectReceipt::Fusion { .. }) {
-        let Some(InstructionOutcome::Payment {
-            subjects,
-            characters,
-            ..
-        }) = execution.receipts.get(&id)
-        else {
-            return Err(invalid("missing Fusion payment outcome"));
-        };
-        if subjects.len() != characters.len() {
-            return Err(invalid("missing Fusion material characteristics"));
-        }
-        return Ok(characters
-            .iter()
-            .map(MemberCard::from)
-            .zip(subjects.iter().copied())
-            .collect());
-    }
-    if matches!(receipt, ObjectReceipt::Look { .. }) {
-        return execution
-            .public_look_objects(
-                game,
-                &Selector::ReceiptMembers {
-                    receipt: receipt.clone(),
-                    projection: MemberProjection::Before,
-                },
-            )?
-            .into_iter()
-            .map(|member| Ok((printed_card(game, execution, member)?, member)))
-            .collect();
-    }
-    match execution.receipts.get(&id) {
-        Some(InstructionOutcome::Discard(outcome)) => outcome
-            .successful
-            .iter()
-            .map(|result| {
-                let before = result
-                    .before
-                    .ok_or_else(|| invalid("missing discard before member"))?;
-                let characters = execution
-                    .facts
-                    .iter()
-                    .find_map(|fact| match fact {
-                        Fact::Discard(event) if event.card_before == before.object => {
-                            Some(&event.characters)
-                        }
-                        _ => None,
-                    })
-                    .ok_or_else(|| invalid("missing discarded characteristics"))?;
-                Ok((MemberCard::from(characters), before.object))
-            })
-            .collect::<Result<Vec<_>>>(),
-        Some(InstructionOutcome::Move(_)) => moved_deck_members(execution, receipt, destination)?
-            .into_iter()
-            .map(|before| Ok((printed_card(game, execution, before)?, before)))
-            .collect(),
-        _ => Err(invalid("missing receipt member producer")),
-    }
-}
-
-fn moved_deck_members(
-    execution: &Execution,
-    receipt: &ObjectReceipt,
-    destination: Option<ZoneKind>,
-) -> Result<Vec<ObjectRef>> {
-    let Some(InstructionOutcome::Move(outcome)) = execution.receipts.get(&local_receipt(receipt)?)
-    else {
-        return Err(invalid("missing deck movement outcome"));
-    };
-    outcome
-        .moved
-        .iter()
-        .filter(|movement| {
-            movement.after.is_some()
-                && destination
-                    .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
-        })
-        .map(|movement| {
-            if !execution.facts.iter().any(|fact| {
-                matches!(fact, Fact::Movement(moved)
-            if moved.movement.before == movement.before && moved.from.kind == ZoneKind::Deck)
-            }) {
-                return Err(unsupported("receipt member that did not leave the deck"));
-            }
-            Ok(movement.before)
-        })
-        .collect()
-}
-
-fn distinct_cost_receipt(
-    receipt: &ObjectReceipt,
-    projection: MemberProjection,
-) -> Result<ReceiptId> {
-    if projection != MemberProjection::Before
-        || !matches!(
-            receipt,
-            ObjectReceipt::Movement {
-                receipt: MovementReceipt::Move { .. }
-            }
-        )
-    {
-        return Err(unsupported(
-            "distinct original costs require successful deck movement before members",
-        ));
-    }
-    local_receipt(receipt)
-}
-
-pub(super) fn distinct_original_costs(
-    game: &Game,
-    execution: &Execution,
-    receipt: &ObjectReceipt,
-    projection: MemberProjection,
-) -> Result<Nat> {
-    distinct_cost_receipt(receipt, projection)?;
-    let mut costs = BTreeSet::new();
-    for before in moved_deck_members(execution, receipt, Some(ZoneKind::Cemetery))? {
-        // Base printing is immutable across generations and effective-cost changes.
-        let card = &game.object(execution.object_id(before)?)?.card;
-        costs.insert(super::cost::printed_play_cost(
-            &game.catalog.face(card, 0)?["cost"],
-        )?);
-    }
-    Ok(Nat(u64::try_from(costs.len()).map_err(invalid)?))
 }
 
 fn check_count(
@@ -544,127 +361,15 @@ pub(super) fn count(
     check_count(receipt, projection, member, predicate)?;
     let members = members(game, execution, receipt, Some(ZoneKind::Cemetery))?;
     let mut count = 0_u64;
-    for (card, before) in &members {
-        if matches(
-            predicate,
-            member,
-            Some(card),
-            Some((game, execution, *before)),
-        )? {
+    for view in &members {
+        let card = view.card();
+        if matches(predicate, member, Some(card), Some((game, execution, view)))? {
             count = count
                 .checked_add(1)
                 .ok_or_else(|| invalid("receipt member count overflow"))?;
         }
     }
     Ok(Nat(count))
-}
-
-/// This trait-only deck read does not require unrelated ability-derived names.
-fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result<MemberCard> {
-    let card = &game.object(execution.object_id(before)?)?.card;
-    let printed = game.catalog.face(card, 0)?;
-    let kind = match printed["card_type"].as_str().unwrap_or_default() {
-        kind if kind.contains("フォロワー") => CardKind::Follower,
-        kind if kind.starts_with("スペル") => CardKind::Spell,
-        kind if kind.starts_with("アミュレット") => CardKind::Amulet,
-        _ => return Err(unsupported("receipt member card kind")),
-    };
-    let text = |value: &serde_json::Value| {
-        value
-            .as_str()
-            .map(str::to_owned)
-            .ok_or_else(|| invalid("unknown printed receipt member text"))
-    };
-    Ok(MemberCard {
-        names: vec![CardName(text(&printed["name"])?)],
-        kind,
-        traits: printed["traits"]
-            .as_array()
-            .ok_or_else(|| invalid("unknown printed traits"))?
-            .iter()
-            .map(|value| text(value).map(TraitId))
-            .collect::<Result<_>>()?,
-        class: Some(ClassId(text(&printed["card_class"])?)),
-    })
-}
-
-pub(super) fn paid_material_acts(
-    execution: &Execution,
-    receipt: &ReceiptReference<MaterialActOutcome>,
-) -> Result<Int> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated paid material Acts"));
-    };
-    let Some(InstructionOutcome::Payment {
-        quantity, subjects, ..
-    }) = execution.receipts.get(id)
-    else {
-        return Err(invalid("missing material Act payment"));
-    };
-    if quantity.unit != QuantityUnit::Cards
-        || quantity.amount.0 < 0
-        || usize::try_from(quantity.amount.0).map_err(invalid)? != subjects.len()
-    {
-        return Err(invalid("material Act quantity"));
-    }
-    Ok(quantity.amount)
-}
-
-pub(super) fn paid_material_attack(
-    execution: &Execution,
-    receipt: &ReceiptReference<MoveOutcome>,
-) -> Result<Int> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated paid material attack"));
-    };
-    let Some(InstructionOutcome::Payment {
-        quantity,
-        subjects,
-        characters,
-    }) = execution.receipts.get(id)
-    else {
-        return Err(invalid("missing material payment"));
-    };
-    let ([_], [characters]) = (subjects.as_slice(), characters.as_slice()) else {
-        return Err(invalid("material attack requires one frozen follower"));
-    };
-    if quantity.unit != QuantityUnit::Cards || quantity.amount != Int(1) {
-        return Err(invalid("material attack quantity"));
-    }
-    match characters.attack {
-        Info::Present(amount) => Ok(amount),
-        Info::AbsentByRules => Err(invalid("missing frozen material attack")),
-    }
-}
-
-pub(super) fn discarded_cost(
-    execution: &Execution,
-    receipt: &ReceiptReference<DiscardOutcome>,
-) -> Result<Int> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iteration discarded cost"));
-    };
-    let Some(InstructionOutcome::Discard(outcome)) = execution.receipts.get(id) else {
-        return Err(invalid("missing discarded cost producer"));
-    };
-    let [member] = outcome.successful.as_slice() else {
-        return Err(invalid("discarded cost requires exactly one card"));
-    };
-    let before = member
-        .before
-        .ok_or_else(|| invalid("missing discarded cost before member"))?;
-    let characters = execution
-        .facts
-        .iter()
-        .find_map(|fact| match fact {
-            Fact::Discard(event) if event.card_before == before.object => Some(&event.characters),
-            _ => None,
-        })
-        .ok_or_else(|| invalid("missing discarded cost characteristics"))?;
-    match characters.cost {
-        Info::Present(amount) if amount.0 >= 0 => Ok(amount),
-        _ => Err(invalid("missing discarded numeric cost")),
-    }
 }
 
 fn snapshot(object: &ObjectView, member: Binding<RuntimeObjectView>) -> Result<()> {
@@ -678,7 +383,7 @@ fn matches(
     expression: &Expr<Bool>,
     member: Binding<RuntimeObjectView>,
     characters: Option<&MemberCard>,
-    original: Option<(&Game, &Execution, ObjectRef)>,
+    original: Option<(&Game, &Execution, &MemberView)>,
 ) -> Result<bool> {
     let Expr::Compute(predicate) = expression else {
         return match expression {
@@ -769,7 +474,7 @@ fn original_cost_matches(
     operation: &IntOperation,
     member: Binding<RuntimeObjectView>,
     threshold: i64,
-    original: Option<(&Game, &Execution, ObjectRef)>,
+    original: Option<(&Game, &Execution, &MemberView)>,
 ) -> Result<bool> {
     let IntOperation::InformationOrZero {
         information:
@@ -782,11 +487,9 @@ fn original_cost_matches(
         return Err(unsupported("receipt member original cost comparison"));
     };
     snapshot(object, member)?;
-    let Some((game, execution, before)) = original else {
+    let Some((game, execution, view)) = original else {
         return Ok(false);
     };
-    // The immutable base printing survives movement and effective-cost changes.
-    let card = &game.object(execution.object_id(before)?)?.card;
-    let cost = super::cost::printed_cost(&game.catalog.face(card, 0)?["cost"])?;
+    let cost = view.original_cost(game, execution)?;
     Ok(cost >= threshold)
 }

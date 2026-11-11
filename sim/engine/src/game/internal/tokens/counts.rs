@@ -1,6 +1,6 @@
 //! Count admission composes only public-zone and successful Before readers.
 
-use super::super::{Execution, Game, Result, invalid, unsupported, values};
+use super::super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use super::dynamic;
 use crate::ir::{
     Arithmetic, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat, NatOperation,
@@ -392,7 +392,7 @@ impl Natural {
             Self::Literal(value) => Ok(*value),
             Self::PublicZone(value) => execution.natural(game, value).map(|value| value.0),
             Self::DestroyedController(receipt, player) => {
-                dynamic::destroyed_controller(execution, game, receipt, player)
+                receipt_members::destroyed_controller(execution, game, receipt, player)
             }
             Self::CheckedInt(value) => {
                 u64::try_from(value.evaluate(execution, game)?).map_err(invalid)
