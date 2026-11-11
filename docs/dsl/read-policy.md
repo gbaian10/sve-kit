@@ -117,6 +117,33 @@ Comparison 的右值仍限原有 `public_numbers`，不是任意數值讀取。
 Search 的作者 power 篩選仍只有上限比較，PlayingQuery 的原費也仍只有上限比較；
 own-hand 同名排除的既有作者形狀限制亦保留。這些缺口不能靠共用 reader 自動放行。
 
+## 持續效果的讀取環境
+
+Grant、Prevention、CostModifier 的 live provider 共用 `card/provider.rs` 的只讀 execution：
+來源、目前世代及控制者取自當下遊戲物件。出牌費用沿用付款 execution 的物件對應，
+獨立投影及進化報價使用查詢內的對應表；兩者都不繼承付款者的 binding、receipt、
+frozen／LKI 或來源資訊 producer，也不分配遊戲的 identity、execution 或安裝時點。
+一般 selector／boolean／number consumer 保持原有准入及使用時的世代、位置與讀權限檢查。
+
+此環境不預先展開來源的 keyword 或全部特徵；合法數值查詢仍走有效數值讀取，
+讓 field 候選包含 provider 自身時可讀攻體而不重入 keyword 投影。
+合法性、觀察與效果使用的既有 selector、有效數值及關鍵字 consumer 維持共用讀法，
+不另建一份預覽快照或結果快取。
+
+| Provider | 仍由原 consumer 保留的政策 |
+| --- | --- |
+| Grant | local 能力；Field、Equipment 或既有 Field＋EX 範圍；裝備授予仍受 host 抑制限制 |
+| Prevention | effective 能力（含已授予定義）；Field／Equipment，保留原替代排序與來源標示 |
+| CostModifier | printed 能力；Field，出牌對象依實際起始區判斷，進化仍只讀自身修正 |
+
+live provider 每次重新列舉來源及能力，來源離場或抑制後停止貢獻。
+已獨立安裝的固定成員授予、費用修正及防傷仍由自己的世代、期限與次數管理，
+不因提供者離場而取消，也不把晚入場者加入原固定集合。
+
+共用環境沒有放寬 consumer：static AddDamage 仍只接受 literal，
+BP20-021 的融合 counter 動態傷害量尚未接線，不能由此推定 BP20-020 的相依閉包已完成。
+installed DamageCap、手牌條件 Quick、其他新時機或新特徵層也不由本環境提供。
+
 ## 准入結果與 token 數量
 
 `WellFormedProgram`／`WellFormedCardProgram` 證明 IR 的型別、scope 與 producer 關係，

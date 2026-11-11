@@ -1,5 +1,5 @@
 use super::super::observation::EffectOrigin;
-use super::super::{Context, Execution, InstructionOutcome, player_id};
+use super::super::{Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::game::player::Viewer;
@@ -8,7 +8,7 @@ use crate::ir::public_numbers;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, CostChange, CostKind, Duration,
-    DurationEnd, Effect, EffectReference, Expr, Generation, InstallationSubjects, InstallationTime,
+    DurationEnd, Effect, EffectReference, Expr, InstallationSubjects, InstallationTime,
     Instruction, Int, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation, SelectionView,
     Selector, TimeAnchor, UsageScope, ZoneKind,
 };
@@ -373,15 +373,7 @@ impl Game {
             if abilities.is_empty() {
                 continue;
             }
-            let object = self.object(&source)?;
-            let provider = self.card_execution(
-                Context {
-                    source: source.clone(),
-                    generation: Generation(object.generation),
-                    controller: player_id(&object.controller)?,
-                },
-                execution.ids.clone(),
-            )?;
+            let provider = self.provider_execution(&source, Some(execution))?;
             for ability in abilities {
                 for effect in &ability.node.declarations {
                     if matches!(
@@ -460,17 +452,7 @@ impl Game {
         if abilities.is_empty() {
             return Ok(0);
         }
-        // Quote-local identities leave preview and failed payment attempts read-only.
-        let mut quote = self.clone();
-        let ids = quote.internal_identities()?;
-        let execution = quote.card_execution(
-            Context {
-                source: holder.into(),
-                generation: Generation(object.generation),
-                controller: player_id(&object.controller)?,
-            },
-            ids,
-        )?;
+        let execution = self.provider_execution(holder, None)?;
         let mut total = 0_i64;
         for ability in &abilities {
             for effect in &ability.node.declarations {
@@ -482,7 +464,7 @@ impl Game {
                 {
                     check(ability, from_ref(effect))?;
                     total = total
-                        .checked_add(execution.integer(&quote, amount)?.0)
+                        .checked_add(execution.integer(self, amount)?.0)
                         .ok_or_else(|| invalid("static evolution delta overflow"))?;
                 }
             }
