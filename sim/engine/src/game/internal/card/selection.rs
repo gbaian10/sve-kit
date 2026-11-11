@@ -24,6 +24,12 @@ use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
+pub(in crate::game::internal) mod constraints;
+
+use constraints::{
+    DistinctProperties, PropertyKey, check_count, unique_handles, within_original_cost_cap,
+};
+
 /// Object candidates visible only to the current chooser, addressed within that question.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct TargetDomain {
@@ -204,25 +210,13 @@ impl TargetWait {
     }
 
     fn validate_selection(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
-        if !contains(
-            self.bounds,
-            Nat(u64::try_from(handles.len()).map_err(invalid)?),
-        ) {
-            return Err(invalid("target cardinality"));
-        }
-        let mut unique = BTreeSet::new();
-        let members = handles
-            .iter()
-            .map(|handle| {
-                if !unique.insert(*handle) {
-                    return Err(invalid("duplicate target handle"));
-                }
-                self.members
-                    .get(usize::try_from(*handle).map_err(invalid)?)
-                    .copied()
-                    .ok_or_else(|| invalid("foreign target handle"))
-            })
-            .collect::<Result<Vec<_>>>()?;
+        check_count(self.bounds, handles.len(), "target cardinality")?;
+        let members = unique_handles(handles, "duplicate target handle", |handle| {
+            self.members
+                .get(usize::try_from(handle).map_err(invalid)?)
+                .copied()
+                .ok_or_else(|| invalid("foreign target handle"))
+        })?;
         if !self.compatible(&members)? {
             return Err(invalid("target selection constraints"));
         }
@@ -230,34 +224,32 @@ impl TargetWait {
     }
 
     fn compatible(&self, members: &[ObjectRef]) -> Result<bool> {
-        if let Some(CostCap { limit, costs }) = &self.cost_cap {
-            let mut total = 0_i64;
-            for member in members {
-                let (_, cost) = costs
-                    .iter()
-                    .find(|(reference, _)| reference == member)
-                    .ok_or_else(|| invalid("missing target original cost"))?;
-                total = total
-                    .checked_add(*cost)
-                    .ok_or_else(|| invalid("target cost sum overflow"))?;
-            }
-            if total > *limit {
-                return Ok(false);
-            }
+        if let Some(CostCap { limit, costs }) = &self.cost_cap
+            && !within_original_cost_cap(
+                members.iter().map(|member| {
+                    costs
+                        .iter()
+                        .find(|(reference, _)| reference == member)
+                        .map(|(_, cost)| *cost)
+                        .ok_or_else(|| invalid("missing target original cost"))
+                }),
+                *limit,
+                "target cost sum overflow",
+            )?
+        {
+            return Ok(false);
         }
         if self.distinct_names {
-            let mut names = BTreeSet::new();
+            let mut names = DistinctProperties::default();
             for member in members {
                 let saved = self
                     .characteristics
                     .iter()
                     .find(|(reference, _)| reference == member)
                     .ok_or_else(|| invalid("missing target names"))?;
-                let own: BTreeSet<_> = saved.1.names.iter().collect();
-                if own.iter().any(|name| names.contains(name)) {
+                if !names.insert_member(saved.1.names.iter().map(|name| PropertyKey::Name(name))) {
                     return Ok(false);
                 }
-                names.extend(own);
             }
         }
         // A single group is already bounded by `TargetWait::bounds`, whose minimum may be
