@@ -4,7 +4,7 @@ use super::tokens::dynamic;
 use super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use crate::ir::{
     Arithmetic, Binding, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat,
-    NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference,
+    NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference, number_bounds::Bounds,
 };
 use core::convert::identity;
 
@@ -70,67 +70,6 @@ enum Boolean {
     Not(Box<Self>),
     CompareInt(Box<Integer>, Comparison, Box<Integer>),
     CompareNat(Box<Natural>, Comparison, Box<Natural>),
-}
-
-#[derive(Clone, Copy)]
-struct Bounds {
-    lower: i64,
-    upper: i64,
-}
-
-impl Bounds {
-    const fn point(value: i64) -> Self {
-        Self {
-            lower: value,
-            upper: value,
-        }
-    }
-
-    fn union(self, other: Self) -> Self {
-        Self {
-            lower: self.lower.min(other.lower),
-            upper: self.upper.max(other.upper),
-        }
-    }
-
-    fn binary(self, operation: Arithmetic, right: Self) -> Result<Self> {
-        Ok(match operation {
-            // Saturation bounds successful checked results; it never changes runtime values.
-            Arithmetic::Add => Self {
-                lower: self.lower.saturating_add(right.lower),
-                upper: self.upper.saturating_add(right.upper),
-            },
-            Arithmetic::Subtract => Self {
-                lower: self.lower.saturating_sub(right.upper),
-                upper: self.upper.saturating_sub(right.lower),
-            },
-            Arithmetic::Multiply => {
-                let a = self.lower.saturating_mul(right.lower);
-                let b = self.lower.saturating_mul(right.upper);
-                let c = self.upper.saturating_mul(right.lower);
-                let d = self.upper.saturating_mul(right.upper);
-                Self {
-                    lower: a.min(b).min(c).min(d),
-                    upper: a.max(b).max(c).max(d),
-                }
-            }
-            Arithmetic::Minimum => Self {
-                lower: self.lower.min(right.lower),
-                upper: self.upper.min(right.upper),
-            },
-            Arithmetic::Maximum => Self {
-                lower: self.lower.max(right.lower),
-                upper: self.upper.max(right.upper),
-            },
-            Arithmetic::FloorDivide if right.lower == right.upper && right.lower > 0 => Self {
-                lower: self.lower.div_euclid(right.lower),
-                upper: self.upper.div_euclid(right.lower),
-            },
-            Arithmetic::FloorDivide | Arithmetic::HalfUp => {
-                return Err(unsupported("token arithmetic proof operands"));
-            }
-        })
-    }
 }
 
 struct CheckedNatural {
@@ -399,10 +338,10 @@ fn arithmetic(
                 upper: values::arithmetic(operation, &[first.upper])?,
             })
         } else {
-            checked
-                .iter()
-                .skip(1)
-                .try_fold(first, |left, right| left.binary(operation, right.bounds))
+            checked.iter().skip(1).try_fold(first, |left, right| {
+                left.binary(operation, right.bounds)
+                    .ok_or_else(|| unsupported("token arithmetic proof operands"))
+            })
         }
     })();
     let bounds = match (policy, bounds) {

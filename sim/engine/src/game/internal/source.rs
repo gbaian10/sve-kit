@@ -160,8 +160,8 @@ impl Execution {
                     } => {
                         let reference = self.object(game, object)?;
                         let information = self
-                            .event_object
-                            .as_ref()
+                            .event_reads
+                            .object()
                             .filter(|subject| subject.reference == reference)
                             .and_then(|subject| subject.information.as_ref())
                             .ok_or_else(|| invalid("missing triggering subject information"))?;

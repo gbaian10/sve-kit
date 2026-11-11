@@ -1,8 +1,8 @@
 //! Accepted die rolls capture field observers before the instruction continues.
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
-    Game, PendingOccurrence, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind,
-    invalid, optional_payment, unsupported,
+    Game, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind, invalid,
+    optional_payment, unsupported,
 };
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::{Execution, seat_name};
@@ -15,18 +15,6 @@ fn observes(ability: &Ability) -> bool {
             Some(TriggerCondition::Event {
                 pattern: EventPattern::Dice { binding, predicate }
             }) if *predicate == dice_predicate(*binding))
-}
-
-/// A resolving observer reads the accepted roll through its own header binding.
-pub(super) fn bind_event(execution: &mut Execution, pending: &PendingOccurrence) {
-    if let (Some(EventPayload::Dice { event }), Some(trigger)) =
-        (&pending.timing, &pending.ability.node.trigger)
-        && let TriggerCondition::Event {
-            pattern: EventPattern::Dice { binding, .. },
-        } = &trigger.on
-    {
-        execution.dice_event = Some((*binding, event.clone()));
-    }
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
