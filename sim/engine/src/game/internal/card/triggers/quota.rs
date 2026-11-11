@@ -3,6 +3,8 @@ use super::{
     Game, PendingOccurrence, PendingOption, PlayerId, Result, invalid, player_id, unsupported,
 };
 use crate::game::internal::{Execution, InputDomain, Wait};
+use crate::game::player::Viewer;
+use crate::game::player::observation::PendingTrigger;
 use crate::ir::{
     AbilityCostPolicy, AbilityInstanceId, BatchPolicy, DecisionId, LimitSpec, TriggerAggregation,
 };
@@ -240,5 +242,27 @@ impl Game {
             plan.groups.push_front(group);
         }
         self.internal_commit_admission(plan)
+    }
+}
+
+impl Admission {
+    pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Result<Vec<PendingTrigger>> {
+        let mut result = self
+            .ready
+            .iter()
+            .filter_map(|pending| pending.observed(game, perspective, None))
+            .collect::<Result<Vec<_>>>()?;
+        for group in &self.groups {
+            result.extend(
+                group
+                    .candidates
+                    .iter()
+                    .filter_map(|pending| {
+                        pending.observed(game, perspective, Some(group.remaining))
+                    })
+                    .collect::<Result<Vec<_>>>()?,
+            );
+        }
+        Ok(result)
     }
 }

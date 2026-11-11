@@ -1,5 +1,9 @@
 use super::*;
 use core::mem::swap;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{
+    EffectRecipient, InstalledChange, ObservedZone, PreventionChange,
+};
 
 fn input(effect: &Value) -> Value {
     equipment_played::tree(&json!({"static":{"effects":[effect]}}), "unit-follower")
@@ -471,4 +475,150 @@ fn raw_controller_prevention_cannot_target_leaders_or_install_as_an_applied_effe
     };
     *source = canonical.clone();
     WellFormedCardProgram::check(installed).unwrap_err();
+}
+
+fn installed_object_prevention() -> Game {
+    let tree = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[{"apply":{"on":"this","effect":{"prevent":{"kind":"ability"}},"until":"turn"}}]}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([{"id":"d0","card":"unit-follower"}]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "object-prevention-observation",
+    )
+    .unwrap();
+    let mut saved = serde_json::to_value(&game).unwrap();
+    saved["state"]["objects"]["d0"]["generation"] = json!(u64::MAX);
+    let mut game: Game = serde_json::from_value(saved).unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    resolved(
+        game.activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    game
+}
+
+fn interrupted_object_prevention() -> WellFormedProgram {
+    checked(vec![
+        movement::put(
+            1,
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            },
+            OwnerZone::Hand,
+        ),
+        ordering::look(2, 1),
+        ordering::order(3, ordering::looked(2), Position::Top {}),
+        draw(4, 1),
+    ])
+}
+
+#[test]
+fn installed_object_prevention_observation_matches_the_real_damage_replacement() {
+    let mut game = installed_object_prevention();
+    let before = rule_observation::field(&game, Viewer::P1, 0);
+    let effect = before
+        .effects
+        .iter()
+        .find(|effect| matches!(effect.change, InstalledChange::Prevention { .. }))
+        .unwrap();
+    assert!(
+        matches!(&effect.change,InstalledChange::Prevention { kind: DamageKind::Ability, change: PreventionChange::Prevent, remaining: None, recipients: Some(targets), sources: None } if matches!(targets.as_slice(),[EffectRecipient::Card(_)]))
+    );
+    let hit = checked(vec![instruction(
+        1,
+        Action::Damage {
+            recipients: RecipientSet::Objects {
+                objects: zone(ZoneKind::Field, 91),
+            },
+            amount: DamageAmount::Uniform {
+                amount: Expr::Literal(Int(2)),
+            },
+            flags: DamageFlags::Ability,
+            source: ObjectView::Current {
+                object: Box::new(ObjectOperand::SourceHolder {}),
+            },
+            batch: BatchPolicy::Instruction {},
+        },
+    )]);
+    let mut opposing = context(2);
+    opposing.source = "f".into();
+    assert!(
+        game.execute_internal(&hit, &source("synthetic"), opposing)
+            .unwrap()
+            .complete
+    );
+    assert_eq!(
+        rule_observation::field(&game, Viewer::P1, 0).stats,
+        before.stats
+    );
+    let own = game
+        .observe(Viewer::P1)
+        .unwrap()
+        .players
+        .iter()
+        .find(|player| player.player == Viewer::P1)
+        .unwrap()
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .handle
+        .clone();
+    let interrupted = interrupted_object_prevention();
+    assert!(
+        !game
+            .execute_internal(&interrupted, &source("synthetic"), context(1))
+            .unwrap()
+            .complete
+    );
+    let question = game.internal_decision(View::P1).unwrap();
+    game.observe(Viewer::P2).unwrap();
+    game.answer_internal(question.actor, question.token, Answer::Order(vec![0]))
+        .unwrap_err();
+    let restored = game.observe(Viewer::P2).unwrap();
+    let opposing = restored
+        .players
+        .iter()
+        .find(|player| player.player == Viewer::P1)
+        .unwrap()
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .properties
+        .state
+        .as_ref()
+        .unwrap();
+    let effect = opposing
+        .effects
+        .iter()
+        .find(|effect| matches!(effect.change, InstalledChange::Prevention { .. }))
+        .unwrap();
+    assert!(effect.source.as_ref().unwrap().holder.is_none());
+    assert!(
+        matches!(&effect.change,InstalledChange::Prevention { recipients: Some(links), .. } if links.is_empty()),
+        "frozen scope links must not bypass the retired source identity"
+    );
+    assert!(rule_observation::field(&game,Viewer::P1,0).effects.iter().any(|effect| matches!(&effect.change,InstalledChange::Prevention { recipients: Some(links), .. } if links == &[EffectRecipient::Card(own.clone())])),"continuous owner knowledge keeps its authorized scope link");
 }

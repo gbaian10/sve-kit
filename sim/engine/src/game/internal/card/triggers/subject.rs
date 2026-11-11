@@ -1,4 +1,5 @@
 //! Event subject fields avoid unrelated title or ability bindings.
+use super::super::super::observation::ObjectLink;
 use super::{Game, Result, invalid, unsupported};
 use crate::game::Frame;
 use crate::game::internal::{SubjectHistoryEvent, SubjectHistoryFact};
@@ -123,6 +124,7 @@ impl Game {
         let information = self.public_subject_information(source, Vec::new())?;
         let object = self.internal_current_reference(source)?;
         Ok(SubjectHistoryFact {
+            link: ObjectLink::capture(self, source, object.generation.0),
             event,
             destination: destination.map(str::to_owned),
             object: object.id.0,

@@ -1,5 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_engine::game::player::Viewer;
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn opponent() -> PlayerRef {
@@ -126,6 +127,7 @@ fn turn_history_distinguishes_pending_combo_from_committed_cards_and_resets() {
         game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
         25
     );
+    assert_eq!(game.observe(Viewer::P1).unwrap().history.played, [1, 0]);
     resolved(game.play_internal_card("s1", PlayerId { seat: 1 }).unwrap());
     game.resume_internal_card().unwrap();
     assert_eq!(
@@ -152,6 +154,8 @@ fn turn_history_distinguishes_pending_combo_from_committed_cards_and_resets() {
         game.projection(View::Referee).unwrap()["turn"]["active"],
         "P2"
     );
+    assert_eq!(game.observe(Viewer::P1).unwrap().history.played, [0, 0]);
+    assert_eq!(game.observe(Viewer::P1).unwrap().history.subjects.len(), 0);
     resolved(
         game.activate_internal_card("b", AbilityId(1), PlayerId { seat: 2 })
             .unwrap(),

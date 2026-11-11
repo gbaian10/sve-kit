@@ -39,6 +39,8 @@ mod life;
 mod pilot;
 #[path = "internal_ir/player_observation.rs"]
 mod player_observation;
+#[path = "internal_ir/rule_observation.rs"]
+mod rule_observation;
 
 #[path = "internal_ir/next_damage.rs"]
 mod next_damage;

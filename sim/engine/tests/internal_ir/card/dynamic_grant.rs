@@ -4,6 +4,8 @@
 )]
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::ObservedZone;
 
 fn followers(scope: u64) -> Selector {
     let binding = Binding::new(50, ScopeId(scope));
@@ -1240,4 +1242,72 @@ fn generic_activation_grants_reject_qualified_entries_and_field_auras() {
             "case aura={aura}: {error}"
         );
     }
+}
+
+#[test]
+fn a_granted_quota_keeps_its_provider_memory_and_loses_only_the_departed_provider_link() {
+    let mut grant = definition_grant(DurationEnd::NoTemporalExpiry {});
+    let Node::Instruction { instruction } = &mut grant.node else {
+        panic!("grant instruction");
+    };
+    let Action::Grant { abilities, .. } = &mut instruction.action else {
+        panic!("grant action");
+    };
+    let GrantedAbility::Definition { ability: granted } = &mut abilities[0] else {
+        panic!("definition");
+    };
+    granted.trigger.as_mut().unwrap().limit = Some(LimitSpec {
+        maximum: Nat(1),
+        window: LimitWindow::Turn,
+        scope: LimitScope::AbilityInstance,
+        consume_at: ConsumptionPoint::PendingAdmission,
+    });
+    let program = grant_program(vec![
+        ability(1, vec![grant]),
+        ability(
+            2,
+            vec![super::instruction(
+                2,
+                Action::Destroy {
+                    objects: Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    },
+                },
+            )],
+        ),
+    ]);
+    let mut game = position(&program);
+    activate_grant(&mut game);
+    let observation = game.observe(Viewer::P1).unwrap();
+    let provider = observation
+        .players
+        .iter()
+        .find(|player| player.player == Viewer::P1)
+        .unwrap()
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Field)
+        .unwrap()
+        .cards[0]
+        .card
+        .handle
+        .clone();
+    let quota = rule_observation::field(&game, Viewer::P1, 1)
+        .quotas
+        .unwrap();
+    assert_eq!(quota.len(), 1);
+    assert_eq!(quota[0].remaining, 1);
+    assert_eq!(quota[0].source.card, "unit-amulet");
+    assert_eq!(quota[0].source.holder.as_ref(), Some(&provider));
+    resolved(
+        game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    let quota = rule_observation::field(&game, Viewer::P1, 0)
+        .quotas
+        .unwrap();
+    assert_eq!(quota[0].source.card, "unit-amulet");
+    assert_eq!(quota[0].source.holder, None);
+    assert_eq!(quota[0].remaining, 1);
 }

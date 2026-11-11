@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
+use sve_engine::game::player::Viewer;
 
 pub(super) fn lastword(mut ability: Located<Ability>) -> Located<Ability> {
     ability.node.kind = AbilityKind::Triggered;
@@ -329,6 +330,22 @@ fn lethal_rule_batch_offers_quota_before_pending_after_the_observer_leaves() {
                 usize::try_from(3 - ordinal).unwrap()
             );
             assert_eq!(domain.earlier.len(), usize::try_from(ordinal).unwrap());
+            let observation = game.observe(Viewer::P1).unwrap();
+            assert_eq!(
+                observation
+                    .pending
+                    .iter()
+                    .filter(|pending| pending.admission_remaining == Some(maximum - ordinal))
+                    .count(),
+                usize::try_from(3 - ordinal).unwrap()
+            );
+            assert!(
+                game.observe(Viewer::P2)
+                    .unwrap()
+                    .pending
+                    .iter()
+                    .all(|pending| pending.admission_remaining.is_none())
+            );
             let before = exact_authority(&game);
             for (actor, token, answer) in [
                 (PlayerId { seat: 2 }, q.token, Answer::TriggerQuota(1)),

@@ -1,5 +1,7 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::{InstalledChange, TriggerTiming};
 
 fn tree(delay: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -138,6 +140,24 @@ fn repeated_installation_from_the_same_ability_gets_two_distinct_pending_occurre
             game.resume_internal_card().unwrap();
         }
     }
+    let observation = game.observe(Viewer::P1).unwrap();
+    assert_eq!(observation.pending.len(), 2);
+    assert!(
+        observation
+            .pending
+            .iter()
+            .all(|pending| pending.timing == TriggerTiming::LeaveField)
+    );
+    assert!(
+        observation
+            .players
+            .iter()
+            .flat_map(|player| &player.effects)
+            .any(|effect| effect.change
+                == InstalledChange::Delayed {
+                    timing: TriggerTiming::LeaveField
+                })
+    );
     for count in [2, 1] {
         let question = game.internal_pending_choice().unwrap().unwrap();
         let InputDomain::Pending(options) = &question.domain else {

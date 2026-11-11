@@ -4,6 +4,7 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::Viewer;
 
 fn reroll() -> Located<Ability> {
     let mut entry = ability(2, vec![]);
@@ -137,6 +138,16 @@ fn rerolls_replace_the_result_and_fixed_repeats_reset_the_permission() {
     assert_eq!(dice[0].attempts, vec![DieFace::One, DieFace::Two]);
     assert_eq!(dice[0].value, DieFace::Two);
     assert_eq!(dice[1].value, DieFace::Five);
+    let history = game.observe(Viewer::P1).unwrap().history;
+    assert_eq!(
+        history
+            .dice
+            .iter()
+            .map(|roll| roll.value)
+            .collect::<Vec<_>>(),
+        [2, 5]
+    );
+    assert_eq!(history, game.observe(Viewer::P2).unwrap().history);
 }
 
 #[test]

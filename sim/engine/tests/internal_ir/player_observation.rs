@@ -1,6 +1,6 @@
 use super::ordering::{look, looked, order};
 use super::*;
-use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::internal::{DecisionView, InputDomain, ResumeStage};
 use sve_engine::game::player::events::EventKind;
 use sve_engine::game::player::observation::{
     CardObservation, Observation, ObservedZone, ZoneObservation,
@@ -389,12 +389,39 @@ fn published_rollback_does_not_reissue_a_disclosed_handle_and_keeps_continuous_h
     );
 }
 
+fn attack_and_finish(game: &mut Game) {
+    game.internal_rule_action(&json!({"do":"attack","attacker":"s","target":"P2.leader"}))
+        .unwrap();
+    while let Some(question) = game.internal_quick_choice().unwrap() {
+        game.answer_internal_card(question.actor, question.token, Answer::Quick(None))
+            .unwrap();
+    }
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+}
+
 #[test]
 fn return_to_hand_then_origin_rollback_cannot_resurrect_the_opponents_old_handle() {
     let mut initial = setup(1, json!([{"id":"d0","card":"unit-follower"}]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     let mut game = exhausted_deck(&initial);
+    let empty = WellFormedCardProgram::check(CardProgram {
+        abilities: vec![],
+        card_play_costs: vec![],
+    })
+    .unwrap();
+    game.load_internal_card("unit-follower", &empty).unwrap();
+    attack_and_finish(&mut game);
+    assert!(
+        game.observe(Viewer::P2)
+            .unwrap()
+            .history
+            .subjects
+            .iter()
+            .any(|fact| fact.current.is_some())
+    );
     let old = visible(
         &game.observe(Viewer::P2).unwrap(),
         Viewer::P1,
@@ -453,6 +480,23 @@ fn return_to_hand_then_origin_rollback_cannot_resurrect_the_opponents_old_handle
         )[0]
         .handle,
         own
+    );
+    let opponent_history = game.observe(Viewer::P2).unwrap().history;
+    assert!(
+        opponent_history
+            .subjects
+            .iter()
+            .all(|fact| fact.current.is_none()),
+        "published loss followed by origin rollback must not reconnect historical identities"
+    );
+    assert!(
+        game.observe(Viewer::P1)
+            .unwrap()
+            .history
+            .subjects
+            .iter()
+            .any(|fact| fact.current.as_ref() == Some(&own)),
+        "the controller kept identifying the card throughout"
     );
 }
 

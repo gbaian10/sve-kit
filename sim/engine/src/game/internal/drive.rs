@@ -1,8 +1,11 @@
 //! Complete Drive checks share typed continuations and the authority's ordinary mutations.
+use super::observation::EffectOrigin;
 use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, invalid,
     player_id, seat_name, unsupported,
 };
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::ir::{
     Action, Bool, CharacteristicPatch, CheckId, DecisionId, DriveCheckedEvent, DriveTriggerEvent,
     Duration, DurationEnd, EffectReference, EventPayload, Expr, Instruction, Int, Nat,
@@ -25,6 +28,7 @@ pub(super) const fn icon_name(icon: TriggerIcon) -> &'static str {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct LeaderAttackLock {
+    origin: EffectOrigin,
     generation: u64,
     turn: u64,
 }
@@ -83,6 +87,28 @@ impl DriveWait {
     reason = "Drive's rule procedure shares the authoritative typed execution."
 )]
 impl Game {
+    pub(super) fn observed_drive_locks(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{EffectExpiry, InstalledChange, InstalledEffect};
+        let Some(lock) = self.state.ir_no_leader_attack.get(holder) else {
+            return Ok(vec![]);
+        };
+        if !self.internal_leader_attack_locked(holder)? {
+            return Ok(vec![]);
+        }
+        Ok(vec![InstalledEffect {
+            source: lock.origin.observed(self, perspective),
+            expires: EffectExpiry::TurnEnd,
+            main_live: true,
+            intervals: vec![],
+            active: true,
+            change: InstalledChange::NoLeaderAttack,
+        }])
+    }
+
     pub(super) fn internal_drive(
         &mut self,
         execution: &mut Execution,
@@ -271,6 +297,7 @@ impl Game {
                     self.state.ir_no_leader_attack.insert(
                         id,
                         LeaderAttackLock {
+                            origin: EffectOrigin::capture(self, execution, &effect.source)?,
                             generation: selected.generation.0,
                             turn: self.state.schedule.current()?,
                         },

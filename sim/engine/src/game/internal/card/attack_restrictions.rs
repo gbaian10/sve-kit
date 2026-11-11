@@ -1,5 +1,9 @@
 use super::super::duration::{EffectEnd, TurnInterval};
+use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, Slot};
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
+use crate::ir::PlayerId;
 use crate::ir::{
     Bool, DurationEnd, InstallationSubjects, InstallationTime, Interval, Selector, TimeAnchor,
 };
@@ -94,6 +98,49 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     reason = "Attack permissions use the authoritative combat position."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_attack_locks(
+        &self,
+        perspective: Viewer,
+        holder: &str,
+    ) -> Result<Vec<InstalledEffect>> {
+        use crate::game::player::observation::{InstalledChange, InstalledEffect, viewer};
+        let object = self.object(holder)?;
+        self.state
+            .ir_attack_restrictions
+            .iter()
+            .filter(|lock| {
+                object.zone == "field" && lock.id == holder && lock.generation == object.generation
+            })
+            .map(|lock| {
+                let leaders = lock
+                    .leaders
+                    .as_ref()
+                    .map(|players| {
+                        players
+                            .iter()
+                            .map(|seat| viewer(super::seat_name(PlayerId { seat: *seat })?))
+                            .collect::<Result<Vec<_>>>()
+                    })
+                    .transpose()?;
+                let live = !lock.end.source_expired(self);
+                Ok(InstalledEffect {
+                    source: lock.origin.observed(self, perspective),
+                    expires: lock.end.observed()?,
+                    main_live: live,
+                    intervals: lock
+                        .interval
+                        .map(TurnInterval::observed)
+                        .transpose()?
+                        .flatten()
+                        .into_iter()
+                        .collect(),
+                    active: live && lock.interval.is_none_or(TurnInterval::active),
+                    change: InstalledChange::AttackRestriction { leaders },
+                })
+            })
+            .collect()
+    }
+
     pub(in crate::game) fn internal_attack_restricted(
         &self,
         attacker: &str,
@@ -191,6 +238,7 @@ impl Game {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub(in crate::game) struct AttackLock {
+    origin: EffectOrigin,
     id: String,
     generation: u64,
     leaders: Option<Vec<u32>>,
@@ -310,6 +358,7 @@ impl Game {
                 continue;
             }
             self.state.ir_attack_restrictions.push(AttackLock {
+                origin: EffectOrigin::capture(self, execution, &instruction.source)?,
                 id,
                 generation: member.generation.0,
                 leaders: leaders.clone(),

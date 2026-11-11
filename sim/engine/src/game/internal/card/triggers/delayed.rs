@@ -4,6 +4,8 @@ use super::{
     RuntimeAbilitySource, ScopeId, Slot, SourceInformation, invalid, unsupported,
 };
 use crate::game::internal::{Execution, InstructionOutcome};
+use crate::game::player::Viewer;
+use crate::game::player::observation::InstalledEffect;
 use crate::game::{Frame, Object};
 use crate::ir::delayed as delayed_ir;
 use crate::ir::{
@@ -14,6 +16,7 @@ use crate::ir::{RuntimeZoneRef, ZoneKind};
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct Installed {
+    origin: super::EffectOrigin,
     turn: u64,
     holder: String,
     source: RuntimeAbilitySource,
@@ -29,6 +32,34 @@ pub(in crate::game::internal) struct Installed {
     reason = "Installed observers join the common trigger machinery."
 )]
 impl Game {
+    pub(in crate::game::internal) fn observed_delayed(
+        &self,
+        perspective: Viewer,
+        player: Viewer,
+    ) -> Vec<InstalledEffect> {
+        use crate::game::player::observation::{
+            EffectExpiry, InstalledChange, InstalledEffect, TriggerTiming,
+        };
+        self.card_runtime
+            .delayed
+            .iter()
+            .filter(|record| {
+                record.source.controller == player.player()
+                    && (perspective == player || record.information.publicly_identified())
+            })
+            .map(|record| InstalledEffect {
+                source: record.origin.observed(self, perspective),
+                expires: EffectExpiry::TurnEnd,
+                main_live: true,
+                intervals: vec![],
+                active: true,
+                change: InstalledChange::Delayed {
+                    timing: TriggerTiming::LeaveField,
+                },
+            })
+            .collect()
+    }
+
     pub(in crate::game::internal) fn internal_install_delay(
         &mut self,
         execution: &mut Execution,
@@ -87,6 +118,7 @@ impl Game {
             .ok_or_else(|| invalid("delayed execution has no admitted plan"))?
             .delayed(instruction, callback(instruction, source)?)?;
         self.card_runtime.delayed.push(Installed {
+            origin: super::EffectOrigin::capture(self, execution, &instruction.source)?,
             turn: self.state.schedule.current()?,
             holder,
             source,
@@ -116,6 +148,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
         let mut pending = PendingOccurrence {
+            origin: record.origin.clone(),
             id: self.card_runtime.next_pending,
             holder: record.holder.clone(),
             source: record.source,
