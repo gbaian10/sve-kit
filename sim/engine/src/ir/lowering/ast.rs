@@ -179,6 +179,7 @@ pub(super) struct FusionQuery {
     pub kind: Option<SearchKind>,
     pub r#trait: Option<String>,
     pub token: Option<bool>,
+    pub not_token: Option<bool>,
     pub orig_cost_ge: Option<u64>,
 }
 

@@ -371,11 +371,19 @@ impl Game {
             .generation
             .checked_add(1)
             .ok_or_else(|| invalid("rule movement generation exhausted"))?;
-        if !object.state["counters"]
-            .as_object()
-            .is_none_or(|counters| counters.values().all(|count| count.as_i64() == Some(0)))
-        {
-            return Err(unsupported("unimplemented counter rule carry"));
+        if let Some(counters) = object.state["counters"].as_object() {
+            // The callers carry EX and Resolution objects only into Resolution or Field,
+            // where moved_attributes retains their state (CR 10.6.2.1.3 and 10.6.2.8.1.1).
+            let carries_counters = matches!(object.zone.as_str(), "ex" | "resolution");
+            for count in counters.values() {
+                let count = count
+                    .as_i64()
+                    .filter(|count| *count >= 0)
+                    .ok_or_else(|| invalid("invalid counter for rule movement"))?;
+                if count != 0 && !carries_counters {
+                    return Err(unsupported("unimplemented counter rule carry"));
+                }
+            }
         }
         Ok(())
     }

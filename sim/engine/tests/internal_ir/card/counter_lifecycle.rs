@@ -347,7 +347,7 @@ fn trigger_counter_head_reuses_the_same_selected_material_payment_and_may_be_dec
 }
 
 #[test]
-fn ex_phase_source_can_enter_field_with_zero_counters_but_nonzero_carry_is_rejected() {
+fn ex_phase_source_carries_counters_to_field_and_rejects_invalid_counters() {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
@@ -365,7 +365,7 @@ fn ex_phase_source_can_enter_field_with_zero_counters_but_nonzero_carry_is_rejec
         .unwrap()
         .remove("unit-follower")
         .unwrap();
-    for count in [0_u8, 1] {
+    for count in [0_i64, 1, -1] {
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"]["field"] = json!([]);
@@ -381,35 +381,34 @@ fn ex_phase_source_can_enter_field_with_zero_counters_but_nonzero_carry_is_rejec
         )
         .unwrap();
         game.load_internal_card("unit-follower", &program).unwrap();
-        assert_eq!(
-            game.internal_rule_action(&json!({"do":"end-phase"}))
-                .unwrap()
-                .outcome,
-            "resolved"
-        );
+        let origin = game.clone();
+        let phase = game.internal_rule_action(&json!({"do":"end-phase"}));
+        if count < 0 {
+            assert!(
+                matches!(phase, Err(EngineFailure::Invalid(message)) if message.contains("invalid card counter")),
+                "the phase trigger cannot capture a source with invalid counters"
+            );
+            transactions::assert_restored(&game, &origin);
+            continue;
+        }
+        assert_eq!(phase.unwrap().outcome, "resolved");
         let question = game.internal_pending_choice().unwrap().unwrap();
         let InputDomain::Pending(options) = &question.domain else {
             panic!("EX phase")
         };
         assert_eq!(options.len(), 1);
-        let origin = game.clone();
-        let result = game.answer_internal_card(
-            question.actor,
-            question.token,
-            Answer::Pending(options[0].handle),
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
         );
-        if count == 0 {
-            resolved(result.unwrap());
-            let view = game.projection(View::Referee).unwrap();
-            assert_eq!(view["P1"]["field"], json!(["s"]));
-            assert_eq!(view["P1"]["ex"], json!([]));
-            assert_eq!(view["objects"]["s"]["generation"], 1_u8);
-        } else {
-            assert!(
-                matches!(result, Err(EngineFailure::Unsupported(message)) if message.contains("EX source counter carry")),
-                "nonzero counters cannot be silently discarded on EX source entry"
-            );
-            transactions::assert_restored(&game, &origin);
-        }
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["field"], json!(["s"]));
+        assert_eq!(view["P1"]["ex"], json!([]));
+        assert_eq!(view["objects"]["s"]["generation"], 1_u8);
+        assert_eq!(view["objects"]["s"]["counters"]["test"], count);
     }
 }

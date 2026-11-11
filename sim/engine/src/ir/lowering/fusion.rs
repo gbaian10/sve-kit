@@ -47,13 +47,14 @@ pub(super) fn lower(
     {
         return Err(unsupported(path));
     }
+    let token = token_filter(&fusion.sel, path)?;
     let mut sets = Vec::new();
     for zone in [ZoneKind::Hand, ZoneKind::Ex] {
         let binding = Binding::new(context.card_allocator.id(path)?, context.scope);
         let filter = super::selection::ObjectFilter {
             kind: fusion.sel.kind.as_ref().map(super::search::card_kind),
             trait_id: fusion.sel.r#trait.as_deref(),
-            token: fusion.sel.token,
+            token,
             original_cost: [None, None, fusion.sel.orig_cost_ge],
             ..super::selection::ObjectFilter::default()
         };
@@ -110,6 +111,14 @@ pub(super) fn lower(
             }],
         },
     })
+}
+
+fn token_filter(query: &ast::FusionQuery, path: &str) -> Result<Option<bool>, LoweringError> {
+    match (query.token, query.not_token) {
+        (token @ (None | Some(true)), None) => Ok(token),
+        (None, Some(true)) => Ok(Some(false)),
+        _ => Err(unsupported(path)),
+    }
 }
 
 fn cardinality(fusion: &ast::Fusion, path: &str) -> Result<Cardinality, LoweringError> {
