@@ -1,6 +1,7 @@
 //! Public revelation is local to one resolution and one hidden location.
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
+use crate::EngineFailure;
 use crate::ir::{
     Bool, Expr, Instruction, MemberProjection, Nat, NumericProperty, ObjectReceipt, ObjectRef,
     PlayerRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, ZoneKind,
@@ -232,14 +233,18 @@ impl Execution {
             return Err(invalid("missing public look"));
         };
         if self.look_viewers.get(&id) != Some(&self.context.controller) {
-            return Err(unsupported("foreign public look"));
+            return Err(EngineFailure::AuthorizationIntegrity(
+                "foreign public look".into(),
+            ));
         }
         let members: Vec<_> = outcome.looked.iter().map(|view| view.object).collect();
         let published = self.receipts.values().any(|result| {
             matches!(result, InstructionOutcome::Revealed(revealed) if revealed == &members)
         });
         if !published {
-            return Err(unsupported("look was not revealed"));
+            return Err(EngineFailure::AuthorizationIntegrity(
+                "look was not revealed".into(),
+            ));
         }
         for member in &members {
             let object = game.object(self.object_id(*member)?)?;

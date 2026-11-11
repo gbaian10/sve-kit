@@ -337,11 +337,20 @@ fn public_look_reads_require_same_resolution_revelation_and_current_generation()
             property: ObjectProperty::Names,
         })),
     }));
-    let rejects_reads = |candidate: &Execution, game: &Game| {
-        candidate.integer(game, &cost).unwrap_err();
-        candidate.integer(game, &names).unwrap_err();
+    let rejects_reads = |candidate: &Execution, game: &Game, missing_snapshot: bool| {
+        for expression in [&cost, &names] {
+            let failure = candidate.integer(game, expression).unwrap_err();
+            if missing_snapshot {
+                assert!(matches!(failure, crate::EngineFailure::Unsupported(_)));
+            } else {
+                assert!(matches!(
+                    failure,
+                    crate::EngineFailure::AuthorizationIntegrity(_)
+                ));
+            }
+        }
     };
-    rejects_reads(&execution, &board);
+    rejects_reads(&execution, &board, false);
     execution.objects(&board, &objects).unwrap_err();
     let Some(InstructionOutcome::Look(looked)) = execution.receipts.get(&ReceiptId(2)) else {
         panic!("the paused program owns a private Look receipt")
@@ -354,18 +363,18 @@ fn public_look_reads_require_same_resolution_revelation_and_current_generation()
     assert_eq!(execution.integer(&board, &names).unwrap(), Int(1));
     let mut stale = board.clone();
     stale.object_mut("tail").unwrap().generation += 1;
-    rejects_reads(&execution, &stale);
+    rejects_reads(&execution, &stale, true);
     execution.objects(&stale, &objects).unwrap_err();
     let mut displaced = board.clone();
     displaced.object_mut("tail").unwrap().zone = "hand".into();
-    rejects_reads(&execution, &displaced);
+    rejects_reads(&execution, &displaced, true);
     let mut foreign = execution.clone();
     foreign
         .look_viewers
         .insert(ReceiptId(2), PlayerId { seat: 2 });
-    rejects_reads(&foreign, &board);
+    rejects_reads(&foreign, &board, false);
     execution.receipts.remove(&ReceiptId(99));
-    rejects_reads(&execution, &board);
+    rejects_reads(&execution, &board, false);
 }
 
 fn zone_population(zone: ZoneKind) -> Selector {
