@@ -1,7 +1,7 @@
 //! Count admission composes only public-zone and successful Before readers.
 
-use super::super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
-use super::dynamic;
+use super::tokens::dynamic;
+use super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use crate::ir::{
     Arithmetic, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat, NatOperation,
     NatRead, PlayerRef, Predicate, ReceiptReference,
@@ -150,8 +150,8 @@ fn natural(expression: &Expr<Nat>) -> Result<CheckedNatural> {
         Expr::Literal(Nat(count)) => (Natural::Literal(*count), Some(*count)),
         Expr::Live(read)
             if matches!(read.as_ref(), NatRead::ZoneCount { selector }
-            if super::super::card::selection::field_selector(selector).is_ok()
-                || super::super::card::selection::public_zone_selector(selector).is_ok()) =>
+            if super::card::selection::field_selector(selector).is_ok()
+                || super::card::selection::public_zone_selector(selector).is_ok()) =>
         {
             (Natural::PublicZone(Box::new(expression.clone())), None)
         }

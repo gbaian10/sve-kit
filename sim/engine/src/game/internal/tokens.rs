@@ -1,7 +1,6 @@
 use crate::ir::player_stages;
 mod capacity;
-mod counts;
-mod dynamic;
+pub(super) mod dynamic;
 pub(super) mod equipment;
 
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
@@ -10,6 +9,7 @@ pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
 
+use super::number_plan::CountPlan;
 use super::{Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_name, unsupported};
 use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
@@ -62,7 +62,7 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
     tokens
         .iter()
         .all(|token| match &token.template {
-            TokenTemplate::Fixed { .. } => counts::CountPlan::compile(&token.count).is_ok(),
+            TokenTemplate::Fixed { .. } => CountPlan::compile(&token.count).is_ok(),
             TokenTemplate::Name { name, kind } => {
                 if !matches!(kind, None | Some(CardKind::Follower)) {
                     return false;
@@ -81,7 +81,7 @@ fn specification(action: &Action) -> Option<(&[TokenSpec], &ZoneRef)> {
 pub(in crate::game::internal) struct TokenPlan {
     instruction: Instruction,
     destination: ZoneRef,
-    counts: Vec<counts::CountPlan>,
+    counts: Vec<CountPlan>,
 }
 impl TokenPlan {
     pub(in crate::game::internal) fn compile(instruction: &Instruction) -> Result<Self> {
@@ -92,7 +92,7 @@ impl TokenPlan {
             destination: destination.clone(),
             counts: tokens
                 .iter()
-                .map(|token| counts::CountPlan::compile(&token.count))
+                .map(|token| CountPlan::compile(&token.count))
                 .collect::<Result<_>>()?,
         })
     }
@@ -559,7 +559,7 @@ fn collect_paths(program: &Program, prefix: &str, accepted: &mut Paths) {
                                 "{path}/instruction/action/tokens/{token_index}/template/name"
                             ));
                         }
-                        if let Ok(plan) = counts::CountPlan::compile(&token.count) {
+                        if let Ok(plan) = CountPlan::compile(&token.count) {
                             accepted.counts.extend(plan.before_paths(&format!(
                                 "{path}/instruction/action/tokens/{token_index}/count"
                             )));
@@ -652,7 +652,7 @@ pub(super) fn mask_operands(node: &mut Node) {
                 *kind = None;
             }
             if valid {
-                counts::CountPlan::mask_before(&mut token.count);
+                CountPlan::mask_before(&mut token.count);
             }
         }
     }
