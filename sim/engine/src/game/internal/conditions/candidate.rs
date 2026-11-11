@@ -104,6 +104,9 @@ impl Reader for Candidate<'_> {
                 };
                 Ok(actual == *expected)
             }
+            BooleanProperty::Controller(_)
+            | BooleanProperty::ActivePlayer(_)
+            | BooleanProperty::SameSource => Err(unsupported("candidate event role property")),
             BooleanProperty::State(_) => Err(unsupported("candidate boolean property")),
         }
     }

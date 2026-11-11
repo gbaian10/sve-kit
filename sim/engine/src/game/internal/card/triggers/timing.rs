@@ -5,6 +5,7 @@ use super::{
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant;
 use crate::game::internal::source::SourceSnapshot;
 use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
@@ -381,14 +382,15 @@ impl Game {
                 {
                     continue;
                 }
-                if !plan.subject.matches_information(
+                if !subject_condition::matches(
+                    &plan.subject,
                     &information.borrowed(),
                     holder == attacker,
                     controller,
                     actor,
                     active,
                     information.token,
-                ) {
+                )? {
                     continue;
                 }
                 if !plan.keywords_any.is_empty() {
@@ -673,14 +675,15 @@ impl Game {
                     {
                         return Err(invalid("damage source identity mismatch"));
                     }
-                    if !filter.matches_information(
+                    if !subject_condition::matches(
+                        filter,
                         &information.subject.borrowed(),
                         holder_reference == event.source.object,
                         controller,
                         event.controller,
                         active,
                         information.subject.token,
-                    ) {
+                    )? {
                         continue;
                     }
                 }

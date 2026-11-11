@@ -4,7 +4,7 @@ use crate::ir::{
     Binding, Bool, CardKind, CausePattern, CharacteristicView, Characteristics,
     CharacteristicsFields, ClassFrozen, ClassId, DiscardEvent, EffectSource, EventContext,
     EventSnapshotPolicy, Expr, Info, KindFrozen, ObjectFrozen, ObjectOperand, ObjectRef,
-    ObjectView, PlayerFrozen, PlayerId, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsRead,
+    ObjectView, PlayerFrozen, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsRead,
     TriggerSpec,
 };
 
@@ -145,14 +145,6 @@ impl DiscardCard {
         (card.kind.is_some() || card.class.as_ref().is_some_and(|class| !class.0.is_empty()))
             .then_some(card)
     }
-
-    fn matches(&self, characters: &Characteristics) -> bool {
-        self.kind.is_none_or(|kind| kind == characters.kind)
-            && self
-                .class
-                .as_ref()
-                .is_none_or(|class| characters.class.as_ref() == Some(class))
-    }
 }
 
 #[derive(Clone)]
@@ -226,25 +218,6 @@ impl DiscardFilter {
             }
         }
         None
-    }
-    pub(crate) fn matches(
-        &self,
-        player: PlayerId,
-        card: ObjectRef,
-        source: ObjectRef,
-        controller: PlayerId,
-        active: PlayerId,
-    ) -> bool {
-        self.own.is_none_or(|own| own == (player == controller))
-            && (!self.itself || card == source)
-            && (!self.own_turn || active == controller)
-    }
-
-    /// Characteristic filters read the card's hand characteristics before it leaves.
-    pub(crate) fn matches_card(&self, characters: &Characteristics) -> bool {
-        self.card
-            .as_ref()
-            .is_none_or(|card| card.matches(characters))
     }
 }
 

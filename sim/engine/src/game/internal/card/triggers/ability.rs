@@ -4,6 +4,7 @@ use super::{
     TriggerAggregation, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::internal::Execution;
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::ir::events::ability::filter;
 use crate::ir::optional_payment;
 use crate::ir::{LimitSpec, RuntimeAbilityReference, UbActivatedEvent};
@@ -62,14 +63,15 @@ impl Game {
             for ability in self.internal_printed_abilities(&holder)? {
                 if ability.node.active_zones == [ZoneKind::Field]
                     && let Some(plan) = filter(&ability.node)
-                    && plan.matches_information(
+                    && subject_condition::matches(
+                        &plan,
                         &info.borrowed(),
                         holder == execution.context.source,
                         controller,
                         source.controller,
                         active,
                         info.token,
-                    )
+                    )?
                 {
                     matched.push((holder.clone(), ability));
                 }

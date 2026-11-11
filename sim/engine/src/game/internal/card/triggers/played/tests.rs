@@ -33,14 +33,18 @@ fn unknown_printed_values_do_not_satisfy_zero_or_upper_bounds() {
                 names: &[],
             };
             assert!(plan.valid());
-            assert!(!plan.matches_information(
-                &info,
-                false,
-                PlayerId { seat: 1 },
-                PlayerId { seat: 1 },
-                PlayerId { seat: 1 },
-                false
-            ));
+            assert!(
+                !subject_condition::played(
+                    &plan,
+                    &info,
+                    false,
+                    PlayerId { seat: 1 },
+                    PlayerId { seat: 1 },
+                    PlayerId { seat: 1 },
+                    false
+                )
+                .unwrap()
+            );
         }
     }
     for value in [json!("0"), json!(0_u8)] {
