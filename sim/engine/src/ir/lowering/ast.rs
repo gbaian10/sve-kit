@@ -1,4 +1,4 @@
-use crate::ir::{CardKind, ZoneKind};
+use crate::ir::{CardKind, Stat, ZoneKind};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::slice::from_ref;
 use serde::Deserialize;
@@ -3517,6 +3517,23 @@ pub(super) enum ChangeStat {
     Hp,
 }
 
+impl StatSubscription {
+    pub(super) fn properties(&self) -> Vec<Stat> {
+        let stats = match &self.stat {
+            None => return vec![Stat::Attack, Stat::Life],
+            Some(ChangeStats::One(stat)) => from_ref(stat),
+            Some(ChangeStats::Many(stats)) => stats,
+        };
+        stats
+            .iter()
+            .map(|stat| match stat {
+                ChangeStat::Power => Stat::Attack,
+                ChangeStat::Hp => Stat::Life,
+            })
+            .collect()
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum BodyStatReference {
@@ -3654,7 +3671,23 @@ pub(super) struct Reroll {
 #[serde(untagged)]
 pub(super) enum HistoryCondition {
     Dice(DiceHistory),
+    StatChanged(StatGainHistory),
     Other(HistoryQuery),
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct StatGainHistory {
+    #[serde(rename = "event")]
+    pub _event: StatGainEvent,
+    #[serde(rename = "window")]
+    pub _window: ThisTurn,
+    pub r#where: StatSubscription,
+    pub at_least: Option<u64>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum StatGainEvent {
+    StatChanged,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

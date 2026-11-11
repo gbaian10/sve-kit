@@ -1197,25 +1197,11 @@ fn lowered_change(
         }
         ast::PhaseSubscription::StatChanged(entry) => {
             let event = Binding::new(event_id, scope);
-            let properties = match &entry.stat {
-                None => vec![super::Stat::Attack, super::Stat::Life],
-                Some(ast::ChangeStats::One(stat)) => vec![match stat {
-                    ast::ChangeStat::Power => super::Stat::Attack,
-                    ast::ChangeStat::Hp => super::Stat::Life,
-                }],
-                Some(ast::ChangeStats::Many(stats)) => stats
-                    .iter()
-                    .map(|stat| match stat {
-                        ast::ChangeStat::Power => super::Stat::Attack,
-                        ast::ChangeStat::Hp => super::Stat::Life,
-                    })
-                    .collect(),
-            };
             Ok(EventPattern::StatChange {
                 binding: event,
                 predicate: super::events::change::StatFilter {
                     itself: entry.reference.is_some(),
-                    properties,
+                    properties: entry.properties(),
                     up: entry
                         .direction
                         .as_ref()

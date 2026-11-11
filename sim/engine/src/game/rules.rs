@@ -857,6 +857,7 @@ impl Game {
         }
         self.state.ir_subject_history.clear();
         self.state.ir_damage_history.clear();
+        self.state.ir_stat_gain_history.clear();
         self.state.ir_ub_history.clear();
         self.state.used.clear();
         for object in self.state.objects.values_mut() {

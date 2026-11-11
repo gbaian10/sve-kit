@@ -1,0 +1,39 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "evolve",
+        "subjects": "self"
+      },
+      "costs": [
+        {
+          "amount": 1,
+          "op": "pp"
+        }
+      ],
+      "kind": "evolve",
+      "line": 1,
+      "play_if": {
+        "read": "self.stats_increased_this_turn"
+      }
+    },
+    {
+      "body": {
+        "max": 1,
+        "min": 0,
+        "op": "search",
+        "select": {
+          "side": "self",
+          "trait": "荒野",
+          "zone": "deck"
+        },
+        "to": "cemetery"
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 2,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

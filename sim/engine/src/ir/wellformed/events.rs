@@ -838,6 +838,16 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        if let EventPattern::StatChange { binding, .. } = &query.pattern {
+            let Some(plan) = super::super::history_turn::public::stat_gain_plan(query) else {
+                return self.reject();
+            };
+            return self.isolated(|checker| {
+                checker.define(*binding, BindingKind::Value)?;
+                checker.define(plan.subject, BindingKind::Value)?;
+                checker.define(plan.facet, BindingKind::Value)
+            });
+        }
         if super::super::history_turn::public::banished_plan(query).is_some()
             && let EventPattern::Banish { binding, .. } = &query.pattern
         {

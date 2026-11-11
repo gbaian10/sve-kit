@@ -286,6 +286,7 @@ impl BodyContext<'_> {
             ast::Condition::History(history) => {
                 return match history {
                     ast::HistoryCondition::Dice(dice) => self.dice_history(dice, path),
+                    ast::HistoryCondition::StatChanged(_) => Err(unsupported(path)),
                     ast::HistoryCondition::Other(query) => self.history_condition(query, path),
                 };
             }

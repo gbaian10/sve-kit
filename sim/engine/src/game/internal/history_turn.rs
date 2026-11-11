@@ -2,6 +2,7 @@
 
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
 use crate::ir::dice as ir_dice;
+use crate::ir::events::change::StatFilter;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::timing::opponent;
@@ -15,11 +16,74 @@ use crate::ir::{Action, Bool, Control, Expr, Node, Program};
 use crate::ir::{
     CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, Selector, TraitId,
 };
+use crate::ir::{
+    EventPayload, ObjectOperand, ObjectRef, PlayerId, RuntimeDamageRecipient, RuntimeHolder, Stat,
+};
 use crate::ir::{ExecutionRef, HistoryQuery, Location, PlayerRef, Requirement, Requirements};
-use crate::ir::{ObjectRef, PlayerId, RuntimeDamageRecipient};
 use alloc::collections::BTreeSet;
+use core::iter::once;
 use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
+
+/// The current-turn stat history only needs the positive facets for each committed event.
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub(in crate::game) struct StatGainHistoryFact {
+    object: u64,
+    generation: u64,
+    attack: bool,
+    life: bool,
+}
+
+pub(super) fn stat_gain_exists(
+    execution: &Execution,
+    game: &Game,
+    plan: &StatFilter,
+) -> Result<Bool> {
+    let holder = execution.object(game, &ObjectOperand::SourceHolder {})?;
+    Ok(Bool(game.state.ir_stat_gain_history.iter().any(|fact| {
+        fact.object == holder.id.0
+            && fact.generation == holder.generation.0
+            && plan.properties.iter().any(|property| match property {
+                Stat::Attack => fact.attack,
+                Stat::Life => fact.life,
+            })
+    })))
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Stat facts use the common committed change path."
+)]
+impl Game {
+    pub(in crate::game::internal) fn internal_record_stat_gains(
+        &mut self,
+        events: &[EventPayload],
+    ) {
+        self.state
+            .ir_stat_gain_history
+            .extend(events.iter().filter_map(|payload| {
+                let EventPayload::StatChange { event } = payload else {
+                    return None;
+                };
+                let RuntimeHolder::Object { object } = event.subject else {
+                    return None;
+                };
+                let positive = |property| {
+                    once(&event.facets.first)
+                        .chain(&event.facets.rest)
+                        .any(|facet| facet.property == property && facet.delta.0 > 0)
+                };
+                let attack = positive(Stat::Attack);
+                let life = positive(Stat::Life);
+                (attack || life).then_some(StatGainHistoryFact {
+                    object: object.id.0,
+                    generation: object.generation.0,
+                    attack,
+                    life,
+                })
+            }));
+    }
+}
 
 pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requirement) -> bool {
     requirement

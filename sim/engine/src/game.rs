@@ -203,6 +203,8 @@ struct State {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_damage_history: Vec<internal::DamageHistoryFact>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    ir_stat_gain_history: Vec<internal::StatGainHistoryFact>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_ub_history: Vec<internal::UbHistoryFact>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     ir_dice_history: Vec<internal::DiceHistoryFact>,
@@ -492,6 +494,7 @@ impl Game {
             event_occurrences: BTreeMap::new(),
             ir_subject_history: Vec::new(),
             ir_damage_history: Vec::new(),
+            ir_stat_gain_history: Vec::new(),
             ir_ub_history: Vec::new(),
             ir_dice_history: Vec::new(),
             knowledge: BTreeMap::new(),

@@ -1,0 +1,36 @@
+cards:
+  BP11-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            history:
+              event: stat_changed
+              where:
+                direction: up
+                ref: this
+                stat:
+                  - power
+                  - hp
+              window: this_turn
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  trait: 荒野
+                  who: self
+                  zone: deck
+                to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-11"
+format: 2
+kind: author_effect_set

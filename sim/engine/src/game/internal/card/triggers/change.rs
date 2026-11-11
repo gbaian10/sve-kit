@@ -95,6 +95,7 @@ impl Game {
         cause: &Value,
         before: SnapshotId,
     ) -> Result<()> {
+        self.internal_record_stat_gains(events);
         if events.is_empty()
             || !self.card_runtime.definitions.cards.values().any(|program| {
                 program

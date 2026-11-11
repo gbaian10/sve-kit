@@ -69,7 +69,9 @@ mod grant;
 mod history_turn;
 mod transfer;
 pub(in crate::game) use history_turn::DamageHistoryFact;
-pub(super) use history_turn::{SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact};
+pub(super) use history_turn::{
+    StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact,
+};
 mod life;
 mod movement;
 mod numeric;
