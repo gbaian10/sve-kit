@@ -5,6 +5,7 @@ use super::super::{
     ObjectRef, PaymentOptionality, PaymentTime, PlaySlot, PlaySpec, Predicate, Program, ReceiptId,
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SpellCountTime, Visibility,
 };
+use super::groups::{Groups, TotalBounds};
 use super::{
     AbilitySource, Action, Allocator, BTreeMap, BTreeSet, BatchPolicy, Binding, BodyContext, Bool,
     Cardinality, DamageAmount, DamageFlags, Expr, Int, Located, LoweringError, Nat, Node,
@@ -407,7 +408,7 @@ impl BodyContext<'_> {
         let mut plain = target.clone();
         plain.groups = None;
         let (mut domain, _) = self.object_choice(&plain, path, false)?;
-        let mut lowered = Vec::new();
+        let mut lowered = Groups::new(TotalBounds::Explicit(cardinality));
         for group in groups {
             if group.orig_cost_eq.is_some() == group.orig_cost_le.is_some()
                 || target.from.orig_cost_eq.is_some()
@@ -422,18 +423,19 @@ impl BodyContext<'_> {
             query.orig_cost_le = group.orig_cost_le.map(ast::NumericArgument::Literal);
             query.r#trait.clone_from(&group.r#trait);
             query.not_class.clone_from(&group.not_class);
-            lowered.push(SelectionGroup {
-                selector: self.public_target_selector(&query, path)?,
-                cardinality: Cardinality {
+            lowered.push(
+                Cardinality {
                     minimum: Nat(u64::from(required)),
                     maximum: Some(Nat(1)),
                 },
-            });
+                || self.public_target_selector(&query, path),
+                path,
+            )?;
         }
         let ChoiceDomain::Objects { constraint, .. } = &mut domain else {
             return Err(unsupported(path));
         };
-        constraint.groups = lowered;
+        constraint.groups = lowered.finish(None).groups;
         Ok((domain, cardinality))
     }
 

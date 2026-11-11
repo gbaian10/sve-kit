@@ -1,6 +1,6 @@
 use super::super::grant::EffectiveAbility;
 use super::super::observation::{EffectOrigin, ObjectLink};
-use super::super::{Context, Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
+use super::super::{Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::EffectEnd;
 use crate::game::player::ObjectHandle;
@@ -16,10 +16,10 @@ use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
-    Expr, FaceId, Generation, InstallationSubjects, InstallationTime, Instruction,
-    InstructionContext, InstructionId, Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView,
-    PlayerId, PlayerRef, Program, ProposedEventPattern, ReceiptId, RecipientSet, Requirement,
-    Requirements, Selector, TimeAnchor, ZoneKind,
+    Expr, FaceId, InstallationSubjects, InstallationTime, Instruction, InstructionContext,
+    InstructionId, Int, Node, ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef, Program,
+    ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements, Selector, TimeAnchor,
+    ZoneKind,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -707,7 +707,7 @@ impl Game {
                 continue;
             }
             let object = self.object(&provider)?;
-            let execution = self.static_prevention_execution(&provider)?;
+            let execution = self.provider_execution(&provider, None)?;
             for located in abilities {
                 for effect in &located.node.declarations {
                     let Some(shape) = projection(effect) else {
@@ -769,26 +769,6 @@ impl Game {
             }
         }
         Ok(())
-    }
-
-    fn static_prevention_execution(&self, provider: &str) -> Result<Execution> {
-        let object = self.object(provider)?;
-        let ids = self
-            .state
-            .objects
-            .keys()
-            .cloned()
-            .zip(1_u64..)
-            .map(|(id, number)| (ObjectId(number), id))
-            .collect();
-        self.card_execution(
-            Context {
-                source: provider.into(),
-                generation: Generation(object.generation),
-                controller: player_id(&object.controller)?,
-            },
-            ids,
-        )
     }
 
     fn granted_prevention_label(
