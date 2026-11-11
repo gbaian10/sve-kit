@@ -46,8 +46,12 @@ fn printed(token: bool) -> Arc<Catalog> {
     )
 }
 
-fn board(members: &[&str], token: bool) -> Game {
-    let program = lowerer().lower(&input()).unwrap()["unit-follower"].clone();
+fn board(members: &[&str], token: bool, body: Option<&Value>) -> Game {
+    let mut document = input();
+    if let Some(body) = body {
+        document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = body.clone();
+    }
+    let program = lowerer().lower(&document).unwrap()["unit-follower"].clone();
     let mut position = setup(1, json!([]));
     position["players"]["P1"]["zones"]["hand"] = json!([]);
     let mut field = vec![json!({"id":"s","card":"unit-follower"})];
@@ -84,7 +88,7 @@ fn field_receipt_original_cost_branches_use_only_this_movements_successes() {
             true,
         ),
     ] {
-        let mut game = board(&members, false);
+        let mut game = board(&members, false, None);
         resolved(
             game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
                 .unwrap(),
@@ -113,7 +117,7 @@ fn field_receipt_original_cost_branches_use_only_this_movements_successes() {
 
 #[test]
 fn a_field_receipt_retains_original_printing_after_token_erasure() {
-    let mut game = board(&["unit-spell"], true);
+    let mut game = board(&["unit-spell"], true, None);
     resolved(
         game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
             .unwrap(),
@@ -222,6 +226,38 @@ fn raw_field_receipts_need_the_checked_source_destination_and_original_before_vi
         assert!(
             matches!(error, EngineFailure::Unsupported(_)),
             "a valid raw program still needs the matching backend producer authority"
+        );
+    }
+}
+
+#[test]
+fn field_movement_success_count_and_did_share_the_actual_successful_members() {
+    let movement = input()["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0].clone();
+    let body = json!([
+        movement,
+        {"damage":{"to":{"leaders":"opponents"},"n":{"times":[{"count_of":"sent"},2]}}},
+        {"if":{"cond":{"did":"sent"},"then":[{"life":{"who":"self","delta":1}}]}}
+    ]);
+    for (members, count) in [
+        (vec!["unit-amulet"], 0_i64),
+        (vec!["unit-follower"], 1_i64),
+        (vec!["unit-follower", "unit-spell", "unit-amulet"], 2_i64),
+    ] {
+        let mut game = board(&members, false, Some(&body));
+        resolved(
+            game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P2"]["leader"]["life"],
+            20_i64 - count * 2,
+            "count_of supplies the successful movement count to arithmetic"
+        );
+        assert_eq!(
+            state["P1"]["leader"]["life"],
+            20_i64 + i64::from(count > 0),
+            "did sees no success for an empty result"
         );
     }
 }
