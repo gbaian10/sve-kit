@@ -1,4 +1,5 @@
 use super::play::PlayState;
+use super::selection::constraints::{DistinctProperties, PropertyKey, check_count, unique_handles};
 use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::{
@@ -37,29 +38,28 @@ struct MaterialCandidate {
 
 impl MaterialWait {
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
-        if handles.len() != self.count {
-            return Err(invalid("material cardinality"));
-        }
-        let mut unique = BTreeSet::new();
-        let mut costs = BTreeSet::new();
-        handles
-            .iter()
-            .map(|handle| {
-                if !unique.insert(*handle) {
-                    return Err(invalid("duplicate material handle"));
-                }
-                let candidate = self
-                    .members
-                    .get(usize::try_from(*handle).map_err(invalid)?)
-                    .ok_or_else(|| invalid("foreign material handle"))?;
-                if let Some(cost) = candidate.original_cost
-                    && !costs.insert(cost)
-                {
-                    return Err(invalid("duplicate original material cost"));
-                }
-                Ok(candidate.reference)
-            })
-            .collect()
+        let count = Nat(u64::try_from(self.count).map_err(invalid)?);
+        check_count(
+            Cardinality {
+                minimum: count,
+                maximum: Some(count),
+            },
+            handles.len(),
+            "material cardinality",
+        )?;
+        let mut costs = DistinctProperties::default();
+        unique_handles(handles, "duplicate material handle", |handle| {
+            let candidate = self
+                .members
+                .get(usize::try_from(handle).map_err(invalid)?)
+                .ok_or_else(|| invalid("foreign material handle"))?;
+            if let Some(cost) = candidate.original_cost
+                && !costs.insert_member([PropertyKey::OriginalCost(cost)])
+            {
+                return Err(invalid("duplicate original material cost"));
+            }
+            Ok(candidate.reference)
+        })
     }
 }
 

@@ -1,5 +1,8 @@
 //! Search owns its private candidate evaluator and never lends it to ordinary selectors.
 
+use super::card::selection::constraints::{
+    DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
+};
 use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, contains,
     invalid, seat_name, unsupported,
@@ -860,7 +863,7 @@ impl Game {
         wait: &SearchWait,
         found: &[ObjectRef],
     ) -> Result<()> {
-        let mut names = BTreeSet::new();
+        let mut names = DistinctProperties::default();
         for object in found {
             let index = wait
                 .members
@@ -872,25 +875,22 @@ impl Game {
                     .names
                     .get(index)
                     .ok_or_else(|| invalid("missing frozen search names"))?;
-                if own.iter().any(|name| names.contains(name)) {
+                if !names.insert_member(own.iter().map(|name| PropertyKey::Name(name))) {
                     return Err(invalid("search names must differ"));
                 }
-                names.extend(own.iter().cloned());
             }
         }
-        if let Some(limit) = wait.cost_cap {
-            let mut total = 0_i64;
-            for object in found {
-                let id = execution.object_id(*object)?;
-                total = total
-                    .checked_add(super::cost::printed_cost(
-                        &self.internal_cost_print(id)?["cost"],
-                    )?)
-                    .ok_or_else(|| invalid("search cost sum overflow"))?;
-            }
-            if total > limit {
-                return Err(invalid("search original cost total exceeds its cap"));
-            }
+        if let Some(limit) = wait.cost_cap
+            && !within_original_cost_cap(
+                found.iter().map(|object| {
+                    let id = execution.object_id(*object)?;
+                    super::cost::printed_cost(&self.internal_cost_print(id)?["cost"])
+                }),
+                limit,
+                "search cost sum overflow",
+            )?
+        {
+            return Err(invalid("search original cost total exceeds its cap"));
         }
         Ok(())
     }
@@ -935,22 +935,16 @@ impl Game {
                     .as_ref()
                     .ok_or_else(|| invalid("missing search groups"))?;
                 for (cards, view) in groups.iter().zip(views) {
-                    if !contains(
-                        view.cardinality,
-                        Nat(u64::try_from(cards.len()).map_err(invalid)?),
-                    ) {
-                        return Err(invalid("search group cardinality"));
-                    }
+                    check_count(view.cardinality, cards.len(), "search group cardinality")?;
                 }
                 groups.iter().flatten().copied().collect()
             }
         };
-        if !contains(
+        check_count(
             wait.domain.cardinality,
-            Nat(u64::try_from(found.len()).map_err(invalid)?),
-        ) {
-            return Err(invalid("search total cardinality"));
-        }
+            found.len(),
+            "search total cardinality",
+        )?;
         self.internal_search_check_totals(execution, wait, &found)?;
         if let Action::Search {
             destination: Some(SearchDestination::Single { movement }),
