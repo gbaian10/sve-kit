@@ -187,13 +187,23 @@ fn matches(
         Selector::Zone {
             players,
             zone,
+            binding,
             predicate,
             ..
         } => Ok(*zone == origin
             && execution
                 .players(game, players)?
                 .contains(&player_id(&game.object(holder)?.controller)?)
-            && super::selection::matches_candidate(game, holder, predicate)?),
+            && super::selection::matches_candidate(
+                game,
+                holder,
+                &super::super::conditions::ConditionPlan::compile(
+                    predicate,
+                    *binding,
+                    super::super::conditions::Policy::Selection,
+                )?
+                .prepare(None)?,
+            )?),
         _ => Err(unsupported("player cost selector")),
     }
 }

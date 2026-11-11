@@ -643,3 +643,57 @@ fn static_my_turn_discount_does_not_reduce_a_quick_spell_during_the_opponents_tu
         );
     }
 }
+
+#[test]
+fn a_player_cost_subject_does_not_gain_prepared_dynamic_operands() {
+    let mut raw = player_discount_program(&json!({"who":"self","kind":"follower"}), 1)
+        .card()
+        .clone();
+    let Node::Instruction { instruction } =
+        &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
+    else {
+        panic!("installation")
+    };
+    let Action::InstallEffect { effect, .. } = &mut instruction.action else {
+        panic!("installation")
+    };
+    let Effect::CostModifier {
+        subjects: Selector::Union { sets },
+        ..
+    } = effect.as_mut()
+    else {
+        panic!("subjects")
+    };
+    for selector in sets {
+        let Selector::Zone {
+            binding, predicate, ..
+        } = selector
+        else {
+            panic!("subject candidates")
+        };
+        **predicate = condition_inputs::unprepared_cost(*binding);
+    }
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"provider","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"candidate","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "literal-only-subjects",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &checked).unwrap();
+    resolved(
+        game.activate_internal_card("provider", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let before = exact_authority(&game);
+    assert!(matches!(
+        game.play_internal_card("candidate", PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(exact_authority(&game), before);
+}

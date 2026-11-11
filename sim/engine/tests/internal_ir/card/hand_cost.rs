@@ -514,3 +514,49 @@ fn hand_cost_keyword_filter_accepts_only_known_basic_keywords() {
         .unwrap();
     lower("not-a-keyword").unwrap_err();
 }
+
+#[test]
+fn a_hand_cost_does_not_start_preparing_a_dynamic_comparison_operand() {
+    let mut raw = filtered_program(&json!({"who":"self","zone":"hand","orig_cost_le":7}), false)
+        .card()
+        .clone();
+    let CostSpec::Ordered { steps } = &mut raw.abilities[0].node.play.as_mut().unwrap().costs
+    else {
+        panic!("costs")
+    };
+    let Action::Discard {
+        mode: DiscardMode::Chosen { constraint },
+        ..
+    } = &mut steps[2].instruction.action
+    else {
+        panic!("discard")
+    };
+    let Selector::Zone {
+        binding, predicate, ..
+    } = &mut constraint.groups[0].selector
+    else {
+        panic!("hand candidates")
+    };
+    **predicate = condition_inputs::unprepared_cost(*binding);
+    let checked = WellFormedCardProgram::check(raw).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"candidate","card":"unit-spell"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "literal-only-hand",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &checked).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let before = exact_authority(&game);
+    assert!(matches!(
+        game.activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(exact_authority(&game), before);
+}
