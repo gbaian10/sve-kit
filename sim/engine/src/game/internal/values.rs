@@ -1205,7 +1205,7 @@ fn local_receipt<T>(location: &ReceiptLocation<T>) -> Result<&ReceiptId> {
     Ok(id)
 }
 
-fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
+pub(super) fn arithmetic(operation: Arithmetic, values: &[i64]) -> Result<i64> {
     let (&first, rest) = values
         .split_first()
         .ok_or_else(|| invalid("empty arithmetic"))?;

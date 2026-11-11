@@ -206,7 +206,7 @@ fn dynamic_creation_rejects_unproved_receipts_views_and_player_scope() {
     }
 }
 
-fn raw_body() -> Program {
+pub(super) fn raw_body() -> Program {
     let (_, _, input) = selected(steps(), false);
     let lowered = ExpandedLowerer::new()
         .unwrap()
@@ -234,7 +234,7 @@ fn raw_game() -> Game {
     .unwrap()
 }
 
-fn protected_game(body: Program) -> Game {
+pub(super) fn protected_game(body: Program) -> Game {
     fn locate(program: &mut Program, span: &SourceSpan, origin: &AbilitySource) {
         for step in &mut program.steps {
             step.source = span.clone();
