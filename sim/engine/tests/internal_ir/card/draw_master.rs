@@ -16,14 +16,20 @@ fn a_draw_reaches_only_its_own_controller_or_a_chosen_objects_controller() {
     for who in [json!("self"), json!({"master_of":"victim"})] {
         lowerer().lower(&tree(&json!({"n":1,"who":who}))).unwrap();
     }
-    for who in [
-        json!("opp"),
-        json!({"master_of":"missing"}),
-        json!({"leaders":"all"}),
+    for (who, rejection) in [
+        (json!("opp"), "unsupported_construct"),
+        (json!("opponent"), "unsupported_construct"),
+        (json!("p"), "unsupported_construct"),
+        (json!({"master_of":"missing"}), "unsupported_construct"),
+        (json!({"leaders":"all"}), "invalid_expanded"),
     ] {
-        assert!(
-            lowerer().lower(&tree(&json!({"n":1,"who":who}))).is_err(),
-            "{who}: other drawers are not wired"
+        assert_eq!(
+            lowerer()
+                .lower(&tree(&json!({"n":1,"who":who})))
+                .unwrap_err()
+                .code,
+            rejection,
+            "{who}: unsupported drawers must remain rejected"
         );
     }
 }
