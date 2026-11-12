@@ -38,7 +38,8 @@ impl Visitor for DirectPaths<'_> {
                 Control::Sequence { .. }
                 | Control::May { .. }
                 | Control::If { .. }
-                | Control::Mode { .. },
+                | Control::Mode { .. }
+                | Control::Pay { .. },
             ) => Traversal::Descend,
             NodeRef::Control(_) | NodeRef::CostSpec(_) => Traversal::Skip,
             NodeRef::Instruction(instruction) => {
@@ -155,7 +156,9 @@ pub(in crate::game::internal) fn mask_origin(
                         mask_origin(body, event);
                     }
                 }
-                Control::Sequence { body } | Control::May { body, .. } => mask_origin(body, event),
+                Control::Sequence { body }
+                | Control::May { body, .. }
+                | Control::Pay { on_paid: body, .. } => mask_origin(body, event),
                 Control::Mode { modes, .. } => {
                     for mode in modes {
                         mask_origin(&mut mode.body, event);
