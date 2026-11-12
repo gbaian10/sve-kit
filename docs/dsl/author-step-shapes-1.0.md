@@ -79,6 +79,8 @@ move.order 為 chooser/shuffle，要求 deck 且明寫 position；chooser 由 mo
 | evolve | ref:O | into:CardName／非空 CardName[]／ObjectSel；不收直接 param | A-060；BP09-004 的能力頭不算動作例 |
 | transform | ref:O、into:CardName或{allocate:{among:CardName[],each_exactly_once:true}} | entry_effects:E[]；into 不借 evolve 列表 | A-016j |
 
+Counter 的 `delta:N` 接受數值算式；lowering 可證非負時降為 Add、可證非正時降為 Remove，零沿 Add。正負未知或不透明的有號讀值仍回 Unsupported，不截成零；量在指示開始時由既有數值計畫讀取。費用的 counter `n` 仍只接受固定自然數。
+
 TriggerKind 的封閉值為 fanfare、lastword、evolve_time、super_evolve_time、attack_time、race_time、drive_time。entry_effects 在成功產生的新世代上、入場誘發掃描前安裝；no_trigger 的 entry occurrence 責任仍沿效果矩陣。look 的多玩家 top 須使用 each_player，不能把 PlayerSet 當單一 viewer（BP06-113）。
 
 create 必填 token 與 to；token 為 CardName／ParamRef／兩者的非空列表／`{same_name_as:ObjectRef,kind?:follower}`／`{allocate:{among:CardName[],total:Q,by?:PlayerRef}}`。可選 n:CountAmount／upto:Q／any:true 恰至多一，省略每個名稱 1；allocate 已有 total，不可再填外層數量。to 為 Z／ParamRef／`{one_of:Z[至少兩項],by:PlayerRef,scope:each|batch}`。可選 counters（非空 CounterName→Q map）、by、acted、entry_effects、bind、instead、M。acted 的已知區域限 field；選項與參數目的地由 C1 展開後驗。token 單值／列表見 GAP-A-002，allocate 見 A-016g，目的地選項 GAP-A-017，upto GAP-A-039，bind A-016f；any、counters 為合成格。

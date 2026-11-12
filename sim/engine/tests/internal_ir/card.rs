@@ -953,3 +953,6 @@ mod counter_amounts;
 
 #[path = "card/cost_number_plan.rs"]
 mod cost_number_plan;
+
+#[path = "card/counter_author.rs"]
+mod counter_author;
