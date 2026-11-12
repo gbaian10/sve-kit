@@ -59,11 +59,40 @@ fn append_departure(costs: &mut CostSpec) {
 }
 
 fn source_program() -> WellFormedCardProgram {
-    let mut raw=fragment(&json!({"activate":{"per_turn":1,"cost":{"steps":[{"pp":1},{"act_self":true},{"counter":{"on":{"who":"self","zone":"field","name":"unit-amulet"},"holders":1,"name":"test","n":1}}]},
-        "do":[{"choice":{"n":1,"exclude_chosen":"this_turn","options":[
-            [{"discard":{"who":"self","n":1,"random":true}},{"discard":{"who":"self","n":1}},{"draw":{"n":0}}],
-            [{"draw":{"n":0}}]
-        ]}}]}}),"unit-follower").card().clone();
+    let mut tree = equipment_played::tree(
+        &json!({"activate":{
+            "per_turn":1,
+            "cost":{"steps":[{"pp":1},{"act_self":true},{"counter":{"on":{"who":"self","zone":"field","name":"unit-amulet"},"holders":1,"name":"test","n":1}}]},
+            "do":[{"choice":{"n":1,"exclude_chosen":"this_turn","options":[
+                [{"discard":{"who":"self","n":1,"random":true}},{"discard":{"who":"self","n":1}},{"draw":{"n":0}}],
+                [{"draw":{"n":0}}]
+            ]}}]
+        }}),
+        "unit-follower",
+    );
+    let dice = (0..16)
+        .map(|index| json!({"dice":{"bind":format!("die{index}")}}))
+        .collect::<Vec<_>>();
+    let template = tree["cards"]["unit-follower"]["abilities"][0].clone();
+    for (line, body) in [
+        (3, json!(dice)),
+        (4, json!([{"discard":{"who":"self","n":1,"random":true}}])),
+    ] {
+        let mut entry = template.clone();
+        entry["line"] = json!(line);
+        entry["activate"] = json!({"cost":{"pp":0}, "do":body});
+        tree["cards"]["unit-follower"]["abilities"]
+            .as_array_mut()
+            .unwrap()
+            .push(entry);
+    }
+    let mut raw = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+        .card()
+        .clone();
     append_departure(&mut raw.abilities[0].node.play.as_mut().unwrap().costs);
     let Node::Control {
         control: Control::Mode { modes, .. },
@@ -117,7 +146,20 @@ fn awaiting(play: CardPlay) -> DecisionView {
 
 #[test]
 fn payment_failure_after_body_rng_restores_material_generation_history_pending_modes_and_quota() {
-    let mut game = board(&source_program());
+    let program = source_program();
+    let probe = |line| {
+        program
+            .card()
+            .abilities
+            .iter()
+            .find(|ability| ability.source.line == line)
+            .unwrap()
+            .node
+            .id
+    };
+    let dice = probe(3);
+    let discard = probe(4);
+    let mut game = board(&program);
     let origin = game.clone();
     let mut chosen = None;
     for _ in 0..2 {
@@ -173,7 +215,70 @@ fn payment_failure_after_body_rng_restores_material_generation_history_pending_m
             Err(EngineFailure::Invalid(_) | EngineFailure::Invariant(_))
         ));
         transactions::assert_reverted_from(&game, &origin, &published);
+        assert_random_continuation(&game, &origin, dice, discard);
     }
+}
+
+fn dice_sequence(game: &mut Game, ability: AbilityId) -> Vec<DieFace> {
+    let played = game
+        .activate_internal_card("source", ability, PlayerId { seat: 1 })
+        .unwrap();
+    let result = resolved(played);
+    let dice = result
+        .progress
+        .facts
+        .iter()
+        .filter_map(|fact| {
+            if let Fact::Dice(event) = fact {
+                Some(event.value)
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(
+        dice.len(),
+        16,
+        "the probe observes sixteen successive native random results"
+    );
+    dice
+}
+
+fn assert_random_continuation(restored: &Game, origin: &Game, dice: AbilityId, discard: AbilityId) {
+    let mut control = origin.clone();
+    let expected = dice_sequence(&mut control, dice);
+    let mut actual = restored.clone();
+    assert_eq!(
+        dice_sequence(&mut actual, dice),
+        expected,
+        "failure restores the subsequent random stream"
+    );
+
+    let mut advanced = origin.clone();
+    let prefix = advanced
+        .activate_internal_card("source", discard, PlayerId { seat: 1 })
+        .unwrap();
+    resolved(prefix);
+    loop {
+        while advanced.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            advanced.resume_internal_card().unwrap();
+        }
+        let Some(q) = advanced.internal_pending_choice().unwrap() else {
+            break;
+        };
+        let InputDomain::Pending(options) = &q.domain else {
+            panic!("discard observer")
+        };
+        let observed = advanced
+            .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+            .unwrap();
+        resolved(observed);
+    }
+    assert_ne!(
+        dice_sequence(&mut advanced, dice),
+        expected,
+        "the same committed random-discard prefix changes this seed's continuation, so an opaque RNG Debug cannot hide a missed rollback"
+    );
 }
 
 fn cancelled_head() -> (Game, DecisionView) {
