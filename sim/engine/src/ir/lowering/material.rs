@@ -7,7 +7,7 @@ use crate::ir::{
     InputMode, MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, Posture, ScopeId,
     SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Visibility, ZoneRef,
 };
-use crate::ir::{AggregateBound, Comparison, Expr, Int, NumericProperty};
+use crate::ir::{AggregateBound, Comparison, Expr, Int, NumericProperty, ObjectProperty};
 
 #[derive(Clone, Copy)]
 pub(super) enum Operation {
@@ -26,7 +26,9 @@ pub(super) fn lower(
     operation: Operation,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.sel.acted.is_some() || material.distinct_by.is_some() {
+    if material.sel.acted.is_some()
+        || (material.distinct_by.is_some() && (material.any || material.cost_sum_ge.is_some()))
+    {
         return Err(unsupported(path));
     }
     let cardinality = cardinality(material, path)?;
@@ -60,6 +62,12 @@ pub(super) fn lower(
     }
     let (objects, mut decision) =
         choice(allocator, bindings, scope, &material.sel, cardinality, path)?;
+    if matches!(material.distinct_by, Some(ast::MaterialDistinct::OrigCost)) {
+        let ChoiceDomain::Objects { constraint, .. } = &mut decision.domain else {
+            return Err(unsupported(path));
+        };
+        constraint.distinct_by = Some(ObjectProperty::Cost);
+    }
     if let Some(floor) = material.cost_sum_ge {
         // Only acting any number of own field followers has a card (BP11-P30) needing a floor.
         let (Operation::Act, ChoiceDomain::Objects { constraint, .. }) =

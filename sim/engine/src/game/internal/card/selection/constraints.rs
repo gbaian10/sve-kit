@@ -1,4 +1,5 @@
-use crate::game::internal::{Result, contains, invalid};
+use crate::game::internal::cost::printed_play_cost;
+use crate::game::internal::{Game, Result, contains, invalid};
 use crate::ir::{Cardinality, Nat};
 use alloc::collections::BTreeSet;
 
@@ -64,4 +65,21 @@ pub(in crate::game::internal) fn within_original_cost_cap(
         sum.checked_add(cost?).ok_or_else(|| invalid(overflow))
     })?;
     Ok(total <= limit)
+}
+
+pub(in crate::game::internal) fn original_material_cost(
+    game: &Game,
+    id: &str,
+) -> Result<Option<i64>> {
+    let cost = &game.internal_cost_print(id)?["cost"];
+    if cost.is_null() || cost == "-" {
+        return Ok(None);
+    }
+    printed_play_cost(cost).map(Some)
+}
+
+pub(in crate::game::internal) fn distinct_original_cost_count(
+    costs: impl IntoIterator<Item = i64>,
+) -> usize {
+    costs.into_iter().collect::<BTreeSet<_>>().len()
 }

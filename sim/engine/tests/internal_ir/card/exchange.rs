@@ -214,7 +214,7 @@ fn distinct_cost_exchange_requires_enough_original_costs_before_asking_for_mater
 }
 
 #[test]
-fn activation_cost_still_rejects_distinct_original_costs() {
+fn activation_cost_distinctness_requires_a_fixed_positive_quantity() {
     let mut tree = candidate("unit-follower", json!({}), false);
     let entry = tree["cards"]["unit-follower"]["abilities"][0]
         .as_object_mut()
@@ -224,6 +224,11 @@ fn activation_cost_still_rejects_distinct_original_costs() {
     lowerer().lower(&tree).unwrap();
     tree["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"]["banish"]["distinct_by"] =
         json!("orig_cost");
+    lowerer().lower(&tree).unwrap();
+    let material =
+        &mut tree["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"]["banish"];
+    material.as_object_mut().unwrap().remove("n");
+    material["any"] = json!(true);
     lowerer().lower(&tree).unwrap_err();
 }
 

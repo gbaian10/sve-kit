@@ -2,7 +2,10 @@
 
 use crate::game::player::{SelectionQuestion, Viewer};
 
-use super::selection::constraints::{check_count, unique_handles};
+use super::selection::constraints::{
+    DistinctProperties, PropertyKey, check_count, distinct_original_cost_count,
+    original_material_cost, unique_handles,
+};
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
@@ -14,16 +17,18 @@ use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
-    MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectRef, OwnerZone, PlaySlot, PlaySpec,
-    PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit, ReceiptId, ScopeId,
-    SelectionSnapshot, SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind,
-    ZoneRef,
+    MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectProperty, ObjectRef, OwnerZone,
+    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
+    ReceiptId, ScopeId, SelectionSnapshot, SelectionView, Selector, Visibility,
+    WellFormedCardProgram, ZoneKind, ZoneRef,
 };
 use crate::ir::{
     AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
     ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
 use alloc::collections::BTreeMap;
+
+type FrozenCosts = Vec<(ObjectRef, i64)>;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
@@ -34,6 +39,7 @@ pub(in crate::game::internal) struct MaterialWait {
     field: bool,
     selector: Selector,
     floor: Option<CostFloor>,
+    original_costs: Option<FrozenCosts>,
 }
 
 #[derive(Clone, Debug)]
@@ -151,6 +157,7 @@ impl MaterialWait {
             field: false,
             selector,
             floor: None,
+            original_costs: None,
         }
     }
 
@@ -190,6 +197,18 @@ impl MaterialWait {
                 .copied()
                 .ok_or_else(|| invalid("foreign material handle"))
         })?;
+        if let Some(costs) = &self.original_costs {
+            let mut distinct = DistinctProperties::default();
+            for member in &members {
+                let (_, cost) = costs
+                    .iter()
+                    .find(|(reference, _)| reference == member)
+                    .ok_or_else(|| invalid("missing material original cost"))?;
+                if !distinct.insert_member([PropertyKey::OriginalCost(*cost)]) {
+                    return Err(invalid("duplicate original material cost"));
+                }
+            }
+        }
         if let Some(floor) = &self.floor
             && !floor.reached(&members)?
         {
@@ -350,7 +369,11 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
             || (constraint.cardinality.minimum.0 > 0
                 && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
         || group.cardinality != constraint.cardinality
-        || constraint.distinct_by.is_some()
+        || constraint.distinct_by.is_some_and(|property| {
+            property != ObjectProperty::Cost
+                || constraint.cardinality.minimum.0 == 0
+                || !constraint.aggregate_bounds.is_empty()
+        })
         || constraint.disjoint != Disjointness::Disjoint
         || (!constraint.aggregate_bounds.is_empty()
             && (constraint.cardinality.maximum.is_some()
@@ -660,33 +683,42 @@ impl Game {
             .first()
             .ok_or_else(|| invalid("material group"))?
             .selector;
-        let members = self.material_candidates(execution, selector, standing)?;
+        let (members, costs) = self.material_cost_candidates(execution, constraint, standing)?;
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
         let field = zones(selector)? == [ZoneKind::Field];
         let names = (0..members.len())
             .map(|i| i.to_string())
             .collect::<Vec<_>>();
-        subsets(&names, count, count)
-            .into_iter()
-            .map(|selected| {
-                let chosen = selected
-                    .iter()
-                    .map(|index| {
-                        members
-                            .get(index.parse::<usize>().map_err(invalid)?)
-                            .copied()
-                            .ok_or_else(|| invalid("material subset"))
-                    })
-                    .collect::<Result<Vec<_>>>()?;
-                Ok((
-                    binding.key(),
-                    Slot::Objects {
-                        members: chosen,
-                        on_field_at_capture: field,
-                    },
-                ))
-            })
-            .collect()
+        let mut choices = Vec::new();
+        for selected in subsets(&names, count, count) {
+            let chosen = selected
+                .iter()
+                .map(|index| {
+                    members
+                        .get(index.parse::<usize>().map_err(invalid)?)
+                        .copied()
+                        .ok_or_else(|| invalid("material subset"))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            if costs.as_ref().is_some_and(|costs| {
+                distinct_original_cost_count(
+                    costs
+                        .iter()
+                        .filter(|(member, _)| chosen.contains(member))
+                        .map(|(_, cost)| *cost),
+                ) != chosen.len()
+            }) {
+                continue;
+            }
+            choices.push((
+                binding.key(),
+                Slot::Objects {
+                    members: chosen,
+                    on_field_at_capture: field,
+                },
+            ));
+        }
+        Ok(choices)
     }
 
     pub(super) fn internal_reveal_material_parameter(
@@ -702,6 +734,32 @@ impl Game {
         }
         check_reveal_parameter(decision)?;
         self.material_parameter(execution, decision, false)
+    }
+
+    fn material_cost_candidates(
+        &self,
+        execution: &Execution,
+        constraint: &SelectionConstraint,
+        standing: bool,
+    ) -> Result<(Vec<ObjectRef>, Option<FrozenCosts>)> {
+        let selector = &constraint
+            .groups
+            .first()
+            .ok_or_else(|| invalid("material group"))?
+            .selector;
+        let members = self.material_candidates(execution, selector, standing)?;
+        if constraint.distinct_by != Some(ObjectProperty::Cost) {
+            return Ok((members, None));
+        }
+        let mut eligible = Vec::new();
+        let mut costs = Vec::new();
+        for member in members {
+            if let Some(cost) = original_material_cost(self, execution.object_id(member)?)? {
+                eligible.push(member);
+                costs.push((member, cost));
+            }
+        }
+        Ok((eligible, Some(costs)))
     }
 
     /// Printed costs are read once, when the payment is asked.
@@ -746,7 +804,8 @@ impl Game {
             .first()
             .ok_or_else(|| invalid("material group"))?
             .selector;
-        let members = self.material_candidates(execution, selector, standing)?;
+        let (members, original_costs) =
+            self.material_cost_candidates(execution, constraint, standing)?;
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
         let floor = self.material_cost_floor(execution, constraint, &members)?;
         // Every candidate together is the largest total, so it decides whether paying is possible.
@@ -754,7 +813,10 @@ impl Game {
             Some(floor) => !floor.reached(&members)?,
             None => false,
         };
-        if members.len() < count || short {
+        let available = original_costs.as_ref().map_or(members.len(), |costs| {
+            distinct_original_cost_count(costs.iter().map(|(_, cost)| *cost))
+        });
+        if available < count || short {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient materials".into(),
             ));
@@ -784,7 +846,18 @@ impl Game {
                     members: public,
                     cardinality: constraint.cardinality,
                     distinct_names: false,
-                    original_costs: None,
+                    original_costs: original_costs
+                        .as_ref()
+                        .map(|costs| {
+                            costs
+                                .iter()
+                                .enumerate()
+                                .map(|(index, (_, cost))| {
+                                    Ok((u64::try_from(index).map_err(invalid)?, *cost))
+                                })
+                                .collect::<Result<BTreeMap<_, _>>>()
+                        })
+                        .transpose()?,
                     roles: vec![],
                 }),
             },
@@ -797,6 +870,7 @@ impl Game {
                     && zones(selector)? == [ZoneKind::Field],
                 selector: selector.clone(),
                 floor,
+                original_costs,
             }),
         ));
         Ok(())
@@ -1104,6 +1178,20 @@ impl Game {
                 .iter()
                 .map(|handle| handle.parse::<u64>().map_err(invalid))
                 .collect::<Result<Vec<_>>>()?;
+            if let Some(costs) = &domain.original_costs {
+                let selected_costs = handles
+                    .iter()
+                    .map(|handle| {
+                        costs
+                            .get(handle)
+                            .copied()
+                            .ok_or_else(|| invalid("missing Quick material original cost"))
+                    })
+                    .collect::<Result<Vec<_>>>()?;
+                if distinct_original_cost_count(selected_costs) != handles.len() {
+                    continue;
+                }
+            }
             let mut trial = self.clone();
             let mut paid = execution.clone();
             trial.card_runtime.active_source = paid.ability;
