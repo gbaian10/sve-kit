@@ -2,6 +2,7 @@
 
 use crate::game::player::{SelectionQuestion, Viewer};
 
+use super::selection::constraints::{check_count, unique_handles};
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
@@ -22,7 +23,7 @@ use crate::ir::{
     AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
     ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
-use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::collections::BTreeMap;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
@@ -182,25 +183,13 @@ impl MaterialWait {
     }
 
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
-        if !contains(
-            self.bounds,
-            Nat(u64::try_from(handles.len()).map_err(invalid)?),
-        ) {
-            return Err(invalid("material cardinality"));
-        }
-        let mut seen = BTreeSet::new();
-        let members = handles
-            .iter()
-            .map(|handle| {
-                if !seen.insert(*handle) {
-                    return Err(invalid("duplicate material handle"));
-                }
-                self.members
-                    .get(usize::try_from(*handle).map_err(invalid)?)
-                    .copied()
-                    .ok_or_else(|| invalid("foreign material handle"))
-            })
-            .collect::<Result<Vec<_>>>()?;
+        check_count(self.bounds, handles.len(), "material cardinality")?;
+        let members = unique_handles(handles, "duplicate material handle", |handle| {
+            self.members
+                .get(usize::try_from(handle).map_err(invalid)?)
+                .copied()
+                .ok_or_else(|| invalid("foreign material handle"))
+        })?;
         if let Some(floor) = &self.floor
             && !floor.reached(&members)?
         {
