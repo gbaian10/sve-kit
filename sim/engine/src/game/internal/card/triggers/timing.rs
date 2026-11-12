@@ -304,11 +304,7 @@ impl Game {
         before: SnapshotId,
     ) -> Result<()> {
         use crate::ir::events::attack::filter;
-        if !self.card_runtime.is_empty() {
-            let observation =
-                self.internal_subject_history(attacker, SubjectHistoryEvent::Attack, None, false)?;
-            self.state.ir_subject_history.push(observation);
-        }
+        self.internal_record_subject_event(attacker, SubjectHistoryEvent::Attack)?;
         if !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
                 program

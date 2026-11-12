@@ -7,15 +7,7 @@ use crate::ir::{
     Action, Comparison, Control, DecisionId, DiceEvent, DiceOperation, DieFace, Expr, Instruction,
     Nat, Node, PlayerRef, RollId, Termination,
 };
-use serde::{Deserialize, Serialize};
 use serde_json::json;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub(in crate::game) struct DiceHistoryFact {
-    turn: u64,
-    player: u32,
-    value: u64,
-}
 
 #[derive(Clone, Debug)]
 pub(super) struct RollWait {
@@ -220,13 +212,7 @@ impl Game {
         };
         let value = Nat(ir_dice::value(wait.event.value));
         execution.slots.insert(result.key(), Slot::Natural(value));
-        let turn = self.state.schedule.current()?;
-        self.state.ir_dice_history.retain(|fact| fact.turn == turn);
-        self.state.ir_dice_history.push(DiceHistoryFact {
-            turn,
-            player: wait.event.roller.seat,
-            value: value.0,
-        });
+        self.internal_record_dice_history(wait.event.roller, value)?;
         let group = self.group();
         self.emit(
             json!({"kind":"サイコロ","player":seat_name(wait.event.roller)?,"result":value.0}),

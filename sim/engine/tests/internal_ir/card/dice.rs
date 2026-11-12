@@ -499,3 +499,57 @@ fn dice_history_counts_only_the_controllers_rolls_in_the_current_turn() {
     activate_on(&mut game, "f", reader, 2);
     assert_eq!(hand_size(&game, "P2"), before + 1);
 }
+
+#[test]
+fn accepted_dice_from_the_same_players_previous_turn_do_not_count_during_an_extra_turn() {
+    let program = lower_activations(&[
+        json!({"cost":{"pp":0},"do":[{"dice":{"bind":"die"}}]}),
+        json!({"cost":{"pp":0},"do":[{"if":{
+            "cond":{"history":{"event":"dice_rolled","who":"self","window":"this_turn","where":{"value":{"ge":1}}}},
+            "then":[{"draw":{"n":1}}]
+        }}]}),
+    ]);
+    let roller = program.card().abilities[0].node.id;
+    let reader = program.card().abilities[1].node.id;
+    let mut initial = setup(
+        1,
+        json!([
+            {"id":"first-read","card":"unit-spell"},{"id":"turn-draw","card":"unit-spell"},
+            {"id":"second-read","card":"unit-spell"},{"id":"reserve","card":"unit-spell"}
+        ]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["semantic_state"]["turn_schedule"] =
+        json!({"extra":[{"player":"P1","count":1}],"skipped":[]});
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "dice-extra-history",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    activate_on(&mut game, "s", roller, 1);
+    activate_on(&mut game, "s", reader, 1);
+    assert_eq!(hand_size(&game, "P1"), 1);
+    let accepted = game.observe(Viewer::P1).unwrap().history.dice;
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    quick::pass(&mut game);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["turn"]["active"],
+        "P1"
+    );
+    assert_eq!(game.observe(Viewer::P1).unwrap().history.dice, accepted);
+    let before = hand_size(&game, "P1");
+    activate_on(&mut game, "s", reader, 1);
+    assert_eq!(hand_size(&game, "P1"), before);
+    activate_on(&mut game, "s", roller, 1);
+    activate_on(&mut game, "s", reader, 1);
+    assert_eq!(hand_size(&game, "P1"), before + 1);
+    assert_eq!(game.observe(Viewer::P1).unwrap().history.dice.len(), 1);
+}

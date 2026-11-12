@@ -90,25 +90,6 @@ impl Game {
             .map(Some)
     }
 
-    pub(in crate::game) fn internal_commit_subject_history(
-        &mut self,
-        observations: Vec<SubjectHistoryFact>,
-    ) -> Result<()> {
-        for fact in observations {
-            let current = self
-                .state
-                .ir_objects
-                .iter()
-                .find(|(_, number)| **number == fact.object)
-                .and_then(|(id, _)| self.state.objects.get(id))
-                .ok_or_else(|| invalid("missing committed history subject"))?;
-            if current.generation != fact.generation {
-                self.state.ir_subject_history.push(fact);
-            }
-        }
-        Ok(())
-    }
-
     pub(in crate::game) fn internal_subject_history(
         &mut self,
         source: &str,
