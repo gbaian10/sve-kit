@@ -1945,7 +1945,7 @@ impl<'definitions> BodyContext<'definitions> {
                 self.allocator.id(path)?,
                 self.scope,
             ))),
-            ast::Step::Counter(value) => counters::change(value, counters::holder(), path),
+            ast::Step::Counter(value) => self.counter_change(value, counters::holder(), path),
             ast::Step::GainDrive(_) => Ok(ride::gain_drive()),
             ast::Step::Race(value) => Ok(resource_entry::action(
                 value.n.unwrap_or(1),
