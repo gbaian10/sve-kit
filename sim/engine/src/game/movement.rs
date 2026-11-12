@@ -169,7 +169,7 @@ impl Game {
             .collect::<Vec<_>>();
         let group = self.group();
         for object in &discarded {
-            self.bump(&format!("{}.discarded", object.controller), 1);
+            self.internal_record_discard_history(&object.controller);
             self.emit(
                 json!({"kind":"捨てる","player":object.controller,"object":object.id}),
                 &frame.cause,

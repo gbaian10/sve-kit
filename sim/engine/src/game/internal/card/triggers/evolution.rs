@@ -99,11 +99,7 @@ impl Game {
         original_cause: &serde_json::Value,
         frame: &Frame,
     ) -> Result<()> {
-        if !self.card_runtime.is_empty() {
-            let observation =
-                self.internal_subject_history(holder, SubjectHistoryEvent::Evolve, None, false)?;
-            self.state.ir_subject_history.push(observation);
-        }
+        self.internal_record_subject_event(holder, SubjectHistoryEvent::Evolve)?;
         let Some(plan) = plan else { return Ok(()) };
         let observers = self.evolution_observers()?;
         let subject_controller = player_id(&self.object(holder)?.controller)?;

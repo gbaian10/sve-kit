@@ -41,16 +41,7 @@ impl Game {
     pub(super) fn change_life(&mut self, seat: &str, life: i64) -> Result<()> {
         let previous = int(&self.player(seat)?.leader["life"]);
         self.player_mut(seat)?.leader["life"] = json!(life);
-        if life < previous {
-            self.bump(&format!("{seat}.leader_hp_decreased"), 1);
-        }
-        if life > previous {
-            self.bump(&format!("{seat}.leader_hp_increase_count"), 1);
-            self.bump(
-                &format!("{seat}.leader_hp_increased"),
-                life.saturating_sub(previous),
-            );
-        }
+        self.internal_record_life_history(seat, previous, life);
         Ok(())
     }
 

@@ -60,7 +60,6 @@ mod cost;
 mod counters;
 mod dice;
 mod discard;
-pub(in crate::game) use dice::DiceHistoryFact;
 mod drive;
 mod duration;
 mod earth;
@@ -74,7 +73,7 @@ mod flip;
 mod grant;
 mod history_turn;
 mod transfer;
-pub(in crate::game) use history_turn::DamageHistoryFact;
+pub(in crate::game) use history_turn::{DamageHistoryFact, DiceHistoryFact};
 pub(super) use history_turn::{
     StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact,
 };

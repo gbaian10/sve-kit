@@ -880,25 +880,9 @@ impl Game {
         self.state.turn["elapsed_turns"][&seat] =
             json!(int(&self.state.turn["elapsed_turns"][&seat]).saturating_add(1));
         self.record_player_phase();
-        for value in self.state.counters.values_mut() {
-            *value = 0;
-        }
-        self.state.ir_subject_history.clear();
-        self.state.ir_damage_history.clear();
-        self.state.ir_stat_gain_history.clear();
-        self.state.ir_ub_history.clear();
+        self.internal_reset_turn_counters_and_facts();
         self.state.used.clear();
-        for object in self.state.objects.values_mut() {
-            object.state["stats_increased_this_turn"] = json!(false);
-            if let Some(state) = object.state.as_object_mut() {
-                state.remove("damaged_this_turn");
-                state.remove("control_changed_this_turn");
-                state.remove("evolved_after_control_change");
-            }
-            if object.state.get("attacks_this_turn").is_some() {
-                object.state["attacks_this_turn"] = json!(0_i64);
-            }
-        }
+        self.internal_reset_object_turn_marks();
         let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
         let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
         let player = self.player_mut(&seat)?;

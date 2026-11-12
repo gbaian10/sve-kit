@@ -763,13 +763,7 @@ impl Game {
                 *count = 0;
             }
             self.collect_movement_knowledge(id, owner, destination, &mut learned);
-            if previous.zone == "ex"
-                && destination == "banish"
-                && self.catalog.rule_bindings.has_resource("lesson_item")
-                && self.single_rules_name_matches_role(id, "lesson_item")?
-            {
-                self.bump(&format!("{}.magic_item_banished", previous.controller), 1);
-            }
+            self.internal_record_lesson_history(id, previous, destination)?;
             if token_erasure_zone(string(&printed["card_type"]), destination) {
                 erased.push(id.clone());
             }

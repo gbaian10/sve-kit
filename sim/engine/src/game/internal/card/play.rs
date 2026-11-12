@@ -4,7 +4,7 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
-use crate::game::internal::{InstructionOutcome, UbHistoryFact, player_id};
+use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
 use crate::ir::quick::is_printed_quick;
@@ -1648,10 +1648,6 @@ impl Game {
         self.commit_internal_play(execution, play)
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "The original payment and play commit order remains one authority transaction."
-    )]
     fn commit_internal_play(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let source = execution
             .ability
@@ -1717,14 +1713,7 @@ impl Game {
             },
         );
         if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
-            self.bump(
-                &format!("{}.ub_activated", seat_name(source.controller)?),
-                1,
-            );
-            self.state.ir_ub_history.push(UbHistoryFact {
-                execution: execution.id.0,
-                controller: source.controller.seat,
-            });
+            self.internal_commit_union_burst(execution.id, source.controller)?;
         }
         if play.qualification == AbilityQualification::UnionBurst {
             self.internal_ub_activated_events(execution)?;

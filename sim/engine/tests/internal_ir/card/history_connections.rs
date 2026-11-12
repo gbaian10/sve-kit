@@ -10,7 +10,7 @@ fn snapshot(game: &Game) -> (Value, TurnHistory) {
     )
 }
 
-fn consumer(query: &Value, qualify_evolution: bool) -> WellFormedCardProgram {
+fn consumer(query: &Value, qualify_evolution: bool, destination: &str) -> WellFormedCardProgram {
     let mut tree = equipment_played::tree(
         &json!({"play":{
             "cost_delta":{"if":{"history":query},"delta":-1}
@@ -21,12 +21,17 @@ fn consumer(query: &Value, qualify_evolution: bool) -> WellFormedCardProgram {
     if qualify_evolution {
         evolution["evolve"]["usable_if"] = json!({"history":query});
     }
+    let departure = if destination == "banish" {
+        json!({"banish":"this"})
+    } else {
+        json!({"move":{"ref":"this","to":destination}})
+    };
     for (index, head) in [
         evolution,
         json!({"activate":{"cost":{"pp":0},"do":[{"if":{
             "cond":{"history":query},"then":[{"life":{"who":"self","delta":1}}]
         }}]}}),
-        json!({"activate":{"cost":{"pp":0},"do":[{"move":{"ref":"this","to":"cemetery"}}]}}),
+        json!({"activate":{"cost":{"pp":0},"do":[departure]}}),
     ]
     .into_iter()
     .enumerate()
@@ -103,7 +108,7 @@ fn committed_subject_facts_share_cost_evolution_and_body_conditions_after_depart
         let threshold = if event == "attacked" { 3 } else { 1 };
         let query = json!({"event":event,"window":"this_turn","who":"self",
             "sel":{"kind":"follower","name":"unit-follower"},"at_least":threshold});
-        let program = consumer(&query, true);
+        let program = consumer(&query, true, "cemetery");
         for qualifying in [false, true] {
             let subjects = if event == "attacked" {
                 2_usize.checked_add(usize::from(qualifying)).unwrap()
@@ -188,7 +193,7 @@ fn committed_subject_facts_share_cost_evolution_and_body_conditions_after_depart
 #[test]
 fn committed_evolution_facts_still_discount_after_the_evolved_subject_leaves() {
     let query = json!({"event":"evolved","window":"this_turn","who":"self","at_least":1});
-    let program = consumer(&query, false);
+    let program = consumer(&query, false, "cemetery");
     let form = departure_form();
     let mut game = initial_game(&program, &form, 1);
     game.internal_rule_action(
@@ -268,4 +273,75 @@ fn played_intersection_qualifies_evolution_and_survives_the_evolution() {
         game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
         life + 1
     );
+}
+
+#[test]
+fn named_leave_history_keeps_each_destination_and_repeated_departures_after_replay() {
+    use sve_engine::game::player::observation::{HistoryEvent, ObservedZone};
+    for (destination, expected) in [
+        ("cemetery", ObservedZone::Cemetery),
+        ("hand", ObservedZone::Hand),
+        ("banish", ObservedZone::Banish),
+    ] {
+        let repeated = destination == "hand";
+        let threshold = if repeated { 2 } else { 1 };
+        let query = json!({"event":"left_field","window":"this_turn","who":"self",
+            "sel":{"kind":"follower","name":"unit-follower"},"at_least":threshold});
+        let program = consumer(&query, false, destination);
+        let mut game = initial_game(&program, &card(vec![]), 1);
+        let departure = program.card().abilities[2].node.id;
+        depart(&mut game, "u0", departure);
+        let history = game.observe(Viewer::P1).unwrap().history;
+        assert_eq!(
+            history
+                .subjects
+                .iter()
+                .filter(|fact| fact.event == HistoryEvent::Leave)
+                .count(),
+            1
+        );
+        assert!(
+            history
+                .subjects
+                .iter()
+                .filter(|fact| fact.event == HistoryEvent::Leave)
+                .all(|fact| fact.destination == Some(expected))
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"][destination]
+                .as_array()
+                .unwrap()
+                .len(),
+            1 + usize::from(repeated)
+        );
+        assert_eq!(
+            cost_observation::preview(&game, Viewer::P1).cost.total_pp,
+            Some(i64::from(repeated))
+        );
+        if repeated {
+            game.play_internal_card("u0", PlayerId { seat: 1 }).unwrap();
+            settle(&mut game);
+            depart(&mut game, "u0", departure);
+            let history = game.observe(Viewer::P1).unwrap().history;
+            assert_eq!(
+                history
+                    .subjects
+                    .iter()
+                    .filter(|fact| fact.event == HistoryEvent::Leave)
+                    .count(),
+                2
+            );
+            assert!(
+                history
+                    .subjects
+                    .iter()
+                    .filter(|fact| fact.event == HistoryEvent::Leave)
+                    .all(|fact| fact.destination == Some(ObservedZone::Hand))
+            );
+            assert_eq!(
+                cost_observation::preview(&game, Viewer::P1).cost.total_pp,
+                Some(0)
+            );
+        }
+    }
 }

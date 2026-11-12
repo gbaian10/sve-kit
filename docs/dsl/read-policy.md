@@ -407,3 +407,25 @@ Controller 相對的任意玩家關係，Life／PpMaximum 仍可讀原有玩家�
 單一篩選只接受保存的 kind（Follower／Spell／Amulet）、trait、token 欄位；names、class、original cost、keyword、itself 與 own_turn 等形狀在編譯時拒絕。
 Play 事實必須完整對得上已提交 counter，初始歷史不足時拒絕，不能以空欄位或零次數代替未知資訊。
 即使主體後來離場或 token 消失，仍使用打出當時保存的欄位；未公開的對手手牌不因這項查詢而取得身分。
+
+## 歷史的形成、提交與回合重設
+
+歷史提交的 bookkeeping 集中在 `game/internal/history_turn/commit.rs`，各 producer 仍在原事件時點呼叫。
+共用的生命、捨棄與移區 primitive 使用同一組 bookkeeping；查詢、初始局面載入及交易回滾的範圍不變。
+七類儲存來源為回合 counters、subject／damage／stat_gain／ub／dice 五組事實，以及物件回合標記，不能當成同一種 push 或同一個回合計數。
+
+| 事件／來源 | 形成與提交時點 | 重設與保留界線 |
+| --- | --- | --- |
+| 正式 Play | 先捕捉當時公開特徵，再增加 cards_played，最後提交 subject fact；保留 Play names 未保存的限制 | 進入下一個實際回合時重設；初始／原型 counter 可多於 facts，filtered Play 仍檢查完整性 |
+| Attack、Evolve | 有執行期時先保存已提交主體，再判斷是否有觀察者或進化捕捉計畫 | 以 object＋generation 保存；主體離場不抹除當回合事實 |
+| Leave | 移區前捕捉，移區後只為 generation 確實改變的對象提交；去向與 destroyed 分開保存 | 同張卡換世代後再離場是另一筆事實；不能從目前物件補名稱 |
+| UB | typed 能力付款與 AbilityPlayed 事實提交後，記 counter 與 execution-linked fact，再通知 UB 觀察者 | 原型與初始 counter 不偽造 execution fact；排除本次只扣確實相連的那一筆 |
+| 骰子 | 接受最終骰值、寫入結果後，以目前 TurnId 清理舊事實並提交，再公布骰子事件；未接受的重擲值不記 | 不在一般回合重設時清空；scalar 查詢依目前 TurnId 過濾，觀察仍列出保留事實，下一次接受骰值時才清理舊資料 |
+| 生命 | 寫入新生命後，分別記減少次數、增加次數與增加量；零變化不記 | 各次變化保持獨立；失敗付款隨原交易回滾 |
+| 捨棄、Lesson | 捨棄只取原本在手牌的卡，在移區前逐張記錄；Lesson 在 EX→banish 成功移動、資源名稱確認後記錄，早於 token 消去 | 失敗交易整體回滾，不把其他移區當成捨棄或 Lesson |
+| StatGain、Damage、物件標記 | 保留正向 facet、實際傷害及原 mutation 的提交點與觀察者判斷；物件標記不代替有 generation 的事實 | 保留既有 SourceLink、觀察與 selector 用途，不由共用查詢補新 producer |
+
+每次進入實際新回合（包括同一玩家的額外回合），先沿既有流程完成回合排程與階段記錄，再將**所有回合 counters** 歸零（含歷史與合法性計數），清空 subject／damage／stat_gain／ub 事實，並重設原有 used 與物件回合標記。
+這些重設之間沒有讀取或事件；實作保留原順序以便核對，不表示它們彼此有規則上的依賴。
+`record_player_phase` 在清除前呼叫觀察，但 Phase 事件只保存回合資訊，並不保存 `TurnHistory`。
+額外回合、跨回合與初始局面仍使用原來的 TurnId、counter 及 generation 語義，不替換儲存格式。

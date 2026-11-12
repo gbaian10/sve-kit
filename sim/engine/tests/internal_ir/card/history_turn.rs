@@ -1,6 +1,7 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::player::Viewer;
+use sve_engine::game::player::observation::SubjectHistory;
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 fn opponent() -> PlayerRef {
@@ -234,4 +235,81 @@ fn ub_history_lowering_is_closed_to_current_turn_formal_plays() {
         }}}
     }]);
     lowerer.lower_with_printed_costs(&tree, &costs).unwrap_err();
+}
+
+#[test]
+fn an_extra_turn_resets_committed_and_initial_history_even_for_the_same_active_player() {
+    for (seat, active, other) in [(1, "P1", "P2"), (2, "P2", "P1")] {
+        let mut initial = setup(seat, json!([]));
+        initial["turn"]["active"] = json!(active);
+        initial["players"][active]["pp"] = json!({"current":10,"max":10});
+        initial["players"][active]["zones"]["hand"] = json!([
+            {"id":"first","card":"unit-spell"},{"id":"second","card":"unit-spell"}
+        ]);
+        initial["players"][active]["zones"]["deck"] = json!([
+            {"id":"extra-draw","card":"unit-spell"},{"id":"later-draw","card":"unit-spell"}
+        ]);
+        initial["players"][other]["zones"]["deck"] =
+            json!([{"id":"opposing-draw","card":"unit-spell"}]);
+        initial["semantic_state"]["turn_schedule"] =
+            json!({"extra":[{"player":active,"count":1}],"skipped":[]});
+        initial["semantic_state"]["counters_this_turn"][active] =
+            json!({"cards_played":3,"ub_activated":2});
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "extra-history",
+        )
+        .unwrap();
+        game.load_internal_card("unit-spell", &card(vec![play::spell(vec![])]))
+            .unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        let slot = usize::try_from(seat.checked_sub(1).unwrap()).unwrap();
+        assert_eq!(game.observe(Viewer::P1).unwrap().history.played[slot], 3);
+        assert_eq!(
+            game.observe(Viewer::P1).unwrap().history.union_bursts[slot],
+            2
+        );
+        resolved(game.play_internal_card("first", PlayerId { seat }).unwrap());
+        game.resume_internal_card().unwrap();
+        let before = game.observe(Viewer::P1).unwrap();
+        assert_eq!(before.history.played[slot], 4);
+        assert_eq!(before.history.subjects.len(), 1);
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        quick::pass(&mut game);
+        let extra = game.observe(Viewer::P1).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["turn"]["active"],
+            active
+        );
+        assert_eq!(
+            extra.turn.elapsed_turns[slot],
+            before.turn.elapsed_turns[slot] + 1
+        );
+        assert_eq!(extra.history.played, [0, 0]);
+        assert_eq!(extra.history.union_bursts, [0, 0]);
+        assert_eq!(extra.history.subjects, Vec::<SubjectHistory>::new());
+        resolved(
+            game.play_internal_card("second", PlayerId { seat })
+                .unwrap(),
+        );
+        game.resume_internal_card().unwrap();
+        assert_eq!(game.observe(Viewer::P1).unwrap().history.played[slot], 1);
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        quick::pass(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["turn"]["active"],
+            other
+        );
+        assert_eq!(game.observe(Viewer::P1).unwrap().history.played, [0, 0]);
+        assert_eq!(
+            game.observe(Viewer::P1).unwrap().history.subjects,
+            Vec::<SubjectHistory>::new()
+        );
+    }
 }
