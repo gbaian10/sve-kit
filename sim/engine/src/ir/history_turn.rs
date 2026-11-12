@@ -328,6 +328,9 @@ fn subject_case(
 ) -> Option<(SubjectHistoryKind, SubjectFilter)> {
     let filter = SubjectFilter::parse(fields, predicate)?;
     (!filter.own_turn
+        && filter
+            .original_cost
+            .is_none_or(|(comparison, cost)| comparison == super::Comparison::Equal && cost > 0)
         && filter.keyword.is_none()
         && *query == subject_query(kind, key.1, key.0, &filter))
     .then_some((kind, filter))

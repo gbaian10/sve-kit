@@ -28,6 +28,7 @@ pub(super) enum BooleanProperty {
     Controller(PlayerId),
     ActivePlayer(PlayerId),
     SameSource,
+    KnownClass,
     State(BooleanState),
     Posture(Posture),
     Evolution(EvolutionState),

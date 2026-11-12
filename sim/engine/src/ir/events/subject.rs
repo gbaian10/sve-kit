@@ -8,7 +8,7 @@ use crate::ir::{
     KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, NumberRead, ObjectFrozen, ObjectOperand,
     ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent,
     Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, UbActivatedEvent,
-    ZoneFrozen, ZoneKind, ZoneOperation,
+    ValueEquality, ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
@@ -133,6 +133,43 @@ impl SubjectFields {
                 },
                 view: CharacteristicView::Original,
             },
+        })))
+    }
+
+    fn name_contains(self, fragment: &CardName) -> Expr<Bool> {
+        Expr::Compute(Box::new(Predicate::NameContains {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::FromExpression {
+                    value: Box::new(self.object()),
+                }),
+            },
+            name: Expr::Literal(fragment.clone()),
+        }))
+    }
+
+    fn known_class(self) -> Expr<Bool> {
+        Expr::Compute(Box::new(Predicate::Not {
+            predicate: Expr::Compute(Box::new(Predicate::ClassEquals {
+                left: self.class(),
+                right: Expr::Literal(Info::AbsentByRules),
+            })),
+        }))
+    }
+
+    fn known_original_cost(self) -> Option<Expr<Bool>> {
+        let Expr::Compute(operation) = self.original_cost()? else {
+            return None;
+        };
+        let IntOperation::InformationOrZero { information } = *operation else {
+            return None;
+        };
+        Some(Expr::Compute(Box::new(Predicate::Not {
+            predicate: Expr::Compute(Box::new(Predicate::Equal {
+                operands: Box::new(ValueEquality::InfoInt {
+                    left: Expr::Live(Box::new(information)),
+                    right: Expr::Literal(Info::AbsentByRules),
+                }),
+            })),
         })))
     }
 
@@ -557,7 +594,7 @@ impl<'subject> SubjectInformation<'subject> {
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct SubjectFilter {
-    pub(crate) original_cost: Option<i64>,
+    pub(crate) original_cost: Option<(Comparison, i64)>,
     pub(crate) keyword: Option<KeywordId>,
     pub(crate) own: Option<bool>,
     pub(crate) itself: Option<bool>,
@@ -568,7 +605,9 @@ pub(crate) struct SubjectFilter {
     pub(crate) name: Option<CardName>,
     /// 「カード名に『…』を含む」 on an entering subject (BP13-027).
     pub(crate) name_contains: Option<CardName>,
+    pub(crate) name_contains_any: Vec<CardName>,
     pub(crate) class: Option<ClassId>,
+    pub(crate) not_class: Option<ClassId>,
     pub(crate) own_turn: bool,
     pub(crate) token: Option<bool>,
 }
@@ -652,21 +691,18 @@ impl SubjectFilter {
             })));
         }
         if let Some(fragment) = &self.name_contains {
-            predicates.push(Expr::Compute(Box::new(Predicate::NameContains {
-                object: ObjectView::Current {
-                    object: Box::new(ObjectOperand::FromExpression {
-                        value: Box::new(fields.object()),
-                    }),
-                },
-                name: Expr::Literal(fragment.clone()),
+            predicates.push(fields.name_contains(fragment));
+        }
+        if !self.name_contains_any.is_empty() {
+            predicates.push(Expr::Compute(Box::new(Predicate::Or {
+                predicates: self
+                    .name_contains_any
+                    .iter()
+                    .map(|fragment| fields.name_contains(fragment))
+                    .collect(),
             })));
         }
-        if let Some(class) = &self.class {
-            predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
-                left: fields.class(),
-                right: Expr::Literal(Info::Present(class.clone())),
-            })));
-        }
+        self.append_class_predicates(fields, &mut predicates);
         if let (Some(positive), Some(predicate)) = (self.token, fields.token()) {
             predicates.push(if positive {
                 predicate
@@ -680,17 +716,52 @@ impl SubjectFilter {
                 right: Expr::Literal(PlayerRef::Controller {}),
             })));
         }
-        if let Some(cost) = self.original_cost {
+        if !self.append_cost_predicates(fields, &mut predicates) {
+            return Expr::Literal(Bool(false));
+        }
+        Expr::Compute(Box::new(Predicate::And { predicates }))
+    }
+
+    fn append_class_predicates(&self, fields: SubjectFields, predicates: &mut Vec<Expr<Bool>>) {
+        if let Some(class) = &self.class {
+            predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
+                left: fields.class(),
+                right: Expr::Literal(Info::Present(class.clone())),
+            })));
+        }
+        if let Some(class) = &self.not_class {
+            predicates.push(fields.known_class());
+            predicates.push(Expr::Compute(Box::new(Predicate::Not {
+                predicate: Expr::Compute(Box::new(Predicate::ClassEquals {
+                    left: fields.class(),
+                    right: Expr::Literal(Info::Present(class.clone())),
+                })),
+            })));
+        }
+    }
+
+    fn append_cost_predicates(
+        &self,
+        fields: SubjectFields,
+        predicates: &mut Vec<Expr<Bool>>,
+    ) -> bool {
+        if let Some((comparison, cost)) = self.original_cost {
             let Some(left) = fields.original_cost() else {
-                return Expr::Literal(Bool(false));
+                return false;
             };
+            if comparison != Comparison::Equal || cost == 0 {
+                let Some(known) = fields.known_original_cost() else {
+                    return false;
+                };
+                predicates.push(known);
+            }
             predicates.push(Expr::Compute(Box::new(Predicate::CompareInt {
                 left,
-                comparison: Comparison::Equal,
+                comparison,
                 right: Expr::Literal(Int(cost)),
             })));
         }
-        Expr::Compute(Box::new(Predicate::And { predicates }))
+        true
     }
 
     pub(crate) fn parse(fields: SubjectFields, expression: &Expr<Bool>) -> Option<Self> {
@@ -754,18 +825,46 @@ impl SubjectFilter {
         let Expr::Compute(predicate) = part else {
             return None;
         };
+        if (matches!(fields, SubjectFields::Entry(_)) && *part == fields.known_class())
+            || fields.known_original_cost().as_ref() == Some(part)
+        {
+            return Some(());
+        }
+        if let Predicate::Not {
+            predicate: Expr::Compute(inner),
+        } = predicate.as_ref()
+            && let Predicate::ClassEquals {
+                left,
+                right: Expr::Literal(Info::Present(class)),
+            } = inner.as_ref()
+        {
+            if !matches!(fields, SubjectFields::Entry(_))
+                || *left != fields.class()
+                || class.0.is_empty()
+            {
+                return None;
+            }
+            self.not_class = Some(class.clone());
+            return Some(());
+        }
         if matches!(predicate.as_ref(), Predicate::HasAbility { .. }) {
             self.keyword = Some(fields.parsed_keyword(part)?);
         } else if let Predicate::CompareInt {
             left,
-            comparison: Comparison::Equal,
+            comparison,
             right: Expr::Literal(Int(cost)),
         } = predicate.as_ref()
         {
-            if *cost <= 0 || fields.original_cost().as_ref() != Some(left) {
+            if *cost < 0
+                || !matches!(
+                    comparison,
+                    Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual
+                )
+                || fields.original_cost().as_ref() != Some(left)
+            {
                 return None;
             }
-            self.original_cost = Some(*cost);
+            self.original_cost = Some((*comparison, *cost));
         } else if let Predicate::KindEquals {
             left,
             right: Expr::Literal(kind),
@@ -781,7 +880,9 @@ impl SubjectFilter {
             }
             self.trait_id = Some(trait_id.clone());
         } else if let Predicate::Or { predicates } = predicate.as_ref() {
-            self.trait_union(fields, predicates)?;
+            if self.trait_union(fields, predicates).is_none() {
+                self.name_union(fields, predicates)?;
+            }
         } else if let Predicate::ClassEquals {
             left,
             right: Expr::Literal(Info::Present(class)),
@@ -852,7 +953,41 @@ impl SubjectFilter {
         Some(())
     }
 
+    fn name_union(&mut self, fields: SubjectFields, branches: &[Expr<Bool>]) -> Option<()> {
+        if !matches!(fields, SubjectFields::Entry(_)) || !self.name_contains_any.is_empty() {
+            return None;
+        }
+        let mut fragments = Vec::new();
+        for branch in branches {
+            let Expr::Compute(predicate) = branch else {
+                return None;
+            };
+            let Predicate::NameContains {
+                name: Expr::Literal(fragment),
+                ..
+            } = predicate.as_ref()
+            else {
+                return None;
+            };
+            if fragment.0.is_empty()
+                || fragments.contains(fragment)
+                || *branch != fields.name_contains(fragment)
+            {
+                return None;
+            }
+            fragments.push(fragment.clone());
+        }
+        if fragments.len() < 2 {
+            return None;
+        }
+        self.name_contains_any = fragments;
+        Some(())
+    }
+
     fn closed_characteristics(&self, fields: SubjectFields) -> bool {
+        if !self.name_contains_any.is_empty() && self.name_contains.is_some() {
+            return false;
+        }
         if self.keyword.is_some() {
             return *self
                 == (Self {
@@ -884,11 +1019,18 @@ impl SubjectFilter {
         active: PlayerId,
         token: bool,
     ) -> bool {
-        self.original_cost
-            .is_none_or(|expected| characters.original_cost == Some(expected))
-            && self
-                .keyword
-                .is_none_or(|keyword| characters.keywords.contains(&keyword))
+        self.original_cost.is_none_or(|(comparison, expected)| {
+            characters
+                .original_cost
+                .is_some_and(|cost| match comparison {
+                    Comparison::Equal => cost == expected,
+                    Comparison::LessEqual => cost <= expected,
+                    Comparison::GreaterEqual => cost >= expected,
+                    Comparison::NotEqual | Comparison::Less | Comparison::Greater => false,
+                })
+        }) && self
+            .keyword
+            .is_none_or(|keyword| characters.keywords.contains(&keyword))
             && self.token.is_none_or(|expected| expected == token)
             && self.itself.is_none_or(|itself| itself == same)
             && self
@@ -914,10 +1056,21 @@ impl SubjectFilter {
                     .iter()
                     .any(|name| name.0.contains(&fragment.0))
             })
+            && (self.name_contains_any.is_empty()
+                || self.name_contains_any.iter().any(|fragment| {
+                    characters
+                        .names
+                        .iter()
+                        .any(|name| name.0.contains(&fragment.0))
+                }))
             && self
                 .class
                 .as_ref()
                 .is_none_or(|class| characters.class == Some(class))
+            && self
+                .not_class
+                .as_ref()
+                .is_none_or(|excluded| characters.class.is_some_and(|class| class != excluded))
             && (!self.own_turn || active == observer_controller)
     }
 }
