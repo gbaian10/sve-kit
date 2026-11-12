@@ -112,3 +112,37 @@ fn single_group_witness_preserves_order_and_strict_minimum() {
     assert!(!constraint.accepts(&[card(2)]));
     assert!(!constraint.accepts(&[card(2), card(99)]));
 }
+
+#[test]
+fn joint_costs_reassign_broad_slots_without_a_group_or_candidate_cutoff() {
+    let broad = GroupConstraints {
+        members: vec![(1..=40).map(card).collect()],
+        bounds: vec![exact(2)],
+    };
+    let mut proofs = vec![broad];
+    for id in 1..=4 {
+        proofs.push(GroupConstraints {
+            members: vec![vec![card(id)]],
+            bounds: vec![exact(1)],
+        });
+    }
+    let answer = GroupConstraints::joint_witness(&proofs).unwrap().unwrap();
+    assert_eq!(answer[0].len(), 2);
+    assert!(
+        answer[0]
+            .iter()
+            .all(|member| ![card(1), card(2), card(3), card(4)].contains(member))
+    );
+    for (proof, chosen) in proofs.iter().zip(&answer) {
+        assert!(proof.accepts(chosen));
+    }
+    assert_eq!(
+        GroupConstraints::joint_witness(&proofs).unwrap(),
+        Some(answer)
+    );
+    proofs.push(GroupConstraints {
+        members: vec![vec![card(1)]],
+        bounds: vec![exact(1)],
+    });
+    assert_eq!(GroupConstraints::joint_witness(&proofs).unwrap(), None);
+}

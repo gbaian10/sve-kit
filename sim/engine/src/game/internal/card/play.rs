@@ -866,7 +866,7 @@ impl Game {
             let mut trial = probe.clone();
             let mut paid = selection.clone();
             let members = wait.validate(&trial, &paid, &[candidate.handle])?;
-            paid.cost_materials.insert(wait.receipt(), members);
+            wait.record(&mut paid, members);
             match trial.internal_card_payment(&mut paid, &payment.play.costs, false) {
                 Ok(()) => return Ok(true),
                 Err(crate::EngineFailure::IllegalPlay(_)) => {}
@@ -1161,6 +1161,7 @@ impl Game {
             slots: BTreeMap::new(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
+            hand_cost_groups: BTreeMap::new(),
             fusion_material_pending: vec![],
             movement_capacity: BTreeMap::new(),
             material_selections: BTreeMap::new(),

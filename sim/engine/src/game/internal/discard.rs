@@ -2,8 +2,8 @@
 
 use crate::game::internal::card::selection::groups::GroupConstraints;
 use crate::game::internal::player::CandidateLinks;
-use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
+use crate::game::player::{SelectionGroup, SelectionQuestion};
 
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, contains, invalid, seat_name,
@@ -11,8 +11,8 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, Cause, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome,
-    Disjointness, Expr, Instruction, Int, MoveMethod, Nat, ObjectRef, PlayerRelation, ReceiptId,
-    SelectionView, Selector, ZoneKind,
+    Disjointness, Expr, Instruction, InstructionContext, Int, MoveMethod, Nat, ObjectRef,
+    PlayerRelation, ReceiptId, SelectionView, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -156,12 +156,39 @@ impl HandWait {
         actor: Viewer,
         domain: &super::TargetDomain,
     ) -> Result<SelectionQuestion> {
-        game.player_selection(
+        let mut question = game.player_selection(
             actor,
             domain,
             &self.members.iter().copied().map(Some).collect::<Vec<_>>(),
             &self.links,
-        )
+        )?;
+        question.groups = self
+            .groups
+            .members
+            .iter()
+            .zip(&self.groups.bounds)
+            .map(|(members, bounds)| {
+                Ok(SelectionGroup {
+                    handles: members
+                        .iter()
+                        .map(|member| {
+                            let index = self
+                                .members
+                                .iter()
+                                .position(|candidate| candidate == member)
+                                .ok_or_else(|| invalid("missing hand group member"))?;
+                            domain
+                                .members
+                                .get(index)
+                                .map(|candidate| candidate.handle)
+                                .ok_or_else(|| invalid("missing hand group coordinate"))
+                        })
+                        .collect::<Result<_>>()?,
+                    cardinality: *bounds,
+                })
+            })
+            .collect::<Result<_>>()?;
+        Ok(question)
     }
 
     pub(super) fn strict(
@@ -182,10 +209,41 @@ impl HandWait {
         }
     }
 
-    pub(super) fn witness(&self) -> Result<Vec<u64>> {
+    pub(super) const fn grouped(
+        links: CandidateLinks,
+        instruction: Box<Instruction>,
+        members: Vec<ObjectRef>,
+        bounds: Cardinality,
+        groups: GroupConstraints,
+    ) -> Self {
+        Self {
+            links,
+            instruction,
+            members,
+            bounds,
+            groups,
+        }
+    }
+
+    pub(super) fn record(&self, execution: &mut Execution, members: Vec<ObjectRef>) {
+        execution
+            .hand_cost_groups
+            .insert(self.receipt(), self.groups.clone());
+        execution.cost_materials.insert(self.receipt(), members);
+    }
+
+    pub(super) const fn proof(&self) -> &GroupConstraints {
+        &self.groups
+    }
+
+    pub(super) fn witness_members(&self) -> Result<Vec<ObjectRef>> {
         self.groups
             .witness(&self.members, self.bounds)?
-            .ok_or_else(|| crate::EngineFailure::IllegalPlay("no hand cost selection".into()))?
+            .ok_or_else(|| crate::EngineFailure::IllegalPlay("no hand cost selection".into()))
+    }
+
+    pub(super) fn handles(&self, members: &[ObjectRef]) -> Result<Vec<u64>> {
+        members
             .iter()
             .map(|member| {
                 let index = self
@@ -196,6 +254,10 @@ impl HandWait {
                 u64::try_from(index).map_err(invalid)
             })
             .collect()
+    }
+
+    pub(super) const fn decision(&self) -> DecisionId {
+        DecisionId(self.instruction.id.0)
     }
 
     pub(super) const fn receipt(&self) -> ReceiptId {
@@ -243,6 +305,13 @@ impl HandWait {
                     .get(usize::try_from(*handle).map_err(invalid)?)
                     .ok_or_else(|| invalid("foreign discard handle"))?;
                 let object = game.object(execution.object_id(member)?)?;
+                if self.instruction.context == InstructionContext::Cost
+                    && execution.cost_materials.iter().any(|(receipt, chosen)| {
+                        *receipt != self.receipt() && chosen.contains(&member)
+                    })
+                {
+                    return Err(invalid("hand member reserved by another cost"));
+                }
                 if object.generation != member.generation.0
                     || object.zone != "hand"
                     || object.owner != seat

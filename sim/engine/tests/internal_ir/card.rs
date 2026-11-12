@@ -972,3 +972,6 @@ mod material_distinct;
 
 #[path = "card/field_token_exchange.rs"]
 mod field_token_exchange;
+
+#[path = "card/hand_groups.rs"]
+mod hand_groups;
