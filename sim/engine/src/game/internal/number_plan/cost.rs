@@ -1,7 +1,7 @@
 //! Cost permissions constrain nodes; composition and evaluation remain in the shared plan.
 
 use super::super::card::selection::public_zone_selector;
-use crate::ir::history_turn::discarded_plan;
+use crate::ir::history_turn::HistoryPlan;
 use crate::ir::{
     Arithmetic, Bool, BoolRead, ExecutionRef, Expr, HistoryCount, Int, IntOperation, IntRead, Nat,
     NatOperation, NatRead, ObjectProperty, PlayerRef, PlayerResource, Predicate, SelectionView,
@@ -15,7 +15,7 @@ pub(super) fn admits_natural(value: &Expr<Nat>) -> bool {
             NatRead::HistoryCount {
                 query,
                 count: HistoryCount::Facts,
-            } => discarded_plan(query),
+            } => matches!(HistoryPlan::compile(query), Some(HistoryPlan::Discarded)),
             NatRead::ZoneCount {
                 selector:
                     Selector::Zone {

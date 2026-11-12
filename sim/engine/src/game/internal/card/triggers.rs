@@ -828,7 +828,9 @@ impl PendingOccurrence {
     }
 
     fn capture_history(&mut self, game: &Game) -> Result<()> {
-        use crate::ir::history_turn::{evolution_capture_header, evolution_capture_query};
+        use crate::ir::history_turn::{
+            HistoryPlan, evolution_capture_header, evolution_capture_query,
+        };
         use crate::ir::{Capture, CaptureTime, EventContext, Int};
         if self.ability.node.event_captures.is_empty() {
             return Ok(());
@@ -853,11 +855,15 @@ impl PendingOccurrence {
                 },
             )
             .ok_or_else(|| unsupported("event history capture value"))?;
+            let Some(HistoryPlan::Subject { event, filter }) = HistoryPlan::compile(query) else {
+                return Err(unsupported("event history capture value"));
+            };
             let count = subject_count_at(
                 game,
                 Some(self.source),
                 self.source.controller,
-                query,
+                event,
+                &filter,
                 HistoryCount::Facts,
             )?;
             let (key, slot) = match capture {

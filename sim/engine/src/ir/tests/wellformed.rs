@@ -1063,3 +1063,5 @@ fn single_transform_checks_bindings_and_keeps_allocated_variants_closed() {
         WellFormedReason::UnsupportedShape,
     );
 }
+
+mod history_plans;

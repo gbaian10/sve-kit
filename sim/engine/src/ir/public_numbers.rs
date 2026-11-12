@@ -80,8 +80,9 @@ pub(crate) fn target_count(value: &Expr<Int>, comparison: super::Comparison) -> 
     else {
         return false;
     };
-    super::history_turn::life_plan(query)
-        .is_some_and(|filter| filter.own == Some(true) && filter.up == Some(true))
+    matches!(super::history_turn::HistoryPlan::compile(query),
+        Some(super::history_turn::HistoryPlan::Life(filter))
+        if filter.own == Some(true) && filter.up == Some(true))
 }
 
 fn count(selector: &Selector) -> bool {

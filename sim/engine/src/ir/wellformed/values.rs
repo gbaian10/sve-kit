@@ -6,8 +6,8 @@ use super::{
 };
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
-use crate::ir::history_turn::played_filter;
-use crate::ir::history_turn::public::{banished_plan, damaged_plan};
+use crate::ir::history_turn::HistoryPlan;
+use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
@@ -131,12 +131,14 @@ impl Checker {
     }
 
     fn history_count_read(&mut self, query: &HistoryQuery, count: HistoryCount) -> Checked {
-        if (matches!(query.pattern, EventPattern::Discard { .. }) || played_filter(query).is_some())
+        let plan = HistoryPlan::compile(query);
+        if (matches!(query.pattern, EventPattern::Discard { .. })
+            || matches!(&plan, Some(HistoryPlan::PlayedFiltered { .. })))
             && count != HistoryCount::Facts
         {
             return self.reject();
         }
-        if banished_plan(query).is_some() {
+        if matches!(&plan, Some(HistoryPlan::Lesson(_))) {
             return self.reject();
         }
         self.history(query)

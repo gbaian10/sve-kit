@@ -11,6 +11,69 @@ use super::{
     UbActivatedEvent,
 };
 
+pub(crate) enum HistoryPlan<'query> {
+    Dice(super::dice::History),
+    Discarded,
+    Life(super::events::life::LifeFilter),
+    Ub {
+        player: Option<PlayerRef>,
+        exclude_current: bool,
+    },
+    Played(PlayedBy),
+    PlayedFiltered {
+        filter: PlayedHistoryFilter,
+        card: Binding<super::ObjectRef>,
+    },
+    Subject {
+        event: SubjectHistoryKind,
+        filter: SubjectFilter,
+    },
+    StatGain(super::events::change::StatFilter),
+    Lesson(&'query super::CardName),
+}
+
+impl<'query> HistoryPlan<'query> {
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "Other event patterns remain outside executable history queries."
+    )]
+    pub(crate) fn compile(query: &'query HistoryQuery) -> Option<Self> {
+        match &query.pattern {
+            EventPattern::Dice { .. } => super::dice::history(query).map(Self::Dice),
+            EventPattern::Discard { .. } => discarded_plan(query).then_some(Self::Discarded),
+            EventPattern::LifeChange { .. } => life_plan(query).map(Self::Life),
+            EventPattern::UbActivated { .. } => {
+                ub_plan(query).map(|(player, exclude_current)| Self::Ub {
+                    player,
+                    exclude_current,
+                })
+            }
+            EventPattern::Play { .. } => played_by(query).map(Self::Played).or_else(|| {
+                played_filter(query).map(|(filter, card)| Self::PlayedFiltered { filter, card })
+            }),
+            EventPattern::Attack { .. }
+            | EventPattern::Evolve { .. }
+            | EventPattern::Destroy { .. }
+            | EventPattern::LeaveField { .. } => {
+                subject_plan(query).map(|(event, filter)| Self::Subject { event, filter })
+            }
+            EventPattern::StatChange { .. } => public::stat_gain_plan(query).map(Self::StatGain),
+            EventPattern::Banish { .. } => public::banished_plan(query).map(Self::Lesson),
+            _ => None,
+        }
+    }
+}
+
+pub(crate) enum NumericHistoryPlan {
+    LifeSum(super::events::life::LifeFilter),
+}
+
+impl NumericHistoryPlan {
+    pub(crate) fn compile(query: &super::NumericHistoryQuery) -> Option<Self> {
+        life_sum_plan(query).map(Self::LifeSum)
+    }
+}
+
 pub(crate) fn played_query(event: Binding<PlayEvent>, player: Option<PlayerRef>) -> HistoryQuery {
     HistoryQuery {
         pattern: EventPattern::Play {
@@ -91,9 +154,7 @@ impl PlayedHistoryFilter {
     }
 }
 
-pub(crate) fn played_filter(
-    query: &HistoryQuery,
-) -> Option<(PlayedHistoryFilter, Binding<super::ObjectRef>)> {
+fn played_filter(query: &HistoryQuery) -> Option<(PlayedHistoryFilter, Binding<super::ObjectRef>)> {
     let EventPattern::Play {
         binding: event,
         predicate: Expr::Compute(outer),
@@ -166,12 +227,12 @@ pub(crate) fn discarded_query(event: Binding<DiscardEvent>) -> HistoryQuery {
     }
 }
 
-pub(crate) fn discarded_plan(query: &HistoryQuery) -> bool {
+fn discarded_plan(query: &HistoryQuery) -> bool {
     matches!(&query.pattern, EventPattern::Discard { binding, .. }
         if *query == discarded_query(*binding))
 }
 
-pub(crate) fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {
+fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {
     let EventPattern::Play { binding, predicate } = &query.pattern else {
         return None;
     };
@@ -228,7 +289,7 @@ pub(crate) fn ub_query(
     }
 }
 
-pub(crate) fn ub_plan(query: &HistoryQuery) -> Option<(Option<PlayerRef>, bool)> {
+fn ub_plan(query: &HistoryQuery) -> Option<(Option<PlayerRef>, bool)> {
     let EventPattern::UbActivated { binding, predicate } = &query.pattern else {
         return None;
     };
@@ -336,7 +397,7 @@ fn subject_case(
     .then_some((kind, filter))
 }
 
-pub(crate) fn subject_plan(query: &HistoryQuery) -> Option<(SubjectHistoryKind, SubjectFilter)> {
+fn subject_plan(query: &HistoryQuery) -> Option<(SubjectHistoryKind, SubjectFilter)> {
     if let EventPattern::Attack { binding, predicate } = &query.pattern {
         return subject_case(
             query,
@@ -407,7 +468,7 @@ fn life_filter(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> 
     (life_query(*binding, filter) == *query).then_some(filter)
 }
 
-pub(crate) fn life_plan(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> {
+fn life_plan(query: &HistoryQuery) -> Option<super::events::life::LifeFilter> {
     life_filter(query).filter(|filter| {
         !filter.crosses_zero
             && filter.own.is_some()
@@ -416,9 +477,7 @@ pub(crate) fn life_plan(query: &HistoryQuery) -> Option<super::events::life::Lif
     })
 }
 
-pub(crate) fn life_sum_plan(
-    query: &super::NumericHistoryQuery,
-) -> Option<super::events::life::LifeFilter> {
+fn life_sum_plan(query: &super::NumericHistoryQuery) -> Option<super::events::life::LifeFilter> {
     let super::NumericHistoryQuery::LifeDelta {
         event,
         predicate,
@@ -452,20 +511,13 @@ pub(crate) fn evolution_count(read: &super::NatRead) -> Option<&HistoryQuery> {
     else {
         return None;
     };
-    let EventPattern::Evolve { binding, .. } = &query.pattern else {
-        return None;
-    };
-    (*query
-        == subject_query(
-            SubjectHistoryKind::Evolve,
-            binding.key().1,
-            binding.key().0,
-            &SubjectFilter {
-                own: Some(true),
-                kind: Some(super::CardKind::Follower),
-                ..SubjectFilter::default()
-            },
-        ))
+    matches!(HistoryPlan::compile(query), Some(HistoryPlan::Subject {
+        event: SubjectHistoryKind::Evolve, filter,
+    }) if filter == (SubjectFilter {
+        own: Some(true),
+        kind: Some(super::CardKind::Follower),
+        ..SubjectFilter::default()
+    }))
     .then_some(query)
 }
 
@@ -543,3 +595,6 @@ pub(crate) fn evolution_capture_header(ability: &super::Ability) -> bool {
                 })
         })
 }
+
+#[cfg(test)]
+mod tests;
