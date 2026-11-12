@@ -6,7 +6,7 @@
 )]
 
 use super::number_plan::NaturalAmountPlan;
-use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
+use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::ir::{
     Action, Binding, ChoiceDomain, Control, CounterChangeEvent, CounterKind, CounterOperation,
     Expr, FollowPermission, Holder, Instruction, Int, IntOperation, Nat, NatRead, ObjectOperand,
@@ -257,12 +257,23 @@ impl Game {
         else {
             return Err(unsupported("object counter change"));
         };
-        let before = execution.counter(self, holder, kind)?;
         let Holder::Object { object } = holder else {
             return Err(unsupported("object counter holder"));
         };
         let reference = execution.object(self, object)?;
         let id = execution.object_id(reference)?.to_owned();
+        if payment {
+            let current = self.object(&id)?;
+            if current.generation != reference.generation.0
+                || !matches!(current.zone.as_str(), "field" | "ex")
+                || current.controller != seat_name(execution.context.controller)?
+            {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "counter cost material changed".into(),
+                ));
+            }
+        }
+        let before = execution.counter(self, holder, kind)?;
         if !matches!(self.object(&id)?.zone.as_str(), "field" | "ex") {
             return Err(unsupported("counter holder must be in Field or EX"));
         }

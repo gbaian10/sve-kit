@@ -279,3 +279,40 @@ fn mode_exclusion_requires_one_exact_play_choice() {
     *cardinality = bounds(1, Some(2));
     reject_card(playable(vec![node]), WellFormedReason::InvalidModes);
 }
+
+#[test]
+fn printed_field_quick_limits_keep_the_ordinary_quota_contract() {
+    let mut card = playable(vec![]);
+    card.abilities[0].node.kind = AbilityKind::Activated;
+    play_mut(&mut card).limit = Some(LimitSpec::activated_per_turn(Nat(1)));
+    let origin = card.abilities[0].node.source.origin.clone();
+    card.abilities[0].node.source.origin = AbilityOrigin::Keyword {
+        keyword: KeywordId::Quick,
+        origin: Box::new(origin),
+    };
+    let source = card.abilities[0].node.source.clone();
+    if let CostSpec::Ordered { steps } = &mut play_mut(&mut card).costs {
+        for step in steps {
+            step.instruction.source = source.clone();
+        }
+    }
+    accept_card(card.clone());
+    for zone in [ZoneKind::Hand, ZoneKind::Cemetery, ZoneKind::Ex] {
+        let mut invalid = card.clone();
+        invalid.abilities[0].node.active_zones = vec![zone];
+        reject_card(invalid, WellFormedReason::UnsupportedShape);
+    }
+    let mut zero_limit = card.clone();
+    play_mut(&mut zero_limit).limit = Some(LimitSpec::activated_per_turn(Nat(0)));
+    reject_card(zero_limit, WellFormedReason::UnsupportedShape);
+    let mut wrong_consumption = card.clone();
+    play_mut(&mut wrong_consumption).limit = Some(LimitSpec {
+        consume_at: ConsumptionPoint::PendingAdmission,
+        ..LimitSpec::activated_per_turn(Nat(1))
+    });
+    reject_card(wrong_consumption, WellFormedReason::UnsupportedShape);
+    if let AbilityOrigin::Keyword { keyword, .. } = &mut card.abilities[0].node.source.origin {
+        *keyword = KeywordId::EarthRite;
+    }
+    reject_card(card, WellFormedReason::UnsupportedShape);
+}

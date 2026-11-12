@@ -11,6 +11,7 @@ use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
 use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
+use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
@@ -514,7 +515,8 @@ impl Checker {
             .and_then(|play| play.limit)
             .is_some_and(|limit| {
                 ability.kind != AbilityKind::Activated
-                    || !matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+                    || !(matches!(ability.source.origin, AbilityOrigin::Printed { .. })
+                        || (is_printed_quick(ability) && ability.active_zones == [ZoneKind::Field]))
                     || !matches!(
                         ability.active_zones.as_slice(),
                         [ZoneKind::Field | ZoneKind::Ex]

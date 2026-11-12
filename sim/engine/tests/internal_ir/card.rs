@@ -983,3 +983,9 @@ mod next_play_cost;
 
 #[path = "card/quick_payment.rs"]
 mod quick_payment;
+
+#[path = "card/quick_counter.rs"]
+mod quick_counter;
+
+#[path = "card/payment_recovery.rs"]
+mod payment_recovery;
