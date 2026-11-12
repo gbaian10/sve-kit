@@ -1432,3 +1432,73 @@ fn resolving_spell_returns_only_its_current_source_to_hand_and_preserves_other_r
     assert_eq!(state["P1"]["cemetery"], json!([]));
     assert_eq!(state["objects"]["s"]["generation"], 2_u8);
 }
+
+#[test]
+fn live_and_captured_distribution_totals_share_the_pre_payment_snapshot_after_retry() {
+    for live in [false, true] {
+        let mut raw = distribution_spell(0, Expr::Literal(Bool(true)))
+            .card()
+            .clone();
+        if live {
+            let ChoiceDomain::Distribution { total, .. } =
+                &mut raw.abilities[0].node.play.as_mut().unwrap().parameters[1].domain
+            else {
+                panic!("distribution");
+            };
+            *total = Expr::Compute(Box::new(NatOperation::CheckedInt {
+                value: Expr::Live(Box::new(IntRead::PlayerResource {
+                    player: PlayerRef::Controller {},
+                    property: PlayerResource::PpCurrent,
+                })),
+            }));
+        }
+        let program = WellFormedCardProgram::check(raw).unwrap();
+        let mut game = position(&program, "ex", 5);
+        let first = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+        let retry = awaiting(
+            game.answer_internal_card(
+                first.actor,
+                first.token,
+                Answer::Targets(vec![0, 1, 2, 3, 4]),
+            )
+            .unwrap(),
+        );
+        assert_ne!(retry.token, first.token);
+        let distribution = awaiting(
+            game.answer_internal_card(retry.actor, retry.token, Answer::Targets(vec![0, 1]))
+                .unwrap(),
+        );
+        assert!(
+            matches!(&distribution.domain, InputDomain::Distribution(domain)
+            if domain.total == Nat(4) && domain.minimum == Nat(1))
+        );
+        let result = resolved(
+            game.answer_internal_card(
+                distribution.actor,
+                distribution.token,
+                Answer::Distribution(vec![
+                    DamageShare {
+                        handle: 0,
+                        amount: Nat(3),
+                    },
+                    DamageShare {
+                        handle: 1,
+                        amount: Nat(1),
+                    },
+                ]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            3
+        );
+        assert_eq!(
+            result.progress.receipts[&ReceiptId(1)],
+            InstructionOutcome::Damage(DamageQuantityOutcome {
+                requested: Int(4),
+                actual: Nat(4)
+            })
+        );
+    }
+}

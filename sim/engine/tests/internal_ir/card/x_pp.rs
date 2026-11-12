@@ -307,3 +307,37 @@ fn x_pp_unaffordable_fixed_part_cannot_be_hidden_in_the_x_range() {
     .unwrap_err();
     transactions::assert_restored(&game, &origin);
 }
+
+#[test]
+fn declared_x_stays_frozen_across_payment_and_a_later_resolution_question() {
+    let program = program(json!({
+        "x":{},"cost":{"steps":[{"pp":"x"},{"act_self":true}]},
+        "do":[
+            {"buff":{"on":"this","power":"x","hp":0}},
+            {"choose":{"bind":"friend","from":{"who":"self","zone":"field","kind":"follower"},"n":1}},
+            {"buff":{"on":"friend","power":"x","hp":"x"}}
+        ]
+    }));
+    let mut game = board(&program, 3);
+    let x = start(&mut game, &program);
+    let choice = awaiting(
+        game.answer_internal_card(x.actor, x.token, Answer::Integer(Nat(1)))
+            .unwrap(),
+    );
+    assert!(matches!(&choice.domain, InputDomain::Targets(domain) if domain.members.len()==1));
+    let during = game.projection(View::Referee).unwrap();
+    assert_eq!(during["P1"]["pp"]["current"], 2);
+    assert_eq!(during["objects"]["s"]["power"], 3);
+    let before = exact_authority(&game);
+    game.answer_internal_card(x.actor, x.token, Answer::Integer(Nat(2)))
+        .unwrap_err();
+    assert_eq!(exact_authority(&game), before);
+    resolved(
+        game.answer_internal_card(choice.actor, choice.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["pp"]["current"], 2);
+    assert_eq!(after["objects"]["s"]["power"], 4);
+    assert_eq!(after["objects"]["s"]["hp"], 4);
+}
