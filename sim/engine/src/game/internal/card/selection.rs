@@ -26,6 +26,9 @@ use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
 pub(in crate::game::internal) mod constraints;
+pub(in crate::game::internal) mod groups;
+
+use groups::GroupConstraints;
 
 use constraints::{
     DistinctProperties, PropertyKey, check_count, unique_handles, within_original_cost_cap,
@@ -73,8 +76,7 @@ pub(in crate::game::internal) struct TargetWait {
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
-    group_members: Vec<Vec<ObjectRef>>,
-    group_bounds: Vec<Cardinality>,
+    groups: GroupConstraints,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
     cost_cap: Option<CostCap>,
@@ -127,9 +129,10 @@ impl TargetWait {
         let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
         let mut question = game.player_selection(actor, domain, &references, &self.links)?;
         question.groups = self
-            .group_members
+            .groups
+            .members
             .iter()
-            .zip(&self.group_bounds)
+            .zip(&self.groups.bounds)
             .map(|(members, bounds)| {
                 Ok(player::SelectionGroup {
                     handles: members
@@ -147,7 +150,7 @@ impl TargetWait {
                                 .handle)
                         })
                         .collect::<Result<_>>()?,
-                    cardinality: if self.group_members.len() == 1 {
+                    cardinality: if self.groups.members.len() == 1 {
                         self.bounds
                     } else {
                         *bounds
@@ -332,23 +335,17 @@ impl TargetWait {
         }
         // A single group is already bounded by `TargetWait::bounds`, whose minimum may be
         // lowered when a resolution has fewer available candidates than requested.
-        if self.group_members.len() == 1 {
+        if self.groups.members.len() == 1 {
             return Ok(true);
         }
-        Ok(assign_groups(
-            members,
-            0,
-            &self.group_members,
-            &self.group_bounds,
-            &mut vec![0; self.group_members.len()],
-        ))
+        Ok(self.groups.accepts(members))
     }
 
     fn capacity(&self) -> Result<u64> {
-        if self.group_members.len() > 1 && !self.distinct_names && self.cost_cap.is_none() {
-            return group_capacity(&self.group_members, &self.group_bounds);
+        if self.groups.members.len() > 1 && !self.distinct_names && self.cost_cap.is_none() {
+            return self.groups.capacity();
         }
-        if !self.distinct_names && self.group_members.len() <= 1 {
+        if !self.distinct_names && self.groups.members.len() <= 1 {
             let Some(CostCap { limit, costs }) = &self.cost_cap else {
                 return u64::try_from(self.members.len()).map_err(invalid);
             };
@@ -368,7 +365,7 @@ impl TargetWait {
             }
             return Ok(count);
         }
-        if self.group_members.len() == 1
+        if self.groups.members.len() == 1
             && let Some(maximum) = self.bounds.maximum.filter(|maximum| maximum.0 <= 2)
         {
             return self.pair_capacity(maximum.0);
@@ -418,88 +415,6 @@ impl TargetWait {
         }
         Ok(available)
     }
-}
-
-fn group_capacity(members: &[Vec<ObjectRef>], bounds: &[Cardinality]) -> Result<u64> {
-    if !matches!(members.len(), 2 | 3)
-        || bounds.len() != members.len()
-        || bounds
-            .iter()
-            .any(|bound| bound.maximum != Some(Nat(1)) || bound.minimum.0 > 1)
-    {
-        return Err(unsupported("group capacity bounds"));
-    }
-    // Each object fills at most one group, including objects that match several filters.
-    let mut reachable = [false; 8];
-    reachable[0] = true;
-    let mut seen = BTreeSet::new();
-    for member in members.iter().flatten() {
-        if !seen.insert((member.id, member.generation)) {
-            continue;
-        }
-        let previous = reachable;
-        for (mask, _) in previous
-            .iter()
-            .enumerate()
-            .filter(|(_, possible)| **possible)
-        {
-            for (group, candidates) in members.iter().enumerate() {
-                if mask & (1 << group) == 0 && candidates.contains(member) {
-                    reachable[mask | (1 << group)] = true;
-                }
-            }
-        }
-    }
-    let mut maximum = 0;
-    for (mask, possible) in reachable.iter().enumerate() {
-        if *possible
-            && bounds
-                .iter()
-                .enumerate()
-                .all(|(group, bound)| bound.minimum == Nat(0) || mask & (1 << group) != 0)
-        {
-            maximum = maximum.max(u64::from(mask.count_ones()));
-        }
-    }
-    Ok(maximum)
-}
-
-fn assign_groups(
-    members: &[ObjectRef],
-    index: usize,
-    group_members: &[Vec<ObjectRef>],
-    bounds: &[Cardinality],
-    counts: &mut [u64],
-) -> bool {
-    if index == members.len() {
-        return bounds.iter().enumerate().all(|(group, bound)| {
-            bound.minimum.0 <= counts[group]
-                && bound
-                    .maximum
-                    .is_none_or(|maximum| counts[group] <= maximum.0)
-        });
-    }
-    for group in 0..group_members.len() {
-        if !group_members[group].contains(&members[index])
-            || bounds[group]
-                .maximum
-                .is_some_and(|maximum| counts[group] >= maximum.0)
-        {
-            continue;
-        }
-        counts[group] = counts[group].saturating_add(1);
-        if assign_groups(
-            members,
-            index.saturating_add(1),
-            group_members,
-            bounds,
-            counts,
-        ) {
-            return true;
-        }
-        counts[group] = counts[group].saturating_sub(1);
-    }
-    false
 }
 
 /// Candidates are the union of the groups; one candidate may belong to several groups.
@@ -1279,8 +1194,10 @@ impl Game {
                 cost_cap: self.target_cost_cap(execution, &constraint, &members)?,
                 members,
                 bounds,
-                group_members,
-                group_bounds,
+                groups: GroupConstraints {
+                    members: group_members,
+                    bounds: group_bounds,
+                },
                 characteristics,
                 distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
                 on_field_at_capture,

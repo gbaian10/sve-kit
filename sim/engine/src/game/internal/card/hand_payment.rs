@@ -167,16 +167,10 @@ impl Game {
             let Some((question, Wait::CostDiscard(wait))) = execution.waiting.take() else {
                 return Err(invalid("probe hand cost question"));
             };
-            let InputDomain::CostMaterials(domain) = question.domain else {
+            let InputDomain::CostMaterials(_) = question.domain else {
                 return Err(invalid("probe hand cost domain"));
             };
-            let least = usize::try_from(domain.cardinality.minimum.0).map_err(invalid)?;
-            let handles: Vec<_> = domain
-                .members
-                .iter()
-                .take(least)
-                .map(|member| member.handle)
-                .collect();
+            let handles = wait.witness()?;
             let members = wait.validate(self, execution, &handles)?;
             execution.cost_materials.insert(wait.receipt(), members);
         }
