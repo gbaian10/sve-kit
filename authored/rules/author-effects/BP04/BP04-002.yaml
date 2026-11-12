@@ -1,0 +1,33 @@
+cards:
+  BP04-002:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                distribute: true
+                n:
+                  plus:
+                    - count:
+                        who: self
+                        zone: hand
+                    - count:
+                        who: self
+                        zone: ex
+                to: enemies
+          targets:
+            - any: true
+              bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

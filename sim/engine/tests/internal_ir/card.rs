@@ -23,6 +23,8 @@ mod formal_target_groups;
 mod granted_played;
 #[path = "card/hand_banish.rs"]
 mod hand_banish;
+#[path = "card/hand_distribution.rs"]
+mod hand_distribution;
 #[path = "card/material_acts.rs"]
 mod material_acts;
 #[path = "card/move_result_numbers.rs"]
