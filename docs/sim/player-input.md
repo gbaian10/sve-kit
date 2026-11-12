@@ -149,3 +149,27 @@ Quick 在 pending 與規則檢查完成後出題，即使沒有合法行動也�
 正常進化的 `Evolve` 意圖開始後，`QuestionShape::Evolution` 依序提供進化牌面、材料、
 棄手牌及付款題；宿主以 `Command::Evolution` 回當題能力代號或顯示域內的答案。
 用途為 `PlayParameter`；非應答者只看等待摘要，完整規則見[主要意圖契約](main-actions.md#正常進化宣告)。
+
+## 基礎策略 host
+
+`host::PolicyHost` 保存兩席各自的 `BasicPolicy`，`run(&mut Game)` 只透過
+`input`、`observe`、`submit_player` 推進已初始化的 typed 對局。
+`Game::start_player_game` 可直接交給 host；受信任局面由原有啟動入口準備，host 不處理
+權威載入／恢復。策略仍只取得本席 Observation 與 QuestionShape；題目 token 僅供 host
+綁定 Command 與辨識重答同一題，不參與策略選擇。
+
+外部傳輸可用 `prepare` 取得一筆 Command，依題目 actor 提交後，將該筆真實 Submission
+交給 `record_submission`。一次只有一筆 pending；未配對就再次 prepare，或沒有 pending
+就回報，停止為 ProtocolError。查詢／準備不計提交次數，也不使用策略的行動預算。
+
+HostLimits 預設至多 10,000 次提交，同一題允許 1 次額外重試。
+Rejected 計入總次數，但不使用策略預算；讀取最新題目後可重答，超過重試上限停止為
+RejectedLimit。成功、回退、取消或題目改變會重設同題計數。
+總次數上限在 prepare 強制，耗盡停止為 StepLimit。
+
+HostReport 保留各 SubmissionKind 計數及兩席接受次數；停止狀態不再改變。
+只有 Finished 表示原生正常終局，winner 為空表示平手。
+EngineFault、PolicyFailure、RejectedLimit、StepLimit、ProtocolError 均不假造勝者；
+Reverted、Cancelled 分開記錄並可繼續，不是正常終局。
+原生 EngineFault 優先於其他結果；已回報的 Finished 優先於提交次數耗盡，最後一筆額度
+上結束的對局仍是 Finished。故障細節保留於權威端，host 不公開診斷訊息。
