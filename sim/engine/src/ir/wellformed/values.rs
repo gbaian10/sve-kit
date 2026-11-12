@@ -8,6 +8,7 @@ use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::played_filter;
 use crate::ir::history_turn::public::{banished_plan, damaged_plan};
+use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
@@ -190,6 +191,12 @@ impl Checker {
                 NatFrozen::RaceOrdinal { event } => self.event_field(*event),
             },
             Expr::Live(read) => match read.as_ref() {
+                NatRead::ZoneCount { selector }
+                    if !self.event_capture() && public_numbers::hand_count(selector) =>
+                {
+                    // A public length read grants no visibility to the hand's members.
+                    self.selector_members(selector)
+                }
                 NatRead::ZoneCount { selector } => self.selector(selector),
                 NatRead::Counter { holder, .. } => self.holder(holder),
                 NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {

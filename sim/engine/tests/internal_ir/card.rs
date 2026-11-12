@@ -37,6 +37,8 @@ mod player_main_actions;
 mod player_policy;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
+#[path = "card/public_hand_numbers.rs"]
+mod public_hand_numbers;
 #[path = "card/public_return_union.rs"]
 mod public_return_union;
 #[path = "card/token_follower_union.rs"]
