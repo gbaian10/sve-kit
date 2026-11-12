@@ -28,7 +28,7 @@ pub(super) fn permit() -> Located<Ability> {
     a
 }
 
-fn quick_activated(mut a: Located<Ability>) -> Located<Ability> {
+pub(super) fn quick_activated(mut a: Located<Ability>) -> Located<Ability> {
     a.node.source.origin = AbilityOrigin::Keyword {
         keyword: KeywordId::Quick,
         origin: Box::new(a.node.source.origin.clone()),

@@ -630,6 +630,32 @@ fn conditional_modes(
     Ok(groups)
 }
 
+fn quick_cost_shape(action: &Action) -> bool {
+    match action {
+        Action::Resource {
+            amount: Expr::Literal(_),
+            ..
+        }
+        | Action::Counter {
+            amount: Expr::Literal(_),
+            ..
+        }
+        | Action::Posture { .. }
+        | Action::Life {
+            change: NumericChange::Add {
+                amount: Expr::Literal(_),
+            },
+            ..
+        }
+        | Action::Move { .. } => true,
+        Action::Discard { .. } => super::hand_payment::source_discard(action),
+        Action::Banish {
+            objects: Selector::Objects { objects },
+        } => objects == &[ObjectOperand::SourceHolder {}],
+        _ => false,
+    }
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Formal plays share the authority's execution and rollback boundary."
@@ -690,7 +716,7 @@ impl Game {
         let available = if material {
             probe.internal_quick_material_costs_available(&execution, play)?
         } else {
-            self.quick_costs_available(holder, &execution, &play.costs, actor, spell)?
+            self.quick_costs_available(holder, ability, &execution, actor, spell)?
         };
         if !available {
             return Ok(false);
@@ -717,16 +743,45 @@ impl Game {
     fn quick_costs_available(
         &self,
         holder: &str,
+        ability: &Ability,
         execution: &Execution,
-        costs: &CostSpec,
         actor: PlayerId,
         spell: bool,
     ) -> Result<bool> {
-        if !matches!(costs, CostSpec::Ordered { .. }) {
+        let costs = &ability
+            .play
+            .as_ref()
+            .ok_or_else(|| invalid("missing Quick PlaySpec"))?
+            .costs;
+        let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("Quick costs"));
+        };
+        // Keep the existing quote language while replacing its payment proof.
+        if !steps
+            .iter()
+            .all(|step| quick_cost_shape(&step.instruction.action))
+        {
+            return Err(unsupported("Quick cost proof"));
         }
-        self.known_costs_available(holder, execution, costs, actor, spell)?
-            .ok_or_else(|| unsupported("Quick cost proof"))
+        // Keep the old Quick ownership boundary until departure costs are widened separately.
+        if steps
+            .iter()
+            .any(|step| matches!(step.instruction.action, Action::Banish { .. }))
+            && self.object(holder)?.owner != seat_name(actor)?
+        {
+            return Ok(false);
+        }
+        let mut probe = self.clone();
+        let mut payment = if spell {
+            probe.spell_execution(holder, actor, ability)?
+        } else {
+            let mut payment = execution.clone();
+            let source = probe.internal_card_source(holder, ability.id, actor)?;
+            payment.bind_source(&probe, source)?;
+            payment
+        };
+        probe.card_runtime.active_source = payment.ability;
+        probe.internal_payment_probe(&mut payment, costs, spell)
     }
 
     pub(super) fn known_costs_available(
@@ -845,10 +900,8 @@ impl Game {
             .play
             .as_ref()
             .ok_or_else(|| invalid("missing Quick play"))?;
-        match probe.internal_card_payment(&mut selection, &play.costs, true) {
-            Ok(()) => {}
-            Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),
-            Err(error) => return Err(error),
+        if !probe.internal_payment_probe(&mut selection, &play.costs, true)? {
+            return Ok(false);
         }
         match probe.internal_hand_cost_materials(&mut selection, &payment.play.costs) {
             Ok(true) => {}
@@ -867,10 +920,8 @@ impl Game {
             let mut paid = selection.clone();
             let members = wait.validate(&trial, &paid, &[candidate.handle])?;
             wait.record(&mut paid, members);
-            match trial.internal_card_payment(&mut paid, &payment.play.costs, false) {
-                Ok(()) => return Ok(true),
-                Err(crate::EngineFailure::IllegalPlay(_)) => {}
-                Err(error) => return Err(error),
+            if trial.internal_payment_probe(&mut paid, &payment.play.costs, false)? {
+                return Ok(true);
             }
         }
         Ok(false)

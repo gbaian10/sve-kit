@@ -1196,10 +1196,8 @@ impl Game {
             let mut paid = execution.clone();
             trial.card_runtime.active_source = paid.ability;
             wait.bind(&mut paid, wait.validate(&handles)?);
-            match trial.internal_card_payment(&mut paid, &play.costs, false) {
-                Ok(()) => return Ok(true),
-                Err(crate::EngineFailure::IllegalPlay(_)) => {}
-                Err(error) => return Err(error),
+            if trial.internal_payment_probe(&mut paid, &play.costs, false)? {
+                return Ok(true);
             }
         }
         Ok(false)

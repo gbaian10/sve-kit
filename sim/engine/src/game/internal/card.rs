@@ -786,6 +786,20 @@ impl Game {
         Ok(original)
     }
 
+    /// Only disposable payment authorities may turn an illegal play into a failed proof.
+    pub(super) fn internal_payment_probe(
+        &mut self,
+        execution: &mut Execution,
+        costs: &CostSpec,
+        card_cost: bool,
+    ) -> Result<bool> {
+        match self.internal_card_payment(execution, costs, card_cost) {
+            Ok(()) => Ok(true),
+            Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
