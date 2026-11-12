@@ -33,6 +33,16 @@ pub(crate) enum HistoryPlan<'query> {
 }
 
 impl<'query> HistoryPlan<'query> {
+    pub(crate) const fn cost_facts(&self) -> bool {
+        matches!(self, Self::Discarded)
+            || matches!(self, Self::Subject {
+                event: SubjectHistoryKind::Attack | SubjectHistoryKind::Evolve | SubjectHistoryKind::Leave,
+                filter,
+            } if filter.original_cost.is_none()
+                && filter.name_contains.is_none()
+                && filter.name_contains_any.is_empty())
+    }
+
     #[expect(
         clippy::wildcard_enum_match_arm,
         reason = "Other event patterns remain outside executable history queries."
@@ -100,9 +110,37 @@ pub(crate) enum PlayedHistoryFilter {
     Trait(super::TraitId),
     TraitsAny([super::TraitId; 2]),
     Spell,
+    Intersection {
+        kind: Option<super::CardKind>,
+        trait_id: Option<super::TraitId>,
+        token: Option<bool>,
+    },
 }
 
 impl PlayedHistoryFilter {
+    pub(crate) fn from_subject(filter: &SubjectFilter) -> Option<Self> {
+        if !matches!(
+            filter.kind,
+            None | Some(
+                super::CardKind::Follower | super::CardKind::Spell | super::CardKind::Amulet
+            )
+        ) || filter.trait_id.as_ref().is_some_and(|id| id.0.is_empty())
+            || (filter.kind.is_none() && filter.trait_id.is_none() && filter.token.is_none())
+        {
+            return None;
+        }
+        let plan = match (filter.kind, filter.trait_id.as_ref(), filter.token) {
+            (None, Some(id), None) => Self::Trait(id.clone()),
+            (Some(super::CardKind::Spell), None, None) => Self::Spell,
+            (kind, trait_id, token) => Self::Intersection {
+                kind,
+                trait_id: trait_id.cloned(),
+                token,
+            },
+        };
+        (plan.subjects() == [filter.clone()]).then_some(plan)
+    }
+
     pub(crate) fn subjects(&self) -> Vec<SubjectFilter> {
         let traits = match self {
             Self::Trait(id) => vec![id.clone()],
@@ -111,6 +149,19 @@ impl PlayedHistoryFilter {
                 return vec![SubjectFilter {
                     own: Some(true),
                     kind: Some(super::CardKind::Spell),
+                    ..SubjectFilter::default()
+                }];
+            }
+            Self::Intersection {
+                kind,
+                trait_id,
+                token,
+            } => {
+                return vec![SubjectFilter {
+                    own: Some(true),
+                    kind: *kind,
+                    trait_id: trait_id.clone(),
+                    token: *token,
                     ..SubjectFilter::default()
                 }];
             }
@@ -186,16 +237,7 @@ fn played_filter(query: &HistoryQuery) -> Option<(PlayedHistoryFilter, Binding<s
         PlayedHistoryFilter::TraitsAny([left, right])
     } else {
         let filter = SubjectFilter::parse(fields, predicate)?;
-        if let Some(id) = filter.trait_id {
-            if id.0.is_empty() {
-                return None;
-            }
-            PlayedHistoryFilter::Trait(id)
-        } else if filter.kind == Some(super::CardKind::Spell) {
-            PlayedHistoryFilter::Spell
-        } else {
-            return None;
-        }
+        PlayedHistoryFilter::from_subject(&filter)?
     };
     (*query == plan.query(*event, *card)).then_some((plan, *card))
 }

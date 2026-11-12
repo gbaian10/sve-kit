@@ -4,6 +4,7 @@
 )]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
+use sve_engine::game::player::Viewer;
 
 fn tree(filter: Option<Value>) -> Value {
     let mut query = json!({"event":"played","window":"this_turn","who":"self"});
@@ -134,7 +135,7 @@ fn history_reader(filter: Option<Value>) -> WellFormedCardProgram {
         .remove("unit-follower")
         .unwrap()
 }
-fn traits_catalog(missing: bool) -> Arc<Catalog> {
+fn traits_catalog(missing: bool, token: bool) -> Arc<Catalog> {
     let (snapshot, keywords, document) = catalog_documents(&json!("1"));
     let snapshot = snapshot
         .lines()
@@ -145,6 +146,11 @@ fn traits_catalog(missing: bool) -> Arc<Catalog> {
                 "unit-amulet" => json!(["宴楽"]),
                 _ => json!(["魔法使い"]),
             };
+            if token && row["number"] == "unit-amulet" {
+                row["faces"][0]["card_type"] = json!("フォロワー・トークン");
+                row["faces"][0]["power"] = json!("1");
+                row["faces"][0]["hp"] = json!("1");
+            }
             if missing {
                 row["faces"][0].as_object_mut().unwrap().remove("traits");
                 row["faces"][0]
@@ -171,8 +177,16 @@ fn initial() -> Value {
     initial
 }
 fn position(initial: &Value, reader: &WellFormedCardProgram, missing: bool) -> Game {
+    position_with_tokens(initial, reader, missing, false)
+}
+fn position_with_tokens(
+    initial: &Value,
+    reader: &WellFormedCardProgram,
+    missing: bool,
+    token: bool,
+) -> Game {
     let mut game = Game::new(
-        traits_catalog(missing),
+        traits_catalog(missing, token),
         initial,
         &Value::Null,
         &Value::Null,
@@ -258,8 +272,13 @@ fn late_entering_reader_sees_plays_without_observers_and_departed_spell() {
 
 #[test]
 fn incomplete_explicit_history_refuses_filtered_queries_but_preserves_unfiltered_counts() {
-    for filtered in [true, false] {
-        let reader = history_reader(filtered.then(|| json!({"trait":"宴楽"})));
+    for filter in [
+        None,
+        Some(json!({"trait":"宴楽"})),
+        Some(json!({"kind":"follower","trait":"宴楽","token":true})),
+    ] {
+        let filtered = filter.is_some();
+        let reader = history_reader(filter);
         let mut initial = initial();
         initial["semantic_state"]["counters_this_turn"]["P1"]["cards_played"] = json!(3);
         let mut game = position(&initial, &reader, false);
@@ -297,12 +316,12 @@ fn wider_played_selectors_and_nonplayed_trait_unions_stay_rejected() {
         json!({"traits_any":["宴楽"]}),
         json!({"traits_any":["宴楽","魔法使い","プリコネ"]}),
         json!({"trait":""}),
-        json!({"kind":"follower"}),
-        json!({"kind":"amulet"}),
         json!({"class":"ウィッチ"}),
         json!({"name":"unit-follower"}),
         json!({"other":true}),
-        json!({"trait":"宴楽","kind":"spell"}),
+        json!({"trait":"宴楽","token":true,"class":"ウィッチ"}),
+        json!({"token":true,"name":"unit-follower"}),
+        json!({"kind":"follower","orig_cost_eq":1}),
     ] {
         lowerer().lower(&tree(Some(filter))).unwrap_err();
     }
@@ -375,19 +394,7 @@ fn raw_history_variants_are_rejected_before_runtime() {
                 let Predicate::And { predicates } = inner.as_mut() else {
                     panic!("controller and kind");
                 };
-                let predicate = predicates
-                    .iter_mut()
-                    .find_map(|p| {
-                        if let Expr::Compute(op) = p
-                            && let Predicate::KindEquals { right, .. } = op.as_mut()
-                        {
-                            Some(right)
-                        } else {
-                            None
-                        }
-                    })
-                    .unwrap();
-                *predicate = Expr::Literal(CardKind::Follower);
+                predicates.push(predicates.last().unwrap().clone());
             }
         }
         WellFormedCardProgram::check(candidate).unwrap_err();
@@ -445,7 +452,7 @@ fn nested_play_and_ability_put_share_the_exact_play_fact_boundary() {
         let programs = lowerer().lower(&input).unwrap();
         let initial = child_position(full, opponent);
         let mut game = Game::new(
-            traits_catalog(false),
+            traits_catalog(false, false),
             &initial,
             &Value::Null,
             &Value::Null,
@@ -564,7 +571,7 @@ fn an_old_generation_play_counts_as_another_card_after_the_same_physical_card_re
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"child","card":"unit-follower"}]);
     let mut game = Game::new(
-        traits_catalog(false),
+        traits_catalog(false, false),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -842,5 +849,87 @@ fn played_union_raw_ir_rejects_reversed_or_extra_branches() {
             predicates.swap(0, 1);
         }
         WellFormedCardProgram::check(candidate).unwrap_err();
+    }
+}
+
+#[test]
+fn played_kind_trait_and_token_filters_lower_and_load() {
+    for filter in [
+        json!({"kind":"follower"}),
+        json!({"kind":"amulet"}),
+        json!({"trait":"宴楽","kind":"spell"}),
+        json!({"kind":"follower","trait":"宴楽","token":true}),
+        json!({"kind":"spell","not_token":true}),
+    ] {
+        lower_and_load(&tree(Some(filter)));
+    }
+}
+
+#[test]
+fn played_intersections_use_saved_facts_after_token_erasure_without_hidden_hand_identity() {
+    for (filter, expected) in [
+        (json!({"kind":"follower","trait":"宴楽"}), 2),
+        (json!({"trait":"宴楽","token":true}), 1),
+        (json!({"kind":"follower","trait":"宴楽","token":true}), 1),
+        (
+            json!({"kind":"follower","trait":"魔法使い","token":true}),
+            0,
+        ),
+        (
+            json!({"kind":"spell","trait":"魔法使い","not_token":true}),
+            1,
+        ),
+    ] {
+        let mut candidate = history_reader(Some(filter)).card().clone();
+        let others = Selector::Difference {
+            input: Box::new(Selector::Zone {
+                players: players(PlayerRelation::SelfPlayer),
+                zone: ZoneKind::Field,
+                view: SelectionView::Current {},
+                binding: Binding::new(901, ScopeId(901)),
+                predicate: Box::new(Expr::Literal(Bool(true))),
+            }),
+            except: Box::new(Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            }),
+        };
+        candidate.abilities.push(ability(
+            90,
+            vec![movement::put(90, others, OwnerZone::Cemetery)],
+        ));
+        let reader = WellFormedCardProgram::check(candidate).unwrap();
+        let mut observations = Vec::new();
+        for hidden in ["unit-spell", "unit-follower"] {
+            let mut initial = initial();
+            initial["players"]["P1"]["zones"]["hand"]
+                .as_array_mut()
+                .unwrap()
+                .retain(|object| object["id"] != "amulet");
+            initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"amulet","card":"unit-amulet"}]);
+            initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"hidden","card":hidden}]);
+            let mut game = position_with_tokens(&initial, &reader, false, true);
+            for id in ["spell", "amulet", "dual"] {
+                play_card(&mut game, id, 1);
+            }
+            read_count(&mut game, &reader, expected);
+            resolved(
+                game.activate_internal_card("reader", AbilityId(90), PlayerId { seat: 1 })
+                    .unwrap(),
+            );
+            game.resume_internal_card().unwrap();
+            assert!(
+                !game.projection(View::Referee).unwrap()["P1"]["cemetery"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("amulet")),
+                "a departing token is erased"
+            );
+            read_count(&mut game, &reader, expected);
+            observations.push(game.observe(Viewer::P1).unwrap());
+        }
+        assert_eq!(
+            observations[0], observations[1],
+            "a private opposing hand changes no public history read"
+        );
     }
 }

@@ -68,3 +68,75 @@ fn subject_queries_reject_foreign_windows_and_execution_inclusion() {
         ub_query(Binding::new(12, ScopeId(1)), None, true).include_execution;
     assert!(HistoryPlan::compile(&excluding).is_none());
 }
+
+fn played_subject_query(filter: &SubjectFilter) -> HistoryQuery {
+    let event = Binding::new(20, ScopeId(1));
+    let card = Binding::new(21, ScopeId(1));
+    let mut query = played_query(event, None);
+    query.pattern = EventPattern::Play {
+        binding: event,
+        predicate: Expr::Compute(Box::new(Predicate::PlayedCard {
+            subject: Expr::Frozen(Box::new(super::super::PlaySubjectFields::PlaySubject {
+                event,
+            })),
+            card,
+            predicate: filter.predicate(SubjectFields::Played { event, card }),
+        })),
+    };
+    query
+}
+
+#[test]
+fn played_intersections_refuse_unsaved_fields_at_the_raw_query_boundary() {
+    let filter = SubjectFilter {
+        own: Some(true),
+        kind: Some(CardKind::Follower),
+        trait_id: Some(TraitId("fixture".into())),
+        token: Some(true),
+        ..SubjectFilter::default()
+    };
+    assert!(matches!(
+        HistoryPlan::compile(&played_subject_query(&filter)),
+        Some(HistoryPlan::PlayedFiltered { .. })
+    ));
+    for invalid in [
+        SubjectFilter {
+            kind: Some(CardKind::EvolveFollower),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            kind: Some(CardKind::Crest),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            name: Some(super::super::CardName("hidden".into())),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            class: Some(super::super::ClassId("fixture".into())),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            original_cost: Some((super::super::Comparison::Equal, 1)),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            keyword: Some(super::super::KeywordId::Ward),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            itself: Some(true),
+            ..filter.clone()
+        },
+        SubjectFilter {
+            own_turn: true,
+            ..filter.clone()
+        },
+        SubjectFilter {
+            own: Some(false),
+            ..filter
+        },
+    ] {
+        assert!(HistoryPlan::compile(&played_subject_query(&invalid)).is_none());
+    }
+}

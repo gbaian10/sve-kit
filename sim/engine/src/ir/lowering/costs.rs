@@ -43,7 +43,10 @@ pub(super) fn lower(
                 else {
                     return Err(unsupported(&path));
                 };
-                (amount, Some(condition(&change.r#if, allocator, &path)?))
+                (
+                    amount,
+                    Some(condition(&change.r#if, entry, allocator, &path)?),
+                )
             } else {
                 (decode::<ast::Number>(value.clone(), &path)?, None)
             };
@@ -111,6 +114,7 @@ fn population(
 
 fn condition(
     value: &ast::CostCondition,
+    entry: &ast::Ability,
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Expr<Bool>, LoweringError> {
@@ -163,7 +167,7 @@ fn condition(
         ast::CostCondition::All(items) | ast::CostCondition::Any(items) => {
             let predicates = items
                 .iter()
-                .map(|item| condition(item, allocator, path))
+                .map(|item| condition(item, entry, allocator, path))
                 .collect::<Result<Vec<_>, _>>()?;
             if matches!(value, ast::CostCondition::All(_)) {
                 Predicate::And { predicates }
@@ -172,12 +176,12 @@ fn condition(
             }
         }
         ast::CostCondition::Not(value) => Predicate::Not {
-            predicate: condition(value, allocator, path)?,
+            predicate: condition(value, entry, allocator, path)?,
         },
         ast::CostCondition::Exists(value) => Predicate::Exists {
             objects: query(value, allocator, path)?,
         },
-        ast::CostCondition::History(history) => history_condition(history, allocator, path)?,
+        ast::CostCondition::History(history) => history_condition(history, entry, allocator, path)?,
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
             left: match &value.left {
                 ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
@@ -217,16 +221,24 @@ fn condition(
 
 fn history_condition(
     history: &ast::HistoryQuery,
+    entry: &ast::Ability,
     allocator: &mut Allocator,
     path: &str,
 ) -> Result<Predicate, LoweringError> {
+    let body = ast::Body::default();
+    let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+    context.allocator.next = context.card_allocator.next;
+    let query = context.history_query(history, path)?;
+    context.card_allocator.next = context.card_allocator.next.max(context.allocator.next);
+    if matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+        || !crate::ir::history_turn::HistoryPlan::compile(&query)
+            .is_some_and(|plan| plan.cost_facts())
+    {
+        return Err(unsupported(path));
+    }
     Ok(Predicate::CompareNat {
         left: Expr::Live(Box::new(NatRead::HistoryCount {
-            query: super::conditions::discarded_history(
-                history,
-                Binding::new(allocator.id(path)?, ScopeId(0)),
-                path,
-            )?,
+            query,
             count: HistoryCount::Facts,
         })),
         comparison: Comparison::GreaterEqual,

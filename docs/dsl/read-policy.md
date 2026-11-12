@@ -389,3 +389,21 @@ Controller 相對的任意玩家關係，Life／PpMaximum 仍可讀原有玩家�
 仍遵循各自的既有綁定與時點。靜態進化費用及宣告數值使用的 `public_numbers` 文法獨立保留，
 自己未篩選整個 Hand 的公開張數由上節獨立授權，不因共用 Cost policy 而取得手牌身分、
 篩選手牌或其他數值讀取權限。
+
+## 已提交歷史的共用查詢
+
+歷史查詢先編譯成封閉的 `HistoryPlan`／`NumericHistoryPlan`，再由 count、exists、sum 讀既有保存來源。
+共用計畫不合併各使用處的權限：Combo 保留含本次的待提交投影，UB 保留排除本次，Lesson 與 StatGain 的存在查詢也不改成一般 count > 0。
+原本的事件提交、回合清除與序列化位置不變。
+
+費用 modifier 的歷史數值與條件可讀 Discarded，及已提交 Attack／Evolve／Leave 的 Facts 計數；
+與進化資格及本文沿同一 query lowering 與歷史求值。
+費用不讀 Subjects 去重模式，也不取得 UB、一般 Played、StatGain 或其他歷史種類的權限。
+主體離場後仍以保存事實計數；名稱只用已保存的完整名稱，缺失時拒絕，不以目前物件或卡表回填。
+費用歷史不接受原費篩選（歷史事實不保存原費），也不開放片段名稱篩選。
+報價與正式提交各自在原時點讀同一組規則，報價不提交事件；付款失敗仍依原交易邊界回滾。
+
+自己的本回合 Played Facts 可用 kind、trait、token／not_token 的交集，及原有兩 trait 聯集。
+單一篩選只接受保存的 kind（Follower／Spell／Amulet）、trait、token 欄位；names、class、original cost、keyword、itself 與 own_turn 等形狀在編譯時拒絕。
+Play 事實必須完整對得上已提交 counter，初始歷史不足時拒絕，不能以空欄位或零次數代替未知資訊。
+即使主體後來離場或 token 消失，仍使用打出當時保存的欄位；未公開的對手手牌不因這項查詢而取得身分。
