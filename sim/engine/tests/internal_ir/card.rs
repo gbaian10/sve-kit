@@ -978,3 +978,6 @@ mod hand_groups;
 
 #[path = "card/next_play_cost.rs"]
 mod next_play_cost;
+
+#[path = "card/quick_payment.rs"]
+mod quick_payment;
