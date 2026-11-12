@@ -748,7 +748,7 @@ pub(super) enum LifeHolder {
 #[serde(deny_unknown_fields)]
 pub(super) struct ResourceIncrease {
     pub who: SelfPlayer,
-    pub delta: u64,
+    pub delta: Number,
 }
 
 #[derive(Deserialize)]

@@ -712,6 +712,8 @@ mod life_holder;
 mod hand_discard;
 #[path = "card/resource.rs"]
 mod resource;
+#[path = "card/resource_amounts.rs"]
+mod resource_amounts;
 
 #[path = "card/reveal_hand.rs"]
 mod reveal_hand;
