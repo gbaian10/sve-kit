@@ -562,7 +562,16 @@ impl Game {
         let id = execution
             .trigger_occurrence
             .ok_or_else(|| invalid("head payment without occurrence"))?;
-        self.internal_cancel_occurrence(id, execution.id);
+        let checkpoint = execution.id;
+        let origin = execution
+            .origin
+            .as_ref()
+            .ok_or_else(|| invalid("head payment without rollback origin"))?
+            .as_ref()
+            .clone();
+        let published = self.published_knowledge();
+        self.restore_player_state(origin, &published)?;
+        self.internal_cancel_occurrence(id, checkpoint);
         Ok(true)
     }
 

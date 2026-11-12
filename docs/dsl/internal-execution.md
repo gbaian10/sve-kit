@@ -151,7 +151,9 @@ exact 1 可帶 `CurrentTurnAbilityInstance` 排除；Authority 以既有 ModeUse
 DSL lowering 接常值 n／upto、單一 SC／NC instead 及 this_turn 排除；混合 exact>1、
 多個 instead 的優先序、改計數母體的 rule modifier、Handoff、未支援的參數依賴、其他 actor 與任意私有 choose 保持拒絕。
 Quick 起動的模式歷史排除在整卡准入保持拒絕；既有 Quick preflight 尚未承載歷史。
-Quick 起動的 PlaySpec.limit 已由 Printed 限制拒絕，不因本片擴張 Quick。
+場上印刷 Quick 起動可沿用相同的 PlaySpec.limit；預檢以正式能力實例與實際 TurnId
+查剩餘額度，無材料費用的起動也不例外。其他 keyword origin，以及 Hand／Cemetery／EX 的
+Quick 加 limit 仍拒絕；不因限次支援而放寬模式歷史排除。
 完整額度與模式語義見[チョイス擴充與起動能力限次 §1–4](choice-limit-semantics.md)。
 
 所有 targets／play Distribution 共用移入 Resolution 及先決選項後的一份選擇 snapshot。
@@ -330,6 +332,10 @@ main 階段也沿正式付款程序打出。可選手牌費用沿既有 `spell.o
 預檢先在副本收集候選並枚舉固定張數的組合，將該組合綁到既有材料 slot，沿正式費用順序試付。
 因此同一張卡不能同時支付自身與材料的 Act，PP、レッスン與來源棄牌也要能完整支付；試付不執行本文，
 不提交事件、姿態、移區或次數消耗。正式目標可行性仍在付款前的局面判斷，材料不當成正式目標。
+所選物件的 counter 費用也走同一完整試付與實付；材料是否包含來源本身依原 selector，
+不另外硬性排除。付款動態重驗 holder 的世代、Field／EX 與控制者，材料失效或餘量不足
+是 IllegalPlay，報價只排除該候選；backend Unsupported 與數值故障仍保留，不抹成付不起。
+效果端讀取 stale counter 的原 Unsupported 邊界不變。
 單一場上或 EX 的候選上限各為 5；若要擴充區域或容量，須重新評估完整副本試付的組合數。
 Quick 法術的公開材料、墓地材料、Field＋EX 聯集、變動張數與多組材料仍拒絕。
 

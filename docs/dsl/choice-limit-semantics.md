@@ -3,7 +3,7 @@
 本文件補充[正式 play](play-semantics.md)、[執行語義](runtime-semantics.md)與
 [觸發額度](trigger-lki-semantics.md#3-限次與同時批次)，是內部契約。
 現行支援以[內部執行入口](internal-execution.md)為準；不新增DSL 語法、公開 program、
-capability、最低版本或整卡資格，也不擴張 Quick、費用及結算重驗的支援範圍。
+capability、最低版本或整卡資格；Quick、費用及結算重驗仍受內部執行入口的已驗範圍限制。
 
 規則依據為[日文 CR 1.28.0（2026-09-28）](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，
 PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`。
@@ -19,7 +19,7 @@ PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`�
 | --- | --- | --- |
 | 模式數 | 常值 exact／upto；既有 SC／NC 條件式模式數子集，限 §2.1 的表示 | 5.18.2–.3、10.6.2.2.3 |
 | 本回合模式排除 | `exclude_chosen: this_turn`，固定 exact 1，唯一模式群組 | 卡文及 Q1567、Q1779、Q2563；IR 的 H.mode-use |
-| 起動限次 | 普通 Printed Activated、Field、常值正安全整數 `per_turn=N` | 卡文、10.6.2.5.4／.7、5.16.2.2.1 |
+| 起動限次 | Field 的普通 Printed Activated 或印刷 Quick 起動、常值正安全整數 `per_turn=N` | 卡文、10.6.2.5.4／.7、5.16.2.2.1 |
 
 先拒絕：對手／其他 actor 選模式、巢狀或多個 ChoiceKeyword、If／Repeat 內的
 ChoiceKeyword、模式內 Distribution、無 option 的根 targets 與模式 targets 混用、
@@ -133,12 +133,15 @@ play 契約回整次 origin，連暫存 played、模式歷史與額度一併撤�
 | 進化前後印刷能力 | 5.16.2.2／.2.2.1 使舊印刷能力失去、新定義取得；即使文字相同，新定義也有新實例 |
 | 進化後仍持續存在的同一能力來源 | 不因 holder 進化或重算有效能力重配實例；holder 本身不換世代 |
 
-這沿用觸發契約的能力生命週期。第一版只准入 Printed；能力失去後重新授予、複製、
+這沿用觸發契約的能力生命週期。來源限 Printed，或恰為 Field 的
+Keyword(Quick, Printed) 起動；其他 keyword 或區域的 Quick 加限次仍拒絕。
+能力失去後重新授予、複製、
 暫時消除能力、Grant 的實例重建與共享限次仍拒絕，不從「文字相同」推論身分。
 [BP01-013 フェアリービースト](https://shadowverse-evolve.com/cardlist/?cardno=BP01-013)
 Q158（2022-04-26）確認兩個持有者可各使用一次；
 [BP03-038 オズの大魔女](https://shadowverse-evolve.com/cardlist/?cardno=BP03-038)
-Q471（2022-12-09）確認自己與對手的回合各可使用一次，不因此解鎖其 Quick 與土之秘術；
+Q471（2022-12-09）確認自己與對手的回合各可使用一次。其場上 Quick 起動與土之秘術付款
+片段沿共同付款管線驗收，不代表其他能力或整卡准入；
 [BP08-084 欲望の狂信者](https://shadowverse-evolve.com/cardlist/?cardno=BP08-084)
 提供每回合兩次的卡文形狀，並不因此解鎖其生命成本。
 玩家的進化／進化相當能力共享行動次數是 RulePermission，不能塞進本片的 AbilityInstance 額度。

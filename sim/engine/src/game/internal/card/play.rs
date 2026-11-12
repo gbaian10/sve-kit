@@ -702,10 +702,23 @@ impl Game {
             execution.play_origin = Some(spell_origin(&self.object(holder)?.zone)?);
         }
         let material = play.parameters.iter().any(super::material::is_parameter);
-        if material || super::qualification(&play.costs)?.is_some() {
+        if material
+            || (!spell && play.limit.is_some())
+            || super::qualification(&play.costs)?.is_some()
+        {
             let source = probe.internal_card_source(holder, ability.id, actor)?;
             execution.bind_source(&probe, source)?;
             probe.card_runtime.active_source = Some(source);
+            if !spell
+                && let Some(limit) = play.limit
+                && !probe.card_runtime.quota_available(
+                    source.instance,
+                    TurnId(probe.state.schedule.current()?),
+                    limit,
+                )
+            {
+                return Ok(false);
+            }
             match probe.internal_use_prerequisite(&execution, &play.costs) {
                 Ok(()) => {}
                 Err(crate::EngineFailure::IllegalPlay(_)) => return Ok(false),

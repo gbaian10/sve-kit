@@ -1218,13 +1218,6 @@ pub(super) fn check_payment(
     if discards > 1 || (discards > 0 && quick) {
         return Err(unsupported("one non-Quick hand cost group"));
     }
-    if quick
-        && steps
-            .iter()
-            .any(|step| super::counters::selected_cost(&step.instruction.action).is_some())
-    {
-        return Err(unsupported("non-self counter Quick quote"));
-    }
     for step in steps {
         let instruction = &step.instruction;
         if step.materials.is_some()
