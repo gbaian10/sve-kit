@@ -218,3 +218,66 @@ fn player_question_real_train_cost_floor_uses_frozen_printed_costs() {
     assert_eq!(state["objects"]["three"]["acted"], true);
     assert_eq!(state["objects"]["train"]["power"], 4_u8);
 }
+
+#[test]
+fn policy_real_train_selects_complete_crew_from_public_question() {
+    use sve_engine::game::player::{
+        Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
+    };
+    use sve_engine::ir::Posture;
+    use sve_engine::policy;
+
+    let mut game = train(
+        "BP11-P30",
+        &json!([
+            {"id":"one","card":"BP01-171","state":{"cost":9_i64}},
+            {"id":"two","card":"BP17-077","state":{"cost":0_i64}},
+            {"id":"three","card":"BP07-076","state":{"cost":0_i64}}
+        ]),
+    );
+    game.activate_internal_card("train", ability("BP11-P30", 0), PLAYER)
+        .unwrap();
+    let Input::Question(public) = game.input(Viewer::P1) else {
+        panic!("player crew question");
+    };
+    let QuestionShape::Decision(DecisionShape::CostMaterials(materials)) = &public.shape else {
+        panic!("player crew materials");
+    };
+    let selected = policy::select(materials).unwrap();
+    assert_eq!(selected.roles.len(), 0);
+    assert_eq!(selected.targets.len(), 2);
+    assert_eq!(
+        materials
+            .members
+            .iter()
+            .filter(|member| selected.targets.contains(&member.handle))
+            .map(|member| member.original_cost)
+            .collect::<Vec<_>>(),
+        vec![Some(2), Some(3)]
+    );
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Answer {
+                token: public.token,
+                answer: Answer::CostMaterials(selected.targets),
+            },
+        )
+        .kind,
+        SubmissionKind::Applied,
+    );
+    let observation = game.observe(Viewer::P1).unwrap();
+    let acted = observation.players[0]
+        .zones
+        .iter()
+        .flat_map(|zone| &zone.cards)
+        .filter(|card| {
+            card.card
+                .properties
+                .state
+                .as_ref()
+                .is_some_and(|state| state.posture == Posture::Acted)
+        })
+        .count();
+    assert_eq!(acted, 2);
+}

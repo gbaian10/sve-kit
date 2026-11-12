@@ -35,7 +35,7 @@ pub use selection::{
     DistributionQuestion, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
 };
 
-pub use super::internal::Answer;
+pub use super::internal::{Answer, DamageShare, SearchAnswer, TargetRoleAssignment};
 
 use crate::ir::{Nat, PlayerId};
 use core::fmt;
