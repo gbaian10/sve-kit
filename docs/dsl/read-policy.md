@@ -75,8 +75,15 @@ operand 盤點若只處理既有直接事件主體，仍須保留自己原先允
 | 使用者 | 保留的遍歷政策 |
 | --- | --- |
 | `Requirements::derive`／`derive_program` | 全部結構與分支，來源隨 Located 進出；既有 code 與位置集合不變 |
-| `event_operand::paths` | 只進 Sequence／May／If／Mode 本文，保留 Modify／Grant／Token／Move／InstallEffect 原有直接主體判定；Damage 的 Objects／Union recipient 只授權同一事件的精確主體 expression；略過成本及所有指示的巢狀定義／延遲本文 |
+| `event_operand::paths` | 只進 Sequence／May／If／Mode 本文及 Pay.on_paid，保留 Modify／Grant／Token／Move／InstallEffect 原有直接主體判定；Damage 的 Objects／Union recipient 只授權同一事件的精確主體 expression；略過成本及所有指示的巢狀定義／延遲本文 |
 | `event_operand::target_paths` | 只進 Sequence／May／If，保留 If 條件與 Modify／Grant／Move／Destroy 原有 target 判定；不因共用 walker 新增 Mode 或 Pay |
+
+事件主體盤點在 Pay 只走 `on_paid`，成本的 CostSpec 仍整棵略過；指示內的獨立
+Ability 與延遲本文也維持原界線。入場來源條件的准入檢查同樣沿 `on_paid`，只處理
+原事件 binding。這允許既有直接主體動作（含 Damage recipient）位於付款後本文，
+不讓成本、Damage source／amount 或其他 execution 繼承事件讀取權。
+付款者、來源、時點與成本仍由原流程驗證；只有實付成功才執行 `on_paid`，拒付及
+付款失敗不求值其中的主體或局部回條。結構走訪這個本文本身不構成付款證明。
 
 BodyReference 仍是參照節點；結構走訪不追蹤並展開它指向的定義，也不嘗試執行迴圈。
 
