@@ -31,6 +31,8 @@ mod played_traits;
 mod player_declarations;
 #[path = "card/player_main_actions.rs"]
 mod player_main_actions;
+#[path = "card/player_policy.rs"]
+mod player_policy;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
 #[path = "card/public_return_union.rs"]
