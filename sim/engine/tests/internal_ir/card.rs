@@ -5,6 +5,8 @@ mod condition_inputs;
 mod dice;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
+#[path = "card/event_damage_consumer.rs"]
+mod event_damage_consumer;
 #[path = "card/event_operand_admission.rs"]
 mod event_operand_admission;
 #[path = "card/evolution_ordinal.rs"]
@@ -31,6 +33,8 @@ mod played_traits;
 mod player_declarations;
 #[path = "card/player_main_actions.rs"]
 mod player_main_actions;
+#[path = "card/player_policy.rs"]
+mod player_policy;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
 #[path = "card/public_hand_numbers.rs"]
@@ -953,3 +957,6 @@ mod counter_amounts;
 
 #[path = "card/cost_number_plan.rs"]
 mod cost_number_plan;
+
+#[path = "card/counter_author.rs"]
+mod counter_author;

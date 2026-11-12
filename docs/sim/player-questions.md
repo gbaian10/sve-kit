@@ -100,3 +100,32 @@ IfNonempty、Remainder 大小規則；有角色時整個選取與完整不重疊
 `InvalidQuestion` 表示缺少必要資料或題目結構損壞，`NoSolution` 表示已窮盡所有可能，
 `SearchExhausted` 表示共用的 100,000 次選取／群組回溯步數已耗盡、可行性仍未知。
 上限不截斷候選，也不能將策略失敗當作正常終局或引擎錯誤。
+
+## 基礎 policy 的程序與主要行動
+
+每席各持有一個 `BasicPolicy::new(viewer)`，呼叫
+`choose(&Observation, &QuestionShape)` 取得 `Choice`。
+策略拒收其他觀看者的觀察，僅讀玩家資料；`Choice` 保留候選的不透明能力供回送，
+題目 token 由呼叫端綁定為 `Command`，不參與策略偏好或回合識別。
+
+目前各題型皆有確定性答案：整數取有效下限，路線取第一個實際座標，排序回完整原順序，
+選取／搜尋／分配沿用前述求解器。Modes 取原生上限內最少非空選項，保留可用量為零時
+回空的原生差異；有角色的選取使用完整角色答案，Discard 依付款或效果使用原答案通道。
+開局選第一個起始護符、自己先攻並保留手牌；收尾選取全部 Guard 與精確的超額棄牌。
+進化選第一個形式，PP 足夠時先用 PP，不足時才用允許的 EP，依題目許可使用超進化。
+Quick 選 Pass、BeforeDraw 選 Stop，其餘可選付款與效果接受；Drive 只在 Critical／Stand
+帶上第一個目標，空集合依原生規則略過指定；Front 不接受。
+
+主要行動依序偏好 Play、Evolve、Activate、Attack、EndPhase，同類保留原候選順序。
+每個公開回合，Play、Evolve、Activate **每類各一次**；Activate 的限制涵蓋該席所有來源，
+不是每張卡各一次。Attack 持續選原生列出的合法攻擊，不因策略預算跳過強制攻擊。
+這是保守策略，沒有比較未來局面的搜尋。
+
+每次提交後，立即以剛送出的 `Choice` 呼叫 `record_submission(&choice, kind)`。
+Applied、Reverted、Cancelled 才使用該主要行動類別的預算；Rejected、EngineFault 與
+非主要行動的答案不使用預算。查詢、未提交的選擇及其他題目的回報都不暗中使用預算。
+宣告被接受後才回退時，該類預算仍已使用。公開的 active 或 elapsed_turns 改變時清除預算，
+同回合內的 phase 改變不會清除。
+
+完整對局宿主仍須區分策略失敗、有限次的 Rejected 重試、回退／取消、EngineFault、
+正常 Finished 與步數耗盡，並以步數上限處理可能的持續攻擊循環；步數耗盡不能當作終局。

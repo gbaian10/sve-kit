@@ -75,7 +75,7 @@ operand 盤點若只處理既有直接事件主體，仍須保留自己原先允
 | 使用者 | 保留的遍歷政策 |
 | --- | --- |
 | `Requirements::derive`／`derive_program` | 全部結構與分支，來源隨 Located 進出；既有 code 與位置集合不變 |
-| `event_operand::paths` | 只進 Sequence／May／If／Mode 本文，保留 Modify／Grant／Token／Move／InstallEffect 原有直接主體判定；略過成本及所有指示的巢狀定義／延遲本文 |
+| `event_operand::paths` | 只進 Sequence／May／If／Mode 本文，保留 Modify／Grant／Token／Move／InstallEffect 原有直接主體判定；Damage 的 Objects／Union recipient 只授權同一事件的精確主體 expression；略過成本及所有指示的巢狀定義／延遲本文 |
 | `event_operand::target_paths` | 只進 Sequence／May／If，保留 If 條件與 Modify／Grant／Move／Destroy 原有 target 判定；不因共用 walker 新增 Mode 或 Pay |
 
 BodyReference 仍是參照節點；結構走訪不追蹤並展開它指向的定義，也不嘗試執行迴圈。
@@ -356,6 +356,13 @@ queue，不放入事件讀取 context。歷史查詢保留自己的准入與保�
 因為 `Not` 變成匹配。它與其他條件同在排入前判斷，不匹配不消耗每回合 quota；
 不限定入場方式或只在自己的回合觀察，仍遵循事件原有權限。必選目標無解時，
 保留整個能力取消的既有行為，不先執行後續回復。其他事件家族不因此增加職業排除。
+
+事件本文的 `damage.to: it` 使用同一 pending 保存的事件主體，不建立正式目標，
+因此不經 Aura 的正式目標限制。既有具名目標優先使用自己的 binding；沒有物件事件時
+不能使用此簡寫。授權只涵蓋 recipient 中的同一事件主體，不涵蓋 Damage 的 source 或
+amount；執行時仍重驗已保存的物件世代、場上位置與 follower 類型，不跟隨離場後的新世代。
+drive-checked 事件的 `it` 同樣沿用已捕捉的 drive holder，與既有 Modify／Grant／Move
+的主體讀取一致，不改為重新查詢目前的 holder。
 
 ## 費用 modifier 與 While 條件
 

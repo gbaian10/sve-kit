@@ -1,5 +1,8 @@
 use super::{Action, BodyContext, Expr, LoweringError, Nat, ObjectOperand, ast, unsupported};
-use crate::ir::{Cardinality, CounterKind, CounterOperation, Decision, Holder, Selector};
+use crate::ir::{
+    Cardinality, CounterKind, CounterOperation, Decision, Holder, Int, Selector, number_bounds,
+};
+use alloc::collections::BTreeSet;
 
 pub(super) const fn holder() -> Holder {
     Holder::Object {
@@ -7,24 +10,34 @@ pub(super) const fn holder() -> Holder {
     }
 }
 
-pub(super) fn change(
-    value: &ast::CounterChange,
-    holder: Holder,
+fn signed_change(
+    delta: Expr<Int>,
     path: &str,
-) -> Result<Action, LoweringError> {
-    let amount = value.delta.checked_abs().ok_or_else(|| unsupported(path))?;
-    Ok(Action::Counter {
-        holder,
-        kind: CounterKind(value.name.clone()),
-        operation: if value.delta < 0 {
-            CounterOperation::Remove {}
-        } else {
-            CounterOperation::Add {}
-        },
-        amount: Expr::Literal(Nat(
-            u64::try_from(amount).map_err(|_private| unsupported(path))?
-        )),
-    })
+) -> Result<(CounterOperation, Expr<Nat>), LoweringError> {
+    use crate::ir::{Arithmetic, IntOperation, NatOperation};
+    let bounds = number_bounds::integer(&delta);
+    let (operation, value) = if bounds.lower >= 0 {
+        if let Expr::Compute(operation) = &delta
+            && let IntOperation::FromNat { value } = operation.as_ref()
+        {
+            return Ok((CounterOperation::Add {}, value.clone()));
+        }
+        (CounterOperation::Add {}, delta)
+    } else if bounds.upper <= 0 {
+        (
+            CounterOperation::Remove {},
+            Expr::Compute(Box::new(IntOperation::Arithmetic {
+                operation: Arithmetic::Subtract,
+                arguments: vec![Expr::Literal(Int(0)), delta],
+            })),
+        )
+    } else {
+        return Err(unsupported(path));
+    };
+    Ok((
+        operation,
+        Expr::Compute(Box::new(NatOperation::CheckedInt { value })),
+    ))
 }
 
 pub(super) fn cost(
@@ -132,6 +145,36 @@ fn require_counter(
     reason = "Counter lowering shares the ability binding environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn counter_change(
+        &mut self,
+        value: &ast::CounterChange,
+        holder: Holder,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let (operation, amount) = if let ast::Number::Literal(delta) = value.delta {
+            let amount = delta.checked_abs().ok_or_else(|| unsupported(path))?;
+            (
+                if delta < 0 {
+                    CounterOperation::Remove {}
+                } else {
+                    CounterOperation::Add {}
+                },
+                Expr::Literal(Nat(
+                    u64::try_from(amount).map_err(|_private| unsupported(path))?
+                )),
+            )
+        } else {
+            let delta = self.number(&value.delta, path, &mut BTreeSet::new())?;
+            signed_change(delta, path)?
+        };
+        Ok(Action::Counter {
+            holder,
+            kind: CounterKind(value.name.clone()),
+            operation,
+            amount,
+        })
+    }
+
     pub(super) fn counter_step(
         &mut self,
         value: &ast::CounterChange,
@@ -168,7 +211,7 @@ impl BodyContext<'_> {
                                     source: origin.clone(),
                                     precondition: None,
                                     context: InstructionContext::Effect,
-                                    action: change(
+                                    action: self.counter_change(
                                         value,
                                         Holder::Object {
                                             object: ObjectOperand::Bound { binding },

@@ -1,6 +1,6 @@
 //! Conservative bounds describe successful checked results, never runtime clamping.
 
-use super::Arithmetic;
+use super::{Arithmetic, Expr, Int, IntOperation};
 
 #[derive(Clone, Copy)]
 pub(crate) struct Bounds {
@@ -60,5 +60,62 @@ impl Bounds {
                 return None;
             }
         })
+    }
+}
+
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Opaque signed readers have no structural sign proof."
+)]
+pub(crate) fn integer(expression: &Expr<Int>) -> Bounds {
+    let unknown = Bounds {
+        lower: i64::MIN,
+        upper: i64::MAX,
+    };
+    match expression {
+        Expr::Literal(Int(value)) => Bounds::point(*value),
+        Expr::Compute(operation) => match operation.as_ref() {
+            IntOperation::FromNat { value } => {
+                if let Expr::Literal(value) = value
+                    && let Ok(value) = i64::try_from(value.0)
+                {
+                    return Bounds::point(value);
+                }
+                Bounds {
+                    lower: 0,
+                    upper: i64::MAX,
+                }
+            }
+            IntOperation::Arithmetic {
+                operation,
+                arguments,
+            } => {
+                let valid = match operation {
+                    Arithmetic::Minimum | Arithmetic::Maximum => !arguments.is_empty(),
+                    Arithmetic::HalfUp => false,
+                    Arithmetic::Add
+                    | Arithmetic::Subtract
+                    | Arithmetic::Multiply
+                    | Arithmetic::FloorDivide => arguments.len() == 2,
+                };
+                if !valid {
+                    return unknown;
+                }
+                let mut values = arguments.iter().map(integer);
+                let Some(first) = values.next() else {
+                    return unknown;
+                };
+                values
+                    .try_fold(first, |left, right| left.binary(*operation, right))
+                    .unwrap_or(unknown)
+            }
+            IntOperation::Conditional {
+                then_value,
+                else_value,
+                ..
+            } => integer(then_value).union(integer(else_value)),
+            _ => unknown,
+        },
+        Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => unknown,
     }
 }
