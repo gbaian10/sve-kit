@@ -8,8 +8,8 @@ use crate::ir::events::fusion;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
+use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::source_link::SourceLink;
-use crate::ir::history_turn::{discarded_plan, played_by, played_filter, subject_plan, ub_plan};
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
 use crate::ir::{ZoneFrozen, ZoneKind, ZoneOperation, ZoneRef};
 macro_rules! projected_equality {
@@ -838,8 +838,9 @@ impl Checker {
     }
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
+        let compiled = HistoryPlan::compile(query);
         if let EventPattern::StatChange { binding, .. } = &query.pattern {
-            let Some(plan) = super::super::history_turn::public::stat_gain_plan(query) else {
+            let Some(HistoryPlan::StatGain(plan)) = &compiled else {
                 return self.reject();
             };
             return self.isolated(|checker| {
@@ -848,7 +849,7 @@ impl Checker {
                 checker.define(plan.facet, BindingKind::Value)
             });
         }
-        if super::super::history_turn::public::banished_plan(query).is_some()
+        if matches!(&compiled, Some(HistoryPlan::Lesson(_)))
             && let EventPattern::Banish { binding, .. } = &query.pattern
         {
             return self.isolated(|checker| checker.define(*binding, BindingKind::Value));
@@ -857,33 +858,33 @@ impl Checker {
             self.without_keyword_filter(predicate)?;
         }
         if let EventPattern::Discard { binding, predicate } = &query.pattern {
-            return if discarded_plan(query) {
+            return if matches!(&compiled, Some(HistoryPlan::Discarded)) {
                 self.local_value(*binding, predicate)
             } else {
                 self.reject()
             };
         }
-        if ub_plan(query).is_some()
+        if matches!(&compiled, Some(HistoryPlan::Ub { .. }))
             && let EventPattern::UbActivated { binding, predicate } = &query.pattern
         {
             return self.local_value(*binding, predicate);
         }
-        if played_by(query).is_some()
+        if matches!(&compiled, Some(HistoryPlan::Played(_)))
             && let EventPattern::Play { binding, predicate } = &query.pattern
         {
             return self.local_value(*binding, predicate);
         }
         if let EventPattern::Play { binding, .. } = &query.pattern {
-            let Some((_, card)) = played_filter(query) else {
+            let Some(HistoryPlan::PlayedFiltered { card, .. }) = &compiled else {
                 return self.reject();
             };
             return self.isolated(|checker| {
                 checker.define(*binding, BindingKind::Value)?;
-                checker.local_value(card, &Expr::Literal(Bool(true)))
+                checker.local_value(*card, &Expr::Literal(Bool(true)))
             });
         }
         self.history_window(&query.window, query.include_execution)?;
-        if subject_plan(query).is_some() {
+        if matches!(&compiled, Some(HistoryPlan::Subject { .. })) {
             return self.isolated(|checker| {
                 if let EventPattern::Attack { binding, .. } = &query.pattern {
                     checker.define(*binding, BindingKind::Value)

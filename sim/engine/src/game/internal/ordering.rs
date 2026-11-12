@@ -7,10 +7,9 @@ use crate::game::player::Viewer;
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
-use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
-use crate::ir::history_turn::{life_plan, life_sum_plan, played_filter, subject_plan};
+use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
 use crate::ir::observation::{self, Consumer, LeafKind, Shape};
 use crate::ir::prevention;
 use crate::ir::reveal_until as reveal_shape;
@@ -573,7 +572,7 @@ fn mask_public_number(number: &mut Expr<Int>) {
         *number = Expr::Literal(Int(0));
         return;
     }
-    if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if life_sum_plan(query).is_some()))
+    if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if matches!(NumericHistoryPlan::compile(query), Some(NumericHistoryPlan::LifeSum(_)))))
     {
         *number = Expr::Literal(Int(0));
         return;
@@ -618,7 +617,7 @@ fn mask_public_natural(value: &mut Expr<Nat>) {
         *value = Expr::Literal(Nat(0));
         return;
     }
-    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if subject_plan(query).is_some() || life_plan(query).is_some() || played_filter(query).is_some() || ir_dice::history(query).is_some()))
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if matches!(HistoryPlan::compile(query), Some(HistoryPlan::Subject { .. } | HistoryPlan::Life(_) | HistoryPlan::PlayedFiltered { .. } | HistoryPlan::Dice(_)))))
     {
         *value = Expr::Literal(Nat(0));
         return;

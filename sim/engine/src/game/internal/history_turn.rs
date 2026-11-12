@@ -4,29 +4,34 @@ use super::observation::ObjectLink;
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
 use crate::game::player::Viewer;
 use crate::game::player::observation::TurnHistory;
-use crate::ir::dice as ir_dice;
 use crate::ir::events::change::StatFilter;
 use crate::ir::events::life::LifeFilter;
-use crate::ir::events::subject::SubjectInformation;
+use crate::ir::events::subject::{SubjectFilter, SubjectInformation};
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::history_turn::{
-    PlayedBy, discarded_plan, life_plan, life_sum_plan, played_by, played_filter, ub_plan,
+    HistoryPlan, NumericHistoryPlan, PlayedBy, PlayedHistoryFilter, SubjectHistoryKind,
 };
-use crate::ir::history_turn::{SubjectHistoryKind, subject_plan};
 use crate::ir::{Action, Bool, Control, Expr, Node, Program};
-use crate::ir::{
-    CardKind, CardName, ClassId, HistoryCount, Int, NumericHistoryQuery, Selector, TraitId,
-};
+use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, Selector, TraitId};
 use crate::ir::{
     EventPayload, ObjectOperand, ObjectRef, PlayerId, RuntimeDamageRecipient, RuntimeHolder, Stat,
 };
-use crate::ir::{ExecutionRef, HistoryQuery, Location, PlayerRef, Requirement, Requirements};
+use crate::ir::{ExecutionRef, Location, PlayerRef, Requirement, Requirements};
 use alloc::collections::BTreeSet;
 use core::iter::once;
 use core::slice::from_ref;
 use serde::{Deserialize, Serialize};
+
+fn saved_kind(kind: &str) -> Result<CardKind> {
+    match kind {
+        "follower" => Ok(CardKind::Follower),
+        "spell" => Ok(CardKind::Spell),
+        "amulet" => Ok(CardKind::Amulet),
+        _ => Err(invalid("invalid saved history kind")),
+    }
+}
 
 /// The current-turn stat history only needs the positive facets for each committed event.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -38,11 +43,7 @@ pub(in crate::game) struct StatGainHistoryFact {
     life: bool,
 }
 
-pub(super) fn stat_gain_exists(
-    execution: &Execution,
-    game: &Game,
-    plan: &StatFilter,
-) -> Result<Bool> {
+fn stat_gain_exists(execution: &Execution, game: &Game, plan: &StatFilter) -> Result<Bool> {
     let holder = execution.object(game, &ObjectOperand::SourceHolder {})?;
     Ok(Bool(game.state.ir_stat_gain_history.iter().any(|fact| {
         fact.object == holder.id.0
@@ -80,12 +81,7 @@ impl Game {
                         seat: fact.controller,
                     })?)?,
                     active: viewer(seat_name(PlayerId { seat: fact.active })?)?,
-                    kind: match fact.kind.as_str() {
-                        "follower" => CardKind::Follower,
-                        "spell" => CardKind::Spell,
-                        "amulet" => CardKind::Amulet,
-                        _ => return Err(invalid("history card kind")),
-                    },
+                    kind: saved_kind(&fact.kind)?,
                     class: (!fact.class.is_empty()).then(|| fact.class.clone()),
                     traits: fact.traits.clone(),
                     names: fact.names.clone(),
@@ -218,27 +214,41 @@ pub(super) fn public_location(requirements: &Requirements, location: &Location) 
 }
 
 pub(super) fn check_lesson_condition(game: &Game, condition: &Expr<Bool>) -> Result<()> {
-    if let Some(name) = banished_condition(condition)
-        && (!game.catalog.rule_bindings.has_resource("lesson_item")
-            || !game
-                .catalog
-                .rule_bindings
-                .matches_resource("lesson_item", from_ref(&name.0))?)
+    if let Some(name) = banished_condition(condition) {
+        check_lesson_resource(game, name)?;
+    }
+    Ok(())
+}
+
+fn check_lesson_resource(game: &Game, name: &CardName) -> Result<()> {
+    if !game.catalog.rule_bindings.has_resource("lesson_item")
+        || !game
+            .catalog
+            .rule_bindings
+            .matches_resource("lesson_item", from_ref(&name.0))?
     {
         return Err(unsupported("history name is not the bound lesson resource"));
     }
     Ok(())
 }
 
-pub(super) fn lesson_exists(
-    execution: &Execution,
-    game: &Game,
-    condition: &Expr<Bool>,
-) -> Result<Bool> {
-    check_lesson_condition(game, condition)?;
-    Ok(Bool(
-        committed_counter(game, execution.context.controller, "magic_item_banished")? > 0,
-    ))
+pub(super) fn exists(execution: &Execution, game: &Game, plan: &HistoryPlan<'_>) -> Result<Bool> {
+    match plan {
+        HistoryPlan::StatGain(filter) => stat_gain_exists(execution, game, filter),
+        HistoryPlan::Lesson(name) => {
+            check_lesson_resource(game, name)?;
+            Ok(Bool(
+                committed_counter(game, execution.context.controller, "magic_item_banished")? > 0,
+            ))
+        }
+        HistoryPlan::Dice(_)
+        | HistoryPlan::Discarded
+        | HistoryPlan::Life(_)
+        | HistoryPlan::Ub { .. }
+        | HistoryPlan::Played(_)
+        | HistoryPlan::PlayedFiltered { .. }
+        | HistoryPlan::Subject { .. } => Err(unsupported("boolean expression")),
+    }
 }
 
 pub(super) fn mask_public_history(program: &mut Program) {
@@ -269,7 +279,12 @@ fn committed_counter(game: &Game, player: PlayerId, name: &str) -> Result<u64> {
     u64::try_from(count).map_err(invalid)
 }
 
-fn count(execution: &Execution, game: &Game, player: &PlayerRef, pending: bool) -> Result<Nat> {
+fn played_count(
+    execution: &Execution,
+    game: &Game,
+    player: &PlayerRef,
+    pending: bool,
+) -> Result<Nat> {
     let player = execution.player(game, player)?;
     let mut count = committed_counter(game, player, "cards_played")?;
     // CR 13.2 includes the card whose formal play is being checked, before it commits.
@@ -297,71 +312,53 @@ pub(super) fn combo(
     if reference != (ExecutionRef::Current {}) {
         return Err(unsupported("Combo execution"));
     }
-    count(execution, game, player, true)
+    played_count(execution, game, player, true)
 }
 
-pub(super) fn played(execution: &Execution, game: &Game, query: &HistoryQuery) -> Result<Nat> {
-    if let Some((plan, _)) = played_filter(query) {
-        let controller = execution.context.controller;
-        let all = game
-            .state
-            .ir_subject_history
-            .iter()
-            .filter(|fact| {
-                fact.event == SubjectHistoryEvent::Play && fact.controller == controller.seat
-            })
-            .collect::<Vec<_>>();
-        if u64::try_from(all.len()).map_err(invalid)?
-            != committed_counter(game, controller, "cards_played")?
-        {
-            return Err(unsupported("incomplete filtered played-card history"));
-        }
-        let filters = plan.subjects();
-        let mut count = 0_u64;
-        for fact in all {
-            let kind = match fact.kind.as_str() {
-                "follower" => CardKind::Follower,
-                "spell" => CardKind::Spell,
-                "amulet" => CardKind::Amulet,
-                _ => return Err(invalid("invalid saved played-card kind")),
-            };
-            let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
-            let information = SubjectInformation {
-                original_cost: None,
-                keywords: &[],
-                kind: Some(kind),
-                traits: &traits,
-                names: &[],
-                class: None,
-            };
-            if filters.iter().any(|filter| {
-                filter.matches_information(
-                    &information,
-                    false,
-                    controller,
-                    controller,
-                    PlayerId { seat: fact.active },
-                    fact.token,
-                )
-            }) {
-                count = count
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("played-card count overflow"))?;
-            }
-        }
-        return Ok(Nat(count));
-    }
-    if let PlayedBy::Player(player) = played_by(query)
-        .ok_or_else(|| unsupported("unfiltered current-turn played-card history"))?
+fn filtered_played(execution: &Execution, game: &Game, plan: &PlayedHistoryFilter) -> Result<Nat> {
+    let controller = execution.context.controller;
+    let all = game
+        .state
+        .ir_subject_history
+        .iter()
+        .filter(|fact| {
+            fact.event == SubjectHistoryEvent::Play && fact.controller == controller.seat
+        })
+        .collect::<Vec<_>>();
+    if u64::try_from(all.len()).map_err(invalid)?
+        != committed_counter(game, controller, "cards_played")?
     {
-        count(execution, game, &player, false)
-    } else {
-        let own = count(execution, game, &PlayerRef::Controller {}, false)?.0;
-        let other = count(execution, game, &opponent(), false)?.0;
-        own.checked_add(other)
-            .map(Nat)
-            .ok_or_else(|| invalid("played-card count overflow"))
+        return Err(unsupported("incomplete filtered played-card history"));
     }
+    let filters = plan.subjects();
+    let mut count = 0_u64;
+    for fact in all {
+        let kind = saved_kind(&fact.kind)?;
+        let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
+        let information = SubjectInformation {
+            original_cost: None,
+            keywords: &[],
+            kind: Some(kind),
+            traits: &traits,
+            names: &[],
+            class: None,
+        };
+        if filters.iter().any(|filter| {
+            filter.matches_information(
+                &information,
+                false,
+                controller,
+                controller,
+                PlayerId { seat: fact.active },
+                fact.token,
+            )
+        }) {
+            count = count
+                .checked_add(1)
+                .ok_or_else(|| invalid("played-card count overflow"))?;
+        }
+    }
+    Ok(Nat(count))
 }
 
 /// Only committed IR executions can exclude their own fact from the shared counter.
@@ -475,76 +472,94 @@ fn ub_count(
     Ok(Nat(total))
 }
 
-pub(super) fn subjects(
+pub(super) fn count(
     execution: &Execution,
     game: &Game,
-    query: &HistoryQuery,
+    plan: &HistoryPlan<'_>,
     count: HistoryCount,
 ) -> Result<Nat> {
-    if let Some(filter) = ir_dice::history(query) {
-        if count != HistoryCount::Facts {
-            return Err(unsupported("dice history subject count"));
+    match plan {
+        HistoryPlan::Dice(filter) => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("dice history subject count"));
+            }
+            super::dice::history_count(execution, game, filter.face)
         }
-        return super::dice::history_count(execution, game, filter.face);
+        HistoryPlan::Discarded => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("discard history subject count"));
+            }
+            committed_counter(game, execution.context.controller, "discarded").map(Nat)
+        }
+        HistoryPlan::Life(filter) => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("life history subject count"));
+            }
+            let counter = if filter.up == Some(true) {
+                "leader_hp_increase_count"
+            } else {
+                "leader_hp_decreased"
+            };
+            u64::try_from(life_counter(execution, game, *filter, counter)?)
+                .map(Nat)
+                .map_err(invalid)
+        }
+        HistoryPlan::Ub {
+            player,
+            exclude_current,
+        } => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("UB history subject count"));
+            }
+            ub_count(execution, game, player.as_ref(), *exclude_current)
+        }
+        HistoryPlan::Subject { event, filter } => subject_count_at(
+            game,
+            execution.ability,
+            execution.context.controller,
+            *event,
+            filter,
+            count,
+        ),
+        HistoryPlan::PlayedFiltered { filter, .. } => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("played history subject count"));
+            }
+            filtered_played(execution, game, filter)
+        }
+        HistoryPlan::Played(by) => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("played history subject count"));
+            }
+            match by {
+                PlayedBy::Player(player) => played_count(execution, game, player, false),
+                PlayedBy::Any => {
+                    let own = played_count(execution, game, &PlayerRef::Controller {}, false)?.0;
+                    let other = played_count(execution, game, &opponent(), false)?.0;
+                    own.checked_add(other)
+                        .map(Nat)
+                        .ok_or_else(|| invalid("played-card count overflow"))
+                }
+            }
+        }
+        HistoryPlan::StatGain(_) | HistoryPlan::Lesson(_) => {
+            Err(unsupported(if count == HistoryCount::Facts {
+                "unfiltered current-turn played-card history"
+            } else {
+                "played history subject count"
+            }))
+        }
     }
-    if discarded_plan(query) {
-        if count != HistoryCount::Facts {
-            return Err(unsupported("discard history subject count"));
-        }
-        return committed_counter(game, execution.context.controller, "discarded").map(Nat);
-    }
-    if let Some(filter) = life_plan(query) {
-        if count != HistoryCount::Facts {
-            return Err(unsupported("life history subject count"));
-        }
-        let counter = if filter.up == Some(true) {
-            "leader_hp_increase_count"
-        } else {
-            "leader_hp_decreased"
-        };
-        return u64::try_from(life_counter(execution, game, filter, counter)?)
-            .map(Nat)
-            .map_err(invalid);
-    }
-    if let Some((player, exclude_current)) = ub_plan(query) {
-        if count != HistoryCount::Facts {
-            return Err(unsupported("UB history subject count"));
-        }
-        return ub_count(execution, game, player.as_ref(), exclude_current);
-    }
-    subject_count(execution, game, query, count)
-}
-
-fn subject_count(
-    execution: &Execution,
-    game: &Game,
-    query: &HistoryQuery,
-    count: HistoryCount,
-) -> Result<Nat> {
-    let Some(_) = subject_plan(query) else {
-        if count != HistoryCount::Facts {
-            return Err(unsupported("played history subject count"));
-        }
-        return played(execution, game, query);
-    };
-    subject_count_at(
-        game,
-        execution.ability,
-        execution.context.controller,
-        query,
-        count,
-    )
 }
 
 pub(super) fn subject_count_at(
     game: &Game,
     source: Option<super::RuntimeAbilitySource>,
     controller: PlayerId,
-    query: &HistoryQuery,
+    event: SubjectHistoryKind,
+    filter: &SubjectFilter,
     count: HistoryCount,
 ) -> Result<Nat> {
-    let (event, filter) =
-        subject_plan(query).ok_or_else(|| unsupported("subject history query"))?;
     let mut facts = 0_u64;
     let mut identities = BTreeSet::new();
     for fact in &game.state.ir_subject_history {
@@ -567,12 +582,7 @@ pub(super) fn subject_count_at(
         if !eligible {
             continue;
         }
-        let kind = match fact.kind.as_str() {
-            "follower" => CardKind::Follower,
-            "spell" => CardKind::Spell,
-            "amulet" => CardKind::Amulet,
-            _ => return Err(invalid("invalid saved history kind")),
-        };
+        let kind = saved_kind(&fact.kind)?;
         let class = ClassId(fact.class.clone());
         let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
         if filter.name.is_some() && fact.names.is_none() {
@@ -642,13 +652,12 @@ fn life_counter(
     Ok(value)
 }
 
-pub(super) fn life_sum(
-    execution: &Execution,
-    game: &Game,
-    query: &NumericHistoryQuery,
-) -> Result<Int> {
-    let filter = life_sum_plan(query).ok_or_else(|| unsupported("life history sum"))?;
-    life_counter(execution, game, filter, "leader_hp_increased").map(Int)
+pub(super) fn sum(execution: &Execution, game: &Game, plan: &NumericHistoryPlan) -> Result<Int> {
+    match plan {
+        NumericHistoryPlan::LifeSum(filter) => {
+            life_counter(execution, game, *filter, "leader_hp_increased").map(Int)
+        }
+    }
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

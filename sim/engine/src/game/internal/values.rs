@@ -10,10 +10,11 @@ use crate::ir::AttackEvent;
 use crate::ir::ObjectRelation;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
-use crate::ir::history_turn::public::{banished_plan, damaged_plan, stat_gain_plan};
+use crate::ir::history_turn::public::damaged_plan;
+use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
-    ExecutionRef, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
+    ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
 };
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
@@ -554,7 +555,11 @@ impl Execution {
                         PlayerResource::Sep => player.sep,
                     }))
                 }
-                IntRead::HistorySum { query } => super::history_turn::life_sum(self, game, query),
+                IntRead::HistorySum { query } => {
+                    let plan = NumericHistoryPlan::compile(query)
+                        .ok_or_else(|| unsupported("life history sum"))?;
+                    super::history_turn::sum(self, game, &plan)
+                }
             },
             Expr::Frozen(frozen) => match frozen.as_ref() {
                 IntFrozen::DamageAmount { event } => {
@@ -683,7 +688,14 @@ impl Execution {
                 super::history_turn::combo(self, game, player, *execution)
             }
             NatRead::HistoryCount { query, count } => {
-                super::history_turn::subjects(self, game, query, *count)
+                let plan = HistoryPlan::compile(query).ok_or_else(|| {
+                    unsupported(if *count == HistoryCount::Facts {
+                        "unfiltered current-turn played-card history"
+                    } else {
+                        "played history subject count"
+                    })
+                })?;
+                super::history_turn::count(self, game, &plan, *count)
             }
             NatRead::ZoneCount {
                 selector:
@@ -1062,13 +1074,11 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
-            BoolRead::HistoryExists { query } if banished_plan(query).is_some() => {
-                super::history_turn::lesson_exists(self, game, &Expr::Live(Box::new(read.clone())))
+            BoolRead::HistoryExists { query } => {
+                let plan =
+                    HistoryPlan::compile(query).ok_or_else(|| unsupported("boolean expression"))?;
+                super::history_turn::exists(self, game, &plan)
             }
-            BoolRead::HistoryExists { query } => stat_gain_plan(query).map_or_else(
-                || Err(unsupported("boolean expression")),
-                |plan| super::history_turn::stat_gain_exists(self, game, &plan),
-            ),
             BoolRead::FieldEntryOrigin {
                 object: ObjectOperand::SourceHolder {},
                 zone: ZoneKind::Cemetery,

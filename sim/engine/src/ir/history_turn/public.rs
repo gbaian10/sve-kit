@@ -32,7 +32,7 @@ pub(crate) fn stat_gain_query(
     })
 }
 
-pub(crate) fn stat_gain_plan(query: &HistoryQuery) -> Option<StatFilter> {
+pub(super) fn stat_gain_plan(query: &HistoryQuery) -> Option<StatFilter> {
     let EventPattern::StatChange { binding, predicate } = &query.pattern else {
         return None;
     };
@@ -76,7 +76,7 @@ pub(crate) fn banished_query(event: Binding<BanishEvent>, name: CardName) -> His
     })
 }
 
-pub(crate) fn banished_plan(query: &HistoryQuery) -> Option<&CardName> {
+pub(super) fn banished_plan(query: &HistoryQuery) -> Option<&CardName> {
     let EventPattern::Banish {
         binding,
         predicate: Expr::Compute(operation),
@@ -110,7 +110,10 @@ pub(crate) fn banished_condition(condition: &Expr<Bool>) -> Option<&CardName> {
     let BoolRead::HistoryExists { query } = read.as_ref() else {
         return None;
     };
-    banished_plan(query)
+    let Some(super::HistoryPlan::Lesson(name)) = super::HistoryPlan::compile(query) else {
+        return None;
+    };
+    Some(name)
 }
 
 fn damaged_query(event: Binding<DamageEvent>, candidate: Binding<ObjectRef>) -> HistoryQuery {

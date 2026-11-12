@@ -1,6 +1,7 @@
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::player::Viewer;
+use sve_engine::ir::lowering::LoweringError;
 
 fn raw(amount: Expr<Int>, condition: Option<Expr<Bool>>) -> CardProgram {
     let source = source("unit-follower");
@@ -201,4 +202,54 @@ fn a_static_cost_condition_uses_its_providers_controller_during_quote_and_paymen
             10 - expected
         );
     }
+}
+
+fn lower_head(head: &str, body: Value) -> Result<WellFormedCardProgram, LoweringError> {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry[head] = body;
+    tree["cards"] = json!({"unit-follower":{
+        "meta":tree["cards"]["BP08-038"]["meta"],"abilities":[entry]
+    }});
+    Ok(lowerer().lower(&tree)?.remove("unit-follower").unwrap())
+}
+
+#[test]
+fn subject_and_ub_body_counts_do_not_gain_cost_permissions_from_the_shared_plan() {
+    for event in ["attacked", "evolved", "left_field", "ub_activated"] {
+        let mut query = json!({"event":event,"window":"this_turn","who":"self"});
+        if event != "ub_activated" {
+            query["sel"] = json!({"kind":"follower"});
+        }
+        lower_head(
+            "activate",
+            json!({"cost":{"pp":0},
+            "do":[{"draw":{"n":{"history_count":query}}}]}),
+        )
+        .unwrap();
+        let cost = lower_head("play", json!({"cost_delta":{"history_count":query}})).unwrap();
+        let mut game = board(&initial());
+        assert!(
+            matches!(
+                game.load_internal_card("unit-follower", &cost),
+                Err(EngineFailure::Unsupported(_))
+            ),
+            "{event} remains outside Cost"
+        );
+    }
+}
+
+#[test]
+fn stat_gain_history_remains_an_evolution_qualification_not_a_cost_or_body_condition() {
+    let condition = json!({"history":{"event":"stat_changed","window":"this_turn",
+        "where":{"ref":"this","direction":"up","stat":["power","hp"]}}});
+    lower_head("evolve", json!({"cost":{"pp":1},"usable_if":condition})).unwrap();
+    lower_head("play", json!({"cost_delta":{"if":condition,"delta":-1}})).unwrap_err();
+    lower_head(
+        "activate",
+        json!({"cost":{"pp":0},
+        "do":[{"if":{"cond":condition,"then":[{"draw":{"n":1}}]}}]}),
+    )
+    .unwrap_err();
 }
