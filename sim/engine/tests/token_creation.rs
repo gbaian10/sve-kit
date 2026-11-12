@@ -16,6 +16,8 @@ use sve_engine::ir::PlayerId;
 
 #[path = "token_creation/banish_observed.rs"]
 mod banish_observed;
+#[path = "token_creation/evolution_distribution.rs"]
+mod evolution_distribution;
 #[path = "token_creation/extra_turn.rs"]
 mod extra_turn;
 #[path = "token_creation/paid_x.rs"]

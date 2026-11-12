@@ -46,7 +46,7 @@ fn assert_selection(game: &Game, selection: &SelectionQuestion) {
     );
 }
 
-fn evolve(game: &mut Game, super_evolution: bool) -> SubmissionKind {
+pub(super) fn evolve(game: &mut Game, super_evolution: bool) -> SubmissionKind {
     evolve_with_ep(game, super_evolution, false)
 }
 
