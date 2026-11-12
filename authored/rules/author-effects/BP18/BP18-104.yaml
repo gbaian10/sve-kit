@@ -1,0 +1,68 @@
+cards:
+  BP18-104:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  not_same_name_as_this: true
+                groups:
+                  - trait: 透京
+                  - name: 戒信の六銘伝・聖士郎
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -2
+                    next_only: true
+                    when_playing:
+                      trait: 透京
+                      who: self
+                until: turn
+                who: self
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - life:
+                delta: 1
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
