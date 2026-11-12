@@ -312,3 +312,17 @@ expression 改成 current object，也不以臨時物件或 binding 取得讀取
 消耗政策也不因共用條件核心改變。Fusion 的付款前保存、成功付款後投遞仍是獨立
 queue，不放入事件讀取 context。歷史查詢保留自己的准入與保存資料政策，不因
 事件 adapter 共用核心而取得新的條件或來源。
+
+## 費用 modifier 與 While 條件
+
+卡片自身的出牌費用 modifier 與靜態費用的 While 條件，透過 `number_plan` 的 Cost policy
+編譯完整組合樹，再沿既有數值與布林求值。Cost 葉保留原有公開 selector 白名單，
+不繼承 Token 的廣義 Field selector 或任意 EffectAmount 葉；整區 Banish 張數仍可讀
+Controller 相對的任意玩家關係，Life／PpMaximum 仍可讀原有玩家。
+
+報價與正式付款都在原呼叫時點、以各自的 Execution 與當下狀態求值；
+靜態 While 使用來源 provider 的 Execution。條件為 false 時不求值該 modifier 的金額，
+負折扣合法，算術溢位仍在求值時失敗，Delta 累加後只對最終總額取零下限。
+這個計畫不消耗額度、不改付款或宣告快照；未決 X、已付結果、AtPlay 與目標／分配
+仍遵循各自的既有綁定與時點。靜態進化費用及宣告數值使用的 `public_numbers` 文法獨立保留，
+不因共用 Cost policy 而取得手牌身份或更多數值讀取權限。
