@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn a_payment_body_does_not_inherit_direct_event_subject_read_permission() {
+fn paid_continuations_can_consume_the_same_direct_event_subject() {
     let catalog = catalog();
     let subject_move = json!({"move":{"ref":"it","to":"cemetery"}});
     let payment = |steps: Value| json!({"pay":{"cost":{"act_self":true},"do":steps}});
@@ -11,7 +11,7 @@ fn a_payment_body_does_not_inherit_direct_event_subject_read_permission() {
             payment(json!([{"move":{"ref":"this","to":"cemetery"}}])),
             true,
         ),
-        (payment(json!([subject_move])), false),
+        (payment(json!([subject_move])), true),
     ] {
         let tree = equipment_played::tree(
             &json!({"auto":{
