@@ -2011,14 +2011,12 @@ impl<'definitions> BodyContext<'definitions> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
-            ast::Step::Pp(value) => {
-                numeric::resource_increase(value, super::Resource::PpCurrent, path)
-            }
+            ast::Step::Pp(value) => self.resource_increase(value, super::Resource::PpCurrent, path),
             ast::Step::Discard(value) => self.discard(value, path),
             ast::Step::PpMax(value) => {
-                numeric::resource_increase(value, super::Resource::PpMaximum, path)
+                self.resource_increase(value, super::Resource::PpMaximum, path)
             }
-            ast::Step::Ep(value) => numeric::resource_increase(value, super::Resource::Ep, path),
+            ast::Step::Ep(value) => self.resource_increase(value, super::Resource::Ep, path),
             ast::Step::Draw(draw) => self.draw(draw, path),
             ast::Step::Damage(damage) => self.damage(damage, path),
             ast::Step::Life(life) => self.life(life, path),

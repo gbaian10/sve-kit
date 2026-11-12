@@ -46,25 +46,6 @@ pub(super) fn distinct_count(
     ))
 }
 
-pub(super) fn resource_increase(
-    value: &ast::ResourceIncrease,
-    resource: Resource,
-    path: &str,
-) -> Result<Action, LoweringError> {
-    let ast::SelfPlayer::Controller = value.who;
-    if value.delta == 0 {
-        return Err(unsupported(path));
-    }
-    Ok(Action::Resource {
-        player: PlayerRef::Controller {},
-        resource,
-        operation: ResourceOperation::Add,
-        amount: Expr::Literal(Int(
-            i64::try_from(value.delta).map_err(|_private| unsupported(path))?
-        )),
-    })
-}
-
 pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duration, LoweringError> {
     Ok(Duration {
         end: match until {
@@ -103,6 +84,21 @@ fn combined(
 }
 
 impl BodyContext<'_> {
+    pub(super) fn resource_increase(
+        &mut self,
+        value: &ast::ResourceIncrease,
+        resource: Resource,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let ast::SelfPlayer::Controller = value.who;
+        Ok(Action::Resource {
+            player: PlayerRef::Controller {},
+            resource,
+            operation: ResourceOperation::Add,
+            amount: self.number(&value.delta, path, &mut BTreeSet::new())?,
+        })
+    }
+
     /// 「それのリーダー」 follows the chosen object's controller, captured when it was chosen.
     pub(super) fn life(&mut self, life: &ast::Life, path: &str) -> Result<Action, LoweringError> {
         let player = match &life.who {
