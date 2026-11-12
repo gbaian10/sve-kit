@@ -357,3 +357,34 @@ fn resolution_source_payment_rejects_nonfield_sources_and_auto_head_spelling() {
         assert_eq!(before, exact_authority(&game));
     }
 }
+
+#[test]
+fn policy_host_preserves_real_reverted_payment_without_counting_it_as_rejection() {
+    use sve_engine::host::{HostLimits, HostOutcome, PolicyHost};
+    let programs = lowerer().lower(&tree()).unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "host-revert",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.advance_player_input();
+    let mut host = PolicyHost::new(HostLimits {
+        max_submissions: 3,
+        max_retries: 0,
+    });
+    let report = host.run(&mut game);
+    assert_eq!(report.outcome, HostOutcome::StepLimit);
+    assert_eq!(report.stats.submissions, 3);
+    assert_eq!(report.stats.applied, 2);
+    assert_eq!(report.stats.reverted, 1);
+    assert_eq!(report.stats.cancelled, 0);
+    assert_eq!(report.stats.rejected, 0);
+}

@@ -16,6 +16,7 @@ pub mod ai;
 pub mod assist;
 pub mod catalog;
 pub mod game;
+pub mod host;
 pub mod ir;
 pub mod policy;
 mod random;
