@@ -58,6 +58,10 @@ impl Context {
 impl Reader for Captured<'_> {
     fn boolean(&self, property: &BooleanProperty) -> Result<bool> {
         match (property, self.context) {
+            (BooleanProperty::KnownClass, _) => match &self.information {
+                Information::Event(information) => Ok(information.class.is_some()),
+                _ => Err(unsupported("captured class availability")),
+            },
             (BooleanProperty::Controller(expected), context) => context
                 .controller()
                 .map(|controller| controller == *expected)
@@ -165,8 +169,8 @@ const fn original_cost(comparison: Comparison, value: i64) -> Tree<Atom> {
 
 fn subject(filter: &SubjectFilter, observer: PlayerId) -> Tree<Atom> {
     let mut conditions = Vec::new();
-    if let Some(cost) = filter.original_cost {
-        conditions.push(original_cost(Comparison::Equal, cost));
+    if let Some((comparison, cost)) = filter.original_cost {
+        conditions.push(original_cost(comparison, cost));
     }
     if let Some(keyword) = filter.keyword {
         conditions.push(boolean(BooleanProperty::Keyword(keyword), true));
@@ -204,11 +208,27 @@ fn subject(filter: &SubjectFilter, observer: PlayerId) -> Tree<Atom> {
     if let Some(fragment) = &filter.name_contains {
         conditions.push(Tree::Atom(Atom::Contains(fragment.0.clone())));
     }
+    if !filter.name_contains_any.is_empty() {
+        conditions.push(Tree::Or(
+            filter
+                .name_contains_any
+                .iter()
+                .map(|fragment| Tree::Atom(Atom::Contains(fragment.0.clone())))
+                .collect(),
+        ));
+    }
     if let Some(class) = &filter.class {
         conditions.push(labels(
             LabelsProperty::Class(CharacteristicView::Effective),
             vec![class.0.clone()],
         ));
+    }
+    if let Some(class) = &filter.not_class {
+        conditions.push(boolean(BooleanProperty::KnownClass, true));
+        conditions.push(Tree::Not(Box::new(labels(
+            LabelsProperty::Class(CharacteristicView::Effective),
+            vec![class.0.clone()],
+        ))));
     }
     if filter.own_turn {
         conditions.push(boolean(BooleanProperty::ActivePlayer(observer), true));

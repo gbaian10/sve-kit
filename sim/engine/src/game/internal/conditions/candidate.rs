@@ -104,6 +104,7 @@ impl Reader for Candidate<'_> {
                 };
                 Ok(actual == *expected)
             }
+            BooleanProperty::KnownClass => Err(unsupported("candidate captured class information")),
             BooleanProperty::Controller(_)
             | BooleanProperty::ActivePlayer(_)
             | BooleanProperty::SameSource => Err(unsupported("candidate event role property")),

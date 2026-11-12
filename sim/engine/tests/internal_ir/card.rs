@@ -712,6 +712,8 @@ mod life_holder;
 mod hand_discard;
 #[path = "card/resource.rs"]
 mod resource;
+#[path = "card/resource_amounts.rs"]
+mod resource_amounts;
 
 #[path = "card/reveal_hand.rs"]
 mod reveal_hand;
@@ -942,3 +944,6 @@ mod receipt_field_costs;
 
 #[path = "card/counter_amounts.rs"]
 mod counter_amounts;
+
+#[path = "card/cost_number_plan.rs"]
+mod cost_number_plan;

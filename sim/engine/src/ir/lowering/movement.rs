@@ -232,8 +232,13 @@ pub(super) fn movement_filter(
     path: &str,
     support: FilterSupport,
 ) -> Result<SubjectFilter, LoweringError> {
+    if subject.is_some_and(|sel| sel.r#where.is_some()) {
+        return Err(unsupported(path));
+    }
     if subject.is_some_and(|sel| {
-        sel.r#where.is_some() || sel.orig_cost_le.is_some() || sel.orig_cost_ge.is_some()
+        sel.not_class.as_ref().is_some_and(|class| {
+            class.is_empty() || sel.class.is_some() || !matches!(support, FilterSupport::EntryCost)
+        })
     }) {
         return Err(unsupported(path));
     }
@@ -260,14 +265,31 @@ pub(super) fn movement_filter(
     }) {
         return Err(unsupported(path));
     }
-    let original_cost = subject.and_then(|sel| sel.orig_cost_eq);
+    let bounds = subject
+        .map_or([None, None, None], |sel| {
+            [
+                sel.orig_cost_eq.map(|n| (Comparison::Equal, n)),
+                sel.orig_cost_le.map(|n| (Comparison::LessEqual, n)),
+                sel.orig_cost_ge.map(|n| (Comparison::GreaterEqual, n)),
+            ]
+        })
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+    let original_cost = match bounds.as_slice() {
+        [] => None,
+        [(comparison, cost)] => Some((
+            *comparison,
+            i64::try_from(*cost).map_err(|_overflow| unsupported(path))?,
+        )),
+        _ => return Err(unsupported(path)),
+    };
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     let allow_original_cost = matches!(
         support,
         FilterSupport::OriginalCost | FilterSupport::EntryCost
     );
-    if original_cost == Some(0)
-        || (original_cost.is_some() && !allow_original_cost)
+    if (original_cost.is_some() && !allow_original_cost)
         || keyword.is_some_and(|keyword| {
             keyword != KeywordId::Ward || !matches!(support, FilterSupport::CemeteryWard)
         })
@@ -276,10 +298,7 @@ pub(super) fn movement_filter(
     }
     Ok(SubjectFilter {
         keyword,
-        original_cost: original_cost
-            .map(i64::try_from)
-            .transpose()
-            .map_err(|_overflow| unsupported(path))?,
+        original_cost,
         own,
         itself: if itself {
             Some(true)
@@ -291,12 +310,7 @@ pub(super) fn movement_filter(
         },
         kind: subject
             .and_then(|sel| sel.kind.as_ref())
-            .map(|kind| match kind {
-                ast::SearchKind::Follower => CardKind::Follower,
-                ast::SearchKind::Spell => CardKind::Spell,
-                ast::SearchKind::Amulet => CardKind::Amulet,
-                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
-            }),
+            .map(super::search::card_kind),
         trait_id: subject
             .and_then(|sel| sel.trait_id.as_ref())
             .map(|id| TraitId(id.clone())),
@@ -307,6 +321,10 @@ pub(super) fn movement_filter(
         name_contains: subject
             .and_then(|sel| sel.name_contains.as_ref())
             .map(|fragment| CardName(fragment.clone())),
+        name_contains_any: Vec::new(),
+        not_class: subject
+            .and_then(|sel| sel.not_class.as_ref())
+            .map(|class| ClassId(class.clone())),
         class: subject
             .and_then(|sel| sel.class.as_ref())
             .map(|class| ClassId(class.clone())),
@@ -324,9 +342,10 @@ pub(super) fn played(
     let (mut subject, alternate) = match &entry.sel {
         None => (None, None),
         Some(ast::PlayedSubject::Single(subject)) => (Some(subject.clone()), None),
-        Some(ast::PlayedSubject::Union {
-            any_of: [first, second],
-        }) => (Some(first.clone()), Some(second)),
+        Some(ast::PlayedSubject::Union { any_of }) => {
+            let [first, second] = any_of.as_ref();
+            (Some(first.clone()), Some(second))
+        }
     };
     let mut original = None;
     let mut traits_any = Vec::new();
@@ -392,5 +411,55 @@ pub(super) fn played(
     Ok(EventPattern::Play {
         binding: event,
         predicate: plan.predicate(event),
+    })
+}
+
+pub(super) fn entry_union(
+    entries: &[ast::PhaseSubscription],
+    event_id: u64,
+    scope: ScopeId,
+    path: &str,
+) -> Result<EventPattern, LoweringError> {
+    if entries.len() < 2 {
+        return Err(unsupported(path));
+    }
+    let mut common = None;
+    let mut fragments = Vec::new();
+    for entry in entries {
+        let ast::PhaseSubscription::EnterField(entry) = entry else {
+            return Err(unsupported(path));
+        };
+        let mut filter = movement_filter(
+            entry
+                .who
+                .as_ref()
+                .map(|side| matches!(side, ast::EntryPlayer::Controller)),
+            entry.reference.is_some(),
+            entry.sel.as_ref(),
+            entry.during.is_some(),
+            path,
+            FilterSupport::EntryCost,
+        )?;
+        let fragment = filter
+            .name_contains
+            .take()
+            .ok_or_else(|| unsupported(path))?;
+        if fragments.contains(&fragment) || common.as_ref().is_some_and(|common| *common != filter)
+        {
+            return Err(unsupported(path));
+        }
+        common = Some(filter);
+        fragments.push(fragment);
+    }
+    let mut filter = common.ok_or_else(|| unsupported(path))?;
+    filter.name_contains_any = fragments;
+    let event = Binding::new(event_id, scope);
+    let predicate = filter.predicate(SubjectFields::Entry(event));
+    if SubjectFilter::parse(SubjectFields::Entry(event), &predicate).is_none() {
+        return Err(unsupported(path));
+    }
+    Ok(EventPattern::EnterField {
+        binding: event,
+        predicate,
     })
 }

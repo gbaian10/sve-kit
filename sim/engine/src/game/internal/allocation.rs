@@ -7,9 +7,9 @@ use crate::game::player::Viewer;
 use super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name, unsupported};
 use crate::game::player::QuestionPurpose;
 use crate::ir::{
-    Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Nat,
-    PlayerId, RecipientSet, ResolvedDamageAllocation, ResolvedRecipients, RuntimeDamageRecipient,
-    ScopeId, SnapshotId,
+    Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Expr,
+    Nat, PlayerId, RecipientSet, ResolvedDamageAllocation, ResolvedRecipients,
+    RuntimeDamageRecipient, ScopeId, SnapshotId,
 };
 use serde_json::{Value, json};
 
@@ -101,6 +101,18 @@ impl DistributionWait {
 pub(super) struct Allocation {
     occurrence: DistributionWait,
     answer: Vec<ResolvedDamageAllocation>,
+}
+
+pub(super) fn feasible(
+    execution: &Execution,
+    game: &Game,
+    recipients: &RecipientSet,
+    total: &Expr<Nat>,
+) -> Result<bool> {
+    let recipients = execution.recipients(game, recipients)?;
+    let total = execution.natural(game, total)?;
+    Ok(recipients.members().is_empty()
+        || u64::try_from(recipients.members().len()).map_err(invalid)? <= total.0)
 }
 
 pub(super) fn packet(domain: &DistributionDomain) -> Value {

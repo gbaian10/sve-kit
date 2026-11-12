@@ -244,8 +244,7 @@ fn equality_accepts_known_zero_and_two_but_rejects_neighboring_costs() {
 }
 
 #[test]
-fn only_played_headers_accept_original_cost_ranges_and_trait_unions() {
-    // enter_field also reads a trait union (BP21-008); its cost ranges stay Played-only.
+fn event_cost_ranges_keep_entry_shapes_and_trait_unions_closed() {
     let mut entry = equipment_played::tree(
         &json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"traits_any":["宴楽","魔法使い"]}}},"do":[{"life":{"who":"self","delta":1}}]}}),
         "unit-follower",
@@ -273,11 +272,17 @@ fn only_played_headers_accept_original_cost_ranges_and_trait_unions() {
                 continue;
             }
             let mut tree = baseline.clone();
+            let accepts_departure_cost =
+                header == "left_field" && filter.get("traits_any").is_none();
             tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"][header]["sel"] = filter;
-            assert!(matches!(
-                lowerer().lower(&tree).unwrap_err().code,
-                "unsupported_construct" | "invalid_expanded"
-            ));
+            if accepts_departure_cost {
+                lowerer().lower(&tree).unwrap();
+            } else {
+                assert!(matches!(
+                    lowerer().lower(&tree).unwrap_err().code,
+                    "unsupported_construct" | "invalid_expanded"
+                ));
+            }
         }
     }
     for filter in [

@@ -748,7 +748,7 @@ pub(super) enum LifeHolder {
 #[serde(deny_unknown_fields)]
 pub(super) struct ResourceIncrease {
     pub who: SelfPlayer,
-    pub delta: u64,
+    pub delta: Number,
 }
 
 #[derive(Deserialize)]
@@ -2961,7 +2961,7 @@ pub(super) struct PlayedSubscription {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PlayedSubject {
     Single(MovementSubject),
-    Union { any_of: [MovementSubject; 2] },
+    Union { any_of: Box<[MovementSubject; 2]> },
 }
 impl Auto {
     /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.
@@ -3026,6 +3026,7 @@ pub(super) struct MovementSubject {
     pub traits_any: Option<Vec<String>>,
     pub keyword: Option<FilterKeyword>,
     pub class: Option<String>,
+    pub not_class: Option<String>,
     pub kind: Option<SearchKind>,
     #[serde(rename = "trait")]
     pub trait_id: Option<String>,

@@ -1453,11 +1453,7 @@ impl Game {
             recipients, total, ..
         } = &first.domain
         {
-            let recipients = candidate.recipients(self, recipients)?;
-            let total = candidate.natural(self, total)?;
-            if !recipients.members().is_empty()
-                && u64::try_from(recipients.members().len()).map_err(invalid)? > total.0
-            {
+            if !super::super::allocation::feasible(&candidate, self, recipients, total)? {
                 return Ok(false);
             }
             candidate.captures(self, &first.captures)?;

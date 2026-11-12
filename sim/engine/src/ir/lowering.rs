@@ -65,7 +65,7 @@ mod tokens;
 mod transfer;
 mod transform;
 
-use super::events::subject::SubjectFields;
+use super::events::subject::{SubjectFields, SubjectFilter};
 use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Arithmetic, BatchPolicy, Binding, Bool, CardProgram, Cardinality, DamageAmount, DamageFlags,
@@ -820,6 +820,11 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
                 Err(unsupported(path))
             };
         }
+        if matches!(&auto.on, ast::PhaseSubscription::AnyOf(events) if events.iter().all(|event| matches!(event, ast::PhaseSubscription::EnterField(_))))
+            && zones != [ZoneKind::Field]
+        {
+            return Err(unsupported(path));
+        }
         let cemetery = auto.cemetery_observer();
         // A card in the cemetery never observes its own entry.
         if cemetery
@@ -1044,6 +1049,13 @@ fn lowered_subscription(
         ast::PhaseSubscription::AnyOf(_) if hand_exit::is_hand_union(on) => {
             Ok(hand_exit::discard(event_id, scope))
         }
+        ast::PhaseSubscription::AnyOf(entries)
+            if entries
+                .iter()
+                .all(|entry| matches!(entry, ast::PhaseSubscription::EnterField(_))) =>
+        {
+            movement::entry_union(entries, event_id, scope, path)
+        }
         ast::PhaseSubscription::Fused(_)
         | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_) => fusion::subscription(on, ids, path, allocator),
@@ -1134,20 +1146,25 @@ fn lowered_subscription(
         ast::PhaseSubscription::Damage(entry) => Ok(combat::damaged(entry, event_id, scope)),
         ast::PhaseSubscription::EnterField(entry) => {
             let event = Binding::new(event_id, scope);
+            let fields = SubjectFields::Entry(event);
+            let predicate = movement::movement_filter(
+                entry
+                    .who
+                    .as_ref()
+                    .map(|side| matches!(side, ast::EntryPlayer::Controller)),
+                entry.reference.is_some(),
+                entry.sel.as_ref(),
+                entry.during.is_some(),
+                path,
+                movement::FilterSupport::EntryCost,
+            )?
+            .predicate(fields);
+            if SubjectFilter::parse(fields, &predicate).is_none() {
+                return Err(unsupported(path));
+            }
             Ok(EventPattern::EnterField {
                 binding: event,
-                predicate: movement::movement_filter(
-                    entry
-                        .who
-                        .as_ref()
-                        .map(|side| matches!(side, ast::EntryPlayer::Controller)),
-                    entry.reference.is_some(),
-                    entry.sel.as_ref(),
-                    entry.during.is_some(),
-                    path,
-                    movement::FilterSupport::EntryCost,
-                )?
-                .predicate(SubjectFields::Entry(event)),
+                predicate,
             })
         }
     }
@@ -2011,14 +2028,12 @@ impl<'definitions> BodyContext<'definitions> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
-            ast::Step::Pp(value) => {
-                numeric::resource_increase(value, super::Resource::PpCurrent, path)
-            }
+            ast::Step::Pp(value) => self.resource_increase(value, super::Resource::PpCurrent, path),
             ast::Step::Discard(value) => self.discard(value, path),
             ast::Step::PpMax(value) => {
-                numeric::resource_increase(value, super::Resource::PpMaximum, path)
+                self.resource_increase(value, super::Resource::PpMaximum, path)
             }
-            ast::Step::Ep(value) => numeric::resource_increase(value, super::Resource::Ep, path),
+            ast::Step::Ep(value) => self.resource_increase(value, super::Resource::Ep, path),
             ast::Step::Draw(draw) => self.draw(draw, path),
             ast::Step::Damage(damage) => self.damage(damage, path),
             ast::Step::Life(life) => self.life(life, path),
