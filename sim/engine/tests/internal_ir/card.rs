@@ -33,6 +33,8 @@ mod played_traits;
 mod player_declarations;
 #[path = "card/player_main_actions.rs"]
 mod player_main_actions;
+#[path = "card/player_policy.rs"]
+mod player_policy;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
 #[path = "card/public_return_union.rs"]
@@ -888,6 +890,10 @@ mod exchange_pp_guard;
 
 #[path = "card/fusion.rs"]
 mod fusion;
+#[path = "card/fusion_exact.rs"]
+mod fusion_exact;
+#[path = "card/material_search.rs"]
+mod material_search;
 
 #[path = "card/shuffle.rs"]
 mod shuffle;
@@ -949,3 +955,6 @@ mod counter_amounts;
 
 #[path = "card/cost_number_plan.rs"]
 mod cost_number_plan;
+
+#[path = "card/counter_author.rs"]
+mod counter_author;

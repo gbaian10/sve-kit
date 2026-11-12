@@ -522,7 +522,7 @@ pub(super) enum CounterCostHolder {
 pub(super) struct CounterChange {
     pub on: Objects,
     pub name: String,
-    pub delta: i64,
+    pub delta: Number,
 }
 
 #[derive(Deserialize)]

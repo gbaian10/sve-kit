@@ -16,11 +16,10 @@ pub(crate) fn materials(action: &Action) -> Option<&SelectionConstraint> {
         return None;
     };
     let count = materials.cardinality;
+    let fixed = count.minimum.0 > 0 && count.maximum == Some(count.minimum);
+    let up_to_two = count.minimum == Nat(0) && count.maximum == Some(Nat(2));
     if group.cardinality != count
-        || !matches!(
-            (count.minimum.0, count.maximum),
-            (1, Some(Nat(1))) | (0, Some(Nat(2)))
-        )
+        || !(fixed || up_to_two)
         || materials.distinct_by.is_some()
         || materials.disjoint != Disjointness::Disjoint
         || !materials.aggregate_bounds.is_empty()
