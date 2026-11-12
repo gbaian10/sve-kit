@@ -975,3 +975,6 @@ mod field_token_exchange;
 
 #[path = "card/hand_groups.rs"]
 mod hand_groups;
+
+#[path = "card/next_play_cost.rs"]
+mod next_play_cost;
