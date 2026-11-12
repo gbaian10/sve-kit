@@ -118,3 +118,85 @@ fn player_main_actions_real_card_attack_and_turn_end_need_only_question_capabili
     assert_eq!(state["turn"]["active"], "P2");
     assert_eq!(state["P2"]["hand"], json!(["next-draw"]));
 }
+
+#[test]
+fn basic_policy_real_attack_uses_observation_and_question_without_authority_reads() {
+    use sve_engine::policy::{BasicPolicy, Choice};
+
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"authority-attacker","card":"BP01-037"}]);
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "policy-real",
+    )
+    .unwrap();
+    game.advance_player_input();
+    let mut policy = BasicPolicy::new(Viewer::P1);
+    let public = question(&game, Viewer::P1);
+    let observation = game.observe(Viewer::P1).unwrap();
+    let choice = policy.choose(&observation, &public.shape).unwrap();
+    let Choice::MainAction { intent, answer } = &choice else {
+        panic!("main choice");
+    };
+    let MainIntentKind::Attack { attacker, .. } = &intent.kind else {
+        panic!("attack choice");
+    };
+    let power = attacker
+        .properties
+        .state
+        .as_ref()
+        .unwrap()
+        .stats
+        .unwrap()
+        .attack;
+    assert!(power > 0);
+    assert_eq!(
+        *answer,
+        MainActionAnswer::Attack(AttackTarget::Leader(Viewer::P2))
+    );
+    let submission = game.submit_player(
+        Viewer::P1,
+        Command::MainAction {
+            token: public.token,
+            intent: intent.id.clone(),
+            answer: answer.clone(),
+        },
+    );
+    assert_eq!(submission.kind, SubmissionKind::Applied);
+    policy.record_submission(&choice, submission.kind);
+    let quick_question = question(&game, Viewer::P2);
+    let mut opponent = BasicPolicy::new(Viewer::P2);
+    let quick_choice = opponent
+        .choose(&game.observe(Viewer::P2).unwrap(), &quick_question.shape)
+        .unwrap();
+    let Choice::Decision(quick_answer) = &quick_choice else {
+        panic!("Quick answer");
+    };
+    assert_eq!(*quick_answer, Answer::Quick(None));
+    let quick_submission = game.submit_player(
+        Viewer::P2,
+        Command::Answer {
+            token: quick_question.token,
+            answer: quick_answer.clone(),
+        },
+    );
+    assert_eq!(quick_submission.kind, SubmissionKind::Applied);
+    opponent.record_submission(&quick_choice, quick_submission.kind);
+    let after_attack = question(&game, Viewer::P1);
+    let end_choice = policy
+        .choose(&game.observe(Viewer::P1).unwrap(), &after_attack.shape)
+        .unwrap();
+    assert!(
+        matches!(end_choice, Choice::MainAction { intent: end_intent, answer: MainActionAnswer::None }
+        if matches!(end_intent.kind, MainIntentKind::EndPhase))
+    );
+    assert_eq!(
+        game.observe(Viewer::P1).unwrap().players[1].resources.life,
+        20_i64.checked_sub(power).unwrap()
+    );
+}

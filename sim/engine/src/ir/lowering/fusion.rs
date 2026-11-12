@@ -147,9 +147,9 @@ fn record_receipt(
 
 fn cardinality(fusion: &ast::Fusion, path: &str) -> Result<Cardinality, LoweringError> {
     match (fusion.n, fusion.upto) {
-        (Some(1), None) => Ok(Cardinality {
-            minimum: Nat(1),
-            maximum: Some(Nat(1)),
+        (Some(count), None) if count > 0 => Ok(Cardinality {
+            minimum: Nat(count),
+            maximum: Some(Nat(count)),
         }),
         (None, Some(2)) => Ok(Cardinality {
             minimum: Nat(0),
