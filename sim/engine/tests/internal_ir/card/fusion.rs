@@ -199,9 +199,9 @@ fn hand_only_fusion_into_a_full_ex_rolls_back_the_entire_payment() {
 }
 
 #[test]
-fn fusion_rejects_unneeded_counts_and_non_hand_activation() {
+fn fusion_rejects_zero_unsupported_ranges_and_non_hand_activation() {
     for modifier in [
-        json!({"n":2_u8}),
+        json!({"n":0_u8}),
         json!({"upto":1_u8}),
         json!({"n":1_u8,"zone":"field"}),
     ] {
