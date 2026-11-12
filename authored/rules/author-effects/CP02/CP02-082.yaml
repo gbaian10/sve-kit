@@ -1,0 +1,40 @@
+cards:
+  CP02-082:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              history:
+                event: evolved
+                sel:
+                  kind: follower
+                who: self
+                window: this_turn
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  crimson: true
+                then:
+                  - damage:
+                      n: 3
+                      to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

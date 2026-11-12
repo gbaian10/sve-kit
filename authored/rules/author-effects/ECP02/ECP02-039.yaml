@@ -1,0 +1,78 @@
+cards:
+  ECP02-039:
+    abilities:
+      - fanfare:
+          cost:
+            lesson: 1
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: デレマス
+                may: true
+                upto: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  groups:
+                    - n: 1
+                      sel:
+                        trait: キュート
+                        who: self
+                        zone: hand
+                    - n: 1
+                      sel:
+                        trait: クール
+                        who: self
+                        zone: hand
+                    - n: 1
+                      sel:
+                        trait: パッション
+                        who: self
+                        zone: hand
+          do:
+            - life:
+                delta: 3
+                who: self
+            - draw:
+                n: 3
+                who: self
+            - pp:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

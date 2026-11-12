@@ -1,37 +1,5 @@
 use super::*;
 
-fn fixture() -> &'static SelectedEffects {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    SELECTED.get_or_init(|| {
-        let (snapshot, keywords, mut input) = inputs().clone();
-        input["documents"].as_array_mut().unwrap().push(json!([
-            "striken-fragment.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "CP03-072":{"status":"complete","abilities":[]}
-            }})
-            .to_string()
-        ]));
-        repository::select(&snapshot, &keywords, &input).unwrap()
-    })
-}
-
-fn striken() -> WellFormedCardProgram {
-    let mut tree = expanded::tree().clone();
-    let mut card = tree["cards"]["BP08-038"].clone();
-    let mut template = card["abilities"][0].clone();
-    template.as_object_mut().unwrap().remove("fanfare");
-    let mut restriction = template.clone();
-    restriction["line"] = json!(1_u8);
-    restriction["static"] = json!({"effects":[{"cannot":{"what":"attack"}}]});
-    template["line"] = json!(2_u8);
-    template["auto"] = json!({"on":{"drive_trigger":{"who":"self"}},"do":[
-        {"apply":{"on":"this","effect":{"lose_abilities":{}},"until":"turn"}}
-    ]});
-    card["abilities"] = json!([restriction, template]);
-    tree["cards"] = json!({"CP03-072":card});
-    lowerer().lower(&tree).unwrap().remove("CP03-072").unwrap()
-}
-
 fn pass(game: &mut Game) {
     if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
@@ -62,8 +30,7 @@ fn position() -> Value {
     initial
 }
 
-// Q1418/Q1419 are exercised with the real snapshot and source fragments;
-// this fixture does not admit the card or verify its complete source closure.
+// Q1418/Q1419 exercise the complete admitted card and real Drive procedure.
 #[test]
 fn cp03_072_stand_trigger_preserves_its_independent_leader_lock_and_both_pending_losses() {
     let initial = position();
@@ -71,14 +38,13 @@ fn cp03_072_stand_trigger_preserves_its_independent_leader_lock_and_both_pending
     let facts = json!({"BP01-037":{"verified":true,"trigger_icon":"stand"},
         "BP01-006":{"verified":true,"trigger_icon":"stand"}});
     let mut game = Game::from_selected_effects(
-        fixture().clone(),
+        selection().clone(),
         &initial,
         &facts,
         &Value::Null,
         "striken-fragment",
     )
     .unwrap();
-    game.load_internal_card("CP03-072", &striken()).unwrap();
     for target in ["P2.leader", "enemy"] {
         assert_eq!(
             game.internal_rule_action(&json!({"do":"attack","attacker":"ally","target":target}))

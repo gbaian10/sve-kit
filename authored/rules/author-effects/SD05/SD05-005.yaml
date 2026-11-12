@@ -1,0 +1,31 @@
+cards:
+  SD05-005:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - drain
+                on:
+                  kind: follower
+                  name: フォレストバット
+                  token: true
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: フォレストバット
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
