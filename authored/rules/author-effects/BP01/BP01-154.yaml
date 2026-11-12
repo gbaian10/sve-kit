@@ -1,0 +1,36 @@
+cards:
+  BP01-154:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - attack_time:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      all:
+                        - exists:
+                            name: ツインプリズナー・フラム
+                            who: self
+                            zone: cemetery
+                        - exists:
+                            name: ツインプリズナー・グラス
+                            who: self
+                            zone: cemetery
+                    n: 7
+                n: 3
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,51 @@
+cards:
+  BP10-085:
+    abilities:
+      - fanfare:
+          do:
+            - counter:
+                delta:
+                  count:
+                    who: self
+                    zone: hand
+                name: 恩寵カウンター
+                on: this
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - counter:
+                  n: 2
+                  name: 恩寵カウンター
+                  on: this
+          do:
+            - life:
+                delta: 1
+                who: self
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - search:
+                n: 1
+                sel:
+                  orig_cost_eq: 7
+                  trait: アルカナ
+                  who: self
+                  zone: deck
+                to: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

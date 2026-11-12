@@ -1,0 +1,91 @@
+cards:
+  BP13-006:
+    abilities:
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      distinct_names:
+                        class: エルフ
+                        kind: spell
+                        who: self
+                        zone: cemetery
+                    op: ge
+                    right: 5
+                then:
+                  - buff:
+                      hp: -2
+                      on: enemy
+                      power: -2
+            - buff:
+                hp: 2
+                on: this
+                power: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: first
+                from:
+                  class: エルフ
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: first
+                result: taken1
+                to: hand
+            - reveal:
+                bind: shown
+                ref: first
+            - choose:
+                bind: second
+                from:
+                  class: エルフ
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: second
+                result: taken2
+                to: cemetery
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    any_of:
+                      - in:
+                          objects_of: taken1
+                          view: before
+                      - in:
+                          objects_of: taken2
+                          view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

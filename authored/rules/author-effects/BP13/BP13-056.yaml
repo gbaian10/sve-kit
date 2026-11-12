@@ -1,0 +1,56 @@
+cards:
+  BP13-056:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+                  - drain
+                on:
+                  kind: follower
+                  name: ドラゴン
+                  who: self
+                  zone: field
+      - auto:
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                on: enemy
+                until:
+                  during_next_turn:
+                    who: opp
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 2
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - create:
+                n: 1
+                to: field
+                token: ドラゴン
+          per_turn: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

@@ -1,98 +1,56 @@
-format: 1
-kind: effect_set
 cards:
   BP03-011:
-    status: complete
     abilities:
-      - line: 1
-        kind: trigger
-        body:
+      - body:
           op: destroy
           subjects: self
         event: main_start
-      - line: 2
-        kind: static
-        body:
+        kind: trigger
+        line: 1
+      - body:
+          abilities:
+            - body:
+                condition:
+                  read: event.target_is_follower
+                op: if
+                then:
+                  amount: 2
+                  op: damage
+                  subjects: event.target
+              event: attack
+              kind: trigger
+              line: 2
+              subject: self
           op: aura
           subjects:
             side: self
-            zone: field
             type: follower
-          abilities:
-            - line: 2
-              kind: trigger
-              body:
-                op: if
-                condition:
-                  read: event.target_is_follower
-                then:
-                  op: damage
-                  subjects: event.target
-                  amount: 2
-              event: attack
-              subject: self
-      - line: 3
-        kind: trigger
-        body:
+            zone: field
+        kind: static
+        line: 2
+      - body:
           op: seq
           steps:
-            - op: create
-              name: フェアリー
+            - bind: created
               count: 1
+              name: フェアリー
+              op: create
               to: field
-              bind: created
-            - op: if
-              condition:
-                fn: ge
+            - condition:
                 args:
                   - read: self.combo
                   - 3
+                fn: ge
+              op: if
               then:
-                op: modify
-                subjects: created
                 keywords:
                   - rush
+                op: modify
+                subjects: created
         event: enter
-        subject: self
-  BP03-SL07:
-    status: complete
-    review: 土の秘術（13.3.3.2）是打出時的可選追加費用，效果只讀 paid 條件，不在解算中再次付費。
-    abilities:
-      - line: 1
         kind: trigger
-        body:
-          op: seq
-          steps:
-            - op: create
-              name: 大地の魔片
-              count: 1
-              to: field
-            - op: stack
-              amount: 1
-            - op: draw
-              count: 1
-        event: enter
+        line: 3
         subject: self
-      - line: 2
-        kind: activated
-        body:
-          op: if
-          condition:
-            read: paid.earth
-          then:
-            op: adjust_cost
-            subjects:
-              side: self
-              zone: any
-              type: spell
-            amount: -4
-            until: end-of-turn
-            uses: 1
-            consume_on: spell_play
-        quick: true
-        limit: 1
-        additional_costs:
-          - key: earth
-            costs:
-              - op: earth_rite
-                count: 1
+    status: complete
+format: 1
+kind: effect_set

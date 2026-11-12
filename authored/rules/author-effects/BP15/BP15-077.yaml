@@ -1,0 +1,36 @@
+cards:
+  BP15-077:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            crimson: true
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: ex
+                        token: 愛絶の飛翔
+                  - - draw:
+                        n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP15-PR24
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

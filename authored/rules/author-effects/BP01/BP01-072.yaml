@@ -1,0 +1,62 @@
+cards:
+  BP01-072:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: first
+                from:
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: first
+                result: taken1
+                to: hand
+            - reveal:
+                bind: shown
+                ref: first
+            - choose:
+                bind: second
+                from:
+                  in: seen
+                  kind: spell
+                may: true
+                n: 1
+            - move:
+                ref: second
+                result: taken2
+                to: cemetery
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    any_of:
+                      - in:
+                          objects_of: taken1
+                          view: before
+                      - in:
+                          objects_of: taken2
+                          view: before
+                  in: seen
+                to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
