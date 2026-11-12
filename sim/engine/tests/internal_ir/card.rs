@@ -964,3 +964,6 @@ mod cost_number_plan;
 
 #[path = "card/counter_author.rs"]
 mod counter_author;
+
+#[path = "card/material_distinct.rs"]
+mod material_distinct;

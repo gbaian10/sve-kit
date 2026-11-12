@@ -1,6 +1,9 @@
 use super::super::conditions::{ConditionPlan, Policy};
 use super::play::PlayState;
-use super::selection::constraints::{DistinctProperties, PropertyKey, check_count, unique_handles};
+use super::selection::constraints::{
+    DistinctProperties, PropertyKey, check_count, distinct_original_cost_count,
+    original_material_cost, unique_handles,
+};
 use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
@@ -17,7 +20,6 @@ use crate::ir::{
     QuantityUnit, Selector, ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
-use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(super) struct ExchangeState {
@@ -89,22 +91,10 @@ impl MaterialWait {
 
 fn available_count(members: &[MaterialCandidate], distinct: Option<ObjectProperty>) -> usize {
     if distinct == Some(ObjectProperty::Cost) {
-        members
-            .iter()
-            .filter_map(|member| member.original_cost)
-            .collect::<BTreeSet<_>>()
-            .len()
+        distinct_original_cost_count(members.iter().filter_map(|member| member.original_cost))
     } else {
         members.len()
     }
-}
-
-fn original_material_cost(game: &Game, id: &str) -> Result<Option<i64>> {
-    let cost = &game.internal_cost_print(id)?["cost"];
-    if cost.is_null() || cost == "-" {
-        return Ok(None);
-    }
-    super::super::cost::printed_play_cost(cost).map(Some)
 }
 
 pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<()> {
