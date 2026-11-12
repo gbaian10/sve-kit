@@ -2,7 +2,7 @@ use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::ir::lowering::LoweringError;
 
-fn lower_body(body: &Value) -> Result<WellFormedCardProgram, LoweringError> {
+pub(super) fn lower_body(body: &Value) -> Result<WellFormedCardProgram, LoweringError> {
     let mut tree = fanfare::expanded::tree().clone();
     let mut ability = tree["cards"]["BP08-038"]["abilities"][0].clone();
     ability["fanfare"] = body.clone();
@@ -13,13 +13,18 @@ fn lower_body(body: &Value) -> Result<WellFormedCardProgram, LoweringError> {
 #[test]
 fn dynamic_numeric_declarations_reject_hidden_foreign_and_source_dependent_reads() {
     for number in [
-        json!({"count":{"who":"self","zone":"hand"}}),
+        json!({"count":{"who":"self","zone":"hand","kind":"follower"}}),
+        json!({"count":{"who":"opp","zone":"hand"}}),
+        json!({"count":{"who":"all","zone":"hand"}}),
+        json!({"count":{"who":"self","zone":"hand","other":true}}),
+        json!({"count":{"who":"self","zone":"banish"}}),
         json!({"count":{"who":"self","zone":"deck"}}),
         json!({"count":{"who":"opp","zone":"field"}}),
         json!({"resource":{"who":"opp","kind":"pp_max"}}),
         json!({"hp_of":"this"}),
         json!({"distinct_names":{"who":"opp","zone":"cemetery"}}),
         json!({"distinct_names":{"who":"self","zone":"hand"}}),
+        json!({"distinct_orig_costs":{"who":"self","zone":"hand"}}),
         json!({"distinct_orig_costs":{"who":"self","zone":"cemetery"}}),
     ] {
         for field in ["cost_le", "orig_cost_le"] {
@@ -143,7 +148,7 @@ fn exact_and_upper_public_target_counts_are_frozen_in_the_formal_question() {
     }
 }
 #[test]
-fn hand_written_dynamic_count_constraints_cannot_hide_a_hand_read() {
+fn hand_written_dynamic_count_constraints_cannot_hide_a_filtered_hand_read() {
     let program=lower_body(&json!({"targets":[{"bind":"target","from":{"who":"opp","zone":"field","kind":"follower"},"upto":{"count":{"who":"self","zone":"field"}}}],"do":[{"destroy":{"ref":"target"}}]})).unwrap();
     let mut bad = program.card().clone();
     let ChoiceDomain::Objects { constraint, .. } =
@@ -161,12 +166,26 @@ fn hand_written_dynamic_count_constraints_cannot_hide_a_hand_read() {
         panic!("live public count");
     };
     let NatRead::ZoneCount {
-        selector: Selector::Zone { zone, .. },
+        selector:
+            Selector::Zone {
+                zone,
+                predicate,
+                binding,
+                ..
+            },
     } = read.as_mut()
     else {
         panic!("zone selector");
     };
     *zone = ZoneKind::Hand;
+    **predicate = Expr::Compute(Box::new(Predicate::NamesIntersect {
+        left: Expr::Live(Box::new(NamesRead::Names {
+            object: ObjectView::Current {
+                object: Box::new(ObjectOperand::Bound { binding: *binding }),
+            },
+        })),
+        right: Expr::Literal(vec![CardName("unit-follower".into())]),
+    }));
     assert!(
         WellFormedCardProgram::check(bad).is_err(),
         "lowerer bypass cannot grant a hidden numeric declaration"

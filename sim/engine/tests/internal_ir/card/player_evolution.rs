@@ -62,6 +62,103 @@ fn form(game: &mut Game, actor: Viewer) {
 }
 
 #[test]
+fn static_source_evolution_quotes_and_payment_reread_the_public_hand_count() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut base = tree["cards"]["synthetic-evolution"].clone();
+    let mut modifier = tree["cards"]["BP08-038"]["abilities"][0].clone();
+    modifier.as_object_mut().unwrap().remove("fanfare");
+    modifier["line"] = json!(2);
+    modifier["static"] = json!({"effects":[{"evolve_cost_mod":{
+        "on":"this","delta":{"count":{"who":"self","zone":"hand"}}
+    }}]});
+    let mut draw = modifier.clone();
+    draw.as_object_mut().unwrap().remove("static");
+    draw["line"] = json!(3);
+    draw["activate"] = json!({"cost":{"pp":0},"do":[{"draw":{"n":1}}]});
+    base["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .extend([modifier, draw]);
+    tree["cards"] = json!({"unit-follower":base});
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let draw = program
+        .card()
+        .abilities
+        .iter()
+        .find(|a| {
+            a.node.kind == AbilityKind::Activated
+                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
+        })
+        .unwrap()
+        .node
+        .id;
+    let mut game = evolution::position(1, &program, &card(vec![]));
+    let quote = |game: &Game| {
+        let mut copy = game.clone();
+        start(&mut copy, Viewer::P1);
+        form(&mut copy, Viewer::P1);
+        let QuestionShape::Evolution(EvolutionQuestion::Payment(payment)) =
+            question(&copy, Viewer::P1).shape
+        else {
+            panic!("evolution price")
+        };
+        payment.total_pp
+    };
+    assert_eq!(quote(&game), 1);
+    resolved(
+        game.activate_internal_card("s", draw, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    assert_eq!(quote(&game), 2, "the new card changes the next price");
+    start(&mut game, Viewer::P1);
+    form(&mut game, Viewer::P1);
+    let payment = question(&game, Viewer::P1);
+    let before = exact_authority(&game);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Evolution {
+                token: payment.token,
+                answer: EvolutionAnswer::Payment {
+                    pp: 1,
+                    ep: false,
+                    super_evolution: false
+                },
+            }
+        )
+        .kind,
+        SubmissionKind::Rejected
+    );
+    assert_eq!(exact_authority(&game), before);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::Evolution {
+                token: payment.token,
+                answer: EvolutionAnswer::Payment {
+                    pp: 2,
+                    ep: false,
+                    super_evolution: false
+                },
+            }
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0);
+    assert_eq!(state["objects"]["s"]["evolved_with"], "e");
+    assert_eq!(state["P1"]["hand"], json!(["d"]));
+}
+
+#[test]
 fn player_evolution_normal_and_super_share_native_resources_and_events() {
     let (base, evolved) = evolution::programs();
     for (actor, super_evolution) in [(Viewer::P1, false), (Viewer::P2, true)] {

@@ -31,7 +31,9 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
             } => !arguments.is_empty() && arguments.iter().all(check),
             IntOperation::FromNat {
                 value: Expr::Live(read),
-            } => matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector)),
+            } => {
+                matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector))
+            }
             IntOperation::FromNat {
                 value: Expr::Bound(_),
             } => true,
@@ -46,6 +48,14 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
         },
         _ => false,
     }
+}
+
+pub(super) fn hand_count(selector: &Selector) -> bool {
+    matches!(selector, Selector::Zone {
+        players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..
+    } if players.relation == PlayerRelation::SelfPlayer
+        && players.relative_to == (PlayerRef::Controller {})
+        && **predicate == Expr::Literal(Bool(true)))
 }
 pub(crate) fn target_count(value: &Expr<Int>, comparison: super::Comparison) -> bool {
     if check(value) {
