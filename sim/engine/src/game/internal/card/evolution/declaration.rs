@@ -416,9 +416,7 @@ impl Declaration {
             (Wait::CostDiscard(wait), true) => {
                 let members = wait.validate(game, &self.selection, handles)?;
                 self.discard.clone_from(&members);
-                self.selection
-                    .cost_materials
-                    .insert(wait.receipt(), members);
+                wait.record(&mut self.selection, members);
             }
             _ => return Err(invalid("evolution selection authority")),
         }

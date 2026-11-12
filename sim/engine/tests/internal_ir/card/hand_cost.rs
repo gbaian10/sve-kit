@@ -475,7 +475,6 @@ fn grouped_hand_cost_keeps_unneeded_material_shapes_closed() {
     let other = json!({"sel":{"who":"self","zone":"hand"},"n":1_u8});
     for groups in [
         json!([source.clone(), source.clone()]),
-        json!([other.clone(), other.clone()]),
         json!([source.clone(), other.clone(), other.clone()]),
         json!([{"sel":{"in":"this"},"n":2_u8}, other]),
         json!([source.clone(), {"sel":{"who":"self","zone":"hand"},"n":2_u8}]),

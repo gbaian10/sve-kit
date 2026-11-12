@@ -84,6 +84,39 @@ pub(super) fn grouped(
     material: &ast::HandMaterialGroups,
     path: &str,
 ) -> Result<Action, LoweringError> {
+    if matches!(material.groups.len(), 2 | 3)
+        && material
+            .groups
+            .iter()
+            .all(|group| matches!(group, ast::HandMaterialGroup::Material(_)))
+    {
+        let mut groups = super::groups::Groups::new(super::groups::TotalBounds::Sum);
+        for (index, entry) in material.groups.iter().enumerate() {
+            let ast::HandMaterialGroup::Material(other) = entry else {
+                return Err(unsupported(path));
+            };
+            if other.result.is_some() || other.n != Some(1) || other.upto.is_some() || other.any {
+                return Err(unsupported(path));
+            }
+            let Action::Discard {
+                mode: DiscardMode::Chosen { constraint },
+                ..
+            } = lower(allocator, other, &format!("{path}/groups/{index}"))?
+            else {
+                return Err(unsupported(path));
+            };
+            let [group] = constraint.groups.as_slice() else {
+                return Err(unsupported(path));
+            };
+            groups.push(group.cardinality, || Ok(group.selector.clone()), path)?;
+        }
+        return Ok(Action::Discard {
+            player: PlayerRef::Controller {},
+            mode: DiscardMode::Chosen {
+                constraint: groups.finish(None),
+            },
+        });
+    }
     let ([
         ast::HandMaterialGroup::Source { n: 1, .. },
         ast::HandMaterialGroup::Material(other),

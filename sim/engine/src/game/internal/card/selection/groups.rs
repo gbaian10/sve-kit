@@ -12,6 +12,65 @@ pub(in crate::game::internal) struct GroupConstraints {
 }
 
 impl GroupConstraints {
+    /// Match all required slots together; earlier broad choices may move for a narrow slot.
+    pub(in crate::game::internal) fn joint_witness(
+        proofs: &[Self],
+    ) -> Result<Option<Vec<Vec<ObjectRef>>>> {
+        let mut seen = BTreeSet::new();
+        let candidates = proofs
+            .iter()
+            .flat_map(|proof| proof.members.iter().flatten())
+            .copied()
+            .filter(|member| seen.insert((member.id, member.generation)))
+            .collect::<Vec<_>>();
+        let mut slots = Vec::new();
+        let mut owners = Vec::new();
+        for (owner, proof) in proofs.iter().enumerate() {
+            if proof.members.len() != proof.bounds.len() {
+                return Err(invalid("joint group bounds"));
+            }
+            for (members, bounds) in proof.members.iter().zip(&proof.bounds) {
+                if bounds
+                    .maximum
+                    .is_some_and(|maximum| maximum.0 < bounds.minimum.0)
+                {
+                    return Err(invalid("joint group cardinality"));
+                }
+                let count = usize::try_from(bounds.minimum.0).map_err(invalid)?;
+                if count > candidates.len().saturating_sub(slots.len()) {
+                    return Ok(None);
+                }
+                let eligible = candidates
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(index, member)| members.contains(member).then_some(index))
+                    .collect::<Vec<_>>();
+                for _ in 0..count {
+                    slots.push(eligible.clone());
+                    owners.push(owner);
+                }
+            }
+        }
+        let mut matching = vec![None; candidates.len()];
+        for slot in 0..slots.len() {
+            if !augment(
+                slot,
+                &slots,
+                &mut matching,
+                &mut vec![false; candidates.len()],
+            ) {
+                return Ok(None);
+            }
+        }
+        let mut result = vec![Vec::new(); proofs.len()];
+        for (candidate, slot) in matching.into_iter().enumerate() {
+            if let Some(slot) = slot {
+                result[owners[slot]].push(candidates[candidate]);
+            }
+        }
+        Ok(Some(result))
+    }
+
     pub(in crate::game::internal) fn accepts(&self, members: &[ObjectRef]) -> bool {
         let mut unique = BTreeSet::new();
         if self.members.len() != self.bounds.len()
@@ -145,6 +204,25 @@ impl GroupConstraints {
         }
         Ok(reachable)
     }
+}
+
+fn augment(
+    slot: usize,
+    slots: &[Vec<usize>],
+    matching: &mut [Option<usize>],
+    seen: &mut [bool],
+) -> bool {
+    for candidate in &slots[slot] {
+        if seen[*candidate] {
+            continue;
+        }
+        seen[*candidate] = true;
+        if matching[*candidate].is_none_or(|previous| augment(previous, slots, matching, seen)) {
+            matching[*candidate] = Some(slot);
+            return true;
+        }
+    }
+    false
 }
 
 #[cfg(test)]

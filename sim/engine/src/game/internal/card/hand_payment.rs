@@ -1,11 +1,9 @@
 //! Hand cost choices are collected before any cost is committed.
 use super::play::PlayState;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
-use crate::game::internal::player::CandidateLinks;
-use crate::game::internal::{
-    DecisionId, DistributionMember, InputDomain, InstructionOutcome, Wait, contains,
-    discard::HandWait, search,
-};
+use crate::game::internal::{InstructionOutcome, contains, search};
+
+mod choices;
 use crate::ir::{
     Action, Bool, Cardinality, CostSpec, DiscardMode, Disjointness, Expr, Instruction, Int,
     MoveDestination, MoveReason, Nat, ObjectOperand, ObjectRef, OwnerZone, PlayerRef,
@@ -13,7 +11,8 @@ use crate::ir::{
 };
 
 struct HandSelection<'action> {
-    group: &'action SelectionGroup,
+    groups: &'action [SelectionGroup],
+    cardinality: Cardinality,
     source: bool,
 }
 
@@ -29,8 +28,10 @@ fn selection(action: &Action) -> Result<HandSelection<'_>> {
         minimum: Nat(1),
         maximum: Some(Nat(1)),
     };
-    let (group, source) = match constraint.groups.as_slice() {
-        [group] if group.cardinality == constraint.cardinality => (group, false),
+    let (groups, source, cardinality) = match constraint.groups.as_slice() {
+        [group] if group.cardinality == constraint.cardinality => {
+            (constraint.groups.as_slice(), false, constraint.cardinality)
+        }
         [own, group]
             if own.cardinality == one
                 && group.cardinality == one
@@ -41,7 +42,16 @@ fn selection(action: &Action) -> Result<HandSelection<'_>> {
                     })
                 && source_selector(&own.selector) =>
         {
-            (group, true)
+            (&constraint.groups[1..], true, one)
+        }
+        groups
+            if matches!(groups.len(), 2 | 3)
+                && groups.iter().all(|group| group.cardinality == one)
+                && constraint.cardinality.minimum.0
+                    == u64::try_from(groups.len()).map_err(invalid)?
+                && constraint.cardinality.maximum == Some(constraint.cardinality.minimum) =>
+        {
+            (groups, false, constraint.cardinality)
         }
         _ => return Err(unsupported("hand cost groups")),
     };
@@ -51,24 +61,30 @@ fn selection(action: &Action) -> Result<HandSelection<'_>> {
     {
         return Err(unsupported("hand cost cardinality"));
     }
-    let Selector::Zone {
-        players,
-        zone: ZoneKind::Hand,
-        view: SelectionView::Current {},
-        binding,
-        predicate,
-    } = &group.selector
-    else {
-        return Err(unsupported("current own hand cost selector"));
-    };
-    if players.relation != PlayerRelation::SelfPlayer
-        || players.relative_to != (PlayerRef::Controller {})
-        || players.cardinality != one
-    {
-        return Err(unsupported("own hand cost player"));
+    for group in groups {
+        let Selector::Zone {
+            players,
+            zone: ZoneKind::Hand,
+            view: SelectionView::Current {},
+            binding,
+            predicate,
+        } = &group.selector
+        else {
+            return Err(unsupported("current own hand cost selector"));
+        };
+        if players.relation != PlayerRelation::SelfPlayer
+            || players.relative_to != (PlayerRef::Controller {})
+            || players.cardinality != one
+        {
+            return Err(unsupported("own hand cost player"));
+        }
+        search::check_predicate(predicate, *binding)?;
     }
-    search::check_predicate(predicate, *binding)?;
-    Ok(HandSelection { group, source })
+    Ok(HandSelection {
+        groups,
+        cardinality,
+        source,
+    })
 }
 
 fn source_selector(selector: &Selector) -> bool {
@@ -117,7 +133,8 @@ pub(super) fn single_additional(costs: &CostSpec) -> bool {
     // The Quick quote covers another hand card; its Spell source is already in Resolution.
     selection(&step.instruction.action).is_ok_and(|plan| {
         !plan.source
-            && plan.group.cardinality
+            && plan.groups.len() == 1
+            && plan.cardinality
                 == (Cardinality {
                     minimum: Nat(1),
                     maximum: Some(Nat(1)),
@@ -135,46 +152,34 @@ impl Game {
         execution: &mut Execution,
         play: &PlayState,
     ) -> Result<bool> {
-        if let Some((_, additional)) = play.additional.as_deref()
-            && self.internal_hand_cost_materials(execution, &additional.play.costs)?
-        {
+        let mut costs = Vec::new();
+        if let Some((_, additional)) = play.additional.as_deref() {
+            costs.push(&additional.play.costs);
+        }
+        costs.push(&play.costs);
+        let early_hand = costs.iter().any(|cost| matches!(cost, CostSpec::Ordered { steps }
+            if steps.iter().any(|step| matches!(step.instruction.action, Action::Discard { mode: DiscardMode::Chosen { .. }, .. })
+                && !execution.cost_materials.contains_key(&step.instruction.receipt))));
+        costs.extend(
+            play.optional
+                .iter()
+                .filter(|payment| payment.accepted == Some(true))
+                .map(|payment| &payment.costs),
+        );
+        // Fusion materials keep their original place before accepted optional hand fees.
+        if !early_hand && self.internal_fusion_materials(execution, &play.costs)? {
             return Ok(true);
         }
-        if self.internal_hand_cost_materials(execution, &play.costs)?
-            || self.internal_fusion_materials(execution, &play.costs)?
-        {
-            return Ok(true);
-        }
-        for payment in play
-            .optional
-            .iter()
-            .filter(|payment| payment.accepted == Some(true))
-        {
-            if self.internal_hand_cost_materials(execution, &payment.costs)? {
-                return Ok(true);
-            }
-        }
-        Ok(false)
+        self.internal_hand_payment_question(execution, &costs)
     }
 
-    /// Fills each open hand cost with its least legal selection so a probe can test payability.
+    /// Finds a disjoint assignment before any of the ordered costs are committed.
     pub(super) fn internal_probe_hand_costs(
-        &mut self,
+        &self,
         execution: &mut Execution,
         costs: &CostSpec,
     ) -> Result<()> {
-        while self.internal_hand_cost_materials(execution, costs)? {
-            let Some((question, Wait::CostDiscard(wait))) = execution.waiting.take() else {
-                return Err(invalid("probe hand cost question"));
-            };
-            let InputDomain::CostMaterials(_) = question.domain else {
-                return Err(invalid("probe hand cost domain"));
-            };
-            let handles = wait.witness()?;
-            let members = wait.validate(self, execution, &handles)?;
-            execution.cost_materials.insert(wait.receipt(), members);
-        }
-        Ok(())
+        self.internal_probe_hand_payments(execution, &[costs])
     }
 
     pub(super) fn internal_hand_cost_materials(
@@ -182,103 +187,7 @@ impl Game {
         execution: &mut Execution,
         costs: &CostSpec,
     ) -> Result<bool> {
-        let CostSpec::Ordered { steps } = costs else {
-            return Err(unsupported("ordered hand costs"));
-        };
-        for step in steps {
-            let instruction = &step.instruction;
-            if !matches!(instruction.action, Action::Discard { .. })
-                || source_discard(&instruction.action)
-                || execution.cost_materials.contains_key(&instruction.receipt)
-            {
-                continue;
-            }
-            let plan = selection(&instruction.action)?;
-            let Selector::Zone {
-                binding, predicate, ..
-            } = &plan.group.selector
-            else {
-                return Err(unsupported("hand cost selector"));
-            };
-            let source_reserved = plan.source
-                || steps
-                    .iter()
-                    .any(|cost| source_discard(&cost.instruction.action));
-            if plan.source {
-                let seat = seat_name(execution.context.controller)?;
-                let source = self.object(&execution.context.source)?;
-                if source.zone != "hand" || source.owner != seat || source.controller != seat {
-                    return Err(crate::EngineFailure::IllegalPlay(
-                        "grouped hand source unavailable".into(),
-                    ));
-                }
-            }
-            let (members, candidates) = self.internal_hand_cost_candidates(
-                execution,
-                &super::super::conditions::ConditionPlan::compile(
-                    predicate,
-                    *binding,
-                    super::super::conditions::Policy::Search,
-                )?
-                .prepare(None)?,
-                source_reserved,
-            )?;
-            if u64::try_from(members.len()).map_err(invalid)? < plan.group.cardinality.minimum.0 {
-                return Err(crate::EngineFailure::IllegalPlay(
-                    "insufficient hand cost materials".into(),
-                ));
-            }
-            self.internal_wait(
-                execution,
-                DecisionId(instruction.id.0),
-                execution.context.controller,
-                InputDomain::CostMaterials(super::TargetDomain {
-                    members: candidates,
-                    cardinality: plan.group.cardinality,
-                    distinct_names: false,
-                    original_costs: None,
-                    roles: vec![],
-                }),
-                Wait::CostDiscard(HandWait::strict(
-                    CandidateLinks::capture(self, execution, members.iter().copied())?,
-                    instruction.clone(),
-                    members,
-                    plan.group.cardinality,
-                )),
-            )?;
-            return Ok(true);
-        }
-        Ok(false)
-    }
-
-    fn internal_hand_cost_candidates(
-        &self,
-        execution: &Execution,
-        predicate: &super::super::conditions::PreparedCondition,
-        source_reserved: bool,
-    ) -> Result<(Vec<ObjectRef>, Vec<DistributionMember>)> {
-        let seat = seat_name(execution.context.controller)?;
-        let mut members = Vec::new();
-        let mut candidates = Vec::new();
-        for id in self.zone_ids(seat, "hand") {
-            if source_reserved && id == execution.context.source {
-                continue;
-            }
-            let object = self.object(&id)?;
-            if object.owner != seat || object.controller != seat {
-                return Err(unsupported("foreign hand owner"));
-            }
-            if search::matches_candidate(self, &id, predicate)? {
-                candidates.push(DistributionMember {
-                    handle: u64::try_from(members.len()).map_err(invalid)?,
-                    player: execution.context.controller,
-                    card: Some(object.card.clone()),
-                    name: Some(self.card_name(&id)?),
-                });
-                members.push(execution.reference(self, &id)?);
-            }
-        }
-        Ok((members, candidates))
+        self.internal_hand_payment_question(execution, &[costs])
     }
 
     /// A hand-source cost is payable only while the activating card is still in its owner's hand.
@@ -307,10 +216,17 @@ impl Game {
                 .remove(&instruction.receipt)
                 .ok_or_else(|| invalid("missing hand cost selection"))?;
             if !contains(
-                plan.group.cardinality,
+                plan.cardinality,
                 Nat(u64::try_from(members.len()).map_err(invalid)?),
             ) {
                 return Err(invalid("incomplete hand cost selection"));
+            }
+            let proof = execution
+                .hand_cost_groups
+                .remove(&instruction.receipt)
+                .ok_or_else(|| invalid("missing hand cost proof"))?;
+            if !proof.accepts(&members) {
+                return Err(invalid("hand cost group proof"));
             }
             if plan.source {
                 let source = execution.object(self, &ObjectOperand::SourceHolder {})?;

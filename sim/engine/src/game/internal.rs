@@ -611,6 +611,7 @@ pub(super) struct Execution {
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_materials: BTreeMap<ReceiptId, Vec<ObjectRef>>,
+    hand_cost_groups: BTreeMap<ReceiptId, card::selection::groups::GroupConstraints>,
     fusion_material_pending: Vec<card::triggers::PendingOccurrence>,
     movement_capacity: BTreeMap<(ReceiptId, u32), Vec<movement::ArrivalMember>>,
     material_selections: BTreeMap<(ScopeId, u64), card::material::MaterialWait>,
@@ -793,6 +794,7 @@ impl Game {
                 slots: BTreeMap::new(),
                 receipts: BTreeMap::new(),
                 cost_materials: BTreeMap::new(),
+                hand_cost_groups: BTreeMap::new(),
                 fusion_material_pending: vec![],
                 movement_capacity: BTreeMap::new(),
                 material_selections: BTreeMap::new(),
@@ -903,7 +905,7 @@ impl Game {
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
                     rollback = execution.answer_origin(validated);
-                    execution.cost_materials.insert(wait.receipt(), members);
+                    wait.record(&mut execution, members);
                 }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;

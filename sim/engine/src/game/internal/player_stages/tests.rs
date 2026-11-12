@@ -43,6 +43,7 @@ fn execution(game: &mut Game) -> Execution {
         slots: BTreeMap::new(),
         receipts: BTreeMap::new(),
         cost_materials: BTreeMap::new(),
+        hand_cost_groups: BTreeMap::new(),
         movement_capacity: BTreeMap::new(),
         material_selections: BTreeMap::new(),
         effect_evolution_destinations: BTreeMap::new(),
