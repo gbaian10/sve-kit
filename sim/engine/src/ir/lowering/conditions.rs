@@ -647,27 +647,14 @@ impl BodyContext<'_> {
                     path,
                     super::movement::FilterSupport::Basic,
                 )?;
-                let plan = if let Some(trait_id) = &filter.trait_id {
-                    if trait_id.0.is_empty() {
-                        return Err(unsupported(path));
-                    }
-                    PlayedHistoryFilter::Trait(trait_id.clone())
-                } else if filter.kind == Some(super::super::CardKind::Spell) {
-                    PlayedHistoryFilter::Spell
-                } else {
-                    return Err(unsupported(path));
-                };
-                if plan.subjects() != [filter] {
-                    return Err(unsupported(path));
-                }
-                plan
+                PlayedHistoryFilter::from_subject(&filter).ok_or_else(|| unsupported(path))?
             }
         };
         let card = Binding::new(self.allocator.id(path)?, self.scope);
         Ok(plan.query(Binding::new(id, self.scope), card))
     }
 
-    fn history_query(
+    pub(super) fn history_query(
         &mut self,
         history: &ast::HistoryQuery,
         path: &str,

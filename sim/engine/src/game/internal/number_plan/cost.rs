@@ -15,7 +15,7 @@ pub(super) fn admits_natural(value: &Expr<Nat>) -> bool {
             NatRead::HistoryCount {
                 query,
                 count: HistoryCount::Facts,
-            } => matches!(HistoryPlan::compile(query), Some(HistoryPlan::Discarded)),
+            } => HistoryPlan::compile(query).is_some_and(|plan| plan.cost_facts()),
             NatRead::ZoneCount {
                 selector:
                     Selector::Zone {
