@@ -817,3 +817,46 @@ fn field_ex_token_cemetery_material_loader_rejects_other_destinations_counts_and
             .unwrap_err();
     }
 }
+
+#[test]
+fn policy_host_preserves_real_cancelled_occurrence_and_continues_to_its_limit() {
+    use sve_engine::host::{HostLimits, HostOutcome, PolicyHost};
+    let typed = program(
+        "unit-follower",
+        "fanfare",
+        json!({
+            "cost":{"banish":{"sel":{"who":"self","zone":"cemetery"},"n":5}},
+            "do":[{"life":{"who":"self","delta":1}}]
+        }),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"c0","card":"unit-spell"}, {"id":"c1","card":"unit-spell"},
+        {"id":"c2","card":"unit-spell"}, {"id":"c3","card":"unit-spell"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "host-cancel",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &typed).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.advance_player_input();
+    let mut host = PolicyHost::new(HostLimits {
+        max_submissions: 2,
+        max_retries: 0,
+    });
+    let report = host.run(&mut game);
+    assert_eq!(report.outcome, HostOutcome::StepLimit);
+    assert_eq!(report.stats.submissions, 2);
+    assert_eq!(report.stats.applied, 1);
+    assert_eq!(report.stats.cancelled, 1);
+    assert_eq!(report.stats.reverted, 0);
+    assert_eq!(report.stats.rejected, 0);
+}
