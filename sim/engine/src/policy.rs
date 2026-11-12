@@ -3,8 +3,11 @@
 //! Selection helpers do not read Game, authority state, object identities or question tokens.
 //! Their answers still require native validation by the player submission interface.
 
+mod basic;
+mod decision;
 mod selection;
 
+pub use basic::{BasicPolicy, Choice};
 pub use selection::{SelectionAnswer, distribute, search, select};
 
 /// Failure to construct a complete answer, distinct from an engine fault or game result.
