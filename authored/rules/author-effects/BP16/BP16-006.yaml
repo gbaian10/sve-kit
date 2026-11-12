@@ -1,0 +1,46 @@
+cards:
+  BP16-006:
+    abilities:
+      - evolve_time:
+          do:
+            - draw:
+                n: 1
+            - create:
+                n: 2
+                to: field
+                token: フェアリー
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - damage:
+                distribute: true
+                n:
+                  plus:
+                    - count:
+                        who: self
+                        zone: field
+                    - count:
+                        who: self
+                        zone: hand
+                to: enemies
+          targets:
+            - any: true
+              bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
