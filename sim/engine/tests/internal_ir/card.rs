@@ -888,6 +888,10 @@ mod exchange_pp_guard;
 
 #[path = "card/fusion.rs"]
 mod fusion;
+#[path = "card/fusion_exact.rs"]
+mod fusion_exact;
+#[path = "card/material_search.rs"]
+mod material_search;
 
 #[path = "card/shuffle.rs"]
 mod shuffle;
