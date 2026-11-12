@@ -1,5 +1,6 @@
 //! The chooser's hand is exposed only through token-local candidates for this discard.
 
+use crate::game::internal::card::selection::groups::GroupConstraints;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
@@ -21,6 +22,7 @@ pub(super) struct HandWait {
     instruction: Box<Instruction>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
+    groups: GroupConstraints,
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -162,7 +164,7 @@ impl HandWait {
         )
     }
 
-    pub(super) const fn strict(
+    pub(super) fn strict(
         links: CandidateLinks,
         instruction: Box<Instruction>,
         members: Vec<ObjectRef>,
@@ -171,10 +173,31 @@ impl HandWait {
         Self {
             links,
             instruction,
+            groups: GroupConstraints {
+                members: vec![members.clone()],
+                bounds: vec![bounds],
+            },
             members,
             bounds,
         }
     }
+
+    pub(super) fn witness(&self) -> Result<Vec<u64>> {
+        self.groups
+            .witness(&self.members, self.bounds)?
+            .ok_or_else(|| crate::EngineFailure::IllegalPlay("no hand cost selection".into()))?
+            .iter()
+            .map(|member| {
+                let index = self
+                    .members
+                    .iter()
+                    .position(|candidate| candidate == member)
+                    .ok_or_else(|| invalid("missing hand cost coordinate"))?;
+                u64::try_from(index).map_err(invalid)
+            })
+            .collect()
+    }
+
     pub(super) const fn receipt(&self) -> ReceiptId {
         self.instruction.receipt
     }
@@ -209,7 +232,7 @@ impl HandWait {
         }
         let seat = seat_name(execution.player(game, &self.instruction.actor)?)?;
         let mut unique = BTreeSet::new();
-        handles
+        let members = handles
             .iter()
             .map(|handle| {
                 if !unique.insert(*handle) {
@@ -229,7 +252,11 @@ impl HandWait {
                 }
                 Ok(member)
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        if !self.groups.accepts(&members) {
+            return Err(invalid("discard group constraints"));
+        }
+        Ok(members)
     }
 }
 
@@ -326,6 +353,10 @@ impl Game {
             Wait::Discard(HandWait {
                 links: CandidateLinks::capture(self, execution, members.iter().copied())?,
                 instruction,
+                groups: GroupConstraints {
+                    members: vec![members.clone()],
+                    bounds: vec![count],
+                },
                 members,
                 bounds: count,
             }),
