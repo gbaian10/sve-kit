@@ -1,0 +1,46 @@
+cards:
+  BP17-089:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                not_class: ナイトメア
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - move:
+                ref: ally
+                result: entered
+                to: field
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

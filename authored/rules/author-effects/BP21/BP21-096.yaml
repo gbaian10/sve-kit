@@ -1,0 +1,39 @@
+cards:
+  BP21-096:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+          usable_if:
+            history:
+              event: stat_changed
+              where:
+                direction: up
+                ref: this
+                stat: hp
+              window: this_turn
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    kind: follower
+                    other: true
+                    trait: 学院
+                    who: self
+                    zone: field
+                then:
+                  - life:
+                      delta: 1
+                      who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
