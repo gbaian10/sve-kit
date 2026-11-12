@@ -8,16 +8,48 @@ use crate::ir::{
 };
 use core::convert::identity;
 
+mod cost;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Policy {
     TokenCount(Option<Binding<Nat>>),
     EffectAmount,
     CounterAmount,
+    Cost { play_origin: bool },
 }
 
 impl Policy {
     const fn opaque_leaves(self) -> bool {
-        matches!(self, Self::EffectAmount | Self::CounterAmount)
+        matches!(
+            self,
+            Self::EffectAmount | Self::CounterAmount | Self::Cost { .. }
+        )
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct CostAmountPlan(Integer);
+
+impl CostAmountPlan {
+    pub(super) fn compile(value: &Expr<Int>) -> Result<Self> {
+        integer(value, Policy::Cost { play_origin: false }).map(|checked| Self(checked.plan))
+    }
+
+    pub(super) fn evaluate(&self, execution: &Execution, game: &Game) -> Result<i64> {
+        self.0.evaluate(execution, game)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct CostConditionPlan(Boolean);
+
+impl CostConditionPlan {
+    pub(super) fn compile(value: &Expr<Bool>, play_origin: bool) -> Result<Self> {
+        boolean(value, Policy::Cost { play_origin }).map(|checked| Self(checked.plan))
+    }
+
+    pub(super) fn evaluate(&self, execution: &Execution, game: &Game) -> Result<bool> {
+        self.0.evaluate(execution, game)
     }
 }
 
@@ -146,6 +178,9 @@ impl CountPlan {
 }
 
 fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
+    if matches!(policy, Policy::Cost { .. }) && !cost::admits_natural(expression) {
+        return Err(unsupported("play cost public count"));
+    }
     let (plan, constant) = match expression {
         Expr::Literal(Nat(count)) => (Natural::Literal(*count), Some(*count)),
         Expr::Bound(binding) if matches!(policy, Policy::TokenCount(Some(expected)) if expected == *binding) => {
@@ -161,7 +196,9 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
         Expr::Compute(operation) => match operation.as_ref() {
             NatOperation::CheckedInt { value } => {
                 let checked = integer(value, policy)?;
-                if policy != Policy::EffectAmount && checked.bounds.lower < 0 {
+                if matches!(policy, Policy::TokenCount(_) | Policy::CounterAmount)
+                    && checked.bounds.lower < 0
+                {
                     return Err(unsupported(if matches!(policy, Policy::TokenCount(_)) {
                         "token count cannot be proved nonnegative"
                     } else {
@@ -193,7 +230,7 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
                     Policy::TokenCount(_) => condition
                         .constant
                         .and_then(|selected| if selected { yes.constant } else { no.constant }),
-                    Policy::EffectAmount | Policy::CounterAmount => condition
+                    Policy::EffectAmount | Policy::CounterAmount | Policy::Cost { .. } => condition
                         .constant
                         .zip(yes.constant)
                         .zip(no.constant)
@@ -226,6 +263,9 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
 }
 
 fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
+    if matches!(policy, Policy::Cost { .. }) && !cost::admits_integer(expression) {
+        return Err(unsupported("play cost count operand"));
+    }
     match expression {
         Expr::Literal(Int(value)) => Ok(CheckedInteger {
             plan: Integer::Literal(*value),
@@ -279,7 +319,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
                     Policy::TokenCount(_) => condition
                         .constant
                         .and_then(|selected| if selected { yes.constant } else { no.constant }),
-                    Policy::EffectAmount | Policy::CounterAmount => condition
+                    Policy::EffectAmount | Policy::CounterAmount | Policy::Cost { .. } => condition
                         .constant
                         .zip(yes.constant)
                         .zip(no.constant)
@@ -348,7 +388,9 @@ fn arithmetic(
         (Policy::TokenCount(_), result) => result.transpose().map_err(|error| {
             unsupported(&format!("constant token arithmetic overflow: {error}"))
         })?,
-        (Policy::EffectAmount | Policy::CounterAmount, result) => result.and_then(Result::ok),
+        (Policy::EffectAmount | Policy::CounterAmount | Policy::Cost { .. }, result) => {
+            result.and_then(Result::ok)
+        }
     };
     let first = checked
         .first()
@@ -369,10 +411,11 @@ fn arithmetic(
     })();
     let bounds = match (policy, bounds) {
         (Policy::TokenCount(_), value) => value?,
-        (Policy::EffectAmount | Policy::CounterAmount, value) => value.unwrap_or(Bounds {
-            lower: i64::MIN,
-            upper: i64::MAX,
-        }),
+        (Policy::EffectAmount | Policy::CounterAmount | Policy::Cost { .. }, value) => value
+            .unwrap_or(Bounds {
+                lower: i64::MIN,
+                upper: i64::MAX,
+            }),
     };
     Ok(CheckedInteger {
         plan: Integer::Arithmetic(
@@ -385,6 +428,11 @@ fn arithmetic(
 }
 
 fn boolean(expression: &Expr<Bool>, policy: Policy) -> Result<CheckedBoolean> {
+    if let Policy::Cost { play_origin } = policy
+        && !cost::admits_boolean(expression, play_origin)
+    {
+        return Err(unsupported("play cost public condition"));
+    }
     let (plan, constant) = match expression {
         Expr::Literal(Bool(value)) => (Boolean::Literal(*value), Some(*value)),
         Expr::Compute(operation) => match operation.as_ref() {

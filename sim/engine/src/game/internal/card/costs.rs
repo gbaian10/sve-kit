@@ -1,16 +1,10 @@
+use super::super::number_plan::{CostAmountPlan, CostConditionPlan};
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
-use crate::ir::history_turn::discarded_plan;
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{AbilityKind, CostOverride, FaceId, Located, PlayCostPayment};
-use crate::ir::{
-    AbilityOrigin, AbilitySource, Arithmetic, CostSpec, ExecutionRef, HistoryCount, ObjectOperand,
-    ZoneKind,
-};
-use crate::ir::{
-    Bool, BoolRead, CostChange, Expr, Int, IntOperation, IntRead, Nat, NatOperation, NatRead,
-    ObjectProperty, PlayerRef, PlayerResource, Predicate, SelectionView, Selector, SourceSpan,
-};
+use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
+use crate::ir::{CostChange, Expr, Int, Nat, PlayerRef, Selector, SourceSpan};
 use alloc::collections::BTreeSet;
 
 fn at_source(error: crate::EngineFailure, source: &SourceSpan) -> crate::EngineFailure {
@@ -102,11 +96,11 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 )?;
                 match &modifier.node.change {
                     CostChange::Delta { amount } | CostChange::Set { amount } => {
-                        check_integer(amount)?;
+                        CostAmountPlan::compile(amount)?;
                     }
                 }
                 if let Some(condition) = &modifier.node.condition {
-                    check_condition(condition, true)?;
+                    CostConditionPlan::compile(condition, true)?;
                 }
                 Ok(())
             };
@@ -216,132 +210,6 @@ fn check_additional(
     Ok(())
 }
 
-pub(super) fn check_condition(condition: &Expr<Bool>, play_origin: bool) -> Result<()> {
-    match condition {
-        Expr::Literal(_) => Ok(()),
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                BoolRead::Crimson {
-                    player: PlayerRef::Controller {}
-                }
-            ) || (play_origin
-                && matches!(
-                    read.as_ref(),
-                    BoolRead::CardPlayOrigin {
-                        execution: ExecutionRef::Current {},
-                        zone: ZoneKind::Hand | ZoneKind::Ex
-                    }
-                )) =>
-        {
-            Ok(())
-        }
-        Expr::Compute(predicate) => match predicate.as_ref() {
-            Predicate::And { predicates } | Predicate::Or { predicates } => {
-                for item in predicates {
-                    check_condition(item, play_origin)?;
-                }
-                Ok(())
-            }
-            Predicate::Not { predicate } => check_condition(predicate, play_origin),
-            Predicate::CompareNat {
-                left,
-                right: Expr::Literal(_),
-                ..
-            } => check_count(left),
-            Predicate::CompareInt {
-                left,
-                right: Expr::Literal(_),
-                ..
-            } => check_integer(left),
-            Predicate::PlayerEquals {
-                left: Expr::Literal(PlayerRef::Controller {}),
-                right: Expr::Literal(PlayerRef::Active {}),
-            } => Ok(()),
-            Predicate::Exists { objects } => check_objects(objects),
-            _ => Err(unsupported("play cost public condition")),
-        },
-        _ => Err(unsupported("play cost public condition")),
-    }
-}
-
-fn check_integer(value: &Expr<Int>) -> Result<()> {
-    match value {
-        Expr::Live(read)
-            if matches!(
-                read.as_ref(),
-                IntRead::PlayerResource {
-                    property: PlayerResource::Life | PlayerResource::PpMaximum,
-                    ..
-                }
-            ) =>
-        {
-            Ok(())
-        }
-        Expr::Literal(_) => Ok(()),
-        Expr::Compute(operation) => match operation.as_ref() {
-            IntOperation::FromNat { value: count } => check_count(count),
-            IntOperation::Arithmetic {
-                operation:
-                    Arithmetic::Subtract
-                    | Arithmetic::Multiply
-                    | Arithmetic::FloorDivide
-                    | Arithmetic::Minimum,
-                arguments,
-            } => {
-                for argument in arguments {
-                    check_integer(argument)?;
-                }
-                Ok(())
-            }
-            _ => Err(unsupported("play cost count operand")),
-        },
-        _ => Err(unsupported("play cost count operand")),
-    }
-}
-
-fn check_count(value: &Expr<Nat>) -> Result<()> {
-    match value {
-        Expr::Literal(_) => Ok(()),
-        Expr::Live(read) => match read.as_ref() {
-            NatRead::HistoryCount {
-                query,
-                count: HistoryCount::Facts,
-            } if discarded_plan(query) => Ok(()),
-            // The banish zone is public, but only its whole size is read here (BP17-051).
-            NatRead::ZoneCount {
-                selector:
-                    Selector::Zone {
-                        zone: ZoneKind::Banish,
-                        view: SelectionView::Current {},
-                        players,
-                        predicate,
-                        ..
-                    },
-            } if players.relative_to == (PlayerRef::Controller {})
-                && **predicate == Expr::Literal(Bool(true)) =>
-            {
-                Ok(())
-            }
-            NatRead::ZoneCount { selector } => check_objects(selector),
-            NatRead::TurnOrdinal { .. } => Ok(()),
-            _ => Err(unsupported("play cost public count")),
-        },
-        Expr::Compute(operation) => match operation.as_ref() {
-            NatOperation::DistinctCount {
-                objects,
-                property: ObjectProperty::Names | ObjectProperty::Cost,
-            } => check_objects(objects),
-            _ => Err(unsupported("play cost public count")),
-        },
-        _ => Err(unsupported("play cost public count")),
-    }
-}
-
-fn check_objects(objects: &Selector) -> Result<()> {
-    super::selection::public_zone_selector(objects)
-}
-
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Payment replacements use the same authoritative Resolution state."
@@ -401,7 +269,7 @@ impl Game {
                     .condition
                     .as_ref()
                     .map_or(Ok(true), |condition| {
-                        condition_value(self, execution, condition)
+                        CostConditionPlan::compile(condition, true)?.evaluate(execution, self)
                     })?;
                 if !applies {
                     continue;
@@ -409,7 +277,9 @@ impl Game {
                 match &modifier.node.change {
                     CostChange::Delta { amount } => {
                         delta = delta
-                            .checked_add(execution.integer(self, amount)?.0)
+                            .checked_add(
+                                CostAmountPlan::compile(amount)?.evaluate(execution, self)?,
+                            )
                             .ok_or_else(|| invalid("play cost overflow"))?;
                     }
                     CostChange::Set {
@@ -437,8 +307,4 @@ impl Game {
         self.internal_other_play_cost(execution, base, delta)
             .map(|cost| cost.max(0))
     }
-}
-
-fn condition_value(game: &Game, execution: &Execution, condition: &Expr<Bool>) -> Result<bool> {
-    execution.boolean(game, condition).map(|Bool(value)| value)
 }
