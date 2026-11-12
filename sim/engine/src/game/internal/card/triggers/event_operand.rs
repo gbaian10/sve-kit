@@ -3,7 +3,8 @@ use crate::ir::events::attack::target_plan;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Action, Binding, Bool, Control, EnterFieldEvent, Expr, InstallationSubjects, LkiReason,
-    NameOperation, Node, ObjectOperand, ObjectRef, ObjectView, Program, Selector, TokenTemplate,
+    NameOperation, Node, ObjectOperand, ObjectRef, ObjectView, Program, RecipientSet, Selector,
+    TokenTemplate,
 };
 use crate::ir::{Int, IntOperation, Predicate};
 use alloc::collections::BTreeSet;
@@ -66,6 +67,12 @@ fn direct_action_paths(
     allowed: &mut BTreeSet<String>,
 ) {
     match action {
+        Action::Damage { recipients, .. } => recipient_subjects(
+            recipients,
+            &format!("{path}/action/recipients"),
+            event,
+            allowed,
+        ),
         Action::Modify {
             subjects: objects, ..
         }
@@ -107,6 +114,25 @@ fn direct_action_paths(
             event,
             allowed,
         ),
+        _ => {}
+    }
+}
+
+fn recipient_subjects(
+    recipients: &RecipientSet,
+    path: &str,
+    event: &Expr<ObjectRef>,
+    allowed: &mut BTreeSet<String>,
+) {
+    match recipients {
+        RecipientSet::Objects { objects } => {
+            subjects(objects, &format!("{path}/objects"), event, allowed);
+        }
+        RecipientSet::Union { sets } => {
+            for (index, set) in sets.iter().enumerate() {
+                recipient_subjects(set, &format!("{path}/sets/{index}"), event, allowed);
+            }
+        }
         _ => {}
     }
 }

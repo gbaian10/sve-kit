@@ -5,6 +5,8 @@ mod condition_inputs;
 mod dice;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
+#[path = "card/event_damage_consumer.rs"]
+mod event_damage_consumer;
 #[path = "card/event_operand_admission.rs"]
 mod event_operand_admission;
 #[path = "card/evolution_ordinal.rs"]

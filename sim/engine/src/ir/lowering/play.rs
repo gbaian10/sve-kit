@@ -884,8 +884,14 @@ impl BodyContext<'_> {
                 }],
             },
             ast::Recipients::Target(name) => RecipientSet::Objects {
-                objects: Selector::Bound {
-                    reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
+                objects: if let Some(reference) = self.targets.get(name) {
+                    Selector::Bound {
+                        reference: *reference,
+                    }
+                } else if name == "it" {
+                    self.objects(&ast::Objects::Bound(name.clone()), path)?
+                } else {
+                    return Err(unsupported(path));
                 },
             },
             ast::Recipients::Union { any_of } => self.recipient_union(any_of, path)?,
