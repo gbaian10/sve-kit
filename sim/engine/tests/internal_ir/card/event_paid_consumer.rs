@@ -5,7 +5,7 @@
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 
-fn lower(steps: &Value) -> WellFormedCardProgram {
+pub(super) fn lower(steps: &Value) -> WellFormedCardProgram {
     lowerer()
         .lower(&equipment_played::tree(
             &json!({"auto":{
@@ -57,7 +57,7 @@ fn paid_subject() -> WellFormedCardProgram {
     WellFormedCardProgram::check(raw).unwrap()
 }
 
-fn state(acted: bool) -> Value {
+pub(super) fn state(acted: bool) -> Value {
     let mut state = setup(2, json!([{"id":"opponent-draw","card":"unit-spell"}]));
     state["turn"]["active"] = json!("P2");
     state["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -70,23 +70,30 @@ fn state(acted: bool) -> Value {
 }
 
 fn board(program: &WellFormedCardProgram, acted: bool) -> Game {
+    position(program, &state(acted), &card(vec![]), &card(vec![]))
+}
+
+pub(super) fn position(
+    program: &WellFormedCardProgram,
+    initial: &Value,
+    follower: &WellFormedCardProgram,
+    spell: &WellFormedCardProgram,
+) -> Game {
     let mut game = Game::new(
         static_keywords::keyword_catalog(),
-        &state(acted),
+        initial,
         &Value::Null,
         &Value::Null,
         "paid-event-subject",
     )
     .unwrap();
     game.load_internal_card("unit-amulet", program).unwrap();
-    game.load_internal_card("unit-spell", &card(vec![]))
-        .unwrap();
-    game.load_internal_card("unit-follower", &card(vec![]))
-        .unwrap();
+    game.load_internal_card("unit-spell", spell).unwrap();
+    game.load_internal_card("unit-follower", follower).unwrap();
     game
 }
 
-fn question(play: CardPlay) -> DecisionView {
+pub(super) fn question(play: CardPlay) -> DecisionView {
     let CardPlay::Awaiting(question) = play else {
         panic!("resolution payment question")
     };
