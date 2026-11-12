@@ -967,3 +967,6 @@ mod counter_author;
 
 #[path = "card/material_distinct.rs"]
 mod material_distinct;
+
+#[path = "card/field_token_exchange.rs"]
+mod field_token_exchange;

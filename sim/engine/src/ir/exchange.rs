@@ -1,7 +1,8 @@
 //! The exchange selector grammar is shared by structural and runtime checks.
 use super::{
-    Action, Bool, ChoiceDomain, ClassId, ClassRead, Expr, Info, Nat, ObjectOperand, ObjectView,
-    PlayCostExchange, Posture, PostureRead, Predicate, Selector, ZoneKind,
+    Action, Bool, ChoiceDomain, ClassId, ClassRead, Expr, Info, MoveDestination, MoveReason, Nat,
+    ObjectOperand, ObjectView, OwnerZone, PlayCostExchange, Posture, PostureRead, Predicate,
+    Selector, ZoneKind,
 };
 
 /// A PP increase modifies the single play quotation and has no material route.
@@ -109,4 +110,28 @@ pub(crate) fn pair(exchange: &PlayCostExchange) -> bool {
         }
     }
     field && ex
+}
+
+/// Tokens may pay only the existing own-Field Put route into their owners' cemetery.
+pub(crate) fn field_put_route(exchange: &PlayCostExchange, index: usize) -> bool {
+    let Some(routes) = exchange.routes() else {
+        return false;
+    };
+    let Some((decision, step)) = routes.get(index) else {
+        return false;
+    };
+    let ChoiceDomain::Objects {
+        constraint,
+        binding,
+        ..
+    } = &decision.domain
+    else {
+        return false;
+    };
+    matches!(constraint.groups.as_slice(), [group]
+        if matches!(group.selector, Selector::Zone { zone: ZoneKind::Field, .. }))
+        && matches!(&step.instruction.action,
+            Action::Move { objects: Selector::Bound { reference }, movement, reason: MoveReason::Put }
+                if reference == binding
+                    && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
 }

@@ -302,10 +302,7 @@ impl Game {
             ConditionPlan::compile(predicate, *binding, Policy::Search)?.prepare(None)?;
         let action = &route_step(exchange, index)?.action;
         let posture = matches!(action, Action::Posture { .. });
-        let token_put = exchange.materials.len() == 2
-            && execution.field_entry
-            && matches!(action, Action::Move { .. })
-            && *zone == ZoneKind::Field;
+        let token_put = execution.field_entry && exchange_shape::field_put_route(exchange, index);
         let zone = match zone {
             ZoneKind::Field => "field",
             ZoneKind::Cemetery => "cemetery",
@@ -406,15 +403,12 @@ impl Game {
             let Some(exchange) = &face.node.exchange else {
                 continue;
             };
-            if !exchange_shape::pair(&exchange.node) {
-                continue;
-            }
             let routes = exchange
                 .node
                 .routes()
                 .ok_or_else(|| unsupported("exchange route authority"))?;
-            for (decision, step) in routes {
-                if !matches!(step.instruction.action, Action::Move { .. }) {
+            for (index, (decision, _)) in routes.into_iter().enumerate() {
+                if !exchange_shape::field_put_route(&exchange.node, index) {
                     continue;
                 }
                 let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
