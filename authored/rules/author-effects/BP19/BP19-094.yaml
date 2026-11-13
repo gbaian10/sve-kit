@@ -1,0 +1,38 @@
+cards:
+  BP19-094:
+    abilities:
+      - evolve_time:
+          do:
+            - destroy:
+                ref:
+                  kind: amulet
+                  who: self
+                  zone: field
+                result: broken
+            - damage:
+                n:
+                  count_of: broken
+                to:
+                  any_of:
+                    - leader: opp
+                    - kind: follower
+                      who: opp
+                      zone: field
+            - life:
+                delta:
+                  count_of: broken
+                who: self
+            - pp:
+                delta:
+                  count_of: broken
+                who: self
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

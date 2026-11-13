@@ -1,0 +1,36 @@
+cards:
+  BP17-061:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - history_count:
+                  event: left_field
+                  sel:
+                    name: ナテラの大樹
+                  who: self
+                  window: this_turn
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 5
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
