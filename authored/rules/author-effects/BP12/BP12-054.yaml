@@ -1,0 +1,61 @@
+cards:
+  BP12-054:
+    abilities:
+      - auto:
+          do:
+            - optional:
+                do:
+                  - move:
+                      ref: this
+                      to: ex
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          do:
+            - damage:
+                n: 6
+                to:
+                  any_of:
+                    - kind: follower
+                      other: true
+                      who: all
+                      zone: field
+                    - leaders: opponents
+        line: 3
+      - activate:
+          cost:
+            steps:
+              - pp: 3
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 6
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          usable_if:
+            awakened: true
+          zone: ex
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

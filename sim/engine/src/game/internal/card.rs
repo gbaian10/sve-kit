@@ -814,7 +814,10 @@ impl Game {
         for step in steps {
             self.check_keyword_cost(execution, step)?;
             if material::source_field_cost(&step.instruction.action)
-                && self.object(&execution.context.source)?.zone != "field"
+                && !material::source_cost_zone(
+                    &step.instruction.action,
+                    &self.object(&execution.context.source)?.zone,
+                )
             {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "source cost requires the field".into(),
@@ -998,9 +1001,16 @@ pub(super) fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
         [ZoneKind::Hand | ZoneKind::Cemetery] => {
             matches!(kind, "フォロワー" | "スペル" | "アミュレット")
         }
+        // Any card that can wait in EX may carry an ability active there.
         [ZoneKind::Ex] => matches!(
             kind,
-            "クレスト・トークン" | "スペル・トークン" | "アミュレット・トークン" | "アミュレット"
+            "フォロワー"
+                | "スペル"
+                | "アミュレット"
+                | "フォロワー・トークン"
+                | "クレスト・トークン"
+                | "スペル・トークン"
+                | "アミュレット・トークン"
         ),
         _ => false,
     }

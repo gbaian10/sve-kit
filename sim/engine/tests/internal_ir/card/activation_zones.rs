@@ -224,3 +224,54 @@ fn ex_self_banish_and_two_named_materials_reserve_distinct_own_objects_atomicall
         assert_eq!(state["P1"]["leader"]["life"], 21);
     }
 }
+
+fn ex_follower(program: &WellFormedCardProgram) -> Game {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut board = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "ex-follower",
+    )
+    .unwrap();
+    board.load_internal_card("unit-follower", program).unwrap();
+    board
+        .load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    board
+}
+
+#[test]
+fn an_ex_follower_can_send_itself_to_the_cemetery_as_its_cost() {
+    let program = lowered(json!({"zone":"ex",
+        "cost":{"steps":[{"pp":1},{"self_to_cemetery":true}]},
+        "do":[{"life":{"who":"self","delta":1}}]}));
+    let mut board = ex_follower(&program);
+    resolved(
+        board
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    let state = board.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["s"]));
+    assert_eq!(state["P1"]["ex"], json!([]));
+    assert_eq!(state["P1"]["leader"]["life"], 21);
+    assert_eq!(state["P1"]["pp"]["current"], 1);
+}
+
+#[test]
+fn acting_itself_still_needs_the_source_on_the_field() {
+    let program = lowered(json!({"zone":"ex",
+        "cost":{"steps":[{"pp":1},{"act_self":true}]},
+        "do":[{"life":{"who":"self","delta":1}}]}));
+    let mut board = ex_follower(&program);
+    let before = exact_authority(&board);
+    board
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap_err();
+    assert_eq!(exact_authority(&board), before);
+}
