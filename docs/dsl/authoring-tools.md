@@ -232,7 +232,9 @@ buff:
 
 場上正式目標與結算選取也接受 `power_le: N`／`power_ge: N`，依候選目前的攻擊力篩選（CSD02b-001「攻撃力3以下の…を選ぶ」、CP04-032「攻撃力3以上の…を選ぶ」）。極值 `where` 與聯集分支不帶這兩個條件，並用時拒絕。
 
-手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支都必須讀自己的手牌並各自帶靜態篩選，同時符合多個分支的卡仍只算一張；混入其他區域、對手手牌、`except`、極值或動態費用的分支在載入時拒絕。
+手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支各自帶靜態篩選，同時符合多個分支的卡仍只算一張；分支可合併選牌者自己的手牌與 EX，但不可讀其他玩家的手牌或 EX，也不接受其他區域、`except`、極值或動態費用。
+
+「自分の手札か自分のEXエリア」沿用同一個 `choose.from.any_of`（SP01-010），例如 `{any_of: [{who: self, zone: hand, kind: follower, trait: 兵士, orig_cost_le: 2}, {who: self, zone: ex, kind: follower, trait: 兵士, orig_cost_le: 2}]}`。兩區共用一次選擇與 `upto: 1` 上限，分支順序不影響私有權限；整題只向選牌者公開，對手仍看不到手牌候選。後續相鄰的 `move: {ref: selected, to: field, result: entered}` 沿用一般入場容量與事件處理，不支付卡片的打出費用。
 
 Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示兩組或三組各至多 1 張，搭配 `may: true` 與 `upto: <組數>`；每組須有 `kind` 或非空 `trait`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與法術、BP11-086 的荒野卡與低費從者、ECP02-034 的キュート／クール／パッション）。每張實體卡最多佔一組，同時符合多組也不能重複選取；某組沒有候選不妨礙選其他組。候選與選擇仍只向控制者公開，放入手牌的公開另寫 `reveal`。`groups` 不與 `any_of`、外層特徵或合計費用並用。可多選的 Look 選取若要進場，`move: {ref: <選取>, to: field}` 必須緊接在 `choose` 之後、位於同一層本文；選項上限在出題時依空位計算，中間或條件分支內的進場會在載入時拒絕。分組或聯集拿回手牌不受場位限制。
 
