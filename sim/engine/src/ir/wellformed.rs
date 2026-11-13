@@ -580,10 +580,8 @@ impl Checker {
         });
         self.ability_source = previous_source;
         result?;
-        if let Action::Discard { player, .. }
-        | Action::Draw { player, .. }
-        | Action::Search { player, .. } = &instruction.action
-            && instruction.actor != *player
+        if super::perspective::performer(&instruction.action)
+            .is_some_and(|performer| instruction.actor != *performer)
         {
             return self.reject();
         }

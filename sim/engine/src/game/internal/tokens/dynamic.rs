@@ -65,7 +65,9 @@ pub(in crate::game::internal) fn projection(
 }
 
 pub(crate) fn check_each(control: &Control) -> Result<()> {
-    if player_stages::procedure(control).is_some() {
+    if player_stages::procedure(control).is_some()
+        || player_stages::choice_procedure(control).is_some()
+    {
         return Ok(());
     }
     let Control::EachPlayer {

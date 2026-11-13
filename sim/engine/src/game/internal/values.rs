@@ -556,6 +556,9 @@ impl Execution {
             }
             _ => return Err(unsupported("capture domain")),
         };
+        if let Slot::Player(player) = value {
+            self.switch_procedure_player(key, player);
+        }
         self.slots.insert(key, value);
         Ok(())
     }

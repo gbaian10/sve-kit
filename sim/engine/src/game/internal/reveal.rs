@@ -3,8 +3,9 @@
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
 use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
+use crate::ir::perspective;
 use crate::ir::{
-    Bool, Expr, Instruction, Nat, NumericProperty, ObjectRef, PlayerRef, PlayerRelation, ReceiptId,
+    Bool, Expr, Instruction, Nat, NumericProperty, ObjectRef, PlayerRelation, ReceiptId,
     ReceiptLocation, SelectionView, Selector, ZoneKind,
 };
 use core::mem::take;
@@ -32,7 +33,7 @@ pub(super) fn check_objects(objects: &Selector) -> Result<()> {
     else {
         return Err(unsupported("direct whole-hand reveal"));
     };
-    if players.relative_to != (PlayerRef::Controller {})
+    if !perspective::readable(&players.relative_to)
         || !matches!(
             players.relation,
             PlayerRelation::SelfPlayer | PlayerRelation::Opponents

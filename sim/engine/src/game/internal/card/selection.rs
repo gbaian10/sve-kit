@@ -8,8 +8,10 @@ use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::observation_selection::{
-    CardTotals, card_totals, held_by, private_hand_choice, private_look_choice, revealed_choice,
+    CardTotals, card_totals, private_hand_choice, private_look_choice, revealed_choice,
+    single_holder,
 };
+use crate::ir::perspective;
 use crate::ir::{
     Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
     MoveDestination, MoveSpec, Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot,
@@ -635,14 +637,8 @@ fn candidate_zone(selector: &Selector, allow_resolution_zones: bool) -> Result<&
         {
             "evolve_deck"
         }
-        // Loading already proved the chooser holds this hand; either player may be that holder.
-        ZoneKind::Hand
-            if allow_resolution_zones
-                && (held_by(players, &PlayerRef::Controller {})
-                    || held_by(players, &opponent())) =>
-        {
-            "hand"
-        }
+        // Loading already proved the chooser holds this hand.
+        ZoneKind::Hand if allow_resolution_zones && single_holder(players) => "hand",
         ZoneKind::Cemetery => "cemetery",
         ZoneKind::Banish
             if players.relation == PlayerRelation::SelfPlayer
@@ -882,7 +878,7 @@ pub(in crate::game::internal) fn field_selector(selector: &Selector) -> Result<(
             predicate,
             binding,
             players,
-        } if players.relative_to == (PlayerRef::Controller {}) => {
+        } if perspective::readable(&players.relative_to) => {
             check_predicate(predicate, *binding, false)
         }
         // "それ以外" removes an earlier target binding; "他の" removes the source holder.
@@ -914,7 +910,11 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
         return Ok(());
     }
     match selector {
-        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+        // "他の" removes the source holder; "それ以外" removes an earlier chosen binding.
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}])
+                || matches!(except.as_ref(), Selector::Bound { .. }) =>
+        {
             public_zone_selector(input)
         }
         Selector::Extremum {
@@ -936,7 +936,7 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
             predicate,
             binding,
             players,
-        } if players.relative_to == (PlayerRef::Controller {})
+        } if perspective::readable(&players.relative_to)
             && (*zone != ZoneKind::Evolve || players.relation == PlayerRelation::SelfPlayer) =>
         {
             check_predicate(predicate, *binding, false)

@@ -127,6 +127,16 @@ fn own_hand_zone(selector: &Selector, holder: &PlayerRef) -> bool {
     } if held_by(players, holder))
 }
 
+/// Whether `players` names exactly one player: the controller, its opponent, or a procedure's
+/// player.
+pub(crate) fn single_holder(players: &super::PlayerSet) -> bool {
+    match players.relation {
+        PlayerRelation::SelfPlayer => super::perspective::readable(&players.relative_to),
+        PlayerRelation::Opponents => players.relative_to == (PlayerRef::Controller {}),
+        PlayerRelation::All | PlayerRelation::Bound => false,
+    }
+}
+
 /// Whether `players` names exactly `holder`, read either directly or as the controller's opponent.
 pub(crate) fn held_by(players: &super::PlayerSet, holder: &PlayerRef) -> bool {
     match players.relation {

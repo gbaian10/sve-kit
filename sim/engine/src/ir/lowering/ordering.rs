@@ -830,16 +830,15 @@ impl BodyContext<'_> {
             }),
             ast::RevealRef::WholeHand(hand) => {
                 let ast::HandZone::Hand = hand.zone;
-                let relation = match hand.who {
-                    ast::Side::Controller => PlayerRelation::SelfPlayer,
-                    ast::Side::Opponent => PlayerRelation::Opponents,
-                    ast::Side::All => return Err(unsupported(path)),
-                };
+                if matches!(hand.who, ast::Side::All) {
+                    return Err(unsupported(path));
+                }
+                let (relation, relative_to) = self.side_set(&hand.who, path)?;
                 Ok(Action::Reveal {
                     objects: Selector::Zone {
                         players: PlayerSet {
                             relation,
-                            relative_to: PlayerRef::Controller {},
+                            relative_to,
                             cardinality: Cardinality {
                                 minimum: Nat(1),
                                 maximum: Some(Nat(1)),

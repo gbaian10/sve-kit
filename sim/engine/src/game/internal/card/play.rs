@@ -1223,6 +1223,7 @@ impl Game {
             ids,
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
+            procedures: Vec::new(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
             hand_cost_groups: BTreeMap::new(),

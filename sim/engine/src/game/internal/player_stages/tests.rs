@@ -40,6 +40,7 @@ fn execution(game: &mut Game) -> Execution {
         timestamp: 1,
         ids: game.internal_identities().unwrap(),
         todo: VecDeque::new(),
+        procedures: Vec::new(),
         slots: BTreeMap::new(),
         receipts: BTreeMap::new(),
         cost_materials: BTreeMap::new(),

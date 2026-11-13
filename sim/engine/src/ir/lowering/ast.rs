@@ -556,7 +556,11 @@ pub(super) struct Optional {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Participant {
     Side(LeaderSide),
-    MasterOf { master_of: String },
+    MasterOf {
+        master_of: String,
+    },
+    /// The player of an enclosing `each_player`.
+    Bound(String),
 }
 
 #[derive(Deserialize)]
@@ -1147,14 +1151,39 @@ pub(super) struct BoundExcept {
     pub reference: String,
 }
 
-#[derive(Clone, Deserialize, PartialEq, Eq)]
+/// Whose objects a query reads; a binding name is the player of an enclosing `each_player`.
+#[derive(Clone, PartialEq, Eq)]
 pub(super) enum Side {
-    #[serde(rename = "self")]
     Controller,
-    #[serde(rename = "opp")]
     Opponent,
-    #[serde(rename = "all")]
     All,
+    Bound(String),
+}
+
+impl Side {
+    /// The relation to the effect controller; a procedure's player has none.
+    pub(super) const fn relation(&self) -> Option<super::super::PlayerRelation> {
+        match self {
+            Self::Controller => Some(super::super::PlayerRelation::SelfPlayer),
+            Self::Opponent => Some(super::super::PlayerRelation::Opponents),
+            Self::All => Some(super::super::PlayerRelation::All),
+            Self::Bound(_) => None,
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for Side {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(match String::deserialize(deserializer)?.as_str() {
+            "self" => Self::Controller,
+            "opp" => Self::Opponent,
+            "all" => Self::All,
+            name => Self::Bound(name.to_owned()),
+        })
+    }
 }
 
 #[derive(Clone, Deserialize)]

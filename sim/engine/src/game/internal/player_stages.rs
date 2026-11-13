@@ -3,10 +3,12 @@ use super::{
     Execution, Fact, Game, InstructionOutcome, Result, Slot, invalid, player_id, seat_name,
     unsupported,
 };
+use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Action, CardQuantityOutcome, Control, Expr, Instruction, Int, Located, MoveOutcome, Nat, Node,
-    ObjectRef, PlayerId, Selector, ZoneKind,
+    ObjectRef, PlayerId, PlayerStage, ReceiptId, ScopeId, Selector, ZoneKind,
 };
+use alloc::collections::{BTreeMap, BTreeSet};
 
 #[cfg(test)]
 mod tests;
@@ -198,5 +200,127 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved }),
         );
         Ok(())
+    }
+}
+
+/// Each player's own results inside a choice procedure: a later stage reads the choices,
+/// captures and receipts that player made, never those the previous player left in the same
+/// bindings. Nested procedures stack inside the outer player's environment.
+#[derive(Clone, Debug)]
+pub(super) struct ProcedureLocals {
+    player: (ScopeId, u64),
+    scopes: BTreeSet<ScopeId>,
+    receipts: BTreeSet<ReceiptId>,
+    saved: BTreeMap<u32, Locals>,
+}
+
+#[derive(Clone, Debug, Default)]
+struct Locals {
+    slots: Vec<((ScopeId, u64), Slot)>,
+    targets: Vec<((ScopeId, u64), super::card::selection::TargetWait)>,
+    receipts: Vec<(ReceiptId, InstructionOutcome)>,
+}
+
+/// Every lexical scope and receipt slot a procedure's stage bodies can produce.
+#[derive(Default)]
+struct LocalNames {
+    scopes: BTreeSet<ScopeId>,
+    receipts: BTreeSet<ReceiptId>,
+}
+
+impl Visitor for LocalNames {
+    fn enter(&mut self, node: NodeRef<'_>, _path: &str) -> Traversal {
+        match node {
+            NodeRef::Program(program) => {
+                self.scopes.insert(program.scope);
+            }
+            NodeRef::Instruction(instruction) => {
+                self.receipts.insert(instruction.receipt);
+            }
+            NodeRef::Control(
+                Control::May { receipt, .. }
+                | Control::Pay { receipt, .. }
+                | Control::Simultaneous { receipt, .. },
+            ) => {
+                self.receipts.insert(*receipt);
+            }
+            NodeRef::Control(_)
+            | NodeRef::Source(_)
+            | NodeRef::Ability(_)
+            | NodeRef::Action(_)
+            | NodeRef::Effect(_)
+            | NodeRef::CostSpec(_)
+            | NodeRef::ObjectOperand(_) => {}
+        }
+        Traversal::Descend
+    }
+}
+
+impl ProcedureLocals {
+    pub(super) fn new(player: (ScopeId, u64), stages: &[PlayerStage]) -> Self {
+        let mut names = LocalNames::default();
+        for stage in stages {
+            walk::program(&stage.body, "", &mut names);
+        }
+        Self {
+            player,
+            scopes: names.scopes,
+            receipts: names.receipts,
+            saved: BTreeMap::new(),
+        }
+    }
+}
+
+fn take<K, V, Local>(map: &mut BTreeMap<K, V>, local: Local) -> Vec<(K, V)>
+where
+    K: Ord + Copy,
+    Local: Fn(&K) -> bool,
+{
+    let keys = map
+        .keys()
+        .copied()
+        .filter(|key| local(key))
+        .collect::<Vec<_>>();
+    keys.into_iter()
+        .filter_map(|key| map.remove(&key).map(|value| (key, value)))
+        .collect()
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Switching the procedure player swaps only that procedure's local results."
+)]
+impl Execution {
+    pub(super) fn begin_procedure(&mut self, locals: ProcedureLocals) {
+        self.procedures.push(locals);
+    }
+
+    /// Switching an outer procedure's player ends every procedure nested inside it.
+    pub(super) fn switch_procedure_player(&mut self, key: (ScopeId, u64), next: PlayerId) {
+        let Some(index) = self
+            .procedures
+            .iter()
+            .rposition(|procedure| procedure.player == key)
+        else {
+            return;
+        };
+        self.procedures.truncate(index.saturating_add(1));
+        let Some(mut procedure) = self.procedures.pop() else {
+            return;
+        };
+        let local = |entry: &(ScopeId, u64)| procedure.scopes.contains(&entry.0);
+        let current = Locals {
+            slots: take(&mut self.slots, local),
+            targets: take(&mut self.targets, local),
+            receipts: take(&mut self.receipts, |id| procedure.receipts.contains(id)),
+        };
+        if let Some(Slot::Player(previous)) = self.slots.get(&key) {
+            procedure.saved.insert(previous.seat, current);
+        }
+        let own = procedure.saved.remove(&next.seat).unwrap_or_default();
+        self.slots.extend(own.slots);
+        self.targets.extend(own.targets);
+        self.receipts.extend(own.receipts);
+        self.procedures.push(procedure);
     }
 }

@@ -2,12 +2,13 @@ use super::{
     Action, Binding, BodyContext, Expr, LoweringError, Nat, PlayerRef, ZoneKind, ast, unsupported,
 };
 use crate::ir::events::subject::SubjectFields;
+use crate::ir::perspective::performer;
 use crate::ir::{
     AbilitySource, CardKind, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
     NameOperation, NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView,
-    PlayerOrder, PlayerRead, PlayerRelation, PlayerSet, PlayerStage, Posture, Predicate, Role,
-    Selector, SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec, TokenTemplate,
-    TokenTemplateId, ZoneRef,
+    PlayerOrder, PlayerRead, PlayerRelation, PlayerSet, PlayerStage, Posture, Predicate, Program,
+    RepeatBody, Role, Selector, SourceSpan, StageMode, TextQuantifier, TokenDestination, TokenSpec,
+    TokenTemplate, TokenTemplateId, ZoneRef,
 };
 use alloc::collections::BTreeSet;
 
@@ -247,6 +248,12 @@ impl BodyContext<'_> {
             _ => false,
         };
         let procedure = Self::player_procedure(each);
+        // Other per-player bodies run as a choice procedure: one player finishes a stage before
+        // the next player starts it, turn player first.
+        let choices = !legacy
+            && !procedure
+            && !each.stages.is_empty()
+            && each.stages.iter().all(|stage| !stage.is_empty());
         if matches!(
             each.binding.as_str(),
             "self" | "opp" | "turn" | "non_turn" | "current" | "item"
@@ -254,13 +261,13 @@ impl BodyContext<'_> {
             || self.targets.contains_key(&each.binding)
             || self.observations.contains_key(&each.binding)
             || self.searches.contains(&each.binding)
-            || !(legacy || procedure)
+            || !(legacy || procedure || choices)
         {
             return Err(unsupported(path));
         }
         let parent = self.scope;
-        // Stage results are local to this procedure, like the player binding itself.
-        let observations = self.observations.clone();
+        // Stage results and choices are local to this procedure, like the player binding.
+        let saved = self.local_bindings();
         self.scope = self.card_allocator.scope(path)?;
         let player = Binding::new(self.allocator.id(path)?, self.scope);
         self.players.insert(each.binding.clone(), player);
@@ -270,20 +277,29 @@ impl BodyContext<'_> {
                 let stage_path = format!("{path}/each_player/stages/{index}");
                 self.scope = self.card_allocator.scope(&stage_path)?;
                 let mut body = self.steps(stage, &stage_path, span, source)?;
-                for step in &mut body.steps {
-                    if let Node::Instruction { instruction } = &mut step.node {
-                        instruction.actor = PlayerRef::Bound { binding: player };
+                let stage_player = PlayerRef::Bound { binding: player };
+                if choices {
+                    performed_by_procedure_player(&mut body);
+                } else {
+                    for step in &mut body.steps {
+                        if let Node::Instruction { instruction } = &mut step.node {
+                            instruction.actor = stage_player.clone();
+                        }
                     }
                 }
                 stages.push(PlayerStage {
                     body,
-                    mode: StageMode::NonChoiceSimultaneous {},
+                    mode: if choices {
+                        StageMode::ChoiceProcedure {}
+                    } else {
+                        StageMode::NonChoiceSimultaneous {}
+                    },
                 });
             }
             Ok(())
         })();
         self.players.remove(&each.binding);
-        self.observations = observations;
+        self.restore_bindings(saved);
         self.scope = parent;
         result?;
         Ok(Node::Control {
@@ -302,5 +318,48 @@ impl BodyContext<'_> {
                 choice_order: PlayerOrder::TurnPlayerFirst,
             },
         })
+    }
+}
+
+/// In a choice stage an action keeps the actor its own lowering gave it, such as the effect
+/// controller for `win who: self`; an action whose performer is a procedure player in scope
+/// (`draw who: p`, or an outer `shuffle who: p` inside a nested procedure) is performed by
+/// that player.
+fn performed_by_procedure_player(program: &mut Program) {
+    for step in &mut program.steps {
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Some(player @ PlayerRef::Bound { .. }) = performer(&instruction.action)
+        {
+            instruction.actor = player.clone();
+        }
+        if let Node::Control { control } = &mut step.node {
+            if let Control::Sequence { body }
+            | Control::May { body, .. }
+            | Control::EachObject { body, .. }
+            | Control::Pay { on_paid: body, .. }
+            | Control::Repeat {
+                body: RepeatBody::Program { body },
+                ..
+            } = control
+            {
+                performed_by_procedure_player(body);
+            }
+            if let Control::If {
+                then_body,
+                else_body,
+                ..
+            } = control
+            {
+                performed_by_procedure_player(then_body);
+                if let Some(body) = else_body {
+                    performed_by_procedure_player(body);
+                }
+            }
+            if let Control::Mode { modes, .. } = control {
+                for mode in modes {
+                    performed_by_procedure_player(&mut mode.body);
+                }
+            }
+        }
     }
 }

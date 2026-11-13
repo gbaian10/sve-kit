@@ -81,7 +81,7 @@ fn check_choice_shape(
     ) && (!resolution
         || !matches!(
             target.from.who,
-            Some(ast::Side::Controller | ast::Side::Opponent)
+            Some(ast::Side::Controller | ast::Side::Opponent | ast::Side::Bound(_))
         )
         || target.from.other
         || target.from.not_same_name_as_this
@@ -231,16 +231,14 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let mut sets = Vec::new();
+        let (relation, relative_to) =
+            self.side_set(query.who.as_ref().ok_or_else(|| unsupported(path))?, path)?;
         for zone in zones {
             let candidate = Binding::new(1, self.card_allocator.scope(path)?);
             sets.push(Selector::Zone {
                 players: PlayerSet {
-                    relation: match query.who.as_ref().ok_or_else(|| unsupported(path))? {
-                        ast::Side::Controller => PlayerRelation::SelfPlayer,
-                        ast::Side::Opponent => PlayerRelation::Opponents,
-                        ast::Side::All => PlayerRelation::All,
-                    },
-                    relative_to: PlayerRef::Controller {},
+                    relation,
+                    relative_to: relative_to.clone(),
                     cardinality: Cardinality {
                         minimum: Nat(0),
                         maximum: None,
@@ -1640,20 +1638,16 @@ pub(super) fn trigger_choice(
     }
 }
 
-const fn target_players(side: &ast::Side) -> PlayerSet {
-    PlayerSet {
+fn target_players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringError> {
+    Ok(PlayerSet {
         relative_to: PlayerRef::Controller {},
-        relation: match side {
-            ast::Side::Controller => PlayerRelation::SelfPlayer,
-            ast::Side::Opponent => PlayerRelation::Opponents,
-            ast::Side::All => PlayerRelation::All,
-        },
+        relation: side.relation().ok_or_else(|| unsupported(path))?,
         cardinality: Cardinality {
             minimum: Nat(0),
             maximum: None,
         },
         text_quantifier: TextQuantifier::Implicit,
-    }
+    })
 }
 
 fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, LoweringError> {
@@ -1688,15 +1682,18 @@ fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, 
         {
             return Err(unsupported(path));
         }
-        target_players(match leaders {
-            ast::LeaderGroup::All => &ast::Side::All,
-            ast::LeaderGroup::Opponents => &ast::Side::Opponent,
-        })
+        target_players(
+            match leaders {
+                ast::LeaderGroup::All => &ast::Side::All,
+                ast::LeaderGroup::Opponents => &ast::Side::Opponent,
+            },
+            path,
+        )?
     } else {
         if !matches!(query.kind, Some(ast::SearchKind::Follower)) {
             return Err(unsupported(path));
         }
-        target_players(query.who.as_ref().ok_or_else(|| unsupported(path))?)
+        target_players(query.who.as_ref().ok_or_else(|| unsupported(path))?, path)?
     };
     Ok(players)
 }

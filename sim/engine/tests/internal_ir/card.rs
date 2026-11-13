@@ -1002,3 +1002,6 @@ mod private_choice;
 
 #[path = "card/player_shares.rs"]
 mod player_shares;
+
+#[path = "card/player_choices.rs"]
+mod player_choices;

@@ -108,3 +108,32 @@ pub(crate) fn returned_share(count: &Expr<Int>) -> Option<ReceiptId> {
         ReceiptLocation::Iteration { .. } => None,
     }
 }
+
+/// Every player in turn order runs each stage body, choices included, before the next player
+/// starts that stage; the body is checked and executed by ordinary rules for that player.
+pub(crate) fn choice_procedure(
+    control: &Control,
+) -> Option<(&PlayerSet, Binding<PlayerRef>, &[PlayerStage])> {
+    let Control::EachPlayer {
+        players,
+        player,
+        stages,
+        choice_order: PlayerOrder::TurnPlayerFirst,
+    } = control
+    else {
+        return None;
+    };
+    (players.relation == PlayerRelation::All
+        && players.relative_to == (PlayerRef::Controller {})
+        && players.cardinality
+            == (Cardinality {
+                minimum: Nat(0),
+                maximum: None,
+            })
+        && players.text_quantifier == TextQuantifier::All
+        && !stages.is_empty()
+        && stages.iter().all(|stage| {
+            stage.mode == (StageMode::ChoiceProcedure {}) && !stage.body.steps.is_empty()
+        }))
+    .then_some((players, *player, stages))
+}

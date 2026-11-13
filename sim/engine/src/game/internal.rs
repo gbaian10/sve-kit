@@ -639,6 +639,7 @@ pub(super) struct Execution {
     nested: Option<Box<card::nested::Continuation>>,
     cost_override: Option<CostOverride>,
     play_origin_player: Option<PlayerId>,
+    procedures: Vec<player_stages::ProcedureLocals>,
 }
 
 #[expect(
@@ -791,6 +792,7 @@ impl Game {
                     .map(|step| step.node.clone())
                     .collect(),
                 slots: BTreeMap::new(),
+                procedures: Vec::new(),
                 receipts: BTreeMap::new(),
                 cost_materials: BTreeMap::new(),
                 hand_cost_groups: BTreeMap::new(),

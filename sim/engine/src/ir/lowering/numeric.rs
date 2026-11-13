@@ -302,14 +302,11 @@ impl BodyContext<'_> {
         }
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.map(ast::FieldKind::search);
+        let (relation, relative_to) = self.side_set(&query.who, path)?;
         let objects = Selector::Zone {
             players: PlayerSet {
-                relation: match query.who {
-                    ast::Side::Controller => PlayerRelation::SelfPlayer,
-                    ast::Side::Opponent => PlayerRelation::Opponents,
-                    ast::Side::All => PlayerRelation::All,
-                },
-                relative_to: PlayerRef::Controller {},
+                relation,
+                relative_to,
                 cardinality: Cardinality {
                     minimum: Nat(0),
                     maximum: None,
