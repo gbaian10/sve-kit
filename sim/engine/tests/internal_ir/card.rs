@@ -13,6 +13,8 @@ mod event_operand_admission;
 mod event_paid_consumer;
 #[path = "card/event_paid_damage.rs"]
 mod event_paid_damage;
+#[path = "card/event_subject_condition.rs"]
+mod event_subject_condition;
 #[path = "card/evolution_ordinal.rs"]
 mod evolution_ordinal;
 #[path = "card/exchange_routes.rs"]

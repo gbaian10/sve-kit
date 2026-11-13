@@ -34,10 +34,18 @@ struct DirectPaths<'paths> {
 impl Visitor for DirectPaths<'_> {
     fn enter(&mut self, node: NodeRef<'_>, path: &str) -> Traversal {
         match node {
+            NodeRef::Control(Control::If { condition, .. }) => {
+                condition_subjects(
+                    condition,
+                    &format!("{path}/condition"),
+                    self.event,
+                    self.allowed,
+                );
+                Traversal::Descend
+            }
             NodeRef::Control(
                 Control::Sequence { .. }
                 | Control::May { .. }
-                | Control::If { .. }
                 | Control::Mode { .. }
                 | Control::Pay { .. },
             ) => Traversal::Descend,
@@ -49,6 +57,47 @@ impl Visitor for DirectPaths<'_> {
             }
             _ => Traversal::Descend,
         }
+    }
+}
+
+/// 「場に出たフォロワーが…なら」: a branch condition may filter the exact subject.
+fn condition_subjects(
+    condition: &Expr<Bool>,
+    path: &str,
+    event: &Expr<ObjectRef>,
+    allowed: &mut BTreeSet<String>,
+) {
+    let Expr::Compute(operation) = condition else {
+        return;
+    };
+    match operation.as_ref() {
+        Predicate::Exists {
+            objects: Selector::Filter { input, .. },
+        } => subjects(
+            input,
+            &format!("{path}/compute/objects/input"),
+            event,
+            allowed,
+        ),
+        Predicate::Not { predicate } => {
+            condition_subjects(
+                predicate,
+                &format!("{path}/compute/predicate"),
+                event,
+                allowed,
+            );
+        }
+        Predicate::And { predicates } | Predicate::Or { predicates } => {
+            for (index, branch) in predicates.iter().enumerate() {
+                condition_subjects(
+                    branch,
+                    &format!("{path}/compute/predicates/{index}"),
+                    event,
+                    allowed,
+                );
+            }
+        }
+        _ => {}
     }
 }
 
