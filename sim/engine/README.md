@@ -10,9 +10,15 @@ effect paths sharing one `Game` and authority state:
   `Catalog::from_current_selection` and `Game::from_selected_effects` admit current
   whole cards. See [the author contract](../../docs/dsl/author-contract-1.0.md).
 - The frozen prototype reads `authored/rules/effects/`, validated against
-  `dsl/effects.schema.json` before and after macro expansion. Runner adapters,
-  the old player packet, AI, `Replay` and `Assist` still use this path. Its shared
+  `dsl/effects.schema.json` before and after macro expansion. The old runner
+  adapters (`Adapter`, `ReplayAdapter`, `AssistAdapter`, `AiAdapter`), the old
+  player packet, AI, `Replay` and `Assist` still use this path. Its shared
   scenario gate does not establish typed-path coverage.
+
+The shared rule exam also runs on the typed path: `TypedAdapter` plays both seats
+through the player interface only, and `sim/engine/tests/typed_exam.rs` compares the
+result with [tests/engine/typed-known-results.yaml](../../tests/engine/typed-known-results.yaml).
+See [engine status](../../docs/sim/engine-status.md#驗證方式) for the list rules.
 
 The player match interface is being built on the typed path. The old
 `decide`/`legal`/`projection`, JSON interpreter, AI and replay prototype are frozen
@@ -23,49 +29,11 @@ search is a separate follow-up. Scope and progress are tracked in
 [#1971](https://github.com/gbaian10/sve-kit/issues/1971); enduring boundaries are in
 [engine status](../../docs/sim/engine-status.md).
 
-The CLI instructions below evaluate the frozen prototype. Some declared semantics
-are not executable; missing and partial programs are rejected.
-
-From the repository root, first generate the pinned JP input used by the prototype.
-Use the `batch_id` in `tests/engine/card-input.json`, absolute input/output paths,
-and a new output filename (the generator refuses to overwrite an existing file):
-
-```bash
-uv run --directory carddb --locked sve-carddb parsed-cards engine-fixture /absolute/path/to/card-data '<batch_id from tests/engine/card-input.json>' /absolute/path/to/new-cards.jsonl
-```
-
-This temporary projection comes from the admitted public `card-data/`; it is not
-a separately maintained snapshot. Remove it after the evaluation.
-Run all four shared evaluations with that generated input:
-
-```bash
-cargo run --locked --release -p sve-engine --bin sve-prototype -- /absolute/path/to/new-cards.jsonl . all target/prototype
-```
-
-Modes are `all`, `g1`, `ai`, `replay`, `assist`, `validate`, `rules` and `gate`. Evaluation output
-contains unchanged runner reports, a Q4 audit and two core-written search forests.
-Forest identities are hypothetical and do not reuse unseen match IDs.
-
-The positional interface is `sve-prototype SNAPSHOT [ROOT] [MODE] [OUTPUT]
-[SELECTION_OR_KNOWN]`. `SNAPSHOT` is required; `ROOT`, `MODE` and `OUTPUT` default
-to `.`, `all` and `target/prototype`. The final path is used by `rules` and `gate`.
-Use `--help` or `--version` without a snapshot. Invalid modes, unknown options and
-excess arguments exit with status 2 before input loading or report creation.
-Put `--` before positional arguments if a path starts with a dash.
-
-`all` runs G1 and the three architecture/AI suites. Use `rules` without a selection
-to run every public scenario discovered in `tests/rules-scenarios/`, or supply a
-selection file as the final argument,
-for example the G1 selection:
-
-```bash
-cargo run --locked --release -p sve-engine --bin sve-prototype -- /absolute/path/to/new-cards.jsonl . rules target/prototype/g1 tests/rules-scenarios/g1-selection.yaml
-```
-
-`gate` runs every public scenario and fails unless the result matches
-[tests/engine/known-failures.yaml](../../tests/engine/known-failures.yaml) exactly.
-
-Successful CLI exit means reports were written; inspect their statuses for failures.
+The `sve-prototype` binary evaluated the frozen prototype. It loads the catalogue
+with `Catalog::load`, which refuses the current author inventory, so every mode now
+stops before running. It is not maintained and is scheduled for removal with the
+other prototype exits ([#2009](https://github.com/gbaian10/sve-kit/issues/2009)).
+The shared suites below run through the test wrapper instead.
 
 Tests use synthetic cards for boundaries and a fresh projection of the pinned JP
 batch for the shared suites. The wrapper generates that input, replaces any inherited

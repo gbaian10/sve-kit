@@ -66,7 +66,8 @@ opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原�
 - typed 的 lowering、raw IR、准入及執行測試位於 `sim/engine/src/ir/tests/`、
   `sim/engine/tests/internal_ir/` 與 `sim/engine/tests/current_repository/` 等；
   共同原型題本通過不表示這些路徑已被驗收。
-- 執行方式與公開測試輸入依 [sim/engine/README.md](../../sim/engine/README.md)。
+- 執行方式與公開測試輸入依 [sim/engine/README.md](../../sim/engine/README.md)；
+  舊原型的 `sve-prototype` CLI 在目前的作者庫下已無法執行，題本以上述測試為準。
 
 題本通過只表示受測局面正確，不能推論任意卡片或組合都正確。
 規則族正反例與推定強度依 [DSL 驗收規格](../dsl/validation.md)。
