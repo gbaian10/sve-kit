@@ -781,15 +781,22 @@ impl BodyContext<'_> {
             let ast::ExistsQuery::Selected(query) = query else {
                 return Err(unsupported(path));
             };
-            let reference = self
+            let input = if let Some(reference) = self
                 .targets
                 .get(&query.reference)
                 .copied()
                 .filter(|_| !self.observed_targets.contains(&query.reference))
-                .ok_or_else(|| unsupported(path))?;
+            {
+                Selector::Bound { reference }
+            } else if query.reference == "it" {
+                // 「場に出たフォロワーが…なら」: the event subject in the generation the event saw.
+                self.objects(&ast::Objects::Bound(query.reference.clone()), path)?
+            } else {
+                return Err(unsupported(path));
+            };
             return Ok(Expr::Compute(Box::new(Predicate::Exists {
                 objects: Selector::Filter {
-                    input: Box::new(Selector::Bound { reference }),
+                    input: Box::new(input),
                     binding,
                     predicate: Box::new(super::selection::field_filter(
                         &super::selection::ObjectFilter::from(query),

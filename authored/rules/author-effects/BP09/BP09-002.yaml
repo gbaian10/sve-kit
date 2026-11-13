@@ -1,0 +1,44 @@
+cards:
+  BP09-002:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    in: it
+                    trait: 獣
+                else:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+                then:
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
+          on:
+            enter_field:
+              sel:
+                kind: follower
+                other: true
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

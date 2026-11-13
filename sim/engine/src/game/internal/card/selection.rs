@@ -18,7 +18,7 @@ use crate::ir::{
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
-use crate::ir::{Bool, Expr, MemberProjection, SelectionView, ZoneKind};
+use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, ZoneKind};
 use crate::ir::{Position, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
@@ -927,7 +927,7 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
             input,
             binding,
             predicate,
-        } if matches!(input.as_ref(), Selector::Bound { .. }) => {
+        } if matches!(input.as_ref(), Selector::Bound { .. }) || public_event_subject(input) => {
             check_predicate(predicate, *binding, false)
         }
         Selector::Zone {
@@ -943,6 +943,21 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
         }
         _ => Err(unsupported("public count selector")),
     }
+}
+
+/// The single subject of an event that happens in a public zone is as public as a chosen target.
+fn public_event_subject(selector: &Selector) -> bool {
+    let Selector::Objects { objects } = selector else {
+        return false;
+    };
+    matches!(objects.as_slice(), [ObjectOperand::FromExpression { value }]
+        if matches!(value.as_ref(), Expr::Frozen(subject) if matches!(subject.as_ref(),
+            ObjectFrozen::EnterFieldObject { .. }
+                | ObjectFrozen::EnterExObject { .. }
+                | ObjectFrozen::AttackAttacker { .. }
+                | ObjectFrozen::EvolveSubject { .. }
+                | ObjectFrozen::LeaveFieldObjectBefore { .. }
+                | ObjectFrozen::DestroyObjectBefore { .. })))
 }
 
 fn revealed_groups(constraint: &SelectionConstraint) -> bool {
