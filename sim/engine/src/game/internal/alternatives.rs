@@ -5,10 +5,11 @@ use crate::ir::{
     ModeId, Nat, PlayerRef, Program, Visibility,
 };
 
-/// Players who may answer or pay inside an effect: its controller, the opponent, or a
-/// player captured when an object was chosen. Live reads would let a move change the decider.
+/// Players who may answer or pay inside an effect: its controller, the opponent, the player of
+/// an enclosing player procedure, or a player captured when an object was chosen. Live reads
+/// would let a move change the decider.
 pub(in crate::game::internal) fn participant(actor: &PlayerRef) -> bool {
-    matches!(actor, PlayerRef::Controller {})
+    matches!(actor, PlayerRef::Controller {} | PlayerRef::Bound { .. })
         || *actor == timing::opponent()
         || matches!(actor, PlayerRef::FromExpression { value } if matches!(value.as_ref(), Expr::Captured(_)))
 }

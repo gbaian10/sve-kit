@@ -1287,6 +1287,28 @@ struct FieldEntryGuard {
     adjacent: Option<String>,
 }
 
+/// Names a nested body (an optional or a player procedure) may bind; the enclosing body sees
+/// none of them once the nested body ends.
+struct LocalBindings {
+    targets: BTreeMap<String, Binding<Selector>>,
+    recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
+    observations: BTreeMap<String, super::ObjectReceipt>,
+    observed_targets: BTreeSet<String>,
+    field_entry_multi: BTreeSet<String>,
+    searches: BTreeSet<String>,
+    ex_outputs: BTreeMap<String, Selector>,
+    field_outputs: BTreeMap<String, FieldOutput>,
+    evolution_targets: BTreeMap<String, ZoneKind>,
+    ex_targets: BTreeSet<String>,
+    flip_targets: BTreeSet<String>,
+    hand_targets: BTreeSet<String>,
+    playable_targets: BTreeSet<String>,
+    opponent_cemetery_targets: BTreeSet<String>,
+    cemetery_banish_targets: BTreeSet<String>,
+    deck_return_targets: BTreeSet<String>,
+    local_payments: BTreeMap<String, ReceiptId>,
+}
+
 fn choice_before(steps: &[ast::Step], index: usize) -> Option<String> {
     if let Some(ast::Step::Choose(choice)) = index.checked_sub(1).and_then(|i| steps.get(i)) {
         Some(choice.bind.clone())
@@ -1665,6 +1687,48 @@ impl<'definitions> BodyContext<'definitions> {
             source: located,
             node,
         }
+    }
+
+    fn local_bindings(&self) -> LocalBindings {
+        LocalBindings {
+            targets: self.targets.clone(),
+            recipient_targets: self.recipient_targets.clone(),
+            observations: self.observations.clone(),
+            observed_targets: self.observed_targets.clone(),
+            field_entry_multi: self.field_entry.multi.clone(),
+            searches: self.searches.clone(),
+            ex_outputs: self.ex_outputs.clone(),
+            field_outputs: self.field_outputs.clone(),
+            evolution_targets: self.evolution_targets.clone(),
+            ex_targets: self.ex_targets.clone(),
+            flip_targets: self.flip_targets.clone(),
+            hand_targets: self.hand_targets.clone(),
+            playable_targets: self.playable_targets.clone(),
+            opponent_cemetery_targets: self.opponent_cemetery_targets.clone(),
+            cemetery_banish_targets: self.cemetery_banish_targets.clone(),
+            deck_return_targets: self.deck_return_targets.clone(),
+            local_payments: self.local_payments.clone(),
+        }
+    }
+
+    fn restore_bindings(&mut self, saved: LocalBindings) {
+        self.targets = saved.targets;
+        self.recipient_targets = saved.recipient_targets;
+        self.observations = saved.observations;
+        self.observed_targets = saved.observed_targets;
+        self.field_entry.multi = saved.field_entry_multi;
+        self.searches = saved.searches;
+        self.ex_outputs = saved.ex_outputs;
+        self.field_outputs = saved.field_outputs;
+        self.evolution_targets = saved.evolution_targets;
+        self.ex_targets = saved.ex_targets;
+        self.flip_targets = saved.flip_targets;
+        self.hand_targets = saved.hand_targets;
+        self.playable_targets = saved.playable_targets;
+        self.opponent_cemetery_targets = saved.opponent_cemetery_targets;
+        self.cemetery_banish_targets = saved.cemetery_banish_targets;
+        self.deck_return_targets = saved.deck_return_targets;
+        self.local_payments = saved.local_payments;
     }
 
     /// A named payment result is readable only by later steps of the same step list.

@@ -191,12 +191,6 @@ fn dynamic_creation_rejects_unproved_receipts_views_and_player_scope() {
     let mut wrong = base.clone();
     wrong[1]["each_player"]["stages"][0][0]["create"]["by"] = json!("foreign");
     variants.push(wrong);
-    let mut extra = base.clone();
-    extra[1]["each_player"]["stages"][0]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"draw":{"n":1_u8}}));
-    variants.push(extra);
     let mut conditional = base.clone();
     conditional[0] = json!({"if":{"cond":{"awakened":true},"then":[base[0].clone()]}});
     variants.push(conditional);
@@ -656,18 +650,18 @@ fn each_player_banish_keeps_one_simultaneous_receipt_for_both_decks() {
 #[test]
 fn each_player_banish_rejects_foreign_decks_extra_stages_and_private_unions() {
     let base = banish_steps();
+    // Every player banishing the effect controller's deck is an ordinary per-player stage now,
+    // read by general rules rather than as this shared own-deck banish.
+    let mut controllers = base.clone();
+    controllers[1]["each_player"]["stages"][0][0]["banish"]["top"]["who"] = json!("self");
+    let (shared, registry, accepted) = selected(controllers, false);
+    Catalog::from_current_selection(&shared, &registry, &accepted).unwrap();
     let mut variants = Vec::new();
-    for who in ["opp", "self", "missing"] {
+    for who in ["opp", "missing"] {
         let mut steps = base.clone();
         steps[1]["each_player"]["stages"][0][0]["banish"]["top"]["who"] = json!(who);
         variants.push(steps);
     }
-    let mut extra = base.clone();
-    extra[1]["each_player"]["stages"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!([{ "draw":{"n":1_u8}}]));
-    variants.push(extra);
     let mut private = base.clone();
     private[0]["banish"]["ref"]["any_of"][1]["zone"] = json!("hand");
     variants.push(private);
@@ -750,4 +744,50 @@ fn raw_player_banish_rejects_unproved_private_authority_without_mutation() {
             "unsupported raw stage must reject before mutation"
         );
     }
+}
+
+/// A stage action naming no player of its own (`draw n:1`) is the effect controller's, so
+/// these former single-instruction stages are no longer the shared per-player shapes.
+#[test]
+fn an_extra_controller_draw_turns_a_player_stage_into_a_choice_procedure() {
+    let mut start = position();
+    for seat in ["P1", "P2"] {
+        start["players"][seat]["zones"]["deck"] = json!(
+            (0_u8..4)
+                .map(|index| json!({"id":format!("{seat}-d{index}"),"card":"creator"}))
+                .collect::<Vec<_>>()
+        );
+    }
+    let mut creation = steps();
+    creation[1]["each_player"]["stages"][0]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"draw":{"n":1_u8}}));
+    let mut game = game(creation, false, &start);
+    let CardPlay::Resolved(_) = game
+        .play_internal_card("creator", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("no choice is asked");
+    };
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 1);
+    assert_eq!(view["P2"]["field"].as_array().unwrap().len(), 2);
+    assert_eq!(
+        view["P1"]["hand"].as_array().unwrap().len(),
+        2,
+        "the effect controller drew once per player"
+    );
+    // A procedure player's own deck top stays private outside the shared banish shape, so
+    // the extra stage is refused when the game loads it.
+    let mut banish = banish_steps();
+    banish[1]["each_player"]["stages"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!([{ "draw":{"n":1_u8}}]));
+    let (snapshot, keywords, input) = selected(banish, false);
+    let snapshot = token_kind(&snapshot, "フォロワー");
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    Game::from_selected_effects(selected, &start, &Value::Null, &Value::Null, "banish-draw")
+        .unwrap_err();
 }

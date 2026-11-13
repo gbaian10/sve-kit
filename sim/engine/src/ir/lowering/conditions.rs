@@ -1190,18 +1190,14 @@ impl BodyContext<'_> {
         }
         let predicate =
             super::selection::field_filter(&super::selection::ObjectFilter::from(count), binding);
+        let (relation, relative_to) = self.side_set(&count.who, path)?;
         let selector = Selector::Zone {
             players: PlayerSet {
-                relation: match count.who {
-                    ast::Side::Controller => PlayerRelation::SelfPlayer,
-                    ast::Side::Opponent => PlayerRelation::Opponents,
-                    ast::Side::All => PlayerRelation::All,
-                },
-                relative_to: PlayerRef::Controller {},
+                relation,
+                relative_to,
                 cardinality: Cardinality {
                     minimum: Nat(u64::from(!matches!(count.who, ast::Side::All))),
-                    maximum: matches!(count.who, ast::Side::Controller | ast::Side::Opponent)
-                        .then_some(Nat(1)),
+                    maximum: (!matches!(count.who, ast::Side::All)).then_some(Nat(1)),
                 },
                 text_quantifier: if matches!(count.who, ast::Side::All) {
                     TextQuantifier::All

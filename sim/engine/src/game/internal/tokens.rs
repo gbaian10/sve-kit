@@ -3,6 +3,9 @@ mod capacity;
 pub(super) mod dynamic;
 pub(super) mod equipment;
 
+use crate::ir::{
+    Capture, CaptureRef, CaptureTime, Cardinality, PlayerRelation, PlayerSet, TextQuantifier,
+};
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
 use crate::ir::{optional_payment, x_pp};
 
@@ -269,6 +272,55 @@ impl Game {
         )
     }
 
+    /// Expands a choice procedure stage by stage, turn player first.
+    fn internal_choice_procedure(
+        &self,
+        execution: &mut Execution,
+        control: &Control,
+    ) -> Result<()> {
+        let (players, binding, stages) = player_stages::choice_procedure(control)
+            .ok_or_else(|| invalid("checked choice procedure"))?;
+        let mut order = execution.players(self, players)?;
+        let active = super::player_id(self.active())?;
+        order.sort_by_key(|member| *member != active);
+        execution.begin_procedure(super::player_stages::ProcedureLocals::new(
+            binding.key(),
+            stages,
+        ));
+        // Each body follows a capture of its player, so a decision waiting inside a body
+        // keeps that player bound when the procedure resumes.
+        for stage in stages.iter().rev() {
+            for member in order.iter().rev() {
+                let player = if *member == active {
+                    PlayerRef::Active {}
+                } else {
+                    PlayerRef::RequireOne {
+                        players: Box::new(PlayerSet {
+                            relation: PlayerRelation::Opponents,
+                            relative_to: PlayerRef::Active {},
+                            cardinality: Cardinality {
+                                minimum: Nat(1),
+                                maximum: Some(Nat(1)),
+                            },
+                            text_quantifier: TextQuantifier::One,
+                        }),
+                    }
+                };
+                execution.prepend(stage.body.clone());
+                execution.todo.push_front(Node::Capture {
+                    capture: Capture::Player {
+                        at: CaptureTime::AtResolution {
+                            scope: stage.body.scope,
+                        },
+                        value: Expr::Literal(player),
+                        into: CaptureRef { binding },
+                    },
+                });
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn internal_player_stage(
         &mut self,
         execution: &mut Execution,
@@ -276,6 +328,9 @@ impl Game {
     ) -> Result<()> {
         if player_stages::procedure(control).is_some() {
             return self.internal_nonchoice_player_stages(execution, control);
+        }
+        if player_stages::choice_procedure(control).is_some() {
+            return self.internal_choice_procedure(execution, control);
         }
         if super::movement::player_banish(control).is_some() {
             let previous = self.card_runtime.active_source;
@@ -663,6 +718,8 @@ pub(super) fn requirement(requirement: &Requirement, paths: &Paths) -> bool {
         | "shape.PlayerStage"
         | "internal.StageMode.NonChoiceSimultaneous"
         | "shape.StageMode.NonChoiceSimultaneous"
+        | "internal.StageMode.ChoiceProcedure"
+        | "shape.StageMode.ChoiceProcedure"
         | "internal.PlayerOrder.TurnPlayerFirst"
         | "shape.PlayerRef.Bound" => (&paths.stages, &[]),
         "shape.ObjectView.LastKnown" | "reference.lki" | "internal.LkiReason.ZoneExit" => {

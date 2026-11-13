@@ -306,9 +306,9 @@ pub(super) fn named_public_query(
         return Err(unsupported(path));
     }
     Ok(match value.zone {
-        ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field),
-        ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex),
-        ast::PublicZone::Cemetery => public_zone_query(value, binding, ZoneKind::Cemetery),
+        ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field, path)?,
+        ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex, path)?,
+        ast::PublicZone::Cemetery => public_zone_query(value, binding, ZoneKind::Cemetery, path)?,
         ast::PublicZone::FieldEx => return Err(unsupported(path)),
     })
 }
@@ -317,14 +317,11 @@ fn public_zone_query(
     value: &ast::PublicQuery,
     binding: Binding<ObjectRef>,
     zone: ZoneKind,
-) -> Selector {
-    Selector::Zone {
+    path: &str,
+) -> Result<Selector, LoweringError> {
+    Ok(Selector::Zone {
         players: PlayerSet {
-            relation: match value.who {
-                ast::Side::Controller => PlayerRelation::SelfPlayer,
-                ast::Side::Opponent => PlayerRelation::Opponents,
-                ast::Side::All => PlayerRelation::All,
-            },
+            relation: value.who.relation().ok_or_else(|| unsupported(path))?,
             relative_to: PlayerRef::Controller {},
             cardinality: Cardinality {
                 minimum: Nat(0),
@@ -339,5 +336,5 @@ fn public_zone_query(
             &super::selection::ObjectFilter::from(value),
             binding,
         )),
-    }
+    })
 }

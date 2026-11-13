@@ -3,6 +3,7 @@ use super::{
     PlayerRef, Selector, ast, unsupported,
 };
 use crate::ir::ObjectProperty;
+use crate::ir::PlayerRelation;
 use crate::ir::events::timing;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, EventContext,
@@ -98,7 +99,26 @@ impl BodyContext<'_> {
             Some(ast::Participant::MasterOf { master_of }) => {
                 self.selected_player(master_of, Role::Controller, path)
             }
+            Some(ast::Participant::Bound(name)) => Ok(PlayerRef::Bound {
+                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+            }),
         }
+    }
+
+    /// A query's players: relative to the controller, or exactly an enclosing procedure's player.
+    pub(super) fn side_set(
+        &self,
+        side: &ast::Side,
+        path: &str,
+    ) -> Result<(PlayerRelation, PlayerRef), LoweringError> {
+        if let ast::Side::Bound(name) = side {
+            let binding = *self.players.get(name).ok_or_else(|| unsupported(path))?;
+            return Ok((PlayerRelation::SelfPlayer, PlayerRef::Bound { binding }));
+        }
+        Ok((
+            side.relation().ok_or_else(|| unsupported(path))?,
+            PlayerRef::Controller {},
+        ))
     }
 
     pub(super) fn selected_name(

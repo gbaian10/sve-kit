@@ -17,25 +17,9 @@ impl BodyContext<'_> {
     ) -> Result<Located<Node>, LoweringError> {
         let actor = self.participant(optional.who.as_ref(), path)?;
         let parent = self.scope;
-        let targets = self.targets.clone();
-        let recipients = self.recipient_targets.clone();
-        let observations = self.observations.clone();
-        let observed_targets = self.observed_targets.clone();
-        let field_entry_multi = self.field_entry.multi.clone();
-        let searches = self.searches.clone();
-        let outputs = self.ex_outputs.clone();
-        let field_outputs = self.field_outputs.clone();
-        let evolution_targets = self.evolution_targets.clone();
-        let ex_targets = self.ex_targets.clone();
-        let flip_targets = self.flip_targets.clone();
-        let hand_targets = self.hand_targets.clone();
-        let playable_targets = self.playable_targets.clone();
-        let opponent_cemetery_targets = self.opponent_cemetery_targets.clone();
-        let cemetery_banish_targets = self.cemetery_banish_targets.clone();
-        let deck_return_targets = self.deck_return_targets.clone();
-        // `then` continues the same optional body, so payment results stay readable until the
-        // whole optional ends.
-        let payments = self.local_payments.clone();
+        // `then` continues the same optional body, so payment results and other local names
+        // stay readable until the whole optional ends.
+        let saved = self.local_bindings();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
         let mut body = self.step_list(
@@ -56,23 +40,7 @@ impl BodyContext<'_> {
             );
         }
         self.scope = parent;
-        self.targets = targets;
-        self.recipient_targets = recipients;
-        self.observations = observations;
-        self.observed_targets = observed_targets;
-        self.field_entry.multi = field_entry_multi;
-        self.searches = searches;
-        self.ex_outputs = outputs;
-        self.field_outputs = field_outputs;
-        self.evolution_targets = evolution_targets;
-        self.ex_targets = ex_targets;
-        self.flip_targets = flip_targets;
-        self.hand_targets = hand_targets;
-        self.playable_targets = playable_targets;
-        self.opponent_cemetery_targets = opponent_cemetery_targets;
-        self.cemetery_banish_targets = cemetery_banish_targets;
-        self.deck_return_targets = deck_return_targets;
-        self.local_payments = payments;
+        self.restore_bindings(saved);
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
             maximum: Some(super::Nat(1)),
@@ -249,13 +217,16 @@ impl BodyContext<'_> {
             )
         });
         let own_hand = hand
-            && matches!(
-                (&choice.by, &from.who),
+            && match (&choice.by, &from.who) {
                 (
                     Some(ast::Participant::Side(ast::LeaderSide::Opponent)),
-                    Some(ast::Side::Opponent)
-                )
-            );
+                    Some(ast::Side::Opponent),
+                ) => true,
+                (Some(ast::Participant::Bound(chooser)), Some(ast::Side::Bound(holder))) => {
+                    chooser == holder
+                }
+                _ => false,
+            };
         if ((from.observation.is_some() && !revealed) || hand)
             && actor != (PlayerRef::Controller {})
             && !own_hand

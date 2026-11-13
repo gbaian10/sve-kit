@@ -1,7 +1,7 @@
 use super::{
     Ability, AbilityId, Allocator, Binding, BodyContext, Cardinality, Expr, Located, LoweringError,
-    Nat, PlayerRef, PlayerRelation, PlayerSet, ScopeId, SelectionView, Selector, TextQuantifier,
-    ZoneKind, ast, unsupported,
+    Nat, PlayerRef, PlayerSet, ScopeId, SelectionView, Selector, TextQuantifier, ZoneKind, ast,
+    unsupported,
 };
 use crate::ir::{
     AbilityKind, AbilityQualification, Action, CostChange, CostKind, DurationEnd, Effect,
@@ -9,20 +9,16 @@ use crate::ir::{
 };
 use core::mem::swap;
 
-const fn players(side: &ast::Side) -> PlayerSet {
-    PlayerSet {
-        relation: match side {
-            ast::Side::Controller => PlayerRelation::SelfPlayer,
-            ast::Side::Opponent => PlayerRelation::Opponents,
-            ast::Side::All => PlayerRelation::All,
-        },
+fn players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringError> {
+    Ok(PlayerSet {
+        relation: side.relation().ok_or_else(|| unsupported(path))?,
         relative_to: PlayerRef::Controller {},
         cardinality: Cardinality {
             minimum: Nat(0),
             maximum: None,
         },
         text_quantifier: TextQuantifier::Implicit,
-    }
+    })
 }
 
 fn change(value: &ast::CostModifier, path: &str) -> Result<CostChange, LoweringError> {
@@ -76,7 +72,7 @@ fn query(
                 );
 
                 Ok(Selector::Zone {
-                    players: players(&value.who),
+                    players: players(&value.who, path)?,
                     zone,
                     view: SelectionView::Current {},
                     binding,
@@ -248,7 +244,7 @@ impl BodyContext<'_> {
         }
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Players {
-                players: players(&value.who),
+                players: players(&value.who, path)?,
                 affected: Binding::new(1, self.card_allocator.scope(path)?),
             },
             capture: InstallationTime::InstructionStart,
