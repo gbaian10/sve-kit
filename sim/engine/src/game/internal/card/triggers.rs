@@ -992,6 +992,25 @@ const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
     reason = "Pending projection reads the same cached occurrence identities as native answers."
 )]
 impl Game {
+    /// Physical holder behind a current pending-order option; the trusted exam runner
+    /// resolves fixture labels with it after the holder stops being identifiable.
+    #[cfg(feature = "runner")]
+    pub(crate) fn referee_pending_holder(&self, handle: u64) -> Option<&str> {
+        let (view, ids) = self.card_runtime.question.as_ref()?;
+        let InputDomain::Pending(options) = &view.domain else {
+            return None;
+        };
+        let (_, id) = options
+            .iter()
+            .zip(ids)
+            .find(|(option, _)| option.handle == handle)?;
+        self.card_runtime
+            .pending
+            .iter()
+            .find(|pending| pending.id == *id)
+            .map(|pending| pending.holder.as_str())
+    }
+
     pub(in crate::game::internal) fn player_pending_options(
         &self,
         actor: Viewer,

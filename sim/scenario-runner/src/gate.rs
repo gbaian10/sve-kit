@@ -39,6 +39,10 @@ pub struct KnownFailure {
     pub status: String,
     /// The known-error entry that explains it.
     pub error: String,
+    /// When written, the exact [`reason`] the run must still give, so a scenario
+    /// listed for one cause cannot start failing for another.
+    #[serde(default)]
+    pub reason: Option<String>,
 }
 
 /// Why the gate rejected a run.
@@ -92,6 +96,17 @@ pub enum GateProblem {
         /// Scenario name.
         scenario: String,
     },
+    /// A listed scenario fails with the recorded kind but for another reason.
+    ReasonChanged {
+        /// Question id.
+        question: String,
+        /// Scenario name.
+        scenario: String,
+        /// Recorded reason.
+        listed: String,
+        /// Actual reason.
+        actual: String,
+    },
     /// A listed status is not one of the verdict kinds.
     UnknownStatus {
         /// Question id.
@@ -138,6 +153,23 @@ pub const fn status(verdict: &Verdict) -> &'static str {
         Verdict::Unsupported { .. } => "unsupported",
         Verdict::AdapterError { .. } => "adapter-error",
         Verdict::Ineligible { .. } => "ineligible",
+    }
+}
+
+/// A stable cause of a non-pass: the engine's reason, or every mismatched checkpoint,
+/// view and comparison of a failure (expected and actual values are left out).
+#[must_use]
+pub fn reason(verdict: &Verdict) -> String {
+    match verdict {
+        Verdict::Pass => String::new(),
+        Verdict::Fail { failures } => failures
+            .iter()
+            .map(|failure| format!("{} {} {}", failure.at, failure.view, failure.what))
+            .collect::<Vec<_>>()
+            .join("; "),
+        Verdict::Unsupported { reason }
+        | Verdict::AdapterError { reason }
+        | Verdict::Ineligible { reason } => reason.clone(),
     }
 }
 
@@ -213,7 +245,20 @@ pub fn gate(reports: &[ScenarioReport], known: &KnownFailures) -> GateReport {
                     actual: actual.to_owned(),
                 });
             }
-            (Some(_), _) => report.known = report.known.saturating_add(1),
+            (Some(entry), _) => {
+                let actual_reason = reason(&scenario.verdict);
+                match &entry.reason {
+                    Some(recorded) if *recorded != actual_reason => {
+                        report.problems.push(GateProblem::ReasonChanged {
+                            question: scenario.question.clone(),
+                            scenario: scenario.scenario.clone(),
+                            listed: recorded.clone(),
+                            actual: actual_reason,
+                        });
+                    }
+                    _ => report.known = report.known.saturating_add(1),
+                }
+            }
         }
     }
     for ((question, scenario), _) in listed {

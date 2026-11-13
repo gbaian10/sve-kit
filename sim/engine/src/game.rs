@@ -26,6 +26,8 @@ mod placement;
 pub mod player;
 mod progression;
 mod randomness;
+#[cfg(feature = "runner")]
+mod referee;
 mod resources;
 mod restrictions;
 mod rules;
@@ -289,6 +291,8 @@ pub struct Game {
     player_evolution: Option<Box<internal::EvolutionDeclaration>>,
     #[serde(skip)]
     player_events: player::events::Journal,
+    #[serde(skip)]
+    referee_events: Option<Vec<Value>>,
 }
 
 #[expect(
@@ -585,6 +589,7 @@ impl Game {
             player_epoch: 0,
             player_evolution: None,
             player_events: player::events::Journal::default(),
+            referee_events: None,
         };
         game.initialize_evolved(&position)?;
         game.initialize_history(&position)?;
@@ -998,6 +1003,9 @@ impl Game {
         event["cause"] = cause.clone();
         event["group"] = json!(group);
         self.record_player_step(&event);
+        if let Some(log) = &mut self.referee_events {
+            log.push(event.clone());
+        }
         self.emitted.push(event);
         id
     }

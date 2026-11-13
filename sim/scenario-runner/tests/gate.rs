@@ -1,6 +1,6 @@
 //! The strict gate fails on every deviation from the reviewed list.
 
-use sve_scenario_runner::gate::{GateProblem, KnownFailure, KnownFailures, gate, status};
+use sve_scenario_runner::gate::{GateProblem, KnownFailure, KnownFailures, gate, reason, status};
 use sve_scenario_runner::runner::{Failure, ScenarioReport, Verdict};
 
 fn report(question: &str, scenario: &str, verdict: Verdict) -> ScenarioReport {
@@ -29,6 +29,7 @@ fn listed(question: &str, scenario: &str, status: &str) -> KnownFailure {
         scenario: scenario.into(),
         status: status.into(),
         error: "KE-TEST".into(),
+        reason: None,
     }
 }
 
@@ -160,4 +161,36 @@ fn a_scenario_run_twice_and_an_unknown_listed_status_are_reported() {
         scenario: "a".into(),
         status: "failed".into(),
     }));
+}
+
+#[test]
+fn a_listed_reason_must_still_match() {
+    let mut entry = listed("q", "a", "fail");
+    entry.reason = Some(reason(&fail()));
+    let same = gate(&[report("q", "a", fail())], &known(1, vec![entry.clone()]));
+    assert!(same.ok(), "{same:?}");
+    assert_eq!(same.known, 1);
+    // Same verdict kind, another mismatched assertion: the cause moved.
+    let other = Verdict::Fail {
+        failures: vec![Failure {
+            at: "after-decision-1".into(),
+            view: "judge".into(),
+            what: "assert P2.leader.life".into(),
+            expected: 18_u8.into(),
+            actual: 20_u8.into(),
+        }],
+    };
+    let moved = gate(&[report("q", "a", other)], &known(1, vec![entry]));
+    assert!(matches!(
+        moved.problems.as_slice(),
+        [GateProblem::ReasonChanged { listed, actual, .. }]
+            if listed == "after-decision-1 judge outcome"
+                && actual == "after-decision-1 judge assert P2.leader.life"
+    ));
+    let mut missing_card = listed("q", "a", "unsupported");
+    missing_card.reason = Some("no authored program: X-001".into());
+    let drifted = Verdict::Unsupported {
+        reason: "no authored program: Y-002".into(),
+    };
+    assert!(!gate(&[report("q", "a", drifted)], &known(1, vec![missing_card])).ok());
 }
