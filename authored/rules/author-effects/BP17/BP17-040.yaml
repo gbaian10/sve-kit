@@ -57,15 +57,15 @@ cards:
                         kind: follower
                         who: opp
                         zone: field
-            - buff:
-                hp: 2
-                on:
-                  kind: follower
-                  other: true
-                  trait: 機械
-                  who: self
-                  zone: field
-                power: 2
+                  - buff:
+                      hp: 2
+                      on:
+                        kind: follower
+                        other: true
+                        trait: 機械
+                        who: self
+                        zone: field
+                      power: 2
         line: 2
     admission: light
     meta:

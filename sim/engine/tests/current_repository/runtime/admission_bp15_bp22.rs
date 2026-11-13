@@ -43,6 +43,19 @@ fn bp16_025_requires_enemy_then_enters_an_ex_soldier_and_checks_three_names() {
 }
 
 #[test]
+fn bp16_025_cannot_play_its_fanfare_without_an_enemy_and_keeps_the_ex_soldier() {
+    let mut initial = position("BP16-025");
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"soldier","card":"BP01-T05"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = game(&initial);
+    enter(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!(["source"]));
+    assert_eq!(state["P1"]["ex"], json!(["soldier"]));
+    assert!(game.internal_pending_choice().unwrap().is_none());
+}
+
+#[test]
 fn bp17_089_reanimates_a_low_cost_follower_and_triggers_for_its_other_class() {
     let mut initial = position("BP17-089");
     initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"ally","card":"BP01-171"}]);
@@ -89,7 +102,6 @@ fn bp21_096_fanfare_requires_another_academy_follower_and_evolution_requires_hp_
 #[test]
 fn bp21_097_whole_evolved_face_deals_its_current_power() {
     let mut initial = position("BP21-096");
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] =
         json!([{"id":"source","card":"BP21-096","state":{"hp":4_i32,"max_hp":4_i32}}]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"evolved","card":"BP21-097"}]);
@@ -113,10 +125,8 @@ fn bp21_097_whole_evolved_face_deals_its_current_power() {
         .unwrap();
     finish(&mut game, play);
     let state = game.projection(View::Referee).unwrap();
-    assert_eq!(
-        state["objects"]["enemy"]["damage"],
-        state["objects"]["source"]["power"]
-    );
+    assert_eq!(state["objects"]["source"]["power"], 3_i32);
+    assert_eq!(state["objects"]["enemy"]["damage"], 3_i32);
 }
 
 #[test]
@@ -179,6 +189,68 @@ fn bp22_097_attack_draws_discards_and_uses_follower_receipt_while_preventing_com
 }
 
 #[test]
+fn bp22_097_uses_the_discarded_spell_or_amulet_in_a_hand_containing_followers() {
+    for (fuel, enemy_damage) in [("BP21-052", 0_i32), ("BP01-162", 3_i32)] {
+        let mut initial = position("BP22-096");
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"fuel","card":fuel}]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP22-096","state":{"evolved":true,"evolved_with":"form","power":3_i32,"hp":6_i32,"max_hp":6_i32}}]);
+        initial["players"]["P1"]["zones"]["evolution"] = json!([{"id":"form","card":"BP22-097"}]);
+        initial["players"]["P2"]["zones"]["field"][0]["state"]["acted"] = json!(true);
+        let mut game = game(&initial);
+        game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":"enemy"}))
+            .unwrap();
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &pending.domain else {
+            panic!("attack trigger");
+        };
+        let CardPlay::Awaiting(discard) = game
+            .answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap()
+        else {
+            panic!("draw then discard");
+        };
+        let InputDomain::Targets(domain) = &discard.domain else {
+            panic!("discard choice");
+        };
+        assert_eq!(domain.members.len(), 3);
+        let chosen = domain
+            .members
+            .iter()
+            .find(|member| member.card.as_deref() == Some(fuel))
+            .unwrap()
+            .handle;
+        let resolution = game
+            .answer_internal_card(discard.actor, discard.token, Answer::Targets(vec![chosen]))
+            .unwrap();
+        finish(&mut game, resolution);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["cemetery"], json!(["fuel"]));
+        assert_eq!(state["P1"]["hand"], json!(["draw1", "draw2"]));
+        assert_eq!(state["P2"]["leader"]["life"], 20_i32);
+        assert_eq!(state["objects"]["enemy"]["damage"], enemy_damage);
+        settle(&mut game);
+        while let Some(q) = game.internal_quick_choice().unwrap() {
+            let pass = game
+                .answer_internal_card(q.actor, q.token, Answer::Quick(None))
+                .unwrap();
+            finish(&mut game, pass);
+            settle(&mut game);
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["source"]["damage"],
+            0_i32
+        );
+    }
+}
+
+#[test]
 fn bp17_040_discount_puts_original_cost_six_and_seven_mechs_then_reads_both_receipts() {
     let mut initial = position("BP17-040");
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"six","card":"BP19-041"},{"id":"seven","card":"BP17-104"},{"id":"small","card":"BP17-041"}]);
@@ -191,6 +263,56 @@ fn bp17_040_discount_puts_original_cost_six_and_seven_mechs_then_reads_both_rece
     assert_eq!(state["objects"]["small"]["power"], 4_i32);
     assert_eq!(state["objects"]["small"]["hp"], 4_i32);
     assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 3);
+    let tentacle = state["P1"]["field"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|id| &state["objects"][id.as_str().unwrap()])
+        .find(|object| object["name"] == "蹂躙の触手")
+        .unwrap();
+    assert_eq!(tentacle["power"], 6_i32);
+    assert_eq!(tentacle["hp"], 4_i32);
+}
+
+#[test]
+fn bp17_040_six_alone_creates_an_unbuffed_tentacle_without_enemy_damage() {
+    let mut initial = position("BP17-040");
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"six","card":"BP19-041"},{"id":"small","card":"BP17-041"}]);
+    let mut game = game(&initial);
+    enter(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 10_i32);
+    assert_eq!(state["P1"]["cemetery"], json!(["six"]));
+    assert_eq!(state["objects"]["enemy"]["damage"], 0_i32);
+    assert_eq!(state["objects"]["small"]["power"], 2_i32);
+    assert_eq!(state["objects"]["small"]["hp"], 2_i32);
+    assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 3);
+    let tentacle = state["P1"]["field"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|id| &state["objects"][id.as_str().unwrap()])
+        .find(|object| object["name"] == "蹂躙の触手")
+        .unwrap();
+    assert_eq!(tentacle["power"], 4_i32);
+    assert_eq!(tentacle["hp"], 2_i32);
+}
+
+#[test]
+fn bp17_040_seven_alone_damages_and_buffs_without_creating_a_tentacle() {
+    let mut initial = position("BP17-040");
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"seven","card":"BP17-104"},{"id":"small","card":"BP17-041"}]);
+    let mut game = game(&initial);
+    enter(&mut game);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 10_i32);
+    assert_eq!(state["P1"]["cemetery"], json!(["seven"]));
+    assert_eq!(state["objects"]["enemy"]["damage"], 4_i32);
+    assert_eq!(state["objects"]["small"]["power"], 4_i32);
+    assert_eq!(state["objects"]["small"]["hp"], 4_i32);
+    assert_eq!(state["P1"]["field"], json!(["small", "source"]));
 }
 
 #[test]
