@@ -10,7 +10,8 @@ use crate::ir::{
 
 #[cfg(test)]
 mod tests;
-use crate::ir::{player_stages::procedure, shuffle};
+use crate::ir::player_stages::{procedure, returned_share};
+use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;
 
 #[expect(
@@ -57,6 +58,34 @@ impl Execution {
 
 #[expect(
     clippy::multiple_inherent_impl,
+    reason = "A player's own draw count reads the same stage receipts."
+)]
+impl Execution {
+    fn player_draw_count(&self, count: &Expr<Int>, player: PlayerId) -> Result<u64> {
+        if let Expr::Literal(Int(count)) = count {
+            return u64::try_from(*count).map_err(invalid);
+        }
+        let receipt = returned_share(count).ok_or_else(|| unsupported("player draw count"))?;
+        let Some(InstructionOutcome::Move(MoveOutcome { moved })) = self.receipts.get(&receipt)
+        else {
+            return Err(invalid("missing whole return receipt"));
+        };
+        let own = moved
+            .iter()
+            .filter(|result| {
+                result.actual_to
+                    == Some(RuntimeZoneRef {
+                        player,
+                        kind: ZoneKind::Deck,
+                    })
+            })
+            .count();
+        u64::try_from(own).map_err(invalid)
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
     reason = "Player stages use the shared authority transaction."
 )]
 impl Game {
@@ -81,16 +110,14 @@ impl Game {
                 };
                 self.internal_instruction_boundary(execution, |game, execution| {
                     match &instruction.action {
-                        Action::Draw {
-                            count: Expr::Literal(Int(count)),
-                            ..
-                        } => {
-                            game.internal_player_draws(
-                                execution,
-                                instruction,
-                                &players,
-                                u64::try_from(*count).map_err(invalid)?,
-                            )?;
+                        Action::Draw { count, .. } => {
+                            let counts = players
+                                .iter()
+                                .map(|player| {
+                                    Ok((*player, execution.player_draw_count(count, *player)?))
+                                })
+                                .collect::<Result<Vec<_>>>()?;
+                            game.internal_player_draws(execution, instruction, &counts)?;
                         }
                         Action::Move { .. } => {
                             let mut members = Vec::new();
@@ -120,13 +147,16 @@ impl Game {
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
-        players: &[PlayerId],
-        count: u64,
+        counts: &[(PlayerId, u64)],
     ) -> Result<()> {
         let mut actual = 0_u64;
-        for ordinal in 1..=count {
+        let longest = counts.iter().map(|(_, count)| *count).max().unwrap_or(0);
+        for ordinal in 1..=longest {
             let mut events = Vec::new();
-            for player in players {
+            for (player, count) in counts {
+                if ordinal > *count {
+                    continue;
+                }
                 if let Some(event) =
                     self.internal_draw_card(execution, instruction, *player, Nat(ordinal))?
                 {
@@ -142,8 +172,9 @@ impl Game {
                     .ok_or_else(|| invalid("player draw count overflow"))?;
             }
         }
-        let requested = count
-            .checked_mul(u64::try_from(players.len()).map_err(invalid)?)
+        let requested = counts
+            .iter()
+            .try_fold(0_u64, |total, (_, count)| total.checked_add(*count))
             .ok_or_else(|| invalid("player draw request overflow"))?;
         execution.receipts.insert(
             instruction.receipt,

@@ -163,10 +163,16 @@ impl BodyContext<'_> {
                     name,
                     ObjectReceipt::Movement {
                         receipt: match value.to {
-                            ast::Destination::Deck => MovementReceipt::Order {
-                                receipt: ReceiptReference::new(receipt),
-                            },
-                            ast::Destination::Field
+                            // A whole-zone return is one unordered move, not a placed order.
+                            ast::Destination::Deck
+                                if !matches!(value.r#ref, Some(ast::MoveObjects::Whole(_))) =>
+                            {
+                                MovementReceipt::Order {
+                                    receipt: ReceiptReference::new(receipt),
+                                }
+                            }
+                            ast::Destination::Deck
+                            | ast::Destination::Field
                             | ast::Destination::Ex
                             | ast::Destination::Hand
                             | ast::Destination::Cemetery => MovementReceipt::Move {

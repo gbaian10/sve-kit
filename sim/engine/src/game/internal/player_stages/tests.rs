@@ -207,8 +207,7 @@ fn prohibited_empty_deck_does_not_fail_while_the_other_player_finishes_drawing()
     game.internal_player_draws(
         &mut execution,
         &instruction,
-        &[PlayerId { seat: 1 }, PlayerId { seat: 2 }],
-        3,
+        &[(PlayerId { seat: 1 }, 3), (PlayerId { seat: 2 }, 3)],
     )
     .unwrap();
     assert!(!game.state.draws_failed.contains("P1"));
