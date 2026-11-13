@@ -1,5 +1,8 @@
 use super::{AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, payment};
-use crate::ir::{Control, Decision, PaymentOptionality, PaymentTime, Program, ReceiptId};
+use crate::ir::{
+    Action, Control, CostSpec, Decision, PaymentOptionality, PaymentTime, PlayerRef, Program,
+    ReceiptId,
+};
 use core::slice;
 
 pub(super) struct PaymentDeclaration {
@@ -22,33 +25,37 @@ impl BodyContext<'_> {
         if self.auto.is_none() {
             return Err(super::unsupported(path));
         }
+        let payer = self.participant(payment.who.as_ref(), path)?;
         let operations = match &payment.cost {
             ast::Cost::Short(operation) => slice::from_ref(operation.as_ref()),
             ast::Cost::Ordered { steps } => steps.as_slice(),
         };
-        let conditional_pp = self.discard_pp_event.is_some()
-            && matches!(operations, [ast::CostOperation::Pp(ast::PpAmount::Literal(n))] if *n > 0)
-            && matches!(payment.steps.as_slice(), [ast::Step::Move(value)]
-                if matches!(value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::This(_))))
-                    && matches!(value.to, ast::Destination::Field));
-        if !conditional_pp
-            && (operations.is_empty()
-                || operations.iter().any(|operation| {
-                    !matches!(
-                        operation,
-                        ast::CostOperation::ActSelf(true)
-                            | ast::CostOperation::SelfToCemetery(true)
-                    )
-                }))
-        {
+        // A fixed positive PP amount is the payer's own resource, so any player may pay it.
+        let player_pp =
+            matches!(operations, [ast::CostOperation::Pp(ast::PpAmount::Literal(n))] if *n > 0);
+        let source_costs = payer == (PlayerRef::Controller {})
+            && !operations.is_empty()
+            && operations.iter().all(|operation| {
+                matches!(
+                    operation,
+                    ast::CostOperation::ActSelf(true) | ast::CostOperation::SelfToCemetery(true)
+                )
+            });
+        if !player_pp && !source_costs {
             return Err(super::unsupported(path));
         }
-        let play = payment::lower(self, &payment.cost, origin, path)?;
+        let mut play = payment::lower(self, &payment.cost, origin, path)?;
+        if payer != (PlayerRef::Controller {}) {
+            pay_as(&mut play.costs, &payer, path)?;
+        }
         let scope = self.scope;
         self.scope = self.card_allocator.scope(path)?;
         let body = self.steps(&payment.steps, path, source, origin);
         self.scope = scope;
         let receipt = ReceiptId(self.card_allocator.id(path)?);
+        if let Some(result) = &payment.result {
+            self.bind_payment(result, receipt, path)?;
+        }
         Ok(Self::located_step(
             source,
             path,
@@ -62,6 +69,22 @@ impl BodyContext<'_> {
                 },
             },
         ))
+    }
+
+    fn bind_payment(
+        &mut self,
+        name: &str,
+        receipt: ReceiptId,
+        path: &str,
+    ) -> Result<(), LoweringError> {
+        if self
+            .local_payments
+            .insert(name.to_owned(), receipt)
+            .is_some()
+        {
+            return Err(super::unsupported(path));
+        }
+        Ok(())
     }
 
     pub(super) fn optional_payment(
@@ -125,7 +148,7 @@ impl BodyContext<'_> {
         };
         let receipt = ReceiptId(self.card_allocator.id(&path)?);
         if let Some(result) = result {
-            self.local_payment = Some((result.clone(), receipt));
+            self.bind_payment(result, receipt, &path)?;
         }
         let mut located = source.clone();
         located.author_path.clone_from(&path);
@@ -148,6 +171,21 @@ impl BodyContext<'_> {
             parameters: play.parameters,
         }))
     }
+}
+
+/// Moves a player-resource cost onto another payer; other costs belong to the source.
+fn pay_as(costs: &mut CostSpec, payer: &PlayerRef, path: &str) -> Result<(), LoweringError> {
+    let CostSpec::Ordered { steps } = costs else {
+        return Err(super::unsupported(path));
+    };
+    for step in steps {
+        let Action::Resource { player, .. } = &mut step.instruction.action else {
+            return Err(super::unsupported(path));
+        };
+        player.clone_from(payer);
+        step.instruction.actor.clone_from(payer);
+    }
+    Ok(())
 }
 
 pub(super) fn check_entry(

@@ -15,6 +15,7 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         ability_source: &super::AbilitySource,
     ) -> Result<Located<Node>, LoweringError> {
+        let actor = self.participant(optional.who.as_ref(), path)?;
         let parent = self.scope;
         let targets = self.targets.clone();
         let recipients = self.recipient_targets.clone();
@@ -32,9 +33,12 @@ impl BodyContext<'_> {
         let opponent_cemetery_targets = self.opponent_cemetery_targets.clone();
         let cemetery_banish_targets = self.cemetery_banish_targets.clone();
         let deck_return_targets = self.deck_return_targets.clone();
+        // `then` continues the same optional body, so payment results stay readable until the
+        // whole optional ends.
+        let payments = self.local_payments.clone();
         self.scope = self.card_allocator.scope(path)?;
         let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
-        let mut body = self.steps(
+        let mut body = self.step_list(
             &optional.steps,
             &format!("{path}/optional/do"),
             source,
@@ -42,7 +46,7 @@ impl BodyContext<'_> {
         )?;
         if let Some(continuation) = &optional.then {
             body.steps.extend(
-                self.steps(
+                self.step_list(
                     continuation,
                     &format!("{path}/optional/then"),
                     source,
@@ -68,6 +72,7 @@ impl BodyContext<'_> {
         self.opponent_cemetery_targets = opponent_cemetery_targets;
         self.cemetery_banish_targets = cemetery_banish_targets;
         self.deck_return_targets = deck_return_targets;
+        self.local_payments = payments;
         let bounds = super::Cardinality {
             minimum: super::Nat(0),
             maximum: Some(super::Nat(1)),
@@ -84,7 +89,7 @@ impl BodyContext<'_> {
                     choice: Decision {
                         id: DecisionId(id),
                         captures: vec![],
-                        actor: PlayerRef::Controller {},
+                        actor,
                         domain: super::super::ChoiceDomain::Integer {
                             cardinality: bounds,
                             binding,

@@ -3,6 +3,7 @@ use super::{
     PlayerRef, Selector, ast, unsupported,
 };
 use crate::ir::ObjectProperty;
+use crate::ir::events::timing;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, EventContext,
     IntOperation, NameOperation, NumberRead, PlayerRead, Role, ScopeId, Stat,
@@ -80,6 +81,24 @@ impl BodyContext<'_> {
         Ok(PlayerRef::FromExpression {
             value: Box::new(Expr::Captured(into)),
         })
+    }
+
+    /// Who answers or pays: the effect controller, its opponent, or a chosen object's
+    /// controller captured at selection, so a later move cannot change the decider.
+    pub(super) fn participant(
+        &mut self,
+        who: Option<&ast::Participant>,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        match who {
+            None | Some(ast::Participant::Side(ast::LeaderSide::Controller)) => {
+                Ok(PlayerRef::Controller {})
+            }
+            Some(ast::Participant::Side(ast::LeaderSide::Opponent)) => Ok(timing::opponent()),
+            Some(ast::Participant::MasterOf { master_of }) => {
+                self.selected_player(master_of, Role::Controller, path)
+            }
+        }
     }
 
     pub(super) fn selected_name(

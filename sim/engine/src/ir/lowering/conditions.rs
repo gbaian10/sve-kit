@@ -835,10 +835,7 @@ impl BodyContext<'_> {
         name: &str,
         path: &str,
     ) -> Result<super::super::PaymentReference, LoweringError> {
-        if let Some((bound_name, receipt)) = &self.local_payment {
-            if bound_name != name {
-                return Err(unsupported(path));
-            }
+        if let Some(receipt) = self.local_payments.get(name) {
             return Ok(super::super::PaymentReference::Local {
                 receipt: super::super::ReceiptReference::new(*receipt),
             });

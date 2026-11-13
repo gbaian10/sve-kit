@@ -1395,9 +1395,8 @@ struct BodyContext<'definitions> {
     discard_event: Option<Binding<super::DiscardEvent>>,
     banish_event: Option<Binding<super::BanishEvent>>,
     hand_exit: Option<hand_exit::Branch>,
-    discard_pp_event: Option<Binding<super::DiscardEvent>>,
     scope: ScopeId,
-    local_payment: Option<(String, ReceiptId)>,
+    local_payments: BTreeMap<String, ReceiptId>,
     definition: AbilityId,
     payment_result: Option<(String, PaymentReference)>,
     allocator: Allocator,
@@ -1468,7 +1467,6 @@ impl<'definitions> BodyContext<'definitions> {
             discard_event: None,
             banish_event: None,
             hand_exit: None,
-            discard_pp_event: None,
             entry_event: None,
             evolution: entry.evolve.as_ref(),
             source_can_enter_field: false,
@@ -1518,7 +1516,7 @@ impl<'definitions> BodyContext<'definitions> {
                 || body.optional_cost.is_some()
                 || body.head_cost.is_some()
                 || (entry.activate.is_none() && entry.spell.is_none() && !body.targets.is_empty()),
-            local_payment: None,
+            local_payments: BTreeMap::new(),
         }
     }
 
@@ -1663,11 +1661,25 @@ impl<'definitions> BodyContext<'definitions> {
         }
     }
 
+    /// A named payment result is readable only by later steps of the same step list.
+    fn steps(
+        &mut self,
+        author_steps: &[ast::Step],
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Program, LoweringError> {
+        let payments = self.local_payments.clone();
+        let program = self.step_list(author_steps, path, source, ability_source);
+        self.local_payments = payments;
+        program
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "Step dispatch shares one binding and receipt environment."
     )]
-    fn steps(
+    fn step_list(
         &mut self,
         author_steps: &[ast::Step],
         path: &str,
@@ -1792,19 +1804,12 @@ impl<'definitions> BodyContext<'definitions> {
                 let condition = self.condition(&conditional.cond, &step_path)?;
                 let parent = self.scope;
                 self.scope = self.card_allocator.scope(&step_path)?;
-                let previous_payment = self.discard_pp_event;
-                self.discard_pp_event = self.discard_event.filter(|_| {
-                    super::optional_payment::public_pp_guard(&condition)
-                        && conditional.r#else.is_none()
-                        && matches!(conditional.then.as_slice(), [ast::Step::Pay(_)])
-                });
                 let then_body = self.steps(
                     &conditional.then,
                     &format!("{step_path}/if/then"),
                     source,
                     ability_source,
                 )?;
-                self.discard_pp_event = previous_payment;
                 let else_body = if let Some(otherwise) = &conditional.r#else {
                     self.scope = self.card_allocator.scope(&step_path)?;
                     Some(self.steps(
