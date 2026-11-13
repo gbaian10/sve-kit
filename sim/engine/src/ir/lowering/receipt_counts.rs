@@ -203,7 +203,8 @@ impl BodyContext<'_> {
             | ObjectReceipt::TransformCreated { .. }
             | ObjectReceipt::Token { .. }
             | ObjectReceipt::Flip { .. }
-            | ObjectReceipt::RevealUntil { .. } => false,
+            | ObjectReceipt::RevealUntil { .. }
+            | ObjectReceipt::Reveal { .. } => false,
         };
         if !readable {
             return Err(unsupported(path));

@@ -184,6 +184,17 @@ impl BodyContext<'_> {
                 }
                 return self.search_result(step, receipt, path);
             }
+            // A whole revealed hand stays a public observation for later steps of the effect.
+            ast::Step::Reveal(value)
+                if matches!(value.r#ref, Some(ast::RevealRef::WholeHand(_))) =>
+            {
+                Some((
+                    &value.bind,
+                    ObjectReceipt::Reveal {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                ))
+            }
             ast::Step::Simultaneous(_)
             | ast::Step::Shuffle(_)
             | ast::Step::StackPlus(_)

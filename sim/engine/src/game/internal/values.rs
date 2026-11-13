@@ -234,6 +234,31 @@ impl Execution {
             self.object(game, object).map(Some)
         }
     }
+    /// A whole-hand member that moved since the reveal is no longer the revealed card.
+    fn revealed_members(&self, game: &Game, receipt: &ObjectReceipt) -> Result<Vec<ObjectRef>> {
+        let receipt = match receipt {
+            ObjectReceipt::RevealUntil { receipt, members } => {
+                return self.revealed_objects(receipt, *members);
+            }
+            ObjectReceipt::Reveal { receipt } => receipt,
+            _ => return Err(unsupported("revealed receipt")),
+        };
+        let Some(InstructionOutcome::Revealed(members)) =
+            self.receipts.get(local_receipt(receipt.location())?)
+        else {
+            return Err(invalid("missing reveal receipt"));
+        };
+        Ok(members
+            .iter()
+            .copied()
+            .filter(|member| {
+                self.object_id(*member)
+                    .and_then(|id| game.object(id))
+                    .is_ok_and(|object| object.generation == member.generation.0)
+            })
+            .collect())
+    }
+
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
         if damaged_plan(selector).is_some() {
             return self.public_target_objects(game, selector, false);
@@ -306,9 +331,10 @@ impl Execution {
                 ..
             } => self.public_look_objects(game, objects)?,
             Selector::ReceiptMembers {
-                receipt: ObjectReceipt::RevealUntil { receipt, members },
+                receipt:
+                    receipt @ (ObjectReceipt::RevealUntil { .. } | ObjectReceipt::Reveal { .. }),
                 projection: MemberProjection::Before,
-            } => self.revealed_objects(receipt, *members)?,
+            } => self.revealed_members(game, receipt)?,
             Selector::ReceiptMembers {
                 receipt: ObjectReceipt::Movement { receipt },
                 projection: MemberProjection::Before,

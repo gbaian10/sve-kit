@@ -14,6 +14,24 @@ use crate::ir::{BatchPolicy, ClassId, TraitId, TriggerAggregation};
     reason = "Discard shares the body's binding allocator."
 )]
 impl BodyContext<'_> {
+    fn whole_hand(&mut self, player: &PlayerRef, path: &str) -> Result<Selector, LoweringError> {
+        Ok(Selector::Zone {
+            players: PlayerSet {
+                relation: PlayerRelation::SelfPlayer,
+                relative_to: player.clone(),
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+                text_quantifier: TextQuantifier::Implicit,
+            },
+            zone: ZoneKind::Hand,
+            view: SelectionView::Current {},
+            binding: Binding::new(self.allocator.id(path)?, self.scope),
+            predicate: Box::new(Expr::Literal(Bool(true))),
+        })
+    }
+
     pub(super) fn discard(
         &mut self,
         value: &ast::Discard,
@@ -24,6 +42,14 @@ impl BodyContext<'_> {
                 || value.all.is_some()
                 || value.random.is_some()
                 || matches!(value.who, Some(ast::LeaderSide::Opponent)))
+        {
+            return Err(unsupported(path));
+        }
+        if value.reference.is_some()
+            && (value.n.is_some()
+                || value.all.is_some()
+                || value.random.is_some()
+                || value.any.is_some())
         {
             return Err(unsupported(path));
         }
@@ -43,21 +69,7 @@ impl BodyContext<'_> {
                 DiscardMode::Chosen {
                     constraint: SelectionConstraint {
                         groups: vec![SelectionGroup {
-                            selector: Selector::Zone {
-                                players: PlayerSet {
-                                    relation: PlayerRelation::SelfPlayer,
-                                    relative_to: player.clone(),
-                                    cardinality: Cardinality {
-                                        minimum: Nat(1),
-                                        maximum: Some(Nat(1)),
-                                    },
-                                    text_quantifier: TextQuantifier::Implicit,
-                                },
-                                zone: ZoneKind::Hand,
-                                view: SelectionView::Current {},
-                                binding: Binding::new(self.allocator.id(path)?, self.scope),
-                                predicate: Box::new(Expr::Literal(Bool(true))),
-                            },
+                            selector: self.whole_hand(&player, path)?,
                             cardinality,
                         }],
                         cardinality,
@@ -68,40 +80,28 @@ impl BodyContext<'_> {
                 }
             }
             (Some(n), None) if n > 0 && value.random == Some(true) => DiscardMode::Random {
-                population: Selector::Zone {
-                    players: PlayerSet {
-                        relation: PlayerRelation::SelfPlayer,
-                        relative_to: player.clone(),
-                        cardinality: Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
-                        },
-                        text_quantifier: TextQuantifier::Implicit,
-                    },
-                    zone: ZoneKind::Hand,
-                    view: SelectionView::Current {},
-                    binding: Binding::new(self.allocator.id(path)?, self.scope),
-                    predicate: Box::new(Expr::Literal(Bool(true))),
-                },
+                population: self.whole_hand(&player, path)?,
                 count: Expr::Literal(Int(i64::try_from(n).map_err(|_overflow| unsupported(path))?)),
             },
-            (None, Some(true)) if value.random.is_none() => DiscardMode::All {
-                eligible: Selector::Zone {
-                    players: PlayerSet {
-                        relation: PlayerRelation::SelfPlayer,
-                        relative_to: player.clone(),
-                        cardinality: Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
-                        },
-                        text_quantifier: TextQuantifier::Implicit,
+            (None, None)
+                if value.random.is_none()
+                    && let Some(name) = &value.reference =>
+            {
+                let chosen = Selector::Bound {
+                    reference: *self.targets.get(name).ok_or_else(|| unsupported(path))?,
+                };
+                let hand = self.whole_hand(&player, path)?;
+                DiscardMode::All {
+                    eligible: Selector::Intersection {
+                        sets: vec![hand, chosen],
                     },
-                    zone: ZoneKind::Hand,
-                    view: SelectionView::Current {},
-                    binding: Binding::new(self.allocator.id(path)?, self.scope),
-                    predicate: Box::new(Expr::Literal(Bool(true))),
-                },
-            },
+                }
+            }
+            (None, Some(true)) if value.random.is_none() && value.reference.is_none() => {
+                DiscardMode::All {
+                    eligible: self.whole_hand(&player, path)?,
+                }
+            }
             _ => return Err(unsupported(path)),
         };
         Ok(Action::Discard { player, mode })

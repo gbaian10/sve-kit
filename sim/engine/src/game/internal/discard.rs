@@ -43,7 +43,8 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
-fn eligible(action: &Action) -> Result<&Selector> {
+/// The discarding player's whole current hand, or only the cards chosen earlier that remain in it.
+fn eligible(action: &Action) -> Result<Option<&Selector>> {
     let Action::Discard {
         player,
         mode: DiscardMode::All { eligible },
@@ -51,13 +52,20 @@ fn eligible(action: &Action) -> Result<&Selector> {
     else {
         return Err(unsupported("self all-hand discard"));
     };
+    let (hand, chosen) = match eligible {
+        Selector::Intersection { sets } => match sets.as_slice() {
+            [hand, chosen @ Selector::Bound { .. }] => (hand, Some(chosen)),
+            _ => return Err(unsupported("chosen hand discard")),
+        },
+        hand => (hand, None),
+    };
     let Selector::Zone {
         players,
         zone: ZoneKind::Hand,
         view: SelectionView::Current {},
         predicate,
         ..
-    } = eligible
+    } = hand
     else {
         return Err(unsupported("direct current hand discard"));
     };
@@ -69,7 +77,7 @@ fn eligible(action: &Action) -> Result<&Selector> {
     {
         return Err(unsupported("unfiltered own hand discard"));
     }
-    Ok(eligible)
+    Ok(chosen)
 }
 
 /// A random discard draws from its player's whole current hand by a fixed positive count.
@@ -346,13 +354,20 @@ impl Game {
                 ..
             }
         ) {
-            eligible(&instruction.action)?;
+            let chosen = eligible(&instruction.action)?
+                .map(|chosen| execution.objects(self, chosen))
+                .transpose()?;
             let player = execution.player(self, &instruction.actor)?;
             let seat = seat_name(player)?;
             let members = self
                 .zone_ids(seat, "hand")
                 .into_iter()
                 .map(|id| execution.reference(self, &id))
+                .filter(|member| {
+                    chosen.as_ref().is_none_or(|chosen| {
+                        member.as_ref().is_ok_and(|member| chosen.contains(member))
+                    })
+                })
                 .collect::<Result<Vec<_>>>()?;
             let outcome = self.internal_discard_members(execution, &members)?;
             execution

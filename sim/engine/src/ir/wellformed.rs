@@ -1150,6 +1150,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Draw { .. } => TypeId::of::<CardQuantityOutcome>(),
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
         Action::RevealUntil { .. } => TypeId::of::<super::RevealUntilOutcome>(),
+        Action::Reveal { .. } => TypeId::of::<super::RevealOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
         Action::FlipDown { .. } => TypeId::of::<FlipOutcome>(),
         Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
@@ -1164,7 +1165,6 @@ const fn outcome(action: &Action) -> TypeId {
         Action::InstallEffect { .. }
         | Action::Transfer { .. }
         | Action::Life { .. }
-        | Action::Reveal { .. }
         | Action::Shuffle { .. }
         | Action::FlipUp { .. }
         | Action::Posture { .. }
