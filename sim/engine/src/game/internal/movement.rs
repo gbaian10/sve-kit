@@ -265,7 +265,7 @@ fn admitted_field_entry(objects: &Selector, movement: &MoveSpec) -> bool {
 pub(super) fn field_move(movement: &MoveSpec) -> bool {
     matches!(&movement.to, MoveDestination::Shared { zone }
         if (perspective::readable(&zone.player)
-            || matches!(zone.player, PlayerRef::Owner {})
+            || matches!(zone.player, PlayerRef::Owner {} | PlayerRef::Active {})
             || zone.player == opponent())
             && zone.kind == ZoneKind::Field)
 }
@@ -789,8 +789,8 @@ impl Game {
                 && object.controller == seat
                 && execution.is_private_hand_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
-            let private_look = ((seat == super::seat_name(execution.context.controller)?
-                && self.private_look_deck_member(execution, objects, member)?)
+            // The receiving player must be the one who looked at the card (BP01-083).
+            let private_look = (self.looked_by(execution, objects, member, seat)?
                 || (object.zone == "deck"
                     && object.owner == seat
                     && object.controller == seat
@@ -1529,9 +1529,7 @@ impl Game {
         if changed_players.is_empty() {
             return Ok(());
         }
-        execution
-            .look_viewers
-            .retain(|_, viewer| !changed_players.contains(viewer));
+        execution.retain_look_viewers(|viewer| !changed_players.contains(&viewer));
         let changed_owners = changed_players
             .iter()
             .map(|player| super::seat_name(*player))

@@ -1,5 +1,5 @@
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
-use super::{Execution, Game, Nat, ObjectRef, Result, invalid, player_id, unsupported};
+use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::Viewer;
@@ -21,7 +21,7 @@ use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
 use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, ZoneKind};
-use crate::ir::{Position, hand_position};
+use crate::ir::{Position, ReceiptLocation, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
@@ -1116,12 +1116,24 @@ impl Game {
         selector: &Selector,
         member: ObjectRef,
     ) -> Result<bool> {
+        self.looked_by(
+            execution,
+            selector,
+            member,
+            super::seat_name(execution.context.controller)?,
+        )
+    }
+
+    /// A privately looked deck card chosen through `selector` that `seat` still observes.
+    pub(in crate::game::internal) fn looked_by(
+        &self,
+        execution: &Execution,
+        selector: &Selector,
+        member: ObjectRef,
+        seat: &str,
+    ) -> Result<bool> {
         Ok(execution.is_private_look_target(selector, member)
-            && self.current_observed_deck(
-                execution,
-                member,
-                super::seat_name(execution.context.controller)?,
-            )?)
+            && self.current_observed_deck(execution, member, seat)?)
     }
 
     pub(super) fn internal_target(
@@ -1765,7 +1777,7 @@ impl Execution {
                 if !allow_resolution_zones {
                     return Err(unsupported("look choice outside resolution"));
                 }
-                self.observed_objects(game, selector, self.context.controller, Consumer::Choice)?
+                self.observed_objects(game, selector, self.look_reader(selector), Consumer::Choice)?
             }
             _ => self.objects(game, selector)?,
         };
@@ -1774,6 +1786,22 @@ impl Execution {
             .into_iter()
             .filter(|member| seen.insert((member.id, member.generation)))
             .collect())
+    }
+
+    /// Looked cards are read as the player who looked at them; the question's actor must still
+    /// have observed each candidate when the question is asked.
+    fn look_reader(&self, selector: &Selector) -> PlayerId {
+        match selector {
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { receipt },
+                ..
+            } => match receipt.location() {
+                ReceiptLocation::Local { id } => self.look_viewers.get(id).copied(),
+                ReceiptLocation::Iteration { .. } => None,
+            },
+            _ => None,
+        }
+        .unwrap_or(self.context.controller)
     }
 
     fn filtered_target_objects(
@@ -1804,7 +1832,7 @@ impl Execution {
                 && !game.current_observed_deck(
                     self,
                     member,
-                    super::super::seat_name(self.context.controller)?,
+                    super::super::seat_name(self.look_reader(input))?,
                 )?
             {
                 continue;

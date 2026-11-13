@@ -135,7 +135,13 @@ impl BodyContext<'_> {
         {
             self.cemetery_banish_targets.insert(choice.bind.clone());
         }
-        if hand
+        // A card chosen from a player's own hand or own looked deck enters that player's field.
+        let own_look = target
+            .from
+            .observation
+            .as_ref()
+            .is_some_and(|name| self.look_viewers.get(name) == Some(&actor));
+        if (hand || own_look)
             && actor != (PlayerRef::Controller {})
             && let Some(binding) = self.targets.get(&choice.bind)
         {
@@ -200,7 +206,7 @@ impl BodyContext<'_> {
     }
 
     /// A private source is shown only to its holder: another player may choose from its own
-    /// hand, while looked cards stay with the controller who looked. Publicly revealed cards
+    /// hand, while looked cards stay with the player who looked. Publicly revealed cards
     /// may be chosen by any participant.
     fn chooser(
         &mut self,
@@ -227,7 +233,12 @@ impl BodyContext<'_> {
                 }
                 _ => false,
             };
-        if ((from.observation.is_some() && !revealed) || hand)
+        // Privately looked cards may be chosen by the player who looked at them.
+        let looked_by_actor = from
+            .observation
+            .as_ref()
+            .is_some_and(|name| self.look_viewers.get(name) == Some(&actor));
+        if ((from.observation.is_some() && !revealed && !looked_by_actor) || hand)
             && actor != (PlayerRef::Controller {})
             && !own_hand
         {

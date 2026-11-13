@@ -99,10 +99,18 @@ impl BodyContext<'_> {
             Some(ast::Participant::MasterOf { master_of }) => {
                 self.selected_player(master_of, Role::Controller, path)
             }
-            Some(ast::Participant::Bound(name)) => Ok(PlayerRef::Bound {
-                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
-            }),
+            Some(ast::Participant::Bound(name)) => self.named_player(name, path),
         }
+    }
+
+    /// A player named by a reserved name or an enclosing procedure: `turn` is the turn player.
+    pub(super) fn named_player(&self, name: &str, path: &str) -> Result<PlayerRef, LoweringError> {
+        if name == "turn" {
+            return Ok(PlayerRef::Active {});
+        }
+        Ok(PlayerRef::Bound {
+            binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+        })
     }
 
     /// A query's players: relative to the controller, or exactly an enclosing procedure's player.
