@@ -88,19 +88,33 @@ fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
     }
 }
 
-/// Current own-hand candidates, or a union of such branches ("手札のAかB").
-pub(crate) fn own_hand_selector(selector: &Selector) -> bool {
+/// Current candidates from `holder`'s own hand, or a union of such branches ("手札のAかB").
+pub(crate) fn own_hand_selector(selector: &Selector, holder: &PlayerRef) -> bool {
     if let Selector::Union { sets } = selector {
-        return sets.len() > 1 && sets.iter().all(own_hand_zone);
+        return sets.len() > 1 && sets.iter().all(|set| own_hand_zone(set, holder));
     }
-    own_hand_zone(selector)
+    own_hand_zone(selector, holder)
 }
 
-fn own_hand_zone(selector: &Selector) -> bool {
+fn own_hand_zone(selector: &Selector, holder: &PlayerRef) -> bool {
     matches!(selector, Selector::Zone {
-        players, zone: super::ZoneKind::Hand, view: super::SelectionView::Current {}, ..
-    } if players.relation == PlayerRelation::SelfPlayer
-        && players.relative_to == (PlayerRef::Controller {}))
+        players,
+        zone: super::ZoneKind::Hand,
+        view: super::SelectionView::Current {},
+        ..
+    } if held_by(players, holder))
+}
+
+/// Whether `players` names exactly `holder`, read either directly or as the controller's opponent.
+pub(crate) fn held_by(players: &super::PlayerSet, holder: &PlayerRef) -> bool {
+    match players.relation {
+        PlayerRelation::SelfPlayer => players.relative_to == *holder,
+        PlayerRelation::Opponents => {
+            players.relative_to == (PlayerRef::Controller {})
+                && *holder == super::events::timing::opponent()
+        }
+        PlayerRelation::All | PlayerRelation::Bound => false,
+    }
 }
 
 /// A hand choice authorizes only its controller to inspect current own-hand candidates.
@@ -139,8 +153,7 @@ pub(crate) fn private_hand_choice(decision: &Decision) -> bool {
             .maximum
             .is_none_or(|max| max.0 > 0 && cardinality.minimum.0 <= max.0)
         && (may == Declinable::Required || cardinality.minimum == Nat(0))
-        && own_hand_selector(&group.selector)
-        && decision.actor == (PlayerRef::Controller {})
+        && own_hand_selector(&group.selector, &decision.actor)
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
         && constraint.distinct_by.is_none()

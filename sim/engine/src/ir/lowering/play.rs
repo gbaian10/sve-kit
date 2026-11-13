@@ -79,7 +79,10 @@ fn check_choice_shape(
         target.from.zone,
         Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
     ) && (!resolution
-        || !matches!(target.from.who, Some(ast::Side::Controller))
+        || !matches!(
+            target.from.who,
+            Some(ast::Side::Controller | ast::Side::Opponent)
+        )
         || target.from.other
         || target.from.not_same_name_as_this
         || target.from.has_state_filter()
@@ -1184,6 +1187,10 @@ impl BodyContext<'_> {
                 context.receipt_reads.clone_from(&self.receipt_reads);
                 context.observed_targets.clone_from(&self.observed_targets);
                 context.field_entry.multi = self.field_entry.multi.clone();
+                context
+                    .field_entry
+                    .holders
+                    .clone_from(&self.field_entry.holders);
                 context.targets.clone_from(&self.targets);
                 context.follower_targets.clone_from(&self.follower_targets);
                 context.target_roles.clone_from(&self.target_roles);

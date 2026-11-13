@@ -8,12 +8,12 @@ use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::observation_selection::{
-    CardTotals, card_totals, private_hand_choice, private_look_choice,
+    CardTotals, card_totals, held_by, private_hand_choice, private_look_choice,
 };
 use crate::ir::{
     Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
-    Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot, PlayerRef, PlayerRelation,
-    ScopeId, SelectionConstraint, SelectionGroup, Selector,
+    MoveDestination, MoveSpec, Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot,
+    PlayerRef, PlayerRelation, ScopeId, SelectionConstraint, SelectionGroup, Selector,
 };
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
@@ -617,10 +617,11 @@ fn candidate_zone(selector: &Selector, allow_resolution_zones: bool) -> Result<&
         {
             "evolve_deck"
         }
+        // Loading already proved the chooser holds this hand; either player may be that holder.
         ZoneKind::Hand
             if allow_resolution_zones
-                && players.relation == PlayerRelation::SelfPlayer
-                && players.relative_to == (PlayerRef::Controller {}) =>
+                && (held_by(players, &PlayerRef::Controller {})
+                    || held_by(players, &opponent())) =>
         {
             "hand"
         }
@@ -801,7 +802,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         selector => target_selector(selector)?,
     }
-    if (decision.actor != (PlayerRef::Controller {}) && decision.actor != opponent())
+    if !super::super::alternatives::participant(&decision.actor)
         || !matches!(
             selection_zone(&group.selector),
             Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve)
@@ -1121,12 +1122,16 @@ impl Game {
         let constraint = evaluated_counts(self, execution, constraint, decision)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
-        // The capacity is the destination's: the controller's field, even when the opponent picks.
+        // The capacity is the receiving field's, which need not be the chooser's.
+        let receiver = match execution.field_entry_receiver(binding.key()) {
+            Some(player) => execution.player(self, player)?,
+            None => execution.context.controller,
+        };
         let bounds = field_entry_bounds(
             self,
-            super::seat_name(execution.context.controller)?,
+            super::seat_name(receiver)?,
             (observed_deck || own_hand || (allow_resolution_zones && own_ex_pick(&constraint)))
-                && execution.feeds_field_entry(binding.key()),
+                && execution.field_entry_receiver(binding.key()).is_some(),
             bounds,
         )?;
         let public = members
@@ -1480,13 +1485,25 @@ impl Execution {
     }
 
     /// Lowering admits a private multi-card pick onto the field only as the very next step.
-    fn feeds_field_entry(&self, key: (ScopeId, u64)) -> bool {
-        self.todo.front().is_some_and(|node| {
-            matches!(node, Node::Instruction { instruction }
-                if matches!(&instruction.action, Action::Move {
-                    objects: Selector::Bound { reference }, movement, ..
-                } if reference.key() == key && super::super::movement::field_move(movement)))
-        })
+    /// The player whose field the very next step fills with this selection, if any.
+    fn field_entry_receiver(&self, key: (ScopeId, u64)) -> Option<&PlayerRef> {
+        let Some(Node::Instruction { instruction }) = self.todo.front() else {
+            return None;
+        };
+        match &instruction.action {
+            Action::Move {
+                objects: Selector::Bound { reference },
+                movement:
+                    movement @ MoveSpec {
+                        to: MoveDestination::Shared { zone },
+                        ..
+                    },
+                ..
+            } if reference.key() == key && super::super::movement::field_move(movement) => {
+                Some(&zone.player)
+            }
+            _ => None,
+        }
     }
 
     pub(in crate::game::internal) fn is_private_look_target(

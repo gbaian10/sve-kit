@@ -5,6 +5,7 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
+use crate::ir::events::timing::opponent;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
@@ -258,8 +259,12 @@ fn admitted_field_entry(objects: &Selector, movement: &MoveSpec) -> bool {
         && source_allowed
 }
 
+/// Entry checks still require each card's owner and controller to be this field's player.
 pub(super) fn field_move(movement: &MoveSpec) -> bool {
-    matches!(&movement.to, MoveDestination::Shared { zone } if matches!(zone.player, PlayerRef::Controller {} | PlayerRef::Owner {}) && zone.kind == ZoneKind::Field)
+    matches!(&movement.to, MoveDestination::Shared { zone }
+        if (matches!(zone.player, PlayerRef::Controller {} | PlayerRef::Owner {})
+            || zone.player == opponent())
+            && zone.kind == ZoneKind::Field)
 }
 
 pub(super) fn cemetery_ex_move(action: &Action) -> bool {

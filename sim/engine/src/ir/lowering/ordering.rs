@@ -452,7 +452,26 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        Ok(shared_put(self.objects(objects, path)?, ZoneKind::Field))
+        let mut action = shared_put(self.objects(objects, path)?, ZoneKind::Field);
+        if let (
+            Some(holder),
+            Action::Move {
+                movement:
+                    MoveSpec {
+                        to: MoveDestination::Shared { zone },
+                        ..
+                    },
+                ..
+            },
+        ) = (
+            self.targets
+                .get(name)
+                .and_then(|binding| self.field_entry.holders.get(&binding.key())),
+            &mut action,
+        ) {
+            zone.player.clone_from(holder);
+        }
+        Ok(action)
     }
 
     pub(super) fn banish(

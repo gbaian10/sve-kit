@@ -1280,6 +1280,9 @@ enum CounterReadView {
 #[derive(Default)]
 struct FieldEntryGuard {
     multi: BTreeSet<String>,
+    /// A card picked from another player's own hand enters that holder's field; keyed by the
+    /// selection binding so a later selection reusing the name never inherits it.
+    holders: BTreeMap<(ScopeId, u64), PlayerRef>,
     /// Binding of the choose step directly before the step being lowered.
     adjacent: Option<String>,
 }

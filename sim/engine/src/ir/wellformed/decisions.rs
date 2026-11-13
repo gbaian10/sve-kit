@@ -570,8 +570,7 @@ impl Checker {
                 zone: ZoneKind::Hand,
                 ..
             } if !self.env.private_choice
-                || players.relation != PlayerRelation::SelfPlayer
-                || players.relative_to != *actor =>
+                || !super::super::observation_selection::held_by(players, actor) =>
             {
                 self.reject()
             }
