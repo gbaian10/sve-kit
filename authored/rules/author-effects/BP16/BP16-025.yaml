@@ -1,0 +1,62 @@
+cards:
+  BP16-025:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - choose:
+                bind: soldier
+                from:
+                  kind: follower
+                  token: true
+                  trait: 兵士
+                  who: self
+                  zone: ex
+                n: 1
+            - move:
+                ref: soldier
+                result: entered
+                to: field
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - damage:
+                n: 4
+                to:
+                  leader: opp
+            - draw:
+                n: 1
+                who: self
+          per_turn: 1
+          usable_if:
+            cmp:
+              left:
+                distinct_names:
+                  kind: follower
+                  token: true
+                  trait: 兵士
+                  who: self
+                  zone: field
+              op: ge
+              right: 3
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

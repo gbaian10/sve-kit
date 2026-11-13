@@ -1,0 +1,68 @@
+cards:
+  BP17-042:
+    abilities:
+      - evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                groups:
+                  - trait: 機械
+                  - name: ソニック・フォー
+                may: true
+                upto: 2
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - damage:
+                            n: 1
+                            to:
+                              any_of:
+                                - leader: opp
+                                - kind: follower
+                                  who: opp
+                                  zone: field
+                      on:
+                        played:
+                          sel:
+                            trait: 機械
+                          who: self
+                on: this
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

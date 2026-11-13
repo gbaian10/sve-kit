@@ -1,0 +1,32 @@
+cards:
+  BP15-PR15:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n:
+                  per:
+                    of:
+                      count:
+                        who: self
+                        zone: cemetery
+                    unit: 5
+                to: field
+                token: 絶叫の残響・ルルナイ
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token:
+      name: 絶叫の拡散
+      template: true
+    token_sources:
+      - card: BP15-P32
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

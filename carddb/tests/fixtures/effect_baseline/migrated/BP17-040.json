@@ -1,0 +1,146 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "static",
+      "body": {
+        "op": "adjust_cost",
+        "subjects": "self",
+        "amount": -5,
+        "condition": {
+          "fn": "gt",
+          "args": [
+            {
+              "count": {
+                "side": "self",
+                "zone": "field",
+                "type": "follower",
+                "trait": "機械",
+                "where": {
+                  "fn": "ge",
+                  "args": [
+                    {
+                      "read": "item.cost"
+                    },
+                    6
+                  ]
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "op": "move",
+            "subjects": {
+              "side": "self",
+              "zone": "field",
+              "type": "follower",
+              "trait": "機械",
+              "where": {
+                "fn": "ge",
+                "args": [
+                  {
+                    "read": "item.cost"
+                  },
+                  6
+                ]
+              }
+            },
+            "to": "cemetery",
+            "bind": "sent"
+          },
+          {
+            "op": "if",
+            "condition": {
+              "fn": "gt",
+              "args": [
+                {
+                  "count": {
+                    "from": "sent",
+                    "where": {
+                      "fn": "eq",
+                      "args": [
+                        {
+                          "read": "item.cost"
+                        },
+                        6
+                      ]
+                    }
+                  }
+                },
+                0
+              ]
+            },
+            "then": {
+              "op": "create",
+              "name": "蹂躙の触手",
+              "count": 1,
+              "to": "field"
+            }
+          },
+          {
+            "op": "if",
+            "condition": {
+              "fn": "gt",
+              "args": [
+                {
+                  "count": {
+                    "from": "sent",
+                    "where": {
+                      "fn": "eq",
+                      "args": [
+                        {
+                          "read": "item.cost"
+                        },
+                        7
+                      ]
+                    }
+                  }
+                },
+                0
+              ]
+            },
+            "then": {
+              "op": "seq",
+              "steps": [
+                {
+                  "op": "damage",
+                  "subjects": {
+                    "side": "opponent",
+                    "zone": "field",
+                    "type": "follower"
+                  },
+                  "amount": 4
+                },
+                {
+                  "op": "modify",
+                  "subjects": {
+                    "side": "self",
+                    "zone": "field",
+                    "type": "follower",
+                    "trait": "機械",
+                    "other": true
+                  },
+                  "power": 2,
+                  "hp": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "subject": "self"
+    }
+  ]
+}

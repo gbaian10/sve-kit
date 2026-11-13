@@ -1,0 +1,78 @@
+cards:
+  BP17-040:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -5
+            if:
+              exists:
+                kind: follower
+                orig_cost_ge: 6
+                trait: 機械
+                who: self
+                zone: field
+      - fanfare:
+          do:
+            - move:
+                ref:
+                  kind: follower
+                  orig_cost_ge: 6
+                  trait: 機械
+                  who: self
+                  zone: field
+                result: sent
+                to: cemetery
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: sent
+                          view: before
+                        orig_cost_eq: 6
+                    op: ge
+                    right: 1
+                then:
+                  - create:
+                      n: 1
+                      to: field
+                      token: 蹂躙の触手
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: sent
+                          view: before
+                        orig_cost_eq: 7
+                    op: ge
+                    right: 1
+                then:
+                  - damage:
+                      n: 4
+                      to:
+                        kind: follower
+                        who: opp
+                        zone: field
+                  - buff:
+                      hp: 2
+                      on:
+                        kind: follower
+                        other: true
+                        trait: 機械
+                        who: self
+                        zone: field
+                      power: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
