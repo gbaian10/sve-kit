@@ -187,6 +187,44 @@ impl BodyContext<'_> {
         })))
     }
 
+    /// Draws, shuffles and whole returns of the bound player; a draw may count that player's own
+    /// share of a return made in an earlier stage (「戻した枚数と同じだけ引く」).
+    fn player_procedure(each: &ast::EachPlayer) -> bool {
+        let bound = |name: &String| name == &each.binding;
+        let mut returned = BTreeSet::new();
+        if each.stages.is_empty() {
+            return false;
+        }
+        for stage in &each.stages {
+            if stage.is_empty() {
+                return false;
+            }
+            for step in stage {
+                let valid = if let ast::Step::Draw(draw) = step {
+                    matches!(&draw.who, Some(ast::LifeHolder::Bound(name)) if bound(name))
+                        && (matches!(draw.n, ast::Number::Literal(0..=10_000))
+                            || matches!(&draw.n, ast::Number::CountOf {
+                                count_of: ast::CountOf::Named(name),
+                            } if returned.contains(name)))
+                } else if let ast::Step::Shuffle(shuffle) = step {
+                    matches!(&shuffle.who, ast::DeckHolder::Bound(name) if bound(name))
+                } else if let ast::Step::Move(movement) = step {
+                    // Every player finishes this return before the next instruction reads it.
+                    returned.extend(movement.result.clone());
+                    matches!(&movement.r#ref, Some(ast::MoveObjects::Whole(whole))
+                        if matches!(&whole.who, ast::DeckHolder::Bound(name) if bound(name)))
+                        && Self::unordered_deck(movement)
+                } else {
+                    false
+                };
+                if !valid {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
     pub(super) fn each_player(
         &mut self,
         each: &ast::EachPlayer,
@@ -208,18 +246,7 @@ impl BodyContext<'_> {
             },
             _ => false,
         };
-        let procedure = !each.stages.is_empty() && each.stages.iter().all(|stage| {
-            !stage.is_empty() && stage.iter().all(|step| {
-                matches!(step, ast::Step::Draw(draw)
-                    if matches!(&draw.who, Some(ast::LifeHolder::Bound(name)) if name == &each.binding)
-                        && matches!(draw.n, ast::Number::Literal(0..=10_000)))
-                    || matches!(step, ast::Step::Shuffle(shuffle)
-                        if matches!(&shuffle.who, ast::DeckHolder::Bound(name) if name == &each.binding))
-                    || matches!(step, ast::Step::Move(movement)
-                        if matches!(&movement.r#ref, Some(ast::MoveObjects::Whole(whole)) if matches!(&whole.who, ast::DeckHolder::Bound(name) if name == &each.binding))
-                            && Self::unordered_deck(movement) && movement.result.is_none())
-            })
-        });
+        let procedure = Self::player_procedure(each);
         if matches!(
             each.binding.as_str(),
             "self" | "opp" | "turn" | "non_turn" | "current" | "item"
@@ -232,6 +259,8 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let parent = self.scope;
+        // Stage results are local to this procedure, like the player binding itself.
+        let observations = self.observations.clone();
         self.scope = self.card_allocator.scope(path)?;
         let player = Binding::new(self.allocator.id(path)?, self.scope);
         self.players.insert(each.binding.clone(), player);
@@ -254,6 +283,7 @@ impl BodyContext<'_> {
             Ok(())
         })();
         self.players.remove(&each.binding);
+        self.observations = observations;
         self.scope = parent;
         result?;
         Ok(Node::Control {
