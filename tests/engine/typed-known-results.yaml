@@ -47,7 +47,7 @@ known:
   - question: "card-BP01-170"
     scenario: "[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
   - question: "card-BP01-P23"
     scenario: "A 公開 3 張 → 選手牌裡的古の英雄（オーラ）→ 對手捨棄 → 之後對手抽的新卡 P1 不知道"
@@ -59,11 +59,6 @@ known:
     status: unsupported
     error: "unadmitted BP01-P23 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP01-P23/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP02-062"
-    scenario: "A 用第二張儀式的費用捨 1 張 → 竜少女 −2 費 → 結束階段兩張儀式各造成 2 傷害"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-4 omniscient awaiting"
   - question: "card-BP02-SL16"
     scenario: "能力 1 手牌 0"
     status: unsupported
@@ -107,7 +102,7 @@ known:
   - question: "card-BP03-SL07"
     scenario: "C 計數器只剩 1 → 取完變 0 → 依土の秘術文字放墓場 → token 消去；效果仍成立"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events"
   - question: "card-BP04-007"
     scenario: "已打出卡片 0"
@@ -141,9 +136,9 @@ known:
     reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP05-007"
     scenario: "選 1 張 EX滿=True"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice at ActionWindow"
+    status: fail
+    error: "typed-gap: after-decision-1 assert P1.cemetery (#2008)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.resolution; after-decision-1 omniscient awaiting"
   - question: "card-BP05-057"
     scenario: "[fable] A 用 +2 後攻擊力 4 的ファイター付費 → 對リーダー 4 傷害"
     status: unsupported
@@ -157,7 +152,7 @@ known:
   - question: "card-BP05-092"
     scenario: "[fable] A 異形攻擊リーダー致體力 −3：勝利被禁止、敗北被禁止；護り手把體力設為 1 並進墓場"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
   - question: "card-BP05-SL12"
     scenario: "A 三輪：第 1、2 輪各放到 1 張サイ → 第 3 輪沒有 → 停；攻撃力 +9、墓場 12 張"
@@ -177,7 +172,7 @@ known:
   - question: "card-BP07-030"
     scenario: "A2 アクト 0 棵大樹 → 費用視為已付、0 傷害不做；ウルフ 仍アクト"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events"
   - question: "card-BP07-030"
     scenario: "B 信念の剣閃：必須追加費用アクト 2 棵大樹 → 打出、5 傷害＋リーダー 2"
@@ -252,7 +247,7 @@ known:
   - question: "card-BP09-004"
     scenario: "A 選『真紅の絆・ポーラ』（face 1）：進化時把場上其他 2 張放到 EX"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events; after-decision-1 omniscient awaiting"
   - question: "card-BP09-004"
     scenario: "B 選『深緑の純心・ポーラ』（face 0）：看 5 張、公開エルフ・スペル加入手牌、其餘放底"
@@ -274,11 +269,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-2 assert P1.leader.life (#2008)"
     reason: "after-decision-2 omniscient assert P1.leader.life; after-decision-2 omniscient assert P2.field; after-decision-2 omniscient events"
-  - question: "card-BP10-050"
-    scenario: "B 場上沒有【スタック】卡也可以選【2】並不付 → 什麼都不發生"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "card-BP10-SL06"
     scenario: "[3, 4]"
     status: fail
@@ -309,11 +299,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-3 events (#2008)"
     reason: "after-decision-3 omniscient events"
-  - question: "card-BP11-P30"
-    scenario: "[fable] B 本回合進場的列車：操縦後不能攻擊リーダー，突進可攻擊アクト從者"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-3 omniscient awaiting"
   - question: "card-BP12-072"
     scenario: "A 由能力從墓場出場 → ファンファーレ進化 → 2/2 → 進化時；之後仍可用進化能力"
     status: unsupported
@@ -342,7 +327,7 @@ known:
   - question: "card-BP14-023"
     scenario: "B EX 只有 1 張金貨 → 進化時能力付不出費用 → 起動的 1 PP 已付、什麼都不發生"
     status: fail
-    error: "interface: events-pending-or-ability+outcome-question-count-triage (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient events"
   - question: "card-BP14-023"
     scenario: "C 對手場上有ジェンティルドンナ → 不是誘發，照樣可以打出進化時能力"
@@ -357,7 +342,7 @@ known:
   - question: "card-BP15-008"
     scenario: "兩張法術各建立一次延遲誘發，來源已進墓場仍各抽一張"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
   - question: "card-BP15-066"
     scenario: "A 覚醒：ファンファーレ 對體力 1 的崇拝者 與ガルミーユ 各 1 傷害 → 崇拝者 先被破壞，兩個誘發再結算"
@@ -367,8 +352,8 @@ known:
   - question: "card-BP15-079"
     scenario: "A 正例：エンジェルバレッジ 讓ギンセツ與一ツ尾狐同時被規則處理破壞 → 誘發，對 b1 與 P2 リーダー各 1 傷害"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-2 omniscient events"
   - question: "card-BP15-079"
     scenario: "B Q2021 原題：テミスの審判 全滅 → 誘發，但打出時選不到目標 → 取消一次"
     status: fail
@@ -382,7 +367,7 @@ known:
   - question: "card-BP15-113"
     scenario: "B 體力 10 → 攻擊リーダー → ドレイン 回復 2"
     status: fail
-    error: "interface: awaiting-extra-fields+events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events; after-decision-2 omniscient awaiting; after-decision-3 omniscient events"
   - question: "card-BP15-113"
     scenario: "C 上場時 11，先自傷到 10 再攻擊 → 攻擊時有ドレイン"
@@ -411,9 +396,9 @@ known:
     reason: "play answer rejected"
   - question: "card-BP15-PR10"
     scenario: "對手墓場 10 選項 [1, 2]"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice for Targets"
+    status: fail
+    error: "typed-gap: after-decision-1 awaiting (#2008)"
+    reason: "after-decision-1 omniscient awaiting"
   - question: "card-BP16-049"
     scenario: "[astra] SC 初始 9"
     status: fail
@@ -422,7 +407,7 @@ known:
   - question: "card-BP16-049"
     scenario: "[fable] B 墓場 9 張法術（自身不算）→ SC 不成立 → 保留能力 → ラストワード誘發"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "card-BP16-SL08"
     scenario: "[astra] 原 EX 0"
@@ -436,19 +421,14 @@ known:
     reason: 'typed runner: pending event {"entered_ex":"new-1"} cannot be checked'
   - question: "card-BP16-SL08"
     scenario: "[astra] 原 EX 5"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice at ActionWindow"
+    status: fail
+    error: "typed-gap: after-decision-2 awaiting (#2008)"
+    reason: "after-decision-2 omniscient outcome; after-decision-2 omniscient awaiting"
   - question: "card-BP16-SL08"
     scenario: "[fable] A 抽到 d1 後把 d1 放回牌庫頂"
-    status: adapter-error
-    error: "interface: runner translation / interface (#2008)"
-    reason: "resolve-choice answer rejected"
-  - question: "card-BP16-SL08"
-    scenario: "[fable] B 把原本的手牌 h1 放到牌庫底"
-    status: adapter-error
-    error: "interface: runner translation / interface (#2008)"
-    reason: "resolve-choice answer rejected"
+    status: fail
+    error: "typed-gap: after-decision-3 events (#2008)"
+    reason: "after-decision-3 omniscient events"
   - question: "card-BP16-T15"
     scenario: "[astra] 從 ex 打出"
     status: fail
@@ -496,9 +476,9 @@ known:
     reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a3 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP17-044"
     scenario: "A 場上 4 張、付 +2、不找到：遮断出場（5 張）→ 蹂躙不出"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice at ActionWindow"
+    status: fail
+    error: "typed-gap: after-decision-2 awaiting (#2008)"
+    reason: "after-decision-2 omniscient awaiting; after-decision-3 omniscient outcome; after-decision-3 omniscient awaiting; after-decision-4 omniscient events"
   - question: "card-BP17-044"
     scenario: "B 場上 3 張：遮断與蹂躙都出場"
     status: adapter-error
@@ -517,8 +497,8 @@ known:
   - question: "card-BP18-007"
     scenario: "A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events; after-decision-2 omniscient awaiting"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-2 omniscient events"
   - question: "card-BP18-059"
     scenario: "A 進化時把爆炎の咆哮 放 EX → 付 +3 打出 → 只扣 2 PP，找ドラーク 上場"
     status: adapter-error
@@ -567,7 +547,7 @@ known:
   - question: "card-BP18-SP01"
     scenario: "[fable] B 箱詰め的從者在自己開始階段不站起；對手回合結束後能力回來（守護重新擋攻擊）"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-8 omniscient events"
   - question: "card-BP19-009"
     scenario: "A 第 3 張打出的若芽 由ファンファーレ 進化 → 根際 誘發 3 傷害 → 之後進化能力仍可用 1 次 → 第二次被拒"
@@ -578,7 +558,7 @@ known:
     scenario: "[fable] A 從手牌融合ファイター → 進 EX 帶 1 個融合カウンター → 從 EX 打出 → ファンファーレ付計數器出 token"
     status: fail
     error: "typed-gap: after-decision-3 assert P1.field (#2008)"
-    reason: "after-decision-2 omniscient awaiting; after-decision-3 omniscient outcome; after-decision-3 omniscient assert P1.field; after-decision-3 omniscient assert P1.field.a1; after-decision-3 omniscient assert P1.field.new-1; after-decision-3 omniscient events"
+    reason: "after-decision-3 omniscient outcome; after-decision-3 omniscient assert P1.field; after-decision-3 omniscient assert P1.field.a1; after-decision-3 omniscient assert P1.field.new-1; after-decision-3 omniscient events"
   - question: "card-BP19-080"
     scenario: "A 起動把 2 隻八獄從者從墓場放上場 → 2 隻ミロエル 各誘發 2 次 → b1 受 4 傷害"
     status: unsupported
@@ -587,18 +567,8 @@ known:
   - question: "card-BP19-080"
     scenario: "B 從手牌打出中尉 → 2 隻ミロエル 都誘發，但「墓場から」不成立 → 沒有傷害"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
-  - question: "card-BP19-080"
-    scenario: "C 對手回合：アリオーシュ 被交戰破壞 → ラストワード 把中尉從墓場放上場 → ミロエル 在對手回合誘發"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-2 omniscient awaiting"
-  - question: "card-BP19-080"
-    scenario: "D ミロエル 自己被寒冷の死霊術師從墓場放上場（1/1）→ 自己的能力也誘發"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient awaiting"
   - question: "card-BP19-081"
     scenario: "A 攻擊力 −2 的從者攻擊リーダー → 沒有傷害"
     status: unsupported
@@ -627,8 +597,8 @@ known:
   - question: "card-BP19-086"
     scenario: "A 對手回合：LW 復活特攻隊長 → ファンファーレ 自傷並進化 → ピアシィ 與根際 在對手回合誘發"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-2 omniscient awaiting; after-decision-5 omniscient awaiting; after-decision-8 omniscient events"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-5 omniscient awaiting; after-decision-8 omniscient events"
   - question: "card-BP19-090"
     scenario: "B 一個都不選 → 不能打出"
     status: adapter-error
@@ -647,13 +617,13 @@ known:
   - question: "card-BP19-P21"
     scenario: "blessing 蘇生ミロエル後當回合起動"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-2 omniscient events"
   - question: "card-BP19-P21"
     scenario: "necromancer 蘇生ミロエル後當回合起動"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-2 omniscient events"
   - question: "card-BP19-P25"
     scenario: "NC=9 模式=1"
     status: unsupported
@@ -762,13 +732,8 @@ known:
   - question: "card-BP20-SL17"
     scenario: "A ファンファーレ 全體 1 傷害 → 3 個誘發（含致命的崇拝者）→ 大佐被破壞 → ラストワード 打アジュラ → アジュラ 再誘發"
     status: fail
-    error: "interface: awaiting-compound+events-pending-or-ability (#2008)"
-    reason: "after-decision-3 omniscient awaiting; after-decision-4 omniscient events; after-decision-6 omniscient awaiting"
-  - question: "card-BP21-016"
-    scenario: "同名獸不能付費"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
+    reason: "after-decision-4 omniscient events"
   - question: "card-BP21-P38"
     scenario: "放入 EX 1 張"
     status: unsupported
@@ -782,17 +747,12 @@ known:
   - question: "card-BP21-P56"
     scenario: "A 第一次 +2 抽 1 張；同回合第二次不抽"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events"
-  - question: "card-CP01-019"
-    scenario: "A 食事 → 出走時讓アクト狀態的ジャングルポケット站起 → 它不能攻擊，但可用アクト費用起動"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "card-CP02-007"
     scenario: "A アイテム 當法術打出（不是消滅）→ ビート 離場不抽"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "card-CP03-001"
     scenario: "A 三隻アクアフォース先攻擊過 → メイルストローム第 4 次攻擊 → 進化成グローリー → 驅動檢查 → 傷害 4"
@@ -804,16 +764,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-9 events (#2008)"
     reason: "after-decision-9 omniscient events"
-  - question: "card-CP03-110"
-    scenario: "執行觸發"
-    status: fail
-    error: "interface: awaiting-unrendered (#2008)"
-    reason: "after-decision-2 omniscient awaiting"
-  - question: "card-CP03-110"
-    scenario: "只翻出但拒絕觸發"
-    status: fail
-    error: "interface: awaiting-unrendered (#2008)"
-    reason: "after-decision-2 omniscient awaiting"
   - question: "card-CP04-012"
     scenario: "title 已橫置=False"
     status: unsupported
@@ -923,27 +873,17 @@ known:
     scenario: "A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出"
     status: fail
     error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient awaiting"
-  - question: "card-ECP02-001"
-    scenario: "B EX 沒有アイテム → 費用付不出 → 拒付 → 待機取消"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
-  - question: "card-ECP02-001"
-    scenario: "C PP 只剩 0 → 整個費用不能付，アイテム 也不消滅"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
+    reason: "after-decision-2 omniscient awaiting"
   - question: "card-ECP02-065"
     scenario: "A 擲到 3、不重擲 → 對手把攻擊力最高的從者放到墓場"
-    status: unsupported
+    status: adapter-error
     error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice for DiceReroll"
+    reason: "P2 has no question"
   - question: "card-ECP02-065"
     scenario: "B 擲到 4（無事）→ 重擲 → 2 → 對手リーダー 3 傷害、自己 +3；舊目不再參照"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice for DiceReroll"
+    status: fail
+    error: "typed-gap: after-decision-3 events (#2008)"
+    reason: "after-decision-3 omniscient events"
   - question: "card-ECP02-SL28"
     scenario: "A 超進化 → 兩個能力待機；超進化時把守護從者變護符 → 攻擊リーダー不被擋；全體傷害不打護符"
     status: unsupported
@@ -951,9 +891,9 @@ known:
     reason: "internal D1 does not support unloaded whole card ECP02-SL29/0, query complete card names: current ability definitions unavailable"
   - question: "card-ECP02-SL33"
     scenario: "A EX 已滿 5 張 → 一張アイテム都不放（select 空），仍 +4 與抽 2；非デレマス從者全破壞"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice at ActionWindow"
+    status: fail
+    error: "typed-gap: after-decision-1 awaiting (#2008)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
   - question: "card-ETD01-011"
     scenario: "自己回合被 Quick 選中"
     status: unsupported
@@ -980,11 +920,6 @@ known:
     error: "interface: awaiting-unrendered (#2008)"
     reason: "after-decision-2 omniscient awaiting"
   - question: "card-SD08-006"
-    scenario: "A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
-  - question: "card-SD08-006"
     scenario: "B 有其他從者、體力 10：第一段選了目標但不破壞也不抽；第二段（另一段落）照常 +5"
     status: fail
     error: "typed-gap: after-decision-3 events (#2008)"
@@ -992,18 +927,13 @@ known:
   - question: "card-SD08-006"
     scenario: "D 對手沒有從者、體力 10：第一段選不到目標 → 待機取消、不抽；第二段照常 +5"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "card-SP01-SP30"
-    scenario: "A 從手牌打出 → 條件不成立，只抽 1 張"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
-  - question: "card-SP01-SP30"
     scenario: "C 對手 EX 已滿 5 張 → 不移動、留在場上"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice for Pending"
+    status: fail
+    error: "typed-gap: after-decision-2 awaiting (#2008)"
+    reason: "after-decision-2 omniscient outcome; after-decision-2 omniscient awaiting"
   - question: "card-SP01-U23"
     scenario: "A 先 +4 再打出 → 破壞目標並抽 1 張"
     status: fail
@@ -1012,7 +942,7 @@ known:
   - question: "card-SP01-U23"
     scenario: "B 本回合沒有 +4 → 不破壞、也不抽（以降の効果は働かず）"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "flow-advance-decline-r3-01"
     scenario: "七張拒絕出場仍耗額度"
@@ -1117,7 +1047,7 @@ known:
   - question: "rule-1.3.2-01"
     scenario: "C ギンネ【1】對已アクト的從者：アクト不做、不發事件；「次のスタートフェイズにスタンドしない」仍適用"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "rule-1.3.4-01"
     scenario: "[astra] 場數 1/1"
@@ -1192,7 +1122,7 @@ known:
   - question: "rule-10.4.7-01"
     scenario: "D1 ダークアリス的ラストワード：付「デッキの上10枚を消滅」→ 出場、捨 1 張"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "rule-10.4.7-01"
     scenario: "D2 不付 → 整段不做：留在墓場、不捨牌、牌庫不動"
@@ -1242,13 +1172,8 @@ known:
   - question: "rule-10.6.2-01"
     scenario: "A ユリウス【1】【3】：目標在打出時選，抽 2 張後才捨 1 張（可捨剛抽的）"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
-  - question: "rule-10.6.2-01"
-    scenario: "B 對手場上沒有從者 → 不能選【1】；awaiting 只剩不含 1 的組合；選【2】【3】照常"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "rule-10.6.2.4-01"
     scenario: "選取 1"
     status: unsupported
@@ -1338,7 +1263,7 @@ known:
     scenario: "[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次"
     status: fail
     error: "typed-gap: after-decision-1 events (#2008)"
-    reason: "after-decision-1 omniscient events; after-decision-2 omniscient events; after-decision-2 omniscient awaiting; after-decision-3 omniscient outcome; after-decision-3 omniscient events"
+    reason: "after-decision-1 omniscient events; after-decision-2 omniscient events; after-decision-3 omniscient outcome; after-decision-3 omniscient events"
   - question: "rule-10.7.3.2-01"
     scenario: "[fable] A2 付得出 → 搜到另一張放到場上 → 它也誘發 → 這次 PP 0 付不出 → 取消"
     status: unsupported
@@ -1352,12 +1277,12 @@ known:
   - question: "rule-10.7.4-02"
     scenario: "A Q2702：誘發時マゼルベイン體力 ≤0 仍在場，結算時已被規則處理送墓 → 不能放 EX"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events; after-decision-3 omniscient events"
   - question: "rule-10.7.4-02"
     scenario: "B Q2685：結束階段手牌上限捨棄，マゼルベイン在場 → 可以放 EX"
     status: fail
-    error: "interface: events-pending-or-ability (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events; after-decision-5 omniscient events"
   - question: "rule-10.7.4.2-01"
     scenario: "互相誘發兩次並各結算一次"
@@ -1509,26 +1434,11 @@ known:
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
     reason: 'typed runner: pending {"keyword":"シングルドライブ","rule":"14.4.7.3.2","source":"a1"} matches 2 occurrences'
-  - question: "rule-14.4.5-01"
-    scenario: "[astra] 第一次執行抽牌，第二次翻到治療"
-    status: fail
-    error: "interface: awaiting-unrendered (#2008)"
-    reason: "after-decision-3 omniscient awaiting; after-decision-4 omniscient awaiting"
-  - question: "rule-14.4.5-01"
-    scenario: "[astra] 第一次不執行，第二次仍翻到抽牌"
-    status: fail
-    error: "interface: awaiting-unrendered (#2008)"
-    reason: "after-decision-3 omniscient awaiting; after-decision-4 omniscient awaiting"
-  - question: "rule-14.4.5-01"
-    scenario: "[fable] A 第1次揭露ドロートリガー、執行 → 抽到 a4 → 第2次看到 a5"
-    status: fail
-    error: "interface: awaiting-unrendered (#2008)"
-    reason: "after-decision-2 omniscient awaiting"
   - question: "rule-14.5-01"
     scenario: "C ペコリーヌ的ファンファーレ {コスト2}：付費裝備新的プリンセスソード；PP 不足則取消"
     status: fail
     error: "typed-gap: after-decision-3 assert P1.equipment (#2008)"
-    reason: "after-decision-2 omniscient awaiting; after-decision-3 omniscient outcome; after-decision-3 omniscient assert P1.equipment; after-decision-3 omniscient assert P1.equipment.new-1; after-decision-3 omniscient assert P1.pp.current; after-decision-3 omniscient events"
+    reason: "after-decision-3 omniscient outcome; after-decision-3 omniscient assert P1.equipment; after-decision-3 omniscient assert P1.equipment.new-1; after-decision-3 omniscient assert P1.pp.current; after-decision-3 omniscient events"
   - question: "rule-14.5-01"
     scenario: "C2 PP 只有 3 → 打出後 PP 0 → ファンファーレ費用付不出 → 待機取消"
     status: fail
@@ -1541,19 +1451,14 @@ known:
     reason: "typed runner: resolve-choice for WardEntry"
   - question: "rule-4.4.4-01"
     scenario: "C 場上 5 張 → 法術可以打出，但 0 個 token 建立"
-    status: unsupported
-    error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice at ActionWindow"
+    status: fail
+    error: "typed-gap: after-decision-1 awaiting (#2008)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient awaiting"
   - question: "rule-5.11-01"
     scenario: "頂部選 0 張並排序；下一句排底部"
     status: adapter-error
     error: "interface: runner translation / interface (#2008)"
     reason: "resolve-choice answer rejected"
-  - question: "rule-5.18-01"
-    scenario: "[astra] [3, 1]"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "rule-5.18-01"
     scenario: "[astra] []"
     status: adapter-error
@@ -1568,7 +1473,7 @@ known:
     scenario: "[fable] A 選【2】【3】：awaiting 列出全部 10 種合法組合；結算依卡面順序（先 +3 再抽）"
     status: fail
     error: "typed-gap: after-decision-2 events (#2008)"
-    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
+    reason: "after-decision-2 omniscient events"
   - question: "rule-5.22-01"
     scenario: "BP01-173"
     status: unsupported
@@ -1594,11 +1499,6 @@ known:
     status: fail
     error: "interface: awaiting-unidentifiable-holder (#2008)"
     reason: "after-decision-2 omniscient awaiting"
-  - question: "rule-8.4-01"
-    scenario: "A クイック時點打死攻擊者 → 8.4.9 不造成傷害；awaiting 列出 pass 與可打的クイック"
-    status: fail
-    error: "interface: awaiting-compound (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "rule-9.1.5.1.1-01"
     scenario: "EX 紋章 2 枚"
     status: unsupported

@@ -16,6 +16,7 @@ pub mod inherit;
 pub mod model;
 pub mod runner;
 
+pub use compare::AwaitingMode;
 pub use engine::{Engine, EngineError, Step, View};
 pub use gate::{GateProblem, GateReport, KnownFailures, gate, load_known_failures};
 pub use inherit::Fixture;

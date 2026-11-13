@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use sve_engine::adapter::TypedAdapter;
 use sve_scenario_runner::inherit::expand;
 use sve_scenario_runner::{
-    Engine as _, EngineError, RunOptions, gate, load_dir, load_known_failures, run,
+    AwaitingMode, Engine as _, EngineError, RunOptions, gate, load_dir, load_known_failures, run,
 };
 
 #[path = "support/repository.rs"]
@@ -39,6 +39,7 @@ fn every_shared_scenario_passes_on_the_typed_entry_or_is_listed() {
         None,
         RunOptions {
             require_verified: true,
+            awaiting: AwaitingMode::FirstStage,
         },
     )
     .unwrap();

@@ -16,7 +16,8 @@ use sve_scenario_runner::arch::{
     ArchOptions, AssistEngine, Outcome, ReplayEngine, check_assist, check_replay, load_fixtures,
 };
 use sve_scenario_runner::{
-    RunOptions, Verdict, gate, load_dir, load_known_failures, load_selection, run, score_g1,
+    AwaitingMode, RunOptions, Verdict, gate, load_dir, load_known_failures, load_selection, run,
+    score_g1,
 };
 
 fn root() -> PathBuf {
@@ -52,6 +53,7 @@ fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
         None,
         RunOptions {
             require_verified: true,
+            awaiting: AwaitingMode::Complete,
         },
     )
     .unwrap();

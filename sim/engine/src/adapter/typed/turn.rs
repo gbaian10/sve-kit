@@ -17,9 +17,10 @@ use crate::game::player::{
     Answer, AttackTarget, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, EvolutionAnswer, EvolutionQuestion, Input, MainActionAnswer, MainIntent,
     MainIntentKind, ObjectHandle, OpeningAnswer, OpeningQuestion, PendingChoice, Question,
-    QuestionPurpose, QuestionShape, SelectionGroup, SelectionQuestion, SubmissionKind, Viewer,
+    QuestionPurpose, QuestionShape, QuickChoice, SelectionGroup, SelectionQuestion, SubmissionKind,
+    TargetRoleAssignment, Viewer,
 };
-use crate::ir::{ModeId, Nat, StepwiseAnswer};
+use crate::ir::{ModeId, Nat, Position, StepwiseAnswer};
 use core::mem::take;
 
 /// Serial player questions one exam decision may span, including forced Quick passes.
@@ -115,14 +116,39 @@ impl Turn<'_> {
                 Answer::Modes(options.into_iter().map(ModeId).collect())
             }
             DecisionShape::Targets(selection) => {
-                if params.targets.is_empty() {
-                    let Some(select) = params.select.take() else {
-                        return Ok(None);
-                    };
-                    Answer::Targets(self.members(selection, &select)?)
+                let wanted = if !params.targets.is_empty() {
+                    params.targets.remove(0)
+                } else if let Some(select) = params.select.take() {
+                    select
+                } else if params.choice == Some(false) && selection.cardinality.minimum.0 == 0 {
+                    // Declining an optional choice is choosing nobody.
+                    params.choice = None;
+                    Vec::new()
                 } else {
-                    let wanted = params.targets.remove(0);
-                    Answer::Targets(self.members(selection, &wanted)?)
+                    return Ok(None);
+                };
+                let targets = self.members(selection, &wanted)?;
+                if selection.roles.is_empty() {
+                    Answer::Targets(targets)
+                } else {
+                    let edge = match params.position.take().as_deref() {
+                        Some("top") => Position::Top {},
+                        Some("bottom") => Position::Bottom {},
+                        _ => return Ok(None),
+                    };
+                    let roles = selection
+                        .roles
+                        .iter()
+                        .map(|role| TargetRoleAssignment {
+                            role: role.role,
+                            targets: if role.position == Some(edge) {
+                                targets.clone()
+                            } else {
+                                Vec::new()
+                            },
+                        })
+                        .collect();
+                    Answer::TargetsWithRoles { targets, roles }
                 }
             }
             DecisionShape::Distribution(distribution) => {
@@ -183,7 +209,7 @@ impl Turn<'_> {
                     return Ok(None);
                 }
             }
-            DecisionShape::May => {
+            DecisionShape::May | DecisionShape::DiceReroll { .. } => {
                 let Some(choice) = params.choice.take() else {
                     return Ok(None);
                 };
@@ -256,8 +282,7 @@ impl Turn<'_> {
                     use_ep: params.pay["ep"].as_u64().unwrap_or_default() > 0,
                 }
             }
-            DecisionShape::DiceReroll { .. }
-            | DecisionShape::Abilities(_)
+            DecisionShape::Abilities(_)
             | DecisionShape::WardEntry { .. }
             | DecisionShape::Quick { .. }
             | DecisionShape::ExchangeRoutes(_)
@@ -380,6 +405,192 @@ fn intent(
     actions.intents.iter().find(|intent| accept(&intent.kind))
 }
 
+/// A Quick play or activation, answered from the current Quick window.
+fn quick_action(
+    turn: &mut Turn<'_>,
+    verb: &str,
+    decision: &Value,
+    question: &Question,
+    options: &[QuickChoice],
+    params: &mut Params,
+) -> Result<Option<SubmissionKind>, EngineError> {
+    let (label, line) = if verb == "play" {
+        (decision["card"].as_str().unwrap_or_default(), None)
+    } else {
+        (
+            decision["ability"]["source"].as_str().unwrap_or_default(),
+            decision["ability"]["line"].as_u64(),
+        )
+    };
+    let Some(choice) = options.iter().find(|choice| {
+        choice
+            .object
+            .as_ref()
+            .and_then(|handle| turn.label(handle))
+            .as_deref()
+            == Some(label)
+            && line.is_none_or(|line| choice.line == Some(line))
+    }) else {
+        return Ok(None);
+    };
+    let kind = turn.answer(question, Answer::Quick(Some(choice.handle)))?;
+    turn.follow(params, kind).map(Some)
+}
+
+/// A main-phase intent and its serial declaration parameters; `None` when not offered.
+fn main_action(
+    turn: &mut Turn<'_>,
+    verb: &str,
+    decision: &Value,
+    question: &Question,
+    params: &mut Params,
+) -> Result<Option<SubmissionKind>, EngineError> {
+    let kind = match verb {
+        "play" => {
+            let card = decision["card"].as_str().unwrap_or_default();
+            let Some(found) = intent(
+                question,
+                |kind| matches!(kind, MainIntentKind::Play { card: c } if turn.label(&c.handle).as_deref() == Some(card)),
+            ) else {
+                return Ok(None);
+            };
+            let kind = turn.submit(Command::MainAction {
+                token: question.token,
+                intent: found.id.clone(),
+                answer: MainActionAnswer::None,
+            })?;
+            turn.follow(params, kind)?
+        }
+        "activate" => {
+            let source = decision["ability"]["source"].as_str().unwrap_or_default();
+            let line = decision["ability"]["line"].as_u64();
+            let card = decision["ability"]["card"].as_str();
+            let Some(found) = intent(question, |kind| {
+                matches!(kind, MainIntentKind::Activate { holder, source: text, line: l }
+                    if turn.label(&holder.handle).as_deref() == Some(source)
+                        && line.is_none_or(|line| *l == line)
+                        && card.is_none_or(|card| text.as_ref().is_none_or(|text| text.card == card)))
+            }) else {
+                return Ok(None);
+            };
+            let kind = turn.submit(Command::MainAction {
+                token: question.token,
+                intent: found.id.clone(),
+                answer: MainActionAnswer::None,
+            })?;
+            turn.follow(params, kind)?
+        }
+        "evolve" => {
+            let source = decision["source"].as_str().unwrap_or_default();
+            let line = decision["ability"]["line"].as_u64();
+            let Some(found) = intent(question, |kind| {
+                matches!(kind, MainIntentKind::Evolve { holder, line: l }
+                    if turn.label(&holder.handle).as_deref() == Some(source)
+                        && line.is_none_or(|line| *l == line))
+            }) else {
+                return Ok(None);
+            };
+            params.select = decision["evolve_card"]
+                .as_str()
+                .map(|card| vec![card.to_owned()]);
+            params.x = decision["face"].as_u64();
+            let kind = turn.submit(Command::MainAction {
+                token: question.token,
+                intent: found.id.clone(),
+                answer: MainActionAnswer::None,
+            })?;
+            turn.follow(params, kind)?
+        }
+        "attack" => {
+            let attacker = decision["attacker"].as_str().unwrap_or_default();
+            let target = decision["target"].as_str().unwrap_or_default();
+            let Some(found) = intent(question, |kind| {
+                matches!(kind, MainIntentKind::Attack { attacker: a, .. }
+                    if turn.label(&a.handle).as_deref() == Some(attacker))
+            }) else {
+                return Ok(None);
+            };
+            let MainIntentKind::Attack { targets, .. } = &found.kind else {
+                return Err(adapter("attack intent changed shape"));
+            };
+            let Some(recipient) = targets.iter().find(|recipient| match recipient {
+                AttackTarget::Leader(player) => {
+                    target
+                        .strip_suffix(".leader")
+                        .and_then(|p| seat(&json!(p)).ok())
+                        == Some(*player)
+                }
+                AttackTarget::Card(handle) => turn.label(handle).as_deref() == Some(target),
+            }) else {
+                return Ok(None);
+            };
+            turn.submit(Command::MainAction {
+                token: question.token,
+                intent: found.id.clone(),
+                answer: MainActionAnswer::Attack(recipient.clone()),
+            })?
+        }
+        "end-phase" => {
+            let Some(found) = intent(question, |kind| matches!(kind, MainIntentKind::EndPhase))
+            else {
+                return Err(adapter("end-phase is not offered"));
+            };
+            turn.submit(Command::MainAction {
+                token: question.token,
+                intent: found.id.clone(),
+                answer: MainActionAnswer::None,
+            })?
+        }
+        _ => return Err(untranslated(format!("{verb} at ActionWindow"))),
+    };
+    Ok(Some(kind))
+}
+
+/// The exam's pending occurrence, which must be the only candidate it can name.
+fn choose_pending(
+    turn: &mut Turn<'_>,
+    pending: &Value,
+    question: &Question,
+    choices: &[PendingChoice],
+    params: &mut Params,
+) -> Result<SubmissionKind, EngineError> {
+    // The exam names an occurrence by its ability and, when written, its event;
+    // the runner cannot read the event, so it never accepts an unchecked one.
+    if !pending["event"].is_null() {
+        return Err(untranslated(format!(
+            "pending event {} cannot be checked",
+            pending["event"]
+        )));
+    }
+    let ability = &pending["ability"];
+    let source = ability["source"].as_str().unwrap_or_default();
+    let line = ability["line"].as_u64();
+    let card = ability["card"].as_str();
+    let labels = turn.labels();
+    let matching: Vec<&PendingChoice> = choices
+        .iter()
+        .filter(|choice| {
+            labels.pending_source(choice).as_deref() == Some(source)
+                && line.is_none_or(|line| choice.line == line)
+                && card.is_none_or(|card| choice.card == card)
+        })
+        .collect();
+    // Several occurrences of one ability differ only by their event; the runner
+    // cannot read that event, so it must not pick one for the exam.
+    let choice = match matching.as_slice() {
+        [] => return Err(adapter(format!("pending {ability} is not offered"))),
+        [choice] => *choice,
+        _ => {
+            return Err(untranslated(format!(
+                "pending {ability} matches {} occurrences",
+                matching.len()
+            )));
+        }
+    };
+    let kind = turn.answer(question, Answer::Pending(choice.handle))?;
+    turn.follow(params, kind)
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "One closed mapping from exam verbs to player commands."
@@ -402,164 +613,32 @@ pub(super) fn act(
         .into()
     };
     let question = turn.require()?;
+    // Typed asks nothing when no card can be chosen; the exam still writes the empty answer.
+    if verb == "resolve-choice"
+        && decision["select"].as_array().is_some_and(Vec::is_empty)
+        && !mid_resolution(&question)
+    {
+        return Ok(progress(turn.game));
+    }
     let kind = match (verb, &question.shape) {
         ("play" | "activate", QuestionShape::Decision(DecisionShape::Quick { options, .. })) => {
-            let (label, line) = if verb == "play" {
-                (decision["card"].as_str().unwrap_or_default(), None)
-            } else {
-                (
-                    decision["ability"]["source"].as_str().unwrap_or_default(),
-                    decision["ability"]["line"].as_u64(),
-                )
-            };
-            let Some(choice) = options.iter().find(|choice| {
-                choice
-                    .object
-                    .as_ref()
-                    .and_then(|handle| turn.label(handle))
-                    .as_deref()
-                    == Some(label)
-                    && line.is_none_or(|line| choice.line == Some(line))
-            }) else {
-                return Ok(refused(verb));
-            };
-            let kind = turn.answer(&question, Answer::Quick(Some(choice.handle)))?;
-            turn.follow(&mut params, kind)?
+            match quick_action(turn, verb, decision, &question, options, &mut params)? {
+                Some(kind) => kind,
+                None => return Ok(refused(verb)),
+            }
         }
         ("pass", QuestionShape::Decision(DecisionShape::Quick { .. })) => {
             turn.answer(&question, Answer::Quick(None))?
         }
-        ("play", QuestionShape::ActionWindow(_)) => {
-            let card = decision["card"].as_str().unwrap_or_default();
-            let Some(found) = intent(
-                &question,
-                |kind| matches!(kind, MainIntentKind::Play { card: c } if turn.label(&c.handle).as_deref() == Some(card)),
-            ) else {
-                return Ok(refused(verb));
-            };
-            let kind = turn.submit(Command::MainAction {
-                token: question.token,
-                intent: found.id.clone(),
-                answer: MainActionAnswer::None,
-            })?;
-            turn.follow(&mut params, kind)?
-        }
-        ("activate", QuestionShape::ActionWindow(_)) => {
-            let source = decision["ability"]["source"].as_str().unwrap_or_default();
-            let line = decision["ability"]["line"].as_u64();
-            let card = decision["ability"]["card"].as_str();
-            let Some(found) = intent(&question, |kind| {
-                matches!(kind, MainIntentKind::Activate { holder, source: text, line: l }
-                    if turn.label(&holder.handle).as_deref() == Some(source)
-                        && line.is_none_or(|line| *l == line)
-                        && card.is_none_or(|card| text.as_ref().is_none_or(|text| text.card == card)))
-            }) else {
-                return Ok(refused(verb));
-            };
-            let kind = turn.submit(Command::MainAction {
-                token: question.token,
-                intent: found.id.clone(),
-                answer: MainActionAnswer::None,
-            })?;
-            turn.follow(&mut params, kind)?
-        }
-        ("evolve", QuestionShape::ActionWindow(_)) => {
-            let source = decision["source"].as_str().unwrap_or_default();
-            let line = decision["ability"]["line"].as_u64();
-            let Some(found) = intent(&question, |kind| {
-                matches!(kind, MainIntentKind::Evolve { holder, line: l }
-                    if turn.label(&holder.handle).as_deref() == Some(source)
-                        && line.is_none_or(|line| *l == line))
-            }) else {
-                return Ok(refused(verb));
-            };
-            params.select = decision["evolve_card"]
-                .as_str()
-                .map(|card| vec![card.to_owned()]);
-            params.x = decision["face"].as_u64();
-            let kind = turn.submit(Command::MainAction {
-                token: question.token,
-                intent: found.id.clone(),
-                answer: MainActionAnswer::None,
-            })?;
-            turn.follow(&mut params, kind)?
-        }
-        ("attack", QuestionShape::ActionWindow(_)) => {
-            let attacker = decision["attacker"].as_str().unwrap_or_default();
-            let target = decision["target"].as_str().unwrap_or_default();
-            let Some(found) = intent(&question, |kind| {
-                matches!(kind, MainIntentKind::Attack { attacker: a, .. }
-                    if turn.label(&a.handle).as_deref() == Some(attacker))
-            }) else {
-                return Ok(refused(verb));
-            };
-            let MainIntentKind::Attack { targets, .. } = &found.kind else {
-                return Err(adapter("attack intent changed shape"));
-            };
-            let Some(recipient) = targets.iter().find(|recipient| match recipient {
-                AttackTarget::Leader(player) => {
-                    target
-                        .strip_suffix(".leader")
-                        .and_then(|p| seat(&json!(p)).ok())
-                        == Some(*player)
-                }
-                AttackTarget::Card(handle) => turn.label(handle).as_deref() == Some(target),
-            }) else {
-                return Ok(refused(verb));
-            };
-            turn.submit(Command::MainAction {
-                token: question.token,
-                intent: found.id.clone(),
-                answer: MainActionAnswer::Attack(recipient.clone()),
-            })?
-        }
-        ("end-phase", QuestionShape::ActionWindow(_)) => {
-            let Some(found) = intent(&question, |kind| matches!(kind, MainIntentKind::EndPhase))
-            else {
-                return Err(adapter("end-phase is not offered"));
-            };
-            turn.submit(Command::MainAction {
-                token: question.token,
-                intent: found.id.clone(),
-                answer: MainActionAnswer::None,
-            })?
-        }
+        (
+            "play" | "activate" | "evolve" | "attack" | "end-phase",
+            QuestionShape::ActionWindow(_),
+        ) => match main_action(turn, verb, decision, &question, &mut params)? {
+            Some(kind) => kind,
+            None => return Ok(refused(verb)),
+        },
         ("choose-pending", QuestionShape::Decision(DecisionShape::Pending(choices))) => {
-            // The exam names an occurrence by its ability and, when written, its event;
-            // the runner cannot read the event, so it never accepts an unchecked one.
-            if !pending["event"].is_null() {
-                return Err(untranslated(format!(
-                    "pending event {} cannot be checked",
-                    pending["event"]
-                )));
-            }
-            let ability = &pending["ability"];
-            let source = ability["source"].as_str().unwrap_or_default();
-            let line = ability["line"].as_u64();
-            let card = ability["card"].as_str();
-            let labels = turn.labels();
-            let matching: Vec<&PendingChoice> = choices
-                .iter()
-                .filter(|choice| {
-                    labels.pending_source(choice).as_deref() == Some(source)
-                        && line.is_none_or(|line| choice.line == line)
-                        && card.is_none_or(|card| choice.card == card)
-                })
-                .collect();
-            // Several occurrences of one ability differ only by their event; the runner
-            // cannot read that event, so it must not pick one for the exam.
-            let choice = match matching.as_slice() {
-                [] => return Err(adapter(format!("pending {ability} is not offered"))),
-                [choice] => *choice,
-                _ => {
-                    return Err(untranslated(format!(
-                        "pending {ability} matches {} occurrences",
-                        matching.len()
-                    )));
-                }
-            };
-            let kind = turn.answer(&question, Answer::Pending(choice.handle))?;
-            turn.follow(&mut params, kind)?
+            choose_pending(turn, pending, &question, choices, &mut params)?
         }
         (
             "order-replacements",
@@ -648,17 +727,7 @@ pub(super) fn act(
         }
     };
     Ok(match kind {
-        SubmissionKind::Applied => {
-            if matches!(turn.game.input(turn.by), Input::Finished { .. }) {
-                "game-end".into()
-            } else if [Viewer::P1, Viewer::P2].into_iter().any(
-                |seat| matches!(turn.game.input(seat), Input::Question(q) if mid_resolution(&q)),
-            ) {
-                "paused".into()
-            } else {
-                "resolved".into()
-            }
-        }
+        SubmissionKind::Applied => progress(turn.game),
         SubmissionKind::Reverted => refused(verb),
         SubmissionKind::Cancelled => "pending-cancelled".into(),
         SubmissionKind::Rejected => {
@@ -722,6 +791,23 @@ fn assign(
                 undo.pop();
             }
         }
+    }
+}
+
+/// The exam outcome of an applied decision, read from where play now waits.
+fn progress(game: &Game) -> String {
+    if [Viewer::P1, Viewer::P2]
+        .into_iter()
+        .any(|seat| matches!(game.input(seat), Input::Finished { .. }))
+    {
+        "game-end".into()
+    } else if [Viewer::P1, Viewer::P2]
+        .into_iter()
+        .any(|seat| matches!(game.input(seat), Input::Question(q) if mid_resolution(&q)))
+    {
+        "paused".into()
+    } else {
+        "resolved".into()
     }
 }
 

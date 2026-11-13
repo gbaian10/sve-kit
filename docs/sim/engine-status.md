@@ -62,6 +62,7 @@ opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原�
   `tests/engine/typed-known-results.yaml` 逐條列出尚未通過的局面、原因類別（未准入卡、舊語意狀態、typed 缺口、介面差異）
   與確切原因 `reason`（引擎回報的原因，或每個不符的 checkpoint、視角與比對項）；
   清單外失敗、清單內轉綠、判定種類或 `reason` 改變都會讓測試失敗，轉綠時刪掉該條。
+  typed 對宣告參數逐題提問，所以 awaiting 以 `AwaitingMode::FirstStage` 比對：題本的複合選項只比第一題決定的欄位。
 - typed 的 lowering、raw IR、准入及執行測試位於 `sim/engine/src/ir/tests/`、
   `sim/engine/tests/internal_ir/` 與 `sim/engine/tests/current_repository/` 等；
   共同原型題本通過不表示這些路徑已被驗收。

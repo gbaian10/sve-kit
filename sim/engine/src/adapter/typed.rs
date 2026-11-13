@@ -159,7 +159,9 @@ impl Engine for TypedAdapter {
             let labels = Labels { game, by: seat };
             return Ok(Some(labels.choices(&question).map_or_else(
                 || json!({"by": by, "unrendered": shape_name(&question.shape)}),
-                |choices| json!({"by": by, "choices": choices}),
+                |choices| {
+                    json!({"by": by, "choices": choices, "fields": Labels::fields(&question)})
+                },
             )));
         }
         Ok(None)

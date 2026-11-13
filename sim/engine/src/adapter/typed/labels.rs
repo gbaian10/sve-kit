@@ -10,7 +10,7 @@ use crate::game::player::{
     AttackTarget, CardOption, ClosingQuestion, DecisionShape, MainIntentKind, ObjectHandle,
     PendingChoice, Question, QuestionShape, SelectionQuestion, Viewer,
 };
-use crate::ir::Nat;
+use crate::ir::{Nat, Position};
 
 /// Read-only fixture label resolution for one seat's capabilities.
 #[derive(Clone, Copy)]
@@ -113,6 +113,79 @@ impl Labels<'_> {
             })
     }
 
+    /// Fields each exam verb answers in this native question; later questions' fields
+    /// are not among them. The runner cuts written choices to exactly these.
+    pub(super) fn fields(question: &Question) -> Value {
+        match &question.shape {
+            QuestionShape::Decision(shape) => match shape {
+                DecisionShape::Pending(_) => json!({"choose-pending": ["pending"]}),
+                DecisionShape::Targets(selection) if !selection.roles.is_empty() => {
+                    json!({"resolve-choice": ["select", "position"]})
+                }
+                DecisionShape::Targets(_)
+                | DecisionShape::Discard { .. }
+                | DecisionShape::Search(_)
+                | DecisionShape::SearchPartition(_)
+                | DecisionShape::MovementCapacity(_) => json!({"resolve-choice": ["select"]}),
+                DecisionShape::CostMaterials(_) => json!({"resolve-choice": ["costs"]}),
+                DecisionShape::May
+                | DecisionShape::OptionalCost
+                | DecisionShape::ResolutionPayment
+                | DecisionShape::DiceReroll { .. } => json!({"resolve-choice": ["choice"]}),
+                DecisionShape::DriveTrigger { .. } => {
+                    json!({"resolve-choice": ["choice", "select"]})
+                }
+                DecisionShape::Modes { .. } | DecisionShape::ResolutionAlternative { .. } => {
+                    json!({"resolve-choice": ["options"]})
+                }
+                DecisionShape::Order(_) => json!({"resolve-choice": ["order"]}),
+                DecisionShape::Quick { .. } => json!({"play": ["card"], "activate": ["ability"]}),
+                DecisionShape::Abilities(_)
+                | DecisionShape::ResourceEntryPayment { .. }
+                | DecisionShape::WardEntry { .. }
+                | DecisionShape::ExchangeRoutes(_)
+                | DecisionShape::BeforeDraw
+                | DecisionShape::TriggerQuota(_)
+                | DecisionShape::Integer(_)
+                | DecisionShape::DamageReplacements(_)
+                | DecisionShape::Distribution(_)
+                | DecisionShape::SearchReplacement
+                | DecisionShape::TokenCapacity(_) => json!({}),
+            },
+            QuestionShape::ActionWindow(_) => {
+                json!({"play": ["card"], "activate": ["ability"], "evolve": ["source"]})
+            }
+            QuestionShape::Evolution(_) | QuestionShape::Opening(_) | QuestionShape::Closing(_) => {
+                json!({})
+            }
+        }
+    }
+
+    /// One question picks the cards and the deck edge they go to; every subset is
+    /// offered once per edge role. Roles without an edge have no exam rendering.
+    fn role_choices(&self, selection: &SelectionQuestion) -> Option<Vec<Value>> {
+        let edges = selection
+            .roles
+            .iter()
+            .map(|role| match role.position {
+                Some(Position::Top {}) => Some("top"),
+                Some(Position::Bottom {}) => Some("bottom"),
+                Some(Position::Index { .. }) | None => None,
+            })
+            .collect::<Option<Vec<_>>>()?;
+        let mut result = Vec::new();
+        for subset in subsets(
+            &self.member_labels(selection),
+            selection.cardinality.minimum.0,
+            selection.cardinality.maximum,
+        )? {
+            for edge in &edges {
+                result.push(json!({"do": "resolve-choice", "select": subset, "position": edge}));
+            }
+        }
+        Some(result)
+    }
+
     fn member_labels(&self, question: &SelectionQuestion) -> Vec<String> {
         question
             .members
@@ -184,6 +257,9 @@ impl Labels<'_> {
                         })
                         .collect(),
                 ),
+                DecisionShape::Targets(selection) if !selection.roles.is_empty() => {
+                    self.role_choices(selection)
+                }
                 DecisionShape::Targets(selection)
                 | DecisionShape::Discard {
                     cards: selection, ..
@@ -217,7 +293,22 @@ impl Labels<'_> {
                 ),
                 DecisionShape::May
                 | DecisionShape::OptionalCost
-                | DecisionShape::ResolutionPayment => execute(),
+                | DecisionShape::ResolutionPayment
+                | DecisionShape::DiceReroll { .. } => execute(),
+                DecisionShape::DriveTrigger { targets, .. } => {
+                    let mut result: Vec<Value> = self
+                        .card_labels(targets)
+                        .into_iter()
+                        .map(|target| {
+                            json!({"do": "resolve-choice", "choice": "execute", "select": [target]})
+                        })
+                        .collect();
+                    if result.is_empty() {
+                        result.push(json!({"do": "resolve-choice", "choice": "execute"}));
+                    }
+                    result.push(json!({"do": "resolve-choice", "choice": "decline"}));
+                    Some(result)
+                }
                 DecisionShape::Modes { modes, count, .. }
                 | DecisionShape::ResolutionAlternative { modes, count, .. } => {
                     let ids: Vec<String> = modes.iter().map(|mode| mode.0.to_string()).collect();
@@ -279,14 +370,12 @@ impl Labels<'_> {
                             .collect(),
                     )
                 }
-                DecisionShape::DiceReroll { .. }
-                | DecisionShape::Abilities(_)
+                DecisionShape::Abilities(_)
                 | DecisionShape::ResourceEntryPayment { .. }
                 | DecisionShape::ExchangeRoutes(_)
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
                 | DecisionShape::Integer(_)
-                | DecisionShape::DriveTrigger { .. }
                 | DecisionShape::MovementCapacity(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement

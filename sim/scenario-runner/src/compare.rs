@@ -7,7 +7,8 @@
 //! - an event `group` must be one contiguous block in the engine's event stream;
 //! - a zone placeholder must be exactly `{filler: n}`: an unidentified card that carries
 //!   an id or any other field is not a placeholder;
-//! - `awaiting.choices` must equal the complete option set exactly, field for field.
+//! - `awaiting.choices` must equal the complete option set exactly, field for field,
+//!   unless the run selects [`AwaitingMode::FirstStage`].
 
 use core::iter;
 use serde_json::{Map, Value};
@@ -354,6 +355,79 @@ pub fn awaiting(view: View, expected: &Value, actual: Option<&Value>) -> bool {
         }
         _ => false,
     }
+}
+
+/// How `awaiting.choices` is compared.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum AwaitingMode {
+    /// The complete option set, field for field (contract 6.5).
+    #[default]
+    Complete,
+    /// For an engine that asks declaration parameters one question at a time. Its
+    /// `awaiting.fields` declares, per verb, the fields its current question answers;
+    /// each written choice keeps only those fields, equal ones collapse, and the sets
+    /// must be equal. Without a declaration nothing is cut.
+    FirstStage,
+}
+
+/// Verbs whose written choices may carry parameters of later questions.
+const SERIAL_VERBS: [&str; 5] = [
+    "choose-pending",
+    "play",
+    "activate",
+    "evolve",
+    "resolve-choice",
+];
+
+fn first_stage(expected: &[Value], fields: Option<&Map<String, Value>>) -> Vec<Value> {
+    let mut cut: Vec<Value> = Vec::new();
+    for choice in expected {
+        let kept = choice
+            .as_object()
+            .and_then(|map| {
+                let verb = map.get("do").and_then(Value::as_str)?;
+                if !SERIAL_VERBS.contains(&verb) {
+                    return None;
+                }
+                let keys = fields?.get(verb)?.as_array()?;
+                Some(Value::Object(
+                    map.iter()
+                        .filter(|(key, _)| {
+                            *key == "do" || keys.iter().any(|field| field.as_str() == Some(key))
+                        })
+                        .map(|(key, value)| (key.clone(), value.clone()))
+                        .collect(),
+                ))
+            })
+            .unwrap_or_else(|| choice.clone());
+        if !cut.contains(&kept) {
+            cut.push(kept);
+        }
+    }
+    cut
+}
+
+/// [`awaiting`] after cutting the written choices to the fields the engine declares
+/// for its current question; the engine's own choices are only deduplicated.
+#[must_use]
+pub fn awaiting_first_stage(view: View, expected: &Value, actual: Option<&Value>) -> bool {
+    let Some(actual) = actual else {
+        return false;
+    };
+    let fields = actual.get("fields").and_then(Value::as_object);
+    let mut expected = expected.clone();
+    if let Some(choices) = expected.get_mut("choices")
+        && let Some(items) = choices.as_array()
+    {
+        *choices = Value::Array(first_stage(items, fields));
+    }
+    let mut offered = actual.clone();
+    if let Some(choices) = offered.get_mut("choices")
+        && let Some(items) = choices.as_array()
+    {
+        *choices = Value::Array(first_stage(items, None));
+    }
+    awaiting(view, &expected, Some(&offered))
 }
 
 /// Whether `needle` occurs anywhere in `haystack`, as a value or as a map key.
