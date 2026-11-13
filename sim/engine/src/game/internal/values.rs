@@ -680,7 +680,8 @@ impl Execution {
         )
     }
 
-    /// A chosen follower's current stat; one that left the field or changed generation adds 0.
+    /// A chosen follower's current stat; one that left its field or EX generation adds 0.
+    /// In EX it reads the stat the object currently keeps there, as search candidates do.
     fn selected_live_sum(
         &self,
         game: &Game,
@@ -691,10 +692,25 @@ impl Execution {
             self.objects(game, objects)?.into_iter().map(|object| {
                 let id = self.object_id(object)?;
                 let current = game.object(id)?;
-                if current.generation != object.generation.0 || current.zone != "field" {
+                if current.generation != object.generation.0
+                    || !game.object_type(id)?.contains("フォロワー")
+                {
                     return Ok(0);
                 }
-                super::aggregates::numeric_value(game, id, property)
+                if current.zone == "field" {
+                    return super::aggregates::numeric_value(game, id, property);
+                }
+                if current.zone != "ex" {
+                    return Ok(0);
+                }
+                let field = if property == NumericProperty::Attack {
+                    "power"
+                } else {
+                    "hp"
+                };
+                current.state[field]
+                    .as_i64()
+                    .ok_or_else(|| invalid("public follower stat"))
             }),
             "numeric aggregate overflow",
         )

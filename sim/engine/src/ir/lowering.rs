@@ -1427,6 +1427,8 @@ struct BodyContext<'definitions> {
     follower_targets: BTreeSet<String>,
     target_roles: BTreeMap<(String, String), Binding<Selector>>,
     ability_holders: BTreeSet<String>,
+    /// Formal targets naming at most one field or EX object, whose stats a body may read.
+    single_targets: BTreeSet<String>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     parameters: Vec<super::Decision>,
     resolution_scope: ScopeId,
@@ -1506,6 +1508,7 @@ impl<'definitions> BodyContext<'definitions> {
             follower_targets: BTreeSet::new(),
             target_roles: BTreeMap::new(),
             ability_holders: BTreeSet::new(),
+            single_targets: BTreeSet::new(),
             recipient_targets: BTreeMap::new(),
             parameters: vec![],
             resolution_scope: scope,

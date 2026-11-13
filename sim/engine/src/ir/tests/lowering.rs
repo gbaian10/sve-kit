@@ -1861,7 +1861,7 @@ fn trait_unions_filter_public_targets_and_reject_single_traits_counts_and_leader
 }
 
 #[test]
-fn live_attack_reads_only_a_single_chosen_own_follower() {
+fn live_attack_reads_a_single_chosen_public_object() {
     let lowerer = lowerer();
     let costs = BTreeMap::from([("SD03-005".to_owned(), Nat(1))]);
     let spell = |reader: &str| {
@@ -1904,9 +1904,10 @@ fn live_attack_reads_only_a_single_chosen_own_follower() {
             IntOperation::Sum { objects: Selector::Bound { .. }, property: NumericProperty::Attack })),
         "the amount reads the chosen follower when the damage resolves"
     );
+    // 「後者の攻撃力」 may name any single public target, not only an own follower.
     lowerer
         .lower_with_printed_costs(&spell("enemy"), &costs)
-        .unwrap_err();
+        .unwrap();
     // A body choose of exactly one own field follower is the same public single object.
     let mut chosen = expanded::spell_tree().clone();
     *chosen

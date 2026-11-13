@@ -923,8 +923,8 @@ impl BodyContext<'_> {
                     super::super::NumericProperty::Attack,
                     path,
                 ),
-                // 「前者の攻撃力」: the chosen own follower's attack when read, after earlier buffs.
-                ast::Observation::Binding(name) if self.ability_holders.contains(name) => {
+                // 「前者の攻撃力」: the chosen object's attack when read, after earlier buffs.
+                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
                     let reference = self
                         .targets
                         .get(name)

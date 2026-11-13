@@ -206,6 +206,16 @@ impl BodyContext<'_> {
         query: &ast::TargetQuery,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        self.narrowed_target_selector(query, None, path)
+    }
+
+    /// A formal target group adds its conditions to the query's own, never replacing them.
+    fn narrowed_target_selector(
+        &mut self,
+        query: &ast::TargetQuery,
+        group: Option<&ast::FormalTargetGroup>,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
         let zones = query
             .zone
             .as_ref()
@@ -256,10 +266,31 @@ impl BodyContext<'_> {
                         query.orig_cost_le.as_ref(),
                         path,
                     )?;
-                    if query.not_same_name_as_this {
+                    let predicate = if query.not_same_name_as_this {
                         super::search::exclude_holder_name(predicate, candidate)
                     } else {
                         predicate
+                    };
+                    match group {
+                        Some(group) => Expr::Compute(Box::new(Predicate::And {
+                            predicates: vec![
+                                predicate,
+                                super::selection::field_filter(
+                                    &super::selection::ObjectFilter {
+                                        trait_id: group.r#trait.as_deref(),
+                                        not_class: group.not_class.as_deref(),
+                                        original_cost: [
+                                            group.orig_cost_eq,
+                                            group.orig_cost_le,
+                                            None,
+                                        ],
+                                        ..super::selection::ObjectFilter::default()
+                                    },
+                                    candidate,
+                                ),
+                            ],
+                        })),
+                        None => predicate,
                     }
                 }),
             });
@@ -288,6 +319,7 @@ impl BodyContext<'_> {
             return self.grouped_target_choice(target, path, resolution);
         }
         let dynamic_count = check_choice_shape(target, resolution, path)?;
+        self.check_union_branches(target, resolution, path)?;
         if target.from.observation.is_some() {
             if target
                 .from
@@ -353,8 +385,7 @@ impl BodyContext<'_> {
         }
         self.remember_evolution_target(target, cardinality, resolution);
         self.remember_transfer_target(target, cardinality, dynamic_count, resolution);
-        let selector = self.public_target_selector(&target.from, path)?;
-        let selector = self.target_extremum(&target.from, selector, path)?;
+        let selector = self.target_choice_selector(target, path)?;
         Ok((
             ChoiceDomain::Objects {
                 constraint: SelectionConstraint {
@@ -376,6 +407,66 @@ impl BodyContext<'_> {
             },
             cardinality,
         ))
+    }
+
+    /// Each 「AかB」 branch must stand alone as an ordinary public target query.
+    fn check_union_branches(
+        &self,
+        target: &ast::Target,
+        resolution: bool,
+        path: &str,
+    ) -> Result<(), LoweringError> {
+        for branch in target.any_of.iter().flatten() {
+            if branch.observation.is_some()
+                || branch.leader.is_some()
+                || branch.leaders.is_some()
+                || branch.leader_or
+            {
+                return Err(unsupported(path));
+            }
+            let mut alone = target.clone();
+            alone.from = branch.clone();
+            alone.any_of = None;
+            check_choice_shape(&alone, resolution, path)?;
+            self.check_cemetery_target(&alone, path)?;
+        }
+        Ok(())
+    }
+
+    fn target_choice_selector(
+        &mut self,
+        target: &ast::Target,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        self.branches_selector(
+            target
+                .any_of
+                .as_deref()
+                .unwrap_or_else(|| slice::from_ref(&target.from)),
+            None,
+            path,
+        )
+    }
+
+    /// One complete public target query per branch; several branches form one candidate set.
+    fn branches_selector(
+        &mut self,
+        branches: &[ast::TargetQuery],
+        group: Option<&ast::FormalTargetGroup>,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let mut sets = branches
+            .iter()
+            .map(|branch| {
+                let selector = self.narrowed_target_selector(branch, group, path)?;
+                self.target_extremum(branch, selector, path)
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(if sets.len() == 1 {
+            sets.remove(0)
+        } else {
+            Selector::Union { sets }
+        })
     }
 
     fn grouped_target_choice(
@@ -411,27 +502,21 @@ impl BodyContext<'_> {
         let mut plain = target.clone();
         plain.groups = None;
         let (mut domain, _) = self.object_choice(&plain, path, false)?;
+        let branches = target
+            .any_of
+            .as_deref()
+            .unwrap_or_else(|| slice::from_ref(&target.from));
         let mut lowered = Groups::new(TotalBounds::Explicit(cardinality));
         for group in groups {
-            if group.orig_cost_eq.is_some() == group.orig_cost_le.is_some()
-                || target.from.orig_cost_eq.is_some()
-                || target.from.orig_cost_le.is_some()
-                || target.from.r#trait.is_some()
-                || target.from.not_class.is_some()
-            {
+            if group.orig_cost_eq.is_some() == group.orig_cost_le.is_some() {
                 return Err(unsupported(path));
             }
-            let mut query = target.from.clone();
-            query.orig_cost_eq = group.orig_cost_eq;
-            query.orig_cost_le = group.orig_cost_le.map(ast::NumericArgument::Literal);
-            query.r#trait.clone_from(&group.r#trait);
-            query.not_class.clone_from(&group.not_class);
             lowered.push(
                 Cardinality {
                     minimum: Nat(u64::from(required)),
                     maximum: Some(Nat(1)),
                 },
-                || self.public_target_selector(&query, path),
+                || self.branches_selector(branches, Some(group), path),
                 path,
             )?;
         }
@@ -503,6 +588,27 @@ impl BodyContext<'_> {
         }
         if ability_holder_target(target, cardinality) {
             self.ability_holders.insert(target.bind.clone());
+        }
+        let public = |query: &ast::TargetQuery| {
+            query
+                .zone
+                .as_ref()
+                .and_then(target_zones)
+                .is_some_and(|zones| {
+                    zones
+                        .iter()
+                        .all(|zone| matches!(zone, ZoneKind::Field | ZoneKind::Ex))
+                })
+        };
+        if cardinality.maximum == Some(Nat(1))
+            && target
+                .any_of
+                .as_deref()
+                .unwrap_or_else(|| slice::from_ref(&target.from))
+                .iter()
+                .all(public)
+        {
+            self.single_targets.insert(target.bind.clone());
         }
         match &target.from.zone {
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Cemetery))
@@ -1157,6 +1263,7 @@ impl BodyContext<'_> {
                 follower_targets: BTreeSet::new(),
                 target_roles: BTreeMap::new(),
                 ability_holders: BTreeSet::new(),
+                single_targets: BTreeSet::new(),
                 recipient_targets: BTreeMap::new(),
                 parameters: vec![],
                 resolution_scope: self.resolution_scope,
@@ -1200,6 +1307,7 @@ impl BodyContext<'_> {
                 context.follower_targets.clone_from(&self.follower_targets);
                 context.target_roles.clone_from(&self.target_roles);
                 context.ability_holders.clone_from(&self.ability_holders);
+                context.single_targets.clone_from(&self.single_targets);
                 context
                     .recipient_targets
                     .clone_from(&self.recipient_targets);
