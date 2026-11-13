@@ -80,7 +80,7 @@ fn cp03_007_destroys_a_target_and_uses_its_actual_destroy_count() {
 }
 
 #[test]
-fn cp03_028_named_grave_condition_draws_discards_and_prevents_damage() {
+fn cp03_028_named_grave_condition_draws_then_discards() {
     let mut initial = position("CP03-028");
     initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"blaster","card":"CSD03a-003"}]);
     let mut game = game(&initial);
@@ -127,6 +127,71 @@ fn cp03_012_ride_buffs_then_reveals_its_printed_look_choice() {
     assert_eq!(state["objects"]["source"]["hp"], 3_i32);
     assert_eq!(state["P1"]["hand"], json!(["top"]));
     assert_eq!(state["P1"]["leader"]["life"], 12_i32);
+}
+
+#[test]
+fn cp03_012_look_can_be_declined_and_an_unqualified_pick_does_not_heal() {
+    for (top, take) in [("CP03-011", false), ("BP01-037", true)] {
+        let mut initial = position("CP03-012");
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP03-012"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] =
+            json!([{"id":"point","card":"CSD03a-017"}]);
+        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":top},{"id":"middle","card":"BP01-037"},{"id":"tail","card":"BP01-037"}]);
+        let mut game = game(&initial);
+        let ability = game.internal_activated_sources("source").unwrap()[0].definition;
+        let activation = game
+            .activate_internal_card("source", ability, PlayerId { seat: 1 })
+            .unwrap();
+        finish(&mut game, activation);
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &pending.domain else {
+            panic!("drive trigger");
+        };
+        let CardPlay::Awaiting(choice) = game
+            .answer_internal_card(
+                pending.actor,
+                pending.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap()
+        else {
+            panic!("optional private Look choice");
+        };
+        let InputDomain::Targets(domain) = &choice.domain else {
+            panic!("private Look choice");
+        };
+        assert_eq!(domain.members.len(), 1);
+        let answer = if take {
+            vec![domain.members[0].handle]
+        } else {
+            vec![]
+        };
+        let resolution = game
+            .answer_internal_card(choice.actor, choice.token, Answer::Targets(answer))
+            .unwrap();
+        finish(&mut game, resolution);
+        settle(&mut game);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["objects"]["source"]["power"], 3_i32);
+        assert_eq!(state["objects"]["source"]["hp"], 3_i32);
+        assert_eq!(state["P1"]["leader"]["life"], 10_i32);
+        assert_eq!(
+            state["P1"]["hand"],
+            if take { json!(["top"]) } else { json!([]) }
+        );
+        assert_eq!(
+            state["P1"]["deck"],
+            if take {
+                json!(["middle", "tail"])
+            } else {
+                json!(["top", "middle", "tail"])
+            }
+        );
+    }
 }
 
 #[test]

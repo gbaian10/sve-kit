@@ -29,16 +29,6 @@ cards:
             - reveal:
                 bind: shown
                 ref: picked
-            - move:
-                order: chooser
-                position: bottom
-                ref:
-                  except:
-                    in:
-                      objects_of: taken
-                      view: before
-                  in: seen
-                to: deck
             - if:
                 cond:
                   cmp:

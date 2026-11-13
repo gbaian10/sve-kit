@@ -42,7 +42,7 @@ fn cp03_072_stand_trigger_preserves_its_independent_leader_lock_and_both_pending
         &initial,
         &facts,
         &Value::Null,
-        "striken-fragment",
+        "current-runtime",
     )
     .unwrap();
     for target in ["P2.leader", "enemy"] {
