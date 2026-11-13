@@ -1,16 +1,33 @@
-//! A selected opponent follower changes controller without leaving the field.
+//! Selected followers change controller without leaving the field.
 use super::{Execution, Game, InstructionOutcome, Result, seat_name, unsupported};
-use crate::ir::{Action, Instruction, ObjectOperand, PlayerRef, Selector};
+use crate::ir::perspective::readable;
+use crate::ir::{Action, Instruction, ObjectOperand, PlayerRef, PlayerRelation, Selector};
+
+/// The recipient is the effect controller, a procedure's player, or the one opponent of either.
+fn recipient(player: &PlayerRef) -> bool {
+    match player {
+        PlayerRef::Controller {} | PlayerRef::Bound { .. } => true,
+        PlayerRef::RequireOne { players } => {
+            players.relation == PlayerRelation::Opponents && readable(&players.relative_to)
+        }
+        PlayerRef::FromExpression { .. }
+        | PlayerRef::Owner {}
+        | PlayerRef::Active {}
+        | PlayerRef::ProposedDamageRecipient {}
+        | PlayerRef::ProposedDamageController {} => false,
+    }
+}
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     if let Action::Transfer {
         objects,
         destination_controller,
     } = action
-        && (!matches!(objects, Selector::Objects { objects } if matches!(objects.as_slice(), [ObjectOperand::Selected { .. }]))
-            || *destination_controller != (PlayerRef::Controller {}))
+        && (!(matches!(objects, Selector::Objects { objects } if matches!(objects.as_slice(), [ObjectOperand::Selected { .. }]))
+            || matches!(objects, Selector::Bound { .. }))
+            || !recipient(destination_controller))
     {
-        return Err(unsupported("single selected follower steal"));
+        return Err(unsupported("selected follower transfer"));
     }
     Ok(())
 }
@@ -26,14 +43,17 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         check_action(&instruction.action)?;
-        let Action::Transfer { objects, .. } = &instruction.action else {
+        let Action::Transfer {
+            objects,
+            destination_controller,
+        } = &instruction.action
+        else {
             return Err(unsupported("transfer instruction"));
         };
         let members = execution.objects(self, objects)?;
-        if members.len() > 1 {
-            return Err(unsupported("single follower steal"));
-        }
-        let controller = seat_name(execution.context.controller)?;
+        // The recipient and its free field slot are read when each object moves (Q1766).
+        let recipient = execution.player(self, destination_controller)?;
+        let controller = seat_name(recipient)?;
         let mut transferred = Vec::new();
         for member in members {
             let id = execution.object_id(member)?;

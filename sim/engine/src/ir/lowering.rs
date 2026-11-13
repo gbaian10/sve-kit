@@ -1428,6 +1428,8 @@ struct BodyContext<'definitions> {
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
     players: BTreeMap<String, Binding<PlayerRef>>,
+    /// The innermost enclosing procedure's player, from whose perspective `other_players` reads.
+    procedure_player: Option<Binding<PlayerRef>>,
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
     field_outputs: BTreeMap<String, FieldOutput>,
@@ -1509,6 +1511,7 @@ impl<'definitions> BodyContext<'definitions> {
             card_allocator,
             definitions: &body.define,
             players: BTreeMap::new(),
+            procedure_player: None,
             searches: BTreeSet::new(),
             ex_outputs: BTreeMap::new(),
             field_outputs: BTreeMap::new(),
@@ -2052,6 +2055,7 @@ impl<'definitions> BodyContext<'definitions> {
             }),
             ast::Step::FlipDown(value) => self.flip_down(value, path),
             ast::Step::Steal(value) => self.steal(value, path),
+            ast::Step::Give(value) => self.give(value, path),
             ast::Step::Banish(value) => self.banish(value, path),
             ast::Step::Transform(value) => self.transform(value, path),
             ast::Step::Act(value) | ast::Step::Stand(value) => Ok(Action::Posture {

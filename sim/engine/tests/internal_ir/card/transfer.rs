@@ -282,7 +282,7 @@ fn transfer_departure_uses_original_owner_and_lastword_uses_the_thief() {
     assert_eq!(after["P2"]["leader"]["life"], 10_u8);
 }
 #[test]
-fn transfer_lowering_and_admission_keep_give_multi_target_and_other_destinations_closed() {
+fn transfer_lowering_and_admission_keep_multi_target_and_other_destinations_closed() {
     for (key, value) in [
         ("who", json!("self")),
         ("zone", json!("cemetery")),
