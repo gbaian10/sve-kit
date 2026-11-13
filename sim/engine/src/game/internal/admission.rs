@@ -27,7 +27,7 @@ use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
 use crate::ir::hand_position;
-use crate::ir::observation_selection::{private_hand_choice, private_look_choice};
+use crate::ir::observation_selection::{private_hand_choice, private_look_choice, revealed_choice};
 use crate::ir::player_stages;
 use crate::ir::{
     AbilityOrigin, AbilitySource, Binding, CostSpec, Decision, EnterFieldEvent, KeywordId,
@@ -756,7 +756,9 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             }
         );
     let stack_rule = printed_keywords::is_stack_increase_choice(decision);
-    let private_look = private_look_choice(decision) || private_hand_choice(decision);
+    // A public reveal choice may also be declined, like a choice among looked cards.
+    let private_look =
+        private_look_choice(decision) || private_hand_choice(decision) || revealed_choice(decision);
     if !matches!(
         decision.domain,
         ChoiceDomain::Integer {
@@ -948,6 +950,7 @@ fn supported(code: &str) -> bool {
             | "shape.Selector.ReceiptMembers"
             | "read.receipt.members"
             | "shape.ObjectReceipt.Look"
+            | "shape.ObjectReceipt.Reveal"
             | "shape.ObjectReceipt.Flip"
             | "shape.ObjectReceipt.Movement"
             | "shape.ObjectReceipt.Fusion"

@@ -8,7 +8,7 @@ use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::observation_selection::{
-    CardTotals, card_totals, held_by, private_hand_choice, private_look_choice,
+    CardTotals, card_totals, held_by, private_hand_choice, private_look_choice, revealed_choice,
 };
 use crate::ir::{
     Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
@@ -18,7 +18,7 @@ use crate::ir::{
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
-use crate::ir::{Bool, Expr, SelectionView, ZoneKind};
+use crate::ir::{Bool, Expr, MemberProjection, SelectionView, ZoneKind};
 use crate::ir::{Position, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
@@ -773,6 +773,18 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         return Ok(());
     }
+    if revealed_groups(constraint) {
+        if !super::super::alternatives::participant(&decision.actor) || !revealed_choice(decision) {
+            return Err(unsupported("revealed choice actor or bounds"));
+        }
+        for group in &constraint.groups {
+            let (binding, predicate) = revealed_filter(&group.selector)
+                .ok_or_else(|| unsupported("revealed group selector"))?;
+            // Like a looked card, a revealed one may be compared with the effect's source.
+            check_predicate(predicate, binding, true)?;
+        }
+        return Ok(());
+    }
     let private_look_groups = !constraint.groups.is_empty()
         && constraint
             .groups
@@ -912,6 +924,34 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
         }
         _ => Err(unsupported("public count selector")),
     }
+}
+
+fn revealed_groups(constraint: &SelectionConstraint) -> bool {
+    !constraint.groups.is_empty()
+        && constraint
+            .groups
+            .iter()
+            .all(|group| revealed_filter(&group.selector).is_some())
+}
+
+/// A choice among members of one public reveal, still in the zone where they were shown.
+fn revealed_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr<Bool>)> {
+    let Selector::Filter {
+        input,
+        binding,
+        predicate,
+    } = selector
+    else {
+        return None;
+    };
+    matches!(
+        input.as_ref(),
+        Selector::ReceiptMembers {
+            receipt: ObjectReceipt::Reveal { .. },
+            projection: MemberProjection::Before,
+        }
+    )
+    .then_some((*binding, predicate))
 }
 
 fn private_look_filter(selector: &Selector) -> Option<(Binding<ObjectRef>, &Expr<Bool>)> {
@@ -1118,6 +1158,7 @@ impl Game {
         let private_evolve = evolution || advance_entry::selection(decision).is_some();
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
+        let revealed = revealed_groups(constraint);
         let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
         let constraint = evaluated_counts(self, execution, constraint, decision)?;
         let group_members = self.target_group_members(execution, decision, &constraint)?;
@@ -1144,6 +1185,7 @@ impl Game {
                 let private_observation = observed_deck
                     && self.current_observed_deck(execution, *reference, actor_seat)?;
                 if !(private_observation
+                    || (revealed && object.zone == "hand" && self.publicly_located(id))
                     || (own_hand
                         && object.zone == "hand"
                         && object.owner == actor_seat
@@ -1686,7 +1728,8 @@ impl Execution {
         allow_resolution_zones: bool,
     ) -> Result<Vec<ObjectRef>> {
         let private_look = private_look_filter(selector).is_some();
-        let policy = if private_look {
+        let revealed = revealed_filter(selector).is_some();
+        let policy = if private_look || revealed {
             super::super::conditions::Policy::PrivateSelection
         } else {
             super::super::conditions::Policy::Selection
@@ -1696,7 +1739,7 @@ impl Execution {
             game,
             execution: self,
         };
-        let condition = plan.prepare(private_look.then_some(&operands))?;
+        let condition = plan.prepare((private_look || revealed).then_some(&operands))?;
         let mut filtered = Vec::new();
         for member in self.public_target_objects(game, input, allow_resolution_zones)? {
             if private_look
@@ -1718,12 +1761,11 @@ impl Execution {
             {
                 continue;
             }
-            if !private_look
-                && !matches!(
-                    game.object(self.object_id(member)?)?.zone.as_str(),
-                    "field" | "ex" | "cemetery"
-                )
-            {
+            let id = self.object_id(member)?;
+            let zone = game.object(id)?.zone.as_str();
+            let public = matches!(zone, "field" | "ex" | "cemetery")
+                || (revealed && zone == "hand" && game.publicly_located(id));
+            if !private_look && !public {
                 return Err(unsupported("selected condition requires public objects"));
             }
             if matches_candidate(game, self.object_id(member)?, &condition)? {

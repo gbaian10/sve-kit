@@ -460,3 +460,379 @@ fn a_public_choice_is_answered_by_the_selection_time_controller() {
         );
     }
 }
+
+/// BP01-111's shape: the opponent reveals their hand, the controller picks, the holder discards.
+fn revealed_discard() -> Value {
+    tree(
+        "unit-follower",
+        &json!({"fanfare":{"do":[
+            {"damage":{"n":2,"to":{"leader":"self"}}},
+            {"reveal":{"bind":"shown","ref":{"who":"opp","zone":"hand"}}},
+            {"choose":{"bind":"picked","from":{"in":"shown"},"n":1}},
+            {"discard":{"ref":"picked","who":"opp"}}
+        ]}}),
+    )
+}
+
+#[test]
+fn a_chosen_card_is_discarded_only_by_reference() {
+    let discard = |value: Value| {
+        tree(
+            "unit-follower",
+            &json!({"fanfare":{"do":[
+                {"reveal":{"bind":"shown","ref":{"who":"opp","zone":"hand"}}},
+                {"choose":{"bind":"picked","from":{"in":"shown"},"n":1}},
+                {"discard":value}
+            ]}}),
+        )
+    };
+    lowerer()
+        .lower(&discard(json!({"ref":"picked","who":"opp"})))
+        .unwrap();
+    assert_eq!(
+        lowerer()
+            .lower(&discard(json!({"ref":"missing","who":"opp"})))
+            .unwrap_err()
+            .code,
+        "unsupported_construct",
+        "an unbound reference names no card"
+    );
+    lowerer()
+        .lower(&discard(json!({"ref":"picked","who":"opp","n":1})))
+        .unwrap_err();
+}
+
+#[test]
+fn the_controller_picks_from_a_revealed_hand_and_its_holder_discards_it() {
+    let programs = lowerer().lower(&revealed_discard()).unwrap();
+    for seat in [1_u32, 2] {
+        let (me, them) = (seat_name(seat), seat_name(other(seat)));
+        for picked in ["h1", "h2"] {
+            let mut game = position(
+                &programs,
+                seat,
+                &json!([{"id":"h1","card":"unit-follower"},{"id":"h2","card":"unit-spell"}]),
+            );
+            game.play_internal_card("s", PlayerId { seat }).unwrap();
+            let choice = awaiting(pending(&mut game));
+            assert_eq!(
+                choice.actor,
+                PlayerId { seat },
+                "the effect controller picks"
+            );
+            let InputDomain::Targets(domain) = &choice.domain else {
+                panic!("revealed candidates");
+            };
+            let card = if picked == "h1" {
+                "unit-follower"
+            } else {
+                "unit-spell"
+            };
+            let handle = domain
+                .members
+                .iter()
+                .find(|member| member.card.as_deref() == Some(card))
+                .unwrap()
+                .handle;
+            assert_eq!(
+                domain.members.len(),
+                2,
+                "every revealed card, spells included"
+            );
+            let before = exact_authority(&game);
+            game.answer_internal_card(
+                PlayerId { seat: other(seat) },
+                choice.token,
+                Answer::Targets(vec![handle]),
+            )
+            .unwrap_err();
+            assert_eq!(exact_authority(&game), before, "the holder cannot pick");
+            resolved(
+                game.answer_internal_card(
+                    choice.actor,
+                    choice.token,
+                    Answer::Targets(vec![handle]),
+                )
+                .unwrap(),
+            );
+            let state = game.projection(View::Referee).unwrap();
+            let kept = if picked == "h1" { "h2" } else { "h1" };
+            assert_eq!(state[them]["cemetery"], json!([picked]), "seat={seat}");
+            assert_eq!(state[them]["hand"], json!([kept]), "seat={seat}");
+            assert_eq!(state[me]["leader"]["life"], 18);
+        }
+    }
+}
+
+#[test]
+fn an_empty_revealed_hand_still_lets_the_rest_resolve() {
+    // Q340: the self damage happens even when the opponent has no hand.
+    let programs = lowerer().lower(&revealed_discard()).unwrap();
+    let mut game = position(&programs, 1, &json!([]));
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    let pending_play = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending_play.domain else {
+        panic!("one pending occurrence");
+    };
+    let played = game
+        .answer_internal_card(
+            pending_play.actor,
+            pending_play.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap();
+    let empty = awaiting(played);
+    assert!(
+        targets(&empty).is_empty(),
+        "no card can be picked from an empty hand"
+    );
+    resolved(
+        game.answer_internal_card(empty.actor, empty.token, Answer::Targets(vec![]))
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["leader"]["life"], 18);
+    assert_eq!(state["P2"]["cemetery"], json!([]));
+}
+
+/// Plays `s` for P1 against `hand` held by P2, resolving the fanfare up to its first question.
+fn reveal_position(steps: &Value, hand: &Value, deck: &Value) -> (Game, DecisionView) {
+    let programs = lowerer()
+        .lower(&tree("unit-follower", &json!({"fanfare":{"do":steps}})))
+        .unwrap();
+    let mut initial = setup(1, deck.clone());
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["pp"] = json!({"current":5,"max":5});
+    initial["players"]["P2"]["zones"]["hand"] = hand.clone();
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "reveal").unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    for number in ["unit-spell", "unit-amulet"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    let question = awaiting(pending(&mut game));
+    (game, question)
+}
+
+fn handle_of(question: &DecisionView, card: &str) -> u64 {
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("a target question");
+    };
+    domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some(card))
+        .unwrap()
+        .handle
+}
+
+fn cards_of(question: &DecisionView) -> Vec<String> {
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("a target question");
+    };
+    domain
+        .members
+        .iter()
+        .map(|member| member.card.clone().unwrap())
+        .collect()
+}
+
+const SHOWN: &str = r#"{"reveal":{"bind":"shown","ref":{"who":"opp","zone":"hand"}}}"#;
+
+#[test]
+fn the_revealed_hands_holder_may_be_the_chooser() {
+    let steps = json!([
+        serde_json::from_str::<Value>(SHOWN).unwrap(),
+        {"choose":{"bind":"picked","from":{"in":"shown"},"n":1,"by":"opp"}},
+        {"discard":{"ref":"picked","who":"opp"}}
+    ]);
+    let (mut game, choice) = reveal_position(
+        &steps,
+        &json!([{"id":"h1","card":"unit-follower"},{"id":"h2","card":"unit-spell"}]),
+        &json!([]),
+    );
+    assert_eq!(choice.actor, PlayerId { seat: 2 }, "the holder chooses");
+    let spell = handle_of(&choice, "unit-spell");
+    let before = exact_authority(&game);
+    game.answer_internal_card(
+        PlayerId { seat: 1 },
+        choice.token,
+        Answer::Targets(vec![spell]),
+    )
+    .unwrap_err();
+    assert_eq!(
+        exact_authority(&game),
+        before,
+        "the effect controller cannot answer"
+    );
+    resolved(
+        game.answer_internal_card(choice.actor, choice.token, Answer::Targets(vec![spell]))
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["cemetery"], json!(["h2"]));
+    assert_eq!(state["P2"]["hand"], json!(["h1"]));
+}
+
+#[test]
+fn a_revealed_choice_excludes_the_sources_name_even_after_it_left() {
+    for departed in [false, true] {
+        let mut steps = vec![];
+        if departed {
+            steps.push(json!({"destroy":"this"}));
+        }
+        steps.push(serde_json::from_str::<Value>(SHOWN).unwrap());
+        steps.push(json!({"choose":{"bind":"picked","from":{"in":"shown","not_same_name_as_this":true},"n":1}}));
+        steps.push(json!({"discard":{"ref":"picked","who":"opp"}}));
+        let (mut game, choice) = reveal_position(
+            &Value::Array(steps),
+            &json!([{"id":"h1","card":"unit-follower"},{"id":"h2","card":"unit-spell"}]),
+            &json!([]),
+        );
+        assert_eq!(cards_of(&choice), ["unit-spell"], "departed={departed}");
+        resolved(
+            game.answer_internal_card(
+                choice.actor,
+                choice.token,
+                Answer::Targets(vec![handle_of(&choice, "unit-spell")]),
+            )
+            .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P2"]["cemetery"],
+            json!(["h2"]),
+            "departed={departed}"
+        );
+    }
+}
+
+#[test]
+fn revealed_cards_may_be_picked_in_groups() {
+    let steps = json!([
+        serde_json::from_str::<Value>(SHOWN).unwrap(),
+        {"choose":{"bind":"picked","from":{"in":"shown"},
+            "groups":[{"kind":"follower"},{"kind":"spell"}],"upto":2,"may":true}},
+        {"discard":{"ref":"picked","who":"opp"}}
+    ]);
+    let hand = json!([
+        {"id":"h1","card":"unit-follower"},
+        {"id":"h2","card":"unit-spell"},
+        {"id":"h3","card":"unit-amulet"}
+    ]);
+    let (mut game, choice) = reveal_position(&steps, &hand, &json!([]));
+    assert_eq!(choice.actor, PlayerId { seat: 1 });
+    let mut offered = cards_of(&choice);
+    offered.sort();
+    assert_eq!(
+        offered,
+        ["unit-follower", "unit-spell"],
+        "an amulet fits no group"
+    );
+    let follower = handle_of(&choice, "unit-follower");
+    let spell = handle_of(&choice, "unit-spell");
+    resolved(
+        game.answer_internal_card(
+            choice.actor,
+            choice.token,
+            Answer::Targets(vec![follower, spell]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["cemetery"], json!(["h1", "h2"]));
+    assert_eq!(state["P2"]["hand"], json!(["h3"]));
+}
+
+#[test]
+fn only_cards_still_where_they_were_revealed_are_read_or_discarded() {
+    // A card drawn after the reveal is never a member.
+    let programs = lowerer()
+        .lower(&tree(
+            "unit-follower",
+            &json!({"fanfare":{"do":[
+                {"reveal":{"bind":"shown","ref":{"who":"self","zone":"hand"}}},
+                {"draw":{"n":1}},
+                {"choose":{"bind":"picked","from":{"in":"shown"},"n":1}},
+                {"discard":{"ref":"picked"}}
+            ]}}),
+        ))
+        .unwrap();
+    let mut initial = setup(1, json!([{"id":"d0","card":"unit-spell"}]));
+    initial["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"s","card":"unit-follower"},{"id":"k","card":"unit-amulet"}]);
+    initial["players"]["P1"]["pp"] = json!({"current":5,"max":5});
+    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "drawn").unwrap();
+    game.load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap();
+    for number in ["unit-spell", "unit-amulet"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    let choice = awaiting(pending(&mut game));
+    assert_eq!(
+        cards_of(&choice),
+        ["unit-amulet"],
+        "the drawn card was not revealed"
+    );
+    resolved(
+        game.answer_internal_card(
+            choice.actor,
+            choice.token,
+            Answer::Targets(targets(&choice)),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["k"]));
+    assert_eq!(state["P1"]["hand"], json!(["d0"]));
+    // A chosen set loses members discarded meanwhile and discards only the rest.
+    let (mut game, three) = reveal_position(
+        &json!([
+            serde_json::from_str::<Value>(SHOWN).unwrap(),
+            {"choose":{"bind":"three","from":{"in":"shown"},"n":3}},
+            {"choose":{"bind":"one","from":{"in":"shown"},"n":1}},
+            {"discard":{"ref":"one","who":"opp"}},
+            {"choose":{"bind":"rest","from":{"in":"shown"},"upto":3}},
+            {"discard":{"ref":"three","who":"opp"}}
+        ]),
+        &json!([
+            {"id":"h1","card":"unit-follower"},
+            {"id":"h2","card":"unit-spell"},
+            {"id":"h3","card":"unit-amulet"}
+        ]),
+        &json!([]),
+    );
+    let one = awaiting(
+        game.answer_internal_card(three.actor, three.token, Answer::Targets(targets(&three)))
+            .unwrap(),
+    );
+    let rest = awaiting(
+        game.answer_internal_card(
+            one.actor,
+            one.token,
+            Answer::Targets(vec![handle_of(&one, "unit-spell")]),
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        cards_of(&rest).len(),
+        2,
+        "the discarded card is no longer a revealed member"
+    );
+    resolved(
+        game.answer_internal_card(rest.actor, rest.token, Answer::Targets(vec![]))
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P2"]["cemetery"].as_array().unwrap().len(),
+        3,
+        "{state}"
+    );
+    assert_eq!(state["P2"]["hand"], json!([]));
+}

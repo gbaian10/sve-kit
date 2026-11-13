@@ -1,5 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
-use crate::ir::observation_selection::private_look_choice;
+use crate::ir::observation_selection::{private_look_choice, revealed_choice};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
 use crate::ir::{
@@ -99,7 +99,10 @@ impl Checker {
         else {
             return Err(self.error(WellFormedReason::DecisionTiming));
         };
-        if *may != Declinable::Required && !private_look_choice(decision) {
+        if *may != Declinable::Required
+            && !private_look_choice(decision)
+            && !revealed_choice(decision)
+        {
             return self.reject();
         }
         if let Some(guard) = precondition {
@@ -605,6 +608,8 @@ impl Checker {
             } => match receipt {
                 ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::RevealUntil { receipt, .. } => self.visible_receipt(receipt),
+                // Every player saw the publicly revealed members.
+                ObjectReceipt::Reveal { .. } => Ok(()),
                 ObjectReceipt::Token { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::Movement { receipt } if *projection == MemberProjection::Before => {
                     self.movement_before_visible(receipt)

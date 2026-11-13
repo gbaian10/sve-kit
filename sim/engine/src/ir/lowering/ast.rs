@@ -761,6 +761,9 @@ pub(super) struct ResourceIncrease {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Discard {
+    /// 「それを捨てる」: cards chosen earlier, discarded only while still in this player's hand.
+    #[serde(rename = "ref")]
+    pub reference: Option<String>,
     pub n: Option<u64>,
     pub all: Option<bool>,
     pub who: Option<LeaderSide>,

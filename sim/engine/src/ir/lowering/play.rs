@@ -702,7 +702,12 @@ impl BodyContext<'_> {
         let receipt = self
             .observations
             .get(observation)
-            .filter(|receipt| matches!(receipt, ObjectReceipt::Look { .. }))
+            .filter(|receipt| {
+                matches!(
+                    receipt,
+                    ObjectReceipt::Look { .. } | ObjectReceipt::Reveal { .. }
+                )
+            })
             .ok_or_else(|| unsupported(path))?
             .clone();
         let cardinality = match (

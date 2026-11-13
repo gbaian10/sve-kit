@@ -151,6 +151,16 @@ impl Game {
         Ok(())
     }
 
+    /// Every player still knows where this card is, as after a public reveal.
+    pub(super) fn publicly_located(&self, id: &str) -> bool {
+        ["P1", "P2"].iter().all(|viewer| {
+            self.state
+                .knowledge
+                .get(*viewer)
+                .is_some_and(|known| known.knows_location(id))
+        })
+    }
+
     pub(super) fn internal_record_reveal(
         &self,
         execution: &mut Execution,

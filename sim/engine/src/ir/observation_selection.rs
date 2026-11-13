@@ -28,14 +28,15 @@ pub(crate) const fn card_totals(bounds: &[AggregateBound]) -> CardTotals {
     }
 }
 
-pub(crate) fn private_look_choice(decision: &Decision) -> bool {
+/// Bounds shared by every choice among observed members, whoever may see them.
+fn observed_constraint(decision: &Decision) -> Option<&SelectionConstraint> {
     let ChoiceDomain::Objects {
         constraint,
         target_roles: None,
         ..
     } = &decision.domain
     else {
-        return false;
+        return None;
     };
     let DecisionKind::ResolutionChoice {
         may,
@@ -43,28 +44,49 @@ pub(crate) fn private_look_choice(decision: &Decision) -> bool {
         precondition: None,
     } = decision.kind
     else {
-        return false;
+        return None;
     };
-    cardinality == constraint.cardinality
-        && cardinality.maximum.is_some_and(|max| max.0 > 0 && cardinality.minimum.0 <= max.0)
+    (cardinality == constraint.cardinality
+        && cardinality
+            .maximum
+            .is_some_and(|max| max.0 > 0 && cardinality.minimum.0 <= max.0)
         && (may == Declinable::Required || cardinality.minimum == Nat(0))
         && group_bounds(constraint, may)
-        && constraint.groups.iter().all(|group| matches!(&group.selector,
-            Selector::Filter { input, .. } if observation::classify(input, Consumer::Choice, Position::Input).is_some()
-        ))
-        && decision.actor == (PlayerRef::Controller {})
-        && matches!(&decision.visibility, Visibility::Only { players }
-            if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
         && match constraint.distinct_by {
             None => true,
-            Some(ObjectProperty::Names) => constraint.groups.len() == 1 && constraint.aggregate_bounds.is_empty(),
+            Some(ObjectProperty::Names) => {
+                constraint.groups.len() == 1 && constraint.aggregate_bounds.is_empty()
+            }
             _ => false,
         }
         && !matches!(
             card_totals(&constraint.aggregate_bounds),
             CardTotals::Unsupported
         )
-        && constraint.disjoint == Disjointness::Disjoint
+        && constraint.disjoint == Disjointness::Disjoint)
+        .then_some(constraint)
+}
+
+pub(crate) fn private_look_choice(decision: &Decision) -> bool {
+    observed_constraint(decision).is_some_and(|constraint| {
+        constraint.groups.iter().all(|group| matches!(&group.selector,
+            Selector::Filter { input, .. } if observation::classify(input, Consumer::Choice, Position::Input).is_some()
+        ))
+    }) && decision.actor == (PlayerRef::Controller {})
+        && matches!(&decision.visibility, Visibility::Only { players }
+            if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
+}
+
+/// Members of one public reveal: the observed choice bounds, shown to every player.
+pub(crate) fn revealed_choice(decision: &Decision) -> bool {
+    observed_constraint(decision).is_some_and(|constraint| {
+        constraint.groups.iter().all(|group| matches!(&group.selector,
+            Selector::Filter { input, .. } if matches!(input.as_ref(), Selector::ReceiptMembers {
+                receipt: super::ObjectReceipt::Reveal { .. },
+                projection: super::MemberProjection::Before,
+            })
+        ))
+    }) && decision.visibility == (Visibility::Public {})
 }
 
 fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {

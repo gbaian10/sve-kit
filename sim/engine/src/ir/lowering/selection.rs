@@ -129,7 +129,7 @@ impl BodyContext<'_> {
             if union.is_some() {
                 return Err(unsupported(path));
             }
-            return self.grouped_observed_choose(choice, from, groups, path, source);
+            return self.grouped_observed_choose(choice, from, groups, actor, path, source);
         }
         // Exact zero needs the distinct ForcedZeroUnits instruction-start contract.
         if choice.n == Some(0) || choice.reveal == Some(true) || choice.order == Some(true) {
@@ -174,21 +174,7 @@ impl BodyContext<'_> {
                 .holders
                 .insert(binding.key(), actor.clone());
         }
-        let visibility = if target.from.observation.is_some() || hand {
-            Visibility::Only {
-                players: super::super::PlayerSet {
-                    relation: super::super::PlayerRelation::SelfPlayer,
-                    relative_to: actor.clone(),
-                    cardinality: super::super::Cardinality {
-                        minimum: super::super::Nat(1),
-                        maximum: Some(super::super::Nat(1)),
-                    },
-                    text_quantifier: super::super::TextQuantifier::Implicit,
-                },
-            }
-        } else {
-            Visibility::Public {}
-        };
+        let visibility = self.choice_visibility(target.from.observation.as_deref(), hand, &actor);
         let mut located = source.clone();
         path.clone_into(&mut located.author_path);
         Ok(Located {
@@ -214,8 +200,39 @@ impl BodyContext<'_> {
         })
     }
 
+    /// Hands and looked cards are shown only to the chooser; a public reveal is shown to all.
+    fn choice_visibility(
+        &self,
+        observation: Option<&str>,
+        hand: bool,
+        actor: &PlayerRef,
+    ) -> Visibility {
+        let revealed = observation.is_some_and(|name| {
+            matches!(
+                self.observations.get(name),
+                Some(super::super::ObjectReceipt::Reveal { .. })
+            )
+        });
+        if (observation.is_some() && !revealed) || hand {
+            Visibility::Only {
+                players: super::super::PlayerSet {
+                    relation: super::super::PlayerRelation::SelfPlayer,
+                    relative_to: actor.clone(),
+                    cardinality: super::super::Cardinality {
+                        minimum: super::super::Nat(1),
+                        maximum: Some(super::super::Nat(1)),
+                    },
+                    text_quantifier: super::super::TextQuantifier::Implicit,
+                },
+            }
+        } else {
+            Visibility::Public {}
+        }
+    }
+
     /// A private source is shown only to its holder: another player may choose from its own
-    /// hand, while looked cards stay with the controller who looked.
+    /// hand, while looked cards stay with the controller who looked. Publicly revealed cards
+    /// may be chosen by any participant.
     fn chooser(
         &mut self,
         choice: &ast::Choose,
@@ -224,6 +241,12 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<PlayerRef, LoweringError> {
         let actor = self.participant(choice.by.as_ref(), path)?;
+        let revealed = from.observation.as_ref().is_some_and(|name| {
+            matches!(
+                self.observations.get(name),
+                Some(super::super::ObjectReceipt::Reveal { .. })
+            )
+        });
         let own_hand = hand
             && matches!(
                 (&choice.by, &from.who),
@@ -232,7 +255,9 @@ impl BodyContext<'_> {
                     Some(ast::Side::Opponent)
                 )
             );
-        if (from.observation.is_some() || hand) && actor != (PlayerRef::Controller {}) && !own_hand
+        if ((from.observation.is_some() && !revealed) || hand)
+            && actor != (PlayerRef::Controller {})
+            && !own_hand
         {
             return Err(unsupported(path));
         }
@@ -299,6 +324,7 @@ impl BodyContext<'_> {
         choice: &ast::Choose,
         from: &ast::TargetQuery,
         groups: &[ast::ChooseGroup],
+        actor: PlayerRef,
         path: &str,
         source: &SourceSpan,
     ) -> Result<Located<Node>, LoweringError> {
@@ -346,13 +372,20 @@ impl BodyContext<'_> {
         let receipt = self
             .observations
             .get(observation)
-            .filter(|receipt| matches!(receipt, super::super::ObjectReceipt::Look { .. }))
+            .filter(|receipt| {
+                matches!(
+                    receipt,
+                    super::super::ObjectReceipt::Look { .. }
+                        | super::super::ObjectReceipt::Reveal { .. }
+                )
+            })
             .ok_or_else(|| unsupported(path))?
             .clone();
         let cardinality = super::super::Cardinality {
             minimum: super::super::Nat(0),
             maximum: Some(super::super::Nat(group_count)),
         };
+        let visibility = self.choice_visibility(Some(observation), false, &actor);
         let constraint = self.observed_groups(
             groups,
             &receipt,
@@ -364,7 +397,7 @@ impl BodyContext<'_> {
         if self.targets.insert(choice.bind.clone(), binding).is_some() {
             return Err(unsupported(path));
         }
-        // Grouped picks are still private Look members, like a single observed choice.
+        // Grouped picks stay members of their observation, like a single observed choice.
         self.observed_targets.insert(choice.bind.clone());
         self.field_entry.multi.insert(choice.bind.clone());
         let domain = super::super::ChoiceDomain::Objects {
@@ -380,24 +413,14 @@ impl BodyContext<'_> {
                 decision: Decision {
                     id: DecisionId(self.card_allocator.id(path)?),
                     captures: vec![],
-                    actor: PlayerRef::Controller {},
+                    actor,
                     domain,
                     kind: DecisionKind::ResolutionChoice {
                         may: Declinable::MayDecline,
                         cardinality,
                         precondition: None,
                     },
-                    visibility: Visibility::Only {
-                        players: super::super::PlayerSet {
-                            relation: super::super::PlayerRelation::SelfPlayer,
-                            relative_to: PlayerRef::Controller {},
-                            cardinality: super::super::Cardinality {
-                                minimum: super::super::Nat(1),
-                                maximum: Some(super::super::Nat(1)),
-                            },
-                            text_quantifier: super::super::TextQuantifier::Implicit,
-                        },
-                    },
+                    visibility,
                 },
             },
         })
