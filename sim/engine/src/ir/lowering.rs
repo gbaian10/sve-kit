@@ -1780,6 +1780,12 @@ impl<'definitions> BodyContext<'definitions> {
                 )?);
                 continue;
             }
+            if let ast::Step::Move(movement) = step
+                && matches!(movement.position, Some(ast::Placement::OneOf { .. }))
+            {
+                steps.extend(self.deck_edges(movement, &step_path, source, ability_source)?);
+                continue;
+            }
             if let ast::Step::Choose(choice) = step
                 && matches!(choice.from, ast::ChooseFrom::Advance(_))
             {

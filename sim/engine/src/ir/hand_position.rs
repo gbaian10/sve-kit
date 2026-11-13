@@ -1,4 +1,5 @@
-//! One private card and its deck edge share the existing selection-role partition.
+//! Deck-edge placements share the existing selection-role partition: one private card and
+//! its edge, or every public candidate split between the deck top and bottom.
 use super::observation_selection::private_hand_choice;
 use super::{
     Action, Bool, Cardinality, ChoiceDomain, Control, Decision, Expr, InstructionContext,
@@ -57,9 +58,62 @@ pub(crate) fn choice(decision: &Decision) -> Option<&TargetRoleSpec> {
     private_hand_choice(&plain).then_some(spec)
 }
 
-fn positioned_move(node: &Node, binding: super::Binding<Selector>, position: Position) -> bool {
+/// A public partition of every candidate between the deck top (role 1) and bottom (role 2);
+/// each pile lists its cards nearest the top first, so the player also orders them (Q156).
+pub(crate) fn edges(decision: &Decision) -> Option<&TargetRoleSpec> {
+    if !decision.captures.is_empty() || private_hand_choice(decision) {
+        return None;
+    }
+    let ChoiceDomain::Objects {
+        constraint,
+        binding,
+        target_roles: Some(spec),
+    } = &decision.domain
+    else {
+        return None;
+    };
+    let any = Cardinality {
+        minimum: Nat(0),
+        maximum: None,
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return None;
+    };
+    let [top, bottom] = spec.roles.as_slice() else {
+        return None;
+    };
+    let every = RoleCardinality::Fixed { cardinality: any };
+    (constraint.cardinality == any
+        && group.cardinality == any
+        && top.role == Nat(1)
+        && bottom.role == Nat(2)
+        && top.cardinality == every
+        && bottom.cardinality == every
+        && top.binding != bottom.binding
+        && top.binding != *binding
+        && bottom.binding != *binding)
+        .then_some(spec)
+}
+
+/// Whether `reference` is one of a deck-edge partition's piles, whose answer ordered it.
+/// The question's whole selection is not a pile.
+pub(crate) fn ordered_pile(decision: &Decision, reference: super::Binding<Selector>) -> bool {
+    edges(decision).is_some_and(|spec| spec.roles.iter().any(|role| role.binding == reference))
+}
+
+/// Roles that place their objects at a deck edge: a private card-and-edge pick or a partition.
+pub(crate) fn positioned(decision: &Decision) -> Option<&TargetRoleSpec> {
+    choice(decision).or_else(|| edges(decision))
+}
+
+fn positioned_move(
+    node: &Node,
+    binding: super::Binding<Selector>,
+    position: Position,
+    actor: &PlayerRef,
+) -> bool {
     matches!(node, Node::Instruction { instruction }
-        if instruction.actor == (PlayerRef::Controller {})
+        if instruction.actor == *actor
         && instruction.context == InstructionContext::Effect && instruction.precondition.is_none()
         && matches!(&instruction.action, Action::Move { objects: Selector::Bound { reference }, movement, reason: MoveReason::Put }
             if *reference == binding
@@ -74,7 +128,7 @@ pub(crate) fn valid(program: &Program) -> bool {
             && matches!(&decision.domain, ChoiceDomain::Objects { target_roles: Some(spec), .. }
                 if spec.roles.iter().any(|role| matches!(role.cardinality, RoleCardinality::Fixed { .. })))
         {
-            let Some(spec) = choice(decision) else {
+            let Some(spec) = positioned(decision) else {
                 return false;
             };
             let Some(top) = index
@@ -92,9 +146,22 @@ pub(crate) fn valid(program: &Program) -> bool {
             let [top_role, bottom_role] = spec.roles.as_slice() else {
                 return false;
             };
-            if !positioned_move(&top.node, top_role.binding, Position::Top {})
-                || !positioned_move(&bottom.node, bottom_role.binding, Position::Bottom {})
-            {
+            // A private card is put by the effect controller; a public partition is put by its
+            // chooser or by the effect controller that `move.by: self` names.
+            let actors = if choice(decision).is_some() {
+                vec![PlayerRef::Controller {}]
+            } else {
+                vec![decision.actor.clone(), PlayerRef::Controller {}]
+            };
+            if !actors.iter().any(|actor| {
+                positioned_move(&top.node, top_role.binding, Position::Top {}, actor)
+                    && positioned_move(
+                        &bottom.node,
+                        bottom_role.binding,
+                        Position::Bottom {},
+                        actor,
+                    )
+            }) {
                 return false;
             }
         }

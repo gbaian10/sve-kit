@@ -892,7 +892,8 @@ pub(super) struct Move {
     pub order: Option<MoveOrder>,
     pub result: Option<String>,
     #[serde(rename = "by")]
-    pub _by: Option<SelfPlayer>,
+    /// The performing player; a deck-edge placement's chooser is `position.by`.
+    pub by: Option<SelfPlayer>,
 }
 
 #[derive(Deserialize)]
@@ -943,9 +944,18 @@ pub(super) enum Destination {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Placement {
-    Chosen { chosen: String },
+    Chosen {
+        chosen: String,
+    },
     Edge(DeckEdge),
-    Nth { nth: u64 },
+    Nth {
+        nth: u64,
+    },
+    /// A player assigns each moved object one of these placements.
+    OneOf {
+        one_of: Vec<Self>,
+        by: Participant,
+    },
 }
 
 #[derive(Deserialize)]

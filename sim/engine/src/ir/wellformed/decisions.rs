@@ -136,7 +136,7 @@ impl Checker {
         if let Some(cardinality) = cardinality {
             self.cardinality(cardinality)?;
         }
-        let positioned = hand_position::choice(decision).is_some();
+        let positioned = hand_position::positioned(decision).is_some();
         if has_roles(&decision.domain)
             && !positioned
             && !matches!(

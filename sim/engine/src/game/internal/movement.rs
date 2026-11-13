@@ -6,6 +6,7 @@ use super::{
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
 use crate::ir::events::timing::opponent;
+use crate::ir::hand_position;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::perspective;
 use crate::ir::shuffle as shuffle_shape;
@@ -706,7 +707,14 @@ impl Game {
         } else {
             members
         };
-        let (mut moves, successful) = self.internal_move_members(
+        // Only a deck-edge pile's own role was ordered by its answer (Q156); the question's
+        // whole selection and every other multi-card deck move still need an order choice.
+        let order_settled = kind == ZoneKind::Deck
+            && matches!(objects, Selector::Bound { reference }
+            if execution.targets.get(&reference.key()).is_some_and(|wait| {
+                hand_position::ordered_pile(&wait.decision, *reference)
+            }));
+        let (mut moves, successful) = self.commit_move_members(
             execution,
             &members,
             zone,
@@ -715,6 +723,7 @@ impl Game {
             kind == ZoneKind::Ex,
             movement.and_then(|(spec, _)| spec.position),
             None,
+            order_settled,
         )?;
         if let Some(plan) = capacity_plan {
             moves = capacity::complete_receipt(plan.moves, moves);
