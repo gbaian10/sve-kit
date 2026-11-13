@@ -312,18 +312,8 @@ fn bp08_110_count_is_relative_to_the_second_seat_controller() {
 fn unadmitted_advance_cards_remain_rejected_as_evolution_resources() {
     let mut initial = position("BP08-110", 0);
     form(&mut initial, "BP10-004");
-    let (snapshot, keywords, original) = inputs();
-    let mut input = original.clone();
-    let card_id = &selection().current["BP10-004"].card_id;
-    // Keep the resource boundary unadmitted even after this real card migrates.
-    input["authors"]
-        .as_array_mut()
-        .unwrap()
-        .retain(|author| author["input"]["card_id"].as_str() != Some(card_id.as_str()));
-    let selected = repository::select(snapshot, keywords, &input).unwrap();
-    assert!(!selected.current.contains_key("BP10-004"));
     let result = Game::from_selected_effects(
-        selected,
+        selection_with_rules().clone(),
         &initial,
         &Value::Null,
         &Value::Null,

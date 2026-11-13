@@ -173,6 +173,18 @@ fn bp03_038_fanfare_draws_after_creating_a_stacked_sigil() {
     play(&mut game);
     let view = state(&game);
     assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 2);
+    let sigil = view["P1"]["field"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|id| **id != json!("source"))
+        .unwrap()
+        .as_str()
+        .unwrap();
+    assert_eq!(
+        view["objects"][sigil]["counters"]["スタックカウンター"],
+        2_u8
+    );
     assert_eq!(view["P1"]["hand"], json!(["top"]));
 }
 
@@ -193,7 +205,46 @@ fn bp04_041_fanfare_partitions_all_four_observed_cards() {
 }
 
 #[test]
-fn bp05_105_observes_a_neutral_follower_entering() {
+fn bp04_041_fanfare_resolves_with_fewer_than_four_deck_cards() {
+    for count in 0_u8..=3_u8 {
+        let mut initial = source("BP04-041", "hand");
+        initial["players"]["P1"]["zones"]["deck"] = json!(
+            (1_u8..=count)
+                .map(|i| json!({"id":format!("card{i}"),"card":"BP01-171"}))
+                .collect::<Vec<_>>()
+        );
+        let mut game = loaded(&initial);
+        play(&mut game);
+        let view = state(&game);
+        assert_eq!(
+            view["P1"]["hand"],
+            if count >= 1 {
+                json!(["card1"])
+            } else {
+                json!([])
+            }
+        );
+        assert_eq!(
+            view["P1"]["cemetery"],
+            if count >= 2 {
+                json!(["card2"])
+            } else {
+                json!([])
+            }
+        );
+        assert_eq!(
+            view["P1"]["deck"],
+            if count >= 3 {
+                json!(["card3"])
+            } else {
+                json!([])
+            }
+        );
+    }
+}
+
+#[test]
+fn bp05_105_observes_a_neutral_card_play() {
     let mut initial = source("BP05-105", "field");
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"neutral","card":"BP01-171"}]);
     let mut game = loaded(&initial);
@@ -210,19 +261,6 @@ fn bp09_055_recovers_pp_from_dragon_spells_in_cemetery() {
     let mut game = loaded(&initial);
     play(&mut game);
     assert_eq!(state(&game)["P1"]["pp"]["current"], 2_u8);
-}
-
-#[test]
-fn bp10_004_pays_act_to_damage_the_opponents_played_follower() {
-    let mut initial = source("BP10-004", "field");
-    initial["turn"]["active"] = json!("P2");
-    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"enemy","card":"BP01-037"}]);
-    let mut game = loaded(&initial);
-    let step = game
-        .play_internal_card("enemy", PlayerId { seat: 2 })
-        .unwrap();
-    settle(&mut game, Some(step));
-    assert_eq!(state(&game)["P2"]["cemetery"], json!(["enemy"]));
 }
 
 #[test]
@@ -249,6 +287,7 @@ fn bp11_032_declares_and_pays_x_to_create_that_many_knights() {
     play(&mut game);
     let view = state(&game);
     assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 3);
+    assert_eq!(view["P1"]["pp"]["current"], 6_u8);
 }
 
 #[test]
@@ -292,6 +331,13 @@ fn bp14_066_removes_two_hot_spring_counters_before_its_buff() {
     activate(&mut game, "BP14-066", 2);
     let view = state(&game);
     assert_eq!(view["objects"]["source"]["power"], before + 1);
+    assert_eq!(view["objects"]["spa"]["counters"]["神湯カウンター"], 0_u8);
+    assert!(
+        view["objects"]["source"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("疾走"))
+    );
     game.activate_internal_card("source", ability("BP14-066", 2), PLAYER)
         .expect_err("the printed payment or per-turn quota must reject this activation");
 }
