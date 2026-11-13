@@ -992,3 +992,6 @@ mod payment_recovery;
 
 #[path = "card/participant.rs"]
 mod participant;
+
+#[path = "card/private_choice.rs"]
+mod private_choice;

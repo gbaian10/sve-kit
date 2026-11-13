@@ -1581,7 +1581,7 @@ pub(super) struct Choose {
     pub may: Option<bool>,
     pub reveal: Option<bool>,
     pub order: Option<bool>,
-    pub by: Option<LeaderSide>,
+    pub by: Option<Participant>,
 }
 
 #[derive(Deserialize)]

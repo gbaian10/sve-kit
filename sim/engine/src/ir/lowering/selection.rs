@@ -124,11 +124,7 @@ impl BodyContext<'_> {
             from.zone,
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
         );
-        if (from.observation.is_some() || hand)
-            && matches!(choice.by, Some(ast::LeaderSide::Opponent))
-        {
-            return Err(unsupported(path));
-        }
+        let actor = self.chooser(choice, from, hand, path)?;
         if let Some(groups) = &choice.groups {
             if union.is_some() {
                 return Err(unsupported(path));
@@ -170,11 +166,19 @@ impl BodyContext<'_> {
         {
             self.cemetery_banish_targets.insert(choice.bind.clone());
         }
+        if hand
+            && actor != (PlayerRef::Controller {})
+            && let Some(binding) = self.targets.get(&choice.bind)
+        {
+            self.field_entry
+                .holders
+                .insert(binding.key(), actor.clone());
+        }
         let visibility = if target.from.observation.is_some() || hand {
             Visibility::Only {
                 players: super::super::PlayerSet {
                     relation: super::super::PlayerRelation::SelfPlayer,
-                    relative_to: PlayerRef::Controller {},
+                    relative_to: actor.clone(),
                     cardinality: super::super::Cardinality {
                         minimum: super::super::Nat(1),
                         maximum: Some(super::super::Nat(1)),
@@ -193,10 +197,7 @@ impl BodyContext<'_> {
                 decision: Decision {
                     id: DecisionId(self.card_allocator.id(path)?),
                     captures: vec![],
-                    actor: match choice.by {
-                        Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
-                        Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
-                    },
+                    actor,
                     domain,
                     kind: DecisionKind::ResolutionChoice {
                         may: if choice.may == Some(true) {
@@ -211,6 +212,31 @@ impl BodyContext<'_> {
                 },
             },
         })
+    }
+
+    /// A private source is shown only to its holder: another player may choose from its own
+    /// hand, while looked cards stay with the controller who looked.
+    fn chooser(
+        &mut self,
+        choice: &ast::Choose,
+        from: &ast::TargetQuery,
+        hand: bool,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        let actor = self.participant(choice.by.as_ref(), path)?;
+        let own_hand = hand
+            && matches!(
+                (&choice.by, &from.who),
+                (
+                    Some(ast::Participant::Side(ast::LeaderSide::Opponent)),
+                    Some(ast::Side::Opponent)
+                )
+            );
+        if (from.observation.is_some() || hand) && actor != (PlayerRef::Controller {}) && !own_hand
+        {
+            return Err(unsupported(path));
+        }
+        Ok(actor)
     }
 
     fn observed_groups(
@@ -382,8 +408,10 @@ const fn exact_own_cemetery_choice(choice: &ast::Choose, cardinality: super::Car
     let ast::ChooseFrom::Query(from) = &choice.from else {
         return false;
     };
-    matches!(choice.by, None | Some(ast::LeaderSide::Controller))
-        && !matches!(choice.may, Some(true))
+    matches!(
+        choice.by,
+        None | Some(ast::Participant::Side(ast::LeaderSide::Controller))
+    ) && !matches!(choice.may, Some(true))
         && from.observation.is_none()
         && matches!(from.who, Some(ast::Side::Controller))
         && matches!(
@@ -435,12 +463,15 @@ fn private_union(any_of: &[ast::TargetQuery]) -> bool {
         && any_of
             .iter()
             .all(|branch| branch.observation.as_ref() == first))
-        || any_of.iter().all(own_hand_branch)
+        || [ast::Side::Controller, ast::Side::Opponent]
+            .iter()
+            .any(|holder| any_of.iter().all(|branch| own_hand_branch(branch, holder)))
 }
 
-const fn own_hand_branch(branch: &ast::TargetQuery) -> bool {
+/// Every branch reads one holder's own hand, so the chooser's authority covers the union.
+fn own_hand_branch(branch: &ast::TargetQuery, holder: &ast::Side) -> bool {
     branch.observation.is_none()
-        && matches!(branch.who, Some(ast::Side::Controller))
+        && branch.who.as_ref() == Some(holder)
         && matches!(
             branch.zone,
             Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
