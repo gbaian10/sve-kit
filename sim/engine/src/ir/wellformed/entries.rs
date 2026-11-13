@@ -540,8 +540,11 @@ impl Checker {
                                             matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| matches!(step.instruction.action, Action::Reveal { .. })))
                                         })
                                 }))
-                            || (ability.kind == AbilityKind::Activated
-                                && super::modes::play_modes_without_fees(body)
+                            // Head-cost materials sit beside fee-free modes on any played header.
+                            || (matches!(
+                                ability.kind,
+                                AbilityKind::Activated | AbilityKind::Triggered
+                            ) && super::modes::play_modes_without_fees(body)
                                 && play.parameters.iter().all(public_cost_material)))
                     }))
             {

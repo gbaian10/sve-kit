@@ -31,6 +31,8 @@ mod hand_banish;
 mod hand_distribution;
 #[path = "card/material_acts.rs"]
 mod material_acts;
+#[path = "card/mode_head_materials.rs"]
+mod mode_head_materials;
 #[path = "card/move_result_numbers.rs"]
 mod move_result_numbers;
 #[path = "card/next_damage.rs"]

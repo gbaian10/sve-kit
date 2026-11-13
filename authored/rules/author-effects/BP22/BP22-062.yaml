@@ -1,0 +1,59 @@
+cards:
+  BP22-062:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - assail
+                on:
+                  kind: follower
+                  name: イグニスドラゴン
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - choice:
+                options:
+                  - - move:
+                        ref: spell
+                        to: ex
+                  - - pay:
+                        cost:
+                          pp: 5
+                        do:
+                          - move:
+                              ref: dragon
+                              result: entered
+                              to: field
+                upto: 2
+          targets:
+            - bind: spell
+              from:
+                name: 貫く咆哮
+                who: self
+                zone: cemetery
+              n: 1
+              option: 1
+            - bind: dragon
+              from:
+                name: イグニスドラゴン
+                who: self
+                zone: cemetery
+              n: 1
+              option: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set
