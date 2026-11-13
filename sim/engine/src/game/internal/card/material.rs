@@ -552,6 +552,14 @@ pub(super) fn source_field_cost(action: &Action) -> bool {
         )
 }
 
+/// Acting needs a field card; 「EXエリアのこれを墓場に置く」 may also send itself from EX.
+pub(super) fn source_cost_zone(action: &Action, zone: &str) -> bool {
+    match action {
+        Action::Posture { .. } => zone == "field",
+        _ => matches!(zone, "field" | "ex"),
+    }
+}
+
 fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
     match action {
         Action::Banish { .. } => true,

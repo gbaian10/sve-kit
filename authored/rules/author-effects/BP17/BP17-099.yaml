@@ -1,0 +1,66 @@
+cards:
+  BP17-099:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - move:
+                acted: true
+                ref: this
+                result: entered
+                to: field
+          usable_if:
+            cmp:
+              left:
+                count:
+                  trait: 機械
+                  who: self
+                  zone: ex
+              op: eq
+              right: 5
+          zone: ex
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - self_to_ex: true
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 機械
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set
