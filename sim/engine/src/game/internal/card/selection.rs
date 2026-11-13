@@ -765,7 +765,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     else {
         return Err(unsupported("resolution public choice domain"));
     };
-    if target_roles.is_some() && hand_position::choice(decision).is_none() {
+    if target_roles.is_some() && hand_position::positioned(decision).is_none() {
         return Err(unsupported("resolution position roles"));
     }
     if private_hand_choice(decision) {
@@ -817,6 +817,9 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         return Ok(());
     }
     let group = target_group(constraint)?;
+    // Objects an earlier selection bound (such as a formal target) were already authorized;
+    // each must still be a current public card when this question is asked.
+    let earlier = matches!(group.selector, Selector::Bound { .. });
     match &group.selector {
         Selector::Zone {
             zone: ZoneKind::Ex,
@@ -827,13 +830,15 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         } if players.relative_to == (PlayerRef::Controller {}) => {
             check_predicate(predicate, *binding, false)?;
         }
+        Selector::Bound { .. } => {}
         selector => target_selector(selector)?,
     }
     if !super::super::alternatives::participant(&decision.actor)
-        || !matches!(
-            selection_zone(&group.selector),
-            Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve)
-        )
+        || !(earlier
+            || matches!(
+                selection_zone(&group.selector),
+                Some(ZoneKind::Field | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Evolve)
+            ))
     {
         return Err(unsupported("resolution public choice actor or selector"));
     }
@@ -1024,7 +1029,7 @@ pub(in crate::game::internal) fn matches_candidate(
 }
 
 fn role_domains(decision: &Decision) -> Vec<TargetRoleDomain> {
-    let positioned = hand_position::choice(decision).is_some();
+    let positioned = hand_position::positioned(decision).is_some();
     match &decision.domain {
         ChoiceDomain::Objects {
             target_roles: Some(spec),
@@ -1155,6 +1160,13 @@ impl Game {
         let available = wait.capacity()?;
         // CR 1.3.2: a resolving instruction does as much as possible; play stays strict.
         wait.bounds.minimum = Nat(wait.bounds.minimum.0.min(available));
+        if hand_position::edges(decision).is_some() {
+            // Every candidate is put at one of the edges.
+            wait.bounds = Cardinality {
+                minimum: Nat(available),
+                maximum: Some(Nat(available)),
+            };
+        }
         domain.cardinality = wait.bounds;
         let actor = execution.player(self, &decision.actor)?;
         // Even an empty or singleton resolution domain remains a player's decision.
@@ -1195,7 +1207,19 @@ impl Game {
         let revealed = revealed_groups(constraint);
         let actor_seat = super::seat_name(execution.player(self, &decision.actor)?)?;
         let constraint = evaluated_counts(self, execution, constraint, decision)?;
-        let group_members = self.target_group_members(execution, decision, &constraint)?;
+        let mut group_members = self.target_group_members(execution, decision, &constraint)?;
+        // An earlier selection's object that has since left its zone is a new object now; only
+        // the ones still current remain candidates.
+        for (group, members) in constraint.groups.iter().zip(&mut group_members) {
+            if matches!(group.selector, Selector::Bound { .. }) {
+                members.retain(|member| {
+                    execution
+                        .object_id(*member)
+                        .and_then(|id| self.object(id))
+                        .is_ok_and(|object| object.generation == member.generation.0)
+                });
+            }
+        }
         let (members, group_bounds, bounds) = group_layout(&constraint, &group_members);
         // The capacity is the receiving field's, which need not be the chooser's.
         let receiver = match execution.field_entry_receiver(binding.key()) {

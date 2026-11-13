@@ -988,6 +988,8 @@ fn deck_position(position: Option<&ast::Placement>, path: &str) -> Result<Positi
                 index: PositiveNat(index),
             })
             .ok_or_else(|| unsupported(path)),
-        None | Some(ast::Placement::Chosen { .. }) => Err(unsupported(path)),
+        None | Some(ast::Placement::Chosen { .. } | ast::Placement::OneOf { .. }) => {
+            Err(unsupported(path))
+        }
     }
 }
