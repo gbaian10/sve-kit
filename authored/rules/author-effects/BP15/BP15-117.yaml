@@ -1,0 +1,41 @@
+cards:
+  BP15-117:
+    abilities:
+      - fanfare:
+          do:
+            - choice:
+                options:
+                  - - destroy:
+                        ref: amulet
+                  - - damage:
+                        n: 3
+                        to:
+                          kind: follower
+                          who: opp
+                          zone: field
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+                  - - draw:
+                        n: 2
+                        who: self
+                upto: 2
+          targets:
+            - bind: amulet
+              from:
+                kind: amulet
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

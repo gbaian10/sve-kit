@@ -1,0 +1,51 @@
+cards:
+  BP20-030:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - counter:
+                  n: 1
+                  name: 融合カウンター
+                  on: this
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - search:
+                cost_sum_le: 8
+                distinct_by: name
+                sel:
+                  kind: follower
+                  traits_all:
+                    - 絶傑
+                    - 盗賊
+                  who: self
+                  zone: deck
+                to: field
+                upto: 3
+        line: 1
+      - activate:
+          do:
+            - counter:
+                delta: 1
+                name: 融合カウンター
+                on: this
+          fusion:
+            n: 3
+            sel:
+              orig_cost_ge: 1
+              trait: 財宝
+              who: self
+              zone:
+                - hand
+                - ex
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set
