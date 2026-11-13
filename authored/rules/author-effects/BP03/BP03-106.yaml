@@ -1,0 +1,40 @@
+cards:
+  BP03-106:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+          do:
+            - buff:
+                hp: 1
+                on: chosen
+                power: 1
+          targets:
+            - bind: chosen
+              from:
+                any_of:
+                  - keyword: storm
+                    kind: follower
+                    who: self
+                    zone: field
+                  - keyword: ward
+                    kind: follower
+                    who: self
+                    zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

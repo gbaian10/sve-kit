@@ -1,0 +1,64 @@
+cards:
+  BP16-098:
+    abilities:
+      - evolve_time:
+          do:
+            - set_stat:
+                on: enemy
+                power: 0
+            - set_stat:
+                hp: 1
+                on: enemy
+            - act: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - line: 2
+        super_evolve_time:
+          do:
+            - move:
+                ref: card
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -4
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+          targets:
+            - bind: card
+              from:
+                any_of:
+                  - kind: spell
+                    orig_cost_le: 4
+                    trait: 信仰
+                    who: self
+                    zone: cemetery
+                  - kind: amulet
+                    orig_cost_le: 4
+                    trait: 信仰
+                    who: self
+                    zone: cemetery
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

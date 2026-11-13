@@ -1,0 +1,50 @@
+cards:
+  BP21-007:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+        line: 1
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        hp: 1
+                        on: fairies
+                        power: 1
+                  - - create:
+                        n: 2
+                        to: field
+                        token: フェアリー
+          targets:
+            - bind: fairies
+              from:
+                kind: follower
+                token: true
+                trait: 妖精
+                who: self
+                zone:
+                  - field
+                  - ex
+              option: 1
+              upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+    token_sources:
+      - card: BP01-T03
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

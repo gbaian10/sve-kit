@@ -47,6 +47,8 @@ mod prevent_controller;
 mod public_hand_numbers;
 #[path = "card/public_return_union.rs"]
 mod public_return_union;
+#[path = "card/target_union.rs"]
+mod target_union;
 #[path = "card/token_follower_union.rs"]
 mod token_follower_union;
 #[path = "card/top_banish.rs"]

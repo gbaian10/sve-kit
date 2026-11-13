@@ -117,7 +117,7 @@ fn three_optional_groups_allow_zero_and_overlap_only_once_per_card() {
 }
 
 #[test]
-fn grouped_targets_reject_unneeded_zones_counts_and_combined_constraints() {
+fn grouped_targets_reject_unneeded_zones_and_counts_but_combine_constraints() {
     lower(&tree(2, true)).unwrap();
     for change in [
         json!({"n":1}),
@@ -129,7 +129,6 @@ fn grouped_targets_reject_unneeded_zones_counts_and_combined_constraints() {
         json!({"groups":[{"orig_cost_le":3,"orig_cost_eq":1},{"orig_cost_le":3}]}),
         json!({"groups":[{"orig_cost_le":3},{"orig_cost_le":3},{"orig_cost_le":3}],"n":3}),
         json!({"n":null,"upto":1}),
-        json!({"from":{"who":"self","zone":"cemetery","kind":"follower","orig_cost_le":5}}),
     ] {
         let mut input = tree(2, true);
         let target = &mut input["cards"]["unit-spell"]["abilities"][0]["spell"]["targets"][0];
@@ -138,6 +137,11 @@ fn grouped_targets_reject_unneeded_zones_counts_and_combined_constraints() {
         }
         lower(&input).unwrap_err();
     }
+    // A cost limit on the shared query and one on each group must both hold.
+    let mut both = tree(2, true);
+    both["cards"]["unit-spell"]["abilities"][0]["spell"]["targets"][0]["from"]["orig_cost_le"] =
+        json!(5);
+    lower(&both).unwrap();
 }
 
 #[test]

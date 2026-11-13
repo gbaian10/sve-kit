@@ -1,0 +1,33 @@
+cards:
+  BP04-128:
+    abilities:
+      - evolve_time:
+          do:
+            - banish: chosen
+          targets:
+            - bind: chosen
+              from:
+                any_of:
+                  - kind: follower
+                    power_le: 1
+                    who: opp
+                    zone: field
+                  - hp_le: 1
+                    kind: follower
+                    who: opp
+                    zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

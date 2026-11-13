@@ -1524,19 +1524,91 @@ pub(super) enum AtPlay {
 }
 
 #[derive(Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[serde(try_from = "RawTarget")]
 pub(super) struct Target {
-    #[serde(default)]
     pub any: bool,
     pub option: Option<u64>,
     pub bind: String,
+    /// For a union this keeps only what every branch shares, so per-binding bookkeeping
+    /// never assumes a filter that only one branch has.
     pub from: TargetQuery,
+    /// 「AかB」 branches of one candidate set; a card matching several is still one choice.
+    pub any_of: Option<Vec<TargetQuery>>,
     pub groups: Option<Vec<FormalTargetGroup>>,
     pub distinct_by: Option<Names>,
     pub cost_sum_le: Option<u64>,
     pub roles: Option<BTreeMap<String, TargetRole>>,
     pub n: Option<NumericArgument>,
     pub upto: Option<NumericArgument>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RawTarget {
+    #[serde(default)]
+    any: bool,
+    option: Option<u64>,
+    bind: String,
+    from: TargetFrom,
+    groups: Option<Vec<FormalTargetGroup>>,
+    distinct_by: Option<Names>,
+    cost_sum_le: Option<u64>,
+    roles: Option<BTreeMap<String, TargetRole>>,
+    n: Option<NumericArgument>,
+    upto: Option<NumericArgument>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+enum TargetFrom {
+    Union { any_of: Vec<TargetQuery> },
+    Query(Box<TargetQuery>),
+}
+
+fn shared<T>(branches: &[TargetQuery], field: impl Fn(&TargetQuery) -> &Option<T>) -> Option<T>
+where
+    T: Clone + PartialEq,
+{
+    let (first, rest) = branches.split_first()?;
+    let value = field(first).as_ref()?;
+    rest.iter()
+        .all(|branch| field(branch).as_ref() == Some(value))
+        .then(|| value.clone())
+}
+
+impl TryFrom<RawTarget> for Target {
+    type Error = &'static str;
+
+    fn try_from(raw: RawTarget) -> Result<Self, Self::Error> {
+        let (from, any_of) = match raw.from {
+            TargetFrom::Query(query) => (*query, None),
+            TargetFrom::Union { any_of } => {
+                if any_of.len() < 2 {
+                    return Err("target any_of needs at least two branches");
+                }
+                let common = TargetQuery {
+                    who: shared(&any_of, |branch| &branch.who),
+                    zone: shared(&any_of, |branch| &branch.zone),
+                    kind: shared(&any_of, |branch| &branch.kind),
+                    ..TargetQuery::default()
+                };
+                (common, Some(any_of))
+            }
+        };
+        Ok(Self {
+            any: raw.any,
+            option: raw.option,
+            bind: raw.bind,
+            from,
+            any_of,
+            groups: raw.groups,
+            distinct_by: raw.distinct_by,
+            cost_sum_le: raw.cost_sum_le,
+            roles: raw.roles,
+            n: raw.n,
+            upto: raw.upto,
+        })
+    }
 }
 
 #[derive(Clone, Deserialize)]
@@ -1630,7 +1702,7 @@ pub(super) struct ChooseGroup {
     pub orig_cost_le: Option<u64>,
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
     pub except: Option<ObservedNameExcept>,
@@ -1760,7 +1832,7 @@ impl TargetQuery {
     }
 }
 
-#[derive(Clone, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Deserialize)]
 #[serde(untagged)]
 pub(super) enum TargetZone {
     Single(TargetSingleZone),

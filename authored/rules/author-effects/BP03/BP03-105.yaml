@@ -1,0 +1,41 @@
+cards:
+  BP03-105:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - fanfare:
+          do:
+            - buff:
+                hp: 0
+                on: chosen
+                power: 1
+          targets:
+            - bind: chosen
+              from:
+                any_of:
+                  - keyword: storm
+                    kind: follower
+                    other: true
+                    who: self
+                    zone: field
+                  - keyword: ward
+                    kind: follower
+                    other: true
+                    who: self
+                    zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

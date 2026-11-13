@@ -149,6 +149,7 @@ impl BodyContext<'_> {
             groups: None,
             bind: choice.bind.clone(),
             from: from.clone(),
+            any_of: None,
             distinct_by: choice.distinct_by.clone(),
             cost_sum_le: choice.cost_sum_le,
             roles: None,

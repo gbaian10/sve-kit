@@ -587,8 +587,7 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
                     minimum: Nat(u64::from(required)),
                     maximum: Some(Nat(1)),
                 })
-                || !matches!(&group.selector, Selector::Zone { zone: ZoneKind::Cemetery | ZoneKind::Banish, players, .. }
-                if players.relation == PlayerRelation::SelfPlayer && players.relative_to == (PlayerRef::Controller {}))
+                || !own_return_group(&group.selector)
             {
                 return Err(unsupported("formal target group selector"));
             }
@@ -597,6 +596,25 @@ pub(super) fn check(constraint: &SelectionConstraint) -> Result<()> {
         return Ok(());
     }
     target_selector(&target_group(constraint)?.selector)
+}
+
+/// A group draws from the controller's cemetery or banish zone; a 「AかB」 group from each branch.
+fn own_return_group(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone {
+            zone: ZoneKind::Cemetery | ZoneKind::Banish,
+            players,
+            ..
+        } => {
+            players.relation == PlayerRelation::SelfPlayer
+                && players.relative_to == (PlayerRef::Controller {})
+        }
+        Selector::Union { sets } => !sets.is_empty() && sets.iter().all(own_return_group),
+        Selector::Difference { input, except } if matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]) => {
+            own_return_group(input)
+        }
+        _ => false,
+    }
 }
 
 fn public_object(object: &Object) -> bool {
@@ -638,11 +656,7 @@ fn candidate_zone(selector: &Selector, allow_resolution_zones: bool) -> Result<&
 
 fn target_selector(selector: &Selector) -> Result<()> {
     match selector {
-        Selector::Union { sets }
-            if sets.len() == 2 && sets.iter().all(|set| matches!(set, Selector::Zone { .. })) =>
-        {
-            target_union(sets)
-        }
+        Selector::Union { sets } if !sets.is_empty() => target_union(sets),
         Selector::Zone {
             zone: ZoneKind::Evolve,
             ..
@@ -683,15 +697,19 @@ fn target_selector(selector: &Selector) -> Result<()> {
 }
 
 fn target_union(sets: &[Selector]) -> Result<()> {
-    let field_ex = sets.iter().all(|set| {
-        matches!(
-            set,
+    let field_ex = matches!(
+        sets,
+        [
             Selector::Zone {
-                zone: ZoneKind::Field | ZoneKind::Ex,
+                zone: ZoneKind::Field,
+                ..
+            },
+            Selector::Zone {
+                zone: ZoneKind::Ex,
                 ..
             }
-        )
-    });
+        ]
+    );
     let public_return = matches!(
         sets,
         [
@@ -715,7 +733,8 @@ fn target_union(sets: &[Selector]) -> Result<()> {
         ]
     ) && sets.iter().all(own_zone_selector);
     if !field_ex && !public_return {
-        return Err(unsupported("public target union zones"));
+        // 「AかB」: one candidate set whose branches are each an ordinary formal target.
+        return sets.iter().try_for_each(target_selector);
     }
     for set in sets {
         if public_return {
