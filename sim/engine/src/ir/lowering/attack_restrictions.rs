@@ -121,7 +121,8 @@ fn permission(
                 RuleId(133),
             )
         }
-        ast::StaticEffect::Reroll(_)
+        ast::StaticEffect::BanishInstead(_)
+        | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)
         | ast::StaticEffect::AlsoNamed(_)

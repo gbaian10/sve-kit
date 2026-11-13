@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-061:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.1-sol }
+          date: "2026-11-14"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        static:
+          effects:
+            - banish_instead:
+                from: field
+                to: cemetery
+                on: { who: opp, zone: field, kind: follower }
+      - line: 3
+        fanfare:
+          do:
+            - damage:
+                to: { who: opp, zone: field, kind: follower }
+                n: 8
+            - damage:
+                to: { leaders: opponents }
+                n: 4

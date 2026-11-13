@@ -1,5 +1,4 @@
 use super::{BindingKind, CaptureTime, Checked, Checker, WellFormedError, WellFormedReason};
-use crate::ir::OncePerEvent;
 use crate::ir::events::banish as banish_header;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard as discard_header;
@@ -8,7 +7,6 @@ use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::events::{drive, equipment};
 use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
-use crate::ir::optional_payment;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::quick::is_printed_quick;
@@ -25,11 +23,13 @@ use crate::ir::{
     AbilityOrigin, Binding, Bool, EnterFieldEvent, Expr, KeywordId, ObjectFrozen, ObjectOperand,
     Predicate,
 };
+use crate::ir::{AbilitySource, EffectDefinitionId, OncePerEvent};
 use crate::ir::{
     ActionPattern, EventRewrite, PermissionSubject, ProposedEventPattern, ReplacementScope,
     Selector,
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
+use crate::ir::{move_replacement, optional_payment};
 use crate::ir::{trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
@@ -652,6 +652,23 @@ impl Checker {
         }
     }
 
+    fn move_replacement(
+        &mut self,
+        effect: &Effect,
+        id: EffectDefinitionId,
+        source: &AbilitySource,
+        zones: &[ZoneKind],
+    ) -> Checked {
+        let shape = move_replacement::projection(effect)
+            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
+        if zones != [ZoneKind::Field] || !self.effect_ids.insert(id) {
+            return self.reject();
+        }
+        self.ability_source(source)?;
+        self.selector(shape.objects)?;
+        self.boolean(shape.condition)
+    }
+
     fn effect(&mut self, effect: &Effect, ability_zones: &[ZoneKind]) -> Checked {
         match effect {
             Effect::Continuous {
@@ -687,6 +704,11 @@ impl Checker {
                     TimestampBasis::ProperPlay { .. } => return self.reject(),
                 }
                 self.duration(duration)
+            }
+            Effect::Replacement { id, source, .. }
+                if move_replacement::projection(effect).is_some() =>
+            {
+                self.move_replacement(effect, *id, source, ability_zones)
             }
             Effect::Replacement { .. } if prevention::projection(effect).is_some() => {
                 self.prevention(effect, ability_zones)
