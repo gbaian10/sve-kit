@@ -1102,7 +1102,6 @@ impl BodyContext<'_> {
                 discard_event: self.discard_event,
                 banish_event: self.banish_event,
                 hand_exit: self.hand_exit,
-                discard_pp_event: None,
                 static_zone: self.static_zone,
                 activation_zone: self.activation_zone,
                 subject_event: self.subject_event,
@@ -1122,7 +1121,7 @@ impl BodyContext<'_> {
                 scope,
                 definition: self.definition,
                 payment_result: None,
-                local_payment: self.local_payment.clone(),
+                local_payments: self.local_payments.clone(),
                 allocator: Allocator {
                     next: self.allocator.next,
                     ..Allocator::default()
@@ -1250,7 +1249,14 @@ fn mode_body(
     let [ast::Step::Pay(payment)] = steps else {
         return context.steps(steps, path, source, origin);
     };
-    if resolution {
+    // A chosen mode is paid by its chooser and has no separate payment result.
+    if resolution
+        || !matches!(
+            payment.who,
+            None | Some(ast::Participant::Side(ast::LeaderSide::Controller))
+        )
+        || payment.result.is_some()
+    {
         return Err(unsupported(path));
     }
     let paid = super::payment::lower(context, &payment.cost, origin, path)?;

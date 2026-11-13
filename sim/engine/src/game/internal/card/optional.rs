@@ -24,12 +24,18 @@ pub(super) struct OptionalState {
 
 pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<()> {
     let Control::Pay {
-        costs, optional, ..
+        at,
+        costs,
+        optional,
+        ..
     } = control
     else {
         return Err(unsupported("optional payment control"));
     };
     let required = *optional == PaymentOptionality::Required;
+    // Play-time declarations are always answered by the controller, so only a resolution
+    // payment may name another payer.
+    let foreign = *at == PaymentTime::ResolutionChoice;
     let CostSpec::Ordered { steps } = costs else {
         return Err(unsupported("optional cost alternatives"));
     };
@@ -38,14 +44,19 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
     }
     for step in steps {
         let instruction = &step.instruction;
+        let payer = instruction.actor == (PlayerRef::Controller {})
+            || (foreign
+                && super::super::alternatives::participant(&instruction.actor)
+                && matches!(&instruction.action, Action::Resource { player, .. }
+                    if *player == instruction.actor));
         if step.materials.is_some()
             || instruction.precondition.is_some()
             || instruction.source != *origin
-            || instruction.actor != (PlayerRef::Controller {})
+            || !payer
             || instruction.context != InstructionContext::Cost
-            || !(matches!(&instruction.action, Action::Resource { player: PlayerRef::Controller {},
+            || !(matches!(&instruction.action, Action::Resource { player,
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
-            amount } if x_pp::cost_amount(amount))
+            amount } if *player == instruction.actor && x_pp::cost_amount(amount))
                 || (required && super::super::life::is_cost(&instruction.action))
                 || (required
                     && matches!(
@@ -178,15 +189,26 @@ pub(super) fn cemetery_self_banish(ability: &Ability) -> bool {
 }
 
 fn positive_pp(costs: &CostSpec) -> bool {
-    matches!(costs, CostSpec::Ordered { steps }
-        if matches!(steps.as_slice(), [step] if step.materials.is_none()
-            && step.instruction.precondition.is_none()
-            && step.instruction.actor == (PlayerRef::Controller {})
-            && step.instruction.context == InstructionContext::Cost
-            && matches!(&step.instruction.action, Action::Resource {
-                player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
-                operation: ResourceOperation::Pay, amount: Expr::Literal(Int(n)),
-            } if *n > 0)))
+    player_pp(costs) == Some(&PlayerRef::Controller {})
+}
+
+fn player_pp(costs: &CostSpec) -> Option<&PlayerRef> {
+    let CostSpec::Ordered { steps } = costs else {
+        return None;
+    };
+    let [step] = steps.as_slice() else {
+        return None;
+    };
+    let instruction = &step.instruction;
+    (step.materials.is_none()
+        && instruction.precondition.is_none()
+        && instruction.context == InstructionContext::Cost
+        && super::super::alternatives::participant(&instruction.actor)
+        && matches!(&instruction.action, Action::Resource {
+            player, resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
+            amount: Expr::Literal(Int(n)),
+        } if *player == instruction.actor && *n > 0))
+    .then_some(&instruction.actor)
 }
 
 fn discard_return(program: &Program) -> Option<Binding<DiscardEvent>> {
@@ -278,7 +300,8 @@ fn hand_pp_payment(ability: &Ability) -> bool {
 fn field_resolution_costs(program: &Program) -> bool {
     program.steps.iter().all(|step| match &step.node {
         Node::Control { control: Control::Pay { at: PaymentTime::ResolutionChoice, costs, .. } } => {
-            matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
+            player_pp(costs).is_some()
+                || matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
                 && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
         }
         Node::Control { control: Control::If { then_body, else_body, .. } } => {
@@ -437,6 +460,7 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
     } = control
     {
         if (positive_pp(costs) && discard_return(on_paid).is_some())
+            || player_pp(costs).is_some()
             || (!steps.is_empty()
                 && steps
                     .iter()
@@ -445,7 +469,7 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
             return Ok(());
         }
         return Err(unsupported(
-            "resolution payment only supports source field costs",
+            "resolution payment only supports source field costs or player PP",
         ));
     }
     if !matches!(control, Control::Pay { at: PaymentTime::PlayParameter,
@@ -476,10 +500,15 @@ impl Game {
         else {
             return Err(unsupported("resolution payment timing"));
         };
+        // The payer answers its own payment; source costs stay with the effect controller.
+        let payer = match player_pp(&costs) {
+            Some(payer) => execution.player(self, payer)?,
+            None => execution.context.controller,
+        };
         self.internal_wait(
             execution,
             DecisionId(receipt.0),
-            execution.context.controller,
+            payer,
             InputDomain::OptionalCost,
             Wait::ResolutionPayment {
                 costs,

@@ -1,8 +1,17 @@
 use super::{Execution, Game, InputDomain, Result, Wait, invalid, unsupported};
+use crate::ir::events::timing;
 use crate::ir::{
     Cardinality, ChoiceDomain, Control, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
     ModeId, Nat, PlayerRef, Program, Visibility,
 };
+
+/// Players who may answer or pay inside an effect: its controller, the opponent, or a
+/// player captured when an object was chosen. Live reads would let a move change the decider.
+pub(in crate::game::internal) fn participant(actor: &PlayerRef) -> bool {
+    matches!(actor, PlayerRef::Controller {})
+        || *actor == timing::opponent()
+        || matches!(actor, PlayerRef::FromExpression { value } if matches!(value.as_ref(), Expr::Captured(_)))
+}
 
 pub(super) fn check_may(control: &Control) -> Result<()> {
     use crate::ir::{Decision, DecisionKind, Declinable};
@@ -12,7 +21,7 @@ pub(super) fn check_may(control: &Control) -> Result<()> {
     };
     if !matches!(control, Control::May {
         choice: Decision {
-            actor: PlayerRef::Controller {},
+            actor,
             domain: ChoiceDomain::Integer { cardinality, .. },
             kind: DecisionKind::ResolutionChoice {
                 may: Declinable::MayDecline, cardinality: decision_bounds, precondition: None,
@@ -21,7 +30,7 @@ pub(super) fn check_may(control: &Control) -> Result<()> {
             captures,
             ..
         }, ..
-    } if *cardinality == bounds && *decision_bounds == bounds && captures.is_empty())
+    } if participant(actor) && *cardinality == bounds && *decision_bounds == bounds && captures.is_empty())
     {
         return Err(unsupported("optional body decision"));
     }

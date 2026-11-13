@@ -442,7 +442,10 @@ fn self_discard_movement_and_resolution_pp_remain_closed_to_the_needed_actions()
                     json!({"steps":[{"pp":3_u8},{"act_self":true}]});
             }
         }
-        lowerer().lower(&tree(&head, &discard_all())).unwrap_err();
+        // A hand-zone payment keeps its guarded discard shape at lowering or at load.
+        if let Ok(programs) = lowerer().lower(&tree(&head, &discard_all())) {
+            reject_raw(programs["unit-follower"].card().clone());
+        }
     }
 }
 
@@ -692,7 +695,7 @@ fn event_cause_in_a_body_does_not_gain_the_header_exception() {
 }
 
 #[test]
-fn raw_field_and_non_discard_resolution_pp_do_not_gain_the_hand_exception() {
+fn field_resolution_pp_uses_the_general_payment_without_the_hand_guard() {
     let valid = lowered_observer(&observer(false, guarded_return()));
     for phase in [false, true] {
         let mut program = valid.clone();
@@ -732,11 +735,11 @@ fn raw_field_and_non_discard_resolution_pp_do_not_gain_the_hand_exception() {
             &initial(),
             &Value::Null,
             &Value::Null,
-            "field-pp-rejection",
+            "field-pp-general",
         )
         .unwrap();
-        game.load_internal_card("unit-follower", &checked)
-            .unwrap_err();
+        // A field auto ability may offer a fixed positive PP payment under any guard or trigger.
+        game.load_internal_card("unit-follower", &checked).unwrap();
     }
 }
 
@@ -835,7 +838,7 @@ fn invalid_material_answer_does_not_commit_discard_or_pending_authority() {
 }
 
 #[test]
-fn nested_field_payment_cannot_hide_a_positive_pp_resolution_payment() {
+fn nested_field_payment_admits_a_positive_pp_resolution_payment() {
     let mut program = lowered_observer(&json!({
         "on":{"phase":{"which":"end","whose":"self"}},
         "do":[{"pay":{"cost":{"act_self":true},"do":[
@@ -872,10 +875,7 @@ fn nested_field_payment_cannot_hide_a_positive_pp_resolution_payment() {
         "nested-resolution-pp-boundary",
     )
     .unwrap();
-    let before = format!("{game:?}");
-    game.load_internal_card("unit-follower", &checked)
-        .unwrap_err();
-    assert_eq!(format!("{game:?}"), before);
+    game.load_internal_card("unit-follower", &checked).unwrap();
 }
 
 #[test]
@@ -883,8 +883,8 @@ fn nested_field_payment_cannot_hide_a_positive_pp_resolution_payment() {
     clippy::wildcard_enum_match_arm,
     reason = "Only the repeat wrapper is peeled; the inline payment passes through unchanged."
 )]
-fn fixed_repeat_cannot_hide_a_positive_pp_resolution_payment() {
-    let mut failures = vec![];
+fn fixed_repeat_keeps_the_inline_positive_pp_resolution_payment_rule() {
+    let mut outcomes = vec![];
     for wrapped in [false, true] {
         let pay =
             json!({"pay":{"cost":{"act_self":true},"do":[{"life":{"who":"self","delta":1_u8}}]}});
@@ -931,16 +931,16 @@ fn fixed_repeat_cannot_hide_a_positive_pp_resolution_payment() {
             "repeat-resolution-pp-boundary",
         )
         .unwrap();
-        failures.push(format!(
+        outcomes.push(format!(
             "{:?}",
             game.load_internal_card("unit-follower", &checked)
-                .unwrap_err()
         ));
     }
     assert_eq!(
-        failures[0], failures[1],
-        "a fixed repeat keeps the inline payment rejection"
+        outcomes[0], outcomes[1],
+        "a fixed repeat keeps the inline payment outcome"
     );
+    assert_eq!(outcomes[0], "Ok(())");
 }
 
 #[test]

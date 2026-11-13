@@ -837,14 +837,11 @@ impl Game {
                 action if reveal_cost::selected(execution, action) => {
                     self.internal_hand_material_cost_payment(execution, &step.instruction)?
                 }
-                Action::Resource { amount, .. } => {
+                Action::Resource { player, amount, .. } => {
+                    let payer = execution.player(self, player)?;
                     let amount = execution.integer(self, amount)?;
                     let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
-                    (
-                        self.internal_pay_pp(execution.context.controller, amount)?,
-                        Vec::new(),
-                        Vec::new(),
-                    )
+                    (self.internal_pay_pp(payer, amount)?, Vec::new(), Vec::new())
                 }
                 Action::Posture { objects, .. }
                 | Action::Banish { objects }

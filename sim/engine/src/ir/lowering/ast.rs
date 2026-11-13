@@ -538,8 +538,8 @@ pub(super) struct ModePayment {
     pub cost: Cost,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
-    #[serde(rename = "who")]
-    pub _who: Option<SelfPlayer>,
+    pub who: Option<Participant>,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -547,9 +547,16 @@ pub(super) struct ModePayment {
 pub(super) struct Optional {
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
-    #[serde(rename = "who")]
-    pub _who: Option<SelfPlayer>,
+    pub who: Option<Participant>,
     pub then: Option<Vec<Step>>,
+}
+
+/// Who answers or pays inside an effect; `master_of` is the chosen object's controller.
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Participant {
+    Side(LeaderSide),
+    MasterOf { master_of: String },
 }
 
 #[derive(Deserialize)]
