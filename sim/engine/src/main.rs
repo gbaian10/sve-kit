@@ -34,8 +34,8 @@ use sve_scenario_runner::arch::{
     load_fixtures,
 };
 use sve_scenario_runner::{
-    Fixture, RunOptions, View, gate, load_dir, load_known_failures, load_selection, run, score_g1,
-    summary,
+    AwaitingMode, Fixture, RunOptions, View, gate, load_dir, load_known_failures, load_selection,
+    run, score_g1, summary,
 };
 
 type Result<T> = result::Result<T, Box<dyn Error>>;
@@ -107,6 +107,7 @@ fn rules(
         selection.as_ref(),
         RunOptions {
             require_verified: true,
+            awaiting: AwaitingMode::Complete,
         },
     )?;
     retain(&output.join("rules.txt"), &reports)?;
@@ -127,6 +128,7 @@ fn strict_gate(catalog: &Arc<Catalog>, root: &Path, output: &Path, known: &Path)
         None,
         RunOptions {
             require_verified: true,
+            awaiting: AwaitingMode::Complete,
         },
     )?;
     retain(&output.join("rules.txt"), &reports)?;

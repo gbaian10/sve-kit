@@ -48,6 +48,7 @@ pub(super) struct Params {
     pub(super) order: Option<Vec<String>>,
     pub(super) choice: Option<bool>,
     pub(super) proceed: Option<bool>,
+    pub(super) position: Option<String>,
 }
 
 impl Params {
@@ -112,6 +113,7 @@ impl Params {
                 .map(|choice| choice == "execute")
                 .or_else(|| (decision["costs"] == "decline").then_some(false)),
             proceed: decision["continue"].as_bool(),
+            position: decision["position"].as_str().map(str::to_owned),
         }
     }
 
@@ -127,5 +129,6 @@ impl Params {
             && self.choice.is_none()
             && self.proceed.is_none()
             && self.pay.is_null()
+            && self.position.is_none()
     }
 }

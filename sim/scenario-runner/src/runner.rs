@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::ScenarioError;
-use crate::compare;
+use crate::compare::{self, AwaitingMode};
 use crate::engine::{Engine, EngineError, View};
 use crate::inherit::{Fixture, expand};
 use crate::model::{Expected, Question, from_yaml, parse_question};
@@ -48,6 +48,8 @@ pub struct RunOptions {
     /// Score only questions that are `status: verified` and rely on no
     /// `card_facts` entry with `verified: false`; others become [`Verdict::Ineligible`].
     pub require_verified: bool,
+    /// How `awaiting.choices` is compared; the contract's complete set by default.
+    pub awaiting: AwaitingMode,
 }
 
 /// One mismatch at a checkpoint.
@@ -203,7 +205,13 @@ pub fn run(
             }
             let verdict = match ineligible(q, fixture, options) {
                 Some(reason) => Verdict::Ineligible { reason },
-                None => run_one(engine, fixture, &scenario.decisions, &scenario.expected)?,
+                None => run_one(
+                    engine,
+                    fixture,
+                    &scenario.decisions,
+                    &scenario.expected,
+                    options.awaiting,
+                )?,
             };
             reports.push(ScenarioReport {
                 question: q.id.clone(),
@@ -250,6 +258,7 @@ pub fn score_g1(
     }
     let options = RunOptions {
         require_verified: true,
+        awaiting: AwaitingMode::Complete,
     };
     let reports = run(engine, questions, Some(selection), options)?;
     if let Some(r) = reports
@@ -291,6 +300,7 @@ pub fn run_one(
     fixture: &Fixture,
     decisions: &[Value],
     expected: &[Expected],
+    awaiting: AwaitingMode,
 ) -> Result<Verdict, ScenarioError> {
     let mut checkpoints: BTreeMap<usize, Vec<&Expected>> = BTreeMap::new();
     for e in expected {
@@ -336,6 +346,7 @@ pub fn run_one(
                 entry,
                 &step.outcome,
                 &window,
+                awaiting,
                 &mut failures,
             ) {
                 return Ok(engine_verdict(e));
@@ -364,6 +375,7 @@ fn check(
     entry: &Expected,
     outcome: &str,
     events: &[Value],
+    awaiting: AwaitingMode,
     failures: &mut Vec<Failure>,
 ) -> Result<(), EngineError> {
     let view = View::parse(&entry.view)
@@ -422,7 +434,11 @@ fn check(
     }
     if let Some(want) = &entry.awaiting {
         let got = engine.awaiting(view)?;
-        if !compare::awaiting(view, want, got.as_ref()) {
+        let matches = match awaiting {
+            AwaitingMode::Complete => compare::awaiting(view, want, got.as_ref()),
+            AwaitingMode::FirstStage => compare::awaiting_first_stage(view, want, got.as_ref()),
+        };
+        if !matches {
             fail("awaiting".into(), want.clone(), got.unwrap_or(Value::Null));
         }
     }

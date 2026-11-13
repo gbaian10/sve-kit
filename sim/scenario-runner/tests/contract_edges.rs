@@ -15,13 +15,14 @@
 
 use serde_json::{Value, json};
 use sve_scenario_runner::compare::{
-    assert_value, awaiting, events_exact, events_subsequence, exact, forbidden_hit, subset,
+    assert_value, awaiting, awaiting_first_stage, events_exact, events_subsequence, exact,
+    forbidden_hit, subset,
 };
 use sve_scenario_runner::model::parse_question;
 use sve_scenario_runner::runner::{Failure, ScenarioReport, summary};
 use sve_scenario_runner::{
-    Engine, EngineError, Fixture, RunOptions, Selection, Step, Verdict, View, load_dir,
-    parse_selection, run, score_g1,
+    AwaitingMode, Engine, EngineError, Fixture, RunOptions, Selection, Step, Verdict, View,
+    load_dir, parse_selection, run, score_g1,
 };
 
 fn arr(v: Value) -> Vec<Value> {
@@ -201,6 +202,119 @@ fn choices_must_be_the_exact_option_set() {
     assert!(awaiting(View::Omniscient, &want, Some(&same)));
     assert!(!awaiting(View::Omniscient, &want, Some(&missing)));
     assert!(!awaiting(View::P1, &want, Some(&extra_field)));
+}
+
+#[test]
+fn first_stage_cuts_only_fields_of_later_questions() {
+    let pending = json!({"ability": {"source": "a1", "line": 1}});
+    let want = json!({"by": "P1", "choices": [
+        {"do": "choose-pending", "pending": pending, "targets": {"1": ["b1"]}},
+        {"do": "choose-pending", "pending": pending, "targets": {"1": ["b2"]}},
+        {"do": "resolve-choice", "choice": "execute", "select": ["d1"]},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]});
+    let fields = json!({"choose-pending": ["pending"], "resolve-choice": ["choice"]});
+    let serial = json!({"by": "P1", "fields": fields, "choices": [
+        {"do": "choose-pending", "pending": pending},
+        {"do": "resolve-choice", "choice": "execute"},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]});
+    assert!(awaiting_first_stage(View::Omniscient, &want, Some(&serial)));
+    assert!(!awaiting(View::Omniscient, &want, Some(&serial)));
+    // A different first question still fails: the cut keeps the deciding field.
+    let other = json!({"by": "P1", "fields": fields, "choices": [
+        {"do": "choose-pending", "pending": {"ability": {"source": "a2", "line": 1}}},
+        {"do": "resolve-choice", "choice": "execute"},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]});
+    assert!(!awaiting_first_stage(View::Omniscient, &want, Some(&other)));
+    let missing = json!({"by": "P1", "fields": fields,
+        "choices": [{"do": "choose-pending", "pending": pending}]});
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &want,
+        Some(&missing)
+    ));
+    // Without a declaration nothing is cut.
+    let undeclared = json!({"by": "P1", "choices": serial["choices"]});
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &want,
+        Some(&undeclared)
+    ));
+}
+
+#[test]
+fn first_stage_keeps_every_field_the_current_question_answers() {
+    // One question accepts a drive trigger and picks its target together.
+    let drive_fields = json!({"resolve-choice": ["choice", "select"]});
+    let drive = json!({"by": "P1", "choices": [
+        {"do": "resolve-choice", "choice": "execute", "select": ["a1"]},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]});
+    let offered = |choices: Value| json!({"by": "P1", "fields": drive_fields, "choices": choices});
+    assert!(awaiting_first_stage(
+        View::Omniscient,
+        &drive,
+        Some(&offered(drive["choices"].clone()))
+    ));
+    let other_target = offered(json!([
+        {"do": "resolve-choice", "choice": "execute", "select": ["b1"]},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]));
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &drive,
+        Some(&other_target)
+    ));
+    let no_target = offered(json!([
+        {"do": "resolve-choice", "choice": "execute"},
+        {"do": "resolve-choice", "choice": "decline"},
+    ]));
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &drive,
+        Some(&no_target)
+    ));
+    // One question picks the card and its deck edge together.
+    let edge_fields = json!({"resolve-choice": ["select", "position"]});
+    let edges = json!({"by": "P1", "choices": [
+        {"do": "resolve-choice", "select": ["h1"], "position": "top"},
+        {"do": "resolve-choice", "select": ["h1"], "position": "bottom"},
+    ]});
+    let placed = |choices: Value| json!({"by": "P1", "fields": edge_fields, "choices": choices});
+    assert!(awaiting_first_stage(
+        View::Omniscient,
+        &edges,
+        Some(&placed(edges["choices"].clone()))
+    ));
+    let bottom_only = placed(json!([
+        {"do": "resolve-choice", "select": ["h1"], "position": "bottom"},
+    ]));
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &edges,
+        Some(&bottom_only)
+    ));
+    let no_edge = placed(json!([{"do": "resolve-choice", "select": ["h1"]}]));
+    assert!(!awaiting_first_stage(
+        View::Omniscient,
+        &edges,
+        Some(&no_edge)
+    ));
+}
+
+#[test]
+fn first_stage_keeps_unparameterised_choices_whole() {
+    let want = json!({"by": "P1", "choices": [
+        {"do": "place-acted", "object": "a1", "acted": true},
+        {"do": "pass"},
+    ]});
+    let cut =
+        json!({"by": "P1", "choices": [{"do": "place-acted", "object": "a1"}, {"do": "pass"}]});
+    assert!(!awaiting_first_stage(View::Omniscient, &want, Some(&cut)));
+    assert!(awaiting_first_stage(View::Omniscient, &want, Some(&want)));
+    assert_eq!(AwaitingMode::default(), AwaitingMode::Complete);
 }
 
 // --- runner behaviour, with a scripted engine ---
@@ -397,6 +511,7 @@ fn unverified_questions_are_not_scored_when_required() {
     let mut engine = Script::new(vec![]);
     let options = RunOptions {
         require_verified: true,
+        awaiting: AwaitingMode::Complete,
     };
     let reports = run(&mut engine, &[q], None, options).unwrap();
     assert!(matches!(reports[0].verdict, Verdict::Ineligible { .. }));
@@ -412,6 +527,7 @@ fn unconfirmed_card_facts_are_not_scored_when_required() {
     let mut engine = Script::new(vec![]);
     let options = RunOptions {
         require_verified: true,
+        awaiting: AwaitingMode::Complete,
     };
     let reports = run(&mut engine, &[q], None, options).unwrap();
     assert!(matches!(reports[0].verdict, Verdict::Ineligible { .. }));

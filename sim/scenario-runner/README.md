@@ -66,7 +66,14 @@ Where the contract is silent, the runner uses the following:
 - **Event range**: runs from the previous distinct checkpoint to this one; views at one checkpoint share it
 - **Placeholders**: a placeholder must be exactly `{filler: n}`; one carrying an id or any other field is not unidentified
 - **`group`**: every group label must be one contiguous block in the engine's event stream, whether or not the question mentions that group
-- **`awaiting`**: same player; `choices` equal the complete option set field for field; from the other player's view no `choices` may be sent
+- **`awaiting`**: same player; `choices` equal the complete option set field for field; from the other player's view no `choices` may be sent.
+  An engine that asks declaration parameters one question at a time runs with `RunOptions::awaiting = AwaitingMode::FirstStage`:
+  the engine's `awaiting.fields` declares, per verb, the fields its current question answers together, from the native
+  question shape (`{"resolve-choice": ["choice", "select"]}` for a drive trigger, `["select", "position"]` for a card and
+  its deck edge). Each written `choose-pending`, `play`, `activate`, `evolve` or `resolve-choice` choice keeps only the
+  declared fields, equal ones collapse, and the sets must be equal; a declared field missing from the engine's choices is
+  a mismatch. Without a declaration nothing is cut. Fields of later questions are compared at the checkpoints that wait
+  on them
 - **Hidden information**: no hidden object's id may appear anywhere in the viewer's projection or `awaiting` output. Its card number may not appear either, unless another card with that number is one the viewer can identify
 - **YAML**: booleans are YAML 1.2 (`true`/`false` only), so ids such as `y` or `on` stay strings. The question set parses identically with PyYAML
 
