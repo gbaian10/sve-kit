@@ -1,0 +1,80 @@
+cards:
+  BP04-041:
+    abilities:
+      - attack_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 1
+                  who: self
+            - optional:
+                do:
+                  - move:
+                      ref:
+                        in: seen
+                      to: cemetery
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: first
+                from:
+                  in: seen
+                n: 1
+            - move:
+                ref: first
+                result: one
+                to: hand
+            - choose:
+                bind: second
+                from:
+                  in: seen
+                n: 1
+            - move:
+                ref: second
+                result: two
+                to: cemetery
+            - choose:
+                bind: third
+                from:
+                  in: seen
+                n: 1
+            - move:
+                order: chooser
+                position: top
+                ref: third
+                result: three
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    any_of:
+                      - in:
+                          objects_of: one
+                          view: before
+                      - in:
+                          objects_of: two
+                          view: before
+                      - in:
+                          objects_of: three
+                          view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

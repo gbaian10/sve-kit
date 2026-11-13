@@ -1,0 +1,62 @@
+cards:
+  BP02-037:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 大地の魔片
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do:
+            - buff:
+                hp: -2
+                on: enemy
+                power: -2
+          quick: true
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - earth_rite: 1
+          do:
+            - buff:
+                hp: 2
+                on: ally
+                power: 2
+          quick: true
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP07-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

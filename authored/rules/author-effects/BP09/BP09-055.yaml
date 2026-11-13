@@ -1,0 +1,30 @@
+cards:
+  BP09-055:
+    abilities:
+      - evolve:
+          cost:
+            pp: 5
+          into:
+            - 聖竜・リントヴルム
+            - 邪竜・リントヴルム
+        line: 1
+      - fanfare:
+          do:
+            - pp:
+                delta:
+                  count:
+                    class: ドラゴン
+                    kind: spell
+                    who: self
+                    zone: cemetery
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

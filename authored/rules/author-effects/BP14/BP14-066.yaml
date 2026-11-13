@@ -1,0 +1,68 @@
+cards:
+  BP14-066:
+    abilities:
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: 宴楽
+                may: true
+                n: 1
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: top
+                ref: picked
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    any_of:
+                      - in:
+                          objects_of: placed
+                          view: before
+                  in: seen
+                to: deck
+        line: 1
+      - activate:
+          cost:
+            counter:
+              holders: 1
+              n: 2
+              name: 神湯カウンター
+              on:
+                name: 竜山温泉
+                who: self
+                zone: field
+          do:
+            - buff:
+                hp: 0
+                on: this
+                power: 1
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          per_turn: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

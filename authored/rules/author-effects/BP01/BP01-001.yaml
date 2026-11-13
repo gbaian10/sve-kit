@@ -1,0 +1,42 @@
+cards:
+  BP01-001:
+    abilities:
+      - fanfare:
+          do:
+            - choose:
+                any: true
+                bind: fairies
+                from:
+                  kind: follower
+                  trait: 妖精
+                  who: self
+                  zone: ex
+            - transform:
+                into: 薔薇の一撃
+                ref: fairies
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - pp:
+                delta:
+                  count:
+                    name: 薔薇の一撃
+                    who: self
+                    zone: ex
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP01-T01
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

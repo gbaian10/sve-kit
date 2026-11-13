@@ -1,0 +1,41 @@
+cards:
+  BP11-032:
+    abilities:
+      - fanfare:
+          cost:
+            pp: x
+          do:
+            - create:
+                n: x
+                to: field
+                token: スティールナイト
+          x: {}
+        line: 1
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - rush
+                  - assail
+                on:
+                  class: ロイヤル
+                  kind: follower
+                  who: self
+                  zone: field
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP11-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

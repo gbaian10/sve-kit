@@ -1,0 +1,68 @@
+cards:
+  BP05-105:
+    abilities:
+      - keywords:
+          - drain
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+          on:
+            played:
+              sel:
+                class: ニュートラル
+              who: self
+        line: 2
+      - fanfare:
+          cost:
+            pp: 3
+          do:
+            - search:
+                groups:
+                  - n: 1
+                    sel:
+                      name: 飢餓の使徒
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      name: 飢餓の輝き
+                      who: self
+                      zone: deck
+                to: ex
+        line: 3
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          resource:
+                            kind: pp_max
+                            who: self
+                        op: eq
+                        right: 10
+                    - cmp:
+                        left:
+                          resource:
+                            kind: pp_max
+                            who: opp
+                        op: eq
+                        right: 10
+                then:
+                  - draw:
+                      n: 3
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
