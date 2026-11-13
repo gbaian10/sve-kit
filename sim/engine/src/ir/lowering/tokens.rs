@@ -271,6 +271,7 @@ impl BodyContext<'_> {
         self.scope = self.card_allocator.scope(path)?;
         let player = Binding::new(self.allocator.id(path)?, self.scope);
         self.players.insert(each.binding.clone(), player);
+        let outer = self.procedure_player.replace(player);
         let mut stages = Vec::new();
         let result: Result<(), LoweringError> = (|| {
             for (index, stage) in each.stages.iter().enumerate() {
@@ -299,6 +300,7 @@ impl BodyContext<'_> {
             Ok(())
         })();
         self.players.remove(&each.binding);
+        self.procedure_player = outer;
         self.restore_bindings(saved);
         self.scope = parent;
         result?;

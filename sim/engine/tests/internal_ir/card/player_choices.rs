@@ -676,3 +676,6 @@ fn a_nested_procedure_shuffles_the_deck_its_action_names() {
         assert_eq!(ids(&state, "P1", "field"), ["s"], "who={who}");
     }
 }
+
+#[path = "player_gifts.rs"]
+mod gifts;

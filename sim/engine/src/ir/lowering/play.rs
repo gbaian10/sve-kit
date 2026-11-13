@@ -1225,6 +1225,7 @@ impl BodyContext<'_> {
                 source_use: self.source_use,
                 counter_read_view: self.counter_read_view,
                 players: self.players.clone(),
+                procedure_player: self.procedure_player,
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
                 evolution: None,
@@ -1593,6 +1594,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Act(_)
         | ast::Step::Stand(_)
         | ast::Step::Steal(_)
+        | ast::Step::Give(_)
         | ast::Step::FlipDown(_)
         | ast::Step::Buff(_)
         | ast::Step::Grant(_)

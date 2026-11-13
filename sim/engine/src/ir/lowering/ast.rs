@@ -429,6 +429,7 @@ pub(super) enum Step {
     Act(ObjectAction),
     Stand(ObjectAction),
     Steal(Steal),
+    Give(Give),
     FlipDown(ObjectAction),
     Buff(Modify),
     Grant(Grant),
@@ -1161,6 +1162,15 @@ pub(super) enum Side {
 }
 
 impl Side {
+    fn named(name: &str) -> Self {
+        match name {
+            "self" => Self::Controller,
+            "opp" => Self::Opponent,
+            "all" => Self::All,
+            name => Self::Bound(name.to_owned()),
+        }
+    }
+
     /// The relation to the effect controller; a procedure's player has none.
     pub(super) const fn relation(&self) -> Option<super::super::PlayerRelation> {
         match self {
@@ -1177,12 +1187,7 @@ impl<'de> Deserialize<'de> for Side {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(match String::deserialize(deserializer)?.as_str() {
-            "self" => Self::Controller,
-            "opp" => Self::Opponent,
-            "all" => Self::All,
-            name => Self::Bound(name.to_owned()),
-        })
+        Ok(Self::named(&String::deserialize(deserializer)?))
     }
 }
 
@@ -3911,4 +3916,31 @@ pub(super) struct BanishPermissionCards {
 #[serde(deny_unknown_fields)]
 pub(super) struct Steal {
     pub r#ref: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Give {
+    pub r#ref: String,
+    pub to: GiveRecipient,
+}
+
+/// `other_players` are the players other than the giving one; any other name is one player.
+pub(super) enum GiveRecipient {
+    OtherPlayers,
+    Player(Side),
+}
+
+impl<'de> Deserialize<'de> for GiveRecipient {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let name = String::deserialize(deserializer)?;
+        Ok(if name == "other_players" {
+            Self::OtherPlayers
+        } else {
+            Self::Player(Side::named(&name))
+        })
+    }
 }
