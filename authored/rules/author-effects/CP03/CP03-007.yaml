@@ -1,0 +1,46 @@
+cards:
+  CP03-007:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -6
+            if:
+              history:
+                at_least: 3
+                event: attacked
+                sel:
+                  kind: follower
+                  trait: アクアフォース
+                who: self
+                window: this_turn
+      - keywords:
+          - twin_drive
+        line: 2
+      - fanfare:
+          do:
+            - destroy:
+                ref: enemy
+                result: broken
+            - damage:
+                n:
+                  count_of: broken
+                to:
+                  leader: opp
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,28 @@
+cards:
+  CP03-072:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                what: attack
+      - auto:
+          do:
+            - apply:
+                effect:
+                  lose_abilities: {}
+                on: this
+                until: turn
+          on:
+            drive_trigger:
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

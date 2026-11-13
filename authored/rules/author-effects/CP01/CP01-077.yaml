@@ -1,0 +1,45 @@
+cards:
+  CP01-077:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  trait: メジロ家
+                  who: self
+                  zone: deck
+                to: hand
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    name: おどれ・さわげ・フェスれ！
+                    who: self
+                    zone: cemetery
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 1
+                  - grant:
+                      keywords:
+                        - rush
+                      on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,38 @@
+cards:
+  CP01-017:
+    abilities:
+      - feed:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - storm
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  all:
+                    - exists:
+                        name: 検証、開始
+                        who: self
+                        zone: cemetery
+                    - exists:
+                        name: ナリタタイシン
+                        who: self
+                        zone: cemetery
+                then:
+                  - buff:
+                      hp: 1
+                      on: this
+                      power: 3
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

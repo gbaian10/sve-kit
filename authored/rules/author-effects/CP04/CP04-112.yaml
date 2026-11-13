@@ -1,0 +1,48 @@
+cards:
+  CP04-112:
+    abilities:
+      - fanfare:
+          do:
+            - move:
+                ref: allies
+                result: entered
+                to: field
+          targets:
+            - bind: allies
+              distinct_by: name
+              from:
+                kind: follower
+                orig_cost_le: 2
+                who: self
+                zone: cemetery
+              upto: 3
+          ub: true
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on:
+                  event: holder
+                power: 1
+          on:
+            ub_activated:
+              holder:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              who: self
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
