@@ -121,7 +121,9 @@ CR 7.2.5 的 start 檢查完整結束、對局尚未終局，才在 7.3.1 發一
 `game/opening.rs` 的首回合入口與 `game/rules.rs` 的正常回合入口現在只收集
 舊 `main_start`；D1 要接到既有 typed Phase／pending 程序。不能只擴充
 `internal_end_event` 的比對，卻漏掉 producer 或首回合。
-BP01-083「各プレイヤーは、自身の…」涉及每位玩家執行者，不降為本片 each 的同義式。
+BP01-083「各プレイヤーは、自身の…」寫成 `whose: turn`：main phase 永遠屬於回合玩家，所以等於每位玩家自己的 main phase，lowering 與 each 一樣不限制玩家。
+能力 controller 仍是護符的 controller（Q204），本體以 `turn` 指名當時的回合玩家：
+他看自己的牌頂（`look.by: turn`）、從看過的牌選擇，並把選中的從者放到自己的場上。
 
 ## 5. 自身離場
 

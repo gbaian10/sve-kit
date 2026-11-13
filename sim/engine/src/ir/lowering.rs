@@ -1177,7 +1177,7 @@ fn phase_subscription(
     let player = match phase.whose {
         ast::PhasePlayer::Controller => Some(PlayerRef::Controller {}),
         ast::PhasePlayer::Opponent => Some(super::events::timing::opponent()),
-        ast::PhasePlayer::Each => None,
+        ast::PhasePlayer::Each | ast::PhasePlayer::Turn => None,
     };
     EventPattern::Phase {
         binding: event,
@@ -1293,6 +1293,7 @@ struct LocalBindings {
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     observations: BTreeMap<String, super::ObjectReceipt>,
+    look_viewers: BTreeMap<String, PlayerRef>,
     observed_targets: BTreeSet<String>,
     field_entry_multi: BTreeSet<String>,
     searches: BTreeSet<String>,
@@ -1430,6 +1431,8 @@ struct BodyContext<'definitions> {
     players: BTreeMap<String, Binding<PlayerRef>>,
     /// The innermost enclosing procedure's player, from whose perspective `other_players` reads.
     procedure_player: Option<Binding<PlayerRef>>,
+    /// Who privately looked at each named Look, the only player who may choose from it.
+    look_viewers: BTreeMap<String, PlayerRef>,
     searches: BTreeSet<String>,
     ex_outputs: BTreeMap<String, Selector>,
     field_outputs: BTreeMap<String, FieldOutput>,
@@ -1512,6 +1515,7 @@ impl<'definitions> BodyContext<'definitions> {
             definitions: &body.define,
             players: BTreeMap::new(),
             procedure_player: None,
+            look_viewers: BTreeMap::new(),
             searches: BTreeSet::new(),
             ex_outputs: BTreeMap::new(),
             field_outputs: BTreeMap::new(),
@@ -1697,6 +1701,7 @@ impl<'definitions> BodyContext<'definitions> {
             targets: self.targets.clone(),
             recipient_targets: self.recipient_targets.clone(),
             observations: self.observations.clone(),
+            look_viewers: self.look_viewers.clone(),
             observed_targets: self.observed_targets.clone(),
             field_entry_multi: self.field_entry.multi.clone(),
             searches: self.searches.clone(),
@@ -1718,6 +1723,7 @@ impl<'definitions> BodyContext<'definitions> {
         self.targets = saved.targets;
         self.recipient_targets = saved.recipient_targets;
         self.observations = saved.observations;
+        self.look_viewers = saved.look_viewers;
         self.observed_targets = saved.observed_targets;
         self.field_entry.multi = saved.field_entry_multi;
         self.searches = saved.searches;
@@ -2096,16 +2102,24 @@ impl<'definitions> BodyContext<'definitions> {
             }
             ast::Step::Shuffle(value) => self.shuffle(value, path),
             ast::Step::Look(value) => {
-                if !matches!(
-                    value.top.who,
-                    ast::DeckHolder::Side(ast::LeaderSide::Controller)
-                ) {
+                let holder = match &value.top.who {
+                    ast::DeckHolder::Side(ast::LeaderSide::Controller) => PlayerRef::Controller {},
+                    ast::DeckHolder::Bound(name) => self.named_player(name, path)?,
+                    ast::DeckHolder::Side(ast::LeaderSide::Opponent)
+                    | ast::DeckHolder::Group(_)
+                    | ast::DeckHolder::OwnerOf { .. } => return Err(unsupported(path)),
+                };
+                // `by` defaults to the effect controller; a private look at another player's
+                // deck has no viewer authority.
+                let viewer = self.participant(value.by.as_ref(), path)?;
+                if viewer != holder {
                     return Err(unsupported(path));
                 }
+                self.look_viewers.insert(value.bind.clone(), viewer.clone());
                 Ok(Action::Look {
-                    viewer: PlayerRef::Controller {},
+                    viewer,
                     zone: super::ZoneRef {
-                        player: PlayerRef::Controller {},
+                        player: holder,
                         kind: ZoneKind::Deck,
                     },
                     count: Expr::Literal(Nat(value.top.n)),

@@ -812,8 +812,8 @@ pub(super) enum SetLifeHolder {
 pub(super) struct Look {
     pub top: DeckTop,
     pub bind: String,
-    #[serde(rename = "by")]
-    pub _by: Option<SelfPlayer>,
+    /// Who looks; only the deck's own holder may look at it privately.
+    pub by: Option<Participant>,
 }
 
 #[derive(Deserialize)]
@@ -2462,6 +2462,9 @@ pub(super) enum PhasePlayer {
     Opponent,
     #[serde(rename = "each")]
     Each,
+    /// A phase always belongs to the turn player, so this is every player's own phase.
+    #[serde(rename = "turn")]
+    Turn,
 }
 
 #[derive(Deserialize)]

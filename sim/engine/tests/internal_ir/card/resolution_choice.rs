@@ -179,7 +179,6 @@ fn resolution_amulet_choice_reuses_public_handles_and_destroy() {
 fn resolution_choice_rejects_hidden_sources_invalid_actors_and_optional_instructions() {
     for choice in [
         json!({"bind":"t","from":{"who":"opp","zone":"hand"},"n":1}),
-        json!({"bind":"t","from":{"who":"opp","zone":"field"},"n":1,"by":"turn"}),
         json!({"bind":"t","from":{"who":"opp","zone":"field"},"n":1,"may":true}),
         json!({"bind":"t","from":{"who":"opp","zone":"field"},"n":0}),
     ] {

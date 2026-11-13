@@ -301,8 +301,10 @@ OnSuperEvolve 在受驗超進化付款及加值後，與 OnEvolve 共用同一 E
 DamageAmount 只准入自身已綁定 Damage 事件的有限讀值路徑，不授權 closed Program 偽造事件。
 
 DSL 的 `whose=each` 尚不符合現有 A.player-ref schema，DSL lowering 維持拒絕；
-內部 typed Phase 可表示不限制回合玩家。其他物件監看、LifeChange、一般 Move 訂閱、
-Grant／Delay、非 Field 入口、離場取代與 BP01-083 均維持拒絕。
+`whose=turn`（每位玩家自己的 main phase）與內部 typed Phase 一樣不限制回合玩家。
+私有 Look 的 viewer 必須是牌庫持有者，可以是效果 controller、程序玩家或回合玩家；
+只有 viewer 能從看過的牌中選擇，選中的牌放到該 viewer 的場上。其他物件監看、
+LifeChange、一般 Move 訂閱、Grant／Delay、非 Field 入口與離場取代均維持拒絕。
 
 ### Quick 窗口
 

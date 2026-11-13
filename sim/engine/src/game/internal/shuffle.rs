@@ -63,7 +63,7 @@ impl Game {
         };
         self.shuffle(seat, &ids)?;
         if matches!(scope, ShuffleScope::FullZone {}) {
-            execution.look_viewers.clear();
+            execution.retain_look_viewers(|_| false);
             execution.record_fact(self, Fact::Shuffled { player });
         }
         if let Some(receipt) = shuffle::consumed(&instruction.action) {

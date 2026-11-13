@@ -1226,6 +1226,7 @@ impl BodyContext<'_> {
                 counter_read_view: self.counter_read_view,
                 players: self.players.clone(),
                 procedure_player: self.procedure_player,
+                look_viewers: self.look_viewers.clone(),
                 leave_event: self.leave_event,
                 entry_event: self.entry_event,
                 evolution: None,

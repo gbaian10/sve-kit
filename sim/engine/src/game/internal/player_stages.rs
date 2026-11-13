@@ -219,6 +219,10 @@ struct Locals {
     slots: Vec<((ScopeId, u64), Slot)>,
     targets: Vec<((ScopeId, u64), super::card::selection::TargetWait)>,
     receipts: Vec<(ReceiptId, InstructionOutcome)>,
+    // A Look receipt keeps its viewer and the candidate identities captured when it looked;
+    // knowledge still revokes the observation after a shuffle or other deck change.
+    look_viewers: Vec<(ReceiptId, PlayerId)>,
+    receipt_links: Vec<(ReceiptId, super::player::CandidateLinks)>,
 }
 
 /// Every lexical scope and receipt slot a procedure's stage bodies can produce.
@@ -296,6 +300,17 @@ impl Execution {
     }
 
     /// Switching an outer procedure's player ends every procedure nested inside it.
+    /// Revoking a look also reaches the looks saved for procedure players not acting now, so
+    /// a later look cannot revive one that a shuffle or deck change ended.
+    pub(super) fn retain_look_viewers(&mut self, keep: impl Fn(PlayerId) -> bool) {
+        self.look_viewers.retain(|_, viewer| keep(*viewer));
+        for procedure in &mut self.procedures {
+            for locals in procedure.saved.values_mut() {
+                locals.look_viewers.retain(|(_, viewer)| keep(*viewer));
+            }
+        }
+    }
+
     pub(super) fn switch_procedure_player(&mut self, key: (ScopeId, u64), next: PlayerId) {
         let Some(index) = self
             .procedures
@@ -313,6 +328,10 @@ impl Execution {
             slots: take(&mut self.slots, local),
             targets: take(&mut self.targets, local),
             receipts: take(&mut self.receipts, |id| procedure.receipts.contains(id)),
+            look_viewers: take(&mut self.look_viewers, |id| procedure.receipts.contains(id)),
+            receipt_links: take(&mut self.player_receipt_links, |id| {
+                procedure.receipts.contains(id)
+            }),
         };
         if let Some(Slot::Player(previous)) = self.slots.get(&key) {
             procedure.saved.insert(previous.seat, current);
@@ -321,6 +340,8 @@ impl Execution {
         self.slots.extend(own.slots);
         self.targets.extend(own.targets);
         self.receipts.extend(own.receipts);
+        self.look_viewers.extend(own.look_viewers);
+        self.player_receipt_links.extend(own.receipt_links);
         self.procedures.push(procedure);
     }
 }

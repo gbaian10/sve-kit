@@ -872,7 +872,7 @@ impl Game {
         let seat = seat_name(player)?;
         let remaining = self.internal_known_deck(seat)?;
         self.shuffle(seat, &remaining)?;
-        execution.look_viewers.clear();
+        execution.retain_look_viewers(|_| false);
         execution.record_fact(self, Fact::Shuffled { player });
         execution
             .receipts

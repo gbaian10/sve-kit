@@ -72,9 +72,19 @@ pub(crate) fn private_look_choice(decision: &Decision) -> bool {
         constraint.groups.iter().all(|group| matches!(&group.selector,
             Selector::Filter { input, .. } if observation::classify(input, Consumer::Choice, Position::Input).is_some()
         ))
-    }) && decision.actor == (PlayerRef::Controller {})
+    }) && looker(&decision.actor)
         && matches!(&decision.visibility, Visibility::Only { players }
             if players.relation == PlayerRelation::SelfPlayer && players.relative_to == decision.actor)
+}
+
+/// A private look is chosen from by a player its Look could name as the viewer: the effect
+/// controller, a procedure's player or the turn player. The executor still requires that
+/// player to have looked at each candidate.
+const fn looker(actor: &PlayerRef) -> bool {
+    matches!(
+        actor,
+        PlayerRef::Controller {} | PlayerRef::Bound { .. } | PlayerRef::Active {}
+    )
 }
 
 /// Members of one public reveal: the observed choice bounds, shown to every player.
