@@ -2,8 +2,10 @@
 
 mod architecture;
 mod intelligence;
+mod typed;
 pub use architecture::{AssistAdapter, ReplayAdapter};
 pub use intelligence::AiAdapter;
+pub use typed::TypedAdapter;
 
 use alloc::sync::Arc;
 
