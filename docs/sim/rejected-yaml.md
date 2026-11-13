@@ -4,15 +4,13 @@
 檢查每張卡。不通過的卡記在 `Catalog::rejections()`（`檔案:行: 訊息`），**永不執行**：
 任何用到它的操作都回 `Unsupported("card program rejected at load: …")`。
 
-先由公開 `card-data/` 產生本次使用的 JP 輸入；批次取自 `tests/engine/card-input.json`
-的 `batch_id`，輸入與輸出使用絕對路徑，輸出檔必須尚不存在。從 repo 根目錄執行：
+從 repo 根目錄以測試包裝執行共用測試，它會產生公開 JP 輸入、跑完後刪除：
 
 ```bash
-uv run --directory carddb --locked sve-carddb parsed-cards engine-fixture /absolute/path/to/card-data '<tests/engine/card-input.json 的 batch_id>' /absolute/path/to/new-cards.jsonl
-cargo run --locked -p sve-engine --bin sve-prototype -- /absolute/path/to/new-cards.jsonl . validate target/validate
+python3 .github/ci/rust_tests.py test --locked -p sve-engine --test shared
 ```
 
-產出的 JSONL 為暫存測試輸入，驗證完成後可刪除。
+`sve-prototype` 的 `validate` 模式在目前的作者庫下已無法執行，預定隨舊原型出口一併移除。
 
 機器可讀清單在 [rejected-yaml.yaml](../../tests/engine/rejected-yaml.yaml)；共用測試
 `authored_yaml_loads_or_is_a_listed_rejection` 要求實際結果與清單完全相同（多一張、少一張都失敗）。
