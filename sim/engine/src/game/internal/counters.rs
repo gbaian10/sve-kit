@@ -273,12 +273,15 @@ impl Game {
                 ));
             }
         }
+        let current = self.object(&id)?;
         if !payment
             && !matches!(object, ObjectOperand::SourceHolder {})
-            && self.object(&id)?.generation != reference.generation.0
+            && current.generation != reference.generation.0
+            && !matches!(current.zone.as_str(), "field" | "ex")
         {
-            // A chosen holder that changed zones, such as a source paid away, is no longer there;
-            // the effect's own source keeps rejecting so its earlier steps roll back.
+            // A chosen holder now outside Field and EX, such as a source paid to the deck, cannot
+            // hold counters, so the instruction does nothing. A new Field or EX object still
+            // rejects: following it needs an explicit `follow`, and the source rolls back.
             execution.receipts.insert(
                 instruction.receipt,
                 InstructionOutcome::Counter(CounterChangeEvent {
