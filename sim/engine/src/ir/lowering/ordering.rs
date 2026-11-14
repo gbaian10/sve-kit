@@ -682,12 +682,24 @@ impl BodyContext<'_> {
             },
             path,
         )?;
+        self.observed_destination(value, cards, path)
+    }
+
+    fn observed_destination(
+        &mut self,
+        value: &ast::Move,
+        cards: Selector,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
         match value.to {
             ast::Destination::Ex if value.position.is_none() && value.order.is_none() => {
                 Ok(shared_put(cards, ZoneKind::Ex))
             }
             ast::Destination::Cemetery if value.position.is_none() && value.order.is_none() => {
                 Ok(owner_put(cards, OwnerZone::Cemetery))
+            }
+            ast::Destination::Hand if value.position.is_none() && value.order.is_none() => {
+                Ok(owner_put(cards, OwnerZone::Hand))
             }
             ast::Destination::Deck if value.order.is_some() => {
                 self.observed_order(cards, value.position.as_ref(), path)

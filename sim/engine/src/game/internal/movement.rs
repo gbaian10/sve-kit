@@ -321,7 +321,7 @@ pub(super) fn observed_move(action: &Action) -> bool {
         && matches!(action, Action::Move { objects, movement, .. }
         if matches!(&movement.to, MoveDestination::Shared { zone }
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex)
-            || (movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
+            || (matches!(movement.to, MoveDestination::Owners {zone: OwnerZone::Cemetery | OwnerZone::Hand})
                 && observation::visit(objects, Consumer::ObservedMove, &mut |_| {})))
 }
 

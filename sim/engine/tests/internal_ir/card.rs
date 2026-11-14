@@ -1027,3 +1027,6 @@ mod spell_origin;
 mod source_counter_quantity;
 #[path = "card/target_role_objects.rs"]
 mod target_role_objects;
+
+#[path = "card/observed_hand_remainder.rs"]
+mod observed_hand_remainder;
