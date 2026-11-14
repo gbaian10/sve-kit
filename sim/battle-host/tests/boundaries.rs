@@ -2,7 +2,6 @@
 
 #![expect(
     clippy::unwrap_used,
-    clippy::panic,
     reason = "A malformed synthetic fixture or an unexpected message invalidates these tests."
 )]
 
