@@ -1,4 +1,4 @@
-//! Physical movement and successful receipt projections; full replacement chains remain closed.
+//! Physical movement, live banish replacements and successful receipt projections.
 
 use super::{
     Execution, Fact, Game, InstructionOutcome, Result, int, invalid, player_id, unsupported,
@@ -12,7 +12,7 @@ use crate::ir::perspective;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
-    DestroyOutcome, DurationEnd, Effect, EffectSource, Expr, Generation, Instruction,
+    DestroyOutcome, DurationEnd, Effect, EffectId, EffectSource, Expr, Generation, Instruction,
     InstructionContext, MoveDestination, MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec,
     MovementEvent, Nat, Node, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef,
     PlayerRelation, Polarity, Position, PositiveNat, Posture, ResultMember, ResultMemberId,
@@ -39,6 +39,7 @@ struct PlannedMove {
     followup: Option<&'static str>,
     evolution: Option<(String, u64)>,
     stack_replaced: bool,
+    banish_replaced: bool,
 }
 
 struct MovementPlan {
@@ -1100,11 +1101,14 @@ impl Game {
             {
                 continue;
             }
+            let stack_replaced = self.stack_replaces_departure(&id, zone)?;
+            let banish_replaced =
+                !stack_replaced && self.internal_banish_replaces_move(&id, zone)?;
+            let actual_zone = if banish_replaced { "banish" } else { zone };
             let evolution = self.departing_evolution(&previous)?;
             let followup =
-                self.departure_followup(execution, &previous, zone, evolution.is_some())?;
+                self.departure_followup(execution, &previous, actual_zone, evolution.is_some())?;
 
-            let stack_replaced = self.stack_replaces_departure(&id, zone)?;
             plans.push(PlannedMove {
                 result_index: moves.len().saturating_sub(1),
                 id,
@@ -1113,6 +1117,7 @@ impl Game {
                 followup,
                 evolution,
                 stack_replaced,
+                banish_replaced,
             });
         }
         Ok(MovementPlan { moves, plans })
@@ -1354,6 +1359,16 @@ impl Game {
             &ids,
             super::super::player::events::MovementMethod::Effect(method),
         );
+        let redirected = plans
+            .iter()
+            .filter(|plan| plan.banish_replaced)
+            .map(|plan| plan.id.clone())
+            .collect::<Vec<_>>();
+        self.player_movement_method(
+            player_mark,
+            &redirected,
+            super::super::player::events::MovementMethod::Effect(MoveMethod::Banish),
+        );
         self.check_created_ex_arrivals(created)?;
         if kind == ZoneKind::Hand {
             // As with draws, the public card stays known but its new hand slot is not located.
@@ -1384,9 +1399,11 @@ impl Game {
             followup,
             evolution,
             stack_replaced,
+            banish_replaced,
         } in plans
         {
             self.check_evolution_return(evolution.as_ref())?;
+            let actual_zone = if banish_replaced { "banish" } else { zone };
             let current = self.object(&id)?;
             if stack_replaced {
                 check_stack_replacement(&previous, current)?;
@@ -1398,7 +1415,7 @@ impl Game {
                 != previous
                     .generation
                     .saturating_add(if followup.is_some() { 2 } else { 1 })
-                || current.zone != followup.unwrap_or(zone)
+                || current.zone != followup.unwrap_or(actual_zone)
                 || player_id(&self.object(&id)?.controller)?
                     != moves
                         .get(index)
@@ -1415,6 +1432,7 @@ impl Game {
                 .ok_or_else(|| invalid("missing movement result"))?;
             result.after = Some(after);
             result.actual_to = Some(result.requested_to);
+            self.stamp_banish_replacement(result, &previous, banish_replaced)?;
             if kind == ZoneKind::Deck && followup.is_none() {
                 result.actual_position = self
                     .object_position(&id)?
@@ -1432,7 +1450,11 @@ impl Game {
                         player: controller_before,
                         kind: from_kind,
                     },
-                    method,
+                    method: if banish_replaced {
+                        MoveMethod::Banish
+                    } else {
+                        method
+                    },
                     cause: Cause::Effect {
                         execution: execution.id,
                     },
@@ -1443,7 +1465,8 @@ impl Game {
             if matches!(
                 method,
                 MoveMethod::Destroy | MoveMethod::Banish | MoveMethod::Discard
-            ) {
+            ) && !banish_replaced
+            {
                 successful.push(ResultMember {
                     id: ResultMemberId(u64::try_from(index).map_err(invalid)?),
                     before: Some(RuntimeObjectView {
@@ -1457,7 +1480,7 @@ impl Game {
                     }),
                 });
             }
-            if method == MoveMethod::Destroy {
+            if method == MoveMethod::Destroy && !banish_replaced {
                 let player_step = self.emit(
                     json!({"kind":"破壊","object":id,"source":frame.source}),
                     &frame.cause,
@@ -1482,6 +1505,29 @@ impl Game {
             self.invalidate_deck_observations(execution, &moves, &old_deck)?;
         }
         Ok((moves, successful))
+    }
+
+    fn stamp_banish_replacement(
+        &mut self,
+        result: &mut MoveResult,
+        previous: &Object,
+        replaced: bool,
+    ) -> Result<()> {
+        if replaced {
+            result.actual_to = Some(RuntimeZoneRef {
+                player: player_id(&previous.owner)?,
+                kind: ZoneKind::Banish,
+            });
+            result
+                .replacements
+                .push(EffectId(self.state.next_ir_effect));
+            self.state.next_ir_effect = self
+                .state
+                .next_ir_effect
+                .checked_add(1)
+                .ok_or_else(|| invalid("replacement identity exhausted"))?;
+        }
+        Ok(())
     }
 
     fn filter_owner_ex_arrivals(

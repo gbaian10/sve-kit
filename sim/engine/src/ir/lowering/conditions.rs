@@ -1158,6 +1158,17 @@ impl BodyContext<'_> {
         count: &ast::CountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        Ok(super::numeric::aggregate_count(
+            self.counted_objects(count, path)?,
+            None,
+        ))
+    }
+
+    pub(super) fn counted_objects(
+        &mut self,
+        count: &ast::CountQuery,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
         if matches!(count.kind, Some(ast::CountKind::Crest))
             && (!matches!(count.zone, ast::CountZone::Ex)
                 || !matches!(count.who, ast::Side::Controller))
@@ -1243,7 +1254,7 @@ impl BodyContext<'_> {
         } else {
             selector
         };
-        Ok(super::numeric::aggregate_count(selector, None))
+        Ok(selector)
     }
 }
 

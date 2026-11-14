@@ -127,6 +127,27 @@ fn lowers(head: &Value) -> bool {
 }
 
 #[test]
+fn field_cemetery_banish_replacement_lowers_and_loads_as_a_live_declaration() {
+    let head = json!({"static":{"effects":[{"banish_instead":{
+        "on":{"who":"opp","zone":"field","kind":"follower"},
+        "from":"field","to":"cemetery"
+    }}]}});
+    let program = lowered(&head).unwrap();
+    let _game = position_with_card(1, &program);
+    let mut invalid_player = program.card().clone();
+    if let Effect::Replacement {
+        affected_player, ..
+    } = &mut invalid_player.abilities[0].node.declarations[0]
+    {
+        *affected_player = PlayerRef::Controller {};
+    }
+    assert!(
+        WellFormedCardProgram::check(invalid_player).is_err(),
+        "the affected player belongs to the movement proposal, not the provider"
+    );
+}
+
+#[test]
 fn removal_lowering_only_opens_the_holder_forms_printed_by_seed_cards() {
     for (shape, accepted) in [
         (json!({"what":"destroy","by":"ability"}), true),

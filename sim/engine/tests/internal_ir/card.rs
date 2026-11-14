@@ -130,6 +130,9 @@ mod lastword_revive;
 #[path = "card/trigger_targets.rs"]
 mod trigger_targets;
 
+#[path = "card/conditioned_choice.rs"]
+mod conditioned_choice;
+
 #[path = "card/trigger_choice.rs"]
 mod trigger_choice;
 
@@ -1011,3 +1014,6 @@ mod player_shares;
 
 #[path = "card/player_choices.rs"]
 mod player_choices;
+
+#[path = "card/field_banish_replacement.rs"]
+mod field_banish_replacement;
