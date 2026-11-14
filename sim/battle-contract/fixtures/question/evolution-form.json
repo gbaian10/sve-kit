@@ -1,0 +1,57 @@
+{
+  "id": "q-evolution_form",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "evolution_form",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 0
+      },
+      "object": "o1"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "evolution_form",
+          "object": "o7",
+          "face": {
+            "printing_id": "SYN01-007",
+            "face": 1
+          }
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unique",
+    "answer": {
+      "kind": "choose",
+      "chosen": ["c1"]
+    },
+    "public": false
+  },
+  "assistance": null,
+  "rules": []
+}

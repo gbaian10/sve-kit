@@ -116,6 +116,13 @@ def measure(
         "complete_text_by_region": complete,
         "images_metadata": {"file_count": len(images), **_sizes(images)},
         "manifest": _sizes([manifest]),
+        "programs": _sizes(
+            [
+                blob
+                for key, blob in snapshot.payloads.items()
+                if files[key]["role"] == "programs"
+            ]
+        ),
         "shard_count": len(shards),
         "shards": shards,
         "oversized_shards": oversized,

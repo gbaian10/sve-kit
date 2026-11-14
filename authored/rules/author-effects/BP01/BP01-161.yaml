@@ -1,0 +1,32 @@
+cards:
+  BP01-161:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - move:
+                        ref:
+                          who: p
+                          zone: hand
+                        result: returned
+                        to: deck
+                    - shuffle:
+                        who: p
+                  - - draw:
+                        n:
+                          count_of: returned
+                        who: p
+            - draw:
+                n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

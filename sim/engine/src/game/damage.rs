@@ -131,6 +131,7 @@ impl Game {
         };
         let facts = facts.or(combat.as_deref());
         let mut pending = self.drain_triggers(actual, &frame.cause)?;
+        let player_batch = self.player_event_mark();
         let group = self.group();
         let mut damaged = Vec::new();
         let mut life_changes = Vec::new();
@@ -138,13 +139,15 @@ impl Game {
             let id = string(&hit["target"]);
             let source = string(&hit["source"]);
             let amount = int(&hit["amount"]);
-            if let Some(seat) = id.strip_suffix(".leader") {
+            let (before, after) = if let Some(seat) = id.strip_suffix(".leader") {
                 let before = int(&self.player(seat)?.leader["life"]);
                 let life = before.saturating_sub(amount);
                 self.change_life(seat, life)?;
                 life_changes.push((seat.to_owned(), before, life));
                 self.bump(&format!("{seat}.leader_damaged"), 1);
+                (before, life)
             } else {
+                let before = int(&self.object(id)?.state["hp"]);
                 self.numeric_damage(id, amount)?;
                 let follower = self.object_type(id)?.contains("フォロワー");
                 let object = self.object_mut(id)?;
@@ -156,7 +159,8 @@ impl Game {
                         .checked_add(amount)
                         .ok_or_else(|| invalid("damage overflow"))?
                 );
-            }
+                (before, int(&object.state["hp"]))
+            };
             damaged.push(self.event_subject(id)?);
             let source_generation = facts
                 .and_then(|facts| facts.get(hit_index))
@@ -168,7 +172,7 @@ impl Game {
                 });
             let player_source = self.player_source_before(source, source_generation);
             let player_step = self.emit(
-                json!({"kind":"ダメージ","source":source,"target":id,"amount":amount}),
+                json!({"kind":"ダメージ","source":source,"target":id,"amount":amount,"before":before,"after":after}),
                 &frame.cause,
                 group,
             );
@@ -192,6 +196,7 @@ impl Game {
                 &[],
             );
         }
+        self.seal_player_event_batch(player_batch);
         pending.extend(self.collect_subject_event(
             "damage",
             &damaged,

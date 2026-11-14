@@ -194,12 +194,17 @@ TABLES = (
             ForeignKey(("load_id",), "dsl_load", ("id",)),
         ),
         checks=(
-            Check("status = 'missing_dsl'"),
+            Check("status IN ('missing_dsl', 'draft', 'reviewed')"),
             Check(
-                "candidate_hash IS NULL AND dsl_version IS NULL AND engine_version IS NULL AND engine_build_hash IS NULL AND validation_policy_id IS NULL"
+                "engine_version IS NULL AND engine_build_hash IS NULL AND validation_policy_id IS NULL"
             ),
             Check("automatic = 0"),
-            Check("validation_state = 'not_applicable'"),
+            Check(
+                "(status = 'missing_dsl' AND dsl_id IS NULL AND candidate_hash IS NULL "
+                "AND dsl_version IS NULL AND validation_state = 'not_applicable') OR "
+                "(status IN ('draft', 'reviewed') AND dsl_id IS NOT NULL AND candidate_hash IS NOT NULL "
+                "AND dsl_version = '1.0' AND validation_state = 'fresh')"
+            ),
             Check("json_array_length(reason_codes) > 0"),
             Check("sve_sorted_unique(reason_codes) = 1"),
         ),

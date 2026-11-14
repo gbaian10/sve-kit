@@ -1,6 +1,7 @@
 """Implemented T1 DDL groups; none yet claim a complete import/validation pipeline."""
 
 from sve_carddb.build import (
+    dsl,
     four_layer,
     mechanics,
     t0,
@@ -20,9 +21,10 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 18
+SCHEMA_VERSION = 19
 MINIMUM_CAPABILITIES = ("t0", "cr", "errata", "correction", "qa", "related")
 TABLES = (
+    *dsl.TABLES,
     *t1_cr.TABLES,
     *t1_errata.TABLES,
     *t1_correction.TABLES,
@@ -39,6 +41,8 @@ TABLES = (
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
     capabilities=(
+        Capability("dsl", tuple(table.name for table in dsl.TABLES)),
+        Capability("dsl_validation", ("dsl_load",), implemented=False),
         Capability("t0", tuple(table.name for table in t0.TABLES)),
         Capability("cr", tuple(table.name for table in t1_cr.TABLES)),
         Capability("errata", tuple(table.name for table in t1_errata.TABLES)),
@@ -85,7 +89,7 @@ REGISTRY = Registry(
         *(
             cap
             for cap in t0.REGISTRY.capabilities
-            if cap.name not in {"t0", "cr", "art", "keyword"}
+            if cap.name not in {"t0", "cr", "art", "keyword", "dsl"}
         ),
     ),
 )
@@ -101,6 +105,7 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
         | four_layer.schemas()
         | t1_rulings.schemas()
         | mechanics.schemas()
-        | {"TranslationTokens": {"type": "null"}},
+        | {"TranslationTokens": {"type": "null"}}
+        | (dsl.schemas() if "dsl" in requested else {}),
         version=SCHEMA_VERSION,
     )

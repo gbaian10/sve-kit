@@ -1,0 +1,110 @@
+{
+  "id": "q-mulligan",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "mulligan",
+  "processing": {
+    "stage": "opening",
+    "controller": "p1",
+    "source": null,
+    "subject": null,
+    "rule": null,
+    "procedure": {
+      "kind": "each_player",
+      "actor": "p1",
+      "round": null
+    },
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "mulligan",
+    "hand": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": "o1"
+        },
+        "controller": null,
+        "origin": {
+          "player": "p1",
+          "zone": "hand",
+          "position": 0
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c2",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-002",
+            "face": 0
+          },
+          "object": "o2"
+        },
+        "controller": null,
+        "origin": {
+          "player": "p1",
+          "zone": "hand",
+          "position": 1
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c3",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-002",
+            "face": 0
+          },
+          "object": "o3"
+        },
+        "controller": null,
+        "origin": {
+          "player": "p1",
+          "zone": "hand",
+          "position": 2
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c4",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-003",
+            "face": 0
+          },
+          "object": "o4"
+        },
+        "controller": null,
+        "origin": {
+          "player": "p1",
+          "zone": "hand",
+          "position": 3
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      }
+    ]
+  },
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

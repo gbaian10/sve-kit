@@ -14,6 +14,9 @@ use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutco
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
 
+#[path = "support/rule_fixtures.rs"]
+mod rule_fixtures;
+
 #[path = "token_creation/banish_observed.rs"]
 mod banish_observed;
 #[path = "token_creation/evolution_distribution.rs"]
@@ -24,6 +27,8 @@ mod extra_turn;
 mod paid_x;
 #[path = "token_creation/per.rs"]
 mod per;
+#[path = "token_creation/strict.rs"]
+mod strict;
 #[path = "token_creation/victory.rs"]
 mod victory;
 

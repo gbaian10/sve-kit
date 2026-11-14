@@ -1,0 +1,14 @@
+{
+  "kind": "submit",
+  "request_id": "request-evolution-payment",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "evolution_payment",
+      "pp": 0,
+      "use_ep": true,
+      "super_evolution": true
+    }
+  }
+}

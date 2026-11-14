@@ -6,8 +6,8 @@ use super::{
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
-use crate::game::player::Viewer;
 use crate::game::player::observation::AbilityQuota;
+use crate::game::player::{AdmissionGapReason, Viewer};
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -390,6 +390,37 @@ impl Game {
             self.load_internal_card(&number, &card.candidate.program)?;
         }
         Ok(Arc::clone(&self.card_runtime.definitions))
+    }
+
+    pub(in crate::game) fn prepare_strict_cards(
+        &mut self,
+        selected: &SelectedEffects,
+        required: &BTreeSet<String>,
+    ) -> Result<BTreeMap<String, AdmissionGapReason>> {
+        let mut definitions = RuntimeCards::default();
+        let mut failures = BTreeMap::new();
+        for number in required {
+            let Some(candidate) = selected.current.get(number) else {
+                continue;
+            };
+            let card = self.catalog.resolve_current(Arc::clone(candidate))?;
+            self.catalog.check_current_printing(number, &card)?;
+            definitions.current.insert(number.clone(), Arc::new(card));
+        }
+        self.card_runtime.selected = true;
+        self.card_runtime.definitions = Arc::new(definitions);
+        for number in required {
+            if let Some(candidate) = selected.current.get(number) {
+                match self.load_internal_card(number, &candidate.program) {
+                    Ok(()) => {}
+                    Err(crate::EngineFailure::Unsupported(_private)) => {
+                        failures.insert(number.clone(), AdmissionGapReason::UnsupportedRuntime);
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+        }
+        Ok(failures)
     }
 
     fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {

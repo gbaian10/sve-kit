@@ -1,0 +1,41 @@
+cards:
+  BP07-050:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - move:
+                position: bottom
+                ref: picked
+                to: deck
+            - choose:
+                bind: put
+                by: opp
+                from:
+                  any_of:
+                    - kind: follower
+                      who: opp
+                      zone: hand
+                    - kind: amulet
+                      who: opp
+                      zone: hand
+                upto: 1
+            - move:
+                ref: put
+                result: entered
+                to: field
+          targets:
+            - bind: picked
+              from:
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

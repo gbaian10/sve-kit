@@ -14,7 +14,8 @@ use serde::de::DeserializeOwned;
 use serde_json::Value;
 use support::{damaged, fixtures};
 use sve_battle_contract::observation::BattleObservation;
-use sve_battle_contract::{HostError, HostMessage, decode, encode};
+use sve_battle_contract::question::Question;
+use sve_battle_contract::{ClientMessage, HostError, HostMessage, decode, encode};
 
 fn check<T>(group: &str)
 where
@@ -43,8 +44,18 @@ fn host_messages_round_trip() {
 }
 
 #[test]
+fn client_messages_round_trip() {
+    check::<ClientMessage>("client");
+}
+
+#[test]
 fn observations_round_trip() {
     check::<BattleObservation>("observation");
+}
+
+#[test]
+fn questions_round_trip() {
+    check::<Question>("question");
 }
 
 #[test]

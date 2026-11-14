@@ -1,0 +1,45 @@
+{
+  "id": "q-ward_entry",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "ward_entry",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "object": "o2"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "confirm",
+    "allowed": [true, false],
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "object": "o2"
+    },
+    "origin": {
+      "player": "p1",
+      "zone": "resolution",
+      "position": 0
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

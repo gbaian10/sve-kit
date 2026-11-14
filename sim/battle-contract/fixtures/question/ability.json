@@ -1,0 +1,76 @@
+{
+  "id": "q-ability",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "ability",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 0
+      },
+      "object": "o1"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "ability",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 1,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          }
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "ability",
+          "source": {
+            "kind": "card",
+            "printing_id": "SYN01-006",
+            "face": 0,
+            "line": 2,
+            "holder": null
+          }
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

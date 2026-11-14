@@ -12,8 +12,15 @@
 `PlayerDeck` 只帶構築依據與主牌組／進化牌組的快照卡號，沒有卡面資料、實體 ID、
 匿名填充物或任意局面。宿主先依[牌組構築契約](deck-construction.md)驗證牌組；
 引擎不另做一份構築規則，而會重驗 `SelectedEffects` 的來源、每張牌的完整 typed 選用、
-准入與可抽取的開局牌數。載入失敗回傳 `Result::Err`，尚未交付對局；局內回答的錯誤
-使用 `SubmissionKind`。同版本、同牌組、同先攻選擇席與私密 seed 可重現同一開局。
+准入與可抽取的開局牌數。strict 要求雙方主牌組、進化牌組、規則產生的初始 EX 資源及
+所有 token 依存完整准入；只有原型程式的卡片不會進局，也不以空 IR 補足缺少的效果。
+宿主可先用 `Game::check_player_decks(&selected, &decks)` 檢查；開局入口仍會自行重驗。
+缺少准入時回傳 `StrictStartError::Admission(report)`，宿主只把
+`report.gaps(viewer)` 的卡號與封閉原因交付已認證的該席，不能把對手缺口或整份報告傳給玩家。
+依存已說明的缺口不重複列為產生者不支援。來源不符或權威資料錯誤則回傳
+`StrictStartError::Initialization`，原始診斷只留在權威端。
+失敗時尚未交付對局；局內回答的錯誤使用 `SubmissionKind`。
+同版本、同牌組、同先攻選擇席與私密 seed 可重現同一開局。
 宿主把驗證後的永久卡片 ID 與張數對應至同一快照的實際版次卡號，逐張展開；
 構築輸入未指定職業時，使用已驗主戰者的印刷職業值。現行 typed 對局以玩家座位及
 資源表示主戰者，沒有主戰者卡片物件；其卡片資格由宿主驗證。先攻選擇席沿用既有
@@ -154,7 +161,7 @@ Quick 在 pending 與規則檢查完成後出題，即使沒有合法行動也�
 
 `host::PolicyHost` 保存兩席各自的 `BasicPolicy`，`run(&mut Game)` 只透過
 `input`、`observe`、`submit_player` 推進已初始化的 typed 對局。
-`Game::start_player_game` 可直接交給 host；受信任局面由原有啟動入口準備，host 不處理
+`Game::start_player_game` 成功回傳的 Game 可直接交給 host；受信任局面由原有啟動入口準備，host 不處理
 權威載入／恢復。策略仍只取得本席 Observation 與 QuestionShape；題目 token 僅供 host
 綁定 Command 與辨識重答同一題，不參與策略選擇。
 

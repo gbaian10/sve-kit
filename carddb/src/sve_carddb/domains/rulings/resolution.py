@@ -206,7 +206,7 @@ def build(documents: tuple[Document, ...], rebuild: Rebuild | None = None) -> Re
                     )
                     for use in selected[0].uses
                 )
-            elif re.fullmatch(r"[EDL]\.[a-z][a-z0-9_.-]*", identifier):
+            elif re.fullmatch(r"[A-Z]\.[a-z][a-z0-9_.-]*", identifier):
                 retained.append(
                     RetainedReference(
                         ruling_ref=ref,
