@@ -1,4 +1,4 @@
-//! Declaration routing for the three composable printed static providers.
+//! Declaration routing for composable printed static providers.
 use super::{Ability, AbilityKind, AbilityOrigin, CharacteristicPatch, ContinuousLayer, Effect};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -6,10 +6,14 @@ pub(crate) enum Family {
     Grant,
     Prevention,
     Cost,
+    MoveReplacement,
 }
 
 pub(crate) fn family(effect: &Effect) -> Option<Family> {
     match effect {
+        Effect::Replacement { .. } if super::move_replacement::projection(effect).is_some() => {
+            Some(Family::MoveReplacement)
+        }
         Effect::Continuous {
             patch: CharacteristicPatch::GrantAbility { .. },
             layer: ContinuousLayer::Ability,
