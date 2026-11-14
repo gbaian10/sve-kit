@@ -238,6 +238,12 @@ fn committed_play_facts_filter_kind_and_traits_and_count_a_dual_trait_card_once(
         (json!({"traits_any":["宴楽","魔法使い"]}), 3),
         (json!({"trait":"宴楽"}), 2),
         (json!({"kind":"spell"}), 1),
+        (json!({"name":"unit-spell"}), 1),
+        (json!({"kind":"spell","name":"unit-spell"}), 1),
+        (
+            json!({"name":"unit-amulet","trait":"宴楽","not_token":true}),
+            1,
+        ),
     ] {
         let program = history_reader(Some(filter));
         let mut game = position(&initial(), &program, false);
@@ -317,10 +323,9 @@ fn wider_played_selectors_and_nonplayed_trait_unions_stay_rejected() {
         json!({"traits_any":["宴楽","魔法使い","プリコネ"]}),
         json!({"trait":""}),
         json!({"class":"ウィッチ"}),
-        json!({"name":"unit-follower"}),
+        json!({"name":""}),
         json!({"other":true}),
         json!({"trait":"宴楽","token":true,"class":"ウィッチ"}),
-        json!({"token":true,"name":"unit-follower"}),
         json!({"kind":"follower","orig_cost_eq":1}),
     ] {
         lowerer().lower(&tree(Some(filter))).unwrap_err();

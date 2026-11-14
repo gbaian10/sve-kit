@@ -7,7 +7,8 @@ use super::{
 use crate::game::Object;
 use crate::game::internal::{DamageOccurrence, player_id};
 use crate::ir::{
-    CardKind, EventPayload, ExecutionId, PlayerId, RuntimeDamageRecipient, RuntimeHolder, Stat,
+    CardKind, CardName, EventPayload, ExecutionId, PlayerId, RuntimeDamageRecipient, RuntimeHolder,
+    Stat,
 };
 use core::iter::once;
 use serde_json::json;
@@ -57,8 +58,9 @@ impl Game {
         let fact = if self.card_runtime.is_empty() {
             None
         } else {
-            // Played queries need neither titles nor class, even in minimal catalogs.
-            let information = self.public_characteristics(source, Vec::new())?;
+            // Later ability loss must not rewrite the names recorded for this play.
+            let names = self.card_names(source)?.into_iter().map(CardName).collect();
+            let information = self.public_characteristics(source, names)?;
             let kind = match information.kind {
                 Some(CardKind::Follower) => "follower",
                 Some(CardKind::Spell) => "spell",
@@ -77,7 +79,7 @@ impl Game {
                 kind: kind.into(),
                 class: String::new(),
                 traits: information.traits.into_iter().map(|id| id.0).collect(),
-                names: None,
+                names: Some(information.names.into_iter().map(|name| name.0).collect()),
                 token: information.token,
                 destroyed: false,
             })

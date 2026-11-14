@@ -527,9 +527,9 @@ impl Checker {
 
     pub(super) fn player(&mut self, player: &PlayerRef) -> Checked {
         match player {
-            PlayerRef::ProposedDamageRecipient {} | PlayerRef::ProposedDamageController {} => {
-                self.reject()
-            }
+            PlayerRef::ProposedDamageRecipient {}
+            | PlayerRef::ProposedDamageController {}
+            | PlayerRef::ProposedMoveController {} => self.reject(),
             PlayerRef::Controller {} | PlayerRef::Owner {} | PlayerRef::Active {} => Ok(()),
             PlayerRef::Bound { binding } => self.reference(*binding, BindingKind::Value),
             PlayerRef::RequireOne { players } => self.players(players),

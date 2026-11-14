@@ -126,6 +126,22 @@ fn hand_selection_is_not_a_formal_target_or_a_choice_from_the_opponents_hand() {
         ]});
         lowerer().lower(&tree).unwrap_err();
     }
+    let mut private = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[
+            {"choose":{"bind":"population","from":{"who":"self","zone":"hand"},"n":1}},
+            {"banish":{"ref":"population"}}
+        ]}}),
+        "unit-follower",
+    );
+    lowerer().lower(&private).unwrap();
+    private["cards"]["unit-follower"]["abilities"][0]["activate"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .insert(
+            1,
+            json!({"choose":{"bind":"subset","by":"opp","from":{"in":"population"},"upto":1}}),
+        );
+    lowerer().lower(&private).unwrap_err();
     let mut tree = fanfare::expanded::tree().clone();
     tree["cards"]["BP08-038"]["abilities"][0]["fanfare"] = json!({
         "targets":[{"bind":"selected","from":{"who":"self","zone":"hand"},"n":1}],

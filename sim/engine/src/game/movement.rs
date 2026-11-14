@@ -247,7 +247,11 @@ impl Game {
         let group = self.group();
         for id in ids {
             self.require_ability_sources("movement replacement")?;
-            let mut destination = zone.to_owned();
+            let mut destination = if self.internal_banish_replaces_move(id, zone)? {
+                "banish".into()
+            } else {
+                zone.to_owned()
+            };
             for source in self.field_ids() {
                 for code in self.abilities(&source)? {
                     let body = &code["body"];
