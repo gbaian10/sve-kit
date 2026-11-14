@@ -3,6 +3,7 @@
     reason = "Unexpected authority decisions invalidate these synthetic scenarios."
 )]
 use super::*;
+use sve_engine::EngineFailure;
 use sve_engine::game::internal::InputDomain;
 
 #[test]
@@ -64,27 +65,35 @@ fn source_counter_sets_the_public_target_limit() {
 }
 
 #[test]
-fn source_power_sets_the_public_original_cost_limit() {
-    let tree = equipment_played::tree(
-        &json!({"activate":{"cost":{"pp":0},"targets":[{"bind":"ally","from":{"who":"self","zone":"field","kind":"follower","other":true,"orig_cost_le":{"power_of":"this"}},"n":1}],"do":[{"buff":{"on":"ally","power":1,"hp":1}}]}}),
-        "unit-follower",
-    );
-    let program = lowerer()
-        .lower(&tree)
-        .unwrap()
-        .remove("unit-follower")
-        .unwrap();
-    for power in [2_u8, 4] {
+fn source_stats_set_the_public_original_cost_limit() {
+    for (reading, stat, value) in [
+        ("power_of", "power", 2_u8),
+        ("power_of", "power", 4),
+        ("hp_of", "hp", 2),
+        ("hp_of", "hp", 4),
+    ] {
+        let mut limit = json!({});
+        limit[reading] = json!("this");
+        let tree = equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"targets":[{"bind":"ally","from":{"who":"self","zone":"field","kind":"follower","other":true,"orig_cost_le":limit},"n":1}],"do":[{"buff":{"on":"ally","power":1,"hp":1}}]}}),
+            "unit-follower",
+        );
+        let program = lowerer()
+            .lower(&tree)
+            .unwrap()
+            .remove("unit-follower")
+            .unwrap();
         let mut initial = setup(1, json!([]));
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
-        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower","state":{"power":power}},{"id":"ally","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower","state":{}},{"id":"ally","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["field"][0]["state"][stat] = json!(value);
         initial["players"]["P2"]["zones"]["field"] = json!([]);
         let mut game = Game::new(
             catalog_with_cost(&json!("3")),
             &initial,
             &Value::Null,
             &Value::Null,
-            "source-power-limit",
+            "source-stat-limit",
         )
         .unwrap();
         game.load_internal_card("unit-follower", &program).unwrap();
@@ -94,8 +103,11 @@ fn source_power_sets_the_public_original_cost_limit() {
             program.card().abilities[0].node.id,
             PlayerId { seat: 1 },
         );
-        if power < 3 {
-            assert!(step.is_err() || matches!(step, Ok(CardPlay::Cancelled)));
+        if value < 3 {
+            match step {
+                Err(error) => assert!(!matches!(error, EngineFailure::Unsupported(_))),
+                Ok(play) => assert!(matches!(play, CardPlay::Cancelled)),
+            }
             assert_eq!(exact_authority(&game), before);
         } else {
             let CardPlay::Awaiting(q) = step.unwrap() else {

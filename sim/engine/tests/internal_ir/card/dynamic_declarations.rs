@@ -11,7 +11,7 @@ pub(super) fn lower_body(body: &Value) -> Result<WellFormedCardProgram, Lowering
     Ok(lowerer().lower(&tree)?.remove("unit-follower").unwrap())
 }
 #[test]
-fn dynamic_numeric_declarations_reject_hidden_foreign_and_source_dependent_reads() {
+fn dynamic_numeric_declarations_reject_hidden_foreign_and_unbound_reads() {
     for number in [
         json!({"count":{"who":"self","zone":"hand","kind":"follower"}}),
         json!({"count":{"who":"opp","zone":"hand"}}),
@@ -21,7 +21,7 @@ fn dynamic_numeric_declarations_reject_hidden_foreign_and_source_dependent_reads
         json!({"count":{"who":"self","zone":"deck"}}),
         json!({"count":{"who":"opp","zone":"field"}}),
         json!({"resource":{"who":"opp","kind":"pp_max"}}),
-        json!({"hp_of":"this"}),
+        json!({"hp_of":"unknown"}),
         json!({"distinct_names":{"who":"opp","zone":"cemetery"}}),
         json!({"distinct_names":{"who":"self","zone":"hand"}}),
         json!({"distinct_orig_costs":{"who":"self","zone":"hand"}}),
