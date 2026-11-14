@@ -1053,6 +1053,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sve-battle-host"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde-saphyr",
+ "serde_json",
+ "sha2",
+ "sve-engine",
+]
+
+[[package]]
 name = "sve-engine"
 version = "0.1.0"
 dependencies = [
