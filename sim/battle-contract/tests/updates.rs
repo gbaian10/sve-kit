@@ -12,7 +12,7 @@ mod support;
 
 use alloc::collections::BTreeSet;
 use serde_json::Value;
-use sve_battle_contract::event::EventDelivery;
+use sve_battle_contract::event::{EventBatch, EventDelivery};
 use sve_battle_contract::presentation::PresentationOp;
 use sve_battle_contract::{HostError, HostMessage, decode, schema};
 
@@ -133,7 +133,7 @@ fn a_promoted_batch_links_back_by_presentation_id_and_is_not_animated_again() {
                 .any(|event| event.presentation_id.is_some())
         })
         .collect();
-    assert_ne!(promoted, Vec::new());
+    assert_ne!(promoted, Vec::<&EventBatch>::new());
     for batch in promoted {
         // A scope promotes as a whole: every member carries its link.
         assert!(
