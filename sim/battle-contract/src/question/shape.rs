@@ -438,7 +438,7 @@ pub struct OrderItem {
 /// One bucket of a partition.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
-pub struct Bucket {
+pub struct PartitionBucket {
     /// Printed position of the bucket, counted from zero.
     pub bucket: Nat,
     /// Where its items go; absent when they stay where they are.
@@ -552,7 +552,7 @@ pub enum QuestionShape {
         /// The complete frozen set.
         items: Vec<Candidate>,
         /// Every bucket, the one for unselected items included.
-        buckets: Vec<Bucket>,
+        buckets: Vec<PartitionBucket>,
     },
     /// Give each recipient a share.
     Distribute {

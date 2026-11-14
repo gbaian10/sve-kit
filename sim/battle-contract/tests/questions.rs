@@ -7,6 +7,7 @@
 
 extern crate alloc;
 
+#[path = "support/fixtures.rs"]
 mod support;
 
 use alloc::collections::BTreeSet;
@@ -16,7 +17,10 @@ use serde_json::Value;
 use sve_battle_contract::question::{AutoAnswer, Question, QuestionShape, QuestionUse, ShapeKind};
 use sve_battle_contract::{Answer, ClientMessage, Command, HostError, decode, encode, schema};
 
-fn fixtures<T: DeserializeOwned + Serialize>(group: &str) -> Vec<T> {
+fn fixtures<T>(group: &str) -> Vec<T>
+where
+    T: DeserializeOwned + Serialize,
+{
     support::fixtures(group)
         .into_iter()
         .map(|(_, text)| decode(&text).unwrap())
@@ -44,7 +48,10 @@ fn variants(definition: &str, pointer: &str) -> BTreeSet<String> {
         .collect()
 }
 
-fn wire_name<T: Serialize>(value: &T) -> String {
+fn wire_name<T>(value: &T) -> String
+where
+    T: Serialize,
+{
     serde_json::from_str(&encode(value).unwrap()).unwrap()
 }
 

@@ -11,10 +11,10 @@ pub use selection::{
     RoleSize, Selection, SelectionGroup, SelectionRole,
 };
 pub use shape::{
-    AttackOption, AttackTarget, Bucket, ChoiceOption, ChoiceValue, DiceChoice, EarlierChoice,
+    AttackOption, AttackTarget, ChoiceOption, ChoiceValue, DiceChoice, EarlierChoice,
     EmptyDistribution, EvolutionHint, EvolutionPayment, MainIntent, OrderDirection, OrderItem,
-    QuantityUnit, QuestionShape, QuickAction, QuickOption, QuickWindow, ReplacementRoute,
-    StepwiseChoice, TokenChoice, TriggerEvent, TriggerIcon,
+    PartitionBucket, QuantityUnit, QuestionShape, QuickAction, QuickOption, QuickWindow,
+    ReplacementRoute, StepwiseChoice, TokenChoice, TriggerEvent, TriggerIcon,
 };
 
 use crate::answer::Answer;
@@ -231,13 +231,19 @@ pub enum AutoAnswer {
 pub struct NoAssistance;
 
 impl Serialize for NoAssistance {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_unit()
     }
 }
 
 impl<'de> Deserialize<'de> for NoAssistance {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         <()>::deserialize(deserializer).map(|()| Self)
     }
 }
