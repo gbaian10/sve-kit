@@ -14,7 +14,7 @@ pub use shape::{
     AttackOption, AttackTarget, Bucket, ChoiceOption, ChoiceValue, DiceChoice, EarlierChoice,
     EmptyDistribution, EvolutionHint, EvolutionPayment, MainIntent, OrderDirection, OrderItem,
     QuantityUnit, QuestionShape, QuickAction, QuickOption, QuickWindow, ReplacementRoute,
-    StepwiseChoice, TokenChoice, TriggerIcon,
+    StepwiseChoice, TokenChoice, TriggerEvent, TriggerIcon,
 };
 
 use crate::answer::Answer;

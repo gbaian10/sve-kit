@@ -14,7 +14,7 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use sve_battle_contract::question::{AutoAnswer, Question, QuestionShape, QuestionUse, ShapeKind};
-use sve_battle_contract::{Answer, ClientMessage, Command, decode, encode, schema};
+use sve_battle_contract::{Answer, ClientMessage, Command, HostError, decode, encode, schema};
 
 fn fixtures<T: DeserializeOwned + Serialize>(group: &str) -> Vec<T> {
     support::fixtures(group)
@@ -164,6 +164,63 @@ fn the_assistance_slot_only_holds_null() {
     question["assistance"] = Value::Bool(false);
     assert_eq!(
         decode::<Question>(&question.to_string()).err(),
-        Some(sve_battle_contract::HostError::FORMAT)
+        Some(HostError::FORMAT)
     );
+}
+
+#[test]
+fn occurrences_of_one_source_keep_the_public_details_that_tell_them_apart() {
+    let [pending] = documents("question")
+        .into_iter()
+        .filter(|question| tag(question, "/use") == "pending_order")
+        .collect::<Vec<_>>()
+        .try_into()
+        .unwrap();
+    let options = pending
+        .pointer("/shape/options")
+        .unwrap()
+        .as_array()
+        .unwrap();
+    let detail = |index: usize, pointer: &str| options[index].pointer(pointer).unwrap().clone();
+    // Same source, same controller, same kind of event: only the public detail differs.
+    for (first, second, pointer) in [
+        (0, 1, "/value/event/value"),
+        (2, 3, "/value/event/amount"),
+        (4, 5, "/value/event/delta"),
+        (6, 7, "/value/event/turn"),
+    ] {
+        assert_eq!(
+            detail(first, "/value/source"),
+            detail(second, "/value/source")
+        );
+        assert_eq!(
+            detail(first, "/value/event/kind"),
+            detail(second, "/value/event/kind")
+        );
+        assert_ne!(detail(first, pointer), detail(second, pointer));
+    }
+    let listed: BTreeSet<_> = options
+        .iter()
+        .map(|option| tag(option, "/value/event/kind"))
+        .collect();
+    assert_eq!(listed, variants("TriggerEvent", "/properties/kind/const"));
+}
+
+#[test]
+fn earlier_quota_choices_carry_their_details_but_no_answerable_code() {
+    let [quota] = documents("question")
+        .into_iter()
+        .filter(|question| tag(question, "/use") == "trigger_quota")
+        .collect::<Vec<_>>()
+        .try_into()
+        .unwrap();
+    let earlier = quota.pointer("/shape/earlier").unwrap().as_array().unwrap();
+    let amounts: Vec<_> = earlier
+        .iter()
+        .map(|choice| choice.pointer("/value/event/amount").unwrap().clone())
+        .collect();
+    assert_eq!(amounts, [Value::from(1_u8), Value::from(3_u8)]);
+    for choice in earlier {
+        assert_eq!(choice.get("id"), None);
+    }
 }

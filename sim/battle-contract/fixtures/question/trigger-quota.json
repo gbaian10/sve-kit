@@ -36,7 +36,11 @@
             }
           },
           "controller": "p1",
-          "timing": "evolve"
+          "event": {
+            "kind": "damage",
+            "amount": 2
+          },
+          "position": 0
         },
         "cost": null
       }
@@ -59,7 +63,30 @@
             "holder": null
           },
           "controller": "p2",
-          "timing": "leave_field"
+          "event": {
+            "kind": "damage",
+            "amount": 1
+          },
+          "position": 1
+        }
+      },
+      {
+        "actor": "p2",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "card",
+            "printing_id": "SYN01-008",
+            "face": null,
+            "line": null,
+            "holder": null
+          },
+          "controller": "p2",
+          "event": {
+            "kind": "damage",
+            "amount": 3
+          },
+          "position": 1
         }
       }
     ],

@@ -36,7 +36,11 @@
             }
           },
           "controller": "p1",
-          "timing": "evolve"
+          "event": {
+            "kind": "dice",
+            "value": 1
+          },
+          "position": null
         },
         "cost": null
       },
@@ -45,14 +49,751 @@
         "value": {
           "kind": "occurrence",
           "source": {
-            "kind": "card",
-            "printing_id": "SYN01-003",
-            "face": null,
-            "line": null,
-            "holder": null
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
           },
           "controller": "p1",
-          "timing": null
+          "event": {
+            "kind": "dice",
+            "value": 6
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c3",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "damage",
+            "amount": 1
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c4",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "damage",
+            "amount": 2
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c5",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "life_change",
+            "delta": -2,
+            "player": "p2"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c6",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "life_change",
+            "delta": 3,
+            "player": "p1"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c7",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "phase",
+            "phase": "end",
+            "turn": 4,
+            "player": "p1"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c8",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "phase",
+            "phase": "start",
+            "turn": 5,
+            "player": "p2"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c9",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "race",
+            "ordinal": 1
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c10",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "attack",
+            "ordinal": 2
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c11",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "enter_field",
+            "rules_names": ["合成フォロワー甲"],
+            "from": "hand"
+          },
+          "position": 1
+        },
+        "cost": null
+      },
+      {
+        "id": "c12",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "enter_field",
+            "rules_names": ["合成トークン甲"],
+            "from": null
+          },
+          "position": 1
+        },
+        "cost": null
+      },
+      {
+        "id": "c13",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "posture",
+            "posture": "acted"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c14",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "evolve",
+            "state": "super_evolved"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c15",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "move",
+            "player": "p2",
+            "from": "deck",
+            "to": "cemetery"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c16",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "drive_gained"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c17",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "enter_ex"
+          },
+          "position": 2
+        },
+        "cost": null
+      },
+      {
+        "id": "c18",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "stat_change"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c19",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "destroy"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c20",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "union_burst"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c21",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "fusion"
+          },
+          "position": 1
+        },
+        "cost": null
+      },
+      {
+        "id": "c22",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "play"
+          },
+          "position": 1
+        },
+        "cost": null
+      },
+      {
+        "id": "c23",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "discard"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c24",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "banish"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c25",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "draw"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c26",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "drive_checked"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c27",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "drive_trigger"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c28",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "equip"
+          },
+          "position": 0
         },
         "cost": null
       }

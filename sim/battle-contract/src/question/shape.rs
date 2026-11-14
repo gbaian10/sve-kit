@@ -2,9 +2,9 @@
 
 use super::ShapeKind;
 use super::selection::{Bounds, Candidate, Capacity, Destination, Origin, Selection};
-use crate::common::{CardRef, ObjectHandle, OptionId, Seat, SourceRef, Subject, TextRef};
+use crate::common::{CardRef, ObjectHandle, OptionId, Seat, SourceRef, Subject, TextRef, Zone};
 use crate::number::{Int, Nat};
-use crate::observation::{CostSummary, TriggerTiming};
+use crate::observation::{CostSummary, EvolutionState, Phase, Posture};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -106,6 +106,103 @@ pub enum EmptyDistribution {
     Reject,
 }
 
+/// Public summary of the completed event that made an occurrence pending.
+///
+/// Two occurrences of one source differ by these details, so they are typed here and
+/// never read back from a description.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum TriggerEvent {
+    /// Drive was acquired.
+    DriveGained,
+    /// A race completed.
+    Race {
+        /// Which race of the turn it was.
+        ordinal: Nat,
+    },
+    /// A card entered the field.
+    EnterField {
+        /// Rules names of the entering card.
+        rules_names: Vec<String>,
+        /// Zone it came from; absent when it was created.
+        from: Option<Zone>,
+    },
+    /// A card entered EX.
+    EnterEx,
+    /// A stat changed.
+    StatChange,
+    /// A posture changed.
+    Posture {
+        /// Resulting posture.
+        posture: Posture,
+    },
+    /// A card was destroyed.
+    Destroy,
+    /// Union Burst was activated.
+    UnionBurst,
+    /// Cards were fused.
+    Fusion,
+    /// A card was played.
+    Play,
+    /// Cards were discarded.
+    Discard,
+    /// Cards were banished.
+    Banish,
+    /// Cards were drawn.
+    Draw,
+    /// A Drive check completed.
+    DriveChecked,
+    /// A Drive trigger completed.
+    DriveTrigger,
+    /// A die value was accepted.
+    Dice {
+        /// Accepted value.
+        value: Nat,
+    },
+    /// Equipment was attached.
+    Equip,
+    /// Cards moved between zones.
+    Move {
+        /// Player whose zone they left.
+        player: Seat,
+        /// Zone they left.
+        from: Zone,
+        /// Zone they entered.
+        to: Zone,
+    },
+    /// A follower attacked.
+    Attack {
+        /// Which attack of the turn it was.
+        ordinal: Nat,
+    },
+    /// A phase began.
+    Phase {
+        /// The phase.
+        phase: Phase,
+        /// Turn number.
+        turn: Nat,
+        /// Turn player.
+        player: Seat,
+    },
+    /// A follower evolved.
+    Evolve {
+        /// Evolved or super evolved.
+        state: EvolutionState,
+    },
+    /// Leader life changed.
+    LifeChange {
+        /// Signed change.
+        delta: Int,
+        /// Whose leader.
+        player: Seat,
+    },
+    /// Damage was dealt.
+    Damage {
+        /// Amount dealt.
+        amount: Nat,
+    },
+}
+
 /// One token offered by a token-capacity option, before any token object exists.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -153,8 +250,10 @@ pub enum ChoiceValue {
         source: SourceRef,
         /// Its controller.
         controller: Seat,
-        /// Completed event category that produced it, when known.
-        timing: Option<TriggerTiming>,
+        /// The completed event that produced it, with its public details.
+        event: TriggerEvent,
+        /// Slot of the source when that event completed, when the event records one.
+        position: Option<Nat>,
     },
     /// A destination for found cards.
     Destination {
