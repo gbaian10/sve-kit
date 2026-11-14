@@ -1022,3 +1022,6 @@ mod field_banish_replacement;
 
 #[path = "card/trigger_multiplicity.rs"]
 mod trigger_multiplicity;
+
+#[path = "card/earth_exchange.rs"]
+mod earth_exchange;

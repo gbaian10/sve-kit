@@ -1263,3 +1263,5 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
 
 進化能力的 `usable_if.entered_by: {ref: this, by: ability | play}` 讀取該物件目前世代的已確認進場方式，跨回合保留。入場曲本文仍讀它所屬的進場事件；離場再入場後依新事件重記，不接受初始物件狀態中自行標示的進場旗標作為證據。
+
+`play.optional_cost: {earth_rite: N}` 可搭配 `optional_cost_set` 或 `optional_cost_delta`，在同一次出牌報價中選擇是否支付土之秘術。材料保留 Stack 關鍵字及實付 counter 的付款事件；支付後剩餘 Stack 為零時依既有規則送墓。拒絕付款時沿用原本出牌費用，不消耗 Stack。
