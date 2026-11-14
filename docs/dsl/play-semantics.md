@@ -57,8 +57,11 @@ Quick 的首批時點、許可與交易續接義務見 [Quick 契約](quick-sema
 | 8：解決 | Follower／Amulet 依 .8.1 從 Resolution 進場；Spell／Activated／Triggered 依 .8.2 按本文次序解算，被選模式按印刷序（.8.2.2）。AtResolution 在其既定入口一次捕捉 |
 | 9：收尾 | .8.3：仍在 Resolution 的卡去 owner 墓地，能力則移除；不把已移走的卡之後的新世代再拉回墓地。完成本文、Resolution 與 EndResolution 收尾後才形成 resolved，再交 CheckTiming |
 
-步驟 7 是遊戲規則上的「已打出」，不是供外部消費者提前發布部分交易的許可。本文暫停
+步驟 7 是遊戲規則上的「已打出」，不是提前提交部分交易的許可。本文暫停
 時可保存本次暫存 facts／receipts，但成功完成前不能把它們當成已提交的完整 Activation。
+供音畫使用的獨立暫態投影依[對戰契約](../sim/battle-contract.md#6-有限暫態呈現)：
+本層與所有外層都已成立、結果不再可由規則回復且觀看者已獲授權時，才可呈現完成批次；
+這不改變本節的付款、RNG、Activation、CheckTiming 與原生回復邊界。
 步驟 9 的 check timing 先處理規則再處理 pending（10.5.2）；入場時可產生 Fanfare 待機，
 不能在步驟 8 的卡片 play 中直接執行其本文或先問它的目標。卡片 play 成功後，Fanfare
 有自己的 origin、ExecutionId、選擇與成本；Fanfare 失敗不撤回先前已完成的卡片付款。
