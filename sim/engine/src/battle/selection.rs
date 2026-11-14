@@ -4,6 +4,7 @@ use crate::game::player::{
 };
 use crate::ir::{Cardinality, RoleCardinality};
 use alloc::collections::{BTreeMap, BTreeSet};
+use core::fmt;
 use sve_battle_contract::question::{
     Bounds, Candidate, CostTotal, Destination, Distinct, GroupAssignment, Origin, RoleSize,
     Selection, SelectionGroup, SelectionRole,
@@ -26,10 +27,25 @@ pub struct CandidateDetails {
 }
 
 /// One frozen selection and its private native-coordinate lookup.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SelectionProjection {
+    channel: SelectionChannel,
     selection: Selection,
     coordinates: BTreeMap<OptionId, u64>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum SelectionChannel {
+    Targets,
+    Search,
+}
+
+impl fmt::Debug for SelectionProjection {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter
+            .debug_struct("SelectionProjection")
+            .finish_non_exhaustive()
+    }
 }
 
 impl SelectionProjection {
@@ -44,7 +60,7 @@ impl SelectionProjection {
         destinations: &BTreeMap<u64, Destination>,
         mut resolve: impl FnMut(u64) -> Result<CandidateDetails>,
     ) -> Result<Self> {
-        let mut projection = Self::empty(question.cardinality)?;
+        let mut projection = Self::empty(question.cardinality, SelectionChannel::Targets)?;
         for member in &question.members {
             let details = resolve(member.handle)?;
             if details.controller != Some(seat(member.player)) {
@@ -77,6 +93,10 @@ impl SelectionProjection {
                 return Err(ProjectionError::Unavailable);
             }
             let destination = destinations.get(&role.role.0).copied();
+            if role.position.is_none() && destination.is_some_and(|value| value.position.is_some())
+            {
+                return Err(ProjectionError::Unavailable);
+            }
             if let Some(position) = role.position {
                 let edge = match position {
                     crate::ir::Position::Top {} => sve_battle_contract::question::Edge::Top,
@@ -114,6 +134,8 @@ impl SelectionProjection {
     }
 
     /// Project a search, retaining explicit assignments for every printed group.
+    /// The resolver supplies controllers: searching another player's deck does not
+    /// make the searcher the controller of its cards.
     ///
     /// # Errors
     /// The same completeness and numeric checks as [`Self::new`].
@@ -122,7 +144,7 @@ impl SelectionProjection {
         question: &SearchQuestion,
         mut resolve: impl FnMut(u64) -> Result<CandidateDetails>,
     ) -> Result<Self> {
-        let mut projection = Self::empty(question.cardinality)?;
+        let mut projection = Self::empty(question.cardinality, SelectionChannel::Search)?;
         for card in &question.cards {
             projection.push(
                 id,
@@ -156,6 +178,9 @@ impl SelectionProjection {
     /// # Errors
     /// Refuses a different shape, foreign/duplicate candidates or incomplete roles.
     pub fn targets(&self, answer: &Answer) -> Result<crate::game::player::Answer> {
+        if self.channel != SelectionChannel::Targets {
+            return Err(ProjectionError::Unavailable);
+        }
         let Answer::Select {
             selected,
             groups,
@@ -209,6 +234,9 @@ impl SelectionProjection {
     /// # Errors
     /// Refuses missing/extra groups, overlapping assignments or a different selected union.
     pub fn search_answer(&self, answer: &Answer) -> Result<SearchAnswer> {
+        if self.channel != SelectionChannel::Search {
+            return Err(ProjectionError::Unavailable);
+        }
         let Answer::Select {
             selected,
             groups,
@@ -265,8 +293,9 @@ impl SelectionProjection {
         }
     }
 
-    fn empty(cardinality: Cardinality) -> Result<Self> {
+    fn empty(cardinality: Cardinality, channel: SelectionChannel) -> Result<Self> {
         Ok(Self {
+            channel,
             selection: Selection {
                 candidates: Vec::new(),
                 shown: Vec::new(),

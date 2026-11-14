@@ -115,6 +115,8 @@ fn selection_retains_complete_constraints_without_native_coordinates() {
     // Numeric handles are authority coordinates, even when they exceed JavaScript's range.
     assert!(!wire.contains("18446744073709551610"));
     assert!(!wire.contains("583"));
+    let debug = format!("{projection:?}");
+    assert!(!debug.contains("18446744073709551610"));
 }
 
 #[test]
@@ -274,7 +276,6 @@ fn required_facts_and_out_of_range_numbers_stop_projection() {
             .host_error(),
         HostError::RANGE,
     );
-    assert!(SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).is_err());
     question.cardinality.maximum = Some(ir::Nat(5));
     question.members.first_mut().unwrap().original_cost = Some(i64::MAX);
     assert!(SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).is_err());
@@ -369,6 +370,18 @@ fn authorized_role_destinations_and_existence_groups_stay_attached() {
         |_| Ok(details()),
     )
     .unwrap();
+    let unexpected_edge = BTreeMap::from([(9, destination)]);
+    let mut unordered_role = question.clone();
+    unordered_role.roles.first_mut().unwrap().position = None;
+    assert!(
+        SelectionProjection::new(
+            &QuestionId::new("edge".into()),
+            &unordered_role,
+            &unexpected_edge,
+            |_| Ok(details())
+        )
+        .is_err()
+    );
     assert_eq!(
         projection.selection().roles.first().unwrap().destination,
         Some(destination)
@@ -390,4 +403,38 @@ fn authorized_role_destinations_and_existence_groups_stay_attached() {
         ProjectionError::Unavailable.host_error(),
         HostError::PROJECTION
     );
+}
+
+#[test]
+fn selection_decoders_refuse_the_other_native_answer_channel() {
+    let targets = SelectionProjection::new(
+        &QuestionId::new("targets".into()),
+        &question(),
+        &BTreeMap::new(),
+        |_| Ok(details()),
+    )
+    .unwrap();
+    let empty = Answer::Select {
+        selected: vec![],
+        groups: None,
+        roles: vec![],
+    };
+    assert!(targets.search_answer(&empty).is_err());
+    let search = SearchQuestion {
+        cards: vec![],
+        cardinality: bounds(0, Some(0)),
+        groups: Some(vec![SelectionGroup {
+            handles: vec![],
+            cardinality: bounds(0, Some(0)),
+        }]),
+        distinct_names: false,
+        maximum_original_cost: None,
+    };
+    let projection = SelectionProjection::search(
+        &QuestionId::new("search".into()),
+        &search,
+        |_| Ok(details()),
+    )
+    .unwrap();
+    assert!(projection.targets(&empty).is_err());
 }
