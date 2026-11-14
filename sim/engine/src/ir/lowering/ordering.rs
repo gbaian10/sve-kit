@@ -767,6 +767,16 @@ impl BodyContext<'_> {
                     event: MovementEvent::LeaveField { event },
                 }],
             }
+        } else if let ast::Objects::Follow { follow } = objects {
+            match self.observations.get(follow) {
+                Some(ObjectReceipt::Movement {
+                    receipt: receipt @ MovementReceipt::Discard { .. },
+                }) => Selector::MoveAfter {
+                    receipt: receipt.clone(),
+                    permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                },
+                _ => self.objects(objects, path)?,
+            }
         } else {
             self.objects(objects, path)?
         };
