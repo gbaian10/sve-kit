@@ -120,10 +120,19 @@ fn group_bounds(constraint: &SelectionConstraint, may: Declinable) -> bool {
     }
 }
 
-/// Current candidates from `holder`'s own hand, or a union of such branches ("手札のAかB").
-pub(crate) fn own_hand_selector(selector: &Selector, holder: &PlayerRef) -> bool {
+/// A private union keeps hand inspection within the chooser's own zones.
+fn own_hand_selector(selector: &Selector, holder: &PlayerRef) -> bool {
     if let Selector::Union { sets } = selector {
-        return sets.len() > 1 && sets.iter().all(|set| own_hand_zone(set, holder));
+        return sets.len() > 1
+            && sets.iter().any(|set| own_hand_zone(set, holder))
+            && sets.iter().all(|set| {
+                matches!(set, Selector::Zone {
+                players,
+                zone: super::ZoneKind::Hand | super::ZoneKind::Ex,
+                view: super::SelectionView::Current {},
+                ..
+            } if held_by(players, holder))
+            });
     }
     own_hand_zone(selector, holder)
 }

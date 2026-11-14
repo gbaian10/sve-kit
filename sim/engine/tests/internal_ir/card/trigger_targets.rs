@@ -423,3 +423,169 @@ fn fanfare_distributes_damage_after_declaring_its_targets() {
     assert_eq!(state["objects"]["a"]["damage"], 1);
     assert_eq!(state["objects"]["b"]["damage"], 2);
 }
+
+#[test]
+fn attack_target_condition_can_share_a_capability_with_its_prevention_body() {
+    let program = program(
+        "attack_time",
+        json!({"do":[{"if":{
+            "cond":{"is":{"ref":"attack_target","kind":"follower"}},
+            "then":[{"apply":{"on":"this","until":"turn","effect":{"prevent":{"kind":"any"}}}}]
+        }}]}),
+    );
+    let mut abilities = program.card().abilities.clone();
+    abilities.push(ability(
+        1000,
+        vec![damage(
+            1001,
+            RecipientSet::Objects {
+                objects: Selector::Objects {
+                    objects: vec![ObjectOperand::SourceHolder {}],
+                },
+            },
+            1,
+        )],
+    ));
+    let program = card(abilities);
+    for target in ["f", "P2.leader"] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"s","card":"unit-follower","state":{"entered_this_turn":false}}
+        ]);
+        initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "shared-capability",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        game.internal_rule_action(&json!({"do":"attack","attacker":"s","target":target}))
+            .unwrap();
+        finish_attack(&mut game);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["objects"]["s"]["damage"], 0_u8);
+        if target == "f" {
+            assert_eq!(state["objects"]["f"]["damage"], 2_u8);
+        } else {
+            assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+            assert_eq!(state["objects"]["f"]["damage"], 0_u8);
+        }
+        game.activate_internal_card("s", AbilityId(1000), PlayerId { seat: 1 })
+            .unwrap();
+        finish_attack(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["s"]["damage"],
+            u8::from(target != "f")
+        );
+    }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "Unexpected decisions invalidate the synthetic attack scenario."
+)]
+fn finish_attack(game: &mut Game) {
+    for _ in 0_u8..20_u8 {
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        } else if let Some(question) = game.internal_pending_choice().unwrap() {
+            let InputDomain::Pending(options) = &question.domain else {
+                panic!("attack occurrence")
+            };
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap();
+        } else if let Some(question) = game.internal_quick_choice().unwrap() {
+            game.answer_internal_card(question.actor, question.token, Answer::Quick(None))
+                .unwrap();
+        } else {
+            return;
+        }
+    }
+    panic!("attack did not finish")
+}
+
+#[test]
+fn an_admitted_capability_location_does_not_authorize_an_unrelated_predicate() {
+    let valid = program(
+        "attack_time",
+        json!({"do":[{"if":{
+            "cond":{"is":{"ref":"attack_target","kind":"follower"}},
+            "then":[{"apply":{"on":"this","until":"turn","effect":{"prevent":{"kind":"any"}}}}]
+        }}]}),
+    );
+    let mut raw = valid.card().clone();
+    let steps = &mut raw.abilities[0].node.body.as_mut().unwrap().steps;
+    let mut extra = steps[0].clone();
+    let Node::Control {
+        control:
+            Control::If {
+                condition,
+                then_body,
+                ..
+            },
+    } = &mut extra.node
+    else {
+        panic!("attack condition")
+    };
+    let Expr::Compute(expression) = condition else {
+        panic!("attack predicate")
+    };
+    let Predicate::Exists {
+        objects: Selector::Filter { predicate, .. },
+    } = expression.as_ref()
+    else {
+        panic!("attack target")
+    };
+    let Expr::Compute(predicate) = predicate.as_ref() else {
+        panic!("target predicate")
+    };
+    let Predicate::RecipientIsFollower { recipient, .. } = predicate.as_ref() else {
+        panic!("target recipient")
+    };
+    *condition = Expr::Compute(Box::new(Predicate::RecipientIsFollower {
+        recipient: recipient.clone(),
+        objects: Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        },
+    }));
+    then_body.steps.clear();
+    then_body.scope = ScopeId(1000);
+    steps.push(extra);
+    let invalid = WellFormedCardProgram::check(raw).unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "mixed-capability-location",
+    )
+    .unwrap();
+    let mut admitted = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "valid-capability-location",
+    )
+    .unwrap();
+    admitted
+        .load_internal_card("unit-follower", &valid)
+        .unwrap();
+    let before = exact_authority(&game);
+    let rejected = game.load_internal_card("unit-follower", &invalid);
+    assert!(
+        matches!(rejected, Err(sve_engine::EngineFailure::Unsupported(_))),
+        "{rejected:?}"
+    );
+    assert_eq!(exact_authority(&game), before);
+}
