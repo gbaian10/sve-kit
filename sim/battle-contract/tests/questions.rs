@@ -191,10 +191,10 @@ fn occurrences_of_one_source_keep_the_public_details_that_tell_them_apart() {
     let detail = |index: usize, pointer: &str| options[index].pointer(pointer).unwrap().clone();
     // Same source, same controller, same kind of event: only the public detail differs.
     for (first, second, pointer) in [
-        (0, 1, "/value/event/value"),
-        (2, 3, "/value/event/amount"),
-        (4, 5, "/value/event/delta"),
-        (6, 7, "/value/event/turn"),
+        (0_usize, 1_usize, "/value/event/value"),
+        (2_usize, 3_usize, "/value/event/amount"),
+        (4_usize, 5_usize, "/value/event/delta"),
+        (6_usize, 7_usize, "/value/event/turn"),
     ] {
         assert_eq!(
             detail(first, "/value/source"),
