@@ -8,7 +8,7 @@
 
 use core::array::from_fn;
 use serde_json::Value;
-use sha2::{Digest, Sha256};
+use sha2::{Digest as _, Sha256};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
 use sve_battle_host::wire::{
     InputState, Outgoing, ReceiptResult, Seat, Submit, SubmitCommand, TemporaryAnswer, Update,
@@ -22,7 +22,8 @@ use sve_engine::host::HostLimits;
 fn hex(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
         .iter()
-        .map(|byte| format!("{byte:02x}"))
+        .flat_map(|byte| [byte >> 4_u8, byte & 15])
+        .filter_map(|nibble| char::from_digit(u32::from(nibble), 16))
         .collect()
 }
 
@@ -74,7 +75,12 @@ fn session(control: [SeatControl; 2]) -> LocalSession {
 fn absorb(deliveries: &[Delivery], latest: &mut [Option<Update>; 2]) {
     for delivery in deliveries {
         if let Outgoing::Update(update) = &delivery.message {
-            let slot = &mut latest[usize::from(delivery.seat == Seat::P2)];
+            let [first, second] = latest;
+            let slot = if delivery.seat == Seat::P1 {
+                first
+            } else {
+                second
+            };
             if let Some(previous) = slot.as_ref() {
                 assert!(update.update_seq > previous.update_seq, "{update:?}");
             }
@@ -87,7 +93,7 @@ fn absorb(deliveries: &[Delivery], latest: &mut [Option<Update>; 2]) {
 fn play_out(session: &mut LocalSession) -> [Option<Update>; 2] {
     let mut latest: [Option<Update>; 2] = [None, None];
     absorb(&session.start(), &mut latest);
-    for request in 0..5_000 {
+    for request in 0..5_000_u32 {
         let open = latest
             .iter()
             .flatten()
@@ -112,14 +118,18 @@ fn play_out(session: &mut LocalSession) -> [Option<Update>; 2] {
             },
         );
         let first = out.first().unwrap();
-        assert_eq!(first.seat, seat);
-        assert!(matches!(&first.message,
+        assert_eq!(first.seat, seat, "the receipt goes to the submitting seat");
+        assert!(
+            matches!(&first.message,
             Outgoing::Receipt(receipt) if receipt.request_id == request
-                && receipt.result == ReceiptResult::Applied));
+                && receipt.result == ReceiptResult::Applied),
+            "the receipt comes first: {first:?}"
+        );
         assert!(
             out.iter()
                 .skip(1)
-                .all(|delivery| matches!(delivery.message, Outgoing::Update(_)))
+                .all(|delivery| matches!(delivery.message, Outgoing::Update(_))),
+            "only updates follow the receipt"
         );
         absorb(&out, &mut latest);
     }

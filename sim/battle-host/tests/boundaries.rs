@@ -7,7 +7,9 @@
 )]
 
 use serde_json::{Value, json};
-use std::sync::Arc;
+extern crate alloc;
+
+use alloc::sync::Arc;
 use sve_battle_host::wire::{
     HostError, HostErrorReason, InputState, Outgoing, Receipt, ReceiptResult, Rejection, Seat,
     Submit, SubmitCommand, TemporaryAnswer, Update,
@@ -27,8 +29,8 @@ fn card(number: &str, power: &str, hp: &str) -> String {
 /// A pregame opening; two different cards make a drifted shuffle visible later.
 fn game() -> Game {
     let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let effects = json!({"format":1,"kind":"effect_set","cards":{
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let effects = json!({"format":1_u8,"kind":"effect_set","cards":{
         "t-small":{"status":"complete","review":"synthetic","abilities":[]},
         "t-large":{"status":"complete","review":"synthetic","abilities":[]}
     }})
@@ -36,7 +38,7 @@ fn game() -> Game {
     let catalog =
         Catalog::from_documents(&snapshot, &registry, &[("t.yaml".into(), effects)]).unwrap();
     let deck = |seat: &str| {
-        (0..10)
+        (0..10_u32)
             .map(|index| {
                 let number = if index % 2 == 0 { "t-small" } else { "t-large" };
                 json!({"id":format!("{seat}/deck/{index}"),"card":number})
@@ -107,7 +109,7 @@ fn rejected(seat: Seat, request: &str) -> Vec<Delivery> {
     }]
 }
 
-fn stopped(seat: Seat, reason: HostErrorReason) -> Delivery {
+const fn stopped(seat: Seat, reason: HostErrorReason) -> Delivery {
     Delivery {
         seat,
         message: Outgoing::HostError(HostError { format: 0, reason }),
@@ -124,7 +126,12 @@ impl Seats {
             let Outgoing::Update(update) = &delivery.message else {
                 continue;
             };
-            let slot = &mut self.0[usize::from(delivery.seat == Seat::P2)];
+            let [first, second] = &mut self.0;
+            let slot = if delivery.seat == Seat::P1 {
+                first
+            } else {
+                second
+            };
             if let Some(previous) = slot.as_ref() {
                 assert!(update.update_seq > previous.update_seq, "{update:?}");
             }
@@ -157,7 +164,7 @@ fn a_stale_id_from_the_other_seat_never_names_its_current_question() {
     let (first, first_id) = seats.question().unwrap();
     // Answer until the other seat holds its own first question.
     let mut current = (first, first_id.clone());
-    for request in 0..10 {
+    for request in 0..10_u32 {
         let out = session.submit(current.0, answer(&current.1, &format!("r{request}")));
         seats.absorb(&out);
         current = seats.question().unwrap();
@@ -202,7 +209,7 @@ fn scripted(noise: bool) -> (Vec<Delivery>, String) {
     let mut seats = Seats::default();
     seats.absorb(&started);
     let mut previous = String::new();
-    for request in 0..200 {
+    for request in 0..200_u32 {
         let Some((seat, id)) = seats.question() else {
             break;
         };
@@ -210,11 +217,12 @@ fn scripted(noise: bool) -> (Vec<Delivery>, String) {
             for (from, question) in [(other(seat), id.as_str()), (seat, previous.as_str())] {
                 assert_eq!(
                     session.submit(from, answer(question, "noise")),
-                    rejected(from, "noise")
+                    rejected(from, "noise"),
+                    "noise is rejected before reaching the engine"
                 );
             }
-            for seat in [Seat::P1, Seat::P2] {
-                let _baseline = session.baseline(seat);
+            for viewer in [Seat::P1, Seat::P2] {
+                let _baseline = session.baseline(viewer);
             }
         }
         let out = session.submit(seat, answer(&id, &format!("r{request}")));
@@ -280,7 +288,10 @@ fn concede_while_waiting_finishes_for_both_seats_and_cannot_repeat() {
 fn a_policy_seat_has_no_channel() {
     let mut session = session([SeatControl::Player, SeatControl::Policy], 100);
     let started = session.start();
-    assert!(!started.is_empty());
+    assert!(
+        matches!(started.as_slice(), [first, ..] if first.seat == Seat::P1),
+        "the player seat gets a baseline"
+    );
     assert!(started.iter().all(|delivery| delivery.seat == Seat::P1));
     assert_eq!(
         session.submit(Seat::P2, answer("p2-q1", "no-channel")),
@@ -291,7 +302,11 @@ fn a_policy_seat_has_no_channel() {
 #[test]
 fn an_exhausted_budget_stops_interaction() {
     let mut policies = session([SeatControl::Policy, SeatControl::Policy], 2);
-    assert!(policies.start().is_empty());
+    assert_eq!(
+        policies.start(),
+        Vec::<Delivery>::new(),
+        "no player channel"
+    );
     assert_eq!(policies.stopped(), Some(HostErrorReason::Budget));
 
     let mut session = session([SeatControl::Player, SeatControl::Policy], 1);
@@ -302,10 +317,10 @@ fn an_exhausted_budget_stops_interaction() {
     assert!(matches!(&out[0].message,
         Outgoing::Receipt(receipt) if receipt.result == ReceiptResult::Applied));
     seats.absorb(&out);
-    let (seat, id) = seats.question().unwrap();
+    let (next_seat, next_id) = seats.question().unwrap();
     let before = authority(&session);
     assert_eq!(
-        session.submit(seat, answer(&id, "over")),
+        session.submit(next_seat, answer(&next_id, "over")),
         vec![stopped(Seat::P1, HostErrorReason::Budget)]
     );
     assert_eq!(authority(&session), before);
@@ -362,7 +377,7 @@ fn wire_messages_use_the_temporary_format_and_snake_case_tags() {
     let json = serde_json::to_value(&started[0].message).unwrap();
     assert_eq!(
         json,
-        json!({"kind":"update","format":0,"viewer":"p1","update_seq":1,"baseline":true,
+        json!({"kind":"update","format":0_u8,"viewer":"p1","update_seq":1_u8,"baseline":true,
             "input":{"kind":"question","id":"p1-q1","purpose":"rule_choice","shape":"opening"}})
     );
     let receipt = serde_json::to_value(&rejected(Seat::P1, "r")[0].message).unwrap();
