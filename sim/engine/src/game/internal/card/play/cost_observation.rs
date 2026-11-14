@@ -122,7 +122,7 @@ fn component(game: &Game, execution: &Execution, step: &CostStep) -> Option<Cost
                 DiscardMode::Chosen { constraint } => (constraint.cardinality.maximum
                     == Some(constraint.cardinality.minimum))
                 .then_some(constraint.cardinality.minimum.0),
-                DiscardMode::Random { count, .. } => {
+                DiscardMode::Random { count, .. } | DiscardMode::ChosenCount { count, .. } => {
                     let value = execution.integer(game, count).ok()?;
                     u64::try_from(value.0).ok()
                 }

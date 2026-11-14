@@ -98,16 +98,17 @@ adds it for you. Messages that start with `Merge`, `Revert`, `Pull request`, `fi
 
 Use the component as the scope, so `git log --grep '(carddb)'` shows one component's history:
 
-| Scope        | Component                                    |
-| ------------ | -------------------------------------------- |
-| `carddb`     | Card data pipeline                           |
-| `authored`   | Human-maintained data                        |
-| `dsl`        | Effect DSL schema                            |
-| `sim/engine` | Rules engine                                 |
-| `sim/server` | Game server                                  |
-| `sim/web`    | Web client                                   |
-| `docs`       | ADRs and design docs                         |
-| _(none)_     | CI, tools, top-level docs (`ci` issue label) |
+| Scope                 | Component                                    |
+| --------------------- | -------------------------------------------- |
+| `carddb`              | Card data pipeline                           |
+| `authored`            | Human-maintained data                        |
+| `dsl`                 | Effect DSL schema                            |
+| `sim/battle-contract` | Battle wire contract                         |
+| `sim/engine`          | Rules engine                                 |
+| `sim/server`          | Game server                                  |
+| `sim/web`             | Web client                                   |
+| `docs`                | ADRs and design docs                         |
+| _(none)_              | CI, tools, top-level docs (`ci` issue label) |
 
 Each component is versioned on its own, and its next version is worked out from the commits
 that carry its scope. So keep one component per commit: when a change touches several components,

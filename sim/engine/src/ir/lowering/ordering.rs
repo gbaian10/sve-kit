@@ -42,13 +42,14 @@ impl BodyContext<'_> {
         {
             if !matches!(value.who, None | Some(ast::LeaderSide::Controller))
                 || value.all.is_some()
-                || value.random.is_some()
+                || value.random == Some(true)
             {
                 return Err(unsupported(path));
             }
-            let maximum = match (&value.any, value.n) {
-                (Some(_), None) => None,
-                (None, Some(1)) => Some(Nat(1)),
+            // A count read on resolution has no fixed upper bound, like an any-number discard.
+            let maximum = match (&value.any, &value.n) {
+                (Some(_), None) | (None, Some(ast::DiscardCount::Number(_))) => None,
+                (None, Some(ast::DiscardCount::Fixed(1))) => Some(Nat(1)),
                 _ => return Err(unsupported(path)),
             };
             return super::payment::record_discard(

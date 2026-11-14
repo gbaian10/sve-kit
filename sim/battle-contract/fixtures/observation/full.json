@@ -1,0 +1,1339 @@
+{
+  "viewer": "p1",
+  "objects": {
+    "o1": {
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 0
+      },
+      "effective_face": {
+        "printing_id": "SYN01-001",
+        "face": 1
+      },
+      "owner": "p1",
+      "controller": "p1",
+      "knowledge": "public",
+      "facing": "up",
+      "characteristics": {
+        "rules_names": ["合成フォロワー甲"],
+        "card_type": "フォロワー・エボルヴ",
+        "traits": ["合成タイプ"],
+        "classes": ["合成クラス"],
+        "cost": 2
+      },
+      "state": {
+        "posture": "acted",
+        "evolution": "evolved",
+        "stats": {
+          "attack": 3,
+          "life": -1
+        },
+        "keywords": ["合成キーワード甲", "合成キーワード乙"],
+        "counters": [
+          {
+            "name": "合成カウンター",
+            "amount": 2
+          }
+        ],
+        "boxed": false,
+        "effects": [
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "numeric",
+              "attack": {
+                "kind": "add",
+                "amount": 2
+              },
+              "life": {
+                "kind": "set",
+                "amount": 5
+              }
+            }
+          },
+          {
+            "source": null,
+            "expires": {
+              "kind": "no_temporal_expiry"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "numeric",
+              "attack": null,
+              "life": null
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "resolution_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "cost",
+              "cost": "evolution",
+              "change": {
+                "kind": "add",
+                "amount": -1
+              }
+            }
+          },
+          {
+            "source": {
+              "kind": "card",
+              "printing_id": "SYN01-002",
+              "face": null,
+              "line": null,
+              "holder": null
+            },
+            "expires": {
+              "kind": "next_turn_end",
+              "player": "p2"
+            },
+            "main_live": true,
+            "intervals": [
+              {
+                "kind": "next_turn",
+                "player": "p2"
+              },
+              {
+                "kind": "current_turn"
+              }
+            ],
+            "active": true,
+            "change": {
+              "kind": "grant",
+              "keywords": ["合成キーワード丙"],
+              "traits": ["合成タイプ"],
+              "definitions": [
+                {
+                  "ability": "triggered",
+                  "line": 2
+                }
+              ]
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "source_leaves_field"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": false,
+            "change": {
+              "kind": "ability_removal",
+              "boxed": true
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "next_start_end",
+              "player": "p1"
+            },
+            "main_live": false,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "pilot"
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "no_stand",
+              "player": "p1"
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "attack_restriction",
+              "leaders": ["p2"]
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "attack_restriction",
+              "leaders": null
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "ability_restriction",
+              "except_evolution": true
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "no_leader_attack"
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "prevention",
+              "damage": "combat",
+              "change": {
+                "kind": "prevent"
+              },
+              "remaining": 1,
+              "recipients": [
+                {
+                  "kind": "leader",
+                  "player": "p1"
+                },
+                {
+                  "kind": "card",
+                  "object": "o1"
+                }
+              ],
+              "sources": ["o3"]
+            }
+          },
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "expires": {
+              "kind": "turn_end"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "prevention",
+              "damage": "any",
+              "change": {
+                "kind": "add",
+                "amount": -2
+              },
+              "remaining": null,
+              "recipients": null,
+              "sources": null
+            }
+          }
+        ],
+        "quotas": [
+          {
+            "source": {
+              "kind": "text",
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 1,
+                "step": null,
+                "granted_by": null,
+                "holder": "o1"
+              }
+            },
+            "ability": "activated",
+            "maximum": 1,
+            "remaining": 0,
+            "consume_at": "play_committed"
+          },
+          {
+            "source": {
+              "kind": "card",
+              "printing_id": "SYN01-002",
+              "face": 1,
+              "line": null,
+              "holder": "o1"
+            },
+            "ability": "triggered",
+            "maximum": 2,
+            "remaining": 2,
+            "consume_at": "pending_admission"
+          }
+        ]
+      }
+    },
+    "o2": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "effective_face": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "owner": "p1",
+      "controller": "p1",
+      "knowledge": "private",
+      "facing": "up",
+      "characteristics": {
+        "rules_names": ["合成フォロワー乙", "別名"],
+        "card_type": "フォロワー",
+        "traits": [],
+        "classes": null,
+        "cost": null
+      },
+      "state": null
+    },
+    "o3": {
+      "card": {
+        "printing_id": "SYN01-003Ⓢ",
+        "face": 0
+      },
+      "effective_face": {
+        "printing_id": "SYN01-003Ⓢ",
+        "face": 0
+      },
+      "owner": "p2",
+      "controller": "p2",
+      "knowledge": "public",
+      "facing": "down",
+      "characteristics": {
+        "rules_names": ["合成アミュレット"],
+        "card_type": "アミュレット",
+        "traits": [],
+        "classes": ["合成クラス"],
+        "cost": 1
+      },
+      "state": {
+        "posture": "standing",
+        "evolution": "base",
+        "stats": null,
+        "keywords": [],
+        "counters": [],
+        "boxed": false,
+        "effects": [],
+        "quotas": null
+      }
+    },
+    "o4": {
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 1
+      },
+      "effective_face": {
+        "printing_id": "SYN01-001",
+        "face": 1
+      },
+      "owner": "p1",
+      "controller": "p1",
+      "knowledge": "public",
+      "facing": "up",
+      "characteristics": {
+        "rules_names": ["合成フォロワー甲"],
+        "card_type": "フォロワー・エボルヴ",
+        "traits": ["合成タイプ"],
+        "classes": ["合成クラス"],
+        "cost": null
+      },
+      "state": null
+    }
+  },
+  "turn": {
+    "active": "p1",
+    "first_player": "p2",
+    "phase": "main",
+    "elapsed_turns": [3, 2]
+  },
+  "attack": {
+    "attacker": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 1
+      },
+      "object": "o1"
+    },
+    "target": {
+      "kind": "leader",
+      "player": "p2"
+    }
+  },
+  "players": [
+    {
+      "seat": "p1",
+      "life": 17,
+      "pp": 3,
+      "max_pp": 5,
+      "ep": 2,
+      "sep": 1,
+      "effects": [
+        {
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 1,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "expires": {
+            "kind": "turn_end"
+          },
+          "main_live": true,
+          "intervals": [],
+          "active": true,
+          "change": {
+            "kind": "player_cost",
+            "change": {
+              "kind": "add",
+              "amount": -1
+            },
+            "limited": true
+          }
+        },
+        {
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 1,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "expires": {
+            "kind": "turn_end"
+          },
+          "main_live": true,
+          "intervals": [],
+          "active": true,
+          "change": {
+            "kind": "banish_play"
+          }
+        },
+        {
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 1,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "expires": {
+            "kind": "turn_end"
+          },
+          "main_live": true,
+          "intervals": [],
+          "active": true,
+          "change": {
+            "kind": "delayed",
+            "timing": "enter_field"
+          }
+        }
+      ],
+      "zones": {
+        "deck": {
+          "count": 40,
+          "capacity": null,
+          "cards": []
+        },
+        "evolve_deck": {
+          "count": 9,
+          "capacity": null,
+          "cards": []
+        },
+        "hand": {
+          "count": 4,
+          "capacity": null,
+          "cards": [
+            {
+              "position": 0,
+              "object": "o2"
+            }
+          ]
+        },
+        "field": {
+          "count": 1,
+          "capacity": 5,
+          "cards": [
+            {
+              "position": 0,
+              "object": "o1"
+            }
+          ]
+        },
+        "ex": {
+          "count": 0,
+          "capacity": 5,
+          "cards": []
+        },
+        "cemetery": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "banish": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "resolution": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "evolution": {
+          "count": 1,
+          "capacity": null,
+          "cards": [
+            {
+              "position": 0,
+              "object": "o4"
+            }
+          ]
+        },
+        "race": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "drive": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "trigger": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "equipment": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        }
+      }
+    },
+    {
+      "seat": "p2",
+      "life": 20,
+      "pp": 0,
+      "max_pp": 4,
+      "ep": 0,
+      "sep": 0,
+      "effects": [],
+      "zones": {
+        "deck": {
+          "count": 41,
+          "capacity": null,
+          "cards": []
+        },
+        "evolve_deck": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "hand": {
+          "count": 5,
+          "capacity": null,
+          "cards": []
+        },
+        "field": {
+          "count": 1,
+          "capacity": 5,
+          "cards": [
+            {
+              "position": null,
+              "object": "o3"
+            }
+          ]
+        },
+        "ex": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "cemetery": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "banish": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "resolution": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "evolution": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "race": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "drive": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "trigger": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        },
+        "equipment": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
+        }
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "kind": "evolution",
+      "from": "o4",
+      "to": "o1"
+    }
+  ],
+  "processing": [
+    {
+      "stage": "resolve",
+      "controller": "p1",
+      "source": {
+        "card": {
+          "printing_id": "SYN01-001",
+          "face": 0
+        },
+        "wording_revision": "r1",
+        "section": "main",
+        "line": 1,
+        "step": 2,
+        "granted_by": {
+          "printing_id": "SYN01-009",
+          "face": 0
+        },
+        "holder": "o1"
+      },
+      "subject": {
+        "kind": "card",
+        "card": {
+          "printing_id": "SYN01-001",
+          "face": 1
+        },
+        "object": "o1"
+      },
+      "rule": {
+        "kind": "cr",
+        "id": "0.0.1",
+        "revision": "synthetic",
+        "strength": "official"
+      },
+      "procedure": {
+        "kind": "each_player",
+        "actor": "p2",
+        "round": 1
+      },
+      "declared": [
+        {
+          "kind": "modes",
+          "modes": [
+            {
+              "mode": 1,
+              "text": {
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "wording_revision": "r1",
+                "section": "main",
+                "line": 2,
+                "step": null,
+                "granted_by": null,
+                "holder": null
+              }
+            },
+            {
+              "mode": 3,
+              "text": null
+            }
+          ]
+        },
+        {
+          "kind": "number",
+          "role": "x",
+          "value": 3
+        },
+        {
+          "kind": "targets",
+          "targets": [
+            {
+              "kind": "player",
+              "player": "p2"
+            },
+            {
+              "kind": "leader",
+              "player": "p2"
+            },
+            {
+              "kind": "card",
+              "card": {
+                "printing_id": "SYN01-003Ⓢ",
+                "face": 0
+              },
+              "object": null
+            }
+          ]
+        },
+        {
+          "kind": "optional_cost",
+          "accepted": true
+        },
+        {
+          "kind": "name",
+          "rules_name": "合成フォロワー乙"
+        }
+      ],
+      "payment": {
+        "basis": "before_payment",
+        "total_pp": null,
+        "groups": [
+          {
+            "role": {
+              "kind": "original"
+            },
+            "lines": [
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "known",
+                  "amount": 2
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "variable",
+                  "fixed": 1,
+                  "copies": 2,
+                  "x": null
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "variable",
+                  "fixed": 0,
+                  "copies": 1,
+                  "x": 3
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "unavailable"
+                }
+              },
+              {
+                "kind": "posture",
+                "cards": 1
+              },
+              {
+                "kind": "life",
+                "change": -2
+              },
+              {
+                "kind": "counter",
+                "name": "合成カウンター",
+                "count": null
+              },
+              {
+                "kind": "move",
+                "cards": null
+              },
+              {
+                "kind": "discard",
+                "cards": 1,
+                "selected": false
+              },
+              {
+                "kind": "banish",
+                "cards": 2
+              },
+              {
+                "kind": "reveal",
+                "cards": null
+              },
+              {
+                "kind": "fusion",
+                "cards": 2,
+                "selected": true
+              },
+              {
+                "kind": "entry_resources",
+                "cards": 3,
+                "use_ep": null
+              },
+              {
+                "kind": "other"
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "additional"
+            },
+            "lines": []
+          },
+          {
+            "role": {
+              "kind": "mode"
+            },
+            "lines": [
+              {
+                "kind": "life",
+                "change": null
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "optional",
+              "required": false,
+              "accepted": null
+            },
+            "lines": [
+              {
+                "kind": "posture",
+                "cards": null
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "optional",
+              "required": true,
+              "accepted": true
+            },
+            "lines": [
+              {
+                "kind": "entry_resources",
+                "cards": 1,
+                "use_ep": true
+              }
+            ]
+          }
+        ],
+        "pending": [
+          "x",
+          "optional",
+          "modes",
+          "materials",
+          "exchange",
+          "entry_resources",
+          "unavailable"
+        ]
+      }
+    },
+    {
+      "stage": "quick",
+      "controller": null,
+      "source": null,
+      "subject": null,
+      "rule": null,
+      "procedure": {
+        "kind": "repeat",
+        "actor": "p1",
+        "round": null
+      },
+      "declared": [],
+      "payment": null
+    }
+  ],
+  "costs": {
+    "cards": [
+      {
+        "object": "o2",
+        "cost": {
+          "basis": "current_context",
+          "total_pp": 2,
+          "groups": [
+            {
+              "role": {
+                "kind": "original"
+              },
+              "lines": [
+                {
+                  "kind": "pp",
+                  "quote": {
+                    "kind": "known",
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "pending": []
+        }
+      }
+    ],
+    "current_play": {
+      "source": null,
+      "cost": {
+        "basis": "before_payment",
+        "total_pp": null,
+        "groups": [
+          {
+            "role": {
+              "kind": "original"
+            },
+            "lines": [
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "known",
+                  "amount": 2
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "variable",
+                  "fixed": 1,
+                  "copies": 2,
+                  "x": null
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "variable",
+                  "fixed": 0,
+                  "copies": 1,
+                  "x": 3
+                }
+              },
+              {
+                "kind": "pp",
+                "quote": {
+                  "kind": "unavailable"
+                }
+              },
+              {
+                "kind": "posture",
+                "cards": 1
+              },
+              {
+                "kind": "life",
+                "change": -2
+              },
+              {
+                "kind": "counter",
+                "name": "合成カウンター",
+                "count": null
+              },
+              {
+                "kind": "move",
+                "cards": null
+              },
+              {
+                "kind": "discard",
+                "cards": 1,
+                "selected": false
+              },
+              {
+                "kind": "banish",
+                "cards": 2
+              },
+              {
+                "kind": "reveal",
+                "cards": null
+              },
+              {
+                "kind": "fusion",
+                "cards": 2,
+                "selected": true
+              },
+              {
+                "kind": "entry_resources",
+                "cards": 3,
+                "use_ep": null
+              },
+              {
+                "kind": "other"
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "additional"
+            },
+            "lines": []
+          },
+          {
+            "role": {
+              "kind": "mode"
+            },
+            "lines": [
+              {
+                "kind": "life",
+                "change": null
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "optional",
+              "required": false,
+              "accepted": null
+            },
+            "lines": [
+              {
+                "kind": "posture",
+                "cards": null
+              }
+            ]
+          },
+          {
+            "role": {
+              "kind": "optional",
+              "required": true,
+              "accepted": true
+            },
+            "lines": [
+              {
+                "kind": "entry_resources",
+                "cards": 1,
+                "use_ep": true
+              }
+            ]
+          }
+        ],
+        "pending": [
+          "x",
+          "optional",
+          "modes",
+          "materials",
+          "exchange",
+          "entry_resources",
+          "unavailable"
+        ]
+      }
+    }
+  },
+  "pending": [
+    {
+      "source": {
+        "kind": "text",
+        "text": {
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "wording_revision": "r1",
+          "section": "main",
+          "line": 1,
+          "step": null,
+          "granted_by": null,
+          "holder": "o1"
+        }
+      },
+      "controller": "p1",
+      "timing": "evolve",
+      "admission_remaining": 1
+    },
+    {
+      "source": {
+        "kind": "card",
+        "printing_id": "SYN01-002",
+        "face": 0,
+        "line": 3,
+        "holder": null
+      },
+      "controller": "p2",
+      "timing": "leave_field",
+      "admission_remaining": null
+    }
+  ],
+  "history": {
+    "subjects": [
+      {
+        "event": "evolve",
+        "current": "o1",
+        "controller": "p1",
+        "active": "p1",
+        "card_kind": "evolve_follower",
+        "class": "合成クラス",
+        "traits": ["合成タイプ"],
+        "names": ["合成フォロワー甲"],
+        "token": false,
+        "destroyed": false,
+        "destination": null
+      },
+      {
+        "event": "leave",
+        "current": null,
+        "controller": "p2",
+        "active": "p1",
+        "card_kind": "follower",
+        "class": null,
+        "traits": [],
+        "names": null,
+        "token": true,
+        "destroyed": true,
+        "destination": "cemetery"
+      }
+    ],
+    "damage": [
+      {
+        "recipient": null,
+        "source": "o1",
+        "controller": "p1"
+      }
+    ],
+    "stat_gains": [
+      {
+        "current": "o1",
+        "attack": true,
+        "life": false
+      }
+    ],
+    "dice": [
+      {
+        "player": "p2",
+        "value": 6
+      }
+    ],
+    "played": [2, 0],
+    "union_bursts": [0, 1]
+  },
+  "remembered": [
+    {
+      "card": {
+        "printing_id": "SYN01-004",
+        "face": 0
+      },
+      "owner": "p2"
+    }
+  ]
+}
