@@ -2,3 +2,5 @@
 [toolchain]
 channel = "1.99.1"
 components = ["rustfmt", "clippy", "llvm-tools"]
+# The local battle Worker runs the engine as WebAssembly (sim/web `build:engine`).
+targets = ["wasm32-unknown-unknown"]

@@ -10,10 +10,19 @@ publish.workspace = true
 [lints]
 workspace = true
 
+# The browser Worker loads the cdylib; native tests and the future server use the rlib.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sve-battle-contract = { path = "../battle-contract" }
 sve-engine = { path = "../engine", default-features = false }
+
+# Exact: the generated JavaScript glue must come from the same wasm-bindgen CLI version.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "=0.2.129"
 
 [dev-dependencies]
 serde-saphyr = "2.0"

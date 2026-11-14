@@ -2,6 +2,8 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": [
     "tests/lint-fixtures/**",
+    // wasm-bindgen output from `build:engine`; its exports are the engine's, not ours.
+    "src/battle/engine/generated/**",
     // Vitest loads setup through its config in dev; it has no production entry.
     "tests/setup.ts",
     // `battle-contract` generates the contract types and validator; package scripts invoke it.
@@ -10,6 +12,8 @@
     "scripts/catalog/main.ts",
     // `drawer-check` is a development-only CLI invoked by package scripts.
     "scripts/drawer-check/main.ts",
+    // `engine` builds the battle engine WebAssembly; development and CI CLIs only.
+    "scripts/engine/*.ts",
     // `fixture` builds test snapshots and is not shipped.
     "scripts/fixture/main.ts",
     // `screenshots` is a development-only CLI invoked by package scripts.
@@ -21,6 +25,8 @@
     // The battle Worker and screens (#2127, #2132) import the contract from here; nothing ships yet.
     "src/battle/contract/index.ts!",
     "scripts/ci/public-junit-reporter.ts",
+    // Local battle entry; the battle screen imports it next (#2130), keep it in production analysis.
+    "src/battle/engine/client.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.
