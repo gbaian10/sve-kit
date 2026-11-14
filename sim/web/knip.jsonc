@@ -13,7 +13,12 @@
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
-  "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
+  "ignoreDependencies": [
+    "@fontsource/ibm-plex-sans",
+    // The dependency-only PR precedes the battle-contract generator; remove these in the follow-up (#2124).
+    "ajv",
+    "json-schema-to-typescript",
+  ],
   "entry": [
     "bench/driver.ts",
     "scripts/ci/public-junit-reporter.ts",
