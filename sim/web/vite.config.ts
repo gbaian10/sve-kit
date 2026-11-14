@@ -361,7 +361,7 @@ export default defineConfig({
   },
   worker: {
     plugins: () => [buildIdPlugin(BUILD_INPUTS)],
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         entryFileNames: (chunk) =>
           chunk.name === "image-sw" ? "image-sw.js" : "assets/[name]-[hash].js",

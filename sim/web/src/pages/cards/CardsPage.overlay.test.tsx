@@ -45,10 +45,8 @@ const matchMedia = (query: string): MediaQueryList =>
     onchange: null,
     addEventListener: () => undefined,
     removeEventListener: () => undefined,
-    addListener: () => undefined,
-    removeListener: () => undefined,
     dispatchEvent: () => false,
-  }) as MediaQueryList
+  }) as unknown as MediaQueryList
 
 beforeAll(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL) => {

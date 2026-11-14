@@ -75,8 +75,6 @@ function resizableWindow() {
         onchange: null,
         addEventListener: (_type: string, listener: () => void) => listeners.add(listener),
         removeEventListener: (_type: string, listener: () => void) => listeners.delete(listener),
-        addListener: () => undefined,
-        removeListener: () => undefined,
         dispatchEvent: () => false,
       }) as unknown as MediaQueryList,
   )
