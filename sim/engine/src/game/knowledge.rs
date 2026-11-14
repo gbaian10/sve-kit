@@ -90,14 +90,6 @@ impl Knowledge {
         Ok(())
     }
 
-    /// Every handle this viewer can currently use to identify an object.
-    pub(super) fn held_handles(&self) -> BTreeSet<String> {
-        self.handles
-            .values()
-            .map(|entry| entry.value.clone())
-            .collect()
-    }
-
     pub(super) fn forget_location(&mut self, id: &str) {
         self.located.remove(id);
         self.handles.remove(id);
@@ -109,6 +101,26 @@ impl Knowledge {
     reason = "Knowledge owns player identity periods."
 )]
 impl Game {
+    /// Handles of the objects on this viewer's board right now. An erased object keeps its
+    /// authority handle until its knowledge is cleared, but it is on no board.
+    pub(in crate::game) fn observable_handles(
+        &self,
+        perspective: Viewer,
+    ) -> BTreeSet<ObjectHandle> {
+        self.state
+            .knowledge
+            .get(seat(perspective))
+            .map(|known| {
+                known
+                    .handles
+                    .iter()
+                    .filter(|(id, _)| self.player_knows_object(perspective, id))
+                    .map(|(_, entry)| ObjectHandle(entry.value.clone()))
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
     pub(super) fn learn(&mut self, seat: &str, id: &str, located: bool) -> Result<()> {
         self.learn_members(seat, &[id.into()], located)
     }

@@ -4,6 +4,7 @@ use super::{
     Viewer,
 };
 use crate::game::Game;
+use crate::game::player::ObjectHandle;
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::mem::take;
@@ -358,7 +359,7 @@ impl Journal {
         &mut self,
         viewer: Viewer,
         ready: bool,
-        live: BTreeSet<String>,
+        live: BTreeSet<ObjectHandle>,
     ) -> Result<(), EventError> {
         let perspective = index(viewer);
         let log = self

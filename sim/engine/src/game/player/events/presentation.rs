@@ -5,9 +5,7 @@
 
 use super::{EventCard, EventError, EventKind, EventSubject, PlayerEvent, Viewer};
 use crate::game::Game;
-use crate::game::knowledge::Knowledge;
 use crate::game::player::ObjectHandle;
-use crate::game::player::observation::seat;
 use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 use core::fmt;
@@ -116,8 +114,8 @@ pub(super) struct Presentation {
     open: Vec<Shown>,
     /// Scopes whose batch a restoration discarded, until the submission's result says why.
     discarded: Vec<ScopeId>,
-    /// Object handles this viewer held at its previous handoff.
-    held: Arc<BTreeSet<String>>,
+    /// Handles of the objects on the board this viewer was handed last.
+    held: Arc<BTreeSet<ObjectHandle>>,
     record: Arc<[Arc<PresentationEntry>]>,
 }
 
@@ -154,7 +152,7 @@ impl Presentation {
     /// now or the one it was last handed. A card revealed and hidden again inside the
     /// uncommitted window is known only from memory; without separate evidence that the
     /// viewer saw it, its result waits for commitment.
-    fn identifiable(&self, live: &BTreeSet<String>, events: &[EventKind]) -> bool {
+    fn identifiable(&self, live: &BTreeSet<ObjectHandle>, events: &[EventKind]) -> bool {
         events.iter().all(|kind| {
             let source = match kind {
                 EventKind::Action(action) => action
@@ -168,15 +166,13 @@ impl Presentation {
                 .map(|card| card.handle.as_ref())
                 .chain(source.map(Some))
                 .all(|handle| {
-                    handle
-                        .map(ObjectHandle::as_str)
-                        .is_some_and(|text| live.contains(text) || self.held.contains(text))
+                    handle.is_some_and(|known| live.contains(known) || self.held.contains(known))
                 })
         })
     }
 
-    /// Remember what this viewer can identify at this handoff.
-    pub(super) fn hold(&mut self, live: BTreeSet<String>) {
+    /// Remember the board this viewer is handed now.
+    pub(super) fn hold(&mut self, live: BTreeSet<ObjectHandle>) {
         if *self.held != live {
             self.held = Arc::new(live);
         }
@@ -188,7 +184,7 @@ impl Presentation {
     pub(super) fn show(
         &mut self,
         stream: &Arc<()>,
-        live: &BTreeSet<String>,
+        live: &BTreeSet<ObjectHandle>,
         batch: u64,
         events: Vec<EventKind>,
     ) -> Option<bool> {
@@ -333,12 +329,7 @@ impl Game {
     /// # Errors
     /// A perspective-local projection gap; input and observation are unaffected.
     pub fn present_player_events(&mut self, viewer: Viewer) -> Result<(), EventError> {
-        let live = self
-            .state
-            .knowledge
-            .get(seat(viewer))
-            .map(Knowledge::held_handles)
-            .unwrap_or_default();
+        let live = self.observable_handles(viewer);
         let ready = self.provisional_stop();
         self.player_events.present(viewer, ready, live)
     }

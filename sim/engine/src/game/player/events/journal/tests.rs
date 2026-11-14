@@ -1,5 +1,4 @@
 use super::*;
-use crate::game::player::ObjectHandle;
 use crate::game::player::events::{
     ActionEvent, EventCard, EventSubject, PresentationOp, ProvisionalBatch,
 };
@@ -313,8 +312,11 @@ fn reveal(handle: &str) -> EventKind {
     })
 }
 
-fn handles(names: &[&str]) -> BTreeSet<String> {
-    names.iter().map(|name| (*name).to_owned()).collect()
+fn handles(names: &[&str]) -> BTreeSet<ObjectHandle> {
+    names
+        .iter()
+        .map(|name| ObjectHandle((*name).to_owned()))
+        .collect()
 }
 
 fn batches(journal: &Journal, viewer: Viewer) -> Vec<ProvisionalBatch> {
