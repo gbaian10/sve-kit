@@ -46,7 +46,7 @@ use crate::ir::RevealUntilOutcome;
 
 mod ability_suppression;
 mod admission;
-pub(crate) use admission::AdmittedCard;
+pub(crate) use admission::{AdmittedCard, CandidateAdmission};
 mod aggregates;
 mod conditions;
 pub(in crate::game) use ability_suppression::SuppressionState;

@@ -272,6 +272,36 @@ fn player_opening_uses_real_start_amulets_and_bound_initial_resources() {
 }
 
 #[test]
+fn deck_scoped_selection_starts_the_same_game_as_the_whole_selection() {
+    let mut decks = decks();
+    // BP01-001 transforms cards into a token, so its closure reaches beyond the deck list.
+    decks[0].main.push("BP01-001".into());
+    let scoped = repository::select_decks(&decks).unwrap();
+    for number in ["BP01-P25", "BP10-122", "BP01-001", "BP01-T01"] {
+        assert!(scoped.current.contains_key(number), "{number}");
+    }
+    assert!(scoped.current.len() < 20, "{}", scoped.current.len());
+    assert!(
+        Game::check_player_decks(&scoped, &decks)
+            .unwrap()
+            .is_admitted()
+    );
+    let start =
+        |selected| Game::start_player_game(selected, decks.clone(), Viewer::P2, "scoped").unwrap();
+    let (scoped, whole) = (start(scoped), start(selection().clone()));
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            format!("{:?}", scoped.input(viewer)),
+            format!("{:?}", whole.input(viewer))
+        );
+        assert_eq!(
+            format!("{:?}", scoped.observe(viewer).unwrap()),
+            format!("{:?}", whole.observe(viewer).unwrap())
+        );
+    }
+}
+
+#[test]
 fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
     let mut absent = decks();
     absent[0].main[0] = "missing-printing".into();

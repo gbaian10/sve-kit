@@ -1,5 +1,6 @@
 use super::super::{Result, invalid, tokens};
 use crate::ir::events::subscriptions;
+use crate::ir::lowering::CurrentCardProgram;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Ability, AbilityId, Action, CardProgram, Instruction, InstructionId, Located, Program,
@@ -9,6 +10,7 @@ use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
 use core::fmt;
 use core::ops::Deref;
+use std::sync::OnceLock;
 
 #[derive(Clone, Debug)]
 pub(crate) struct AdmittedCard {
@@ -64,6 +66,69 @@ impl AdmittedCard {
             .find(|ability| ability.located() == definition)
             .cloned()
             .ok_or_else(|| invalid("ability differs from admitted definition"))
+    }
+}
+
+/// One accepted candidate with the admission work that reads nothing but its program.
+///
+/// Every printing and every selection sharing the candidate shares these results;
+/// checks that read the snapshot or the game are repeated per printing and never stored.
+pub(crate) struct CandidateAdmission {
+    candidate: Arc<CurrentCardProgram>,
+    compiled: OnceLock<Result<Arc<AdmittedCard>>>,
+    abilities: Vec<OnceLock<Result<()>>>,
+}
+
+impl CandidateAdmission {
+    pub(crate) fn new(candidate: Arc<CurrentCardProgram>) -> Self {
+        let abilities = candidate
+            .program
+            .card()
+            .abilities
+            .iter()
+            .map(|_| OnceLock::new())
+            .collect();
+        Self {
+            candidate,
+            compiled: OnceLock::new(),
+            abilities,
+        }
+    }
+
+    pub(crate) const fn candidate(&self) -> &Arc<CurrentCardProgram> {
+        &self.candidate
+    }
+
+    pub(super) fn compiled(&self) -> Result<Arc<AdmittedCard>> {
+        self.compiled
+            .get_or_init(|| AdmittedCard::compile(&self.candidate.program).map(Arc::new))
+            .clone()
+    }
+
+    pub(in crate::game::internal) fn ability_of(
+        shared: Option<&Self>,
+        index: usize,
+        check: impl FnOnce() -> Result<()>,
+    ) -> Result<()> {
+        // A program admitted without an accepted candidate has nowhere to keep the outcome.
+        let Some(shared) = shared else {
+            return check();
+        };
+        shared
+            .abilities
+            .get(index)
+            .ok_or_else(|| invalid("ability outside the accepted candidate"))?
+            .get_or_init(check)
+            .clone()
+    }
+}
+
+impl fmt::Debug for CandidateAdmission {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // The candidate is already printed by the selection that owns it.
+        f.debug_struct("CandidateAdmission")
+            .field("card_no", &self.candidate.card_no)
+            .finish_non_exhaustive()
     }
 }
 
