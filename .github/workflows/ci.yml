@@ -35,6 +35,8 @@ jobs:
       python: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true') }}
       rust: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
       web: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true') }}
+      # Engine changes must still compile to WebAssembly; the web job builds its own copy.
+      engine_wasm: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
       scan: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.scan == 'true' || steps.filter.outputs.shared == 'true') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -677,6 +679,40 @@ jobs:
           DATA_DIR: ${{ runner.temp }}/sve-rust-coverage
         run: rm -rf "$DATA_DIR"
 
+  engine-wasm:
+    needs: changes
+    if: ${{ needs.changes.outputs.engine_wasm == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MISE_EXEC_AUTO_INSTALL: "false"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          clean: true
+      # rust-toolchain.toml lists the wasm32 target, so this installs it too.
+      - name: Install the pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: engine-wasm
+          save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Must equal the wasm-bindgen version in Cargo.lock; build:engine checks it.
+      - uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2.90.2
+        with:
+          tool: wasm-bindgen@0.2.129
+      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+        with:
+          cache: true
+          cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # The build and size scripts use only Node built-ins, so no bun install is needed.
+      - name: Build the engine to WebAssembly
+        working-directory: sim/web
+        run: |
+          bun run build:engine
+          bun run scripts/engine/size.ts >> "$GITHUB_STEP_SUMMARY"
+
   web:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
@@ -712,6 +748,12 @@ jobs:
       # byte, and every fixture must survive Rust → JSON → generated validator → Rust unchanged.
       - name: Battle contract generation is reproducible and round-trips
         run: bun run check:contract
+      # Types, tests and the bundle also import the engine glue (never committed); Rust is installed above.
+      - uses: taiki-e/install-action@3a3daafd3b7f23b8f65d9f5ba2db203fb59b79e2 # v2.90.2
+        with:
+          tool: wasm-bindgen@0.2.129
+      - name: Build the engine to WebAssembly
+        run: bun run build:engine
       - name: Web formatting, lint, types and both Knip modes
         run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
       - name: Vitest
@@ -835,6 +877,7 @@ jobs:
       - rust
       - rust-tests
       - rust-coverage
+      - engine-wasm
       - web
       - scan
     runs-on: ubuntu-latest
@@ -845,7 +888,7 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
         run: |
           # Unmapped jobs are mandatory; only unchanged components may skip.
-          component='{"card-data":"card_data","python":"python","python-tests":"python","python-coverage":"python","rust":"rust","rust-tests":"rust","rust-coverage":"rust","web":"web","scan":"scan"}'
+          component='{"card-data":"card_data","python":"python","python-tests":"python","python-coverage":"python","rust":"rust","rust-tests":"rust","rust-coverage":"rust","engine-wasm":"engine_wasm","web":"web","scan":"scan"}'
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do
