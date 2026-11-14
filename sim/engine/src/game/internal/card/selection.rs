@@ -1456,10 +1456,13 @@ impl Game {
         execution: &Execution,
         parameters: &[Decision],
     ) -> Result<bool> {
-        for decision in parameters
-            .iter()
-            .filter(|decision| !super::material::is_parameter(decision))
-        {
+        for decision in parameters.iter().filter(|decision| {
+            !super::material::is_parameter(decision)
+                && matches!(
+                    decision.domain,
+                    ChoiceDomain::Objects { .. } | ChoiceDomain::Recipients { .. }
+                )
+        }) {
             let feasible = if matches!(decision.domain, ChoiceDomain::Recipients { .. }) {
                 let (_, domain) = self.recipient_target_domain(execution, decision)?;
                 domain.cardinality.minimum.0
@@ -1484,11 +1487,18 @@ impl Game {
         if parameters.is_empty() {
             return Ok(true);
         }
-        let mut candidate = execution.clone();
-        candidate.slots.clone_from(slots);
         let first = parameters
             .front()
             .ok_or_else(|| invalid("missing target restart"))?;
+        if super::material::is_parameter(first) {
+            return self.internal_feasible_targets(
+                execution,
+                slots,
+                &parameters.iter().skip(1).cloned().collect(),
+            );
+        }
+        let mut candidate = execution.clone();
+        candidate.slots.clone_from(slots);
         if let ChoiceDomain::Distribution {
             recipients, total, ..
         } = &first.domain
