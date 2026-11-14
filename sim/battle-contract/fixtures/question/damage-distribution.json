@@ -1,0 +1,75 @@
+{
+  "id": "q-damage_distribution",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "damage_distribution",
+  "processing": {
+    "stage": "allocate",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "distribute",
+    "recipients": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "leader",
+          "player": "p2"
+        },
+        "controller": null,
+        "origin": null,
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c2",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-002",
+            "face": 0
+          },
+          "object": "o2"
+        },
+        "controller": "p2",
+        "origin": {
+          "player": "p2",
+          "zone": "field",
+          "position": null
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      }
+    ],
+    "total": 3,
+    "share": {
+      "min": 0,
+      "max": null
+    },
+    "empty": "allow_without_total"
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

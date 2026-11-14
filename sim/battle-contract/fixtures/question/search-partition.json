@@ -1,0 +1,113 @@
+{
+  "id": "q-search_partition",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "search_partition",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "partition",
+    "items": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": null
+        },
+        "controller": null,
+        "origin": null,
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c2",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-002",
+            "face": 0
+          },
+          "object": null
+        },
+        "controller": null,
+        "origin": null,
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c3",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-003",
+            "face": 0
+          },
+          "object": null
+        },
+        "controller": null,
+        "origin": null,
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      }
+    ],
+    "buckets": [
+      {
+        "bucket": 0,
+        "destination": {
+          "player": "p1",
+          "zone": "hand",
+          "position": null
+        },
+        "bounds": {
+          "min": 1,
+          "max": 1
+        },
+        "ordered": false
+      },
+      {
+        "bucket": 1,
+        "destination": {
+          "player": "p1",
+          "zone": "deck",
+          "position": "bottom"
+        },
+        "bounds": {
+          "min": 2,
+          "max": 2
+        },
+        "ordered": true
+      }
+    ]
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

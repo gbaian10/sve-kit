@@ -1,0 +1,53 @@
+{
+  "id": "q-evolution_payment",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "evolution_payment",
+  "processing": {
+    "stage": "pay",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 0
+      },
+      "object": "o1"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "evolution_payment",
+    "payments": [
+      {
+        "pp": 1,
+        "use_ep": false,
+        "super_evolution": false
+      },
+      {
+        "pp": 0,
+        "use_ep": true,
+        "super_evolution": false
+      },
+      {
+        "pp": 1,
+        "use_ep": false,
+        "super_evolution": true
+      },
+      {
+        "pp": 0,
+        "use_ep": true,
+        "super_evolution": true
+      }
+    ]
+  },
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

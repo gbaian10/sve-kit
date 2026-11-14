@@ -259,6 +259,7 @@ class DirectTestTests(unittest.TestCase):
             )
         )
         for path in (
+            "sim/battle-contract/src/lib.rs",
             "sim/engine/src/lib.rs",
             "tests/engine/card-input.json",
         ):

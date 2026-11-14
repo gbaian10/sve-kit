@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-002:
+    abilities:
+      - line: 1
+        keywords:
+          - bane
+      - line: 2
+        fanfare:
+          cost:
+            banish:
+              sel:
+                who: self
+                zone: ex
+                trait: 妖精
+              any: true
+              result: fairies
+          do:
+            - draw:
+                n:
+                  x_paid: fairies
+            - discard:
+                who: self
+                n:
+                  x_paid: fairies
+      - line: 3
+        activate:
+          cost:
+            act_self: true
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: cemetery
+                  class: エルフ
+              op: ge
+              right: 20
+          do:
+            - damage:
+                n: 6
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - who: opp
+                      zone: field
+                      kind: follower
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-14"

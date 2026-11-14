@@ -1,0 +1,77 @@
+{
+  "id": "q-drive_trigger",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "drive_trigger",
+  "processing": {
+    "stage": "resolve",
+    "controller": null,
+    "source": null,
+    "subject": null,
+    "rule": {
+      "kind": "cr",
+      "id": "0.0.1",
+      "revision": "synthetic",
+      "strength": "official"
+    },
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "drive_trigger",
+    "icon": "critical",
+    "allowed": [true, false],
+    "targets": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": "o1"
+        },
+        "controller": "p1",
+        "origin": {
+          "player": "p1",
+          "zone": "field",
+          "position": null
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      },
+      {
+        "id": "c3",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-003",
+            "face": 0
+          },
+          "object": "o3"
+        },
+        "controller": "p1",
+        "origin": {
+          "player": "p1",
+          "zone": "field",
+          "position": null
+        },
+        "rules_names": null,
+        "original_cost": null,
+        "classes": null
+      }
+    ],
+    "target_bounds": {
+      "min": 1,
+      "max": 1
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

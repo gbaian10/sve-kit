@@ -1,0 +1,207 @@
+{
+  "id": "q-hand_limit_discard",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "hand_limit_discard",
+  "processing": {
+    "stage": "closing",
+    "controller": null,
+    "source": null,
+    "subject": null,
+    "rule": {
+      "kind": "cr",
+      "id": "0.0.1",
+      "revision": "synthetic",
+      "strength": "official"
+    },
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "select",
+    "selection": {
+      "candidates": [
+        {
+          "id": "c1",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "object": "o1"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 0
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c2",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-002",
+              "face": 0
+            },
+            "object": "o2"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 1
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c3",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-003",
+              "face": 0
+            },
+            "object": "o3"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 2
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c4",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-004",
+              "face": 0
+            },
+            "object": "o4"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 3
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c5",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-005",
+              "face": 0
+            },
+            "object": "o5"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 4
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c6",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-006",
+              "face": 0
+            },
+            "object": "o6"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 5
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c7",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-007",
+              "face": 0
+            },
+            "object": "o7"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 6
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c8",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-008",
+              "face": 0
+            },
+            "object": "o8"
+          },
+          "controller": null,
+          "origin": {
+            "player": "p1",
+            "zone": "hand",
+            "position": 7
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        }
+      ],
+      "shown": [],
+      "bounds": {
+        "min": 1,
+        "max": 1
+      },
+      "groups": [],
+      "group_assignment": "existence",
+      "roles": [],
+      "distinct": [],
+      "original_cost_total": {
+        "min": null,
+        "max": null
+      },
+      "capacity": null
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

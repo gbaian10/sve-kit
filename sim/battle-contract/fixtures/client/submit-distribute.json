@@ -1,0 +1,21 @@
+{
+  "kind": "submit",
+  "request_id": "request-distribute",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "distribute",
+      "shares": [
+        {
+          "option": "c1",
+          "amount": 3
+        },
+        {
+          "option": "c2",
+          "amount": 0
+        }
+      ]
+    }
+  }
+}
