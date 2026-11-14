@@ -138,7 +138,10 @@ fn deck_scoped_selection_keeps_gaps_and_acceptance_checks() {
         report.gaps(Viewer::P2),
         [gap("not-authored", AdmissionGapReason::MissingProgram)]
     );
-    assert!(report == rejected(selected(&snapshot, &keywords, &input), decks.clone()));
+    assert_eq!(
+        report,
+        rejected(selected(&snapshot, &keywords, &input), decks.clone())
+    );
     let mut changed = scoped;
     changed.current.clear();
     assert!(matches!(
