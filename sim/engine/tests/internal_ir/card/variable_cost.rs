@@ -176,3 +176,54 @@ fn filtered_banish_zone_counts_stay_closed_for_play_costs() {
         json!({"cost_delta":{"minus":[0,{"count":{"who":"self","zone":"banish","kind":"spell"}}]}});
     lowerer().lower(&tree).unwrap_err();
 }
+
+#[test]
+fn played_history_controls_only_the_first_matching_card_discount() {
+    let mut expanded = fanfare::expanded::tree().clone();
+    let mut seed = expanded["cards"]["BP08-038"].clone();
+    let mut header = seed["abilities"][0].clone();
+    header.as_object_mut().unwrap().remove("fanfare");
+    header["static"] = json!({
+        "while":{"cmp":{"left":{"history_count":{"event":"played","who":"self","window":"this_turn","sel":{"kind":"follower"}}},"op":"eq","right":0}},
+        "effects":[{"cost_mod":{"when_playing":{"who":"self","kind":"follower"},"delta":-1}}]
+    });
+    seed["abilities"] = json!([header]);
+    expanded["cards"] = json!({"unit-amulet":seed});
+    let program = lowerer()
+        .lower(&expanded)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":10_u8,"max":10_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"provider","card":"unit-amulet"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"}
+    ]);
+    let mut game = Game::new(
+        catalog_with_cost(&json!("3")),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "played-cost",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &program).unwrap();
+    game.load_internal_card("unit-follower", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    for (id, remaining) in [("first", 8_u8), ("second", 5_u8)] {
+        assert!(matches!(
+            game.play_internal_card(id, PlayerId { seat: 1 }).unwrap(),
+            CardPlay::Entered(_)
+        ));
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            remaining
+        );
+    }
+}

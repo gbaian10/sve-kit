@@ -3,4 +3,25 @@
 # and on a listed scenario whose verdict kind changed. Each entry points to
 # the engine tracking issue; validation requirements are in docs/dsl/validation.md.
 expected_scenarios: 708
-known: []
+# Retired BP18-SL16 prototype coverage is recorded separately from the typed gate.
+known:
+  - question: "card-BP18-SL16"
+    scenario: "A ファフニール 交戰破壞機械鋸の死運び → 消滅、ラストワード 不誘發"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP18-SL16"
+  - question: "card-BP18-SL16"
+    scenario: "B P2 用「これを墓場に置く」當費用 → 被換成消滅，費用仍算已支付 → 照樣放 2 張到墓場"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP18-SL16"
+  - question: "card-BP18-SL16"
+    scenario: "C ファンファーレ 8 傷害打死機械鋸 → 消滅、ラストワード 不誘發（古の英雄 部分拆到 flow-forbid-vs-replace-r3-01）"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP18-SL16"
+  - question: "flow-forbid-vs-replace-r3-01"
+    scenario: "A ファフニール 的ファンファーレ 8 傷害打死體力 5 的古の英雄 → 不消滅、進墓場"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP18-SL16"

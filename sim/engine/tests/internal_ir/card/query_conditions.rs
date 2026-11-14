@@ -283,3 +283,65 @@ fn posture_filter_does_not_authorize_unscoped_holder_state() {
     game.load_internal_card("unit-follower", &program)
         .unwrap_err();
 }
+
+#[test]
+fn choose_a_subset_of_an_earlier_public_binding_keeps_the_original_population() {
+    for by in ["self", "opp"] {
+        let document = equipment_played::tree(
+            &json!({"activate":{
+                "cost":{"pp":0},"targets":[{"bind":"population","from":{"who":"opp","zone":"field","kind":"follower"},"n":2}],
+                "do":[{"choose":{"bind":"subset","by":by,"from":{"in":"population"},"upto":1}},{"act":"subset"}]
+            }}),
+            "unit-amulet",
+        );
+        let program = lowerer()
+            .lower(&document)
+            .unwrap()
+            .remove("unit-amulet")
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-amulet"}]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"a","card":"unit-follower"},{"id":"b","card":"unit-follower"},{"id":"outside","card":"unit-follower"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "bound-subset",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &program).unwrap();
+        game.load_internal_card("unit-follower", &card(vec![]))
+            .unwrap();
+        let CardPlay::Awaiting(formal) = game
+            .activate_internal_card(
+                "s",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap()
+        else {
+            panic!("formal population")
+        };
+        let CardPlay::Awaiting(subset) = game
+            .answer_internal_card(formal.actor, formal.token, Answer::Targets(vec![0, 1]))
+            .unwrap()
+        else {
+            panic!("public subset")
+        };
+        let InputDomain::Targets(domain) = &subset.domain else {
+            panic!("subset objects")
+        };
+        assert_eq!(subset.actor.seat, if by == "self" { 1 } else { 2 });
+        assert_eq!(domain.members.len(), 2);
+        resolved(
+            game.answer_internal_card(subset.actor, subset.token, Answer::Targets(vec![1]))
+                .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["objects"]["a"]["acted"], false);
+        assert_eq!(state["objects"]["b"]["acted"], true);
+        assert_eq!(state["objects"]["outside"]["acted"], false);
+    }
+}
