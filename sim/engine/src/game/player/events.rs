@@ -2,9 +2,14 @@
 
 mod journal;
 mod ordering;
+mod presentation;
 mod steps;
 
 pub(in crate::game) use journal::{Journal, MovementBefore, PublishedEvents};
+pub use presentation::{
+    PresentationCursor, PresentationEntry, PresentationId, PresentationOp, ProvisionalBatch,
+    ProvisionalEvent, ScopeId,
+};
 
 use super::observation::{CardProperties, EffectSource, ObservedZone, TurnObservation};
 use super::{ObjectHandle, Viewer};
@@ -268,6 +273,9 @@ pub struct PlayerEvent {
     pub parent: Option<EventId>,
     /// Frozen authorized rules result.
     pub kind: EventKind,
+    /// The provisional occurrence this viewer was already shown for this event, if any.
+    /// A whole batch is linked or none of it; a linked batch is history and is not played again.
+    pub presentation: Option<PresentationId>,
 }
 
 /// One complete producer-sealed batch, in rules order.

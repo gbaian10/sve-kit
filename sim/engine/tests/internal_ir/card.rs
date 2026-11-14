@@ -53,6 +53,10 @@ mod player_declarations;
 mod player_main_actions;
 #[path = "card/player_policy.rs"]
 mod player_policy;
+#[path = "card/presentation_fault.rs"]
+mod presentation_fault;
+#[path = "card/presentation_nested.rs"]
+mod presentation_nested;
 #[path = "card/prevent_controller.rs"]
 mod prevent_controller;
 #[path = "card/public_hand_numbers.rs"]

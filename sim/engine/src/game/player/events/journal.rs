@@ -1,3 +1,4 @@
+use super::presentation::{Presentation, PresentationCursor, PresentationEntry};
 use super::{
     ActionKind, EventError, EventId, EventKind, EventLocation, PlayerEvent, PlayerEventBatch,
     Viewer,
@@ -33,6 +34,27 @@ struct ViewerLog {
     groups: Arc<BTreeMap<String, u64>>,
     parents: Arc<BTreeMap<String, EventId>>,
     fault: bool,
+    presentation: Presentation,
+}
+
+impl ViewerLog {
+    /// Finish one committed batch. A batch this viewer was shown early must commit exactly
+    /// as shown; otherwise this viewer's history stops rather than guess the correspondence.
+    fn close(
+        &mut self,
+        serial: u64,
+        mut events: Vec<PlayerEvent>,
+        batches: &mut Vec<Arc<PlayerEventBatch>>,
+    ) -> bool {
+        if !self.presentation.promote(&self.stream, serial, &mut events) {
+            self.fault = true;
+            return false;
+        }
+        if !events.is_empty() {
+            batches.push(Arc::new(PlayerEventBatch { events }));
+        }
+        true
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -81,6 +103,65 @@ pub(in crate::game) struct MovementBefore {
     pub(super) generations: BTreeMap<String, u64>,
 }
 
+/// Rules order as one perspective may see it; shared by commitment and early presentation.
+fn ordered(pending: &[Pending], perspective: usize) -> Vec<&Pending> {
+    let mut ordered = pending.iter().collect::<Vec<_>>();
+    let mut start = 0;
+    while let Some(first) = ordered.get(start) {
+        let is_unordered = first.ordering != BatchOrder::Fixed && first.object.is_some();
+        let mut end = start.saturating_add(1);
+        if is_unordered {
+            while ordered.get(end).is_some_and(|entry| {
+                entry.batch == first.batch
+                    && entry.group == first.group
+                    && entry.ordering == first.ordering
+                    && entry.object.is_some()
+            }) {
+                end = end.saturating_add(1);
+            }
+            if let Some(unordered_batch) = ordered.get_mut(start..end) {
+                // Private permutations cannot order another viewer's authorized revocations.
+                unordered_batch.sort_by_cached_key(|entry| {
+                    entry.views.get(perspective).map(super::ordering::key)
+                });
+            }
+        }
+        start = end;
+    }
+    ordered
+}
+
+/// Leading batches whose every member is final and projectable for this perspective.
+/// A batch without an authorized member is listed empty; it opens no scope.
+fn sealed_batches(pending: &[Pending], perspective: usize) -> Vec<(u64, Vec<EventKind>)> {
+    let mut batches: Vec<(u64, Vec<EventKind>)> = Vec::new();
+    for entry in ordered(pending, perspective) {
+        let view = match entry.views.get(perspective) {
+            Some(Ok(view)) if entry.sealed => view,
+            _ => {
+                // The batch this member belongs to is not complete for this perspective.
+                if batches
+                    .last()
+                    .is_some_and(|(batch, _)| *batch == entry.batch)
+                {
+                    batches.pop();
+                }
+                break;
+            }
+        };
+        if batches
+            .last()
+            .is_none_or(|(batch, _)| *batch != entry.batch)
+        {
+            batches.push((entry.batch, Vec::new()));
+        }
+        if let (Some(kind), Some((_, events))) = (view, batches.last_mut()) {
+            events.push(kind.clone());
+        }
+    }
+    batches
+}
+
 impl Journal {
     pub(in crate::game) const fn active(&self) -> bool {
         self.active
@@ -100,6 +181,21 @@ impl Journal {
         self.committed = published.committed;
         self.serial = self.serial.max(self.committed);
         self.pending.retain(|entry| entry.serial > self.committed);
+        let pending = &self.pending;
+        for log in &mut self.logs {
+            log.presentation
+                .discard(|batch| pending.iter().any(|entry| entry.batch == batch));
+        }
+    }
+
+    /// Close the scopes a restoration discarded: withdrawn after a fault, otherwise the
+    /// viewer's history stops because a shown result was undone by rules.
+    pub(in crate::game) fn settle_presentation(&mut self, fault: bool) {
+        for log in &mut self.logs {
+            if !log.presentation.settle(&log.stream, fault) {
+                log.fault = true;
+            }
+        }
     }
 
     pub(super) fn push(
@@ -153,34 +249,11 @@ impl Journal {
             let mut batches: Vec<Arc<PlayerEventBatch>> = Vec::new();
             let mut batch = Vec::new();
             let mut previous = None;
-            let mut ordered = self.pending.iter().collect::<Vec<_>>();
-            let mut start = 0;
-            while let Some(first) = ordered.get(start) {
-                let is_unordered = first.ordering != BatchOrder::Fixed && first.object.is_some();
-                let mut end = start.saturating_add(1);
-                if is_unordered {
-                    while ordered.get(end).is_some_and(|entry| {
-                        entry.batch == first.batch
-                            && entry.group == first.group
-                            && entry.ordering == first.ordering
-                            && entry.object.is_some()
-                    }) {
-                        end = end.saturating_add(1);
-                    }
-                    if let Some(unordered_batch) = ordered.get_mut(start..end) {
-                        // Private permutations cannot order another viewer's authorized revocations.
-                        unordered_batch.sort_by_cached_key(|entry| {
-                            entry.views.get(perspective).map(super::ordering::key)
-                        });
-                    }
-                }
-                start = end;
-            }
-            for entry in ordered {
-                if previous != Some(entry.batch) && !batch.is_empty() {
-                    batches.push(Arc::new(PlayerEventBatch {
-                        events: take(&mut batch),
-                    }));
+            for entry in ordered(&self.pending, perspective) {
+                if let Some(serial) = previous.filter(|serial| *serial != entry.batch)
+                    && !log.close(serial, take(&mut batch), &mut batches)
+                {
+                    break;
                 }
                 previous = Some(entry.batch);
                 let Some(view) = entry.views.get(perspective) else {
@@ -223,13 +296,16 @@ impl Journal {
                     group,
                     parent,
                     kind,
+                    presentation: None,
                 });
                 log.count = next;
             }
+            if let Some(serial) = previous.filter(|_| !log.fault) {
+                log.close(serial, batch, &mut batches);
+            }
+            // Everything uncommitted has now committed, so a scope left open lost its source.
+            log.fault |= !log.presentation.settled();
             if !log.fault {
-                if !batch.is_empty() {
-                    batches.push(Arc::new(PlayerEventBatch { events: batch }));
-                }
                 let mut chunks = log.chunks.to_vec();
                 chunks.extend(batches);
                 log.chunks = Arc::from(chunks);
@@ -273,6 +349,40 @@ impl Journal {
             .iter()
             .flat_map(|chunk| chunk.events.iter())
             .filter(move |event| event.id.index > offset))
+    }
+
+    /// Record every complete batch this viewer has not been shown yet.
+    pub(super) fn present(&mut self, viewer: Viewer) -> Result<(), EventError> {
+        let perspective = index(viewer);
+        let log = self
+            .logs
+            .get_mut(perspective)
+            .ok_or(EventError::ProjectionGap)?;
+        if log.fault {
+            return Err(EventError::ProjectionGap);
+        }
+        for (batch, events) in sealed_batches(&self.pending, perspective) {
+            if log.presentation.show(&log.stream, batch, events).is_none() {
+                log.fault = true;
+                return Err(EventError::ProjectionGap);
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn read_presentation(
+        &self,
+        viewer: Viewer,
+        after: Option<&PresentationCursor>,
+    ) -> Result<impl Iterator<Item = &PresentationEntry>, EventError> {
+        let log = self
+            .logs
+            .get(index(viewer))
+            .ok_or(EventError::ProjectionGap)?;
+        if log.fault {
+            return Err(EventError::ProjectionGap);
+        }
+        log.presentation.read(&log.stream, after)
     }
 
     fn reader(
@@ -337,6 +447,9 @@ impl Game {
     }
 
     pub(in crate::game) fn publish_player_events(&mut self) {
+        // Whatever a restoration discarded and no answer accounted for was lost to a fault.
+        self.player_events
+            .settle_presentation(self.player_fault.is_some());
         // Every suspended execution may still restore an origin, including nested plays.
         if self.player_events.active && (self.typed.is_none() || self.state.game["ended"] == true) {
             self.player_events.commit();
@@ -363,3 +476,6 @@ impl Game {
         );
     }
 }
+
+#[cfg(test)]
+mod tests;

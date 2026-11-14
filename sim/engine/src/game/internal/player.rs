@@ -1,7 +1,7 @@
 //! Authority-only adapters keep player tokens and results free of execution coordinates.
 
 use super::{
-    Answer, CardPlay, DecisionToken, DecisionView, Execution, Game, PlayerId, Result, Wait,
+    Answer, CardPlay, DecisionToken, DecisionView, Execution, Fact, Game, PlayerId, Result, Wait,
 };
 use crate::game::player::{QuestionPurpose, SubmissionKind};
 use crate::ir::DecisionKind;
@@ -64,6 +64,21 @@ impl Execution {
         *validated = true;
         self.origin.take()
     }
+
+    /// Whether this play and every play enclosing it have been played (step 7).
+    /// Before that, payment, capacity or a declined head cost can still undo a layer by rules.
+    fn established(&self) -> bool {
+        self.facts.iter().any(|fact| {
+            matches!(
+                fact,
+                Fact::CardPlayed { execution, .. } | Fact::AbilityPlayed { execution, .. }
+                    if *execution == self.id
+            )
+        }) && self
+            .nested
+            .as_ref()
+            .is_none_or(|nested| nested.parent.established())
+    }
 }
 
 #[expect(
@@ -71,6 +86,17 @@ impl Execution {
     reason = "The player adapter shares existing authority dispatch and rollback."
 )]
 impl Game {
+    /// A real input stop inside an established play that keeps its origin: from here only an
+    /// internal fault can discard what has completed. Procedures that are not plays, and
+    /// suspensions without an origin, never qualify.
+    pub(in crate::game) fn provisional_stop(&self) -> bool {
+        self.player_fault.is_none()
+            && self.state.game["ended"] != true
+            && self.typed.as_ref().is_some_and(|execution| {
+                execution.waiting.is_some() && execution.origin.is_some() && execution.established()
+            })
+    }
+
     pub(in crate::game) fn player_decision(&self) -> Option<(DecisionView, QuestionPurpose)> {
         if let Some((question, wait)) = self
             .typed

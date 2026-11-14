@@ -27,6 +27,8 @@
     "scripts/ci/public-junit-reporter.ts",
     // Local battle entry; the battle screen imports it next (#2130), keep it in production analysis.
     "src/battle/engine/client.ts!",
+    // Playback order of one seat's updates; the battle screen and its audio (#2130, #2131) consume it next.
+    "src/battle/presentation/queue.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.
