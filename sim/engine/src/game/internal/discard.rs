@@ -37,6 +37,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             DiscardMode::Random { .. } => {
                 random_count(action)?;
             }
+            DiscardMode::ChosenCount { .. } => {
+                chosen_count(action)?;
+            }
             DiscardMode::DownTo { .. } => return Err(unsupported("self hand discard mode")),
         }
     }
@@ -80,8 +83,8 @@ fn eligible(action: &Action) -> Result<Option<&Selector>> {
     Ok(chosen)
 }
 
-/// A random discard draws from its player's whole current hand by a fixed positive count.
-fn random_count(action: &Action) -> Result<u64> {
+/// A random discard draws from its player's whole current hand; a printed count is positive.
+fn random_count(action: &Action) -> Result<&Expr<Int>> {
     let Action::Discard {
         player,
         mode:
@@ -94,7 +97,7 @@ fn random_count(action: &Action) -> Result<u64> {
                         predicate,
                         ..
                     },
-                count: Expr::Literal(Int(count)),
+                count,
             },
     } = action
     else {
@@ -105,11 +108,42 @@ fn random_count(action: &Action) -> Result<u64> {
         || players.cardinality.minimum != Nat(1)
         || players.cardinality.maximum != Some(Nat(1))
         || **predicate != Expr::Literal(Bool(true))
-        || *count <= 0
+        || matches!(count, Expr::Literal(Int(value)) if *value <= 0)
     {
         return Err(unsupported("unfiltered random hand discard"));
     }
-    u64::try_from(*count).map_err(invalid)
+    Ok(count)
+}
+
+/// The player chooses as many cards from their whole current hand as a value read on resolution.
+fn chosen_count(action: &Action) -> Result<&Expr<Int>> {
+    let Action::Discard {
+        player,
+        mode:
+            DiscardMode::ChosenCount {
+                population:
+                    Selector::Zone {
+                        players,
+                        zone: ZoneKind::Hand,
+                        view: SelectionView::Current {},
+                        predicate,
+                        ..
+                    },
+                count,
+            },
+    } = action
+    else {
+        return Err(unsupported("counted whole-hand discard"));
+    };
+    if players.relative_to != *player
+        || players.relation != PlayerRelation::SelfPlayer
+        || players.cardinality.minimum != Nat(1)
+        || players.cardinality.maximum != Some(Nat(1))
+        || **predicate != Expr::Literal(Bool(true))
+    {
+        return Err(unsupported("unfiltered counted hand discard"));
+    }
+    Ok(count)
 }
 
 fn bounds(action: &Action) -> Result<Cardinality> {
@@ -380,7 +414,9 @@ impl Game {
             mode: DiscardMode::Random { .. },
         } = &instruction.action
         {
-            let count = random_count(&instruction.action)?;
+            let count = execution.integer(self, random_count(&instruction.action)?)?;
+            // A value read on resolution may be zero or negative and then discards nothing.
+            let count = u64::try_from(count.0).unwrap_or(0);
             let seat = seat_name(execution.player(self, player)?)?;
             let hand = self.zone_ids(seat, "hand");
             // Anonymous hand cards still belong to the population; never draw around them.
@@ -398,7 +434,9 @@ impl Game {
                 .insert(instruction.receipt, InstructionOutcome::Discard(outcome));
             return Ok(());
         }
-        let mut count = bounds(&instruction.action)?;
+        let Some(mut count) = self.chosen_discard_bounds(execution, &instruction)? else {
+            return Ok(());
+        };
         let player = execution.player(self, &instruction.actor)?;
         let seat = seat_name(player)?;
         let mut members = Vec::new();
@@ -445,6 +483,38 @@ impl Game {
                 bounds: count,
             }),
         )
+    }
+
+    /// Chosen bounds; a counted discard reads its value now and records nothing for zero or less.
+    fn chosen_discard_bounds(
+        &self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<Option<Cardinality>> {
+        if !matches!(
+            &instruction.action,
+            Action::Discard {
+                mode: DiscardMode::ChosenCount { .. },
+                ..
+            }
+        ) {
+            return bounds(&instruction.action).map(Some);
+        }
+        let requested = execution.integer(self, chosen_count(&instruction.action)?)?;
+        let Ok(requested @ 1..) = u64::try_from(requested.0) else {
+            execution.receipts.insert(
+                instruction.receipt,
+                InstructionOutcome::Discard(DiscardOutcome {
+                    successful: vec![],
+                    moves: vec![],
+                }),
+            );
+            return Ok(None);
+        };
+        Ok(Some(Cardinality {
+            minimum: Nat(requested),
+            maximum: Some(Nat(requested)),
+        }))
     }
 
     pub(super) fn internal_discard_answer(
