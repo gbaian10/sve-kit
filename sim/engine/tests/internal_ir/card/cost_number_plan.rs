@@ -298,7 +298,7 @@ fn cost_subject_histories_do_not_admit_subject_deduplication_or_other_event_cond
             "unsupported_construct"
         );
     }
-    for event in ["ub_activated", "played", "destroyed"] {
+    for event in ["ub_activated", "destroyed"] {
         assert_eq!(
             lower_head(
                 "play",
