@@ -1,5 +1,6 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::ReceiptLocation;
+use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
     Binding, Bool, Cardinality, ChoiceDomain, Decision, DecisionKind, Declinable, Disjointness,
     Expr, FollowPermission, MoveDestination, MoveReason, MoveSpec, MovementReceipt,
@@ -130,7 +131,11 @@ impl Checker {
             return Err(self.error(WellFormedReason::InvalidMovement));
         }
         // Entry installation needs a new-generation subject; a source-holder substitution is unsafe.
-        if !movement.entry_effects.is_empty() {
+        // Only the Fanfare suppression is consumed at entry itself and never installed.
+        if !(movement.entry_effects.is_empty()
+            || (suppresses_fanfare(&movement.entry_effects)
+                && matches!(&movement.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field)))
+        {
             return self.reject();
         }
         if let Some(order) = &movement.order {

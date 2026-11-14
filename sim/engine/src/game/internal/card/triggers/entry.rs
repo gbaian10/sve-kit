@@ -7,11 +7,12 @@ use super::{
 };
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
+use crate::game::internal::movement::ENTRY_WITHOUT_FANFARE;
 use crate::game::{Frame, Object};
-use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
+use crate::ir::{KeywordId, LimitSpec};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -57,6 +58,20 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
         return None;
     };
     SubjectFilter::parse(SubjectFields::Entry(*binding), predicate)
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 removes only the entering card's own Fanfare, before it
+/// becomes pending or spends a trigger limit; other observers of the same entry still see it.
+fn own_fanfare_suppressed(frame: &Frame, holder: &str, old: &Object, ability: &Ability) -> bool {
+    holder == old.id
+        && matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Fanfare,
+                ..
+            }
+        )
+        && frame.values.get(ENTRY_WITHOUT_FANFARE) == Some(&serde_json::Value::Bool(true))
 }
 
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
@@ -200,15 +215,17 @@ impl Game {
                 for ability in abilities {
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if subject_condition::matches(
-                        &plan,
-                        &SubjectInformation::from_characters(&characters, original_cost),
-                        *holder == old.id,
-                        controller,
-                        entry_controller,
-                        active,
-                        self.object_type(&old.id)?.contains("トークン"),
-                    )? && !self.internal_trigger_forbidden(&ability.node, controller)?
+                    if !own_fanfare_suppressed(frame, holder, old, &ability.node)
+                        && subject_condition::matches(
+                            &plan,
+                            &SubjectInformation::from_characters(&characters, original_cost),
+                            *holder == old.id,
+                            controller,
+                            entry_controller,
+                            active,
+                            self.object_type(&old.id)?.contains("トークン"),
+                        )?
+                        && !self.internal_trigger_forbidden(&ability.node, controller)?
                     {
                         matched.push((holder, ability, controller));
                     }

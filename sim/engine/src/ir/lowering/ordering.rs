@@ -1,5 +1,6 @@
+use super::super::trigger_restrictions;
 use super::super::{
-    DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
+    DecisionId, Effect, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
     MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position, PositiveNat,
     Posture, ReceiptReference, Visibility,
 };
@@ -594,12 +595,33 @@ impl BodyContext<'_> {
         })
     }
 
+    /// A move to the field carries its arrival posture and entry effects on the movement itself.
+    fn field_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        let mut action = match &value.r#ref {
+            Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
+                self.self_return(objects, path)?
+            }
+            _ => self.field_entry_move(value, path)?,
+        };
+        let Action::Move { movement, .. } = &mut action else {
+            if value.entry_effects.is_some() {
+                return Err(unsupported(path));
+            }
+            return Ok(action);
+        };
+        movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+        movement.entry_effects = entry_effects(value, path)?;
+        Ok(action)
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.acted.is_some() && !matches!(value.to, ast::Destination::Field) {
+        if (value.acted.is_some() || value.entry_effects.is_some())
+            && !matches!(value.to, ast::Destination::Field)
+        {
             return Err(unsupported(path));
         }
         if let Some(action) = self.public_reveal_move(value, path)? {
@@ -609,16 +631,7 @@ impl BodyContext<'_> {
             return Ok(action);
         }
         if matches!(value.to, ast::Destination::Field) {
-            let mut action = match &value.r#ref {
-                Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
-                    self.self_return(objects, path)?
-                }
-                _ => self.field_entry_move(value, path)?,
-            };
-            if let Action::Move { movement, .. } = &mut action {
-                movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
-            }
-            return Ok(action);
+            return self.field_move(value, path);
         }
         if let Some(top) = &value.top {
             return self.top_move(value, top, path);
@@ -997,5 +1010,15 @@ fn deck_position(position: Option<&ast::Placement>, path: &str) -> Result<Positi
         None | Some(ast::Placement::Chosen { .. } | ast::Placement::OneOf { .. }) => {
             Err(unsupported(path))
         }
+    }
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 is the only entry effect a field entry carries;
+/// the AST already admits nothing else.
+fn entry_effects(value: &ast::Move, path: &str) -> Result<Vec<Effect>, LoweringError> {
+    match value.entry_effects.as_deref() {
+        None => Ok(vec![]),
+        Some([_]) => Ok(trigger_restrictions::entry_without_fanfare()),
+        Some(_) => Err(unsupported(path)),
     }
 }

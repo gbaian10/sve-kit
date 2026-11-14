@@ -911,6 +911,34 @@ pub(super) struct Move {
     #[serde(rename = "by")]
     /// The performing player; a deck-edge placement's chooser is `position.by`.
     pub by: Option<SelfPlayer>,
+    pub entry_effects: Option<Vec<EntryEffect>>,
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 on the cards a field entry puts.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryEffect {
+    #[serde(rename = "cannot")]
+    pub _cannot: EntryCannot,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryCannot {
+    #[serde(rename = "what")]
+    pub _what: PlayAbilityAction,
+    #[serde(rename = "ability")]
+    pub _ability: EntryAbility,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryAbility {
+    #[serde(rename = "keyword")]
+    pub _keyword: FanfareKeyword,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FanfareKeyword {
+    Fanfare,
 }
 
 #[derive(Deserialize)]
