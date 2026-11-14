@@ -273,8 +273,12 @@ impl Game {
                 ));
             }
         }
-        if !payment && self.object(&id)?.generation != reference.generation.0 {
-            // A chosen holder that changed zones, such as a source paid away, is no longer there.
+        if !payment
+            && !matches!(object, ObjectOperand::SourceHolder {})
+            && self.object(&id)?.generation != reference.generation.0
+        {
+            // A chosen holder that changed zones, such as a source paid away, is no longer there;
+            // the effect's own source keeps rejecting so its earlier steps roll back.
             execution.receipts.insert(
                 instruction.receipt,
                 InstructionOutcome::Counter(CounterChangeEvent {
