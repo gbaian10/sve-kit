@@ -1039,3 +1039,6 @@ mod selected_play_cost;
 
 #[path = "card/public_destroy_filter.rs"]
 mod public_destroy_filter;
+
+#[path = "card/hand_source_ex.rs"]
+mod hand_source_ex;

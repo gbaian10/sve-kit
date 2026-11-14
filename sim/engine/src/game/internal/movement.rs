@@ -593,7 +593,11 @@ impl Game {
                     && object.zone == "hand"
                     && object.owner == actor
                     && object.controller == actor
-                    && private_hand_member(execution, instruction, objects, object, member);
+                    && (private_hand_member(execution, instruction, objects, object, member)
+                        || (object.id == execution.context.source
+                            && member.generation == execution.context.generation
+                            && execution.ability.is_some()
+                            && matches!(objects, Selector::Objects { objects } if objects.as_slice() == [ObjectOperand::SourceHolder {}])));
                 let private_observed_move =
                     method == MoveMethod::Put
                         && matches!(kind, ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery)
