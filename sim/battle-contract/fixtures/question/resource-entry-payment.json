@@ -1,0 +1,90 @@
+{
+  "id": "q-resource_entry_payment",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "resource_entry_payment",
+  "processing": {
+    "stage": "pay",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "object": "o2"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "resource_payment",
+    "materials": {
+      "candidates": [
+        {
+          "id": "c1",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "object": "o1"
+          },
+          "controller": "p1",
+          "origin": {
+            "player": "p1",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c3",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-003",
+              "face": 0
+            },
+            "object": "o3"
+          },
+          "controller": "p1",
+          "origin": {
+            "player": "p1",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        }
+      ],
+      "shown": [],
+      "bounds": {
+        "min": 0,
+        "max": 2
+      },
+      "groups": [],
+      "group_assignment": "existence",
+      "roles": [],
+      "distinct": [],
+      "original_cost_total": {
+        "min": null,
+        "max": null
+      },
+      "capacity": null
+    },
+    "ep_allowed": true
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

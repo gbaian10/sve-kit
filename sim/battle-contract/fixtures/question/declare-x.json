@@ -1,0 +1,55 @@
+{
+  "id": "q-declare_x",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "declare_x",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 1,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "integer",
+    "bounds": {
+      "min": 0,
+      "max": 5
+    },
+    "unit": "pp",
+    "source": {
+      "kind": "text",
+      "text": {
+        "card": {
+          "printing_id": "SYN01-002",
+          "face": 0
+        },
+        "wording_revision": "r1",
+        "section": "main",
+        "line": 1,
+        "step": null,
+        "granted_by": null,
+        "holder": "o2"
+      }
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

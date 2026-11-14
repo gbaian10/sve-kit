@@ -1,0 +1,93 @@
+{
+  "id": "q-modes",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "modes",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 1,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "mode",
+          "mode": 1,
+          "text": {
+            "card": {
+              "printing_id": "SYN01-002",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 2,
+            "step": null,
+            "granted_by": null,
+            "holder": null
+          }
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "mode",
+          "mode": 2,
+          "text": {
+            "card": {
+              "printing_id": "SYN01-002",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 3,
+            "step": null,
+            "granted_by": null,
+            "holder": null
+          }
+        },
+        "cost": null
+      },
+      {
+        "id": "c3",
+        "value": {
+          "kind": "mode",
+          "mode": 4,
+          "text": null
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 2
+    },
+    "count": 2,
+    "earlier": [],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

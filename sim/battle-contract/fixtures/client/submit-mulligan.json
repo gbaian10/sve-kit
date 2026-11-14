@@ -1,0 +1,13 @@
+{
+  "kind": "submit",
+  "request_id": "request-mulligan",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "mulligan",
+      "redraw": true,
+      "bottom_order": ["c2", "c1", "c4", "c3"]
+    }
+  }
+}

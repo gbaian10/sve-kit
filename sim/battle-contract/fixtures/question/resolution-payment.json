@@ -1,0 +1,43 @@
+{
+  "id": "q-resolution_payment",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "resolution_payment",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "confirm",
+    "allowed": [false],
+    "subject": null,
+    "origin": null
+  },
+  "auto_answer": {
+    "kind": "unique",
+    "answer": {
+      "kind": "confirm",
+      "accept": false
+    },
+    "public": true
+  },
+  "assistance": null,
+  "rules": []
+}

@@ -1,0 +1,36 @@
+{
+  "kind": "submit",
+  "request_id": "request-select",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "select",
+      "selected": ["c1", "c2"],
+      "groups": [
+        {
+          "group": 0,
+          "selected": ["c1"]
+        },
+        {
+          "group": 1,
+          "selected": []
+        }
+      ],
+      "roles": [
+        {
+          "role": 0,
+          "selected": ["c1"]
+        },
+        {
+          "role": 1,
+          "selected": ["c2"]
+        },
+        {
+          "role": 2,
+          "selected": []
+        }
+      ]
+    }
+  }
+}

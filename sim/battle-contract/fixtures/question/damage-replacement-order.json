@@ -1,0 +1,80 @@
+{
+  "id": "q-damage_replacement_order",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "damage_replacement_order",
+  "processing": {
+    "stage": "resolve",
+    "controller": null,
+    "source": null,
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "order",
+    "items": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": "o1"
+        },
+        "source": {
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 4,
+            "step": null,
+            "granted_by": null,
+            "holder": "o1"
+          }
+        }
+      },
+      {
+        "id": "c2",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": "o1"
+        },
+        "source": {
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 5,
+            "step": null,
+            "granted_by": null,
+            "holder": "o1"
+          }
+        }
+      }
+    ],
+    "direction": "application",
+    "destination": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}
