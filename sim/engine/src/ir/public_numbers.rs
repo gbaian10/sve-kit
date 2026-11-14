@@ -16,7 +16,7 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
             read.as_ref(),
             IntRead::PlayerResource {
                 player: PlayerRef::Controller {},
-                property: PlayerResource::PpMaximum
+                property: PlayerResource::PpMaximum | PlayerResource::PpCurrent
             }
         ),
         Expr::Compute(operation) => match operation.as_ref() {
