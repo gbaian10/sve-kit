@@ -51,6 +51,7 @@ mod reveal_until;
 mod stack;
 mod static_declarations;
 mod static_keywords;
+mod trigger_multiplicity;
 mod trigger_restrictions;
 mod victory;
 mod x_pp;
@@ -533,7 +534,8 @@ impl Allocator {
                 Some(
                     ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
-                    | ast::StaticEffect::BanishInstead(_),
+                    | ast::StaticEffect::BanishInstead(_)
+                    | ast::StaticEffect::ExtraTrigger(_),
                 )
                 | None => {
                     return Err(unsupported(path));

@@ -3270,6 +3270,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     BanishInstead(BanishReplacement),
+    ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
     Reroll(Reroll),
@@ -3292,6 +3293,21 @@ pub(super) struct BanishReplacement {
     pub on: Option<Objects>,
     pub from: String,
     pub to: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ExtraTriggers {
+    pub phase: TriggerPhase,
+    pub who: LeaderSide,
+    pub n: u64,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum TriggerPhase {
+    Main,
+    End,
 }
 
 #[derive(Deserialize)]

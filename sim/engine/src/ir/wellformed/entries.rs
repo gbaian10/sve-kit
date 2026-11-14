@@ -30,7 +30,7 @@ use crate::ir::{
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
 use crate::ir::{move_replacement, optional_payment};
-use crate::ir::{trigger_restrictions, victory};
+use crate::ir::{trigger_multiplicity, trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
 /// A fixed-count public head-cost material; activated modes may follow it (BP09-071, BP09-078).
@@ -765,6 +765,9 @@ impl Checker {
                 duration,
                 usage: None,
             } => self.cost_declaration(*kind, subjects, change, duration),
+            Effect::RuleModifier { .. } if trigger_multiplicity::projection(effect).is_some() => {
+                self.trigger_multiplicity(effect, ability_zones)
+            }
             Effect::RuleModifier { .. } | Effect::DeckRule { .. } | Effect::CostModifier { .. } => {
                 self.reject()
             }
