@@ -486,6 +486,10 @@ fn attack_target_condition_can_share_a_capability_with_its_prevention_body() {
     }
 }
 
+#[expect(
+    clippy::panic,
+    reason = "Unexpected decisions invalidate the synthetic attack scenario."
+)]
 fn finish_attack(game: &mut Game) {
     for _ in 0_u8..20_u8 {
         if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
