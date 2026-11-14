@@ -217,17 +217,23 @@ fn filter(
             binding,
         ));
     }
-    if let Some(class) = &query.class {
+    for (class, negate) in [(&query.class, false), (&query.not_class, true)] {
+        let Some(class) = class else { continue };
         if class.is_empty() {
             return Err(unsupported(path));
         }
-        predicates.push(Expr::Compute(Box::new(Predicate::ClassEquals {
+        let predicate = Expr::Compute(Box::new(Predicate::ClassEquals {
             left: Expr::Live(Box::new(ClassRead::Class {
                 object: view.clone(),
                 view: CharacteristicView::Original,
             })),
             right: Expr::Literal(Info::Present(ClassId(class.clone()))),
-        })));
+        }));
+        predicates.push(if negate {
+            Expr::Compute(Box::new(Predicate::Not { predicate }))
+        } else {
+            predicate
+        });
     }
     for (amount, comparison) in [
         (query.orig_cost_eq, Comparison::Equal),
