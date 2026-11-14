@@ -1406,6 +1406,12 @@ enum FieldOutputKind {
     Other,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ChoiceContext {
+    Ability,
+    Mode,
+}
+
 struct BodyContext<'definitions> {
     x: Option<x_pp::Parameter>,
     static_zone: Option<ZoneKind>,
@@ -1469,6 +1475,7 @@ struct BodyContext<'definitions> {
     event_captures: Vec<super::Capture>,
     event_trigger: Option<TriggerSpec>,
     formal_play: bool,
+    choice_context: ChoiceContext,
     auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
@@ -1552,6 +1559,7 @@ impl<'definitions> BodyContext<'definitions> {
             event_trigger: None,
             mode_targets: BTreeMap::new(),
             auto: entry.auto.as_ref(),
+            choice_context: ChoiceContext::Ability,
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()

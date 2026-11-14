@@ -1109,7 +1109,10 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         ability_source: &AbilitySource,
     ) -> Result<Located<Node>, LoweringError> {
-        if !self.formal_play || choice.options.is_empty() {
+        if self.choice_context == super::ChoiceContext::Mode
+            || !self.formal_play
+            || choice.options.is_empty()
+        {
             return Err(unsupported(path));
         }
         let maximum = u64::try_from(choice.options.len()).map_err(|_private| unsupported(path))?;
@@ -1303,6 +1306,7 @@ impl BodyContext<'_> {
                 event_captures: vec![],
                 event_trigger: None,
                 formal_play: !resolution,
+                choice_context: super::ChoiceContext::Mode,
                 auto: None,
                 mode_targets: BTreeMap::new(),
             };

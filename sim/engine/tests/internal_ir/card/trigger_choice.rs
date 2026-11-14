@@ -479,3 +479,117 @@ fn paid_mode_declares_damage_allocation_before_its_counter_material() {
     assert_eq!(state["objects"]["soil"]["counters"]["test"], 1_u8);
     assert_eq!(state["P1"]["pp"]["current"], 2_u8);
 }
+
+#[test]
+fn mode_bodies_reject_nested_choices_even_inside_payment() {
+    let nested = json!({"choice":{"n":1,"options":[
+        [{"life":{"who":"self","delta":1}}],
+        [{"life":{"who":"self","delta":2}}]
+    ]}});
+    for step in [
+        nested.clone(),
+        json!({"pay":{"cost":{"pp":1},"do":[nested]}}),
+    ] {
+        let document = equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[
+                {"choice":{"n":1,"options":[[step],[{"life":{"who":"self","delta":3}}]]}}
+            ]}}),
+            "unit-follower",
+        );
+        let error = lowerer().lower(&document).unwrap_err();
+        assert_eq!(error.code, "unsupported_construct");
+        assert!(error.path.contains("/choice/options/0"), "{error:?}");
+    }
+}
+
+#[test]
+fn top_level_distribution_uses_its_own_group_with_multiple_targets() {
+    let document = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"targets":[
+            {"bind":"damaged","from":{"who":"opp","zone":"field","kind":"follower"},"n":2},
+            {"bind":"unrelated","from":{"who":"self","zone":"field","kind":"follower"},"n":1}
+        ],"do":[
+            {"damage":{"to":"damaged","n":4,"distribute":true}},
+            {"act":"unrelated"}
+        ]}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut game = Game::new(
+        catalog(),
+        &mode_allocation_position(),
+        &Value::Null,
+        &Value::Null,
+        "multiple-target-distribution",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(first) = game
+        .activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap()
+    else {
+        panic!("first target group");
+    };
+    let InputDomain::Targets(domain) = &first.domain else {
+        panic!("opposing targets");
+    };
+    assert_eq!(domain.members.len(), 2);
+    let selected = domain.members.iter().map(|member| member.handle).collect();
+    let CardPlay::Awaiting(second) = game
+        .answer_internal_card(first.actor, first.token, Answer::Targets(selected))
+        .unwrap()
+    else {
+        panic!("second target group");
+    };
+    let InputDomain::Targets(domain) = &second.domain else {
+        panic!("unrelated allied target");
+    };
+    assert_eq!(domain.members.len(), 1);
+    let CardPlay::Awaiting(distribution) = game
+        .answer_internal_card(
+            second.actor,
+            second.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap()
+    else {
+        panic!("distribution after both target groups");
+    };
+    let InputDomain::Distribution(domain) = &distribution.domain else {
+        panic!("only the damaged group is distributed");
+    };
+    assert_eq!(domain.members.len(), 2);
+    let shares = domain
+        .members
+        .iter()
+        .map(|member| DamageShare {
+            handle: member.handle,
+            amount: Nat(2),
+        })
+        .collect();
+    resolved(
+        game.answer_internal_card(
+            distribution.actor,
+            distribution.token,
+            Answer::Distribution(shares),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    for id in ["one", "two"] {
+        assert_eq!(state["objects"][id]["damage"], 2_u8);
+    }
+    assert_eq!(state["objects"]["s"]["acted"], true);
+    assert_eq!(state["objects"]["s"]["damage"], 0_u8);
+    assert_eq!(state["objects"]["soil"]["counters"]["test"], 2_u8);
+}
