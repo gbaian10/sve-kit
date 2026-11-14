@@ -100,7 +100,7 @@ impl BodyContext<'_> {
             who: query.who.clone(),
             zone: ast::PublicZone::Field,
             kind: query.kind.map(ast::FieldKind::search),
-            keyword: None,
+            keyword: query.keyword,
             r#trait: query.r#trait.clone(),
             class: query.class.clone(),
             not_class: query.not_class.clone(),

@@ -257,6 +257,7 @@ impl BodyContext<'_> {
                 who: ast::Side::Opponent,
                 zone: ast::Zone::Field,
                 kind: Some(ast::FieldKind::Follower),
+                keyword: None,
                 r#trait: None,
                 class: None,
                 not_class: None,
@@ -323,6 +324,7 @@ impl BodyContext<'_> {
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
                     kind: kind.as_ref().map(super::search::card_kind),
+                    keyword: query.keyword.map(|keyword| keyword.0),
                     trait_id: query.r#trait.as_deref(),
                     class: query.class.as_deref(),
                     not_class: query.not_class.as_deref(),

@@ -345,3 +345,107 @@ fn choose_a_subset_of_an_earlier_public_binding_keeps_the_original_population() 
         assert_eq!(state["objects"]["outside"]["acted"], false);
     }
 }
+
+#[test]
+fn keyword_filtered_buff_uses_effective_abilities_and_the_controller() {
+    let spell=lowerer().lower_with_printed_costs(&equipment_played::tree(&json!({"spell":{"do":[
+        {"buff":{"on":{"who":"self","zone":"field","kind":"follower","keyword":"ward"},"power":1,"hp":2}}
+    ]}}),"unit-spell"),&BTreeMap::from([("unit-spell".to_owned(),Nat(1))])).unwrap().remove("unit-spell").unwrap();
+    let ward = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"static":{"effects":[{"grant":{"keywords":["ward"]}}]}}),
+            "unit-follower",
+        ))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"ward","card":"unit-follower"},
+        {"id":"muted","card":"unit-follower","state":{"silenced":true}}
+    ]);
+    let mut game = Game::new(
+        static_keywords::keyword_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "keyword-buff",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &spell).unwrap();
+    game.load_internal_card("unit-follower", &ward).unwrap();
+    resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["ward"]["power"], 3_u8);
+    assert_eq!(state["objects"]["ward"]["hp"], 5_u8);
+    for object in ["muted", "f"] {
+        assert_eq!(state["objects"][object]["power"], 2_u8);
+        assert_eq!(state["objects"][object]["hp"], 3_u8);
+    }
+}
+
+#[test]
+fn keyword_filtered_numeric_changes_exclude_their_own_holder() {
+    let mut document = equipment_played::tree(
+        &json!({"static":{"effects":[{"grant":{"keywords":["ward"]}}]}}),
+        "unit-follower",
+    );
+    let mut activation = document["cards"]["unit-follower"]["abilities"][0].clone();
+    activation.as_object_mut().unwrap().remove("static");
+    activation["sources"][0]["ability_scope"] = json!("buff-other-ward");
+    activation["activate"] = json!({"cost":{"pp":0},"do":[{"buff":{
+        "on":{"who":"self","zone":"field","kind":"follower","keyword":"ward","other":true},"power":1,"hp":2
+    }}]});
+    document["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(activation);
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"source","card":"unit-follower"},{"id":"other","card":"unit-follower"}]);
+    let mut game = Game::new(
+        static_keywords::keyword_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "other-ward-buff",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    resolved(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[1].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["source"]["power"], 2_u8);
+    assert_eq!(state["objects"]["source"]["hp"], 3_u8);
+    assert_eq!(state["objects"]["other"]["power"], 3_u8);
+    assert_eq!(state["objects"]["other"]["hp"], 5_u8);
+    assert_eq!(state["objects"]["f"]["power"], 2_u8);
+}
+
+#[test]
+fn numeric_keyword_filters_keep_the_existing_field_and_ex_zone_boundary() {
+    for kind in ["buff", "set_stat"] {
+        let mut step = json!({});
+        step[kind] = json!({"on":{"who":"self","zone":"field","keyword":"ward"},"power":1});
+        let mut document = equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[step]}}),
+            "unit-follower",
+        );
+        lowerer().lower(&document).unwrap();
+        document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0][kind]["on"]["zone"] =
+            json!("cemetery");
+        lowerer().lower(&document).unwrap_err();
+    }
+}

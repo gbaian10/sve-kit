@@ -1120,6 +1120,7 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<FieldKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
