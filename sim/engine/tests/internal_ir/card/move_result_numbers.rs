@@ -483,7 +483,7 @@ fn raw_follow_permission_kind_unknown_receipts_and_non_deck_producers_stay_close
 }
 
 #[test]
-fn ex_result_cost_set_accepts_only_one_non_negative_fixed_value() {
+fn ex_result_cost_set_keeps_invalid_values_and_positive_deltas_closed() {
     let with = |effect: Value| {
         let mut tree = circle(&json!(1));
         tree["cards"]["unit-follower"]["abilities"][0]["fanfare"]["do"][1] = json!({"apply":{
@@ -499,10 +499,23 @@ fn ex_result_cost_set_accepts_only_one_non_negative_fixed_value() {
     );
     for rejected in [
         json!({"when_playing":{"in":"affected"},"set":-1}),
-        json!({"when_playing":{"in":"affected"},"delta":1}),
         json!({"when_playing":{"in":"affected"},"set":0,"delta":-1}),
         json!({"when_playing":{"in":"affected"},"set":0,"next_only":true}),
     ] {
         lowerer().lower(&with(rejected)).unwrap_err();
     }
+    let programs = lowerer()
+        .lower(&with(json!({"when_playing":{"in":"affected"},"delta":1})))
+        .unwrap();
+    let mut board = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "ex-result-positive-cost-guard",
+    )
+    .unwrap();
+    board
+        .load_internal_card("unit-follower", &programs["unit-follower"])
+        .unwrap_err();
 }

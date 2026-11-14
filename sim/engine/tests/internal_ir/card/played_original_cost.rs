@@ -272,10 +272,10 @@ fn event_cost_ranges_keep_entry_shapes_and_trait_unions_closed() {
                 continue;
             }
             let mut tree = baseline.clone();
-            let accepts_departure_cost =
-                header == "left_field" && filter.get("traits_any").is_none();
+            let accepts_original_cost =
+                matches!(header, "left_field" | "evolved") && filter.get("traits_any").is_none();
             tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"][header]["sel"] = filter;
-            if accepts_departure_cost {
+            if accepts_original_cost {
                 lowerer().lower(&tree).unwrap();
             } else {
                 assert!(matches!(
