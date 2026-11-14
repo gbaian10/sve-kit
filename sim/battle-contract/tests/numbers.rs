@@ -123,9 +123,9 @@ fn raw_floats_must_be_finite_safe_integers() {
     assert_eq!(Int::try_from(-9_007_199_254_740_991.0_f64), Ok(Int::MIN));
     for value in [
         0.5_f64,
-        -1.5,
-        9_007_199_254_740_992.0,
-        -9_007_199_254_740_992.0,
+        -1.5_f64,
+        9_007_199_254_740_992.0_f64,
+        -9_007_199_254_740_992.0_f64,
         f64::MAX,
         f64::MIN_POSITIVE,
         f64::NAN,
