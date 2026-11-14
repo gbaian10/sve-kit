@@ -126,7 +126,6 @@ fn scalar_zone_counts_reject_hidden_characteristic_filters_and_unknown_keywords(
         json!({"who":"self","zone":"hand","names":["unit-follower"]}),
         json!({"who":"self","zone":"deck","names":["unit-follower"]}),
         json!({"who":"self","zone":"banish","names":["unit-follower"]}),
-        json!({"who":"self","zone":"evolve_deck","face_up":true,"name":"one","names":["two"]}),
     ] {
         lowerer()
             .lower(&tree(
@@ -710,5 +709,26 @@ fn a_named_trait_count_limits_modes_to_its_actual_field_population() {
             game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
             22_u8
         );
+    }
+}
+
+#[test]
+fn evolve_deck_mode_count_conditions_require_a_single_public_name() {
+    let count = json!({"who":"self","zone":"evolve_deck","face_up":true,"name":"one"});
+    let document = |query| {
+        tree(&json!({"cost":{"pp":0},"do":[{"choice":{
+            "n":1,
+            "instead":[{"if":{"cmp":{"left":{"count":query},"op":"ge","right":1}},"upto":2}],
+            "options":[[{"life":{"who":"self","delta":1}}],[{"life":{"who":"self","delta":2}}]]
+        }}]}))
+    };
+    lowerer().lower(&document(count)).unwrap();
+    for query in [
+        json!({"who":"self","zone":"evolve_deck","face_up":true,"names":["one","two"]}),
+        json!({"who":"self","zone":"evolve_deck","face_up":true,"name":"one","names":["two"]}),
+        json!({"who":"opp","zone":"evolve_deck","face_up":true,"name":"one"}),
+        json!({"who":"self","zone":"evolve_deck","face_up":false,"name":"one"}),
+    ] {
+        lowerer().lower(&document(query)).unwrap_err();
     }
 }

@@ -381,6 +381,7 @@ impl BodyContext<'_> {
             || !matches!(count.zone, ast::CountZone::EvolveDeck)
             || count.face_up != Some(true)
             || count.name.as_ref().is_none_or(String::is_empty)
+            || !count.names.is_empty()
             || count.kind.is_some()
             || count.class.is_some()
             || count.not_class.is_some()
