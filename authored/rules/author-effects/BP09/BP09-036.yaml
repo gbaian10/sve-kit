@@ -1,0 +1,46 @@
+cards:
+  BP09-036:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: -2
+                when_playing:
+                  token: true
+                  trait: 禁忌
+                  who: self
+          while:
+            cmp:
+              left:
+                history_count:
+                  event: played
+                  sel:
+                    token: true
+                    trait: 禁忌
+                  who: self
+                  window: this_turn
+              op: eq
+              right: 0
+      - evolve_time:
+          cost:
+            earth_rite: 1
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 久遠の秘薬
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP09-T02
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

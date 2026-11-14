@@ -1,0 +1,29 @@
+cards:
+  BP11-005:
+    abilities:
+      - keywords:
+          - storm
+        line: 1
+      - evolve_time:
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
