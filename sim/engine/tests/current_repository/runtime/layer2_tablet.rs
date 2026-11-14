@@ -70,12 +70,17 @@ fn allocate(game: &mut Game, found: usize, field: usize, ex: usize, free: [u64; 
                 Answer::Search(SearchAnswer::Grouped(vec![handles]))
             }
             InputDomain::SearchPartition(domain) => {
-                assert_eq!(domain.cardinality.minimum, Nat(0));
+                assert_eq!(
+                    domain.cardinality.minimum,
+                    Nat(0),
+                    "each optional destination permits leaving all found cards in the deck"
+                );
                 assert_eq!(
                     domain.cardinality.maximum,
                     Some(Nat(free[partition]
                         .min(u64::try_from(domain.cards.len()).unwrap())
-                        .min(10)))
+                        .min(10))),
+                    "the declared upper bound is capped by remaining cards and destination capacity"
                 );
                 let count = if partition == 0 { field } else { ex };
                 if domain.cards.len()

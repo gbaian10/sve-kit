@@ -25,12 +25,16 @@ fn position(zone: &str, stacks: u8, enemy: bool) -> Value {
     initial
 }
 
-fn finish(game: &mut Game, mut play: CardPlay, modes: &[u64], pay: bool, expected_count: u64) {
+fn finish(game: &mut Game, mut play: CardPlay, modes: &[u64], accepted: bool, expected_count: u64) {
     for _ in 0_u8..32 {
         if let CardPlay::Awaiting(question) = play {
             let answer = match &question.domain {
                 InputDomain::Modes { count, .. } => {
-                    assert_eq!(*count, Nat(expected_count));
+                    assert_eq!(
+                        *count,
+                        Nat(expected_count),
+                        "only cemetery entry permits up to three modes"
+                    );
                     if expected_count == 1 {
                         game.answer_internal_card(
                             question.actor,
@@ -42,7 +46,7 @@ fn finish(game: &mut Game, mut play: CardPlay, modes: &[u64], pay: bool, expecte
                     Answer::Modes(modes.iter().copied().map(ModeId).collect())
                 }
                 InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
-                InputDomain::OptionalCost => Answer::OptionalCost(pay),
+                InputDomain::OptionalCost => Answer::OptionalCost(accepted),
                 InputDomain::CostMaterials(domain) => {
                     Answer::CostMaterials(vec![domain.members[0].handle])
                 }
@@ -170,14 +174,14 @@ fn bp07_038_granted_lastword_banishes_the_cemetery_generation_after_combat() {
         panic!("Riley lastword");
     };
     assert_eq!(options.len(), 1);
-    let play = game
+    let lastword = game
         .answer_internal_card(
             question.actor,
             question.token,
             Answer::Pending(options[0].handle),
         )
         .unwrap();
-    finish(&mut game, play, &[], true, 3);
+    finish(&mut game, lastword, &[], true, 3);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["banish"], json!(["riley"]));
     assert_eq!(state["P1"]["cemetery"], json!([]));

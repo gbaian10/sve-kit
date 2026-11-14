@@ -36,22 +36,23 @@ fn evolve(game: &mut Game) {
         )
         .unwrap()
         .outcome,
-        "resolved"
+        "resolved",
+        "the real source must evolve before its evolved ability can trigger"
     );
     for _ in 0_u8..16 {
         if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
             game.resume_internal_card().unwrap();
         }
-        let Some(question) = game.internal_pending_choice().unwrap() else {
+        let Some(pending) = game.internal_pending_choice().unwrap() else {
             return;
         };
-        let InputDomain::Pending(options) = &question.domain else {
+        let InputDomain::Pending(options) = &pending.domain else {
             panic!("pending evolution ability");
         };
         let mut play = game
             .answer_internal_card(
-                question.actor,
-                question.token,
+                pending.actor,
+                pending.token,
                 Answer::Pending(options[0].handle),
             )
             .unwrap();
