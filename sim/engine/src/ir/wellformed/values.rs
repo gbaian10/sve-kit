@@ -12,7 +12,7 @@ use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
-    PaymentReference, PlayerRead, PostureRead,
+    PaymentReference, PlayerRead, PostureRead, SpellCountTime,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -288,7 +288,8 @@ impl Checker {
                 BoolFrozen::PaymentComplete {
                     receipt: PaymentReference::CardPlay { face, receipt },
                 } if self.capture_time.is_none()
-                    && self.count_time.is_none()
+                    // Play-time reads see the accepted declaration; a failed payment reverts the play.
+                    && matches!(self.count_time, None | Some(SpellCountTime::AtPlay))
                     && self.env.chooser.is_none()
                     && self.card_payment_body.as_ref() == Some(face)
                     && self.card_payments.get(&face.0) == Some(receipt) =>

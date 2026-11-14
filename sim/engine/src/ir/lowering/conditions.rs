@@ -343,13 +343,7 @@ impl BodyContext<'_> {
             },
             ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
             ast::Condition::Did(name) => return self.move_success(name, path),
-            ast::Condition::Paid(paid) => {
-                return Ok(Expr::Frozen(Box::new(
-                    super::super::BoolFrozen::PaymentComplete {
-                        receipt: self.payment_reference(&paid.receipt, path)?,
-                    },
-                )));
-            }
+            ast::Condition::Paid(paid) => return self.paid_condition(paid, path),
         })))
     }
 
@@ -845,6 +839,18 @@ impl BodyContext<'_> {
                 })))
             }
         }
+    }
+
+    pub(super) fn paid_condition(
+        &self,
+        paid: &ast::PaidReceipt,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        Ok(Expr::Frozen(Box::new(
+            super::super::BoolFrozen::PaymentComplete {
+                receipt: self.payment_reference(&paid.receipt, path)?,
+            },
+        )))
     }
 
     fn payment_reference(

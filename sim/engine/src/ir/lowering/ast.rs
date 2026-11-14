@@ -2860,6 +2860,7 @@ pub(super) struct ChoiceInstead {
 #[serde(rename_all = "snake_case")]
 pub(super) enum ModeCondition {
     Cmp(Box<BodyComparison>),
+    Paid(PaidReceipt),
     History(HistoryQuery),
     Spellchain(u64),
     Necro(u64),

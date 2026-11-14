@@ -1028,6 +1028,11 @@ impl Execution {
                         _ => Err(invalid("missing card payment result")),
                     }
                 }
+                // Before payment, the accepted declaration equals completion: a failed payment
+                // reverts the whole play.
+                None if self.spell => super::card::exchange::declared(self, face, *receipt)
+                    .map(Bool)
+                    .ok_or_else(|| invalid("unavailable card play payment")),
                 _ => Err(invalid("unavailable card play payment")),
             },
             _ => Err(unsupported("boolean receipt")),
