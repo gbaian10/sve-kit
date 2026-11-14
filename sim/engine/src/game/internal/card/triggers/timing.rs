@@ -13,6 +13,7 @@ use crate::game::{Step, int, string};
 use crate::ir::dice as ir_dice;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::fusion;
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -140,6 +141,7 @@ fn timing_zone_allowed(ability: &Ability, trigger: &TriggerSpec) -> bool {
         || super::phase_in_zone(ability, ZoneKind::Ex)
         || (super::phase_in_zone(ability, ZoneKind::Cemetery)
             && super::played::cemetery_body(ability))
+        || super::evolution::ex_evolution(ability)
 }
 
 fn aggregation_allowed(trigger: &TriggerSpec) -> bool {
@@ -314,6 +316,14 @@ impl Game {
         self.internal_record_subject_event(attacker, SubjectHistoryEvent::Attack)?;
         if !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+                if program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| subscriptions::compound(&ability.node))
+                {
+                    return true;
+                }
                 program
                     .card()
                     .abilities
@@ -468,6 +478,9 @@ impl Game {
         !self.internal_has_drain_grants()
             && !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+            if program.card().abilities.iter().any(|ability| subscriptions::compound(&ability.node)) {
+                return true;
+            }
                 program.card().abilities.iter().any(|ability| {
                     matches!(
                         ability.node.trigger.as_ref().map(|trigger| &trigger.on),
@@ -706,6 +719,14 @@ impl Game {
         use crate::ir::events::life::LifeFilter;
         use crate::ir::{Int, LifeChangeEvent};
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program.card().abilities.iter().any(|ability| {
                 matches!(
                     ability.node.trigger.as_ref().map(|trigger| &trigger.on),
@@ -891,12 +912,19 @@ impl Game {
         let header = self.pending_header(actor, Cause::Rule { rule }, None, before)?;
         let mut pending = Vec::new();
         for (holder, ability) in candidates {
-            pending.push(self.timing_occurrence(
-                &holder,
-                ability,
-                &header,
-                Event::Phase { event },
-            )?);
+            let source = self.internal_effective_source(&holder, &ability)?;
+            let additional = self.additional_phase_triggers(phase, source.controller)?;
+            let total = additional
+                .checked_add(1)
+                .ok_or_else(|| invalid("trigger multiplicity overflow"))?;
+            for _ in 0..total {
+                pending.push(self.timing_occurrence(
+                    &holder,
+                    ability.clone(),
+                    &header,
+                    Event::Phase { event },
+                )?);
+            }
         }
         self.internal_admit_pending(pending)
     }

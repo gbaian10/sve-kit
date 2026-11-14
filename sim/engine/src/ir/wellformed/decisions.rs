@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::TurnOperation;
 use crate::ir::observation_selection::{private_look_choice, revealed_choice};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
@@ -804,6 +805,7 @@ impl Checker {
                         }
                         let valid = matches!(&step.instruction.action,
                             Action::Discard { .. }
+                            | Action::ScheduleTurn { player: PlayerRef::Controller {}, operation: TurnOperation::SkipNext {}, .. }
                             | Action::Fusion { .. }
                             | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }

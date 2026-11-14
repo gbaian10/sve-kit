@@ -849,6 +849,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                     matches!(
                         other.capability.code,
                         "shape.NatFrozen.DiceValue"
+                            | "shape.IntFrozen.MoveBatchCount"
                             | "shape.EntryMethodFields.EnterFieldMethod"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
@@ -867,7 +868,8 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.Action.Dice"
+        "shape.IntFrozen.MoveBatchCount"
+            | "shape.Action.Dice"
             | "action.dice"
             | "shape.DiceOperation.Roll"
             | "shape.Control.Repeat"
@@ -945,6 +947,7 @@ fn supported(code: &str) -> bool {
             | "internal.Role.Owner"
             | "internal.Role.Controller"
             | "player.require-one"
+            | "shape.TurnOperation.SkipNext"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
             | "shape.Action.RemoveAbility"
@@ -1266,6 +1269,8 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.Conditional"
             | "shape.NatRead.ZoneCount"
             | "read.zone-count"
+            | "shape.NatRead.OtherHandCount"
+            | "read.other-hand-count"
             | "shape.NatRead.TurnOrdinal"
             | "read.turn.ordinal"
             | "shape.Predicate.And"

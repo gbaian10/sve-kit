@@ -319,11 +319,28 @@ pub(in crate::game::internal) fn target_paths(
 
 fn target_action_paths(action: &Action, path: &str, allowed: &mut BTreeSet<String>) {
     match action {
+        Action::Damage { recipients, .. } => {
+            target_recipient_paths(recipients, &format!("{path}/action/recipients"), allowed);
+        }
         Action::Modify { subjects, .. } | Action::Grant { subjects, .. } => {
             target_selector_path(subjects, &format!("{path}/action/subjects"), allowed);
         }
         Action::Move { objects, .. } | Action::Destroy { objects } => {
             target_selector_path(objects, &format!("{path}/action/objects"), allowed);
+        }
+        _ => {}
+    }
+}
+
+fn target_recipient_paths(recipients: &RecipientSet, path: &str, allowed: &mut BTreeSet<String>) {
+    match recipients {
+        RecipientSet::Objects { objects } => {
+            target_selector_path(objects, &format!("{path}/objects"), allowed);
+        }
+        RecipientSet::Union { sets } => {
+            for (index, set) in sets.iter().enumerate() {
+                target_recipient_paths(set, &format!("{path}/sets/{index}"), allowed);
+            }
         }
         _ => {}
     }

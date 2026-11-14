@@ -270,7 +270,8 @@ fn event_cost_ranges_compose_for_entry_but_keep_history_and_other_events_closed(
             }
             let mut tree = baseline.clone();
             let accepts_event_cost = header == "enter_field"
-                || (header == "left_field" && filter.get("traits_any").is_none());
+                || (matches!(header, "left_field" | "evolved")
+                    && filter.get("traits_any").is_none());
             tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"][header]["sel"] = filter;
             if accepts_event_cost {
                 lowerer().lower(&tree).unwrap();

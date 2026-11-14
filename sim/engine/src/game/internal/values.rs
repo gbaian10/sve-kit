@@ -631,6 +631,38 @@ impl Execution {
         Ok(())
     }
 
+    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
+        match frozen {
+            IntFrozen::MoveBatchCount { event } => {
+                let count = self
+                    .event_reads
+                    .move_batch_count(*event)
+                    .ok_or_else(|| invalid("missing committed EX batch authority"))?;
+                Ok(Int(i64::try_from(count).map_err(invalid)?))
+            }
+            IntFrozen::DamageAmount { event } => {
+                let hit = self
+                    .event_reads
+                    .damage(*event)
+                    .ok_or_else(|| invalid("missing damage event authority"))?;
+                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
+            }
+            IntFrozen::PaidMaterialActs { receipt } => {
+                super::receipt_members::paid_material_acts(self, receipt)
+            }
+            IntFrozen::PaidMaterialNumber { receipt, property } => {
+                super::receipt_members::paid_material_number(self, receipt, *property)
+            }
+            IntFrozen::ReceiptRequested { receipt } => {
+                self.quantity(receipt).map(|(requested, _)| requested)
+            }
+            IntFrozen::DiscardedCost { receipt } => {
+                super::receipt_members::discarded_cost(self, receipt)
+            }
+            _ => Err(unsupported("signed projection")),
+        }
+    }
+
     pub(super) fn integer(&self, game: &Game, expr: &Expr<Int>) -> Result<Int> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -734,31 +766,6 @@ impl Execution {
         )
     }
 
-    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
-        match frozen {
-            IntFrozen::DamageAmount { event } => {
-                let hit = self
-                    .event_reads
-                    .damage(*event)
-                    .ok_or_else(|| invalid("missing damage event authority"))?;
-                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
-            }
-            IntFrozen::PaidMaterialActs { receipt } => {
-                super::receipt_members::paid_material_acts(self, receipt)
-            }
-            IntFrozen::PaidMaterialNumber { receipt, property } => {
-                super::receipt_members::paid_material_number(self, receipt, *property)
-            }
-            IntFrozen::ReceiptRequested { receipt } => {
-                self.quantity(receipt).map(|(requested, _)| requested)
-            }
-            IntFrozen::DiscardedCost { receipt } => {
-                super::receipt_members::discarded_cost(self, receipt)
-            }
-            _ => Err(unsupported("signed projection")),
-        }
-    }
-
     /// A printed original cost belongs to the card, so a moved target still has it.
     /// Only a public pick of at most one field or EX card lends it; a private pick never does.
     fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
@@ -832,6 +839,18 @@ impl Execution {
                     .ok_or_else(|| invalid("missing player turn ordinal"))
             }
             NatRead::Counter { holder, kind } => self.counter(game, holder, kind),
+            NatRead::OtherHandCount { player, excluding } => {
+                let excluded = self.object(game, excluding)?;
+                let excluded_id = self.object_id(excluded)?;
+                let current = game.object(excluded_id)?.generation == excluded.generation.0;
+                let hand = game.zone_ids(seat_name(self.player(game, player)?)?, "hand");
+                Ok(Nat(u64::try_from(
+                    hand.iter()
+                        .filter(|id| !current || id.as_str() != excluded_id)
+                        .count(),
+                )
+                .map_err(invalid)?))
+            }
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }

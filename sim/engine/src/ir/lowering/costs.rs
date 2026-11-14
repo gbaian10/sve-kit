@@ -4,8 +4,8 @@ use super::{
     ZoneKind, ast, decode, source_span, unsupported,
 };
 use crate::ir::{
-    BoolRead, Comparison, CostChange, HistoryCount, IntRead, NatRead, ObjectRef, PlayCostModifier,
-    PlayerResource,
+    BoolRead, Comparison, CostChange, HistoryCount, IntOperation, IntRead, NatRead, ObjectOperand,
+    ObjectRef, PlayCostModifier, PlayerResource,
 };
 
 pub(super) fn lower(
@@ -205,16 +205,7 @@ fn condition_number(
 ) -> Result<Expr<Int>, LoweringError> {
     Ok(match value {
         ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
-        ast::PublicNumber::Count {
-            count: ast::PublicCountQuery::Public(count),
-        } => super::numeric::aggregate_count(condition_count_query(count, allocator, path)?, None),
-        ast::PublicNumber::Count {
-            count: ast::PublicCountQuery::Numeric(count),
-        } => {
-            let body = ast::Body::default();
-            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
-            context.zone_count(count, path)?
-        }
+        ast::PublicNumber::Count { count } => cost_count(count, entry, allocator, path)?,
         ast::PublicNumber::DistinctNames { distinct_names } => super::numeric::distinct_count(
             distinct_names,
             super::super::ObjectProperty::Names,
@@ -328,7 +319,7 @@ pub(super) fn named_public_query(
         Selector::Difference {
             input: Box::new(objects),
             except: Box::new(Selector::Objects {
-                objects: vec![super::super::ObjectOperand::SourceHolder {}],
+                objects: vec![ObjectOperand::SourceHolder {}],
             }),
         }
     } else {
@@ -360,4 +351,37 @@ fn public_zone_query(
             binding,
         )),
     })
+}
+
+fn cost_count(
+    count: &ast::PublicCountQuery,
+    entry: &ast::Ability,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    match count {
+        ast::PublicCountQuery::Public(query) => Ok(super::numeric::aggregate_count(
+            condition_count_query(query, allocator, path)?,
+            None,
+        )),
+        ast::PublicCountQuery::Numeric(query) => {
+            let body = ast::Body::default();
+            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+            if matches!(query.zone, ast::CountZone::Hand)
+                && query.other
+                && matches!(query.who, ast::Side::Controller)
+            {
+                let mut unfiltered = query.clone();
+                unfiltered.other = false;
+                context.zone_count(&unfiltered, path)?;
+                return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::OtherHandCount {
+                        player: PlayerRef::Controller {},
+                        excluding: ObjectOperand::SourceHolder {},
+                    })),
+                })));
+            }
+            context.zone_count(query, path)
+        }
+    }
 }

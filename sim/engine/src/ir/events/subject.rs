@@ -111,12 +111,15 @@ impl SubjectFields {
                 EventContext::EnterField { event },
                 EventSnapshotPolicy::AfterEntry,
             ),
+            Self::Evolve(event) => (
+                EventContext::Evolve { event },
+                EventSnapshotPolicy::AfterEntry,
+            ),
             Self::Attack(_)
             | Self::Posture(_)
             | Self::DamageSource(_)
             | Self::Played { .. }
             | Self::Destroy(_)
-            | Self::Evolve(_)
             | Self::Cemetery(_)
             | Self::Hand(_)
             | Self::Ex(_)

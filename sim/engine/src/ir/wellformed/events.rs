@@ -8,6 +8,7 @@ use crate::ir::events::fusion;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
@@ -634,9 +635,18 @@ impl Checker {
         if patterns.is_empty() {
             return self.reject();
         }
+        if view.is_some_and(|view| view != EventSnapshotPolicy::AtReveal) {
+            return Err(self.error(WellFormedReason::InvalidEntry));
+        }
         for (index, alternative) in patterns.iter().enumerate() {
             self.at(&format!("patterns/{index}"), |checker| {
-                checker.isolated(|checker| checker.event_pattern(alternative, view, triggering))
+                checker.isolated(|checker| {
+                    checker.event_pattern(
+                        alternative,
+                        view.map(|_| subscriptions::view(alternative)),
+                        triggering,
+                    )
+                })
             })?;
         }
         Ok(())
@@ -990,30 +1000,30 @@ impl Checker {
         let Expr::Frozen(field) = left else {
             return self.reject();
         };
-        // A leave or mill names one public destination; the deck origin is mill-only.
-        let expected = match field.as_ref() {
+        let Expr::Compute(operation) = right else {
+            return self.reject();
+        };
+        let ZoneOperation::OfPlayer { player, kind } = operation.as_ref();
+        // Zone identity is public; these comparisons never enumerate a deck or hand.
+        let allowed = match field.as_ref() {
             ZoneFrozen::LeaveFieldTo { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Cemetery
+                *kind == ZoneKind::Cemetery
             }
             ZoneFrozen::MoveFrom { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Deck
+                matches!(kind, ZoneKind::Deck | ZoneKind::Ex)
             }
             ZoneFrozen::MoveTo { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Cemetery
+                matches!(kind, ZoneKind::Cemetery | ZoneKind::Hand)
             }
             ZoneFrozen::PlayOriginZone { .. }
             | ZoneFrozen::DiscardActualTo { .. }
             | ZoneFrozen::BanishFrom { .. }
             | ZoneFrozen::DriveCheckedFinalDestination { .. } => return self.reject(),
         };
-        let Expr::Compute(operation) = right else {
-            return self.reject();
-        };
-        let ZoneOperation::OfPlayer { player, kind } = operation.as_ref();
-        if *kind != expected {
+        if !allowed {
             return self.reject();
         }
         self.player(player)

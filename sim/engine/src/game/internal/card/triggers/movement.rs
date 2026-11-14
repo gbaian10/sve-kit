@@ -9,6 +9,7 @@ use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, KeywordId, PlayerId};
 use alloc::collections::BTreeMap;
@@ -165,6 +166,14 @@ impl Game {
 
     fn movement_observers(&self, exit: bool) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

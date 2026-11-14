@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-021:
+    admission: light
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            in_zone: { ref: this, zone: ex }
+      - line: 2
+        evolve:
+          cost: { pp: 2 }
+      - line: 3
+        keywords: [rush]
+      - line: 4
+        auto:
+          zone: ex
+          on:
+            evolved:
+              who: self
+              sel: { kind: follower }
+          do:
+            - if:
+                cond:
+                  in_zone: { ref: this, zone: ex }
+                then:
+                  - counter: { on: this, name: 戦意カウンター, delta: 1 }
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            counter: { on: this, name: 戦意カウンター }
+                          op: ge
+                          right: 2
+                      then:
+                        - optional:
+                            do:
+                              - move: { ref: this, to: field, result: returned }
+                              - evolve: { ref: { follow: returned } }
+      - line: 5
+        lastword:
+          do:
+            - move: { ref: this, to: ex }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

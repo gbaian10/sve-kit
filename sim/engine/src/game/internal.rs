@@ -1684,7 +1684,7 @@ impl Game {
         match &instruction.action {
             Action::GameResult { .. } => self.internal_victory(execution, &instruction)?,
             Action::Transfer { .. } => self.internal_transfer(execution, &instruction)?,
-            Action::ScheduleTurn { .. } => self.internal_extra_turn(execution, &instruction)?,
+            Action::ScheduleTurn { .. } => self.internal_schedule_turn(execution, &instruction)?,
             Action::PlayCard { .. } => self.internal_nested_card(execution, &instruction)?,
             Action::PlayAbility { .. } => self.internal_nested_ability(execution, &instruction)?,
             Action::RideDrive { .. } => self.internal_gain_drive(execution, &instruction)?,

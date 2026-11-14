@@ -32,6 +32,7 @@ mod modes;
 mod movement;
 mod prevention;
 mod producers;
+mod trigger_multiplicity;
 mod values;
 mod visibility;
 pub use entries::{WellFormedCardProgram, WellFormedProcedure};
@@ -705,7 +706,8 @@ impl Checker {
                 operation:
                     super::TurnOperation::InsertBefore {
                         anchor: super::ScheduleAnchor::NextTurn {},
-                    },
+                    }
+                    | super::TurnOperation::SkipNext {},
                 occurrence,
             } if *instruction_actor == (PlayerRef::Controller {}) => {
                 self.define(*occurrence, BindingKind::Value)

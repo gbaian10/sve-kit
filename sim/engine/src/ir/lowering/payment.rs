@@ -6,6 +6,7 @@ use super::{
     AbilitySource, Action, BodyContext, Cardinality, Expr, Instruction, InstructionContext,
     InstructionId, Int, LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
 };
+use crate::ir::{Binding, TurnOperation};
 use core::slice::from_ref;
 
 pub(super) fn activated(
@@ -139,6 +140,14 @@ fn lower_operations(
         let keyword = matches!(operation, ast::CostOperation::EarthRite(_))
             .then_some(super::KeywordId::EarthRite);
         let action = match operation {
+            ast::CostOperation::SkipTurn(value) => {
+                let ast::SelfPlayer::Controller = value.who;
+                Action::ScheduleTurn {
+                    player: PlayerRef::Controller {},
+                    operation: TurnOperation::SkipNext {},
+                    occurrence: Binding::new(context.allocator.id(path)?, context.scope),
+                }
+            }
             ast::CostOperation::EarthRite(amount) => {
                 let (action, decision) = super::earth::cost(context, *amount, path)?;
                 parameters.extend(decision);
@@ -442,7 +451,8 @@ fn material_operation(
         | ast::CostOperation::ToDeckBottom(_)
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_)
-        | ast::CostOperation::SelfToEx(_) => Err(unsupported(path)),
+        | ast::CostOperation::SelfToEx(_)
+        | ast::CostOperation::SkipTurn(_) => Err(unsupported(path)),
     }
 }
 

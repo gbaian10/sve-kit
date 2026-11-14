@@ -270,6 +270,7 @@ pub(super) enum CostOperation {
     Lesson(u64),
     Counter(CounterCost),
     EarthRite(u64),
+    SkipTurn(SkipTurnCost),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
@@ -284,6 +285,12 @@ pub(super) enum CostOperation {
     SelfToCemetery(bool),
     /// 「手札のこれをEXエリアに置く」; only a hand activation pays it.
     SelfToEx(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SkipTurnCost {
+    pub who: SelfPlayer,
 }
 
 #[derive(Deserialize)]
@@ -1183,6 +1190,8 @@ pub(super) struct ObjectQuery {
     pub acted: Option<bool>,
     pub except: Option<Box<BoundExcept>>,
     #[serde(default)]
+    pub not_same_name_as_this: bool,
+    #[serde(default)]
     pub other: bool,
 }
 
@@ -1363,7 +1372,7 @@ pub(super) struct EvolutionCostModifier {
 #[serde(deny_unknown_fields)]
 pub(super) struct CostModifier {
     pub when_playing: Playing,
-    pub delta: Option<i64>,
+    pub delta: Option<Value>,
     pub set: Option<i64>,
     pub next_only: Option<bool>,
 }
@@ -2324,7 +2333,7 @@ impl CountKind {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
     pub face_up: Option<bool>,
@@ -2349,7 +2358,7 @@ pub(super) struct CountQuery {
     pub not_token: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
     EvolveDeck,
@@ -3022,6 +3031,7 @@ pub(super) enum ModeCondition {
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
     pub pp: Option<u64>,
+    pub earth_rite: Option<u64>,
     pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
@@ -3305,7 +3315,7 @@ impl Auto {
 #[serde(deny_unknown_fields)]
 pub(super) struct MoveSubscription {
     pub from: MoveOrigin,
-    pub to: DepartureDestination,
+    pub to: Option<DepartureDestination>,
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub sel: Option<MovementSubject>,
@@ -3321,6 +3331,7 @@ pub(super) enum MoveOrigin {
 #[serde(rename_all = "snake_case")]
 pub(super) enum MoveZone {
     Field,
+    Ex,
     /// Only a public deck-to-cemetery move; the deck owner must be named.
     Deck,
 }
@@ -3436,6 +3447,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     BanishInstead(BanishReplacement),
+    ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
     Reroll(Reroll),
@@ -3458,6 +3470,21 @@ pub(super) struct BanishReplacement {
     pub on: Option<Objects>,
     pub from: String,
     pub to: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ExtraTriggers {
+    pub phase: TriggerPhase,
+    pub who: LeaderSide,
+    pub n: u64,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum TriggerPhase {
+    Main,
+    End,
 }
 
 #[derive(Deserialize)]

@@ -1,12 +1,15 @@
 use super::duration::EffectEnd;
+use super::number_plan::CostAmountPlan;
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::Frame;
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
+use crate::ir::number_bounds;
 use crate::ir::{
     Action, CostChange, CostKind, DurationEnd, Effect, EffectId, Expr, InstallationSubjects,
     InstallationTime, Instruction, Int, Selector, TimeAnchor,
 };
+use alloc::collections::BTreeSet;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -31,6 +34,18 @@ struct CostModifier {
 enum Change {
     Delta(i64),
     Set(i64),
+    LiveDelta(u64),
+}
+
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct LiveCost {
+    plan: CostAmountPlan,
+    execution: Execution,
+}
+
+fn live_delta(change: &CostChange) -> bool {
+    matches!(change, CostChange::Delta { amount }
+        if number_bounds::integer(amount).upper <= 0 && CostAmountPlan::compile(amount).is_ok())
 }
 
 fn fixed_change(change: &CostChange) -> Result<Change> {
@@ -69,7 +84,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         let supported = match kind {
             CostKind::Play => {
                 matches!(objects, Selector::MoveAfter { .. } | Selector::Bound { .. })
-                    && (matches!(change, CostChange::Delta { amount: Expr::Literal(Int(amount)) } if *amount <= 0)
+                    && (live_delta(change)
                         || matches!(change, CostChange::Set { amount: Expr::Literal(Int(amount)) } if *amount >= 0))
                     && matches!(
                         duration.end,
@@ -134,6 +149,21 @@ pub(super) fn printed_play_cost(value: &Value) -> Result<i64> {
     reason = "Cost modifiers share authoritative movement and turn occurrences."
 )]
 impl Game {
+    fn resolved_cost_change(&self, change: Change) -> Result<Change> {
+        if let Change::LiveDelta(id) = change {
+            let formula = self
+                .card_runtime
+                .live_costs
+                .get(&id)
+                .ok_or_else(|| invalid("missing live cost formula"))?;
+            Ok(Change::Delta(
+                formula.plan.evaluate(&formula.execution, self)?,
+            ))
+        } else {
+            Ok(change)
+        }
+    }
+
     pub(in crate::game) fn internal_cost_active(&self) -> bool {
         self.internal_granted_cost_active(None)
             || self
@@ -200,8 +230,9 @@ impl Game {
             .filter(|state| state.generation == generation)
         {
             for effect in state.effects.iter().filter(|effect| !effect.evolution) {
-                match effect.change {
+                match self.resolved_cost_change(effect.change)? {
                     Change::Set(amount) => base = amount,
+                    Change::LiveDelta(_) => return Err(invalid("unresolved live cost")),
                     Change::Delta(amount) => {
                         delta = delta
                             .checked_add(amount)
@@ -248,17 +279,40 @@ impl Game {
             0
         };
         for change in changes {
-            match change {
+            match self.resolved_cost_change(change)? {
                 Change::Delta(amount) => {
                     delta = delta
                         .checked_add(amount)
                         .ok_or_else(|| invalid("cost overflow"))?;
                 }
                 Change::Set(amount) => base = amount,
+                Change::LiveDelta(_) => return Err(invalid("unresolved live cost")),
             }
         }
         base.checked_add(delta)
             .ok_or_else(|| invalid("cost overflow"))
+    }
+
+    fn prepare_cost_change(
+        &self,
+        execution: &Execution,
+        change: &CostChange,
+    ) -> Result<(Option<LiveCost>, CostChange)> {
+        let live = match change {
+            CostChange::Delta { amount } if !matches!(amount, Expr::Literal(_)) => Some(LiveCost {
+                plan: CostAmountPlan::compile(amount)?,
+                execution: execution.clone(),
+            }),
+            _ => None,
+        };
+        let quoted = if let Some(formula) = &live {
+            CostChange::Delta {
+                amount: Expr::Literal(Int(formula.plan.evaluate(&formula.execution, self)?)),
+            }
+        } else {
+            change.clone()
+        };
+        Ok((live, quoted))
     }
 
     pub(super) fn internal_install_cost(
@@ -288,6 +342,7 @@ impl Game {
             return Err(unsupported("cost change"));
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
+        let (live, quoted) = self.prepare_cost_change(execution, change)?;
         let mut subjects = Vec::new();
         for reference in execution.objects(self, objects)? {
             let id = execution.object_id(reference)?;
@@ -304,7 +359,7 @@ impl Game {
             {
                 return Err(unsupported("cost modifier target zone"));
             }
-            self.installed_cost_with(id, 0, *kind, Some(change))?;
+            self.installed_cost_with(id, 0, *kind, Some(&quoted))?;
             subjects.push((id.to_owned(), reference));
         }
         let installed = EffectId(self.state.next_ir_effect);
@@ -315,6 +370,14 @@ impl Game {
                 .checked_add(1)
                 .ok_or_else(|| invalid("cost effect identities exhausted"))?;
         }
+        let stored_change = if let Some(formula) = live {
+            if !subjects.is_empty() {
+                self.card_runtime.live_costs.insert(installed.0, formula);
+            }
+            Change::LiveDelta(installed.0)
+        } else {
+            fixed_change(change)?
+        };
         let origin_record =
             super::observation::EffectOrigin::capture(self, execution, &instruction.source)?;
         for (id, reference) in &subjects {
@@ -338,7 +401,7 @@ impl Game {
                 execution: execution.id.0,
                 timestamp: execution.timestamp,
                 evolution: *kind == CostKind::Evolution,
-                change: fixed_change(change)?,
+                change: stored_change,
                 end,
             });
         }
@@ -414,6 +477,25 @@ impl Game {
         self.internal_grants_rule_carry(holder, before)
     }
 
+    fn retain_live_costs(&mut self) {
+        let retained = self
+            .state
+            .ir_cost
+            .values()
+            .flat_map(|state| &state.effects)
+            .filter_map(|effect| {
+                if let Change::LiveDelta(id) = effect.change {
+                    Some(id)
+                } else {
+                    None
+                }
+            })
+            .collect::<BTreeSet<_>>();
+        self.card_runtime
+            .live_costs
+            .retain(|id, _| retained.contains(id));
+    }
+
     pub(super) fn internal_cost_cleanup(&mut self) {
         self.state.ir_cost.retain(|id, state| {
             self.state
@@ -421,6 +503,7 @@ impl Game {
                 .get(id)
                 .is_some_and(|object| object.generation == state.generation)
         });
+        self.retain_live_costs();
     }
 
     pub(super) fn internal_cost_end_turn(&mut self, turn: u64) {
@@ -432,6 +515,7 @@ impl Game {
                 .retain(|effect| effect.end != EffectEnd::Turn(turn));
             !state.effects.is_empty()
         });
+        self.retain_live_costs();
     }
 }
 
@@ -466,9 +550,10 @@ impl Game {
                         } else {
                             CostKind::Play
                         },
-                        change: match effect.change {
+                        change: match self.resolved_cost_change(effect.change)? {
                             Change::Delta(amount) => NumberChange::Add(amount),
                             Change::Set(amount) => NumberChange::Set(amount),
+                            Change::LiveDelta(_) => return Err(invalid("unresolved live cost")),
                         },
                     },
                 })

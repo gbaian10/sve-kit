@@ -8,6 +8,7 @@ use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::player::observation::AbilityQuota;
 use crate::game::player::{AdmissionGapReason, Viewer};
+use crate::ir::TurnOperation;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -37,6 +38,7 @@ use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
 use crate::ir::{choice_rules, evolution_limits};
 mod move_replacement;
+mod trigger_multiplicity;
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -147,6 +149,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) quick_start: bool,
     pub(in crate::game::internal) banish_play: BTreeMap<u32, play_restrictions::BanishPermission>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
+    pub(in crate::game::internal) live_costs: BTreeMap<u64, super::cost::LiveCost>,
 }
 
 impl CardRuntime {
@@ -832,6 +835,29 @@ impl Game {
         }
     }
 
+    fn check_payment_source_zone(&self, execution: &Execution, action: &Action) -> Result<()> {
+        if material::source_field_cost(action)
+            && !material::source_cost_zone(action, &self.object(&execution.context.source)?.zone)
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "source cost requires the field".into(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn skip_turn_payment(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<Quantity> {
+        self.internal_schedule_turn(execution, instruction)?;
+        Ok(Quantity {
+            amount: Int(1),
+            unit: QuantityUnit::Times,
+        })
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
@@ -845,17 +871,16 @@ impl Game {
         self.check_hand_material_cost_entry(execution, costs)?;
         for step in steps {
             self.check_keyword_cost(execution, step)?;
-            if material::source_field_cost(&step.instruction.action)
-                && !material::source_cost_zone(
-                    &step.instruction.action,
-                    &self.object(&execution.context.source)?.zone,
-                )
-            {
-                return Err(crate::EngineFailure::IllegalPlay(
-                    "source cost requires the field".into(),
-                ));
-            }
+            self.check_payment_source_zone(execution, &step.instruction.action)?;
             let (quantity, subjects, characters) = match &step.instruction.action {
+                Action::ScheduleTurn {
+                    operation: TurnOperation::SkipNext {},
+                    ..
+                } => (
+                    self.skip_turn_payment(execution, &step.instruction)?,
+                    Vec::new(),
+                    Vec::new(),
+                ),
                 Action::Counter { .. } => (
                     self.internal_counter(execution, &step.instruction, true)?,
                     Vec::new(),
@@ -1067,6 +1092,9 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
                 Some(Family::Prevention) => prevention::check(located, declaration)?,
                 Some(Family::Cost) => other_costs::check(located, declaration)?,
                 Some(Family::MoveReplacement) => move_replacement::check(located, declaration)?,
+                Some(Family::TriggerMultiplicity) => {
+                    trigger_multiplicity::check(located, declaration)?;
+                }
                 None => return Err(unsupported("static declaration provider")),
             }
         }
@@ -1146,7 +1174,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let nonfield_trigger = triggers::phase_in_zone(ability, ZoneKind::Ex)
         || triggers::phase_in_zone(ability, ZoneKind::Cemetery)
         || triggers::ex_self_entry(ability)
-        || triggers::ex_entry(ability);
+        || triggers::ex_entry(ability)
+        || triggers::ex_evolution(ability);
     let played_trigger = filter(ability).is_some()
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();
@@ -1299,6 +1328,11 @@ pub(super) fn check_payment(
             } => objects == &[ObjectOperand::SourceHolder {}] && material::source_put(movement),
             action @ Action::Banish { .. } if super::movement::deck_top(action).is_some() => !quick,
             action if reveal_payment::selected(action, &play.parameters) => !quick,
+            Action::ScheduleTurn {
+                player: PlayerRef::Controller {},
+                operation: TurnOperation::SkipNext {},
+                ..
+            } => true,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             Action::Fusion { .. } => fusion::check_cost(&instruction.action),

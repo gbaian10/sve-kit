@@ -514,6 +514,9 @@ fn public_mode_count(value: &Expr<Int>) -> bool {
     };
     match read.as_ref() {
         NatRead::ZoneCount {
+            selector: Selector::Difference { .. },
+        } => public_numbers::check(value),
+        NatRead::ZoneCount {
             selector:
                 Selector::Zone {
                     zone,

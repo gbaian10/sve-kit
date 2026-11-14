@@ -16,6 +16,7 @@ use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, ObjectRe
 use crate::ir::{KeywordId, LimitSpec};
 use core::mem;
 
+use crate::ir::events::subscriptions;
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
         return Ok(false);
@@ -226,11 +227,9 @@ impl Game {
         if previous.is_empty()
             || (!self.has_delayed_entries()
                 && !self.card_runtime.definitions.cards.values().any(|program| {
-                    program
-                        .card()
-                        .abilities
-                        .iter()
-                        .any(|ability| filter(&ability.node).is_some())
+                    program.card().abilities.iter().any(|ability| {
+                        filter(&ability.node).is_some() || subscriptions::compound(&ability.node)
+                    })
                 }))
         {
             return Ok(());

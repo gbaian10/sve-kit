@@ -1,11 +1,12 @@
 //! Printed movement headers share the immutable event filter plan.
 use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
+use crate::ir::events::ex_departure::ExDepartureFilter;
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{
-    CardKind, CardName, ClassId, Comparison, KeywordId, ObjectRef, PlayEvent, TraitId,
+    CardKind, CardName, ClassId, Comparison, KeywordId, ObjectRef, PlayEvent, TraitId, ZoneKind,
 };
 
 #[derive(Clone, Copy)]
@@ -132,6 +133,25 @@ fn moved(
             (Some(matches!(who, ast::EntryPlayer::Controller)), zone)
         }
     };
+    if *zone == ast::MoveZone::Ex {
+        let own = own.ok_or_else(|| unsupported(path))?;
+        if entry.reference.is_some() || entry.sel.is_some() {
+            return Err(unsupported(path));
+        }
+        let event = Binding::new(event_id, scope);
+        return Ok(EventPattern::Move {
+            binding: event,
+            predicate: ExDepartureFilter {
+                own,
+                own_turn: entry.during.is_some(),
+                to: entry.to.as_ref().map(|to| match to {
+                    ast::DepartureDestination::Cemetery => ZoneKind::Cemetery,
+                    ast::DepartureDestination::Hand => ZoneKind::Hand,
+                }),
+            }
+            .predicate(event),
+        });
+    }
     if *zone == ast::MoveZone::Deck {
         return mill(entry, own, event_id, scope, path);
     }
@@ -144,7 +164,7 @@ fn moved(
         subject.as_ref(),
         entry.during.is_some(),
         path,
-        if own == Some(true) && matches!(entry.to, ast::DepartureDestination::Cemetery) {
+        if own == Some(true) && matches!(entry.to, Some(ast::DepartureDestination::Cemetery)) {
             FilterSupport::CemeteryWard
         } else {
             FilterSupport::Basic
@@ -157,7 +177,7 @@ fn moved(
         let ast::Item::Item = history.r#where.recipient;
         if own != Some(false)
             || filter.kind != Some(CardKind::Follower)
-            || !matches!(entry.to, ast::DepartureDestination::Cemetery)
+            || !matches!(entry.to, Some(ast::DepartureDestination::Cemetery))
             || entry.during.is_none()
         {
             return Err(unsupported(path));
@@ -186,8 +206,9 @@ fn moved(
         predicate
     } else {
         filter.predicate(match entry.to {
-            ast::DepartureDestination::Cemetery => SubjectFields::Cemetery(event),
-            ast::DepartureDestination::Hand => SubjectFields::Hand(event),
+            Some(ast::DepartureDestination::Cemetery) => SubjectFields::Cemetery(event),
+            Some(ast::DepartureDestination::Hand) => SubjectFields::Hand(event),
+            None => SubjectFields::Leave(event),
         })
     };
     Ok(EventPattern::LeaveField {
@@ -209,7 +230,7 @@ fn mill(
     };
     if entry.reference.is_some()
         || entry.sel.is_some()
-        || !matches!(entry.to, ast::DepartureDestination::Cemetery)
+        || !matches!(entry.to, Some(ast::DepartureDestination::Cemetery))
     {
         return Err(unsupported(path));
     }
@@ -274,25 +295,7 @@ pub(super) fn movement_filter(
     }) {
         return Err(unsupported(path));
     }
-    let bounds = subject
-        .map_or([None, None, None], |sel| {
-            [
-                sel.orig_cost_eq.map(|n| (Comparison::Equal, n)),
-                sel.orig_cost_le.map(|n| (Comparison::LessEqual, n)),
-                sel.orig_cost_ge.map(|n| (Comparison::GreaterEqual, n)),
-            ]
-        })
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
-    let original_cost = match bounds.as_slice() {
-        [] => None,
-        [(comparison, cost)] => Some((
-            *comparison,
-            i64::try_from(*cost).map_err(|_overflow| unsupported(path))?,
-        )),
-        _ => return Err(unsupported(path)),
-    };
+    let original_cost = original_cost(subject, path)?;
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     let allow_original_cost = matches!(
         support,
@@ -472,4 +475,29 @@ pub(super) fn entry_union(
         binding: event,
         predicate,
     })
+}
+
+pub(super) fn original_cost(
+    subject: Option<&ast::MovementSubject>,
+    path: &str,
+) -> Result<Option<(Comparison, i64)>, LoweringError> {
+    let bounds = subject
+        .map_or([None, None, None], |sel| {
+            [
+                sel.orig_cost_eq.map(|n| (Comparison::Equal, n)),
+                sel.orig_cost_le.map(|n| (Comparison::LessEqual, n)),
+                sel.orig_cost_ge.map(|n| (Comparison::GreaterEqual, n)),
+            ]
+        })
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+    match bounds.as_slice() {
+        [] => Ok(None),
+        [(comparison, cost)] => Ok(Some((
+            *comparison,
+            i64::try_from(*cost).map_err(|_overflow| unsupported(path))?,
+        ))),
+        _ => Err(unsupported(path)),
+    }
 }

@@ -1,0 +1,29 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-017:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on:
+            moved:
+              from: { who: self, zone: ex }
+              during: { turn: self }
+          aggregation: batch
+          per_turn: 1
+          do:
+            - create:
+                token: フェアリー
+                n: { event: amount }
+                to: ex
+    token_sources:
+      - card: BP22-T05
+        line: 1
+        section: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

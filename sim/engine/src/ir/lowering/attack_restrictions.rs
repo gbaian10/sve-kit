@@ -122,6 +122,7 @@ fn permission(
             )
         }
         ast::StaticEffect::BanishInstead(_)
+        | ast::StaticEffect::ExtraTrigger(_)
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)

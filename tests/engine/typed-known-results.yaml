@@ -64,16 +64,6 @@ known:
     status: unsupported
     error: "unadmitted BP02-SL17 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "B 打出當回合：攻撃時 2 傷害打死體力 2 的目標 → 不交戰、攻擊者體力不減"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP03-109"
     scenario: "A 奪走出走中的ハルウララ → 仍有突進 → 攻擊アクト狀態的ファイター → 互相受傷"
     status: unsupported
@@ -602,13 +592,13 @@ known:
   - question: "card-BP19-SL22"
     scenario: "A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 2 occurrences'
   - question: "card-BP19-SL22"
     scenario: "B 兩張エルラーデ → 每個能力誘發 3 次、每次可選 2 個 → 全選【3】共抽 6 張"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 3 occurrences'
   - question: "card-BP19-SL26"
     scenario: "可看 1 張"
     status: unsupported
@@ -661,9 +651,9 @@ known:
     reason: "after-decision-2 omniscient assert P1.deck; after-decision-2 omniscient assert P1.hand; after-decision-2 omniscient forbidden_events"
   - question: "card-BP20-R13"
     scenario: "A 以跳過下一回合為費用進化 → 進化時 PP 最大值 +1、+3、抽 1 → 對手回合 → 自己回合被跳過 → 對手再一個回合"
-    status: unsupported
-    error: "unadmitted BP20-R13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-R13/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: pending card stamp and healing trace projection (#2008)"
+    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
   - question: "card-BP20-SL17"
     scenario: "A ファンファーレ 全體 1 傷害 → 3 個誘發（含致命的崇拝者）→ 大佐被破壞 → ラストワード 打アジュラ → アジュラ 再誘發"
     status: fail
@@ -884,16 +874,6 @@ known:
     status: unsupported
     error: "unadmitted BP15-SL13 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊有オーラ的從者"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊主戰者條件不成立"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-equipment-capacity-r3-01"
     scenario: "PP=2"
     status: unsupported

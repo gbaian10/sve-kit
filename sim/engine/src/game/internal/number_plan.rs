@@ -3,7 +3,7 @@
 use super::tokens::dynamic;
 use super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use crate::ir::{
-    Arithmetic, Binding, Bool, Comparison, DestroyOutcome, Expr, Int, IntOperation, Nat,
+    Arithmetic, Binding, Bool, Comparison, DestroyOutcome, Expr, Int, IntFrozen, IntOperation, Nat,
     NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference, number_bounds::Bounds,
 };
 use core::convert::identity;
@@ -262,6 +262,17 @@ fn natural(expression: &Expr<Nat>, policy: Policy) -> Result<CheckedNatural> {
     Ok(CheckedNatural { plan, constant })
 }
 
+fn move_batch_integer(expression: &Expr<Int>) -> CheckedInteger {
+    CheckedInteger {
+        plan: Integer::Effect(Box::new(expression.clone())),
+        bounds: Bounds {
+            lower: 0,
+            upper: i64::MAX,
+        },
+        constant: None,
+    }
+}
+
 fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
     if matches!(policy, Policy::Cost { .. }) && !cost::admits_integer(expression) {
         return Err(unsupported("play cost count operand"));
@@ -272,6 +283,9 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
             bounds: Bounds::point(*value),
             constant: Some(*value),
         }),
+        Expr::Frozen(read) if matches!(read.as_ref(), IntFrozen::MoveBatchCount { .. }) => {
+            Ok(move_batch_integer(expression))
+        }
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value } => {
                 let checked = natural(value, policy)?;

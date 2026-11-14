@@ -193,6 +193,18 @@ fn check_static_source(shape: &Prevention<'_>, origin: &AbilitySource) -> Result
     Ok(())
 }
 
+// Prevention unions must not widen the shared numeric selector mask.
+fn object_recipients(objects: &Selector) -> RecipientSet {
+    match objects {
+        Selector::Union { sets } => RecipientSet::Union {
+            sets: sets.iter().map(object_recipients).collect(),
+        },
+        objects => RecipientSet::Objects {
+            objects: objects.clone(),
+        },
+    }
+}
+
 pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Result<()> {
     let ability = &located.node;
     if ability.kind != AbilityKind::Static
@@ -222,18 +234,14 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
         let mut sets = Vec::new();
         if let Some(recipients) = shape.recipients {
             sets.push(match recipients {
-                Recipients::Objects(objects) => RecipientSet::Objects {
-                    objects: objects.clone(),
-                },
+                Recipients::Objects(objects) => object_recipients(objects),
                 Recipients::Leaders(players) => RecipientSet::Leaders {
                     players: players.clone(),
                 },
             });
         }
         if let Some(DamageSource::Objects(objects)) = shape.damage_source {
-            sets.push(RecipientSet::Objects {
-                objects: objects.clone(),
-            });
+            sets.push(object_recipients(objects));
         }
         if equipment {
             // Both validated relation ends are public field followers, not the equipment itself.

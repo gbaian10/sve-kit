@@ -470,7 +470,20 @@ impl Game {
         result.retain(|ability| {
             ability.node.qualification != AbilityQualification::UnionBurst || ub_enabled
         });
-        Ok(result)
+        Ok(result
+            .into_iter()
+            .flat_map(|ability| {
+                ability
+                    .definition
+                    .event_alternatives()
+                    .into_iter()
+                    .map(|definition| EffectiveAbility {
+                        definition,
+                        grant: ability.grant.clone(),
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect())
     }
 
     pub(in crate::game::internal) fn internal_effective_source(

@@ -51,6 +51,7 @@ mod reveal_until;
 mod stack;
 mod static_declarations;
 mod static_keywords;
+mod trigger_multiplicity;
 mod trigger_restrictions;
 mod victory;
 mod x_pp;
@@ -346,7 +347,7 @@ fn lower_play_costs(
                 additional = Some(lowered);
             }
             let source = source_span(coordinates, entry_path, ability)?;
-            if let Some(lowered) = exchange::lower(play, &source, allocator)? {
+            if let Some(lowered) = exchange::lower(ability, play, &source, allocator)? {
                 if exchange.is_some() {
                     return Err(unsupported(entry_path));
                 }
@@ -533,7 +534,8 @@ impl Allocator {
                 Some(
                     ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
-                    | ast::StaticEffect::BanishInstead(_),
+                    | ast::StaticEffect::BanishInstead(_)
+                    | ast::StaticEffect::ExtraTrigger(_),
                 )
                 | None => {
                     return Err(unsupported(path));
@@ -845,7 +847,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
             && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
                 || (zones == [ZoneKind::Ex]
-                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))
+                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_) | ast::PhaseSubscription::Evolved(_))
                     // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
                     && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
                         if placed.reference.is_some())
@@ -1015,7 +1017,9 @@ fn lowered_trigger(
             active_zones: active_zones(entry, path)?,
             view: if matches!(
                 pattern,
-                EventPattern::Play { .. } | EventPattern::UbActivated { .. }
+                EventPattern::Play { .. }
+                    | EventPattern::UbActivated { .. }
+                    | EventPattern::AnyOf { .. }
             ) || super::events::fusion::combined(&pattern)
             {
                 EventSnapshotPolicy::AtReveal

@@ -1028,6 +1028,8 @@ impl BodyContext<'_> {
                     Selector::Bound {
                         reference: *reference,
                     }
+                } else if name == "attack_target" {
+                    self.attack_target_objects(path)?
                 } else if name == "it" {
                     self.objects(&ast::Objects::Bound(name.clone()), path)?
                 } else {

@@ -7,6 +7,7 @@ use crate::game::internal::Execution;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::played::filter;
+use crate::ir::events::subscriptions;
 use crate::ir::optional_payment;
 use crate::ir::{
     Action, CharacteristicPatch, Control, Effect, GrantedAbility, LimitSpec, Located,
@@ -218,6 +219,14 @@ impl Game {
         cost: ReceiptId,
     ) -> Result<()> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

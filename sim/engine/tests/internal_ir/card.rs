@@ -1050,3 +1050,33 @@ mod public_destroy_filter;
 
 #[path = "card/hand_source_ex.rs"]
 mod hand_source_ex;
+
+#[path = "card/trigger_multiplicity.rs"]
+mod trigger_multiplicity;
+
+#[path = "card/earth_exchange.rs"]
+mod earth_exchange;
+
+#[path = "card/next_turn_cost.rs"]
+mod next_turn_cost;
+
+#[path = "card/granted_attack_target.rs"]
+mod granted_attack_target;
+
+#[path = "card/live_cost_history.rs"]
+mod live_cost_history;
+
+#[path = "card/ex_evolution_observer.rs"]
+mod ex_evolution_observer;
+
+#[path = "card/skip_turn_evolution.rs"]
+mod skip_turn_evolution;
+
+#[path = "card/mixed_subscription.rs"]
+mod mixed_subscription;
+
+#[path = "card/evolution_original_cost.rs"]
+mod evolution_original_cost;
+
+#[path = "card/ex_departure_batch.rs"]
+mod ex_departure_batch;

@@ -8,6 +8,7 @@ use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::{Object, int};
 use crate::ir::events::change::{PostureFilter, StatFilter};
+use crate::ir::events::subscriptions;
 use crate::ir::{ExecutionId, ObjectRef, PlayerId, RuntimeHolder};
 use serde_json::Value;
 
@@ -100,6 +101,14 @@ impl Game {
         self.internal_record_stat_gains(events);
         if events.is_empty()
             || !self.card_runtime.definitions.cards.values().any(|program| {
+                if program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| subscriptions::compound(&ability.node))
+                {
+                    return true;
+                }
                 program
                     .card()
                     .abilities

@@ -7,6 +7,7 @@ use super::{
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::{Execution, Fact};
 use crate::ir::events::fusion::{combined, filter, material_filter};
+use crate::ir::events::subscriptions;
 use crate::ir::optional_payment;
 use crate::ir::{FusedEvent, LimitSpec, ObjectRef, TriggerCondition};
 use core::mem;
@@ -133,6 +134,14 @@ impl Game {
             });
         }
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities
