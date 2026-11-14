@@ -869,10 +869,28 @@ impl Game {
         Ok(())
     }
 
-    fn field_entry_player(&self, execution: &Execution, movement: &MoveSpec) -> Result<PlayerId> {
+    fn field_entry_player(
+        &self,
+        execution: &Execution,
+        movement: &MoveSpec,
+        objects: &Selector,
+        members: &[ObjectRef],
+    ) -> Result<PlayerId> {
         let MoveDestination::Shared { zone } = &movement.to else {
             return Err(invalid("field entry destination"));
         };
+        // 「それを場に出す」 returns a departed card to its own owner's field; for a Last Word's
+        // self-return that owner is the source's, for another card's departure it is not.
+        if zone.player == (PlayerRef::Owner {})
+            && matches!(objects, Selector::Objects { objects } if matches!(objects.as_slice(),
+                [ObjectOperand::FollowEventMove { event: MovementEvent::LeaveField { .. } }]))
+            && let [member] = members
+        {
+            let object = self.object(execution.object_id(*member)?)?;
+            if object.generation == member.generation.0 {
+                return player_id(&object.owner);
+            }
+        }
         execution.player(self, &zone.player)
     }
 
@@ -917,7 +935,7 @@ impl Game {
         let Action::Move { movement, .. } = &instruction.action else {
             return Err(invalid("field entry movement"));
         };
-        let destination = self.field_entry_player(execution, movement)?;
+        let destination = self.field_entry_player(execution, movement, objects, &members)?;
         let owner_destination = destination != execution.context.controller;
         let seat = super::seat_name(destination)?;
         self.check_field_entry(execution, &members, objects, seat)?;
