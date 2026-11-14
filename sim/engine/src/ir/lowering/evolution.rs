@@ -418,15 +418,13 @@ pub(super) fn subscription(
             || sel.token.is_some()
             || sel.not_token.is_some()
             || sel.class.is_some()
-            || sel.orig_cost_eq == Some(0)
-            || sel.orig_cost_le.is_some()
-            || sel.orig_cost_ge.is_some()
             || sel.traits_any.is_some()
     }) {
         return Err(unsupported(path));
     }
     let event = Binding::new(event_id, scope);
     let filter = SubjectFilter {
+        original_cost: super::movement::original_cost(entry.sel.as_ref(), path)?,
         own: entry
             .who
             .as_ref()

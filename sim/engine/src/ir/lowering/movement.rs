@@ -265,25 +265,7 @@ pub(super) fn movement_filter(
     }) {
         return Err(unsupported(path));
     }
-    let bounds = subject
-        .map_or([None, None, None], |sel| {
-            [
-                sel.orig_cost_eq.map(|n| (Comparison::Equal, n)),
-                sel.orig_cost_le.map(|n| (Comparison::LessEqual, n)),
-                sel.orig_cost_ge.map(|n| (Comparison::GreaterEqual, n)),
-            ]
-        })
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>();
-    let original_cost = match bounds.as_slice() {
-        [] => None,
-        [(comparison, cost)] => Some((
-            *comparison,
-            i64::try_from(*cost).map_err(|_overflow| unsupported(path))?,
-        )),
-        _ => return Err(unsupported(path)),
-    };
+    let original_cost = original_cost(subject, path)?;
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     let allow_original_cost = matches!(
         support,
@@ -462,4 +444,29 @@ pub(super) fn entry_union(
         binding: event,
         predicate,
     })
+}
+
+pub(super) fn original_cost(
+    subject: Option<&ast::MovementSubject>,
+    path: &str,
+) -> Result<Option<(Comparison, i64)>, LoweringError> {
+    let bounds = subject
+        .map_or([None, None, None], |sel| {
+            [
+                sel.orig_cost_eq.map(|n| (Comparison::Equal, n)),
+                sel.orig_cost_le.map(|n| (Comparison::LessEqual, n)),
+                sel.orig_cost_ge.map(|n| (Comparison::GreaterEqual, n)),
+            ]
+        })
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+    match bounds.as_slice() {
+        [] => Ok(None),
+        [(comparison, cost)] => Ok(Some((
+            *comparison,
+            i64::try_from(*cost).map_err(|_overflow| unsupported(path))?,
+        ))),
+        _ => Err(unsupported(path)),
+    }
 }
