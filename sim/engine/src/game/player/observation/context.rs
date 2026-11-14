@@ -20,6 +20,13 @@ pub enum PreventionChange {
     Prevent,
     /// Add a signed amount to the covered damage.
     Add(i64),
+    /// Each covered damage of at least `threshold` becomes `replacement`.
+    Cap {
+        /// Smallest single damage that is replaced.
+        threshold: u64,
+        /// Damage dealt instead.
+        replacement: u64,
+    },
 }
 
 /// Trigger event category without a payload, binding or event identity.
