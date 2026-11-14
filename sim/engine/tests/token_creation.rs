@@ -27,6 +27,8 @@ mod extra_turn;
 mod paid_x;
 #[path = "token_creation/per.rs"]
 mod per;
+#[path = "token_creation/shared_admission.rs"]
+mod shared_admission;
 #[path = "token_creation/strict.rs"]
 mod strict;
 #[path = "token_creation/victory.rs"]

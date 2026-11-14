@@ -1,8 +1,8 @@
 use super::super::{Step, list};
 use super::tokens::PaidX;
 use super::{
-    Context, Execution, Fact, Game, InstructionOutcome, Progress, admission, int, player_id,
-    seat_name, unsupported,
+    CandidateAdmission, Context, Execution, Fact, Game, InstructionOutcome, Progress, admission,
+    int, player_id, seat_name, unsupported,
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
@@ -43,7 +43,7 @@ use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::slice::from_ref;
-use core::{mem::take, result};
+use core::{mem::take, ptr, result};
 use serde::Serializer;
 use serde::ser::Error as _;
 use serde_json::json;
@@ -370,7 +370,9 @@ impl Game {
     fn prepare_current_cards(&mut self, selected: &SelectedEffects) -> Result<Arc<RuntimeCards>> {
         let mut definitions = RuntimeCards::default();
         let mut representatives = BTreeMap::new();
-        for (number, candidate) in &selected.current {
+        // The caller verified the public candidates against these accepted copies.
+        for (number, accepted) in selected.accepted() {
+            let candidate = accepted.candidate();
             let card = if let Some(card) = representatives.get(&candidate.card_id) {
                 Arc::clone(card)
             } else {
@@ -382,15 +384,8 @@ impl Game {
             definitions.current.insert(number.clone(), card);
         }
         self.card_runtime.definitions = Arc::new(definitions);
-        let cards = self
-            .card_runtime
-            .definitions
-            .current
-            .iter()
-            .map(|(number, card)| (number.clone(), Arc::clone(card)))
-            .collect::<Vec<_>>();
-        for (number, card) in cards {
-            self.load_internal_card(&number, &card.candidate.program)?;
+        for (number, accepted) in selected.accepted() {
+            self.load_accepted_card(number, accepted)?;
         }
         Ok(Arc::clone(&self.card_runtime.definitions))
     }
@@ -403,18 +398,20 @@ impl Game {
         let mut definitions = RuntimeCards::default();
         let mut failures = BTreeMap::new();
         for number in required {
-            let Some(candidate) = selected.current.get(number) else {
+            let Some(accepted) = selected.accepted().get(number) else {
                 continue;
             };
-            let card = self.catalog.resolve_current(Arc::clone(candidate))?;
+            let card = self
+                .catalog
+                .resolve_current(Arc::clone(accepted.candidate()))?;
             self.catalog.check_current_printing(number, &card)?;
             definitions.current.insert(number.clone(), Arc::new(card));
         }
         self.card_runtime.selected = true;
         self.card_runtime.definitions = Arc::new(definitions);
         for number in required {
-            if let Some(candidate) = selected.current.get(number) {
-                match self.load_internal_card(number, &candidate.program) {
+            if let Some(accepted) = selected.accepted().get(number) {
+                match self.load_accepted_card(number, accepted) {
                     Ok(()) => {}
                     Err(crate::EngineFailure::Unsupported(_private)) => {
                         failures.insert(number.clone(), AdmissionGapReason::UnsupportedRuntime);
@@ -475,11 +472,24 @@ impl Game {
         Ok(())
     }
 
+    fn load_accepted_card(&mut self, card_no: &str, accepted: &CandidateAdmission) -> Result<()> {
+        let admitted = admission::admit_candidate(self, card_no, accepted)?;
+        Arc::make_mut(&mut self.card_runtime.definitions)
+            .cards
+            .insert(card_no.into(), admitted);
+        Ok(())
+    }
+
+    /// `shared` must own `card`; it supplies the outcomes that depend on the program alone.
     pub(in crate::game::internal) fn check_internal_card(
         &self,
         card_no: &str,
         card: &WellFormedCardProgram,
+        shared: Option<&CandidateAdmission>,
     ) -> Result<()> {
+        if shared.is_some_and(|owner| !ptr::eq(&owner.candidate().program, card)) {
+            return Err(invalid("shared admission belongs to another candidate"));
+        }
         let base_print = self.catalog.face(card_no, 0)?;
         let base_face = self.printed_face_id(card_no, 0)?;
         check_base_face(base_print, pilot_face(card, &base_face.0))?;
@@ -561,14 +571,18 @@ impl Game {
                 .ok_or_else(|| invalid("missing body"))?;
             let x = super::tokens::paid_x(ability);
             check_nodes_with_x(self, &body.steps, &located.source, &ability.source, x)?;
-            admission::check_card_with_x(
-                body,
-                &located.source,
-                &ability.source,
-                ability.trigger.as_ref(),
-                x,
-            )?;
-            play::check(ability, &located.source)?;
+            // Neither check receives the game, so one outcome serves every printing.
+            let program_only = || {
+                admission::check_card_with_x(
+                    body,
+                    &located.source,
+                    &ability.source,
+                    ability.trigger.as_ref(),
+                    x,
+                )?;
+                play::check(ability, &located.source)
+            };
+            CandidateAdmission::ability_of(shared, index, program_only)?;
         }
         Ok(())
     }

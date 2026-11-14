@@ -2,7 +2,7 @@
 
 use super::current::CurrentCard;
 use super::{Card, Catalog, EngineFailure, EngineIdentityInput, Result, invalid};
-use crate::game::internal::AdmittedCard;
+use crate::game::internal::{AdmittedCard, CandidateAdmission};
 use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
@@ -22,7 +22,7 @@ pub struct SelectedEffects {
     pub prototypes: Arc<Catalog>,
     /// Whole-card candidates; selection does not grant execution or use qualification.
     pub current: BTreeMap<String, Arc<CurrentCardProgram>>,
-    accepted: BTreeMap<String, Arc<CurrentCardProgram>>,
+    accepted: Arc<BTreeMap<String, Arc<CandidateAdmission>>>,
     accepted_prototypes: Arc<Catalog>,
     runtime: Arc<OnceLock<Result<Arc<RuntimeCards>>>>,
 }
@@ -65,18 +65,24 @@ impl SelectedEffects {
             || self.current.iter().any(|(number, candidate)| {
                 self.accepted
                     .get(number)
-                    .is_none_or(|accepted| !Arc::ptr_eq(candidate, accepted))
+                    .is_none_or(|accepted| !Arc::ptr_eq(candidate, accepted.candidate()))
             })
         {
             return Err(invalid("current selection changed after acceptance"));
         }
         Ok(())
     }
+
+    /// The private accepted copies; use them only after [`Self::check_runtime`] passed.
+    pub(crate) fn accepted(&self) -> &BTreeMap<String, Arc<CandidateAdmission>> {
+        &self.accepted
+    }
 }
 
 /// Reusable loader for related current selections.
 ///
 /// Exact snapshot records and author inputs share immutable facts and candidates.
+/// A shared candidate also shares the admission work that depends on its program alone.
 /// Snapshot closure, prototype, token and rule checks still run for every selection.
 /// Drop the loader when the related selections are no longer needed to release
 /// its cached facts and candidates.
@@ -84,7 +90,7 @@ impl SelectedEffects {
 #[derive(Debug)]
 pub struct CurrentSelectionLoader {
     lowerer: ExpandedLowerer,
-    candidates: Mutex<BTreeMap<String, Arc<CurrentCardProgram>>>,
+    candidates: Mutex<BTreeMap<String, Arc<CandidateAdmission>>>,
     snapshot_cards: Mutex<BTreeMap<String, Arc<Card>>>,
 }
 
@@ -155,7 +161,7 @@ impl CurrentSelectionLoader {
         Ok(Arc::clone(cards.entry(key).or_insert(card)))
     }
 
-    fn compile(&self, input: &Value) -> Result<Arc<CurrentCardProgram>> {
+    fn compile(&self, input: &Value) -> Result<Arc<CandidateAdmission>> {
         // Key the complete input, including source evidence, rather than trusting caller hashes.
         let key = serde_json::to_string(input).map_err(invalid)?;
         let cached = self.candidates.lock().map_err(invalid)?.get(&key).cloned();
@@ -163,7 +169,7 @@ impl CurrentSelectionLoader {
             return Ok(candidate);
         }
         // Lower outside the lock so unrelated selections can prepare in parallel.
-        let candidate = Arc::new(self.lowerer.lower_current(input).map_err(invalid)?);
+        let candidate = accept(self.lowerer.lower_current(input).map_err(invalid)?);
         let mut candidates = self.candidates.lock().map_err(invalid)?;
         Ok(Arc::clone(candidates.entry(key).or_insert(candidate)))
     }
@@ -181,9 +187,13 @@ pub(super) fn select(
         keywords,
         handoff,
         rules,
-        |input| lowerer.lower_current(input).map(Arc::new).map_err(invalid),
+        |input| lowerer.lower_current(input).map(accept).map_err(invalid),
         Catalog::read_snapshot_card,
     )
+}
+
+fn accept(candidate: CurrentCardProgram) -> Arc<CandidateAdmission> {
+    Arc::new(CandidateAdmission::new(Arc::new(candidate)))
 }
 
 #[derive(Deserialize)]
@@ -219,7 +229,7 @@ fn select_using(
     keywords: &str,
     handoff: &Value,
     rules: Option<(&str, &EngineIdentityInput)>,
-    mut compile: impl FnMut(&Value) -> Result<Arc<CurrentCardProgram>>,
+    mut compile: impl FnMut(&Value) -> Result<Arc<CandidateAdmission>>,
     read_card: impl FnMut(&str) -> Result<Arc<Card>>,
 ) -> Result<SelectedEffects> {
     let selection: Selection = serde_json::from_value(handoff.clone())
@@ -227,6 +237,7 @@ fn select_using(
     let mut prototypes =
         Catalog::read_documents_using(snapshot, keywords, &selection.documents, read_card)?;
     let mut current = BTreeMap::new();
+    let mut accepted = BTreeMap::new();
     let mut identities = BTreeSet::new();
     for author in selection.authors {
         let (candidate, printings) = match author {
@@ -246,17 +257,22 @@ fn select_using(
                 )));
             }
         };
-        let program = compile(&candidate)?;
+        let admission = compile(&candidate)?;
+        let program = admission.candidate();
         if !identities.insert(program.card_id.clone()) || !printings.contains(&program.card_no) {
             return Err(invalid(
                 "current selection identity or representative missing",
             ));
         }
         for number in printings {
-            register_printing(&mut prototypes, &number, &program)?;
-            if current.insert(number, Arc::clone(&program)).is_some() {
+            register_printing(&mut prototypes, &number, program)?;
+            if current
+                .insert(number.clone(), Arc::clone(program))
+                .is_some()
+            {
                 return Err(invalid("duplicate current printing"));
             }
+            accepted.insert(number, Arc::clone(&admission));
         }
     }
     prototypes.validate_token_templates()?;
@@ -283,7 +299,7 @@ fn select_using(
         runtime: Arc::default(),
         accepted_prototypes: Arc::clone(&prototypes),
         prototypes,
-        accepted: current.clone(),
+        accepted: Arc::new(accepted),
         current,
     })
 }
