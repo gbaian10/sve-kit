@@ -1,0 +1,50 @@
+cards:
+  BP07-004:
+    abilities:
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: ナテラの大樹
+          on:
+            discarded:
+              from: hand
+              ref: this
+              who: self
+        line: 1
+      - line: 2
+        play:
+          optional_cost:
+            to_cemetery:
+              n: 4
+              sel:
+                trait: 自然
+                who: self
+                zone: field
+          optional_cost_delta: -4
+      - fanfare:
+          do:
+            - move:
+                ref: returned
+                result: revived
+                to: field
+          targets:
+            - bind: returned
+              from:
+                class: エルフ
+                kind: follower
+                orig_cost_le: 5
+                who: self
+                zone: cemetery
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

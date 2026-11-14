@@ -1,0 +1,51 @@
+cards:
+  BP07-093:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - damage:
+                      n: 3
+                      to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+                  result: paid
+          do:
+            - life:
+                delta: 1
+                who: self
+            - move:
+                position:
+                  nth: 3
+                ref:
+                  follow: paid
+                to: deck
+          zone: hand
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

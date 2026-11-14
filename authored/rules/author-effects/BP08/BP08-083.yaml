@@ -1,0 +1,31 @@
+cards:
+  BP08-083:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 1
+                do:
+                  - move:
+                      ref: this
+                      to: field
+          on:
+            discarded:
+              during:
+                turn: self
+              who: opp
+          zone: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

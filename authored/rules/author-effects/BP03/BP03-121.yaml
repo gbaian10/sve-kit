@@ -1,0 +1,31 @@
+cards:
+  BP03-121:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n:
+                  plus:
+                    - count:
+                        names:
+                          - 卵の大爆発
+                          - ハンプティダンプティ
+                        who: self
+                        zone: cemetery
+                    - 1
+                to:
+                  any_of:
+                    - kind: follower
+                      who: all
+                      zone: field
+                    - leader: opp
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set
