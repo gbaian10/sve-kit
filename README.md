@@ -58,6 +58,7 @@ sve-kit/
 ├── dsl/                   Effect DSL JSON Schema — the only authority for its grammar
 │
 ├── sim/                   Battle simulator
+│   ├── battle-contract/   Wire types shared by the battle host and its clients
 │   ├── engine/            Rust rules-engine prototype
 │   ├── scenario-runner/   Engine-neutral scenario runner
 │   └── web/               Web client (React / TypeScript)

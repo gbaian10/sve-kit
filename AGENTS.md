@@ -17,16 +17,16 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 ## 目錄與職責
 
-| 路徑         | 職責                                                                              | 技術        |
-| ------------ | --------------------------------------------------------------------------------- | ----------- |
-| `card-data/` | 已審查的日英解析卡片輸入與來源證據                                                | JSON        |
-| `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
-| `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；與 carddb 共用 uv workspace              | Python、uv  |
-| `scan/`      | 拍卡辨識：卡圖庫、訓練、匯出 ONNX、評估、卡片索引；獨立 uv 專案（不在 workspace） | Python、uv  |
-| `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
-| `dsl/`       | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
-| `sim/`       | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
-| `docs/`      | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
+| 路徑         | 職責                                                                                  | 技術        |
+| ------------ | ------------------------------------------------------------------------------------- | ----------- |
+| `card-data/` | 已審查的日英解析卡片輸入與來源證據                                                    | JSON        |
+| `carddb/`    | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                             | Python、uv  |
+| `publish/`   | 讀已驗證的公開匯出根，上傳 R2 與遠端 GC；與 carddb 共用 uv workspace                  | Python、uv  |
+| `scan/`      | 拍卡辨識：卡圖庫、訓練、匯出 ONNX、評估、卡片索引；獨立 uv 專案（不在 workspace）     | Python、uv  |
+| `authored/`  | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                     | YAML        |
+| `dsl/`       | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                           | JSON Schema |
+| `sim/`       | 模擬器：`battle-contract/`、`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立 | Rust、TS    |
+| `docs/`      | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖     | Markdown    |
 
 專案用語（卡表快照、啟動包、分片、版次等）以根目錄 `GLOSSARY.md` 為準，新增或改名先在那份寫一兩句定義與「避免用」別名，不放實作細節。
 記錄架構決定時依 [ADR 規則](docs/adr/README.md) 判斷是否同時符合難以回頭、需背景解釋及真實取捨；規格細節留在對應契約。
