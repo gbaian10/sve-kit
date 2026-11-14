@@ -1,0 +1,36 @@
+cards:
+  BP01-083:
+    abilities:
+      - auto:
+          do:
+            - look:
+                bind: seen
+                by: turn
+                top:
+                  n: 1
+                  who: turn
+            - choose:
+                bind: picked
+                by: turn
+                from:
+                  in: seen
+                  kind: follower
+                upto: 1
+            - move:
+                ref: picked
+                result: entered
+                to: field
+          on:
+            phase:
+              which: main
+              whose: turn
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

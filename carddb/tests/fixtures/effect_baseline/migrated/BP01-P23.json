@@ -1,0 +1,43 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "amount": 2,
+            "op": "damage",
+            "subjects": "self.leader"
+          },
+          {
+            "op": "reveal",
+            "subjects": {
+              "side": "opponent",
+              "zone": "hand"
+            },
+            "to": "all"
+          },
+          {
+            "bind": "chosen",
+            "max": 1,
+            "min": 1,
+            "op": "select",
+            "select": {
+              "side": "opponent",
+              "zone": "hand"
+            }
+          },
+          {
+            "op": "discard",
+            "subjects": "chosen"
+          }
+        ]
+      },
+      "event": "evolve",
+      "kind": "trigger",
+      "line": 1,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}
