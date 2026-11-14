@@ -30,7 +30,7 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
     }) as unknown as MediaQueryList
 }
 
-// jsdom 30 has no <dialog> behaviour; this is only what the Dialog component relies on.
+// jsdom has no <dialog> behaviour; this is only what the Dialog component relies on.
 if (typeof HTMLDialogElement !== "undefined" && !("showModal" in HTMLDialogElement.prototype)) {
   const proto = HTMLDialogElement.prototype as HTMLDialogElement & {
     showModal: () => void
@@ -48,6 +48,15 @@ if (typeof HTMLDialogElement !== "undefined" && !("showModal" in HTMLDialogEleme
     this.removeAttribute("open")
     this.dispatchEvent(new Event("close"))
   }
+}
+
+// p-queue 10 passes itself (a jsdom EventTarget here) to Node's setMaxListeners, which needs
+// Node's brand; browsers have no `process`, so only Node+jsdom breaks (sindresorhus/p-queue#257).
+if (typeof EventTarget !== "undefined") {
+  Object.defineProperty(EventTarget, Symbol.for("nodejs.event_target"), {
+    value: true,
+    configurable: true,
+  })
 }
 
 // jsdom has no ResizeObserver; components only need it to re-measure on resize.

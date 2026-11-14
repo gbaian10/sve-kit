@@ -14,6 +14,8 @@ use super::rule_fixtures;
 use serde_json::Value;
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
+use sve_engine::game::Game;
+use sve_engine::game::player::PlayerDeck;
 use sve_engine::ir::lowering::ExpandedLowerer;
 
 pub(crate) fn inputs() -> &'static (String, String, Value) {
@@ -100,6 +102,20 @@ pub(crate) fn select_with_rules(
     identity: &EngineIdentityInput,
 ) -> sve_engine::Result<SelectedEffects> {
     loader().select_with_rules(snapshot, keywords, input, rules, identity)
+}
+
+/// Only what these decks can reach, from the same inputs and loader as the whole selection.
+pub(crate) fn select_decks(decks: &[PlayerDeck; 2]) -> sve_engine::Result<SelectedEffects> {
+    let (snapshot, keywords, input) = inputs();
+    let rules = bound_rules(snapshot);
+    Game::select_player_decks(
+        loader(),
+        snapshot,
+        keywords,
+        input,
+        Some((&rules, &EngineIdentityInput::LegacyJp)),
+        decks,
+    )
 }
 
 pub(crate) fn select_without_rules(

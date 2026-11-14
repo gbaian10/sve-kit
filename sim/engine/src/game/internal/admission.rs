@@ -1,7 +1,7 @@
 use super::tokens::PaidX;
 use crate::ir::{AbilityId, InstructionId, ScopeId, WellFormedCardProgram};
 mod plan;
-pub(crate) use plan::AdmittedCard;
+pub(crate) use plan::{AdmittedCard, CandidateAdmission};
 pub(super) use plan::{AdmittedProgram, BodyPlan, PlannedAbility};
 
 pub(super) fn compile(program: &WellFormedProgram, source: &SourceSpan) -> Result<AdmittedProgram> {
@@ -14,8 +14,17 @@ pub(super) fn compile_card(
     number: &str,
     program: &WellFormedCardProgram,
 ) -> Result<AdmittedCard> {
-    game.check_internal_card(number, program)?;
+    game.check_internal_card(number, program, None)?;
     AdmittedCard::compile(program)
+}
+
+pub(super) fn admit_candidate(
+    game: &super::Game,
+    number: &str,
+    accepted: &CandidateAdmission,
+) -> Result<Arc<AdmittedCard>> {
+    game.check_internal_card(number, &accepted.candidate().program, Some(accepted))?;
+    accepted.compiled()
 }
 
 use super::{
@@ -40,6 +49,7 @@ use crate::ir::{NumericChange, play_restrictions};
 use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
 use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
 use alloc::collections::BTreeSet;
+use alloc::sync::Arc;
 use core::num::NonZeroU32;
 
 pub(super) fn check(program: &WellFormedProgram, source: &SourceSpan) -> Result<()> {

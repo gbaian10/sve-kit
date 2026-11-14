@@ -448,6 +448,30 @@ fn current_loader_shares_exact_candidates_and_rechecks_changed_inputs() {
     loader.select(snapshot, keywords, &handoff).unwrap();
 }
 
+/// The one check that the whole repository selection lowers and admits; deck-scoped
+/// loading and later selections never repeat it for cards they do not use.
+#[test]
+fn whole_repository_selection_lowers_and_admits_every_printing() {
+    let accepted = inputs().2["authors"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|author| author["status"] == "accepted")
+        .map(|author| author["printings"].as_array().unwrap().len())
+        .sum::<usize>();
+    let selected = selection();
+    assert_eq!(selected.current.len(), accepted);
+    // Construction returns no game unless every selected printing passes runtime admission.
+    Game::from_selected_effects(
+        selected.clone(),
+        &runtime::setup("P1", "P1", [20, 20]),
+        &Value::Null,
+        &Value::Null,
+        "whole-selection",
+    )
+    .unwrap();
+}
+
 #[test]
 fn current_loader_preserves_snapshot_facts_and_validation_across_selections() {
     use std::sync::Barrier;
