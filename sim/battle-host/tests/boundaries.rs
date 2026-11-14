@@ -90,7 +90,8 @@ const fn concede(request: String) -> Submit {
     }
 }
 
-/// Exact authority state, including randomness.
+/// Authority state as Debug prints it. The RNG prints no internal position, so unchanged
+/// randomness is shown by `rejected_commands_and_queries_do_not_advance_rules_or_randomness`.
 fn authority(session: &LocalSession) -> String {
     format!("{:?}", session.game())
 }
