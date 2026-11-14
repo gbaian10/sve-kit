@@ -2025,7 +2025,7 @@ pub(super) enum Number {
         history_count: HistoryQuery,
     },
     HistorySum {
-        history_sum: LifeHistorySum,
+        history_sum: HistorySum,
     },
     LeaderLife {
         leader_life: LeaderSide,
@@ -2143,6 +2143,51 @@ pub(super) enum HistoryExclusion {
 #[serde(deny_unknown_fields)]
 pub(super) struct LifeHistoryFilter {
     pub direction: LifeDirection,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum HistorySum {
+    Life(LifeHistorySum),
+    Payment(PaymentHistorySum),
+}
+
+/// 「このターン中に自分の【土の秘術】によって…【スタック】を取っていた」 totals.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaymentHistorySum {
+    pub event: PaymentHistoryEvent,
+    pub window: ThisTurn,
+    pub who: LeaderSide,
+    pub r#where: PaymentHistoryFilter,
+    pub field: PaymentHistoryField,
+    #[serde(rename = "distinct")]
+    pub _distinct: Option<FactsOnly>,
+}
+#[derive(Deserialize)]
+pub(super) enum PaymentHistoryEvent {
+    #[serde(rename = "payment")]
+    Payment,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaymentHistoryFilter {
+    pub cost_kind: EarthRiteKind,
+}
+#[derive(Deserialize)]
+pub(super) enum EarthRiteKind {
+    #[serde(rename = "earth_rite")]
+    EarthRite,
+}
+#[derive(Deserialize)]
+pub(super) enum PaymentHistoryField {
+    #[serde(rename = "removed_stack")]
+    RemovedStack,
+}
+#[derive(Deserialize)]
+pub(super) enum FactsOnly {
+    #[serde(rename = "facts")]
+    Facts,
 }
 
 #[derive(Deserialize)]

@@ -1,0 +1,39 @@
+cards:
+  BP14-037:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+          usable_if:
+            cmp:
+              left:
+                history_sum:
+                  event: payment
+                  field: removed_stack
+                  where:
+                    cost_kind: earth_rite
+                  who: self
+                  window: this_turn
+              op: ge
+              right: 2
+        line: 1
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: 大地の魔片
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+    token_sources:
+      - card: BP11-T08
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

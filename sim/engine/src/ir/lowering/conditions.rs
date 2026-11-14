@@ -885,9 +885,28 @@ impl BodyContext<'_> {
 
     fn history_sum_number(
         &mut self,
-        history_sum: &ast::LifeHistorySum,
+        history_sum: &ast::HistorySum,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        let history_sum = match history_sum {
+            ast::HistorySum::Life(life) => life,
+            ast::HistorySum::Payment(payment) => {
+                let ast::PaymentHistoryEvent::Payment = payment.event;
+                let ast::ThisTurn::ThisTurn = payment.window;
+                let ast::EarthRiteKind::EarthRite = payment.r#where.cost_kind;
+                let ast::PaymentHistoryField::RemovedStack = payment.field;
+                // Printed cards only read their controller's own Earth Rite total.
+                if !matches!(payment.who, ast::LeaderSide::Controller) {
+                    return Err(unsupported(path));
+                }
+                return Ok(Expr::Live(Box::new(IntRead::HistorySum {
+                    query: super::super::history_turn::earth_rite_stack_query(
+                        Binding::new(self.allocator.id(path)?, self.scope),
+                        Binding::new(self.allocator.id(path)?, self.scope),
+                    ),
+                })));
+            }
+        };
         if !matches!(history_sum.r#where.direction, ast::LifeDirection::Up) {
             return Err(unsupported(path));
         }
