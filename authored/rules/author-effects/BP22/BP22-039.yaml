@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP22-039:
+    admission: light
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            earth_rite: 9
+          optional_cost_set: 1
+      - line: 2
+        keywords: [ward]
+      - line: 3
+        fanfare:
+          targets:
+            - bind: enemies
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 3
+          do:
+            - destroy: enemies
+            - damage:
+                to:
+                  leaders: opponents
+                n: 3
+            - life:
+                who: self
+                delta: 3
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

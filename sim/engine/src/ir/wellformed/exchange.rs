@@ -2,11 +2,11 @@ use super::{Checked, Checker, WellFormedReason};
 use crate::ir::exchange as exchange_shape;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, Decision, DecisionKind,
-    DiscardMode, Disjointness, ExecutionRef, Expr, InputMode, InstructionContext, Int,
-    MoveDestination, MoveReason, ObjectProperty, OwnerZone, PlayCostExchange, PlayCostPayment,
-    PlaySlot, PlayerRef, PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector,
-    Visibility, ZoneKind,
+    Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, CounterOperation, Decision,
+    DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, Holder, InputMode,
+    InstructionContext, Int, KeywordId, MoveDestination, MoveReason, Nat, ObjectOperand,
+    ObjectProperty, OwnerZone, PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef,
+    PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 #[expect(
@@ -160,7 +160,14 @@ impl Checker {
         let selected = Selector::Bound {
             reference: *binding,
         };
-        let valid = matches!(&step.instruction.action,
+        let earth_rite = matches!(&step.instruction.action,
+            Action::Counter { holder: Holder::Object { object: ObjectOperand::Selected { selection } },
+                kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(Nat(amount)) }
+                if *selection == *binding && kind.0 == "stack_counter" && *amount > 0
+                    && *zone == ZoneKind::Field && constraint.cardinality.minimum == Nat(1)
+                    && step.keyword == Some(KeywordId::EarthRite));
+        let valid = earth_rite
+            || matches!(&step.instruction.action,
             Action::Move { objects, movement, reason: MoveReason::Put }
                 if *zone == ZoneKind::Field && *objects == selected
                     && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
@@ -175,7 +182,7 @@ impl Checker {
                     if matches!(sets.as_slice(), [Selector::Zone {players: hand_players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..}, other]
                         if hand_players == players && **predicate == Expr::Literal(Bool(true)) && *other == selected)));
         if !valid
-            || step.keyword.is_some()
+            || (step.keyword.is_some() && !earth_rite)
             || step.materials.is_some()
             || step.instruction.precondition.is_some()
             || step.instruction.actor != (PlayerRef::Controller {})

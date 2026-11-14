@@ -346,7 +346,7 @@ fn lower_play_costs(
                 additional = Some(lowered);
             }
             let source = source_span(coordinates, entry_path, ability)?;
-            if let Some(lowered) = exchange::lower(play, &source, allocator)? {
+            if let Some(lowered) = exchange::lower(ability, play, &source, allocator)? {
                 if exchange.is_some() {
                     return Err(unsupported(entry_path));
                 }

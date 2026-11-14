@@ -1239,3 +1239,5 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+`play.optional_cost: {earth_rite: N}` 可搭配 `optional_cost_set` 或 `optional_cost_delta`，在同一次出牌報價中選擇是否支付土之秘術。材料保留 Stack 關鍵字及實付 counter 的付款事件；支付後剩餘 Stack 為零時依既有規則送墓。拒絕付款時沿用原本出牌費用，不消耗 Stack。
