@@ -173,13 +173,7 @@ impl CurrentSelectionLoader {
             };
             let owner =
                 Owner::of_input(candidate).ok_or_else(|| invalid("invalid current selection"))?;
-            if !identities.insert(owner.card_id)
-                || !printings.iter().any(|number| number == owner.card_no)
-            {
-                return Err(invalid(
-                    "current selection identity or representative missing",
-                ));
-            }
+            claim_identity(&mut identities, owner.card_id, owner.card_no, &printings)?;
             for number in printings {
                 register_printing(&mut prototypes, &number, &owner)?;
                 if owners.insert(number, candidate).is_some() {
@@ -340,6 +334,21 @@ impl<'owner> Owner<'owner> {
     }
 }
 
+/// One author per permanent card, whose own printing is among those it claims.
+fn claim_identity<Id: Ord>(
+    identities: &mut BTreeSet<Id>,
+    card_id: Id,
+    card_no: &str,
+    printings: &[String],
+) -> Result<()> {
+    if !identities.insert(card_id) || !printings.iter().any(|number| number == card_no) {
+        return Err(invalid(
+            "current selection identity or representative missing",
+        ));
+    }
+    Ok(())
+}
+
 fn record_rejection(prototypes: &mut Catalog, card_no: &str, reason: &str) -> Result<()> {
     if reason != "source_unresolved_issue" {
         return Err(EngineFailure::Unsupported(format!(
@@ -407,11 +416,12 @@ fn select_using(
         };
         let admission = compile(input)?;
         let program = admission.candidate();
-        if !identities.insert(program.card_id.clone()) || !printings.contains(&program.card_no) {
-            return Err(invalid(
-                "current selection identity or representative missing",
-            ));
-        }
+        claim_identity(
+            &mut identities,
+            program.card_id.clone(),
+            &program.card_no,
+            &printings,
+        )?;
         let owner = Owner::of_program(program);
         for number in printings {
             register_printing(&mut prototypes, &number, &owner)?;
