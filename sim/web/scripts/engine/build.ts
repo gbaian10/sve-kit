@@ -1,18 +1,24 @@
 // Builds the battle engine (sim/battle-host) to WebAssembly and generates its JavaScript glue
 // into src/battle/engine/generated/. The output is a clean build product and never committed.
 import { spawnSync } from "node:child_process"
-import { readFileSync, rmSync } from "node:fs"
+import { rmSync } from "node:fs"
 import path from "node:path"
 
 const repo = path.resolve(import.meta.dirname, "../../../..")
 export const GENERATED = path.resolve(import.meta.dirname, "../../src/battle/engine/generated")
 const TARGET = "wasm32-unknown-unknown"
 
-/** The wasm-bindgen crate version locked for the build; the CLI must match it exactly. */
-export function lockedBindgenVersion(lock: string): string {
-  const match = /\[\[package\]\]\nname = "wasm-bindgen"\nversion = "([^"]+)"/.exec(lock)
-  if (match?.[1] === undefined) throw new Error("Cargo.lock has no wasm-bindgen package")
-  return match[1]
+/** The locked wasm-bindgen crate version from `cargo metadata`; the CLI must match it exactly. */
+export function lockedBindgenVersion(metadata: string): string {
+  const { packages } = JSON.parse(metadata) as { packages: { name: string; version: string }[] }
+  const versions = new Set(
+    packages.filter((item) => item.name === "wasm-bindgen").map((item) => item.version),
+  )
+  const [version] = versions
+  if (versions.size !== 1 || version === undefined) {
+    throw new Error(`expected one locked wasm-bindgen version, found ${String(versions.size)}`)
+  }
+  return version
 }
 
 /** The cdylib path from cargo's JSON messages. */
@@ -50,7 +56,9 @@ function run(command: string, args: string[], capture = false): string {
 }
 
 function main(): void {
-  const version = lockedBindgenVersion(readFileSync(path.join(repo, "Cargo.lock"), "utf8"))
+  const version = lockedBindgenVersion(
+    run("cargo", ["metadata", "--locked", "--format-version", "1"], true),
+  )
   const bindgen = process.env["SVE_WASM_BINDGEN"] ?? "wasm-bindgen"
   let found: string
   try {

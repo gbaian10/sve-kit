@@ -3,18 +3,31 @@ import { describe, expect, it } from "vitest"
 import { lockedBindgenVersion, wasmArtifact } from "./build"
 
 describe("engine build", () => {
-  it("reads the locked wasm-bindgen version, not a similarly named crate", () => {
-    const lock = [
-      "[[package]]",
-      'name = "wasm-bindgen-macro"',
-      'version = "9.9.9"',
-      "",
-      "[[package]]",
-      'name = "wasm-bindgen"',
-      'version = "0.2.129"',
-    ].join("\n")
-    expect(lockedBindgenVersion(lock)).toBe("0.2.129")
-    expect(() => lockedBindgenVersion("")).toThrow("no wasm-bindgen")
+  it("reads the one locked wasm-bindgen version by exact package name", () => {
+    const metadata = (packages: [string, string][]) =>
+      JSON.stringify({
+        packages: packages.map(([name, version]) => ({ name, version, id: `${name}@${version}` })),
+        workspace_members: [],
+      })
+    expect(
+      lockedBindgenVersion(
+        metadata([
+          ["wasm-bindgen-macro", "9.9.9"],
+          ["wasm-bindgen", "0.2.129"],
+        ]),
+      ),
+    ).toBe("0.2.129")
+    expect(() => lockedBindgenVersion(metadata([["wasm-bindgen-shared", "1.0.0"]]))).toThrow(
+      "found 0",
+    )
+    expect(() =>
+      lockedBindgenVersion(
+        metadata([
+          ["wasm-bindgen", "0.2.129"],
+          ["wasm-bindgen", "0.2.130"],
+        ]),
+      ),
+    ).toThrow("found 2")
   })
 
   it("picks exactly one battle-host wasm artifact from cargo messages", () => {
