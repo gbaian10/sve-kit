@@ -8,7 +8,7 @@
     "dev": "bun run generate:contract && vite",
     "dev:lan": "bun run generate:contract && SVE_DEV_HTTPS=1 vite --host 0.0.0.0",
     "build:engine": "bun run scripts/engine/build.ts",
-    "build:all": "bun run generate:contract && vite build",
+    "build:all": "bun run generate:contract && bun run build:engine && vite build",
     "preview": "vite preview",
     "typecheck": "bun run generate:contract && bun check --threads=4",
     "lint:all": "bun run lint:js && bun run lint:css",
@@ -24,7 +24,7 @@
     "fixture:build": "bun run scripts/fixture/main.ts",
     "generate:contract": "bun run scripts/battle-contract/main.ts generate",
     "check:contract": "bun run generate:contract && bun run scripts/battle-contract/main.ts check && bun run scripts/battle-contract/main.ts roundtrip",
-    "deploy:dev": "bun run build:engine && VITE_CDN_BASE=/cdn-preview bun run build:all && wrangler deploy --config wrangler.dev.jsonc",
+    "deploy:dev": "VITE_CDN_BASE=/cdn-preview bun run build:all && wrangler deploy --config wrangler.dev.jsonc",
     "shots": "bun run scripts/screenshots/main.ts",
     "bench:catalog": "bun run scripts/catalog/main.ts",
     "check:drawer": "bun run scripts/drawer-check/main.ts"

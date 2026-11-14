@@ -25,6 +25,8 @@
     // The battle Worker and screens (#2127, #2132) import the contract from here; nothing ships yet.
     "src/battle/contract/index.ts!",
     "scripts/ci/public-junit-reporter.ts",
+    // Local battle entry; the battle screen imports it next (#2130), keep it in production analysis.
+    "src/battle/engine/client.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.
