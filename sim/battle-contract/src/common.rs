@@ -17,13 +17,19 @@ const FORMAT: u64 = 1;
 pub struct Format;
 
 impl Serialize for Format {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_u64(FORMAT)
     }
 }
 
 impl<'de> Deserialize<'de> for Format {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         deserializer.deserialize_u64(FormatVisitor)
     }
 }
@@ -51,7 +57,10 @@ impl Visitor<'_> for FormatVisitor {
         formatter.write_str("the wire format number 1")
     }
 
-    fn visit_u64<E: de::Error>(self, v: u64) -> Result<Format, E> {
+    fn visit_u64<E>(self, v: u64) -> Result<Format, E>
+    where
+        E: de::Error,
+    {
         if v == FORMAT {
             Ok(Format)
         } else {

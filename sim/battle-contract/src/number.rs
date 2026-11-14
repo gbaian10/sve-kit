@@ -49,9 +49,8 @@ impl TryFrom<i64> for Nat {
     type Error = HostError;
 
     fn try_from(value: i64) -> Result<Self, HostError> {
-        u64::try_from(value)
-            .map_err(|_negative| HostError::RANGE)
-            .and_then(Self::try_from)
+        let unsigned = u64::try_from(value).map_err(|_negative| HostError::RANGE)?;
+        Self::try_from(unsigned)
     }
 }
 
@@ -59,9 +58,8 @@ impl TryFrom<usize> for Nat {
     type Error = HostError;
 
     fn try_from(value: usize) -> Result<Self, HostError> {
-        u64::try_from(value)
-            .map_err(|_wider| HostError::RANGE)
-            .and_then(Self::try_from)
+        let unsigned = u64::try_from(value).map_err(|_wider| HostError::RANGE)?;
+        Self::try_from(unsigned)
     }
 }
 
@@ -69,7 +67,7 @@ impl TryFrom<f64> for Nat {
     type Error = HostError;
 
     fn try_from(value: f64) -> Result<Self, HostError> {
-        integral(value).and_then(Self::try_from)
+        Self::try_from(integral(value)?)
     }
 }
 
@@ -80,13 +78,19 @@ impl From<u32> for Nat {
 }
 
 impl Serialize for Nat {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_u64(self.0)
     }
 }
 
 impl<'de> Deserialize<'de> for Nat {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         deserializer.deserialize_u64(NatVisitor)
     }
 }
@@ -136,9 +140,8 @@ impl TryFrom<u64> for Int {
     type Error = HostError;
 
     fn try_from(value: u64) -> Result<Self, HostError> {
-        i64::try_from(value)
-            .map_err(|_wider| HostError::RANGE)
-            .and_then(Self::try_from)
+        let signed = i64::try_from(value).map_err(|_wider| HostError::RANGE)?;
+        Self::try_from(signed)
     }
 }
 
@@ -146,7 +149,7 @@ impl TryFrom<f64> for Int {
     type Error = HostError;
 
     fn try_from(value: f64) -> Result<Self, HostError> {
-        integral(value).and_then(Self::try_from)
+        Self::try_from(integral(value)?)
     }
 }
 
@@ -164,13 +167,19 @@ impl From<Nat> for Int {
 }
 
 impl Serialize for Int {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.serialize_i64(self.0)
     }
 }
 
 impl<'de> Deserialize<'de> for Int {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         deserializer.deserialize_i64(IntVisitor)
     }
 }
@@ -206,11 +215,17 @@ impl Visitor<'_> for NatVisitor {
         formatter.write_str("an integer from 0 to 9007199254740991")
     }
 
-    fn visit_i64<E: de::Error>(self, v: i64) -> Result<Nat, E> {
+    fn visit_i64<E>(self, v: i64) -> Result<Nat, E>
+    where
+        E: de::Error,
+    {
         Nat::try_from(v).map_err(E::custom)
     }
 
-    fn visit_u64<E: de::Error>(self, v: u64) -> Result<Nat, E> {
+    fn visit_u64<E>(self, v: u64) -> Result<Nat, E>
+    where
+        E: de::Error,
+    {
         Nat::try_from(v).map_err(E::custom)
     }
 }
@@ -224,11 +239,17 @@ impl Visitor<'_> for IntVisitor {
         formatter.write_str("an integer from -9007199254740991 to 9007199254740991")
     }
 
-    fn visit_i64<E: de::Error>(self, v: i64) -> Result<Int, E> {
+    fn visit_i64<E>(self, v: i64) -> Result<Int, E>
+    where
+        E: de::Error,
+    {
         Int::try_from(v).map_err(E::custom)
     }
 
-    fn visit_u64<E: de::Error>(self, v: u64) -> Result<Int, E> {
+    fn visit_u64<E>(self, v: u64) -> Result<Int, E>
+    where
+        E: de::Error,
+    {
         Int::try_from(v).map_err(E::custom)
     }
 }

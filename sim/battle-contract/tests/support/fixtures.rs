@@ -69,12 +69,12 @@ pub(crate) fn damaged(original: &Value) -> Vec<(String, Value)> {
         }
         for key in keys {
             let mut reduced = original.clone();
-            let fields = reduced
+            reduced
                 .pointer_mut(&pointer)
                 .unwrap()
                 .as_object_mut()
-                .unwrap();
-            fields.remove(&key);
+                .unwrap()
+                .remove(&key);
             copies.push((format!("missing {key} in {pointer}"), reduced));
         }
     }

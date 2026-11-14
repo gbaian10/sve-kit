@@ -5,6 +5,7 @@
     reason = "A schema that cannot be built must fail the test."
 )]
 
+#[path = "support/fixtures.rs"]
 mod support;
 
 use jsonschema::Validator;

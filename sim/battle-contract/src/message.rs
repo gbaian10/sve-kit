@@ -180,7 +180,10 @@ impl Receipt {
 }
 
 impl<'de> Deserialize<'de> for Receipt {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let stated = ReceiptFields::deserialize(deserializer)?;
         let receipt = Self::new(stated.request_id, stated.result);
         if receipt.rejection == stated.rejection {

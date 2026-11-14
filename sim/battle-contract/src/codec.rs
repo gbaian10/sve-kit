@@ -17,7 +17,10 @@ use serde_json::{Map, Value};
 ///
 /// # Errors
 /// The value cannot be represented as JSON.
-pub fn encode<T: Serialize>(message: &T) -> Result<String, HostError> {
+pub fn encode<T>(message: &T) -> Result<String, HostError>
+where
+    T: Serialize,
+{
     serde_json::to_string(message).map_err(|_unrepresentable| HostError::PROJECTION)
 }
 
@@ -29,7 +32,10 @@ pub fn encode<T: Serialize>(message: &T) -> Result<String, HostError> {
 /// # Errors
 /// `range` when the text is JSON without a repeated key but some number is not a safe
 /// integer; otherwise `format`.
-pub fn decode<T: DeserializeOwned + Serialize>(json: &str) -> Result<T, HostError> {
+pub fn decode<T>(json: &str) -> Result<T, HostError>
+where
+    T: DeserializeOwned + Serialize,
+{
     let unsafe_number = Cell::new(false);
     let mut text = serde_json::Deserializer::from_str(json);
     let written = Faithful {
@@ -64,7 +70,10 @@ struct Faithful<'report> {
 impl<'de> DeserializeSeed<'de> for Faithful<'_> {
     type Value = Value;
 
-    fn deserialize<D: Deserializer<'de>>(self, deserializer: D) -> Result<Value, D::Error> {
+    fn deserialize<D>(self, deserializer: D) -> Result<Value, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         deserializer.deserialize_any(self)
     }
 }
@@ -76,25 +85,37 @@ impl<'de> Visitor<'de> for Faithful<'_> {
         formatter.write_str("a JSON value")
     }
 
-    fn visit_bool<E: de::Error>(self, v: bool) -> Result<Value, E> {
+    fn visit_bool<E>(self, v: bool) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         Ok(Value::Bool(v))
     }
 
-    fn visit_f64<E: de::Error>(self, _v: f64) -> Result<Value, E> {
+    fn visit_f64<E>(self, _v: f64) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         // The parser yields a float for a fraction, an exponent or a magnitude it has
         // already rounded; none is a safe integer, whatever value survived.
         self.unsafe_number.set(true);
         Ok(Value::Null)
     }
 
-    fn visit_i64<E: de::Error>(self, v: i64) -> Result<Value, E> {
+    fn visit_i64<E>(self, v: i64) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         if Int::try_from(v).is_err() {
             self.unsafe_number.set(true);
         }
         Ok(Value::from(v))
     }
 
-    fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Value, A::Error> {
+    fn visit_map<A>(self, mut map: A) -> Result<Value, A::Error>
+    where
+        A: MapAccess<'de>,
+    {
         let mut fields = Map::new();
         while let Some(key) = map.next_key::<String>()? {
             let value = map.next_value_seed(self)?;
@@ -105,7 +126,10 @@ impl<'de> Visitor<'de> for Faithful<'_> {
         Ok(Value::Object(fields))
     }
 
-    fn visit_seq<A: SeqAccess<'de>>(self, mut seq: A) -> Result<Value, A::Error> {
+    fn visit_seq<A>(self, mut seq: A) -> Result<Value, A::Error>
+    where
+        A: SeqAccess<'de>,
+    {
         let mut items = Vec::new();
         while let Some(item) = seq.next_element_seed(self)? {
             items.push(item);
@@ -113,18 +137,27 @@ impl<'de> Visitor<'de> for Faithful<'_> {
         Ok(Value::Array(items))
     }
 
-    fn visit_str<E: de::Error>(self, v: &str) -> Result<Value, E> {
+    fn visit_str<E>(self, v: &str) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         Ok(Value::String(v.to_owned()))
     }
 
-    fn visit_u64<E: de::Error>(self, v: u64) -> Result<Value, E> {
+    fn visit_u64<E>(self, v: u64) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         if Nat::try_from(v).is_err() {
             self.unsafe_number.set(true);
         }
         Ok(Value::from(v))
     }
 
-    fn visit_unit<E: de::Error>(self) -> Result<Value, E> {
+    fn visit_unit<E>(self) -> Result<Value, E>
+    where
+        E: de::Error,
+    {
         Ok(Value::Null)
     }
 }

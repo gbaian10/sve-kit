@@ -6,6 +6,7 @@
     reason = "A missing or malformed fixture must fail the test."
 )]
 
+#[path = "support/fixtures.rs"]
 mod support;
 
 use serde::Serialize;
@@ -15,7 +16,10 @@ use support::{damaged, fixtures};
 use sve_battle_contract::observation::BattleObservation;
 use sve_battle_contract::{HostError, HostMessage, decode, encode};
 
-fn check<T: DeserializeOwned + Serialize>(group: &str) {
+fn check<T>(group: &str)
+where
+    T: DeserializeOwned + Serialize,
+{
     for (name, text) in fixtures(group) {
         let message: T = decode(&text)
             .map_err(|error| format!("{name}: {error}"))
@@ -127,6 +131,6 @@ fn a_repeated_key_is_refused_wherever_it_hides_a_value() {
 
 #[test]
 fn text_after_the_message_is_a_format_error() {
-    let text = r#"{"kind":"host_error","format":1,"reason":"range"} {}"#;
+    let text = r#"{"kind":"host_error","format":1,"reason":"range"} []"#;
     assert_eq!(decode::<HostMessage>(text), Err(HostError::FORMAT));
 }
