@@ -543,6 +543,14 @@ impl Checker {
                 self.hand(population, player)?;
                 self.integer(count)
             }
+            DiscardMode::ChosenCount { population, count } => {
+                if !self.env.choices {
+                    return self.reject();
+                }
+                self.selector(population)?;
+                self.hand(population, player)?;
+                self.integer(count)
+            }
             DiscardMode::All { eligible } => {
                 self.selector(eligible)?;
                 self.hand(eligible, player)
