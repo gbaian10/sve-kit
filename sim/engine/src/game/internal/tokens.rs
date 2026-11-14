@@ -9,7 +9,7 @@ use crate::ir::{
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
 use crate::ir::{optional_payment, x_pp};
 
-pub(super) use capacity::{CapacityWait, TransformResume};
+pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
 
@@ -143,6 +143,16 @@ impl TokenPlan {
 pub(super) enum TokenAllocation {
     Created(Vec<String>),
     Capacity {
+        prints: Vec<String>,
+        names: Vec<String>,
+        choices: Vec<Vec<String>>,
+        available: usize,
+    },
+}
+
+pub(super) enum TokenSelection {
+    Chosen(Vec<String>),
+    Choices {
         prints: Vec<String>,
         names: Vec<String>,
         choices: Vec<Vec<String>>,
@@ -443,7 +453,7 @@ impl Game {
             requests.push((name, count));
         }
         let destination = plan.destination.kind;
-        match self.allocate_token_requests(&requests, destination, actor, None)? {
+        match self.allocate_token_requests(&requests, destination, actor)? {
             TokenAllocation::Created(ids) => Ok(Some(ids)),
             TokenAllocation::Capacity {
                 prints,
@@ -461,7 +471,6 @@ impl Game {
                         zone: destination,
                         actor,
                         available,
-                        transform: None,
                     },
                 )?;
                 Ok(None)
@@ -474,8 +483,33 @@ impl Game {
         requests: &[(String, u64)],
         destination: ZoneKind,
         actor: PlayerId,
-        limit: Option<usize>,
     ) -> Result<TokenAllocation> {
+        match self.token_selection(requests, destination, actor, None)? {
+            TokenSelection::Chosen(prints) => self
+                .internal_create_prints(&prints, seat_name(actor)?)
+                .map(TokenAllocation::Created),
+            TokenSelection::Choices {
+                prints,
+                names,
+                choices,
+                available,
+            } => Ok(TokenAllocation::Capacity {
+                prints,
+                names,
+                choices,
+                available,
+            }),
+        }
+    }
+
+    /// Resolves the creatable prints without creating objects, so a caller may ask first.
+    pub(super) fn token_selection(
+        &self,
+        requests: &[(String, u64)],
+        destination: ZoneKind,
+        actor: PlayerId,
+        limit: Option<usize>,
+    ) -> Result<TokenSelection> {
         let seat = seat_name(actor)?;
         let zone = if destination == ZoneKind::Field {
             "field"
@@ -497,29 +531,26 @@ impl Game {
             ]);
         }
         let prints = self.unique_crest_creations(&requested, zone, seat)?;
-        let selected = if prints.len() > available {
-            let names = prints
-                .iter()
-                .map(|card| self.token_name(card))
-                .collect::<Result<Vec<_>>>()?;
-            let choices = token_combinations(&names, available)?;
-            if choices.len() > 1 {
-                return Ok(TokenAllocation::Capacity {
-                    prints,
-                    names,
-                    choices,
-                    available,
-                });
-            }
-            let chosen = choices
-                .first()
-                .ok_or_else(|| invalid("missing token capacity result"))?;
-            prints_for_names(&prints, &names, chosen)?
-        } else {
-            prints
-        };
-        self.internal_create_prints(&selected, seat)
-            .map(TokenAllocation::Created)
+        if prints.len() <= available {
+            return Ok(TokenSelection::Chosen(prints));
+        }
+        let names = prints
+            .iter()
+            .map(|card| self.token_name(card))
+            .collect::<Result<Vec<_>>>()?;
+        let choices = token_combinations(&names, available)?;
+        if choices.len() > 1 {
+            return Ok(TokenSelection::Choices {
+                prints,
+                names,
+                choices,
+                available,
+            });
+        }
+        let chosen = choices
+            .first()
+            .ok_or_else(|| invalid("missing token capacity result"))?;
+        prints_for_names(&prints, &names, chosen).map(TokenSelection::Chosen)
     }
 
     fn commit_tokens(

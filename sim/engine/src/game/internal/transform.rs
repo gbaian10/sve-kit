@@ -1,15 +1,20 @@
-use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
+use super::tokens::TokenSelection;
+use super::{
+    Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
+};
+use crate::game::tokens::prints_for_names;
 use crate::ir::{
-    Action, DecisionId, Instruction, MoveMethod, Selector, TokenAllocation, TokenTemplateId,
-    TransformOutcome, ZoneKind,
+    Action, DecisionId, Instruction, MoveMethod, MoveResult, PlayerId, PlayerRef,
+    RuntimeObjectView, Selector, TokenAllocation, TokenTemplateId, TransformOutcome, ZoneKind,
 };
 
 enum Templates<'action> {
     Single(&'action TokenTemplateId),
-    /// Each template once; fewer successful banishments choose which templates to create.
+    /// Each template once; the ability's controller decides which templates each EX receives.
     EachOnce {
         templates: &'action [TokenTemplateId],
         decision: DecisionId,
+        actor: &'action PlayerRef,
     },
 }
 
@@ -36,10 +41,12 @@ fn specification(action: &Action) -> Option<(&Selector, Templates<'_>)> {
         TokenAllocation::EachExactlyOnce {
             templates,
             decision,
+            actor,
             ..
         } => Templates::EachOnce {
             templates,
             decision: *decision,
+            actor,
         },
         TokenAllocation::Unrestricted { .. } => return None,
     };
@@ -64,15 +71,76 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     Ok(())
 }
 
+struct Banishment {
+    groups: Vec<(PlayerId, usize)>,
+    banished: Vec<RuntimeObjectView>,
+    moves: Vec<MoveResult>,
+}
+
+/// Template assignment that survives the decider's questions until every EX group is settled.
+#[derive(Clone, Debug)]
+pub(super) struct TemplatePlan {
+    instruction: Instruction,
+    decision: DecisionId,
+    /// The ability's controller decides; it is not necessarily a destination.
+    actor: PlayerId,
+    /// Unsettled destinations with their successful banishment counts, next one first.
+    groups: Vec<(PlayerId, usize)>,
+    remaining: Vec<TokenTemplateId>,
+    assigned: Vec<(PlayerId, Vec<String>)>,
+    banished: Vec<RuntimeObjectView>,
+    moves: Vec<MoveResult>,
+}
+
+impl TemplatePlan {
+    fn assign(&mut self, game: &Game, prints: Vec<String>) -> Result<()> {
+        if self.groups.is_empty() {
+            return Err(invalid("template assignment without a destination"));
+        }
+        let (destination, _) = self.groups.remove(0);
+        let mut remaining = Vec::new();
+        for template in self.remaining.drain(..) {
+            if !prints.contains(&game.catalog.token_print(&template.0)?) {
+                remaining.push(template);
+            }
+        }
+        self.remaining = remaining;
+        self.assigned.push((destination, prints));
+        Ok(())
+    }
+}
+
+/// The decider picks which remaining templates one destination EX receives.
+#[derive(Clone, Debug)]
+pub(super) struct TemplateWait {
+    plan: TemplatePlan,
+    destination: PlayerId,
+    count: usize,
+    prints: Vec<String>,
+    names: Vec<String>,
+    choices: Vec<Vec<String>>,
+    available: usize,
+}
+
+impl TemplateWait {
+    pub(super) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
+        (self.destination, ZoneKind::Ex, self.available)
+    }
+
+    pub(super) fn validate(&self, handle: u64) -> Result<Vec<String>> {
+        let chosen = usize::try_from(handle)
+            .ok()
+            .and_then(|index| self.choices.get(index))
+            .ok_or_else(|| invalid("invalid transformation template choice"))?;
+        prints_for_names(&self.prints, &self.names, chosen)
+    }
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Transformation reuses authoritative banishment and token creation."
 )]
 impl Game {
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Banishment, per-controller counts and template creation form one transaction."
-    )]
     pub(super) fn internal_transform(
         &mut self,
         execution: &mut Execution,
@@ -80,6 +148,69 @@ impl Game {
     ) -> Result<()> {
         let (objects, templates) = specification(&instruction.action)
             .ok_or_else(|| unsupported("EX transformation shape"))?;
+        let Banishment {
+            groups,
+            banished,
+            moves,
+        } = self.internal_transform_banish(execution, objects)?;
+        match templates {
+            Templates::Single(template) => {
+                let mut ids = Vec::new();
+                for (player, count) in groups {
+                    let requests = [(template.0.clone(), u64::try_from(count).map_err(invalid)?)];
+                    let super::tokens::TokenAllocation::Created(created) =
+                        self.allocate_token_requests(&requests, ZoneKind::Ex, player)?
+                    else {
+                        return Err(invalid(
+                            "single-template transformation requested a capacity choice",
+                        ));
+                    };
+                    ids.extend(created);
+                }
+                let created = self.commit_token_objects(execution, ZoneKind::Ex, &ids)?;
+                execution.receipts.insert(
+                    instruction.receipt,
+                    InstructionOutcome::Transform(TransformOutcome {
+                        banished,
+                        created,
+                        moves,
+                    }),
+                );
+                Ok(())
+            }
+            Templates::EachOnce {
+                templates,
+                decision,
+                actor,
+            } => {
+                // Load-time checks bound the selection; a larger result means a forged program.
+                if banished.len() > templates.len() {
+                    return Err(invalid("more transformed objects than templates"));
+                }
+                let actor = execution.player(self, actor)?;
+                self.internal_transform_plan(
+                    execution,
+                    TemplatePlan {
+                        instruction: instruction.clone(),
+                        decision,
+                        actor,
+                        groups,
+                        remaining: templates.to_vec(),
+                        assigned: Vec::new(),
+                        banished,
+                        moves,
+                    },
+                )
+            }
+        }
+    }
+
+    /// Banishes the current EX objects and counts the successes of each controller.
+    fn internal_transform_banish(
+        &mut self,
+        execution: &mut Execution,
+        objects: &Selector,
+    ) -> Result<Banishment> {
         let mut origins = Vec::new();
         let mut players = Vec::new();
         for reference in execution.objects(self, objects)? {
@@ -122,78 +253,99 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         let active = super::player_id(self.active())?;
         players.sort_by_key(|player| *player != active);
-        if matches!(templates, Templates::EachOnce { .. }) && players.len() > 1 {
-            return Err(unsupported(
-                "allocated transformation of several controllers",
-            ));
+        let groups = players
+            .into_iter()
+            .map(|player| {
+                let count = banished
+                    .iter()
+                    .filter(|before| {
+                        origins.iter().any(|(reference, controller)| {
+                            *reference == before.object && *controller == player
+                        })
+                    })
+                    .count();
+                (player, count)
+            })
+            .filter(|(_, count)| *count > 0)
+            .collect();
+        Ok(Banishment {
+            groups,
+            banished,
+            moves,
+        })
+    }
+
+    /// Settles each destination in turn, asking the decider only when a real choice remains.
+    fn internal_transform_plan(
+        &mut self,
+        execution: &mut Execution,
+        mut plan: TemplatePlan,
+    ) -> Result<()> {
+        while let Some(&(destination, count)) = plan.groups.first() {
+            let requests = plan
+                .remaining
+                .iter()
+                .map(|template| (template.0.clone(), 1))
+                .collect::<Vec<_>>();
+            match self.token_selection(&requests, ZoneKind::Ex, destination, Some(count))? {
+                TokenSelection::Chosen(prints) => plan.assign(self, prints)?,
+                TokenSelection::Choices {
+                    prints,
+                    names,
+                    choices,
+                    available,
+                } => {
+                    let decision = plan.decision;
+                    let actor = plan.actor;
+                    let domain = InputDomain::TokenCapacity {
+                        choices: choices.clone(),
+                    };
+                    return self.internal_wait(
+                        execution,
+                        decision,
+                        actor,
+                        domain,
+                        Wait::TransformTemplates(Box::new(TemplateWait {
+                            plan,
+                            destination,
+                            count,
+                            prints,
+                            names,
+                            choices,
+                            available,
+                        })),
+                    );
+                }
+            }
         }
         let mut ids = Vec::new();
-        for player in players {
-            let count = banished
-                .iter()
-                .filter(|before| {
-                    origins.iter().any(|(reference, controller)| {
-                        *reference == before.object && *controller == player
-                    })
-                })
-                .count();
-            let created = match &templates {
-                Templates::Single(template) => {
-                    let requests = [(template.0.clone(), u64::try_from(count).map_err(invalid)?)];
-                    let super::tokens::TokenAllocation::Created(created) =
-                        self.allocate_token_requests(&requests, ZoneKind::Ex, player, None)?
-                    else {
-                        return Err(invalid(
-                            "single-template transformation requested a capacity choice",
-                        ));
-                    };
-                    created
-                }
-                Templates::EachOnce {
-                    templates,
-                    decision,
-                } => {
-                    if count > templates.len() {
-                        return Err(invalid("more transformed objects than templates"));
-                    }
-                    if count == 0 {
-                        continue;
-                    }
-                    let requests = templates
-                        .iter()
-                        .map(|template| (template.0.clone(), 1))
-                        .collect::<Vec<_>>();
-                    let resume = super::tokens::TransformResume {
-                        decision: *decision,
-                        banished: banished.clone(),
-                        moves: moves.clone(),
-                    };
-                    let Some(created) = self.internal_transform_templates(
-                        execution,
-                        instruction,
-                        &requests,
-                        player,
-                        count,
-                        resume,
-                    )?
-                    else {
-                        // The player chooses the templates; the answer commits the outcome.
-                        return Ok(());
-                    };
-                    created
-                }
-            };
-            ids.extend(created);
+        for (destination, prints) in &plan.assigned {
+            ids.extend(self.internal_create_prints(prints, seat_name(*destination)?)?);
         }
         let created = self.commit_token_objects(execution, ZoneKind::Ex, &ids)?;
         execution.receipts.insert(
-            instruction.receipt,
+            plan.instruction.receipt,
             InstructionOutcome::Transform(TransformOutcome {
-                banished,
+                banished: plan.banished,
                 created,
-                moves,
+                moves: plan.moves,
             }),
         );
         Ok(())
+    }
+
+    pub(super) fn internal_transform_answer(
+        &mut self,
+        execution: &mut Execution,
+        wait: TemplateWait,
+        prints: Vec<String>,
+    ) -> Result<()> {
+        let space = self.token_capacity(seat_name(wait.destination)?, "ex")?;
+        if space.min(wait.count) != wait.available {
+            return Err(invalid("EX capacity changed during the template choice"));
+        }
+        let mut plan = wait.plan;
+        plan.assign(self, prints)?;
+        self.internal_transform_plan(execution, plan)
     }
 }

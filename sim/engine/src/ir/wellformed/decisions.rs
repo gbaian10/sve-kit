@@ -232,7 +232,7 @@ impl Checker {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
                 self.constraint(constraint, formal_targets)?;
-                self.define(*binding, BindingKind::Value)?;
+                self.define_selection(*binding, constraint.cardinality.maximum)?;
                 if let Some(roles) = target_roles {
                     self.roles(roles, constraint.cardinality, positioned)?;
                 }
