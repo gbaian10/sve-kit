@@ -147,29 +147,39 @@ fn names(game: &Game, seat: &str) -> Vec<String> {
 
 /// Answers the targets internally, then the template question through the player pipeline.
 fn play_as_player(game: &mut Game, destination: Viewer, template: &str) {
-    let step = game.play_internal_card("source", PLAYER).unwrap();
-    let CardPlay::Awaiting(q) = step else {
+    let played = game.play_internal_card("source", PLAYER).unwrap();
+    let CardPlay::Awaiting(q) = played else {
         panic!("targets were expected")
     };
     let InputDomain::Targets(d) = &q.domain else {
         panic!("targets were expected")
     };
     let handles = d.members.iter().map(|m| m.handle).collect();
-    let step = game
+    let answered = game
         .answer_internal_card(q.actor, q.token, Answer::Targets(handles))
         .unwrap();
-    assert!(matches!(step, CardPlay::Awaiting(_)), "a template question");
+    assert!(matches!(answered, CardPlay::Awaiting(_)), "a template question");
     game.advance_player_input();
     let Input::Question(question) = game.input(Viewer::P1) else {
         panic!("the ability's controller decides the templates")
     };
-    assert_eq!(question.purpose, QuestionPurpose::ResolutionChoice);
+    assert_eq!(
+        question.purpose,
+        QuestionPurpose::ResolutionChoice,
+        "allocating templates is a resolution choice, not a capacity rule"
+    );
     let QuestionShape::Decision(DecisionShape::TokenCapacity(choice)) = &question.shape else {
         panic!("template combinations")
     };
-    assert_eq!(choice.destination, destination);
-    assert_eq!(choice.available, Nat(1));
-    assert!(matches!(game.input(Viewer::P2), Input::Waiting(_)));
+    assert_eq!(
+        choice.destination, destination,
+        "the tokens go to the banished object's controller"
+    );
+    assert_eq!(choice.available, Nat(1), "one successful banishment");
+    assert!(
+        matches!(game.input(Viewer::P2), Input::Waiting(_)),
+        "the other seat only waits"
+    );
     let handle = choice
         .choices
         .iter()
@@ -185,7 +195,8 @@ fn play_as_player(game: &mut Game, destination: Viewer, template: &str) {
             }
         )
         .kind,
-        SubmissionKind::Applied
+        SubmissionKind::Applied,
+        "the decider's answer is accepted"
     );
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
@@ -219,7 +230,7 @@ fn bp08_011_controller_chooses_the_template_for_an_opponent_ex() {
     initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"rival","card":"BP08-T09"}]);
     let mut game = edited_game(&OPPONENT, &json!({"who": "opp", "n": 1_u8}), &initial);
     play_as_player(&mut game, Viewer::P2, "ロイド");
-    assert!(names(&game, "P1").is_empty());
+    assert_eq!(names(&game, "P1"), Vec::<String>::new());
     assert_eq!(names(&game, "P2"), ["ロイド"]);
 }
 
