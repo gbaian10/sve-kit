@@ -789,7 +789,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             else {
                 return Err(unsupported("hand selector"));
             };
-            super::super::search::check_predicate(predicate, *binding)?;
+            check_predicate(predicate, *binding, false)?;
         }
         return Ok(());
     }

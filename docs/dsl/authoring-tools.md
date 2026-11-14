@@ -871,11 +871,15 @@ cmp:
 
 `instead[].if.cmp` 可讀任一玩家場上、EX、墓場的公開篩選計數，以及消滅區不帶篩選的張數（目前未開放有篩選的消滅區計數，見[型別化 IR 驗證](typed-ir-validation.md)），並與常數比較，例如 BP10-052 的「自分の墓場のチェス・カードが5枚以上なら、代わりに2つまで」寫 `{cmp: {left: {count: {who: self, zone: cemetery, trait: チェス}}, op: ge, right: 5}}`。`instead[].if.history` 接受與 `if.cond.history` 相同的本回合歷史，例如 BP16-074 的「このターン、自分の場のフォロワーが進化していたなら」寫 `{history: {event: evolved, window: this_turn, who: self}}`。`instead[].if.leader_life` 接受任一玩家主戰者體力與常數的單一比較（`eq`／`le`／`ge` 擇一），例如 CP04-091 的「自分のリーダーの体力が10以下なら、代わりに2つまで」寫 `{leader_life: {who: self, le: 10}}`；PP、EP 等其他玩家資源仍不開放。三者都在宣告模式時求值並固定本次上限；手牌、牌庫等隱藏區域的計數與任意算式仍拒絕。
 
+## 手牌選牌的公開動態費用上限
+
+單一手牌 `choose.from` 可用 `orig_cost_le: {resource: {who: self, kind: pp}}` 讀取選牌時自己的剩餘 PP，並以 `not_same_name_as_this: true` 排除能力持有者同名卡（BP21-093）。上限沿用公開數值運算，在出題時依目前狀態固定；卡片或能力成本已支付時讀取付款後餘額，最大 PP 不代替目前 PP。候選及答案仍只向選牌者公開，後續 `move: {ref: picked, to: field, result: entered}` 沿用私有手牌入場及容量處理，無須支付被選從者的打出費用。手牌聯集的各分支仍沿用既有靜態篩選。
+
 ## 公開數值宣告與查詢上限
 
-正式 `targets.n`／`upto` 及 `targets.from`、`search.sel` 的 `cost_le`／`orig_cost_le` 可使用既有 Number：自己的 PP 最大值、自己場上／EX／墓場的公開計數與同一範圍的 `distinct_names` 卡名種類數，以及這些值的 `plus`／`minus`／`times`／`per`／`min` 與 `define` 別名。計數接受現有常量種類、職業、特徵、精確卡名與原費篩選，並補上常量 `orig_cost_ge`；不授予 `distinct_orig_costs`、隱藏手牌／牌庫、其他玩家、來源屬性、回條或時點覆寫讀值。公開上限不得與私下 Look 選取或 extremum 人口混用。
+正式 `targets.n`／`upto` 及 `targets.from`、`search.sel` 的 `cost_le`／`orig_cost_le` 可使用既有 Number：自己的目前 PP 與 PP 最大值、自己場上／EX／墓場的公開計數與同一範圍的 `distinct_names` 卡名種類數，以及這些值的 `plus`／`minus`／`times`／`per`／`min` 與 `define` 別名。計數接受現有常量種類、職業、特徵、精確卡名與原費篩選，並補上常量 `orig_cost_ge`；不授予 `distinct_orig_costs`、隱藏手牌／牌庫、其他玩家、來源屬性、回條或時點覆寫讀值。公開上限不得與私下 Look 選取或 extremum 人口混用。
 
-目標張數在準備正式問題時求值，負數依數量規則以零處理；精確張數同時固定上下限，`upto` 的下限保持零。結果存入既有選擇問題，不在付款或結算時重新讀取。搜尋的數值篩選則在搜尋指示開始、發現私有候選前固定，保留有其他條件時可找不到的規則；例如 BP04-098 用 `PP最大值 - 1` 表示嚴格較低的原費，BP07-091 用自己的 EX 卡數作上限。
+目標張數在準備正式問題時求值，負數依數量規則以零處理；精確張數同時固定上下限，`upto` 的下限保持零。宣告型正式目標讀取宣告當下的目前 PP，可能早於本次付款；結算型手牌 `choose` 則讀取該指示出題時的餘額。結果存入既有選擇問題，不在付款或結算時重新讀取。搜尋的數值篩選則在搜尋指示開始、發現私有候選前固定，保留有其他條件時可找不到的規則；例如 BP04-098 用 `PP最大值 - 1` 表示嚴格較低的原費，BP07-091 用自己的 EX 卡數作上限。
 
 正式 `choice.upto` 另接受 `per: {of: {count: ...}, unit: <正整數>}` 的公開自身計數，依完整單位向下取整（BP22-074 每十張原費二的墓場卡）。零組略過，結果仍限制在印刷模式數內，沿用不可重複及適正目標規則；精確 `choice.n`、替換上限與任意數量算式沒有因此開放。
 
