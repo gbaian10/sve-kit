@@ -16,12 +16,13 @@ use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
-    ChoiceDomain, Control, CounterOperation, Expr, GrantedAbility, Holder, InstallationSubjects,
-    Instruction, Int, IntOperation, IntRead, Located, LookOutcome, MemberProjection,
-    MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
-    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
-    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
-    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ChoiceDomain, Control, CounterOperation, ExecutionRef, Expr, GrantedAbility, Holder,
+    InstallationSubjects, Instruction, Int, IntOperation, IntRead, Located, LookOutcome,
+    MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
+    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
+    Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
+    RuntimeObjectView, ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode,
+    Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -531,6 +532,11 @@ fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
 }
 
 fn mask_public_condition(condition: &mut Expr<Bool>) {
+    if matches!(condition, Expr::Live(read) if matches!(read.as_ref(), BoolRead::CardPlayOrigin { zone: ZoneKind::Hand | ZoneKind::Ex, execution: ExecutionRef::Current {} }))
+    {
+        *condition = Expr::Literal(Bool(false));
+        return;
+    }
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
             Predicate::PostureEquals { .. } => {

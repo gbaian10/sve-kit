@@ -2955,6 +2955,7 @@ pub(super) struct PlayedFromCondition {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum PlayedZone {
+    Hand,
     Ex,
 }
 #[derive(Deserialize)]

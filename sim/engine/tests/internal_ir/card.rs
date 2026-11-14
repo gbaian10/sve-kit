@@ -1019,3 +1019,6 @@ mod player_choices;
 mod field_banish_replacement;
 #[path = "card/source_posture.rs"]
 mod source_posture;
+
+#[path = "card/spell_origin.rs"]
+mod spell_origin;
