@@ -310,34 +310,6 @@ impl Game {
         }
         Ok(hex)
     }
-
-    pub(crate) fn carry_from(&mut self, source: &Self) {
-        for seat in ["P1", "P2"] {
-            let Some(known) = source.state.knowledge.get(seat) else {
-                continue;
-            };
-            let knowledge = self.state.knowledge.entry(seat.into()).or_default();
-            for (id, card) in &known.seen {
-                if !knowledge.carried.iter().any(|entry| entry["object"] == *id) {
-                    knowledge.seen.insert(id.clone(), card.clone());
-                    knowledge
-                        .carried
-                        .push(json!({"object":id,"from":card["from"]}));
-                }
-            }
-        }
-    }
-
-    pub(crate) fn opening_node(&mut self, node: &str) {
-        self.node = node.into();
-        for knowledge in self.state.knowledge.values_mut() {
-            for seen in knowledge.seen.values_mut() {
-                if seen["from"] == "opening" {
-                    seen["from"] = json!(node);
-                }
-            }
-        }
-    }
 }
 
 fn normalize_origins(root: &mut Value) {

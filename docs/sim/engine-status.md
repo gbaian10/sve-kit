@@ -19,7 +19,7 @@
 | 路徑 | 作者資料與載入 | 執行與使用邊界 |
 | --- | --- | --- |
 | typed | `authored/rules/author-effects/` 與 `effect-bodies/`；Schema 由 `dsl/author-nodes.schema.json` 等定義；Python current reader 展開完整作者選擇，Rust `ExpandedLowerer` 產生受驗 IR | `Catalog::from_current_selection`／`Game::from_selected_effects` 建立已准入整卡的局面，`game/internal/` 執行 typed IR；有 Rust authority API，宿主接通狀態以 #1971 為準 |
-| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection`、JSON 效果解譯器、AI 與回放原型；共同規則題本已改由 typed 玩家入口執行，不再經原型 adapter |
+| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection` 與 JSON 效果解譯器，只剩引擎測試驅動；共同規則題本已改由 typed 玩家入口執行，原型回放、輔助與 AI 已移除 |
 
 DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering、IR 良構與 runtime 准入。
 作者儲存格式與展開入口依[承載契約](../dsl/author-contract-1.0.md)及[作者工具](../dsl/authoring-tools.md)，
@@ -37,7 +37,7 @@ DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering�
 A、B、C 組的交付清單與 D 組後續排程留在 #1971，不在本頁複製工作進度。
 
 AI 第一版使用基礎 policy，僅靠與玩家相同的觀察及決定介面完成對局；搜尋另行處理。
-這是介面邊界，不表示舊 `ai.rs` 已遷移或完整 typed 對局已驗收。
+這是介面邊界，不表示完整 typed 對局已驗收；原型 AI 已移除，typed 搜尋與 AI 契約檢查由 #2208 追蹤。
 `docs/ai/` 的 v2 profile 仍是未實作設計，現行原型載入器不接受該格式。
 
 ## 載入與執行驗證
@@ -73,11 +73,9 @@ opcode、誘發事件、讀值路徑、選擇器及期間；載入期拒絕結�
 裁判狀態、來源證據、續體及含秘密的存檔不可當一般玩家封包。
 這是共同資訊契約，不以舊投影已省略部分欄位推論完整符合。
 
-已載入的 typed CardRuntime 目前拒絕序列化與摘要；舊 `astra-save/1` 回放／輔助原型
-不構成 typed 恢復、版本相容或不可信輸入授權保證。
-恢復與對外入口的交付由 #1971 追蹤。
-
-舊回放與輔助原型的封存記錄仍待重新確認，追蹤於 #478；不得據此推論線上恢復已完成驗收。
+已載入的 typed CardRuntime 目前拒絕序列化與摘要；原型回放與輔助已移除，
+typed 重播與輔助模式由 #2206、#2207 追蹤。恢復與對外入口的交付由 #1971 追蹤；
+不得據此推論線上恢復已完成驗收。
 
 ## 執行與建置邊界
 

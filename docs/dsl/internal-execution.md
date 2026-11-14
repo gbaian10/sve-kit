@@ -1005,8 +1005,7 @@ Typed `BoxPilot::Pilot` 只承接來源自身、CurrentTurnEnd／Installation �
 世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
 NextTurnEdge、phase edge、DuringNextPhase、SetKind 與下節以外的 Continuous 仍拒絕。
 尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
-布林摘要，不含 effect、execution 或加數明細；belief 入口見到它即拒絕，
-不把有效值當成原型基礎值重建另一份可 decide 的局面。
+布林摘要，不含 effect、execution 或加數明細。
 
 `prepare_internal_play` 是合成 closed Program 的可信適正 play 提交入口：先驗整棵樹及 context，
 再保存封閉的 Program／來源／execution 關聯與單調 ProperPlay 時間，回傳不可由玩家構造的 handle。

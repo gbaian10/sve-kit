@@ -156,15 +156,11 @@ Python 基線測試驗證 AST、位置、分類版本與跨行 pointer；Rust �
 ### 已遷移到 DSL 1.0 的卡
 
 整卡切換到DSL 1.0 後，原型條目離開 `authored/rules/effects/`，其原 AST 原樣保存在
-`carddb/tests/fixtures/effect_baseline/migrated/<卡號>.json`。這些 fixture 目前仍供
-Rust 共用情境測試還原已遷移卡的原型 AST。Python 不再斷言遷移前後等價；基線測試以作者索引
+`carddb/tests/fixtures/effect_baseline/migrated/<卡號>.json`。Python 不再斷言遷移前後等價；基線測試以作者索引
 與 fixture 中的卡號排除已遷移卡，再檢查仍在原型目錄中的卡片 AST 指紋與位置。
 
-舊 Rust 執行器的 `shared`（回放、輔助與 AI 契約檢查）與 `cards` 只驗**歷史回歸**：測試 catalog
-以明確命名的輔助函式，在已通過 `Catalog::from_current_selection()` 的原型文件上還原這些保存的
-原 AST。這個 catalog 不是 current 選用結果，也不讓遷移卡取得 runtime 資格。共同規則題本不經
-這個 catalog，改由 typed 玩家入口（`sim/engine/tests/typed_exam.rs`）與
-`tests/engine/typed-known-results.yaml` 把關。
+原本還原這些原 AST 的歷史回歸 catalog 已隨舊共享情境與 `cards` 測試移除；共同規則題本由
+typed 玩家入口（`sim/engine/tests/typed_exam.rs`）與 `tests/engine/typed-known-results.yaml` 把關。
 
 真正的 current 選用另由 `current_repository` 測試直接驗證：選用結果的原型側不含已遷移卡，
 DSL 檔走完整 D0 候選。歷史 fixture 不得填回選用結果，也不得當成 current 的 fallback。

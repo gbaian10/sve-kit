@@ -10,9 +10,8 @@ effect paths sharing one `Game` and authority state:
   `Catalog::from_current_selection` and `Game::from_selected_effects` admit current
   whole cards. See [the author contract](../../docs/dsl/author-contract-1.0.md).
 - The frozen prototype reads `authored/rules/effects/`, validated against
-  `dsl/effects.schema.json` before and after macro expansion. The old runner
-  adapters (`ReplayAdapter`, `AssistAdapter`, `AiAdapter`), the old player packet,
-  AI, `Replay` and `Assist` still use this path.
+  `dsl/effects.schema.json` before and after macro expansion. Only engine tests
+  still drive this path, through the old `decide`/`legal` and player packet.
 
 The shared rule exam runs on the typed path: `TypedAdapter` plays both seats
 through the player interface only, and `sim/engine/tests/typed_exam.rs` compares the
@@ -20,8 +19,11 @@ result with [tests/engine/typed-known-results.yaml](../../tests/engine/typed-kno
 See [engine status](../../docs/sim/engine-status.md#驗證方式) for the list rules.
 
 The player match interface is being built on the typed path. The old
-`decide`/`legal`/`projection`, JSON interpreter, AI and replay prototype are frozen
-for retirement after host migration and replacement validation. Draw, movement,
+`decide`/`legal`/`projection` and JSON interpreter are frozen test drivers. The
+prototype replay, assist and AI were removed; their typed successors are tracked in
+[#2206](https://github.com/gbaian10/sve-kit/issues/2206),
+[#2207](https://github.com/gbaian10/sve-kit/issues/2207) and
+[#2208](https://github.com/gbaian10/sve-kit/issues/2208). Draw, movement,
 combat, turn and terminal primitives still called by typed execution remain
 maintained. The first typed AI uses a basic policy through the player interface;
 search is a separate follow-up. Scope and progress are tracked in
@@ -72,7 +74,7 @@ only the single rules name after movement, without aliases.
 positions, without special bindings. A rule that requires an unbound role returns
 `Unsupported`. Bound loaders reject missing roles/templates and inconsistent
 references before execution. The resolved input background and required player
-codes are saved inside the existing prototype `astra-save/1`; missing fields fail
+codes are saved with the serialized `Game`; missing fields fail
 rather than restoring empty defaults. Restore uses that saved background. This
 does not provide cross-version migration, `save/2`, or server input authorization.
 
@@ -89,10 +91,10 @@ The default `runner` feature enables the evaluation adapters. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.
 
-New games and observation-based samples use `chacha12-sha256-rand09-v1`:
+New games use `chacha12-sha256-rand09-v1`:
 `ChaCha12Rng` from rand_chacha 0.10.0, with rand 0.10.3's unbiased range sampler
 and slice shuffle. These versions are pinned because sampling is part of the
-replay sequence. The seed is SHA-256 of the bytes
+authoritative sequence. The seed is SHA-256 of the bytes
 `sve-engine/chacha12-sha256-rand09-v1\0` followed by the exact UTF-8 seed string;
 the stream and word position start at zero. Future sequence changes need a new
 algorithm name and must retain readers for previous algorithms.
@@ -100,11 +102,10 @@ algorithm name and must retain readers for previous algorithms.
 Trusted saves retain the algorithm, seed, stream and complete word position.
 The 68-bit word position is encoded as `[low_u64, high_u64]` so JSON round trips
 do not truncate it. Player packets contain none of this private RNG state.
-Scripted random outcomes still take precedence and do not consume that stream;
-search sampling owns a separate stream and cannot advance the authoritative one.
+Scripted random outcomes still take precedence and do not consume that stream.
 
 RNG objects must include the known algorithm name; numeric states and objects
 without an algorithm are rejected. No legacy RNG or seed reconstruction path is
 retained: the handwritten generator was never deployed and has no real saves.
-The prototype's trusted `astra-save/1` container is unchanged; this does not add
+Trusted `Game` serialization is unchanged; this does not add
 general save migration or untrusted-input authorization.

@@ -1,10 +1,6 @@
 //! Thin neutral-runner adapter; it only converts input and result types.
 
-mod architecture;
-mod intelligence;
 mod typed;
-pub use architecture::{AssistAdapter, ReplayAdapter};
-pub use intelligence::AiAdapter;
 pub use typed::TypedAdapter;
 
 use sve_scenario_runner::{EngineError, View};
