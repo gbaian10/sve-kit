@@ -1,6 +1,11 @@
 [workspace]
 resolver = "3"
-members = ["sim/battle-contract", "sim/scenario-runner", "sim/engine"]
+members = [
+    "sim/battle-contract",
+    "sim/scenario-runner",
+    "sim/engine",
+    "sim/battle-host",
+]
 
 [workspace.package]
 edition = "2024"
