@@ -33,7 +33,7 @@ describe("DSL profile tuple decoding", () => {
     const native = objectValue(v3Fixture("mentioned-by-native.json"))
     const manifest = objectValue(native["manifest"])
     const file = arrayValue(manifest["files"])
-      .map(objectValue)
+      .map((item) => objectValue(item))
       .find((item) => item["key"] === "engine/shared/family-family/0")
     if (!file) throw new Error("missing synthetic engine file")
     const value = objectValue(objectValue(native["payloads"])[stringValue(file["key"])])
