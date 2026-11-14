@@ -109,20 +109,26 @@ describe("BattleHost", () => {
     )
     const submit = { request_id: "r1", command: { kind: "concede" as const } }
     p2.send({ kind: "submit", submit })
-    p1.send({ kind: "baseline" })
+    p1.send({ kind: "baseline", request_id: "b1" })
     await settle()
     expect(p1.received).toEqual([])
     release()
     await settle()
     expect(session?.calls).toEqual(["start", `submit p2 ${JSON.stringify(submit)}`, "baseline p1"])
-    // Each seat only receives its own deliveries.
+    // Each seat only receives its own deliveries; the baseline reply is announced first.
+    expect(p1.received.map((message) => message.kind)).toEqual([
+      "update",
+      "update",
+      "baseline_start",
+      "update",
+    ])
+    expect(p1.received[2]).toEqual({ kind: "baseline_start", request_id: "b1" })
     expect(
-      p1.received.every((message) => message.kind === "update" && message.viewer === "p1"),
+      p1.received.every((message) => message.kind !== "update" || message.viewer === "p1"),
     ).toBe(true)
     expect(
       p2.received.every((message) => message.kind === "update" && message.viewer === "p2"),
     ).toBe(true)
-    expect(p1.received).toHaveLength(3)
   })
 
   it("draws the seed and first chooser inside the Worker unless fixed", async () => {
@@ -166,7 +172,7 @@ describe("BattleHost", () => {
     ] as const) {
       const p1 = new FakePort()
       setUp(() => Promise.reject(new Error(message)), { p1 })
-      p1.send({ kind: "baseline" })
+      p1.send({ kind: "baseline", request_id: "b1" })
       await settle()
       expect(p1.received).toEqual([{ kind: "load_error", code }])
     }
@@ -184,7 +190,7 @@ describe("BattleHost", () => {
     }
     setUp(() => Promise.resolve(trapping), { p1, p2 })
     p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
-    p1.send({ kind: "baseline" })
+    p1.send({ kind: "baseline", request_id: "b1" })
     await settle()
     const stopped = { kind: "host_error", format: 0, reason: "projection" }
     expect(p1.received).toEqual([stopped])

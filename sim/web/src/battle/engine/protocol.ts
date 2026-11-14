@@ -82,7 +82,14 @@ export interface InitMessage {
 }
 
 /** Seat port → Worker. */
-export type SeatRequest = { kind: "submit"; submit: Submit } | { kind: "baseline" }
+export type SeatRequest =
+  { kind: "submit"; submit: Submit } | { kind: "baseline"; request_id: string }
 
-/** Worker → seat port. */
-export type SeatMessage = Outgoing | { kind: "load_error"; code: LoadErrorCode }
+/**
+ * Worker → seat port. `baseline_start` precedes the deliveries answering that baseline request,
+ * so the receiver can tell them from updates already queued on the port.
+ */
+export type SeatMessage =
+  | Outgoing
+  | { kind: "load_error"; code: LoadErrorCode }
+  | { kind: "baseline_start"; request_id: string }

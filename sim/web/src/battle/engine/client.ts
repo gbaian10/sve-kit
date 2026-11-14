@@ -32,6 +32,17 @@ export class ChannelClosedError extends Error {
   }
 }
 
+/** Rejects commands after the host stopped interaction (host or load error). */
+export class ChannelStoppedError extends Error {
+  readonly stop: StopMessage
+  constructor(stop: StopMessage) {
+    super(`interaction stopped: ${stop.kind}`)
+    this.stop = stop
+  }
+}
+
+type StopMessage = Extract<SeatMessage, { kind: "host_error" | "load_error" }>
+
 /** One seat's ordered channel; at most one rules command is in flight, never retried. */
 export class SeatChannel {
   readonly seat: Seat
@@ -40,7 +51,9 @@ export class SeatChannel {
   #pending:
     { id: string; resolve: (receipt: Receipt) => void; reject: (error: Error) => void } | undefined
   #sent = 0
+  #queries = 0
   #closed = false
+  #stopped: StopMessage | undefined
 
   constructor(seat: Seat, port: ChannelPort) {
     this.seat = seat
@@ -54,6 +67,11 @@ export class SeatChannel {
     return this.#pending !== undefined
   }
 
+  /** The host or load error that stopped interaction, if any; it never clears. */
+  get stopped(): StopMessage | undefined {
+    return this.#stopped
+  }
+
   /** Every non-receipt message, in delivery order. */
   listen(listener: (message: SeatMessage) => void): () => void {
     this.#listeners.add(listener)
@@ -62,6 +80,7 @@ export class SeatChannel {
 
   submit(command: Command): Promise<Receipt> {
     if (this.#closed) return Promise.reject(new ChannelClosedError())
+    if (this.#stopped !== undefined) return Promise.reject(new ChannelStoppedError(this.#stopped))
     if (this.#pending !== undefined) return Promise.reject(new CommandOutstandingError())
     this.#sent += 1
     const id = `${this.seat}-c${String(this.#sent)}`
@@ -71,9 +90,16 @@ export class SeatChannel {
     })
   }
 
-  /** Ask for this seat's complete state; a query that never advances the match. */
-  baseline(): void {
-    if (!this.#closed) this.#port.postMessage({ kind: "baseline" })
+  /**
+   * Ask for this seat's complete state; a query that never advances the match. Returns the
+   * request id its `baseline_start` will carry, or undefined when nothing was sent.
+   */
+  baseline(): string | undefined {
+    if (this.#closed || this.#stopped !== undefined) return undefined
+    this.#queries += 1
+    const id = `${this.seat}-b${String(this.#queries)}`
+    this.#port.postMessage({ kind: "baseline", request_id: id })
+    return id
   }
 
   /** Destroy the channel; later messages from an old Worker are ignored. */
@@ -96,9 +122,11 @@ export class SeatChannel {
       pending.resolve(message)
       return
     }
+    if (this.#stopped !== undefined) return
     if (message.kind === "host_error" || message.kind === "load_error") {
-      // Interaction stops; an outstanding command will never get a receipt.
-      this.#pending?.reject(new ChannelClosedError())
+      // Interaction stops for good; an outstanding command will never get a receipt.
+      this.#stopped = message
+      this.#pending?.reject(new ChannelStoppedError(message))
       this.#pending = undefined
     }
     for (const listener of this.#listeners) listener(message)
@@ -144,13 +172,17 @@ export function startLocalBattle(
   }
 }
 
-/** Hot seat: the UI follows one viewer; switching drops the old seat's state and reloads a baseline. */
+/**
+ * Hot seat: the UI follows one viewer. Switching drops the old seat's state and accepts updates
+ * again only after the reply to this switch's own baseline request begins.
+ */
 export class HotSeat {
   readonly #channels: Record<Seat, SeatChannel>
   readonly #onChange: (viewer: Seat, update: Update | undefined) => void
   #viewer: Seat
   #latest: Update | undefined
-  #awaitingBaseline = true
+  #awaiting: string | undefined
+  #stopped: StopMessage | undefined
 
   constructor(
     channels: Record<Seat, SeatChannel>,
@@ -175,24 +207,41 @@ export class HotSeat {
     return this.#latest
   }
 
+  /** The host or load error that stopped the battle, if any. */
+  get stopped(): StopMessage | undefined {
+    return this.#stopped
+  }
+
   switchTo(viewer: Seat): void {
     this.#viewer = viewer
     this.#latest = undefined
-    this.#awaitingBaseline = true
     this.#onChange(viewer, undefined)
-    this.#channels[viewer].baseline()
+    if (this.#stopped === undefined) this.#awaiting = this.#channels[viewer].baseline()
   }
 
-  /** Commands go only through the current viewer's channel. */
+  /** Commands go only through the current viewer's channel, and only while a question is shown. */
   submit(command: Command): Promise<Receipt> {
+    if (this.#stopped !== undefined) return Promise.reject(new ChannelStoppedError(this.#stopped))
     return this.#channels[this.#viewer].submit(command)
   }
 
   #receive(seat: Seat, message: SeatMessage): void {
-    if (seat !== this.#viewer || message.kind !== "update") return
-    // Updates queued before the switch are older than the requested baseline.
-    if (this.#awaitingBaseline && !message.baseline) return
-    this.#awaitingBaseline = false
+    if (this.#stopped !== undefined) return
+    if (message.kind === "host_error" || message.kind === "load_error") {
+      // The host stops every seat; nothing shown may stay answerable.
+      this.#stopped = message
+      this.#awaiting = undefined
+      this.#latest = undefined
+      this.#onChange(this.#viewer, undefined)
+      return
+    }
+    if (seat !== this.#viewer) return
+    if (message.kind === "baseline_start") {
+      if (message.request_id === this.#awaiting) this.#awaiting = undefined
+      return
+    }
+    // Anything before this switch's baseline reply was queued for the old view.
+    if (message.kind !== "update" || this.#awaiting !== undefined) return
     this.#latest = message
     this.#onChange(seat, message)
   }

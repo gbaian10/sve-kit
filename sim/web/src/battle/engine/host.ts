@@ -94,7 +94,8 @@ export class BattleHost {
   #handle(seat: Seat, request: SeatRequest): void {
     if (request.kind === "submit") {
       this.#call((session) => session.submit(seat, JSON.stringify(request.submit)))
-    } else {
+    } else if (!this.#stopped && this.#session !== undefined) {
+      this.#ports.get(seat)?.postMessage({ kind: "baseline_start", request_id: request.request_id })
       this.#call((session) => session.baseline(seat))
     }
   }

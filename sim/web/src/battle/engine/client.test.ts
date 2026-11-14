@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it } from "vitest"
 import {
   type BattleWorker,
   ChannelClosedError,
+  ChannelStoppedError,
   CommandOutstandingError,
   HotSeat,
   SeatChannel,
@@ -89,7 +90,7 @@ describe("SeatChannel", () => {
     const pending = channel.submit(concede)
     worker.postMessage(update("p1", 1))
     worker.postMessage({ kind: "host_error", format: 0, reason: "budget" })
-    await expect(pending).rejects.toBeInstanceOf(ChannelClosedError)
+    await expect(pending).rejects.toBeInstanceOf(ChannelStoppedError)
     expect(seen.map((message) => message.kind)).toEqual(["update", "host_error"])
   })
 
@@ -114,37 +115,129 @@ describe("SeatChannel", () => {
 })
 
 describe("HotSeat", () => {
-  it("shows only the viewer and reloads a baseline after a switch", async () => {
+  function hotSeat(viewer: Seat = "p1") {
     const p1 = pair("p1")
     const p2 = pair("p2")
-    const shown: [Seat, Update | undefined][] = []
-    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, "p1", (viewer, latest) => {
-      shown.push([viewer, latest])
+    const shown: [Seat, number | undefined][] = []
+    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, viewer, (seat, latest) => {
+      shown.push([seat, latest?.update_seq])
     })
+    return { hot, p1, p2, shown }
+  }
+
+  /** Reply to a baseline request the way the Worker does: marker first, then the update. */
+  function reply(worker: MessagePort, request: SeatRequest | undefined, latest: Update) {
+    if (request?.kind !== "baseline") throw new Error("expected a baseline request")
+    worker.postMessage({ kind: "baseline_start", request_id: request.request_id })
+    worker.postMessage(latest)
+  }
+
+  it("shows only the viewer and reloads that seat after a switch", async () => {
+    const { hot, p1, p2, shown } = hotSeat()
     p1.worker.postMessage(update("p1", 1, true))
     p2.worker.postMessage(update("p2", 1, true))
     await tick()
-    expect(shown).toEqual([["p1", update("p1", 1, true)]])
+    expect(shown).toEqual([["p1", 1]])
 
     hot.switchTo("p2")
     expect(hot.latest).toBeUndefined()
-    // A late non-baseline update queued before the switch is older than the baseline.
-    p2.worker.postMessage(update("p2", 2))
     p1.worker.postMessage(update("p1", 2))
     await tick()
-    expect(p2.requests).toEqual([{ kind: "baseline" }])
-    expect(shown.at(-1)).toEqual(["p2", undefined])
-    p2.worker.postMessage(update("p2", 2, true))
-    p2.worker.postMessage(update("p2", 3))
+    expect(p2.requests).toEqual([{ kind: "baseline", request_id: "p2-b1" }])
+    reply(p2.worker, p2.requests[0], update("p2", 1, true))
+    p2.worker.postMessage(update("p2", 2))
     await tick()
     expect(hot.viewer).toBe("p2")
-    expect(hot.latest).toEqual(update("p2", 3))
+    expect(shown).toEqual([
+      ["p1", 1],
+      ["p2", undefined],
+      ["p2", 1],
+      ["p2", 2],
+    ])
 
     void hot.submit(concede)
     await tick()
     expect(p2.requests.at(-1)).toMatchObject({ kind: "submit" })
     expect(p1.requests).toEqual([])
   })
+
+  it("does not take an older queued baseline as the reply to this switch", async () => {
+    const { hot, p2, shown } = hotSeat()
+    // The start baseline and a later update for p2 are still on the port when the user switches.
+    p2.worker.postMessage(update("p2", 1, true))
+    p2.worker.postMessage(update("p2", 2))
+    hot.switchTo("p2")
+    await tick()
+    expect(hot.latest).toBeUndefined()
+    expect(shown).toEqual([["p2", undefined]])
+    reply(p2.worker, p2.requests[0], update("p2", 2, true))
+    await tick()
+    expect(hot.latest).toEqual(update("p2", 2, true))
+  })
+
+  it("ignores replies to earlier switches after switching back and forth", async () => {
+    const { hot, p1, p2 } = hotSeat()
+    hot.switchTo("p2")
+    hot.switchTo("p1")
+    hot.switchTo("p2")
+    await tick()
+    expect(p2.requests).toEqual([
+      { kind: "baseline", request_id: "p2-b1" },
+      { kind: "baseline", request_id: "p2-b2" },
+    ])
+    expect(p1.requests).toEqual([{ kind: "baseline", request_id: "p1-b1" }])
+    reply(p2.worker, p2.requests[0], update("p2", 1, true))
+    p2.worker.postMessage(update("p2", 2))
+    await tick()
+    expect(hot.latest).toBeUndefined()
+    reply(p2.worker, p2.requests[1], update("p2", 2, true))
+    await tick()
+    expect(hot.latest).toEqual(update("p2", 2, true))
+  })
+
+  for (const stop of [
+    { kind: "host_error", format: 0, reason: "projection" },
+    { kind: "load_error", code: "engine" },
+  ] as const) {
+    for (const inFlight of [false, true]) {
+      it(`stops for good on ${stop.kind} (command in flight: ${String(inFlight)})`, async () => {
+        const { hot, p1, p2, shown } = hotSeat()
+        p1.worker.postMessage(update("p1", 1, true))
+        await tick()
+        expect(hot.latest?.input.kind).toBe("question")
+        // Settle into a value right away so the rejection is observed before the assertion.
+        const pending = inFlight
+          ? hot.submit(concede).then(
+              () => "receipt",
+              (error: unknown) => error,
+            )
+          : undefined
+        await tick()
+        const sent = p1.requests.length
+        // The Worker broadcasts the stop to every seat.
+        p1.worker.postMessage(stop)
+        p2.worker.postMessage(stop)
+        await tick()
+        if (pending !== undefined) expect(await pending).toBeInstanceOf(ChannelStoppedError)
+        expect(hot.stopped).toEqual(stop)
+        expect(hot.latest).toBeUndefined()
+        expect(shown.at(-1)).toEqual(["p1", undefined])
+        await expect(hot.submit(concede)).rejects.toBeInstanceOf(ChannelStoppedError)
+        await expect(p1.channel.submit(concede)).rejects.toBeInstanceOf(ChannelStoppedError)
+        expect(p1.channel.baseline()).toBeUndefined()
+        hot.switchTo("p2")
+        // A late update cannot revive interaction.
+        p1.worker.postMessage(update("p1", 2))
+        p2.worker.postMessage(update("p2", 2, true))
+        await tick()
+        expect(hot.latest).toBeUndefined()
+        expect(p1.requests).toHaveLength(sent)
+        expect(p2.requests).toEqual([])
+        expect(p1.channel.stopped).toEqual(stop)
+        expect(p1.channel.busy).toBe(false)
+      })
+    }
+  }
 })
 
 describe("startLocalBattle", () => {
