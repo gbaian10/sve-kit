@@ -661,6 +661,11 @@ fn mask_public_predicate(selector: &mut Selector) {
         return;
     }
     match selector {
+        Selector::Union { sets } => {
+            for set in sets {
+                mask_public_predicate(set);
+            }
+        }
         Selector::Extremum {
             input, property, ..
         } if super::aggregates::check(input, *property).is_ok() => {

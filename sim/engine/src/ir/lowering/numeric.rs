@@ -271,6 +271,7 @@ impl BodyContext<'_> {
                 name_contains: None,
                 acted: None,
                 except: None,
+                not_same_name_as_this: false,
                 other: false,
             } = &**query
             else {
@@ -335,6 +336,7 @@ impl BodyContext<'_> {
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
                     acted: query.acted,
+                    not_same_name_as_this: query.not_same_name_as_this,
                     ..super::selection::ObjectFilter::default()
                 },
                 binding,

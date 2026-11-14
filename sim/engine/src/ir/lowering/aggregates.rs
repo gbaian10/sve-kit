@@ -93,7 +93,7 @@ impl BodyContext<'_> {
     ) -> Result<Selector, LoweringError> {
         let population = ast::PublicQuery {
             acted: None,
-            not_same_name_as_this: false,
+            not_same_name_as_this: query.not_same_name_as_this,
             traits_any: None,
             evolved: None,
             traits_all: Vec::new(),

@@ -55,6 +55,22 @@ impl BodyContext<'_> {
                     binding,
                 ));
             }
+            Some(ast::Recipients::Union { any_of }) => {
+                let mut sets = Vec::new();
+                for (index, limb) in any_of.iter().enumerate() {
+                    let limb_path = format!("{path}/any_of/{index}");
+                    let filter =
+                        self.prevention_recipients(Some(limb), fallback.clone(), &limb_path)?;
+                    let Expr::Compute(condition) = filter.condition else {
+                        return Err(unsupported(path));
+                    };
+                    let Predicate::RecipientIsFollower { objects, .. } = *condition else {
+                        return Err(unsupported(path));
+                    };
+                    sets.push(objects);
+                }
+                return Ok(recipient(Selector::Union { sets }, binding));
+            }
             Some(ast::Recipients::Leader { leader }) => PlayerSet {
                 relation: PlayerRelation::SelfPlayer,
                 relative_to: match leader {
