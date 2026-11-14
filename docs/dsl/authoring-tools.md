@@ -1243,3 +1243,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 墓場來源也可使用 `auto: {zone: cemetery, on: {phase: {whose: self, which: end}}}` 訂閱既有 Main／End 時點。事件發生時只擷取宣告有效區內的來源，本文沿用一般條件、可選付款與墓場自身移動；不以場上同名卡代替墓場來源。
 
 本文的 `standing: this` 與常駐條件共用來源姿態讀值。正式目標仍先宣告，才於解算該條件時判斷來源目前是否直立；它不是時點事件的觸發篩選。
+
+`enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。
