@@ -78,6 +78,7 @@ jobs:
               - 'sim/battle-contract/**'
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
+              - 'sim/battle-host/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'rust-toolchain.toml'
