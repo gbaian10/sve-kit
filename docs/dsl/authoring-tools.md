@@ -548,6 +548,7 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 手牌的起動能力可用 `activate: {zone: hand, cost: {steps: [{pp: 1}, {self_to_ex: true}]}}` 表示「{コスト1}手札のこれをEXエリアに置く：…」（BP10-017、BP08-072）。本卡依一般移動規則從手牌放到持有者的 EX 並公開；`self_to_ex` 只接受 `zone: hand` 的非 Quick 起動費用；Quick、其他區域、自動能力的 `pay`、進化與打出費用都拒絕（Quick 候選尚未預檢 EX 空位）。
 
 手牌自體棄牌成本可用 `{discard: {ref: this, result: paid}}` 命名結果；後續 `move: {ref: {follow: paid}, to: deck, position: {nth: 3}}` 沿用該棄牌回條的新世代放回牌庫。牌庫不足時放到底部，不沿用棄牌前的舊物件身分。
+效果本文的 `discard` 若帶 `result`，產生的棄牌回條也可沿用同一個 `follow` 牌庫指定位置移動，追蹤實際成功棄牌後的新世代。
 
 融合用 `activate: {fusion: {sel: {who: self, zone: [hand, ex], trait: 財宝, orig_cost_ge: 1}, n: 1}, do: [...]}`，省略有效區時固定為手牌，也可明寫 `zone: hand`。沿用私有成本選材問題及原子付款：材料排除來源本身，手牌材料捨棄，EX 材料送墓，再把來源放到自己的 EX。EX 滿格時可先用 EX 材料騰出空位；整份付款失敗一併回復。本文的 `this` 精確跟隨該來源移入 EX 後的世代，原有的發動來源仍保留在能力紀錄。
 
