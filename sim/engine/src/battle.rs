@@ -4,6 +4,7 @@
 //! authenticated seat and current question before submitting the decoded answer.
 
 mod costs;
+mod events;
 mod history;
 mod objects;
 mod pending;
@@ -12,6 +13,7 @@ mod selection;
 mod sources;
 
 pub use costs::project_costs;
+pub use events::{EventObjects, ProjectedEvent, project_batch};
 pub use history::project_history;
 pub use pending::project_pending;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
