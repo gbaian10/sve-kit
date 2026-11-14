@@ -79,6 +79,8 @@ records:
 不足兩張時仍可選該模式，但不能只翻一張（Q2294、Q2295）；不能拿選取張數代替成功結果。
 シュヴァルグラン的翻面是入場能力本文的條件式指示，並非進化付款。
 
+`flip_down.ref` 可直接指定自己進化牌堆的正面集合，例如 `{who: self, zone: evolve_deck, kind: evolve_follower, face_up: true}`；沿用公開進化牌堆篩選，翻面後撤銷對手的公開位置知識。具名結果仍記錄實際成功翻面的成員。
+
 ## 同名建牌張數規則
 
 直接作者入口接受卡級 `deck_rule: {deck: main | evolve, same_name_max: N}`。

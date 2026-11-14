@@ -430,7 +430,7 @@ pub(super) enum Step {
     Stand(ObjectAction),
     Steal(Steal),
     Give(Give),
-    FlipDown(ObjectAction),
+    FlipDown(FlipDown),
     Buff(Modify),
     Grant(Grant),
     SetStat(Modify),
@@ -984,6 +984,16 @@ pub(super) struct PublicBanishUnion {
 pub(super) struct PublicBanishZone {
     pub who: Side,
     pub zone: Zone,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum FlipDown {
+    Public {
+        r#ref: CountQuery,
+        result: Option<String>,
+    },
+    Selected(ObjectAction),
 }
 
 #[derive(Deserialize)]
