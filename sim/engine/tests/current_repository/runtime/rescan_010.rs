@@ -219,12 +219,22 @@ fn bp05_087_evolve_time_increases_pp_max_restores_life_and_draws() {
     initial["players"]["P1"]["zones"]["deck"] =
         json!([{"id":"drawn","card":"BP01-037"}]);
     let mut game = game(&initial);
+    let definition = selection().current["BP05-086"]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.source.line == 1)
+        .unwrap()
+        .node
+        .id;
 
     let action = game
         .internal_rule_action(&json!({
             "do":"evolve",
             "source":"base",
             "evolve_card":"form",
+            "definition":definition.0,
             "pay":{"pp":4_u8}
         }))
         .unwrap();
