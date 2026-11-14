@@ -645,7 +645,7 @@ impl BodyContext<'_> {
             }
             if value.position.is_some()
                 || value.order.is_some()
-                || source_objects.is_some_and(|objects| !self.supports_move_result(value, objects))
+                || !self.supports_move_result(value, source_objects, public_query)
             {
                 return Err(unsupported(path));
             }
@@ -976,14 +976,20 @@ impl BodyContext<'_> {
         })
     }
 
-    fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
+    fn supports_move_result(
+        &self,
+        value: &ast::Move,
+        objects: Option<&ast::Objects>,
+        public: Option<&ast::PublicQuery>,
+    ) -> bool {
+        let own_field = matches!(objects, Some(ast::Objects::Zone(query))
+            if matches!(query.who, ast::Side::Controller) && matches!(query.zone, ast::Zone::Field))
+            || matches!(public, Some(query)
+                if matches!(query.who, ast::Side::Controller) && matches!(query.zone, ast::PublicZone::Field));
         value.result.is_none()
             || matches!(value.to, ast::Destination::Ex)
-            || (matches!(value.to, ast::Destination::Cemetery)
-                && matches!(objects, ast::Objects::Zone(query)
-                    if matches!(query.who, ast::Side::Controller)
-                        && matches!(query.zone, ast::Zone::Field)))
-            || matches!(objects, ast::Objects::Bound(name)
+            || (matches!(value.to, ast::Destination::Cemetery) && own_field)
+            || matches!(objects, Some(ast::Objects::Bound(name))
                 if self.observed_targets.contains(name)
                     && matches!(value.to, ast::Destination::Hand | ast::Destination::Cemetery))
     }

@@ -805,15 +805,7 @@ impl BodyContext<'_> {
                 },
             })));
         };
-        let mut objects = super::costs::named_public_query(query, binding, path)?;
-        if query.other {
-            objects = Selector::Difference {
-                input: Box::new(objects),
-                except: Box::new(Selector::Objects {
-                    objects: vec![super::super::ObjectOperand::SourceHolder {}],
-                }),
-            };
-        }
+        let objects = super::costs::named_public_query(query, binding, path)?;
         Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
     }
 
