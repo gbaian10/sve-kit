@@ -10,6 +10,7 @@ use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::events::subscriptions;
+use crate::ir::events::zone_gate::{DepartureGate, ZoneCountGate};
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DestroyEvent, EnterExEvent, EntryOrigin, KeywordId, PlayerId};
 use alloc::collections::BTreeMap;
@@ -24,6 +25,7 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
     match pattern {
         EventPattern::LeaveField { binding, predicate } => SourceLink::parse(*binding, predicate)
             .map(|link| link.subject)
+            .or_else(|| DepartureGate::parse(*binding, predicate).map(|(gate, _)| gate.subject))
             .or_else(|| SubjectFilter::parse(SubjectFields::Cemetery(*binding), predicate))
             .or_else(|| SubjectFilter::parse(SubjectFields::Hand(*binding), predicate))
             .or_else(|| SubjectFilter::parse(SubjectFields::Leave(*binding), predicate)),
@@ -46,6 +48,13 @@ fn destination_matches(on: &TriggerCondition, destination: &str) -> bool {
     };
     if SourceLink::parse(*binding, predicate).is_some() {
         return destination == "cemetery";
+    }
+    if let Some((_, fields)) = DepartureGate::parse(*binding, predicate) {
+        return match fields {
+            SubjectFields::Cemetery(_) => destination == "cemetery",
+            SubjectFields::Hand(_) => destination == "hand",
+            _ => true,
+        };
     }
     [
         (SubjectFields::Cemetery(*binding), "cemetery"),
@@ -167,6 +176,27 @@ impl Game {
             },
             before,
         )
+    }
+
+    /// Every observer of one batch reads the zone before any member moves (Q2590, Q2620).
+    fn zone_count_gate(&self, gate: ZoneCountGate, observer: PlayerId) -> Result<bool> {
+        let player = if gate.own {
+            observer
+        } else {
+            PlayerId {
+                seat: if observer.seat == 1 { 2 } else { 1 },
+            }
+        };
+        let zone = match gate.zone {
+            ZoneKind::Cemetery => "cemetery",
+            ZoneKind::Field => "field",
+            ZoneKind::Ex => "ex",
+            _ => return Err(unsupported("departure zone gate")),
+        };
+        // Fillers stand for that many cards, as every other zone count reads them.
+        let count = u64::try_from(self.zone_count(super::super::seat_name(player)?, zone))
+            .map_err(|_negative| invalid("zone count"))?;
+        Ok(gate.admits(count))
     }
 
     fn movement_observers(&self, exit: bool) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
@@ -355,6 +385,14 @@ impl Game {
                     if !self.internal_damage_source_link(object, holder_reference, actor, &link) {
                         continue;
                     }
+                }
+                if let TriggerCondition::Event {
+                    pattern: EventPattern::LeaveField { binding, predicate },
+                } = on
+                    && let Some((gate, _)) = DepartureGate::parse(*binding, predicate)
+                    && !self.zone_count_gate(gate.gate, actor)?
+                {
+                    continue;
                 }
                 let source = self.internal_card_source(&holder, ability.node.id, actor)?;
                 let mut information = SourceInformation::current(self, source)?;

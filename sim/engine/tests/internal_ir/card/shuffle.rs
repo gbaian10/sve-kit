@@ -358,7 +358,7 @@ fn resolving_spell_banish_rejects_a_capture_alias_and_non_spell_execution() {
 
 #[test]
 fn cutthroat_fanfare_fragment_moves_one_card_to_hand_and_randomizes_only_the_looked_remainder() {
-    // The real card also needs an unadmitted deck-construction exception; this admits no real CardId.
+    // Isolate shuffle semantics from whole-card construction and admission checks.
     let input = tree(&json!([
         {"look":{"top":{"who":"self","n":8_u8},"bind":"seen"}},
         {"choose":{"from":{"in":"seen"},"n":1_u8,"bind":"picked"}},

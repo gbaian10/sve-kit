@@ -45413,6 +45413,16 @@
       "type": "string",
       "pattern": "^(?!(?:this|it|item|affected|found|entering|attack_target|host|cost1|self|opp|turn|non_turn|current|opponents|each|other_players)$(?![\\s\\S]))[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
     },
+    "DSLNodes.CardDeckRule": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DSLNodes.DeckRule"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.ConditionalDeckRule"
+        }
+      ]
+    },
     "DSLNodes.CardKind": {
       "$ref": "#/$defs/DSLNodes.Code"
     },
@@ -45427,6 +45437,40 @@
     "DSLNodes.Concept": {
       "type": "string",
       "minLength": 1
+    },
+    "DSLNodes.ConditionalDeckRule": {
+      "additionalProperties": false,
+      "properties": {
+        "when": {
+          "const": "self_in_main",
+          "type": "string"
+        },
+        "decks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "main",
+              "evolve"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "exclude_name_contains": {
+          "$ref": "#/$defs/DSLNodes.CardName"
+        },
+        "same_name_max": {
+          "$ref": "#/$defs/DSLNodes.Nat"
+        }
+      },
+      "required": [
+        "when",
+        "decks",
+        "exclude_name_contains",
+        "same_name_max"
+      ],
+      "type": "object"
     },
     "DSLNodes.CounterName": {
       "type": "string",
@@ -45703,7 +45747,7 @@
           }
         },
         "deck_rule": {
-          "$ref": "#/$defs/DSLNodes.DeckRule"
+          "$ref": "#/$defs/DSLNodes.CardDeckRule"
         },
         "token": {
           "$ref": "#/$defs/DSLNodes.TokenIdentity"

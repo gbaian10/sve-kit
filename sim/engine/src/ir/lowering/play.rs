@@ -1285,6 +1285,7 @@ impl BodyContext<'_> {
                 source_can_enter_field: self.source_can_enter_field,
                 spell: self.spell,
                 departure_to_cemetery: self.departure_to_cemetery,
+                departed_subject: self.departed_subject,
                 scope,
                 definition: self.definition,
                 payment_result: None,

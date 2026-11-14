@@ -5,7 +5,11 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.construction_rules import copy_rule, has_copy_rule
+from sve_carddb.contracts.construction_rules import (
+    conditional_copy_rule,
+    copy_rule,
+    has_copy_rule,
+)
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, string
 from sve_carddb.domains.effects.author_expansion import (
@@ -165,7 +169,8 @@ def _deck_rules(
     ordinal: int | None,
     text: str,
 ) -> list[JsonValue]:
-    if not has_copy_rule(text, "jp"):
+    conditional = any(conditional_copy_rule(line) for line in text.splitlines())
+    if not has_copy_rule(text, "jp") and not conditional:
         return []
     names = current.db.select(
         "face_rules_name",
@@ -186,12 +191,17 @@ def _deck_rules(
             rule = copy_rule(line, "jp", name)
         except ValueError:
             raise SourceError("source_deck_rule_name_mismatch") from None
-        if rule is None:
+        conditional_rule = conditional_copy_rule(line)
+        if rule is None and conditional_rule is None:
             continue
-        deck, maximum = rule
+        if rule is not None:
+            deck, maximum = rule
+            declared: JsonValue = {"deck": deck, "same_name_max": maximum}
+        else:
+            declared = conditional_rule
         result.append(
             {
-                "rule": {"deck": deck, "same_name_max": maximum},
+                "rule": declared,
                 "source": {
                     "owner": {"kind": "face_revision", "revision_id": revision},
                     "face_id": _scalar(face["id"]),

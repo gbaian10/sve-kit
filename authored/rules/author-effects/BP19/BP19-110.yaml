@@ -1,0 +1,41 @@
+cards:
+  BP19-110:
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 4
+      - line: 2
+        fanfare:
+          do:
+            - look:
+                bind: seen
+                top: { who: self, n: 8 }
+            - choose:
+                bind: picked
+                from: { in: seen }
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in: { objects_of: taken, view: before }
+                to: deck
+                position: bottom
+                order: shuffle
+    deck_rule:
+      when: self_in_main
+      decks: [main, evolve]
+      exclude_name_contains: カットスロート
+      same_name_max: 1
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6 }
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

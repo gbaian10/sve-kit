@@ -19071,7 +19071,7 @@
           }
         },
         "deck_rule": {
-          "$ref": "#/$defs/DeckRule"
+          "$ref": "#/$defs/CardDeckRule"
         },
         "ignored": {
           "type": "array",
@@ -21683,6 +21683,50 @@
         "name"
       ],
       "additionalProperties": false
+    },
+    "ConditionalDeckRule": {
+      "additionalProperties": false,
+      "properties": {
+        "when": {
+          "const": "self_in_main",
+          "type": "string"
+        },
+        "decks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "main",
+              "evolve"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "exclude_name_contains": {
+          "$ref": "#/$defs/CardName"
+        },
+        "same_name_max": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "when",
+        "decks",
+        "exclude_name_contains",
+        "same_name_max"
+      ],
+      "type": "object"
+    },
+    "CardDeckRule": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/DeckRule"
+        },
+        {
+          "$ref": "#/$defs/ConditionalDeckRule"
+        }
+      ]
     }
   },
   "description": "Closed shared author graph and authored containers. Expansion and source/execution admission are separate; the root rejects standalone documents."

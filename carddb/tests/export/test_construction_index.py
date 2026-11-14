@@ -341,6 +341,8 @@ def test_card_text_copy_rules_and_singleton_rule() -> None:
         "これはメインデッキに5枚まで入れることができる。",
         # A copy rule naming another card.
         "『ほかのカード』は自分のデッキに50枚まで入れることができる。",
+        # The wire index represents singleton restrictions only.
+        "カード名に『Synthetic』を含まないカードは、メインデッキやエボルヴデッキにそれぞれ2枚までしか入れられない。",
     ],
 )
 def test_unrecognised_construction_text_stops_the_export(line: str) -> None:

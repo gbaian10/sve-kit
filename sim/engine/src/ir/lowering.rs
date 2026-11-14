@@ -15,6 +15,7 @@ mod conditions;
 mod costs;
 mod counters;
 mod current;
+mod deck_rules;
 mod delayed;
 mod dice;
 mod discard;
@@ -82,6 +83,7 @@ pub use current::{
     CurrentSourceEvidence, KeywordDeclarationPayload, MetadataObligation, NonBodySource,
     PrintedKeyword, PrintedKeywordsObligation,
 };
+pub use deck_rules::{CardDeckRule, DeckRuleCondition, DeckSection};
 
 use super::AbilityQualification::{Ordinary, UnionBurst};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -761,6 +763,14 @@ fn entry_qualification(entry: &ast::Ability, body: &ast::Body) -> AbilityQualifi
     } else {
         body.ub.as_ref().map_or(Ordinary, |_| UnionBurst)
     }
+}
+
+/// The header itself guarantees the departed card arrived in a cemetery.
+fn departs_to_cemetery(binding: Binding<super::LeaveFieldEvent>, predicate: &Expr<Bool>) -> bool {
+    super::history_turn::source_link::SourceLink::parse(binding, predicate).is_some()
+        || super::events::zone_gate::DepartureGate::parse(binding, predicate)
+            .is_some_and(|(_, fields)| matches!(fields, SubjectFields::Cemetery(_)))
+        || SubjectFilter::parse(SubjectFields::Cemetery(binding), predicate).is_some()
 }
 
 struct HeadEvents {
@@ -1457,6 +1467,8 @@ struct BodyContext<'definitions> {
     evolution: Option<&'definitions ast::Evolution>,
     source_can_enter_field: bool,
     departure_to_cemetery: bool,
+    /// Another card's departure whose header only admits arrivals in the cemetery (BP19-074).
+    departed_subject: Option<Binding<super::LeaveFieldEvent>>,
     leave_event: Option<Binding<super::LeaveFieldEvent>>,
     discard_event: Option<Binding<super::DiscardEvent>>,
     banish_event: Option<Binding<super::BanishEvent>>,
@@ -1553,6 +1565,7 @@ impl<'definitions> BodyContext<'definitions> {
             evolution: entry.evolve.as_ref(),
             source_can_enter_field: false,
             departure_to_cemetery: false,
+            departed_subject: None,
             scope,
             definition: AbilityId(scope.0),
             payment_result: if entry.spell.is_some() {
@@ -1622,6 +1635,12 @@ impl<'definitions> BodyContext<'definitions> {
         self.banish_event = super::events::banish::self_event(&trigger);
         if let TriggerCondition::Event { pattern } = &trigger.on {
             self.subject_event = SubjectFields::from_pattern(pattern);
+            if let EventPattern::LeaveField { binding, predicate } = pattern
+                && self.leave_event.is_none()
+                && departs_to_cemetery(*binding, predicate)
+            {
+                self.departed_subject = Some(*binding);
+            }
             self.equip_event = super::events::equipment::binding(pattern);
             self.drive_checked_event = super::events::drive::checked_binding(pattern);
             if let EventPattern::Dice { binding, .. } = pattern {

@@ -4,9 +4,11 @@ use crate::ir::events::ex_departure::ExDepartureFilter;
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
+use crate::ir::events::zone_gate::{DepartureGate, ZoneCountGate};
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{
-    CardKind, CardName, ClassId, Comparison, KeywordId, ObjectRef, PlayEvent, TraitId, ZoneKind,
+    CardKind, CardName, ClassId, Comparison, KeywordId, LeaveFieldEvent, Nat, ObjectRef, PlayEvent,
+    TraitId, ZoneKind,
 };
 
 #[derive(Clone, Copy)]
@@ -159,7 +161,7 @@ fn moved(
     }
     let event = Binding::new(event_id, scope);
     let mut subject = entry.sel.clone();
-    let link = subject.as_mut().and_then(|subject| subject.r#where.take());
+    let condition = subject.as_mut().and_then(|subject| subject.r#where.take());
     let filter = movement_filter(
         own,
         entry.reference.is_some(),
@@ -172,6 +174,21 @@ fn moved(
             FilterSupport::Basic
         },
     )?;
+    let fields = departure_fields(entry.to.as_ref(), event);
+    let link = match condition.map(|condition| *condition) {
+        None => None,
+        Some(ast::MovementCondition::Link(link)) => Some(link),
+        Some(ast::MovementCondition::ZoneCount(condition)) => {
+            return Ok(EventPattern::LeaveField {
+                binding: event,
+                predicate: DepartureGate {
+                    subject: filter,
+                    gate: zone_count_gate(&condition, Binding::new(damage_id, scope)),
+                }
+                .predicate(fields),
+            });
+        }
+    };
     let predicate = if let Some(link) = link {
         let history = &link.history;
         let ast::DealtDamageHistory::DealtDamage = history.event;
@@ -207,16 +224,49 @@ fn moved(
         }
         predicate
     } else {
-        filter.predicate(match entry.to {
-            Some(ast::DepartureDestination::Cemetery) => SubjectFields::Cemetery(event),
-            Some(ast::DepartureDestination::Hand) => SubjectFields::Hand(event),
-            None => SubjectFields::Leave(event),
-        })
+        filter.predicate(fields)
     };
     Ok(EventPattern::LeaveField {
         binding: event,
         predicate,
     })
+}
+
+const fn departure_fields(
+    to: Option<&ast::DepartureDestination>,
+    event: Binding<LeaveFieldEvent>,
+) -> SubjectFields {
+    match to {
+        Some(ast::DepartureDestination::Cemetery) => SubjectFields::Cemetery(event),
+        Some(ast::DepartureDestination::Hand) => SubjectFields::Hand(event),
+        None => SubjectFields::Leave(event),
+    }
+}
+
+/// 「自分の墓場が10枚以上で」 as a whole public zone count read before the departure.
+const fn zone_count_gate(
+    condition: &ast::ZoneCountCondition,
+    member: Binding<ObjectRef>,
+) -> ZoneCountGate {
+    let comparison = &condition.cmp;
+    ZoneCountGate {
+        own: matches!(comparison.left.count.who, ast::LeaderSide::Controller),
+        zone: match comparison.left.count.zone {
+            ast::GateZone::Field => ZoneKind::Field,
+            ast::GateZone::Ex => ZoneKind::Ex,
+            ast::GateZone::Cemetery => ZoneKind::Cemetery,
+        },
+        comparison: match comparison.op {
+            ast::Comparison::Eq => Comparison::Equal,
+            ast::Comparison::Ne => Comparison::NotEqual,
+            ast::Comparison::Lt => Comparison::Less,
+            ast::Comparison::Le => Comparison::LessEqual,
+            ast::Comparison::Gt => Comparison::Greater,
+            ast::Comparison::Ge => Comparison::GreaterEqual,
+        },
+        threshold: Nat(comparison.right),
+        member,
+    }
 }
 
 /// A milled card has no field information, so only its owner and the turn can filter it.
@@ -296,9 +346,10 @@ pub(super) fn movement_filter(
     }
     let original_cost = original_cost(subject, path)?;
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
+    // Own field-to-cemetery observers read the departing card's printed cost (BP19-074).
     let allow_original_cost = matches!(
         support,
-        FilterSupport::OriginalCost | FilterSupport::EntryCost
+        FilterSupport::OriginalCost | FilterSupport::EntryCost | FilterSupport::CemeteryWard
     );
     if (original_cost.is_some() && !allow_original_cost)
         || keyword.is_some_and(|keyword| {

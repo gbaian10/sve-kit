@@ -46,6 +46,8 @@ ENTRY_TYPES: dict[str, tuple[TypeForm[object], str]] = {
     "CardKeywordSourceUse": (evidence.CardKeywordSourceUse, "CardKeywordSourceUse"),
     "CrOwner": (four_layer.CrOwner, "CrOwner"),
     "DeckRule": (entries.DeckRule, "DeckRule"),
+    "ConditionalDeckRule": (entries.ConditionalDeckRule, "ConditionalDeckRule"),
+    "CardDeckRule": (entries.CardDeckRule, "CardDeckRule"),
     "TokenIdentity": (entries.TokenIdentity, "TokenIdentity"),
     "DirectMeta": (evidence.DirectMeta, "DirectMeta"),
     "DirectSourceUse": (evidence.DirectSourceUse, "DirectSourceUse"),

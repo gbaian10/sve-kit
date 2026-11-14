@@ -15,6 +15,7 @@ pub(crate) mod played;
 pub(crate) mod subject;
 pub(crate) mod subscriptions;
 pub(crate) mod timing;
+pub(crate) mod zone_gate;
 use super::{
     AttackEvent, BanishEvent, BatchPolicy, Binding, Bool, CounterChangeEvent, DamageEvent,
     DestroyEvent, DiceEvent, DiscardEvent, DrawEvent, DriveCheckedEvent, DriveGainedEvent,

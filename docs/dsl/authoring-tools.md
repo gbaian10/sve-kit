@@ -83,7 +83,8 @@ records:
 
 ## 同名建牌張數規則
 
-直接作者入口接受卡級 `deck_rule: {deck: main | evolve, same_name_max: N}`。
+直接作者入口的卡級 `deck_rule` 接受自身上限 `DeckRule` 或條件限制 `ConditionalDeckRule`，兩個分支不可混用。
+既有 `deck_rule: {deck: main | evolve, same_name_max: N}` 保留原有語義。
 它對應第一面的完整規則句：`『自身卡名』は自分のデッキにN枚まで入れることができる。`
 或 `これはエボルヴデッキにN枚まで入れることができる。`，可出現在效果文或附帶條款。
 作者值須與目前來源完全一致，未宣告、錯區、改動上限或沒有對應卡文均拒絕；
@@ -94,7 +95,37 @@ records:
 lowering 核對宣告及整卡覆蓋後，沿用既有的空能力卡程式。
 構築索引與作者入口共用相同的固定句型解析器；索引仍從快照的已採納本文產生 `copies`，
 既有純函式驗證器依構築名稱與區域套用上限。放寬同名張數不放寬主牌組或進化牌組總張數。
-未標 admission 的來源重建入口與其他建牌句型未因此擴充。
+未標 admission 的來源重建入口未因此擴充。
+
+條件限制以「此卡在主牌組中」為生效條件；BP19-110 使用：
+
+```yaml
+deck_rule:
+  when: self_in_main
+  decks: [main, evolve]
+  exclude_name_contains: カットスロート
+  same_name_max: 1
+```
+
+`decks` 必須非空且不重複，接受 main、evolve 或兩者，各自依構築名稱計數，
+同名不同印刷合計。`exclude_name_contains` 是非空、區分大小寫且不做正規化的字面 substring；
+名稱含該字串者沿用原有構築規則。限制與原上限同時成立，不會放寬原上限；
+原本可放更多張的にんじん、オニオン軍団也受限制。來源是否在主牌組依永久 CardId 判斷，
+別名印刷可啟動限制；只在進化牌組時不生效，多份來源不累加限制。
+
+目前直接來源辨識的完整條件句為
+`カード名に『X』を含まないカードは、メインデッキやエボルヴデッキにそれぞれN枚までしか入れられない。`，
+固定產生上述條件與兩個牌組；語法可表達單一牌組，但不能藉此改寫兩個牌組的來源。
+生效條件與排除語義依 BP19-110 的 Q2609–Q2612。規則行照樣參與整卡來源覆蓋，
+Rust lowering 保存已核對的型別資料，不產生對局能力。
+
+引擎公開純函式 `game::player::check_card_deck_rules` 檢查條件限制，
+`Game::check_player_decks` 與 `Game::start_player_game` 共用此檢查，
+違規透過持有者可見的 `DeckRuleViolation` 缺口拒絕開局。
+牌組總張數、普通同名上限、職業與賽制仍由 host 的構築驗證器檢查。
+建牌器可透過 Rust／WASM 呼叫同一純函式，或依相同 DSL 語義驗證；
+既有前端 `sim/web/src/domain/deck/construction.ts` 的 `singletonExcept` 已對應本卡
+每區同名一張的語義，資料來自快照構築索引。前端整合另行處理，伺服器 strict 仍須重驗。
 
 場上的 `extra_trigger` 靜態效果依 `phase` 與 `who`，在階段開始時為符合控制者的原誘發能力增加 `n` 個獨立待處理項目。多個來源的增加次數相加；每個項目保留原能力的來源、控制者、條件與付款，結束階段的能力也涵蓋在對手結束階段誘發的己方 EX 能力。提供者須在事件發生時仍有效，已成立的待處理項目不因提供者離場而取消。
 
@@ -499,6 +530,10 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 墓場法術打出觸發可接正式目標、可選付款與模式，也可執行不操作持有者的普通本文；對 `this` 的操作只准放回控制者場上，不能把墓場持有者當成場上活物件強化、破壞或移 EX。
 
 `entered_from`、`entered_by`、`played_from` 的 `ref: this` 在入場曲與 `auto.on.enter_field: {ref: this}` 讀取自身入場事件。監看他者入場時，可用 `entered_from: {ref: it, from: cemetery}` 讀取該次事件主體的來源；不把能力持有者當成事件主體，其他事件不提供此讀值。進化能力的 `usable_if` 另可用 `entered_from: {ref: this, from: cemetery}` 查詢持有者本次場上世代的入場來源；離場再回場即重新記錄，普通進化不改變來源，進化資格目前限查詢墓場來源。入場事件接受手牌、牌庫及墓場，`not` 可表示非手牌；不由入場方式推斷來源區域。入場來源條件亦可控制唯一的チョイス群組是否出現；`choice.instead` 另接受墓場來源條件以改變可選模式數，仍在宣告時選模式，並沿用同一事件的凍結來源。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
+
+監看他者從場上進墓場的 `auto.on.moved: {from: {who: self, zone: field}, to: cemetery, ...}`，本文可寫 `move: {ref: it, to: field}` 把該次離場的主體放回擁有者的場上（BP19-074「それを場に出す」）；觀察的是對手的卡時，放回的是對手的場，不是觀察者的場。標頭限定送墓，所以 `it` 跟隨這次離場在墓場產生的世代；結算前該卡已被其他效果移出墓場就不追取。可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]` 讓回場的卡不誘發入場曲，與 BP04-038 的放場相同。
+
+同一標頭的 `sel.where` 可寫公開區域張數門檻，例如 `where: {cmp: {left: {count: {who: self, zone: cemetery}}, op: ge, right: 10}}`（「自分の墓場が10枚以上で…場から墓場に置かれたとき」）。門檻在整批移動之前讀取：墓場 9 張時送墓的那張不算進去，不誘發（Q2590）；與觀察者同時送墓仍會誘發（Q2620）。不成立時不產生待機，因此不消耗 `per_turn`。張數只讀自己或對手的場、EX、墓場，不接受篩選，代表多張的 filler 照張數計入；離場主體的 `orig_cost_le` 等原費篩選讀離場前的印刷原費。
 
 法術本文可用 `played_from: {ref: this, from: hand | ex}` 讀取本次適正打出的起始區域，與付款時使用的打出來源共用既有執行資料。自身入場曲也接受 hand／EX 的適正打出來源，效果直接入場不視為打出。先抽牌或移動其他卡不改變這個值；之後將結算中的自身移入 EX，仍受 EX 容量及一般法術清理規則限制。
 

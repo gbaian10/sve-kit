@@ -25,6 +25,8 @@ pub enum AdmissionGapReason {
     UnsupportedRuntime,
     /// A referenced token name has no complete, unambiguous template.
     MissingTokenTemplate,
+    /// An active printed construction restriction rejects this card's copies.
+    DeckRuleViolation,
 }
 
 /// One missing requirement of this seat's deck or its transitive dependencies.
@@ -318,8 +320,16 @@ impl Game {
         )?;
         let failures = probe.prepare_strict_cards(selected, &required)?;
         let mut report = StrictAdmission::default();
-        for (closure, result) in closures.into_iter().zip(&mut report.gaps) {
+        for ((closure, result), deck) in closures.into_iter().zip(&mut report.gaps).zip(decks) {
             let mut gaps = closure.gaps.clone();
+            gaps.extend(
+                super::check_card_deck_rules(selected, deck)?
+                    .into_iter()
+                    .map(|card_no| AdmissionGap {
+                        card_no,
+                        reason: AdmissionGapReason::DeckRuleViolation,
+                    }),
+            );
             for (number, reason) in &failures {
                 if closure.cards.contains(number) && !closure.explains_runtime_rejection(number) {
                     gaps.insert(AdmissionGap {

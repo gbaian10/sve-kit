@@ -447,6 +447,39 @@ impl BodyContext<'_> {
         })
     }
 
+    /// 「それを場に出す」 follows the observed card into the cemetery generation its departure
+    /// created; a card that has since moved on is not fetched (CR 10.7, LKI).
+    fn departed_return(&self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        let event = self.departed_subject.ok_or_else(|| unsupported(path))?;
+        if value.top.is_some()
+            || value.position.is_some()
+            || value.order.is_some()
+            || value.result.is_some()
+        {
+            return Err(unsupported(path));
+        }
+        Ok(Action::Move {
+            objects: Selector::Objects {
+                objects: vec![ObjectOperand::FollowEventMove {
+                    event: MovementEvent::LeaveField { event },
+                }],
+            },
+            movement: MoveSpec {
+                to: MoveDestination::Shared {
+                    zone: super::super::ZoneRef {
+                        player: PlayerRef::Owner {},
+                        kind: ZoneKind::Field,
+                    },
+                },
+                initial_posture: None,
+                entry_effects: vec![],
+                position: None,
+                order: None,
+            },
+            reason: MoveReason::Put,
+        })
+    }
+
     /// Entry must preserve the generation authorized by a choice or successful movement.
     fn field_entry_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
         if let Some(ast::MoveObjects::Field(ast::Objects::Follow { follow })) = &value.r#ref {
@@ -607,6 +640,11 @@ impl BodyContext<'_> {
         let mut action = match &value.r#ref {
             Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
                 self.self_return(objects, path)?
+            }
+            Some(ast::MoveObjects::Field(ast::Objects::Bound(name)))
+                if name == "it" && self.departed_subject.is_some() =>
+            {
+                self.departed_return(value, path)?
             }
             _ => self.field_entry_move(value, path)?,
         };

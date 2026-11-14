@@ -599,21 +599,6 @@ known:
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
     reason: 'typed runner: pending {"line":2,"source":"a1"} matches 3 occurrences'
-  - question: "card-BP19-SL26"
-    scenario: "可看 1 張"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP19-SL26"
-    scenario: "可看 3 張"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP19-SL26"
-    scenario: "可看 8 張"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP20-020"
     scenario: "X=2 選擇素材=1"
     status: fail
@@ -929,21 +914,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-7 events (#2008)"
     reason: "after-decision-7 omniscient events"
-  - question: "flow-private-look-01"
-    scenario: "BP01-042"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-private-look-01"
-    scenario: "BP01-173"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-private-look-01"
-    scenario: "BP01-176"
-    status: unsupported
-    error: "unadmitted BP19-SL26 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-visibility-01"
     scenario: "A 搜尋加入手牌：對手識別那張，不識別其餘手牌"
     status: adapter-error
