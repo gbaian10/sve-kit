@@ -91,7 +91,7 @@ pub enum Stat {
 /// One explicit numeric result, frozen when its action completed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
-pub struct NumberChange {
+pub struct ValueChange {
     /// Value before, when the producer provides it.
     pub before: Option<Int>,
     /// Value after, when the producer provides it.
@@ -107,7 +107,7 @@ pub struct StatChange {
     /// Which stat.
     pub stat: Stat,
     /// Its change.
-    pub change: NumberChange,
+    pub change: ValueChange,
 }
 
 /// A public player resource.
@@ -310,7 +310,7 @@ pub enum EventBody {
         /// Whose leader.
         player: Seat,
         /// The change.
-        change: NumberChange,
+        change: ValueChange,
     },
     /// Follower stats changed.
     StatsChanged {
@@ -326,7 +326,7 @@ pub enum EventBody {
         /// Which resource.
         resource: Resource,
         /// The change.
-        change: NumberChange,
+        change: ValueChange,
     },
     /// Counters on a card changed.
     CounterChanged {
@@ -335,7 +335,7 @@ pub enum EventBody {
         /// Rules name of the counter.
         name: String,
         /// The change.
-        change: NumberChange,
+        change: ValueChange,
     },
     /// A card acted or stood.
     PostureChanged {

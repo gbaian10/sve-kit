@@ -222,7 +222,7 @@ pub enum BattleInput {
         /// That seat.
         actor: Seat,
         /// What this seat may know meanwhile.
-        context: PublicWaiting,
+        context: Box<PublicWaiting>,
     },
     /// The rules ended the game.
     Finished {
@@ -243,13 +243,19 @@ pub enum BattleInput {
 pub struct NoAdvice;
 
 impl Serialize for NoAdvice {
-    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         serializer.collect_seq(iter::empty::<()>())
     }
 }
 
 impl<'de> Deserialize<'de> for NoAdvice {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         <[(); 0]>::deserialize(deserializer).map(|[]| Self)
     }
 }

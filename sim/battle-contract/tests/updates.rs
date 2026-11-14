@@ -7,6 +7,7 @@
 
 extern crate alloc;
 
+#[path = "support/fixtures.rs"]
 mod support;
 
 use alloc::collections::BTreeSet;
@@ -168,30 +169,31 @@ fn differ_only_at(first: &Value, second: &Value, pointer: &str) -> bool {
     first != second && &aligned == second
 }
 
+/// Exactly `N` bodies of one kind, so each case is named instead of indexed.
+fn exactly<const N: usize>(kind: &str) -> [Value; N] {
+    bodies(kind).try_into().unwrap()
+}
+
 #[test]
 fn events_keep_the_public_facts_that_tell_similar_occurrences_apart() {
-    let abilities = bodies("ability_played");
-    assert!(differ_only_at(&abilities[1], &abilities[2], "/ability"));
+    let [_activated, triggered, unknown] = exactly("ability_played");
+    assert!(differ_only_at(&triggered, &unknown, "/ability"));
 
-    let fusions = bodies("fusion");
-    assert!(differ_only_at(&fusions[0], &fusions[1], "/materials"));
+    let [one_material, two_materials] = exactly("fusion");
+    assert!(differ_only_at(&one_material, &two_materials, "/materials"));
 
-    let races = bodies("race");
-    assert!(differ_only_at(&races[0], &races[1], "/ordinal"));
+    let [first_race, second_race] = exactly("race");
+    assert!(differ_only_at(&first_race, &second_race, "/ordinal"));
 
-    let triggers = bodies("drive_trigger");
-    assert!(differ_only_at(&triggers[0], &triggers[1], "/card"));
-    assert_eq!(triggers[2].get("card"), Some(&Value::Null));
+    let [one_card, other_card, hidden_card] = exactly("drive_trigger");
+    assert!(differ_only_at(&one_card, &other_card, "/card"));
+    assert_eq!(hidden_card.get("card"), Some(&Value::Null));
 
-    let checks = bodies("drive_checked");
-    assert!(differ_only_at(&checks[0], &checks[1], "/card"));
-    assert_eq!(checks[2].get("card"), Some(&Value::Null));
+    let [one_check, other_check, hidden_check] = exactly("drive_checked");
+    assert!(differ_only_at(&one_check, &other_check, "/card"));
+    assert_eq!(hidden_check.get("card"), Some(&Value::Null));
 
-    let payments = bodies("payment");
-    assert_eq!(payments[0].pointer("/component/kind").unwrap(), "general");
-    assert!(differ_only_at(
-        &payments[1],
-        &payments[2],
-        "/component/stacks"
-    ));
+    let [general, one_stack, two_stacks] = exactly("payment");
+    assert_eq!(general.pointer("/component/kind").unwrap(), "general");
+    assert!(differ_only_at(&one_stack, &two_stacks, "/component/stacks"));
 }
