@@ -1257,3 +1257,5 @@ Token 建立的數量可使用已准入的公開人口計數，例如 `create: {
 打出費用條件中的 `count` 可沿用一般數值入口所支援的計數，包括 `zone: evolve_deck`、`face_up: true` 與 `kind: evolve_follower`。因此表向的 Advance、非進化從者及裏向卡不納入此篩選；費用計算與本文使用相同的公開區域讀取邊界。
 
 公開頂牌觀察在選出的從者／護符實際入場後，可把觀察集合扣除該次移動 before 成員的餘集移入手牌。沿用觀察回條與成功移動回條的共同作用域；因場上容量未能移動的成員仍屬餘集，不以原先選取清單替代成功結果。
+
+可選的單一正式目標（`upto: 1`）可用 `at: selection`、`selection: card` 與 `value: {orig_cost_of: card}` 捕捉選取時數值，`cost_of`、`power_of`、`hp_of` 同理。零張先走既有空集合條件，結果為 0；一張才讀該物件並凍結數值。一般的 `orig_cost_of: this` 仍是來源資訊讀值。
