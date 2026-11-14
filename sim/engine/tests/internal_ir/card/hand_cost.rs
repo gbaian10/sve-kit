@@ -624,3 +624,70 @@ fn negative_class_hand_cost_selects_only_the_eligible_private_card() {
     assert_eq!(state["P1"]["hand"], json!(["witch", "drawn"]));
     assert_eq!(state["P1"]["pp"]["current"], 1_u8);
 }
+
+#[test]
+fn discarded_hand_source_can_follow_its_receipt_into_the_third_deck_position() {
+    for action in [
+        json!({"grant":{"on":{"follow":"paid"},"keywords":["ward"]}}),
+        json!({"buff":{"on":{"follow":"paid"},"power":1,"hp":1}}),
+        json!({"banish":{"ref":{"follow":"paid"}}}),
+    ] {
+        let tree = equipment_played::tree(
+            &json!({"activate":{
+                "zone":"hand","cost":{"steps":[{"pp":1},{"discard":{"ref":"this","result":"paid"}}]},"do":[action]
+            }}),
+            "unit-follower",
+        );
+        lowerer().lower(&tree).unwrap_err();
+    }
+
+    for size in [0_usize, 1, 4] {
+        let tree = equipment_played::tree(
+            &json!({"activate":{
+                "zone":"hand","cost":{"steps":[{"pp":1},{"discard":{"ref":"this","result":"paid"}}]},
+                "do":[{"life":{"who":"self","delta":1}},{"move":{"ref":{"follow":"paid"},"to":"deck","position":{"nth":3}}}]
+            }}),
+            "unit-follower",
+        );
+        let program = lowerer()
+            .lower(&tree)
+            .unwrap()
+            .remove("unit-follower")
+            .unwrap();
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":2,"max":2});
+        initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["deck"] = Value::Array(
+            (0..size)
+                .map(|i| json!({"id":format!("d{i}"),"card":"unit-spell"}))
+                .collect(),
+        );
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "paid-source-follow",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        resolved(
+            game.activate_internal_card(
+                "source",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap(),
+        );
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"]["hand"], json!([]));
+        assert_eq!(state["P1"]["cemetery"], json!([]));
+        let mut expected = (0..size).map(|i| format!("d{i}")).collect::<Vec<_>>();
+        expected.insert(size.min(2), "source".to_owned());
+        assert_eq!(state["P1"]["deck"], json!(expected));
+        assert_eq!(state["objects"]["source"]["generation"], 2_u8);
+        assert_eq!(state["P1"]["pp"]["current"], 1_u8);
+    }
+}

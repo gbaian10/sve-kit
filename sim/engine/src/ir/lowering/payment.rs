@@ -263,9 +263,10 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::Discard(ast::DiscardCost::Reference { r#ref: name })
-                if name == "this" =>
-            {
+            ast::CostOperation::Discard(ast::DiscardCost::Reference { r#ref, .. }) => {
+                if r#ref != "this" {
+                    return Err(unsupported(path));
+                }
                 Action::Discard {
                     player: PlayerRef::Controller {},
                     mode: super::super::DiscardMode::All {
@@ -336,8 +337,7 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
-            | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
+            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false)
@@ -354,6 +354,21 @@ fn lower_operations(
                 name,
                 ReceiptId(id),
                 super::hand_payment::cardinality(material, path)?,
+                path,
+            )?;
+        }
+        if let ast::CostOperation::Discard(ast::DiscardCost::Reference {
+            result: Some(name), ..
+        }) = operation
+        {
+            record_discard(
+                context,
+                name,
+                ReceiptId(id),
+                Cardinality {
+                    minimum: super::Nat(1),
+                    maximum: Some(super::Nat(1)),
+                },
                 path,
             )?;
         }

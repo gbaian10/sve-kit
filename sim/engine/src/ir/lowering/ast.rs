@@ -333,7 +333,10 @@ pub(super) struct RevealedSelection {
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
     Groups(Box<HandMaterialGroups>),
-    Reference { r#ref: String },
+    Reference {
+        r#ref: String,
+        result: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]
