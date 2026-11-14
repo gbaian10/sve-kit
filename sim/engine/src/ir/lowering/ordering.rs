@@ -120,9 +120,14 @@ impl BodyContext<'_> {
             self.receipt_reads.field_cemetery.insert(receipt);
         }
         let saved = match step {
-            ast::Step::FlipDown(ast::ObjectAction::Long {
-                result: Some(name), ..
-            }) => Some((
+            ast::Step::FlipDown(
+                ast::FlipDown::Selected(ast::ObjectAction::Long {
+                    result: Some(name), ..
+                })
+                | ast::FlipDown::Public {
+                    result: Some(name), ..
+                },
+            ) => Some((
                 name,
                 ObjectReceipt::Flip {
                     receipt: ReceiptReference::new(receipt),

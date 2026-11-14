@@ -55,7 +55,7 @@ tags!(ReplacementScope { SelfOnly, General });
 variants!(ProposedEventPattern {
     LeavesZone { objects: Selector, from: ZoneKind } => [],
     Damage { recipient: Option<RecipientPredicate>, source: Option<SourcePredicate>, kind: DamageKind } => [],
-    Move { objects: Selector, to: ZoneKind } => [],
+    Move { objects: Selector, from: ZoneKind, to: ZoneKind } => [],
     Instruction { pattern: InstructionPattern } => []
 });
 tags!(DamageKind {

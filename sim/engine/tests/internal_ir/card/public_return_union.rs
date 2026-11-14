@@ -129,6 +129,60 @@ fn public_return_unions_reject_other_players_and_unrelated_zone_combinations() {
 }
 
 #[test]
+fn named_numeric_union_modifies_field_and_ex_once_without_touching_other_names() {
+    let document = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[
+            {"buff":{"on":{"any_of":[
+                {"who":"self","zone":"field","kind":"follower","name":"unit-follower"},
+                {"who":"self","zone":"ex","kind":"follower","name":"unit-follower"}
+            ]},"power":2,"hp":2}}
+        ]}}),
+        "unit-amulet",
+    );
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"s","card":"unit-amulet"},{"id":"f","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["ex"] =
+        json!([{"id":"e","card":"unit-follower"},{"id":"other","card":"unit-spell"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"foreign","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "numeric-union",
+    )
+    .unwrap();
+    for (number, program) in [
+        ("unit-amulet", program.clone()),
+        ("unit-follower", card(vec![])),
+        ("unit-spell", card(vec![])),
+    ] {
+        game.load_internal_card(number, &program).unwrap();
+    }
+    resolved(
+        game.activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    for id in ["f", "e"] {
+        assert_eq!(state["objects"][id]["power"], 4_u8);
+        assert_eq!(state["objects"][id]["hp"], 5_u8);
+    }
+    assert_eq!(state["objects"]["foreign"]["power"], 2_u8);
+}
+
+#[test]
 fn named_cemetery_population_moves_to_ex_through_ordinary_capacity() {
     let document = equipment_played::tree(
         &json!({"activate":{"cost":{"pp":0},"do":[
