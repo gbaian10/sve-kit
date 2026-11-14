@@ -2,6 +2,27 @@
 
 import re
 
+from pydantic import JsonValue
+
+CONDITIONAL_PATTERN = re.compile(
+    r"カード名に『(?P<part>[^』]+)』を含まないカードは、"
+    r"メインデッキやエボルヴデッキにそれぞれ(?P<n>\d+)枚までしか入れられない。"
+)
+
+
+def conditional_copy_rule(line: str) -> dict[str, JsonValue] | None:
+    """Recognize the complete conditional construction sentence (Q2610–Q2612)."""
+    match = CONDITIONAL_PATTERN.fullmatch(line.strip())
+    if match is None:
+        return None
+    return {
+        "when": "self_in_main",
+        "decks": ["main", "evolve"],
+        "exclude_name_contains": match["part"],
+        "same_name_max": int(match["n"]),
+    }
+
+
 PATTERNS = {
     "jp": (
         (

@@ -28,6 +28,7 @@ from sve_carddb.contracts.author_evidence import (
     Writers,
 )
 from sve_carddb.contracts.author_leaves import (
+    CardName,
     Concept,
     ParamDeclarations,
     ParamRef,
@@ -246,6 +247,28 @@ class DeckRule(RecordData):
     same_name_max: UInt
 
 
+def _unique_decks(
+    value: tuple[Literal["main", "evolve"], ...],
+) -> tuple[Literal["main", "evolve"], ...]:
+    if len(set(value)) != len(value):
+        raise ValueError("Deck sections must be unique")
+    return value
+
+
+class ConditionalDeckRule(RecordData):
+    when: Literal["self_in_main"]
+    decks: Annotated[
+        tuple[Literal["main", "evolve"], ...],
+        Field(min_length=1, json_schema_extra={"uniqueItems": True}),
+        AfterValidator(_unique_decks),
+    ]
+    exclude_name_contains: CardName
+    same_name_max: UInt
+
+
+type CardDeckRule = DeckRule | ConditionalDeckRule
+
+
 class AuthorFace(RecordData):
     abilities: tuple[Ability, ...]
 
@@ -268,7 +291,7 @@ class AuthorCardFields(TypedDict):
     abilities: NotRequired[tuple[Ability, ...]]
     faces: NotRequired[dict[FaceId, AuthorFace]]
     ignored: NotRequired[tuple[DirectSourceUse, ...]]
-    deck_rule: NotRequired[DeckRule]
+    deck_rule: NotRequired[CardDeckRule]
     token: NotRequired[TokenIdentity]
     token_sources: NotRequired[Annotated[tuple[TokenSource, ...], Field(min_length=1)]]
 

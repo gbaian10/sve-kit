@@ -38,7 +38,7 @@ struct Payload {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ConstructionRule {
-    rule: ast::DeckRule,
+    rule: super::super::CardDeckRule,
     source: ast::DirectSourceUse,
 }
 
@@ -378,6 +378,7 @@ pub(super) fn lower(
     let mut programs =
         compiler.lower_coordinates(&input.tree, &BTreeMap::new(), Some(&identity))?;
     Ok(CurrentCardProgram {
+        deck_rule,
         card_id: input.card_id,
         card_no: input.card_no.clone(),
         source_version: "direct".into(),
