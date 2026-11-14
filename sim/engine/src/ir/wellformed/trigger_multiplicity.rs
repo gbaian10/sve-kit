@@ -8,7 +8,9 @@ use crate::ir::{Effect, ZoneKind};
 )]
 impl Checker {
     pub(super) fn trigger_multiplicity(&mut self, effect: &Effect, zones: &[ZoneKind]) -> Checked {
-        let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
+        let Some(shape) = projection(effect) else {
+            return self.reject();
+        };
         if zones != [ZoneKind::Field] {
             return self.reject();
         }
