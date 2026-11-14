@@ -1,0 +1,42 @@
+cards:
+  BP13-106:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                ref: chosen
+                result: moved
+                to: ex
+            - if:
+                cond:
+                  in_zone:
+                    ref:
+                      follow: moved
+                    zone: ex
+                then:
+                  - move:
+                      acted: true
+                      ref:
+                        follow: moved
+                      to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                other: true
+                who: all
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set
