@@ -1,0 +1,45 @@
+cards:
+  BP13-024:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                target:
+                  leader: opp
+                what: attack
+      - auto:
+          do:
+            - if:
+                cond:
+                  exists:
+                    orig_cost_ge: 3
+                    trait: 指揮官
+                    who: self
+                    zone: field
+                then:
+                  - pay:
+                      cost:
+                        pp: 1
+                      do:
+                        - move:
+                            ref: this
+                            to: field
+          on:
+            phase:
+              which: end
+              whose: self
+          zone: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

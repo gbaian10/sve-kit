@@ -1,0 +1,27 @@
+cards:
+  BP15-122:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - create:
+                n:
+                  count:
+                    kind: follower
+                    who: opp
+                    zone: field
+                to: field
+                token: エンシェントアーティファクト
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+    token_sources:
+      - card: BP05-T04
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

@@ -1,0 +1,83 @@
+cards:
+  BP13-037:
+    abilities:
+      - evolve:
+          cost:
+            pp: 4
+        line: 1
+      - auto:
+          do:
+            - if:
+                cond:
+                  all:
+                    - history:
+                        event: played
+                        sel:
+                          kind: follower
+                          trait: 魔法使い
+                        who: self
+                        window: this_turn
+                    - history:
+                        event: played
+                        sel:
+                          kind: spell
+                          trait: 魔法使い
+                        who: self
+                        window: this_turn
+                then:
+                  - counter:
+                      delta: 1
+                      name: 魔力カウンター
+                      on: this
+          on:
+            phase:
+              which: end
+              whose: self
+          zone: ex
+        line: 2
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - move:
+                ref: this
+                result: moved
+                to: ex
+            - if:
+                cond:
+                  all:
+                    - cmp:
+                        left:
+                          count:
+                            kind: follower
+                            trait: 魔法使い
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                    - cmp:
+                        left:
+                          count:
+                            kind: spell
+                            trait: 魔法使い
+                            who: self
+                            zone: cemetery
+                        op: ge
+                        right: 5
+                then:
+                  - counter:
+                      delta: 1
+                      name: 魔力カウンター
+                      on:
+                        follow: moved
+          zone: hand
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

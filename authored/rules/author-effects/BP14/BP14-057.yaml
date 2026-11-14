@@ -1,0 +1,42 @@
+cards:
+  BP14-057:
+    abilities:
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  cannot:
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                    on: affected
+                    what: stand
+                on:
+                  kind: follower
+                  who: opp
+                  zone: field
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+        line: 1
+      - lastword:
+          do:
+            - destroy:
+                ref:
+                  acted: true
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set
