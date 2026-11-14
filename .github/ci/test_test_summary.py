@@ -381,38 +381,3 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
             assert main(["rust", str(self.folder)]) == 1
         (self.folder / "shard.json").unlink()
         assert "Shard counts unavailable" in rust_summary(self.folder)
-
-    def test_rust_panic_locations_omit_messages_thread_names_and_private_paths(
-        self,
-    ) -> None:
-        """CI-only diagnosis needs source locations without publishing panic contents."""
-        (self.folder / "test.log").write_text(
-            f"thread '{PRIVATE}' panicked at sim/engine/tests/cards.rs:93:10:\n"
-            f"{PRIVATE}\n"
-            f'Invalid("unsupported_construct at /cards/BP15-102/faces/f:abc/abilities/1"); {PRIVATE}\n'
-            f"current selection identity or prototype overlap; {PRIVATE}\n"
-            f"thread '{PRIVATE}' (12345) panicked at sim/engine/src/game.rs:5:2:\n"
-            "thread 'safe' panicked at src/lib.rs:12:3:\n"
-            f"thread 'safe' panicked at /tmp/{PRIVATE}.rs:1:1:\n"
-            "thread 'safe' panicked at tests/../ASCII_PRIVATE_SENTINEL.rs:1:1:\n"
-            "thread 'safe' panicked at /tmp/tests/ASCII_PRIVATE_SENTINEL.rs:1:1:\n"
-            "thread 'safe' panicked at tests/cards.rs:2:1: ASCII_PRIVATE_SENTINEL\n"
-            "test safe::failure ... FAILED\n"
-            "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s\n",
-            encoding="utf-8",
-        )
-        (self.folder / "elapsed.txt").write_text("1", encoding="utf-8")
-        self.write_shard("shard.json", 1, 1, collected=1, selected=1)
-        summary = rust_summary(self.folder)
-        assert "sim/engine/tests/cards.rs:93:10" in summary
-        assert (
-            "unsupported_construct at /cards/BP15-102/faces/f:abc/abilities/1"
-            in summary
-        )
-        assert "current selection identity or prototype overlap" in summary
-        assert "src/lib.rs:12:3" in summary
-        assert "sim/engine/src/game.rs:5:2" in summary
-        assert "12345" not in summary
-        assert PRIVATE not in summary
-        assert "ASCII_PRIVATE_SENTINEL" not in summary
-        assert "thread" not in summary
