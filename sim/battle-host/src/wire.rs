@@ -1,4 +1,6 @@
-//! Channel messages. Seats, ids, numbers, receipts and host errors are the battle contract's
+//! Channel messages between the local host and its seats.
+//!
+//! Seats, ids, numbers, receipts and host errors are the battle contract's
 //! (`sve-battle-contract`); the update and submit payloads stay temporary (format 0) until the
 //! contract's question, answer and update types replace them.
 

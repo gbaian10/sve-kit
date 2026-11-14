@@ -84,7 +84,7 @@ fn answer(id: &str, request: &str) -> Submit {
     }
 }
 
-fn concede(request: String) -> Submit {
+const fn concede(request: String) -> Submit {
     Submit {
         request_id: RequestId::new(request),
         command: SubmitCommand::Concede,

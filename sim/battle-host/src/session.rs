@@ -448,7 +448,7 @@ const fn stop_reason(outcome: HostOutcome) -> HostErrorReason {
     }
 }
 
-fn receipt(seat: Seat, request_id: RequestId, kind: Option<SubmissionKind>) -> Delivery {
+const fn receipt(seat: Seat, request_id: RequestId, kind: Option<SubmissionKind>) -> Delivery {
     let result = match kind {
         None | Some(SubmissionKind::Rejected) => ReceiptResult::Rejected,
         Some(SubmissionKind::Applied) => ReceiptResult::Applied,
