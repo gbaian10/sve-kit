@@ -21,6 +21,14 @@ def safe_details(source: str) -> list[str]:
             r'reason: "((?:choose-pending|resolve-choice|activate|evolve|play) answer rejected)"',
         ),
         (
+            "missing authored program",
+            r'reason: "(no authored program: [A-Z0-9-]{2,24})"',
+        ),
+        (
+            "unloaded whole card",
+            r'reason: "(internal D1 does not support unloaded whole card [A-Z0-9-]{2,24}/[0-9]+, holder [A-Za-z0-9_-]{1,40} generation [0-9]+, query restriction [A-Za-z ]+: current ability definitions unavailable)"',
+        ),
+        (
             "missing pending line/source",
             r'pending \{\\"line\\":([0-9]+),\\"source\\":\\"([A-Za-z][A-Za-z0-9_-]{0,40})\\"\} is not offered',
         ),
