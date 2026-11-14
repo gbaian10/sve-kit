@@ -514,7 +514,12 @@ EP／SEP 卡（種類 `ep`／`sep`）沒有卡片能力：EP、SEP 是玩家持�
 
 目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX；`to: field` 支援從者與護符 token 至自己場上。省略 `n` 為 1；EX 與場上各最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。場上建立共用進場事件與守護的選擇橫置程序；沒有先前區域的建立以 `EntryOrigin::Other` 表示，成功建立的每個 token 各發生一次進場。
 
-EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；多模板分配與進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
+EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
+
+「それはそれぞれ『ロイド』と『ヴィクトリア』に変身する」寫成 `into: {allocate: {among: [ロイド, ヴィクトリア], each_exactly_once: true}}`（BP08-011）。
+依 CR 5.17.1 先消滅、再依實際消滅數建立：新 token 放在各原物件控制者的 EX，模板一律由能力的控制者決定。
+依回合玩家優先逐一處理各 EX 玩家；該玩家還能從剩餘模板中選出不同組合時，控制者以結算選擇（ResolutionChoice）回答，題目沿用模板組合的 `token-capacity` 形狀，`destination` 是收到 token 的玩家、`available` 是該玩家的成功數（受 EX 容量限制），組合唯一時不發問；零張不建立也不發問。模板不對應原卡，打出時仍須選足目標（Q1060、Q1061）。
+`among` 至少兩個不重複的名稱；載入時要求選取的上限不超過模板數，分配決策的 ID 不得與其他決策重複。`total`、`by` 與動態數量不開放。
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱接受單一區域的 Main／End 時點，以及下述融合事件與融合／打出共用事件；有效區本身不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 

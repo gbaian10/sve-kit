@@ -205,6 +205,8 @@ enum BindingKind {
 struct Slot {
     value: TypeId,
     kind: BindingKind,
+    /// Upper bound of an object choice, kept so later instructions can prove counts at load.
+    maximum: Option<Nat>,
 }
 #[derive(Clone, Debug)]
 struct Environment {
@@ -411,9 +413,33 @@ impl Checker {
             Slot {
                 value: TypeId::of::<T>(),
                 kind,
+                maximum: None,
             },
         );
         Ok(())
+    }
+
+    fn define_selection<T>(&mut self, binding: Binding<T>, maximum: Option<Nat>) -> Checked
+    where
+        T: 'static,
+    {
+        self.define(binding, BindingKind::Value)?;
+        if let Some(slot) = self.env.bindings.get_mut(&binding.key()) {
+            slot.maximum = maximum;
+        }
+        Ok(())
+    }
+
+    /// The most objects a selector can name, when the program proves a bound.
+    fn selection_maximum(&self, selector: &Selector) -> Option<usize> {
+        if let Selector::Objects { objects } = selector {
+            return Some(objects.len());
+        }
+        let Selector::Bound { reference } = selector else {
+            return None;
+        };
+        let Nat(maximum) = self.env.bindings.get(&reference.key())?.maximum?;
+        usize::try_from(maximum).ok()
     }
 
     fn reference<T>(&self, binding: Binding<T>, kind: BindingKind) -> Checked
@@ -422,13 +448,7 @@ impl Checker {
     {
         match self.env.bindings.get(&binding.key()) {
             None => Err(self.error(WellFormedReason::UnavailableBinding)),
-            Some(slot)
-                if *slot
-                    != (Slot {
-                        value: TypeId::of::<T>(),
-                        kind,
-                    }) =>
-            {
+            Some(slot) if slot.value != TypeId::of::<T>() || slot.kind != kind => {
                 Err(self.error(WellFormedReason::BindingType))
             }
             Some(_) => Ok(()),
@@ -777,6 +797,33 @@ impl Checker {
                 into: super::TokenAllocation::Single { .. },
                 entry_effects,
             } if entry_effects.is_empty() => self.selector(objects),
+            // Each template once: the count read is the literal template count, never a dynamic total.
+            Action::Transform {
+                objects,
+                into:
+                    super::TokenAllocation::EachExactlyOnce {
+                        templates,
+                        total: Expr::Literal(Nat(total)),
+                        actor: PlayerRef::Controller {},
+                        decision,
+                        ..
+                    },
+                entry_effects,
+            } if entry_effects.is_empty()
+                && templates.len() >= 2
+                && u64::try_from(templates.len()).ok() == Some(*total)
+                && templates.iter().enumerate().all(|(index, template)| {
+                    !templates.iter().take(index).any(|other| other == template)
+                })
+                && self
+                    .selection_maximum(objects)
+                    .is_some_and(|maximum| maximum <= templates.len()) =>
+            {
+                if !self.decisions.insert(*decision) {
+                    return Err(self.error(WellFormedReason::DuplicateDecision));
+                }
+                self.selector(objects)
+            }
             Action::Dice {
                 operation: DiceOperation::Roll {},
                 result,

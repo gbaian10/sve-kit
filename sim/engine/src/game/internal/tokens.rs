@@ -150,6 +150,16 @@ pub(super) enum TokenAllocation {
     },
 }
 
+pub(super) enum TokenSelection {
+    Chosen(Vec<String>),
+    Choices {
+        prints: Vec<String>,
+        names: Vec<String>,
+        choices: Vec<Vec<String>>,
+        available: usize,
+    },
+}
+
 pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
     let Expr::Compute(operation) = name else {
         return false;
@@ -474,13 +484,40 @@ impl Game {
         destination: ZoneKind,
         actor: PlayerId,
     ) -> Result<TokenAllocation> {
+        match self.token_selection(requests, destination, actor, None)? {
+            TokenSelection::Chosen(prints) => self
+                .internal_create_prints(&prints, seat_name(actor)?)
+                .map(TokenAllocation::Created),
+            TokenSelection::Choices {
+                prints,
+                names,
+                choices,
+                available,
+            } => Ok(TokenAllocation::Capacity {
+                prints,
+                names,
+                choices,
+                available,
+            }),
+        }
+    }
+
+    /// Resolves the creatable prints without creating objects, so a caller may ask first.
+    pub(super) fn token_selection(
+        &self,
+        requests: &[(String, u64)],
+        destination: ZoneKind,
+        actor: PlayerId,
+        limit: Option<usize>,
+    ) -> Result<TokenSelection> {
         let seat = seat_name(actor)?;
         let zone = if destination == ZoneKind::Field {
             "field"
         } else {
             "ex"
         };
-        let available = self.token_capacity(seat, zone)?;
+        let space = self.token_capacity(seat, zone)?;
+        let available = limit.map_or(space, |limit| space.min(limit));
         let mut requested = Vec::new();
         for (name, count) in requests {
             let card = self.catalog.token_print(name)?;
@@ -494,29 +531,26 @@ impl Game {
             ]);
         }
         let prints = self.unique_crest_creations(&requested, zone, seat)?;
-        let selected = if prints.len() > available {
-            let names = prints
-                .iter()
-                .map(|card| self.token_name(card))
-                .collect::<Result<Vec<_>>>()?;
-            let choices = token_combinations(&names, available)?;
-            if choices.len() > 1 {
-                return Ok(TokenAllocation::Capacity {
-                    prints,
-                    names,
-                    choices,
-                    available,
-                });
-            }
-            let chosen = choices
-                .first()
-                .ok_or_else(|| invalid("missing token capacity result"))?;
-            prints_for_names(&prints, &names, chosen)?
-        } else {
-            prints
-        };
-        self.internal_create_prints(&selected, seat)
-            .map(TokenAllocation::Created)
+        if prints.len() <= available {
+            return Ok(TokenSelection::Chosen(prints));
+        }
+        let names = prints
+            .iter()
+            .map(|card| self.token_name(card))
+            .collect::<Result<Vec<_>>>()?;
+        let choices = token_combinations(&names, available)?;
+        if choices.len() > 1 {
+            return Ok(TokenSelection::Choices {
+                prints,
+                names,
+                choices,
+                available,
+            });
+        }
+        let chosen = choices
+            .first()
+            .ok_or_else(|| invalid("missing token capacity result"))?;
+        prints_for_names(&prints, &names, chosen).map(TokenSelection::Chosen)
     }
 
     fn commit_tokens(

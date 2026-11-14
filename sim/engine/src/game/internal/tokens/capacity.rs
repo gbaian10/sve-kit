@@ -76,7 +76,7 @@ impl Game {
         )
     }
 
-    pub(in crate::game::internal::tokens) fn token_capacity(
+    pub(in crate::game::internal) fn token_capacity(
         &self,
         seat: &str,
         zone: &str,

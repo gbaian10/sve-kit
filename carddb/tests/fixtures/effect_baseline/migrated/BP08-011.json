@@ -1,0 +1,30 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "names": [
+          "ロイド",
+          "ヴィクトリア"
+        ],
+        "op": "transform",
+        "subjects": "target.1"
+      },
+      "kind": "spell",
+      "line": 1,
+      "targets": [
+        {
+          "key": "1",
+          "max": 2,
+          "min": 2,
+          "order": true,
+          "select": {
+            "name": "操り人形",
+            "side": "self",
+            "zone": "ex"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "complete"
+}

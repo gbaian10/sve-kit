@@ -499,7 +499,23 @@ pub(super) enum AbilityPlayCost {
 pub(super) struct Transform {
     #[serde(rename = "ref")]
     pub reference: Objects,
-    pub into: String,
+    pub into: TransformInto,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum TransformInto {
+    Single(String),
+    Allocated { allocate: TransformAllocation },
+}
+
+/// 「それはそれぞれ『A』と『B』に変身する」: each template once, assigned by successful count.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TransformAllocation {
+    pub among: Vec<String>,
+    #[serde(rename = "each_exactly_once")]
+    pub _each_exactly_once: True,
 }
 
 #[derive(Deserialize)]
