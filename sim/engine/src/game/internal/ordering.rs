@@ -533,6 +533,9 @@ fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
 fn mask_public_condition(condition: &mut Expr<Bool>) {
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
+            Predicate::PostureEquals { .. } => {
+                *condition = super::source::mask_holder_posture(condition);
+            }
             Predicate::Exists { objects } => mask_public_predicate(objects),
             Predicate::ReceiptAny {
                 receipt,

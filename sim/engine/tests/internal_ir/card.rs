@@ -1017,3 +1017,5 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+#[path = "card/source_posture.rs"]
+mod source_posture;

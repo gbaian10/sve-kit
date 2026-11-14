@@ -451,6 +451,10 @@ fn play_requirement(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.EachObject"
+            | "shape.Predicate.PostureEquals"
+            | "shape.PostureRead.Posture"
+            | "read.state.posture"
+            | "predicate.posture-equals"
             | "shape.ActionPattern.PlayAbility"
             | "internal.AbilityKind.Activated"
             | "control.each-object"

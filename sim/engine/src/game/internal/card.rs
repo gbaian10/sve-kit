@@ -1048,7 +1048,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
             let mut declaration = effect.clone();
             if let Effect::Replacement { condition, .. } = &mut declaration {
                 // Field-only admission can reuse the holder's public-posture proof.
-                *condition = static_keywords::field_holder_posture(condition);
+                *condition = super::source::mask_holder_posture(condition);
             }
             single.node.declarations = vec![declaration];
             if holder_removal::is_static(&single.node) {

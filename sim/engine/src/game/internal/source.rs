@@ -5,9 +5,10 @@ use crate::game::Object;
 use crate::game::player::Viewer;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
-    CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr, LkiReason,
-    NameOperation, Nat, NumberRead, ObjectRef, ObjectView, Requirement, Requirements,
-    RuntimeAbilitySource, RuntimeObjectView, SnapshotId, Stat, TraitId,
+    Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
+    LkiReason, NameOperation, Nat, NumberRead, ObjectOperand, ObjectRef, ObjectView, PostureRead,
+    Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId,
+    Stat, TraitId,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -515,5 +516,30 @@ impl Game {
                 .transpose()?
                 .unwrap_or_default(),
         })
+    }
+}
+
+// The value reader exposes posture only for the current source generation on the field.
+pub(super) fn mask_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
+    let Expr::Compute(operation) = condition else {
+        return condition.clone();
+    };
+    match operation.as_ref() {
+        Predicate::PostureEquals {
+            left: Expr::Live(read),
+            right: Expr::Literal(_),
+        } if matches!(read.as_ref(), PostureRead::Posture { object: ObjectView::Current { object } } if matches!(object.as_ref(), ObjectOperand::SourceHolder {})) => {
+            Expr::Literal(Bool(true))
+        }
+        Predicate::And { predicates } => Expr::Compute(Box::new(Predicate::And {
+            predicates: predicates.iter().map(mask_holder_posture).collect(),
+        })),
+        Predicate::Or { predicates } => Expr::Compute(Box::new(Predicate::Or {
+            predicates: predicates.iter().map(mask_holder_posture).collect(),
+        })),
+        Predicate::Not { predicate } => Expr::Compute(Box::new(Predicate::Not {
+            predicate: mask_holder_posture(predicate),
+        })),
+        _ => condition.clone(),
     }
 }
