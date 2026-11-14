@@ -240,7 +240,9 @@ impl Projected for PlayerFrozen {
             Self::DrawPlayer { event } => checker.reference(*event, BindingKind::Value),
             Self::DiscardPlayer { event } => checker.reference(*event, BindingKind::Value),
             Self::DestroyController { event } => checker.reference(*event, BindingKind::Value),
-            Self::BanishActor { event } => checker.reference(*event, BindingKind::Value),
+            Self::BanishActor { event } | Self::BanishOwner { event } => {
+                checker.reference(*event, BindingKind::Value)
+            }
             Self::LifeChangeSubject { event } => checker.reference(*event, BindingKind::Value),
             Self::AttackController { event } => checker.reference(*event, BindingKind::Value),
             Self::PhasePlayer { event } => checker.reference(*event, BindingKind::Value),
@@ -499,7 +501,7 @@ impl Checker {
             EventPattern::Banish { binding, predicate } => self.committed_header(
                 *binding,
                 EventSnapshotPolicy::BeforeExit,
-                banish_header::matches(*binding, predicate),
+                banish_header::admitted(*binding, predicate),
                 view,
                 triggering,
             ),

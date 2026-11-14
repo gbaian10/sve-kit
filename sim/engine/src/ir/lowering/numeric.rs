@@ -487,6 +487,10 @@ impl BodyContext<'_> {
         Ok(Selector::Union { sets })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every continuous installed effect is dispatched from one closed match."
+    )]
     pub(super) fn continuous(
         &mut self,
         installation: &ast::Apply,
@@ -543,7 +547,8 @@ impl BodyContext<'_> {
                 ast::Cannot::Player(_) | ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_),
             )
             | ast::InstalledEffect::Prevent(_)
-            | ast::InstalledEffect::DamageMod(_) => {
+            | ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::DamageCap(_) => {
                 return self.prevent_apply(installation, source, path);
             }
             ast::InstalledEffect::EvolveCostMod(_) => {

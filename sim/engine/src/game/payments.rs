@@ -341,6 +341,11 @@ impl Game {
                 let previous = int(&self.object(id)?.state["counters"]["stack_counter"]);
                 self.object_mut(id)?.state["counters"]["stack_counter"] =
                     json!(previous.saturating_sub(count));
+                let payer = self.object(id)?.controller.clone();
+                self.bump(
+                    &format!("{payer}.earth_rite_stack_removed"),
+                    count.min(previous),
+                );
                 let group = self.group();
                 self.emit(json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name("stack_counter"),"delta":count.saturating_neg()}),&frame.cause,group);
                 if previous == count {

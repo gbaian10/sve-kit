@@ -224,6 +224,10 @@ fn mill(
     })
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every movement subject filter field is validated against one support set."
+)]
 pub(super) fn movement_filter(
     own: Option<bool>,
     itself: bool,
@@ -257,6 +261,11 @@ pub(super) fn movement_filter(
         }
         Some(_) => return Err(unsupported(path)),
     };
+    if subject.is_some_and(|sel| {
+        sel.not_same_name_as_this == Some(true) && !matches!(support, FilterSupport::EntryCost)
+    }) {
+        return Err(unsupported(path));
+    }
     // Only an entering subject reads a name fragment (BP13-027).
     if subject.is_some_and(|sel| {
         sel.name_contains.as_ref().is_some_and(|fragment| {
@@ -330,6 +339,7 @@ pub(super) fn movement_filter(
             .map(|class| ClassId(class.clone())),
         token: subject.and_then(|sel| sel.token.or_else(|| sel.not_token.map(|value| !value))),
         own_turn,
+        not_same_name: subject.and_then(|sel| sel.not_same_name_as_this) == Some(true),
     })
 }
 

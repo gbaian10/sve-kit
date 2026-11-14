@@ -736,9 +736,10 @@ impl Game {
     }
 
     fn installed_keyword_provider(&self, execution: &Execution) -> Result<KeywordProvider> {
-        let authority = execution
+        let callback = execution
             .ability
             .ok_or_else(|| invalid("keyword grant without ability source"))?;
+        let authority = self.delayed_parent(callback.instance).unwrap_or(callback);
         let provider_card = self
             .card_runtime
             .instances
@@ -1103,6 +1104,7 @@ impl Game {
                 .into_iter()
                 .map(|(_, origin)| origin),
         );
+        origins.extend(self.internal_prevention_grants(holder)?);
         Ok(origins)
     }
 }

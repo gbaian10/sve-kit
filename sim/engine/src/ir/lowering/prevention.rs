@@ -2,7 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
-use crate::ir::prevention::{opponent_controller, own_leader, projection};
+use crate::ir::prevention::{holder_counter_step, opponent_controller, own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
     DamageKind, DamageRecipient, Duration, DurationEnd, Effect, EffectDefinitionId,
@@ -187,7 +187,9 @@ impl BodyContext<'_> {
         }
         if matches!(
             value.effect,
-            ast::InstalledEffect::Prevent(_) | ast::InstalledEffect::DamageMod(_)
+            ast::InstalledEffect::Prevent(_)
+                | ast::InstalledEffect::DamageMod(_)
+                | ast::InstalledEffect::DamageCap(_)
         ) {
             self.player_prevention(value, source, path)
         } else {
@@ -195,6 +197,10 @@ impl BodyContext<'_> {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every player-level prevention and damage rewrite shares one installation boundary."
+    )]
     pub(super) fn player_prevention(
         &mut self,
         value: &ast::PlayerEffect,
@@ -216,14 +222,26 @@ impl BodyContext<'_> {
                 shape.next_only,
                 shape.source.as_ref(),
             ),
-            ast::InstalledEffect::DamageMod(shape) if shape.delta < 0 => (
-                EventRewrite::AddDamage {
-                    amount: Expr::Literal(Int(shape.delta)),
-                },
+            ast::InstalledEffect::DamageMod(shape)
+                if shape.literal_delta().is_some_and(|delta| delta < 0) =>
+            {
+                (
+                    EventRewrite::AddDamage {
+                        amount: Expr::Literal(Int(shape.literal_delta().unwrap_or_default())),
+                    },
+                    shape.on.as_ref(),
+                    shape.kind.as_ref(),
+                    shape.next_only,
+                    shape.source.as_ref(),
+                )
+            }
+            // 「このターン、自分のリーダーが受けるN以上のダメージをMにする」 (BP05-101).
+            ast::InstalledEffect::DamageCap(shape) => (
+                damage_cap(shape, path)?,
                 shape.on.as_ref(),
-                shape.kind.as_ref(),
-                shape.next_only,
-                shape.source.as_ref(),
+                None,
+                None,
+                None,
             ),
             ast::InstalledEffect::DamageMod(_)
             | ast::InstalledEffect::PlayPermission(_)
@@ -234,9 +252,13 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
-        // Only the fixed reduction may last the whole turn (BP14-T07); full prevention stays once-only.
+        // Fixed reductions and caps may last the whole turn (BP14-T07); full prevention stays once-only.
         let limited = next == Some(true);
-        if (!limited && !matches!(value.effect, ast::InstalledEffect::DamageMod(_)))
+        if (!limited
+            && !matches!(
+                value.effect,
+                ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_)
+            ))
             || damage_source.is_some()
             || !matches!(kind, None | Some(ast::PreventionKind::Any))
             || !matches!(
@@ -290,6 +312,10 @@ impl BodyContext<'_> {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every object prevention, damage modifier and damage cap shares one installation boundary."
+    )]
     pub(super) fn prevent_apply(
         &mut self,
         installation: &ast::Apply,
@@ -299,7 +325,8 @@ impl BodyContext<'_> {
         let limited = match &installation.effect {
             ast::InstalledEffect::Prevent(shape) => shape.next_only == Some(true),
             ast::InstalledEffect::DamageMod(shape) => shape.next_only == Some(true),
-            ast::InstalledEffect::PlayPermission(_)
+            ast::InstalledEffect::DamageCap(_)
+            | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
@@ -358,8 +385,28 @@ impl BodyContext<'_> {
                     path,
                 )?
             }
-            ast::InstalledEffect::DamageMod(_) => return Err(unsupported(path)),
-            ast::InstalledEffect::PlayPermission(_)
+            // 「このターンと次の相手のターン中、それは『これが受けるN以上のダメージをMにする』を持つ」.
+            ast::InstalledEffect::DamageCap(shape) if shape.on.is_none() => {
+                let recipient = self.prevention_recipients(None, fallback, path)?;
+                let mut effect = self.damage_prevention(
+                    ProposedEventPattern::Damage {
+                        recipient: Some(recipient),
+                        source: None,
+                        kind: DamageKind::Any,
+                    },
+                    source,
+                    condition,
+                    duration.clone(),
+                    path,
+                )?;
+                if let Effect::Replacement { rewrite, .. } = &mut effect {
+                    *rewrite = damage_cap(shape, path)?;
+                }
+                effect
+            }
+            ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::DamageCap(_)
+            | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
@@ -500,24 +547,26 @@ pub(super) fn lower_at_source(
                     shape.source.as_ref(),
                     kind,
                     EventRewrite::AddDamage {
-                        amount: Expr::Literal(Int(shape.delta)),
+                        amount: if let Some(delta) = shape.literal_delta() {
+                            Expr::Literal(Int(delta))
+                        } else {
+                            // 「これの…カウンター1個につき+N」 reads the holder when damage is proposed.
+                            let amount =
+                                context.number(&shape.delta, path, &mut super::BTreeSet::new())?;
+                            if holder_counter_step(&amount).is_none() {
+                                return Err(unsupported(path));
+                            }
+                            amount
+                        },
                     },
                 )
             }
-            ast::StaticEffect::DamageCap(shape) => {
-                if shape.threshold <= shape.set || shape.threshold > i64::MAX.unsigned_abs() {
-                    return Err(unsupported(path));
-                }
-                (
-                    shape.on.as_ref(),
-                    None,
-                    DamageKind::Any,
-                    EventRewrite::CapDamage {
-                        threshold: Expr::Literal(Nat(shape.threshold)),
-                        replacement: Expr::Literal(Nat(shape.set)),
-                    },
-                )
-            }
+            ast::StaticEffect::DamageCap(shape) => (
+                shape.on.as_ref(),
+                None,
+                DamageKind::Any,
+                damage_cap(shape, path)?,
+            ),
             ast::StaticEffect::BanishInstead(_)
             | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
@@ -576,6 +625,17 @@ pub(super) fn lower_at_source(
             body: None,
             declarations,
         },
+    })
+}
+
+/// 「N以上のダメージをMにする」: each single damage of at least N becomes M (Q760, Q1067).
+fn damage_cap(shape: &ast::DamageCap, path: &str) -> Result<EventRewrite, LoweringError> {
+    if shape.threshold <= shape.set || shape.threshold > i64::MAX.unsigned_abs() {
+        return Err(unsupported(path));
+    }
+    Ok(EventRewrite::CapDamage {
+        threshold: Expr::Literal(Nat(shape.threshold)),
+        replacement: Expr::Literal(Nat(shape.set)),
     })
 }
 

@@ -1145,7 +1145,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
             || is_printed_quick(ability));
     let nonfield_trigger = triggers::phase_in_zone(ability, ZoneKind::Ex)
         || triggers::phase_in_zone(ability, ZoneKind::Cemetery)
-        || triggers::ex_self_entry(ability);
+        || triggers::ex_self_entry(ability)
+        || triggers::ex_entry(ability);
     let played_trigger = filter(ability).is_some()
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();

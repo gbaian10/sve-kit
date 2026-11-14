@@ -467,6 +467,8 @@ pub(super) struct ObjectFilter<'query> {
     pub hp_at_most: Option<u64>,
     pub power_at_most: Option<u64>,
     pub power_at_least: Option<u64>,
+    /// 「…カウンターがN個以上」: the candidate's own counter of this name against a bound.
+    pub counter: Option<(&'query str, ast::PowerBound, u64)>,
     pub keyword: Option<super::super::KeywordId>,
     pub has_evolve: bool,
     /// これと同名を除く: the candidate shares no name with the ability holder.
@@ -558,14 +560,24 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
 
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
-        let power = query.r#where.map(|condition| condition.cmp);
+        let comparison = query.r#where.as_ref().map(|condition| &condition.cmp);
+        let power = comparison
+            .filter(|cmp| matches!(cmp.left, ast::PublicCandidateNumber::Power(_)))
+            .map(|cmp| (cmp.op, cmp.right));
+        let counter = comparison.and_then(|cmp| match &cmp.left {
+            ast::PublicCandidateNumber::Counter { counter } => {
+                Some((counter.name.as_str(), cmp.op, cmp.right))
+            }
+            ast::PublicCandidateNumber::Power(_) => None,
+        });
         Self {
             power_at_most: power
-                .filter(|cmp| cmp.op == ast::PowerBound::Le)
-                .map(|cmp| cmp.right),
+                .filter(|(op, _)| *op == ast::PowerBound::Le)
+                .map(|(_, right)| right),
             power_at_least: power
-                .filter(|cmp| cmp.op == ast::PowerBound::Ge)
-                .map(|cmp| cmp.right),
+                .filter(|(op, _)| *op == ast::PowerBound::Ge)
+                .map(|(_, right)| right),
+            counter,
             racing: query.racing,
             kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
@@ -670,7 +682,33 @@ pub(super) fn field_filter(
     let object = super::ObjectView::Current {
         object: Box::new(super::ObjectOperand::Bound { binding: candidate }),
     };
-    view_filter(filter, object)
+    let predicate = view_filter(filter, object);
+    let Some((name, bound, limit)) = filter.counter else {
+        return predicate;
+    };
+    // Counters live on the current object, so only a live candidate can carry this bound.
+    let counter = number_limit_of(
+        super::Expr::Compute(Box::new(super::IntOperation::FromNat {
+            value: super::Expr::Live(Box::new(super::super::NatRead::Counter {
+                holder: super::super::Holder::Object {
+                    object: super::ObjectOperand::Bound { binding: candidate },
+                },
+                kind: super::super::CounterKind(name.to_owned()),
+            })),
+        })),
+        match bound {
+            ast::PowerBound::Ge => super::super::Comparison::GreaterEqual,
+            ast::PowerBound::Le => super::super::Comparison::LessEqual,
+        },
+        limit,
+    );
+    if predicate == super::Expr::Literal(super::Bool(true)) {
+        counter
+    } else {
+        super::Expr::Compute(Box::new(super::Predicate::And {
+            predicates: vec![predicate, counter],
+        }))
+    }
 }
 
 pub(super) fn view_filter(
@@ -923,10 +961,22 @@ fn number_limit(
     comparison: super::super::Comparison,
     limit: u64,
 ) -> super::Expr<super::Bool> {
-    super::Expr::Compute(Box::new(super::Predicate::CompareInt {
-        left: super::Expr::Compute(Box::new(super::IntOperation::InformationOrZero {
+    number_limit_of(
+        super::Expr::Compute(Box::new(super::IntOperation::InformationOrZero {
             information,
         })),
+        comparison,
+        limit,
+    )
+}
+
+fn number_limit_of(
+    left: super::Expr<super::Int>,
+    comparison: super::super::Comparison,
+    limit: u64,
+) -> super::Expr<super::Bool> {
+    super::Expr::Compute(Box::new(super::Predicate::CompareInt {
+        left,
         comparison,
         right: super::Expr::Literal(super::Int(i64::try_from(limit).unwrap_or(i64::MAX))),
     }))

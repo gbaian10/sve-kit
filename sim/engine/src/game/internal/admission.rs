@@ -389,7 +389,8 @@ fn check_requirements(
         node: program.clone(),
         source: source.clone(),
     };
-    let requirements = parent_requirements(&located, card);
+    let mut requirements = parent_requirements(&located, card);
+    super::movement::mask_entry_effects(&mut requirements);
     let token_paths = super::tokens::paths(program, x);
     let kind_paths = super::by_kind::paths(program);
     let mut attack_targets = BTreeSet::new();
@@ -1220,6 +1221,9 @@ fn supported(code: &str) -> bool {
             | "read.history.sum"
             | "shape.NumericHistoryQuery.LifeDelta"
             | "history.sum.life-delta"
+            | "shape.NumericHistoryQuery.EarthRiteRemovedStack"
+            | "history.sum.earth-rite-stack"
+            | "event.payment.earth-rite"
             | "shape.EventPattern.Play"
             | "event.match.Play"
             | "shape.HistoryRange.CurrentTurn"
@@ -1497,6 +1501,13 @@ fn mask_delayed(program: &mut Program) -> Result<()> {
                     | Control::May { body, .. }
                     | Control::Pay { on_paid: body, .. },
             } => mask_delayed(body)?,
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    mask_delayed(&mut mode.body)?;
+                }
+            }
             _ => {}
         }
     }

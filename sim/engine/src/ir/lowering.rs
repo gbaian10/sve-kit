@@ -849,6 +849,9 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
                     // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
                     && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
                         if placed.reference.is_some())
+                    // 「自分の場に…が出たとき」 from EX watches other cards; it never sees itself enter.
+                    && !matches!(&auto.on, ast::PhaseSubscription::EnterField(subscription)
+                        if subscription.reference.is_none())
                     && !matches!(&auto.on, ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_))))
         {
             return Err(unsupported(path));
@@ -1022,6 +1025,7 @@ fn lowered_trigger(
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Destroy { .. }
                     | EventPattern::Discard { .. }
+                    | EventPattern::Banish { .. }
                     | EventPattern::Move { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
@@ -1112,7 +1116,20 @@ fn lowered_subscription(
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, subject_id, scope, path)
         }
-        ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Zone(zone)) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Banish {
+                binding: event,
+                predicate: super::events::banish::zone_predicate(
+                    event,
+                    matches!(zone.who, ast::EntryPlayer::Controller),
+                    zone.during.is_some(),
+                ),
+            })
+        }
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Hand(_)) => {
+            Err(unsupported(path))
+        }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);

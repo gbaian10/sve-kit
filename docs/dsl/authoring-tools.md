@@ -360,6 +360,8 @@ Played 的 `sel` 另接受 `orig_cost_eq`、`orig_cost_le` 或 `orig_cost_ge`，
 `history_sum: {window: this_turn, event: life_changed, who: self, where: {direction: up}, field: delta}` 累加實際增加量；途中減少不扣抵增加量，設定生命亦按實際差額計算。兩者必填玩家與方向；次數查詢接受 `down` 的 `who: self | opp`，另接受 `up` 的 `who: self`，總和只接受 `up`，不接受 `distinct: subjects`，這些入口不接受其他歷史視窗、來源篩選或排除本次執行。
 
 `history_count` 的 `life_changed` 開放本回合自己 `where: {direction: up}` 的事實數；一次實際正增量只計一次，與 `history_sum` 的增加總量分開。零變動、減少與對手增加不計，`set_life` 以實際前後值判斷，回合交替清除。
+
+`history_sum: {window: this_turn, event: payment, who: self, where: {cost_kind: earth_rite}, field: removed_stack}` 累加本回合自己的【土の秘術】實際取下的【スタック】個數，跨多次付款加總（Q1895～Q1897）。只接受 `who: self` 與 `this_turn`；可作 `usable_if` 等條件的數值。付款計入雙方共用的回合計數，拒絕或回復的付款不計，回合開始時清空。
 正式目標 `upto` 可直接讀這個封閉的增加次數查詢；上限為 0 時仍可選 0 個目標並繼續本文。此入口不放寬費用、搜索上限或其他歷史查詢。代表卡 BP21-092／BP21-SL22 與 BP21-T09（Q2769）。
 
 `history: {window: this_turn, event: discarded, who: self, from: hand}` 查詢本回合自己是否曾捨棄手牌；`history_count` 使用相同查詢計算實際捨棄的張數。只接受這個玩家與來源形狀，`distinct` 可省略或為 `facts`，不接受主體篩選、其他來源、排除執行或 `subjects` 去重。效果、正式費用與手牌上限的捨棄都經共同入口計入；普通移區、消滅與抽牌不計，失敗付款連同歷史回復，雙方歷史在下一回合開始歸零。稍後入場的卡仍能讀取本回合較早的捨棄。
@@ -1159,7 +1161,7 @@ BP18-118 在固定選一項的 `choice.options` 中，模式 3 使用：
 
 ## 本回合安裝的事件能力
 
-`delayed` 目前接受以下 `on`，並要求 `until: turn`、`next_only: false`（可省略 false）：
+`delayed` 要求 `until: turn`。指定目標離場的 `on` 如下，並要求 `next_only: false`（可省略 false）：
 
 ```yaml
 delayed:
@@ -1180,6 +1182,17 @@ callback 僅支援固定抽 1、己方回血 2、固定 token 1 張到 EX；
 
 每次安裝獨立，來源之後離場仍有效。目標回手、消滅、回場的新世代不符合場進墓條件；
 本次傷害導致的破壞會在本文安裝完成後，於共同檢查時點發生。例：BP15-001／008／012。
+
+`delayed.on` 也可寫 `enter_field: {who, sel, entered_by?}`，觀察安裝後本回合其他卡進入場上；
+本文的 `it` 是這次入場的卡，本文走一般卡片本文的准入，不限上面的固定 callback。
+`entered_by: play` 只收打出入場（BP03-089「次に自分がプレイしたフォロワーが場に出たとき」）。
+`next_only: true` 表示本回合只誘發一次：同一批同時入場的多張符合時，沿用既有的每回合次數選擇，
+由控制者選其中一張誘發，對應「次に自分の場にフォロワーが1体以上出たとき、その中の1体は…」（SP01-026）。
+選擇在誘發進入待機時決定，不延到結算；這是本專案解讀（`strength: inferred`）。
+進場型本文也可寫 `evolve: {ref: it}`，沿用效果進化的選牌（BP22-037）。
+
+`delayed.on` 也可寫 `life_changed: {who, direction, crosses_zero?}`，與 `auto.on.life_changed` 相同的篩選，
+觀察安裝後本回合每一次實際的生命變化，例如「このターン、自分のリーダーの体力が減少したとき」；本文同樣走一般卡片本文的准入。
 
 ## 場上勝敗禁止與生命跨零事件
 
@@ -1290,3 +1303,55 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
 
 進化能力的 `usable_if.entered_by: {ref: this, by: ability | play}` 讀取該物件目前世代的已確認進場方式，跨回合保留。入場曲本文仍讀它所屬的進場事件；離場再入場後依新事件重記，不接受初始物件狀態中自行標示的進場旗標作為證據。
+
+## 放到場上的卡不能使用入場曲
+
+`move` 到場上時可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]`，
+表示「それの{ファンファーレ}能力を使えない」：這次放上場的卡，自己的入場曲不會成為待機中的能力（GAP-A-044，不改寫成 `no_trigger`）。
+入場曲只會在持有者自己進場時誘發，所以這個限制在該次進場的誘發判定時就處理完，不會留成持續效果；
+同時進場的其他卡與其他觀察進場的能力照常誘發。目前只接受這一種 `entry_effects`，其他形狀與非場上目的地都會拒絕。
+BP04-038 接著用 `apply: {on: {follow: entered}, effect: {cannot: {what: attack}}, until: turn}` 表示「このターン、それは相手を攻撃できない」。
+
+## 持續傷害加值讀來源 counter
+
+場上常在的 `damage_mod.delta` 除常值外，也接受 `{times: [{counter: {on: this, name: …}}, N]}`（N 為正整數），
+在每次提出傷害時讀能力持有者目前的 counter 數乘以 N。BP20-021「これの融合カウンター1個につき、これが与える能力ダメージを+2する」
+寫成 `damage_mod: {source: this, kind: ability, delta: {times: [{counter: {on: this, name: 融合カウンター}}, 2]}}`；
+counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `damage_mod` 仍只接受常值。
+
+## 進場主體排除同名並成為進化對象
+
+`auto.on.enter_field.sel` 可加 `not_same_name_as_this: true`，表示「これと同名を除く」：
+進場的卡與觀察這個能力的卡在誘發當下只要有一個卡名相同，就不誘發。比較的是觀察者目前的卡名，不是事件中保存的資料。
+這個篩選只用於卡片自身的進場觀察；`delayed.on.enter_field` 沒有觀察者卡，不接受此欄位。
+
+同一觸發的本文可寫 `evolve: {ref: it}`，讓進場的那張卡進化（BP22-003／004「…が出たとき、それは進化する」）。
+沿用效果進化的選牌：從自己進化牌庫選一張對應的卡，可不選（Q2789），不支付對方《進化》的成本（Q2788）。
+進場的卡已離場或不是自己控制的從者時不進化。
+
+## 公開候選的 counter 門檻與 EX 卡觀察進場
+
+公開區域查詢的 `where` 除了 `power_of: item`，也接受 `counter: {on: item, name: …}` 與常值比較（`ge`／`le`），
+逐張讀候選目前的 counter。例如 BP21-060 的「自分のEXエリアのカード1枚の情熱カウンターが4個以上なら」寫成
+`exists: {who: self, zone: ex, where: {cmp: {left: {counter: {on: item, name: 情熱カウンター}}, op: ge, right: 4}}}`；
+任何一張達門檻即成立，不加總多張的 counter。counter 只在公開區域的現存物件上讀取，私有區域選取不開放此篩選。
+
+`auto.zone: ex` 可用 `on.enter_field`（不寫 `ref: this`）觀察其他卡進入場上，BP21-057 在 EX 時，每有一張自己的学院從者出場
+就在 EX 的自身放一個 counter（Q2736；同時出場兩張誘發兩次，Q2740）。在場上的同一張卡不因此誘發；
+從 EX 打出到場上時 counter 保留（Q2737）。
+
+## 觀察放入消滅區
+
+`auto.on.banished` 除了手牌的自身（`ref: this, from: hand`），也可寫 `{who: self | opp, during?: {turn: self}}`，
+觀察「（自分のターン中、）自分の消滅領域にカードが置かれたとき」：不論卡從場上、手牌、墓場、牌庫或其他區域放入，
+也不論是效果、成本或規則造成，每一張卡各誘發一次（Q2813）。`who` 指放入的消滅領域屬於誰，也就是卡的擁有者。
+這是場上的觀察；這張卡自己從場上被放入消滅領域時仍會誘發（Q2816），token 放入後立即消去也照樣誘發（Q2814）。
+沒有 `sel`，不篩選放入的卡。
+
+## 安裝有期限的傷害上限
+
+`damage_cap: {threshold: N, set: M}`（N > M）除了常駐，也可以安裝：
+`player_effect: {who: self, effect: {damage_cap: …}, until: turn}` 讓自己的領袖本回合每次受到 N 以上的傷害都變成 M（BP05-101）；
+`apply: {on: …, effect: {damage_cap: …}, until: turn | this_and_next_opp_turn}` 讓選到的物件在期間內同樣處理（BP08-024）。
+上限逐次套用，不是累計（Q760、Q1067）；`this_and_next_opp_turn` 在自己的回合連續時，第二個自己的回合不生效（Q1066）。
+物件上的上限是該物件獲得的能力（「それは『これが受ける4以上のダメージを3にする』を持つ」）：之後失去全部能力時一併失去，失去能力之後才獲得的上限照常生效。

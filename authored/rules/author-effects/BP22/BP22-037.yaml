@@ -1,0 +1,59 @@
+cards:
+  BP22-037:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          on:
+            banished:
+              during:
+                turn: self
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: banish
+                    op: ge
+                    right: 10
+                then:
+                  - delayed:
+                      do:
+                        - evolve:
+                            ref: it
+                      next_only: true
+                      on:
+                        enter_field:
+                          sel:
+                            class: ウィッチ
+                            kind: follower
+                          who: self
+                      until: turn
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

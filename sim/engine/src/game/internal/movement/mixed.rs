@@ -2,7 +2,7 @@
 use super::super::{
     Execution, Game, InstructionOutcome, Result, Slot, invalid, seat_name, unsupported,
 };
-use super::{ArrivalMember, MovementPlan};
+use super::{ArrivalMember, FieldArrival, MovementPlan};
 use crate::ir::mixed_ex;
 use crate::ir::{
     Action, BatchOutcome, Control, Located, MoveMethod, MoveOutcome, Node, Program, ResultMember,
@@ -151,7 +151,10 @@ impl Game {
             MoveMethod::Put,
             true,
             None,
-            None,
+            FieldArrival {
+                posture: None,
+                without_fanfare: false,
+            },
             false,
         )?;
         let created = ids

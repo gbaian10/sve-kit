@@ -1,0 +1,56 @@
+cards:
+  BP21-060:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                instead:
+                  - if:
+                      exists:
+                        where:
+                          cmp:
+                            left:
+                              counter:
+                                name: 情熱カウンター
+                                on: item
+                            op: ge
+                            right: 4
+                        who: self
+                        zone: ex
+                    n: 4
+                n: 2
+                to: enemy
+            - if:
+                cond:
+                  exists:
+                    where:
+                      cmp:
+                        left:
+                          counter:
+                            name: 情熱カウンター
+                            on: item
+                        op: ge
+                        right: 10
+                    who: self
+                    zone: ex
+                then:
+                  - buff:
+                      hp: 6
+                      on: this
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

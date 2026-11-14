@@ -1,15 +1,16 @@
-use super::super::grant::EffectiveAbility;
+use super::super::grant::{EffectiveAbility, GrantOrigin};
 use super::super::observation::{EffectOrigin, ObjectLink};
 use super::super::{Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
-use crate::game::internal::duration::EffectEnd;
+use crate::game::internal::duration::{EffectEnd, TurnInterval};
 use crate::game::player::ObjectHandle;
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
-    DamageSource, Prevention, Recipients, own_leader, projection, whole_turn_leader_reduction,
+    DamageSource, Prevention, Recipients, holder_counter_step, lasting_object_cap, own_leader,
+    projection, whole_turn_leader_reduction,
 };
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::static_declarations::{self, Family};
@@ -99,6 +100,8 @@ enum Targets {
 enum Rewrite {
     Prevent,
     Add(i64),
+    /// Each single damage of at least the first amount becomes the second.
+    Cap(u64, u64),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -117,9 +120,28 @@ pub(in crate::game) struct PreventionState {
     sources: Option<Vec<Member>>,
     kind: Kind,
     end: EffectEnd,
+    /// 「…と次の相手のターン中」 keeps the effect after its own turn ends.
+    #[serde(default)]
+    interval: Option<TurnInterval>,
+    #[serde(default = "main_period")]
+    main_live: bool,
     remaining: Option<u64>,
     rewrite: Rewrite,
     label: Label,
+    /// 「それは『これが受ける…ダメージを…にする』を持つ」 is an ability the recipient gains, so a
+    /// later loss of all abilities removes it like any other installed grant.
+    #[serde(default)]
+    granted: Option<GrantOrigin>,
+}
+
+const fn main_period() -> bool {
+    true
+}
+
+impl PreventionState {
+    fn active(&self) -> bool {
+        self.main_live || self.interval.is_some_and(TurnInterval::active)
+    }
 }
 
 pub(super) fn is_static(ability: &Ability) -> bool {
@@ -288,15 +310,18 @@ pub(in crate::game::internal) fn check_install(
     // A whole-turn reduction on the own leader (BP14-T07) needs no use count.
     let leader_reduction = matches!(subjects, InstallationSubjects::Players { .. })
         && whole_turn_leader_reduction(&shape);
+    let object_cap =
+        matches!(subjects, InstallationSubjects::Objects { .. }) && lasting_object_cap(&shape);
     if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
         && shape.usage.is_none()
         && !leader_reduction
+        && !object_cap
     {
         return Err(unsupported("installed numeric damage replacement"));
     }
     let captured = match subjects {
         InstallationSubjects::Objects { objects, affected } => {
-            if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) {
+            if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) && !object_cap {
                 return Err(unsupported("object damage prevention rewrite"));
             }
             if shape.usage.is_some()
@@ -326,7 +351,7 @@ pub(in crate::game::internal) fn check_install(
         || shape.condition != &Expr::Literal(Bool(true))
         || duration.anchor != (TimeAnchor::Installation {})
         || duration.usage.is_some()
-        || !duration.intervals.is_empty()
+        || (!duration.intervals.is_empty() && !object_cap)
         || !matches!(
             duration.end,
             DurationEnd::CurrentTurnEnd {}
@@ -424,9 +449,15 @@ impl Game {
         Ok(InstalledEffect {
             source: effect.origin.observed(self, perspective),
             expires: effect.end.observed()?,
-            main_live: live,
-            intervals: vec![],
-            active: live && effect.remaining != Some(0),
+            main_live: live && effect.main_live,
+            intervals: effect
+                .interval
+                .map(TurnInterval::observed)
+                .transpose()?
+                .into_iter()
+                .flatten()
+                .collect(),
+            active: live && effect.active() && effect.remaining != Some(0),
             change: InstalledChange::Prevention {
                 kind: match effect.kind {
                     Kind::Any => DamageKind::Any,
@@ -436,6 +467,10 @@ impl Game {
                 change: match effect.rewrite {
                     Rewrite::Prevent => PreventionChange::Prevent,
                     Rewrite::Add(amount) => PreventionChange::Add(amount),
+                    Rewrite::Cap(threshold, replacement) => PreventionChange::Cap {
+                        threshold,
+                        replacement,
+                    },
                 },
                 remaining: effect.remaining,
                 recipients,
@@ -525,7 +560,26 @@ impl Game {
                 EventRewrite::AddDamage {
                     amount: Expr::Literal(amount),
                 } => Rewrite::Add(amount.0),
+                EventRewrite::CapDamage {
+                    threshold: Expr::Literal(threshold),
+                    replacement: Expr::Literal(amount),
+                } => Rewrite::Cap(threshold.0, amount.0),
                 _ => return Err(unsupported("installed prevention rewrite")),
+            };
+            let interval = match duration.intervals.as_slice() {
+                [] => None,
+                [interval] => Some(TurnInterval::at(self, execution, interval)?),
+                _ => return Err(unsupported("installed prevention intervals")),
+            };
+            let granted = match (subjects, rewrite) {
+                (InstallationSubjects::Objects { .. }, Rewrite::Cap(..)) => {
+                    Some(GrantOrigin::Installed {
+                        provider: self.installed_effect_provider(execution)?,
+                        execution: execution.id.0,
+                        instruction: instruction.id.0,
+                    })
+                }
+                _ => None,
             };
             let effect = self.state.next_ir_effect;
             self.state.next_ir_effect = effect
@@ -539,15 +593,38 @@ impl Game {
                 sources,
                 kind: shape.kind.into(),
                 end,
+                interval,
+                main_live: true,
                 remaining: shape.usage.map(|usage| usage.count.0),
                 rewrite,
                 label,
+                granted,
             });
         }
         execution
             .receipts
             .insert(instruction.receipt, InstructionOutcome::Installed(members));
         Ok(())
+    }
+
+    /// Damage caps the holder currently has as gained abilities, for a suppression cutoff.
+    pub(in crate::game::internal) fn internal_prevention_grants(
+        &self,
+        holder: &str,
+    ) -> Result<Vec<GrantOrigin>> {
+        let current = self.object(holder)?;
+        Ok(self
+            .state
+            .ir_preventions
+            .iter()
+            .filter(|effect| {
+                matches!(&effect.recipients, Some(Targets::Objects(objects))
+                if objects.iter().any(|member| {
+                    member.id == holder && member.generation == current.generation
+                }))
+            })
+            .filter_map(|effect| effect.granted.clone())
+            .collect())
     }
 
     fn prevention_label(&self, execution: &Execution) -> Result<Label> {
@@ -620,6 +697,7 @@ impl Game {
         let mut references = Vec::new();
         for effect in &self.state.ir_preventions {
             if effect.remaining == Some(0)
+                || !effect.active()
                 || !effect.kind.matches(hit)
                 || effect.end.source_expired(self)
             {
@@ -635,7 +713,10 @@ impl Game {
                         let current = self.object(target)?;
                         objects.iter().any(|member| {
                             member.id == target && current.generation == member.generation
-                        })
+                        }) && effect
+                            .granted
+                            .as_ref()
+                            .is_none_or(|origin| !self.internal_suppresses_grant(target, origin))
                     }
                 }
             };
@@ -655,6 +736,9 @@ impl Game {
                 match effect.rewrite {
                     Rewrite::Prevent => reference["prevent"] = json!(true),
                     Rewrite::Add(amount) => reference["delta"] = json!(amount),
+                    Rewrite::Cap(threshold, amount) => {
+                        reference["cap"] = json!([threshold, amount]);
+                    }
                 }
                 reference["reference"]["card"] = json!(effect.label.card);
                 reference["reference"]["name"] = json!(effect.label.name);
@@ -758,6 +842,9 @@ impl Game {
                         EventRewrite::AddDamage {
                             amount: Expr::Literal(amount),
                         } => replacement["delta"] = json!(amount.0),
+                        EventRewrite::AddDamage { amount } => {
+                            replacement["delta"] = json!(self.counter_delta(&provider, amount)?);
+                        }
                         EventRewrite::CapDamage {
                             threshold: Expr::Literal(threshold),
                             replacement: Expr::Literal(amount),
@@ -769,6 +856,16 @@ impl Game {
             }
         }
         Ok(())
+    }
+
+    /// 「これの…カウンター1個につき+N」 read from the provider when the damage is proposed.
+    fn counter_delta(&self, provider: &str, amount: &Expr<Int>) -> Result<i64> {
+        let (kind, step) =
+            holder_counter_step(amount).ok_or_else(|| unsupported("damage rewrite arithmetic"))?;
+        i64::try_from(self.card_counter(provider, kind)?.0)
+            .map_err(crate::invalid)?
+            .checked_mul(step)
+            .ok_or_else(|| crate::invalid("damage modifier overflow"))
     }
 
     fn granted_prevention_label(
@@ -787,9 +884,15 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_preventions_end_turn(&mut self, turn: u64) {
-        self.state
-            .ir_preventions
-            .retain(|effect| effect.end != EffectEnd::Turn(turn));
+        self.state.ir_preventions.retain_mut(|effect| {
+            if let Some(interval) = effect.interval.as_mut() {
+                interval.finish(turn);
+            }
+            if effect.end == EffectEnd::Turn(turn) {
+                effect.main_live = false;
+            }
+            effect.main_live || effect.interval.is_some_and(TurnInterval::pending)
+        });
     }
     pub(in crate::game::internal) fn internal_preventions_end_resolution(
         &mut self,
@@ -804,6 +907,9 @@ impl Game {
         let player = player_id(self.active())?.seat;
         for effect in &mut self.state.ir_preventions {
             effect.end.begin(turn, player);
+            if let Some(interval) = effect.interval.as_mut() {
+                interval.begin(turn, player);
+            }
         }
         Ok(())
     }
@@ -832,6 +938,8 @@ pub(in crate::game::internal) fn requirement(
             | "replacement.damage.prevent"
             | "shape.EventRewrite.AddDamage"
             | "replacement.damage.add"
+            | "shape.EventRewrite.CapDamage"
+            | "replacement.damage.cap"
             | "shape.UseLimit"
             | "shape.UsageScope.SharedPlayer"
             | "usage.shared-player"

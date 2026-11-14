@@ -1,5 +1,6 @@
 //! Entry matching runs after the whole successful batch has installed its effective information.
 use super::super::super::cost::printed_cost;
+use super::delayed::DelayedEntry;
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
     Game, PlayerId, Result, SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition,
@@ -7,11 +8,13 @@ use super::{
 };
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
+use crate::game::internal::movement::ENTRY_WITHOUT_FANFARE;
 use crate::game::{Frame, Object};
-use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
-use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
+use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, ObjectRef};
+use crate::ir::{KeywordId, LimitSpec};
+use core::mem;
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -30,6 +33,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || !optional_payment::trigger_play(ability)
         || trigger.active_zones != ability.active_zones
         || !(trigger.active_zones == [ZoneKind::Field]
+            || ex_header(ability)
             || (trigger.active_zones == [ZoneKind::Cemetery]
                 && super::played::cemetery_body(ability)))
         || trigger.view != EventSnapshotPolicy::AfterEntry
@@ -49,6 +53,12 @@ pub(in crate::game::internal) fn cemetery_header(ability: &Ability) -> bool {
     ability.active_zones == [ZoneKind::Cemetery] && filter(ability).is_some()
 }
 
+/// 「自分の場に…が出たとき」 printed on a card waiting in EX; it watches other cards only.
+pub(in crate::game::internal) fn ex_header(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Ex]
+        && filter(ability).is_some_and(|plan| plan.itself != Some(true))
+}
+
 fn filter(ability: &Ability) -> Option<SubjectFilter> {
     let TriggerCondition::Event {
         pattern: EventPattern::EnterField { binding, predicate },
@@ -57,6 +67,20 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
         return None;
     };
     SubjectFilter::parse(SubjectFields::Entry(*binding), predicate)
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 removes only the entering card's own Fanfare, before it
+/// becomes pending or spends a trigger limit; other observers of the same entry still see it.
+fn own_fanfare_suppressed(frame: &Frame, holder: &str, old: &Object, ability: &Ability) -> bool {
+    holder == old.id
+        && matches!(
+            ability.source.origin,
+            AbilityOrigin::Keyword {
+                keyword: KeywordId::Fanfare,
+                ..
+            }
+        )
+        && frame.values.get(ENTRY_WITHOUT_FANFARE) == Some(&serde_json::Value::Bool(true))
 }
 
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
@@ -117,18 +141,20 @@ fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
     reason = "The shared movement boundary owns entry event admission."
 )]
 impl Game {
-    /// Cemetery cards observe only through abilities active in the cemetery.
+    /// Cemetery and EX cards observe only through abilities active in their own zone.
     fn entry_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         let mut holders = self.field_ids();
-        holders.extend(self.zone_ids("P1", "cemetery"));
-        holders.extend(self.zone_ids("P2", "cemetery"));
+        for zone in ["cemetery", "ex"] {
+            holders.extend(self.zone_ids("P1", zone));
+            holders.extend(self.zone_ids("P2", zone));
+        }
         holders
             .into_iter()
             .map(|id| {
-                let zone = if self.object(&id)?.zone == "field" {
-                    ZoneKind::Field
-                } else {
-                    ZoneKind::Cemetery
+                let zone = match self.object(&id)?.zone.as_str() {
+                    "field" => ZoneKind::Field,
+                    "ex" => ZoneKind::Ex,
+                    _ => ZoneKind::Cemetery,
                 };
                 let abilities = if zone == ZoneKind::Field
                     || self
@@ -149,6 +175,48 @@ impl Game {
             .collect()
     }
 
+    /// The entered object, which must be exactly the next generation of the moved card.
+    fn committed_entry(&mut self, old: &Object) -> Result<ObjectRef> {
+        let object = self.internal_current_reference(&old.id)?;
+        if object.generation.0
+            != old
+                .generation
+                .checked_add(1)
+                .ok_or_else(|| invalid("entry generation overflow"))?
+        {
+            return Err(invalid("entry did not commit"));
+        }
+        Ok(object)
+    }
+
+    /// 「これと同名を除く」 compares with the observer as it is now, outside the captured subject.
+    fn shares_observer_name(
+        &mut self,
+        holder: &str,
+        plan: &mut SubjectFilter,
+        subject: &SubjectInformation<'_>,
+    ) -> Result<bool> {
+        Ok(mem::take(&mut plan.not_same_name)
+            && self
+                .internal_characteristics(holder)?
+                .names
+                .iter()
+                .any(|name| subject.names.contains(name)))
+    }
+
+    /// The entering card's one-based field slot orders its simultaneous occurrences.
+    fn entry_position(&self, controller: PlayerId, id: &str) -> Result<u64> {
+        u64::try_from(
+            self.zone_ids(super::super::seat_name(controller)?, "field")
+                .iter()
+                .position(|entered| entered == id)
+                .ok_or_else(|| invalid("entry has no field position"))?,
+        )
+        .map_err(invalid)?
+        .checked_add(1)
+        .ok_or_else(|| invalid("entry position overflow"))
+    }
+
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],
@@ -156,36 +224,30 @@ impl Game {
         frame: &Frame,
     ) -> Result<()> {
         if previous.is_empty()
-            || !self.card_runtime.definitions.cards.values().any(|program| {
-                program
-                    .card()
-                    .abilities
-                    .iter()
-                    .any(|ability| filter(&ability.node).is_some())
-            })
+            || (!self.has_delayed_entries()
+                && !self.card_runtime.definitions.cards.values().any(|program| {
+                    program
+                        .card()
+                        .abilities
+                        .iter()
+                        .any(|ability| filter(&ability.node).is_some())
+                }))
         {
             return Ok(());
         }
         let observers = self.entry_observers()?;
-        let reads_original_cost = observers.iter().any(|(_, abilities)| {
-            abilities.iter().any(|ability| {
-                filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
-            })
-        });
+        let reads_original_cost = self.delayed_entry_reads_original_cost()
+            || observers.iter().any(|(_, abilities)| {
+                abilities.iter().any(|ability| {
+                    filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
+                })
+            });
         let active = player_id(self.active())?;
         let effect_source = self.card_runtime.active_source;
         let (cause, actor, method) = entry_cause(frame)?;
         let mut candidates = Vec::new();
         for old in previous {
-            let object = self.internal_current_reference(&old.id)?;
-            if object.generation.0
-                != old
-                    .generation
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("entry generation overflow"))?
-            {
-                return Err(invalid("entry did not commit"));
-            }
+            let object = self.committed_entry(old)?;
             let entry_controller = player_id(&self.object(&old.id)?.controller)?;
             let characters = self.internal_characteristics(&old.id)?;
             let original_cost = if reads_original_cost {
@@ -194,27 +256,39 @@ impl Game {
                 None
             };
             let header = self.pending_header(actor, cause, effect_source, before)?;
+            let token = self.object_type(&old.id)?.contains("トークン");
+            let subject = SubjectInformation::from_characters(&characters, original_cost);
             let mut matched = Vec::new();
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
                 for ability in abilities {
-                    let plan =
+                    let mut plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
-                    if subject_condition::matches(
-                        &plan,
-                        &SubjectInformation::from_characters(&characters, original_cost),
-                        *holder == old.id,
-                        controller,
-                        entry_controller,
-                        active,
-                        self.object_type(&old.id)?.contains("トークン"),
-                    )? && !self.internal_trigger_forbidden(&ability.node, controller)?
+                    if !own_fanfare_suppressed(frame, holder, old, &ability.node)
+                        && !self.shares_observer_name(holder, &mut plan, &subject)?
+                        && subject_condition::matches(
+                            &plan,
+                            &subject,
+                            *holder == old.id,
+                            controller,
+                            entry_controller,
+                            active,
+                            token,
+                        )?
+                        && !self.internal_trigger_forbidden(&ability.node, controller)?
                     {
                         matched.push((holder, ability, controller));
                     }
                 }
             }
-            if matched.is_empty() {
+            let observed = DelayedEntry {
+                method,
+                controller: entry_controller,
+                active,
+                token,
+            };
+            let installed = self.delayed_entry_matches(&subject, &observed)?;
+            if matched.is_empty() && installed.is_empty() {
                 continue;
             }
             // Only a matching occurrence publishes the origin; unadmitted zones still reject it.
@@ -226,6 +300,8 @@ impl Game {
                 method,
                 play_receipt: None,
             };
+            let position = self.entry_position(event.controller, &old.id)?;
+            candidates.extend(self.delayed_entry_pending(&installed, &event, &header, position)?);
             for (holder, ability, controller) in matched {
                 let source = self.internal_card_source(holder, ability.node.id, controller)?;
                 let information = SourceInformation::current(self, source)?;
@@ -237,15 +313,7 @@ impl Game {
                     header.clone(),
                     None,
                 )?;
-                pending.source_position = u64::try_from(
-                    self.zone_ids(super::super::seat_name(event.controller)?, "field")
-                        .iter()
-                        .position(|id| *id == old.id)
-                        .ok_or_else(|| invalid("entry has no field position"))?,
-                )
-                .map_err(invalid)?
-                .checked_add(1)
-                .ok_or_else(|| invalid("entry position overflow"))?;
+                pending.source_position = position;
                 pending.timing = Some(EventPayload::EnterField {
                     event: event.clone(),
                 });

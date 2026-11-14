@@ -32,6 +32,7 @@ impl BodyContext<'_> {
             order: None,
             result: None,
             by: None,
+            entry_effects: None,
         } = movement
         else {
             return Err(unsupported(move_path));
@@ -112,6 +113,7 @@ impl BodyContext<'_> {
             order: None,
             result: None,
             by: performer,
+            entry_effects: None,
         } = movement
         else {
             return Err(unsupported(path));
