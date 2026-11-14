@@ -58,6 +58,7 @@ class Projection:
     tables: dict[str, list[Record]]
     config: Record
     metadata: Record
+    programs: tuple[Record, ...] = ()
 
 
 def _sort(view: dict[str, list[Record]]) -> None:
@@ -216,4 +217,15 @@ def project(
         and not view["digital_link_coverage"]
     ):
         config["digital_endpoints"] = []
-    return Projection(view, config, metadata)
+    public_cards = {card["id"] for card in view["card"]}
+    programs = tuple(
+        {"id": row["id"], "dsl_version": row["dsl_version"], "ast": row["ast"]}
+        for row in source.rows("dsl_document", "id,card_id,dsl_version,ast")
+        if row["card_id"] in public_cards
+    )
+    return Projection(
+        view,
+        config,
+        metadata,
+        tuple(sorted(programs, key=lambda row: string(row["id"]))),
+    )

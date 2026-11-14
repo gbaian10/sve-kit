@@ -261,7 +261,20 @@ def region_views(
 def support(
     source: Source, view: dict[str, list[Record]], decisions: Decisions
 ) -> None:
-    """R1 has no DSL; blocks still retain every missing source and regional uncertainty."""
+    """Admission supplies a program; execution remains manual until exact engine validation."""
+    documents = {
+        string(row["card_id"]): row
+        for row in source.rows(
+            "dsl_document", "id,card_id,dsl_version,status,program_hash"
+        )
+    }
+    states = {
+        (string(row["card_id"]), string(row["region"])): row
+        for row in source.rows(
+            "card_engine_support",
+            "card_id,region,status,dsl_id,dsl_version,candidate_hash,validation_state,reason_codes",
+        )
+    }
     shared: Record = {
         "status": "missing_dsl",
         "dsl_status": None,
@@ -286,11 +299,33 @@ def support(
             reasons = _region_reasons(source, card, faces, region, decisions)
             if reasons:
                 blocks.append({"region": code, "reasons": json_list(sorted(reasons))})
+        selected = documents.get(string(card["id"]))
+        state = states.get((string(card["id"]), "jp"))
+        if selected is not None and (
+            state is None
+            or state["dsl_id"] != selected["id"]
+            or state["dsl_version"] != selected["dsl_version"]
+            or state["candidate_hash"] != selected["program_hash"]
+        ):
+            raise ValueError("Program requires matching build support")
+        admitted: Record = {}
+        if selected is not None:
+            assert state is not None
+            admitted = {
+                "status": state["status"],
+                "dsl_status": selected["status"],
+                "dsl_version": selected["dsl_version"],
+                "dsl_id": selected["id"],
+                "validation_state": state["validation_state"],
+                "reasons": state["reason_codes"],
+                "program_ref": {"file_key": "programs", "entry_id": selected["id"]},
+            }
         rows.append(
             {
                 "card_id": card["id"],
                 "shared": shared
-                | {"reasons": ["missing_dsl"], "ruling_revision_ids": []},
+                | {"reasons": ["missing_dsl"], "ruling_revision_ids": []}
+                | admitted,
                 "overrides": [],
                 "region_blocks": json_list(blocks),
             }
