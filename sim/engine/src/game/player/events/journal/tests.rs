@@ -128,3 +128,157 @@ fn an_unchanged_batch_is_promoted_with_matching_identities() {
         "committed events refer to the occurrences they were shown as"
     );
 }
+
+fn steps(journal: &Journal, viewer: Viewer) -> Vec<PresentationOp> {
+    journal
+        .read_presentation(viewer, None)
+        .unwrap()
+        .map(|entry| entry.op.clone())
+        .collect()
+}
+
+/// Return to `origin` the way an authority rollback does: the published prefix and the
+/// presentation record survive, everything uncommitted after the origin is gone.
+fn roll_back(journal: &mut Journal, origin: &Journal) {
+    let published = journal.published();
+    let mut target = origin.clone();
+    target.restore(&published);
+    *journal = target;
+}
+
+#[test]
+fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
+    let mut journal = journal(&[]);
+    let origin = journal.clone();
+    for rule in ["first", "second"] {
+        journal.push(
+            [Ok(Some(result(rule))), Ok(Some(result(rule)))],
+            None,
+            &json!({"rule":rule}),
+            format!("unit/{rule}"),
+            None,
+            true,
+        );
+    }
+    journal.present(Viewer::P1).unwrap();
+    roll_back(&mut journal, &origin);
+    journal.settle_presentation(true);
+    let withdrawn = steps(&journal, Viewer::P1);
+    let [
+        PresentationOp::Provisional(first),
+        PresentationOp::Provisional(second),
+        PresentationOp::Cancel {
+            scope: cancelled_first,
+        },
+        PresentationOp::Cancel {
+            scope: cancelled_second,
+        },
+    ] = withdrawn.as_slice()
+    else {
+        panic!("both shown scopes are withdrawn once, in order: {withdrawn:?}");
+    };
+    assert_eq!(
+        (cancelled_first, cancelled_second),
+        (&first.scope, &second.scope),
+        "exactly the discarded scopes are cancelled"
+    );
+    assert_eq!(
+        steps(&journal, Viewer::P2),
+        vec![],
+        "a viewer that was shown nothing has nothing to withdraw"
+    );
+
+    // The rolled-back journal issues the same batch numbers again for different results.
+    journal.push(
+        [Ok(Some(result("retry"))), Ok(Some(result("retry")))],
+        None,
+        &json!({"rule":"retry"}),
+        "unit/retry".into(),
+        None,
+        true,
+    );
+    journal.present(Viewer::P1).unwrap();
+    journal.settle_presentation(true);
+    journal.commit();
+    let after = steps(&journal, Viewer::P1);
+    let [
+        PresentationOp::Provisional(retry),
+        PresentationOp::Promote { scope: promoted },
+    ] = after.get(4..).unwrap()
+    else {
+        panic!("the new batch is shown under its own scope and promoted: {after:?}");
+    };
+    assert!(
+        retry.scope != first.scope && retry.scope != second.scope && *promoted == retry.scope,
+        "a withdrawn scope is never issued again or promoted"
+    );
+    assert_eq!(
+        journal.read(Viewer::P1, None).unwrap().count(),
+        1,
+        "only the batch that really happened is history"
+    );
+}
+
+#[test]
+fn a_restoration_that_keeps_a_shown_batch_withdraws_and_promotes_nothing() {
+    let mut journal = journal(&["kept"]);
+    journal.present(Viewer::P1).unwrap();
+    let stop = journal.clone();
+    journal.push(
+        [Ok(Some(result("lost"))), Ok(Some(result("lost")))],
+        None,
+        &json!({"rule":"lost"}),
+        "unit/lost".into(),
+        None,
+        true,
+    );
+    roll_back(&mut journal, &stop);
+    journal.settle_presentation(true);
+    assert!(
+        matches!(
+            steps(&journal, Viewer::P1).as_slice(),
+            [PresentationOp::Provisional(_)]
+        ),
+        "the shown batch still exists, so it is neither cancelled nor promoted"
+    );
+    journal.commit();
+    assert!(
+        matches!(
+            steps(&journal, Viewer::P1).as_slice(),
+            [
+                PresentationOp::Provisional(_),
+                PresentationOp::Promote { .. }
+            ]
+        ),
+        "it is promoted when it really commits"
+    );
+}
+
+#[test]
+fn a_rules_rollback_of_a_shown_batch_stops_that_viewers_history() {
+    let mut journal = journal(&[]);
+    let origin = journal.clone();
+    journal.push(
+        [Ok(Some(result("shown"))), Ok(Some(result("shown")))],
+        None,
+        &json!({"rule":"shown"}),
+        "unit/shown".into(),
+        None,
+        true,
+    );
+    journal.present(Viewer::P1).unwrap();
+    roll_back(&mut journal, &origin);
+    journal.settle_presentation(false);
+    assert!(
+        matches!(
+            journal.read_presentation(Viewer::P1, None),
+            Err(EventError::ProjectionGap)
+        ),
+        "a rules rollback is not a cancellation; the correspondence is simply lost"
+    );
+    assert_eq!(
+        steps(&journal, Viewer::P2),
+        vec![],
+        "the other viewer is unaffected"
+    );
+}

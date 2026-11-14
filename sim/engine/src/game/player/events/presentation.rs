@@ -7,6 +7,7 @@ use super::{EventError, EventKind, PlayerEvent, Viewer};
 use crate::game::Game;
 use alloc::sync::Arc;
 use core::fmt;
+use core::mem::take;
 
 /// One viewer's reference to a provisional scope; never reused within a game.
 #[derive(Clone)]
@@ -64,6 +65,12 @@ pub enum PresentationOp {
         /// The scope whose occurrences the committed events now refer to.
         scope: ScopeId,
     },
+    /// An internal fault discarded the scope's batch; it never happened and never commits.
+    /// A rules cancellation or an illegal play is never reported this way.
+    Cancel {
+        /// The withdrawn scope.
+        scope: ScopeId,
+    },
 }
 
 /// A position in one viewer's presentation record.
@@ -103,6 +110,8 @@ pub(super) struct Presentation {
     issued: u64,
     /// Scopes that are neither committed nor withdrawn.
     open: Vec<Shown>,
+    /// Scopes whose batch a restoration discarded, until the submission's result says why.
+    discarded: Vec<ScopeId>,
     record: Arc<[Arc<PresentationEntry>]>,
 }
 
@@ -186,6 +195,32 @@ impl Presentation {
     /// Whether every shown scope has reached the end of its life.
     pub(super) const fn settled(&self) -> bool {
         self.open.is_empty()
+    }
+
+    /// After a restoration, set aside the scopes whose source batch no longer exists.
+    /// Their batch numbers may be issued again, so they must stop matching new batches.
+    pub(super) fn discard(&mut self, kept: impl Fn(u64) -> bool) {
+        let (open, gone) = take(&mut self.open)
+            .into_iter()
+            .partition(|shown| kept(shown.batch));
+        self.open = open;
+        self.discarded
+            .extend(gone.into_iter().map(|shown: Shown| shown.scope));
+    }
+
+    /// Give the discarded scopes their end. Only a fault withdraws a shown scope; `false`
+    /// means rules took back something this viewer had already been shown, which no
+    /// presentation step can describe.
+    pub(super) fn settle(&mut self, stream: &Arc<()>, fault: bool) -> bool {
+        let discarded = take(&mut self.discarded);
+        if discarded.is_empty() {
+            return true;
+        }
+        fault
+            && discarded.into_iter().all(|scope| {
+                self.append(stream, PresentationOp::Cancel { scope })
+                    .is_some()
+            })
     }
 
     fn append(&mut self, stream: &Arc<()>, op: PresentationOp) -> Option<()> {

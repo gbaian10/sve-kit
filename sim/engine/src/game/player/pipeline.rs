@@ -227,6 +227,8 @@ impl Game {
                 return SubmissionKind::EngineFault;
             }
         };
+        // This answer did not fault, so a restoration inside it was a rules rollback.
+        self.player_events.settle_presentation(false);
         // An origin rollback can restore an earlier question; its public token must stay dead.
         self.player_epoch = next;
         self.advance_player_input();

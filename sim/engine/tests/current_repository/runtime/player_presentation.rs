@@ -95,7 +95,7 @@ pub(super) fn shown(steps: &[PresentationOp]) -> Vec<ProvisionalBatch> {
         .iter()
         .filter_map(|step| match step {
             PresentationOp::Provisional(batch) => Some(batch.clone()),
-            PresentationOp::Promote { .. } => None,
+            PresentationOp::Promote { .. } | PresentationOp::Cancel { .. } => None,
         })
         .collect()
 }
@@ -106,7 +106,7 @@ pub(super) fn promoted(steps: &[PresentationOp]) -> Vec<ScopeId> {
         .iter()
         .filter_map(|step| match step {
             PresentationOp::Promote { scope } => Some(scope.clone()),
-            PresentationOp::Provisional(_) => None,
+            PresentationOp::Provisional(_) | PresentationOp::Cancel { .. } => None,
         })
         .collect()
 }

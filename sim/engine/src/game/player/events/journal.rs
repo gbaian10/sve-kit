@@ -181,6 +181,21 @@ impl Journal {
         self.committed = published.committed;
         self.serial = self.serial.max(self.committed);
         self.pending.retain(|entry| entry.serial > self.committed);
+        let pending = &self.pending;
+        for log in &mut self.logs {
+            log.presentation
+                .discard(|batch| pending.iter().any(|entry| entry.batch == batch));
+        }
+    }
+
+    /// Close the scopes a restoration discarded: withdrawn after a fault, otherwise the
+    /// viewer's history stops because a shown result was undone by rules.
+    pub(in crate::game) fn settle_presentation(&mut self, fault: bool) {
+        for log in &mut self.logs {
+            if !log.presentation.settle(&log.stream, fault) {
+                log.fault = true;
+            }
+        }
     }
 
     pub(super) fn push(
@@ -432,6 +447,9 @@ impl Game {
     }
 
     pub(in crate::game) fn publish_player_events(&mut self) {
+        // Whatever a restoration discarded and no answer accounted for was lost to a fault.
+        self.player_events
+            .settle_presentation(self.player_fault.is_some());
         // Every suspended execution may still restore an origin, including nested plays.
         if self.player_events.active && (self.typed.is_none() || self.state.game["ended"] == true) {
             self.player_events.commit();

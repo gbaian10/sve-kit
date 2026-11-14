@@ -43,7 +43,7 @@ fn tree(side: &str, child: &str, extra_cost: bool, stale: bool) -> Value {
     tree
 }
 #[derive(Clone, Copy)]
-enum Scenario {
+pub(super) enum Scenario {
     Plain,
     AdditionalCost { material: bool },
     MandatoryReveal { material: bool },
@@ -170,7 +170,7 @@ fn build_programs(
     programs
 }
 
-fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
+pub(super) fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
     let programs = build_programs(side, child, scenario);
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
