@@ -19,7 +19,7 @@ CountAmount=Q 或 ParamRef，只供 draw/discard/create.n；DamageAmount=Q 或 P
 | search.exact/up-to | sel:ObjectSel、n/upto:SelectionQuantity、to:SearchDestination | M、cost_sum_le、distinct_by、entry_effects:E[]、instead | 沿單組數量矩陣 |
 | search.grouped | groups:[{sel,n:Q}或{sel,upto:Q}] 至少兩組、to | 無頂層 sel/n/upto；共通欄同單組 | CP04-P68 sections/0 |
 | SearchDestination 區域 | Z 或 ParamRef | 直接參數只限此整個目的地葉 | BP03-002 原目的地 |
-| SearchDestination 分配 | order:printed、partition:[{zone:Z,n:Q / upto:Q}] 至少兩項 | 每份 n 與 upto 互斥；印刷順序消耗剩餘 found；upto 由玩家選 0 到宣告上限及目的區空位的較小值，未分配成員留牌庫 | CP03-SL07、BP20-117 |
+| SearchDestination 分配 | order:printed、partition:[{zone:Z,n:Q / upto:Q}] 至少兩項 | 每份 n 與 upto 互斥；印刷順序消耗剩餘 found；upto 由玩家選 0 到宣告上限；進場與 EX 的 n／upto 都受當下空位限制，未分配成員留牌庫 | CP03-SL07、BP20-117 |
 | SearchDestination 取代 | zone:Z、instead:{if:C,zone:Z,may?:bool} | 找到並公開後判斷；可讀 found；無 found 不詢問；拒絕走原區；不收 after | BP03-002 |
 | SearchDestination 逐組 | per_group:Z[] 至少兩項 | 只在分組 search；與 groups 等長且同序，由 C1 驗 | BP12-041 |
 

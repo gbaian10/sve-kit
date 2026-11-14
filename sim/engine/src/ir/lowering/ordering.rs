@@ -447,8 +447,14 @@ impl BodyContext<'_> {
         })
     }
 
-    /// Only a chosen target may enter the field, so the movement stays tied to its decision.
+    /// Entry must preserve the generation authorized by a choice or successful movement.
     fn field_entry_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        if let Some(ast::MoveObjects::Field(ast::Objects::Follow { follow })) = &value.r#ref {
+            if value.top.is_some() || value.position.is_some() || value.order.is_some() {
+                return Err(unsupported(path));
+            }
+            return Ok(shared_put(self.followed(follow, path)?, ZoneKind::Field));
+        }
         if let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref {
             if value.top.is_some()
                 || value.position.is_some()

@@ -292,8 +292,10 @@ MoveSpec.order 與 position 尚未接受：末尾洗牌會抵銷同牌庫的放�
 continuation 仍是 destination 的封閉區段，沒有任意 Program／shuffle callback。
 Single、非空 Partition 與 OptionalSelfReplacement 的每個欄位／分支都檢查；Partition
 保留順序與各段基數，不要求各段 minimum 的總和不超過 found，因為後段可能無牌可做。
-沒有 destination 的形狀尚未定義，回報 UnsupportedShape；全部 partition 有限時，
-其 maximum 總和須覆蓋搜尋 maximum，無上限搜尋也不能配全有限 partition。
+沒有 destination 的形狀尚未定義，回報 UnsupportedShape；全部 partition 都是固定份額時，
+其 maximum 總和須覆蓋搜尋 maximum，無上限搜尋也不能配全有限的固定份額。
+含非固定份額的分配可留下未分配成員，成員留在牌庫，最後統一洗牌。
+各份額進場或進 EX 時，題目的 minimum 與 maximum 都依當下空位縮小；固定份額放不下的成員也留在牌庫。
 groups 接受一個 SelectionConstraint，總基數須等於 Search.cardinality、群組非空且
 Disjoint；各群組是指定 deck 的 Current Zone selector，predicate、基數與 aggregate bounds
 逐欄驗證，保留 distinct_by。群組域與全域 filter 取交集，所有群組共用同一次搜尋回答，

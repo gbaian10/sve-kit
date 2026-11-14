@@ -1557,7 +1557,8 @@ pub(super) enum Printed {
 #[serde(deny_unknown_fields)]
 pub(super) struct SearchPart {
     pub zone: SearchZone,
-    pub n: u64,
+    pub n: Option<u64>,
+    pub upto: Option<u64>,
 }
 
 #[derive(Deserialize)]
@@ -2776,6 +2777,13 @@ pub(super) struct PlayRestrictionZone {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ObjectLocation {
+    pub r#ref: Objects,
+    pub zone: String,
+}
+
+#[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostCondition {
     Spellchain(u64),
@@ -3079,7 +3087,7 @@ pub(super) struct ByKind {
 #[serde(rename_all = "snake_case")]
 pub(super) enum Condition {
     MyTurn(bool),
-    InZone(PlayRestrictionZone),
+    InZone(ObjectLocation),
     Is(AttackTargetCondition),
     History(HistoryCondition),
     EnteredFrom(EntryOriginCondition),

@@ -233,21 +233,22 @@ impl BodyContext<'_> {
         })))
     }
 
-    // Intersection preserves the current source generation when its zone is checked.
-    fn source_in_play_zone(
+    // Intersection checks the actual destination without losing the followed generation.
+    fn objects_in_play_zone(
         &mut self,
-        location: &ast::PlayRestrictionZone,
+        location: &ast::ObjectLocation,
         path: &str,
     ) -> Result<Predicate, LoweringError> {
-        if location.r#ref != "this" {
-            return Err(unsupported(path));
-        }
+        let objects = match &location.r#ref {
+            ast::Objects::Follow { follow } => self.followed(follow, path)?,
+            reference => self.objects(reference, path)?,
+        };
         let zone = super::play_restrictions::source_zone(&location.zone)
             .ok_or_else(|| unsupported(path))?;
         Ok(Predicate::Exists {
             objects: Selector::Intersection {
                 sets: vec![
-                    super::numeric::holder(),
+                    objects,
                     Selector::Zone {
                         players: PlayerSet {
                             relation: PlayerRelation::SelfPlayer,
@@ -279,7 +280,7 @@ impl BodyContext<'_> {
                 right: Expr::Literal(PlayerRef::Active {}),
             },
             ast::Condition::MyTurn(false) => return Err(unsupported(path)),
-            ast::Condition::InZone(location) => self.source_in_play_zone(location, path)?,
+            ast::Condition::InZone(location) => self.objects_in_play_zone(location, path)?,
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;

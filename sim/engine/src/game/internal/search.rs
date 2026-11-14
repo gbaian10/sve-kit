@@ -187,15 +187,16 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             replacement::check_predicate(predicate, continuation.found)?;
             movement
         }
-        Some(SearchDestination::Partition { destinations })
-            if matches!(destinations.as_slice(), [hand, cemetery]
-                if hand.zone == (MoveDestination::Owners { zone: OwnerZone::Hand })
-                && cemetery.zone == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
-                && cardinality.maximum.is_some_and(|maximum|
-                    maximum.0.checked_sub(hand.cardinality.minimum.0)
-                        .is_none_or(|needed| cemetery.cardinality.minimum.0 >= needed))) =>
-        {
-            // Unallocated found members have no admitted disposition; prove all choices consume the set.
+        Some(SearchDestination::Partition { destinations }) => {
+            for partition in destinations {
+                check_movement(&MoveSpec {
+                    to: partition.zone.clone(),
+                    position: None,
+                    order: None,
+                    initial_posture: None,
+                    entry_effects: vec![],
+                })?;
+            }
             return Ok(());
         }
         _ => return Err(unsupported("search destination or incomplete allocation")),
@@ -816,16 +817,11 @@ impl Game {
         player: PlayerId,
         count: usize,
     ) -> Result<Option<SearchPartition>> {
-        let (zone, kind) = self.internal_search_destination(execution, to, player)?;
+        let (_, kind) = self.internal_search_destination(execution, to, player)?;
         if !matches!(kind, ZoneKind::Ex | ZoneKind::Field) {
             return Ok(None);
         }
-        let free = usize::try_from(
-            5_i64
-                .saturating_sub(self.zone_count(seat_name(player)?, zone))
-                .max(0),
-        )
-        .map_err(invalid)?;
+        let free = self.movement_free_spaces(player, kind)?;
         if free == 0 || count <= free {
             return Ok(None);
         }
@@ -885,10 +881,21 @@ impl Game {
         execution: &mut Execution,
         mut continuation: PartitionContinuation,
     ) -> Result<()> {
-        while let Some(partition) = continuation.destinations.pop_front() {
+        while let Some(mut partition) = continuation.destinations.pop_front() {
             // Empty segments consume no token, but never skip a nonempty singleton question.
             if continuation.remaining.is_empty() {
                 continue;
+            }
+            let (_, kind) =
+                self.internal_search_destination(execution, &partition.zone, continuation.player)?;
+            if matches!(kind, ZoneKind::Ex | ZoneKind::Field) {
+                let free = u64::try_from(self.movement_free_spaces(continuation.player, kind)?)
+                    .map_err(invalid)?;
+                partition.cardinality.minimum = Nat(partition.cardinality.minimum.0.min(free));
+                partition.cardinality.maximum = Some(Nat(partition
+                    .cardinality
+                    .maximum
+                    .map_or(free, |n| n.0.min(free))));
             }
             let mut cards = Vec::new();
             for &object in &continuation.remaining {
@@ -965,7 +972,7 @@ impl Game {
         if !(SearchPartitionAnswer {
             cards: cards.clone(),
         })
-        .matches_remainder(&wait.continuation.remaining, wait.partition.cardinality)
+        .matches_remainder(&wait.continuation.remaining, wait.domain.cardinality)
         {
             return Err(invalid("partition answer does not match its remainder"));
         }
@@ -1045,8 +1052,8 @@ impl Game {
         to: &MoveDestination,
         player: PlayerId,
     ) -> Result<()> {
-        let (zone, kind) = self.internal_search_destination(execution, to, player)?;
-        if kind == ZoneKind::Field && self.zone_count(seat_name(player)?, zone) < 5 {
+        let (_, kind) = self.internal_search_destination(execution, to, player)?;
+        if kind == ZoneKind::Field && self.movement_free_spaces(player, kind)? > 0 {
             for &object in found {
                 if self
                     .object_type(execution.object_id(object)?)?
@@ -1069,7 +1076,9 @@ impl Game {
     ) -> Result<Vec<MoveResult>> {
         let (zone, kind) = self.internal_search_destination(execution, to, player)?;
         let seat = seat_name(player)?;
-        if matches!(kind, ZoneKind::Ex | ZoneKind::Field) && self.zone_count(seat, zone) >= 5 {
+        if matches!(kind, ZoneKind::Ex | ZoneKind::Field)
+            && self.movement_free_spaces(player, kind)? == 0
+        {
             return self.internal_search_failed(execution, found, to, player);
         }
         if kind == ZoneKind::Field {
