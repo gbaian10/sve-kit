@@ -127,3 +127,53 @@ fn public_return_unions_reject_other_players_and_unrelated_zone_combinations() {
         lowerer().lower(&invalid).unwrap_err();
     }
 }
+
+#[test]
+fn named_cemetery_population_moves_to_ex_through_ordinary_capacity() {
+    let document = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[
+            {"move":{"ref":{"who":"self","zone":"cemetery","name":"unit-follower"},"to":"ex"}}
+        ]}}),
+        "unit-amulet",
+    );
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-amulet"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"g0","card":"unit-follower"},{"id":"g1","card":"unit-follower"},{"id":"other","card":"unit-spell"}
+    ]);
+    initial["players"]["P2"]["zones"]["cemetery"] =
+        json!([{"id":"foreign","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "public-return",
+    )
+    .unwrap();
+    for (number, program) in [
+        ("unit-amulet", program.clone()),
+        ("unit-follower", card(vec![])),
+        ("unit-spell", card(vec![])),
+    ] {
+        game.load_internal_card(number, &program).unwrap();
+    }
+    resolved(
+        game.activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["ex"], json!(["g0", "g1"]));
+    assert_eq!(state["P1"]["cemetery"], json!(["other"]));
+    assert_eq!(state["P2"]["cemetery"], json!(["foreign"]));
+}
