@@ -1,5 +1,6 @@
 """Temporary failure facts for the self-damage tests, excluding card wording."""
 
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -14,6 +15,7 @@ def safe_details(source: str) -> list[str]:
     ):
         return []
     patterns = (
+        ("verdict kind", r"\b(Unsupported|AdapterError|Ineligible) \{\s*reason:"),
         (
             "failed self-damage test",
             r"^test (runtime::self_damage::[A-Za-z0-9_]+) \.\.\. FAILED$",
@@ -36,7 +38,7 @@ def safe_details(source: str) -> list[str]:
         ),
         (
             "unloaded whole card",
-            r'reason: "(internal D1 does not support unloaded whole card [A-Z0-9-]{2,24}/[0-9]+, (?:holder [A-Za-z0-9_-]{1,40} generation [0-9]+, )?query (?:restriction [A-Za-z ]+|complete card names): current ability definitions unavailable)"',
+            r'reason: "(internal D1 does not support unloaded whole card [A-Z0-9-]{2,24}/[0-9]+, (?:holder [A-Za-z0-9_-]{1,40} generation [0-9]+, )?query [A-Za-z0-9 _()-]{1,120}: current ability definitions unavailable)"',
         ),
         (
             "missing pending line/source",
@@ -57,6 +59,12 @@ def safe_details(source: str) -> list[str]:
             f"{label}: {' / '.join(match.groups())}"
             for match in re.finditer(pattern, source, re.MULTILINE)
         )
+    # Hash opaque reasons so source constants can identify them without publishing the text.
+    details.extend(
+        f"reason_repr_sha256: {hashlib.sha256(quoted.encode()).hexdigest()} "
+        f"quoted_length={len(quoted)}"
+        for quoted in re.findall(r'reason:\s*(?:Some\()?("(?:\\.|[^"\\])*")', source)
+    )
     return list(dict.fromkeys(details))
 
 

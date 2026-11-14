@@ -40,7 +40,9 @@ fn karen_pays_lesson_to_buff_the_field_then_damages_itself_without_another_cool_
     event_cemetery::finish_checks(&mut game);
     let buffed = game.projection(View::Referee).unwrap();
     assert_eq!(buffed["P1"]["pp"]["current"], 7_u8);
-    assert_eq!(buffed["P1"]["banish"], json!(["first"]));
+    assert_eq!(buffed["P1"]["ex"], json!(["second", "wrong"]));
+    // Spent spell tokens cease to exist outside EX and resolution.
+    assert_eq!(buffed["P1"]["banish"], json!([]));
     for id in ["source", "ally"] {
         assert_eq!(
             buffed["objects"][id]["power"].as_i64().unwrap(),
