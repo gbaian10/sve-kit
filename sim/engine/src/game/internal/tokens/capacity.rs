@@ -1,6 +1,19 @@
-use super::super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name};
+use super::super::{
+    Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name,
+};
 use crate::game::tokens::prints_for_names;
-use crate::ir::{DecisionId, Instruction, Node, PlayerId, ZoneKind};
+use crate::ir::{
+    DecisionId, Instruction, MoveResult, Node, PlayerId, RuntimeObjectView, TransformOutcome,
+    ZoneKind,
+};
+
+/// A transformation that banished fewer objects than its templates resumes from these results.
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct TransformResume {
+    pub(in crate::game::internal) decision: DecisionId,
+    pub(in crate::game::internal) banished: Vec<RuntimeObjectView>,
+    pub(in crate::game::internal) moves: Vec<MoveResult>,
+}
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct CapacityWait {
@@ -11,6 +24,8 @@ pub(in crate::game::internal) struct CapacityWait {
     pub(super) zone: ZoneKind,
     pub(super) actor: PlayerId,
     pub(super) available: usize,
+    /// Present when the limit is the transformation's successful count, not zone space.
+    pub(super) transform: Option<TransformResume>,
 }
 
 impl CapacityWait {
@@ -40,9 +55,13 @@ impl Game {
         let domain = InputDomain::TokenCapacity {
             choices: wait.choices.clone(),
         };
+        let decision = wait
+            .transform
+            .as_ref()
+            .map_or(DecisionId(wait.instruction.id.0), |resume| resume.decision);
         self.internal_wait(
             execution,
-            DecisionId(wait.instruction.id.0),
+            decision,
             wait.actor,
             domain,
             Wait::TokenCapacity(Box::new(wait)),
@@ -56,6 +75,19 @@ impl Game {
         prints: &[String],
     ) -> Result<()> {
         let seat = seat_name(wait.actor)?;
+        if let Some(resume) = &wait.transform {
+            let ids = self.internal_create_prints(prints, seat)?;
+            let created = self.commit_token_objects(execution, ZoneKind::Ex, &ids)?;
+            execution.receipts.insert(
+                wait.instruction.receipt,
+                InstructionOutcome::Transform(TransformOutcome {
+                    banished: resume.banished.clone(),
+                    created,
+                    moves: resume.moves.clone(),
+                }),
+            );
+            return Ok(());
+        }
         let zone = if wait.zone == ZoneKind::Field {
             "field"
         } else {
@@ -93,5 +125,47 @@ impl Game {
             .iter()
             .map(|card| self.new_token_object(card, 0, seat))
             .collect()
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "A partial transformation asks the same template-combination question."
+)]
+impl Game {
+    /// Asks which templates the successful count creates; returns false when no choice remains.
+    pub(in crate::game::internal) fn internal_transform_templates(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        requests: &[(String, u64)],
+        actor: PlayerId,
+        limit: usize,
+        resume: TransformResume,
+    ) -> Result<Option<Vec<String>>> {
+        match self.allocate_token_requests(requests, ZoneKind::Ex, actor, Some(limit))? {
+            super::TokenAllocation::Created(ids) => Ok(Some(ids)),
+            super::TokenAllocation::Capacity {
+                prints,
+                names,
+                choices,
+                available,
+            } => {
+                self.internal_token_capacity_wait(
+                    execution,
+                    CapacityWait {
+                        instruction: instruction.clone(),
+                        prints,
+                        names,
+                        choices,
+                        zone: ZoneKind::Ex,
+                        actor,
+                        available,
+                        transform: Some(resume),
+                    },
+                )?;
+                Ok(None)
+            }
+        }
     }
 }

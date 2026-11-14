@@ -9,7 +9,7 @@ use crate::ir::{
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
 use crate::ir::{optional_payment, x_pp};
 
-pub(super) use capacity::CapacityWait;
+pub(super) use capacity::{CapacityWait, TransformResume};
 
 pub(super) use dynamic::check_each;
 
@@ -443,7 +443,7 @@ impl Game {
             requests.push((name, count));
         }
         let destination = plan.destination.kind;
-        match self.allocate_token_requests(&requests, destination, actor)? {
+        match self.allocate_token_requests(&requests, destination, actor, None)? {
             TokenAllocation::Created(ids) => Ok(Some(ids)),
             TokenAllocation::Capacity {
                 prints,
@@ -461,6 +461,7 @@ impl Game {
                         zone: destination,
                         actor,
                         available,
+                        transform: None,
                     },
                 )?;
                 Ok(None)
@@ -473,6 +474,7 @@ impl Game {
         requests: &[(String, u64)],
         destination: ZoneKind,
         actor: PlayerId,
+        limit: Option<usize>,
     ) -> Result<TokenAllocation> {
         let seat = seat_name(actor)?;
         let zone = if destination == ZoneKind::Field {
@@ -480,7 +482,8 @@ impl Game {
         } else {
             "ex"
         };
-        let available = self.token_capacity(seat, zone)?;
+        let space = self.token_capacity(seat, zone)?;
+        let available = limit.map_or(space, |limit| space.min(limit));
         let mut requested = Vec::new();
         for (name, count) in requests {
             let card = self.catalog.token_print(name)?;

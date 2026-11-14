@@ -777,6 +777,26 @@ impl Checker {
                 into: super::TokenAllocation::Single { .. },
                 entry_effects,
             } if entry_effects.is_empty() => self.selector(objects),
+            // Each template once: the count read is the literal template count, never a dynamic total.
+            Action::Transform {
+                objects,
+                into:
+                    super::TokenAllocation::EachExactlyOnce {
+                        templates,
+                        total: Expr::Literal(Nat(total)),
+                        actor: PlayerRef::Controller {},
+                        ..
+                    },
+                entry_effects,
+            } if entry_effects.is_empty()
+                && templates.len() >= 2
+                && u64::try_from(templates.len()).ok() == Some(*total)
+                && templates.iter().enumerate().all(|(index, template)| {
+                    !templates.iter().take(index).any(|other| other == template)
+                }) =>
+            {
+                self.selector(objects)
+            }
             Action::Dice {
                 operation: DiceOperation::Roll {},
                 result,

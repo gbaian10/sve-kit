@@ -1,33 +1,65 @@
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::{
-    Action, Instruction, MoveMethod, Selector, TokenAllocation, TokenTemplateId, TransformOutcome,
-    ZoneKind,
+    Action, DecisionId, Instruction, MoveMethod, Selector, TokenAllocation, TokenTemplateId,
+    TransformOutcome, ZoneKind,
 };
 
-fn specification(action: &Action) -> Option<(&Selector, &TokenTemplateId)> {
+enum Templates<'action> {
+    Single(&'action TokenTemplateId),
+    /// Each template once; fewer successful banishments choose which templates to create.
+    EachOnce {
+        templates: &'action [TokenTemplateId],
+        decision: DecisionId,
+    },
+}
+
+impl Templates<'_> {
+    fn names(&self) -> Vec<&TokenTemplateId> {
+        match self {
+            Self::Single(template) => vec![*template],
+            Self::EachOnce { templates, .. } => templates.iter().collect(),
+        }
+    }
+}
+
+fn specification(action: &Action) -> Option<(&Selector, Templates<'_>)> {
     let Action::Transform {
         objects,
-        into: TokenAllocation::Single { template },
+        into,
         entry_effects,
     } = action
     else {
         return None;
     };
+    let templates = match into {
+        TokenAllocation::Single { template } => Templates::Single(template),
+        TokenAllocation::EachExactlyOnce {
+            templates,
+            decision,
+            ..
+        } => Templates::EachOnce {
+            templates,
+            decision: *decision,
+        },
+        TokenAllocation::Unrestricted { .. } => return None,
+    };
     (matches!(objects, Selector::Bound { .. }) && entry_effects.is_empty())
-        .then_some((objects, template))
+        .then_some((objects, templates))
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
     if matches!(action, Action::Transform { .. }) && specification(action).is_none() {
-        return Err(unsupported("single-template EX transformation"));
+        return Err(unsupported("bound EX transformation templates"));
     }
     Ok(())
 }
 
 pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     check_action(action)?;
-    if let Some((_, template)) = specification(action) {
-        super::tokens::check_template(game, &template.0, ZoneKind::Ex)?;
+    if let Some((_, templates)) = specification(action) {
+        for template in templates.names() {
+            super::tokens::check_template(game, &template.0, ZoneKind::Ex)?;
+        }
     }
     Ok(())
 }
@@ -37,12 +69,16 @@ pub(super) fn check_catalog(game: &Game, action: &Action) -> Result<()> {
     reason = "Transformation reuses authoritative banishment and token creation."
 )]
 impl Game {
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Banishment, per-controller counts and template creation form one transaction."
+    )]
     pub(super) fn internal_transform(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        let (objects, template) = specification(&instruction.action)
+        let (objects, templates) = specification(&instruction.action)
             .ok_or_else(|| unsupported("EX transformation shape"))?;
         let mut origins = Vec::new();
         let mut players = Vec::new();
@@ -86,6 +122,11 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         let active = super::player_id(self.active())?;
         players.sort_by_key(|player| *player != active);
+        if matches!(templates, Templates::EachOnce { .. }) && players.len() > 1 {
+            return Err(unsupported(
+                "allocated transformation of several controllers",
+            ));
+        }
         let mut ids = Vec::new();
         for player in players {
             let count = banished
@@ -96,13 +137,51 @@ impl Game {
                     })
                 })
                 .count();
-            let requests = [(template.0.clone(), u64::try_from(count).map_err(invalid)?)];
-            let super::tokens::TokenAllocation::Created(created) =
-                self.allocate_token_requests(&requests, ZoneKind::Ex, player)?
-            else {
-                return Err(invalid(
-                    "single-template transformation requested a capacity choice",
-                ));
+            let created = match &templates {
+                Templates::Single(template) => {
+                    let requests = [(template.0.clone(), u64::try_from(count).map_err(invalid)?)];
+                    let super::tokens::TokenAllocation::Created(created) =
+                        self.allocate_token_requests(&requests, ZoneKind::Ex, player, None)?
+                    else {
+                        return Err(invalid(
+                            "single-template transformation requested a capacity choice",
+                        ));
+                    };
+                    created
+                }
+                Templates::EachOnce {
+                    templates,
+                    decision,
+                } => {
+                    if count > templates.len() {
+                        return Err(invalid("more transformed objects than templates"));
+                    }
+                    if count == 0 {
+                        continue;
+                    }
+                    let requests = templates
+                        .iter()
+                        .map(|template| (template.0.clone(), 1))
+                        .collect::<Vec<_>>();
+                    let resume = super::tokens::TransformResume {
+                        decision: *decision,
+                        banished: banished.clone(),
+                        moves: moves.clone(),
+                    };
+                    let Some(created) = self.internal_transform_templates(
+                        execution,
+                        instruction,
+                        &requests,
+                        player,
+                        count,
+                        resume,
+                    )?
+                    else {
+                        // The player chooses the templates; the answer commits the outcome.
+                        return Ok(());
+                    };
+                    created
+                }
             };
             ids.extend(created);
         }
