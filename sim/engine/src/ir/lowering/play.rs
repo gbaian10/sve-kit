@@ -711,7 +711,7 @@ impl BodyContext<'_> {
         })
     }
 
-    /// Each branch filters the controller's hand; a card matching several branches is one candidate.
+    /// Branches share the chooser's hand authority; overlapping candidates are offered once.
     pub(super) fn hand_union_choice(
         &mut self,
         target: &ast::Target,
