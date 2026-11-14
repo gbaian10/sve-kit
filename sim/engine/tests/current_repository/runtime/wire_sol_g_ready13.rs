@@ -301,6 +301,10 @@ fn bp10_072_end_phase_searches_only_while_an_evolved_follower_is_present() {
 /// Alchemist amulet) and an ordinary follower among the looked-at cards are never offered.
 /// No printed Onmyoji amulet exists; the conditions unit tests cover that combination.
 #[test]
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Any other decision before the choice invalidates the scenario."
+)]
 fn bp20_p28_offers_only_onmyoji_followers_or_spells_from_the_looked_at_cards() {
     for (deck, offered) in [
         (["BP20-P28", "BP21-P21", "BP01-173"], "BP20-P28"),

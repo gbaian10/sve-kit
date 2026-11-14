@@ -5,10 +5,6 @@
 use super::{Game, int, other};
 use crate::Result;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Attack obligations and legality share the authoritative combat state."
-)]
 impl Game {
     pub(super) fn attack_required(&self) -> Result<bool> {
         let mut targets = self.zone_ids(other(self.active()), "field");
