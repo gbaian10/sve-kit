@@ -487,7 +487,7 @@ impl Game {
         card: &WellFormedCardProgram,
         shared: Option<&CandidateAdmission>,
     ) -> Result<()> {
-        if shared.is_some_and(|owner| !ptr::eq(&owner.candidate().program, card)) {
+        if shared.is_some_and(|owner| !ptr::eq(&raw const owner.candidate().program, card)) {
             return Err(invalid("shared admission belongs to another candidate"));
         }
         let base_print = self.catalog.face(card_no, 0)?;

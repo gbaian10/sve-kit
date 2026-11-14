@@ -7,7 +7,7 @@ use crate::ir::lowering::{CurrentCardProgram, ExpandedLowerer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::{fmt, ptr::from_ref};
-use serde::Deserialize;
+use serde::Deserialize as _;
 use serde_json::Value;
 use std::sync::{Mutex, OnceLock};
 
@@ -153,10 +153,10 @@ impl CurrentSelectionLoader {
         &'input self,
         snapshot: &str,
         keywords: &str,
-        input: &'input Value,
+        handoff: &'input Value,
         rules: Option<(&str, &EngineIdentityInput)>,
     ) -> Result<PendingSelection<'input>> {
-        let handoff = read_handoff(input)?;
+        let handoff = read_handoff(handoff)?;
         let mut prototypes =
             Catalog::read_documents_using(snapshot, keywords, &handoff.documents, |line| {
                 self.read_card(line)
@@ -264,18 +264,19 @@ struct Handoff<'handoff> {
 
 /// Exactly `documents` and `authors`; every author is exactly one of the two closed shapes.
 fn read_handoff(handoff: &Value) -> Result<Handoff<'_>> {
-    let read = || {
-        let fields = handoff.as_object().filter(|fields| fields.len() == 2)?;
-        let documents = Vec::deserialize(fields.get("documents")?).ok()?;
-        let authors = fields
-            .get("authors")?
-            .as_array()?
-            .iter()
-            .map(read_author)
-            .collect::<Option<_>>()?;
-        Some(Handoff { documents, authors })
-    };
-    read().ok_or_else(|| invalid("invalid current selection"))
+    read_shape(handoff).ok_or_else(|| invalid("invalid current selection"))
+}
+
+fn read_shape(handoff: &Value) -> Option<Handoff<'_>> {
+    let fields = handoff.as_object().filter(|fields| fields.len() == 2)?;
+    let documents = Vec::deserialize(fields.get("documents")?).ok()?;
+    let authors = fields
+        .get("authors")?
+        .as_array()?
+        .iter()
+        .map(read_author)
+        .collect::<Option<_>>()?;
+    Some(Handoff { documents, authors })
 }
 
 fn read_author(author: &Value) -> Option<Author<'_>> {
@@ -335,12 +336,15 @@ impl<'owner> Owner<'owner> {
 }
 
 /// One author per permanent card, whose own printing is among those it claims.
-fn claim_identity<Id: Ord>(
+fn claim_identity<Id>(
     identities: &mut BTreeSet<Id>,
     card_id: Id,
     card_no: &str,
     printings: &[String],
-) -> Result<()> {
+) -> Result<()>
+where
+    Id: Ord,
+{
     if !identities.insert(card_id) || !printings.iter().any(|number| number == card_no) {
         return Err(invalid(
             "current selection identity or representative missing",
