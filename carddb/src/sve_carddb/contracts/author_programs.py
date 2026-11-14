@@ -843,7 +843,14 @@ class SearchPartitionPartFields(TypedDict):
     n: Quantity
 
 
-type SearchPartitionPart = SearchPartitionPartFields
+@with_config(CONFIG)
+class SearchPartitionUpToFields(TypedDict):
+    zone: Zone
+
+    upto: Quantity
+
+
+type SearchPartitionPart = SearchPartitionPartFields | SearchPartitionUpToFields
 
 
 @with_config(CONFIG)

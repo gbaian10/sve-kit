@@ -802,6 +802,10 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 
+`in_zone: {ref: {follow: moved}, zone: ex}` 延伸既有來源區域條件：檢查同一本文先前成功移區的實際新世代是否在效果控制者的 EX。
+不以原目標的控制者推算目的玩家；移區失敗、進入對手 EX 或世代再次改變都不成立。
+BP13-106 以此條件接 `move: {ref: {follow: moved}, to: field, acted: true}`，從成功移區回條返場；返場會正常觸發入場曲。
+
 打出限制的 `play.cannot_if` 保留 `in_zone: {ref: this, zone: ex}` 與 `my_turn: true`，並可使用已准入的公開條件及其布林組合。例如 BP12-111 以 `cmp` 檢查自己場上的ゴブリン從者數不大於 2；一般打出與 Quick 候選都在扣費、移區或選擇前依當前狀態檢查，拒絕時不更動狀態。條件不能依賴稍後的選擇、結算捕捉或隱藏區域的卡片特徵。這些限制不阻止能力直接移動或將卡置入場，也不提供額外打出區域的許可。
 
 `play.cannot_if` 可用 `{not: {in_zone: {ref: this, zone: hand}}}` 表達只能從手牌打出。來源區域依目前世代檢查；其他效果授予消滅區打出許可時，仍須遵守卡片本身的禁止條件。

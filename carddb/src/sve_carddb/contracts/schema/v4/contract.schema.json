@@ -43543,19 +43543,39 @@
       ]
     },
     "DSLNodes.A.search.partition-part": {
-      "type": "object",
-      "properties": {
-        "zone": {
-          "$ref": "#/$defs/DSLNodes.Zone"
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "zone": {
+              "$ref": "#/$defs/DSLNodes.Zone"
+            },
+            "n": {
+              "$ref": "#/$defs/DSLNodes.A.quantity"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zone",
+            "n"
+          ]
         },
-        "n": {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
+        {
+          "type": "object",
+          "properties": {
+            "zone": {
+              "$ref": "#/$defs/DSLNodes.Zone"
+            },
+            "upto": {
+              "$ref": "#/$defs/DSLNodes.A.quantity"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zone",
+            "upto"
+          ]
         }
-      },
-      "additionalProperties": false,
-      "required": [
-        "zone",
-        "n"
       ]
     },
     "DSLNodes.A.search.per-group": {

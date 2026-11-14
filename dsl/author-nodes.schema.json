@@ -14251,19 +14251,39 @@
       ]
     },
     "A.search.partition-part": {
-      "type": "object",
-      "properties": {
-        "zone": {
-          "$ref": "#/$defs/Zone"
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "zone": {
+              "$ref": "#/$defs/Zone"
+            },
+            "n": {
+              "$ref": "#/$defs/A.quantity"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zone",
+            "n"
+          ]
         },
-        "n": {
-          "$ref": "#/$defs/A.quantity"
+        {
+          "type": "object",
+          "properties": {
+            "zone": {
+              "$ref": "#/$defs/Zone"
+            },
+            "upto": {
+              "$ref": "#/$defs/A.quantity"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "zone",
+            "upto"
+          ]
         }
-      },
-      "additionalProperties": false,
-      "required": [
-        "zone",
-        "n"
       ]
     },
     "A.search.partition": {

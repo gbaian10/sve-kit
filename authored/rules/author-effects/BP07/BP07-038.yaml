@@ -1,0 +1,66 @@
+cards:
+  BP07-038:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        fanfare:
+          cost:
+            earth_rite: 1
+          do:
+            - choice:
+                instead:
+                  - if:
+                      entered_from:
+                        from: cemetery
+                        ref: this
+                    upto: 3
+                n: 1
+                options:
+                  - - damage:
+                        n: 5
+                        to: chosen
+                  - - buff:
+                        hp: 0
+                        on: this
+                        power: 3
+                  - - draw:
+                        n: 2
+                        who: self
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 1
+      - activate:
+          cost:
+            pp: 6
+          do:
+            - move:
+                ref: this
+                result: entered
+                to: field
+            - grant:
+                abilities:
+                  - lastword:
+                      do:
+                        - banish: this
+                keywords:
+                  - storm
+                on:
+                  follow: entered
+          zone: cemetery
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

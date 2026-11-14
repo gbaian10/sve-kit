@@ -93,7 +93,7 @@ pub struct Inputs<'text> {
     pub rules: &'text str,
 }
 
-/// Select effects, start the opening and bind the seat controls.
+/// Select the effects the decks can reach, start the opening and bind the seat controls.
 ///
 /// # Errors
 /// Returns the failing stage without engine diagnostics.
@@ -101,26 +101,25 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
     let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
     let selection: Value =
         serde_json::from_str(inputs.selection).map_err(|_error| LoadError::Format)?;
+    let [first, second] = setup.decks;
+    let decks = [deck(first), deck(second)];
     let selected = CurrentSelectionLoader::new()
         .and_then(|loader| {
-            // The first slice loads the reviewed JP inputs; resolved identities come with strict admission.
-            loader.select_with_rules(
+            // Lowering every author took seconds in the browser; only the decks' reach is needed.
+            // This first slice loads the reviewed JP inputs; resolved identities come later.
+            Game::select_player_decks(
+                &loader,
                 inputs.snapshot,
                 inputs.keywords,
                 &selection,
-                inputs.rules,
-                &EngineIdentityInput::LegacyJp,
+                Some((inputs.rules, &EngineIdentityInput::LegacyJp)),
+                &decks,
             )
         })
         .map_err(|_error| LoadError::Selection)?;
-    let [first, second] = setup.decks;
-    let game = Game::start_player_game(
-        selected,
-        [deck(first), deck(second)],
-        viewer_of(setup.first_chooser),
-        &setup.seed,
-    )
-    .map_err(|_error| LoadError::Match)?;
+    let game =
+        Game::start_player_game(selected, decks, viewer_of(setup.first_chooser), &setup.seed)
+            .map_err(|_error| LoadError::Match)?;
     Ok(LocalSession::new(
         game,
         setup.control.map(|control| match control {
