@@ -3,9 +3,11 @@
 //! Native coordinates stay in the projector. Hosts bind each projection to its
 //! authenticated seat and current question before submitting the decoded answer.
 
+mod costs;
 mod references;
 mod selection;
 
+pub use costs::project_costs;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 
