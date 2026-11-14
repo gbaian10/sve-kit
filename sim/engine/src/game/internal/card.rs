@@ -6,8 +6,8 @@ use super::{
 };
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
-use crate::game::player::Viewer;
 use crate::game::player::observation::AbilityQuota;
+use crate::game::player::{AdmissionGapReason, Viewer};
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -396,8 +396,7 @@ impl Game {
         &mut self,
         selected: &SelectedEffects,
         required: &BTreeSet<String>,
-    ) -> Result<BTreeMap<String, crate::game::player::AdmissionGapReason>> {
-        use crate::game::player::AdmissionGapReason;
+    ) -> Result<BTreeMap<String, AdmissionGapReason>> {
         let mut definitions = RuntimeCards::default();
         let mut failures = BTreeMap::new();
         for number in required {

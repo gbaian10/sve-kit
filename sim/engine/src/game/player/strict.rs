@@ -3,7 +3,7 @@
 use super::{DeckConstruction, PlayerDeck, Viewer};
 use crate::catalog::{Catalog, SelectedEffects};
 use crate::game::Game;
-use crate::ir::walk::{NodeRef, Traversal, Visitor};
+use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{Action, TokenAllocation, TokenTemplate};
 use crate::{EngineFailure, Result};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -59,11 +59,9 @@ impl StrictAdmission {
 }
 
 impl fmt::Debug for StrictAdmission {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Even a rejected opponent deck is private before the opening.
-        formatter
-            .debug_struct("StrictAdmission")
-            .finish_non_exhaustive()
+        f.debug_struct("StrictAdmission").finish_non_exhaustive()
     }
 }
 
@@ -145,11 +143,13 @@ impl Visitor for Dependencies {
                     }
                 }
             }
-            NodeRef::Action(Action::Equip { template, .. })
-            | NodeRef::Action(Action::Transform {
-                into: TokenAllocation::Single { template },
-                ..
-            }) => {
+            NodeRef::Action(
+                Action::Equip { template, .. }
+                | Action::Transform {
+                    into: TokenAllocation::Single { template },
+                    ..
+                },
+            ) => {
                 self.templates.insert(template.0.clone());
             }
             NodeRef::Action(Action::Transform {
@@ -161,7 +161,15 @@ impl Visitor for Dependencies {
                 self.templates
                     .extend(templates.iter().map(|template| template.0.clone()));
             }
-            _ => {}
+            NodeRef::Source(_)
+            | NodeRef::Program(_)
+            | NodeRef::Ability(_)
+            | NodeRef::Control(_)
+            | NodeRef::Instruction(_)
+            | NodeRef::Action(_)
+            | NodeRef::Effect(_)
+            | NodeRef::CostSpec(_)
+            | NodeRef::ObjectOperand(_) => {}
         }
         Traversal::Descend
     }
@@ -213,7 +221,7 @@ fn closure(selected: &SelectedEffects, deck: &PlayerDeck) -> Result<DeckClosure>
         let mut dependencies = Dependencies::default();
         let mut required = BTreeSet::new();
         for ability in &candidate.program.card().abilities {
-            crate::ir::walk::ability(ability, &mut dependencies);
+            walk::ability(ability, &mut dependencies);
         }
         for name in dependencies.templates {
             closure.require_template(catalog, &name, &number, &mut required)?;

@@ -2,12 +2,14 @@
 
 use super::observation::{CardObservation, seat};
 use super::{
-    ObjectHandle, Question, QuestionPurpose, QuestionShape, QuestionToken, SubmissionKind, Viewer,
+    ObjectHandle, Question, QuestionPurpose, QuestionShape, QuestionToken, StrictStartError,
+    SubmissionKind, Viewer,
 };
 use crate::catalog::SelectedEffects;
 use crate::game::Game;
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::BTreeSet;
+use core::result;
 use serde_json::{Value, json};
 
 /// Construction basis already checked by the host against the snapshot's construction index.
@@ -72,10 +74,10 @@ impl Game {
         decks: [PlayerDeck; 2],
         first_chooser: Viewer,
         seed: &str,
-    ) -> core::result::Result<Self, super::StrictStartError> {
+    ) -> result::Result<Self, StrictStartError> {
         let (admitted, report) = Self::prepare_strict_player_decks(&selected, &decks)?;
         if !report.is_admitted() {
-            return Err(super::StrictStartError::Admission(report));
+            return Err(StrictStartError::Admission(report));
         }
         let mut players = serde_json::Map::new();
         for (perspective, deck) in [Viewer::P1, Viewer::P2].into_iter().zip(decks) {

@@ -7,8 +7,10 @@ use super::{author, rule_fixtures, selection};
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::sync::OnceLock;
+use sve_engine::EngineFailure;
 use sve_engine::catalog::{Catalog, CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use sve_engine::game::Game;
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     AdmissionGap, AdmissionGapReason, DeckConstruction, Input, PlayerDeck, StrictAdmission,
     StrictStartError, Viewer,
@@ -302,9 +304,12 @@ fn strict_rule_generated_opening_ex_resources_require_current_admission() {
         .iter()
         .find(|player| player.player == Viewer::P2)
         .unwrap();
-    assert!(owner.zones.iter().any(|zone| zone.kind
-        == sve_engine::game::player::observation::ObservedZone::Ex
-        && zone.count == 5));
+    assert!(
+        owner
+            .zones
+            .iter()
+            .any(|zone| zone.kind == ObservedZone::Ex && zone.count == 5)
+    );
     input["authors"].as_array_mut().unwrap().truncate(1);
     input["documents"] = json!([[
         "synthetic",
@@ -336,13 +341,11 @@ fn strict_snapshot_face_closure_must_match_current_sources() {
     let selected = selected(&snapshot, &keywords, &input);
     assert!(matches!(
         Game::check_player_decks(&selected, &decks()),
-        Err(sve_engine::EngineFailure::Invalid(_))
+        Err(EngineFailure::Invalid(_))
     ));
     assert!(matches!(
         Game::start_player_game(selected, decks(), Viewer::P1, "strict-source"),
-        Err(StrictStartError::Initialization(
-            sve_engine::EngineFailure::Invalid(_)
-        ))
+        Err(StrictStartError::Initialization(EngineFailure::Invalid(_)))
     ));
 }
 
