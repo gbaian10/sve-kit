@@ -1247,3 +1247,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 `enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。
 
 法術本文可用 `played_from: {ref: this, from: hand | ex}` 讀取本次適正打出的起始區域，與付款時使用的打出來源共用既有執行資料。先抽牌或移動其他卡不改變這個值；之後將結算中的自身移入 EX，仍受 EX 容量及一般法術清理規則限制。
+
+正式目標的動態張數及既有動態費用上限可讀來源自己的指示物數量與來源資訊數值，例如 `upto: {counter: {on: this, name: 魔力カウンター}}`，或 `from.orig_cost_le: {power_of: this}`。讀值與候選無關，沿用原本的公開選取、張數及印刷原費檢查。
