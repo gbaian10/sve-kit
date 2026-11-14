@@ -580,6 +580,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 
 自己墓場的卡可放在 `targets`，例如 `from: {who: self, zone: cemetery, kind: follower, trait: 竜族}`；共用正式目標程序在付款前固定候選與宣告，沒有必需目標時不能付款。結算本文用 `move: {ref: returned, to: hand}` 回收。不能用本文的 `choose` 代替正式目標，否則會把本次付款才送墓的卡納入候選。這個目標入口不擴充回場的種類或容量選擇能力。
 
+`move.ref` 可直接指定公開墓場集合，例如 `{who: self, zone: cemetery, name: 決意の予言者・ルーニィ}` 並移到 `ex`；不必先作任意張選擇，移動與 EX 容量處理由既有移動流程完成。
+
 `shuffle: {who: self}` 洗自己的整副牌組，可直接接 Look；空牌組或單張仍視為執行了整副洗牌。
 
 整副手牌可用 `move: {ref: {who: self, zone: hand}, to: deck, result: returned}`，
