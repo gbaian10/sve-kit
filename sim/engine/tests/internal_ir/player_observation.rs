@@ -3,7 +3,7 @@ use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain, ResumeStage};
 use sve_engine::game::player::events::EventKind;
 use sve_engine::game::player::observation::{
-    CardObservation, Observation, ObservedZone, ZoneObservation,
+    CardMemory, CardObservation, Observation, ObservedZone, ZoneObservation,
 };
 use sve_engine::game::player::{ObjectHandle, Viewer};
 
@@ -761,7 +761,10 @@ fn published_memory_survives_rollback_for_a_previously_unknown_seat() {
     let mut initial = setup(1, json!([{"id":"d0","card":"unit-follower"}]));
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let mut game = exhausted_deck(&initial);
-    assert!(game.observe(Viewer::P2).unwrap().remembered.is_empty());
+    assert_eq!(
+        game.observe(Viewer::P2).unwrap().remembered,
+        Vec::<CardMemory>::new()
+    );
     let question = start(&mut game, &reveal_with_tail(vec![draw(4, 1)]));
     let revealed = game.observe(Viewer::P2).unwrap();
     let old = visible(&revealed, Viewer::P1, ObservedZone::Hand)[0]
@@ -772,7 +775,10 @@ fn published_memory_survives_rollback_for_a_previously_unknown_seat() {
         .unwrap_err();
     let rolled_back = game.observe(Viewer::P2).unwrap();
     assert_eq!(rolled_back.remembered, revealed.remembered);
-    assert!(visible(&rolled_back, Viewer::P1, ObservedZone::Hand).is_empty());
+    assert_eq!(
+        visible(&rolled_back, Viewer::P1, ObservedZone::Hand),
+        Vec::<&CardObservation>::new()
+    );
     let next = start(&mut game, &reveal_and_wait());
     let again = game.observe(Viewer::P2).unwrap();
     assert_ne!(

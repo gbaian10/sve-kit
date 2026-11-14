@@ -1,17 +1,17 @@
 use super::ProjectionError;
 use crate::game::player::{
-    SearchAnswer, SearchQuestion, SelectionQuestion, TargetRoleAssignment, Viewer,
+    self, SearchAnswer, SearchQuestion, SelectionQuestion, TargetRoleAssignment, Viewer,
 };
-use crate::ir::{Cardinality, RoleCardinality};
+use crate::ir::{self, Cardinality, Position, RoleCardinality};
 use alloc::collections::{BTreeMap, BTreeSet};
-use core::fmt;
+use core::{fmt, result};
 use sve_battle_contract::question::{
-    Bounds, Candidate, CostTotal, Destination, Distinct, GroupAssignment, Origin, RoleSize,
+    Bounds, Candidate, CostTotal, Destination, Distinct, Edge, GroupAssignment, Origin, RoleSize,
     Selection, SelectionGroup, SelectionRole,
 };
 use sve_battle_contract::{Answer, Int, Nat, OptionId, QuestionId, Seat, Subject};
 
-type Result<T> = core::result::Result<T, ProjectionError>;
+type Result<T> = result::Result<T, ProjectionError>;
 
 /// Candidate facts resolved by the authority against the pinned snapshot and viewer.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -41,9 +41,8 @@ enum SelectionChannel {
 }
 
 impl fmt::Debug for SelectionProjection {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter
-            .debug_struct("SelectionProjection")
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SelectionProjection")
             .finish_non_exhaustive()
     }
 }
@@ -54,12 +53,15 @@ impl SelectionProjection {
     ///
     /// # Errors
     /// Refuses missing required facts, inconsistent coordinates, bounds or destinations.
-    pub fn new(
+    pub fn new<F>(
         id: &QuestionId,
         question: &SelectionQuestion,
         destinations: &BTreeMap<u64, Destination>,
-        mut resolve: impl FnMut(u64) -> Result<CandidateDetails>,
-    ) -> Result<Self> {
+        mut resolve: F,
+    ) -> Result<Self>
+    where
+        F: FnMut(u64) -> Result<CandidateDetails>,
+    {
         let mut projection = Self::empty(question.cardinality, SelectionChannel::Targets)?;
         for member in &question.members {
             let details = resolve(member.handle)?;
@@ -99,9 +101,9 @@ impl SelectionProjection {
             }
             if let Some(position) = role.position {
                 let edge = match position {
-                    crate::ir::Position::Top {} => sve_battle_contract::question::Edge::Top,
-                    crate::ir::Position::Bottom {} => sve_battle_contract::question::Edge::Bottom,
-                    crate::ir::Position::Index { .. } => return Err(ProjectionError::Unavailable),
+                    Position::Top {} => Edge::Top,
+                    Position::Bottom {} => Edge::Bottom,
+                    Position::Index { .. } => return Err(ProjectionError::Unavailable),
                 };
                 if destination.is_none_or(|destination| destination.position != Some(edge)) {
                     return Err(ProjectionError::Unavailable);
@@ -139,11 +141,10 @@ impl SelectionProjection {
     ///
     /// # Errors
     /// The same completeness and numeric checks as [`Self::new`].
-    pub fn search(
-        id: &QuestionId,
-        question: &SearchQuestion,
-        mut resolve: impl FnMut(u64) -> Result<CandidateDetails>,
-    ) -> Result<Self> {
+    pub fn search<F>(id: &QuestionId, question: &SearchQuestion, mut resolve: F) -> Result<Self>
+    where
+        F: FnMut(u64) -> Result<CandidateDetails>,
+    {
         let mut projection = Self::empty(question.cardinality, SelectionChannel::Search)?;
         for card in &question.cards {
             projection.push(
@@ -177,7 +178,7 @@ impl SelectionProjection {
     ///
     /// # Errors
     /// Refuses a different shape, foreign/duplicate candidates or incomplete roles.
-    pub fn targets(&self, answer: &Answer) -> Result<crate::game::player::Answer> {
+    pub fn targets(&self, answer: &Answer) -> Result<player::Answer> {
         if self.channel != SelectionChannel::Targets {
             return Err(ProjectionError::Unavailable);
         }
@@ -194,7 +195,7 @@ impl SelectionProjection {
         }
         let targets = self.decode(selected)?;
         if roles.is_empty() {
-            return Ok(crate::game::player::Answer::Targets(targets));
+            return Ok(player::Answer::Targets(targets));
         }
         let mut assigned = BTreeSet::new();
         let mut seen_roles = BTreeSet::new();
@@ -218,7 +219,7 @@ impl SelectionProjection {
                     return Err(ProjectionError::Unavailable);
                 }
                 Ok(TargetRoleAssignment {
-                    role: crate::ir::Nat(role.role.get()),
+                    role: ir::Nat(role.role.get()),
                     targets: subset,
                 })
             })
@@ -226,7 +227,7 @@ impl SelectionProjection {
         if assigned.len() != targets.len() {
             return Err(ProjectionError::Unavailable);
         }
-        Ok(crate::game::player::Answer::TargetsWithRoles { targets, roles })
+        Ok(player::Answer::TargetsWithRoles { targets, roles })
     }
 
     /// Translate a complete search answer, including empty groups in printed order.
@@ -339,7 +340,7 @@ impl SelectionProjection {
         Ok(())
     }
 
-    fn groups(&mut self, groups: &[crate::game::player::SelectionGroup]) -> Result<()> {
+    fn groups(&mut self, groups: &[player::SelectionGroup]) -> Result<()> {
         for (index, group) in groups.iter().enumerate() {
             let mut seen = BTreeSet::new();
             let eligible = group

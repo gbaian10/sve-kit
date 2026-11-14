@@ -10,6 +10,10 @@ use sve_engine::game::Game;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{CardObservation, Observation, ObservedZone};
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "Invalid synthetic setup or a missing fixture card must fail the test."
+)]
 fn catalog() -> Arc<Catalog> {
     static CATALOG: OnceLock<Arc<Catalog>> = OnceLock::new();
     Arc::clone(CATALOG.get_or_init(|| {
@@ -67,6 +71,10 @@ fn position(secret: &str) -> Value {
     })
 }
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "Invalid synthetic setup or a missing fixture card must fail the test."
+)]
 fn game(position: &Value) -> Game {
     Game::new(
         catalog(),
@@ -78,6 +86,10 @@ fn game(position: &Value) -> Game {
     .unwrap()
 }
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "Invalid synthetic setup or a missing fixture card must fail the test."
+)]
 fn card(observation: &Observation, player: Viewer, zone: ObservedZone) -> &CardObservation {
     &observation
         .players
@@ -121,16 +133,16 @@ fn private_faces_are_known_only_to_their_viewer_and_queries_stay_read_only() {
     assert_eq!(first_observation, second.observe(Viewer::P1).unwrap());
     assert_eq!(first_observation, first.observe(Viewer::P1).unwrap());
     assert_eq!(first.digest().unwrap(), before);
-    let hand = card(&first_observation, Viewer::P1, ObservedZone::Hand);
-    assert!(!hand.public);
-    assert!(!hand.face_up);
+    let first_hand = card(&first_observation, Viewer::P1, ObservedZone::Hand);
+    assert!(!first_hand.public);
+    assert!(!first_hand.face_up);
     let own = first.observe(Viewer::P2).unwrap();
     let other_own = second.observe(Viewer::P2).unwrap();
-    let hand = card(&own, Viewer::P2, ObservedZone::Hand);
-    assert_eq!(hand.physical.card, "secret-a");
-    assert!(!hand.public);
+    let second_hand = card(&own, Viewer::P2, ObservedZone::Hand);
+    assert_eq!(second_hand.physical.card, "secret-a");
+    assert!(!second_hand.public);
     assert_ne!(
-        hand.physical,
+        second_hand.physical,
         card(&other_own, Viewer::P2, ObservedZone::Hand).physical
     );
     let evolve = card(&own, Viewer::P2, ObservedZone::EvolveDeck);
@@ -142,21 +154,19 @@ fn private_faces_are_known_only_to_their_viewer_and_queries_stay_read_only() {
 fn damaged_required_face_or_facing_stops_observation() {
     let mut broken_face = position("secret-a");
     broken_face["players"]["P1"]["zones"]["evolution"][0]["state"]["face"] = json!("unknown");
-    assert!(
-        Game::new(
-            catalog(),
-            &broken_face,
-            &Value::Null,
-            &Value::Null,
-            "unknown-face"
-        )
-        .and_then(|game| game.observe(Viewer::P1))
-        .is_err()
-    );
+    Game::new(
+        catalog(),
+        &broken_face,
+        &Value::Null,
+        &Value::Null,
+        "unknown-face",
+    )
+    .and_then(|game| game.observe(Viewer::P1))
+    .unwrap_err();
     let mut broken_facing = position("secret-a");
     broken_facing["players"]["P1"]["zones"]["field"][0]["face_up"] = json!("unknown");
     let broken = game(&broken_facing);
-    assert!(broken.observe(Viewer::P1).is_err());
+    broken.observe(Viewer::P1).unwrap_err();
 }
 
 #[test]
@@ -180,8 +190,8 @@ fn another_seats_private_knowledge_does_not_change_disclosure_metadata() {
 fn face_memory_keeps_observed_ordinals_and_deduplicates_physical_copies() {
     let mut initial = position("secret-a");
     initial["players"]["P1"]["zones"]["hand"] = json!([
-        {"id":"copy-a","card":"base","state":{"face":1}},
-        {"id":"copy-b","card":"base","state":{"face":1}}
+        {"id":"copy-a","card":"base","state":{"face":1_u64}},
+        {"id":"copy-b","card":"base","state":{"face":1_u64}}
     ]);
     let observed = game(&initial).observe(Viewer::P1).unwrap();
     let faces = observed
@@ -202,9 +212,9 @@ fn face_memory_keeps_observed_ordinals_and_deduplicates_physical_copies() {
 #[test]
 fn an_evolved_face_index_does_not_relabel_the_physical_base() {
     let mut initial = position("secret-a");
-    initial["players"]["P1"]["zones"]["field"][0]["state"]["face"] = json!(1);
+    initial["players"]["P1"]["zones"]["field"][0]["state"]["face"] = json!(1_u64);
     initial["players"]["P1"]["zones"]["evolution"] = json!([
-        {"id":"physical-evolved","card":"base","state":{"face":1}}
+        {"id":"physical-evolved","card":"base","state":{"face":1_u64}}
     ]);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     let game = game(&initial);

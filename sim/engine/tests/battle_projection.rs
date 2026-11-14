@@ -3,14 +3,15 @@
 extern crate alloc;
 
 use alloc::collections::BTreeMap;
+use core::num::NonZeroU64;
 use sve_battle_contract::question::{Distinct, GroupAssignment, RoleSize};
 use sve_battle_contract::{
     Answer, GroupChoice, HostError, Nat, QuestionId, RoleChoice, Seat, Subject,
 };
 use sve_engine::battle::{CandidateDetails, ProjectionError, SelectionProjection};
 use sve_engine::game::player::{
-    SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember, SelectionQuestion,
-    SelectionRole, Viewer,
+    self, CardOption, SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember,
+    SelectionQuestion, SelectionRole, Viewer,
 };
 use sve_engine::ir::{self, Cardinality, RoleCardinality};
 
@@ -32,7 +33,7 @@ const fn details() -> CandidateDetails {
 
 fn question() -> SelectionQuestion {
     SelectionQuestion {
-        members: [18446744073709551610, 583]
+        members: [0xFFFF_FFFF_FFFF_FFFA, 583]
             .into_iter()
             .map(|handle| SelectionMember {
                 handle,
@@ -106,13 +107,16 @@ fn selection_retains_complete_constraints_without_native_coordinates() {
             .get(),
         3
     );
+    let [fixed, conditional, remainder] = selection.roles.as_slice() else {
+        panic!("expected three projected roles")
+    };
     assert!(
-        matches!(selection.roles.first().unwrap().size, RoleSize::Fixed { bounds } if bounds.min == Nat::ZERO && bounds.max == Some(Nat::from(1_u32)))
+        matches!(fixed.size, RoleSize::Fixed { bounds } if bounds.min == Nat::ZERO && bounds.max == Some(Nat::from(1_u32)))
     );
     assert!(
-        matches!(selection.roles.get(1).unwrap().size, RoleSize::IfNonempty { count } if count == Nat::from(1_u32))
+        matches!(conditional.size, RoleSize::IfNonempty { count } if count == Nat::from(1_u32))
     );
-    assert_eq!(selection.roles.get(2).unwrap().size, RoleSize::Remainder);
+    assert_eq!(remainder.size, RoleSize::Remainder);
     let wire = serde_json::to_string(selection).unwrap();
     // Numeric handles are authority coordinates, even when they exceed JavaScript's range.
     assert!(!wire.contains("18446744073709551610"));
@@ -143,16 +147,16 @@ fn target_roles_roundtrip_and_reject_foreign_or_overlapping_assignments() {
             },
             RoleChoice {
                 role: Nat::from(9_u32),
-                selected: selected.get(..1).unwrap().to_vec(),
+                selected: selected.iter().take(1).cloned().collect(),
             },
             RoleChoice {
                 role: Nat::from(12_u32),
-                selected: selected.get(1..).unwrap().to_vec(),
+                selected: selected.iter().skip(1).cloned().collect(),
             },
         ],
     };
     let native = projection.targets(&answer).unwrap();
-    let sve_engine::game::player::Answer::TargetsWithRoles { targets, roles } = native else {
+    let player::Answer::TargetsWithRoles { targets, roles } = native else {
         panic!()
     };
     assert_eq!(
@@ -163,8 +167,14 @@ fn target_roles_roundtrip_and_reject_foreign_or_overlapping_assignments() {
             .map(|member| member.handle)
             .collect::<Vec<_>>()
     );
-    assert!(roles.first().unwrap().targets.is_empty());
-    assert_eq!(roles.get(1).unwrap().targets, targets.get(..1).unwrap());
+    let [empty, fixed, _] = roles.as_slice() else {
+        panic!("expected three decoded roles")
+    };
+    assert_eq!(empty.targets, Vec::<u64>::new());
+    assert_eq!(
+        fixed.targets,
+        targets.iter().take(1).copied().collect::<Vec<_>>()
+    );
     let other = SelectionProjection::new(
         &QuestionId::new("other".into()),
         &question,
@@ -172,17 +182,26 @@ fn target_roles_roundtrip_and_reject_foreign_or_overlapping_assignments() {
         |_| Ok(details()),
     )
     .unwrap();
-    assert!(other.targets(&answer).is_err());
-    if let Answer::Select { roles, .. } = &mut answer {
-        roles.last_mut().unwrap().selected = selected;
+    assert_eq!(
+        other.targets(&answer).unwrap_err(),
+        ProjectionError::Unavailable
+    );
+    if let Answer::Select {
+        roles: wire_roles, ..
+    } = &mut answer
+    {
+        wire_roles.last_mut().unwrap().selected = selected;
     }
-    assert!(projection.targets(&answer).is_err());
+    assert_eq!(
+        projection.targets(&answer).unwrap_err(),
+        ProjectionError::Unavailable
+    );
 }
 
 #[test]
 fn search_preserves_empty_groups_and_printed_order() {
     let question = SearchQuestion {
-        cards: vec![sve_engine::game::player::CardOption {
+        cards: vec![CardOption {
             handle: 931,
             card: "native-card-key".into(),
             name: "display".into(),
@@ -213,15 +232,7 @@ fn search_preserves_empty_groups_and_printed_order() {
         projection.selection().group_assignment,
         GroupAssignment::Explicit
     );
-    assert!(
-        projection
-            .selection()
-            .groups
-            .get(1)
-            .unwrap()
-            .eligible
-            .is_empty()
-    );
+    assert_eq!(projection.selection().groups.last().unwrap().eligible, []);
     let selected = vec![
         projection
             .selection()
@@ -256,7 +267,10 @@ fn search_preserves_empty_groups_and_printed_order() {
     {
         groups.remove(0);
     }
-    assert!(projection.search_answer(&answer).is_err());
+    assert_eq!(
+        projection.search_answer(&answer).unwrap_err(),
+        ProjectionError::Unavailable
+    );
 }
 
 #[test]
@@ -264,10 +278,16 @@ fn required_facts_and_out_of_range_numbers_stop_projection() {
     let id = QuestionId::new("q".into());
     let mut question = question();
     question.members.first_mut().unwrap().rules_names = None;
-    assert!(SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).is_err());
+    assert_eq!(
+        SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).unwrap_err(),
+        ProjectionError::Unavailable
+    );
     question.distinct_names = false;
     question.members.first_mut().unwrap().original_cost = None;
-    assert!(SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).is_err());
+    assert_eq!(
+        SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).unwrap_err(),
+        ProjectionError::Unavailable
+    );
     question.distinct_original_costs = false;
     question.minimum_original_cost = None;
     question.maximum_original_cost = None;
@@ -280,15 +300,20 @@ fn required_facts_and_out_of_range_numbers_stop_projection() {
     );
     question.cardinality.maximum = Some(ir::Nat(5));
     question.members.first_mut().unwrap().original_cost = Some(i64::MAX);
-    assert!(SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).is_err());
+    assert_eq!(
+        SelectionProjection::new(&id, &question, &BTreeMap::new(), |_| Ok(details())).unwrap_err(),
+        ProjectionError::Range
+    );
 }
 
 #[test]
 fn contradictory_domains_and_incomplete_destinations_are_refused() {
     let id = QuestionId::new("invalid-domain".into());
     let check = |question: &SelectionQuestion| {
-        assert!(
-            SelectionProjection::new(&id, question, &BTreeMap::new(), |_| Ok(details())).is_err()
+        assert_eq!(
+            SelectionProjection::new(&id, question, &BTreeMap::new(), |_| Ok(details()))
+                .unwrap_err(),
+            ProjectionError::Unavailable
         );
     };
     let mut duplicate_candidate = question();
@@ -330,7 +355,7 @@ fn contradictory_domains_and_incomplete_destinations_are_refused() {
     check(&missing_destination);
     let mut unsupported_destination = question();
     unsupported_destination.roles.first_mut().unwrap().position = Some(ir::Position::Index {
-        index: ir::PositiveNat(core::num::NonZeroU64::new(2).unwrap()),
+        index: ir::PositiveNat(NonZeroU64::new(2).unwrap()),
     });
     check(&unsupported_destination);
     let wrong_controller = |_| {
@@ -338,8 +363,9 @@ fn contradictory_domains_and_incomplete_destinations_are_refused() {
         candidate.controller = Some(Seat::P2);
         Ok(candidate)
     };
-    assert!(
-        SelectionProjection::new(&id, &question(), &BTreeMap::new(), wrong_controller).is_err()
+    assert_eq!(
+        SelectionProjection::new(&id, &question(), &BTreeMap::new(), wrong_controller).unwrap_err(),
+        ProjectionError::Unavailable
     );
 }
 
@@ -375,14 +401,15 @@ fn authorized_role_destinations_and_existence_groups_stay_attached() {
     let unexpected_edge = BTreeMap::from([(9, destination)]);
     let mut unordered_role = question.clone();
     unordered_role.roles.first_mut().unwrap().position = None;
-    assert!(
+    assert_eq!(
         SelectionProjection::new(
             &QuestionId::new("edge".into()),
             &unordered_role,
             &unexpected_edge,
             |_| Ok(details())
         )
-        .is_err()
+        .unwrap_err(),
+        ProjectionError::Unavailable
     );
     assert_eq!(
         projection.selection().roles.first().unwrap().destination,
@@ -421,7 +448,10 @@ fn selection_decoders_refuse_the_other_native_answer_channel() {
         groups: None,
         roles: vec![],
     };
-    assert!(targets.search_answer(&empty).is_err());
+    assert_eq!(
+        targets.search_answer(&empty).unwrap_err(),
+        ProjectionError::Unavailable
+    );
     let search = SearchQuestion {
         cards: vec![],
         cardinality: bounds(0, Some(0)),
@@ -438,5 +468,8 @@ fn selection_decoders_refuse_the_other_native_answer_channel() {
         |_| Ok(details()),
     )
     .unwrap();
-    assert!(projection.targets(&empty).is_err());
+    assert_eq!(
+        projection.targets(&empty).unwrap_err(),
+        ProjectionError::Unavailable
+    );
 }

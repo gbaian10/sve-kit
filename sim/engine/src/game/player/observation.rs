@@ -245,15 +245,17 @@ pub(in crate::game) fn viewer(value: &str) -> Result<Viewer> {
 }
 
 pub(in crate::game) fn face_up(object: &Object) -> Result<bool> {
-    match object.state.get("face_up") {
-        Some(value) => value
-            .as_bool()
-            .ok_or_else(|| invalid("unknown card facing")),
-        None => Ok(!matches!(
+    object.state.get("face_up").map_or(
+        Ok(!matches!(
             object.zone.as_str(),
             "deck" | "hand" | "evolve_deck"
         )),
-    }
+        |value| {
+            value
+                .as_bool()
+                .ok_or_else(|| invalid("unknown card facing"))
+        },
+    )
 }
 
 pub(in crate::game) fn zone(value: &str) -> Result<ObservedZone> {
