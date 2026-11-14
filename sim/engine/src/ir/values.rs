@@ -363,7 +363,8 @@ variants!(PlayerRef {
     Bound { binding: Binding<PlayerRef> } => [],
     RequireOne { players: Box<PlayerSet> } => ["player.require-one"],
     ProposedDamageRecipient {} => ["player.proposed-damage-recipient"],
-    ProposedDamageController {} => ["player.proposed-damage-controller"]
+    ProposedDamageController {} => ["player.proposed-damage-controller"],
+    ProposedMoveController {} => ["player.proposed-move-controller"]
 });
 variants!(ObjectView {
     Snapshot { value: Box<Expr<RuntimeObjectView>> } => ["reference.snapshot"],

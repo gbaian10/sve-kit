@@ -106,31 +106,34 @@ fn numeric_union_admission_keeps_hand_deck_and_opposing_union_reads_closed() {
 }
 
 #[test]
-fn numeric_token_unions_reject_other_players_kinds_traits_and_unneeded_filters() {
+fn numeric_unions_lower_each_existing_public_filter_and_reject_private_query_shapes() {
     lowerer().lower(&tree(&subjects(), false)).unwrap();
     for (key, value) in [
         ("who", json!("opp")),
         ("who", json!("all")),
         ("zone", json!("field")),
-        ("zone", json!("hand")),
         ("kind", json!("amulet")),
-        ("token", json!(false)),
         ("trait", json!("人形")),
-        ("trait", json!("")),
         ("name", json!("フェアリー")),
         ("orig_cost_le", json!(2)),
         ("other", json!(true)),
         ("acted", json!(true)),
     ] {
-        let mut invalid = subjects();
-        invalid["any_of"][1][key] = value;
-        lowerer().lower(&tree(&invalid, false)).unwrap_err();
+        let mut query = subjects();
+        query["any_of"][1][key] = value;
+        lowerer().lower(&tree(&query, false)).unwrap();
     }
     for key in ["trait", "token", "kind"] {
-        let mut invalid = subjects();
-        invalid["any_of"][1].as_object_mut().unwrap().remove(key);
-        lowerer().lower(&tree(&invalid, false)).unwrap_err();
+        let mut query = subjects();
+        query["any_of"][1].as_object_mut().unwrap().remove(key);
+        lowerer().lower(&tree(&query, false)).unwrap();
     }
+    let mut non_token = subjects();
+    non_token["any_of"][1]["token"] = json!(false);
+    lowerer().lower(&tree(&non_token, false)).unwrap_err();
+    let mut private = subjects();
+    private["any_of"][1]["zone"] = json!("hand");
+    lowerer().lower(&tree(&private, false)).unwrap_err();
     let mut too_many = subjects();
     let extra = too_many["any_of"][0].clone();
     too_many["any_of"].as_array_mut().unwrap().push(extra);
