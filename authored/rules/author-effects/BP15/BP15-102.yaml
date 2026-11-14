@@ -14,8 +14,6 @@ cards:
                   - apply:
                       effect:
                         cannot:
-                          target:
-                            leader: self
                           what: attack
                       on: enemy
                       until: turn
