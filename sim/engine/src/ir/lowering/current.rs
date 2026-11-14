@@ -42,6 +42,8 @@ impl CurrentSourceCheck {
 /// Current source facts and their lowered candidate, without use qualification.
 #[derive(Debug)]
 pub struct CurrentCardProgram {
+    /// Construction rule reconciled with the complete current-source handoff.
+    pub deck_rule: Option<super::CardDeckRule>,
     /// Explicit face ordinals from the identity registry, used by direct admission.
     pub face_ordinals: BTreeMap<String, usize>,
     /// Permanent owner selected by the current reader's JP printing lookup.
@@ -440,6 +442,7 @@ pub(super) fn lower(
         .remove(&input.card_no)
         .ok_or_else(|| invalid("/cards"))?;
     Ok(CurrentCardProgram {
+        deck_rule: None,
         face_ordinals: BTreeMap::new(),
         card_id: input.card_id,
         card_no: input.card_no,

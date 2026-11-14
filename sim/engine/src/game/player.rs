@@ -7,6 +7,7 @@ pub mod events;
 pub mod observation;
 
 mod closing;
+mod construction;
 mod decision;
 mod evolution;
 mod main_actions;
@@ -17,6 +18,7 @@ mod selection;
 mod strict;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
+pub use construction::check_card_deck_rules;
 pub use decision::{
     CardOption, DecisionShape, DiscardKind, MovementCapacityQuestion, PartitionQuestion,
     SearchQuestion, TokenCapacityQuestion,

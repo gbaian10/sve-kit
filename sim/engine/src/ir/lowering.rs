@@ -15,6 +15,7 @@ mod conditions;
 mod costs;
 mod counters;
 mod current;
+mod deck_rules;
 mod delayed;
 mod dice;
 mod discard;
@@ -82,6 +83,7 @@ pub use current::{
     CurrentSourceEvidence, KeywordDeclarationPayload, MetadataObligation, NonBodySource,
     PrintedKeyword, PrintedKeywordsObligation,
 };
+pub use deck_rules::{CardDeckRule, DeckRuleCondition, DeckSection};
 
 use super::AbilityQualification::{Ordinary, UnionBurst};
 use alloc::collections::{BTreeMap, BTreeSet};

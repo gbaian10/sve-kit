@@ -80,12 +80,26 @@ def test_missing_or_changed_declaration_cannot_consume_the_printed_rule(
         materialize(current, "SYN-01", card(rule))
 
 
-def test_an_unprinted_rule_cannot_be_added_to_a_blank_card(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "rule",
+    [
+        {"deck": "main", "same_name_max": 50},
+        {
+            "when": "self_in_main",
+            "decks": ["main", "evolve"],
+            "exclude_name_contains": "Synthetic",
+            "same_name_max": 1,
+        },
+    ],
+)
+def test_an_unprinted_rule_cannot_be_added_to_a_blank_card(
+    tmp_path: Path, rule: JsonValue
+) -> None:
     with (
         synthetic_current(tmp_path) as current,
         pytest.raises(SourceError, match="source_deck_rule_mismatch"),
     ):
-        materialize(current, "SYN-01", card({"deck": "main", "same_name_max": 50}))
+        materialize(current, "SYN-01", card(rule))
 
 
 def test_another_cards_name_does_not_grant_a_limit(tmp_path: Path) -> None:
@@ -143,3 +157,48 @@ def test_blank_card_does_not_require_a_construction_name(tmp_path: Path) -> None
                 )
         result = materialize(current, "SYN-01", card(None))
     assert "deck_rule" not in result
+
+
+CONDITIONAL_TEXT = (
+    "カード名に『Synthetic』を含まないカードは、"
+    "メインデッキやエボルヴデッキにそれぞれ1枚までしか入れられない。"
+)
+CONDITIONAL_RULE: dict[str, JsonValue] = {
+    "when": "self_in_main",
+    "decks": ["main", "evolve"],
+    "exclude_name_contains": "Synthetic",
+    "same_name_max": 1,
+}
+
+
+def test_conditional_rule_is_checked_against_its_complete_source(
+    tmp_path: Path,
+) -> None:
+    with synthetic_current(
+        tmp_path, page("jp", f'<div class="detail">{CONDITIONAL_TEXT}</div>')
+    ) as current:
+        result = materialize(current, "SYN-01", card(CONDITIONAL_RULE))
+    assert result["deck_rule"] == CONDITIONAL_RULE
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {},
+        {"when": "self_in_evolve"},
+        {"decks": ["main"]},
+        {"exclude_name_contains": "Another"},
+        {"same_name_max": 2},
+    ],
+)
+def test_conditional_rule_cannot_change_its_printed_meaning(
+    tmp_path: Path, change: dict[str, JsonValue]
+) -> None:
+    rule = CONDITIONAL_RULE | change if change else None
+    with (
+        synthetic_current(
+            tmp_path, page("jp", f'<div class="detail">{CONDITIONAL_TEXT}</div>')
+        ) as current,
+        pytest.raises(SourceError, match="source_deck_rule_mismatch"),
+    ):
+        materialize(current, "SYN-01", card(rule))

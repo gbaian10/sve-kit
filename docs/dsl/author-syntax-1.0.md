@@ -669,7 +669,12 @@ activate:
 
 ### GAP-A-019
 
-deck_rule 指定 deck:main|evolve 與 same_name_max；不把進化牌庫的 10 張套到主牌庫。
+deck_rule 的既有 `DeckRule` 分支指定 deck:main|evolve 與 same_name_max；不把進化牌庫的 10 張套到主牌庫。
+互斥的 `ConditionalDeckRule` 分支指定 `when: self_in_main`、非空且不重複的
+`decks: [main, evolve]`、非空 `exclude_name_contains` 與 `same_name_max`。
+來源永久卡片在主牌組中才生效；每個牌組依構築名稱分別計數，
+名稱不含排除 substring 者須同時滿足此上限與原有上限。
+完整來源句型、strict 驗證邊界與例子見[同名建牌張數規則](authoring-tools.md#同名建牌張數規則)。
 
 真實卡例：**ECP01-058 開催大成功！**；來源 `ECP01-058#0/text/0`，句型 `T783169f7b6`。
 
