@@ -25,6 +25,7 @@ use crate::ir::{Position, ReceiptLocation, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use core::iter::from_fn;
 use serde_json::{Value, json};
 
 pub(in crate::game::internal) mod constraints;
@@ -1577,7 +1578,7 @@ fn sized_selections(
         .min(members.len());
     (smallest..=largest).flat_map(move |size| {
         let mut indices = Some((0..size).collect::<Vec<_>>());
-        core::iter::from_fn(move || {
+        from_fn(move || {
             let current = indices.take()?;
             let selection = current
                 .iter()
