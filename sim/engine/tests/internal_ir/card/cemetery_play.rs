@@ -651,3 +651,48 @@ fn field_play_filters_match_opponents_name_class_and_token_status_with_one_turn_
         );
     }
 }
+
+#[test]
+fn cemetery_phase_observer_runs_only_from_its_declared_zone_and_pays_on_resolution() {
+    for (zone, accepted, pp, returned) in [
+        ("cemetery", true, 2, true),
+        ("cemetery", false, 2, false),
+        ("cemetery", true, 0, false),
+        ("ex", true, 2, false),
+        ("field", true, 2, false),
+    ] {
+        let mut tree = tree();
+        tree["cards"]["unit-follower"]["abilities"][0]["auto"] = json!({"zone":"cemetery","on":{"phase":{"which":"end","whose":"self"}},"do":[{"pay":{"cost":{"pp":1},"do":[{"move":{"ref":"this","to":"field"}}]}}]});
+        let mut initial = initial(pp);
+        initial["players"]["P1"]["zones"]["cemetery"] = json!([]);
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"phoenix","card":"unit-follower"}]);
+        let mut game = game(&initial, &tree, vec![]);
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let Some(q) = game.internal_pending_choice().unwrap() else {
+            assert_ne!(zone, "cemetery");
+            continue;
+        };
+        assert_eq!(zone, "cemetery");
+        let InputDomain::Pending(options) = &q.domain else {
+            panic!("phase occurrence")
+        };
+        let step = game
+            .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+            .unwrap();
+        if matches!(step, CardPlay::Awaiting(_)) {
+            resolved(pay(&mut game, step, accepted));
+        } else {
+            assert_eq!(pp, 0);
+        }
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["field"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("phoenix")),
+            returned
+        );
+        assert_eq!(state["P1"]["pp"]["current"], pp - u8::from(returned));
+    }
+}

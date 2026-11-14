@@ -1,58 +1,6 @@
 format: 1
 kind: effect_set
 cards:
-  BP19-SL22:
-    status: complete
-    abilities:
-      - line: 1
-        kind: static
-        body:
-          op: repeat_triggers
-          side: self
-          event: end
-          additional: 1
-      - line: 2
-        kind: trigger
-        body:
-          op: choice
-          min: 1
-          max:
-            if:
-              fn: gt
-              args:
-                - count:
-                    zone: field
-                    side: self
-                    type: follower
-                    trait: 八獄
-                    other: true
-                - 0
-            then: 2
-            else: 1
-          modes:
-            - op: damage
-              subjects: target.1
-              amount: 4
-            - op: seq
-              steps:
-                - op: modify
-                  subjects: self.leader
-                  hp: 1
-                - op: stand
-                  subjects: self
-            - op: draw
-              count: 1
-        event: end
-        targets:
-          - key: "1"
-            select:
-              zone: field
-              side: opponent
-              type: follower
-            min: 1
-            max: 1
-            modes:
-              - 1
   BP19-SL26:
     status: complete
     abilities:

@@ -1,4 +1,5 @@
 use super::super::{Result, invalid, tokens};
+use crate::ir::events::subscriptions;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Ability, AbilityId, Action, CardProgram, Instruction, InstructionId, Located, Program,
@@ -143,6 +144,23 @@ impl PlannedAbility {
             plan: Arc::new(compiler.finish()?),
         })
     }
+    pub(in crate::game::internal) fn event_alternatives(self) -> Vec<Self> {
+        if !subscriptions::compound(&self.node) {
+            return vec![self];
+        }
+        subscriptions::alternatives(&self.node)
+            .into_iter()
+            .map(|node| {
+                let mut definition = self.located().clone();
+                definition.node = node;
+                Self {
+                    definition: Definition::Owned(Arc::new(definition)),
+                    plan: Arc::clone(&self.plan),
+                }
+            })
+            .collect()
+    }
+
     pub(in crate::game::internal) fn into_parts(self) -> (Ability, Arc<BodyPlan>) {
         (self.located().node.clone(), self.plan)
     }

@@ -13,6 +13,7 @@ use crate::game::{Step, int, string};
 use crate::ir::dice as ir_dice;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::fusion;
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -111,7 +112,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if !admitted
         || ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || (trigger.active_zones != [ZoneKind::Field] && !super::ex_phase(ability))
+        || !timing_zone_allowed(ability, trigger)
         || trigger.view
             != if matches!(
                 trigger.on,
@@ -133,6 +134,14 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         ));
     }
     Ok(true)
+}
+
+fn timing_zone_allowed(ability: &Ability, trigger: &TriggerSpec) -> bool {
+    trigger.active_zones == [ZoneKind::Field]
+        || super::phase_in_zone(ability, ZoneKind::Ex)
+        || (super::phase_in_zone(ability, ZoneKind::Cemetery)
+            && super::played::cemetery_body(ability))
+        || super::evolution::ex_evolution(ability)
 }
 
 fn aggregation_allowed(trigger: &TriggerSpec) -> bool {
@@ -307,6 +316,14 @@ impl Game {
         self.internal_record_subject_event(attacker, SubjectHistoryEvent::Attack)?;
         if !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+                if program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| subscriptions::compound(&ability.node))
+                {
+                    return true;
+                }
                 program
                     .card()
                     .abilities
@@ -461,6 +478,9 @@ impl Game {
         !self.internal_has_drain_grants()
             && !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+            if program.card().abilities.iter().any(|ability| subscriptions::compound(&ability.node)) {
+                return true;
+            }
                 program.card().abilities.iter().any(|ability| {
                     matches!(
                         ability.node.trigger.as_ref().map(|trigger| &trigger.on),
@@ -699,6 +719,14 @@ impl Game {
         use crate::ir::events::life::LifeFilter;
         use crate::ir::{Int, LifeChangeEvent};
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program.card().abilities.iter().any(|ability| {
                 matches!(
                     ability.node.trigger.as_ref().map(|trigger| &trigger.on),
@@ -707,7 +735,8 @@ impl Game {
                     })
                 )
             })
-        }) {
+        }) && self.card_runtime.delayed.is_empty()
+        {
             return Ok(());
         }
         let active = player_id(self.active())?;
@@ -749,7 +778,7 @@ impl Game {
                     }
                 }
             }
-            if observers.is_empty() {
+            if observers.is_empty() && !self.delayed_life_matches(event, active) {
                 continue;
             }
             let source = if battle {
@@ -776,6 +805,7 @@ impl Game {
                 return Err(unsupported("unadmitted life change producer"));
             };
             let header = self.pending_header(actor, authority, source, snapshot)?;
+            pending.extend(self.delayed_life_pending(event, &header, active)?);
             for (holder, ability) in observers {
                 pending.push(self.timing_occurrence(
                     &holder,
@@ -819,15 +849,22 @@ impl Game {
                 .zone_ids(seat, "field")
                 .into_iter()
                 .chain(self.zone_ids(seat, "ex"))
+                .chain(self.zone_ids(seat, "cemetery"))
             {
+                let zone = match self.object(&holder)?.zone.as_str() {
+                    "ex" => ZoneKind::Ex,
+                    "cemetery" => ZoneKind::Cemetery,
+                    _ => ZoneKind::Field,
+                };
+                if zone == ZoneKind::Cemetery {
+                    let (card, _) = self.internal_effective_print(&holder)?;
+                    if !self.card_runtime.is_loaded(&card) {
+                        continue;
+                    }
+                }
                 for ability in self.timing_abilities(&holder)? {
                     let Some(trigger) = &ability.node.trigger else {
                         continue;
-                    };
-                    let zone = if self.object(&holder)?.zone == "ex" {
-                        ZoneKind::Ex
-                    } else {
-                        ZoneKind::Field
                     };
                     if !trigger.active_zones.contains(&zone) {
                         continue;
@@ -875,12 +912,19 @@ impl Game {
         let header = self.pending_header(actor, Cause::Rule { rule }, None, before)?;
         let mut pending = Vec::new();
         for (holder, ability) in candidates {
-            pending.push(self.timing_occurrence(
-                &holder,
-                ability,
-                &header,
-                Event::Phase { event },
-            )?);
+            let source = self.internal_effective_source(&holder, &ability)?;
+            let additional = self.additional_phase_triggers(phase, source.controller)?;
+            let total = additional
+                .checked_add(1)
+                .ok_or_else(|| invalid("trigger multiplicity overflow"))?;
+            for _ in 0..total {
+                pending.push(self.timing_occurrence(
+                    &holder,
+                    ability.clone(),
+                    &header,
+                    Event::Phase { event },
+                )?);
+            }
         }
         self.internal_admit_pending(pending)
     }

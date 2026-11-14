@@ -1,0 +1,50 @@
+cards:
+  BP22-026:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            - delta: -3
+              if:
+                all:
+                  - cmp:
+                      left:
+                        count:
+                          face_up: true
+                          kind: evolve_follower
+                          who: self
+                          zone: evolve_deck
+                      op: ge
+                      right: 5
+                  - cmp:
+                      left:
+                        count:
+                          face_up: true
+                          kind: evolve_follower
+                          who: self
+                          zone: evolve_deck
+                      op: lt
+                      right: 10
+            - delta: -5
+              if:
+                cmp:
+                  left:
+                    count:
+                      face_up: true
+                      kind: evolve_follower
+                      who: self
+                      zone: evolve_deck
+                  op: eq
+                  right: 10
+      - keywords:
+          - storm
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

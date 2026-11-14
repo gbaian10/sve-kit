@@ -9,8 +9,8 @@ use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::{
     AttackEvent, Binding, DamageEvent, DiceEvent, EnterFieldEvent, EntryMethod, EntryOrigin,
-    EventPattern, EventPayload, LeaveFieldEvent, MovementEvent, ObjectRef, TriggerCondition,
-    TriggerSpec,
+    EventPattern, EventPayload, LeaveFieldEvent, MoveEvent, MovementEvent, ObjectRef,
+    TriggerCondition, TriggerSpec,
 };
 
 #[derive(Clone, Debug, Default)]
@@ -39,6 +39,7 @@ enum Context {
     },
     Damage(Binding<DamageEvent>, DamageEvent),
     Dice(Binding<DiceEvent>, DiceEvent),
+    Move(Binding<MoveEvent>, MoveEvent),
 }
 
 impl Context {
@@ -106,6 +107,9 @@ impl Context {
             (EventPattern::Dice { binding, .. }, Some(EventPayload::Dice { event })) => {
                 Self::Dice(*binding, event.clone())
             }
+            (EventPattern::Move { binding, .. }, Some(EventPayload::Move { event })) => {
+                Self::Move(*binding, *event)
+            }
             _ => Self::Empty,
         })
     }
@@ -128,7 +132,14 @@ impl EventReads {
             | Context::Entry { subject, .. }
             | Context::Attack { subject, .. } => Some(subject),
             Context::Movement { subject, .. } => subject.as_ref(),
-            Context::Empty | Context::Damage(..) | Context::Dice(..) => None,
+            Context::Empty | Context::Damage(..) | Context::Dice(..) | Context::Move(..) => None,
+        }
+    }
+
+    pub(super) fn move_batch_count(&self, binding: Binding<MoveEvent>) -> Option<u64> {
+        match &self.0 {
+            Context::Move(saved, event) if *saved == binding => Some(event.batch_size.0),
+            _ => None,
         }
     }
 

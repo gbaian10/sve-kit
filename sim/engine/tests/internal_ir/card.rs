@@ -85,6 +85,9 @@ mod advance_entry;
 #[path = "card/advance_spell.rs"]
 mod advance_spell;
 
+#[path = "card/entered_trait.rs"]
+mod entered_trait;
+
 #[path = "card/move_followup.rs"]
 mod move_followup;
 
@@ -229,6 +232,9 @@ mod evolution_cost_mod;
 mod evolution;
 #[path = "card/player_evolution.rs"]
 mod player_evolution;
+
+#[path = "card/self_damage.rs"]
+mod self_damage;
 
 #[path = "card/second.rs"]
 mod second;
@@ -809,6 +815,9 @@ mod permanent_stand;
 #[path = "card/dynamic_declarations.rs"]
 mod dynamic_declarations;
 
+#[path = "card/private_hand_cost.rs"]
+mod private_hand_cost;
+
 #[path = "card/hand_selection.rs"]
 mod hand_selection;
 
@@ -1025,3 +1034,58 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+#[path = "card/source_posture.rs"]
+mod source_posture;
+
+#[path = "card/spell_origin.rs"]
+mod spell_origin;
+
+#[path = "card/source_counter_quantity.rs"]
+mod source_counter_quantity;
+#[path = "card/target_role_objects.rs"]
+mod target_role_objects;
+
+#[path = "card/observed_hand_remainder.rs"]
+mod observed_hand_remainder;
+
+#[path = "card/optional_selected_scalar.rs"]
+mod optional_selected_scalar;
+
+#[path = "card/selected_play_cost.rs"]
+mod selected_play_cost;
+
+#[path = "card/public_destroy_filter.rs"]
+mod public_destroy_filter;
+
+#[path = "card/hand_source_ex.rs"]
+mod hand_source_ex;
+
+#[path = "card/trigger_multiplicity.rs"]
+mod trigger_multiplicity;
+
+#[path = "card/earth_exchange.rs"]
+mod earth_exchange;
+
+#[path = "card/next_turn_cost.rs"]
+mod next_turn_cost;
+
+#[path = "card/granted_attack_target.rs"]
+mod granted_attack_target;
+
+#[path = "card/live_cost_history.rs"]
+mod live_cost_history;
+
+#[path = "card/ex_evolution_observer.rs"]
+mod ex_evolution_observer;
+
+#[path = "card/skip_turn_evolution.rs"]
+mod skip_turn_evolution;
+
+#[path = "card/mixed_subscription.rs"]
+mod mixed_subscription;
+
+#[path = "card/evolution_original_cost.rs"]
+mod evolution_original_cost;
+
+#[path = "card/ex_departure_batch.rs"]
+mod ex_departure_batch;

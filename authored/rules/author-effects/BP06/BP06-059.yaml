@@ -1,0 +1,48 @@
+cards:
+  BP06-059:
+    abilities:
+      - line: 1
+        play:
+          cannot_if:
+            not:
+              in_zone:
+                ref: this
+                zone: hand
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 2
+              - self_to_cemetery: true
+          do:
+            - buff:
+                hp: 4
+                on: ally
+                power: 4
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                on: ally
+                until: turn
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+          zone: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

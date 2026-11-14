@@ -10,6 +10,7 @@ use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
+use crate::ir::events::subscriptions;
 use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
 
 fn filter(ability: &Ability) -> Option<DiscardFilter> {
@@ -29,6 +30,12 @@ pub(in crate::game::internal) fn hand_header(ability: &Ability) -> bool {
     ability.active_zones == [ZoneKind::Hand] && filter(ability).is_some_and(|plan| plan.itself)
 }
 
+pub(in crate::game::internal) fn cemetery_header(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Cemetery]
+        && filter(ability).is_some_and(|plan| !plan.itself)
+        && super::played::cemetery_body(ability)
+}
+
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(plan) = filter(ability) else {
         return Ok(false);
@@ -37,10 +44,12 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         .trigger
         .as_ref()
         .ok_or_else(|| invalid("missing discard trigger"))?;
-    let zone = if plan.itself {
-        ZoneKind::Hand
+    let zones_allowed = if plan.itself {
+        trigger.active_zones == [ZoneKind::Hand]
     } else {
-        ZoneKind::Field
+        trigger.active_zones == [ZoneKind::Field]
+            || (trigger.active_zones == [ZoneKind::Cemetery]
+                && super::played::cemetery_body(ability))
     };
     let aggregation_allowed = trigger.aggregation == (TriggerAggregation::PerFact {})
         || (!plan.itself
@@ -53,7 +62,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
         || trigger.active_zones != ability.active_zones
-        || trigger.active_zones != [zone]
+        || !zones_allowed
         || trigger.view != EventSnapshotPolicy::BeforeExit
         || !aggregation_allowed
         || (plan.itself && plan.own_turn)
@@ -87,6 +96,14 @@ pub(in crate::game) struct RuleDiscard {
 impl Game {
     fn has_discard_headers(&self) -> bool {
         self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities
@@ -164,6 +181,8 @@ impl Game {
         let mut characters = None;
         let active = player_id(self.active())?;
         let mut holders = self.field_ids();
+        holders.extend(self.zone_ids("P1", "cemetery"));
+        holders.extend(self.zone_ids("P2", "cemetery"));
         holders.push(id.to_owned());
         for holder in holders {
             let (card, _) = self.internal_effective_print(&holder)?;
@@ -184,10 +203,10 @@ impl Game {
             }
             let actor = player_id(&self.object(&holder)?.controller)?;
             let source = self.internal_current_reference(&holder)?;
-            let zone = if self.object(&holder)?.zone == "hand" {
-                ZoneKind::Hand
-            } else {
-                ZoneKind::Field
+            let zone = match self.object(&holder)?.zone.as_str() {
+                "hand" => ZoneKind::Hand,
+                "cemetery" => ZoneKind::Cemetery,
+                _ => ZoneKind::Field,
             };
             for ability in self.internal_printed_abilities(&holder)? {
                 let Some(plan) = filter(&ability.node) else {

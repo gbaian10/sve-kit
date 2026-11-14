@@ -434,3 +434,82 @@ fn cross_zone_keyword_sources_keep_other_keywords_and_raw_zone_orders_closed() {
 
 #[path = "static_keywords/conditions.rs"]
 mod conditions;
+
+fn power_provider_catalog() -> Arc<Catalog> {
+    let (snapshot, _, document) = catalog_documents(&json!("1"));
+    let mut provider: Value = snapshot
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .find(|row| row["number"] == "unit-follower")
+        .unwrap();
+    provider["number"] = json!("unit-provider");
+    provider["faces"][0]["name"] = json!("unit-provider");
+    let mut document: Value = serde_json::from_str(&document).unwrap();
+    document["cards"]["unit-provider"] = document["cards"]["unit-follower"].clone();
+    Arc::new(
+        Catalog::from_documents(
+            &format!("{snapshot}\n{provider}"),
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../authored/rules/keywords.yaml"
+            )),
+            &[("unit.yaml".into(), document.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn static_keyword_power_equality_rechecks_both_sides_of_the_boundary() {
+    let provider = lowerer().lower(&equipment_played::tree(&json!({"static":{"effects":[{"grant":{
+        "on":{"who":"self","zone":"field","kind":"follower","other":true,"where":{"cmp":{"left":{"power_of":"item"},"op":"eq","right":1}}},
+        "keywords":["aura"]
+    }}]}}),"unit-provider")).unwrap().remove("unit-provider").unwrap();
+    let receiver = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[{"buff":{"on":"this","power":1,"hp":0}}]}}),
+            "unit-follower",
+        ))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let id = receiver.card().abilities[0].node.id;
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"provider","card":"unit-provider","state":{"power":1_u8}},
+        {"id":"below","card":"unit-follower","state":{"power":0_u8}},
+        {"id":"equal","card":"unit-follower","state":{"power":1_u8}},
+        {"id":"above","card":"unit-follower","state":{"power":2_u8}}
+    ]);
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"power":1_u8});
+    let mut game = Game::new(
+        power_provider_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "power-equality",
+    )
+    .unwrap();
+    game.load_internal_card("unit-provider", &provider).unwrap();
+    game.load_internal_card("unit-follower", &receiver).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["equal"]["keywords"], json!(["オーラ"]));
+    for object in ["provider", "below", "above", "f"] {
+        assert_eq!(state["objects"][object]["keywords"], json!([]));
+    }
+    for object in ["below", "equal"] {
+        resolved(
+            game.activate_internal_card(object, id, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+    }
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["below"]["keywords"], json!(["オーラ"]));
+    assert_eq!(state["objects"]["equal"]["keywords"], json!([]));
+}

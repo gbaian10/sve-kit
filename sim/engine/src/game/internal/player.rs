@@ -49,6 +49,7 @@ impl Wait {
             | Self::Order(_)
             | Self::Search(_)
             | Self::SearchPartition(_)
+            | Self::TransformTemplates(_)
             | Self::Draw { .. } => QuestionPurpose::ResolutionChoice,
         }
     }

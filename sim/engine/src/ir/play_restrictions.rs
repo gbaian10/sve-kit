@@ -93,19 +93,20 @@ pub(crate) fn card_play_rule(ability: &Ability) -> Option<CardPlayRule<'_>> {
     else {
         return None;
     };
-    let polarity = match (polarity, ability.active_zones.as_slice()) {
-        (
-            Polarity::Forbid,
-            [ZoneKind::Ex]
-            | [
-                ZoneKind::Hand,
-                ZoneKind::Ex,
-                ZoneKind::Cemetery,
-                ZoneKind::Banish,
-            ],
-        ) => Polarity::Forbid,
-        (Polarity::Allow, [ZoneKind::Cemetery]) => Polarity::Allow,
-        _ => return None,
+    let polarity = match polarity {
+        Polarity::Forbid
+            if !ability.active_zones.is_empty()
+                && ability.active_zones.iter().all(|zone| {
+                    matches!(
+                        zone,
+                        ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Banish
+                    )
+                }) =>
+        {
+            Polarity::Forbid
+        }
+        Polarity::Allow if ability.active_zones == [ZoneKind::Cemetery] => Polarity::Allow,
+        Polarity::Allow | Polarity::Forbid | Polarity::Require => return None,
     };
     let forbids = polarity == Polarity::Forbid;
     let mut expected = declaration(
@@ -199,4 +200,31 @@ pub(crate) fn is_banish_play_installation(action: &Action) -> bool {
         return false;
     };
     banish_play_filter(players, effect, duration).is_some()
+}
+
+/// A source-only membership test carries no authority to inspect its hand neighbours.
+// Only a predicate-free intersection with SourceHolder avoids enumerating private neighbors.
+pub(crate) fn source_zone_query(selector: &Selector) -> Option<ZoneKind> {
+    let Selector::Intersection { sets } = selector else {
+        return None;
+    };
+    match sets.as_slice() {
+        [
+            Selector::Objects { objects },
+            Selector::Zone {
+                players,
+                zone: zone @ (ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Banish),
+                view: SelectionView::Current {},
+                predicate,
+                ..
+            },
+        ] if objects == &[ObjectOperand::SourceHolder {}]
+            && players.relation == PlayerRelation::SelfPlayer
+            && players.relative_to == (PlayerRef::Controller {})
+            && **predicate == Expr::Literal(Bool(true)) =>
+        {
+            Some(*zone)
+        }
+        _ => None,
+    }
 }

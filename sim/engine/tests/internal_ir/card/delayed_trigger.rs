@@ -25,12 +25,6 @@ fn delayed_callbacks_reject_live_outer_reads_nested_installations_and_other_life
         lowerer().lower(&hidden).is_err(),
         "a private hand choice cannot feed an installed watch"
     );
-    let mut life = delayed();
-    life["delayed"]["on"] = json!({"life_changed":{"who":"self","direction":"down"}});
-    assert!(
-        lowerer().lower(&tree(&life)).is_err(),
-        "the unneeded life subscription remains unsupported"
-    );
 
     for (pointer, value) in [
         ("/delayed/until", json!("next_opp_turn")),
@@ -55,6 +49,84 @@ fn delayed_callbacks_reject_live_outer_reads_nested_installations_and_other_life
             "{pointer} cannot widen the installed callback"
         );
     }
+}
+
+fn life_watch() -> Value {
+    let mut life = delayed();
+    life["delayed"]["on"] = json!({"life_changed":{"who":"self","direction":"down"}});
+    life
+}
+
+#[test]
+fn installed_life_watch_triggers_on_a_later_own_leader_decrease_this_turn() {
+    let mut document = tree(&life_watch());
+    document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
+        life_watch(), {"damage":{"to":{"leader":"self"},"n":1}}
+    ]);
+    let lowered = lowerer().lower(&document).unwrap();
+    let mut initial = setup(
+        1,
+        json!([{"id":"d1","card":"unit-follower"}, {"id":"tail","card":"unit-follower"}]),
+    );
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "life-watch",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &lowered["unit-follower"])
+        .unwrap();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("formal target");
+    };
+    resolved(
+        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![0]))
+            .unwrap(),
+    );
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    // Players see the installed watch as a life-change trigger, not a departure one.
+    assert!(
+        game.observe(Viewer::P1)
+            .unwrap()
+            .players
+            .iter()
+            .flat_map(|player| &player.effects)
+            .any(|effect| effect.change
+                == InstalledChange::Delayed {
+                    timing: TriggerTiming::LifeChange
+                }),
+        "the installed watch is public as a life-change trigger"
+    );
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("installed life occurrence");
+    };
+    assert_eq!(options.len(), 1, "one life decrease, one occurrence");
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap(),
+    );
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["d1"]),
+        "the callback draws once"
+    );
 }
 
 #[test]

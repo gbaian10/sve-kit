@@ -7,6 +7,7 @@ use crate::game::internal::Execution;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant::EffectiveAbility;
 use crate::ir::events::played::filter;
+use crate::ir::events::subscriptions;
 use crate::ir::optional_payment;
 use crate::ir::{
     Action, CharacteristicPatch, Control, Effect, GrantedAbility, LimitSpec, Located,
@@ -95,6 +96,11 @@ fn holder_move_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Strin
         match &step.node {
             Node::Instruction { instruction } if returns_holder(&instruction.action) => {
                 paths.insert(format!("{path}/instruction/action/objects/objects/0"));
+            }
+            Node::Control {
+                control: Control::Pay { on_paid, .. },
+            } => {
+                holder_move_paths(on_paid, &format!("{path}/control/on_paid"), paths);
             }
             // 「…てよい」 keeps the same self-return inside its May body.
             Node::Control {
@@ -213,6 +219,14 @@ impl Game {
         cost: ReceiptId,
     ) -> Result<()> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

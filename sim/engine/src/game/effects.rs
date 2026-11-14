@@ -698,8 +698,11 @@ impl Game {
         let mut entered = Vec::new();
         let mut erased = Vec::new();
         let mut advances = Vec::new();
+        let ex_departures =
+            self.internal_before_ex_departures(&movable, typed_entry_before, frame)?;
         let typed_departures =
             self.internal_before_departures(&movable, &destinations, side, frame)?;
+        let banish_zone = self.internal_before_banish_zone(&movable, &destinations, frame)?;
         let player_before = self.player_movement_before(&movable);
         let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
         for plan in &plans {
@@ -832,6 +835,26 @@ impl Game {
             .map(|plan| plan.previous.clone())
             .collect::<Vec<_>>();
         self.internal_mill_events(&milled, typed_entry_before, frame)?;
+        let banished = plans
+            .iter()
+            .filter(|plan| {
+                plan.changed && plan.destination == "banish" && plan.previous.zone != "banish"
+            })
+            .map(|plan| plan.previous.id.clone())
+            .collect::<Vec<_>>();
+        self.internal_commit_banish_zone(banish_zone, &banished)?;
+        let departed_ex = plans
+            .iter()
+            .filter(|plan| plan.changed && plan.previous.zone == "ex")
+            .map(|plan| {
+                (
+                    plan.previous.clone(),
+                    plan.destination.clone(),
+                    plan.controller.clone(),
+                )
+            })
+            .collect::<Vec<_>>();
+        self.internal_ex_departure_events(ex_departures, &departed_ex, typed_entry_before, frame)?;
         self.enqueue(pending);
         for (object, _) in &entered {
             self.initialize_entry_counters(&object.id, frame)?;

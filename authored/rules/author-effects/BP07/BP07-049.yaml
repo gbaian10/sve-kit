@@ -1,0 +1,42 @@
+cards:
+  BP07-049:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        n: 1
+                        to: field
+                        token: 大地の魔片
+                  - - pay:
+                        cost:
+                          earth_rite: 1
+                        do:
+                          - damage:
+                              distribute: true
+                              n: 4
+                              to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              option: 2
+              upto: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+    token_sources:
+      - card: BP07-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

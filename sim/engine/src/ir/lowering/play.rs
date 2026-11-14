@@ -84,7 +84,6 @@ fn check_choice_shape(
             Some(ast::Side::Controller | ast::Side::Opponent | ast::Side::Bound(_))
         )
         || target.from.other
-        || target.from.not_same_name_as_this
         || target.from.has_state_filter()
         || target.distinct_by.is_some()
         || target.cost_sum_le.is_some()
@@ -973,6 +972,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<RecipientSet, LoweringError> {
         Ok(match recipients {
+            ast::Recipients::Target(name) if name == "this" => RecipientSet::Objects {
+                objects: super::numeric::holder(),
+            },
             ast::Recipients::Role { role } => RecipientSet::Objects {
                 objects: Selector::Bound {
                     reference: *self
@@ -1028,6 +1030,8 @@ impl BodyContext<'_> {
                     Selector::Bound {
                         reference: *reference,
                     }
+                } else if name == "attack_target" {
+                    self.attack_target_objects(path)?
                 } else if name == "it" {
                     self.objects(&ast::Objects::Bound(name.clone()), path)?
                 } else {
@@ -1056,14 +1060,24 @@ impl BodyContext<'_> {
             }));
         }
         let amount = if damage.distribute == Some(true) {
-            if !self.formal_play
-                || self.targets.len() != 1
-                || self.parameters.len() != 1
-                || !self.target_roles.is_empty()
-                || !matches!(&damage.to, ast::Recipients::Target(_))
-            {
-                return Err(unsupported(path));
-            }
+            let declaration_scope = self.parameters.iter().find_map(|parameter| {
+                match (&recipients, &parameter.domain) {
+                    (
+                        RecipientSet::Objects {
+                            objects: Selector::Bound { reference },
+                        },
+                        ChoiceDomain::Objects { binding, .. },
+                    ) if reference == binding => Some(binding.key().0),
+                    (
+                        RecipientSet::Bound { recipients },
+                        ChoiceDomain::Recipients { binding, .. },
+                    ) if recipients == binding => Some(binding.key().0),
+                    _ => None,
+                }
+            });
+            let scope = declaration_scope
+                .filter(|_| self.formal_play)
+                .ok_or_else(|| unsupported(path))?;
             let total = if let Expr::Literal(Int(total)) = value {
                 Expr::Literal(Nat(
                     u64::try_from(total).map_err(|_private| unsupported(path))?
@@ -1071,7 +1085,7 @@ impl BodyContext<'_> {
             } else {
                 Expr::Compute(Box::new(NatOperation::CheckedInt { value }))
             };
-            let binding = Binding::new(self.allocator.id(path)?, self.scope);
+            let binding = Binding::new(self.allocator.id(path)?, scope);
             self.parameters.push(parameter(
                 self.card_allocator.id(path)?,
                 PlaySlot::Distribution,
@@ -1105,7 +1119,10 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         ability_source: &AbilitySource,
     ) -> Result<Located<Node>, LoweringError> {
-        if !self.formal_play || choice.options.is_empty() {
+        if self.choice_context == super::ChoiceContext::Mode
+            || !self.formal_play
+            || choice.options.is_empty()
+        {
             return Err(unsupported(path));
         }
         let maximum = u64::try_from(choice.options.len()).map_err(|_private| unsupported(path))?;
@@ -1113,6 +1130,10 @@ impl BodyContext<'_> {
             if choice.n.is_some() || choice.instead.is_some() || choice.exclude_chosen.is_some() {
                 return Err(unsupported(path));
             }
+            #[expect(
+                clippy::unneeded_field_pattern,
+                reason = "New count filters must require an explicit admission decision."
+            )]
             let ast::CountQuery {
                 face_up: None,
                 class: None,
@@ -1124,13 +1145,14 @@ impl BodyContext<'_> {
                 keyword: None,
                 r#trait: Some(_),
                 traits_any: None,
-                name: None,
+                name: _,
+                names: _,
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
                 token: None,
                 not_token: None,
-            } = count
+            } = count.as_ref()
             else {
                 return Err(unsupported(path));
             };
@@ -1243,6 +1265,7 @@ impl BodyContext<'_> {
                 banish_event: self.banish_event,
                 hand_exit: self.hand_exit,
                 static_zone: self.static_zone,
+                source_stats: self.source_stats,
                 activation_zone: self.activation_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,
@@ -1260,6 +1283,7 @@ impl BodyContext<'_> {
                 entry_event: self.entry_event,
                 evolution: None,
                 source_can_enter_field: self.source_can_enter_field,
+                spell: self.spell,
                 departure_to_cemetery: self.departure_to_cemetery,
                 scope,
                 definition: self.definition,
@@ -1299,7 +1323,8 @@ impl BodyContext<'_> {
                 resolution_captures: vec![],
                 event_captures: vec![],
                 event_trigger: None,
-                formal_play: false,
+                formal_play: !resolution,
+                choice_context: super::ChoiceContext::Mode,
                 auto: None,
                 mode_targets: BTreeMap::new(),
             };
@@ -1358,6 +1383,15 @@ impl BodyContext<'_> {
             self.allocator.next = context.allocator.next;
             self.resolution_captures
                 .append(&mut context.resolution_captures);
+            context.parameters.sort_by_key(|parameter| {
+                matches!(
+                    parameter.kind,
+                    DecisionKind::PlayParameter {
+                        slot: PlaySlot::CostMaterials,
+                        ..
+                    }
+                )
+            });
             modes.push(Mode {
                 costs: CostSpec::Ordered { steps: vec![] },
                 id: ModeId(mode_id),
@@ -1509,6 +1543,8 @@ fn choice_count(
     let condition = match &replacement.r#if {
         ast::ModeCondition::Cmp(comparison) => context.public_mode_condition(comparison, path)?,
         ast::ModeCondition::History(history) => context.history_condition(history, path)?,
+        // The play declaration precedes the modes; a failed payment reverts the whole play.
+        ast::ModeCondition::Paid(paid) => context.paid_condition(paid, path)?,
         ast::ModeCondition::EnteredFrom(origin)
             if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
         {

@@ -4,8 +4,8 @@ use super::{
     ZoneKind, ast, decode, source_span, unsupported,
 };
 use crate::ir::{
-    BoolRead, Comparison, CostChange, HistoryCount, IntRead, NatRead, ObjectRef, PlayCostModifier,
-    PlayerResource,
+    BoolRead, Comparison, CostChange, HistoryCount, IntOperation, IntRead, NatRead, ObjectOperand,
+    ObjectRef, PlayCostModifier, PlayerResource,
 };
 
 pub(super) fn lower(
@@ -183,29 +183,7 @@ fn condition(
         },
         ast::CostCondition::History(history) => history_condition(history, entry, allocator, path)?,
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
-            left: match &value.left {
-                ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
-                ast::PublicNumber::Count { count } => super::numeric::aggregate_count(
-                    condition_count_query(count, allocator, path)?,
-                    None,
-                ),
-                ast::PublicNumber::DistinctNames { distinct_names } => {
-                    super::numeric::distinct_count(
-                        distinct_names,
-                        super::super::ObjectProperty::Names,
-                        Binding::new(allocator.id(path)?, ScopeId(0)),
-                        path,
-                    )?
-                }
-                ast::PublicNumber::DistinctOriginalCosts {
-                    distinct_orig_costs,
-                } => super::numeric::distinct_count(
-                    distinct_orig_costs,
-                    super::super::ObjectProperty::Cost,
-                    Binding::new(allocator.id(path)?, ScopeId(0)),
-                    path,
-                )?,
-            },
+            left: condition_number(&value.left, entry, allocator, path)?,
             comparison: match value.op {
                 ast::Comparison::Eq => Comparison::Equal,
                 ast::Comparison::Ne => Comparison::NotEqual,
@@ -217,6 +195,32 @@ fn condition(
             right: Expr::Literal(Int(value.right)),
         },
     })))
+}
+
+fn condition_number(
+    value: &ast::PublicNumber,
+    entry: &ast::Ability,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    Ok(match value {
+        ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
+        ast::PublicNumber::Count { count } => cost_count(count, entry, allocator, path)?,
+        ast::PublicNumber::DistinctNames { distinct_names } => super::numeric::distinct_count(
+            distinct_names,
+            super::super::ObjectProperty::Names,
+            Binding::new(allocator.id(path)?, ScopeId(0)),
+            path,
+        )?,
+        ast::PublicNumber::DistinctOriginalCosts {
+            distinct_orig_costs,
+        } => super::numeric::distinct_count(
+            distinct_orig_costs,
+            super::super::ObjectProperty::Cost,
+            Binding::new(allocator.id(path)?, ScopeId(0)),
+            path,
+        )?,
+    })
 }
 
 fn history_condition(
@@ -305,11 +309,21 @@ pub(super) fn named_public_query(
     {
         return Err(unsupported(path));
     }
-    Ok(match value.zone {
+    let objects = match value.zone {
         ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field, path)?,
         ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex, path)?,
         ast::PublicZone::Cemetery => public_zone_query(value, binding, ZoneKind::Cemetery, path)?,
         ast::PublicZone::FieldEx => return Err(unsupported(path)),
+    };
+    Ok(if value.other {
+        Selector::Difference {
+            input: Box::new(objects),
+            except: Box::new(Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            }),
+        }
+    } else {
+        objects
     })
 }
 
@@ -337,4 +351,41 @@ fn public_zone_query(
             binding,
         )),
     })
+}
+
+fn cost_count(
+    count: &ast::PublicCountQuery,
+    entry: &ast::Ability,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    match count {
+        ast::PublicCountQuery::Public(query) => Ok(super::numeric::aggregate_count(
+            condition_count_query(query, allocator, path)?,
+            None,
+        )),
+        ast::PublicCountQuery::Numeric(query) => {
+            let body = ast::Body::default();
+            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+            if matches!(query.zone, ast::CountZone::Hand)
+                && query.other
+                && matches!(query.who, ast::Side::Controller)
+            {
+                let mut unfiltered = query.clone();
+                unfiltered.other = false;
+                context.zone_count(&unfiltered, path)?;
+                return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::OtherHandCount {
+                        player: PlayerRef::Controller {},
+                        excluding: ObjectOperand::SourceHolder {},
+                    })),
+                })));
+            }
+            // Private zones stay closed to cost conditions apart from the hand count above.
+            if matches!(query.zone, ast::CountZone::Hand | ast::CountZone::Deck) {
+                return Err(unsupported(path));
+            }
+            context.zone_count(query, path)
+        }
+    }
 }

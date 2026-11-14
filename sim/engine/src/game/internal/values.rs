@@ -12,6 +12,7 @@ use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
+use crate::ir::play_restrictions;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
     ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
@@ -261,7 +262,32 @@ impl Execution {
             .collect())
     }
 
+    fn source_zone_objects(&self, game: &Game, zone: ZoneKind) -> Result<Vec<ObjectRef>> {
+        let source = self.object(game, &ObjectOperand::SourceHolder {})?;
+        let current = game.object(self.object_id(source)?)?;
+        let same_zone = matches!(
+            (zone, current.zone.as_str()),
+            (ZoneKind::Hand, "hand")
+                | (ZoneKind::Ex, "ex")
+                | (ZoneKind::Cemetery, "cemetery")
+                | (ZoneKind::Banish, "banish")
+        );
+        Ok(
+            if same_zone
+                && current.generation == source.generation.0
+                && current.controller == seat_name(self.context.controller)?
+            {
+                vec![source]
+            } else {
+                vec![]
+            },
+        )
+    }
+
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+        if let Some(zone) = play_restrictions::source_zone_query(selector) {
+            return self.source_zone_objects(game, zone);
+        }
         if damaged_plan(selector).is_some() {
             return self.public_target_objects(game, selector, false);
         }
@@ -345,14 +371,7 @@ impl Execution {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
             } => self.followed_members(receipt)?,
-            Selector::Difference { input, except } => {
-                let input = self.objects(game, input)?;
-                let except = self.objects(game, except)?;
-                input
-                    .into_iter()
-                    .filter(|object| !except.contains(object))
-                    .collect()
-            }
+            Selector::Difference { input, except } => self.difference(game, input, except)?,
             Selector::Intersection { sets } => self.intersection(game, sets)?,
             _ => return Err(unsupported("selector")),
         };
@@ -360,6 +379,20 @@ impl Execution {
         Ok(objects
             .into_iter()
             .filter(|object| seen.insert((object.id, object.generation)))
+            .collect())
+    }
+
+    fn difference(
+        &self,
+        game: &Game,
+        input: &Selector,
+        except: &Selector,
+    ) -> Result<Vec<ObjectRef>> {
+        let input = self.objects(game, input)?;
+        let except = self.objects(game, except)?;
+        Ok(input
+            .into_iter()
+            .filter(|object| !except.contains(object))
             .collect())
     }
 
@@ -383,7 +416,17 @@ impl Execution {
 
     // Members compare by generation, so a returned object is not the one first selected.
     fn intersection(&self, game: &Game, sets: &[Selector]) -> Result<Vec<ObjectRef>> {
-        let mut sets = sets.iter();
+        // A hand only narrows explicit members such as 「手札のこれ」; it is never enumerated.
+        let (hands, sets): (Vec<&Selector>, Vec<&Selector>) = sets.iter().partition(|set| {
+            matches!(
+                set,
+                Selector::Zone {
+                    zone: ZoneKind::Hand,
+                    ..
+                }
+            )
+        });
+        let mut sets = sets.into_iter();
         let mut members = sets
             .next()
             .map(|set| self.objects(game, set))
@@ -392,6 +435,29 @@ impl Execution {
         for set in sets {
             let other = self.objects(game, set)?;
             members.retain(|object| other.contains(object));
+        }
+        for hand in hands {
+            let Selector::Zone {
+                players, predicate, ..
+            } = hand
+            else {
+                return Err(invalid("hand intersection"));
+            };
+            if !self.boolean(game, predicate)?.0 {
+                return Ok(Vec::new());
+            }
+            let mut held = BTreeSet::new();
+            for player in self.players(game, players)? {
+                held.extend(game.zone_ids(seat_name(player)?, "hand"));
+            }
+            members.retain(|object| {
+                self.object_id(*object).is_ok_and(|id| {
+                    held.contains(id)
+                        && game
+                            .object(id)
+                            .is_ok_and(|current| current.generation == object.generation.0)
+                })
+            });
         }
         Ok(members)
     }
@@ -565,6 +631,38 @@ impl Execution {
         Ok(())
     }
 
+    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
+        match frozen {
+            IntFrozen::MoveBatchCount { event } => {
+                let count = self
+                    .event_reads
+                    .move_batch_count(*event)
+                    .ok_or_else(|| invalid("missing committed EX batch authority"))?;
+                Ok(Int(i64::try_from(count).map_err(invalid)?))
+            }
+            IntFrozen::DamageAmount { event } => {
+                let hit = self
+                    .event_reads
+                    .damage(*event)
+                    .ok_or_else(|| invalid("missing damage event authority"))?;
+                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
+            }
+            IntFrozen::PaidMaterialActs { receipt } => {
+                super::receipt_members::paid_material_acts(self, receipt)
+            }
+            IntFrozen::PaidMaterialNumber { receipt, property } => {
+                super::receipt_members::paid_material_number(self, receipt, *property)
+            }
+            IntFrozen::ReceiptRequested { receipt } => {
+                self.quantity(receipt).map(|(requested, _)| requested)
+            }
+            IntFrozen::DiscardedCost { receipt } => {
+                super::receipt_members::discarded_cost(self, receipt)
+            }
+            _ => Err(unsupported("signed projection")),
+        }
+    }
+
     pub(super) fn integer(&self, game: &Game, expr: &Expr<Int>) -> Result<Int> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -588,7 +686,7 @@ impl Execution {
                 }
                 IntRead::HistorySum { query } => {
                     let plan = NumericHistoryPlan::compile(query)
-                        .ok_or_else(|| unsupported("life history sum"))?;
+                        .ok_or_else(|| unsupported("history sum"))?;
                     super::history_turn::sum(self, game, &plan)
                 }
             },
@@ -668,31 +766,6 @@ impl Execution {
         )
     }
 
-    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
-        match frozen {
-            IntFrozen::DamageAmount { event } => {
-                let hit = self
-                    .event_reads
-                    .damage(*event)
-                    .ok_or_else(|| invalid("missing damage event authority"))?;
-                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
-            }
-            IntFrozen::PaidMaterialActs { receipt } => {
-                super::receipt_members::paid_material_acts(self, receipt)
-            }
-            IntFrozen::PaidMaterialNumber { receipt, property } => {
-                super::receipt_members::paid_material_number(self, receipt, *property)
-            }
-            IntFrozen::ReceiptRequested { receipt } => {
-                self.quantity(receipt).map(|(requested, _)| requested)
-            }
-            IntFrozen::DiscardedCost { receipt } => {
-                super::receipt_members::discarded_cost(self, receipt)
-            }
-            _ => Err(unsupported("signed projection")),
-        }
-    }
-
     /// A printed original cost belongs to the card, so a moved target still has it.
     /// Only a public pick of at most one field or EX card lends it; a private pick never does.
     fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
@@ -766,6 +839,18 @@ impl Execution {
                     .ok_or_else(|| invalid("missing player turn ordinal"))
             }
             NatRead::Counter { holder, kind } => self.counter(game, holder, kind),
+            NatRead::OtherHandCount { player, excluding } => {
+                let excluded = self.object(game, excluding)?;
+                let excluded_id = self.object_id(excluded)?;
+                let current = game.object(excluded_id)?.generation == excluded.generation.0;
+                let hand = game.zone_ids(seat_name(self.player(game, player)?)?, "hand");
+                Ok(Nat(u64::try_from(
+                    hand.iter()
+                        .filter(|id| !current || id.as_str() != excluded_id)
+                        .count(),
+                )
+                .map_err(invalid)?))
+            }
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }
@@ -1063,6 +1148,11 @@ impl Execution {
                         _ => Err(invalid("missing card payment result")),
                     }
                 }
+                // Before payment, the accepted declaration equals completion: a failed payment
+                // reverts the whole play.
+                None if self.spell => super::card::exchange::declared(self, face, *receipt)
+                    .map(Bool)
+                    .ok_or_else(|| invalid("unavailable card play payment")),
                 _ => Err(invalid("unavailable card play payment")),
             },
             _ => Err(unsupported("boolean receipt")),

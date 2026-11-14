@@ -1,0 +1,64 @@
+cards:
+  BP09-003:
+    abilities:
+      - line: 1
+        scope: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - ward
+          while:
+            cmp:
+              left:
+                power_of: this
+              op: ge
+              right: 4
+      - line: 1
+        scope: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                power_of: this
+              op: ge
+              right: 7
+      - line: 1
+        scope: 3
+        static:
+          effects:
+            - ignore_ward:
+                on: this
+          while:
+            cmp:
+              left:
+                power_of: this
+              op: ge
+              right: 10
+      - attack_time:
+          do:
+            - damage:
+                n:
+                  power_of: this
+                to: chosen
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

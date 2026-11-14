@@ -2,10 +2,10 @@ use super::{Allocator, Located, LoweringError, SourceSpan, ast, costs, unsupport
 use crate::ir::{
     Action, Binding, Bool, Cardinality, ChoiceDomain, CostChange, CostSpec, CostStep, Decision,
     DecisionId, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, InputMode,
-    Instruction, InstructionContext, InstructionId, Int, MoveDestination, MoveReason, MoveSpec,
-    Nat, ObjectOperand, ObjectProperty, ObjectView, OwnerZone, PlayCostExchange, PlaySlot,
-    PlayerRef, Posture, PostureRead, Predicate, ReceiptId, SelectionConstraint, SelectionGroup,
-    SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    Instruction, InstructionContext, InstructionId, Int, KeywordId, MoveDestination, MoveReason,
+    MoveSpec, Nat, ObjectOperand, ObjectProperty, ObjectView, OwnerZone, PlayCostExchange,
+    PlaySlot, PlayerRef, Posture, PostureRead, Predicate, ReceiptId, SelectionConstraint,
+    SelectionGroup, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
 };
 
 enum MaterialAction {
@@ -15,6 +15,7 @@ enum MaterialAction {
 }
 
 pub(super) fn lower(
+    entry: &ast::Ability,
     play: &ast::PlayCosts,
     source: &SourceSpan,
     allocator: &mut Allocator,
@@ -38,6 +39,9 @@ pub(super) fn lower(
         },
         _ => return Err(unsupported(&path)),
     };
+    if let Some(amount) = optional.earth_rite {
+        return earth_rite(entry, source, allocator, &path, amount, change).map(Some);
+    }
     let scope = allocator.scope(&path)?;
     let choices = if let Some(routes) = &optional.one_of {
         if routes.len() != 2
@@ -378,4 +382,47 @@ pub(super) fn bindings(
         return Err(unsupported(path));
     }
     Ok(super::PaymentBindings { complete, discard })
+}
+
+fn earth_rite(
+    entry: &ast::Ability,
+    source: &SourceSpan,
+    allocator: &mut Allocator,
+    path: &str,
+    amount: u64,
+    change: CostChange,
+) -> Result<Located<PlayCostExchange>, LoweringError> {
+    let scope = allocator.scope(path)?;
+    let body = ast::Body::default();
+    let mut context = super::BodyContext::new(entry, scope, &body, None, allocator);
+    let (action, decision) = super::earth::cost(&mut context, amount, path)?;
+    let id = context.card_allocator.id(path)?;
+    let mut located = source.clone();
+    path.clone_into(&mut located.author_path);
+    Ok(Located {
+        source: located,
+        node: PlayCostExchange {
+            scope,
+            decision: DecisionId(context.card_allocator.id(path)?),
+            materials: vec![decision.ok_or_else(|| unsupported(path))?],
+            route: None,
+            cost: CostSpec::Ordered {
+                steps: vec![CostStep {
+                    keyword: Some(KeywordId::EarthRite),
+                    materials: None,
+                    instruction: Box::new(Instruction {
+                        id: InstructionId(id),
+                        receipt: ReceiptId(id),
+                        actor: PlayerRef::Controller {},
+                        source: super::ability_source(source, None),
+                        precondition: None,
+                        context: InstructionContext::Cost,
+                        action,
+                    }),
+                }],
+            },
+            change,
+            receipt: ReceiptId(context.card_allocator.id(path)?),
+        },
+    })
 }

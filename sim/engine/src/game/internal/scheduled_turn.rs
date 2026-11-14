@@ -11,12 +11,12 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
                 player: PlayerRef::Controller {},
                 operation: TurnOperation::InsertBefore {
                     anchor: ScheduleAnchor::NextTurn {}
-                },
+                } | TurnOperation::SkipNext {},
                 ..
             }
         )
     {
-        return Err(unsupported("controller extra turn before next turn"));
+        return Err(unsupported("controller turn scheduling"));
     }
     Ok(())
 }
@@ -26,14 +26,24 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     reason = "Typed extra turns mutate the shared authoritative schedule."
 )]
 impl Game {
-    pub(super) fn internal_extra_turn(
+    pub(super) fn internal_schedule_turn(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
         check_action(&instruction.action)?;
         let player = execution.player(self, &PlayerRef::Controller {})?;
-        self.insert_extra_turns(seat_name(player)?.to_owned(), 1)?;
+        if matches!(
+            instruction.action,
+            Action::ScheduleTurn {
+                operation: TurnOperation::SkipNext {},
+                ..
+            }
+        ) {
+            self.skip_next_turn(seat_name(player)?.to_owned())?;
+        } else {
+            self.insert_extra_turns(seat_name(player)?.to_owned(), 1)?;
+        }
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::ScheduledTurn(ScheduleToken(self.state.ir_epoch)),

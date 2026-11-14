@@ -4,8 +4,9 @@ use super::{
     unsupported,
 };
 use crate::ir::{
-    AbilityKind, AbilityQualification, Action, CostChange, CostKind, DurationEnd, Effect,
-    EffectReference, InstallationSubjects, InstallationTime, Int, UsageScope, UseLimit,
+    AbilityKind, AbilityQualification, Action, CostChange, CostKind, Duration, DurationEnd, Effect,
+    EffectReference, InstallationSubjects, InstallationTime, Int, Interval, TimeAnchor, UsageScope,
+    UseLimit,
 };
 use core::mem::swap;
 
@@ -22,9 +23,9 @@ fn players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringError> {
 }
 
 fn change(value: &ast::CostModifier, path: &str) -> Result<CostChange, LoweringError> {
-    match (value.delta, value.set) {
+    match (value.delta.as_ref(), value.set) {
         (Some(amount), None) => Ok(CostChange::Delta {
-            amount: Expr::Literal(Int(amount)),
+            amount: Expr::Literal(Int(super::decode(amount.clone(), path)?)),
         }),
         (None, Some(amount)) if amount >= 0 => Ok(CostChange::Set {
             amount: Expr::Literal(Int(amount)),
@@ -224,15 +225,23 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         let subjects = selector(&modifier.when_playing, self.card_allocator, path)?;
-        let mut duration = super::numeric::duration(value.until.as_ref(), path)?;
-        if !duration.intervals.is_empty()
-            || !matches!(
-                duration.end,
-                DurationEnd::CurrentTurnEnd {} | DurationEnd::NoTemporalExpiry {}
-            )
-        {
-            return Err(unsupported(path));
-        }
+        let mut duration =
+            if let Some(ast::Until::DuringNextTurn { during_next_turn }) = &value.until {
+                let player = match during_next_turn.who {
+                    ast::StandPlayer::Controller => PlayerRef::Controller {},
+                    ast::StandPlayer::Opponent => super::super::events::timing::opponent(),
+                };
+                Duration {
+                    end: DurationEnd::NextTurnEnd {
+                        player: player.clone(),
+                    },
+                    anchor: TimeAnchor::Installation {},
+                    usage: None,
+                    intervals: vec![Interval::DuringNextTurn { player }],
+                }
+            } else {
+                super::numeric::duration(value.until.as_ref(), path)?
+            };
         if modifier.next_only == Some(true) {
             duration.usage = Some(UseLimit {
                 count: Nat(1),

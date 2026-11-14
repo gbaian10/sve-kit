@@ -595,3 +595,117 @@ fn batch_deduplication_precedes_each_sources_once_per_turn_quota() {
         );
     }
 }
+
+fn cemetery_discard_position(own_turn: bool) -> Value {
+    let mut initial = setup(1, json!([]));
+    let active = if own_turn { "P1" } else { "P2" };
+    initial["turn"]["active"] = json!(active);
+    for seat in ["P1", "P2"] {
+        initial["players"][seat]["zones"]["field"] = json!([]);
+        initial["players"][seat]["zones"]["hand"] = json!([]);
+    }
+    initial["players"][active]["zones"]["field"] = json!([{"id":"producer","card":"unit-amulet"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"reviver","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"discarded","card":"unit-spell"}]);
+    initial
+}
+
+#[test]
+fn cemetery_discard_observer_pays_on_its_turn_and_preserves_declines() {
+    let observer = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"auto":{
+                "zone":"cemetery","on":{"discarded":{"who":"opp","during":{"turn":"self"}}},
+                "do":[{"pay":{"cost":{"pp":1},"do":[{"move":{"ref":"this","to":"field"}}]}}]
+            }}),
+            "unit-follower",
+        ))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for (own_turn, accept) in [(true, true), (true, false), (false, false)] {
+        let producer = lowerer()
+            .lower(&equipment_played::tree(
+                &json!({"activate":{"cost":{"pp":0},"do":[
+                    {"discard":{"who":if own_turn {"opp"} else {"self"},"n":1}}
+                ]}}),
+                "unit-amulet",
+            ))
+            .unwrap()
+            .remove("unit-amulet")
+            .unwrap();
+        let initial = cemetery_discard_position(own_turn);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "cemetery-discard",
+        )
+        .unwrap();
+        game.load_internal_card("unit-amulet", &producer).unwrap();
+        game.load_internal_card("unit-follower", &observer).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let actor = PlayerId {
+            seat: if own_turn { 1 } else { 2 },
+        };
+        let CardPlay::Awaiting(q) = game
+            .activate_internal_card("producer", producer.card().abilities[0].node.id, actor)
+            .unwrap()
+        else {
+            panic!("opponent hand discard");
+        };
+        let InputDomain::Targets(domain) = &q.domain else {
+            panic!("discard choice");
+        };
+        resolved(
+            game.answer_internal_card(
+                q.actor,
+                q.token,
+                Answer::Targets(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        if own_turn {
+            let q = game.internal_pending_choice().unwrap().unwrap();
+            let InputDomain::Pending(options) = &q.domain else {
+                panic!("cemetery observer");
+            };
+            let CardPlay::Awaiting(q) = game
+                .answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
+                .unwrap()
+            else {
+                panic!("resolution PP payment");
+            };
+            assert!(matches!(q.domain, InputDomain::OptionalCost));
+            resolved(
+                game.answer_internal_card(q.actor, q.token, Answer::OptionalCost(accept))
+                    .unwrap(),
+            );
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+        } else {
+            assert!(game.internal_pending_choice().unwrap().is_none());
+        }
+        let state = game.projection(View::Referee).unwrap();
+        let returned = own_turn && accept;
+        assert_eq!(
+            state["P1"]["field"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("reviver")),
+            returned
+        );
+        assert_eq!(
+            state["P1"]["pp"]["current"],
+            if returned { 1_u8 } else { 2_u8 }
+        );
+        assert_eq!(state["P2"]["cemetery"], json!(["discarded"]));
+    }
+}

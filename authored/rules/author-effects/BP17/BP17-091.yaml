@@ -1,0 +1,60 @@
+cards:
+  BP17-091:
+    abilities:
+      - activate:
+          advance: true
+          cost:
+            steps:
+              - pp: 3
+              - self_to_cemetery: true
+          do:
+            - choose:
+                bind: goddess
+                from:
+                  advance_follower: true
+                  kind: follower
+                  name: レリックゴッデス
+                  who: self
+                  zone: evolve_deck
+                may: true
+                n: 1
+            - move:
+                ref: goddess
+                to: field
+          usable_if:
+            cmp:
+              left:
+                count:
+                  kind: amulet
+                  who: self
+                  zone: field
+              op: ge
+              right: 4
+        line: 1
+      - fanfare:
+          do:
+            - banish: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto:
+                per:
+                  of:
+                    count:
+                      kind: amulet
+                      who: self
+                      zone: field
+                  unit: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

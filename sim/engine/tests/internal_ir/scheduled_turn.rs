@@ -11,9 +11,9 @@ const fn insertion() -> Action {
 }
 
 #[test]
-fn extra_turn_cannot_schedule_other_players_skip_or_an_unbound_anchor() {
+fn turn_scheduling_rejects_other_players_or_an_unbound_anchor() {
     WellFormedProgram::check(body(1, vec![instruction(1, insertion())])).unwrap();
-    for variant in 0_u8..3 {
+    for variant in 0_u8..2 {
         let mut action = insertion();
         let Action::ScheduleTurn {
             player, operation, ..
@@ -23,7 +23,6 @@ fn extra_turn_cannot_schedule_other_players_skip_or_an_unbound_anchor() {
         };
         match variant {
             0 => *player = PlayerRef::Active {},
-            1 => *operation = TurnOperation::SkipNext {},
             _ => {
                 *operation = TurnOperation::InsertBefore {
                     anchor: ScheduleAnchor::Bound {

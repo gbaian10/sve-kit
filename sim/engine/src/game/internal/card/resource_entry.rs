@@ -198,15 +198,15 @@ fn advance_payment(ability: &Ability, steps: &[CostStep]) -> Result<ResourceEntr
         || !play.parameters.is_empty()
         || !play.captures.is_empty()
         || play.limit.is_some()
-        || rest.len() > 1
         || steps.iter().any(|step| step.materials.is_some())
         || rest.iter().any(|step| {
-            step.instruction.action
-                != (Action::Banish {
-                    objects: Selector::Objects {
-                        objects: vec![ObjectOperand::SourceHolder {}],
-                    },
-                })
+            !super::material::source_field_cost(&step.instruction.action)
+                && step.instruction.action
+                    != (Action::Banish {
+                        objects: Selector::Objects {
+                            objects: vec![ObjectOperand::SourceHolder {}],
+                        },
+                    })
         })
     {
         return Err(unsupported("Advance printed remaining cost"));

@@ -18,8 +18,8 @@ use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
     MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectProperty, ObjectRef, OwnerZone,
-    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Posture, PostureEvent, Quantity, QuantityUnit,
-    ReceiptId, ScopeId, SelectionSnapshot, SelectionView, Selector, Visibility,
+    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Position, Posture, PostureEvent, Quantity,
+    QuantityUnit, ReceiptId, ScopeId, SelectionSnapshot, SelectionView, Selector, Visibility,
     WellFormedCardProgram, ZoneKind, ZoneRef,
 };
 use crate::ir::{
@@ -537,19 +537,31 @@ fn token_material_trait(selector: &Selector) -> Option<&TraitId> {
 pub(super) fn source_field_cost(action: &Action) -> bool {
     matches!(cost_objects(action), Some(Selector::Objects { objects })
         if objects == &[ObjectOperand::SourceHolder {}])
-        && matches!(
-            action,
-            Action::Posture { .. }
-                | Action::Move {
-                    movement: MoveSpec {
-                        to: MoveDestination::Owners {
-                            zone: OwnerZone::Cemetery
-                        },
-                        ..
-                    },
-                    ..
-                }
+        && match action {
+            Action::Posture { .. } => true,
+            Action::Move { movement, .. } => source_put(movement),
+            _ => false,
+        }
+}
+
+/// 「これを墓場に置く」 or 「これをデッキの下に置く」: where a source may put itself as a cost.
+pub(super) const fn source_put(movement: &MoveSpec) -> bool {
+    matches!(
+        (&movement.to, &movement.position),
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Cemetery
+            },
+            None
+        ) | (
+            MoveDestination::Owners {
+                zone: OwnerZone::Deck
+            },
+            Some(Position::Bottom {})
         )
+    ) && movement.order.is_none()
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty()
 }
 
 /// Acting needs a field card; 「EXエリアのこれを墓場に置く」 may also send itself from EX.

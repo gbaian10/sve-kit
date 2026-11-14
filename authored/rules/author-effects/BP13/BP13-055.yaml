@@ -1,0 +1,32 @@
+cards:
+  BP13-055:
+    abilities:
+      - keywords:
+          - assail
+        line: 1
+      - evolve_time:
+          do:
+            - move:
+                ref: chosen
+                result: entered
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                orig_cost_le:
+                  power_of: this
+                trait: 武闘竜人
+                who: self
+                zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

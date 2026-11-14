@@ -1,0 +1,35 @@
+cards:
+  BP11-081:
+    abilities:
+      - auto:
+          do:
+            - stand: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 1
+      - attack_time:
+          do:
+            - if:
+                cond:
+                  is:
+                    kind: follower
+                    ref: attack_target
+                then:
+                  - apply:
+                      effect:
+                        prevent:
+                          kind: any
+                      on: this
+                      until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

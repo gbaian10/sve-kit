@@ -4,7 +4,6 @@
 )]
 
 use super::*;
-use core::iter;
 
 const P1: PlayerId = PlayerId { seat: 1 };
 
@@ -74,54 +73,6 @@ fn position(card: &str) -> Value {
         {"id":"draw-2","card":"BP01-037"}
     ]);
     initial
-}
-
-fn replace_face_id(value: &mut Value, old: &str, new: &str) {
-    match value {
-        Value::String(text) if text == old => new.clone_into(text),
-        Value::Array(values) => {
-            for nested in values {
-                replace_face_id(nested, old, new);
-            }
-        }
-        Value::Object(values) => {
-            for nested in values.values_mut() {
-                replace_face_id(nested, old, new);
-            }
-        }
-        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
-    }
-}
-
-fn game_with_test_evolve_base(initial: &Value) -> Game {
-    // Supply only the 086 base evolve action so this scenario can reach migrated face 087.
-    let (snapshot, keywords, mut input) = inputs().clone();
-    let authors = input["authors"].as_array_mut().unwrap();
-    let mut base = authors
-        .iter()
-        .find(|author| author["input"]["card_no"] == "BP05-004")
-        .unwrap()
-        .clone();
-    let base_id = "c:ff6943948ba651859820aac9b0879df2";
-    base["input"]["card_no"] = json!("BP05-086");
-    base["input"]["card_id"] = json!(base_id);
-    base["input"]["source_payload"]["card_id"] = json!(base_id);
-    base["input"]["source_payload"]["faces"][0]["cost"] = json!(4_u8);
-    base["printings"] = json!(["BP05-086"]);
-    let cards = base["input"]["tree"]["cards"].as_object_mut().unwrap();
-    let mut card = cards.remove("BP05-004").unwrap();
-    let faces = card["faces"].as_object_mut().unwrap();
-    let old_face_id = faces.keys().next().unwrap().clone();
-    let mut face = faces.remove(&old_face_id).unwrap();
-    face["abilities"][0]["evolve"]["cost"]["pp"] = json!(4_u8);
-    let face_id = "f:2342d87f3f9b52ab9f52e29718f75384";
-    replace_face_id(&mut face, &old_face_id, face_id);
-    card["faces"] = Value::Object(iter::once((face_id.to_owned(), face)).collect());
-    cards.insert("BP05-086".to_owned(), card);
-    base["input"]["source_payload"]["faces"][0]["face_id"] = json!(face_id);
-    authors.push(base);
-
-    game_from_selection(initial, &snapshot, &keywords, &input)
 }
 
 fn attack(game: &mut Game, attacker: &str, target: &str) -> String {
@@ -267,13 +218,23 @@ fn bp05_087_evolve_time_increases_pp_max_restores_life_and_draws() {
         json!([{"id":"form","card":"BP05-087"}]);
     initial["players"]["P1"]["zones"]["deck"] =
         json!([{"id":"drawn","card":"BP01-037"}]);
-    let mut game = game_with_test_evolve_base(&initial);
+    let mut game = game(&initial);
+    let definition = selection().current["BP05-086"]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.source.line == 1)
+        .unwrap()
+        .node
+        .id;
 
     let action = game
         .internal_rule_action(&json!({
             "do":"evolve",
             "source":"base",
             "evolve_card":"form",
+            "definition":definition.0,
             "pay":{"pp":4_u8}
         }))
         .unwrap();

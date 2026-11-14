@@ -244,7 +244,7 @@ fn equality_accepts_known_zero_and_two_but_rejects_neighboring_costs() {
 }
 
 #[test]
-fn event_cost_ranges_keep_entry_shapes_and_trait_unions_closed() {
+fn event_cost_ranges_compose_for_entry_but_keep_history_and_other_events_closed() {
     let mut entry = equipment_played::tree(
         &json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"traits_any":["宴楽","魔法使い"]}}},"do":[{"life":{"who":"self","delta":1}}]}}),
         "unit-follower",
@@ -252,10 +252,7 @@ fn event_cost_ranges_keep_entry_shapes_and_trait_unions_closed() {
     lowerer().lower(&entry).unwrap();
     entry["cards"]["unit-follower"]["abilities"][0]["auto"]["on"]["enter_field"]["sel"]["orig_cost_le"] =
         json!(3);
-    assert!(matches!(
-        lowerer().lower(&entry).unwrap_err().code,
-        "unsupported_construct" | "invalid_expanded"
-    ));
+    lowerer().lower(&entry).unwrap();
     for header in ["enter_field", "left_field", "evolved"] {
         let baseline = equipment_played::tree(
             &json!({"auto":{"on":{header:{"who":"self","sel":{"kind":"follower"}}},"do":[{"life":{"who":"self","delta":1}}]}}),
@@ -272,10 +269,11 @@ fn event_cost_ranges_keep_entry_shapes_and_trait_unions_closed() {
                 continue;
             }
             let mut tree = baseline.clone();
-            let accepts_departure_cost =
-                header == "left_field" && filter.get("traits_any").is_none();
+            let accepts_event_cost = header == "enter_field"
+                || (matches!(header, "left_field" | "evolved")
+                    && filter.get("traits_any").is_none());
             tree["cards"]["unit-follower"]["abilities"][0]["auto"]["on"][header]["sel"] = filter;
-            if accepts_departure_cost {
+            if accepts_event_cost {
                 lowerer().lower(&tree).unwrap();
             } else {
                 assert!(matches!(

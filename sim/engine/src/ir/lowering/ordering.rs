@@ -1,5 +1,6 @@
+use super::super::trigger_restrictions;
 use super::super::{
-    DecisionId, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
+    DecisionId, Effect, MemberProjection, MoveDestination, MoveReason, MoveSpec, MovementEvent,
     MovementReceipt, ObjectOperand, ObjectReceipt, OwnerZone, Placement, Position, PositiveNat,
     Posture, ReceiptReference, Visibility,
 };
@@ -595,12 +596,90 @@ impl BodyContext<'_> {
         })
     }
 
+    /// A move to the field carries its arrival posture and entry effects on the movement itself.
+    fn field_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        let mut action = match &value.r#ref {
+            Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
+                self.self_return(objects, path)?
+            }
+            _ => self.field_entry_move(value, path)?,
+        };
+        let Action::Move { movement, .. } = &mut action else {
+            if value.entry_effects.is_some() {
+                return Err(unsupported(path));
+            }
+            return Ok(action);
+        };
+        movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+        movement.entry_effects = entry_effects(value, path)?;
+        Ok(action)
+    }
+
+    fn field_objects_move(
+        &mut self,
+        value: &ast::Move,
+        source_objects: Option<&ast::Objects>,
+        public_query: Option<&ast::PublicQuery>,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if matches!(source_objects, Some(ast::Objects::Bound(name)) if self.hand_targets.contains(name))
+            && matches!(
+                value.to,
+                ast::Destination::Hand | ast::Destination::Cemetery
+            )
+        {
+            return Err(unsupported(path));
+        }
+        if matches!(value.to, ast::Destination::Deck) {
+            return if let Some(objects) = source_objects {
+                self.selected_deck_move(value, objects, path)
+            } else {
+                let query = public_query.ok_or_else(|| unsupported(path))?;
+                let objects = self.public_move_objects(query, path)?;
+                Self::fixed_deck_move(value, objects, path)
+            };
+        }
+        if value.position.is_some()
+            || value.order.is_some()
+            || !self.supports_move_result(value, source_objects, public_query)
+        {
+            return Err(unsupported(path));
+        }
+        let zone = match value.to {
+            ast::Destination::Hand => OwnerZone::Hand,
+            ast::Destination::Cemetery => OwnerZone::Cemetery,
+            ast::Destination::Ex => OwnerZone::Ex,
+            ast::Destination::Deck | ast::Destination::Field => {
+                return Err(unsupported(path));
+            }
+        };
+        if matches!(source_objects, Some(ast::Objects::This(_)))
+            && zone == OwnerZone::Ex
+            && self.activation_zone == Some(ZoneKind::Hand)
+        {
+            // 「自分の手札のこれをEXエリアに置く」 as the effect names only the private source.
+            return Ok(owner_put(
+                super::hand_payment::source(self.card_allocator, path)?,
+                OwnerZone::Ex,
+            ));
+        }
+        let objects = self.ordinary_move_source(source_objects, public_query, zone, path)?;
+        if zone == OwnerZone::Ex
+            && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if self.opponent_cemetery_targets.contains(name))
+        {
+            return Ok(shared_put(objects, ZoneKind::Ex));
+        }
+        Ok(owner_put(objects, zone))
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.acted.is_some() && !matches!(value.to, ast::Destination::Field) {
+        if (value.acted.is_some() || value.entry_effects.is_some())
+            && !matches!(value.to, ast::Destination::Field)
+        {
             return Err(unsupported(path));
         }
         if let Some(action) = self.public_reveal_move(value, path)? {
@@ -610,67 +689,21 @@ impl BodyContext<'_> {
             return Ok(action);
         }
         if matches!(value.to, ast::Destination::Field) {
-            let mut action = match &value.r#ref {
-                Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
-                    self.self_return(objects, path)?
-                }
-                _ => self.field_entry_move(value, path)?,
-            };
-            if let Action::Move { movement, .. } = &mut action {
-                movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
-            }
-            return Ok(action);
+            return self.field_move(value, path);
         }
         if let Some(top) = &value.top {
             return self.top_move(value, top, path);
         }
-        if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
-            if matches!(objects, ast::Objects::Bound(name) if self.hand_targets.contains(name))
-                && matches!(
-                    value.to,
-                    ast::Destination::Hand | ast::Destination::Cemetery
-                )
-            {
-                return Err(unsupported(path));
-            }
-            if matches!(value.to, ast::Destination::Deck) {
-                return self.selected_deck_move(value, objects, path);
-            }
-            if value.position.is_some()
-                || value.order.is_some()
-                || !self.supports_move_result(value, objects)
-            {
-                return Err(unsupported(path));
-            }
-            let zone = match value.to {
-                ast::Destination::Hand => OwnerZone::Hand,
-                ast::Destination::Cemetery => OwnerZone::Cemetery,
-                ast::Destination::Ex => OwnerZone::Ex,
-                ast::Destination::Deck | ast::Destination::Field => {
-                    return Err(unsupported(path));
-                }
-            };
-            if matches!(objects, ast::Objects::This(_))
-                && zone == OwnerZone::Ex
-                && self.leave_event.is_some()
-                && !self.departure_to_cemetery
-            {
-                return Err(unsupported(path));
-            }
-            let objects = match (objects, self.leave_event, zone) {
-                (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
-                    objects: vec![ObjectOperand::FollowEventMove {
-                        event: MovementEvent::LeaveField { event },
-                    }],
-                },
-                _ => self.objects(objects, path)?,
-            };
-            if zone == OwnerZone::Ex
-                && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if self.opponent_cemetery_targets.contains(name))
-            {
-                return Ok(shared_put(objects, ZoneKind::Ex));
-            }
-            return Ok(owner_put(objects, zone));
+        let public_query = match &value.r#ref {
+            Some(ast::MoveObjects::Public(query)) => Some(query.as_ref()),
+            _ => None,
+        };
+        let source_objects = match &value.r#ref {
+            Some(ast::MoveObjects::Field(objects)) => Some(objects),
+            _ => None,
+        };
+        if source_objects.is_some() || public_query.is_some() {
+            return self.field_objects_move(value, source_objects, public_query, path);
         }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Err(unsupported(path));
@@ -684,12 +717,24 @@ impl BodyContext<'_> {
             },
             path,
         )?;
+        self.observed_destination(value, cards, path)
+    }
+
+    fn observed_destination(
+        &mut self,
+        value: &ast::Move,
+        cards: Selector,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
         match value.to {
             ast::Destination::Ex if value.position.is_none() && value.order.is_none() => {
                 Ok(shared_put(cards, ZoneKind::Ex))
             }
             ast::Destination::Cemetery if value.position.is_none() && value.order.is_none() => {
                 Ok(owner_put(cards, OwnerZone::Cemetery))
+            }
+            ast::Destination::Hand if value.position.is_none() && value.order.is_none() => {
+                Ok(owner_put(cards, OwnerZone::Hand))
             }
             ast::Destination::Deck if value.order.is_some() => {
                 self.observed_order(cards, value.position.as_ref(), path)
@@ -757,9 +802,6 @@ impl BodyContext<'_> {
             let cards = self.objects(objects, path)?;
             return self.observed_order(cards, value.position.as_ref(), path);
         }
-        if value.order.is_some() || value.result.is_some() {
-            return Err(unsupported(path));
-        }
         let objects = if let (ast::Objects::This(_), Some(event)) = (objects, self.leave_event) {
             if !self.departure_to_cemetery {
                 return Err(unsupported(path));
@@ -769,9 +811,69 @@ impl BodyContext<'_> {
                     event: MovementEvent::LeaveField { event },
                 }],
             }
+        } else if let ast::Objects::Follow { follow } = objects {
+            match self.observations.get(follow) {
+                Some(ObjectReceipt::Movement {
+                    receipt: receipt @ MovementReceipt::Discard { .. },
+                }) => Selector::MoveAfter {
+                    receipt: receipt.clone(),
+                    permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                },
+                _ => self.objects(objects, path)?,
+            }
         } else {
             self.objects(objects, path)?
         };
+        Self::fixed_deck_move(value, objects, path)
+    }
+
+    fn ordinary_move_source(
+        &mut self,
+        source_objects: Option<&ast::Objects>,
+        public_query: Option<&ast::PublicQuery>,
+        zone: OwnerZone,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        if matches!(source_objects, Some(ast::Objects::This(_)))
+            && zone == OwnerZone::Ex
+            && self.leave_event.is_some()
+            && !self.departure_to_cemetery
+        {
+            return Err(unsupported(path));
+        }
+        match (source_objects, self.leave_event, zone) {
+            (Some(ast::Objects::This(_)), Some(event), OwnerZone::Ex) => Ok(Selector::Objects {
+                objects: vec![ObjectOperand::FollowEventMove {
+                    event: MovementEvent::LeaveField { event },
+                }],
+            }),
+            (Some(objects), _, _) => self.objects(objects, path),
+            (None, _, _) => {
+                self.public_move_objects(public_query.ok_or_else(|| unsupported(path))?, path)
+            }
+        }
+    }
+
+    fn public_move_objects(
+        &mut self,
+        query: &ast::PublicQuery,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let binding = super::Binding::new(
+            self.card_allocator.id(path)?,
+            self.card_allocator.scope(path)?,
+        );
+        super::costs::named_public_query(query, binding, path)
+    }
+
+    fn fixed_deck_move(
+        value: &ast::Move,
+        objects: Selector,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if value.order.is_some() || value.result.is_some() {
+            return Err(unsupported(path));
+        }
         Ok(Action::Move {
             objects,
             movement: MoveSpec {
@@ -936,14 +1038,20 @@ impl BodyContext<'_> {
         })
     }
 
-    fn supports_move_result(&self, value: &ast::Move, objects: &ast::Objects) -> bool {
+    fn supports_move_result(
+        &self,
+        value: &ast::Move,
+        objects: Option<&ast::Objects>,
+        public: Option<&ast::PublicQuery>,
+    ) -> bool {
+        let own_field = matches!(objects, Some(ast::Objects::Zone(query))
+            if matches!(query.who, ast::Side::Controller) && matches!(query.zone, ast::Zone::Field))
+            || matches!(public, Some(query)
+                if matches!(query.who, ast::Side::Controller) && matches!(query.zone, ast::PublicZone::Field));
         value.result.is_none()
             || matches!(value.to, ast::Destination::Ex)
-            || (matches!(value.to, ast::Destination::Cemetery)
-                && matches!(objects, ast::Objects::Zone(query)
-                    if matches!(query.who, ast::Side::Controller)
-                        && matches!(query.zone, ast::Zone::Field)))
-            || matches!(objects, ast::Objects::Bound(name)
+            || (matches!(value.to, ast::Destination::Cemetery) && own_field)
+            || matches!(objects, Some(ast::Objects::Bound(name))
                 if self.observed_targets.contains(name)
                     && matches!(value.to, ast::Destination::Hand | ast::Destination::Cemetery))
     }
@@ -998,5 +1106,15 @@ fn deck_position(position: Option<&ast::Placement>, path: &str) -> Result<Positi
         None | Some(ast::Placement::Chosen { .. } | ast::Placement::OneOf { .. }) => {
             Err(unsupported(path))
         }
+    }
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 is the only entry effect a field entry carries;
+/// the AST already admits nothing else.
+fn entry_effects(value: &ast::Move, path: &str) -> Result<Vec<Effect>, LoweringError> {
+    match value.entry_effects.as_deref() {
+        None => Ok(vec![]),
+        Some([_]) => Ok(trigger_restrictions::entry_without_fanfare()),
+        Some(_) => Err(unsupported(path)),
     }
 }

@@ -595,6 +595,19 @@ pub(super) fn sum(execution: &Execution, game: &Game, plan: &NumericHistoryPlan)
         NumericHistoryPlan::LifeSum(filter) => {
             life_counter(execution, game, *filter, "leader_hp_increased").map(Int)
         }
+        NumericHistoryPlan::EarthRiteStack => {
+            let seat = seat_name(execution.player(game, &PlayerRef::Controller {})?)?;
+            let value = game
+                .state
+                .counters
+                .get(&format!("{seat}.earth_rite_stack_removed"))
+                .copied()
+                .unwrap_or_default();
+            if value < 0 {
+                return Err(invalid("negative Earth Rite history"));
+            }
+            Ok(Int(value))
+        }
     }
 }
 

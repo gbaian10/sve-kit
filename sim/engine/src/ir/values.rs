@@ -538,6 +538,7 @@ tags!(PlayerResource {
 variants!(NatRead {
     Counter { holder: Holder, kind: CounterKind } => ["read.counter"],
     ZoneCount { selector: Selector } => ["read.zone-count"],
+    OtherHandCount { player: PlayerRef, excluding: ObjectOperand } => ["read.other-hand-count"],
     ZoneCapacity { player: PlayerRef, zone: CapacityZone, property: CapacityProperty } => ["read.zone-capacity"],
     Combo { player: PlayerRef, execution: ExecutionRef } => ["read.combo"],
     HistoryCount { query: HistoryQuery, count: HistoryCount } => ["read.history.count"],
@@ -636,6 +637,7 @@ variants!(IntFrozen {
     CounterChangeDelta { event: Binding<CounterChangeEvent> } => ["read.event-field"],
     ReceiptRequested { receipt: MeasuredReceipt } => ["read.receipt.requested"],
     DamageAmount { event: Binding<DamageEvent> } => ["read.event-field"],
+    MoveBatchCount { event: Binding<MoveEvent> } => ["read.event-field"],
     StatDelta { event: Binding<StatDelta> } => ["read.event-field"]
 });
 variants!(NatFrozen {
@@ -812,6 +814,7 @@ variants!(#[derive(Copy)] PlayerFrozen {
     DiscardPlayer { event: Binding<DiscardEvent> } => ["read.event-field"],
     DestroyController { event: Binding<DestroyEvent> } => ["read.event-field"],
     BanishActor { event: Binding<BanishEvent> } => ["read.event-field"],
+    BanishOwner { event: Binding<BanishEvent> } => ["read.event-field"],
     LifeChangeSubject { event: Binding<LifeChangeEvent> } => ["read.event-field"],
     AttackController { event: Binding<AttackEvent> } => ["read.event-field"],
     PhasePlayer { event: Binding<PhaseEvent> } => ["read.event-field"],

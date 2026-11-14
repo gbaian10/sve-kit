@@ -233,7 +233,8 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
     // The closed trigger grammar supplies the nested entry's private-read proof.
     ability.kind == AbilityKind::Triggered
         && ability.qualification == AbilityQualification::Ordinary
-        && (ability.active_zones == [ZoneKind::Field] || super::card::triggers::ex_phase(ability))
+        && (ability.active_zones == [ZoneKind::Field]
+            || super::card::triggers::phase_in_zone(ability, ZoneKind::Ex))
         && (matches!(
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {
@@ -469,7 +470,20 @@ impl Game {
         result.retain(|ability| {
             ability.node.qualification != AbilityQualification::UnionBurst || ub_enabled
         });
-        Ok(result)
+        Ok(result
+            .into_iter()
+            .flat_map(|ability| {
+                ability
+                    .definition
+                    .event_alternatives()
+                    .into_iter()
+                    .map(|definition| EffectiveAbility {
+                        definition,
+                        grant: ability.grant.clone(),
+                    })
+                    .collect::<Vec<_>>()
+            })
+            .collect())
     }
 
     pub(in crate::game::internal) fn internal_effective_source(
@@ -735,9 +749,10 @@ impl Game {
     }
 
     fn installed_keyword_provider(&self, execution: &Execution) -> Result<KeywordProvider> {
-        let authority = execution
+        let callback = execution
             .ability
             .ok_or_else(|| invalid("keyword grant without ability source"))?;
+        let authority = self.delayed_parent(callback.instance).unwrap_or(callback);
         let provider_card = self
             .card_runtime
             .instances
@@ -1102,6 +1117,7 @@ impl Game {
                 .into_iter()
                 .map(|(_, origin)| origin),
         );
+        origins.extend(self.internal_prevention_grants(holder)?);
         Ok(origins)
     }
 }

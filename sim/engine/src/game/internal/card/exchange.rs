@@ -97,6 +97,18 @@ fn available_count(members: &[MaterialCandidate], distinct: Option<ObjectPropert
     }
 }
 
+/// The play declaration answer, read before payment by values fixed during the same play.
+pub(in crate::game::internal) fn declared(
+    execution: &Execution,
+    face: &FaceId,
+    receipt: ReceiptId,
+) -> Option<bool> {
+    let exchange = execution.play.as_ref()?.exchange.as_ref()?;
+    (exchange.face == *face && exchange.definition.receipt == receipt)
+        .then_some(exchange.accepted)
+        .flatten()
+}
+
 pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<()> {
     execution
         .play
@@ -302,6 +314,7 @@ impl Game {
             ConditionPlan::compile(predicate, *binding, Policy::Search)?.prepare(None)?;
         let action = &route_step(exchange, index)?.action;
         let posture = matches!(action, Action::Posture { .. });
+        let counter = matches!(action, Action::Counter { .. });
         let token_put = execution.field_entry && exchange_shape::field_put_route(exchange, index);
         let zone = match zone {
             ZoneKind::Field => "field",
@@ -336,6 +349,7 @@ impl Game {
                 return Err(invalid("foreign hand exchange material"));
             }
             if zone != "hand"
+                && !counter
                 && (object.controller != controller
                     || (!posture && !token_put && self.object_type(&id)?.contains("トークン"))
                     || self.object_type(&id)?.contains("アドバンス")
@@ -677,6 +691,17 @@ impl Game {
             .as_ref()
             .ok_or_else(|| invalid("missing materials"))?;
         let instruction = step(exchange)?;
+        if matches!(instruction.action, Action::Counter { .. }) {
+            let cost = exchange
+                .definition
+                .routes()
+                .and_then(|routes| routes.first().map(|(_, step)| (*step).clone()))
+                .ok_or_else(|| invalid("missing counter exchange step"))?;
+            self.check_keyword_cost(execution, &cost)?;
+            self.internal_counter(execution, instruction, true)?;
+            self.finish_keyword_payment(execution, &cost)?;
+            return Ok(());
+        }
         let outcome = match &instruction.action {
             Action::Discard { .. } => {
                 let outcome = self.internal_discard_members(execution, members)?;

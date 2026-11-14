@@ -12,7 +12,7 @@ use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
-    NumericProperty, PaymentReference, PlayerRead, PostureRead,
+    NumericProperty, PaymentReference, PlayerRead, PostureRead, SpellCountTime,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -71,6 +71,7 @@ impl Checker {
                 | IntFrozen::LifeChangeDelta { event } => self.event_field(*event),
                 IntFrozen::CounterChangeDelta { event } => self.event_field(*event),
                 IntFrozen::DamageAmount { event } => self.event_field(*event),
+                IntFrozen::MoveBatchCount { event } => self.event_field(*event),
                 IntFrozen::StatDelta { event } => self.event_field(*event),
             },
             Expr::Compute(operation) => match operation.as_ref() {
@@ -204,26 +205,7 @@ impl Checker {
                 NatFrozen::AttackOrdinal { event } => self.event_field(*event),
                 NatFrozen::RaceOrdinal { event } => self.event_field(*event),
             },
-            Expr::Live(read) => match read.as_ref() {
-                NatRead::ZoneCount { selector }
-                    if !self.event_capture() && public_numbers::hand_count(selector) =>
-                {
-                    // A public length read grants no visibility to the hand's members.
-                    self.selector_members(selector)
-                }
-                NatRead::ZoneCount { selector } => self.selector(selector),
-                NatRead::Counter { holder, .. } => self.holder(holder),
-                NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {
-                    self.player(player)
-                }
-                NatRead::HistoryCount { query, count } => self.history_count_read(query, *count),
-                NatRead::Combo { player, execution } => {
-                    if *execution != (ExecutionRef::Current {}) {
-                        return self.reject();
-                    }
-                    self.player(player)
-                }
-            },
+            Expr::Live(read) => self.natural_read(read),
             Expr::Compute(operation) => match operation.as_ref() {
                 NatOperation::ReceiptCount {
                     receipt,
@@ -256,6 +238,33 @@ impl Checker {
                     self.natural(else_value)
                 }
             },
+        }
+    }
+
+    fn natural_read(&mut self, read: &NatRead) -> Checked {
+        match read {
+            NatRead::ZoneCount { selector }
+                if !self.event_capture() && public_numbers::hand_count(selector) =>
+            {
+                // A public length read grants no visibility to the hand's members.
+                self.selector_members(selector)
+            }
+            NatRead::ZoneCount { selector } => self.selector(selector),
+            NatRead::Counter { holder, .. } => self.holder(holder),
+            NatRead::OtherHandCount { player, excluding } => {
+                self.player(player)?;
+                self.object(excluding)
+            }
+            NatRead::ZoneCapacity { player, .. } | NatRead::TurnOrdinal { player } => {
+                self.player(player)
+            }
+            NatRead::HistoryCount { query, count } => self.history_count_read(query, *count),
+            NatRead::Combo { player, execution } => {
+                if *execution != (ExecutionRef::Current {}) {
+                    return self.reject();
+                }
+                self.player(player)
+            }
         }
     }
 
@@ -300,7 +309,8 @@ impl Checker {
                 BoolFrozen::PaymentComplete {
                     receipt: PaymentReference::CardPlay { face, receipt },
                 } if self.capture_time.is_none()
-                    && self.count_time.is_none()
+                    // Play-time reads see the accepted declaration; a failed payment reverts the play.
+                    && matches!(self.count_time, None | Some(SpellCountTime::AtPlay))
                     && self.env.chooser.is_none()
                     && self.card_payment_body.as_ref() == Some(face)
                     && self.card_payments.get(&face.0) == Some(receipt) =>
