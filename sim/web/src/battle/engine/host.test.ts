@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
+import { validateHostMessage } from "../contract"
 import { BattleHost, type EngineSession, type SeatPort } from "./host"
 import type {
   Delivery,
@@ -74,10 +75,12 @@ function setUp(
   create: (setup: string) => Promise<EngineSession>,
   ports: Partial<Record<Seat, FakePort>>,
   matchOptions: MatchOptions = options,
+  validate?: ((message: unknown) => boolean) | Promise<(message: unknown) => boolean>,
 ) {
   const host = new BattleHost(
     (_inputs, setup) => create(setup),
     (bytes) => bytes.fill(7),
+    validate,
   )
   host.init({
     kind: "init",
@@ -195,5 +198,59 @@ describe("BattleHost", () => {
     const stopped = { kind: "host_error", format: 1, reason: "projection" }
     expect(p1.received).toEqual([stopped])
     expect(p2.received).toEqual([stopped])
+  })
+
+  it("checks receipts and host errors against the generated contract validator", async () => {
+    const receipt = (result: string) =>
+      JSON.stringify([
+        {
+          seat: "p1",
+          message: { kind: "receipt", request_id: "r", result, rejection: "invalid_submission" },
+        },
+      ])
+    const run = async (submitted: string) => {
+      const p1 = new FakePort()
+      const session: EngineSession = {
+        start: () => "[]",
+        submit: () => submitted,
+        baseline: () => "[]",
+      }
+      setUp(() => Promise.resolve(session), { p1 }, options, validateHostMessage)
+      p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+      p1.send({ kind: "baseline", request_id: "b1" })
+      await settle()
+      return p1.received
+    }
+    const stopped = { kind: "host_error", format: 1, reason: "projection" }
+    expect(validateHostMessage(stopped)).toBe(true)
+    expect(await run(receipt("rejected"))).toEqual([
+      { kind: "receipt", request_id: "r", result: "rejected", rejection: "invalid_submission" },
+      { kind: "baseline_start", request_id: "b1" },
+    ])
+    // A result outside the contract is never delivered; interaction stops instead.
+    expect(await run(receipt("maybe"))).toEqual([stopped])
+  })
+
+  it("queues commands while a lazily imported validator loads, then still validates", async () => {
+    const p1 = new FakePort()
+    let provide: (validate: (message: unknown) => boolean) => void = () => undefined
+    const validator = new Promise<(message: unknown) => boolean>((resolve) => {
+      provide = resolve
+    })
+    const session: EngineSession = {
+      start: () => "[]",
+      submit: () =>
+        JSON.stringify([
+          { seat: "p1", message: { kind: "receipt", request_id: "r", result: "maybe" } },
+        ]),
+      baseline: () => "[]",
+    }
+    setUp(() => Promise.resolve(session), { p1 }, options, validator)
+    p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+    await settle()
+    expect(p1.received).toEqual([])
+    provide(validateHostMessage)
+    await settle()
+    expect(p1.received).toEqual([{ kind: "host_error", format: 1, reason: "projection" }])
   })
 })
