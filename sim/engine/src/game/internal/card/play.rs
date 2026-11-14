@@ -538,14 +538,11 @@ const fn mode_minimum(bounds: Cardinality) -> u64 {
 }
 
 fn conditional_play_modes(ability: &Ability) -> bool {
-    ability.play.as_ref().is_some_and(|play| {
-        matches!(play,
-            PlaySpec { limit: None, captures, parameters, costs: CostSpec::Ordered { steps } }
-            if captures.is_empty() && parameters.is_empty() && steps.is_empty())
-    }) && ability
-        .body
-        .as_ref()
-        .is_some_and(|body| optional_payment::declaration(body).is_none())
+    ability.play.is_some()
+        && ability
+            .body
+            .as_ref()
+            .is_some_and(|body| optional_payment::declaration(body).is_none())
 }
 
 fn collect_modes(program: &Program, conditional: bool) -> Result<Vec<PlayMode>> {
@@ -742,7 +739,7 @@ impl Game {
                 .body
                 .as_ref()
                 .ok_or_else(|| invalid("missing Quick body"))?,
-            false,
+            conditional_play_modes(ability),
         )?;
         let targets = play
             .parameters
@@ -949,6 +946,11 @@ impl Game {
         let Some((group, rest)) = groups.split_first() else {
             return self.internal_feasible_targets(execution, &execution.slots, &parameters);
         };
+        if let Some(condition) = &group.condition
+            && !execution.boolean(self, condition)?.0
+        {
+            return self.quick_mode_plan(execution, rest, parameters);
+        }
         let mut count = execution.natural(self, &group.count)?;
         let mut chosen = group.chosen.clone();
         let ChoiceDomain::Modes { cardinality, .. } = &mut chosen.domain else {

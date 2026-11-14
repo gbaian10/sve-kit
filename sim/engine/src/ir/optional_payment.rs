@@ -1,8 +1,8 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, Bool, Capture, CaptureTime, Comparison, Control, CostSpec, Expr, Int, IntRead, Node,
-    PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate, Program,
-    ReceiptId, ScopeId,
+    Ability, Bool, Capture, CaptureTime, Comparison, Control, CostSpec, ExecutionRef, Expr, Int,
+    IntOperation, IntRead, NatRead, Node, PaymentOptionality, PaymentTime, PlaySpec, PlayerRef,
+    PlayerResource, Predicate, Program, ReceiptId, ScopeId,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
@@ -107,6 +107,15 @@ pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
         return true;
     }
     public_pp_guard(condition)
+        || matches!(condition, Expr::Compute(predicate)
+        if matches!(predicate.as_ref(), Predicate::CompareInt {
+            left: Expr::Compute(operation), comparison: Comparison::GreaterEqual,
+            right: Expr::Literal(Int(minimum)),
+        } if *minimum > 0 && matches!(operation.as_ref(), IntOperation::FromNat {
+            value: Expr::Live(read),
+        } if matches!(read.as_ref(), NatRead::Combo {
+            player: PlayerRef::Controller {}, execution: ExecutionRef::Current {},
+        }))))
 }
 
 pub(crate) fn public_pp_guard(condition: &Expr<Bool>) -> bool {
