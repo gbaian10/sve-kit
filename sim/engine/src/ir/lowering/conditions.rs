@@ -158,6 +158,7 @@ impl BodyContext<'_> {
                 r#trait: None,
                 traits_any: None,
                 name: None,
+                names: Vec::new(),
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
@@ -231,15 +232,17 @@ impl BodyContext<'_> {
         })))
     }
 
-    // The source's original generation must still be in its controller's EX at resolution.
-    fn source_in_ex(
+    // Intersection preserves the current source generation when its zone is checked.
+    fn source_in_play_zone(
         &mut self,
         location: &ast::PlayRestrictionZone,
         path: &str,
     ) -> Result<Predicate, LoweringError> {
-        if location.r#ref != "this" || location.zone != "ex" {
+        if location.r#ref != "this" {
             return Err(unsupported(path));
         }
+        let zone = super::play_restrictions::source_zone(&location.zone)
+            .ok_or_else(|| unsupported(path))?;
         Ok(Predicate::Exists {
             objects: Selector::Intersection {
                 sets: vec![
@@ -254,7 +257,7 @@ impl BodyContext<'_> {
                             },
                             text_quantifier: TextQuantifier::Implicit,
                         },
-                        zone: ZoneKind::Ex,
+                        zone,
                         view: SelectionView::Current {},
                         binding: Binding::new(self.allocator.id(path)?, self.scope),
                         predicate: Box::new(Expr::Literal(Bool(true))),
@@ -275,7 +278,7 @@ impl BodyContext<'_> {
                 right: Expr::Literal(PlayerRef::Active {}),
             },
             ast::Condition::MyTurn(false) => return Err(unsupported(path)),
-            ast::Condition::InZone(location) => self.source_in_ex(location, path)?,
+            ast::Condition::InZone(location) => self.source_in_play_zone(location, path)?,
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;
@@ -374,6 +377,7 @@ impl BodyContext<'_> {
             || !matches!(count.zone, ast::CountZone::EvolveDeck)
             || count.face_up != Some(true)
             || count.name.as_ref().is_none_or(String::is_empty)
+            || !count.names.is_empty()
             || count.kind.is_some()
             || count.class.is_some()
             || count.not_class.is_some()
@@ -822,15 +826,7 @@ impl BodyContext<'_> {
                 },
             })));
         };
-        let mut objects = super::costs::named_public_query(query, binding, path)?;
-        if query.other {
-            objects = Selector::Difference {
-                input: Box::new(objects),
-                except: Box::new(Selector::Objects {
-                    objects: vec![super::super::ObjectOperand::SourceHolder {}],
-                }),
-            };
-        }
+        let objects = super::costs::named_public_query(query, binding, path)?;
         Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
     }
 
@@ -844,6 +840,7 @@ impl BodyContext<'_> {
                 &ast::This::This,
                 Some(Stat::Life),
                 CharacteristicView::Effective,
+                self.source_stats,
             )),
             ast::BodyStatReference::AttackTarget => {
                 Ok(Expr::Compute(Box::new(IntOperation::Sum {
@@ -972,6 +969,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     Some(Stat::Attack),
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => self.paid_material_number(
                     objects_of,
@@ -998,6 +996,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     None,
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => {
                     if self.receipt_reads.paid_materials.contains_key(objects_of) {
@@ -1017,6 +1016,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     None,
                     CharacteristicView::Original,
+                    self.source_stats,
                 )),
                 // 「選んだフォロワーの元のコスト」: printed, so it survives the target leaving.
                 ast::Observation::Binding(name) if self.single_targets.contains(name) => {
@@ -1239,6 +1239,7 @@ impl BodyContext<'_> {
             || count.r#trait.is_some()
             || count.traits_any.is_some()
             || count.name.is_some()
+            || !count.names.is_empty()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
             || count.orig_cost_ge.is_some()
@@ -1317,9 +1318,20 @@ fn this_number(
     reference: &ast::This,
     property: Option<Stat>,
     view: CharacteristicView,
+    source_stats: super::SourceStats,
 ) -> Expr<Int> {
     let ast::This::This = reference;
-    let object = ObjectView::SourceInformation {};
+    // A persistent provider reads its current public stats without an occurrence snapshot.
+    let object = if matches!(source_stats, super::SourceStats::Current)
+        && property.is_some()
+        && view == CharacteristicView::Effective
+    {
+        ObjectView::Current {
+            object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+        }
+    } else {
+        ObjectView::SourceInformation {}
+    };
     let information = match property {
         Some(property) => NumberRead::Stats {
             object,

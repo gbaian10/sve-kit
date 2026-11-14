@@ -1,0 +1,67 @@
+cards:
+  BP11-002:
+    abilities:
+      - auto:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token:
+                  - 従順な駿馬
+                  - 機動二輪車
+                  - 魔導装甲車
+            - life:
+                delta: 2
+                who: self
+          on:
+            left_field:
+              during:
+                turn: self
+              sel:
+                trait: 乗物
+              who: self
+          per_turn: 1
+        line: 1
+      - activate:
+          cost:
+            banish:
+              n: 3
+              sel:
+                kind: amulet
+                who: self
+                zone: field
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - destroy: enemy
+                  - - buff:
+                        hp: 3
+                        on: ally
+                        power: 3
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
+              option: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

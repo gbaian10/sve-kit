@@ -1,0 +1,36 @@
+cards:
+  BP10-029:
+    abilities:
+      - fanfare:
+          do:
+            - create:
+                n: 2
+                to: field
+                token: シールドガーディアン
+        line: 1
+      - fanfare:
+          cost:
+            pp: 3
+          do:
+            - buff:
+                hp: 2
+                on:
+                  keyword: ward
+                  kind: follower
+                  who: self
+                  zone: field
+                power: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+    token_sources:
+      - card: BP10-T06
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

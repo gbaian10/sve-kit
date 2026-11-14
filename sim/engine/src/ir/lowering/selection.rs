@@ -558,6 +558,17 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     }
 }
 
+pub(super) fn power_bounds(power: Option<(ast::PowerBound, u64)>) -> (Option<u64>, Option<u64>) {
+    (
+        power
+            .filter(|(op, _)| matches!(op, ast::PowerBound::Ge | ast::PowerBound::Eq))
+            .map(|(_, right)| right),
+        power
+            .filter(|(op, _)| matches!(op, ast::PowerBound::Le | ast::PowerBound::Eq))
+            .map(|(_, right)| right),
+    )
+}
+
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
         let comparison = query.r#where.as_ref().map(|condition| &condition.cmp);
@@ -570,13 +581,10 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             }
             ast::PublicCandidateNumber::Power(_) => None,
         });
+        let (power_at_least, power_at_most) = power_bounds(power);
         Self {
-            power_at_most: power
-                .filter(|(op, _)| *op == ast::PowerBound::Le)
-                .map(|(_, right)| right),
-            power_at_least: power
-                .filter(|(op, _)| *op == ast::PowerBound::Ge)
-                .map(|(_, right)| right),
+            power_at_most,
+            power_at_least,
             counter,
             racing: query.racing,
             kind: query.kind.as_ref().map(super::search::card_kind),
@@ -633,6 +641,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
                 .as_ref()
                 .map_or(&[], |union| union.0.as_slice()),
             name: query.name.as_deref(),
+            names: &query.names,
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),
             original_cost: [query.orig_cost_eq, None, query.orig_cost_ge],
@@ -699,6 +708,7 @@ pub(super) fn field_filter(
         match bound {
             ast::PowerBound::Ge => super::super::Comparison::GreaterEqual,
             ast::PowerBound::Le => super::super::Comparison::LessEqual,
+            ast::PowerBound::Eq => super::super::Comparison::Equal,
         },
         limit,
     );

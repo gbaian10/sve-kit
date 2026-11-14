@@ -12,6 +12,7 @@ use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
+use crate::ir::play_restrictions;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
     ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
@@ -261,7 +262,32 @@ impl Execution {
             .collect())
     }
 
+    fn source_zone_objects(&self, game: &Game, zone: ZoneKind) -> Result<Vec<ObjectRef>> {
+        let source = self.object(game, &ObjectOperand::SourceHolder {})?;
+        let current = game.object(self.object_id(source)?)?;
+        let same_zone = matches!(
+            (zone, current.zone.as_str()),
+            (ZoneKind::Hand, "hand")
+                | (ZoneKind::Ex, "ex")
+                | (ZoneKind::Cemetery, "cemetery")
+                | (ZoneKind::Banish, "banish")
+        );
+        Ok(
+            if same_zone
+                && current.generation == source.generation.0
+                && current.controller == seat_name(self.context.controller)?
+            {
+                vec![source]
+            } else {
+                vec![]
+            },
+        )
+    }
+
     pub(super) fn objects(&self, game: &Game, selector: &Selector) -> Result<Vec<ObjectRef>> {
+        if let Some(zone) = play_restrictions::source_zone_query(selector) {
+            return self.source_zone_objects(game, zone);
+        }
         if damaged_plan(selector).is_some() {
             return self.public_target_objects(game, selector, false);
         }
@@ -345,14 +371,7 @@ impl Execution {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
             } => self.followed_members(receipt)?,
-            Selector::Difference { input, except } => {
-                let input = self.objects(game, input)?;
-                let except = self.objects(game, except)?;
-                input
-                    .into_iter()
-                    .filter(|object| !except.contains(object))
-                    .collect()
-            }
+            Selector::Difference { input, except } => self.difference(game, input, except)?,
             Selector::Intersection { sets } => self.intersection(game, sets)?,
             _ => return Err(unsupported("selector")),
         };
@@ -360,6 +379,20 @@ impl Execution {
         Ok(objects
             .into_iter()
             .filter(|object| seen.insert((object.id, object.generation)))
+            .collect())
+    }
+
+    fn difference(
+        &self,
+        game: &Game,
+        input: &Selector,
+        except: &Selector,
+    ) -> Result<Vec<ObjectRef>> {
+        let input = self.objects(game, input)?;
+        let except = self.objects(game, except)?;
+        Ok(input
+            .into_iter()
+            .filter(|object| !except.contains(object))
             .collect())
     }
 

@@ -1,0 +1,60 @@
+cards:
+  BP10-081:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 4
+              - banish_self: true
+          do:
+            - if:
+                cond:
+                  exists:
+                    name: マスカレードゴースト
+                    who: self
+                    zone: ex
+                then:
+                  - choose:
+                      bind: chosen
+                      from:
+                        advance_follower: true
+                        kind: follower
+                        name: マスカレードゴースト・S
+                        who: self
+                        zone: evolve_deck
+                      may: true
+                      n: 1
+                  - move:
+                      ref: chosen
+                      to: field
+          zone: cemetery
+        line: 1
+      - line: 1
+        section: 1
+        spell:
+          do:
+            - search:
+                n: 1
+                result: entered
+                sel:
+                  kind: follower
+                  name: マスカレードゴースト
+                  who: self
+                  zone: deck
+                to: field
+            - grant:
+                keywords:
+                  - ward
+                on:
+                  follow: entered
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

@@ -272,6 +272,7 @@ impl BodyContext<'_> {
                 who: ast::Side::Opponent,
                 zone: ast::Zone::Field,
                 kind: Some(ast::FieldKind::Follower),
+                keyword: None,
                 r#trait: None,
                 class: None,
                 not_class: None,
@@ -311,12 +312,23 @@ impl BodyContext<'_> {
             || query.except.is_some()
             || query.hp_le.is_some()
             || query.not_trait.is_some())
-            && (query.alias.is_some() || query.r#where.is_some())
+            && (query.alias.is_some()
+                || matches!(
+                    query.r#where,
+                    Some(ast::ObjectQueryWhere::Extremum(_) | ast::ObjectQueryWhere::Damaged(_))
+                ))
         {
             return Err(unsupported(path));
         }
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.map(ast::FieldKind::search);
+        let power = match &query.r#where {
+            Some(ast::ObjectQueryWhere::Power(condition)) => {
+                Some((condition.cmp.op, condition.cmp.right))
+            }
+            _ => None,
+        };
+        let (power_at_least, power_at_most) = super::selection::power_bounds(power);
         let (relation, relative_to) = self.side_set(&query.who, path)?;
         let objects = Selector::Zone {
             players: PlayerSet {
@@ -338,6 +350,9 @@ impl BodyContext<'_> {
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
                     kind: kind.as_ref().map(super::search::card_kind),
+                    keyword: query.keyword.map(|keyword| keyword.0),
+                    power_at_most,
+                    power_at_least,
                     trait_id: query.r#trait.as_deref(),
                     class: query.class.as_deref(),
                     not_class: query.not_class.as_deref(),

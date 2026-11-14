@@ -1423,9 +1423,22 @@ enum FieldOutputKind {
     Other,
 }
 
+#[derive(Clone, Copy)]
+enum SourceStats {
+    Current,
+    Occurrence,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ChoiceContext {
+    Ability,
+    Mode,
+}
+
 struct BodyContext<'definitions> {
     x: Option<x_pp::Parameter>,
     static_zone: Option<ZoneKind>,
+    source_stats: SourceStats,
     /// Only an activation printed in the hand may move its own card to EX as a cost.
     activation_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
@@ -1489,6 +1502,7 @@ struct BodyContext<'definitions> {
     event_trigger: Option<TriggerSpec>,
     formal_play: bool,
     spell: Option<&'definitions ast::Body>,
+    choice_context: ChoiceContext,
     auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
@@ -1503,6 +1517,11 @@ impl<'definitions> BodyContext<'definitions> {
         Self {
             x: None,
             spell: entry.spell.as_ref(),
+            source_stats: if entry.r#static.is_some() {
+                SourceStats::Current
+            } else {
+                SourceStats::Occurrence
+            },
             static_zone: entry
                 .r#static
                 .as_ref()
@@ -1574,6 +1593,7 @@ impl<'definitions> BodyContext<'definitions> {
             event_trigger: None,
             mode_targets: BTreeMap::new(),
             auto: entry.auto.as_ref(),
+            choice_context: ChoiceContext::Ability,
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()

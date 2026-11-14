@@ -333,7 +333,10 @@ pub(super) struct RevealedSelection {
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
     Groups(Box<HandMaterialGroups>),
-    Reference { r#ref: String },
+    Reference {
+        r#ref: String,
+        result: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]
@@ -964,6 +967,7 @@ pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
     Field(Objects),
+    Public(Box<PublicQuery>),
 }
 
 #[derive(Deserialize)]
@@ -1163,6 +1167,7 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<FieldKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -1186,6 +1191,7 @@ pub(super) struct ObjectQuery {
 pub(super) enum ObjectQueryWhere {
     Extremum(Box<QueryExtremumWhere>),
     Damaged(DamagedThisTurnWhere),
+    Power(PublicPowerWhere),
 }
 
 #[derive(Clone, Deserialize)]
@@ -1985,7 +1991,7 @@ pub(super) struct Choice {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ModeCap {
     Fixed(u64),
-    Count { count: CountQuery },
+    Count { count: Box<CountQuery> },
     // Structured counts retain their narrower admission before the numeric fallback.
     Number(Box<Value>),
 }
@@ -2334,6 +2340,8 @@ pub(super) struct CountQuery {
     /// 「AやBの…」: a public count of cards having either trait (BP09-117).
     pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
+    #[serde(default)]
+    pub names: Vec<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -2845,7 +2853,7 @@ pub(super) struct PublicQuery {
     pub r#where: Option<PublicCandidateWhere>,
 }
 
-/// `where: {cmp: {left: {power_of: item} | {counter: {on: item, name}}, op: ge|le, right: N}}`
+/// `where: {cmp: {left: {power_of: item} | {counter: {on: item, name}}, op: ge|le|eq, right: N}}`
 /// on each public candidate.
 #[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -2856,6 +2864,19 @@ pub(super) struct PublicCandidateWhere {
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicCandidateComparison {
     pub left: PublicCandidateNumber,
+    pub op: PowerBound,
+    pub right: u64,
+}
+/// `where: {cmp: {left: {power_of: item}, op: ge|le|eq, right: N}}` on each field object source.
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicPowerWhere {
+    pub cmp: PublicPowerComparison,
+}
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicPowerComparison {
+    pub left: ItemPower,
     pub op: PowerBound,
     pub right: u64,
 }
@@ -2888,6 +2909,7 @@ pub(super) enum Item {
 pub(super) enum PowerBound {
     Ge,
     Le,
+    Eq,
 }
 
 #[derive(Deserialize)]
@@ -3268,6 +3290,7 @@ impl Auto {
             PhaseSubscription::Played(_)
                 | PhaseSubscription::EnterField(_)
                 | PhaseSubscription::Phase(_)
+                | PhaseSubscription::Discarded(_)
         ) && match &self.zone {
             Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
             Some(ActivationZones::Many(zones)) => {

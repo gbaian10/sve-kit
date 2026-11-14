@@ -187,11 +187,6 @@ fn target_roles_reject_unsupported_cardinalities_and_unknown_references() {
         tree["cards"]["unit-follower"]["abilities"][0]["fanfare"]["targets"][0]["from"] = from;
         lowerer().lower(&tree).unwrap_err();
     }
-    let mut distributed = expanded();
-    distributed["cards"]["unit-follower"]["abilities"][0]["fanfare"]["do"] = json!([
-        {"damage":{"to":"enemies","n":5,"distribute":true}}
-    ]);
-    lowerer().lower(&distributed).unwrap_err();
     for key in ["of", "name"] {
         let mut tree = expanded();
         tree["cards"]["unit-follower"]["abilities"][0]["fanfare"]["do"][0]["damage"]["to"]["role"]

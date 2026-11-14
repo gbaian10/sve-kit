@@ -101,3 +101,72 @@ fn raw_ward_permissions_reject_noncanonical_shapes_before_loading() {
         );
     }
 }
+
+#[test]
+fn live_source_power_controls_ward_bypass_without_an_occurrence_snapshot() {
+    let mut tree = equipment_played::tree(
+        &json!({"static":{
+            "while":{"cmp":{"left":{"power_of":"this"},"op":"ge","right":10}},
+            "effects":[{"ignore_ward":{"on":"this"}}]
+        }}),
+        "unit-follower",
+    );
+    let mut ward = tree["cards"]["unit-follower"]["abilities"][0].clone();
+    ward["static"] = json!({"effects":[{"grant":{"keywords":["ward"]}}]});
+    ward["sources"][0]["ability_scope"] = json!("ward-provider");
+    tree["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(ward);
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for power in [9_u8, 10_u8] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{
+            "id":"source","card":"unit-follower","state":{"power":power,"entered_this_turn":false,"acted":false}
+        }]);
+        initial["players"]["P2"]["zones"]["field"] = json!([{
+            "id":"guard","card":"unit-follower","state":{"entered_this_turn":false,"acted":true}
+        }]);
+        let mut game = Game::new(
+            static_keywords::keyword_catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "live-source-ward",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        let result = game
+            .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"P2.leader"}))
+            .unwrap();
+        assert_eq!(
+            result.outcome,
+            if power == 10 {
+                "resolved"
+            } else {
+                "cannot-attack"
+            }
+        );
+        for _ in 0_u8..10_u8 {
+            if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+                continue;
+            }
+            assert!(game.internal_pending_choice().unwrap().is_none());
+            let Some(q) = game.internal_quick_choice().unwrap() else {
+                break;
+            };
+            game.answer_internal_card(q.actor, q.token, Answer::Quick(None))
+                .unwrap();
+        }
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+            if power == 10 { 10_u8 } else { 20_u8 }
+        );
+    }
+}

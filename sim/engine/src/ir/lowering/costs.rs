@@ -318,11 +318,21 @@ pub(super) fn named_public_query(
     {
         return Err(unsupported(path));
     }
-    Ok(match value.zone {
+    let objects = match value.zone {
         ast::PublicZone::Field => public_zone_query(value, binding, ZoneKind::Field, path)?,
         ast::PublicZone::Ex => public_zone_query(value, binding, ZoneKind::Ex, path)?,
         ast::PublicZone::Cemetery => public_zone_query(value, binding, ZoneKind::Cemetery, path)?,
         ast::PublicZone::FieldEx => return Err(unsupported(path)),
+    };
+    Ok(if value.other {
+        Selector::Difference {
+            input: Box::new(objects),
+            except: Box::new(Selector::Objects {
+                objects: vec![super::super::ObjectOperand::SourceHolder {}],
+            }),
+        }
+    } else {
+        objects
     })
 }
 

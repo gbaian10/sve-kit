@@ -90,9 +90,11 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
             if has_resolution_payment(body)
                 && !(ability.node.kind == AbilityKind::Triggered
                     && matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
-                    && (((ability.node.active_zones == [ZoneKind::Field]
-                        || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
-                        && field_resolution_costs(body))
+                    && (((matches!(
+                        ability.node.active_zones.as_slice(),
+                        [ZoneKind::Field | ZoneKind::Cemetery]
+                    ) || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
+                        && source_resolution_costs(body))
                         || hand_pp_payment(&ability.node)))
             {
                 return Err(unsupported(
@@ -298,7 +300,7 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     positive_pp(costs) && discard_return(on_paid) == Some(event)
 }
 
-fn field_resolution_costs(program: &Program) -> bool {
+fn source_resolution_costs(program: &Program) -> bool {
     program.steps.iter().all(|step| match &step.node {
         Node::Control { control: Control::Pay { at: PaymentTime::ResolutionChoice, costs, .. } } => {
             player_pp(costs).is_some()
@@ -306,10 +308,10 @@ fn field_resolution_costs(program: &Program) -> bool {
                 && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
         }
         Node::Control { control: Control::If { then_body, else_body, .. } } => {
-            field_resolution_costs(then_body) && else_body.as_ref().is_none_or(field_resolution_costs)
+            source_resolution_costs(then_body) && else_body.as_ref().is_none_or(source_resolution_costs)
         }
-        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } | Control::Repeat { body: RepeatBody::Program { body }, .. } } => field_resolution_costs(body),
-        Node::Control { control: Control::Mode { modes, .. } } => modes.iter().all(|mode| field_resolution_costs(&mode.body)),
+        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } | Control::Repeat { body: RepeatBody::Program { body }, .. } } => source_resolution_costs(body),
+        Node::Control { control: Control::Mode { modes, .. } } => modes.iter().all(|mode| source_resolution_costs(&mode.body)),
         _ => true,
     })
 }

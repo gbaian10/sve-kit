@@ -1,0 +1,49 @@
+cards:
+  BP04-022:
+    abilities:
+      - keywords:
+          - rush
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  trait: 指揮官
+                  who: self
+          while:
+            cmp:
+              left:
+                history_count:
+                  event: played
+                  sel:
+                    trait: 指揮官
+                  who: self
+                  window: this_turn
+              op: eq
+              right: 0
+      - fanfare:
+          cost:
+            reveal:
+              n: 2
+              sel:
+                traits_any:
+                  - 指揮官
+                  - 円卓
+                who: self
+                zone: hand
+          do:
+            - pp:
+                delta: 2
+                who: self
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

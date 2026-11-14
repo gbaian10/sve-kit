@@ -1471,7 +1471,15 @@ impl Game {
     ) -> Result<bool> {
         let targets = parameters
             .iter()
-            .filter(|decision| !super::material::is_parameter(decision))
+            .filter(|decision| {
+                !super::material::is_parameter(decision)
+                    && matches!(
+                        decision.domain,
+                        ChoiceDomain::Objects { .. }
+                            | ChoiceDomain::Recipients { .. }
+                            | ChoiceDomain::Distribution { .. }
+                    )
+            })
             .cloned()
             .collect::<VecDeque<_>>();
         self.internal_feasible_targets(execution, &execution.slots, &targets)
@@ -1486,11 +1494,18 @@ impl Game {
         if parameters.is_empty() {
             return Ok(true);
         }
-        let mut candidate = execution.clone();
-        candidate.slots.clone_from(slots);
         let first = parameters
             .front()
             .ok_or_else(|| invalid("missing target restart"))?;
+        if super::material::is_parameter(first) {
+            return self.internal_feasible_targets(
+                execution,
+                slots,
+                &parameters.iter().skip(1).cloned().collect(),
+            );
+        }
+        let mut candidate = execution.clone();
+        candidate.slots.clone_from(slots);
         if let ChoiceDomain::Distribution {
             recipients, total, ..
         } = &first.domain
