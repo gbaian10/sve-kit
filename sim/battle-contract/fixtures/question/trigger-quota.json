@@ -1,0 +1,78 @@
+{
+  "id": "q-trigger_quota",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "trigger_quota",
+  "processing": {
+    "stage": "trigger_admission",
+    "controller": null,
+    "source": null,
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "timing": "evolve"
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [
+      {
+        "actor": "p2",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "card",
+            "printing_id": "SYN01-008",
+            "face": null,
+            "line": null,
+            "holder": null
+          },
+          "controller": "p2",
+          "timing": "leave_field"
+        }
+      }
+    ],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unique",
+    "answer": {
+      "kind": "choose",
+      "chosen": ["c1"]
+    },
+    "public": false
+  },
+  "assistance": null,
+  "rules": []
+}

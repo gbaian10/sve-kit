@@ -6,13 +6,18 @@
 
 extern crate alloc;
 
+mod answer;
 mod codec;
 mod common;
 mod message;
 mod number;
 pub mod observation;
+pub mod question;
 mod schema;
 
+pub use answer::{
+    Answer, BucketChoice, ClientMessage, Command, GroupChoice, RoleChoice, Share, Submit,
+};
 pub use codec::{decode, encode};
 pub use common::{
     CardRef, ContentRef, Format, ObjectHandle, OptionId, QuestionId, RequestId, RuleRef,

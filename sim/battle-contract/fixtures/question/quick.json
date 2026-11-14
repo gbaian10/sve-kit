@@ -1,0 +1,63 @@
+{
+  "id": "q-quick",
+  "actor": "p1",
+  "purpose": "quick_window",
+  "use": "quick",
+  "processing": {
+    "stage": "quick",
+    "controller": "p1",
+    "source": null,
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "quick",
+    "window": "attack",
+    "options": [
+      {
+        "id": "c1",
+        "action": "play",
+        "source": {
+          "kind": "card",
+          "printing_id": "SYN01-005",
+          "face": null,
+          "line": null,
+          "holder": "o5"
+        },
+        "origin": {
+          "player": "p1",
+          "zone": "hand",
+          "position": 0
+        }
+      },
+      {
+        "id": "c2",
+        "action": "ability",
+        "source": {
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 3,
+            "step": null,
+            "granted_by": null,
+            "holder": "o1"
+          }
+        },
+        "origin": null
+      }
+    ]
+  },
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "submit",
+  "request_id": "request-order",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "order",
+      "order": ["c2", "c1"]
+    }
+  }
+}
