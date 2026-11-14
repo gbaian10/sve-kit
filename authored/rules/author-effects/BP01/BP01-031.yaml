@@ -1,0 +1,37 @@
+cards:
+  BP01-031:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - lastword:
+          do:
+            - create:
+                n: 2
+                result: created
+                to: field
+                token: スティールナイト
+            - grant:
+                keywords:
+                  - ward
+                on: created
+            - choose:
+                any: true
+                bind: acted
+                from:
+                  in: created
+            - act: acted
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+    token_sources:
+      - card: BP01-T07
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
