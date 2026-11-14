@@ -6,6 +6,9 @@ pub use context::{
     PreventionChange, StatGainHistory, SubjectHistory, TriggerTiming, TurnHistory,
 };
 
+mod board;
+pub use board::AttackObservation;
+
 mod costs;
 pub use costs::{
     CardCostQuote, CostGroup, CostGroupKind, CostLine, CostObservation, CostSummary, PendingCost,
@@ -19,6 +22,7 @@ pub use effects::{
 };
 
 use super::{ObjectHandle, Viewer};
+use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
@@ -182,6 +186,8 @@ pub struct ZoneObservation {
     pub kind: ObservedZone,
     /// Full size, including anonymous members.
     pub count: u64,
+    /// Rules capacity, absent for zones without a fixed limit.
+    pub capacity: Option<u64>,
     /// Only the currently authorized members.
     pub cards: Vec<ZoneCard>,
 }
@@ -217,6 +223,8 @@ pub struct Observation {
     pub viewer: Viewer,
     /// Current public turn state.
     pub turn: TurnObservation,
+    /// Current attack, absent once its frozen participants are no longer valid.
+    pub attack: Option<AttackObservation>,
     /// Both players in seat order.
     pub players: [PlayerObservation; 2],
     /// Historical memory independent of current location knowledge.
@@ -317,6 +325,7 @@ impl Game {
                     turn["elapsed_turns"]["P2"].as_u64().unwrap_or_default(),
                 ],
             },
+            attack: self.observed_attack(perspective)?,
             players: [
                 self.observed_player(perspective, Viewer::P1)?,
                 self.observed_player(perspective, Viewer::P2)?,
@@ -364,6 +373,9 @@ impl Game {
             zones.push(ZoneObservation {
                 kind: zone(name)?,
                 count: offset,
+                capacity: zone_capacity(name)
+                    .map(|limit| u64::try_from(limit).map_err(invalid))
+                    .transpose()?,
                 cards,
             });
         }

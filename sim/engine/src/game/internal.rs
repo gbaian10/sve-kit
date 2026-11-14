@@ -83,6 +83,7 @@ mod field_entry;
 pub(in crate::game) use field_entry::FieldEntry;
 mod life;
 mod movement;
+pub(in crate::game) use movement::zone_capacity;
 mod number_plan;
 mod numeric;
 mod observation;

@@ -4,8 +4,18 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionToken, DecisionView, InputDomain};
-use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::{DecisionShape, Viewer};
+
+fn observed_remaining_capacity(game: &Game, kind: ObservedZone) -> u64 {
+    let observation = game.observe(Viewer::P1).unwrap();
+    let zone = observation.players[0]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == kind)
+        .unwrap();
+    zone.capacity.unwrap().checked_sub(zone.count).unwrap()
+}
 
 fn question(play: CardPlay) -> DecisionView {
     let CardPlay::Awaiting(question) = play else {
@@ -178,7 +188,7 @@ fn field_capacity_is_a_resolution_choice_and_follow_buffs_only_successful_arriva
 #[test]
 fn player_pipeline_capacity_preserves_distinct_choices_without_physical_ids() {
     use crate::player_pipeline::{answer, question as player_question};
-    use sve_engine::game::player::{QuestionShape, SubmissionKind, Viewer};
+    use sve_engine::game::player::{QuestionShape, SubmissionKind};
 
     let program = lowerer()
         .lower(&field_tree())
@@ -204,6 +214,11 @@ fn player_pipeline_capacity_preserves_distinct_choices_without_physical_ids() {
     assert_eq!(details.destination, Viewer::P1);
     assert_eq!(details.zone, ObservedZone::Field);
     assert_eq!(details.available, Nat(1));
+    assert_eq!(
+        details.available.0,
+        observed_remaining_capacity(&game, ObservedZone::Field),
+        "the drawn field capacity agrees with the actual placement budget"
+    );
     assert_eq!(domain.cards.len(), 2);
     assert_ne!(domain.cards[0].handle, domain.cards[1].handle);
     assert!(
@@ -271,6 +286,11 @@ fn private_look_ex_capacity_leaves_the_unchosen_card_for_the_printed_remainder()
             minimum: Nat(1),
             maximum: Some(Nat(1))
         }
+    );
+    assert_eq!(
+        domain.cardinality.minimum.0,
+        observed_remaining_capacity(&game, ObservedZone::Ex),
+        "the drawn EX capacity agrees with the actual placement budget"
     );
     assert!(
         domain.cards.iter().all(|card| card.object.is_none()),

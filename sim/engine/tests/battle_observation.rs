@@ -250,3 +250,99 @@ fn evolve_deck_missing_facing_defaults_to_private_and_face_down() {
     assert!(!form.face_up);
     assert!(!form.public);
 }
+
+#[test]
+fn board_capacities_follow_movement_limits_without_inventing_other_limits() {
+    let game = game(&position("secret-a"));
+    let before = game.digest().unwrap();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observation = game.observe(viewer).unwrap();
+        for player in &observation.players {
+            for zone in &player.zones {
+                let expected = match zone.kind {
+                    ObservedZone::Field | ObservedZone::Ex => Some(5),
+                    ObservedZone::Deck
+                    | ObservedZone::EvolveDeck
+                    | ObservedZone::Hand
+                    | ObservedZone::Cemetery
+                    | ObservedZone::Banish
+                    | ObservedZone::Resolution
+                    | ObservedZone::Evolution
+                    | ObservedZone::Race
+                    | ObservedZone::Drive
+                    | ObservedZone::Trigger
+                    | ObservedZone::Equipment => None,
+                };
+                assert_eq!(zone.capacity, expected);
+            }
+        }
+        assert!(observation.attack.is_none());
+    }
+    assert_eq!(game.digest().unwrap(), before);
+}
+
+#[expect(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    reason = "A malformed synthetic save must fail the fixture."
+)]
+fn attacking_game(target: &str) -> Value {
+    let original = game(&position("secret-a"));
+    let mut saved = serde_json::to_value(&original).unwrap();
+    let generation = saved["state"]["objects"]["physical-base"]["generation"].clone();
+    saved["state"]["flow"] = json!({
+        "kind":"battle", "attacker":"physical-base", "attacker_generation":generation,
+        "target":target, "target_generation":generation
+    });
+    saved
+}
+
+#[test]
+fn board_attack_rejects_missing_required_participants_and_generations() {
+    for key in ["attacker", "attacker_generation", "target"] {
+        let mut saved = attacking_game("P2.leader");
+        saved["state"]["flow"].as_object_mut().unwrap().remove(key);
+        let damaged: Game = serde_json::from_value(saved).unwrap();
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert_eq!(
+                damaged.observe(viewer).unwrap_err().to_string(),
+                "invalid: player observation unavailable"
+            );
+        }
+    }
+    for target in ["missing-physical-id", "unknown.leader"] {
+        let damaged: Game = serde_json::from_value(attacking_game(target)).unwrap();
+        damaged.observe(Viewer::P1).unwrap_err();
+    }
+    let mut saved = attacking_game("physical-base");
+    saved["state"]["flow"]["target_generation"] = Value::Null;
+    let damaged: Game = serde_json::from_value(saved).unwrap();
+    damaged.observe(Viewer::P1).unwrap_err();
+}
+
+#[test]
+fn board_attack_never_relinks_to_a_new_generation_of_either_participant() {
+    for key in ["attacker_generation", "target_generation"] {
+        let mut saved = attacking_game("physical-base");
+        let current = saved["state"]["flow"][key].as_u64().unwrap();
+        saved["state"]["flow"][key] = json!(current + 1);
+        let stale: Game = serde_json::from_value(saved).unwrap();
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert!(stale.observe(viewer).unwrap().attack.is_none());
+        }
+    }
+}
+
+#[test]
+fn board_attack_requires_current_viewer_authority_for_each_card_endpoint() {
+    let mut saved = attacking_game("physical-base");
+    saved["state"]["knowledge"]["P2"]["located"]
+        .as_array_mut()
+        .unwrap()
+        .retain(|id| id != "physical-base");
+    let damaged: Game = serde_json::from_value(saved).unwrap();
+    let before = damaged.digest().unwrap();
+    assert!(damaged.observe(Viewer::P1).unwrap().attack.is_some());
+    damaged.observe(Viewer::P2).unwrap_err();
+    assert_eq!(damaged.digest().unwrap(), before);
+}

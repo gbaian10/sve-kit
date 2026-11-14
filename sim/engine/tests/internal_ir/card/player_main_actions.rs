@@ -2,8 +2,9 @@
 
 use super::*;
 use crate::player_pipeline::{answer, end_command, question};
+use core::iter::once;
 use sve_engine::game::player::DecisionShape;
-use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::observation::{EffectRecipient, ObservedZone};
 use sve_engine::game::player::{
     AttackTarget, Command, Input, MainActionAnswer, MainActions, MainIntent, MainIntentKind,
     ObjectHandle, Question, QuestionShape, SubmissionKind, Viewer,
@@ -138,6 +139,82 @@ fn player_main_actions_domains_use_public_field_order_and_queries_are_read_only(
         before,
         "Input preserves RNG, clocks, knowledge and events"
     );
+}
+
+#[test]
+fn board_attack_observation_tracks_committed_main_intent_for_both_viewers() {
+    for against_leader in [true, false] {
+        let mut first = board(&initial(), vec![]);
+        let mut private_changed = initial();
+        private_changed["players"]["P2"]["zones"]["hand"] = json!([
+            {"id":"private-opponent","card":"unit-spell"}
+        ]);
+        let mut second_initial = private_changed.clone();
+        second_initial["players"]["P2"]["zones"]["hand"][0] =
+            json!({"id":"different-private-opponent","card":"unit-amulet"});
+        let mut variants = [
+            board(&private_changed, vec![]),
+            board(&second_initial, vec![]),
+        ];
+        for game in once(&mut first).chain(variants.iter_mut()) {
+            assert!(game.observe(Viewer::P1).unwrap().attack.is_none());
+            let question = question(game, Viewer::P1);
+            let selected = attack(&question);
+            let target = if against_leader {
+                AttackTarget::Leader(Viewer::P2)
+            } else {
+                AttackTarget::Card(handle(game, Viewer::P2, 0))
+            };
+            assert_eq!(
+                game.submit_player(Viewer::P1, command(&question, selected, target))
+                    .kind,
+                SubmissionKind::Applied
+            );
+            let before = exact_authority(game);
+            for viewer in [Viewer::P1, Viewer::P2] {
+                let observation = game.observe(viewer).unwrap();
+                let attack = observation.attack.as_ref().unwrap();
+                let field = |owner| {
+                    observation
+                        .players
+                        .iter()
+                        .find(|player| player.player == owner)
+                        .unwrap()
+                        .zones
+                        .iter()
+                        .find(|zone| zone.kind == ObservedZone::Field)
+                        .unwrap()
+                        .cards[0]
+                        .card
+                        .handle
+                        .clone()
+                };
+                assert_eq!(attack.attacker, field(Viewer::P1));
+                assert_eq!(
+                    attack.target,
+                    if against_leader {
+                        EffectRecipient::Leader(Viewer::P2)
+                    } else {
+                        EffectRecipient::Card(field(Viewer::P2))
+                    }
+                );
+                let visible = format!("{attack:?}");
+                for secret in ["physical-z", "enemy-z", "private-opponent", "generation"] {
+                    assert!(!visible.contains(secret));
+                }
+            }
+            assert_eq!(exact_authority(game), before);
+        }
+        assert_eq!(
+            variants[0].observe(Viewer::P1).unwrap(),
+            variants[1].observe(Viewer::P1).unwrap()
+        );
+        assert_eq!(
+            answer(&mut first, Viewer::P2, Answer::Quick(None)).kind,
+            SubmissionKind::Applied
+        );
+        assert!(first.observe(Viewer::P1).unwrap().attack.is_none());
+    }
 }
 
 #[test]
