@@ -33,7 +33,7 @@ def safe_details(source: str) -> list[str]:
             r"left:\s*(?:Number\()?(-?[0-9]+)\)?\s+right:\s*(?:Number\()?(-?[0-9]+)\)?",
         ),
     )
-    details = []
+    details: list[str] = []
     for block in re.split(r"(?m)^---- ", source):
         header = block.partition("\n")[0]
         if not re.fullmatch(
