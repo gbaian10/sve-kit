@@ -247,17 +247,7 @@ impl Game {
     }
 
     pub(in crate::game) fn main_object(&self, actor: Viewer, id: &str) -> Result<CardObservation> {
-        let handle = self
-            .state
-            .knowledge
-            .get(seat(actor))
-            .and_then(|knowledge| knowledge.handle(id))
-            .ok_or_else(|| invalid("main candidate is not identifiable"))?;
-        self.resolve_player_object(actor, &handle)?;
-        Ok(CardObservation {
-            handle,
-            properties: self.observed_card_properties(actor, id)?,
-        })
+        self.observed_card(actor, id)
     }
 
     fn main_action(
