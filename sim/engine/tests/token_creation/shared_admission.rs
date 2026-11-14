@@ -2,9 +2,13 @@
 
 use super::{author, initial, selection};
 use alloc::sync::Arc;
+use core::array::from_fn;
 use serde_json::{Value, json};
 use sve_engine::catalog::{CurrentSelectionLoader, SelectedEffects};
 use sve_engine::game::internal::CardPlay;
+use sve_engine::game::player::{
+    AdmissionGap, AdmissionGapReason, DeckConstruction, PlayerDeck, Viewer,
+};
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
 
@@ -68,4 +72,58 @@ fn a_shared_candidate_is_still_checked_against_every_printing_face() {
     // The reprint's own face is read again, so the shared outcome cannot admit it.
     construct(foreign).unwrap_err();
     construct(matching).unwrap();
+}
+
+#[test]
+fn a_program_rejection_is_identical_for_every_printing_and_selection_until_the_program_changes() {
+    let (plain, keywords, mut admitted) = selection(1);
+    let mut reprint: Value = serde_json::from_str(plain.lines().next().unwrap()).unwrap();
+    reprint["number"] = json!("reprint");
+    let snapshot = format!("{plain}{reprint}\n");
+    admitted["authors"][0]["printings"] = json!(["creator", "reprint"]);
+    // A count reading card kinds in the cemetery lowers, but no runtime selector admits it.
+    let mut rejected = admitted.clone();
+    rejected["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+        ["abilities"][0]["spell"]["do"][0]["create"]["n"] =
+        json!({"count":{"who":"self","zone":"cemetery","kind":"spell"}});
+    let failure = |loader: &CurrentSelectionLoader, input: &Value| {
+        let selected = loader.select(&snapshot, &keywords, input).unwrap();
+        construct(selected).unwrap_err().to_string()
+    };
+    let unshared = failure(&CurrentSelectionLoader::new().unwrap(), &rejected);
+    assert!(unshared.starts_with("unsupported: "), "{unshared}");
+    let loader = CurrentSelectionLoader::new().unwrap();
+    assert_eq!(failure(&loader, &rejected), unshared);
+    assert_eq!(failure(&loader, &rejected), unshared);
+
+    // Each printing of the rejected candidate is its own strict gap.
+    let decks: [PlayerDeck; 2] = from_fn(|_| PlayerDeck {
+        construction: DeckConstruction::Class("ニュートラル".into()),
+        main: ["creator", "reprint"]
+            .into_iter()
+            .cycle()
+            .take(8)
+            .map(str::to_owned)
+            .collect(),
+        evolve: vec![],
+    });
+    let gap = |number: &str| AdmissionGap {
+        card_no: number.into(),
+        reason: AdmissionGapReason::UnsupportedRuntime,
+    };
+    let selected = loader.select(&snapshot, &keywords, &rejected).unwrap();
+    let report = Game::check_player_decks(&selected, &decks).unwrap();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(report.gaps(viewer), [gap("creator"), gap("reprint")]);
+    }
+
+    // The corrected program is another candidate; the rejected one stays rejected beside it.
+    let corrected = loader.select(&snapshot, &keywords, &admitted).unwrap();
+    assert!(
+        Game::check_player_decks(&corrected, &decks)
+            .unwrap()
+            .is_admitted()
+    );
+    construct(corrected).unwrap();
+    assert_eq!(failure(&loader, &rejected), unshared);
 }

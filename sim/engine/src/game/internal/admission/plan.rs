@@ -105,25 +105,21 @@ impl CandidateAdmission {
             .clone()
     }
 
-    /// Run `check` once for the ability at `index`; later printings reuse its exact outcome.
-    fn ability(&self, index: usize, check: impl FnOnce() -> Result<()>) -> Result<()> {
-        self.abilities
-            .get(index)
-            .ok_or_else(|| invalid("ability outside the accepted candidate"))?
-            .get_or_init(check)
-            .clone()
-    }
-
-    /// A program admitted without an accepted candidate has nowhere to keep the outcome.
     pub(in crate::game::internal) fn ability_of(
         shared: Option<&Self>,
         index: usize,
         check: impl FnOnce() -> Result<()>,
     ) -> Result<()> {
+        // A program admitted without an accepted candidate has nowhere to keep the outcome.
         let Some(shared) = shared else {
             return check();
         };
-        shared.ability(index, check)
+        shared
+            .abilities
+            .get(index)
+            .ok_or_else(|| invalid("ability outside the accepted candidate"))?
+            .get_or_init(check)
+            .clone()
     }
 }
 
@@ -443,47 +439,6 @@ mod tests {
         ScopeId, Selector, TokenDestination, TokenSpec, TokenTemplate, TokenTemplateId,
         TriggerSpec, ZoneKind, ZoneRef,
     };
-
-    fn candidate() -> Arc<CurrentCardProgram> {
-        let face = "f:11111111111111111111111111111111";
-        let card = "c:11111111111111111111111111111111";
-        let source = serde_json::json!({"admission":"light","face_id":face,"field":"effect",
-            "owner":{"kind":"face_revision","revision_id":"revision"},
-            "ordinal":null,"line":1_u8,"scope":"ability_0","covers":[1_u8]});
-        let input = serde_json::json!({"admission":"direct","card_id":card,"card_no":"unit",
-            "source_payload":{"card_id":card,"faces":[{"face_id":face,"revision_id":"revision",
-                "ordinal":0_u8,"side":"front","cost":1_u8,
-                "fields":[{"field":"effect","ordinal":null,"lines":[1_u8]}]}]},
-            "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{"unit":{
-                "meta":{"dsl":"1.0","source":"direct","admission":"light",
-                    "written_by":[{"actor":{"who":"test","model":null},"date":"2026-10-28"}],
-                    "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
-                "faces":{face:{"abilities":[{"spell":{"do":[{"draw":{"n":1_u8}}]},"line":1_u8,
-                    "ports":{"imports":{},"exports":{}},"sources":[source]}]}}}}}});
-        let lowerer = crate::ir::lowering::ExpandedLowerer::new().unwrap();
-        Arc::new(lowerer.lower_current(&input).unwrap())
-    }
-
-    #[test]
-    fn program_only_outcomes_run_once_and_keep_their_exact_result() {
-        let shared = CandidateAdmission::new(candidate());
-        let mut runs = 0_u8;
-        for _ in 0_u8..2 {
-            let outcome = shared.ability(0, || {
-                runs = runs.saturating_add(1);
-                Err(invalid("rejected once"))
-            });
-            assert_eq!(outcome.unwrap_err().to_string(), "invalid: rejected once");
-        }
-        assert_eq!(runs, 1);
-        shared.ability(1, || Ok(())).unwrap_err();
-        assert!(Arc::ptr_eq(
-            &shared.compiled().unwrap(),
-            &shared.compiled().unwrap()
-        ));
-        // Without an accepted candidate every call runs its own check.
-        CandidateAdmission::ability_of(None, 9, || Ok(())).unwrap();
-    }
 
     fn token_request() -> (SourceSpan, Instruction) {
         let source = SourceSpan {
