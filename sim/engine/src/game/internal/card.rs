@@ -8,6 +8,7 @@ use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::player::Viewer;
 use crate::game::player::observation::AbilityQuota;
+use crate::ir::TurnOperation;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -801,6 +802,29 @@ impl Game {
         }
     }
 
+    fn check_payment_source_zone(&self, execution: &Execution, action: &Action) -> Result<()> {
+        if material::source_field_cost(action)
+            && !material::source_cost_zone(action, &self.object(&execution.context.source)?.zone)
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "source cost requires the field".into(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn skip_turn_payment(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+    ) -> Result<Quantity> {
+        self.internal_schedule_turn(execution, instruction)?;
+        Ok(Quantity {
+            amount: Int(1),
+            unit: QuantityUnit::Times,
+        })
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
@@ -814,17 +838,16 @@ impl Game {
         self.check_hand_material_cost_entry(execution, costs)?;
         for step in steps {
             self.check_keyword_cost(execution, step)?;
-            if material::source_field_cost(&step.instruction.action)
-                && !material::source_cost_zone(
-                    &step.instruction.action,
-                    &self.object(&execution.context.source)?.zone,
-                )
-            {
-                return Err(crate::EngineFailure::IllegalPlay(
-                    "source cost requires the field".into(),
-                ));
-            }
+            self.check_payment_source_zone(execution, &step.instruction.action)?;
             let (quantity, subjects, characters) = match &step.instruction.action {
+                Action::ScheduleTurn {
+                    operation: TurnOperation::SkipNext {},
+                    ..
+                } => (
+                    self.skip_turn_payment(execution, &step.instruction)?,
+                    Vec::new(),
+                    Vec::new(),
+                ),
                 Action::Counter { .. } => (
                     self.internal_counter(execution, &step.instruction, true)?,
                     Vec::new(),
@@ -1274,6 +1297,11 @@ pub(super) fn check_payment(
             }
             action @ Action::Banish { .. } if super::movement::deck_top(action).is_some() => !quick,
             action if reveal_payment::selected(action, &play.parameters) => !quick,
+            Action::ScheduleTurn {
+                player: PlayerRef::Controller {},
+                operation: TurnOperation::SkipNext {},
+                ..
+            } => true,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             Action::Fusion { .. } => fusion::check_cost(&instruction.action),

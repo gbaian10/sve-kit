@@ -675,7 +675,8 @@ impl Checker {
                 operation:
                     super::TurnOperation::InsertBefore {
                         anchor: super::ScheduleAnchor::NextTurn {},
-                    },
+                    }
+                    | super::TurnOperation::SkipNext {},
                 occurrence,
             } if *instruction_actor == (PlayerRef::Controller {}) => {
                 self.define(*occurrence, BindingKind::Value)

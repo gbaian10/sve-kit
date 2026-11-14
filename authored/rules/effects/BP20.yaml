@@ -91,25 +91,5 @@ cards:
             max: 2
             min: 0
     status: complete
-  BP20-R13:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 4
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - count: 1
-            op: skip_turn
-            side: self
-        kind: evolve
-        line: 2
-    status: complete
 format: 1
 kind: effect_set
