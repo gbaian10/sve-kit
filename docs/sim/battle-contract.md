@@ -17,7 +17,7 @@ strict 只接受完整准入的卡片與依存，不開手動操作，不用空�
 ## 2. 本機宿主與資料格式
 
 Rust wire 型別定義資料模型；adapter 連接既有玩家入口，不直接序列化 Game、native token 或 Debug 字串。
-預定的 sim/battle-contract 純 DTO crate 不依賴 Game；規則投影留在引擎整合邊界，Worker 與未來伺服器共用。
+sim/battle-contract 純 DTO crate 不依賴 Game；規則投影留在引擎整合邊界，Worker 與未來伺服器共用。
 下列 TypeScript 是欄位節錄；完整 tagged union 由 Rust 產生，不以任意 JSON、any 或自由 label 補足缺少的語義。
 
 ```typescript

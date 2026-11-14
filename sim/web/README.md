@@ -10,6 +10,11 @@ through `mise exec`, so they do not depend on shell activation. Bun is the packa
 executes the Node-shebang CLIs (Vite, Vitest, ESLint, …) with Node, and Vitest's jsdom tests do not
 run on the Bun runtime (see Known issues).
 
+The battle contract's TypeScript types and validator are generated from the Rust types in
+`sim/battle-contract` and are never committed, so the checks, the tests, the build and the dev server
+also need the Rust toolchain pinned in `rust-toolchain.toml` (see the repo `CONTRIBUTING.md`). Each of
+those scripts runs `bun run generate:contract` first.
+
 ```bash
 cd sim/web
 bun install
@@ -39,15 +44,17 @@ variables to change them. Only two derived flags reach browser code
 
 ## Scripts
 
-| Script                 | What it does                                              |
-| ---------------------- | --------------------------------------------------------- |
-| `bun run check:all`    | Everything below, in order; run it before pushing         |
-| `bun run format:check` | `bun fmt --check` (`bun run format` rewrites)             |
-| `bun run lint:all`     | ESLint (`lint:js`) and Stylelint (`lint:css`)             |
-| `bun run typecheck`    | `bun check --threads=4`, Bun's built-in type checker      |
-| `bun run test:all`     | Vitest, including the ESLint and Stylelint rule fixtures  |
-| `bun run build:all`    | Production build into `dist/`                             |
-| `bun run shots`        | Manual: real-browser screenshots and geometry (see below) |
+| Script                      | What it does                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `bun run check:all`         | Everything below, in order; run it before pushing                                                    |
+| `bun run format:check`      | `bun fmt --check` (`bun run format` rewrites)                                                        |
+| `bun run check:contract`    | Generates the battle contract twice with identical results; fixtures survive Rust → validator → Rust |
+| `bun run lint:all`          | ESLint (`lint:js`) and Stylelint (`lint:css`)                                                        |
+| `bun run typecheck`         | `bun check --threads=4`, Bun's built-in type checker                                                 |
+| `bun run test:all`          | Vitest, including the ESLint and Stylelint rule fixtures                                             |
+| `bun run build:all`         | Production build into `dist/`                                                                        |
+| `bun run shots`             | Manual: real-browser screenshots and geometry (see below)                                            |
+| `bun run generate:contract` | Generate `src/battle/contract/generated/`; the scripts above that need it run it themselves          |
 
 Scripts never take the name of a Bun built-in command (`test`, `build`, `check`, `lint`, `fmt`):
 `bun test` runs Bun's own test runner, which ignores the Vitest config, and a `check` script would
