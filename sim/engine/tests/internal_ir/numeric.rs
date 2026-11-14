@@ -644,9 +644,9 @@ fn failure_after_resume_restores_pending_numeric_layers_and_completion_keeps_the
 }
 
 #[test]
-fn observations_mark_live_numeric_layers_and_belief_worlds_refuse_them() {
+fn observations_mark_live_numeric_layers_without_internal_state() {
     for seat in [1, 2] {
-        let (actor, opponent, view) = seats(seat);
+        let (_, _, view) = seats(seat);
         let mut game = game(seat, 1);
         let packet = game.projection(view).unwrap();
         assert!(
@@ -654,16 +654,12 @@ fn observations_mark_live_numeric_layers_and_belief_worlds_refuse_them() {
                 .get("typed_numeric_layers")
                 .is_none()
         );
-        Game::from_observation(catalog(), &packet, actor, "numeric-belief").unwrap();
         run(&mut game, vec![buff(2, 1, 1)], seat);
         for view in [View::P1, View::P2, View::Referee] {
             let packet = game.projection(view).unwrap();
             assert_eq!(packet["semantic_state"]["typed_numeric_layers"], true);
             let text = packet.to_string();
             assert!(!text.contains("ir_numeric") && !text.contains("end_resolution"));
-            for observer in [actor, opponent] {
-                Game::from_observation(catalog(), &packet, observer, "numeric-belief").unwrap_err();
-            }
         }
     }
 }

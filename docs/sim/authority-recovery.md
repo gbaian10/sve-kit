@@ -56,7 +56,6 @@ manifest 的 `engine_support_target` 是快照的支援目標，允許全 null�
 
 | 現有入口或資料 | 已有邊界 | 正式恢復仍須補足的責任 |
 | --- | --- | --- |
-| [`Replay::save/restore`](../../sim/engine/src/replay.rs) | 舊原型的可信 `astra-save/1` 節點圖，沿舊 `decide` 執行 | 不能當 typed 輸入紀錄、跨版遷移或不可信玩家上傳的讀取器；舊原型凍結不修 |
 | [`Game` 序列化](../../sim/engine/src/game.rs) | active execution、未解決 prepared play 及已載入 CardRuntime 均拒絕存檔 | typed 續體、准入計畫、待處理及必要權威中間狀態的持久化契約尚未提供；不能只存 `State` 假裝完整 |
 | [`Random`](../../sim/engine/src/random.rs) | 有版本標記、seed、stream、完整 word position 的私有隨機狀態及固定向量測試 | 這不是整局 save；宿主仍須保存本局的隨機輸入來源，並驗證版本、抽樣與洗牌消耗順序 |
 | [`Knowledge`](../../sim/engine/src/game/knowledge.rs) | 保存觀看者的知情範圍、代號及發號高水位；origin 回滾不能復活失效代號 | 恢復須重建同一辨識歷程，保留私有發號輸入與回滾高水位，不能從目前可見牌面重新猜代號 |

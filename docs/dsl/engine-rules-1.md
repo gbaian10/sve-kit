@@ -131,9 +131,9 @@ stack 的 amount ≤ 0 不建立；已有 recipient 仍須選擇，沒有才由�
 不能使用官方名稱常數作預設。凍結 v2.1 題庫的 title 文字由 engine adapter
 透過同批 JP 輸入的 anchor 索引轉接；中立題庫及 scenario-runner 不加入 engine 特有語法。
 
-仍使用原型 astra-save/1；本契約不承諾不同二進位版本的舊存檔可續玩。
+存檔沿用可信的 `Game` 序列化；本契約不承諾不同二進位版本的舊存檔可續玩。
 必要的 resolved binding／title code 隨 Catalog／Game 存檔，缺欄必須反序列化失敗，
-不得以 serde(default) 補空表或重讀最新設定。相同版本的 save／restore／branch
+不得以 serde(default) 補空表或重讀最新設定。相同版本的 save／restore
 須保留開局 queue、合法選項、事件、next_object 與隱藏資訊邊界。
 正式 save/2、跨版遷移及 server 的房間能力授權另有契約才可提供。
 

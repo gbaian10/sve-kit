@@ -12,15 +12,12 @@ use core::result;
 
 #[cfg(feature = "runner")]
 pub mod adapter;
-pub mod ai;
-pub mod assist;
 pub mod catalog;
 pub mod game;
 pub mod host;
 pub mod ir;
 pub mod policy;
 mod random;
-pub mod replay;
 
 /// Authority-only diagnostics; player interfaces return reason-free submission results.
 /// Classify the failed contract, never words in the diagnostic message.

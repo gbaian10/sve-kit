@@ -166,6 +166,54 @@ fn bp22_100_family_full_field_evolves_without_four_pp_then_real_101_draws_and_di
     }
 }
 
+/// KE-13: an effect evolution, not only an evolve action, widens BP16-036's choice.
+#[test]
+fn bp16_036_counts_an_effect_evolution_this_turn() {
+    let mut initial = initial("BP22-100", "BP22-101", "hand");
+    initial["players"]["P1"]["zones"]["hand"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"modes","card":"BP16-036"}));
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"amulet","card":"BP01-016"},{"id":"ally1","card":"BP01-037"},
+        {"id":"ally2","card":"BP01-037"},{"id":"ally3","card":"BP01-037"}
+    ]);
+    let mut game = game(&initial);
+    enter(&mut game);
+    let play = pending(&mut game, "BP22-100");
+    evolve(&mut game, play, "BP22-101");
+    let discard = question(pending(&mut game, "BP22-101"));
+    let InputDomain::Targets(domain) = &discard.domain else {
+        panic!("printed discard");
+    };
+    let drawn = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() != Some("BP16-036"))
+        .map(|member| member.handle)
+        .unwrap();
+    resolved(
+        game.answer_internal_card(discard.actor, discard.token, Answer::Targets(vec![drawn]))
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["evolve_deck"],
+        json!([]),
+        "only the effect evolved this turn"
+    );
+    let CardPlay::Awaiting(modes) = game
+        .play_internal_card("modes", PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("BP16-036 asks for its modes");
+    };
+    let InputDomain::Modes { count, .. } = modes.domain else {
+        panic!("BP16-036 asks for its modes first");
+    };
+    assert_eq!(count.0, 2);
+}
+
 #[test]
 fn bp22_042_family_banishes_two_witch_cards_then_real_043_evolves_and_draws() {
     for (base, form) in [("BP22-042", "BP22-043"), ("BP22-P20", "BP22-P21")] {

@@ -2,10 +2,8 @@
 
 extern crate alloc;
 
-use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_engine::game::{Game, View};
-use sve_engine::replay::Replay;
 
 #[path = "support/random_fixtures.rs"]
 mod random_fixtures;
@@ -27,50 +25,35 @@ fn game() -> Game {
 
 #[test]
 fn games_use_named_stream_and_restore_pending_draws() {
-    let initial = game();
-    assert_eq!(initial.digest().unwrap(), game().digest().unwrap());
-    let encoded = serde_json::to_value(&initial).unwrap();
+    let mut original = game();
+    assert_eq!(original.digest().unwrap(), game().digest().unwrap());
+    let encoded = serde_json::to_value(&original).unwrap();
     assert_eq!(
         encoded["state"]["rng"]["algorithm"],
         "chacha12-sha256-rand09-v1"
     );
-    let (mut original, root) = Replay::start(initial, "new");
-    let (pending, step) = original.decide(&root, &random_fixtures::cast()).unwrap();
+    let step = original.decide(&random_fixtures::cast(), "new").unwrap();
     assert_eq!(step.outcome, "paused");
-    let (mut restored, selected) = Replay::restore(&original.save(&pending).unwrap()).unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&original).unwrap()).unwrap();
     for view in [View::P1, View::P2] {
-        let packet = restored
-            .game(&selected)
-            .unwrap()
-            .projection(view)
-            .unwrap()
-            .to_string();
+        let packet = restored.projection(view).unwrap().to_string();
         for secret in ["\"rng\"", "\"seed\"", "word_pos", "chacha12-sha256"] {
             assert!(!packet.contains(secret));
         }
     }
-    let (a, first) = original
-        .decide(&pending, &random_fixtures::resume())
+    let first = original
+        .decide(&random_fixtures::resume(), "resume")
         .unwrap();
-    let (b, second) = restored
-        .decide(&selected, &random_fixtures::resume())
+    let second = restored
+        .decide(&random_fixtures::resume(), "resume")
         .unwrap();
     assert_eq!(first.events, second.events);
-    assert_eq!(
-        original.game(&a).unwrap().digest().unwrap(),
-        restored.game(&b).unwrap().digest().unwrap()
-    );
-    let branch = restored.branch(&root, false).unwrap();
-    let (branched, repeated) = restored.decide(&branch, &random_fixtures::cast()).unwrap();
-    assert_eq!(repeated.outcome, "paused");
-    assert_eq!(
-        serde_json::to_value(restored.game(&branched).unwrap()).unwrap()["state"]["rng"],
-        serde_json::to_value(original.game(&pending).unwrap()).unwrap()["state"]["rng"]
-    );
+    assert_eq!(original.digest().unwrap(), restored.digest().unwrap());
 }
 
 #[test]
-fn game_and_replay_readers_reject_unversioned_rng() {
+fn game_reader_rejects_unversioned_rng() {
     let initial = game();
     let mut rng = serde_json::to_value(&initial).unwrap()["state"]["rng"].clone();
     rng.as_object_mut().unwrap().remove("algorithm");
@@ -82,20 +65,13 @@ fn game_and_replay_readers_reject_unversioned_rng() {
         ),
     ] {
         let mut encoded = serde_json::to_value(&initial).unwrap();
-        encoded["state"]["rng"] = bad.clone();
+        encoded["state"]["rng"] = bad;
         assert_eq!(
             serde_json::from_value::<Game>(encoded)
                 .unwrap_err()
                 .to_string(),
             message
         );
-        let (replay, root) = Replay::start(initial.clone(), "reject");
-        let mut blob: Value = serde_json::from_slice(&replay.save(&root).unwrap()).unwrap();
-        blob[1]["nodes"][&root]["game"]["state"]["rng"] = bad;
-        let error = Replay::restore(&serde_json::to_vec(&blob).unwrap())
-            .unwrap_err()
-            .to_string();
-        assert!(error.starts_with(&format!("invalid: {message} at line 1 column ")));
     }
 }
 
@@ -158,22 +134,4 @@ fn failed_resolution_rolls_back_consumed_randomness() {
     );
     assert_eq!(initial.digest().unwrap(), before);
     assert_eq!(serde_json::to_value(initial).unwrap(), bytes);
-}
-
-#[test]
-fn observation_sampling_has_its_own_named_stream() {
-    let initial = game();
-    let before = initial.digest().unwrap();
-    let mut packet = initial.projection(View::P1).unwrap();
-    packet["P1"]["deck_list"] =
-        json!([{"card":"unit","count":8_i64},{"card":"spell","count":1_i64}]);
-    let catalog = random_fixtures::catalog();
-    let first = Game::from_observation(Arc::clone(&catalog), &packet, "P1", "world").unwrap();
-    let second = Game::from_observation(catalog, &packet, "P1", "world").unwrap();
-    assert_eq!(first.digest().unwrap(), second.digest().unwrap());
-    assert_eq!(
-        serde_json::to_value(first).unwrap()["state"]["rng"]["algorithm"],
-        "chacha12-sha256-rand09-v1"
-    );
-    assert_eq!(initial.digest().unwrap(), before);
 }

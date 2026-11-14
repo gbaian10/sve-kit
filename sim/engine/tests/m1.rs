@@ -599,14 +599,14 @@ fn r2_every_accepted_selector_field_filters_or_is_rejected() {
     .unwrap_err();
 }
 
-/// R3: the AI's sampled world depends only on what the seat observed: two games that
-/// differ only in hidden cards give the same world for the same seed.
+/// R3: what a seat observes depends only on public information: two games that differ
+/// only in hidden cards give the same player packet.
 #[test]
-fn r3_same_observation_and_seed_give_the_same_world() {
+fn r3_hidden_cards_do_not_change_the_player_packet() {
     let loaded = Arc::new(catalog(&json!({})));
     for (left, right) in [("f-a", "f-b"), ("spell", "amulet"), ("f-c", "heal")] {
-        let world = |hidden: &str| {
-            let game = Game::new(
+        let observed = |hidden: &str| {
+            Game::new(
                 Arc::clone(&loaded),
                 &setup(
                     &json!({"field":[{"id":"a","card":"f-a"}]}),
@@ -616,50 +616,32 @@ fn r3_same_observation_and_seed_give_the_same_world() {
                 &Value::Null,
                 "table",
             )
-            .unwrap();
-            let observed = game.projection(View::P1).unwrap();
-            let sampled =
-                Game::from_observation(Arc::clone(&loaded), &observed, "P1", "same-seed").unwrap();
-            (observed, sampled.digest().unwrap())
+            .unwrap()
+            .projection(View::P1)
+            .unwrap()
         };
-        let (seen_left, world_left) = world(left);
-        let (seen_right, world_right) = world(right);
         assert_eq!(
-            seen_left, seen_right,
+            observed(left),
+            observed(right),
             "{left}/{right} must look the same to P1"
         );
-        assert_eq!(
-            world_left, world_right,
-            "{left}/{right} leaked into the world"
-        );
     }
-    // The original R3 probe swapped the opponent's face-down evolve deck (M-016):
-    // the projection must not reveal it, and rebuilding either fails closed or gives
-    // the same world.
-    let evolve_world = |hidden: &str| {
+    // The original R3 probe swapped the opponent's face-down evolve deck (M-016).
+    let evolve_observed = |hidden: &str| {
         let mut position = setup(&json!({"field":[{"id":"a","card":"f-a"}]}), &json!({}));
         position["players"]["P2"]["zones"]["evolve_deck"] = json!([{"id":"e","card":hidden}]);
-        let game = Game::new(
+        Game::new(
             Arc::clone(&loaded),
             &position,
             &Value::Null,
             &Value::Null,
             "table",
         )
-        .unwrap();
-        let observed = game.projection(View::P1).unwrap();
-        let rebuilt = Game::from_observation(Arc::clone(&loaded), &observed, "P1", "same-seed")
-            .map(|world| world.digest().unwrap());
-        (observed, rebuilt)
+        .unwrap()
+        .projection(View::P1)
+        .unwrap()
     };
-    let (seen_left, rebuilt_left) = evolve_world("f-a");
-    let (seen_right, rebuilt_right) = evolve_world("f-b");
-    assert_eq!(seen_left, seen_right);
-    match (rebuilt_left, rebuilt_right) {
-        (Ok(left), Ok(right)) => assert_eq!(left, right),
-        (Err(EngineFailure::Unsupported(_)), Err(EngineFailure::Unsupported(_))) => {}
-        other => panic!("evolve deck identity changed the rebuilt world: {other:?}"),
-    }
+    assert_eq!(evolve_observed("f-a"), evolve_observed("f-b"));
 }
 
 /// R-0009: a long-form "〜とき、…なら" ability triggers on the event alone; the
