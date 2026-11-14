@@ -781,24 +781,53 @@ impl BodyContext<'_> {
         Ok(subject_query(kind, id, self.scope, &filter))
     }
 
+    fn followed_exists(
+        &mut self,
+        query: &ast::FollowedQuery,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        let output = self
+            .field_outputs
+            .get(&query.r#in.follow)
+            .ok_or_else(|| unsupported(path))?;
+        let objects = if query
+            .keyword
+            .is_some_and(|keyword| keyword.0 == super::super::KeywordId::Ward)
+            && query.kind.is_none()
+            && query.r#trait.is_none()
+        {
+            super::super::follow_keyword::selector(output.receipt.clone(), binding)
+        } else {
+            Selector::Filter {
+                input: Box::new(Selector::MoveAfter {
+                    receipt: output.receipt.clone(),
+                    permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                }),
+                binding,
+                predicate: Box::new(super::selection::field_filter(
+                    &super::selection::ObjectFilter {
+                        kind: query.kind.as_ref().map(super::search::card_kind),
+                        trait_id: query.r#trait.as_deref(),
+                        keyword: query.keyword.map(|keyword| keyword.0),
+                        ..super::selection::ObjectFilter::default()
+                    },
+                    binding,
+                )),
+            }
+        };
+        Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
+    }
+
     fn public_exists(
         &mut self,
         query: &ast::ExistsQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
-        if let ast::ExistsQuery::FollowedKeyword(query) = query {
-            if query.keyword.0 != super::super::KeywordId::Ward {
-                return Err(unsupported(path));
-            }
-            let output = self
-                .field_outputs
-                .get(&query.r#in.follow)
-                .ok_or_else(|| unsupported(path))?;
-            return Ok(Expr::Compute(Box::new(Predicate::Exists {
-                objects: super::super::follow_keyword::selector(output.receipt.clone(), binding),
-            })));
+        if let ast::ExistsQuery::Followed(followed) = query {
+            return self.followed_exists(followed, path);
         }
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
         let ast::ExistsQuery::Public(query) = query else {
             let ast::ExistsQuery::Selected(query) = query else {
                 return Err(unsupported(path));

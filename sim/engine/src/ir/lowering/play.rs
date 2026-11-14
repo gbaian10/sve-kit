@@ -84,7 +84,6 @@ fn check_choice_shape(
             Some(ast::Side::Controller | ast::Side::Opponent | ast::Side::Bound(_))
         )
         || target.from.other
-        || target.from.not_same_name_as_this
         || target.from.has_state_filter()
         || target.distinct_by.is_some()
         || target.cost_sum_le.is_some()
@@ -973,6 +972,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<RecipientSet, LoweringError> {
         Ok(match recipients {
+            ast::Recipients::Target(name) if name == "this" => RecipientSet::Objects {
+                objects: super::numeric::holder(),
+            },
             ast::Recipients::Role { role } => RecipientSet::Objects {
                 objects: Selector::Bound {
                     reference: *self

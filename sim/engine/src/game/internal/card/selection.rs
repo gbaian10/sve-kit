@@ -14,8 +14,9 @@ use crate::ir::observation_selection::{
 use crate::ir::perspective;
 use crate::ir::{
     Action, Binding, Cardinality, ChoiceDomain, Comparison, Decision, DecisionKind, Disjointness,
-    MoveDestination, MoveSpec, Node, ObjectOperand, ObjectProperty, ObjectReceipt, PlaySlot,
-    PlayerRef, PlayerRelation, ScopeId, SelectionConstraint, SelectionGroup, Selector,
+    FollowPermission, MoveDestination, MoveSpec, MovementReceipt, Node, ObjectOperand,
+    ObjectProperty, ObjectReceipt, PlaySlot, PlayerRef, PlayerRelation, ScopeId,
+    SelectionConstraint, SelectionGroup, Selector,
 };
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
@@ -800,7 +801,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             else {
                 return Err(unsupported("hand selector"));
             };
-            super::super::search::check_predicate(predicate, *binding)?;
+            check_predicate(predicate, *binding, false)?;
         }
         return Ok(());
     }
@@ -931,6 +932,13 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
     if follow_keyword::supported(selector) {
         return Ok(());
     }
+    if let Selector::Filter {
+        binding, predicate, ..
+    } = selector
+        && followed_field_filter(selector)
+    {
+        return check_predicate(predicate, *binding, false);
+    }
     match selector {
         // "他の" removes the source holder; "それ以外" removes an earlier chosen binding.
         Selector::Difference { input, except }
@@ -965,6 +973,14 @@ pub(in crate::game::internal) fn public_zone_selector(selector: &Selector) -> Re
         }
         _ => Err(unsupported("public count selector")),
     }
+}
+
+fn followed_field_filter(selector: &Selector) -> bool {
+    matches!(selector, Selector::Filter { input, .. }
+    if matches!(input.as_ref(), Selector::MoveAfter {
+        receipt: MovementReceipt::Move { .. } | MovementReceipt::Search { .. },
+        permission: FollowPermission::SameEffectExplicitReference {},
+    }))
 }
 
 /// The single subject of an event that happens in a public zone is as public as a chosen target.
@@ -1899,7 +1915,7 @@ impl Execution {
             {
                 continue;
             }
-            if follow_keyword::supported(selector)
+            if followed_field_filter(selector)
                 && game.object(self.object_id(member)?)?.zone != "field"
             {
                 continue;

@@ -85,6 +85,9 @@ mod advance_entry;
 #[path = "card/advance_spell.rs"]
 mod advance_spell;
 
+#[path = "card/entered_trait.rs"]
+mod entered_trait;
+
 #[path = "card/move_followup.rs"]
 mod move_followup;
 
@@ -229,6 +232,9 @@ mod evolution_cost_mod;
 mod evolution;
 #[path = "card/player_evolution.rs"]
 mod player_evolution;
+
+#[path = "card/self_damage.rs"]
+mod self_damage;
 
 #[path = "card/second.rs"]
 mod second;
@@ -808,6 +814,9 @@ mod permanent_stand;
 
 #[path = "card/dynamic_declarations.rs"]
 mod dynamic_declarations;
+
+#[path = "card/private_hand_cost.rs"]
+mod private_hand_cost;
 
 #[path = "card/hand_selection.rs"]
 mod hand_selection;

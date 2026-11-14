@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD02b-003:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-14"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            phase:
+              whose: self
+              which: end
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      who: self
+                      zone: field
+                      kind: follower
+                      trait: クール
+                      other: true
+                then:
+                  - damage:
+                      to: this
+                      n: 1
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 3
+              - lesson: 1
+          do:
+            - buff:
+                on:
+                  who: self
+                  zone: field
+                  kind: follower
+                power: 1
