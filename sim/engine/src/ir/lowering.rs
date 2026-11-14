@@ -1400,9 +1400,16 @@ enum FieldOutputKind {
     Other,
 }
 
+#[derive(Clone, Copy)]
+enum SourceStats {
+    Current,
+    Occurrence,
+}
+
 struct BodyContext<'definitions> {
     x: Option<x_pp::Parameter>,
     static_zone: Option<ZoneKind>,
+    source_stats: SourceStats,
     /// Only an activation printed in the hand may move its own card to EX as a cost.
     activation_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
@@ -1476,6 +1483,11 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             x: None,
+            source_stats: if entry.r#static.is_some() {
+                SourceStats::Current
+            } else {
+                SourceStats::Occurrence
+            },
             static_zone: entry
                 .r#static
                 .as_ref()

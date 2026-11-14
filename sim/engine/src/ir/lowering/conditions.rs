@@ -827,6 +827,7 @@ impl BodyContext<'_> {
                 &ast::This::This,
                 Some(Stat::Life),
                 CharacteristicView::Effective,
+                self.source_stats,
             )),
             ast::BodyStatReference::AttackTarget => {
                 Ok(Expr::Compute(Box::new(IntOperation::Sum {
@@ -924,6 +925,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     Some(Stat::Attack),
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => self.paid_material_number(
                     objects_of,
@@ -950,6 +952,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     None,
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => {
                     if self.receipt_reads.paid_materials.contains_key(objects_of) {
@@ -968,6 +971,7 @@ impl BodyContext<'_> {
                 orig_cost_of,
                 None,
                 CharacteristicView::Original,
+                self.source_stats,
             )),
             ast::Number::HistoryCount { history_count } => {
                 if history_count.at_least.is_some() {
@@ -1241,9 +1245,20 @@ fn this_number(
     reference: &ast::This,
     property: Option<Stat>,
     view: CharacteristicView,
+    source_stats: super::SourceStats,
 ) -> Expr<Int> {
     let ast::This::This = reference;
-    let object = ObjectView::SourceInformation {};
+    // A persistent provider reads its current public stats without an occurrence snapshot.
+    let object = if matches!(source_stats, super::SourceStats::Current)
+        && property.is_some()
+        && view == CharacteristicView::Effective
+    {
+        ObjectView::Current {
+            object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+        }
+    } else {
+        ObjectView::SourceInformation {}
+    };
     let information = match property {
         Some(property) => NumberRead::Stats {
             object,
