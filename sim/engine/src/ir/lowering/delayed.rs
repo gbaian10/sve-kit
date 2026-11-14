@@ -31,6 +31,9 @@ impl BodyContext<'_> {
             ast::DelayedOn::EnterField { enter_field } => {
                 self.delayed_entry(value, enter_field, path, source, span)?
             }
+            ast::DelayedOn::LifeChanged { life_changed } => {
+                self.delayed_life(value, life_changed, path, source, span)?
+            }
         };
         if !delayed_ir::valid(&action) {
             return Err(unsupported(path));
@@ -87,6 +90,38 @@ impl BodyContext<'_> {
             },
             body: body?,
             captures,
+            lifetime: DelayedLifetime::Until {
+                duration: Box::new(super::numeric::duration(Some(&value.until), path)?),
+            },
+            source: source.clone(),
+        })
+    }
+
+    /// 「このターン、自分のリーダーの体力が減少したとき」: each later actual change this turn.
+    fn delayed_life(
+        &mut self,
+        value: &ast::Delayed,
+        life: &ast::LifeSubscription,
+        path: &str,
+        source: &AbilitySource,
+        span: &SourceSpan,
+    ) -> Result<Action, LoweringError> {
+        let parent = self.scope;
+        let child = self.card_allocator.scope(path)?;
+        let pattern = super::combat::life(life, self.allocator.id(path)?, child);
+        self.scope = child;
+        let body = self.steps(&value.steps, &format!("{path}/delayed/do"), span, source);
+        self.scope = parent;
+        Ok(Action::Delay {
+            trigger: TriggerSpec {
+                active_zones: vec![],
+                on: TriggerCondition::Event { pattern },
+                view: EventSnapshotPolicy::AfterEntry,
+                aggregation: TriggerAggregation::PerFact {},
+                limit: value.next_only.then_some(delayed_ir::NEXT_ONLY),
+            },
+            body: body?,
+            captures: vec![],
             lifetime: DelayedLifetime::Until {
                 duration: Box::new(super::numeric::duration(Some(&value.until), path)?),
             },

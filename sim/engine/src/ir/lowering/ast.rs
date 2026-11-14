@@ -3928,8 +3928,16 @@ pub(super) struct Delayed {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DelayedOn {
-    Moved { moved: DelayedMove },
-    EnterField { enter_field: DelayedEntry },
+    Moved {
+        moved: DelayedMove,
+    },
+    EnterField {
+        enter_field: DelayedEntry,
+    },
+    /// 「このターン、自分のリーダーの体力が減少したとき」 after installation.
+    LifeChanged {
+        life_changed: LifeSubscription,
+    },
 }
 /// 「このターン、次に自分の場にフォロワーが出たとき」: entries of other cards after installation.
 #[derive(Deserialize)]
