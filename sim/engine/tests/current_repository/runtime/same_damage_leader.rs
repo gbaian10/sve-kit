@@ -39,7 +39,7 @@ fn fixture(initial: &Value) -> Game {
     for number in [A, B] {
         game.load_internal_card(number, &empty).unwrap();
     }
-    // BP19-110 also needs a shuffle of observed cards, so the fixture supplies the evolution producer.
+    // Isolate the evolution trigger from the printed base card's unrelated fanfare.
     let mut tree = expanded::tree().clone();
     tree["cards"] = json!({BASE:tree["cards"]["synthetic-evolution"]});
     let program = lowerer().lower(&tree).unwrap().remove(BASE).unwrap();
