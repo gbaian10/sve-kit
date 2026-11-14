@@ -1260,3 +1260,10 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 入場曲只會在持有者自己進場時誘發，所以這個限制在該次進場的誘發判定時就處理完，不會留成持續效果；
 同時進場的其他卡與其他觀察進場的能力照常誘發。目前只接受這一種 `entry_effects`，其他形狀與非場上目的地都會拒絕。
 BP04-038 接著用 `apply: {on: {follow: entered}, effect: {cannot: {what: attack}}, until: turn}` 表示「このターン、それは相手を攻撃できない」。
+
+## 持續傷害加值讀來源 counter
+
+場上常在的 `damage_mod.delta` 除常值外，也接受 `{times: [{counter: {on: this, name: …}}, N]}`（N 為正整數），
+在每次提出傷害時讀能力持有者目前的 counter 數乘以 N。BP20-021「これの融合カウンター1個につき、これが与える能力ダメージを+2する」
+寫成 `damage_mod: {source: this, kind: ability, delta: {times: [{counter: {on: this, name: 融合カウンター}}, 2]}}`；
+counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `damage_mod` 仍只接受常值。

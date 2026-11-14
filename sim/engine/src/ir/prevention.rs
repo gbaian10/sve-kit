@@ -135,6 +135,40 @@ pub(crate) fn whole_turn_leader_reduction(shape: &Prevention<'_>) -> bool {
         && shape.duration.intervals.is_empty()
 }
 
+/// 「これの…カウンター1個につき+N」: the provider's own live counter times a positive step.
+pub(crate) fn holder_counter_step(amount: &Expr<super::Int>) -> Option<(&super::CounterKind, i64)> {
+    let Expr::Compute(operation) = amount else {
+        return None;
+    };
+    let super::IntOperation::Arithmetic {
+        operation: super::Arithmetic::Multiply,
+        arguments,
+    } = operation.as_ref()
+    else {
+        return None;
+    };
+    let [Expr::Compute(read), Expr::Literal(super::Int(step))] = arguments.as_slice() else {
+        return None;
+    };
+    let super::IntOperation::FromNat {
+        value: Expr::Live(value),
+    } = read.as_ref()
+    else {
+        return None;
+    };
+    let super::NatRead::Counter {
+        holder:
+            super::Holder::Object {
+                object: ObjectOperand::SourceHolder {},
+            },
+        kind,
+    } = value.as_ref()
+    else {
+        return None;
+    };
+    (*step > 0).then_some((kind, *step))
+}
+
 pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
     let Effect::Replacement {
         source,
@@ -188,7 +222,8 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         } | EventRewrite::AddDamage {
             amount: Expr::Literal(_)
         }
-    ) || matches!(rewrite, EventRewrite::CapDamage { threshold: Expr::Literal(threshold), replacement: Expr::Literal(replacement) } if threshold.0 > replacement.0 && threshold.0 <= i64::MAX.unsigned_abs());
+    ) || matches!(rewrite, EventRewrite::AddDamage { amount } if usage.is_none() && holder_counter_step(amount).is_some())
+        || matches!(rewrite, EventRewrite::CapDamage { threshold: Expr::Literal(threshold), replacement: Expr::Literal(replacement) } if threshold.0 > replacement.0 && threshold.0 <= i64::MAX.unsigned_abs());
     if !supported {
         return None;
     }

@@ -654,26 +654,6 @@ known:
     status: unsupported
     error: "unadmitted BP19-SL26 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
-    scenario: "X=1 選擇素材=1"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
-    scenario: "X=2 選擇素材=2"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
-    scenario: "X=2 選擇素材=1"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
-    scenario: "X=3 選擇素材=2"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP20-P12"
     scenario: "[astra] 沒付追加費用"
     status: fail

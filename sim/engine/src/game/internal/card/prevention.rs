@@ -9,7 +9,8 @@ use crate::game::player::observation::InstalledEffect;
 use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
-    DamageSource, Prevention, Recipients, own_leader, projection, whole_turn_leader_reduction,
+    DamageSource, Prevention, Recipients, holder_counter_step, own_leader, projection,
+    whole_turn_leader_reduction,
 };
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::static_declarations::{self, Family};
@@ -758,6 +759,9 @@ impl Game {
                         EventRewrite::AddDamage {
                             amount: Expr::Literal(amount),
                         } => replacement["delta"] = json!(amount.0),
+                        EventRewrite::AddDamage { amount } => {
+                            replacement["delta"] = json!(self.counter_delta(&provider, amount)?);
+                        }
                         EventRewrite::CapDamage {
                             threshold: Expr::Literal(threshold),
                             replacement: Expr::Literal(amount),
@@ -769,6 +773,16 @@ impl Game {
             }
         }
         Ok(())
+    }
+
+    /// 「これの…カウンター1個につき+N」 read from the provider when the damage is proposed.
+    fn counter_delta(&self, provider: &str, amount: &Expr<Int>) -> Result<i64> {
+        let (kind, step) =
+            holder_counter_step(amount).ok_or_else(|| unsupported("damage rewrite arithmetic"))?;
+        i64::try_from(self.card_counter(provider, kind)?.0)
+            .map_err(crate::invalid)?
+            .checked_mul(step)
+            .ok_or_else(|| crate::invalid("damage modifier overflow"))
     }
 
     fn granted_prevention_label(

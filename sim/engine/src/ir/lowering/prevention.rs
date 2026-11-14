@@ -2,7 +2,7 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
-use crate::ir::prevention::{opponent_controller, own_leader, projection};
+use crate::ir::prevention::{holder_counter_step, opponent_controller, own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
     DamageKind, DamageRecipient, Duration, DurationEnd, Effect, EffectDefinitionId,
@@ -216,15 +216,19 @@ impl BodyContext<'_> {
                 shape.next_only,
                 shape.source.as_ref(),
             ),
-            ast::InstalledEffect::DamageMod(shape) if shape.delta < 0 => (
-                EventRewrite::AddDamage {
-                    amount: Expr::Literal(Int(shape.delta)),
-                },
-                shape.on.as_ref(),
-                shape.kind.as_ref(),
-                shape.next_only,
-                shape.source.as_ref(),
-            ),
+            ast::InstalledEffect::DamageMod(shape)
+                if shape.literal_delta().is_some_and(|delta| delta < 0) =>
+            {
+                (
+                    EventRewrite::AddDamage {
+                        amount: Expr::Literal(Int(shape.literal_delta().unwrap_or_default())),
+                    },
+                    shape.on.as_ref(),
+                    shape.kind.as_ref(),
+                    shape.next_only,
+                    shape.source.as_ref(),
+                )
+            }
             ast::InstalledEffect::DamageMod(_)
             | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
@@ -499,7 +503,17 @@ pub(super) fn lower_at_source(
                     shape.source.as_ref(),
                     kind,
                     EventRewrite::AddDamage {
-                        amount: Expr::Literal(Int(shape.delta)),
+                        amount: if let Some(delta) = shape.literal_delta() {
+                            Expr::Literal(Int(delta))
+                        } else {
+                            // 「これの…カウンター1個につき+N」 reads the holder when damage is proposed.
+                            let amount =
+                                context.number(&shape.delta, path, &mut super::BTreeSet::new())?;
+                            if holder_counter_step(&amount).is_none() {
+                                return Err(unsupported(path));
+                            }
+                            amount
+                        },
                     },
                 )
             }
