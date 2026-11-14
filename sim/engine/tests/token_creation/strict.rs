@@ -11,12 +11,22 @@ use sve_engine::game::player::{
     StrictStartError, Viewer,
 };
 
-fn selected(snapshot: &str, keywords: &str, input: &Value) -> SelectedEffects {
+fn loader() -> &'static CurrentSelectionLoader {
     static LOADER: OnceLock<CurrentSelectionLoader> = OnceLock::new();
-    LOADER
-        .get_or_init(|| CurrentSelectionLoader::new().unwrap())
-        .select(snapshot, keywords, input)
-        .unwrap()
+    LOADER.get_or_init(|| CurrentSelectionLoader::new().unwrap())
+}
+
+fn selected(snapshot: &str, keywords: &str, input: &Value) -> SelectedEffects {
+    loader().select(snapshot, keywords, input).unwrap()
+}
+
+fn reachable(
+    snapshot: &str,
+    keywords: &str,
+    input: &Value,
+    decks: &[PlayerDeck; 2],
+) -> sve_engine::Result<SelectedEffects> {
+    Game::select_player_decks(loader(), snapshot, keywords, input, None, decks)
 }
 
 fn decks() -> [PlayerDeck; 2] {
@@ -62,6 +72,79 @@ fn strict_complete_decks_and_generated_ex_tokens_can_start() {
     let game = Game::start_player_game(selected, decks(), Viewer::P2, "strict-start").unwrap();
     assert!(matches!(game.input(Viewer::P2), Input::Question(_)));
     assert!(matches!(game.input(Viewer::P1), Input::Waiting(_)));
+}
+
+#[test]
+fn deck_scoped_selection_lowers_only_reachable_authors() {
+    let (plain_snapshot, keywords, plain_input) = selection(1);
+    let (unused, mut broken) = author(
+        "unused",
+        "33333333333333333333333333333333",
+        "フォロワー",
+        vec![],
+    );
+    broken["input"]["source_payload"]["faces"] = json!([]);
+    let snapshot = format!("{plain_snapshot}{unused}\n");
+    let mut input = plain_input.clone();
+    input["authors"].as_array_mut().unwrap().push(broken);
+    // The whole selection lowers every author and so rejects the one no deck uses.
+    loader().select(&snapshot, &keywords, &input).unwrap_err();
+    let scoped = reachable(&snapshot, &keywords, &input, &decks()).unwrap();
+    assert_eq!(
+        scoped.current.keys().collect::<Vec<_>>(),
+        ["creator", "token"]
+    );
+    assert!(
+        Game::check_player_decks(&scoped, &decks())
+            .unwrap()
+            .is_admitted()
+    );
+    let game = Game::start_player_game(scoped, decks(), Viewer::P2, "strict-start").unwrap();
+    let whole = Game::start_player_game(
+        selected(&plain_snapshot, &keywords, &plain_input),
+        decks(),
+        Viewer::P2,
+        "strict-start",
+    )
+    .unwrap();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            format!("{:?}", game.input(viewer)),
+            format!("{:?}", whole.input(viewer))
+        );
+    }
+    // Once a deck reaches that author, its lowering failure rejects the selection.
+    let mut reaching = decks();
+    reaching[0].main.push("unused".into());
+    reachable(&snapshot, &keywords, &input, &reaching).unwrap_err();
+}
+
+#[test]
+fn deck_scoped_selection_keeps_gaps_and_acceptance_checks() {
+    let (mut snapshot, keywords, input) = selection(1);
+    snapshot.push_str(&json!({"number":"not-authored","faces":[{
+        "name":"unused","card_type":"フォロワー","cost":"1","power":"1","hp":"1","text":"","sections":[]
+    }]}).to_string());
+    let mut decks = decks();
+    decks[0].main.push("missing-printing".into());
+    decks[1].main.push("not-authored".into());
+    let scoped = reachable(&snapshot, &keywords, &input, &decks).unwrap();
+    let report = rejected(scoped.clone(), decks.clone());
+    assert_eq!(
+        report.gaps(Viewer::P1),
+        [gap("missing-printing", AdmissionGapReason::MissingSnapshot)]
+    );
+    assert_eq!(
+        report.gaps(Viewer::P2),
+        [gap("not-authored", AdmissionGapReason::MissingProgram)]
+    );
+    assert!(report == rejected(selected(&snapshot, &keywords, &input), decks.clone()));
+    let mut changed = scoped;
+    changed.current.clear();
+    assert!(matches!(
+        Game::check_player_decks(&changed, &decks),
+        Err(EngineFailure::Invalid(_))
+    ));
 }
 
 #[test]

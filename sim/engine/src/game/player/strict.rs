@@ -1,8 +1,9 @@
 //! Whole-card admission and dependency closure before any player opening is published.
 
 use super::{DeckConstruction, PlayerDeck, Viewer};
-use crate::catalog::{Catalog, SelectedEffects};
+use crate::catalog::{Catalog, CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use crate::game::Game;
+use crate::ir::lowering::CurrentCardProgram;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{Action, TokenAllocation, TokenTemplate};
 use crate::{EngineFailure, Result};
@@ -175,8 +176,12 @@ impl Visitor for Dependencies {
     }
 }
 
-fn closure(selected: &SelectedEffects, deck: &PlayerDeck) -> Result<DeckClosure> {
-    let catalog = &selected.prototypes;
+/// `provide` answers one printing at a time, so a lazy selection lowers only what is reached.
+fn closure(
+    catalog: &Catalog,
+    provide: &mut impl FnMut(&str) -> Result<Option<Arc<CurrentCardProgram>>>,
+    deck: &PlayerDeck,
+) -> Result<DeckClosure> {
     let mut pending = deck
         .main
         .iter()
@@ -195,28 +200,26 @@ fn closure(selected: &SelectedEffects, deck: &PlayerDeck) -> Result<DeckClosure>
         if !closure.cards.insert(number.clone()) {
             continue;
         }
-        let reason = if !catalog.cards.contains_key(&number) {
-            Some(AdmissionGapReason::MissingSnapshot)
+        let found = if !catalog.cards.contains_key(&number) {
+            Err(AdmissionGapReason::MissingSnapshot)
         } else if catalog.rejected.get(&number).is_some_and(|reasons| {
             reasons
                 .iter()
                 .any(|reason| reason == "source_unresolved_issue")
         }) {
-            Some(AdmissionGapReason::UnresolvedRuling)
-        } else if !selected.current.contains_key(&number) {
-            Some(AdmissionGapReason::MissingProgram)
+            Err(AdmissionGapReason::UnresolvedRuling)
         } else {
-            None
+            provide(&number)?.ok_or(AdmissionGapReason::MissingProgram)
         };
-        if let Some(reason) = reason {
-            closure.gaps.insert(AdmissionGap {
-                card_no: number,
-                reason,
-            });
-            continue;
-        }
-        let Some(candidate) = selected.current.get(&number) else {
-            continue;
+        let candidate = match found {
+            Ok(candidate) => candidate,
+            Err(reason) => {
+                closure.gaps.insert(AdmissionGap {
+                    card_no: number,
+                    reason,
+                });
+                continue;
+            }
         };
         let mut dependencies = Dependencies::default();
         let mut required = BTreeSet::new();
@@ -266,12 +269,42 @@ impl Game {
         Self::prepare_strict_player_decks(selected, decks).map(|(_, report)| report)
     }
 
+    /// Select only what these decks can reach: main and evolve cards, generated EX resources
+    /// and token dependencies. Other authors are registered but never lowered or checked.
+    /// The result serves [`Self::check_player_decks`] and [`Self::start_player_game`] for
+    /// these decks; the whole selection is proven loadable by the repository tests instead.
+    ///
+    /// # Errors
+    /// Rejects a malformed selection, inconsistent rules, or a reachable author that fails
+    /// lowering. A deck card without any author is reported later as an admission gap.
+    pub fn select_player_decks(
+        loader: &CurrentSelectionLoader,
+        snapshot: &str,
+        keywords: &str,
+        input: &Value,
+        rules: Option<(&str, &EngineIdentityInput)>,
+        decks: &[PlayerDeck; 2],
+    ) -> Result<SelectedEffects> {
+        let mut pending = loader.begin(snapshot, keywords, input, rules)?;
+        {
+            let (catalog, mut provide) = pending.parts();
+            for deck in decks {
+                closure(catalog, &mut provide, deck)?;
+            }
+        }
+        pending.finish()
+    }
+
     pub(super) fn prepare_strict_player_decks(
         selected: &SelectedEffects,
         decks: &[PlayerDeck; 2],
     ) -> Result<(Self, StrictAdmission)> {
         selected.check_runtime()?;
-        let closures = [closure(selected, &decks[0])?, closure(selected, &decks[1])?];
+        let mut provide = |number: &str| Ok(selected.current.get(number).cloned());
+        let closures = [
+            closure(&selected.prototypes, &mut provide, &decks[0])?,
+            closure(&selected.prototypes, &mut provide, &decks[1])?,
+        ];
         let required = closures
             .iter()
             .flat_map(|closure| closure.cards.iter().cloned())
