@@ -6,6 +6,7 @@ use super::{
 use crate::game::internal::Execution;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::ir::events::ability::filter;
+use crate::ir::events::subscriptions;
 use crate::ir::optional_payment;
 use crate::ir::{LimitSpec, RuntimeAbilityReference, UbActivatedEvent};
 
@@ -40,6 +41,14 @@ impl Game {
         execution: &Execution,
     ) -> Result<()> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

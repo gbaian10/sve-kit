@@ -7,6 +7,7 @@ use super::{
 };
 use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::mill::MillFilter;
+use crate::ir::events::subscriptions;
 use crate::ir::{Generation, MoveEvent, MoveMethod, ObjectRef, Position};
 
 fn filter(ability: &Ability) -> Option<MillFilter> {
@@ -51,6 +52,14 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 impl Game {
     fn mill_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

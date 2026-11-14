@@ -12,6 +12,7 @@ pub(crate) mod life;
 pub(crate) mod mill;
 pub(crate) mod played;
 pub(crate) mod subject;
+pub(crate) mod subscriptions;
 pub(crate) mod timing;
 use super::{
     AttackEvent, BanishEvent, BatchPolicy, Binding, Bool, CounterChangeEvent, DamageEvent,

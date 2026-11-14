@@ -212,9 +212,6 @@ pub(super) fn subscription(
             })
             .collect::<Result<Vec<_>, _>>()?;
         let pattern = EventPattern::AnyOf { patterns };
-        if !fusion::combined(&pattern) {
-            return Err(unsupported(path));
-        }
         Ok(pattern)
     } else {
         Err(unsupported(path))

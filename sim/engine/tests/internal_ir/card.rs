@@ -1017,3 +1017,6 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+
+#[path = "card/mixed_subscription.rs"]
+mod mixed_subscription;

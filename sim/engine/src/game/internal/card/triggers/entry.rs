@@ -13,6 +13,7 @@ use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformatio
 use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
 
+use crate::ir::events::subscriptions;
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
         return Ok(false);
@@ -157,11 +158,9 @@ impl Game {
     ) -> Result<()> {
         if previous.is_empty()
             || !self.card_runtime.definitions.cards.values().any(|program| {
-                program
-                    .card()
-                    .abilities
-                    .iter()
-                    .any(|ability| filter(&ability.node).is_some())
+                program.card().abilities.iter().any(|ability| {
+                    filter(&ability.node).is_some() || subscriptions::compound(&ability.node)
+                })
             })
         {
             return Ok(());

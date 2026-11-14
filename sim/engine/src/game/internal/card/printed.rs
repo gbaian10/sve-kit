@@ -105,6 +105,7 @@ impl Game {
                     && (ability.node.qualification != AbilityQualification::UnionBurst
                         || ub_enabled)
             })
+            .flat_map(super::super::admission::PlannedAbility::event_alternatives)
             .collect())
     }
 

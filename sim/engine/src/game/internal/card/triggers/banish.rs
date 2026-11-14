@@ -7,6 +7,7 @@ use super::{
 use crate::game::internal::Execution;
 use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::banish as header;
+use crate::ir::events::subscriptions;
 use crate::ir::{BanishEvent, MoveMethod, MoveResult, RuntimeZoneRef};
 
 pub(in crate::game::internal) fn hand_header(ability: &Ability) -> bool {
@@ -57,6 +58,14 @@ impl Game {
         }
         let mut captured = Vec::new();
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities

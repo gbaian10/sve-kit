@@ -18,6 +18,7 @@ use super::{
     RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
+use crate::ir::events::subscriptions;
 use crate::ir::{
     BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
     EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, ObjectRef,
@@ -116,6 +117,12 @@ pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
+    if subscriptions::compound(ability) {
+        for branch in subscriptions::alternatives(ability) {
+            check_header(&branch)?;
+        }
+        return Ok(());
+    }
     if matches!(
         ability.source.origin,
         AbilityOrigin::Keyword {

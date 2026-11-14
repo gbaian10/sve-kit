@@ -13,6 +13,7 @@ use crate::game::{Step, int, string};
 use crate::ir::dice as ir_dice;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::fusion;
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -307,6 +308,14 @@ impl Game {
         self.internal_record_subject_event(attacker, SubjectHistoryEvent::Attack)?;
         if !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+                if program
+                    .card()
+                    .abilities
+                    .iter()
+                    .any(|ability| subscriptions::compound(&ability.node))
+                {
+                    return true;
+                }
                 program
                     .card()
                     .abilities
@@ -461,6 +470,9 @@ impl Game {
         !self.internal_has_drain_grants()
             && !self.internal_has_granted_definitions()
             && !self.card_runtime.definitions.cards.values().any(|program| {
+            if program.card().abilities.iter().any(|ability| subscriptions::compound(&ability.node)) {
+                return true;
+            }
                 program.card().abilities.iter().any(|ability| {
                     matches!(
                         ability.node.trigger.as_ref().map(|trigger| &trigger.on),
@@ -699,6 +711,14 @@ impl Game {
         use crate::ir::events::life::LifeFilter;
         use crate::ir::{Int, LifeChangeEvent};
         if !self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program.card().abilities.iter().any(|ability| {
                 matches!(
                     ability.node.trigger.as_ref().map(|trigger| &trigger.on),

@@ -10,6 +10,7 @@ use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
+use crate::ir::events::subscriptions;
 use crate::ir::{BatchPolicy, Characteristics, DiscardEvent, ObjectRef, PlayerId, RuntimeZoneRef};
 
 fn filter(ability: &Ability) -> Option<DiscardFilter> {
@@ -87,6 +88,14 @@ pub(in crate::game) struct RuleDiscard {
 impl Game {
     fn has_discard_headers(&self) -> bool {
         self.card_runtime.definitions.cards.values().any(|program| {
+            if program
+                .card()
+                .abilities
+                .iter()
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
             program
                 .card()
                 .abilities
