@@ -80,6 +80,7 @@ pub(super) fn attack(
         token: subject.token,
         not_token: subject.not_token,
         other: subject.other,
+        not_same_name_as_this: None,
     });
     let mut plan = AttackFilter {
         subject: movement::movement_filter(

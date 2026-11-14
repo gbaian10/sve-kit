@@ -3220,6 +3220,7 @@ pub(super) struct MovementSubject {
     pub token: Option<bool>,
     pub not_token: Option<bool>,
     pub other: Option<bool>,
+    pub not_same_name_as_this: Option<bool>,
 }
 
 #[derive(Clone, Deserialize)]

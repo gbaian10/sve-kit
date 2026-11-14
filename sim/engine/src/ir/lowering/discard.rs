@@ -197,6 +197,7 @@ fn discarded_card(
         token: None,
         not_token: None,
         other: None,
+        not_same_name_as_this: None,
     } = sel
     else {
         return Err(unsupported(path));

@@ -112,6 +112,22 @@ impl super::BodyContext<'_> {
     ) -> Result<(ObjectOperand, Option<Selector>), LoweringError> {
         match reference {
             ast::Objects::This(_) => Ok((ObjectOperand::SourceHolder {}, None)),
+            // 「…が出たとき、それは進化する」: the entering card the trigger observed.
+            ast::Objects::Bound(name)
+                if name == "it"
+                    && matches!(
+                        self.subject_event,
+                        Some(super::super::events::subject::SubjectFields::Entry(_))
+                    ) =>
+            {
+                let event = self.subject_event.ok_or_else(|| unsupported(path))?;
+                Ok((
+                    ObjectOperand::FromExpression {
+                        value: Box::new(event.object()),
+                    },
+                    None,
+                ))
+            }
             ast::Objects::Bound(name)
                 if self.evolution_targets.get(name) == Some(&ZoneKind::Field) =>
             {

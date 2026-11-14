@@ -1267,3 +1267,13 @@ BP04-038 接著用 `apply: {on: {follow: entered}, effect: {cannot: {what: attac
 在每次提出傷害時讀能力持有者目前的 counter 數乘以 N。BP20-021「これの融合カウンター1個につき、これが与える能力ダメージを+2する」
 寫成 `damage_mod: {source: this, kind: ability, delta: {times: [{counter: {on: this, name: 融合カウンター}}, 2]}}`；
 counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `damage_mod` 仍只接受常值。
+
+## 進場主體排除同名並成為進化對象
+
+`auto.on.enter_field.sel` 可加 `not_same_name_as_this: true`，表示「これと同名を除く」：
+進場的卡與觀察這個能力的卡在誘發當下只要有一個卡名相同，就不誘發。比較的是觀察者目前的卡名，不是事件中保存的資料。
+這個篩選只用於卡片自身的進場觀察；`delayed.on.enter_field` 沒有觀察者卡，不接受此欄位。
+
+同一觸發的本文可寫 `evolve: {ref: it}`，讓進場的那張卡進化（BP22-003／004「…が出たとき、それは進化する」）。
+沿用效果進化的選牌：從自己進化牌庫選一張對應的卡，可不選（Q2789），不支付對方《進化》的成本（Q2788）。
+進場的卡已離場或不是自己控制的從者時不進化。
