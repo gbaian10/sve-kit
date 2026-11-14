@@ -72,9 +72,15 @@ def checkout() -> Generator[tuple[Path, Path]]:
     with tempfile.TemporaryDirectory() as temp:
         repository = Path(temp)
         package = repository / "package/sve_carddb"
-        resource = package / "contracts/schema/v3/contract.schema.json"
-        resource.parent.mkdir(parents=True)
-        resource.write_bytes(generate())
+        for selected in PROFILES:
+            resource = (
+                package
+                / "contracts/schema"
+                / selected.resource
+                / "contract.schema.json"
+            )
+            resource.parent.mkdir(parents=True, exist_ok=True)
+            resource.write_bytes(generate(selected.version))
         golden = repository / "tests/fixtures/snapshot-contract/v3"
         golden.mkdir(parents=True)
         (golden / "manifest.json").write_text(
@@ -237,7 +243,10 @@ class FormatLockTests(unittest.TestCase):
             reader = package / "export/reader.py"
             reader.write_text("def read(value):\n payload = value\n return payload\n")
             current = current_fingerprints(package)
-            locked = pin(current["4.0.0"], frozen=frozen)
+            locked: dict[str, JsonValue] = {
+                version: {"fingerprint": value, "frozen": frozen}
+                for version, value in current.items()
+            }
             path = repository / LOCK_PATH
             path.write_text(json.dumps(locked))
             git(repository, "add", LOCK_PATH)
@@ -265,7 +274,9 @@ class FormatLockTests(unittest.TestCase):
             )
             locked = object_value(parse(path.read_bytes()))
             check_lock(locked, current_fingerprints(package), {})
-            frozen = pin(current_fingerprints(package)["4.0.0"], frozen=True)
+            frozen = locked | {
+                "4.0.0": object_value(locked["4.0.0"]) | {"frozen": True}
+            }
             path.write_text(json.dumps(frozen))
             git(repository, "add", LOCK_PATH)
             git(repository, "commit", "-qm", "Freeze synthetic format")
@@ -301,7 +312,7 @@ class FormatLockTests(unittest.TestCase):
         """Shared sample content remains behavior-test input, not a format version."""
         with checkout() as (repository, package):
             current = current_fingerprints(package)
-            locked = pin(current["4.0.0"])
+            locked = update_lock({}, current, {})
             path = repository / "tests/fixtures/snapshot-contract/v3/manifest.json"
             path.write_text(path.read_text().replace("0001", "0002"))
             changed = current_fingerprints(package)
