@@ -26,7 +26,7 @@ def safe_details(source: str) -> list[str]:
         ),
         (
             "unloaded whole card",
-            r'reason: "(internal D1 does not support unloaded whole card [A-Z0-9-]{2,24}/[0-9]+, holder [A-Za-z0-9_-]{1,40} generation [0-9]+, query restriction [A-Za-z ]+: current ability definitions unavailable)"',
+            r'reason: "(internal D1 does not support unloaded whole card [A-Z0-9-]{2,24}/[0-9]+, (?:holder [A-Za-z0-9_-]{1,40} generation [0-9]+, )?query (?:restriction [A-Za-z ]+|complete card names): current ability definitions unavailable)"',
         ),
         (
             "missing pending line/source",
