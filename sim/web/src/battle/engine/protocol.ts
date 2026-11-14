@@ -1,8 +1,9 @@
-// Local-battle messages. Receipt and HostError follow the battle contract (format 1); Update and
-// Submit stay temporary (format 0) until the generated contract types replace these declarations.
-// The Worker init and port routing below stay.
+// Local-battle messages. Seat, Receipt and HostError are the generated battle contract types;
+// Update and Submit stay temporary (format 0) until the engine projection supplies the contract's
+// BattleUpdate, Question and Answer. The Worker init and port routing below stay.
+import type { HostError, Receipt, Seat } from "../contract"
 
-export type Seat = "p1" | "p2"
+export type { Receipt, Seat }
 export const SEATS: readonly Seat[] = ["p1", "p2"]
 type Control = "player" | "policy"
 
@@ -19,19 +20,6 @@ export interface Update {
   update_seq: number
   baseline: boolean
   input: InputState
-}
-
-export interface Receipt {
-  kind: "receipt"
-  request_id: string
-  result: "applied" | "rejected" | "reverted" | "cancelled" | "engine_fault"
-  rejection: "invalid_submission" | null
-}
-
-interface HostError {
-  kind: "host_error"
-  format: 1
-  reason: "format" | "range" | "projection" | "budget"
 }
 
 type Outgoing = Update | Receipt | HostError
