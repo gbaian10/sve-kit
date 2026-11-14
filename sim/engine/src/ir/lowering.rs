@@ -1014,7 +1014,9 @@ fn lowered_trigger(
             active_zones: active_zones(entry, path)?,
             view: if matches!(
                 pattern,
-                EventPattern::Play { .. } | EventPattern::UbActivated { .. }
+                EventPattern::Play { .. }
+                    | EventPattern::UbActivated { .. }
+                    | EventPattern::AnyOf { .. }
             ) || super::events::fusion::combined(&pattern)
             {
                 EventSnapshotPolicy::AtReveal

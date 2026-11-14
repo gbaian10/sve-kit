@@ -106,7 +106,18 @@ impl Game {
         let mut limited: BTreeMap<AbilityInstanceId, (LimitSpec, Vec<PendingOccurrence>)> =
             BTreeMap::new();
         let mut batches = BTreeSet::new();
+        let mut event_patterns = BTreeMap::new();
         for candidate in candidates {
+            if let Some(trigger) = &candidate.ability.node.trigger {
+                let key = (candidate.source.instance, candidate.header.id);
+                if event_patterns
+                    .get(&key)
+                    .is_some_and(|pattern| pattern != &trigger.on)
+                {
+                    continue;
+                }
+                event_patterns.insert(key, trigger.on.clone());
+            }
             if let Some(trigger) = &candidate.ability.node.trigger {
                 match trigger.aggregation {
                     TriggerAggregation::PerFact {} => {}

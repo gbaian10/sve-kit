@@ -12,6 +12,7 @@ use crate::ir::{
     TriggerCondition, ZoneKind,
 };
 
+use crate::ir::events::subscriptions;
 pub(super) fn observer_filter(ability: &Ability) -> Option<SubjectFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
         return None;
@@ -85,18 +86,25 @@ impl Game {
                 && super::printed_origin(&a.node.source.origin).is_ok_and(|(printed,_)| self.printed_face_ordinal(&form.card, printed).is_ok_and(|ordinal| ordinal==face))
         }));
         let external = self.card_runtime.definitions.cards.values().any(|program| {
-            program
+            if program
                 .card()
                 .abilities
                 .iter()
-                .any(|ability| observer_filter(&ability.node).is_some())
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
+            program.card().abilities.iter().any(|ability| {
+                observer_filter(&ability.node).is_some() || subscriptions::compound(&ability.node)
+            })
         });
         let interested = interested
             || (external
                 && self.evolution_observers()?.iter().any(|(_, abilities)| {
-                    abilities
-                        .iter()
-                        .any(|ability| observer_filter(&ability.node).is_some())
+                    abilities.iter().any(|ability| {
+                        observer_filter(&ability.node).is_some()
+                            || subscriptions::compound(&ability.node)
+                    })
                 }));
         if !interested {
             return Ok(None);

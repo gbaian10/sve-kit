@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-027:
+    admission: light
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot: { on: this, what: destroy, by: ability }
+            - cannot: { on: this, what: banish }
+      - line: 2
+        auto:
+          on:
+            any_of:
+              - enter_field:
+                  who: self
+                  sel: { kind: follower, trait: 透京 }
+              - evolved:
+                  who: self
+                  sel: { kind: follower }
+          do:
+            - counter:
+                "on": { who: self, zone: field, name: ギガブレード }
+                name: ギガカウンター
+                delta: 1
+      - line: 3
+        fanfare:
+          do:
+            - counter:
+                "on": { who: self, zone: field, name: ギガブレード }
+                name: ギガカウンター
+                delta: 2
+            - if:
+                cond:
+                  exists: { who: self, zone: field, name: ギガブレード, other: true }
+                then:
+                  - move: { ref: this, to: cemetery }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

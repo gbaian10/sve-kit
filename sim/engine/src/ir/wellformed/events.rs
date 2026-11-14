@@ -8,6 +8,7 @@ use crate::ir::events::fusion;
 use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
+use crate::ir::events::subscriptions;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
@@ -632,9 +633,18 @@ impl Checker {
         if patterns.is_empty() {
             return self.reject();
         }
+        if view.is_some_and(|view| view != EventSnapshotPolicy::AtReveal) {
+            return Err(self.error(WellFormedReason::InvalidEntry));
+        }
         for (index, alternative) in patterns.iter().enumerate() {
             self.at(&format!("patterns/{index}"), |checker| {
-                checker.isolated(|checker| checker.event_pattern(alternative, view, triggering))
+                checker.isolated(|checker| {
+                    checker.event_pattern(
+                        alternative,
+                        view.map(|_| subscriptions::view(alternative)),
+                        triggering,
+                    )
+                })
             })?;
         }
         Ok(())

@@ -1040,3 +1040,6 @@ mod ex_evolution_observer;
 
 #[path = "card/skip_turn_evolution.rs"]
 mod skip_turn_evolution;
+
+#[path = "card/mixed_subscription.rs"]
+mod mixed_subscription;

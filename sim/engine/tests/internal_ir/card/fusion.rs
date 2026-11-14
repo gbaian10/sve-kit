@@ -229,7 +229,7 @@ fn fusion_rejects_zero_unsupported_ranges_and_non_hand_activation() {
 }
 
 #[test]
-fn event_alternatives_reject_unrelated_or_mismatched_subscriptions() {
+fn event_alternatives_accept_independent_family_subscriptions() {
     for other in [
         json!({"phase":{"which":"main","whose":"self"}}),
         json!({"played":{"who":"self","sel":{"trait":"食材"}}}),
@@ -241,11 +241,7 @@ fn event_alternatives_reject_unrelated_or_mismatched_subscriptions() {
                 "do":[{"life":{"who":"self","delta":1_i8}}]
             }),
         )]);
-        assert_eq!(
-            lowerer().lower(&tree).unwrap_err().code,
-            "unsupported_construct",
-            "only the required shared Fusion/Play subscription is admitted"
-        );
+        lowerer().lower(&tree).unwrap();
     }
 }
 
